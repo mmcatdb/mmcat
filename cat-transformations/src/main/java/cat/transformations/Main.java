@@ -9,8 +9,6 @@ import cat.transformations.algorithms2.TransformationModelToInst;
 import cat.transformations.algorithms2.model.AbstractInstance;
 import cat.transformations.algorithms2.model.AbstractKind;
 import cat.transformations.algorithms2.model.AbstractModel;
-import cat.transformations.algorithms2.model.AbstractProperty;
-import cat.transformations.algorithms2.model.AbstractRecord;
 import cat.transformations.algorithms2.model.CategoricalInstance;
 import cat.transformations.algorithms2.model.DocumentKind;
 import cat.transformations.algorithms2.model.DocumentModel;
@@ -27,6 +25,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bson.Document;
+import cat.transformations.algorithms2.model.AbstractSimpleProperty;
+import cat.transformations.algorithms2.model.AbstractRecordProperty;
 
 /**
  *
@@ -131,7 +131,7 @@ public class Main {
 					while (cur.hasNext()) {
 						var doc = cur.next();
 
-						AbstractRecord record = new DocumentRecord();
+						AbstractRecordProperty record = new DocumentRecord();
 						// ted preved vsechny property a nacpi je do dokumentu
 
 						for (Map.Entry<String, Object> property : doc.entrySet()) {
@@ -164,12 +164,12 @@ public class Main {
 
 	}
 
-	private static void processAttribute(AbstractRecord parent, String name, Object value) {
-		AbstractProperty property = new DocumentProperty(name, value, false, false, false);
+	private static void processAttribute(AbstractRecordProperty parent, String name, Object value) {
+		AbstractSimpleProperty property = new DocumentProperty(name, value, false, false, false);
 		parent.putProperty(name, property);
 	}
 
-	private static void processRecord(AbstractRecord parent) {
+	private static void processRecord(AbstractRecordProperty parent) {
 //
 //		// record muze obsahovat property slozitych typu... takze opet zanorovani a volani sebe sama
 //		EntityObject object = result.getOrCreateEntity(key);
@@ -188,7 +188,7 @@ public class Main {
 //		queueOfNames.add(key);
 	}
 
-	private static void processArray(AbstractRecord parent, String name, List array) {
+	private static void processArray(AbstractRecordProperty parent, String name, List array) {
 		if (array.isEmpty()) {
 			parent.putProperty(name, null);	// TODO: neni dobre, mas vkladat prazdne pole!
 			// TODO: chybi ti AbstractArray...

@@ -7,8 +7,6 @@ package cat.transformations.algorithms2;
 
 import cat.transformations.algorithms2.model.AbstractValue;
 import cat.transformations.algorithms2.model.AbstractReference;
-import cat.transformations.algorithms2.model.AbstractRecord;
-import cat.transformations.algorithms2.model.AbstractProperty;
 import cat.transformations.algorithms2.model.AbstractObject;
 import cat.transformations.algorithms2.model.AbstractMorphism;
 import cat.transformations.algorithms2.model.AbstractModel;
@@ -16,6 +14,8 @@ import cat.transformations.algorithms2.model.AbstractInstance;
 import cat.transformations.algorithms2.model.AbstractKind;
 import java.util.LinkedList;
 import java.util.Queue;
+import cat.transformations.algorithms2.model.AbstractSimpleProperty;
+import cat.transformations.algorithms2.model.AbstractRecordProperty;
 
 /**
  *
@@ -27,7 +27,7 @@ public class TransformationModelToInst {
 		return domain + "->" + codomain;
 	}
 
-	private void processAttribute(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractProperty property) {
+	private void processAttribute(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractSimpleProperty property) {
 		var propertyName = property.getName();
 		var attribute = instance.get(propertyName);
 		attribute.add(property.getValue());		// WARN: TOHLE NENI ITERABLE! JE TREBA UPRAVIT ROZHRANI U ABSTRACT_OBJECT!
@@ -35,9 +35,9 @@ public class TransformationModelToInst {
 		morphism.add(superid, property.getValue());
 	}
 
-	private void processStructuredAttribute(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractProperty property, Queue<AbstractRecord> queue, Queue<String> queueOfNames) {
+	private void processStructuredAttribute(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractSimpleProperty property, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
 		// aktualne zpracovavam property - POZOR: strukturovany atribut se od entity lisi pouze tim, ze ma morfismus pouze jednim smerem, zatimco entita ma morfismy obema smery!
-		var value = (AbstractRecord) property.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
+		var value = (AbstractRecordProperty) property.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
 		var object = instance.get(property.getName()); // ted mas i zpracovavany objekt
 
 		var valueSuperid = value.getIdentifiers();
@@ -48,7 +48,7 @@ public class TransformationModelToInst {
 		queueOfNames.add(property.getName());
 	}
 
-	private void processEntity(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractRecord value, String propertyName, Queue<AbstractRecord> queue, Queue<String> queueOfNames) {
+	private void processEntity(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractRecordProperty value, String propertyName, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
 		// aktualne zpracovavam property
 //		var value = (AbstractRecord) property.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
 		var object = instance.get(propertyName); // ted mas i zpracovavany objekt
@@ -63,7 +63,7 @@ public class TransformationModelToInst {
 		queueOfNames.add(propertyName);
 	}
 
-	private void processArray(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractProperty property, Queue<AbstractRecord> queue, Queue<String> queueOfNames) {
+	private void processArray(AbstractInstance instance, AbstractObject entity, Iterable<? extends AbstractValue> superid, AbstractSimpleProperty property, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
 		var array = (Iterable<? extends AbstractValue>) property.getValue();
 
 		int size = 0;
@@ -73,14 +73,14 @@ public class TransformationModelToInst {
 
 			switch (value.getType()) {
 				case ATTRIBUTE ->
-					processAttribute(instance, entity, superid, (AbstractProperty) value);
+					processAttribute(instance, entity, superid, (AbstractSimpleProperty) value);
 				case STRUCTURED_ATTRIBUTE ->
-					processStructuredAttribute(instance, entity, superid, (AbstractProperty) value, queue, queueOfNames);
-				case ENTITY ->
+					processStructuredAttribute(instance, entity, superid, (AbstractSimpleProperty) value, queue, queueOfNames);
+				case RECORD ->
 					// v poli mas rovnou AbstractRecords!
-					processEntity(instance, entity, superid, (AbstractRecord) value, property.getName(), queue, queueOfNames);
+					processEntity(instance, entity, superid, (AbstractRecordProperty) value, property.getName(), queue, queueOfNames);
 				case ARRAY ->
-					processArray(instance, entity, superid, (AbstractProperty) value, queue, queueOfNames);
+					processArray(instance, entity, superid, (AbstractSimpleProperty) value, queue, queueOfNames);
 				case REFERENCE ->
 					processReference();
 			}
@@ -97,18 +97,18 @@ public class TransformationModelToInst {
 	}
 
 	public void process(AbstractModel model, AbstractInstance instance) {
-		Queue<AbstractRecord> queue = new LinkedList<>();
+		Queue<AbstractRecordProperty> queue = new LinkedList<>();
 		Queue<String> queueOfNames = new LinkedList<>();
 
 		for (AbstractKind kind : model.getKinds()) {
 			String kindName = kind.getName();
 
-			for (AbstractRecord record : kind.getRecords()) {
+			for (AbstractRecordProperty record : kind.getRecords()) {
 				queue.add(record);
 				queueOfNames.add(kindName);
 
 				while (!queue.isEmpty()) {
-					AbstractRecord _record = queue.poll();
+					AbstractRecordProperty _record = queue.poll();
 					String _name = queueOfNames.poll();
 
 					// process identifier(s) - insert superid do entity according to kind.getName()
@@ -123,18 +123,18 @@ public class TransformationModelToInst {
 
 						switch (property.getType()) {
 							case ATTRIBUTE ->
-								processAttribute(instance, entity, superid, (AbstractProperty) property);
+								processAttribute(instance, entity, superid, (AbstractSimpleProperty) property);
 							case STRUCTURED_ATTRIBUTE ->
-								processStructuredAttribute(instance, entity, superid, (AbstractProperty) property, queue, queueOfNames);
-							case ENTITY -> {
-								AbstractProperty p = (AbstractProperty) property;
-								processEntity(instance, entity, superid, (AbstractRecord) p.getValue(), p.getName(), queue, queueOfNames);
+								processStructuredAttribute(instance, entity, superid, (AbstractSimpleProperty) property, queue, queueOfNames);
+							case RECORD -> {
+								AbstractSimpleProperty p = (AbstractSimpleProperty) property;
+								processEntity(instance, entity, superid, (AbstractRecordProperty) p.getValue(), p.getName(), queue, queueOfNames);
 							}
-								
 							case ARRAY ->
-								processArray(instance, entity, superid, (AbstractProperty) property, queue, queueOfNames);
+								processArray(instance, entity, superid, (AbstractSimpleProperty) property, queue, queueOfNames);
 							case REFERENCE ->
 								// SKIP FOR NOW! RESIS JE O PAR RADKU NIZ!
+								// MELY BY SE PRESKOCIT, PROTOZE JEJICH HODNOTY PATRI DO JINYCH MORFISMU
 								processReference();
 						}
 

@@ -9,13 +9,13 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public class DocumentProperty implements AbstractProperty {
+public class DocumentProperty implements AbstractSimpleProperty {
 
 	private final String name;
 	private final boolean isIdentifierCompound;
 	private final boolean isReferenceCompound;
 	private final boolean isNullable;
-	private final AbstractSimpleValue value;
+	private final AbstractValue value;
 
 	private static final AbstractType TYPE = AbstractType.ATTRIBUTE;
 

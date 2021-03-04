@@ -15,14 +15,14 @@ public interface AbstractKind {
 
 	public abstract Iterable<String> getPropertyNames();	// ke zvazeni, jestli tohle potrebujeme tady...
 
-	public abstract Iterable<AbstractRecord> getRecords();
+	public abstract Iterable<AbstractRecordProperty> getRecords();
 
-	public abstract AbstractRecord getRecord(int index);
+	public abstract AbstractRecordProperty getRecord(int index);
 
-	public abstract AbstractRecord getRecord(AbstractIdentifier identifier);
+	public abstract AbstractRecordProperty getRecord(AbstractIdentifier identifier);
 
 	public abstract int size();
 	
-	public abstract void add(AbstractRecord record);
+	public abstract void add(AbstractRecordProperty record);
 
 }

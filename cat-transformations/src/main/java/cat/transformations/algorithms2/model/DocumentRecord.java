@@ -14,12 +14,12 @@ import java.util.TreeMap;
  *
  * @author pavel.koupil
  */
-public class DocumentRecord implements AbstractRecord {
+public class DocumentRecord implements AbstractRecordProperty {
 
-	private static final AbstractType TYPE = AbstractType.ENTITY;	// WARN: Nepouzivas DocumentRecord jeste pro nested dokumenty?
+	private static final AbstractType TYPE = AbstractType.RECORD;	// WARN: Nepouzivas DocumentRecord jeste pro nested dokumenty?
 	// pokud ano, pak musis tohle presunout do konstruktoru a umoznit nastavit neco jineho... ale pak to nemusi davat smysl
 
-	private final Map<String, AbstractValue> properties = new TreeMap<>();
+	private final Map<String, AbstractProperty> properties = new TreeMap<>();
 	private final List<AbstractIdentifier> superid = new ArrayList<>();
 	private final List<AbstractReference> references = new ArrayList<>();
 
@@ -35,7 +35,7 @@ public class DocumentRecord implements AbstractRecord {
 	}
 
 	@Override
-	public AbstractValue getProperty(String name) {
+	public AbstractProperty getProperty(String name) {
 		return properties.get(name);
 	}
 
@@ -70,7 +70,7 @@ public class DocumentRecord implements AbstractRecord {
 	}
 
 	@Override
-	public Iterable<AbstractValue> getProperties() {
+	public Iterable<AbstractProperty> getProperties() {
 		return properties.values();
 	}
 
@@ -85,7 +85,7 @@ public class DocumentRecord implements AbstractRecord {
 	}
 
 	@Override
-	public void putProperty(String name, AbstractValue value) {
+	public void putProperty(String name, AbstractProperty value) {
 		properties.put(name, value);
 	}
 

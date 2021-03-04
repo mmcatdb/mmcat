@@ -10,15 +10,7 @@ package cat.transformations.algorithms2.model;
  * @author pavel.koupil
  */
 public interface AbstractValue {
-
+	
 	public abstract AbstractType getType();	// na urovni AbstracProperty
-
-	public abstract boolean isIdentifierCompound();	// na urovni AbstractProperty
-
-	public abstract boolean isReferenceCompound();	// na urovni AbstractProperty
-
-	public abstract boolean isNullable();	// na urovni AbstractProperty
-
-
 
 }

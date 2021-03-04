@@ -11,9 +11,12 @@ package cat.transformations.algorithms2.model;
  */
 public interface AbstractProperty extends AbstractValue {
 
-	// JE ZBYTECNE MIT ABSTRACT VALUE, PREDELEJ TO N
-	public abstract AbstractValue getValue();
+	public abstract boolean isIdentifierCompound();	// na urovni AbstractProperty
 
-	public abstract String getName();	// tohle je lepsi resit na urovni AbstractProperty, takze duplicitni a zbytecne je getValue
+	public abstract boolean isReferenceCompound();	// na urovni AbstractProperty
+
+	public abstract boolean isNullable();	// na urovni AbstractProperty
+
+	public abstract AbstractType getType();	// na urovni AbstracProperty
 
 }

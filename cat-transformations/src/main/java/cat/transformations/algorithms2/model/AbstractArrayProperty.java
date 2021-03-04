@@ -9,6 +9,8 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public interface AbstractSimpleValue extends AbstractValue {
+public interface AbstractArrayProperty extends AbstractProperty {
+
+	public abstract Iterable<AbstractValue> getElements();
 
 }

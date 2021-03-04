@@ -9,7 +9,7 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public class DocumentArray implements AbstractArray {
+public class DocumentArray implements AbstractArrayProperty {
 
 	@Override
 	public AbstractType getType() {
@@ -35,5 +35,5 @@ public class DocumentArray implements AbstractArray {
 	public Iterable<AbstractValue> getElements() {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
-	
+
 }

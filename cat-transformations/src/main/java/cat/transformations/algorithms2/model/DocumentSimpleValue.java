@@ -9,36 +9,12 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public class DocumentSimpleValue implements AbstractSimpleValue {
+public class DocumentSimpleValue implements AbstractValue {
 
 	private final Object value;
 
 	public DocumentSimpleValue(Object value) {
 		this.value = value;
-	}
-
-	@Override
-	public AbstractType getType() {
-		return null;
-	}
-
-	@Override
-	public boolean isIdentifierCompound() {
-		return false;
-	}
-
-	@Override
-	public boolean isReferenceCompound() {
-		return false;
-	}
-
-	@Override
-	public boolean isNullable() {
-		return true;
-	}
-
-	public Object getValue() {
-		return value;
 	}
 
 }

@@ -11,11 +11,11 @@ import java.util.Map;
  *
  * @author pavel.koupil
  */
-public interface AbstractRecord extends AbstractValue/*, Map<String, AbstractValue>*/ {
+public interface AbstractRecordProperty extends AbstractProperty/*, Map<String, AbstractValue>*/ {
 
 	public abstract Iterable<String> getPropertyNames();
 
-	public abstract AbstractValue getProperty(String name);	// tohle je lepsi resit na urovni AbstractRecord
+	public abstract AbstractProperty getProperty(String name);	// tohle je lepsi resit na urovni AbstractRecord
 
 	public abstract Iterable<AbstractIdentifier> getIdentifiers();	// na urovni AbstractRecord
 
@@ -29,8 +29,8 @@ public interface AbstractRecord extends AbstractValue/*, Map<String, AbstractVal
 
 	public abstract AbstractType getPropertyType(String name);	// na urovni AbstractRecord
 
-	public abstract Iterable<AbstractValue> getProperties();
+	public abstract Iterable<AbstractProperty> getProperties();
 
-	public abstract void putProperty(String name, AbstractValue value);	// nemelo by tohle byt spis typu abstractValue?
+	public abstract void putProperty(String name, AbstractProperty value);	// nemelo by tohle byt spis typu abstractValue?
 
 }

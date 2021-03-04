@@ -15,7 +15,7 @@ import java.util.List;
 public class DocumentKind implements AbstractKind {
 
 	private final String name;
-	List<AbstractRecord> records = new ArrayList<>();
+	List<AbstractRecordProperty> records = new ArrayList<>();
 
 	public DocumentKind(String name) {
 		this.name = name;
@@ -32,18 +32,18 @@ public class DocumentKind implements AbstractKind {
 	}
 
 	@Override
-	public Iterable<AbstractRecord> getRecords() {
+	public Iterable<AbstractRecordProperty> getRecords() {
 		return records;
 	}
 
 	@Override
-	public AbstractRecord getRecord(int index) {
+	public AbstractRecordProperty getRecord(int index) {
 		return records.get(index);
 	}
 
 	@Override
-	public AbstractRecord getRecord(AbstractIdentifier identifier) {
-		for (AbstractRecord record : records) {
+	public AbstractRecordProperty getRecord(AbstractIdentifier identifier) {
+		for (AbstractRecordProperty record : records) {
 			for (AbstractIdentifier superid : record.getIdentifiers()) {
 				if (superid.equals(identifier)) {
 					return record;
@@ -59,7 +59,7 @@ public class DocumentKind implements AbstractKind {
 	}
 
 	@Override
-	public void add(AbstractRecord record) {
+	public void add(AbstractRecordProperty record) {
 		records.add(record);
 	}
 
