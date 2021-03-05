@@ -9,7 +9,7 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public interface AbstractSimpleProperty extends AbstractProperty {
+public interface AbstractAttributeProperty extends AbstractProperty {
 
 	// JE ZBYTECNE MIT ABSTRACT VALUE, PREDELEJ TO N
 	public abstract AbstractValue getValue();

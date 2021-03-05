@@ -44,12 +44,15 @@ public class DocumentKind implements AbstractKind {
 	@Override
 	public AbstractRecordProperty getRecord(AbstractIdentifier identifier) {
 		for (AbstractRecordProperty record : records) {
-			for (AbstractIdentifier superid : record.getIdentifiers()) {
-				if (superid.equals(identifier)) {
-					return record;
-				}
+//			for (AbstractIdentifier superid : record.getIdentifiers()) {
+//				if (superid.equals(identifier)) {
+//					return record;
+//				}
+			if (record.getIdentifier().equals(identifier)) {
+				return record;
 			}
 		}
+
 		return null;
 	}
 
@@ -61,6 +64,21 @@ public class DocumentKind implements AbstractKind {
 	@Override
 	public void add(AbstractRecordProperty record) {
 		records.add(record);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+//		for (Map.Entry<String, AbstractKind> entry : kinds.entrySet()) {
+		records.forEach(record -> {
+			builder.append(record);
+			builder.append("\n");
+
+		});
+//		}
+
+		return builder.toString();
 	}
 
 }

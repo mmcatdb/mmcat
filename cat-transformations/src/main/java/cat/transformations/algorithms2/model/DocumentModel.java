@@ -39,4 +39,35 @@ public class DocumentModel implements AbstractModel {
 		kinds.put(name, kind);
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+//		for (Map.Entry<String, AbstractKind> entry : kinds.entrySet()) {
+		kinds.entrySet().forEach(entry -> {
+			builder.append(makeLine());
+			builder.append(entry.getKey());
+			builder.append("\n");
+			builder.append(makeLine());
+
+			// documents
+			builder.append(entry.getValue());
+
+			builder.append(makeLine());
+
+		});
+//		}
+
+		return builder.toString();
+	}
+
+	private String makeLine() {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 120; ++i) {
+			builder.append("-");
+		}
+		builder.append("\n");
+		return builder.toString();
+	}
+
 }

@@ -10,10 +10,16 @@ package cat.transformations.algorithms2.model;
  * @author pavel.koupil
  */
 public enum AbstractType {
-	ATTRIBUTE,
-	STRUCTURED_ATTRIBUTE,
+	KIND,
 	RECORD,
 	ARRAY,
-	REFERENCE;
-
+	INLINED,
+	ATTRIBUTE,
+	STRUCTURED_ATTRIBUTE,
+	IDENTIFIER,
+	REFERENCE,
+	
+	
+	
+	VALUE	// over, jestli je to spravne!
 }

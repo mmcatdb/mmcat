@@ -11,6 +11,10 @@ package cat.transformations.algorithms2.model;
  */
 public interface AbstractArrayProperty extends AbstractProperty {
 
-	public abstract Iterable<AbstractValue> getElements();
+	public abstract Iterable<AbstractProperty> getElements();
+
+	public String getName();
+
+	public void add(AbstractProperty property);
 
 }

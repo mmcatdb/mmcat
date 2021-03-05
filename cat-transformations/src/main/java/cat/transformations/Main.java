@@ -7,26 +7,20 @@ package cat.transformations;
 
 import cat.transformations.algorithms2.TransformationModelToInst;
 import cat.transformations.algorithms2.model.AbstractInstance;
-import cat.transformations.algorithms2.model.AbstractKind;
 import cat.transformations.algorithms2.model.AbstractModel;
 import cat.transformations.algorithms2.model.CategoricalInstance;
-import cat.transformations.algorithms2.model.DocumentKind;
 import cat.transformations.algorithms2.model.DocumentModel;
-import cat.transformations.algorithms2.model.DocumentProperty;
-import cat.transformations.algorithms2.model.DocumentRecord;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bson.Document;
-import cat.transformations.algorithms2.model.AbstractSimpleProperty;
-import cat.transformations.algorithms2.model.AbstractRecordProperty;
+import cat.transformations.algorithms2.model.AbstractType;
+import cat.transformations.wrappers.DocumentWrapper;
 
 /**
  *
@@ -113,104 +107,45 @@ public class Main {
 		Logger mongoLogger = Logger.getLogger("org.mongodb.driver");
 		mongoLogger.setLevel(Level.SEVERE);
 
-		try (var mongoClient = MongoClients.create("mongodb://172.16.254.2:27017")) {
+		try ( var mongoClient = MongoClients.create("mongodb://172.16.254.2:27017")) {
 
 			MongoDatabase database = mongoClient.getDatabase("koupil");
 			Main.setup(database);
 
 			AbstractModel model = new DocumentModel();
 
-			// list collections
-			for (String name : database.listCollectionNames()) {
-				System.out.println(name);
-				AbstractKind kind = new DocumentKind(name);
-
-				// cursor
-				MongoCollection<Document> collection = database.getCollection(name);
-				try (MongoCursor<Document> cur = collection.find().iterator()) {
-					while (cur.hasNext()) {
-						var doc = cur.next();
-
-						AbstractRecordProperty record = new DocumentRecord();
-						// ted preved vsechny property a nacpi je do dokumentu
-
-						for (Map.Entry<String, Object> property : doc.entrySet()) {
-							if (property.getValue() instanceof List) {
-								// NOTE: mame array
-								processArray(record, property.getKey(), (List) property.getValue());
-							} else if (property.getValue() instanceof Document) {
-								// NOTE: mame record
-								processRecord(record);
-							} else {
-								// NOTE: mame simple type
-								processAttribute(record, property.getKey(), property.getValue());
-							}
-
-						}
-
-						kind.add(record);
-
-					}
-				}
-				model.putKind("cars", kind);
-			}
+			DocumentWrapper wrapper = new DocumentWrapper();
+			wrapper.wrap(database, model);
 
 			TransformationModelToInst transformation = new TransformationModelToInst();
 
 			AbstractInstance category = new CategoricalInstance();
+			category.create("cars", AbstractType.KIND);
+			category.create("_id", AbstractType.IDENTIFIER);
+			category.create("name", AbstractType.ATTRIBUTE);
+			category.create("price", AbstractType.ATTRIBUTE);
+			category.create("items", AbstractType.ARRAY);
+			category.create("test", AbstractType.RECORD);
+			category.create("a", AbstractType.ATTRIBUTE);
+			category.create("b", AbstractType.ATTRIBUTE);
+			category.create("c", AbstractType.ATTRIBUTE);
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "items"), category.get("cars"), category.get("items"));
+//			category.createMorphism(TransformationModelToInst.morphismName("items", "cars"), category.get("items"), category.get("cars"));
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "test"), category.get("cars"), category.get("test"));
+			category.createMorphism(TransformationModelToInst.morphismName("test", "cars"), category.get("test"), category.get("cars"));
+			category.createMorphism(TransformationModelToInst.morphismName("test", "a"), category.get("test"), category.get("a"));
+			category.createMorphism(TransformationModelToInst.morphismName("test", "b"), category.get("test"), category.get("b"));
+			category.createMorphism(TransformationModelToInst.morphismName("test", "c"), category.get("test"), category.get("c"));
 
 			transformation.process(model, category);
+
+			System.out.println(model);
+			System.out.println(category);
 		}
 
-	}
-
-	private static void processAttribute(AbstractRecordProperty parent, String name, Object value) {
-		AbstractSimpleProperty property = new DocumentProperty(name, value, false, false, false);
-		parent.putProperty(name, property);
-	}
-
-	private static void processRecord(AbstractRecordProperty parent) {
-//
-//		// record muze obsahovat property slozitych typu... takze opet zanorovani a volani sebe sama
-//		EntityObject object = result.getOrCreateEntity(key);
-//
-//		var embeddedSID = document.get("eid");
-//		if (embeddedSID == null) {
-//			embeddedSID = System.currentTimeMillis() + "TODO-EMBEDDED_ID!";
-//			// tady bys mel modifikovat soubor a vytvorit sid? nezmeni to puvodni soubor?
-//			document.append(key + "_id", embeddedSID);
-////			System.out.println("CREATED EMBEDDED SID: " + embeddedSID);
-//		}
-//		// tady vkladas jen mapping, value jde az pozdeji
-//		RelationshipMorphism morphism = result.getOrCreateRelationshipMorphism(entity.getName() + "->" + object.getName(), entity, object);
-//		morphism.addMapping(sid, embeddedSID);
-//		queue.add(document);
-//		queueOfNames.add(key);
-	}
-
-	private static void processArray(AbstractRecordProperty parent, String name, List array) {
-		if (array.isEmpty()) {
-			parent.putProperty(name, null);	// TODO: neni dobre, mas vkladat prazdne pole!
-			// TODO: chybi ti AbstractArray...
-			// TODO: co delat s prazdnym polem?
-			System.out.println("TODO: processArray - empty array");
-		} else if (array.get(0) instanceof List) {
-			// TODO: co delat s polem poli?
-//			for (var element : array) {
-//				processArray(result, key, (List) element, entity, sid, queue, queueOfNames);
-//			}
-			System.out.println("TODO: processArray - nested array");
-		} else if (array.get(0) instanceof Document) {
-//			for (var element : array) {
-//				processRecord(result, key, (Document) element, entity, sid, queue, queueOfNames);
-//			}
-			System.out.println("TODO: processArray - array of documents");
-		} else {
-//			for (var element : array) {
-//				processAttribute(result, key, element, entity, sid);
-//			}
-			System.out.println("TODO: processArray - array of properties");
-		}
 	}
 
 }

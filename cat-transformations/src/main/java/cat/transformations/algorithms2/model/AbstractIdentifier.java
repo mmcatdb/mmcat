@@ -13,6 +13,9 @@ import java.util.List;
  */
 public interface AbstractIdentifier extends AbstractValue {
 	
+	public void add(List<Object> identifier);
+	
+	// jeden konkretni identifier? nebo superid?
 //	protected List<AbstractProperty> identifier;
 
 }

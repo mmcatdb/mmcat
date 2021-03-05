@@ -5,15 +5,20 @@
  */
 package cat.transformations.algorithms2.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author pavel.koupil
  */
 public class DocumentArray implements AbstractArrayProperty {
 
+	private static final List<AbstractProperty> elements = new ArrayList<>();
+
 	@Override
 	public AbstractType getType() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		return AbstractType.ARRAY;
 	}
 
 	@Override
@@ -32,8 +37,45 @@ public class DocumentArray implements AbstractArrayProperty {
 	}
 
 	@Override
-	public Iterable<AbstractValue> getElements() {
+	public Iterable<AbstractProperty> getElements() {
+		return elements;
+	}
+
+	@Override
+	public String getName() {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public AbstractValue getValue() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public int compareTo(AbstractValue o) {
+		return -1;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("[");
+		int index = 0;
+		for (var element : elements) {
+			builder.append(element);
+			if (++index < elements.size()) {
+				builder.append(",");
+			}
+		}
+		builder.append("]");
+
+		return builder.toString();
+	}
+
+	@Override
+	public void add(AbstractProperty property) {
+		elements.add(property);
 	}
 
 }

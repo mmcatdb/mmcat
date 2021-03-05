@@ -9,8 +9,6 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public interface AbstractMorphism {
-
-	public void add(Iterable<? extends AbstractValue> superid, AbstractValue value);	// WARN: Ted umoznujes pouze jednu hodnotu pridavat
-
+public interface AbstractCategoricalValue extends AbstractValue {
+	
 }

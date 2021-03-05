@@ -17,7 +17,7 @@ public interface AbstractRecordProperty extends AbstractProperty/*, Map<String, 
 
 	public abstract AbstractProperty getProperty(String name);	// tohle je lepsi resit na urovni AbstractRecord
 
-	public abstract Iterable<AbstractIdentifier> getIdentifiers();	// na urovni AbstractRecord
+	public abstract AbstractIdentifier getIdentifier();	// na urovni AbstractRecord
 
 	public abstract Iterable<AbstractReference> getReferences();	// na urovni AbstractRecord
 
@@ -32,5 +32,7 @@ public interface AbstractRecordProperty extends AbstractProperty/*, Map<String, 
 	public abstract Iterable<AbstractProperty> getProperties();
 
 	public abstract void putProperty(String name, AbstractProperty value);	// nemelo by tohle byt spis typu abstractValue?
+
+	public void setIdentifier(AbstractIdentifier superid);
 
 }

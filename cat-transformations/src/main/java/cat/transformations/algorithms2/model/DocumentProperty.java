@@ -9,7 +9,7 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public class DocumentProperty implements AbstractSimpleProperty {
+public class DocumentProperty implements AbstractAttributeProperty {
 
 	private final String name;
 	private final boolean isIdentifierCompound;
@@ -21,7 +21,7 @@ public class DocumentProperty implements AbstractSimpleProperty {
 
 	public DocumentProperty(String name, Object value, boolean isIdentifierCompound, boolean isReferenceCompound, boolean isNullable) {
 		this.name = name;
-		this.value = new DocumentSimpleValue(value);
+		this.value = new DocumentSimpleValue(name, value);
 		this.isIdentifierCompound = isIdentifierCompound;
 		this.isReferenceCompound = isReferenceCompound;
 		this.isNullable = isNullable;
@@ -55,6 +55,23 @@ public class DocumentProperty implements AbstractSimpleProperty {
 	@Override
 	public AbstractType getType() {
 		return TYPE;
+	}
+
+	@Override
+	public int compareTo(AbstractValue o) {
+		return -1;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(name);
+
+		builder.append(":");
+
+		builder.append(value);
+
+		return builder.toString();
 	}
 
 }

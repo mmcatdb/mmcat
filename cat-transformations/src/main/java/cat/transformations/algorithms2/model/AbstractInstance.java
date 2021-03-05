@@ -11,12 +11,16 @@ package cat.transformations.algorithms2.model;
  */
 public interface AbstractInstance {
 
-	public abstract AbstractObject getOrCreate(String name, AbstractType type);
+	public abstract AbstractCategoricalObject getOrCreate(String name, AbstractType type);
 
-	public abstract AbstractObject get(String name);
+	public abstract AbstractCategoricalObject get(String name);
 
 	public abstract boolean create(String name, AbstractType type);
 
-	public abstract AbstractMorphism getMorphism(String name);
+	public abstract AbstractCategoricalMorphism getOrCreateMorphism(String name, AbstractCategoricalObject domain, AbstractCategoricalObject codomain);
+
+	public abstract AbstractCategoricalMorphism getMorphism(String name);
+
+	public abstract void createMorphism(String name, AbstractCategoricalObject domain, AbstractCategoricalObject codomain);
 
 }

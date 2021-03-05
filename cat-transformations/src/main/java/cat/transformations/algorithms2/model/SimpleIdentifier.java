@@ -5,10 +5,57 @@
  */
 package cat.transformations.algorithms2.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author pavel.koupil
  */
 public class SimpleIdentifier implements AbstractIdentifier {
+
+	private final List<List<Object>> identifiers = new ArrayList<>();
+
+	@Override
+	public int compareTo(AbstractValue o) {
+		return -1;
+	}
+
+	@Override
+	public void add(List<Object> identifier) {
+		identifiers.add(identifier);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("{");
+		boolean firstIdentifier = true;
+		for (var identifier : identifiers) {
+
+			if (firstIdentifier) {
+				firstIdentifier = !firstIdentifier;
+			} else {
+				builder.append(",");
+			}
+
+			builder.append("{");
+
+			boolean firstAttribute = true;
+			for (var attribute : identifier) {
+				if (firstAttribute) {
+					firstAttribute = !firstAttribute;
+				} else {
+					builder.append(",");
+				}
+				builder.append(attribute);
+			}
+
+			builder.append("}");
+		}
+		builder.append("}");
+
+		return builder.toString();
+	}
 
 }

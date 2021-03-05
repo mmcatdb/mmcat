@@ -9,7 +9,8 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public interface AbstractValue extends Comparable<AbstractValue> {
+public interface AbstractCategoricalMorphism {
 
-//	public abstract AbstractType getType();	// na urovni AbstracProperty
+	public void add(AbstractValue superid, AbstractValue value);	// WARN: Ted umoznujes pouze jednu hodnotu pridavat
+
 }

@@ -20,7 +20,7 @@ public class DocumentRecord implements AbstractRecordProperty {
 	// pokud ano, pak musis tohle presunout do konstruktoru a umoznit nastavit neco jineho... ale pak to nemusi davat smysl
 
 	private final Map<String, AbstractProperty> properties = new TreeMap<>();
-	private final List<AbstractIdentifier> superid = new ArrayList<>();
+	private AbstractIdentifier superid;// = new SimpleIdentifier();
 	private final List<AbstractReference> references = new ArrayList<>();
 
 	private String name;
@@ -30,7 +30,6 @@ public class DocumentRecord implements AbstractRecordProperty {
 	}
 
 	public DocumentRecord(String name) {
-
 		this.name = name;
 	}
 
@@ -40,7 +39,7 @@ public class DocumentRecord implements AbstractRecordProperty {
 	}
 
 	@Override
-	public Iterable<AbstractIdentifier> getIdentifiers() {
+	public AbstractIdentifier getIdentifier() {
 		return superid;
 	}
 
@@ -102,6 +101,58 @@ public class DocumentRecord implements AbstractRecordProperty {
 	@Override
 	public boolean isNullable() {
 		return true;
+	}
+
+	@Override
+	public AbstractValue getValue() {
+		// WARN! 
+		System.out.println("WARNING: U DOKUMENTU VRACIS CELY DOKUMENT! JAKO GETVALUE! NEBEZPECNE!");
+		return this;
+	}
+
+	@Override
+	public int compareTo(AbstractValue o) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public void setIdentifier(AbstractIdentifier superid) {
+		this.superid = superid;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append(superid);
+		builder.append("\t->\t");
+
+		builder.append("{");
+
+		int index = 0;
+		for (Map.Entry<String, AbstractProperty> property : properties.entrySet()) {
+//		properties.entrySet().forEach(property -> {
+			builder.append(property);
+			if (++index < properties.size()) {
+				builder.append(",");
+			}
+
+//		});
+		}
+
+		builder.append("}");
+
+		builder.append("\t\t");
+		references.forEach(reference -> {
+			builder.append(reference);
+		});
+
+		return builder.toString();
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 
 }

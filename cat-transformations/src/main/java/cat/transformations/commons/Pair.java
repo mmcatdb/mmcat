@@ -5,6 +5,8 @@
  */
 package cat.transformations.commons;
 
+import cat.transformations.algorithms2.model.AbstractCategoricalObject;
+
 /**
  *
  * @author pavel.contos
@@ -19,6 +21,10 @@ public class Pair<X extends Comparable<X>, Y extends Comparable<Y>> implements C
 	public Pair(X x, Y y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	public Pair(AbstractCategoricalObject domain, AbstractCategoricalObject codomain) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	public X getX() {

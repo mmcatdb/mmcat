@@ -17,8 +17,8 @@ public class SimpleReference implements AbstractReference {
 	}
 
 	@Override
-	public AbstractType getType() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public int compareTo(AbstractValue o) {
+		return -1;
 	}
 
 }
