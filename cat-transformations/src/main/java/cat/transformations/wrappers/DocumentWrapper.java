@@ -15,7 +15,6 @@ import cat.transformations.algorithms2.model.DocumentArray;
 import cat.transformations.algorithms2.model.DocumentKind;
 import cat.transformations.algorithms2.model.DocumentProperty;
 import cat.transformations.algorithms2.model.DocumentRecord;
-import cat.transformations.algorithms2.model.DocumentSimpleValue;
 import cat.transformations.algorithms2.model.SimpleIdentifier;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -23,6 +22,8 @@ import com.mongodb.client.MongoDatabase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bson.Document;
 
 /**
@@ -30,6 +31,8 @@ import org.bson.Document;
  * @author pavel.koupil
  */
 public class DocumentWrapper {
+
+	private static final Logger LOGGER = Logger.getLogger(DocumentWrapper.class.getName());
 
 	public void wrap(MongoDatabase database, AbstractModel model) {
 		// list collections
@@ -110,24 +113,36 @@ public class DocumentWrapper {
 	}
 
 	private static AbstractArrayProperty processArray(String name, List array) {
+		LOGGER.log(Level.INFO, String.format("Beginning of processing array %s with length %s", name, array.size()));
 		if (array.isEmpty()) {
-			System.out.println("TODO: processArray - empty array");
-			return new DocumentArray();	// TODO: neni dobre, mas vkladat prazdne pole!
+			LOGGER.log(Level.SEVERE, "Array is empty -> created empty array. Je to v poradku?");
+			return new DocumentArray(name);
 		}
 
-		AbstractArrayProperty arrayProperty = new DocumentArray();
+		AbstractArrayProperty arrayProperty = new DocumentArray(name);
 
 		for (var element : array) {
 			if (element instanceof List) {
-				System.out.println("TODO: processArray - nested array");
+				LOGGER.log(Level.SEVERE, "TODO: Process nested array of arrays");
 //					processArray(result, key, (List) element, entity, sid, queue, queueOfNames);
 			} else if (element instanceof Document) {
-				System.out.println("TODO: processArray - array of documents");
+				LOGGER.log(Level.SEVERE, "TODO: Process nested array of documents");
 //					processRecord(result, key, (Document) element, entity, sid, queue, queueOfNames);
 			} else {
-//					processAttribute(result, key, element, entity, sid);
-				arrayProperty.add(new DocumentSimpleValue(name, element));
-				System.out.println("TODO: processArray - array of properties");
+				AbstractRecordProperty record = new DocumentRecord(name + ".items");
+
+				AbstractIdentifier superid = new SimpleIdentifier();
+				List<Object> identifier = new ArrayList<>();
+				identifier.add(element);
+				superid.add(identifier);
+				record.setIdentifier(superid);
+
+				AbstractAttributeProperty attribute = new DocumentProperty(name + ".att", element, false, false, false);
+				LOGGER.log(Level.INFO, String.format("Added property %s to record %s", attribute.getName(), record.getName()));
+				record.putProperty(attribute.getName(), attribute);
+
+				arrayProperty.add(record);
+				LOGGER.log(Level.INFO, String.format("Added record %s to array %s", record.getName(), arrayProperty.getName()));
 			}
 		}
 

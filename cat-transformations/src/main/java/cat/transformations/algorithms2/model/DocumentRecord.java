@@ -9,12 +9,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author pavel.koupil
  */
 public class DocumentRecord implements AbstractRecordProperty {
+
+	private static final Logger LOGGER = Logger.getLogger(DocumentRecord.class.getName());
 
 	private static final AbstractType TYPE = AbstractType.RECORD;	// WARN: Nepouzivas DocumentRecord jeste pro nested dokumenty?
 	// pokud ano, pak musis tohle presunout do konstruktoru a umoznit nastavit neco jineho... ale pak to nemusi davat smysl
@@ -105,8 +109,7 @@ public class DocumentRecord implements AbstractRecordProperty {
 
 	@Override
 	public AbstractValue getValue() {
-		// WARN! 
-		System.out.println("WARNING: U DOKUMENTU VRACIS CELY DOKUMENT! JAKO GETVALUE! NEBEZPECNE!");
+		LOGGER.log(Level.WARNING, "U DOKUMENTU VRACIS CELY DOKUMENT! JAKO GETVALUE! NEBEZPECNE!");
 		return this;
 	}
 
@@ -125,7 +128,7 @@ public class DocumentRecord implements AbstractRecordProperty {
 		StringBuilder builder = new StringBuilder();
 
 		builder.append(superid);
-		builder.append("\t->\t");
+		builder.append(" -> ");
 
 		builder.append("{");
 
@@ -142,7 +145,7 @@ public class DocumentRecord implements AbstractRecordProperty {
 
 		builder.append("}");
 
-		builder.append("\t\t");
+		builder.append("\tREF:");
 		references.forEach(reference -> {
 			builder.append(reference);
 		});

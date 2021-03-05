@@ -80,4 +80,9 @@ public class CategoricalEntityObject implements AbstractCategoricalObject {
 		return builder.toString();
 	}
 
+	@Override
+	public AbstractType getType() {
+		return type;
+	}
+
 }

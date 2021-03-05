@@ -11,6 +11,7 @@ package cat.transformations.algorithms2.model;
  */
 public interface AbstractCategoricalMorphism {
 
-	public void add(AbstractValue superid, AbstractValue value);	// WARN: Ted umoznujes pouze jednu hodnotu pridavat
+	public abstract void add(AbstractValue superid, AbstractValue value);	// WARN: Ted umoznujes pouze jednu hodnotu pridavat
 
+	public abstract String getName();
 }

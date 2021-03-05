@@ -17,9 +17,9 @@ public enum AbstractType {
 	ATTRIBUTE,
 	STRUCTURED_ATTRIBUTE,
 	IDENTIFIER,
-	REFERENCE,
+	REFERENCE//,
 	
 	
 	
-	VALUE	// over, jestli je to spravne!
+//	VALUE	// over, jestli je to spravne!
 }

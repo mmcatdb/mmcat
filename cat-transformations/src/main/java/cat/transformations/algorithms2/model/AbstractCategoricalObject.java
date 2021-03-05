@@ -19,4 +19,6 @@ public interface AbstractCategoricalObject extends Comparable<AbstractCategorica
 
 	public abstract boolean contains(AbstractValue value);
 
+	public abstract AbstractType getType();
+
 }

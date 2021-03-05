@@ -16,6 +16,12 @@ public class DocumentArray implements AbstractArrayProperty {
 
 	private static final List<AbstractProperty> elements = new ArrayList<>();
 
+	private final String name;
+
+	public DocumentArray(String name) {
+		this.name = name;
+	}
+
 	@Override
 	public AbstractType getType() {
 		return AbstractType.ARRAY;
@@ -43,7 +49,7 @@ public class DocumentArray implements AbstractArrayProperty {
 
 	@Override
 	public String getName() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		return name;
 	}
 
 	@Override

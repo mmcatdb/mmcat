@@ -34,7 +34,7 @@ public class CategoricalMorphism implements AbstractCategoricalMorphism {
 		var pair = new Pair(superid, value);
 		mappings.add(pair);
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -56,6 +56,11 @@ public class CategoricalMorphism implements AbstractCategoricalMorphism {
 
 		builder.append("}");
 		return builder.toString();
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 
 }

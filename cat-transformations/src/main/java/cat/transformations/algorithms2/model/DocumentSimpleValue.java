@@ -11,7 +11,7 @@ package cat.transformations.algorithms2.model;
  */
 public class DocumentSimpleValue implements AbstractProperty {
 
-	private static final AbstractType TYPE = AbstractType.VALUE;
+	private static final AbstractType TYPE = AbstractType.ATTRIBUTE;
 
 	private final Object value;
 

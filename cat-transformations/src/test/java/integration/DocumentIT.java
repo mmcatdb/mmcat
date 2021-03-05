@@ -9,6 +9,7 @@ import cat.transformations.algorithms.Algorithms;
 import cat.transformations.algorithms.TransformationDocToInst;
 import cat.transformations.algorithms.TransformationInstToDoc;
 import cat.transformations.category.InstanceCategory;
+import cat.transformations.commons.Constants;
 import cat.transformations.model.AbstractTable;
 import cat.transformations.model.CSVTable;
 import cat.transformations.model.RelationalInstance;
