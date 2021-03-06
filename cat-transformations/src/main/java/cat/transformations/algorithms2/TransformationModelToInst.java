@@ -18,6 +18,8 @@ import cat.transformations.algorithms2.model.AbstractAttributeProperty;
 import cat.transformations.algorithms2.model.AbstractCategoricalObject;
 import cat.transformations.algorithms2.model.AbstractCategoricalMorphism;
 import cat.transformations.algorithms2.model.AbstractIdentifier;
+import cat.transformations.algorithms2.model.AbstractValue;
+import cat.transformations.algorithms2.model.SimpleIdentifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,20 +67,27 @@ public class TransformationModelToInst {
 
 						switch (object.getType()) {
 							case KIND ->
-								processEntity(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
+								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
 							case RECORD ->
-								processEntity(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
+								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
 							case ARRAY ->
 								processArray(instance, entity, superid, (AbstractArrayProperty) property, queue, queueOfNames);
 							case INLINED ->
-								LOGGER.log(Level.SEVERE, "\t\tINLINED TODO");
+								processInlined();
 							case ATTRIBUTE ->
 								processAttribute(instance, entity, superid, (AbstractAttributeProperty) property);
+							case MULTI_ATTRIBUTE ->
+								processMultiAttribute(instance, entity, superid, (AbstractArrayProperty) property);
 							case STRUCTURED_ATTRIBUTE ->
 								processStructuredAttribute(instance, entity, superid, (AbstractAttributeProperty) property, queue, queueOfNames);
 							case IDENTIFIER ->
 								processAttribute(instance, entity, superid, (AbstractAttributeProperty) property);
 							case REFERENCE ->
+								// SKIP FOR NOW! RESIS JE O PAR RADKU NIZ!
+								// MELY BY SE PRESKOCIT, PROTOZE JEJICH HODNOTY PATRI DO JINYCH MORFISMU
+								processReference();
+							case MULTI_REFERENCE ->
+								// JAK BY TOHLE MELO VYPADAT?
 								// SKIP FOR NOW! RESIS JE O PAR RADKU NIZ!
 								// MELY BY SE PRESKOCIT, PROTOZE JEJICH HODNOTY PATRI DO JINYCH MORFISMU
 								processReference();
@@ -105,91 +114,92 @@ public class TransformationModelToInst {
 
 	}
 
-	private void processValue(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractProperty property) {
-//		System.out.println(String.format("\t\tVALUE superid %s name %s value %s", superid, property.getName(), property.getValue()));
-		var propertyName = property.getName();
-		var attribute = instance.get(propertyName);
-		attribute.add(property.getValue());		// WARN: TOHLE NENI ITERABLE! JE TREBA UPRAVIT ROZHRANI U ABSTRACT_OBJECT!
-		LOGGER.log(Level.SEVERE, String.format("\t\tAdded value %s to domain %s", property.getValue(), attribute.getName()));
-		AbstractCategoricalMorphism morphism = instance.getMorphism(morphismName(entity.getName(), propertyName));
-		morphism.add(superid, property.getValue());
-		LOGGER.log(Level.SEVERE, String.format("\t\tAdded mappings (%s, %s) TO %s", superid, property.getValue(), morphism));
+	private void processRecord(AbstractInstance instance, AbstractCategoricalObject parentObject, AbstractIdentifier parentSuperid, AbstractRecordProperty recordProperty, String recordName, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
+		var object = instance.get(recordName); // ted mas i zpracovavany objekt
+
+		var valueSuperid = recordProperty.getIdentifier();
+
+		addMapping(instance, morphismName(parentObject.getName(), object.getName()), parentSuperid, valueSuperid);
+		addMapping(instance, morphismName(object.getName(), parentObject.getName()), valueSuperid, parentSuperid);
+
+		queue.add(recordProperty);
+		queueOfNames.add(recordProperty.getName());
 	}
 
-	private void processAttribute(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractAttributeProperty property) {
-		var propertyName = property.getName();
-		var attribute = instance.get(propertyName);
-		attribute.add(property.getValue());		// WARN: TOHLE NENI ITERABLE! JE TREBA UPRAVIT ROZHRANI U ABSTRACT_OBJECT!
-		LOGGER.log(Level.INFO, String.format("\t\tAdded value %s to domain %s", property.getValue(), attribute.getName()));
-		System.out.println(morphismName(entity.getName(), propertyName));
-		AbstractCategoricalMorphism morphism = instance.getMorphism(morphismName(entity.getName(), propertyName));
-		morphism.add(superid, property.getValue());
-		LOGGER.log(Level.INFO, String.format("\t\tAdded mappings (%s, %s) TO %s", superid, property.getValue(), morphism));
+	private void processMultiAttribute(AbstractInstance instance, AbstractCategoricalObject parentObject, AbstractIdentifier parentSuperid, AbstractArrayProperty arrayProperty) {
+		var elements = (Iterable<? extends AbstractProperty>) arrayProperty.getElements();
 
+		var arrayObject = instance.get(arrayProperty.getName());
+
+		for (var element : elements) {
+
+			arrayObject.add(element);
+			LOGGER.log(Level.INFO, String.format("\t\tAdded value %s to multi_attribute domain %s", element, arrayProperty.getName()));
+			addMapping(instance, morphismName(parentObject.getName(), element.getName()), parentSuperid, element.getValue());
+		}
 	}
 
-	private void processStructuredAttribute(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractAttributeProperty property, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
-		// aktualne zpracovavam property - POZOR: strukturovany atribut se od entity lisi pouze tim, ze ma morfismus pouze jednim smerem, zatimco entita ma morfismy obema smery!
-		var value = (AbstractRecordProperty) property.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
-		var object = instance.get(property.getName()); // ted mas i zpracovavany objekt
-		var valueSuperid = value.getIdentifier();
+	private void processArray(AbstractInstance instance, AbstractCategoricalObject parentObject, AbstractIdentifier parentSuperid, AbstractArrayProperty arrayProperty, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
+		var elements = (Iterable<? extends AbstractProperty>) arrayProperty.getElements();
 
-		AbstractCategoricalMorphism morphism = instance.getMorphism(morphismName(entity.getName(), object.getName()));	// WARN: co kdyz se odkazuje na jiny? TOHLE MUSIS OVERIT!
-		morphism.add(superid, valueSuperid);
-		queue.add(value);
-		queueOfNames.add(property.getName());
-		LOGGER.log(Level.INFO, String.format("\t\tAdded mappings (%s, %s) TO %s", superid, valueSuperid, morphism));
-	}
-
-	private void processEntity(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractRecordProperty value, String propertyName, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
-		// aktualne zpracovavam property
-//		var value = (AbstractRecord) property.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
-		var object = instance.get(propertyName); // ted mas i zpracovavany objekt
-
-		var valueSuperid = value.getIdentifier();
-
-		AbstractCategoricalMorphism morphism = instance.getMorphism(morphismName(entity.getName(), object.getName()));	// WARN: co kdyz se odkazuje na jiny? TOHLE MUSIS OVERIT!
-		System.out.println(morphismName(entity.getName(), propertyName));
-		morphism.add(superid, valueSuperid);
-		AbstractCategoricalMorphism comorphism = instance.getMorphism(morphismName(object.getName(), entity.getName()));	// WARN: co kdyz se odkazuje na jiny? TOHLE MUSIS OVERIT!
-		comorphism.add(valueSuperid, superid);	// vyuzivam vlastnosti, ze kazdy identifikator ma schopnost identifikace!
-		queue.add(value);
-		queueOfNames.add(value.getName());
-		LOGGER.log(Level.INFO, String.format("\t\tEntity %s - Added mappings (%s,%s) TO %s and comapping (%s,%s) TO %s", propertyName, superid, valueSuperid, morphism.getName(), valueSuperid, superid, comorphism.getName()));
-	}
-
-	private void processArray(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractArrayProperty property, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
-		var array = (Iterable<? extends AbstractProperty>) property.getElements();
+		AbstractCategoricalObject arrayObject = instance.get(arrayProperty.getName());
 
 		int size = 0;
+		for (var element : elements) {
+			AbstractCategoricalObject elementObject = instance.get(element.getName());
+			LOGGER.log(Level.INFO, String.format("\t\tZpracovavas %s prvek (%s,%s) pole (%s, %s)", size, elementObject.getName(), elementObject.getType(), arrayProperty.getName(), arrayProperty.getType()));
+			switch (elementObject.getType()) {
+				case KIND -> {
+					// TAHLE SITUACE BY NEMELA NASTAT... jinak se resi stejne jako RECORD
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> KIND!");
+				}
+				case RECORD -> {
+					AbstractRecordProperty recordElement = (AbstractRecordProperty) element;
+					AbstractIdentifier arraySuperid = new SimpleIdentifier(parentSuperid, recordElement.getIdentifier());
+					arrayObject.add(arraySuperid);
 
-		for (var value : array) {
-			++size;
-			AbstractCategoricalObject object = instance.get(value.getName());
-			LOGGER.log(Level.INFO, String.format("\t\tZpracovavas %s prvek (%s,%s) pole (%s, %s)", size, object.getName(), object.getType(), property.getName(), property.getType()));
-			switch (object.getType()) {
-				case KIND ->
-					processEntity(instance, entity, superid, (AbstractRecordProperty) value, property.getName(), queue, queueOfNames);
-				case RECORD ->
-					processEntity(instance, entity, superid, (AbstractRecordProperty) value, property.getName(), queue, queueOfNames);
-				case ARRAY ->
-					processArray(instance, entity, superid, (AbstractArrayProperty) value, queue, queueOfNames);
-				case INLINED ->
+					processRecord(instance, arrayObject, arraySuperid, recordElement, recordElement.getName(), queue, queueOfNames);
+
+					// mapovani parentObject -> arrayObject (ale ne arrayElementObject!)
+					addMapping(instance, morphismName(parentObject.getName(), arrayObject.getName()), parentSuperid, arraySuperid);
+					addMapping(instance, morphismName(arrayObject.getName(), parentObject.getName()), arraySuperid, parentSuperid);
+				}
+				case ARRAY -> {
+					processArray(instance, parentObject, parentSuperid, (AbstractArrayProperty) element, queue, queueOfNames);
+				}
+				// WARN: nasledujici pripady nesmi nastat, event. mohou nastat v pripade pole poli, ale to jeste over!
+				case INLINED -> {
 					LOGGER.log(Level.SEVERE, "\t\tINLINED TODO");
-				case ATTRIBUTE ->
-					processAttribute(instance, instance.get(property.getName()), superid, (AbstractAttributeProperty) value);
-				case STRUCTURED_ATTRIBUTE ->
-					processStructuredAttribute(instance, entity, superid, (AbstractAttributeProperty) value, queue, queueOfNames);
-				case IDENTIFIER ->
-					processAttribute(instance, entity, superid, (AbstractAttributeProperty) value);
-				case REFERENCE ->
-					// SKIP FOR NOW! RESIS JE O PAR RADKU NIZ!
-					// MELY BY SE PRESKOCIT, PROTOZE JEJICH HODNOTY PATRI DO JINYCH MORFISMU
-					processReference();
-//				case VALUE ->
-//					processValue(instance, entity, superid, (AbstractProperty) value);
+					// pole inlined take nesmi nastat, protoze by to melo byt parovani 1:1
+				}
+				case ATTRIBUTE -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> ATTRIBUTE!");
+//					processAttribute(instance, instance.get(arrayProperty.getName()), parentSuperid, (AbstractAttributeProperty) element);
+					// nahrazeni za multi-attribute
+				}
+				case MULTI_ATTRIBUTE -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> MULTI_ATTRIBUTE!");
+//					processAttribute(instance, instance.get(arrayProperty.getName()), parentSuperid, (AbstractAttributeProperty) element);
+					// nahrazeni za multi-attribute
+				}
+				case STRUCTURED_ATTRIBUTE -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> STRUCTURED_ATTRIBUTE!");
+//					processStructuredAttribute(instance, parentObject, parentSuperid, (AbstractAttributeProperty) element, queue, queueOfNames);
+				}
+				case IDENTIFIER -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> IDENTIFIER!");
+//					processAttribute(instance, parentObject, parentSuperid, (AbstractAttributeProperty) element);
+				}
+				case REFERENCE -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> REFERENCE!");
+//					processReference();
+				}
+				case MULTI_REFERENCE -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> MULTI_REFERENCE!");
+//					processReference();
+				}
 			}
-
+			++size;
 		}
 
 		if (size == 0) {
@@ -198,8 +208,38 @@ public class TransformationModelToInst {
 		}
 	}
 
+	private void processAttribute(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractAttributeProperty attribute) {
+		var attributeObject = instance.get(attribute.getName());
+		attributeObject.add(attribute.getValue());
+		LOGGER.log(Level.INFO, String.format("\t\tAdded value %s to attribute domain %s", attribute.getValue(), attribute.getName()));
+		addMapping(instance, morphismName(entity.getName(), attribute.getName()), superid, attribute.getValue());
+	}
+
+	private void processInlined() {
+		LOGGER.log(Level.SEVERE, "\t\tINLINED TODO");
+	}
+
+	private void processStructuredAttribute(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractAttributeProperty property, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
+		// aktualne zpracovavam property - POZOR: strukturovany atribut se od entity lisi pouze tim, ze ma morfismus pouze jednim smerem, zatimco entita ma morfismy obema smery!
+		var value = (AbstractRecordProperty) property.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
+		var object = instance.get(property.getName()); // ted mas i zpracovavany objekt
+		var valueSuperid = value.getIdentifier();
+
+		addMapping(instance, morphismName(entity.getName(), object.getName()), superid, valueSuperid);
+
+		queue.add(value);
+		queueOfNames.add(property.getName());
+	}
+
 	private void processReference() {
 		LOGGER.log(Level.SEVERE, "NEMELO BY NASTAVAT!");
+	}
+
+	private void addMapping(AbstractInstance instance, String name, AbstractValue domainValue, AbstractValue codomainValue) {
+		LOGGER.log(Level.SEVERE, name);
+		AbstractCategoricalMorphism morphism = instance.getMorphism(name);
+		morphism.add(domainValue, codomainValue);
+		LOGGER.log(Level.SEVERE, String.format("\t\tAdded mappings (%s, %s) TO %s", domainValue, codomainValue, morphism));
 	}
 
 }

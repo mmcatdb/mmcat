@@ -34,11 +34,16 @@ public class CategoricalInstance implements AbstractInstance {
 				result = getOrCreateRelationship(name, type);
 			case ATTRIBUTE ->
 				result = getOrCreateAttribute(name, type);
+			case MULTI_ATTRIBUTE ->
+				result = getOrCreateAttribute(name, type);
 			case STRUCTURED_ATTRIBUTE ->
 				result = getOrCreateAttribute(name, type);
 			case IDENTIFIER ->
 				result = getOrCreateAttribute(name, type);
 			case REFERENCE ->
+				result = null;
+//				result = getOrCreate(name, type);
+			case MULTI_REFERENCE ->
 				result = null;
 //				result = getOrCreate(name, type);
 		}
@@ -99,12 +104,17 @@ public class CategoricalInstance implements AbstractInstance {
 				result = createRelationship(name, type);
 			case ATTRIBUTE ->
 				result = createAttribute(name, type);
+			case MULTI_ATTRIBUTE ->
+				result = createAttribute(name, type);
 			case STRUCTURED_ATTRIBUTE ->
 				result = createAttribute(name, type);
 			case IDENTIFIER ->
 				result = createAttribute(name, type);
 //				result = getOrCreate(name, type);
 			case REFERENCE ->
+				result = false;
+//				result = getOrCreate(name, type);
+			case MULTI_REFERENCE ->
 				result = false;
 //				result = getOrCreate(name, type);
 		}

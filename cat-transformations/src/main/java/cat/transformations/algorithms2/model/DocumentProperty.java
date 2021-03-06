@@ -65,9 +65,9 @@ public class DocumentProperty implements AbstractAttributeProperty {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(name);
+//		builder.append(name);
 
-		builder.append(":");
+//		builder.append(":");
 
 		builder.append(value);
 

@@ -5,6 +5,7 @@
  */
 package cat.transformations.algorithms2.model;
 
+import cat.transformations.commons.Pair;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,16 @@ import java.util.List;
 public class SimpleIdentifier implements AbstractIdentifier {
 
 	private final List<List<Object>> identifiers = new ArrayList<>();
+
+	public SimpleIdentifier() {
+	}
+
+	public SimpleIdentifier(AbstractIdentifier a, AbstractIdentifier b) {
+		List<Object> identifier = new ArrayList<>();
+		identifier.add(new Pair<>(a, b));
+//		identifier.add("ARRAY" + (System.currentTimeMillis() % 1000));
+		identifiers.add(identifier);
+	}
 
 	@Override
 	public int compareTo(AbstractValue o) {

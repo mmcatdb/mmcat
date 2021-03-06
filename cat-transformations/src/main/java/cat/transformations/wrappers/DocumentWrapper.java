@@ -34,6 +34,10 @@ public class DocumentWrapper {
 
 	private static final Logger LOGGER = Logger.getLogger(DocumentWrapper.class.getName());
 
+	private String generateEID() {
+		return "EID" + (System.currentTimeMillis() % 1000);
+	}
+
 	public void wrap(MongoDatabase database, AbstractModel model) {
 		// list collections
 		for (String name : database.listCollectionNames()) {
@@ -58,18 +62,18 @@ public class DocumentWrapper {
 		}
 	}
 
-	private static AbstractAttributeProperty buildAttribute(String name, Object value) {
+	private AbstractAttributeProperty buildAttribute(String name, Object value) {
 		return new DocumentProperty(name, value, false, false, false);
 	}
 
-	private static AbstractRecordProperty buildRecord(String name, Document document, boolean nested) {
+	private AbstractRecordProperty buildRecord(String name, Document document, boolean nested) {
 		System.out.println(String.format("\tbuildingRecord(%s, %s, %s)", name, document, nested));
 		AbstractRecordProperty record = new DocumentRecord(name);
 
 		var embeddedSID = document.get(name + "_id");
-		if (embeddedSID != null) {
-			embeddedSID = System.currentTimeMillis() + "TODO-EMBEDDED_ID!";
-			System.out.println(String.format("\t\tGenerating embedded SID: %s", embeddedSID));
+		if (embeddedSID == null) {
+			embeddedSID = generateEID();
+//			System.out.println(String.format("\t\tGenerating embedded SID: %s", embeddedSID));
 		}
 
 		if (nested) {
@@ -112,7 +116,7 @@ public class DocumentWrapper {
 		return record;
 	}
 
-	private static AbstractArrayProperty processArray(String name, List array) {
+	private AbstractArrayProperty processArray(String name, List array) {
 		LOGGER.log(Level.INFO, String.format("Beginning of processing array %s with length %s", name, array.size()));
 		if (array.isEmpty()) {
 			LOGGER.log(Level.SEVERE, "Array is empty -> created empty array. Je to v poradku?");
@@ -126,23 +130,24 @@ public class DocumentWrapper {
 				LOGGER.log(Level.SEVERE, "TODO: Process nested array of arrays");
 //					processArray(result, key, (List) element, entity, sid, queue, queueOfNames);
 			} else if (element instanceof Document) {
-				LOGGER.log(Level.SEVERE, "TODO: Process nested array of documents");
-//					processRecord(result, key, (Document) element, entity, sid, queue, queueOfNames);
-			} else {
-				AbstractRecordProperty record = new DocumentRecord(name + ".items");
-
-				AbstractIdentifier superid = new SimpleIdentifier();
-				List<Object> identifier = new ArrayList<>();
-				identifier.add(element);
-				superid.add(identifier);
-				record.setIdentifier(superid);
-
-				AbstractAttributeProperty attribute = new DocumentProperty(name + ".att", element, false, false, false);
-				LOGGER.log(Level.INFO, String.format("Added property %s to record %s", attribute.getName(), record.getName()));
-				record.putProperty(attribute.getName(), attribute);
-
+//				LOGGER.log(Level.SEVERE, "TODO: Process nested array of documents");
+				AbstractRecordProperty record = buildRecord(name + ".items", (Document) element, true);
 				arrayProperty.add(record);
 				LOGGER.log(Level.INFO, String.format("Added record %s to array %s", record.getName(), arrayProperty.getName()));
+			} else {
+//				AbstractRecordProperty record = new DocumentRecord(name + ".items");
+
+//				AbstractIdentifier superid = new SimpleIdentifier();
+//				List<Object> identifier = new ArrayList<>();
+//				identifier.add(element);
+//				superid.add(identifier);
+//				record.setIdentifier(superid);
+				AbstractAttributeProperty attribute = buildAttribute(name, element);
+//				LOGGER.log(Level.INFO, String.format("Added property %s to record %s", attribute.getName(), record.getName()));
+//				record.putProperty(attribute.getName(), attribute);
+
+				arrayProperty.add(attribute);
+				LOGGER.log(Level.INFO, String.format("Added attribute %s to array %s", attribute.getName(), arrayProperty.getName()));
 			}
 		}
 

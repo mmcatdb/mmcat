@@ -145,7 +145,7 @@ public class DocumentRecord implements AbstractRecordProperty {
 
 		builder.append("}");
 
-		builder.append("\tREF:");
+		builder.append("+REF:");
 		references.forEach(reference -> {
 			builder.append(reference);
 		});
