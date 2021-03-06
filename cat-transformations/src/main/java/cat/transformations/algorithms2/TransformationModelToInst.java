@@ -67,8 +67,10 @@ public class TransformationModelToInst {
 
 						switch (object.getType()) {
 							case KIND ->
+								// TOHLE NESMI NASTAT! NEBO NASTAVA TO NA TOP LEVEL UROVNI?
 								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
 							case RECORD ->
+								// TOHLE JE PRIPAD PRIMO VNORENEHO DOKUMENTU, TAKZE MUSIS UDELAT VZTAHOVY OBJEKT + VNORENY OBJEKT, ALTERNATIVOU JE STRUCTURED_ATTRIBUTE, OBOJI KARDINALITY 1:1
 								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
 							case ARRAY ->
 								processArray(instance, entity, superid, (AbstractArrayProperty) property, queue, queueOfNames);
@@ -79,7 +81,7 @@ public class TransformationModelToInst {
 							case MULTI_ATTRIBUTE ->
 								processMultiAttribute(instance, entity, superid, (AbstractArrayProperty) property);
 							case STRUCTURED_ATTRIBUTE ->
-								processStructuredAttribute(instance, entity, superid, (AbstractAttributeProperty) property, queue, queueOfNames);
+								processStructuredAttribute(instance, entity, superid, (AbstractRecordProperty) property, queue, queueOfNames);
 							case IDENTIFIER ->
 								processAttribute(instance, entity, superid, (AbstractAttributeProperty) property);
 							case REFERENCE ->
@@ -112,6 +114,18 @@ public class TransformationModelToInst {
 
 		}
 
+	}
+
+	private void processStructuredAttribute(AbstractInstance instance, AbstractCategoricalObject parentObject, AbstractIdentifier parentSuperid, AbstractRecordProperty structuredProperty, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
+		// aktualne zpracovavam property - POZOR: strukturovany atribut se od entity lisi pouze tim, ze ma morfismus pouze jednim smerem, zatimco entita ma morfismy obema smery!
+		var value = (AbstractRecordProperty) structuredProperty.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
+		var object = instance.get(structuredProperty.getName()); // ted mas i zpracovavany objekt
+		var valueSuperid = value.getIdentifier();
+
+		addMapping(instance, morphismName(parentObject.getName(), object.getName()), parentSuperid, valueSuperid);
+
+		queue.add(value);
+		queueOfNames.add(structuredProperty.getName());
 	}
 
 	private void processRecord(AbstractInstance instance, AbstractCategoricalObject parentObject, AbstractIdentifier parentSuperid, AbstractRecordProperty recordProperty, String recordName, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
@@ -217,18 +231,6 @@ public class TransformationModelToInst {
 
 	private void processInlined() {
 		LOGGER.log(Level.SEVERE, "\t\tINLINED TODO");
-	}
-
-	private void processStructuredAttribute(AbstractInstance instance, AbstractCategoricalObject entity, AbstractIdentifier superid, AbstractAttributeProperty property, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
-		// aktualne zpracovavam property - POZOR: strukturovany atribut se od entity lisi pouze tim, ze ma morfismus pouze jednim smerem, zatimco entita ma morfismy obema smery!
-		var value = (AbstractRecordProperty) property.getValue();		// ted mas i value, kterou ale musi byt embedded document, a tedy abstractRecord
-		var object = instance.get(property.getName()); // ted mas i zpracovavany objekt
-		var valueSuperid = value.getIdentifier();
-
-		addMapping(instance, morphismName(entity.getName(), object.getName()), superid, valueSuperid);
-
-		queue.add(value);
-		queueOfNames.add(property.getName());
 	}
 
 	private void processReference() {
