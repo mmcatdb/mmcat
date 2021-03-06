@@ -197,7 +197,7 @@ public class UniversalIT {
 	@Test
 //	@Ignore
 	public void testArrayOfAttributes() {
-		printTestHeader("UniversalIT -> ARRAY OF ATTRIBUTES - MULTI_ATTRIBUTE");
+		printTestHeader("UniversalIT -> testArrayOfAttributes()");
 		try ( var mongoClient = MongoClients.create("mongodb://172.16.254.2:27017")) {
 
 			MongoDatabase database = mongoClient.getDatabase("koupil");

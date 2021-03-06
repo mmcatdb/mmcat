@@ -115,6 +115,8 @@ public class DocumentRecord implements AbstractRecordProperty {
 
 	@Override
 	public int compareTo(AbstractValue o) {
+//		System.out.println("VOLAS compareTo U " + this + "::::::::::AND::::::::::" + o);
+//		return -1;
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 

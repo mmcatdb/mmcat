@@ -62,6 +62,7 @@ public class TransformationModelToInst {
 					LOGGER.log(Level.INFO, String.format("\tRetrieved entity %s", entity));
 
 					for (AbstractProperty property : _record.getProperties()) {
+						System.out.println(property.getName() + ":::!!!!");
 						AbstractCategoricalObject object = instance.get(property.getName());
 						LOGGER.log(Level.INFO, String.format("\t\tWorking with a pair (%s, %s) of TYPES (%s, %s)", entity.getName(), object.getName(), entity.getType(), object.getType()));
 
@@ -71,6 +72,8 @@ public class TransformationModelToInst {
 								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
 							case RECORD ->
 								// TOHLE JE PRIPAD PRIMO VNORENEHO DOKUMENTU, TAKZE MUSIS UDELAT VZTAHOVY OBJEKT + VNORENY OBJEKT, ALTERNATIVOU JE STRUCTURED_ATTRIBUTE, OBOJI KARDINALITY 1:1
+								// NASTAVA TO NEKDY V TOMTO PRIPADE? NE... TADY TO MUSI BYT STRUCTURED ATTRIBUTE NEBO ARRAY!
+								// TOHLE NESMI NASTAT!
 								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
 							case ARRAY ->
 								processArray(instance, entity, superid, (AbstractArrayProperty) property, queue, queueOfNames);
@@ -80,10 +83,16 @@ public class TransformationModelToInst {
 								processAttribute(instance, entity, superid, (AbstractAttributeProperty) property);
 							case MULTI_ATTRIBUTE ->
 								processMultiAttribute(instance, entity, superid, (AbstractArrayProperty) property);
+							case INLINED_ATTRIBUTE ->
+								processAttribute(instance, entity, superid, (AbstractAttributeProperty) property);
 							case STRUCTURED_ATTRIBUTE ->
+								processStructuredAttribute(instance, entity, superid, (AbstractRecordProperty) property, queue, queueOfNames);
+							case INLINED_STRUCTURED_ATTRIBUTE ->
 								processStructuredAttribute(instance, entity, superid, (AbstractRecordProperty) property, queue, queueOfNames);
 							case IDENTIFIER ->
 								processAttribute(instance, entity, superid, (AbstractAttributeProperty) property);
+							case MULTI_IDENTIFIER ->
+								System.out.println("TODO - MULTI_IDENTIFIER");
 							case REFERENCE ->
 								// SKIP FOR NOW! RESIS JE O PAR RADKU NIZ!
 								// MELY BY SE PRESKOCIT, PROTOZE JEJICH HODNOTY PATRI DO JINYCH MORFISMU
@@ -129,6 +138,7 @@ public class TransformationModelToInst {
 	}
 
 	private void processRecord(AbstractInstance instance, AbstractCategoricalObject parentObject, AbstractIdentifier parentSuperid, AbstractRecordProperty recordProperty, String recordName, Queue<AbstractRecordProperty> queue, Queue<String> queueOfNames) {
+		System.out.println("PARENT_OBJECT_CLASS" + parentObject.getClass() + " :: " + parentObject.getName());
 		var object = instance.get(recordName); // ted mas i zpracovavany objekt
 
 		var valueSuperid = recordProperty.getIdentifier();
@@ -146,7 +156,7 @@ public class TransformationModelToInst {
 		var arrayObject = instance.get(arrayProperty.getName());
 
 		for (var element : elements) {
-
+			System.out.println("ADDING ELEMENT " + elements + " TO " + arrayObject.getName());
 			arrayObject.add(element);
 			LOGGER.log(Level.INFO, String.format("\t\tAdded value %s to multi_attribute domain %s", element, arrayProperty.getName()));
 			addMapping(instance, morphismName(parentObject.getName(), element.getName()), parentSuperid, element.getValue());
@@ -196,11 +206,24 @@ public class TransformationModelToInst {
 //					processAttribute(instance, instance.get(arrayProperty.getName()), parentSuperid, (AbstractAttributeProperty) element);
 					// nahrazeni za multi-attribute
 				}
+				case INLINED_ATTRIBUTE -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> ATTRIBUTE!");
+//					processAttribute(instance, instance.get(arrayProperty.getName()), parentSuperid, (AbstractAttributeProperty) element);
+					// nahrazeni za multi-attribute
+				}
 				case STRUCTURED_ATTRIBUTE -> {
 					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> STRUCTURED_ATTRIBUTE!");
 //					processStructuredAttribute(instance, parentObject, parentSuperid, (AbstractAttributeProperty) element, queue, queueOfNames);
 				}
+				case INLINED_STRUCTURED_ATTRIBUTE -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> STRUCTURED_ATTRIBUTE!");
+//					processStructuredAttribute(instance, parentObject, parentSuperid, (AbstractAttributeProperty) element, queue, queueOfNames);
+				}
 				case IDENTIFIER -> {
+					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> IDENTIFIER!");
+//					processAttribute(instance, parentObject, parentSuperid, (AbstractAttributeProperty) element);
+				}
+				case MULTI_IDENTIFIER -> {
 					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> IDENTIFIER!");
 //					processAttribute(instance, parentObject, parentSuperid, (AbstractAttributeProperty) element);
 				}

@@ -43,81 +43,6 @@ public class Main {
 		}
 	}
 
-	public static void setup(MongoDatabase database) {
-
-//		LOGGER.info(Constants.ANSI_BLUE + "TEST" + Constants.ANSI_RESET);
-		try {
-
-			database.createCollection("cars");
-		} catch (MongoCommandException e) {
-
-			database.getCollection("cars").drop();
-		}
-
-		var docs = new ArrayList<Document>();
-
-		MongoCollection<Document> collection = database.getCollection("cars");
-
-		var d1 = new Document("_id", 1);
-		d1.append("name", "Audi");
-		d1.append("price", 52642);
-		docs.add(d1);
-
-		var d2 = new Document("_id", 2);
-		d2.append("name", "Mercedes");
-		d2.append("price", 57127);
-		docs.add(d2);
-
-		var d3 = new Document("_id", 3);
-		d3.append("name", "Skoda");
-		d3.append("price", 9000);
-		docs.add(d3);
-
-		var d4 = new Document("_id", 4);
-		d4.append("name", "Volvo");
-		d4.append("price", 29000);
-		docs.add(d4);
-
-		var d5 = new Document("_id", 5);
-		d5.append("name", "Bentley");
-		d5.append("price", 350000);
-		docs.add(d5);
-
-		var d6 = new Document("_id", 6);
-		d6.append("name", "Citroen");
-		d6.append("price", 21000);
-		docs.add(d6);
-
-		var d8 = new Document("_id", 8);
-		d8.append("name", "Volkswagen");
-		d8.append("price", 21600);
-
-		var d8test = new Document();
-		d8test.append("a", "AAA");
-		d8test.append("b", "BBB");
-		d8test.append("c", "CCC");
-		d8.append("test", d8test);
-
-		docs.add(d8);
-
-		var d7 = new Document("_id", 7);
-		d7.append("name", "Hummer");
-		d7.append("price", 41400);
-
-		List<Object> items = new ArrayList<>();
-		items.add(10);
-		items.add(11);
-		items.add(12);
-		items.add(13);
-		items.add(14);
-		d7.append("items", items);
-
-		docs.add(d7);
-
-		collection.insertMany(docs);
-
-	}
-
 	private static void printTestHeader(String text) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(Constants.ANSI_BLUE);
@@ -139,43 +64,142 @@ public class Main {
 		try ( var mongoClient = MongoClients.create("mongodb://172.16.254.2:27017")) {
 
 			MongoDatabase database = mongoClient.getDatabase("koupil");
-			Main.setup(database);
+			try {
+
+				database.createCollection("cars");
+			} catch (MongoCommandException e) {
+
+				database.getCollection("cars").drop();
+			}
+
+			var docs = new ArrayList<Document>();
+
+			MongoCollection<Document> collection = database.getCollection("cars");
+
+			var d1 = new Document("_id", 1);
+			d1.append("name", "Audi");
+			d1.append("price", 52642);
+			docs.add(d1);
+
+			var d2 = new Document("_id", 2);
+			d2.append("name", "Mercedes");
+			d2.append("price", 57127);
+			docs.add(d2);
+
+			var d3 = new Document("_id", 3);
+			d3.append("name", "Skoda");
+			d3.append("price", 9000);
+			docs.add(d3);
+
+			var d5 = new Document("_id", 5);
+			d5.append("name", "Bentley");
+			d5.append("price", 350000);
+			docs.add(d5);
+
+			var d6 = new Document("_id", 6);
+			d6.append("name", "Citroen");
+			d6.append("price", 21000);
+			docs.add(d6);
+
+			var d8 = new Document("_id", 8);
+			d8.append("name", "Volkswagen");
+			d8.append("price", 21600);
+
+			var address = new Document();
+			address.append("street", "AAA");
+			address.append("city", "BBB");
+			address.append("postalcode", "CCC");
+			d8.append("address", address);
+
+			docs.add(d8);
+			var nestedDocumentA = new Document();
+			nestedDocumentA.append("a", "111");
+			nestedDocumentA.append("b", "222");
+			nestedDocumentA.append("c", "333");
+
+			var nestedDocumentB = new Document();
+			nestedDocumentB.append("a", "444");
+			nestedDocumentB.append("b", "555");
+			nestedDocumentB.append("c", "666");
+
+			var nestedDocumentC = new Document();
+			nestedDocumentC.append("a", "777");
+			nestedDocumentC.append("b", "888");
+			nestedDocumentC.append("c", "999");
+
+			List<Document> array = new ArrayList<>();
+			array.add(nestedDocumentA);
+			array.add(nestedDocumentB);
+			array.add(nestedDocumentC);
+
+			var d4 = new Document("_id", 4);
+			d4.append("name", "Volvo");
+			d4.append("price", 29000);
+			d4.append("array", array);
+			docs.add(d4);
+
+			var d7 = new Document("_id", 7);
+			d7.append("name", "Hummer");
+			d7.append("price", 41400);
+
+			List<Object> multiAttribute = new ArrayList<>();
+			multiAttribute.add("10");
+			multiAttribute.add("11");
+			multiAttribute.add("12");
+			multiAttribute.add("13");
+			multiAttribute.add("14");
+			d7.append("multiAttribute", multiAttribute);
+
+			docs.add(d7);
+
+			System.out.println(d4);
+			System.out.println(d7);
+
+			collection.insertMany(docs);
 
 			AbstractModel model = new DocumentModel();
 
 			DocumentWrapper wrapper = new DocumentWrapper();
 			wrapper.wrap(database, model);
 
-			TransformationModelToInst transformation = new TransformationModelToInst();
+			System.out.println(model);
 
 			AbstractInstance category = new CategoricalInstance();
 			category.create("cars", AbstractType.KIND);
 			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.ATTRIBUTE);
-			category.create("price", AbstractType.ATTRIBUTE);
-			category.create("items", AbstractType.ARRAY);
-			category.create("items.items", AbstractType.RECORD);
-			category.create("items.att", AbstractType.ATTRIBUTE);
-			category.create("test", AbstractType.RECORD);
-			category.create("a", AbstractType.ATTRIBUTE);
-			category.create("b", AbstractType.ATTRIBUTE);
-			category.create("c", AbstractType.ATTRIBUTE);
+			category.create("name", AbstractType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractType.INLINED_ATTRIBUTE);
+			category.create("multiAttribute", AbstractType.MULTI_ATTRIBUTE);
+			category.create("address", AbstractType.STRUCTURED_ATTRIBUTE);
+			category.create("street", AbstractType.INLINED_ATTRIBUTE);
+			category.create("city", AbstractType.INLINED_ATTRIBUTE);
+			category.create("postalcode", AbstractType.INLINED_ATTRIBUTE);
+			category.create("array", AbstractType.ARRAY);
+			category.create("array.items", AbstractType.RECORD);
+			category.create("a", AbstractType.INLINED_ATTRIBUTE);
+			category.create("b", AbstractType.INLINED_ATTRIBUTE);
+			category.create("c", AbstractType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
-			category.createMorphism(TransformationModelToInst.morphismName("cars", "items"), category.get("cars"), category.get("items"));
-			category.createMorphism(TransformationModelToInst.morphismName("items", "cars"), category.get("items"), category.get("cars"));
-			category.createMorphism(TransformationModelToInst.morphismName("items", "items.items"), category.get("items"), category.get("items.items"));
-			category.createMorphism(TransformationModelToInst.morphismName("items.items", "items"), category.get("items.items"), category.get("items"));
-			category.createMorphism(TransformationModelToInst.morphismName("items.items", "items.att"), category.get("items.items"), category.get("items.att"));
-			category.createMorphism(TransformationModelToInst.morphismName("cars", "test"), category.get("cars"), category.get("test"));
-			category.createMorphism(TransformationModelToInst.morphismName("test", "cars"), category.get("test"), category.get("cars"));
-			category.createMorphism(TransformationModelToInst.morphismName("test", "a"), category.get("test"), category.get("a"));
-			category.createMorphism(TransformationModelToInst.morphismName("test", "b"), category.get("test"), category.get("b"));
-			category.createMorphism(TransformationModelToInst.morphismName("test", "c"), category.get("test"), category.get("c"));
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "multiAttribute"), category.get("cars"), category.get("multiAttribute"));
 
-			System.out.println(model);
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "address"), category.get("cars"), category.get("address"));
+			category.createMorphism(TransformationModelToInst.morphismName("address", "street"), category.get("address"), category.get("street"));
+			category.createMorphism(TransformationModelToInst.morphismName("address", "city"), category.get("address"), category.get("city"));
+			category.createMorphism(TransformationModelToInst.morphismName("address", "postalcode"), category.get("address"), category.get("postalcode"));
 
+			category.createMorphism(TransformationModelToInst.morphismName("cars", "array"), category.get("cars"), category.get("array"));
+			category.createMorphism(TransformationModelToInst.morphismName("array", "cars"), category.get("array"), category.get("cars"));
+			category.createMorphism(TransformationModelToInst.morphismName("array", "array.items"), category.get("array"), category.get("array.items"));
+			category.createMorphism(TransformationModelToInst.morphismName("array.items", "array"), category.get("array.items"), category.get("array"));
+			category.createMorphism(TransformationModelToInst.morphismName("array.items", "a"), category.get("array.items"), category.get("a"));
+			category.createMorphism(TransformationModelToInst.morphismName("array.items", "b"), category.get("array.items"), category.get("b"));
+			category.createMorphism(TransformationModelToInst.morphismName("array.items", "c"), category.get("array.items"), category.get("c"));
+
+			System.out.println(category);
+
+			TransformationModelToInst transformation = new TransformationModelToInst();
 			transformation.process(model, category);
 
 			System.out.println(category);
@@ -238,15 +262,13 @@ public class Main {
 			AbstractInstance category = new CategoricalInstance();
 			category.create("cars", AbstractType.KIND);
 			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.ATTRIBUTE);
-			category.create("price", AbstractType.ATTRIBUTE);
+			category.create("name", AbstractType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractType.INLINED_ATTRIBUTE);
 			category.create("array", AbstractType.ARRAY);
 			category.create("array.items", AbstractType.RECORD);
-//			category.create("items.att", AbstractType.ATTRIBUTE);
-//			category.create("test", AbstractType.RECORD);
-			category.create("a", AbstractType.ATTRIBUTE);
-			category.create("b", AbstractType.ATTRIBUTE);
-			category.create("c", AbstractType.ATTRIBUTE);
+			category.create("a", AbstractType.INLINED_ATTRIBUTE);
+			category.create("b", AbstractType.INLINED_ATTRIBUTE);
+			category.create("c", AbstractType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
@@ -254,9 +276,6 @@ public class Main {
 			category.createMorphism(TransformationModelToInst.morphismName("array", "cars"), category.get("array"), category.get("cars"));
 			category.createMorphism(TransformationModelToInst.morphismName("array", "array.items"), category.get("array"), category.get("array.items"));
 			category.createMorphism(TransformationModelToInst.morphismName("array.items", "array"), category.get("array.items"), category.get("array"));
-//			category.createMorphism(TransformationModelToInst.morphismName("items.items", "items.att"), category.get("items.items"), category.get("items.att"));
-//			category.createMorphism(TransformationModelToInst.morphismName("cars", "test"), category.get("cars"), category.get("test"));
-//			category.createMorphism(TransformationModelToInst.morphismName("test", "cars"), category.get("test"), category.get("cars"));
 			category.createMorphism(TransformationModelToInst.morphismName("array.items", "a"), category.get("array.items"), category.get("a"));
 			category.createMorphism(TransformationModelToInst.morphismName("array.items", "b"), category.get("array.items"), category.get("b"));
 			category.createMorphism(TransformationModelToInst.morphismName("array.items", "c"), category.get("array.items"), category.get("c"));
@@ -312,28 +331,13 @@ public class Main {
 			AbstractInstance category = new CategoricalInstance();
 			category.create("cars", AbstractType.KIND);
 			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.ATTRIBUTE);
-			category.create("price", AbstractType.ATTRIBUTE);
+			category.create("name", AbstractType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractType.INLINED_ATTRIBUTE);
 			category.create("multiAttribute", AbstractType.MULTI_ATTRIBUTE);
-//			category.create("array.items", AbstractType.RECORD);
-//			category.create("items.att", AbstractType.ATTRIBUTE);
-//			category.create("test", AbstractType.RECORD);
-//			category.create("a", AbstractType.ATTRIBUTE);
-//			category.create("b", AbstractType.ATTRIBUTE);
-//			category.create("c", AbstractType.ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "multiAttribute"), category.get("cars"), category.get("multiAttribute"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array", "cars"), category.get("array"), category.get("cars"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array", "array.items"), category.get("array"), category.get("array.items"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array.items", "array"), category.get("array.items"), category.get("array"));
-//			category.createMorphism(TransformationModelToInst.morphismName("items.items", "items.att"), category.get("items.items"), category.get("items.att"));
-//			category.createMorphism(TransformationModelToInst.morphismName("cars", "test"), category.get("cars"), category.get("test"));
-//			category.createMorphism(TransformationModelToInst.morphismName("test", "cars"), category.get("test"), category.get("cars"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array.items", "a"), category.get("array.items"), category.get("a"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array.items", "b"), category.get("array.items"), category.get("b"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array.items", "c"), category.get("array.items"), category.get("c"));
 
 			System.out.println(category);
 
@@ -387,25 +391,16 @@ public class Main {
 			AbstractInstance category = new CategoricalInstance();
 			category.create("cars", AbstractType.KIND);
 			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.ATTRIBUTE);
-			category.create("price", AbstractType.ATTRIBUTE);
+			category.create("name", AbstractType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractType.INLINED_ATTRIBUTE);
 			category.create("address", AbstractType.STRUCTURED_ATTRIBUTE);
-//			category.create("array.items", AbstractType.RECORD);
-//			category.create("items.att", AbstractType.ATTRIBUTE);
-//			category.create("test", AbstractType.RECORD);
-			category.create("street", AbstractType.ATTRIBUTE);
-			category.create("city", AbstractType.ATTRIBUTE);
-			category.create("postalcode", AbstractType.ATTRIBUTE);
+			category.create("street", AbstractType.INLINED_ATTRIBUTE);
+			category.create("city", AbstractType.INLINED_ATTRIBUTE);
+			category.create("postalcode", AbstractType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "address"), category.get("cars"), category.get("address"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array", "cars"), category.get("array"), category.get("cars"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array", "array.items"), category.get("array"), category.get("array.items"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array.items", "array"), category.get("array.items"), category.get("array"));
-//			category.createMorphism(TransformationModelToInst.morphismName("items.items", "items.att"), category.get("items.items"), category.get("items.att"));
-//			category.createMorphism(TransformationModelToInst.morphismName("cars", "test"), category.get("cars"), category.get("test"));
-//			category.createMorphism(TransformationModelToInst.morphismName("test", "cars"), category.get("test"), category.get("cars"));
 			category.createMorphism(TransformationModelToInst.morphismName("address", "street"), category.get("address"), category.get("street"));
 			category.createMorphism(TransformationModelToInst.morphismName("address", "city"), category.get("address"), category.get("city"));
 			category.createMorphism(TransformationModelToInst.morphismName("address", "postalcode"), category.get("address"), category.get("postalcode"));
@@ -421,7 +416,7 @@ public class Main {
 
 	}
 
-	public static void testNestedDocument1_1() {
+	public static void testInlinedStructuredAttribute() {
 		printTestHeader("Main -> testStructuredAttribute()");
 		try ( var mongoClient = MongoClients.create("mongodb://172.16.254.2:27017")) {
 
@@ -462,25 +457,16 @@ public class Main {
 			AbstractInstance category = new CategoricalInstance();
 			category.create("cars", AbstractType.KIND);
 			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.ATTRIBUTE);
-			category.create("price", AbstractType.ATTRIBUTE);
-			category.create("address", AbstractType.STRUCTURED_ATTRIBUTE);
-//			category.create("array.items", AbstractType.RECORD);
-//			category.create("items.att", AbstractType.ATTRIBUTE);
-//			category.create("test", AbstractType.RECORD);
-			category.create("street", AbstractType.ATTRIBUTE);
-			category.create("city", AbstractType.ATTRIBUTE);
-			category.create("postalcode", AbstractType.ATTRIBUTE);
+			category.create("name", AbstractType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractType.INLINED_ATTRIBUTE);
+			category.create("address", AbstractType.INLINED_STRUCTURED_ATTRIBUTE);
+			category.create("street", AbstractType.INLINED_ATTRIBUTE);
+			category.create("city", AbstractType.INLINED_ATTRIBUTE);
+			category.create("postalcode", AbstractType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "address"), category.get("cars"), category.get("address"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array", "cars"), category.get("array"), category.get("cars"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array", "array.items"), category.get("array"), category.get("array.items"));
-//			category.createMorphism(TransformationModelToInst.morphismName("array.items", "array"), category.get("array.items"), category.get("array"));
-//			category.createMorphism(TransformationModelToInst.morphismName("items.items", "items.att"), category.get("items.items"), category.get("items.att"));
-//			category.createMorphism(TransformationModelToInst.morphismName("cars", "test"), category.get("cars"), category.get("test"));
-//			category.createMorphism(TransformationModelToInst.morphismName("test", "cars"), category.get("test"), category.get("cars"));
 			category.createMorphism(TransformationModelToInst.morphismName("address", "street"), category.get("address"), category.get("street"));
 			category.createMorphism(TransformationModelToInst.morphismName("address", "city"), category.get("address"), category.get("city"));
 			category.createMorphism(TransformationModelToInst.morphismName("address", "postalcode"), category.get("address"), category.get("postalcode"));
@@ -497,11 +483,11 @@ public class Main {
 	}
 
 	public static void main(String... args) {
-//		Main.demoTest();
+		Main.demoTest();
 //		Main.testArrayOfRecords();
 //		Main.testArrayOfAttributes();
-		Main.testStructuredAttribute();
-		Main.testNestedDocument1_1();
+//		Main.testStructuredAttribute();
+//		Main.testInlinedStructuredAttribute();
 	}
 
 }

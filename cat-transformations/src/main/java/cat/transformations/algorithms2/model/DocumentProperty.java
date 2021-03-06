@@ -21,7 +21,7 @@ public class DocumentProperty implements AbstractAttributeProperty {
 
 	public DocumentProperty(String name, Object value, boolean isIdentifierCompound, boolean isReferenceCompound, boolean isNullable) {
 		this.name = name;
-		this.value = new DocumentSimpleValue(name, value);
+		this.value = DocumentFactory.INSTANCE.createValue(name, value);
 		this.isIdentifierCompound = isIdentifierCompound;
 		this.isReferenceCompound = isReferenceCompound;
 		this.isNullable = isNullable;
@@ -68,7 +68,6 @@ public class DocumentProperty implements AbstractAttributeProperty {
 //		builder.append(name);
 
 //		builder.append(":");
-
 		builder.append(value);
 
 		return builder.toString();

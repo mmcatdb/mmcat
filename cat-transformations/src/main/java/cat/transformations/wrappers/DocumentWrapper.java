@@ -12,6 +12,7 @@ import cat.transformations.algorithms2.model.AbstractKind;
 import cat.transformations.algorithms2.model.AbstractModel;
 import cat.transformations.algorithms2.model.AbstractRecordProperty;
 import cat.transformations.algorithms2.model.DocumentArray;
+import cat.transformations.algorithms2.model.DocumentFactory;
 import cat.transformations.algorithms2.model.DocumentKind;
 import cat.transformations.algorithms2.model.DocumentProperty;
 import cat.transformations.algorithms2.model.DocumentRecord;
@@ -63,12 +64,12 @@ public class DocumentWrapper {
 	}
 
 	private AbstractAttributeProperty buildAttribute(String name, Object value) {
-		return new DocumentProperty(name, value, false, false, false);
+		return DocumentFactory.INSTANCE.createProperty(name, value, false, false, false);
 	}
 
 	private AbstractRecordProperty buildRecord(String name, Document document, boolean nested) {
 		System.out.println(String.format("\tbuildingRecord(%s, %s, %s)", name, document, nested));
-		AbstractRecordProperty record = new DocumentRecord(name);
+		AbstractRecordProperty record = DocumentFactory.INSTANCE.createRecord(name);
 
 		var embeddedSID = document.get(name + "_id");
 		if (embeddedSID == null) {
@@ -120,34 +121,23 @@ public class DocumentWrapper {
 		LOGGER.log(Level.INFO, String.format("Beginning of processing array %s with length %s", name, array.size()));
 		if (array.isEmpty()) {
 			LOGGER.log(Level.SEVERE, "Array is empty -> created empty array. Je to v poradku?");
-			return new DocumentArray(name);
+			return DocumentFactory.INSTANCE.createArray(name);
 		}
 
-		AbstractArrayProperty arrayProperty = new DocumentArray(name);
+		AbstractArrayProperty arrayProperty = DocumentFactory.INSTANCE.createArray(name);
 
 		for (var element : array) {
 			if (element instanceof List) {
 				LOGGER.log(Level.SEVERE, "TODO: Process nested array of arrays");
 //					processArray(result, key, (List) element, entity, sid, queue, queueOfNames);
 			} else if (element instanceof Document) {
-//				LOGGER.log(Level.SEVERE, "TODO: Process nested array of documents");
 				AbstractRecordProperty record = buildRecord(name + ".items", (Document) element, true);
 				arrayProperty.add(record);
 				LOGGER.log(Level.INFO, String.format("Added record %s to array %s", record.getName(), arrayProperty.getName()));
 			} else {
-//				AbstractRecordProperty record = new DocumentRecord(name + ".items");
-
-//				AbstractIdentifier superid = new SimpleIdentifier();
-//				List<Object> identifier = new ArrayList<>();
-//				identifier.add(element);
-//				superid.add(identifier);
-//				record.setIdentifier(superid);
 				AbstractAttributeProperty attribute = buildAttribute(name, element);
-//				LOGGER.log(Level.INFO, String.format("Added property %s to record %s", attribute.getName(), record.getName()));
-//				record.putProperty(attribute.getName(), attribute);
-
 				arrayProperty.add(attribute);
-				LOGGER.log(Level.INFO, String.format("Added attribute %s to array %s", attribute.getName(), arrayProperty.getName()));
+				LOGGER.log(Level.INFO, String.format("Added attribute %s to array %s", attribute.getValue(), arrayProperty.getName()));
 			}
 		}
 

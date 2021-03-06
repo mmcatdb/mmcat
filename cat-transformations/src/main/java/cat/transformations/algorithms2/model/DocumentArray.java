@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class DocumentArray implements AbstractArrayProperty {
 
-	private static final List<AbstractProperty> elements = new ArrayList<>();
+	private final List<AbstractProperty> elements = new ArrayList<>();
 
 	private final String name;
 
