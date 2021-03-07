@@ -14,11 +14,11 @@ import java.util.Set;
  */
 public interface AbstractInstance {
 
-	public abstract AbstractCategoricalObject getOrCreate(String name, AbstractType type);
+	public abstract AbstractCategoricalObject getOrCreate(String name, AbstractObjectType type);
 
 	public abstract AbstractCategoricalObject get(String name);
 
-	public abstract boolean create(String name, AbstractType type);
+	public abstract boolean create(String name, AbstractObjectType type);
 
 	public abstract AbstractCategoricalMorphism getOrCreateMorphism(String name, AbstractCategoricalObject domain, AbstractCategoricalObject codomain);
 

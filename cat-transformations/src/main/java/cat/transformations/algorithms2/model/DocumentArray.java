@@ -23,8 +23,8 @@ public class DocumentArray implements AbstractArrayProperty {
 	}
 
 	@Override
-	public AbstractType getType() {
-		return AbstractType.ARRAY;
+	public AbstractObjectType getType() {
+		return AbstractObjectType.ARRAY;
 	}
 
 	@Override

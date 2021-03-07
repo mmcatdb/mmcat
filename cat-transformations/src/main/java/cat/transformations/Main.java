@@ -5,6 +5,7 @@
  */
 package cat.transformations;
 
+import cat.transformations.algorithms2.TransformationInstToModel;
 import cat.transformations.algorithms2.TransformationModelToInst;
 import cat.transformations.algorithms2.model.AbstractInstance;
 import cat.transformations.algorithms2.model.AbstractModel;
@@ -19,7 +20,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bson.Document;
-import cat.transformations.algorithms2.model.AbstractType;
+import cat.transformations.algorithms2.model.AbstractObjectType;
+import cat.transformations.algorithms2.model.RelationalModel;
+import cat.transformations.algorithms2.schema.RelationalSchema;
 import cat.transformations.commons.Constants;
 import cat.transformations.wrappers.DocumentWrapper;
 import java.io.IOException;
@@ -165,20 +168,20 @@ public class Main {
 			System.out.println(model);
 
 			AbstractInstance category = new CategoricalInstance();
-			category.create("cars", AbstractType.KIND);
-			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.INLINED_ATTRIBUTE);
-			category.create("price", AbstractType.INLINED_ATTRIBUTE);
-			category.create("multiAttribute", AbstractType.MULTI_ATTRIBUTE);
-			category.create("address", AbstractType.STRUCTURED_ATTRIBUTE);
-			category.create("street", AbstractType.INLINED_ATTRIBUTE);
-			category.create("city", AbstractType.INLINED_ATTRIBUTE);
-			category.create("postalcode", AbstractType.INLINED_ATTRIBUTE);
-			category.create("array", AbstractType.ARRAY);
-			category.create("array.items", AbstractType.NESTED_KIND);
-			category.create("a", AbstractType.INLINED_ATTRIBUTE);
-			category.create("b", AbstractType.INLINED_ATTRIBUTE);
-			category.create("c", AbstractType.INLINED_ATTRIBUTE);
+			category.create("cars", AbstractObjectType.KIND);
+			category.create("_id", AbstractObjectType.IDENTIFIER);
+			category.create("name", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("multiAttribute", AbstractObjectType.MULTI_ATTRIBUTE);
+			category.create("address", AbstractObjectType.STRUCTURED_ATTRIBUTE);
+			category.create("street", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("city", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("postalcode", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("array", AbstractObjectType.ARRAY);
+			category.create("array.items", AbstractObjectType.NESTED_KIND);
+			category.create("a", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("b", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("c", AbstractObjectType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
@@ -260,15 +263,15 @@ public class Main {
 			System.out.println(model);
 
 			AbstractInstance category = new CategoricalInstance();
-			category.create("cars", AbstractType.KIND);
-			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.INLINED_ATTRIBUTE);
-			category.create("price", AbstractType.INLINED_ATTRIBUTE);
-			category.create("array", AbstractType.ARRAY);
-			category.create("array.items", AbstractType.NESTED_KIND);
-			category.create("a", AbstractType.INLINED_ATTRIBUTE);
-			category.create("b", AbstractType.INLINED_ATTRIBUTE);
-			category.create("c", AbstractType.INLINED_ATTRIBUTE);
+			category.create("cars", AbstractObjectType.KIND);
+			category.create("_id", AbstractObjectType.IDENTIFIER);
+			category.create("name", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("array", AbstractObjectType.ARRAY);
+			category.create("array.items", AbstractObjectType.NESTED_KIND);
+			category.create("a", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("b", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("c", AbstractObjectType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
@@ -329,11 +332,11 @@ public class Main {
 			System.out.println(model);
 
 			AbstractInstance category = new CategoricalInstance();
-			category.create("cars", AbstractType.KIND);
-			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.INLINED_ATTRIBUTE);
-			category.create("price", AbstractType.INLINED_ATTRIBUTE);
-			category.create("multiAttribute", AbstractType.MULTI_ATTRIBUTE);
+			category.create("cars", AbstractObjectType.KIND);
+			category.create("_id", AbstractObjectType.IDENTIFIER);
+			category.create("name", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("multiAttribute", AbstractObjectType.MULTI_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
@@ -389,14 +392,14 @@ public class Main {
 			System.out.println(model);
 
 			AbstractInstance category = new CategoricalInstance();
-			category.create("cars", AbstractType.KIND);
-			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.INLINED_ATTRIBUTE);
-			category.create("price", AbstractType.INLINED_ATTRIBUTE);
-			category.create("address", AbstractType.STRUCTURED_ATTRIBUTE);
-			category.create("street", AbstractType.INLINED_ATTRIBUTE);
-			category.create("city", AbstractType.INLINED_ATTRIBUTE);
-			category.create("postalcode", AbstractType.INLINED_ATTRIBUTE);
+			category.create("cars", AbstractObjectType.KIND);
+			category.create("_id", AbstractObjectType.IDENTIFIER);
+			category.create("name", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("address", AbstractObjectType.STRUCTURED_ATTRIBUTE);
+			category.create("street", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("city", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("postalcode", AbstractObjectType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
@@ -455,14 +458,14 @@ public class Main {
 			System.out.println(model);
 
 			AbstractInstance category = new CategoricalInstance();
-			category.create("cars", AbstractType.KIND);
-			category.create("_id", AbstractType.IDENTIFIER);
-			category.create("name", AbstractType.INLINED_ATTRIBUTE);
-			category.create("price", AbstractType.INLINED_ATTRIBUTE);
-			category.create("address", AbstractType.INLINED_STRUCTURED_ATTRIBUTE);
-			category.create("street", AbstractType.INLINED_ATTRIBUTE);
-			category.create("city", AbstractType.INLINED_ATTRIBUTE);
-			category.create("postalcode", AbstractType.INLINED_ATTRIBUTE);
+			category.create("cars", AbstractObjectType.KIND);
+			category.create("_id", AbstractObjectType.IDENTIFIER);
+			category.create("name", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("price", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("address", AbstractObjectType.INLINED_STRUCTURED_ATTRIBUTE);
+			category.create("street", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("city", AbstractObjectType.INLINED_ATTRIBUTE);
+			category.create("postalcode", AbstractObjectType.INLINED_ATTRIBUTE);
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
 			category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
@@ -482,12 +485,41 @@ public class Main {
 
 	}
 
+	public static void schemaTest() {
+		AbstractInstance category = new CategoricalInstance();
+		category.create("cars", AbstractObjectType.KIND);
+		category.create("_id", AbstractObjectType.IDENTIFIER);
+		category.create("name", AbstractObjectType.INLINED_ATTRIBUTE);
+		category.create("price", AbstractObjectType.INLINED_ATTRIBUTE);
+		category.create("multiAttribute", AbstractObjectType.MULTI_ATTRIBUTE);
+		category.create("address", AbstractObjectType.STRUCTURED_ATTRIBUTE);
+		category.create("street", AbstractObjectType.INLINED_ATTRIBUTE);
+		category.create("city", AbstractObjectType.INLINED_ATTRIBUTE);
+		category.create("postalcode", AbstractObjectType.INLINED_ATTRIBUTE);
+		category.create("array", AbstractObjectType.ARRAY);
+		category.create("array.items", AbstractObjectType.NESTED_KIND);
+		category.create("a", AbstractObjectType.INLINED_ATTRIBUTE);
+		category.create("b", AbstractObjectType.INLINED_ATTRIBUTE);
+		category.create("c", AbstractObjectType.INLINED_ATTRIBUTE);
+
+		System.out.println(category);
+
+		AbstractModel relational = new RelationalModel(new RelationalSchema());
+
+		TransformationInstToModel transformation = new TransformationInstToModel(category, relational);
+		transformation.processSchema();
+//		transformation.processData();
+
+		System.out.println(relational);
+	}
+
 	public static void main(String... args) {
-		Main.demoTest();
+//		Main.demoTest();
 //		Main.testArrayOfRecords();
 //		Main.testArrayOfAttributes();
 //		Main.testStructuredAttribute();
 //		Main.testInlinedStructuredAttribute();
+		Main.schemaTest();
 	}
 
 }

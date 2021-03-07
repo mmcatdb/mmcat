@@ -5,6 +5,8 @@
  */
 package cat.transformations.algorithms2.model;
 
+import cat.transformations.algorithms2.schema.AbstractSchema;
+
 /**
  *
  * @author pavel.koupil

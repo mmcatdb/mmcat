@@ -5,6 +5,7 @@
  */
 package cat.transformations.algorithms2.model;
 
+import cat.transformations.algorithms2.schema.AbstractSchema;
 import java.util.Map;
 import java.util.TreeMap;
 

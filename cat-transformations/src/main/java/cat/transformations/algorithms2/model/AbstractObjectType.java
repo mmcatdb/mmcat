@@ -9,7 +9,7 @@ package cat.transformations.algorithms2.model;
  *
  * @author pavel.koupil
  */
-public enum AbstractType {
+public enum AbstractObjectType {
 	// -------------------------------| RELACNI MODEL      | DOKUMENTOVY MODEL  | MODEL KLIC HODNOTA | SLOUPCOVY MODEL    | GRAFOVY MODEL      | RDF MODEL          |
 	KIND, // -------------------------| tabulka            | kolekce (root)     | BUCKET?            | tabulka            | label              | ?                  | # V pripade Rel se jedna o tabulku bez FK, ale co kdyz tam budou dve tabulky, ktere se navzajem odkazuji?
 	RECORD, // -----------------------| radek tabulky      | dokument           | dvojice            | radek tabulky      | vrchol / hrana     | RDF triple         | # Prejmenovat! Pouzivano ve smyslu vnoreneho dokumentu!

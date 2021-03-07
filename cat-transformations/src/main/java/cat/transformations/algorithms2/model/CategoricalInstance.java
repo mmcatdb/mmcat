@@ -45,7 +45,7 @@ public class CategoricalInstance implements AbstractInstance {
 	}
 
 	@Override
-	public AbstractCategoricalObject getOrCreate(String name, AbstractType type) {
+	public AbstractCategoricalObject getOrCreate(String name, AbstractObjectType type) {
 		AbstractCategoricalObject result = null;
 		switch (type) {
 			case KIND ->
@@ -81,7 +81,7 @@ public class CategoricalInstance implements AbstractInstance {
 		return result;
 	}
 
-	private CategoricalAttributeObject getOrCreateAttribute(String name, AbstractType type) {
+	private CategoricalAttributeObject getOrCreateAttribute(String name, AbstractObjectType type) {
 		if (objects.containsKey(name)) {
 			return (CategoricalAttributeObject) objects.get(name);// WARN: Exception - casting!
 		} else {
@@ -91,7 +91,7 @@ public class CategoricalInstance implements AbstractInstance {
 		}
 	}
 
-	private CategoricalEntityObject getOrCreateEntity(String name, AbstractType type) {
+	private CategoricalEntityObject getOrCreateEntity(String name, AbstractObjectType type) {
 		if (objects.containsKey(name)) {
 			return (CategoricalEntityObject) objects.get(name);// WARN: Exception - casting!
 		} else {
@@ -101,7 +101,7 @@ public class CategoricalInstance implements AbstractInstance {
 		}
 	}
 
-	private CategoricalRelationshipObject getOrCreateRelationship(String name, AbstractType type) {
+	private CategoricalRelationshipObject getOrCreateRelationship(String name, AbstractObjectType type) {
 		if (objects.containsKey(name)) {
 			return (CategoricalRelationshipObject) objects.get(name);// WARN: Exception - casting!
 		} else {
@@ -121,7 +121,7 @@ public class CategoricalInstance implements AbstractInstance {
 	}
 
 	@Override
-	public boolean create(String name, AbstractType type) {
+	public boolean create(String name, AbstractObjectType type) {
 		boolean result = false;
 		switch (type) {
 			case KIND ->
@@ -157,7 +157,7 @@ public class CategoricalInstance implements AbstractInstance {
 		return result;
 	}
 
-	private boolean createAttribute(String name, AbstractType type) {
+	private boolean createAttribute(String name, AbstractObjectType type) {
 		if (objects.containsKey(name)) {
 			return false;
 		} else {
@@ -167,7 +167,7 @@ public class CategoricalInstance implements AbstractInstance {
 		}
 	}
 
-	private boolean createEntity(String name, AbstractType type) {
+	private boolean createEntity(String name, AbstractObjectType type) {
 		if (objects.containsKey(name)) {
 			return false;
 		} else {
@@ -177,7 +177,7 @@ public class CategoricalInstance implements AbstractInstance {
 		}
 	}
 
-	private boolean createRelationship(String name, AbstractType type) {
+	private boolean createRelationship(String name, AbstractObjectType type) {
 		if (objects.containsKey(name)) {
 			return false;
 		} else {

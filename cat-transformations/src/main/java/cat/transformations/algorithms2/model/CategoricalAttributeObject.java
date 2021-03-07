@@ -22,11 +22,11 @@ public class CategoricalAttributeObject implements AbstractCategoricalObject {
 	// name
 	private final String name;
 	// type
-	private final AbstractType type;
+	private final AbstractObjectType type;
 	// source
 	private final Object source;
 
-	public CategoricalAttributeObject(String name, AbstractType type) {
+	public CategoricalAttributeObject(String name, AbstractObjectType type) {
 		this.name = name;
 		this.type = type;
 		this.source = null;
@@ -81,8 +81,13 @@ public class CategoricalAttributeObject implements AbstractCategoricalObject {
 	}
 
 	@Override
-	public AbstractType getType() {
+	public AbstractObjectType getType() {
 		return type;
+	}
+
+	@Override
+	public String getDataType() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 }

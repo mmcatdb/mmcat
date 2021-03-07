@@ -20,7 +20,7 @@ public class CategoricalSchema implements AbstractInstance {
 	private final Map<String, AbstractCategoricalMorphism> morphisms = new TreeMap<>();
 
 	@Override
-	public AbstractCategoricalObject getOrCreate(String name, AbstractType type) {
+	public AbstractCategoricalObject getOrCreate(String name, AbstractObjectType type) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
@@ -30,7 +30,7 @@ public class CategoricalSchema implements AbstractInstance {
 	}
 
 	@Override
-	public boolean create(String name, AbstractType type) {
+	public boolean create(String name, AbstractObjectType type) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 

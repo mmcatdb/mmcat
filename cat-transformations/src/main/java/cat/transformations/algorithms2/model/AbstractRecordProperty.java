@@ -27,7 +27,7 @@ public interface AbstractRecordProperty extends AbstractProperty/*, Map<String, 
 
 	public abstract boolean isNullable(String name);	// na urovni AbstractRecord
 
-	public abstract AbstractType getPropertyType(String name);	// na urovni AbstractRecord
+	public abstract AbstractObjectType getPropertyType(String name);	// na urovni AbstractRecord
 
 	public abstract Iterable<AbstractProperty> getProperties();
 

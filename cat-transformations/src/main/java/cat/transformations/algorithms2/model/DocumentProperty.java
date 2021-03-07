@@ -17,7 +17,7 @@ public class DocumentProperty implements AbstractAttributeProperty {
 	private final boolean isNullable;
 	private final AbstractValue value;
 
-	private static final AbstractType TYPE = AbstractType.ATTRIBUTE;
+	private static final AbstractObjectType TYPE = AbstractObjectType.ATTRIBUTE;
 
 	public DocumentProperty(String name, Object value, boolean isIdentifierCompound, boolean isReferenceCompound, boolean isNullable) {
 		this.name = name;
@@ -53,7 +53,7 @@ public class DocumentProperty implements AbstractAttributeProperty {
 	}
 
 	@Override
-	public AbstractType getType() {
+	public AbstractObjectType getType() {
 		return TYPE;
 	}
 

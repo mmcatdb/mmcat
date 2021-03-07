@@ -11,7 +11,7 @@ package cat.transformations.algorithms2.model;
  */
 public class DocumentPropertyValue implements AbstractProperty {
 
-	private static final AbstractType TYPE = AbstractType.ATTRIBUTE;
+	private static final AbstractObjectType TYPE = AbstractObjectType.ATTRIBUTE;
 
 	private final Object value;
 
@@ -50,7 +50,7 @@ public class DocumentPropertyValue implements AbstractProperty {
 	}
 
 	@Override
-	public AbstractType getType() {
+	public AbstractObjectType getType() {
 		return TYPE;
 	}
 

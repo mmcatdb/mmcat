@@ -17,7 +17,7 @@ public interface AbstractProperty extends AbstractValue {
 
 	public abstract boolean isNullable();	// na urovni AbstractProperty
 
-	public abstract AbstractType getType();	// na urovni AbstracProperty
+	public abstract AbstractObjectType getType();	// na urovni AbstracProperty
 	
 	public abstract AbstractValue getValue();
 	

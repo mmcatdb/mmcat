@@ -5,12 +5,12 @@
  */
 package cat.transformations.algorithms2;
 
-import cat.transformations.algorithms2.model.AbstractSchema;
+import cat.transformations.algorithms2.schema.AbstractSchema;
 import cat.transformations.algorithms2.model.AbstractCategoricalMorphism;
 import cat.transformations.algorithms2.model.AbstractCategoricalObject;
 import cat.transformations.algorithms2.model.AbstractModel;
 import cat.transformations.algorithms2.model.AbstractInstance;
-import cat.transformations.algorithms2.model.AbstractType;
+import cat.transformations.algorithms2.model.AbstractObjectType;
 import cat.transformations.algorithms2.model.Cardinality;
 import java.util.Set;
 import java.util.TreeSet;
@@ -39,7 +39,10 @@ public class TransformationInstToModel {
 	}
 
 	// tenhle algoritmus musi mit 2 casti - nejprve postaveni schematu, tzn. tabulek, az potom naplneni daty
-	public void process() {
+	public void processData() {
+	}
+
+	public void processSchema() {
 
 		for (String name : instance.objectsKeySet()) {
 			// MEL BYS SPRAVNE VYTAHNOUT PRVNI HODNOTU A DELAT TO PRO NI - VKLADANI DAT!
@@ -47,7 +50,7 @@ public class TransformationInstToModel {
 			Set<String> visited = new TreeSet<>();
 
 			AbstractCategoricalObject object = instance.get(name);
-			if (!object.getType().equals(AbstractType.KIND)) {
+			if (!object.getType().equals(AbstractObjectType.KIND)) {
 				continue;
 			}
 
@@ -116,13 +119,13 @@ public class TransformationInstToModel {
 //								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
 								// KDYZ JSOU NA TOMHLE MISTE, PAK MUSI JIT VZTAHU, KTERY PREDCHAZEL
 								// tyhle relationship atributy vzdycky dostane do hloubky prochazena entita, protoze parent by jich pak musel mit mnoho a neslo by urcit, ke komu patri...
-								schema.addAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+								schema.addAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), x.getDataType(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
 							}
 							case RELATIONSHIP_MULTI_ATTRIBUTE -> {
 //								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
 								// KDYZ JSOU NA TOMHLE MISTE, PAK MUSI JIT VZTAHU, KTERY PREDCHAZEL
 								// tyhle relationship atributy vzdycky dostane do hloubky prochazena entita, protoze parent by jich pak musel mit mnoho a neslo by urcit, ke komu patri...
-								schema.addAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
+								schema.addAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), x.getDataType(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
 							}
 							case RELATIONSHIP_INLINED_ATTRIBUTE -> {
 //								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
@@ -157,13 +160,13 @@ public class TransformationInstToModel {
 						System.out.println("NEPOUZIVA SE");
 
 					case ATTRIBUTE ->
-						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+						schema.addAttribute(name, codomain.getName(), object.getDataType(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
 
 					case MULTI_ATTRIBUTE ->
-						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
+						schema.addAttribute(name, codomain.getName(), object.getDataType(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
 
 					case INLINED_ATTRIBUTE ->
-						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+						schema.addAttribute(name, codomain.getName(), object.getDataType(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
 
 					case STRUCTURED_ATTRIBUTE -> {
 						schema.addStructuredAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE); // NESTED DOKUMENT, NESTED TABULKA, JAK MOC MA BYT TAKOVY STURKTUROVANY ATRIBUT ZANOROVANY?
@@ -176,18 +179,18 @@ public class TransformationInstToModel {
 					}
 
 					case IDENTIFIER ->
-						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+						schema.addAttribute(name, codomain.getName(), object.getDataType(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
 					// IDENTIFIKATORY Z POHLEDU INTEGRITNICH OMEZENI SE BUDOU RESIT POZDEJI, MOZNA TEDY NENI NUTNE ROZLISOVAT ATRIBUTY / IDENTIFIKATORY
 
 					case MULTI_IDENTIFIER ->
-						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
+						schema.addAttribute(name, codomain.getName(), object.getDataType(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
 					// IDENTIFIKATORY Z POHLEDU INTEGRITNICH OMEZENI SE BUDOU RESIT POZDEJI, MOZNA TEDY NENI NUTNE ROZLISOVAT ATRIBUTY / IDENTIFIKATORY
 
 					case REFERENCE ->
-						System.out.println("");
+						System.out.println("ZPRACUJES POZDEJI");
 
 					case MULTI_REFERENCE ->
-						System.out.println("");
+						System.out.println("ZPRACUJES POZDEJI");
 
 				}
 
