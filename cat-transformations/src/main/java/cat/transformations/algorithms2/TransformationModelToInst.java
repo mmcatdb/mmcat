@@ -62,7 +62,6 @@ public class TransformationModelToInst {
 					LOGGER.log(Level.INFO, String.format("\tRetrieved entity %s", entity));
 
 					for (AbstractProperty property : _record.getProperties()) {
-						System.out.println(property.getName() + ":::!!!!");
 						AbstractCategoricalObject object = instance.get(property.getName());
 						LOGGER.log(Level.INFO, String.format("\t\tWorking with a pair (%s, %s) of TYPES (%s, %s)", entity.getName(), object.getName(), entity.getType(), object.getType()));
 
@@ -70,11 +69,12 @@ public class TransformationModelToInst {
 							case KIND ->
 								// TOHLE NESMI NASTAT! NEBO NASTAVA TO NA TOP LEVEL UROVNI?
 								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
-							case RECORD ->
+							case NESTED_KIND ->
 								// TOHLE JE PRIPAD PRIMO VNORENEHO DOKUMENTU, TAKZE MUSIS UDELAT VZTAHOVY OBJEKT + VNORENY OBJEKT, ALTERNATIVOU JE STRUCTURED_ATTRIBUTE, OBOJI KARDINALITY 1:1
 								// NASTAVA TO NEKDY V TOMTO PRIPADE? NE... TADY TO MUSI BYT STRUCTURED ATTRIBUTE NEBO ARRAY!
 								// TOHLE NESMI NASTAT!
-								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
+								LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> NESTED_KIND!");
+//								processRecord(instance, entity, superid, (AbstractRecordProperty) property.getValue(), property.getName(), queue, queueOfNames);
 							case ARRAY ->
 								processArray(instance, entity, superid, (AbstractArrayProperty) property, queue, queueOfNames);
 							case INLINED ->
@@ -177,7 +177,7 @@ public class TransformationModelToInst {
 					// TAHLE SITUACE BY NEMELA NASTAT... jinak se resi stejne jako RECORD
 					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> KIND!");
 				}
-				case RECORD -> {
+				case NESTED_KIND -> {
 					AbstractRecordProperty recordElement = (AbstractRecordProperty) element;
 					AbstractIdentifier arraySuperid = new SimpleIdentifier(parentSuperid, recordElement.getIdentifier());
 					arrayObject.add(arraySuperid);
@@ -203,6 +203,7 @@ public class TransformationModelToInst {
 				}
 				case MULTI_ATTRIBUTE -> {
 					LOGGER.log(Level.SEVERE, "\t\tNESMI NASTAT -> MULTI_ATTRIBUTE!");
+					// MUZE NASTAT! POLE VNORENYCH ATRIBUTU, ALE PAK SE MUSI NEJAK OSETRIT - MUZE NASTAT JAKO VNORENE POLE!
 //					processAttribute(instance, instance.get(arrayProperty.getName()), parentSuperid, (AbstractAttributeProperty) element);
 					// nahrazeni za multi-attribute
 				}

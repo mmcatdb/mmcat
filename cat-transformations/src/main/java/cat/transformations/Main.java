@@ -175,7 +175,7 @@ public class Main {
 			category.create("city", AbstractType.INLINED_ATTRIBUTE);
 			category.create("postalcode", AbstractType.INLINED_ATTRIBUTE);
 			category.create("array", AbstractType.ARRAY);
-			category.create("array.items", AbstractType.RECORD);
+			category.create("array.items", AbstractType.NESTED_KIND);
 			category.create("a", AbstractType.INLINED_ATTRIBUTE);
 			category.create("b", AbstractType.INLINED_ATTRIBUTE);
 			category.create("c", AbstractType.INLINED_ATTRIBUTE);
@@ -265,7 +265,7 @@ public class Main {
 			category.create("name", AbstractType.INLINED_ATTRIBUTE);
 			category.create("price", AbstractType.INLINED_ATTRIBUTE);
 			category.create("array", AbstractType.ARRAY);
-			category.create("array.items", AbstractType.RECORD);
+			category.create("array.items", AbstractType.NESTED_KIND);
 			category.create("a", AbstractType.INLINED_ATTRIBUTE);
 			category.create("b", AbstractType.INLINED_ATTRIBUTE);
 			category.create("c", AbstractType.INLINED_ATTRIBUTE);

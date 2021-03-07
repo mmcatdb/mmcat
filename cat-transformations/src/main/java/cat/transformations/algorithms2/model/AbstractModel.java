@@ -19,4 +19,8 @@ public interface AbstractModel {
 
 	public abstract void putKind(String name, AbstractKind kind);
 
+	public abstract boolean isSchemaRequired();
+
+	public abstract AbstractSchema getSchema();
+
 }

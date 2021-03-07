@@ -11,12 +11,8 @@ import cat.transformations.algorithms2.model.AbstractIdentifier;
 import cat.transformations.algorithms2.model.AbstractKind;
 import cat.transformations.algorithms2.model.AbstractModel;
 import cat.transformations.algorithms2.model.AbstractRecordProperty;
-import cat.transformations.algorithms2.model.DocumentArray;
 import cat.transformations.algorithms2.model.DocumentFactory;
-import cat.transformations.algorithms2.model.DocumentKind;
-import cat.transformations.algorithms2.model.DocumentProperty;
-import cat.transformations.algorithms2.model.DocumentRecord;
-import cat.transformations.algorithms2.model.SimpleIdentifier;
+//import cat.transformations.algorithms2.model.SimpleIdentifier;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -43,7 +39,7 @@ public class DocumentWrapper {
 		// list collections
 		for (String name : database.listCollectionNames()) {
 			System.out.println(name);
-			AbstractKind kind = new DocumentKind(name);
+			AbstractKind kind = DocumentFactory.INSTANCE.createKind(name);
 
 			// cursor
 			MongoCollection<Document> collection = database.getCollection(name);
@@ -78,7 +74,7 @@ public class DocumentWrapper {
 		}
 
 		if (nested) {
-			AbstractIdentifier superid = new SimpleIdentifier();
+			AbstractIdentifier superid = DocumentFactory.INSTANCE.createIdentifier();
 			List<Object> identifier = new ArrayList<>();
 			identifier.add(embeddedSID);
 			superid.add(identifier);
@@ -89,7 +85,7 @@ public class DocumentWrapper {
 
 			if (!nested) {
 				if (property.getKey().equals("_id")) {
-					AbstractIdentifier superid = new SimpleIdentifier();
+					AbstractIdentifier superid = DocumentFactory.INSTANCE.createIdentifier();
 					List<Object> identifier = new ArrayList<>();
 					identifier.add(property.getValue());
 					superid.add(identifier);

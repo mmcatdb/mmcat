@@ -5,7 +5,6 @@
  */
 package cat.transformations.algorithms2.model;
 
-import cat.transformations.commons.Pair;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -21,12 +20,37 @@ public class CategoricalInstance implements AbstractInstance {
 	private final Map<String, AbstractCategoricalMorphism> morphisms = new TreeMap<>();
 
 	@Override
+	public Set<String> objectsKeySet() {
+		return objects.keySet();
+	}
+
+	@Override
+	public Set<String> morphismsKeySet() {
+		return morphisms.keySet();
+	}
+
+	@Override
+	public Set<Map.Entry<String, AbstractCategoricalObject>> objectsEntrySet() {
+		return objects.entrySet();
+	}
+
+	@Override
+	public Set<Map.Entry<String, AbstractCategoricalMorphism>> morphismsEntrySet() {
+		return morphisms.entrySet();
+	}
+
+	@Override
+	public int objectsSize() {
+		return objects.size();
+	}
+
+	@Override
 	public AbstractCategoricalObject getOrCreate(String name, AbstractType type) {
 		AbstractCategoricalObject result = null;
 		switch (type) {
 			case KIND ->
 				result = getOrCreateEntity(name, type);
-			case RECORD ->
+			case NESTED_KIND ->
 				result = getOrCreateEntity(name, type);
 			case ARRAY ->
 				result = getOrCreateRelationship(name, type);
@@ -102,7 +126,7 @@ public class CategoricalInstance implements AbstractInstance {
 		switch (type) {
 			case KIND ->
 				result = createEntity(name, type);
-			case RECORD ->
+			case NESTED_KIND ->
 				result = createEntity(name, type);
 			case ARRAY ->
 				result = createRelationship(name, type);

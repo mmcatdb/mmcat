@@ -63,4 +63,24 @@ public class CategoricalMorphism implements AbstractCategoricalMorphism {
 		return name;
 	}
 
+	@Override
+	public AbstractCategoricalObject getDomain() {
+		return domain;
+	}
+
+	@Override
+	public AbstractCategoricalObject getCodomain() {
+		return codomain;
+	}
+
+	@Override
+	public String getDomainName() {
+		return domain.getName();
+	}
+
+	@Override
+	public String getCodomainName() {
+		return codomain.getName();
+	}
+
 }

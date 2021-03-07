@@ -12,12 +12,12 @@ package cat.transformations.algorithms2.model;
 public enum DocumentFactory {
 	INSTANCE;
 
-	public DocumentKind createKind() {
+	public DocumentModel createModel() {
 		return null;
 	}
 
-	public DocumentModel createModel() {
-		return null;
+	public AbstractKind createKind(String name) {
+		return new DocumentKind(name);
 	}
 
 	public DocumentProperty createProperty(String name, Object value, boolean isIdentifierCompound, boolean isReferenceCompound, boolean isNullable) {
@@ -39,4 +39,9 @@ public enum DocumentFactory {
 	public DocumentPropertyValue createValue(String name, Object value) {
 		return new DocumentPropertyValue(name, value);
 	}
+
+	public SimpleIdentifier createIdentifier() {
+		return new SimpleIdentifier();
+	}
+
 }

@@ -165,7 +165,7 @@ public class UniversalIT {
 			category.create("name", AbstractType.ATTRIBUTE);
 			category.create("price", AbstractType.ATTRIBUTE);
 			category.create("array", AbstractType.ARRAY);
-			category.create("array.items", AbstractType.RECORD);
+			category.create("array.items", AbstractType.NESTED_KIND);
 //			category.create("items.att", AbstractType.ATTRIBUTE);
 //			category.create("test", AbstractType.RECORD);
 			category.create("a", AbstractType.ATTRIBUTE);

@@ -5,8 +5,15 @@
  */
 package cat.transformations.algorithms2;
 
+import cat.transformations.algorithms2.model.AbstractSchema;
+import cat.transformations.algorithms2.model.AbstractCategoricalMorphism;
+import cat.transformations.algorithms2.model.AbstractCategoricalObject;
 import cat.transformations.algorithms2.model.AbstractModel;
 import cat.transformations.algorithms2.model.AbstractInstance;
+import cat.transformations.algorithms2.model.AbstractType;
+import cat.transformations.algorithms2.model.Cardinality;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *
@@ -14,7 +21,184 @@ import cat.transformations.algorithms2.model.AbstractInstance;
  */
 public class TransformationInstToModel {
 
-	public void process(AbstractInstance instance, AbstractModel model) {
+	private final AbstractInstance instance;
+	private final AbstractModel model;
+	private final AbstractSchema schema;
+
+	public TransformationInstToModel(AbstractInstance instance, AbstractModel model) {
+		this.instance = instance;
+		this.model = model;
+
+		if (model.isSchemaRequired()) {
+			schema = model.getSchema();
+			System.out.println("POTREBUJES SCHEMA - POSTAVIT TABULKY PRED NAPLNENIM DATY");
+		} else {
+			// schema first, data later   or data first, schema later pristupy rozlisuj
+			schema = null;
+		}
+	}
+
+	// tenhle algoritmus musi mit 2 casti - nejprve postaveni schematu, tzn. tabulek, az potom naplneni daty
+	public void process() {
+
+		for (String name : instance.objectsKeySet()) {
+			// MEL BYS SPRAVNE VYTAHNOUT PRVNI HODNOTU A DELAT TO PRO NI - VKLADANI DAT!
+			// ODVOZENI SCHEMATU JE JINA VEC - TAM NEZALEZI NA HODNOTACH, ALE JAK ODVODIS DATOVE TYPY? METADATA?
+			Set<String> visited = new TreeSet<>();
+
+			AbstractCategoricalObject object = instance.get(name);
+			if (!object.getType().equals(AbstractType.KIND)) {
+				continue;
+			}
+
+			visited.add(name);
+
+			schema.addKind(name);
+
+			// tady musis vytvorit slozitejsi fronty, bude v nich ukladano vice veci...
+			// pohybuj se pruchodem do sirky, ale pouze smerem dolu - nechces zpetny chod!
+			// QUEUE
+			// QUEUE...
+			System.out.println("POKRACUJEME JEN S KIND! V PRIPADE RELACNI TABULKY SE MUZE STAT, ZE VNORENY KIND NEBUDE ZPRACOVAN - TAKZE NEKDE OZNACUJ, CO MAS HOTOVO - NEHOTOVE POTOM ZPRACUJ POZDEJI");
+
+			for (String morphismName : instance.morphismsKeySet()) {
+				AbstractCategoricalMorphism morphism = instance.getMorphism(morphismName);
+				AbstractCategoricalObject domain = morphism.getDomain();
+				AbstractCategoricalObject codomain = morphism.getCodomain();
+
+				if (!domain.getName().equals(name)) {
+					// Zajimaji te pouze morfismy, ktere vedou z NAME - ostatni zahod
+					// TODO: implementuj lepe instancni a schematickou kategorii - mel bys mit moznost rovnou vratit vsechny morfismy pro danou domain nebo codomain
+					// mozna by si kazdy objekt mel pamatovat, do kterych morfismu vstupuje a ze kterych vychazi
+					continue;
+				}
+
+				if (visited.contains(codomain.getName())) {
+					// Bud uz byl uzel zpracovan, nebo se jedna o rodice - musis overit
+					if (codomain.getName().equals(name)) {
+						// pokud se jedna o rodice, tak jen reference je povolena
+						System.out.println("JEDNA SE O RODICE - V PORADKU, POKRACUJ");
+						System.out.println("ALE MOZNA BUDE POTREBA ZPRACOVAT RODICE TADY!");
+						continue;	// WARN: TADY BUDE MOZNE JEN NECO...
+					} else {
+						// pokud se nejedna o rodice, tak uz bylo zpracovano - preskoc
+						continue;
+					}
+				}
+
+				// jedna se o rodice, v poradku
+				System.out.println("KDY VKLADAT JMENA DO FRONTY? CO KDYZ TED TO NENI JEDNODUCHY ATRIBUT?");
+				visited.add(codomain.getName()); // WARN: opravdu vkladat ted? co kdyz je to neatributovy typ? pak bys ho mel vlozit do fronty a oznacit jako zpracovany az pozdeji
+
+				switch (codomain.getType()) {
+					case KIND ->
+						System.out.println("NEMUZE NASTAT, KIND NEMUZE BYT VE VZTAHU S JINYM KIND");
+
+					case NESTED_KIND ->
+						System.out.println("NEMUZE NASTAT, POUZE V PRIPADE ARRAY");
+
+					case ARRAY -> {
+						// musis najit potomka array, tedy array.items
+						// pak zavolat schema.addRelationship(entityA, relationship, entityB, cardinality);
+						// v tomto pripade bys volal schema.addRelationship(entityA, array, array.items, one/many_to_many);
+						System.out.println("ANO");	// zavolej processArray, bude to zaviset na modelu, takze modelove process array, ale co kdyz to bude mit vnoreny dokument? ... tak jednoduse to nejde
+						// V TOM PRIPADE ALE ROVNOU MUSIS ZAVOLAT PROCESS ATRIBUTY ARRAY, KDYBY NAHODOU NEJAKE BYLY
+						// A DO FRONTY HODIT ENTITY_B
+
+						AbstractCategoricalObject x = instance.get("TODO-DRUHY Z OBJEKTU, NA KTERY VZTAH UKAZUJE");
+
+						switch (x.getType()) {
+							case ARRAY -> {
+							}
+							case NESTED_KIND -> {
+							}
+							case RELATIONSHIP_ATTRIBUTE -> {
+//								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
+								// KDYZ JSOU NA TOMHLE MISTE, PAK MUSI JIT VZTAHU, KTERY PREDCHAZEL
+								// tyhle relationship atributy vzdycky dostane do hloubky prochazena entita, protoze parent by jich pak musel mit mnoho a neslo by urcit, ke komu patri...
+								schema.addAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+							}
+							case RELATIONSHIP_MULTI_ATTRIBUTE -> {
+//								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
+								// KDYZ JSOU NA TOMHLE MISTE, PAK MUSI JIT VZTAHU, KTERY PREDCHAZEL
+								// tyhle relationship atributy vzdycky dostane do hloubky prochazena entita, protoze parent by jich pak musel mit mnoho a neslo by urcit, ke komu patri...
+								schema.addAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
+							}
+							case RELATIONSHIP_INLINED_ATTRIBUTE -> {
+//								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
+								// KDYZ JSOU NA TOMHLE MISTE, PAK MUSI JIT VZTAHU, KTERY PREDCHAZEL
+								// tyhle relationship atributy vzdycky dostane do hloubky prochazena entita, protoze parent by jich pak musel mit mnoho a neslo by urcit, ke komu patri...
+								schema.addAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+							}
+							case RELATIONSHIP_STRUCTURED_ATTRIBUTE -> {
+//								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
+								// KDYZ JSOU NA TOMHLE MISTE, PAK MUSI JIT VZTAHU, KTERY PREDCHAZEL
+								// tyhle relationship atributy vzdycky dostane do hloubky prochazena entita, protoze parent by jich pak musel mit mnoho a neslo by urcit, ke komu patri...
+								schema.addStructuredAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), Cardinality.ONE_TO_ONE); // NESTED DOKUMENT, NESTED TABULKA, JAK MOC MA BYT TAKOVY STURKTUROVANY ATRIBUT ZANOROVANY?
+								System.out.println("TODO: ADD X TO QUEUE");// TADY ZAROVEN VLOZ DO FRONTY TEN OBJEKT, MUSI Se ZPRACOVAT V DALSIM KROCE!
+							}
+							case RELATIONSHIP_INLINED_STRUCTURED_ATTRIBUTE -> {
+//								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
+								// KDYZ JSOU NA TOMHLE MISTE, PAK MUSI JIT VZTAHU, KTERY PREDCHAZEL
+								// tyhle relationship atributy vzdycky dostane do hloubky prochazena entita, protoze parent by jich pak musel mit mnoho a neslo by urcit, ke komu patri...
+								schema.addInlinedStructuredAttribute("PARENT-NAME", "CURRENT-codomain.getName()", x.getName(), Cardinality.ONE_TO_ONE);// U TABULKY PRIMO SLOUPCE, U DOKUMENTU, TAKZE PROCESS INLINED... A JSOU TAM JMENA A HODNOTY VSEHO, TY 
+								System.out.println("TODO: ADD X TO QUEUE");// TADY ZAROVEN VLOZ DO FRONTY TEN OBJEKT, MUSI Se ZPRACOVAT V DALSIM KROCE!
+							}
+						}
+
+					}
+					// musis se rozhodovat a drzet si v tomto algoritmu, co s tim budes delat...
+					// idealne nebo jako zpracuj referenci, pokud je potreba, a to dalsi posli do zasobniku (array)
+					// JESTE MUSIS ROZLISOVAT TYPY MODELU - PRO DOKUMENTOVY JE LEPSI TRANSFORMACE CELEHO DOKUMENTU ZAROVEN, ZATIMCO PRO JINE JE LEPSI DELAT TO PO RADCICH...
+					// SCHEMA VYTVORIS SNADNO, STACI TI PRUCHOD KATEGORII ... NALITI DAT JE PAK NECO JINEHO. POTREBUJES AGGREGATE ORIENTED PRISTUP (cely agregat najednou) A ENTITY ORIENTED PRISTUP - po radcich
+					// LEPSI JE TEN AGGREGATE ORIENTED, PROTOZE TI ZAJISTI, ZE BUDES MIT RIDICI DATA OPRAVDU V TABULKACH - ZAVISLOSTNI STROM SI TIM VYTVORIS
+
+					case INLINED ->
+						System.out.println("NEPOUZIVA SE");
+
+					case ATTRIBUTE ->
+						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+
+					case MULTI_ATTRIBUTE ->
+						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
+
+					case INLINED_ATTRIBUTE ->
+						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+
+					case STRUCTURED_ATTRIBUTE -> {
+						schema.addStructuredAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE); // NESTED DOKUMENT, NESTED TABULKA, JAK MOC MA BYT TAKOVY STURKTUROVANY ATRIBUT ZANOROVANY?
+						System.out.println("TODO: ADD CODOMAIN TO QUEUE");// TADY ZAROVEN VLOZ DO FRONTY TEN OBJEKT, MUSI Se ZPRACOVAT V DALSIM KROCE!
+					}
+
+					case INLINED_STRUCTURED_ATTRIBUTE -> {
+						schema.addInlinedStructuredAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE);// U TABULKY PRIMO SLOUPCE, U DOKUMENTU, TAKZE PROCESS INLINED... A JSOU TAM JMENA A HODNOTY VSEHO, TY 
+						System.out.println("TODO: ADD CODOMAIN TO QUEUE");// TADY ZAROVEN VLOZ DO FRONTY TEN OBJEKT, MUSI Se ZPRACOVAT V DALSIM KROCE!
+					}
+
+					case IDENTIFIER ->
+						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_ONE);// ZPRACUJ NA MISTE!
+					// IDENTIFIKATORY Z POHLEDU INTEGRITNICH OMEZENI SE BUDOU RESIT POZDEJI, MOZNA TEDY NENI NUTNE ROZLISOVAT ATRIBUTY / IDENTIFIKATORY
+
+					case MULTI_IDENTIFIER ->
+						schema.addAttribute(name, codomain.getName(), Cardinality.ONE_TO_MANY);//ROZDIL U AGREGATU/GRAFU/TABULKY
+					// IDENTIFIKATORY Z POHLEDU INTEGRITNICH OMEZENI SE BUDOU RESIT POZDEJI, MOZNA TEDY NENI NUTNE ROZLISOVAT ATRIBUTY / IDENTIFIKATORY
+
+					case REFERENCE ->
+						System.out.println("");
+
+					case MULTI_REFERENCE ->
+						System.out.println("");
+
+				}
+
+				//if (morphism.)
+			}
+
+			// PRIDEJ INTEGRITNI OMEZENI NEJPRVE PRO REFERENCE - PRI NICH NEKDY JESTE VYTVARIS ATRIBUTY
+			// A ZAROVEN POSTAV INTEGRITNI OMEZENI, POKUD SI TO VYZADUJE MODEL
+			// TED MAS PRIDANY VSECHNY ATRIBUTY V KIND, TAK VYTVOR INTEGRITNI OMEZENI TYPU PRIMARY KEY
+			// over, zda sloupce identifikatoru jsou opravdu typu IDENTIFIER NEBO REFERENCE? PAK MUSIS PRIDAT INTEGRITNI OMEZENI...
+		}
 
 	}
 

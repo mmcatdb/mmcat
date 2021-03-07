@@ -70,4 +70,14 @@ public class DocumentModel implements AbstractModel {
 		return builder.toString();
 	}
 
+	@Override
+	public boolean isSchemaRequired() {
+		return false;
+	}
+
+	@Override
+	public AbstractSchema getSchema() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
 }

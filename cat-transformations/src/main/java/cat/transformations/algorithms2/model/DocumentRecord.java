@@ -20,7 +20,7 @@ public class DocumentRecord implements AbstractRecordProperty {
 
 	private static final Logger LOGGER = Logger.getLogger(DocumentRecord.class.getName());
 
-	private static final AbstractType TYPE = AbstractType.RECORD;	// WARN: Nepouzivas DocumentRecord jeste pro nested dokumenty?
+	private static final AbstractType TYPE = AbstractType.NESTED_KIND;	// WARN: Nepouzivas DocumentRecord jeste pro nested dokumenty?
 	// pokud ano, pak musis tohle presunout do konstruktoru a umoznit nastavit neco jineho... ale pak to nemusi davat smysl
 
 	private final Map<String, AbstractProperty> properties = new TreeMap<>();
