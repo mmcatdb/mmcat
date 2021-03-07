@@ -89,7 +89,8 @@ public class CategoricalRelationshipObject implements AbstractCategoricalObject 
 
 	@Override
 	public String getDataType() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		System.out.println("--- TODO: RELATIONSHIP DATA TYPE");
+		return "REL-DTYPE";
 	}
 
 }

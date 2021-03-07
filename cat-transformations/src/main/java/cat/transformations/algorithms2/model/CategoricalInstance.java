@@ -26,6 +26,8 @@ public class CategoricalInstance implements AbstractInstance {
 
 	@Override
 	public Set<String> morphismsKeySet() {
+		System.out.println("VOLAS KEYSET");
+		System.out.println(morphisms.keySet());
 		return morphisms.keySet();
 	}
 
@@ -158,6 +160,7 @@ public class CategoricalInstance implements AbstractInstance {
 	}
 
 	private boolean createAttribute(String name, AbstractObjectType type) {
+		System.out.println("------ CREATING ATTRIBUTE" + name);
 		if (objects.containsKey(name)) {
 			return false;
 		} else {
@@ -168,6 +171,7 @@ public class CategoricalInstance implements AbstractInstance {
 	}
 
 	private boolean createEntity(String name, AbstractObjectType type) {
+		System.out.println("------ CREATING ENTITY" + name);
 		if (objects.containsKey(name)) {
 			return false;
 		} else {
@@ -178,6 +182,7 @@ public class CategoricalInstance implements AbstractInstance {
 	}
 
 	private boolean createRelationship(String name, AbstractObjectType type) {
+		System.out.println("------ CREATING RELATIONSHIP" + name);
 		if (objects.containsKey(name)) {
 			return false;
 		} else {

@@ -502,6 +502,24 @@ public class Main {
 		category.create("b", AbstractObjectType.INLINED_ATTRIBUTE);
 		category.create("c", AbstractObjectType.INLINED_ATTRIBUTE);
 
+		category.createMorphism(TransformationModelToInst.morphismName("cars", "_id"), category.get("cars"), category.get("_id"));
+		category.createMorphism(TransformationModelToInst.morphismName("cars", "name"), category.get("cars"), category.get("name"));
+		category.createMorphism(TransformationModelToInst.morphismName("cars", "price"), category.get("cars"), category.get("price"));
+		category.createMorphism(TransformationModelToInst.morphismName("cars", "multiAttribute"), category.get("cars"), category.get("multiAttribute"));
+
+		category.createMorphism(TransformationModelToInst.morphismName("cars", "address"), category.get("cars"), category.get("address"));
+		category.createMorphism(TransformationModelToInst.morphismName("address", "street"), category.get("address"), category.get("street"));
+		category.createMorphism(TransformationModelToInst.morphismName("address", "city"), category.get("address"), category.get("city"));
+		category.createMorphism(TransformationModelToInst.morphismName("address", "postalcode"), category.get("address"), category.get("postalcode"));
+
+		category.createMorphism(TransformationModelToInst.morphismName("cars", "array"), category.get("cars"), category.get("array"));
+		category.createMorphism(TransformationModelToInst.morphismName("array", "cars"), category.get("array"), category.get("cars"));
+		category.createMorphism(TransformationModelToInst.morphismName("array", "array.items"), category.get("array"), category.get("array.items"));
+		category.createMorphism(TransformationModelToInst.morphismName("array.items", "array"), category.get("array.items"), category.get("array"));
+		category.createMorphism(TransformationModelToInst.morphismName("array.items", "a"), category.get("array.items"), category.get("a"));
+		category.createMorphism(TransformationModelToInst.morphismName("array.items", "b"), category.get("array.items"), category.get("b"));
+		category.createMorphism(TransformationModelToInst.morphismName("array.items", "c"), category.get("array.items"), category.get("c"));
+
 		System.out.println(category);
 
 		AbstractModel relational = new RelationalModel(new RelationalSchema());

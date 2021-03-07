@@ -5,14 +5,12 @@
  */
 package cat.transformations.algorithms2.schema;
 
-import cat.transformations.algorithms2.model.Cardinality;
-
 /**
  *
  * @author pavel.koupil
  */
-public interface AbstractKindSchema {
+public enum RelationalSchemaFactory {
+	INSTANCE;
 
-	public void createProperty(String name, String dataType, Cardinality cardinality);
 	
 }

@@ -42,12 +42,22 @@ public class RelationalModel implements AbstractModel {
 
 	@Override
 	public void putKind(String name, AbstractKind kind) {
+		// TODO: uprav schema? over schema? mel bys mit dva druhy metod, jedna s upravou schematu a druha bez upravy schematu...
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
 	@Override
 	public boolean isSchemaRequired() {
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(schema);
+		builder.append("INSTANCE-TODO-NENI-ZOBRAZENA!\n");
+
+		return builder.toString();
 	}
 
 }

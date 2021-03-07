@@ -21,4 +21,9 @@ public class RelationalReferenceSchema implements AbstractReferenceSchema {
 	public RelationalReferenceSchema() {
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		return builder.toString();
+	}
 }

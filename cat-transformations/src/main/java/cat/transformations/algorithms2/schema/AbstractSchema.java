@@ -13,19 +13,22 @@ import cat.transformations.algorithms2.model.Cardinality;
  */
 public interface AbstractSchema {
 
-	public void addKind(String name);
+	public void createKind(String name);
 
-	public void addAttribute(String domain, String codomain, String datatype, Cardinality cardinality);
+	public void createAttribute(String domain, String codomain, String datatype, Cardinality cardinality);
 
-	public void addStructuredAttribute(String domain, String codomain, Cardinality cardinality);
+	// vztahovy pripad, pro mongo a rel a jine modely se resi jinak!
+	public void createAttribute(String parent, String current, String name, String datatype, Cardinality cardinality);
 
-	public void addInlinedStructuredAttribute(String domain, String codomain, Cardinality cardinality);
+	public void createStructuredAttribute(String domain, String codomain);
 
-	public void addAttribute(String parent, String current, String name, String datatype, Cardinality cardinality);
+	// vztahovy pripad, pro mongo a rel a jine modely se resi jinak!
+	public void createStructuredAttribute(String parent, String current, String name);
 
-	public void addStructuredAttribute(String parent, String current, String name, Cardinality cardinality);
+	public void createInlinedStructuredAttribute(String domain, String codomain);
 
-	public void addInlinedStructuredAttribute(String parent, String current, String name, Cardinality cardinality);
+	// vztahovy pripad, pro mongo a rel a jine modely se resi jinak!
+	public void createInlinedStructuredAttribute(String parent, String current, String name);
 
 	public Iterable<String> getKindNames();
 
