@@ -49,7 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 @RunWith(MockitoJUnitRunner.class)
 public class UniversalIT {

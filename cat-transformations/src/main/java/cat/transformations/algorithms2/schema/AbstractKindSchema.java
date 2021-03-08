@@ -9,7 +9,7 @@ import cat.transformations.algorithms2.model.Cardinality;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public interface AbstractKindSchema {
 

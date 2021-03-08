@@ -10,7 +10,7 @@ import java.util.Set;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public interface AbstractInstance {
 
@@ -37,5 +37,9 @@ public interface AbstractInstance {
 	public Set<String> objectsKeySet();
 
 	public Set<String> morphismsKeySet();
+
+	public Set<String> morphismsKeySet(String name);
+
+	public Set<String> objectsKeySet(AbstractObjectType abstractObjectType);
 
 }

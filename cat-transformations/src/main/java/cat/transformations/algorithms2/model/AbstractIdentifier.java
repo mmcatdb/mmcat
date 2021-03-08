@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public interface AbstractIdentifier extends AbstractValue {
 	

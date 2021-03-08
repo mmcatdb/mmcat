@@ -7,7 +7,7 @@ package integration;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class RDFIT {
 	

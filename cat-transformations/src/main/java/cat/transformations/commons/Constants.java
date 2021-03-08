@@ -7,7 +7,7 @@ package cat.transformations.commons;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public abstract class Constants {
 

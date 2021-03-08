@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public interface AbstractRecordProperty extends AbstractProperty/*, Map<String, AbstractValue>*/ {
 

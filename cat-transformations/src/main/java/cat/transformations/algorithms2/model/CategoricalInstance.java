@@ -8,10 +8,11 @@ package cat.transformations.algorithms2.model;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class CategoricalInstance implements AbstractInstance {
 
@@ -244,6 +245,32 @@ public class CategoricalInstance implements AbstractInstance {
 		builder.append("\n");
 
 		return builder.toString();
+	}
+
+	@Override
+	public Set<String> morphismsKeySet(String name) {
+		Set<String> result = new TreeSet<>();
+		for (String value : morphisms.keySet()) {
+			var morphism = morphisms.get(value);
+			if (name.equals(morphism.getDomainName())) {
+				result.add(morphism.getName());
+			}
+		}
+		System.out.println("RESULT SET OF MORPHISMS: " + result);
+		return result;
+	}
+
+	@Override
+	public Set<String> objectsKeySet(AbstractObjectType type) {
+		Set<String> result = new TreeSet<>();
+		for (String value : objects.keySet()) {
+			var object = objects.get(value);
+			if (type.equals(object.getType())) {
+				result.add(object.getName());
+			}
+		}
+		System.out.println("RESULT SET OF MORPHISMS: " + result);
+		return result;
 	}
 
 }

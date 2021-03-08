@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class DocumentRecord implements AbstractRecordProperty {
 

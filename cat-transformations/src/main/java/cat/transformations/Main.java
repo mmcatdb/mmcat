@@ -31,7 +31,7 @@ import java.util.logging.LogManager;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class Main {
 

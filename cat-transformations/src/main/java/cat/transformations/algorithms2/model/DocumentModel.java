@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class DocumentModel implements AbstractModel {
 

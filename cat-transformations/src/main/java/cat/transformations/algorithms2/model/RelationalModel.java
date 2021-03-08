@@ -10,7 +10,7 @@ import cat.transformations.algorithms2.schema.RelationalSchema;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class RelationalModel implements AbstractModel {
 

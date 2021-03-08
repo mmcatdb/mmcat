@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class RelationalSchema implements AbstractSchema {
 
@@ -44,6 +44,7 @@ public class RelationalSchema implements AbstractSchema {
 				kind.createProperty(codomain, dataType, cardinality);
 				System.out.println("pridej jeste FK teto tabulce, a to jako FK na domain");
 				System.out.println("codomain tabulka muze obsahovat duplicitni hodnoty...");
+				kinds.put(codomain, kind);
 			}
 			case MANY_TO_ONE -> {
 				System.out.println("NEDAVA SMYSL... DODELEJ LOGOVANI");
@@ -94,10 +95,18 @@ public class RelationalSchema implements AbstractSchema {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (String kindName : kinds.keySet()) {
+			builder.append(kindName);
+			builder.append(" -> ");
 			builder.append(kinds.get(kindName));
 			builder.append("\n");
 		}
 
 		return builder.toString();
+	}
+
+	@Override
+	public void createArray(String name) {
+		LOGGER.log(Level.INFO, String.format("creating new ARRAY %s", name));
+		kinds.put(name, new RelationalKindSchema(name));
 	}
 }

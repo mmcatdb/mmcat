@@ -7,7 +7,7 @@ package cat.transformations.algorithms2.model;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public interface AbstractCategoricalObject extends Comparable<AbstractCategoricalObject> {
 

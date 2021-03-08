@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class RelationalReferenceSchema implements AbstractReferenceSchema {
 

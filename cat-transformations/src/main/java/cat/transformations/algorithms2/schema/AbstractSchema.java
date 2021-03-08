@@ -9,7 +9,7 @@ import cat.transformations.algorithms2.model.Cardinality;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public interface AbstractSchema {
 
@@ -31,5 +31,7 @@ public interface AbstractSchema {
 	public void createInlinedStructuredAttribute(String parent, String current, String name);
 
 	public Iterable<String> getKindNames();
+
+	public void createArray(String name);
 
 }

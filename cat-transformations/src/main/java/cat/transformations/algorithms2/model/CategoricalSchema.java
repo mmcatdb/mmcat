@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class CategoricalSchema implements AbstractInstance {
 
@@ -71,6 +71,16 @@ public class CategoricalSchema implements AbstractInstance {
 
 	@Override
 	public Set<String> morphismsKeySet() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public Set<String> morphismsKeySet(String name) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public Set<String> objectsKeySet(AbstractObjectType abstractObjectType) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 

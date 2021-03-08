@@ -18,7 +18,7 @@ import org.bson.Document;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class TransformationInstToDoc {
 

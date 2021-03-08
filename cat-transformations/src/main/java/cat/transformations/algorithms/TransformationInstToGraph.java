@@ -7,7 +7,7 @@ package cat.transformations.algorithms;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class TransformationInstToGraph {
 	

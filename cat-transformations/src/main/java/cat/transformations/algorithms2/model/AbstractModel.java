@@ -9,7 +9,7 @@ import cat.transformations.algorithms2.schema.AbstractSchema;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public interface AbstractModel {
 

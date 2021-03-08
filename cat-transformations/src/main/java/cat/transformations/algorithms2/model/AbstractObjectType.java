@@ -7,7 +7,7 @@ package cat.transformations.algorithms2.model;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public enum AbstractObjectType {
 	// -------------------------------| RELACNI MODEL      | DOKUMENTOVY MODEL  | MODEL KLIC HODNOTA | SLOUPCOVY MODEL    | GRAFOVY MODEL      | RDF MODEL          |

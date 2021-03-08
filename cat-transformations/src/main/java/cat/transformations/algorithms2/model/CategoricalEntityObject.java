@@ -12,7 +12,7 @@ import java.util.TreeSet;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.contos
  */
 public class CategoricalEntityObject implements AbstractCategoricalObject {
 
