@@ -73,16 +73,16 @@ public class TransformationInstToModel {
 			// QUEUE
 			// QUEUE...
 			Queue<AbstractCategoricalMorphism> queue = new LinkedList<>();	// add, poll
+//			Queue<AbstractCategoricalObject> queue = new LinkedList<>();
 			Queue<String> queueOfNames = new LinkedList<>();
 
 			for (String morphismName : instance.morphismsKeySet(name)) {
 				AbstractCategoricalMorphism morphism = instance.getMorphism(morphismName);
-				AbstractCategoricalObject domain = morphism.getDomain();
-				AbstractCategoricalObject codomain = morphism.getCodomain();
 
-				if (!domain.getName().equals(name)) {
+				if (!morphism.getDomain().getName().equals(name)) {
 					LOGGER.log(Level.INFO, String.format("\tSKIP: Morfism %s", morphism.getName()));
 					// Zajimaji te pouze morfismy, ktere vedou z NAME - ostatni zahod
+					// NESMI BYT VEDOUCI ZPET DO NAME? NEBO MUZE? CO KDYZ JE TO ODKAZ NA SEBE SAMA? NENI TO PAK VZTAHOVE? JE... REKURZIVNI VZTAH...
 					// TODO: implementuj lepe instancni a schematickou kategorii - mel bys mit moznost rovnou vratit vsechny morfismy pro danou domain nebo codomain
 					// mozna by si kazdy objekt mel pamatovat, do kterych morfismu vstupuje a ze kterych vychazi
 					continue;
@@ -92,6 +92,8 @@ public class TransformationInstToModel {
 
 				while (!queue.isEmpty()) {
 					morphism = queue.poll();
+					AbstractCategoricalObject domain = morphism.getDomain();
+					AbstractCategoricalObject codomain = morphism.getCodomain();
 
 					LOGGER.log(Level.INFO, String.format("\tOK:   Morfism %s", morphism.getName()));
 
@@ -145,10 +147,13 @@ public class TransformationInstToModel {
 
 								switch (x.getType()) {
 									case ARRAY -> {
+										// TODO: CREATE ARRAY FK, CREATE ARRAY "PK"
 										System.out.println("ARRAY NASTALO");
 									}
 									case NESTED_KIND -> {
+										// TODO: CREATE ARRAY FK, CREATE ARRAY "PK"
 										System.out.println("NESTED_KIND NASTALO");
+//										queue.add(x);
 									}
 									case RELATIONSHIP_ATTRIBUTE -> {
 //								System.out.println("MUZE TAHLE SITUACE TADY NASTAT?");
