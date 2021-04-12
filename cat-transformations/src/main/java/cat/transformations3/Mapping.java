@@ -38,7 +38,7 @@ public class Mapping {
 		builder.append(", {");
 		paths.stream().forEach(path -> {
 			builder.append(path);
-			builder.append(", ");
+			builder.append(", "); 
 		});
 		builder.append("}");
 		builder.append(")");

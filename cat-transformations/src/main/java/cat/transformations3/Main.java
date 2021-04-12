@@ -16,14 +16,14 @@ import java.util.TreeMap;
  */
 public class Main {
 
-	List<Mapping> mappings = new ArrayList();
-	Map<String, Mapping> output = new TreeMap<>();
+	List<Mapping> mappings = new ArrayList<>();
+	Map<String, List<Mapping>> output = new TreeMap<>();
 
 	public void createMappings() {
 		mappings.clear();
 
-		String[] objects = {"kind", "nested", "a", "b", "array", "c", "document", "d", "e"};
-		String[] paths = {"/KIND(a->A1,b->A2)", "/KIND/NESTED(c->A3)", "/KIND(a->A1)", "/KIND(b->A2)", "/KIND/ARRAY", "/KIND/NESTED(c->A3)", "/KIND/ARRAY/[](d->A4,e->A5)", "/KIND/ARRAY/[](d->A4)", "/KIND/ARRAY/[](e->A5)"};
+		String[] objects = {"kind", "nested", "a", "b", "array", "c", "document", "d", "e", "kind2", "f"};
+		String[] paths = {"/KIND(a->A1,b->A2)", "/KIND/NESTED(c->A3)", "/KIND(a->A1)", "/KIND(b->A2)", "/KIND/ARRAY", "/KIND/NESTED(c->A3)", "/KIND/ARRAY/[](d->A4,e->A5)", "/KIND/ARRAY/[](d->A4)", "/KIND/ARRAY/[](e->A5)", "/KIND2(f->B1)", "/KIND2(f->B1)"};
 
 		for (int index = 0; index < objects.length; ++index) {
 			String object = objects[index];
@@ -64,6 +64,12 @@ public class Main {
 			mapping.getPaths().stream().forEach(path -> {
 				String topLevel = getTopLevelNavigationStep(path);
 				System.out.println(topLevel);
+				List<Mapping> list = output.get(topLevel);
+				if (list == null) {
+					list = new ArrayList<>();
+					output.put(topLevel, list);
+				}
+				list.add(mapping);
 			});
 
 		}
@@ -81,8 +87,19 @@ public class Main {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
+		builder.append("===== ===== MAPPING ===== =====\n");
 		for (Mapping mapping : mappings) {
 			builder.append(mapping);
+			builder.append("\n");
+		}
+		builder.append("===== ===== OUTPUT ===== =====\n");
+		for (var entry : output.entrySet()) {
+			builder.append(entry.getKey());
+			builder.append("     ->     ");
+			for (var mapping : entry.getValue()) {
+				builder.append(mapping);
+				builder.append("     ");
+			}
 			builder.append("\n");
 		}
 		return builder.toString();
