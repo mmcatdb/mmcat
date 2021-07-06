@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>org.openjfx.hellofx.MainApp</mainClass>
+        <!--<mainClass>cat.editor.MainApp</mainClass>-->
     </properties>
 
     <organization>
@@ -85,7 +85,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>org.openjfx.hellofx.MainApp</mainClass>
+                    <mainClass>cat.editor.MainApp</mainClass>
+                    <!--<mainClass>cat.tutorial.Main</mainClass>-->
                 </configuration>
             </plugin>
         </plugins>
