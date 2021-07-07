@@ -30,9 +30,10 @@ public class RandomLayout extends Layout {
 
         for (Cell cell : cells) {
 
-            double x = rnd.nextDouble() * 800;
-            double y = rnd.nextDouble() * 800;
+            double x = 20 + rnd.nextDouble() * 500;
+            double y = 20 + rnd.nextDouble() * 500;
 
+            System.out.println(x + ":::" + y);
             cell.relocate(x, y);
 
         }

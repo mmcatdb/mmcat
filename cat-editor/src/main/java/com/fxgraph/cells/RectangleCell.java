@@ -18,6 +18,7 @@ public class RectangleCell extends Cell {
         
         double size = (Math.random() * 50.0)+10.0;
         Rectangle view = new Rectangle(size,size);
+        view.setUserData("aaa");
 
 //        this.relocate(Math.random()*200, 100);
         view.setStroke(Color.CHOCOLATE);

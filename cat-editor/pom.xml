@@ -129,8 +129,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!--<mainClass>cat.editor.MainApp</mainClass>-->
-                    <mainClass>application.Main</mainClass>
+                    <mainClass>cat.editor.MainApp</mainClass>
+                    <!--<mainClass>application.Main</mainClass>-->
+                    
+                    
+                    
                     <!--<mainClass>cat.tutorial.Main</mainClass>-->
                     <!--<mainClass>cat.tutorial.GraphVisTester</mainClass>-->
                     <!--<mainClass>cat.tutorial.TutorialDiagram</mainClass>-->
