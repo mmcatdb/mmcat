@@ -9,6 +9,14 @@
 
     <name>cat-editor</name>
 
+<!--    <repositories>
+        <repository>
+            <id>java-fx-ui</id>
+            <name>xxx</name>
+            <url>http://maven.imagej.net/content/repositories/public/</url>
+        </repository>
+    </repositories>-->
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!--<mainClass>cat.editor.MainApp</mainClass>-->
@@ -20,6 +28,31 @@
     </organization>
 
     <dependencies>
+        
+        <!-- https://mvnrepository.com/artifact/net.sf.jung/jung-visualization -->
+        <dependency>
+            <groupId>net.sf.jung</groupId>
+            <artifactId>jung-visualization</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/net.sf.jung/jung-api -->
+        <dependency>
+            <groupId>net.sf.jung</groupId>
+            <artifactId>jung-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/net.sf.jung/jung-graph-impl -->
+        <dependency>
+            <groupId>net.sf.jung</groupId>
+            <artifactId>jung-graph-impl</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+
+
+
+        
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -36,6 +69,14 @@
             <artifactId>gs-ui</artifactId>
             <version>1.3</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.github.graphstream/gs-ui-javafx -->
+<!--        <dependency>
+            <groupId>com.github.graphstream</groupId>
+            <artifactId>gs-ui-javafx</artifactId>
+            <version>2.0-alpha</version>
+        </dependency>-->
+        
+        
         <!--        <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics </artifactId>
@@ -56,12 +97,15 @@
         </dependency>-->
 
 
-        <!-- https://mvnrepository.com/artifact/com.github.graphstream/gs-ui-javafx -->
-        <!--		<dependency>
-                <groupId>com.github.graphstream</groupId>
-                <artifactId>gs-ui-javafx</artifactId>
-                <version>2.0-alpha</version>
-        </dependency>-->
+        
+
+
+        <dependency>
+            <groupId>com.github.vlsi.mxgraph</groupId>
+            <artifactId>jgraphx</artifactId>
+            <version>4.2.2</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -85,8 +129,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>cat.editor.MainApp</mainClass>
+                    <!--<mainClass>cat.editor.MainApp</mainClass>-->
+                    <mainClass>application.Main</mainClass>
                     <!--<mainClass>cat.tutorial.Main</mainClass>-->
+                    <!--<mainClass>cat.tutorial.GraphVisTester</mainClass>-->
+                    <!--<mainClass>cat.tutorial.TutorialDiagram</mainClass>-->
                 </configuration>
             </plugin>
         </plugins>
