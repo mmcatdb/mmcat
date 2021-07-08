@@ -12,7 +12,8 @@ public enum CellType {
     LABEL,
     IMAGE,
     BUTTON,
-    TITLEDPANE
+    TITLEDPANE,
+    CIRCLE
     ;
 
 }

@@ -8,6 +8,9 @@ package com.fxgraph.graph;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Shape;
 
 public class MouseGestures {
 
@@ -15,12 +18,11 @@ public class MouseGestures {
 
     Graph graph;
 
-    public MouseGestures( Graph graph) {
+    public MouseGestures(Graph graph) {
         this.graph = graph;
     }
 
-    public void makeDraggable( final Node node) {
-
+    public void makeDraggable(final Node node) {
 
         node.setOnMousePressed(onMousePressedEventHandler);
         node.setOnMouseDragged(onMouseDraggedEventHandler);
@@ -28,17 +30,33 @@ public class MouseGestures {
 
     }
 
+    private Paint save;
+    
     EventHandler<MouseEvent> onMousePressedEventHandler = new EventHandler<MouseEvent>() {
 
         @Override
         public void handle(MouseEvent event) {
 
             Node node = (Node) event.getSource();
+            Cell cell = (Cell) event.getSource();
 
             double scale = graph.getScale();
 
+//            System.out.println((event.getSource() instanceof Cell) ? "YES" : "NO");
+//            System.out.println(event.getSource());
+//            cell.getView();
+//            System.out.println("size:  " + cell.getChildren().size());
+//            var xxx = cell.getChildren().get(0);
+            
+            Shape shape = (Shape) cell.getChildren().get(0);
+            save = shape.getStroke();
+            shape.setStroke(Color.YELLOW);
+            shape.setStrokeWidth(5);
+            
+//            System.out.println(xxx.getClass());
+//            node.getViewOrder();
             dragContext.x = node.getBoundsInParent().getMinX() * scale - event.getScreenX();
-            dragContext.y = node.getBoundsInParent().getMinY()  * scale - event.getScreenY();
+            dragContext.y = node.getBoundsInParent().getMinY() * scale - event.getScreenY();
 
         }
     };
@@ -72,6 +90,27 @@ public class MouseGestures {
         @Override
         public void handle(MouseEvent event) {
 
+//            Node node = (Node) event.getSource();
+            Cell cell = (Cell) event.getSource();
+
+//            double scale = graph.getScale();
+
+//            System.out.println((event.getSource() instanceof Cell) ? "YES" : "NO");
+//            System.out.println(event.getSource());
+//            cell.getView();
+//            System.out.println("size:  " + cell.getChildren().size());
+//            var xxx = cell.getChildren().get(0);
+            
+            Shape shape = (Shape) cell.getChildren().get(0);
+//            save = shape.getStroke();
+            shape.setStroke(save);
+            shape.setStrokeWidth(2);
+            
+//            System.out.println(xxx.getClass());
+//            node.getViewOrder();
+//            dragContext.x = node.getBoundsInParent().getMinX() * scale - event.getScreenX();
+//            dragContext.y = node.getBoundsInParent().getMinY() * scale - event.getScreenY();
+            
         }
     };
 

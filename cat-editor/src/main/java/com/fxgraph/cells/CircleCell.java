@@ -5,20 +5,25 @@
  */
 package com.fxgraph.cells;
 
+import com.fxgraph.graph.Cell;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Arc;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
-import com.fxgraph.graph.Cell;
-import javafx.scene.text.Text;
+/**
+ *
+ * @author pavel.koupil
+ */
+public class CircleCell extends Cell {
 
-public class RectangleCell extends Cell {
-
-    public RectangleCell(String id) {
+    public CircleCell(String id) {
         super(id);
 
-        double size = 50;
+        double size = 25;
 //        double size = (Math.random() * 50.0) + 10.0;
-        Rectangle view = new Rectangle(size, size);
+//        Arc view = new Arc(size, size, size, size, size, size);
+        Circle view = new Circle(size, size, size);
         view.setUserData("aaa");
 
 //        this.relocate(Math.random()*200, 100);
@@ -27,11 +32,10 @@ public class RectangleCell extends Cell {
         view.setStroke(color);
 //        view.setStroke(Color.DODGERBLUE);
         view.setFill(color);
-//        view.setFill(Color.DODGERBLUE);
         view.setStrokeWidth(2);
-        Text text = new Text(id);
+//        view.setFill(Color.DODGERBLUE);
+
         setView(view);
-        setView(text);
 
     }
 

@@ -6,6 +6,7 @@
 package com.fxgraph.graph;
 
 import com.fxgraph.cells.ButtonCell;
+import com.fxgraph.cells.CircleCell;
 import com.fxgraph.cells.ImageCell;
 import com.fxgraph.cells.LabelCell;
 import java.util.ArrayList;
@@ -92,8 +93,8 @@ public class Model {
                 break;
 
             case TRIANGLE:
-                TriangleCell circleCell = new TriangleCell(id);
-                addCell(circleCell);
+                TriangleCell triangleCell = new TriangleCell(id);
+                addCell(triangleCell);
                 break;
 
             case LABEL:
@@ -104,6 +105,10 @@ public class Model {
             case IMAGE:
                 ImageCell imageCell = new ImageCell(id);
                 addCell(imageCell);
+                break;
+            case CIRCLE:
+                Cell circleCell = new CircleCell(id);
+                addCell(circleCell);
                 break;
 
             case BUTTON:

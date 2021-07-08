@@ -61,10 +61,15 @@ public class FXMLControllerDEMO {
         model.addCell("Cell A", CellType.RECTANGLE);
         model.addCell("Cell B", CellType.RECTANGLE);
         model.addCell("Cell C", CellType.RECTANGLE);
-        model.addCell("Cell D", CellType.TRIANGLE);
+        model.addCell("Cell D", CellType.CIRCLE);
         model.addCell("Cell E", CellType.TRIANGLE);
         model.addCell("Cell F", CellType.RECTANGLE);
-        model.addCell("Cell G", CellType.RECTANGLE);
+        model.addCell("Cell G", CellType.CIRCLE);
+        model.addCell("Cell H", CellType.CIRCLE);
+        model.addCell("Cell I", CellType.RECTANGLE);
+        model.addCell("Cell J", CellType.TRIANGLE);
+        model.addCell("Cell K", CellType.RECTANGLE);
+        model.addCell("Cell L", CellType.CIRCLE);
 
 //        model.addCell("Cell A", CellType.RECTANGLE);
 //        model.addCell("Cell B", CellType.BUTTON);
@@ -80,6 +85,11 @@ public class FXMLControllerDEMO {
         model.addEdge("Cell B", "Cell E");
         model.addEdge("Cell D", "Cell F");
         model.addEdge("Cell D", "Cell G");
+        model.addEdge("Cell G", "Cell H");
+        model.addEdge("Cell H", "Cell I");
+        model.addEdge("Cell B", "Cell J");
+        model.addEdge("Cell C", "Cell K");
+        
 
         graph.endUpdate();
 
