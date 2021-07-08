@@ -5,8 +5,13 @@
  */
 package com.fxgraph.graph;
 
+import cat.editor.view.cell.CategoricalMorphismCell;
+import cat.editor.view.cell.CategoricalObjectCell;
+import cat.editor.view.cell.CellType;
+import cat.editor.view.cell.Cell;
 import com.fxgraph.cells.ButtonCell;
-import com.fxgraph.cells.CircleCell;
+import cat.editor.view.cell.CircleCell;
+import cat.editor.view.cell.RootCell;
 import com.fxgraph.cells.ImageCell;
 import com.fxgraph.cells.LabelCell;
 import java.util.ArrayList;
@@ -20,7 +25,7 @@ import com.fxgraph.cells.TitledPaneCell;
 
 public class Model {
 
-    Cell graphParent;
+    RootCell graphParent;
 
     List<Cell> allCells;
     List<Cell> addedCells;
@@ -34,7 +39,7 @@ public class Model {
 
     public Model() {
 
-        graphParent = new Cell("_ROOT_");
+        graphParent = new RootCell("_ROOT_");
 
         // clear model, create lists
         clear();
@@ -83,9 +88,18 @@ public class Model {
         return allEdges;
     }
 
-    public void addCell(String id, CellType type) {
+    public void addCell(String id, String name, double x, double y, CellType type) {
 
         switch (type) {
+
+            case CATEGORICAL_OBJECT:
+                CategoricalObjectCell object = new CategoricalObjectCell(id, name, x, y);
+                addCell(object);
+                break;
+            case CATEGORICAL_MORPHISM:
+                CategoricalMorphismCell morphism = new CategoricalMorphismCell(id, name);
+                addCell(morphism);
+                break;
 
             case RECTANGLE:
                 RectangleCell rectangleCell = new RectangleCell(id);
@@ -207,4 +221,5 @@ public class Model {
         removedEdges.clear();
 
     }
+
 }

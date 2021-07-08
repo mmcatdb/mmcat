@@ -7,7 +7,7 @@ package com.fxgraph.cells;
 
 import javafx.scene.image.ImageView;
 
-import com.fxgraph.graph.Cell;
+import cat.editor.view.cell.Cell;
 
 public class ImageCell extends Cell {
 

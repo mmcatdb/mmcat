@@ -3,21 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.cells;
+package cat.editor.view.cell;
 
-import com.fxgraph.graph.Cell;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Arc;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 
 /**
  *
  * @author pavel.koupil
  */
-public class CircleCell extends Cell {
+public class CategoricalObjectCell extends Cell {
 
-    public CircleCell(String id) {
+    public CategoricalObjectCell(String id) {
         super(id);
 
         double size = 25;
@@ -37,6 +35,23 @@ public class CircleCell extends Cell {
 
         setView(view);
 
+    }
+
+    public CategoricalObjectCell(String id, String name, double x, double y) {
+        super(id);
+
+        double size = 25;
+        Circle view = new Circle(size, size, size);
+        view.setUserData("aaa");
+        Color color = Color.color(Math.random(), Math.random(), Math.random());
+        view.setStroke(color);
+        view.setFill(color);
+        view.setStrokeWidth(2);
+        setView(view);
+
+        Text text = new Text(25, 25, name);
+        setView(text);
+        relocate(x,y);
     }
 
 }

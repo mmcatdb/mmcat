@@ -3,30 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.cells;
+package cat.editor.view.cell;
 
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Circle;
 
-import cat.editor.view.cell.Cell;
+/**
+ *
+ * @author pavel.koupil
+ */
+public class CircleCell extends Cell {
 
-public class TriangleCell extends Cell {
-
-    public TriangleCell(String id) {
+    public CircleCell(String id) {
         super(id);
 
-        double width = 50;
-        double height = 50;
-
-        Polygon view = new Polygon(width / 2, 0, width, height, 0, height);
+        double size = 25;
+        Circle view = new Circle(size, size, size);
+        view.setUserData("aaa");
 
         Color color = Color.color(Math.random(), Math.random(), Math.random());
 
         view.setStroke(color);
-//        view.setStroke(Color.RED);
         view.setFill(color);
         view.setStrokeWidth(2);
-//        view.setFill(Color.RED);
 
         setView(view);
 

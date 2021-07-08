@@ -5,13 +5,18 @@
  */
 package cat.editor;
 
-import com.fxgraph.graph.CellType;
+import cat.editor.view.cell.CellType;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.Model;
-import com.fxgraph.layout.base.Layout;
-import com.fxgraph.layout.random.RandomLayout;
+import cat.editor.view.Layout;
+import cat.editor.view.RandomLayout;
+import java.util.Random;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 
@@ -20,12 +25,14 @@ import javafx.scene.layout.BorderPane;
  * @author pavel.koupil
  */
 public class FXMLControllerDEMO {
-    
+
 //    @FXML
 //    private Label label;
-
     @FXML
     private BorderPane borderPane;
+
+    @FXML
+    private ChoiceBox<String> zoom;
 
     private Graph graph = new Graph();
 
@@ -34,8 +41,31 @@ public class FXMLControllerDEMO {
 //        System.out.println("You clicked me!");
 //        label.setText("Hello World!");
 //    }
-
     public void initialize() {
+
+        zoom.setValue("100%");
+        //Retrieving the observable list
+        ObservableList<String> list = zoom.getItems();
+        //Adding items to the list
+        list.add("50%");
+        list.add("75%");
+        list.add("100%");
+        list.add("150%");
+        list.add("200%");
+        list.add("300%");
+        list.add("400%");
+
+        zoom.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number number2) {
+                String selected = zoom.getItems().get((Integer) number2);
+                selected = selected.replace("%", "");
+                double value = Double.parseDouble(selected);
+                value /= 100.0;
+                graph.getScrollPane().zoomTo(value);
+//                System.out.println("ZOOMED TO VALUE: " + value + " :::: " + selected);
+            }
+        });
 
         graph = new Graph();
 
@@ -56,41 +86,75 @@ public class FXMLControllerDEMO {
 
         Model model = graph.getModel();
 
+        Random rnd = new Random();
+        double positionX = 20 + rnd.nextDouble() * 500;
+        double positionY = 20 + rnd.nextDouble() * 500;
+
         graph.beginUpdate();
 
-        model.addCell("Cell A", CellType.RECTANGLE);
-        model.addCell("Cell B", CellType.RECTANGLE);
-        model.addCell("Cell C", CellType.RECTANGLE);
-        model.addCell("Cell D", CellType.CIRCLE);
-        model.addCell("Cell E", CellType.TRIANGLE);
-        model.addCell("Cell F", CellType.RECTANGLE);
-        model.addCell("Cell G", CellType.CIRCLE);
-        model.addCell("Cell H", CellType.CIRCLE);
-        model.addCell("Cell I", CellType.RECTANGLE);
-        model.addCell("Cell J", CellType.TRIANGLE);
-        model.addCell("Cell K", CellType.RECTANGLE);
-        model.addCell("Cell L", CellType.CIRCLE);
+        model.addCell("100", "Customer", 100, 300, CellType.CATEGORICAL_OBJECT);
+        model.addCell("101", "Id", 100, 400, CellType.CATEGORICAL_OBJECT);
+        model.addCell("110", "Orders", 100, 200, CellType.CATEGORICAL_OBJECT);
+        model.addCell("111", "Order", 200, 200, CellType.CATEGORICAL_OBJECT);
+        model.addCell("112", "Number", 200, 100, CellType.CATEGORICAL_OBJECT);
+        model.addCell("113", "Contact", 300, 200, CellType.CATEGORICAL_OBJECT);
+        model.addCell("114", "Type", 400, 200, CellType.CATEGORICAL_OBJECT);
+        model.addCell("115", "Name", 400, 100, CellType.CATEGORICAL_OBJECT);
+        model.addCell("116", "Value", 300, 100, CellType.CATEGORICAL_OBJECT);
+        model.addCell("117", "Items", 200, 300, CellType.CATEGORICAL_OBJECT);
+        model.addCell("118", "Quantity", 300, 300, CellType.CATEGORICAL_OBJECT);
+        model.addCell("121", "Product", 200, 400, CellType.CATEGORICAL_OBJECT);
+        model.addCell("122", "Id", 200, 500, CellType.CATEGORICAL_OBJECT);
+        model.addCell("123", "Name", 300, 500, CellType.CATEGORICAL_OBJECT);
+        model.addCell("124", "Price", 300, 400, CellType.CATEGORICAL_OBJECT);
+//        model.addCell("125", "Audiobook",   positionX, positionY, CellType.CATEGORICAL_OBJECT);
+//        model.addCell("126", "Length",      positionX, positionY, CellType.CATEGORICAL_OBJECT);
+//        model.addCell("127", "Book",        positionX, positionY, CellType.CATEGORICAL_OBJECT);
+//        model.addCell("128", "Pages",       positionX, positionY, CellType.CATEGORICAL_OBJECT);
 
-//        model.addCell("Cell A", CellType.RECTANGLE);
-//        model.addCell("Cell B", CellType.BUTTON);
-//        model.addCell("Cell C", CellType.IMAGE);
-//        model.addCell("Cell D", CellType.TRIANGLE);
-//        model.addCell("Cell E", CellType.LABEL);
-//        model.addCell("Cell F", CellType.TITLEDPANE);
-//        model.addCell("Cell G", CellType.RECTANGLE);
-        model.addEdge("Cell A", "Cell B");
-        model.addEdge("Cell A", "Cell C");
-        model.addEdge("Cell B", "Cell C");
-        model.addEdge("Cell C", "Cell D");
-        model.addEdge("Cell B", "Cell E");
-        model.addEdge("Cell D", "Cell F");
-        model.addEdge("Cell D", "Cell G");
-        model.addEdge("Cell G", "Cell H");
-        model.addEdge("Cell H", "Cell I");
-        model.addEdge("Cell B", "Cell J");
-        model.addEdge("Cell C", "Cell K");
-        
+        model.addEdge("100", "101");
+        model.addEdge("101", "100");
 
+        model.addEdge("100", "110");
+        model.addEdge("110", "100");
+        model.addEdge("111", "110");
+        model.addEdge("110", "111");
+
+        model.addEdge("113", "111");
+        model.addEdge("111", "113");
+        model.addEdge("111", "112");
+        model.addEdge("112", "111");
+
+        model.addEdge("113", "114");
+        model.addEdge("114", "113");
+        model.addEdge("113", "116");
+        model.addEdge("116", "113");
+
+        model.addEdge("114", "115");
+        model.addEdge("115", "114");
+
+        model.addEdge("117", "111");
+        model.addEdge("111", "117");
+        model.addEdge("117", "118");
+        model.addEdge("118", "117");
+        model.addEdge("117", "121");
+        model.addEdge("121", "117");
+
+        model.addEdge("121", "122");
+        model.addEdge("122", "121");
+        model.addEdge("121", "123");
+        model.addEdge("123", "121");
+        model.addEdge("121", "124");
+        model.addEdge("124", "121");
+//        model.addEdge("121", "125");
+//        model.addEdge("125", "121");
+//        model.addEdge("121", "127");
+//        model.addEdge("127", "121");
+
+//        model.addEdge("125", "126");
+//        model.addEdge("126", "125");
+//        model.addEdge("127", "128");
+//        model.addEdge("128", "127");
         graph.endUpdate();
 
     }

@@ -3,10 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.layout.base;
+package cat.editor.view.cell;
 
-public abstract class Layout {
+/**
+ *
+ * @author pavel.koupil
+ */
+public class RootCell extends Cell {
 
-    public abstract void execute();
+    public RootCell(String id) {
+        super(id);
+    }
 
 }

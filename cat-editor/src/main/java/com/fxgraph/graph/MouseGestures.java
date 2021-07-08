@@ -5,6 +5,7 @@
  */
 package com.fxgraph.graph;
 
+import cat.editor.view.cell.Cell;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;

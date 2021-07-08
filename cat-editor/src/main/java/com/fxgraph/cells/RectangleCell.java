@@ -8,7 +8,7 @@ package com.fxgraph.cells;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import com.fxgraph.graph.Cell;
+import cat.editor.view.cell.Cell;
 import javafx.scene.text.Text;
 
 public class RectangleCell extends Cell {

@@ -5,6 +5,8 @@
  */
 package com.fxgraph.graph;
 
+import cat.editor.view.cell.Cell;
+import cat.editor.view.ZoomableScrollPane;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
@@ -26,6 +28,10 @@ public class Graph {
      */
     CellLayer cellLayer;
 
+    public ZoomableScrollPane getScrollPane() {
+        return scrollPane;
+    }
+
     public Graph() {
 
         this.model = new Model();
@@ -44,9 +50,9 @@ public class Graph {
 
     }
 
-    public ScrollPane getScrollPane() {
-        return this.scrollPane;
-    }
+//    public ScrollPane getScrollPane() {
+//        return this.scrollPane;
+//    }
 
     public Pane getCellLayer() {
         return this.cellLayer;
@@ -72,7 +78,7 @@ public class Graph {
         // enable dragging of cells
         for (Cell cell : model.getAddedCells()) {
             mouseGestures.makeDraggable(cell);
-            
+
         }
 
         // every cell must have a parent, if it doesn't, then the graphParent is

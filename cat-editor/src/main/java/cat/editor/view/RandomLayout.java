@@ -3,40 +3,35 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.layout.random;
+package cat.editor.view;
 
 import java.util.List;
 import java.util.Random;
 
-import com.fxgraph.graph.Cell;
+import cat.editor.view.cell.Cell;
 import com.fxgraph.graph.Graph;
-import com.fxgraph.layout.base.Layout;
 
 public class RandomLayout extends Layout {
 
-    Graph graph;
+    private final Graph graph;
 
-    Random rnd = new Random();
+    private final Random rnd = new Random();
 
     public RandomLayout(Graph graph) {
-
         this.graph = graph;
-
     }
 
+    @Override
     public void execute() {
 
         List<Cell> cells = graph.getModel().getAllCells();
 
-        for (Cell cell : cells) {
-
+        cells.forEach(cell -> {
             double x = 20 + rnd.nextDouble() * 500;
             double y = 20 + rnd.nextDouble() * 500;
 
-            System.out.println(x + ":::" + y);
-            cell.relocate(x, y);
-
-        }
+//            cell.relocate(x, y);
+        });
 
     }
 

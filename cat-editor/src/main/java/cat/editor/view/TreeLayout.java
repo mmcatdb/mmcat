@@ -3,17 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.graph;
+package cat.editor.view;
 
-public enum CellType {
-
-    RECTANGLE,
-    TRIANGLE,
-    LABEL,
-    IMAGE,
-    BUTTON,
-    TITLEDPANE,
-    CIRCLE
-    ;
-
+/**
+ *
+ * @author pavel.koupil
+ */
+public class TreeLayout {
+    
 }

@@ -7,7 +7,7 @@ package com.fxgraph.cells;
 
 import javafx.scene.control.TitledPane;
 
-import com.fxgraph.graph.Cell;
+import cat.editor.view.cell.Cell;
 
 public class TitledPaneCell extends Cell {
 

@@ -60,7 +60,7 @@
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                      <children>
-                        <ChoiceBox prefWidth="150.0" />
+                        <ChoiceBox fx:id="zoom" prefWidth="150.0" />
                         <Label text="Velikost" />
                      </children>
                   </VBox>

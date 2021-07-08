@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.graph;
+package cat.editor.view.cell;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,14 +11,14 @@ import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
-public class Cell extends Pane {
+public abstract class Cell extends Pane {
 
-    String cellId;
+    private final String cellId;
 
-    List<Cell> children = new ArrayList<>();
-    List<Cell> parents = new ArrayList<>();
+    private final List<Cell> children = new ArrayList<>();
+    private final List<Cell> parents = new ArrayList<>();
 
-    Node view;
+    private Node view;
 
     public Cell(String cellId) {
         this.cellId = cellId;

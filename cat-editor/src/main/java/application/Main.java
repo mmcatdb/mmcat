@@ -10,11 +10,11 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-import com.fxgraph.graph.CellType;
+import cat.editor.view.cell.CellType;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.Model;
-import com.fxgraph.layout.base.Layout;
-import com.fxgraph.layout.random.RandomLayout;
+import cat.editor.view.Layout;
+import cat.editor.view.RandomLayout;
 
 public class Main extends Application {
 
@@ -47,13 +47,13 @@ public class Main extends Application {
 
         graph.beginUpdate();
 
-        model.addCell("Cell A", CellType.RECTANGLE);
-        model.addCell("Cell B", CellType.RECTANGLE);
-        model.addCell("Cell C", CellType.RECTANGLE);
-        model.addCell("Cell D", CellType.TRIANGLE);
-        model.addCell("Cell E", CellType.TRIANGLE);
-        model.addCell("Cell F", CellType.RECTANGLE);
-        model.addCell("Cell G", CellType.RECTANGLE);
+        model.addCell("Cell A", "X", 0, 0, CellType.RECTANGLE);
+        model.addCell("Cell B", "X", 0, 0, CellType.RECTANGLE);
+        model.addCell("Cell C", "X", 0, 0, CellType.RECTANGLE);
+        model.addCell("Cell D", "X", 0, 0, CellType.TRIANGLE);
+        model.addCell("Cell E", "X", 0, 0, CellType.TRIANGLE);
+        model.addCell("Cell F", "X", 0, 0, CellType.RECTANGLE);
+        model.addCell("Cell G", "X", 0, 0, CellType.RECTANGLE);
 
 //        model.addCell("Cell A", CellType.RECTANGLE);
 //        model.addCell("Cell B", CellType.BUTTON);
@@ -69,7 +69,7 @@ public class Main extends Application {
         model.addEdge("Cell B", "Cell E");
         model.addEdge("Cell D", "Cell F");
         model.addEdge("Cell D", "Cell G");
-        
+
         graph.endUpdate();
 
     }
