@@ -24,7 +24,7 @@ public class ERAttributeCell extends Cell {
         Text text = new Text(name);
         text.setFont(Font.font("DejaVu Sans Mono", 20));
         double height = text.getBoundsInLocal().getHeight();
-        System.out.println(height + " ::: height");
+//        System.out.println(height + " ::: height");
         text.relocate(25, -(height / 2 - SIZE));
 
         Circle shape = new Circle(SIZE, SIZE, SIZE);

@@ -5,6 +5,7 @@
  */
 package com.fxgraph.graph;
 
+import cat.editor.view.edge.CategoricalEdge;
 import cat.editor.view.cell.CategoricalMorphismCell;
 import cat.editor.view.cell.CategoricalObjectCell;
 import cat.editor.view.cell.CellType;
@@ -16,6 +17,8 @@ import cat.editor.view.cell.EREntityCell;
 import cat.editor.view.cell.ERIdentifierCell;
 import cat.editor.view.cell.ERRelationshipCell;
 import cat.editor.view.cell.RootCell;
+import cat.editor.view.edge.EREdge;
+import cat.editor.view.edge.Edge;
 import cat.editor.view.edge.EdgeType;
 import com.fxgraph.cells.ImageCell;
 import com.fxgraph.cells.LabelCell;
@@ -193,14 +196,26 @@ public class Model {
         Cell sourceCell = cellMap.get(sourceId);
         Cell targetCell = cellMap.get(targetId);
 
-        Edge edge = new Edge(sourceCell, targetCell);
+        CategoricalEdge edge = new CategoricalEdge(sourceCell, targetCell);
 
         addedEdges.add(edge);
 
     }
 
     public void addEdge(String sourceId, String targetId, EdgeType type) {
-        addEdge(sourceId, targetId);
+        Cell sourceCell = cellMap.get(sourceId);
+        Cell targetCell = cellMap.get(targetId);
+
+        Edge edge = null;
+
+        switch (type) {
+            case CATEGORICAL ->
+                edge = new CategoricalEdge(sourceCell, targetCell);
+            case ER ->
+                edge = new EREdge(sourceCell, targetCell);
+        }
+        addedEdges.add(edge);
+
     }
 
     /**

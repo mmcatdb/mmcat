@@ -3,24 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.graph;
+package cat.editor.view.edge;
 
 import cat.editor.view.cell.Cell;
 import javafx.scene.Group;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.StrokeType;
 
-public class Edge extends Group {
+public class CategoricalEdge extends Edge {
 
-    protected Cell source;
-    protected Cell target;
+    private final Line line;
 
-    Line line;
-
-    public Edge(Cell source, Cell target) {
-
-        this.source = source;
-        this.target = target;
+    public CategoricalEdge(Cell source, Cell target) {
+        super(source, target);
 
         source.addCellChild(target);
         target.addCellParent(source);
@@ -35,18 +30,8 @@ public class Edge extends Group {
         line.endXProperty().bind(target.layoutXProperty().add(target.getBoundsInParent().getWidth() / 2.0));
         line.endYProperty().bind(target.layoutYProperty().add(target.getBoundsInParent().getHeight() / 2.0));
 
-        
-        
         getChildren().add(line);
 
-    }
-
-    public Cell getSource() {
-        return source;
-    }
-
-    public Cell getTarget() {
-        return target;
     }
 
 }
