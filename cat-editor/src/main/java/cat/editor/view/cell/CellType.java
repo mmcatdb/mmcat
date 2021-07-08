@@ -13,13 +13,16 @@ public enum CellType {
 
     CATEGORICAL_OBJECT,
     CATEGORICAL_MORPHISM,
-    
+    ER_ENTITY,
+    ER_RELATIONSHIP,
+    ER_ATTRIBUTE,
+    ER_IDENTIFIER,
     RECTANGLE,
     TRIANGLE,
     LABEL,
     IMAGE,
     BUTTON,
     TITLEDPANE,
-    CIRCLE;
+    CIRCLE
 
 }

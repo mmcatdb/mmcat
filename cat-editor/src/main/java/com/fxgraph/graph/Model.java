@@ -11,7 +11,12 @@ import cat.editor.view.cell.CellType;
 import cat.editor.view.cell.Cell;
 import com.fxgraph.cells.ButtonCell;
 import cat.editor.view.cell.CircleCell;
+import cat.editor.view.cell.ERAttributeCell;
+import cat.editor.view.cell.EREntityCell;
+import cat.editor.view.cell.ERIdentifierCell;
+import cat.editor.view.cell.ERRelationshipCell;
 import cat.editor.view.cell.RootCell;
+import cat.editor.view.edge.EdgeType;
 import com.fxgraph.cells.ImageCell;
 import com.fxgraph.cells.LabelCell;
 import java.util.ArrayList;
@@ -101,6 +106,23 @@ public class Model {
                 addCell(morphism);
                 break;
 
+            case ER_ENTITY:
+                EREntityCell entity = new EREntityCell(id, name, x, y);
+                addCell(entity);
+                break;
+            case ER_RELATIONSHIP:
+                ERRelationshipCell relationship = new ERRelationshipCell(id, name, x, y);
+                addCell(relationship);
+                break;
+            case ER_ATTRIBUTE:
+                ERAttributeCell attribute = new ERAttributeCell(id, name, x, y);
+                addCell(attribute);
+                break;
+            case ER_IDENTIFIER:
+                ERIdentifierCell identifier = new ERIdentifierCell(id, name, x, y);
+                addCell(identifier);
+                break;
+
             case RECTANGLE:
                 RectangleCell rectangleCell = new RectangleCell(id);
                 addCell(rectangleCell);
@@ -175,6 +197,10 @@ public class Model {
 
         addedEdges.add(edge);
 
+    }
+
+    public void addEdge(String sourceId, String targetId, EdgeType type) {
+        addEdge(sourceId, targetId);
     }
 
     /**
