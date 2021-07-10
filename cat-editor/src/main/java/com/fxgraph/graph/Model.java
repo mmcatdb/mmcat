@@ -5,6 +5,7 @@
  */
 package com.fxgraph.graph;
 
+import cat.editor.view.cell.AvailableObjectCell;
 import cat.editor.view.edge.CategoricalEdge;
 import cat.editor.view.cell.CategoricalMorphismCell;
 import cat.editor.view.cell.CategoricalObjectCell;
@@ -16,7 +17,11 @@ import cat.editor.view.cell.ERAttributeCell;
 import cat.editor.view.cell.EREntityCell;
 import cat.editor.view.cell.ERIdentifierCell;
 import cat.editor.view.cell.ERRelationshipCell;
+import cat.editor.view.cell.KindObjectCell;
+import cat.editor.view.cell.PropertyObjectCell;
 import cat.editor.view.cell.RootCell;
+import cat.editor.view.cell.SelectedKindObjectCell;
+import cat.editor.view.cell.SelectedPropertyObjectCell;
 import cat.editor.view.edge.EREdge;
 import cat.editor.view.edge.Edge;
 import cat.editor.view.edge.EdgeType;
@@ -108,7 +113,26 @@ public class Model {
                 CategoricalMorphismCell morphism = new CategoricalMorphismCell(id, name);
                 addCell(morphism);
                 break;
-
+            case MAPPING_KIND:
+                KindObjectCell kind = new KindObjectCell(id, name, x, y);
+                addCell(kind);
+                break;
+            case MAPPING_PROPERTY:
+                PropertyObjectCell property = new PropertyObjectCell(id, name, x, y);
+                addCell(property);
+                break;
+            case MAPPING_SELECTED_KIND:
+                SelectedKindObjectCell selectedKind = new SelectedKindObjectCell(id, name, x, y);
+                addCell(selectedKind);
+                break;
+            case MAPPING_SELECTED_PROPERTY:
+                SelectedPropertyObjectCell selectedProperty = new SelectedPropertyObjectCell(id, name, x, y);
+                addCell(selectedProperty);
+                break;
+            case MAPPING_AVAILABLE:
+                AvailableObjectCell available = new AvailableObjectCell(id, name, x, y);
+                addCell(available);
+                break;
             case ER_ENTITY:
                 EREntityCell entity = new EREntityCell(id, name, x, y);
                 addCell(entity);
