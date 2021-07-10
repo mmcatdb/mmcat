@@ -6,6 +6,7 @@
 package cat.editor;
 
 import cat.dummy.DummyGraphScenario;
+import cat.dummy.DummyMappingScenario;
 import cat.editor.view.cell.CellType;
 import cat.editor.view.Graph;
 import cat.editor.view.Model;
@@ -31,6 +32,8 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
@@ -69,10 +72,19 @@ public class FXMLControllerDEMO {
     private Tab positionTab;
 
     @FXML
+    private Tab mappingTab;
+
+    @FXML
+    private TextArea mappingTextArea;
+
+    @FXML
     private TreeView treeView;
 
     @FXML
     private Button componentButton;
+
+    @FXML
+    private TabPane tabPane;
 
     private Graph graph = new Graph();
 
@@ -163,6 +175,18 @@ public class FXMLControllerDEMO {
         TreeItem item10 = new TreeItem("Type");
         root3.getChildren().addAll(item4, item5, item6, item7, item8, item82, item83, item9, item10);
 
+        TreeItem item50 = new TreeItem("Order0");
+        TreeItem item51 = new TreeItem("Order1");
+        TreeItem item52 = new TreeItem("Order2");
+        TreeItem item53 = new TreeItem("Order3");
+        TreeItem item54 = new TreeItem("Order4");
+        TreeItem item55 = new TreeItem("Order5");
+        TreeItem item560 = new TreeItem("Order60");
+        TreeItem item56 = new TreeItem("Order6");
+        TreeItem item57 = new TreeItem("Order7");
+        TreeItem item58 = new TreeItem("Order8");
+        root5.getChildren().addAll(item50, item51, item52, item53, item54, item55, item560, item56, item57, item58);
+
         TreeItem root8 = new TreeItem("Transformations");
         TreeItem root9 = new TreeItem("Instance");
 
@@ -181,92 +205,120 @@ public class FXMLControllerDEMO {
             public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getClickCount() == 2) {
                     TreeItem item = (TreeItem) treeView.getSelectionModel().getSelectedItem();
-                    System.out.println("Selected Text : " + item.getValue());
+//                    System.out.println("Selected Text : " + item.getValue());
 
                     String value = (String) item.getValue();
 
-                    if (value.equals("ER")) {
+                    graph = new Graph();
+                    borderPane.setCenter(graph.getScrollPane());
+                    switch (value) {
+                        case "ER" -> {
+                            DummyGraphScenario.INSTANCE.buildER(graph);
+                            tabPane.getSelectionModel().select(diagramTab);
+                        }
+                        case "Categorical" -> {
+                            DummyGraphScenario.INSTANCE.buildSchemaCategory(graph);
+                            tabPane.getSelectionModel().select(diagramTab);
+                        }
+                        case "Product" -> {
+                            DummyGraphScenario.INSTANCE.buildProductKind(graph);
+                            DummyMappingScenario.INSTANCE.buildProductKind(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Product2" -> {
+                            DummyGraphScenario.INSTANCE.buildProductKind2(graph);
+                            DummyMappingScenario.INSTANCE.buildProductKind2(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Product3" -> {
+                            DummyGraphScenario.INSTANCE.buildProductKind3(graph);
+                            DummyMappingScenario.INSTANCE.buildProductKind3(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Customer" -> {
+                            DummyGraphScenario.INSTANCE.buildProductCustomer(graph);
+                            DummyMappingScenario.INSTANCE.buildProductCustomer(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Orders" -> {
+                            DummyGraphScenario.INSTANCE.buildProductOrders(graph);
+                            DummyMappingScenario.INSTANCE.buildProductOrders(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order" -> {
+                            DummyGraphScenario.INSTANCE.buildProductOrder(graph);
+                            DummyMappingScenario.INSTANCE.buildProductOrder(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Items" -> {
+                            DummyGraphScenario.INSTANCE.buildProductItems(graph);
+                            DummyMappingScenario.INSTANCE.buildProductItems(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Contact" -> {
+                            DummyGraphScenario.INSTANCE.buildProductContact(graph);
+                            DummyMappingScenario.INSTANCE.buildProductContact(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Type" -> {
+                            DummyGraphScenario.INSTANCE.buildProductType(graph);
+                            DummyMappingScenario.INSTANCE.buildProductType(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order0" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_0(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_0(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order1" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_1_GroupingId(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_1_GroupingId(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order2" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_2_CompleteId(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_2_CompleteId(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order3" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_3_Contact(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_3_Contact(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order4" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order5" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order60" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_60_Items(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_60_Items(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order6" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_6_Items(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_6_Items(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order7" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_7_InliningProduct(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_7_InliningProduct(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                        case "Order8" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoOrder_8_Complete(graph);
+                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(mappingTab);
+                        }
+                    }
+                    Layout layout = new RandomLayout(graph);
+                    layout.execute();
 
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildER(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-
-                    } else if (value.equals("Categorical")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildSchemaCategory(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    } else if (value.equals("Product")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductKind(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    } else if (value.equals("Product2")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductKind2(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    } else if (value.equals("Product3")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductKind3(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    }
-                    
-                    
-                    else if (value.equals("Customer")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductCustomer(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    }
-                    
-                    else if (value.equals("Orders")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductOrders(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    }
-                    
-                    else if (value.equals("Order")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductOrder(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    }
-                    
-                    else if (value.equals("Items")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductItems(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    }
-                    
-                    else if (value.equals("Contact")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductContact(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    }
-                    
-                    else if (value.equals("Type")) {
-                        graph = new Graph();
-                        borderPane.setCenter(graph.getScrollPane());
-                        DummyGraphScenario.INSTANCE.buildProductType(graph);
-                        Layout layout = new RandomLayout(graph);
-                        layout.execute();
-                    }
                 }
             }
         });
