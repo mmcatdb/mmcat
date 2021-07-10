@@ -9,7 +9,7 @@
 
     <name>cat-editor</name>
 
-<!--    <repositories>
+    <!--    <repositories>
         <repository>
             <id>java-fx-ui</id>
             <name>xxx</name>
@@ -70,7 +70,7 @@
             <version>1.3</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.github.graphstream/gs-ui-javafx -->
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>com.github.graphstream</groupId>
             <artifactId>gs-ui-javafx</artifactId>
             <version>2.0-alpha</version>
@@ -132,8 +132,9 @@
                     <mainClass>cat.editor.MainApp</mainClass>
                     <!--<mainClass>application.Main</mainClass>-->
                     
-                    
-                    
+                    <!--<mainClass>cat.tutorial.AppMain</mainClass>-->
+                    <!--<mainClass>cat.tutorial.DialogFXMLExample</mainClass>-->
+                    <!--<mainClass>cat.tutorial.TreeViewB</mainClass>-->
                     <!--<mainClass>cat.tutorial.Main</mainClass>-->
                     <!--<mainClass>cat.tutorial.GraphVisTester</mainClass>-->
                     <!--<mainClass>cat.tutorial.TutorialDiagram</mainClass>-->

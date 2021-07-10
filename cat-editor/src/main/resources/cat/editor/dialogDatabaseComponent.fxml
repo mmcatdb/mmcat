@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<DialogPane prefHeight="300.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+   <header>
+      <Label text="HEADER-DIALOG-WINDOW" />
+   </header>
+   <graphic>
+      <Label text="Label" />
+   </graphic>
+   <content>
+      <AnchorPane prefHeight="200.0" prefWidth="200.0">
+         <children>
+            <Label layoutX="96.0" layoutY="16.0" text="Databáze" />
+            <Label layoutX="95.0" layoutY="58.0" text="Jméno" />
+            <Label layoutX="107.0" layoutY="159.0" text="Barva" />
+            <ColorPicker layoutX="265.0" layoutY="154.0" />
+            <Button layoutX="139.0" layoutY="214.0" mnemonicParsing="false" text="OK" />
+            <Button layoutX="302.0" layoutY="214.0" mnemonicParsing="false" text="Cancel" />
+            <TextField layoutX="249.0" layoutY="62.0" />
+            <ChoiceBox layoutX="254.0" layoutY="24.0" prefWidth="150.0" />
+            <Button layoutX="129.0" layoutY="180.0" mnemonicParsing="false" text="Test Connection" />
+            <Label layoutX="265.0" layoutY="185.0" text="Test Succesful." />
+            <Label layoutX="92.0" layoutY="96.0" text="Uživatel" />
+            <Label layoutX="99.0" layoutY="123.0" text="Heslo" />
+            <TextField layoutX="250.0" layoutY="101.0" />
+            <PasswordField layoutX="222.0" layoutY="128.0" />
+         </children>
+      </AnchorPane>
+   </content>
+</DialogPane>
