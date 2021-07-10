@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Random;
 
 import cat.editor.view.cell.Cell;
-import com.fxgraph.graph.Graph;
 
 public class RandomLayout extends Layout {
 

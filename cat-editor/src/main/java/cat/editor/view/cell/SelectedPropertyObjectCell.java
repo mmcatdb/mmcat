@@ -29,9 +29,9 @@ public class SelectedPropertyObjectCell extends Cell {
 
         Circle shape = new Circle(SIZE, SIZE, SIZE);
         shape.setUserData("aaa");
-        shape.setStroke(Color.web("FFFF00"));
-        shape.setFill(Color.web("FFE6CC"));
-        shape.setStrokeWidth(3);
+        shape.setStroke(CellColors.SELECTED_STROKE_COLOR);
+        shape.setFill(CellColors.PROPERTY_FILL_COLOR);
+        shape.setStrokeWidth(5);
 
         setView(shape);
         setView(text);

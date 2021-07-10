@@ -14,11 +14,11 @@ import javafx.scene.text.Text;
  *
  * @author pavel.koupil
  */
-public class KindObjectCell extends Cell {
+public class KindCell extends Cell {
 
     private static final double SIZE = 10;
 
-    public KindObjectCell(String id, String name, double x, double y) {
+    public KindCell(String id, String name, double x, double y) {
         super(id);
 
         Text text = new Text(name);
@@ -29,10 +29,12 @@ public class KindObjectCell extends Cell {
 
         Circle shape = new Circle(SIZE, SIZE, SIZE);
         shape.setUserData("aaa");
-        shape.setStroke(Color.web("B85450"));
-        shape.setFill(Color.web("F8CECC"));
+        shape.setStroke(CellColors.KIND_STROKE_COLOR);
+        shape.setFill(CellColors.KIND_FILL_COLOR);
         shape.setStrokeWidth(3);
 
+        
+        
         setView(shape);
         setView(text);
         relocate(x, y);

@@ -5,7 +5,6 @@
  */
 package cat.editor.view.cell;
 
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -14,11 +13,11 @@ import javafx.scene.text.Text;
  *
  * @author pavel.koupil
  */
-public class PropertyObjectCell extends Cell {
+public class AvailableKindCell extends Cell {
 
     private static final double SIZE = 10;
 
-    public PropertyObjectCell(String id, String name, double x, double y) {
+    public AvailableKindCell(String id, String name, double x, double y) {
         super(id);
 
         Text text = new Text(name);
@@ -29,8 +28,8 @@ public class PropertyObjectCell extends Cell {
 
         Circle shape = new Circle(SIZE, SIZE, SIZE);
         shape.setUserData("aaa");
-        shape.setStroke(Color.web("D79B00"));
-        shape.setFill(Color.web("FFE6CC"));
+        shape.setStroke(CellColors.AVAILABLE_STROKE_COLOR);
+        shape.setFill(CellColors.KIND_FILL_COLOR);
         shape.setStrokeWidth(3);
 
         setView(shape);

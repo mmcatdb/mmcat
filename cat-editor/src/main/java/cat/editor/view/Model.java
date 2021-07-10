@@ -3,11 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.graph;
+package cat.editor.view;
 
+import cat.editor.view.cell.AvailableKindCell;
+import cat.editor.view.cell.AvailableNameCell;
 import cat.editor.view.cell.AvailableObjectCell;
+import cat.editor.view.cell.AvailablePropertyCell;
 import cat.editor.view.edge.CategoricalEdge;
-import cat.editor.view.cell.CategoricalMorphismCell;
+//import cat.editor.view.cell.CategoricalMorphismCell;
 import cat.editor.view.cell.CategoricalObjectCell;
 import cat.editor.view.cell.CellType;
 import cat.editor.view.cell.Cell;
@@ -17,10 +20,12 @@ import cat.editor.view.cell.ERAttributeCell;
 import cat.editor.view.cell.EREntityCell;
 import cat.editor.view.cell.ERIdentifierCell;
 import cat.editor.view.cell.ERRelationshipCell;
-import cat.editor.view.cell.KindObjectCell;
-import cat.editor.view.cell.PropertyObjectCell;
+import cat.editor.view.cell.KindCell;
+import cat.editor.view.cell.NameCell;
+import cat.editor.view.cell.PropertyCell;
 import cat.editor.view.cell.RootCell;
-import cat.editor.view.cell.SelectedKindObjectCell;
+import cat.editor.view.cell.SelectedKindCell;
+import cat.editor.view.cell.SelectedNameCell;
 import cat.editor.view.cell.SelectedPropertyObjectCell;
 import cat.editor.view.edge.EREdge;
 import cat.editor.view.edge.Edge;
@@ -103,110 +108,60 @@ public class Model {
 
     public void addCell(String id, String name, double x, double y, CellType type) {
 
+        Cell cell;
         switch (type) {
 
-            case CATEGORICAL_OBJECT:
-                CategoricalObjectCell object = new CategoricalObjectCell(id, name, x, y);
-                addCell(object);
-                break;
-            case CATEGORICAL_MORPHISM:
-                CategoricalMorphismCell morphism = new CategoricalMorphismCell(id, name);
-                addCell(morphism);
-                break;
-            case MAPPING_KIND:
-                KindObjectCell kind = new KindObjectCell(id, name, x, y);
-                addCell(kind);
-                break;
-            case MAPPING_PROPERTY:
-                PropertyObjectCell property = new PropertyObjectCell(id, name, x, y);
-                addCell(property);
-                break;
-            case MAPPING_SELECTED_KIND:
-                SelectedKindObjectCell selectedKind = new SelectedKindObjectCell(id, name, x, y);
-                addCell(selectedKind);
-                break;
-            case MAPPING_SELECTED_PROPERTY:
-                SelectedPropertyObjectCell selectedProperty = new SelectedPropertyObjectCell(id, name, x, y);
-                addCell(selectedProperty);
-                break;
-            case MAPPING_AVAILABLE:
-                AvailableObjectCell available = new AvailableObjectCell(id, name, x, y);
-                addCell(available);
-                break;
-            case ER_ENTITY:
-                EREntityCell entity = new EREntityCell(id, name, x, y);
-                addCell(entity);
-                break;
-            case ER_RELATIONSHIP:
-                ERRelationshipCell relationship = new ERRelationshipCell(id, name, x, y);
-                addCell(relationship);
-                break;
-            case ER_ATTRIBUTE:
-                ERAttributeCell attribute = new ERAttributeCell(id, name, x, y);
-                addCell(attribute);
-                break;
-            case ER_IDENTIFIER:
-                ERIdentifierCell identifier = new ERIdentifierCell(id, name, x, y);
-                addCell(identifier);
-                break;
-
-            case RECTANGLE:
-                RectangleCell rectangleCell = new RectangleCell(id);
-                addCell(rectangleCell);
-                break;
-
-            case TRIANGLE:
-                TriangleCell triangleCell = new TriangleCell(id);
-                addCell(triangleCell);
-                break;
-
-            case LABEL:
-                LabelCell labelCell = new LabelCell(id);
-                addCell(labelCell);
-                break;
-
-            case IMAGE:
-                ImageCell imageCell = new ImageCell(id);
-                addCell(imageCell);
-                break;
-            case CIRCLE:
-                Cell circleCell = new CircleCell(id);
-                addCell(circleCell);
-                break;
-
-            case BUTTON:
-                ButtonCell buttonCell = new ButtonCell(id);
-                addCell(buttonCell);
-                break;
-
-            case TITLEDPANE:
-                TitledPaneCell titledPaneCell = new TitledPaneCell(id);
-                addCell(titledPaneCell);
-                break;
-
-            default:
-                throw new UnsupportedOperationException("Unsupported type: " + type);
+            case MAPPING_AVAILABLE_PROPERTY ->
+                cell = new AvailablePropertyCell(id, name, x, y);
+            case MAPPING_AVAILABLE_KIND ->
+                cell = new AvailableKindCell(id, name, x, y);
+            case MAPPING_AVAILABLE_NAME ->
+                cell = new AvailableNameCell(id, name, x, y);
+            case MAPPING_SELECTED_NAME ->
+                cell = new SelectedNameCell(id, name, x, y);
+            case CATEGORICAL_OBJECT ->
+                cell = new CategoricalObjectCell(id, name, x, y);
+            case MAPPING_KIND ->
+                cell = new KindCell(id, name, x, y);
+            case MAPPING_PROPERTY ->
+                cell = new PropertyCell(id, name, x, y);
+            case MAPPING_SELECTED_KIND ->
+                cell = new SelectedKindCell(id, name, x, y);
+            case MAPPING_SELECTED_PROPERTY ->
+                cell = new SelectedPropertyObjectCell(id, name, x, y);
+            case MAPPING_AVAILABLE ->
+                cell = new AvailableObjectCell(id, name, x, y);
+            case MAPPING_NAME ->
+                cell = new NameCell(id, name, x, y);
+            case ER_ENTITY ->
+                cell = new EREntityCell(id, name, x, y);
+            case ER_RELATIONSHIP ->
+                cell = new ERRelationshipCell(id, name, x, y);
+            case ER_ATTRIBUTE ->
+                cell = new ERAttributeCell(id, name, x, y);
+            case ER_IDENTIFIER ->
+                cell = new ERIdentifierCell(id, name, x, y);
+            case RECTANGLE ->
+                cell = new RectangleCell(id);
+            case TRIANGLE ->
+                cell = new TriangleCell(id);
+            case LABEL ->
+                cell = new LabelCell(id);
+            case IMAGE ->
+                cell = new ImageCell(id);
+            case CIRCLE ->
+                cell = new CircleCell(id);
+            case BUTTON ->
+                cell = new ButtonCell(id);
+            case TITLEDPANE ->
+                cell = new TitledPaneCell(id);
+            default ->
+                cell = null;
         }
+
+        addCell(cell);
     }
 
-//    public void addCell(String id, CellType type) {
-//
-//        switch (type) {
-//
-//        case RECTANGLE:
-//            RectangleCell rectangleCell = new RectangleCell(id);
-//            addCell(rectangleCell);
-//            break;
-//
-//        case TRIANGLE:
-//            TriangleCell circleCell = new TriangleCell(id);
-//            addCell(circleCell);
-//            break;
-//
-//        default:
-//            throw new UnsupportedOperationException("Unsupported type: " + type);
-//        }
-//    }
     private void addCell(Cell cell) {
 
         addedCells.add(cell);
@@ -230,13 +185,15 @@ public class Model {
         Cell sourceCell = cellMap.get(sourceId);
         Cell targetCell = cellMap.get(targetId);
 
-        Edge edge = null;
+        Edge edge;
 
         switch (type) {
             case CATEGORICAL ->
                 edge = new CategoricalEdge(sourceCell, targetCell);
             case ER ->
                 edge = new EREdge(sourceCell, targetCell);
+            default ->
+                edge = null;
         }
         addedEdges.add(edge);
 
@@ -250,7 +207,7 @@ public class Model {
     public void attachOrphansToGraphParent(List<Cell> cellList) {
 
         for (Cell cell : cellList) {
-            if (cell.getCellParents().size() == 0) {
+            if (cell.getCellParents().isEmpty()) {
                 graphParent.addCellChild(cell);
             }
         }

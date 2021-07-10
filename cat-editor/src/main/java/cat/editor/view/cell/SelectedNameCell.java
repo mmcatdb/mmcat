@@ -13,11 +13,11 @@ import javafx.scene.text.Text;
  *
  * @author pavel.koupil
  */
-public class AvailableObjectCell extends Cell {
+public class SelectedNameCell extends Cell {
 
     private static final double SIZE = 10;
 
-    public AvailableObjectCell(String id, String name, double x, double y) {
+    public SelectedNameCell(String id, String name, double x, double y) {
         super(id);
 
         Text text = new Text(name);
@@ -28,9 +28,9 @@ public class AvailableObjectCell extends Cell {
 
         Circle shape = new Circle(SIZE, SIZE, SIZE);
         shape.setUserData("aaa");
-        shape.setStroke(CellColors.AVAILABLE_STROKE_COLOR);
-        shape.setFill(CellColors.OBJECT_FILL_COLOR);
-        shape.setStrokeWidth(3);
+        shape.setStroke(CellColors.SELECTED_STROKE_COLOR);
+        shape.setFill(CellColors.NAME_FILL_COLOR);
+        shape.setStrokeWidth(5);
 
         setView(shape);
         setView(text);
@@ -38,3 +38,4 @@ public class AvailableObjectCell extends Cell {
     }
 
 }
+

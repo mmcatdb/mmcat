@@ -7,8 +7,8 @@ package cat.editor;
 
 import cat.dummy.DummyGraphScenario;
 import cat.editor.view.cell.CellType;
-import com.fxgraph.graph.Graph;
-import com.fxgraph.graph.Model;
+import cat.editor.view.Graph;
+import cat.editor.view.Model;
 import cat.editor.view.Layout;
 import cat.editor.view.RandomLayout;
 import cat.editor.view.edge.EdgeType;

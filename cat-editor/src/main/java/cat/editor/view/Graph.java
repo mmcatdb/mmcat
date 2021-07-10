@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.fxgraph.graph;
+package cat.editor.view;
 
 import cat.editor.view.cell.Cell;
 import cat.editor.view.ZoomableScrollPane;
+import com.fxgraph.graph.CellLayer;
+import com.fxgraph.graph.MouseGestures;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Pane;
