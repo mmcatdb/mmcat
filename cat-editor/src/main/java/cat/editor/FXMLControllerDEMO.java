@@ -37,8 +37,10 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -92,6 +94,9 @@ public class FXMLControllerDEMO {
     private Tab componentTab;
 
     @FXML
+    private Tab instanceTab;
+
+    @FXML
     private TextArea mappingTextArea;
 
     @FXML
@@ -105,6 +110,12 @@ public class FXMLControllerDEMO {
 
     @FXML
     private TabPane tabPane;
+
+    @FXML
+    private TableView instanceTable;
+
+    @FXML
+    private SplitPane splitPane;
 
     private Graph graph = new Graph();
 
@@ -186,7 +197,6 @@ public class FXMLControllerDEMO {
 //            }
 //        }
 //    }
-
     private Image createImage() {
         Rectangle rect = new Rectangle(1200, 1800, Color.CORNFLOWERBLUE);//.snapshot(null, null);
         rect.setFill(createGridPattern());
@@ -211,7 +221,7 @@ public class FXMLControllerDEMO {
 
 //        gc.strokeRect(0, 0, w, h);
         Image image = canvas.snapshot(new SnapshotParameters(), null);
-        
+
         ImagePattern pattern = new ImagePattern(image, 0, 0, w, h, false);
 
         return pattern;
@@ -260,6 +270,12 @@ public class FXMLControllerDEMO {
 
         TreeItem root8 = new TreeItem("Transformations");
         TreeItem root9 = new TreeItem("Instance");
+        TreeItem item90 = new TreeItem("PostgreSQL-Inst");
+        TreeItem item91 = new TreeItem("Neo4j-Inst");
+        TreeItem item92 = new TreeItem("MongoDB-Inst");
+        TreeItem item93 = new TreeItem("RiakKV-Inst");
+        TreeItem item94 = new TreeItem("Cassandra-Inst");
+        root9.getChildren().addAll(item90, item91, item92, item93, item94);
 
         //Adding elements to root2
 //      root3.getChildren().addAll(item7, item8, item9);
@@ -420,6 +436,36 @@ public class FXMLControllerDEMO {
                             DummyGraphScenario.INSTANCE.buildMongoDBKinds(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
                             tabPane.getSelectionModel().select(componentTab);
+                        }
+
+                        case "PostgreSQL-Inst" -> {
+                            DummyGraphScenario.INSTANCE.buildPostgreSQLInstance(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(instanceTab);
+                        }
+
+                        case "Neo4j-Inst" -> {
+                            DummyGraphScenario.INSTANCE.buildNeo4jInstance(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(instanceTab);
+                        }
+
+                        case "MongoDB-Inst" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoDBInstance(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(instanceTab);
+                        }
+
+                        case "RiakKV-Inst" -> {
+                            DummyGraphScenario.INSTANCE.buildRiakKVInstance(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(instanceTab);
+                        }
+
+                        case "Cassandra-Inst" -> {
+                            DummyGraphScenario.INSTANCE.buildCassandraInstance(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(instanceTab);
                         }
 
                     }

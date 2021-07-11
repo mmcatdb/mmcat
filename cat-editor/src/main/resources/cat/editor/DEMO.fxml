@@ -137,31 +137,16 @@
             </ButtonBar>
          </children>
       </HBox>
-      <SplitPane dividerPositions="0.2505567928730512, 0.7505567928730512" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+      <SplitPane fx:id="splitPane" dividerPositions="0.2505567928730512, 0.7505567928730512" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
          <items>
             <AnchorPane minHeight="200.0" style="-fx-border-width: 111;">
                <children>
-                  <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" minWidth="60.0" prefWidth="-1.0" style="&#10;" text="Master" textAlignment="CENTER" wrapText="false">
-                     <font>
-                        <Font size="18.0" fx:id="x1" />
-                     </font>
-                     <textFill>
-                        <Color red="0.624" green="0.624" blue="0.624" fx:id="x2" />
-                     </textFill>
-                  </Label>
                   <TreeView fx:id="treeView" layoutX="35.0" layoutY="73.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
             <ScrollPane fx:id="scrollPane" prefHeight="200.0" prefWidth="200.0" />
             <AnchorPane minHeight="200.0">
                <children>
-                  <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" style="&#10;" text="Details" textAlignment="CENTER" wrapText="false">
-                     <font>
-                        <Font size="18.0" fx:id="x5" />
-                     </font>
-                     <textFill>
-                        <Color red="0.624" green="0.624" blue="0.624" fx:id="x6" />
-                     </textFill></Label>
                   <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
                         <Tab fx:id="diagramTab" text="Diagram">
@@ -306,6 +291,28 @@
                                     <Label layoutX="66.0" layoutY="427.0" text="Preview" />
                                     <Button layoutX="33.0" layoutY="611.0" mnemonicParsing="false" text="Execute" />
                                     <Button layoutX="129.0" layoutY="612.0" mnemonicParsing="false" text="Clear" />
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                        </Tab>
+                        <Tab fx:id="instanceTab" text="Instance">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <TableView fx:id="instanceTable" layoutX="18.0" layoutY="101.0" prefHeight="523.0" prefWidth="279.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0">
+                                      <columns>
+                                        <TableColumn prefWidth="75.0" text="C1" />
+                                        <TableColumn prefWidth="75.0" text="C2" />
+                                          <TableColumn prefWidth="75.0" text="Column X" />
+                                      </columns>
+                                    </TableView>
+                                    <Label layoutX="32.0" layoutY="22.0" text="Object:" />
+                                    <TextField layoutX="114.0" layoutY="18.0" />
+                                    <Button layoutX="19.0" layoutY="635.0" mnemonicParsing="false" text="Add" />
+                                    <Button layoutX="93.0" layoutY="636.0" mnemonicParsing="false" text="Update" />
+                                    <Button layoutX="203.0" layoutY="637.0" mnemonicParsing="false" text="Delete" />
+                                    <Label layoutX="32.0" layoutY="57.0" text="Morphism:" />
+                                    <TextField layoutX="114.0" layoutY="61.0" />
                                  </children>
                               </AnchorPane>
                           </content>
