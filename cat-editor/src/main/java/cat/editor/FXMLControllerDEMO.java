@@ -119,6 +119,36 @@ public class FXMLControllerDEMO {
 
     private Graph graph = new Graph();
 
+    private double backupProjectDividerPosition = 0.0;
+    private double backupDetailDividerPosition = 0.0;
+
+    private double currentProjectDividerPosition;
+    private double currentDetailDividerPosition;
+
+    @FXML
+    private void openCloseProjectAction(ActionEvent event) {
+        if (currentProjectDividerPosition > 0.01) {
+            backupProjectDividerPosition = currentProjectDividerPosition;
+            currentProjectDividerPosition = 0.0;
+        } else {
+            currentProjectDividerPosition = backupProjectDividerPosition;
+        }
+
+        splitPane.setDividerPosition(0, currentProjectDividerPosition);
+    }
+
+    @FXML
+    private void openCloseDetailAction(ActionEvent event) {
+        if (currentDetailDividerPosition < 0.99) {
+            backupDetailDividerPosition = currentDetailDividerPosition;
+            currentDetailDividerPosition = 1.0;
+        } else {
+            currentDetailDividerPosition = backupDetailDividerPosition;
+        }
+
+        splitPane.setDividerPosition(1, currentDetailDividerPosition);
+    }
+
     @FXML
     private void handleStatementAction(ActionEvent event) {
 //        System.out.println("You clicked me!");
@@ -228,6 +258,52 @@ public class FXMLControllerDEMO {
 
     }
 
+    private void selectEditorTabs() {
+        tabPane.getTabs().add(0, diagramTab);
+        tabPane.getTabs().add(1, styleTab);
+        tabPane.getTabs().add(2, textTab);
+        tabPane.getTabs().add(3, positionTab);
+        tabPane.getTabs().remove(mappingTab);
+        tabPane.getTabs().remove(componentTab);
+        tabPane.getTabs().remove(instanceTab);
+
+        tabPane.getSelectionModel().select(diagramTab);
+    }
+
+    private void selectMappingTabs() {
+        tabPane.getTabs().remove(diagramTab);
+        tabPane.getTabs().remove(styleTab);
+        tabPane.getTabs().remove(textTab);
+        tabPane.getTabs().remove(positionTab);
+        tabPane.getTabs().add(0, mappingTab);
+        tabPane.getTabs().remove(componentTab);
+        tabPane.getTabs().remove(instanceTab);
+        tabPane.getSelectionModel().select(mappingTab);
+    }
+
+    private void selectComponentTabs() {
+        tabPane.getTabs().remove(diagramTab);
+        tabPane.getTabs().remove(styleTab);
+        tabPane.getTabs().remove(textTab);
+        tabPane.getTabs().remove(positionTab);
+        tabPane.getTabs().remove(mappingTab);
+        tabPane.getTabs().add(0, componentTab);
+        tabPane.getTabs().remove(instanceTab);
+        tabPane.getSelectionModel().select(componentTab);
+    }
+
+    private void selectInstanceTabs() {
+        tabPane.getTabs().remove(diagramTab);
+        tabPane.getTabs().remove(styleTab);
+        tabPane.getTabs().remove(textTab);
+        tabPane.getTabs().remove(positionTab);
+        tabPane.getTabs().remove(mappingTab);
+        tabPane.getTabs().remove(componentTab);
+        tabPane.getTabs().add(0, instanceTab);
+        tabPane.getSelectionModel().select(instanceTab);
+
+    }
+
     private void initTreeView() {
         //Creating tree items
         TreeItem root1 = new TreeItem("Schema");
@@ -318,154 +394,154 @@ public class FXMLControllerDEMO {
                     switch (value) {
                         case "ER" -> {
                             DummyGraphScenario.INSTANCE.buildER(graph);
-                            tabPane.getSelectionModel().select(diagramTab);
+                            selectEditorTabs();
                         }
                         case "Categorical" -> {
                             DummyGraphScenario.INSTANCE.buildSchemaCategory(graph);
-                            tabPane.getSelectionModel().select(diagramTab);
+                            selectEditorTabs();
                         }
                         case "Product" -> {
                             DummyGraphScenario.INSTANCE.buildProductKind(graph);
                             DummyMappingScenario.INSTANCE.buildProductKind(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Product2" -> {
                             DummyGraphScenario.INSTANCE.buildProductKind2(graph);
                             DummyMappingScenario.INSTANCE.buildProductKind2(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Product3" -> {
                             DummyGraphScenario.INSTANCE.buildProductKind3(graph);
                             DummyMappingScenario.INSTANCE.buildProductKind3(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Customer" -> {
                             DummyGraphScenario.INSTANCE.buildProductCustomer(graph);
                             DummyMappingScenario.INSTANCE.buildProductCustomer(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Orders" -> {
                             DummyGraphScenario.INSTANCE.buildProductOrders(graph);
                             DummyMappingScenario.INSTANCE.buildProductOrders(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order" -> {
                             DummyGraphScenario.INSTANCE.buildProductOrder(graph);
                             DummyMappingScenario.INSTANCE.buildProductOrder(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Items" -> {
                             DummyGraphScenario.INSTANCE.buildProductItems(graph);
                             DummyMappingScenario.INSTANCE.buildProductItems(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Contact" -> {
                             DummyGraphScenario.INSTANCE.buildProductContact(graph);
                             DummyMappingScenario.INSTANCE.buildProductContact(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Type" -> {
                             DummyGraphScenario.INSTANCE.buildProductType(graph);
                             DummyMappingScenario.INSTANCE.buildProductType(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order0" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_0(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_0(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order1" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_1_GroupingId(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_1_GroupingId(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order2" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_2_CompleteId(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_2_CompleteId(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order3" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_3_Contact(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_3_Contact(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order4" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order5" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order60" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_60_Items(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_60_Items(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order6" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_6_Items(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_6_Items(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order7" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_7_InliningProduct(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_7_InliningProduct(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
                         case "Order8" -> {
                             DummyGraphScenario.INSTANCE.buildMongoOrder_8_Complete(graph);
                             DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(mappingTab);
+                            selectMappingTabs();
                         }
 
                         case "PostgreSQL" -> {
                             DummyGraphScenario.INSTANCE.buildPostgreSQLKinds(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(componentTab);
+                            selectComponentTabs();
                         }
 
                         case "Neo4j" -> {
                             DummyGraphScenario.INSTANCE.buildNeo4jKinds(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(componentTab);
+                            selectComponentTabs();
                         }
 
                         case "MongoDB" -> {
                             DummyGraphScenario.INSTANCE.buildMongoDBKinds(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(componentTab);
+                            selectComponentTabs();
                         }
 
                         case "PostgreSQL-Inst" -> {
                             DummyGraphScenario.INSTANCE.buildPostgreSQLInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(instanceTab);
+                            selectInstanceTabs();
                         }
 
                         case "Neo4j-Inst" -> {
                             DummyGraphScenario.INSTANCE.buildNeo4jInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(instanceTab);
+                            selectInstanceTabs();
                         }
 
                         case "MongoDB-Inst" -> {
                             DummyGraphScenario.INSTANCE.buildMongoDBInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(instanceTab);
+                            selectInstanceTabs();
                         }
 
                         case "RiakKV-Inst" -> {
                             DummyGraphScenario.INSTANCE.buildRiakKVInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(instanceTab);
+                            selectInstanceTabs();
                         }
 
                         case "Cassandra-Inst" -> {
                             DummyGraphScenario.INSTANCE.buildCassandraInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-                            tabPane.getSelectionModel().select(instanceTab);
+                            selectInstanceTabs();
                         }
 
                     }
@@ -480,7 +556,26 @@ public class FXMLControllerDEMO {
 
     public void initialize() {
 
-//        initComponentButton();
+        splitPane.setDividerPosition(0, 0.2);
+        splitPane.setDividerPosition(1, 0.75);
+
+        currentProjectDividerPosition = splitPane.getDividerPositions()[0];
+        currentDetailDividerPosition = splitPane.getDividerPositions()[1];
+
+        splitPane.getDividers().get(0).positionProperty().addListener(new ChangeListener<>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
+                currentProjectDividerPosition = (double) t1;
+            }
+        });
+
+        splitPane.getDividers().get(1).positionProperty().addListener(new ChangeListener<>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
+                currentDetailDividerPosition = (double) t1;
+            }
+        });
+
         initTreeView();
 
         zoom.setValue("100%");

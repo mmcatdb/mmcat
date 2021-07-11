@@ -67,7 +67,7 @@
               <buttons>
                   <VBox>
                      <children>
-                      <Button mnemonicParsing="false" text="X" />
+                      <Button mnemonicParsing="false" onAction="#openCloseProjectAction" text="X" />
                         <Label text="Zobrazení" />
                      </children>
                   </VBox>
@@ -129,7 +129,7 @@
                <buttons>
                   <Button mnemonicParsing="false" text="Editor" />
                   <Button mnemonicParsing="false" text="Decomposition" />
-                  <Button mnemonicParsing="false" text="Transformation" />
+                  <Button mnemonicParsing="false" onAction="#openCloseDetailAction" text="X" />
                </buttons>
                <padding>
                   <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
