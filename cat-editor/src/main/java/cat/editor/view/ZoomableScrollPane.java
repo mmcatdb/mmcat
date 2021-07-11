@@ -30,7 +30,9 @@ public class ZoomableScrollPane extends ScrollPane {
         scaleTransform = new Scale(scaleValue, scaleValue, 0, 0);
         zoomGroup.getTransforms().add(scaleTransform);
 
-        zoomGroup.setOnScroll(new ZoomHandler());
+        setPannable(true);
+        
+//        zoomGroup.setOnScroll(new ZoomHandler());
     }
 
     public double getScaleValue() {

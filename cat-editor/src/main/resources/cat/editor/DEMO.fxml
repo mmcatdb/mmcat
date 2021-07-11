@@ -40,16 +40,19 @@
 <?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.effect.Blend?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
@@ -74,6 +77,14 @@
                         <Label text="Velikost" />
                      </children>
                   </VBox>
+              </buttons>
+               <padding>
+                  <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
+               </padding>
+            </ButtonBar>
+            <Pane maxHeight="1.7976931348623157E308" prefWidth="150.0" />
+            <ButtonBar maxHeight="1.7976931348623157E308">
+              <buttons>
                   <VBox prefHeight="200.0" prefWidth="100.0">
                      <children>
                         <Pane prefHeight="200.0" prefWidth="200.0">
@@ -82,20 +93,6 @@
                            </children>
                         </Pane>
                         <Label text="Add Element" />
-                     </children>
-                  </VBox>
-              </buttons>
-               <padding>
-                  <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
-               </padding>
-            </ButtonBar>
-            <Pane maxHeight="1.7976931348623157E308" prefWidth="100.0" />
-            <ButtonBar maxHeight="1.7976931348623157E308">
-              <buttons>
-                  <VBox prefHeight="200.0" prefWidth="100.0">
-                     <children>
-                        <Button mnemonicParsing="false" text="GIF" />
-                        <Label text="ER-to-CAT" />
                      </children>
                   </VBox>
                   <VBox prefHeight="200.0" prefWidth="100.0">
@@ -116,12 +113,18 @@
                         <Label text="Instance" />
                      </children>
                   </VBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Button mnemonicParsing="false" text="GIF" />
+                        <Label text="ER-to-CAT" />
+                     </children>
+                  </VBox>
               </buttons>
                <padding>
                   <Insets bottom="6.0" left="6.0" right="6.0" top="6.0" />
                </padding>
             </ButtonBar>
-            <Pane maxHeight="1.7976931348623157E308" prefWidth="100.0" />
+            <Pane maxHeight="1.7976931348623157E308" prefWidth="50.0" />
             <ButtonBar maxHeight="1.7976931348623157E308">
                <buttons>
                   <Button mnemonicParsing="false" text="Editor" />
@@ -149,10 +152,16 @@
                   <TreeView fx:id="treeView" layoutX="35.0" layoutY="73.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
-            <BorderPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" />
+            <ScrollPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" />
             <AnchorPane minHeight="200.0">
                <children>
-                  <Label alignment="CENTER" font="$x1" layoutX="14.0" layoutY="14.0" style="&#10;" text="Details" textAlignment="CENTER" textFill="$x2" wrapText="false" />
+                  <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" style="&#10;" text="Details" textAlignment="CENTER" wrapText="false">
+                     <font>
+                        <Font size="18.0" fx:id="x5" />
+                     </font>
+                     <textFill>
+                        <Color red="0.624" green="0.624" blue="0.624" fx:id="x6" />
+                     </textFill></Label>
                   <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
                         <Tab fx:id="diagramTab" text="Diagram">
@@ -258,7 +267,45 @@
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <TextArea fx:id="mappingTextArea" layoutY="24.0" prefHeight="506.0" prefWidth="260.0" />
+                                    <TextArea fx:id="mappingTextArea" layoutX="22.0" layoutY="242.0" prefHeight="321.0" prefWidth="272.0" />
+                                    <Label layoutX="37.0" layoutY="34.0" text="Name:" />
+                                    <ChoiceBox fx:id="nameChoiceBox" layoutX="130.0" layoutY="29.0" prefWidth="150.0" />
+                                    <TextField fx:id="nameTextField" layoutX="120.0" layoutY="83.0" />
+                                    <Separator layoutX="30.0" layoutY="200.0" prefWidth="200.0" />
+                                    <Label layoutX="22.0" layoutY="222.0" text="Access Path:" />
+                                    <Button layoutX="14.0" layoutY="163.0" mnemonicParsing="false" text="Add Groupping" />
+                                    <Button layoutX="244.0" layoutY="122.0" mnemonicParsing="false" text="Delete" />
+                                    <Button layoutX="127.0" layoutY="163.0" mnemonicParsing="false" text="GROUP" />
+                                    <Button layoutX="200.0" layoutY="163.0" mnemonicParsing="false" text="TO-PARENT" />
+                                    <Button layoutX="13.0" layoutY="128.0" mnemonicParsing="false" text="MAKE_PROPERTY" />
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                        </Tab>
+                        <Tab fx:id="componentTab" text="Component">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <TableView layoutX="19.0" layoutY="53.0" prefHeight="200.0" prefWidth="278.0">
+                                      <columns>
+                                        <TableColumn prefWidth="75.0" text="Name" />
+                                        <TableColumn prefWidth="71.0" text="Root" />
+                                          <TableColumn prefWidth="75.0" text="Modified" />
+                                          <TableColumn prefWidth="75.0" text="Materialize" />
+                                      </columns>
+                                    </TableView>
+                                    <Label layoutX="27.0" layoutY="25.0" text="Kinds:" />
+                                    <Button layoutX="44.0" layoutY="277.0" mnemonicParsing="false" text="PULL" />
+                                    <Button layoutX="191.0" layoutY="277.0" mnemonicParsing="false" text="PUSH" />
+                                    <Button layoutX="19.0" layoutY="323.0" mnemonicParsing="false" onAction="#handleStatementAction" text="CREATE_SCHEMA" />
+                                    <Button layoutX="24.0" layoutY="371.0" mnemonicParsing="false" text="ALTER_IO" />
+                                    <Button layoutX="142.0" layoutY="371.0" mnemonicParsing="false" text="ALTER_IO_OP" />
+                                    <Button layoutX="156.0" layoutY="323.0" mnemonicParsing="false" text="UPDATE SCHEMA" />
+                                    <TextArea fx:id="statementArea" layoutX="42.0" layoutY="449.0" prefHeight="137.0" prefWidth="250.0" text="SQL TODO... STATEMENT..." />
+                                    <Separator layoutX="14.0" layoutY="424.0" prefWidth="200.0" />
+                                    <Label layoutX="66.0" layoutY="427.0" text="Preview" />
+                                    <Button layoutX="33.0" layoutY="611.0" mnemonicParsing="false" text="Execute" />
+                                    <Button layoutX="129.0" layoutY="612.0" mnemonicParsing="false" text="Clear" />
                                  </children>
                               </AnchorPane>
                           </content>

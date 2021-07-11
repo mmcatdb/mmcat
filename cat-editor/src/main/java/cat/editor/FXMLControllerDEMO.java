@@ -31,6 +31,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
@@ -38,6 +39,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -54,7 +56,7 @@ public class FXMLControllerDEMO {
 //    @FXML
 //    private Label label;
     @FXML
-    private BorderPane borderPane;
+    private ScrollPane borderPane;
 
     @FXML
     private ChoiceBox<String> zoom;
@@ -75,7 +77,13 @@ public class FXMLControllerDEMO {
     private Tab mappingTab;
 
     @FXML
+    private Tab componentTab;
+
+    @FXML
     private TextArea mappingTextArea;
+    
+    @FXML
+    private TextArea statementArea;
 
     @FXML
     private TreeView treeView;
@@ -88,11 +96,19 @@ public class FXMLControllerDEMO {
 
     private Graph graph = new Graph();
 
-//    @FXML
-//    private void handleButtonAction(ActionEvent event) {
+    @FXML
+    private void handleStatementAction(ActionEvent event) {
 //        System.out.println("You clicked me!");
-//        label.setText("Hello World!");
-//    }
+        statementArea.setText("""
+                              CREATE TABLE Customer ( id TEXT);
+                              CREATE TABLE Orders (id TEXT, number TEXT);
+                              CREATE TABLE Order (id TEXT, number TEXT);
+                              CREATE TABLE Items (id TEXT, number TEXT, productId TEXT, quantity TEXT);
+                              CREATE TABLE Product (id TEXT, name TEXT, price TEXT);
+                              CREATE TABLE Contact (id TEXT, number TEXT, name TEXT, value TEXT);
+                              CREATE TABLE Type (Name TEXT);""");
+    }
+    
     @FXML
     void onOpenDialog(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialogDatabaseComponent.fxml"));
@@ -210,7 +226,10 @@ public class FXMLControllerDEMO {
                     String value = (String) item.getValue();
 
                     graph = new Graph();
-                    borderPane.setCenter(graph.getScrollPane());
+//                    borderPane.setCenter(graph.getScrollPane());
+                    borderPane.setContent(graph.getScrollPane());
+//                    borderPane.getChildren().clear();
+//                    borderPane.getChildren().add(graph.getScrollPane());
                     switch (value) {
                         case "ER" -> {
                             DummyGraphScenario.INSTANCE.buildER(graph);
@@ -315,6 +334,25 @@ public class FXMLControllerDEMO {
                             DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
                             tabPane.getSelectionModel().select(mappingTab);
                         }
+
+                        case "PostgreSQL" -> {
+                            DummyGraphScenario.INSTANCE.buildPostgreSQLKinds(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(componentTab);
+                        }
+
+                        case "Neo4j" -> {
+                            DummyGraphScenario.INSTANCE.buildNeo4jKinds(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(componentTab);
+                        }
+
+                        case "MongoDB" -> {
+                            DummyGraphScenario.INSTANCE.buildMongoDBKinds(graph);
+//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+                            tabPane.getSelectionModel().select(componentTab);
+                        }
+
                     }
                     Layout layout = new RandomLayout(graph);
                     layout.execute();

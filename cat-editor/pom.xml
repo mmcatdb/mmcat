@@ -132,6 +132,7 @@
                     <mainClass>cat.editor.MainApp</mainClass>
                     <!--<mainClass>application.Main</mainClass>-->
                     
+                    <!--<mainClass>cat.tutorial.Test</mainClass>-->
                     <!--<mainClass>cat.tutorial.AppMain</mainClass>-->
                     <!--<mainClass>cat.tutorial.DialogFXMLExample</mainClass>-->
                     <!--<mainClass>cat.tutorial.TreeViewB</mainClass>-->
