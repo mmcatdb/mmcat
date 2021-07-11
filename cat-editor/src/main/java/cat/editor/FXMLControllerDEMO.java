@@ -24,6 +24,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -48,7 +49,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -172,12 +175,24 @@ public class FXMLControllerDEMO {
 //        }
     }
 
+//    private void createGrid(ObservableList<Node> children) {
+//        for (int i = 0; i < 1200; i += 20) {
+//            for (int j = 0; j < 1200; j += 20) {
+//                Rectangle shape = new Rectangle(i, j, i + 1, j + 1);
+//                shape.setStroke(Color.GRAY.deriveColor(1, 1, 1, 0.8));
+//                shape.setFill(Color.WHITE);
+//                shape.setStrokeWidth(1);
+//                children.add(shape);
+//            }
+//        }
+//    }
+
     private Image createImage() {
         Rectangle rect = new Rectangle(1200, 1800, Color.CORNFLOWERBLUE);//.snapshot(null, null);
         rect.setFill(createGridPattern());
         return rect.snapshot(null, null);
     }
-    
+
     public ImagePattern createGridPattern() {
 
         double w = 20;//gridSize;
@@ -186,12 +201,17 @@ public class FXMLControllerDEMO {
         Canvas canvas = new Canvas(w, h);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        gc.setStroke(Color.LIGHTGRAY);
-        gc.setFill(Color.WHITE.deriveColor(1, 1, 1, 0.2));
-        gc.fillRect(0, 0, w, h);
-        gc.strokeRect(0, 0, w, h);
+//        Line line = new Line(0,0,1,1);
+        gc.setImageSmoothing(false);
+        gc.setStroke(Color.GRAY.deriveColor(1, 1, 1, 0.8));
+        gc.setFill(Color.WHITE);
+        gc.fillRect(0, 0, 1, 1);
+//        gc.fillRect(0, 0, w, h);
+        gc.strokeRect(0, 0, 1, 1);
 
+//        gc.strokeRect(0, 0, w, h);
         Image image = canvas.snapshot(new SnapshotParameters(), null);
+        
         ImagePattern pattern = new ImagePattern(image, 0, 0, w, h, false);
 
         return pattern;
@@ -269,6 +289,7 @@ public class FXMLControllerDEMO {
                     view.setImage(image);
                     view.setImage(image);
                     graph.getCellLayer().getChildren().add(view);
+//                    createGrid(graph.getCellLayer().getChildren());
 
                     graph.getScrollPane().minWidthProperty().bind(Bindings.createDoubleBinding(()
                             -> scrollPane.getViewportBounds().getWidth(), scrollPane.viewportBoundsProperty()));
@@ -407,6 +428,7 @@ public class FXMLControllerDEMO {
 
                 }
             }
+
         });
     }
 
