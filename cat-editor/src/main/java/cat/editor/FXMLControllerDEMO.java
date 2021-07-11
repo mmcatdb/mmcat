@@ -16,6 +16,7 @@ import cat.editor.view.edge.EdgeType;
 import cat.tutorial.AddPersonDialogController;
 import java.io.IOException;
 import java.util.Random;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -25,6 +26,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
@@ -37,9 +41,14 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -56,7 +65,7 @@ public class FXMLControllerDEMO {
 //    @FXML
 //    private Label label;
     @FXML
-    private ScrollPane borderPane;
+    private ScrollPane scrollPane;
 
     @FXML
     private ChoiceBox<String> zoom;
@@ -81,7 +90,7 @@ public class FXMLControllerDEMO {
 
     @FXML
     private TextArea mappingTextArea;
-    
+
     @FXML
     private TextArea statementArea;
 
@@ -108,7 +117,7 @@ public class FXMLControllerDEMO {
                               CREATE TABLE Contact (id TEXT, number TEXT, name TEXT, value TEXT);
                               CREATE TABLE Type (Name TEXT);""");
     }
-    
+
     @FXML
     void onOpenDialog(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("dialogDatabaseComponent.fxml"));
@@ -161,6 +170,32 @@ public class FXMLControllerDEMO {
 //                }
 //            }
 //        }
+    }
+
+    private Image createImage() {
+        Rectangle rect = new Rectangle(1200, 1800, Color.CORNFLOWERBLUE);//.snapshot(null, null);
+        rect.setFill(createGridPattern());
+        return rect.snapshot(null, null);
+    }
+    
+    public ImagePattern createGridPattern() {
+
+        double w = 20;//gridSize;
+        double h = 20;//gridSize;
+
+        Canvas canvas = new Canvas(w, h);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.setStroke(Color.LIGHTGRAY);
+        gc.setFill(Color.WHITE.deriveColor(1, 1, 1, 0.2));
+        gc.fillRect(0, 0, w, h);
+        gc.strokeRect(0, 0, w, h);
+
+        Image image = canvas.snapshot(new SnapshotParameters(), null);
+        ImagePattern pattern = new ImagePattern(image, 0, 0, w, h, false);
+
+        return pattern;
+
     }
 
     private void initTreeView() {
@@ -226,10 +261,23 @@ public class FXMLControllerDEMO {
                     String value = (String) item.getValue();
 
                     graph = new Graph();
-//                    borderPane.setCenter(graph.getScrollPane());
-                    borderPane.setContent(graph.getScrollPane());
-//                    borderPane.getChildren().clear();
-//                    borderPane.getChildren().add(graph.getScrollPane());
+//                    scrollPane.setCenter(graph.getScrollPane());
+                    scrollPane.setContent(graph.getScrollPane());
+
+                    Image image = createImage();
+                    ImageView view = new ImageView();
+                    view.setImage(image);
+                    view.setImage(image);
+                    graph.getCellLayer().getChildren().add(view);
+
+                    graph.getScrollPane().minWidthProperty().bind(Bindings.createDoubleBinding(()
+                            -> scrollPane.getViewportBounds().getWidth(), scrollPane.viewportBoundsProperty()));
+                    graph.getScrollPane().minHeightProperty().bind(Bindings.createDoubleBinding(()
+                            -> scrollPane.getViewportBounds().getHeight(), scrollPane.viewportBoundsProperty()));
+//    grid.getChildren().add(imageHolder);
+
+//                    scrollPane.getChildren().clear();
+//                    scrollPane.getChildren().add(graph.getScrollPane());
                     switch (value) {
                         case "ER" -> {
                             DummyGraphScenario.INSTANCE.buildER(graph);
@@ -392,7 +440,7 @@ public class FXMLControllerDEMO {
         });
 
 //        graph = new Graph();
-//        borderPane.setCenter(graph.getScrollPane());
+//        scrollPane.setCenter(graph.getScrollPane());
 //        Scene scene = new Scene(root, 1024, 768);
 //        scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 //        primaryStage.setScene(scene);

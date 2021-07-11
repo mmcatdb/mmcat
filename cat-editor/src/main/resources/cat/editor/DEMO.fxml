@@ -152,7 +152,7 @@
                   <TreeView fx:id="treeView" layoutX="35.0" layoutY="73.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
-            <ScrollPane fx:id="borderPane" prefHeight="200.0" prefWidth="200.0" />
+            <ScrollPane fx:id="scrollPane" prefHeight="200.0" prefWidth="200.0" />
             <AnchorPane minHeight="200.0">
                <children>
                   <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" style="&#10;" text="Details" textAlignment="CENTER" wrapText="false">
