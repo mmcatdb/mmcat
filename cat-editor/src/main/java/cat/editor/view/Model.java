@@ -148,18 +148,18 @@ public class Model {
 
 	}
 
-	public void addEdge(String sourceId, String targetId) {
+//	public void addEdge(String id, String sourceId, String targetId) {
+//
+//		Cell sourceCell = cellMap.get(sourceId);
+//		Cell targetCell = cellMap.get(targetId);
+//
+//		CategoricalEdge edge = new CategoricalEdge(id, sourceCell, targetCell);
+//
+//		addedEdges.add(edge);
+//
+//	}
 
-		Cell sourceCell = cellMap.get(sourceId);
-		Cell targetCell = cellMap.get(targetId);
-
-		CategoricalEdge edge = new CategoricalEdge(sourceCell, targetCell);
-
-		addedEdges.add(edge);
-
-	}
-
-	public void addEdge(String sourceId, String targetId, EdgeType type) {
+	public void addEdge(String id, String sourceId, String targetId, EdgeType type) {
 		Cell sourceCell = cellMap.get(sourceId);
 		Cell targetCell = cellMap.get(targetId);
 
@@ -167,7 +167,7 @@ public class Model {
 
 		switch (type) {
 			case CATEGORICAL ->
-				edge = new CategoricalEdge(sourceCell, targetCell);
+				edge = new CategoricalEdge(id, sourceCell, targetCell);
 			case ER ->
 				edge = new EREdge(sourceCell, targetCell);
 			default ->

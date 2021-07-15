@@ -18,7 +18,10 @@ public class CategoricalEdge extends Edge {
 
 	private final Line line;
 
-	public CategoricalEdge(Cell source, Cell target) {
+	private static final double DIFF = 20;
+	private static final double EPSILON = 5;
+
+	public CategoricalEdge(String id, Cell source, Cell target) {
 		super(source, target);
 
 		source.addCellChild(target);
@@ -41,13 +44,63 @@ public class CategoricalEdge extends Edge {
 
 		getChildren().add(line);
 
-		double xOrientation = startX.get() > endX.get() ? 1.0 : -1.0;
-		double yOrientation = startY.get() > endY.get() ? 1.0 : -1.0;
+		Text edgeId = new Text(id);
+		edgeId.setFont(Font.font("DejaVu Sans Mono", 12));
+		double textWidth = edgeId.getBoundsInLocal().getWidth();
+		double textHeight = edgeId.getBoundsInLocal().getHeight();
 
-		Text sourceIdText = new Text(source.getCellId());
-		sourceIdText.setFont(Font.font("DejaVu Sans Mono", 12));
-		sourceIdText.relocate(line.getBoundsInLocal().getMinX() + 30 * xOrientation, line.getBoundsInLocal().getMinY() + 30 * yOrientation);
-		getChildren().add(sourceIdText);
+		double xOrientation = startX.get() <= endX.get() ? 1.0 : -1.0;
+		double yOrientation = startY.get() <= endY.get() ? 1.0 : -1.0;
+
+		double px = xOrientation > 0 ? DIFF : DIFF + textWidth;
+		double py = yOrientation > 0 ? DIFF : DIFF + textHeight;
+
+		double x, y;
+
+		double diffX = (endX.get() - startX.get()) * xOrientation;
+		double diffY = (endY.get() - startY.get()) * yOrientation;
+
+		System.out.println(diffX + ":" + diffY);
+		if (diffX < EPSILON) {
+//			System.out.print("A: ");
+			xOrientation = 1;
+			px = 2;
+			x = startX.get() + px * xOrientation;
+			y = startY.get() + py * yOrientation;
+//			System.out.println(
+//					id + "\t-> [" + x + ", " + y + "]\tsrc [" + startX.get() + ", " + startY.get()
+//					+ "]\ttgt [" + endX.get() + ", " + endY.get()
+//					+ "] \torientX:" + xOrientation
+//					+ "\torientY:" + yOrientation
+//			);
+		} else if (diffY < EPSILON) {
+//			System.out.print("B: ");
+			yOrientation = 1;
+			py = 2;
+			x = startX.get() + px * xOrientation;
+			y = startY.get() + py * yOrientation;
+//			System.out.println(
+//					id + "\t-> [" + x + ", " + y + "]\tsrc [" + startX.get() + ", " + startY.get()
+//					+ "]\ttgt [" + endX.get() + ", " + endY.get()
+//					+ "] \torientX:" + xOrientation
+//					+ "\torientY:" + yOrientation
+//			);
+		} else {
+//			System.out.print("C: ");
+//			xOrientation = 1;
+			px += DIFF;
+			x = startX.get() + px * xOrientation;
+			y = startY.get() + py * yOrientation;
+//			System.out.println(
+//					id + "\t-> [" + x + ", " + y + "]\tsrc [" + startX.get() + ", " + startY.get()
+//					+ "]\ttgt [" + endX.get() + ", " + endY.get()
+//					+ "] \torientX:" + xOrientation
+//					+ "\torientY:" + yOrientation
+//			);
+		}
+
+		edgeId.relocate(x, y);
+		getChildren().add(edgeId);
 
 	}
 
