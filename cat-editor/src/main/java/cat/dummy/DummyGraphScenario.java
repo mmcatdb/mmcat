@@ -212,8 +212,47 @@ public enum DummyGraphScenario {
 		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
 		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
 
-		addCategoryArrows(model);
+		addCategoryOrder2Arrows(model);
 		graph.endUpdate();
+	}
+
+	private void addCategoryOrder2Arrows(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.SELECTED_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
 
 	public void buildOrderCollection_Items(Graph graph) {
@@ -237,8 +276,47 @@ public enum DummyGraphScenario {
 		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
 		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
 
-		addCategoryArrows(model);
+		addCategoryOrder60Arrows(model);
 		graph.endUpdate();
+	}
+
+	private void addCategoryOrder60Arrows(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
 
 	public void buildOrderCollection_Items2(Graph graph) {
@@ -262,8 +340,47 @@ public enum DummyGraphScenario {
 		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
 		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
 
-		addCategoryArrows(model);
+		addCategoryOrder6Arrows(model);
 		graph.endUpdate();
+	}
+
+	private void addCategoryOrder6Arrows(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.SELECTED_CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
 
 	public void buildOrderCollection_InliningProduct(Graph graph) {
@@ -287,8 +404,49 @@ public enum DummyGraphScenario {
 		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
 		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
 
-		addCategoryArrows(model);
+		addCategoryOrder7Arrows(model);
 		graph.endUpdate();
+	}
+
+	private void addCategoryOrder7Arrows(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+		model.addEdge("12.11", "117", "122", EdgeType.SELECTED_CATEGORICAL);
 	}
 
 	public void buildOrderCollection_Complete(Graph graph) {
@@ -312,8 +470,51 @@ public enum DummyGraphScenario {
 		model.addCell("123", "Name", 290, 530, CellType.MAPPING_PROPERTY);
 		model.addCell("124", "Price", 290, 410, CellType.MAPPING_PROPERTY);
 
-		addCategoryArrows(model);
+		addCategoryOrder8Arrows(model);
 		graph.endUpdate();
+	}
+
+	private void addCategoryOrder8Arrows(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+		model.addEdge("12.11", "117", "122", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("13.11", "117", "123", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("14.11", "117", "124", EdgeType.PROPERTY_CATEGORICAL);
 	}
 
 	public void buildNeo4j(Graph graph) {
