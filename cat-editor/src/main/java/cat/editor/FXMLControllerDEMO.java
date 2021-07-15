@@ -198,37 +198,10 @@ public class FXMLControllerDEMO {
 			dialog.showAndWait();
 		});
 
-//        componentButton.setOnAction(new EventHandler<ActionEvent>() {
-//            public void handle(ActionEvent event) {
-//                Parent root;
-//                try {
-//                    root = FXMLLoader.load(getClass().getClassLoader().getResource("dialogDatabaseComponent.fxml"), resources);
-//                    Stage stage = new Stage();
-//                    stage.setTitle("My New Stage Title");
-//                    stage.setScene(new Scene(root, 450, 450));
-//                    stage.show();
-//                    // Hide this current window (if this is what you want)
-//                    ((Node) (event.getSource())).getScene().getWindow().hide();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
 	}
 
-//    private void createGrid(ObservableList<Node> children) {
-//        for (int i = 0; i < 1200; i += 20) {
-//            for (int j = 0; j < 1200; j += 20) {
-//                Rectangle shape = new Rectangle(i, j, i + 1, j + 1);
-//                shape.setStroke(Color.GRAY.deriveColor(1, 1, 1, 0.8));
-//                shape.setFill(Color.WHITE);
-//                shape.setStrokeWidth(1);
-//                children.add(shape);
-//            }
-//        }
-//    }
 	private Image createImage() {
-		Rectangle rect = new Rectangle(1200, 1800, Color.CORNFLOWERBLUE);//.snapshot(null, null);
+		Rectangle rect = new Rectangle(1600, 900, Color.CORNFLOWERBLUE);//.snapshot(null, null);
 		rect.setFill(createGridPattern());
 		return rect.snapshot(null, null);
 	}
@@ -307,7 +280,7 @@ public class FXMLControllerDEMO {
 	private void initTreeView() {
 		//Creating tree items
 		TreeItem item1 = new TreeItem("ER Schema");
-		TreeItem item2 = new TreeItem("Unification Layer");
+		TreeItem item2 = new TreeItem("Categorical Schema");
 		TreeItem item3 = new TreeItem("Database Components");
 		TreeItem item31 = new TreeItem("MongoDB");
 		TreeItem item32 = new TreeItem("Neo4j");
@@ -385,7 +358,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildER(graph);
 							selectEditorTabs();
 						}
-						case "Unification Layer" -> {
+						case "Categorical Schema" -> {
 							DummyGraphScenario.INSTANCE.buildSchemaCategory(graph);
 							selectEditorTabs();
 						}

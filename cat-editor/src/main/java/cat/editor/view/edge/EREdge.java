@@ -14,38 +14,23 @@ import javafx.scene.shape.Line;
  */
 public class EREdge extends Edge {
 
-    private final Line line;
+	private final Line line;
 
-    public EREdge(Cell source, Cell target) {
-        super(source, target);
+	public EREdge(Cell source, Cell target) {
+		super(source, target);
 
-        source.addCellChild(target);
-        target.addCellParent(source);
+		source.addCellChild(target);
+		target.addCellParent(source);
 
-        line = new Line();
-        line.setStrokeWidth(2);
-//        line.setStrokeType(StrokeType.CENTERED);
+		line = new Line();
+		line.setStrokeWidth(2);
 
-//        for (var c : source.getChildren()) {
-//            System.out.println(c);
-//        }
-//        System.out.println("-----");
+		line.startXProperty().bind(source.layoutXProperty().add(source.getChildren().get(0).getBoundsInParent().getWidth() / 2.0));
+		line.startYProperty().bind(source.layoutYProperty().add(source.getChildren().get(0).getBoundsInParent().getHeight() / 2.0));
 
-//        var x = source.layoutXProperty();
-//        var y = source.layoutYProperty();
-//        var xc = source.getChildren().get(0).layoutXProperty();
-//        var xy = source.getChildren().get(0).layoutYProperty();
-//        System.out.println(x + ", " + y + "     :::     " + xc + ", " + y);
-//        
-//        var tx = target.layoutXProperty();
-//        var ty = target.layoutYProperty();
-        
-        line.startXProperty().bind(source.layoutXProperty().add(source.getChildren().get(0).getBoundsInParent().getWidth() / 2.0));
-        line.startYProperty().bind(source.layoutYProperty().add(source.getChildren().get(0).getBoundsInParent().getHeight() / 2.0));
+		line.endXProperty().bind(target.layoutXProperty().add(target.getChildren().get(0).getBoundsInParent().getWidth() / 2.0));
+		line.endYProperty().bind(target.layoutYProperty().add(target.getChildren().get(0).getBoundsInParent().getHeight() / 2.0));
 
-        line.endXProperty().bind(target.layoutXProperty().add(target.getChildren().get(0).getBoundsInParent().getWidth() / 2.0));
-        line.endYProperty().bind(target.layoutYProperty().add(target.getChildren().get(0).getBoundsInParent().getHeight() / 2.0));
-
-        getChildren().add(line);
-    }
+		getChildren().add(line);
+	}
 }

@@ -17,28 +17,45 @@ import javafx.scene.text.Text;
  */
 public class ERRelationshipCell extends Cell {
 
-    public ERRelationshipCell(String id, String name, double x, double y) {
-        super(id);
+	public ERRelationshipCell(String id, String name, double x, double y) {
+		super(id);
 
-        Text text = new Text(name);
-        text.setFont(Font.font("DejaVu Sans Mono", 20));
-        text.relocate(15, 15);
+		Text text = new Text(name);
+		text.setFont(Font.font("DejaVu Sans Mono", 16));
 
-        double width = text.getBoundsInLocal().getWidth() + 30;
-        double height = text.getBoundsInLocal().getHeight() + 30;
+		double textWidth = text.getBoundsInLocal().getWidth();
+		double textHeight = text.getBoundsInLocal().getHeight();
 
-        Polygon shape = new Polygon(
-                width / 2, 0,
-                width, height / 2,
-                width / 2, height,
-                0, height / 2);
-        shape.setUserData("aaa");
-        shape.setStroke(Color.BLACK);
-        shape.setFill(Color.WHITE);
-        shape.setStrokeWidth(2);
-        setView(shape);
+		double shapeWidth = 100;
+		double shapeHeight = 50;
 
-        setView(text);
-        relocate(x, y);
-    }
+		shapeWidth = shapeWidth > textWidth ? shapeWidth : textWidth + 30;
+		shapeHeight = shapeHeight > textHeight ? shapeHeight : textHeight + 30;
+
+		double diffWidth = shapeWidth - textWidth;
+		double diffHeight = shapeHeight - textHeight;
+		text.relocate(diffWidth / 2, diffHeight / 2);
+
+//		System.out.println("[" + shapeWidth / 2 + "," + 0 + "][" + shapeWidth + "," + shapeHeight / 2 + "][" + shapeWidth / 2 + "," + shapeHeight + "][" + 0 + "," + shapeHeight / 2 + "]");
+		Polygon shape = new Polygon(
+				shapeWidth / 2, 0,
+				shapeWidth, shapeHeight / 2,
+				shapeWidth / 2, shapeHeight,
+				0, shapeHeight / 2);
+		shape.setUserData("aaa");
+		shape.setStroke(Color.BLACK);
+		shape.setFill(Color.WHITE);
+		shape.setStrokeWidth(2);
+		setView(shape);
+
+		double dx = (shape.getBoundsInLocal().getWidth() - shapeWidth) / 2.0;
+		double dy = (shape.getBoundsInLocal().getHeight() - shapeHeight) / 2.0;
+
+		dx = dx > 0 ? dx : 0;
+		dy = dy > 0 ? dy : 0;
+
+//		System.out.println(dx + ":::" + dy);
+		setView(text);
+		relocate(x - dx, y - dy);
+	}
 }

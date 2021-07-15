@@ -22,7 +22,7 @@ public class ERIdentifierCell extends Cell {
         super(id);
 
         Text text = new Text(name);
-        text.setFont(Font.font("DejaVu Sans Mono", 20));
+        text.setFont(Font.font("DejaVu Sans Mono", 16));
         double height = text.getBoundsInLocal().getHeight();
 //        System.out.println(height + " ::: height");
         text.relocate(25, -(height / 2 - SIZE));
