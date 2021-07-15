@@ -7,15 +7,11 @@ package cat.editor;
 
 import cat.dummy.DummyGraphScenario;
 import cat.dummy.DummyMappingScenario;
-import cat.editor.view.cell.CellType;
 import cat.editor.view.Graph;
-import cat.editor.view.Model;
 import cat.editor.view.Layout;
 import cat.editor.view.RandomLayout;
-import cat.editor.view.edge.EdgeType;
 import cat.tutorial.AddPersonDialogController;
 import java.io.IOException;
-import java.util.Random;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,7 +20,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -35,7 +30,6 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -47,13 +41,9 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -289,9 +279,9 @@ public class FXMLControllerDEMO {
 		TreeItem item311 = new TreeItem("OrderCollection");
 		TreeItem item312 = new TreeItem("Order1");
 		TreeItem item313 = new TreeItem("Order2");
-		TreeItem item314 = new TreeItem("Order3");
-		TreeItem item315 = new TreeItem("Order4");
-		TreeItem item316 = new TreeItem("Order5");
+//		TreeItem item314 = new TreeItem("Order3");
+//		TreeItem item315 = new TreeItem("Order4");
+//		TreeItem item316 = new TreeItem("Order5");
 		TreeItem item317 = new TreeItem("Order60");
 		TreeItem item318 = new TreeItem("Order6");
 		TreeItem item319 = new TreeItem("Order7");
@@ -323,7 +313,7 @@ public class FXMLControllerDEMO {
 		base.setExpanded(true);
 		base.getChildren().addAll(item1, item2, item3, item4, item5);
 		item3.getChildren().addAll(item31, item32, item33);
-		item31.getChildren().addAll(item311, item312, item313, item314, item315, item316, item317, item318, item319, item3110);
+		item31.getChildren().addAll(item311, item312, item313, item317, item318, item319, item3110);
 		item32.getChildren().addAll(item321, item322, item323);
 		item33.getChildren().addAll(item331, item332, item333, item334, item335, item336, item337);
 		item5.getChildren().addAll(item51, item52, item53);
@@ -355,66 +345,66 @@ public class FXMLControllerDEMO {
 
 					switch (value) {
 						case "ER Schema" -> {
-							DummyGraphScenario.INSTANCE.buildER(graph);
+							DummyGraphScenario.INSTANCE.buildERSchema(graph);
 							selectEditorTabs();
 						}
 						case "Categorical Schema" -> {
-							DummyGraphScenario.INSTANCE.buildSchemaCategory(graph);
+							DummyGraphScenario.INSTANCE.buildCategoricalSchema(graph);
 							selectEditorTabs();
 						}
 						case "MongoDB" -> {
-							DummyGraphScenario.INSTANCE.buildMongoDBKinds(graph);
+							DummyGraphScenario.INSTANCE.buildMongoDB(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectComponentTabs();
 						}
 						case "OrderCollection" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_0(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_0(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrderCollection(graph);
+							DummyMappingScenario.INSTANCE.buildOrderCollection(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Order1" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_1_GroupingId(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_1_GroupingId(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrderCollection_GroupingId(graph);
+							DummyMappingScenario.INSTANCE.buildOrderCollection_GroupingId(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Order2" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_2_CompleteId(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_2_CompleteId(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrderCollection_CompleteId(graph);
+							DummyMappingScenario.INSTANCE.buildOrderCollection_CompleteId(mappingTextArea);
 							selectMappingTabs();
 						}
-						case "Order3" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_3_Contact(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_3_Contact(mappingTextArea);
-							selectMappingTabs();
-						}
-						case "Order4" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(mappingTextArea);
-							selectMappingTabs();
-						}
-						case "Order5" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(mappingTextArea);
-							selectMappingTabs();
-						}
+//						case "Order3" -> {
+//							DummyGraphScenario.INSTANCE.buildMongoOrder_3_Contact(graph);
+//							DummyMappingScenario.INSTANCE.buildMongoOrder_3_Contact(mappingTextArea);
+//							selectMappingTabs();
+//						}
+//						case "Order4" -> {
+//							DummyGraphScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(graph);
+//							DummyMappingScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(mappingTextArea);
+//							selectMappingTabs();
+//						}
+//						case "Order5" -> {
+//							DummyGraphScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(graph);
+//							DummyMappingScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(mappingTextArea);
+//							selectMappingTabs();
+//						}
 						case "Order60" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_60_Items(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_60_Items(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrderCollection_Items(graph);
+							DummyMappingScenario.INSTANCE.buildOrderCollection_Items(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Order6" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_6_Items(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_6_Items(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrderCollection_Items2(graph);
+							DummyMappingScenario.INSTANCE.buildOrderCollection_Items2(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Order7" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_7_InliningProduct(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_7_InliningProduct(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrderCollection_InliningProduct(graph);
+							DummyMappingScenario.INSTANCE.buildOrderCollection_InliningProduct(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Order8" -> {
-							DummyGraphScenario.INSTANCE.buildMongoOrder_8_Complete(graph);
-							DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrderCollection_Complete(graph);
+							DummyMappingScenario.INSTANCE.buildOrderCollection_Complete(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Neo4j" -> {
