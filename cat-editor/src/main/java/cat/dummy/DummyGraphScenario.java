@@ -316,6 +316,106 @@ public enum DummyGraphScenario {
 		graph.endUpdate();
 	}
 
+	public void buildNeo4j(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_KIND);
+		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_KIND);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+
+		addCategoryArrows(model);
+		graph.endUpdate();
+	}
+
+	public void buildCustomerNode(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_KIND);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+
+		addCategoryArrows(model);
+		graph.endUpdate();
+	}
+
+	public void buildOrderNode(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 410, 50, CellType.MAPPING_NAME);
+		model.addCell("116", "Value", 290, 50, CellType.MAPPING_PROPERTY);
+		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+
+		addCategoryArrows(model);
+		graph.endUpdate();
+	}
+	
+	public void buildOrdersEdge(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_PROPERTY);
+		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_KIND);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_PROPERTY);
+		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+
+		addCategoryArrows(model);
+		graph.endUpdate();
+	}
+
 	public void buildProductKind(Graph graph) {
 		Model model = graph.getModel();
 
@@ -632,31 +732,6 @@ public enum DummyGraphScenario {
 		model.addCell("117", "Items", 200, 300, CellType.MAPPING_KIND);
 		model.addCell("118", "Quantity", 300, 300, CellType.CATEGORICAL_OBJECT);
 		model.addCell("121", "Product", 200, 400, CellType.MAPPING_KIND);
-		model.addCell("122", "Id", 200, 500, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 300, 500, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 300, 400, CellType.CATEGORICAL_OBJECT);
-
-		addCategoryArrows(model);
-		graph.endUpdate();
-	}
-
-	public void buildNeo4jKinds(Graph graph) {
-		Model model = graph.getModel();
-
-		graph.beginUpdate();
-
-		model.addCell("100", "Customer", 100, 300, CellType.MAPPING_KIND);
-		model.addCell("101", "Id", 100, 400, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 100, 200, CellType.MAPPING_KIND);
-		model.addCell("111", "Order", 200, 200, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 200, 100, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 300, 200, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 400, 200, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 400, 100, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 300, 100, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 200, 300, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 300, 300, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 200, 400, CellType.CATEGORICAL_OBJECT);
 		model.addCell("122", "Id", 200, 500, CellType.CATEGORICAL_OBJECT);
 		model.addCell("123", "Name", 300, 500, CellType.CATEGORICAL_OBJECT);
 		model.addCell("124", "Price", 300, 400, CellType.CATEGORICAL_OBJECT);

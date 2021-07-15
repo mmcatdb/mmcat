@@ -196,4 +196,16 @@ public enum DummyMappingScenario {
                          }""");
 	}
 
+	public void buildCustomerNode(TextArea mappingTextArea) {
+		System.out.println("TODO!");
+	}
+
+	public void buildOrderNode(TextArea mappingTextArea) {
+		System.out.println("TODO!");
+	}
+
+	public void buildOrdersEdge(TextArea mappingTextArea) {
+		System.out.println("TODO!");
+	}
+
 }

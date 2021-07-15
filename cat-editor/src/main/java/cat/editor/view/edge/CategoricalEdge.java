@@ -60,7 +60,7 @@ public class CategoricalEdge extends Edge {
 		double diffX = (endX.get() - startX.get()) * xOrientation;
 		double diffY = (endY.get() - startY.get()) * yOrientation;
 
-		System.out.println(diffX + ":" + diffY);
+//		System.out.println(diffX + ":" + diffY);
 		if (diffX < EPSILON) {
 //			System.out.print("A: ");
 			xOrientation = 1;

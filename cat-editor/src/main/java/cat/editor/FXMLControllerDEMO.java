@@ -408,15 +408,24 @@ public class FXMLControllerDEMO {
 							selectMappingTabs();
 						}
 						case "Neo4j" -> {
-							DummyGraphScenario.INSTANCE.buildNeo4jKinds(graph);
+							DummyGraphScenario.INSTANCE.buildNeo4j(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectComponentTabs();
 						}
 						case "CustomerNode" -> {
+							DummyGraphScenario.INSTANCE.buildCustomerNode(graph);
+							DummyMappingScenario.INSTANCE.buildCustomerNode(mappingTextArea);
+							selectMappingTabs();
 						}
 						case "OrderNode" -> {
+							DummyGraphScenario.INSTANCE.buildOrderNode(graph);
+							DummyMappingScenario.INSTANCE.buildOrderNode(mappingTextArea);
+							selectMappingTabs();
 						}
 						case "OrdersEdge" -> {
+							DummyGraphScenario.INSTANCE.buildOrdersEdge(graph);
+							DummyMappingScenario.INSTANCE.buildOrdersEdge(mappingTextArea);
+							selectMappingTabs();
 						}
 
 						case "PostgreSQL" -> {
