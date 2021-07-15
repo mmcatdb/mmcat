@@ -69,6 +69,9 @@ public class FXMLControllerDEMO {
 	private Tab diagramTab;
 
 	@FXML
+	private Tab elementTab;
+
+	@FXML
 	private Tab styleTab;
 
 	@FXML
@@ -88,6 +91,9 @@ public class FXMLControllerDEMO {
 
 	@FXML
 	private TextArea mappingTextArea;
+
+	@FXML
+	private TextArea ddlStatementTextArea;
 
 	@FXML
 	private TextArea statementArea;
@@ -223,9 +229,10 @@ public class FXMLControllerDEMO {
 
 	private void selectEditorTabs() {
 		tabPane.getTabs().add(0, diagramTab);
-		tabPane.getTabs().add(1, styleTab);
-		tabPane.getTabs().add(2, textTab);
-		tabPane.getTabs().add(3, positionTab);
+		tabPane.getTabs().add(1, elementTab);
+		tabPane.getTabs().add(2, styleTab);
+		tabPane.getTabs().add(3, textTab);
+		tabPane.getTabs().add(4, positionTab);
 		tabPane.getTabs().remove(mappingTab);
 		tabPane.getTabs().remove(componentTab);
 		tabPane.getTabs().remove(instanceTab);
@@ -235,6 +242,7 @@ public class FXMLControllerDEMO {
 
 	private void selectMappingTabs() {
 		tabPane.getTabs().remove(diagramTab);
+		tabPane.getTabs().remove(elementTab);
 		tabPane.getTabs().remove(styleTab);
 		tabPane.getTabs().remove(textTab);
 		tabPane.getTabs().remove(positionTab);
@@ -246,6 +254,7 @@ public class FXMLControllerDEMO {
 
 	private void selectComponentTabs() {
 		tabPane.getTabs().remove(diagramTab);
+		tabPane.getTabs().remove(elementTab);
 		tabPane.getTabs().remove(styleTab);
 		tabPane.getTabs().remove(textTab);
 		tabPane.getTabs().remove(positionTab);
@@ -257,6 +266,7 @@ public class FXMLControllerDEMO {
 
 	private void selectInstanceTabs() {
 		tabPane.getTabs().remove(diagramTab);
+		tabPane.getTabs().remove(elementTab);
 		tabPane.getTabs().remove(styleTab);
 		tabPane.getTabs().remove(textTab);
 		tabPane.getTabs().remove(positionTab);
