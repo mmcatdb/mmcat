@@ -22,21 +22,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 220, CellType.ER_ENTITY);
-		model.addCell("101", "Id", 90, 300, CellType.ER_IDENTIFIER);
-		model.addCell("110", "Orders", 50, 115, CellType.ER_RELATIONSHIP);
-		model.addCell("111", "Order", 200, 120, CellType.ER_ENTITY);
+		model.addCell("100", "Customer", 50, 260, CellType.ER_ENTITY);
+		model.addCell("101", "Id", 90, 370, CellType.ER_IDENTIFIER);
+		model.addCell("110", "Orders", 50, 135, CellType.ER_RELATIONSHIP);
+		model.addCell("111", "Order", 200, 140, CellType.ER_ENTITY);
 		model.addCell("112", "Number", 240, 50, CellType.ER_ATTRIBUTE);
-		model.addCell("113", "Contact", 350, 115, CellType.ER_RELATIONSHIP);
-		model.addCell("114", "Type", 500, 120, CellType.ER_ENTITY);
+		model.addCell("113", "Contact", 350, 135, CellType.ER_RELATIONSHIP);
+		model.addCell("114", "Type", 500, 140, CellType.ER_ENTITY);
 		model.addCell("115", "Name", 540, 50, CellType.ER_IDENTIFIER);
 		model.addCell("116", "Value", 390, 50, CellType.ER_ATTRIBUTE);
-		model.addCell("117", "Items", 200, 215, CellType.ER_RELATIONSHIP);
-		model.addCell("118", "Quantity", 350, 230, CellType.ER_ATTRIBUTE);
-		model.addCell("121", "Product", 200, 320, CellType.ER_ENTITY);
-		model.addCell("122", "Id", 200, 400, CellType.ER_IDENTIFIER);
-		model.addCell("123", "Name", 280, 400, CellType.ER_ATTRIBUTE);
-		model.addCell("124", "Price", 350, 330, CellType.ER_ATTRIBUTE);
+		model.addCell("117", "Items", 200, 255, CellType.ER_RELATIONSHIP);
+		model.addCell("118", "Quantity", 350, 270, CellType.ER_ATTRIBUTE);
+		model.addCell("121", "Product", 200, 380, CellType.ER_ENTITY);
+		model.addCell("122", "Id", 200, 490, CellType.ER_IDENTIFIER);
+		model.addCell("123", "Name", 280, 490, CellType.ER_ATTRIBUTE);
+		model.addCell("124", "Price", 350, 390, CellType.ER_ATTRIBUTE);
 
 		model.addEdge("100", "101", EdgeType.ER);
 		model.addEdge("110", "100", EdgeType.ER);
@@ -60,21 +60,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 100, 300, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 100, 400, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 100, 200, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 200, 200, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 200, 100, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 300, 200, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 400, 200, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 400, 100, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 300, 100, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 200, 300, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 300, 300, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 200, 400, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 200, 500, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 300, 500, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 300, 400, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryArrows(model);
 		graph.endUpdate();

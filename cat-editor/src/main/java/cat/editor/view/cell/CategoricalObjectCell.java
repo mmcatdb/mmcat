@@ -16,50 +16,44 @@ import javafx.scene.text.Text;
  */
 public class CategoricalObjectCell extends Cell {
 
-    private static final double SIZE = 10;
+	private static final double SIZE = 15;
 
-    public CategoricalObjectCell(String id) {
-        super(id);
+	public CategoricalObjectCell(String id, String name, double x, double y) {
+		super(id);
 
-        double size = 25;
-//        double size = (Math.random() * 50.0) + 10.0;
-//        Arc view = new Arc(size, size, size, size, size, size);
-        Circle view = new Circle(size, size, size);
-        view.setUserData("aaa");
+		Text text = new Text(name);
+		text.setFont(Font.font("DejaVu Sans Mono", 16));
+		double height = text.getBoundsInLocal().getHeight();
+		text.relocate(30, -(height / 2 - SIZE)-SIZE);
 
-//        this.relocate(Math.random()*200, 100);
-        Color color = Color.color(Math.random(), Math.random(), Math.random());
+		relocate(x, y);
 
-        
-        
-        view.setStroke(color);
-//        view.setStroke(Color.DODGERBLUE);
-        view.setFill(color);
-        view.setStrokeWidth(2);
-//        view.setFill(Color.DODGERBLUE);
+		Text idText = new Text(id);
+		idText.setFont(Font.font("DejaVu Sans Mono", 12));
 
-        setView(view);
+		double textWidth = idText.getBoundsInLocal().getWidth();
+		double textHeight = idText.getBoundsInLocal().getHeight();
 
-    }
+		double shapeWidth = SIZE * 2;
+		double shapeHeight = SIZE * 2;
 
-    public CategoricalObjectCell(String id, String name, double x, double y) {
-        super(id);
+		shapeWidth = shapeWidth > textWidth ? shapeWidth : textWidth + 10;
+		shapeHeight = shapeHeight > textHeight ? shapeHeight : textHeight + 10;
 
-        Text text = new Text(name);
-        text.setFont(Font.font("DejaVu Sans Mono", 20));
-        double height = text.getBoundsInLocal().getHeight();
-//        System.out.println(height + " ::: height");
-        text.relocate(25, -(height / 2 - SIZE));
+		double diffWidth = shapeWidth - textWidth;
+		double diffHeight = shapeHeight - textHeight;
+		idText.relocate(diffWidth / 2, diffHeight / 2);
 
-        Circle shape = new Circle(SIZE, SIZE, SIZE);
-        shape.setUserData("aaa");
-        shape.setStroke(Color.BLACK);
-        shape.setFill(Color.WHITE);
-        shape.setStrokeWidth(2);
+		Circle shape = new Circle(SIZE, SIZE, SIZE);
+		shape.setUserData("aaa");
+		shape.setStroke(Color.BLACK);
+		shape.setFill(Color.WHITE);
+		shape.setStrokeWidth(2);
 
-        setView(shape);
-        setView(text);
-        relocate(x, y);
-    }
+		setView(shape);
+		setView(text);
+		setView(idText);
+		relocate(x, y);
+	}
 
 }
