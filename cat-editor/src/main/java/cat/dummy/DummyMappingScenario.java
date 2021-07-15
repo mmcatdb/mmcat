@@ -124,75 +124,75 @@ public enum DummyMappingScenario {
                          }""");
 	}
 
-	public void buildProductKind(TextArea textArea) {
+//	public void buildProductKind(TextArea textArea) {
+//		textArea.setText("""
+//                         {
+//                         }""");
+//	}
+//
+//	public void buildProductKind2(TextArea textArea) {
+//		textArea.setText("""
+//                         {
+//                           id : 1
+//                         }""");
+//	}
+
+	public void buildProduct(TextArea textArea) {
 		textArea.setText("""
                          {
+                           id : 12,
+                           name : 13,
+                           price : 14
                          }""");
 	}
 
-	public void buildProductKind2(TextArea textArea) {
+	public void buildCustomer(TextArea textArea) {
 		textArea.setText("""
                          {
                            id : 1
                          }""");
 	}
 
-	public void buildProductKind3(TextArea textArea) {
+	public void buildOrders(TextArea textArea) {
 		textArea.setText("""
                          {
-                           id : 1,
-                           name : 2,
-                           price : 3
+                           id : 1.-2,
+                           number : 5.-3
                          }""");
 	}
 
-	public void buildProductCustomer(TextArea textArea) {
+	public void buildOrder(TextArea textArea) {
 		textArea.setText("""
                          {
-                           id : 1
+                           id : 1.-2.3,
+                           number : 5
                          }""");
 	}
 
-	public void buildProductOrders(TextArea textArea) {
+	public void buildItems(TextArea textArea) {
 		textArea.setText("""
                          {
-                           id : 1.1,
-                           number : 2.2
+                           id : 1.-2.3.9,
+                           number : 5.9,
+                           productId : 12.11,
+                           quantity: 10
                          }""");
 	}
 
-	public void buildProductOrder(TextArea textArea) {
+	public void buildContact(TextArea textArea) {
 		textArea.setText("""
                          {
-                           id : 1.1.2,
-                           number : 2
+                           id : 1.-2.3.4,
+                           number : 5.4,
+                           value : 7,
+                           name : 8.6
                          }""");
 	}
 
-	public void buildProductItems(TextArea textArea) {
+	public void buildType(TextArea textArea) {
 		textArea.setText("""
                          {
-                           id : 1.1.1.1,
-                           number : 2.2,
-                           productId : 3.3,
-                           quantity: 4
-                         }""");
-	}
-
-	public void buildProductContact(TextArea textArea) {
-		textArea.setText("""
-                         {
-                           id : 1.1.1.1,
-                           number : 2.2,
-                           value : 3,
-                           name : 4.4
-                         }""");
-	}
-
-	public void buildProductType(TextArea textArea) {
-		textArea.setText("""
-                         {
-                           name : 4
+                           name : 8
                          }""");
 	}
 

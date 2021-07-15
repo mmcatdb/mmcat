@@ -429,38 +429,38 @@ public class FXMLControllerDEMO {
 						}
 
 						case "PostgreSQL" -> {
-							DummyGraphScenario.INSTANCE.buildPostgreSQLKinds(graph);
+							DummyGraphScenario.INSTANCE.buildPostgreSQL(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectComponentTabs();
 						}
 						case "Contact" -> {
-							DummyGraphScenario.INSTANCE.buildProductContact(graph);
-							DummyMappingScenario.INSTANCE.buildProductContact(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildContact(graph);
+							DummyMappingScenario.INSTANCE.buildContact(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Customer" -> {
-							DummyGraphScenario.INSTANCE.buildProductCustomer(graph);
-							DummyMappingScenario.INSTANCE.buildProductCustomer(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildCustomer(graph);
+							DummyMappingScenario.INSTANCE.buildCustomer(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Items" -> {
-							DummyGraphScenario.INSTANCE.buildProductItems(graph);
-							DummyMappingScenario.INSTANCE.buildProductItems(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildItems(graph);
+							DummyMappingScenario.INSTANCE.buildItems(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Order" -> {
-							DummyGraphScenario.INSTANCE.buildProductOrder(graph);
-							DummyMappingScenario.INSTANCE.buildProductOrder(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrder(graph);
+							DummyMappingScenario.INSTANCE.buildOrder(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Orders" -> {
-							DummyGraphScenario.INSTANCE.buildProductOrders(graph);
-							DummyMappingScenario.INSTANCE.buildProductOrders(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildOrders(graph);
+							DummyMappingScenario.INSTANCE.buildOrders(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Product" -> {
-							DummyGraphScenario.INSTANCE.buildProductKind(graph);
-							DummyMappingScenario.INSTANCE.buildProductKind(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildProduct(graph);
+							DummyMappingScenario.INSTANCE.buildProduct(mappingTextArea);
 //							DummyGraphScenario.INSTANCE.buildProductKind2(graph);
 //							DummyMappingScenario.INSTANCE.buildProductKind2(mappingTextArea);
 //							DummyGraphScenario.INSTANCE.buildProductKind3(graph);
@@ -468,8 +468,8 @@ public class FXMLControllerDEMO {
 							selectMappingTabs();
 						}
 						case "Type" -> {
-							DummyGraphScenario.INSTANCE.buildProductType(graph);
-							DummyMappingScenario.INSTANCE.buildProductType(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildType(graph);
+							DummyMappingScenario.INSTANCE.buildType(mappingTextArea);
 							selectMappingTabs();
 						}
 						case "Data Migrations" -> {
