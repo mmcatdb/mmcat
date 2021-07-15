@@ -136,7 +136,6 @@ public enum DummyMappingScenario {
 //                           id : 1
 //                         }""");
 //	}
-
 	public void buildProduct(TextArea textArea) {
 		textArea.setText("""
                          {
@@ -196,16 +195,28 @@ public enum DummyMappingScenario {
                          }""");
 	}
 
-	public void buildCustomerNode(TextArea mappingTextArea) {
-		System.out.println("TODO!");
+	public void buildCustomerNode(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1
+                         }""");
 	}
 
-	public void buildOrderNode(TextArea mappingTextArea) {
-		System.out.println("TODO!");
+	public void buildOrderNode(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1.-2.3
+                           number : 5,
+                           8.6.-4 : 7.-4            
+                         }""");
 	}
 
-	public void buildOrdersEdge(TextArea mappingTextArea) {
-		System.out.println("TODO!");
+	public void buildOrdersEdge(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1.-2,
+                           number : 5.-3
+                         }""");
 	}
 
 }
