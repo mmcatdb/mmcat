@@ -6,7 +6,9 @@
 package cat.editor.view.edge;
 
 import cat.editor.view.cell.Cell;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
@@ -14,20 +16,23 @@ import javafx.scene.text.Text;
  *
  * @author pavel.koupil
  */
-public class CategoricalEdge extends Edge {
+public class PropertyNonbaseCategoricalEdge extends Edge {
 
 	private final Line line;
 
 	private static final double DIFF = 20;
 	private static final double EPSILON = 5;
 
-	public CategoricalEdge(String id, Cell source, Cell target) {
+	public PropertyNonbaseCategoricalEdge(String id, Cell source, Cell target) {
 		super(source, target);
 
 		source.addCellChild(target);
 		target.addCellParent(source);
 
 		line = new Line();
+		line.setStroke(EdgeColors.PROPERTY_STROKE_COLOR);
+		line.setFill(EdgeColors.PROPERTY_STROKE_COLOR);
+		line.getStrokeDashArray().addAll(5d, 5d);
 		line.setStrokeWidth(2);
 
 		var startX = source.layoutXProperty().add(source.getChildren().get(0).getBoundsInParent().getWidth() / 2.0);

@@ -10,6 +10,11 @@ package cat.editor.view.edge;
  * @author pavel.koupil
  */
 public enum EdgeType {
-    CATEGORICAL,
-    ER
+	CATEGORICAL,
+	AVAILABLE_CATEGORICAL,
+	SELECTED_CATEGORICAL,
+	PROPERTY_CATEGORICAL,
+	PROPERTY_NONBASE_CATEGORICAL,
+	NAME_CATEGORICAL,
+	ER
 }

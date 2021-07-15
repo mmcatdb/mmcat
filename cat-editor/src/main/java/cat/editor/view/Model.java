@@ -25,9 +25,14 @@ import cat.editor.view.cell.RootCell;
 import cat.editor.view.cell.SelectedKindCell;
 import cat.editor.view.cell.SelectedNameCell;
 import cat.editor.view.cell.SelectedPropertyObjectCell;
+import cat.editor.view.edge.AvailableCategoricalEdge;
 import cat.editor.view.edge.EREdge;
 import cat.editor.view.edge.Edge;
 import cat.editor.view.edge.EdgeType;
+import cat.editor.view.edge.NameCategoricalEdge;
+import cat.editor.view.edge.PropertyCategoricalEdge;
+import cat.editor.view.edge.PropertyNonbaseCategoricalEdge;
+import cat.editor.view.edge.SelectedCategoricalEdge;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -148,17 +153,6 @@ public class Model {
 
 	}
 
-//	public void addEdge(String id, String sourceId, String targetId) {
-//
-//		Cell sourceCell = cellMap.get(sourceId);
-//		Cell targetCell = cellMap.get(targetId);
-//
-//		CategoricalEdge edge = new CategoricalEdge(id, sourceCell, targetCell);
-//
-//		addedEdges.add(edge);
-//
-//	}
-
 	public void addEdge(String id, String sourceId, String targetId, EdgeType type) {
 		Cell sourceCell = cellMap.get(sourceId);
 		Cell targetCell = cellMap.get(targetId);
@@ -168,6 +162,16 @@ public class Model {
 		switch (type) {
 			case CATEGORICAL ->
 				edge = new CategoricalEdge(id, sourceCell, targetCell);
+			case AVAILABLE_CATEGORICAL ->
+				edge = new AvailableCategoricalEdge(id, sourceCell, targetCell);
+			case PROPERTY_CATEGORICAL ->
+				edge = new PropertyCategoricalEdge(id, sourceCell, targetCell);
+			case PROPERTY_NONBASE_CATEGORICAL ->
+				edge = new PropertyNonbaseCategoricalEdge(id, sourceCell, targetCell);
+			case SELECTED_CATEGORICAL ->
+				edge = new SelectedCategoricalEdge(id, sourceCell, targetCell);
+			case NAME_CATEGORICAL ->
+				edge = new NameCategoricalEdge(id, sourceCell, targetCell);
 			case ER ->
 				edge = new EREdge(sourceCell, targetCell);
 			default ->
