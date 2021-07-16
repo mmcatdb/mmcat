@@ -224,6 +224,16 @@
                                  </children></AnchorPane>
                         </content>
                       </Tab>
+                        <Tab fx:id="documentTab" text="Untitled Tab">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
+                        <Tab fx:id="graphTab" text="Untitled Tab">
+                          <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                          </content>
+                        </Tab>
                     </tabs>
                   </TabPane>
                </children>
@@ -238,7 +248,7 @@
                                  <children>
                                     <Pagination fx:id="shapesPagination" focusTraversable="false" layoutX="45.0" layoutY="23.0" maxPageIndicatorCount="6" pageCount="6" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
                                     <Separator layoutX="45.0" layoutY="242.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="212.0" />
-                                    <CheckBox fx:id="elementNameCheckbox" layoutX="34.0" layoutY="253.0" mnemonicParsing="false" text="Element name" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="248.0" />
+                                    <CheckBox fx:id="elementNameCheckbox" layoutX="34.0" layoutY="253.0" mnemonicParsing="false" text="Element name" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="248.0" />
                                     <CheckBox fx:id="arrowNameCheckbox" layoutX="34.0" layoutY="288.0" mnemonicParsing="false" text="Arrow name (role)" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="278.0" />
                                     <CheckBox fx:id="elementSignatureCheckbox" layoutX="27.0" layoutY="314.0" mnemonicParsing="false" text="Element signature" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="500.0" />
                                     <CheckBox fx:id="arrowSignatureCheckbox" layoutX="34.0" layoutY="342.0" mnemonicParsing="false" text="Arrow signature" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="530.0" />
@@ -349,9 +359,9 @@
                                     <Separator layoutX="30.0" layoutY="200.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="66.0" />
                                     <Button layoutX="17.0" layoutY="451.0" mnemonicParsing="false" prefWidth="140.0" text="Group Properties" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="36.0" />
                                     <Button layoutX="187.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Delete" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="162.0" />
-                                    <Button layoutX="14.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Group Properties" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="6.0" />
-                                    <Button layoutX="167.0" layoutY="451.0" mnemonicParsing="false" prefWidth="140.0" text="Ungroup Property" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="36.0" />
-                                    <Button layoutX="144.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Add Simple Property" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Button layoutX="14.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Simple Property" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Button layoutX="167.0" layoutY="451.0" mnemonicParsing="false" prefWidth="140.0" text="Ungroup Properties" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="36.0" />
+                                    <Button layoutX="144.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Complex Property" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
                                     <Button layoutX="24.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Confirm" AnchorPane.leftAnchor="12.0" AnchorPane.topAnchor="162.0" />
                                     <Button layoutX="101.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Cancel" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="110.0" AnchorPane.topAnchor="162.0" />
                                  </children>

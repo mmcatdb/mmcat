@@ -87,6 +87,12 @@ public class FXMLControllerDEMO {
 	private Tab textTab;
 
 	@FXML
+	private Tab documentTab;
+
+	@FXML
+	private Tab graphTab;
+
+	@FXML
 	private Tab positionTab;
 
 	@FXML
@@ -504,6 +510,8 @@ public class FXMLControllerDEMO {
 							initERPalette();
 							mainTabPane.getTabs().get(0).setText("ER Schema");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Categorical Schema" -> {
 							DummyGraphScenario.INSTANCE.buildCategoricalSchema(graph);
@@ -512,6 +520,8 @@ public class FXMLControllerDEMO {
 							initCategoryPalette();
 							mainTabPane.getTabs().get(0).setText("Categorical Schema");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "MongoDB" -> {
 							DummyGraphScenario.INSTANCE.buildMongoDB(graph);
@@ -519,6 +529,8 @@ public class FXMLControllerDEMO {
 							selectComponentTabs();
 							mainTabPane.getTabs().get(0).setText("MongoDB");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "OrderCollection" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection(graph);
@@ -529,6 +541,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order1" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_GroupingId(graph);
@@ -539,6 +553,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(false);
 							nameTextField.setText("_id");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order2" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_CompleteId(graph);
@@ -549,6 +565,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(false);
 							nameTextField.setText("number");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 //						case "Order3" -> {
 //							DummyGraphScenario.INSTANCE.buildMongoOrder_3_Contact(graph);
@@ -574,6 +592,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order6" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Items2(graph);
@@ -584,6 +604,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(false);
 							nameTextField.setText("items");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order7" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_InliningProduct(graph);
@@ -594,6 +616,9 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(false);
 							nameTextField.setText("id");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
+
 						}
 						case "Order8" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Complete(graph);
@@ -605,6 +630,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Neo4j" -> {
 							DummyGraphScenario.INSTANCE.buildNeo4j(graph);
@@ -612,6 +639,8 @@ public class FXMLControllerDEMO {
 							selectComponentTabs();
 							mainTabPane.getTabs().get(0).setText("Neo4j");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "CustomerNode" -> {
 							DummyGraphScenario.INSTANCE.buildCustomerNode(graph);
@@ -623,6 +652,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "OrderNode" -> {
 							DummyGraphScenario.INSTANCE.buildOrderNode(graph);
@@ -634,6 +665,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "OrdersEdge" -> {
 							DummyGraphScenario.INSTANCE.buildOrdersEdge(graph);
@@ -645,6 +678,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 
 						case "PostgreSQL" -> {
@@ -657,6 +692,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Contact" -> {
 							DummyGraphScenario.INSTANCE.buildContact(graph);
@@ -668,6 +705,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Customer" -> {
 							DummyGraphScenario.INSTANCE.buildCustomer(graph);
@@ -679,6 +718,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Items" -> {
 							DummyGraphScenario.INSTANCE.buildItems(graph);
@@ -690,6 +731,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order" -> {
 							DummyGraphScenario.INSTANCE.buildOrder(graph);
@@ -701,6 +744,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Orders" -> {
 							DummyGraphScenario.INSTANCE.buildOrders(graph);
@@ -712,6 +757,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Product" -> {
 							DummyGraphScenario.INSTANCE.buildProduct(graph);
@@ -727,6 +774,8 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Type" -> {
 							DummyGraphScenario.INSTANCE.buildType(graph);
@@ -738,22 +787,30 @@ public class FXMLControllerDEMO {
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Data Migrations" -> {
 							mainTabPane.getTabs().get(0).setText("Data Migrations");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Instance" -> {
 							mainTabPane.getTabs().get(0).setText("Instance");
 							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "MongoDB-Inst" -> {
 							DummyGraphScenario.INSTANCE.buildMongoDB(graph);
 							mainTabPane.getTabs().get(0).setText("MongoDB");
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectInstanceTabs();
-							mainTabPane.getTabs().add(1, instanceMainTab);
+							mainTabPane.getTabs().add(1, documentTab);
 							instanceMainTab.setText("OrderCollection");
+							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(graphTab);
 
 						}
 						case "Neo4j-Inst" -> {
@@ -762,8 +819,10 @@ public class FXMLControllerDEMO {
 //							DummyGraphScenario.INSTANCE.buildNeo4jInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectInstanceTabs();
-							mainTabPane.getTabs().add(1, instanceMainTab);
+							mainTabPane.getTabs().add(1, graphTab);
 							instanceMainTab.setText("Graph");
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(instanceMainTab);
 
 						}
 						case "PostgreSQL-Inst" -> {
@@ -773,6 +832,8 @@ public class FXMLControllerDEMO {
 							selectInstanceTabs();
 							mainTabPane.getTabs().add(1, instanceMainTab);
 							instanceMainTab.setText("Contact");
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
 
 						}
 					}
