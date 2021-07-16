@@ -28,8 +28,10 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -112,6 +114,39 @@ public class FXMLControllerDEMO {
 
 	@FXML
 	private SplitPane splitPane;
+
+	@FXML
+	private Pagination shapesPagination;
+
+	@FXML
+	private CheckBox elementNameCheckbox;
+
+	@FXML
+	private CheckBox arrowNameCheckbox;
+
+	@FXML
+	private CheckBox elementSignatureCheckbox;
+
+	@FXML
+	private CheckBox arrowSignatureCheckbox;
+
+	@FXML
+	private CheckBox nontrivialCardinalitiesCheckbox;
+
+	@FXML
+	private CheckBox trivialCardinalitiesCheckbox;
+
+	@FXML
+	private CheckBox superidentifierCheckbox;
+
+	@FXML
+	private CheckBox idsCheckbox;
+
+	@FXML
+	private CheckBox componentsCheckbox;
+
+	@FXML
+	private CheckBox kindsCheckbox;
 
 	private Graph graph = new Graph();
 
@@ -225,6 +260,32 @@ public class FXMLControllerDEMO {
 
 		return pattern;
 
+	}
+
+	private void selectedCategory() {
+		elementNameCheckbox.setSelected(true);
+		arrowNameCheckbox.setSelected(false);
+		elementSignatureCheckbox.setSelected(true);
+		arrowSignatureCheckbox.setSelected(true);
+		nontrivialCardinalitiesCheckbox.setSelected(false);
+		trivialCardinalitiesCheckbox.setSelected(false);
+		superidentifierCheckbox.setSelected(false);
+		idsCheckbox.setSelected(false);
+		componentsCheckbox.setSelected(false);
+		kindsCheckbox.setSelected(false);
+	}
+
+	private void selectedER() {
+		elementNameCheckbox.setSelected(true);
+		arrowNameCheckbox.setSelected(false);
+		elementSignatureCheckbox.setSelected(false);
+		arrowSignatureCheckbox.setSelected(false);
+		nontrivialCardinalitiesCheckbox.setSelected(false);
+		trivialCardinalitiesCheckbox.setSelected(false);
+		superidentifierCheckbox.setSelected(false);
+		idsCheckbox.setSelected(false);
+		componentsCheckbox.setSelected(false);
+		kindsCheckbox.setSelected(false);
 	}
 
 	private void selectEditorTabs() {
@@ -357,10 +418,12 @@ public class FXMLControllerDEMO {
 						case "ER Schema" -> {
 							DummyGraphScenario.INSTANCE.buildERSchema(graph);
 							selectEditorTabs();
+							selectedER();
 						}
 						case "Categorical Schema" -> {
 							DummyGraphScenario.INSTANCE.buildCategoricalSchema(graph);
 							selectEditorTabs();
+							selectedCategory();
 						}
 						case "MongoDB" -> {
 							DummyGraphScenario.INSTANCE.buildMongoDB(graph);

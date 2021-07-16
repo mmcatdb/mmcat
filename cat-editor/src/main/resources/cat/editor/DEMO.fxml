@@ -227,19 +227,23 @@
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="300.0">
                                  <children>
-                                    <Pagination focusTraversable="false" layoutX="45.0" layoutY="23.0" maxPageIndicatorCount="6" pageCount="6" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Pagination fx:id="shapesPagination" focusTraversable="false" layoutX="45.0" layoutY="23.0" maxPageIndicatorCount="6" pageCount="6" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
                                     <Separator layoutX="45.0" layoutY="242.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="212.0" />
-                                    <CheckBox layoutX="34.0" layoutY="253.0" mnemonicParsing="false" text="jméno objektu" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="218.0" />
-                                    <CheckBox layoutX="34.0" layoutY="288.0" mnemonicParsing="false" text="jméno morfismu" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="248.0" />
-                                    <CheckBox layoutX="27.0" layoutY="314.0" mnemonicParsing="false" text="signatura objektu" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="278.0" />
-                                    <CheckBox layoutX="34.0" layoutY="342.0" mnemonicParsing="false" text="signatura morfismu" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="308.0" />
-                                    <CheckBox layoutX="34.0" layoutY="372.0" mnemonicParsing="false" text="1/2 morfismy (oba směry)" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="338.0" />
-                                    <CheckBox layoutX="34.0" layoutY="398.0" mnemonicParsing="false" text="kardinality" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="368.0" />
-                                    <CheckBox layoutX="25.0" layoutY="416.0" mnemonicParsing="false" text="kardinality 1:1" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="398.0" />
-                                    <CheckBox layoutX="34.0" layoutY="474.0" mnemonicParsing="false" text="superid" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="428.0" />
-                                    <CheckBox layoutX="34.0" layoutY="511.0" mnemonicParsing="false" text="ids" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="458.0" />
-                                    <CheckBox layoutX="34.0" layoutY="553.0" mnemonicParsing="false" text="komponenty" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="488.0" />
-                                    <CheckBox layoutX="34.0" layoutY="595.0" mnemonicParsing="false" text="kind" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="518.0" />
+                                    <CheckBox fx:id="elementNameCheckbox" layoutX="34.0" layoutY="253.0" mnemonicParsing="false" text="Element name" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="248.0" />
+                                    <CheckBox fx:id="arrowNameCheckbox" layoutX="34.0" layoutY="288.0" mnemonicParsing="false" text="Arrow name (role)" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="278.0" />
+                                    <CheckBox fx:id="elementSignatureCheckbox" layoutX="27.0" layoutY="314.0" mnemonicParsing="false" text="Element signature" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="500.0" />
+                                    <CheckBox fx:id="arrowSignatureCheckbox" layoutX="34.0" layoutY="342.0" mnemonicParsing="false" text="Arrow signature" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="530.0" />
+                                    <CheckBox fx:id="nontrivialCardinalitiesCheckbox" layoutX="34.0" layoutY="398.0" mnemonicParsing="false" text="Non-trivial cardinalities" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="308.0" />
+                                    <CheckBox fx:id="trivialCardinalitiesCheckbox" layoutX="25.0" layoutY="416.0" mnemonicParsing="false" text="Trivial cardinalities (one-to-one)" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="338.0" />
+                                    <CheckBox fx:id="superidentifierCheckbox" layoutX="34.0" layoutY="474.0" mnemonicParsing="false" text="Superidentifier" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="560.0" />
+                                    <CheckBox fx:id="idsCheckbox" layoutX="34.0" layoutY="511.0" mnemonicParsing="false" text="Set of identifiers" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="590.0" />
+                                    <CheckBox fx:id="componentsCheckbox" layoutX="34.0" layoutY="553.0" mnemonicParsing="false" text="Database components" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="404.0" />
+                                    <CheckBox fx:id="kindsCheckbox" layoutX="34.0" layoutY="595.0" mnemonicParsing="false" text="Kinds" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="434.0" />
+                                    <Label layoutX="192.0" layoutY="227.0" text="Diagram detail" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="218.0" />
+                                    <Label layoutX="22.0" layoutY="346.0" text="Mapping detail" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="374.0" />
+                                    <Label layoutX="22.0" layoutY="576.0" text="Advanced detail" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="470.0" />
+                                    <Separator layoutX="55.0" layoutY="252.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="368.0" />
+                                    <Separator layoutX="65.0" layoutY="262.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="464.0" />
                                  </children></AnchorPane>
                           </content>
                         </Tab>

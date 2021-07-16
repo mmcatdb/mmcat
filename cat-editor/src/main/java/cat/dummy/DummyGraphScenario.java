@@ -37,6 +37,7 @@ public enum DummyGraphScenario {
 		model.addCell("122", "Id", 200, 490, CellType.ER_IDENTIFIER);
 		model.addCell("123", "Name", 280, 490, CellType.ER_ATTRIBUTE);
 		model.addCell("124", "Price", 350, 390, CellType.ER_ATTRIBUTE);
+		model.addCell("X", "", 170, 150, CellType.ER_WEAK_IDENTIFIER);
 
 		model.addEdge(null, "100", "101", EdgeType.ER);
 		model.addEdge(null, "110", "100", EdgeType.ER);

@@ -18,6 +18,7 @@ import cat.editor.view.cell.ERAttributeCell;
 import cat.editor.view.cell.EREntityCell;
 import cat.editor.view.cell.ERIdentifierCell;
 import cat.editor.view.cell.ERRelationshipCell;
+import cat.editor.view.cell.ERWeakIdentifierCell;
 import cat.editor.view.cell.KindCell;
 import cat.editor.view.cell.NameCell;
 import cat.editor.view.cell.PropertyCell;
@@ -138,6 +139,8 @@ public class Model {
 				cell = new ERAttributeCell(id, name, x, y);
 			case ER_IDENTIFIER ->
 				cell = new ERIdentifierCell(id, name, x, y);
+			case ER_WEAK_IDENTIFIER ->
+				cell = new ERWeakIdentifierCell(id, name, x, y);
 			default ->
 				cell = null;
 		}
