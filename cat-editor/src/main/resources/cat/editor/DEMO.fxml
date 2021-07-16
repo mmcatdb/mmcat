@@ -334,17 +334,17 @@
                           <content>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefWidth="300.0">
                                  <children>
-                                    <Label layoutX="23.0" layoutY="495.0" text="Property Name" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="508.0" />
-                                    <ChoiceBox fx:id="nameChoiceBox" layoutX="133.0" layoutY="537.0" prefWidth="200.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="508.0" />
-                                    <TextField fx:id="nameTextField" layoutX="133.0" layoutY="490.0" prefWidth="200.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="538.0" />
-                                    <Separator layoutX="30.0" layoutY="200.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="412.0" />
-                                    <Button layoutX="17.0" layoutY="451.0" mnemonicParsing="false" prefWidth="140.0" text="Group Properties" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="448.0" />
-                                    <Button layoutX="187.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Delete" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="598.0" />
-                                    <Button layoutX="14.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Group Properties" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="418.0" />
-                                    <Button layoutX="167.0" layoutY="451.0" mnemonicParsing="false" prefWidth="140.0" text="Ungroup Property" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="448.0" />
-                                    <Button layoutX="144.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Add Simple Property" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="418.0" />
-                                    <Button layoutX="24.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Confirm" AnchorPane.leftAnchor="12.0" AnchorPane.topAnchor="598.0" />
-                                    <Button layoutX="101.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Cancel" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="110.0" AnchorPane.topAnchor="598.0" />
+                                    <Label layoutX="23.0" layoutY="495.0" text="Property Name" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="72.0" />
+                                    <ChoiceBox fx:id="nameChoiceBox" layoutX="133.0" layoutY="537.0" prefWidth="180.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="72.0" />
+                                    <TextField fx:id="nameTextField" layoutX="133.0" layoutY="490.0" prefWidth="180.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="102.0" />
+                                    <Separator layoutX="30.0" layoutY="200.0" prefWidth="200.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="66.0" />
+                                    <Button layoutX="17.0" layoutY="451.0" mnemonicParsing="false" prefWidth="140.0" text="Group Properties" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="36.0" />
+                                    <Button layoutX="187.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Delete" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="162.0" />
+                                    <Button layoutX="14.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Group Properties" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Button layoutX="167.0" layoutY="451.0" mnemonicParsing="false" prefWidth="140.0" text="Ungroup Property" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="36.0" />
+                                    <Button layoutX="144.0" layoutY="415.0" mnemonicParsing="false" prefWidth="140.0" text="Add Simple Property" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Button layoutX="24.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Confirm" AnchorPane.leftAnchor="12.0" AnchorPane.topAnchor="162.0" />
+                                    <Button layoutX="101.0" layoutY="613.0" mnemonicParsing="false" prefWidth="80.0" text="Cancel" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="110.0" AnchorPane.topAnchor="162.0" />
                                  </children>
                               </AnchorPane>
                           </content>

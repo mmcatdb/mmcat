@@ -373,7 +373,7 @@ public class FXMLControllerDEMO {
 		tabPane.getTabs().remove(instanceTab);
 		tabPane.getTabs().add(1, accessPathTab);
 		tabPane.getTabs().add(2, ddlTab);
-		tabPane.getSelectionModel().select(mappingTab);
+		tabPane.getSelectionModel().select(accessPathTab);
 	}
 
 	private void selectComponentTabs() {
