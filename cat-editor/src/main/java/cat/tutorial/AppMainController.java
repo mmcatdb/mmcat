@@ -9,6 +9,7 @@ package cat.tutorial;
  *
  * @author pavel.koupil
  */
+import cat.editor.FXMLControllerAddDatabaseDialog;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -43,7 +44,7 @@ public class AppMainController implements Initializable {
     void onOpenDialog(ActionEvent event) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("AddPersonDialog.fxml"));
         Parent parent = fxmlLoader.load();
-        AddPersonDialogController dialogController = fxmlLoader.<AddPersonDialogController>getController();
+        FXMLControllerAddDatabaseDialog dialogController = fxmlLoader.<FXMLControllerAddDatabaseDialog>getController();
         dialogController.setAppMainObservableList(tvObservableList);
 
         Scene scene = new Scene(parent, 300, 200);
