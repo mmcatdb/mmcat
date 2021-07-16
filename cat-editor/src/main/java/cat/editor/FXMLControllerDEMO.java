@@ -10,6 +10,10 @@ import cat.dummy.DummyMappingScenario;
 import cat.editor.view.Graph;
 import cat.editor.view.Layout;
 import cat.editor.view.RandomLayout;
+import cat.editor.view.cell.ERAttributeCell;
+import cat.editor.view.cell.EREntityCell;
+import cat.editor.view.cell.ERIdentifierCell;
+import cat.editor.view.cell.ERRelationshipCell;
 import cat.tutorial.AddPersonDialogController;
 import java.io.IOException;
 import javafx.beans.binding.Bindings;
@@ -38,6 +42,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
@@ -68,6 +73,9 @@ public class FXMLControllerDEMO {
 	private ChoiceBox<String> zoom;
 
 	@FXML
+	private ChoiceBox<String> nameChoiceBox;
+
+	@FXML
 	private Tab diagramTab;
 
 	@FXML
@@ -92,6 +100,12 @@ public class FXMLControllerDEMO {
 	private Tab instanceTab;
 
 	@FXML
+	private Tab accessPathTab;
+
+	@FXML
+	private Tab ddlTab;
+
+	@FXML
 	private TextArea mappingTextArea;
 
 	@FXML
@@ -108,6 +122,9 @@ public class FXMLControllerDEMO {
 
 	@FXML
 	private TabPane tabPane;
+
+	@FXML
+	private TabPane mainTabPane;
 
 	@FXML
 	private TableView instanceTable;
@@ -147,6 +164,12 @@ public class FXMLControllerDEMO {
 
 	@FXML
 	private CheckBox kindsCheckbox;
+
+	@FXML
+	private TextField nameTextField;
+
+	@FXML
+	private TableView kindsTable;
 
 	private Graph graph = new Graph();
 
@@ -262,6 +285,42 @@ public class FXMLControllerDEMO {
 
 	}
 
+	private void initCategoryPalette() {
+		shapesPagination.setPageCount(2);
+		shapesPagination.setCurrentPageIndex(0);
+		shapesPagination.setMaxPageIndicatorCount(2);
+
+		shapesPagination.setPageFactory((pageIndex) -> {
+
+			Palette palette = new Palette();
+
+			palette.getChildren().add(new Rectangle(288, 200, Color.WHITE));
+//			palette.addElement(new EREntityCell("Entity Type", "", 50, 50));
+
+			return palette;
+		});
+	}
+
+	private void initERPalette() {
+		shapesPagination.setPageCount(6);
+		shapesPagination.setCurrentPageIndex(0);
+		shapesPagination.setMaxPageIndicatorCount(6);
+
+		shapesPagination.setPageFactory((pageIndex) -> {
+
+			Palette palette = new Palette();
+
+			palette.getChildren().add(new Rectangle(288, 200, Color.WHITE));
+
+			palette.addElement(new EREntityCell("Entity Type", "Entity", 30, 22));
+			palette.addElement(new ERRelationshipCell("Relationship Type", "Relationship", 174, 17));
+			palette.addElement(new ERAttributeCell("Attribute", "Attribute", 178, 100));
+			palette.addElement(new ERIdentifierCell("Identifier", "Identifier", 38, 100));
+
+			return palette;
+		});
+	}
+
 	private void selectedCategory() {
 		elementNameCheckbox.setSelected(true);
 		arrowNameCheckbox.setSelected(false);
@@ -297,6 +356,8 @@ public class FXMLControllerDEMO {
 		tabPane.getTabs().remove(mappingTab);
 		tabPane.getTabs().remove(componentTab);
 		tabPane.getTabs().remove(instanceTab);
+		tabPane.getTabs().remove(accessPathTab);
+		tabPane.getTabs().remove(ddlTab);
 
 		tabPane.getSelectionModel().select(diagramTab);
 	}
@@ -310,6 +371,8 @@ public class FXMLControllerDEMO {
 		tabPane.getTabs().add(0, mappingTab);
 		tabPane.getTabs().remove(componentTab);
 		tabPane.getTabs().remove(instanceTab);
+		tabPane.getTabs().add(1, accessPathTab);
+		tabPane.getTabs().add(2, ddlTab);
 		tabPane.getSelectionModel().select(mappingTab);
 	}
 
@@ -406,7 +469,6 @@ public class FXMLControllerDEMO {
 					Image image = createImage();
 					ImageView view = new ImageView();
 					view.setImage(image);
-					view.setImage(image);
 					graph.getCellLayer().getChildren().add(view);
 
 					graph.getScrollPane().minWidthProperty().bind(Bindings.createDoubleBinding(()
@@ -419,31 +481,49 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildERSchema(graph);
 							selectEditorTabs();
 							selectedER();
+							initERPalette();
+							mainTabPane.getTabs().get(0).setText("ER Schema");
 						}
 						case "Categorical Schema" -> {
 							DummyGraphScenario.INSTANCE.buildCategoricalSchema(graph);
 							selectEditorTabs();
 							selectedCategory();
+							initCategoryPalette();
+							mainTabPane.getTabs().get(0).setText("Categorical Schema");
 						}
 						case "MongoDB" -> {
 							DummyGraphScenario.INSTANCE.buildMongoDB(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectComponentTabs();
+							mainTabPane.getTabs().get(0).setText("MongoDB");
 						}
 						case "OrderCollection" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
+
 						}
 						case "Order1" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_GroupingId(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_GroupingId(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("User Defined");
+							nameTextField.setDisable(false);
+							nameTextField.setText("_id");
 						}
 						case "Order2" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_CompleteId(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_CompleteId(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("User Defined");
+							nameTextField.setDisable(false);
+							nameTextField.setText("number");
 						}
 //						case "Order3" -> {
 //							DummyGraphScenario.INSTANCE.buildMongoOrder_3_Contact(graph);
@@ -464,72 +544,135 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Items(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_Items(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Order6" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Items2(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_Items2(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("User Defined");
+							nameTextField.setDisable(false);
+							nameTextField.setText("items");
 						}
 						case "Order7" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_InliningProduct(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_InliningProduct(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("User Defined");
+							nameTextField.setDisable(false);
+							nameTextField.setText("id");
 						}
 						case "Order8" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Complete(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_Complete(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Neo4j" -> {
 							DummyGraphScenario.INSTANCE.buildNeo4j(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectComponentTabs();
+							mainTabPane.getTabs().get(0).setText("Neo4j");
 						}
 						case "CustomerNode" -> {
 							DummyGraphScenario.INSTANCE.buildCustomerNode(graph);
 							DummyMappingScenario.INSTANCE.buildCustomerNode(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("CustomerNode");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "OrderNode" -> {
 							DummyGraphScenario.INSTANCE.buildOrderNode(graph);
 							DummyMappingScenario.INSTANCE.buildOrderNode(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderNode");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "OrdersEdge" -> {
 							DummyGraphScenario.INSTANCE.buildOrdersEdge(graph);
 							DummyMappingScenario.INSTANCE.buildOrdersEdge(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrdersEdge");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 
 						case "PostgreSQL" -> {
 							DummyGraphScenario.INSTANCE.buildPostgreSQL(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectComponentTabs();
+							mainTabPane.getTabs().get(0).setText("PostgreSQL");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Contact" -> {
 							DummyGraphScenario.INSTANCE.buildContact(graph);
 							DummyMappingScenario.INSTANCE.buildContact(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("Contact");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Customer" -> {
 							DummyGraphScenario.INSTANCE.buildCustomer(graph);
 							DummyMappingScenario.INSTANCE.buildCustomer(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("Customer");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Items" -> {
 							DummyGraphScenario.INSTANCE.buildItems(graph);
 							DummyMappingScenario.INSTANCE.buildItems(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("Items");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Order" -> {
 							DummyGraphScenario.INSTANCE.buildOrder(graph);
 							DummyMappingScenario.INSTANCE.buildOrder(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("Order");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Orders" -> {
 							DummyGraphScenario.INSTANCE.buildOrders(graph);
 							DummyMappingScenario.INSTANCE.buildOrders(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("Orders");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Product" -> {
 							DummyGraphScenario.INSTANCE.buildProduct(graph);
@@ -539,30 +682,45 @@ public class FXMLControllerDEMO {
 //							DummyGraphScenario.INSTANCE.buildProductKind3(graph);
 //							DummyMappingScenario.INSTANCE.buildProductKind3(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("Product");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Type" -> {
 							DummyGraphScenario.INSTANCE.buildType(graph);
 							DummyMappingScenario.INSTANCE.buildType(mappingTextArea);
 							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("Type");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
 						}
 						case "Data Migrations" -> {
+							mainTabPane.getTabs().get(0).setText("Data Migrations");
 						}
 						case "Instance" -> {
+							mainTabPane.getTabs().get(0).setText("Instance");
 						}
 						case "MongoDB-Inst" -> {
 							DummyGraphScenario.INSTANCE.buildMongoDBInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectInstanceTabs();
+							mainTabPane.getTabs().get(0).setText("MongoDB-Inst");
 						}
 						case "Neo4j-Inst" -> {
 							DummyGraphScenario.INSTANCE.buildNeo4jInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectInstanceTabs();
+							mainTabPane.getTabs().get(0).setText("Neo4j-Inst");
 						}
 						case "PostgreSQL-Inst" -> {
 							DummyGraphScenario.INSTANCE.buildPostgreSQLInstance(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectInstanceTabs();
+							mainTabPane.getTabs().get(0).setText("PostgreSQL-Inst");
 						}
 					}
 					Layout layout = new RandomLayout(graph);
@@ -575,6 +733,8 @@ public class FXMLControllerDEMO {
 	}
 
 	public void initialize() {
+
+		mainTabPane.getTabs().remove(1);
 
 		splitPane.setDividerPosition(0, 0.2);
 		splitPane.setDividerPosition(1, 0.75);
@@ -607,6 +767,12 @@ public class FXMLControllerDEMO {
 		list.add("200%");
 		list.add("300%");
 		list.add("400%");
+
+		nameChoiceBox.setValue("Inherit");
+		ObservableList<String> nameList = nameChoiceBox.getItems();
+		nameList.add("User Defined");
+		nameList.add("Inherit");
+		nameList.add("Dynamic");
 
 		zoom.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<>() {
 			@Override
