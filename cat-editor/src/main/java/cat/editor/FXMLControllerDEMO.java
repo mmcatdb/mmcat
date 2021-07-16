@@ -363,40 +363,46 @@ public class FXMLControllerDEMO {
 	}
 
 	private void selectMappingTabs() {
-		tabPane.getTabs().remove(diagramTab);
+		tabPane.getTabs().add(0, diagramTab);
 		tabPane.getTabs().remove(elementTab);
 		tabPane.getTabs().remove(styleTab);
 		tabPane.getTabs().remove(textTab);
 		tabPane.getTabs().remove(positionTab);
-		tabPane.getTabs().add(0, mappingTab);
+		tabPane.getTabs().add(1, mappingTab);
 		tabPane.getTabs().remove(componentTab);
 		tabPane.getTabs().remove(instanceTab);
-		tabPane.getTabs().add(1, accessPathTab);
-		tabPane.getTabs().add(2, ddlTab);
+		tabPane.getTabs().add(2, accessPathTab);
+		tabPane.getTabs().add(3, ddlTab);
+		
 		tabPane.getSelectionModel().select(accessPathTab);
 	}
 
 	private void selectComponentTabs() {
-		tabPane.getTabs().remove(diagramTab);
+		tabPane.getTabs().add(0, diagramTab);
 		tabPane.getTabs().remove(elementTab);
 		tabPane.getTabs().remove(styleTab);
 		tabPane.getTabs().remove(textTab);
 		tabPane.getTabs().remove(positionTab);
 		tabPane.getTabs().remove(mappingTab);
-		tabPane.getTabs().add(0, componentTab);
+		tabPane.getTabs().add(1, componentTab);
 		tabPane.getTabs().remove(instanceTab);
+		tabPane.getTabs().remove(accessPathTab);
+		tabPane.getTabs().remove(ddlTab);
+		
 		tabPane.getSelectionModel().select(componentTab);
 	}
 
 	private void selectInstanceTabs() {
-		tabPane.getTabs().remove(diagramTab);
+		tabPane.getTabs().add(0, diagramTab);
 		tabPane.getTabs().remove(elementTab);
 		tabPane.getTabs().remove(styleTab);
 		tabPane.getTabs().remove(textTab);
 		tabPane.getTabs().remove(positionTab);
 		tabPane.getTabs().remove(mappingTab);
 		tabPane.getTabs().remove(componentTab);
-		tabPane.getTabs().add(0, instanceTab);
+		tabPane.getTabs().add(1, instanceTab);
+		tabPane.getTabs().remove(accessPathTab);
+		tabPane.getTabs().remove(ddlTab);
 		tabPane.getSelectionModel().select(instanceTab);
 
 	}
