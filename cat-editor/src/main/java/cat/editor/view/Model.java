@@ -176,7 +176,7 @@ public class Model {
 			case NAME_CATEGORICAL ->
 				edge = new NameCategoricalEdge(id, sourceCell, targetCell);
 			case ER ->
-				edge = new EREdge(sourceCell, targetCell);
+				edge = new EREdge(id, sourceCell, targetCell);
 			default ->
 				edge = null;
 		}

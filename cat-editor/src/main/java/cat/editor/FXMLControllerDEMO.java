@@ -47,6 +47,10 @@ import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
@@ -192,12 +196,76 @@ public class FXMLControllerDEMO {
 	private Tab instanceMainTab;
 
 	private Graph graph = new Graph();
+	private Graph graph2 = new Graph();
 
 	private double backupProjectDividerPosition = 0.0;
 	private double backupDetailDividerPosition = 0.0;
 
 	private double currentProjectDividerPosition;
 	private double currentDetailDividerPosition;
+
+	@FXML
+	private void magicButton(ActionEvent event) {
+		AnchorPane parent = (AnchorPane) mainTabPane.getParent();
+		System.out.println(parent + " IS PARENT!");
+
+		var children = parent.getChildren();
+		children.clear();
+
+		TabPane erTabPane = new TabPane();
+		Tab erTab = new Tab();
+		AnchorPane anchor = new AnchorPane();
+		erTab.setContent(anchor);
+
+		ScrollPane scrollPane2 = new ScrollPane();
+		anchor.getChildren().add(scrollPane2);
+
+		AnchorPane.setTopAnchor(scrollPane2, 0.0);
+		AnchorPane.setLeftAnchor(scrollPane2, 0.0);
+		AnchorPane.setRightAnchor(scrollPane2, 0.0);
+		AnchorPane.setBottomAnchor(scrollPane2, 0.0);
+
+		graph2 = new Graph();
+		scrollPane2.setContent(graph2.getScrollPane());
+
+		Image image = createImage();
+		ImageView view = new ImageView();
+		view.setImage(image);
+		graph2.getCellLayer().getChildren().add(view);
+
+		graph2.getScrollPane().minWidthProperty().bind(Bindings.createDoubleBinding(()
+				-> scrollPane2.getViewportBounds().getWidth(), scrollPane2.viewportBoundsProperty()));
+		graph2.getScrollPane().minHeightProperty().bind(Bindings.createDoubleBinding(()
+				-> scrollPane2.getViewportBounds().getHeight(), scrollPane2.viewportBoundsProperty()));
+
+		DummyGraphScenario.INSTANCE.buildERSchema(graph2);
+//							selectEditorTabs();
+//							selectedER();
+//							initERPalette();
+		erTabPane.getTabs().add(0, erTab);
+		erTabPane.getTabs().get(0).setText("ER Schema");
+//		erTabPane.getTabs().remove(instanceMainTab);
+//		erTabPane.getTabs().remove(documentTab);
+//		erTabPane.getTabs().remove(graphTab);
+		Layout layout = new RandomLayout(graph2);
+		layout.execute();
+
+		HBox box = new HBox();
+		box.setPrefWidth(Region.USE_COMPUTED_SIZE);
+		box.setPrefHeight(Region.USE_COMPUTED_SIZE);
+		box.getChildren().add(erTabPane);
+		box.getChildren().add(mainTabPane);
+
+		erTabPane.setPrefWidth(500);
+		erTabPane.setPrefHeight(Region.USE_COMPUTED_SIZE);
+		mainTabPane.setPrefWidth(426);
+		mainTabPane.setPrefHeight(Region.USE_COMPUTED_SIZE);
+
+//		box.getChildren().add(mainTabPane);
+		boolean add = children.add(box);
+		System.out.println("added: " + add);
+
+	}
 
 	@FXML
 	private void openCloseProjectAction(ActionEvent event) {
@@ -359,8 +427,8 @@ public class FXMLControllerDEMO {
 		arrowNameCheckbox.setSelected(false);
 		elementSignatureCheckbox.setSelected(false);
 		arrowSignatureCheckbox.setSelected(false);
-		nontrivialCardinalitiesCheckbox.setSelected(false);
-		trivialCardinalitiesCheckbox.setSelected(false);
+		nontrivialCardinalitiesCheckbox.setSelected(true);
+		trivialCardinalitiesCheckbox.setSelected(true);
 		superidentifierCheckbox.setSelected(false);
 		idsCheckbox.setSelected(false);
 		componentsCheckbox.setSelected(false);
@@ -848,7 +916,7 @@ public class FXMLControllerDEMO {
 
 	public void initialize() {
 
-		splitPane.setDividerPosition(0, 0.2);
+		splitPane.setDividerPosition(0, 0.15);
 		splitPane.setDividerPosition(1, 0.75);
 
 		currentProjectDividerPosition = splitPane.getDividerPositions()[0];
@@ -858,6 +926,7 @@ public class FXMLControllerDEMO {
 			@Override
 			public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
 				currentProjectDividerPosition = (double) t1;
+				System.out.println("PROJECT: " + currentProjectDividerPosition+ ":::" + t);
 			}
 		});
 
@@ -865,6 +934,7 @@ public class FXMLControllerDEMO {
 			@Override
 			public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
 				currentDetailDividerPosition = (double) t1;
+				System.out.println("DETAIL: " + currentDetailDividerPosition + ":::" + t);
 			}
 		});
 

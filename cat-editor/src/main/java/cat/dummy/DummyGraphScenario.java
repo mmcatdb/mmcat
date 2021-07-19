@@ -22,37 +22,37 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 260, CellType.ER_ENTITY);
-		model.addCell("101", "Id", 90, 370, CellType.ER_IDENTIFIER);
-		model.addCell("110", "Orders", 50, 135, CellType.ER_RELATIONSHIP);
-		model.addCell("111", "Order", 200, 140, CellType.ER_ENTITY);
-		model.addCell("112", "Number", 240, 50, CellType.ER_ATTRIBUTE);
-		model.addCell("113", "Contact", 350, 135, CellType.ER_RELATIONSHIP);
-		model.addCell("114", "Type", 500, 140, CellType.ER_ENTITY);
-		model.addCell("115", "Name", 540, 50, CellType.ER_IDENTIFIER);
-		model.addCell("116", "Value", 390, 50, CellType.ER_ATTRIBUTE);
-		model.addCell("117", "Items", 200, 255, CellType.ER_RELATIONSHIP);
-		model.addCell("118", "Quantity", 350, 270, CellType.ER_ATTRIBUTE);
-		model.addCell("121", "Product", 200, 380, CellType.ER_ENTITY);
-		model.addCell("122", "Id", 200, 490, CellType.ER_IDENTIFIER);
-		model.addCell("123", "Name", 280, 490, CellType.ER_ATTRIBUTE);
-		model.addCell("124", "Price", 350, 390, CellType.ER_ATTRIBUTE);
-		model.addCell("X", "", 170, 150, CellType.ER_WEAK_IDENTIFIER);
+		model.addCell("100", "Customer", 10, 220, CellType.ER_ENTITY);
+		model.addCell("101", "Id", 50, 330, CellType.ER_IDENTIFIER);
+		model.addCell("110", "Orders", 10, 95, CellType.ER_RELATIONSHIP);
+		model.addCell("111", "Order", 160, 100, CellType.ER_ENTITY);
+		model.addCell("112", "Number", 200, 10, CellType.ER_ATTRIBUTE);
+		model.addCell("113", "Contact", 310, 95, CellType.ER_RELATIONSHIP);
+		model.addCell("114", "Type", 460, 100, CellType.ER_ENTITY);
+		model.addCell("115", "Name", 500, 10, CellType.ER_IDENTIFIER);
+		model.addCell("116", "Value", 350, 10, CellType.ER_ATTRIBUTE);
+		model.addCell("117", "Items", 160, 215, CellType.ER_RELATIONSHIP);
+		model.addCell("118", "Quantity", 310, 230, CellType.ER_ATTRIBUTE);
+		model.addCell("121", "Product", 160, 340, CellType.ER_ENTITY);
+		model.addCell("122", "Id", 160, 450, CellType.ER_IDENTIFIER);
+		model.addCell("123", "Name", 240, 450, CellType.ER_ATTRIBUTE);
+		model.addCell("124", "Price", 310, 350, CellType.ER_ATTRIBUTE);
+		model.addCell("X", "", 130, 110, CellType.ER_WEAK_IDENTIFIER);
 
-		model.addEdge(null, "100", "101", EdgeType.ER);
-		model.addEdge(null, "110", "100", EdgeType.ER);
-		model.addEdge(null, "110", "111", EdgeType.ER);
-		model.addEdge(null, "113", "111", EdgeType.ER);
-		model.addEdge(null, "111", "112", EdgeType.ER);
-		model.addEdge(null, "113", "114", EdgeType.ER);
-		model.addEdge(null, "113", "116", EdgeType.ER);
-		model.addEdge(null, "114", "115", EdgeType.ER);
-		model.addEdge(null, "117", "111", EdgeType.ER);
-		model.addEdge(null, "117", "118", EdgeType.ER);
-		model.addEdge(null, "117", "121", EdgeType.ER);
-		model.addEdge(null, "121", "122", EdgeType.ER);
-		model.addEdge(null, "121", "123", EdgeType.ER);
-		model.addEdge(null, "121", "124", EdgeType.ER);
+		model.addEdge("", "100", "101", EdgeType.ER);
+		model.addEdge("(0,*)", "110", "100", EdgeType.ER);
+		model.addEdge("(1,1)", "110", "111", EdgeType.ER);
+		model.addEdge("(0,*)", "113", "111", EdgeType.ER);
+		model.addEdge("", "111", "112", EdgeType.ER);
+		model.addEdge("(0,*)", "113", "114", EdgeType.ER);
+		model.addEdge("", "113", "116", EdgeType.ER);
+		model.addEdge("", "114", "115", EdgeType.ER);
+		model.addEdge("(0,*)", "117", "111", EdgeType.ER);
+		model.addEdge("", "117", "118", EdgeType.ER);
+		model.addEdge("(0,*)", "117", "121", EdgeType.ER);
+		model.addEdge("", "121", "122", EdgeType.ER);
+		model.addEdge("", "121", "123", EdgeType.ER);
+		model.addEdge("", "121", "124", EdgeType.ER);
 		graph.endUpdate();
 	}
 
