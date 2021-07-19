@@ -5,6 +5,7 @@
  */
 package cat.editor;
 
+import cat.dummy.DummyDDLScenario;
 import cat.dummy.DummyGraphScenario;
 import cat.dummy.DummyMappingScenario;
 import cat.editor.view.Graph;
@@ -218,7 +219,6 @@ public class FXMLControllerDEMO {
 		secondaryTabPane.setPrefWidth(500);
 		mainTabPane.setPrefWidth(426);
 
-
 //		var children = parent.getChildren();
 //		children.clear();
 //
@@ -234,7 +234,6 @@ public class FXMLControllerDEMO {
 //		AnchorPane.setLeftAnchor(scrollPane2, 0.0);
 //		AnchorPane.setRightAnchor(scrollPane2, 0.0);
 //		AnchorPane.setBottomAnchor(scrollPane2, 0.0);
-
 		graph2 = new Graph();
 		scrollPane2.setContent(graph2.getScrollPane());
 
@@ -274,7 +273,6 @@ public class FXMLControllerDEMO {
 ////		box.getChildren().add(mainTabPane);
 //		boolean add = children.add(box);
 //		System.out.println("added: " + add);
-
 	}
 
 	@FXML
@@ -305,13 +303,27 @@ public class FXMLControllerDEMO {
 	private void handleStatementAction(ActionEvent event) {
 //        System.out.println("You clicked me!");
 		statementArea.setText("""
-                              CREATE TABLE Customer ( id TEXT);
-                              CREATE TABLE Orders (id TEXT, number TEXT);
-                              CREATE TABLE Order (id TEXT, number TEXT);
-                              CREATE TABLE Items (id TEXT, number TEXT, productId TEXT, quantity TEXT);
-                              CREATE TABLE Product (id TEXT, name TEXT, price TEXT);
-                              CREATE TABLE Contact (id TEXT, number TEXT, name TEXT, value TEXT);
-                              CREATE TABLE Type (Name TEXT);""");
+                              CREATE TABLE Customer (
+                              id TEXT
+                              );
+                        
+                              CREATE TABLE Contact (
+                              id TEXT,
+                              number TEXT,
+                              name TEXT,
+                              value TEXT
+                              );
+                   
+                              CREATE TABLE Orders (
+                              id TEXT,
+                              number TEXT,
+                              items JSONB
+                              );
+                                                
+                        CREATE TABLE Type (
+                              Name TEXT
+                              );
+                        """);
 	}
 
 	@FXML
@@ -475,6 +487,21 @@ public class FXMLControllerDEMO {
 		tabPane.getSelectionModel().select(accessPathTab);
 	}
 
+	private void selectDDLTabs() {
+		tabPane.getTabs().add(0, diagramTab);
+		tabPane.getTabs().remove(elementTab);
+		tabPane.getTabs().remove(styleTab);
+		tabPane.getTabs().remove(textTab);
+		tabPane.getTabs().remove(positionTab);
+		tabPane.getTabs().add(1, mappingTab);
+		tabPane.getTabs().remove(componentTab);
+		tabPane.getTabs().remove(instanceTab);
+		tabPane.getTabs().add(2, accessPathTab);
+		tabPane.getTabs().add(3, ddlTab);
+
+		tabPane.getSelectionModel().select(ddlTab);
+	}
+
 	private void selectComponentTabs() {
 		tabPane.getTabs().add(0, diagramTab);
 		tabPane.getTabs().remove(elementTab);
@@ -511,7 +538,7 @@ public class FXMLControllerDEMO {
 		TreeItem item2 = new TreeItem("Categorical Schema");
 		TreeItem item3 = new TreeItem("Database Components");
 		TreeItem item31 = new TreeItem("MongoDB");
-		TreeItem item32 = new TreeItem("Neo4j");
+//		TreeItem item32 = new TreeItem("Neo4j");
 		TreeItem item33 = new TreeItem("PostgreSQL");
 
 		TreeItem item311 = new TreeItem("OrderCollection");
@@ -525,16 +552,20 @@ public class FXMLControllerDEMO {
 		TreeItem item319 = new TreeItem("Order7");
 		TreeItem item3110 = new TreeItem("Order8");
 
-		TreeItem item321 = new TreeItem("CustomerNode");
-		TreeItem item322 = new TreeItem("OrderNode");
-		TreeItem item323 = new TreeItem("OrdersEdge");
-
+//		TreeItem item321 = new TreeItem("CustomerNode");
+//		TreeItem item322 = new TreeItem("OrderNode");
+//		TreeItem item323 = new TreeItem("OrdersEdge");
 		TreeItem item331 = new TreeItem("Contact");
 		TreeItem item332 = new TreeItem("Customer");
-		TreeItem item333 = new TreeItem("Items");
-		TreeItem item334 = new TreeItem("Order");
+//		TreeItem item333 = new TreeItem("Items");
+//		TreeItem item334 = new TreeItem("Order");
 		TreeItem item335 = new TreeItem("Orders");
-		TreeItem item336 = new TreeItem("Product");
+		TreeItem item3351 = new TreeItem("Orders1");
+		TreeItem item3352 = new TreeItem("Orders2");
+		TreeItem item3353 = new TreeItem("Orders3");
+		TreeItem item3354 = new TreeItem("Orders4");
+		TreeItem item3355 = new TreeItem("Orders5");
+//		TreeItem item336 = new TreeItem("Product");
 		TreeItem item337 = new TreeItem("Type");
 //		TreeItem item82 = new TreeItem("Product2");
 //		TreeItem item83 = new TreeItem("Product3");
@@ -542,7 +573,7 @@ public class FXMLControllerDEMO {
 		TreeItem item4 = new TreeItem("Data Migrations");
 		TreeItem item5 = new TreeItem("Instance");
 		TreeItem item51 = new TreeItem("MongoDB-Inst");
-		TreeItem item52 = new TreeItem("Neo4j-Inst");
+//		TreeItem item52 = new TreeItem("Neo4j-Inst");
 		TreeItem item53 = new TreeItem("PostgreSQL-Inst");
 
 //      root3.getChildren().addAll(item7, item8, item9);
@@ -550,11 +581,11 @@ public class FXMLControllerDEMO {
 		TreeItem<String> base = new TreeItem<>("MyProject");
 		base.setExpanded(true);
 		base.getChildren().addAll(item1, item2, item3, item4, item5);
-		item3.getChildren().addAll(item31, item32, item33);
+		item3.getChildren().addAll(item31, /*item32,*/ item33);
 		item31.getChildren().addAll(item311, item312, item313, item317, item318, item319, item3110);
-		item32.getChildren().addAll(item321, item322, item323);
-		item33.getChildren().addAll(item331, item332, item333, item334, item335, item336, item337);
-		item5.getChildren().addAll(item51, item52, item53);
+//		item32.getChildren().addAll(item321, item322, item323);
+		item33.getChildren().addAll(item331, item332, /*item333, item334,*/ item335, item3351, item3352, item3353, item3354, item3355, /*item336,*/ item337);
+		item5.getChildren().addAll(item51, /*item52,*/ item53);
 		//Creating a TreeView item
 		treeView.setRoot(base);
 
@@ -604,6 +635,7 @@ public class FXMLControllerDEMO {
 						case "MongoDB" -> {
 							DummyGraphScenario.INSTANCE.buildMongoDB(graph);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(statementArea);
 							selectComponentTabs();
 							mainTabPane.getTabs().get(0).setText("MongoDB");
 							mainTabPane.getTabs().remove(instanceMainTab);
@@ -613,6 +645,7 @@ public class FXMLControllerDEMO {
 						case "OrderCollection" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
 							nameChoiceBox.setValue("Inherit");
@@ -625,6 +658,7 @@ public class FXMLControllerDEMO {
 						case "Order1" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_GroupingId(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_GroupingId(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
 							nameChoiceBox.setValue("User Defined");
@@ -637,6 +671,7 @@ public class FXMLControllerDEMO {
 						case "Order2" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_CompleteId(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_CompleteId(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
 							nameChoiceBox.setValue("User Defined");
@@ -664,6 +699,7 @@ public class FXMLControllerDEMO {
 						case "Order60" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Items(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_Items(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
 							nameChoiceBox.setValue("Inherit");
@@ -676,6 +712,7 @@ public class FXMLControllerDEMO {
 						case "Order6" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Items2(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_Items2(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
 							nameChoiceBox.setValue("User Defined");
@@ -688,6 +725,7 @@ public class FXMLControllerDEMO {
 						case "Order7" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_InliningProduct(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_InliningProduct(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
 							nameChoiceBox.setValue("User Defined");
@@ -701,6 +739,7 @@ public class FXMLControllerDEMO {
 						case "Order8" -> {
 							DummyGraphScenario.INSTANCE.buildOrderCollection_Complete(graph);
 							DummyMappingScenario.INSTANCE.buildOrderCollection_Complete(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
 							nameChoiceBox.setDisable(true);
@@ -711,57 +750,58 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(documentTab);
 							mainTabPane.getTabs().remove(graphTab);
 						}
-						case "Neo4j" -> {
-							DummyGraphScenario.INSTANCE.buildNeo4j(graph);
-//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-							selectComponentTabs();
-							mainTabPane.getTabs().get(0).setText("Neo4j");
-							mainTabPane.getTabs().remove(instanceMainTab);
-							mainTabPane.getTabs().remove(documentTab);
-							mainTabPane.getTabs().remove(graphTab);
-						}
-						case "CustomerNode" -> {
-							DummyGraphScenario.INSTANCE.buildCustomerNode(graph);
-							DummyMappingScenario.INSTANCE.buildCustomerNode(mappingTextArea);
-							selectMappingTabs();
-							mainTabPane.getTabs().get(0).setText("CustomerNode");
-							nameChoiceBox.setDisable(true);
-							nameChoiceBox.setValue("Inherit");
-							nameTextField.setDisable(true);
-							nameTextField.setText("");
-							mainTabPane.getTabs().remove(instanceMainTab);
-							mainTabPane.getTabs().remove(documentTab);
-							mainTabPane.getTabs().remove(graphTab);
-						}
-						case "OrderNode" -> {
-							DummyGraphScenario.INSTANCE.buildOrderNode(graph);
-							DummyMappingScenario.INSTANCE.buildOrderNode(mappingTextArea);
-							selectMappingTabs();
-							mainTabPane.getTabs().get(0).setText("OrderNode");
-							nameChoiceBox.setDisable(true);
-							nameChoiceBox.setValue("Inherit");
-							nameTextField.setDisable(true);
-							nameTextField.setText("");
-							mainTabPane.getTabs().remove(instanceMainTab);
-							mainTabPane.getTabs().remove(documentTab);
-							mainTabPane.getTabs().remove(graphTab);
-						}
-						case "OrdersEdge" -> {
-							DummyGraphScenario.INSTANCE.buildOrdersEdge(graph);
-							DummyMappingScenario.INSTANCE.buildOrdersEdge(mappingTextArea);
-							selectMappingTabs();
-							mainTabPane.getTabs().get(0).setText("OrdersEdge");
-							nameChoiceBox.setDisable(true);
-							nameChoiceBox.setValue("Inherit");
-							nameTextField.setDisable(true);
-							nameTextField.setText("");
-							mainTabPane.getTabs().remove(instanceMainTab);
-							mainTabPane.getTabs().remove(documentTab);
-							mainTabPane.getTabs().remove(graphTab);
-						}
+//						case "Neo4j" -> {
+//							DummyGraphScenario.INSTANCE.buildNeo4j(graph);
+////                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+//							selectComponentTabs();
+//							mainTabPane.getTabs().get(0).setText("Neo4j");
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(graphTab);
+//						}
+//						case "CustomerNode" -> {
+//							DummyGraphScenario.INSTANCE.buildCustomerNode(graph);
+//							DummyMappingScenario.INSTANCE.buildCustomerNode(mappingTextArea);
+//							selectMappingTabs();
+//							mainTabPane.getTabs().get(0).setText("CustomerNode");
+//							nameChoiceBox.setDisable(true);
+//							nameChoiceBox.setValue("Inherit");
+//							nameTextField.setDisable(true);
+//							nameTextField.setText("");
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(graphTab);
+//						}
+//						case "OrderNode" -> {
+//							DummyGraphScenario.INSTANCE.buildOrderNode(graph);
+//							DummyMappingScenario.INSTANCE.buildOrderNode(mappingTextArea);
+//							selectMappingTabs();
+//							mainTabPane.getTabs().get(0).setText("OrderNode");
+//							nameChoiceBox.setDisable(true);
+//							nameChoiceBox.setValue("Inherit");
+//							nameTextField.setDisable(true);
+//							nameTextField.setText("");
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(graphTab);
+//						}
+//						case "OrdersEdge" -> {
+//							DummyGraphScenario.INSTANCE.buildOrdersEdge(graph);
+//							DummyMappingScenario.INSTANCE.buildOrdersEdge(mappingTextArea);
+//							selectMappingTabs();
+//							mainTabPane.getTabs().get(0).setText("OrdersEdge");
+//							nameChoiceBox.setDisable(true);
+//							nameChoiceBox.setValue("Inherit");
+//							nameTextField.setDisable(true);
+//							nameTextField.setText("");
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(graphTab);
+//						}
 
 						case "PostgreSQL" -> {
 							DummyGraphScenario.INSTANCE.buildPostgreSQL(graph);
+							DummyDDLScenario.INSTANCE.createPostgreSQLKinds(ddlStatementTextArea);
 //                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
 							selectComponentTabs();
 							mainTabPane.getTabs().get(0).setText("PostgreSQL");
@@ -776,7 +816,8 @@ public class FXMLControllerDEMO {
 						case "Contact" -> {
 							DummyGraphScenario.INSTANCE.buildContact(graph);
 							DummyMappingScenario.INSTANCE.buildContact(mappingTextArea);
-							selectMappingTabs();
+							DummyDDLScenario.INSTANCE.buildContact(ddlStatementTextArea);
+							selectDDLTabs();
 							mainTabPane.getTabs().get(0).setText("Contact");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -789,7 +830,8 @@ public class FXMLControllerDEMO {
 						case "Customer" -> {
 							DummyGraphScenario.INSTANCE.buildCustomer(graph);
 							DummyMappingScenario.INSTANCE.buildCustomer(mappingTextArea);
-							selectMappingTabs();
+							DummyDDLScenario.INSTANCE.buildCustomer(ddlStatementTextArea);
+							selectDDLTabs();
 							mainTabPane.getTabs().get(0).setText("Customer");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -799,36 +841,39 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(documentTab);
 							mainTabPane.getTabs().remove(graphTab);
 						}
-						case "Items" -> {
-							DummyGraphScenario.INSTANCE.buildItems(graph);
-							DummyMappingScenario.INSTANCE.buildItems(mappingTextArea);
-							selectMappingTabs();
-							mainTabPane.getTabs().get(0).setText("Items");
-							nameChoiceBox.setDisable(true);
-							nameChoiceBox.setValue("Inherit");
-							nameTextField.setDisable(true);
-							nameTextField.setText("");
-							mainTabPane.getTabs().remove(instanceMainTab);
-							mainTabPane.getTabs().remove(documentTab);
-							mainTabPane.getTabs().remove(graphTab);
-						}
-						case "Order" -> {
-							DummyGraphScenario.INSTANCE.buildOrder(graph);
-							DummyMappingScenario.INSTANCE.buildOrder(mappingTextArea);
-							selectMappingTabs();
-							mainTabPane.getTabs().get(0).setText("Order");
-							nameChoiceBox.setDisable(true);
-							nameChoiceBox.setValue("Inherit");
-							nameTextField.setDisable(true);
-							nameTextField.setText("");
-							mainTabPane.getTabs().remove(instanceMainTab);
-							mainTabPane.getTabs().remove(documentTab);
-							mainTabPane.getTabs().remove(graphTab);
-						}
+//						case "Items" -> {
+//							DummyGraphScenario.INSTANCE.buildItems(graph);
+//							DummyMappingScenario.INSTANCE.buildItems(mappingTextArea);
+//							DummyDDLScenario.INSTANCE.buildItems(ddlStatementTextArea);
+//							selectMappingTabs();
+//							mainTabPane.getTabs().get(0).setText("Items");
+//							nameChoiceBox.setDisable(true);
+//							nameChoiceBox.setValue("Inherit");
+//							nameTextField.setDisable(true);
+//							nameTextField.setText("");
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(graphTab);
+//						}
+//						case "Order" -> {
+//							DummyGraphScenario.INSTANCE.buildOrder(graph);
+//							DummyMappingScenario.INSTANCE.buildOrder(mappingTextArea);
+//							DummyDDLScenario.INSTANCE.buildOrder(mappingTextArea);
+//							selectMappingTabs();
+//							mainTabPane.getTabs().get(0).setText("Order");
+//							nameChoiceBox.setDisable(true);
+//							nameChoiceBox.setValue("Inherit");
+//							nameTextField.setDisable(true);
+//							nameTextField.setText("");
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(graphTab);
+//						}
 						case "Orders" -> {
-							DummyGraphScenario.INSTANCE.buildOrders(graph);
-							DummyMappingScenario.INSTANCE.buildOrders(mappingTextArea);
-							selectMappingTabs();
+							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_0(graph);
+							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_0(mappingTextArea);
+							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_0(ddlStatementTextArea);
+							selectDDLTabs();
 							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -838,15 +883,12 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(documentTab);
 							mainTabPane.getTabs().remove(graphTab);
 						}
-						case "Product" -> {
-							DummyGraphScenario.INSTANCE.buildProduct(graph);
-							DummyMappingScenario.INSTANCE.buildProduct(mappingTextArea);
-//							DummyGraphScenario.INSTANCE.buildProductKind2(graph);
-//							DummyMappingScenario.INSTANCE.buildProductKind2(mappingTextArea);
-//							DummyGraphScenario.INSTANCE.buildProductKind3(graph);
-//							DummyMappingScenario.INSTANCE.buildProductKind3(mappingTextArea);
-							selectMappingTabs();
-							mainTabPane.getTabs().get(0).setText("Product");
+						case "Orders1" -> {
+							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_1(graph);
+							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_1(mappingTextArea);
+							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_1(ddlStatementTextArea);
+							selectDDLTabs();
+							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
 							nameTextField.setDisable(true);
@@ -855,9 +897,84 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(documentTab);
 							mainTabPane.getTabs().remove(graphTab);
 						}
+						case "Orders2" -> {
+							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_2(graph);
+							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_2(mappingTextArea);
+							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_2(ddlStatementTextArea);
+							selectDDLTabs();
+							mainTabPane.getTabs().get(0).setText("Orders");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
+							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
+						}
+						case "Orders3" -> {
+							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_3(graph);
+							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_3(mappingTextArea);
+							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_3(ddlStatementTextArea);
+							selectDDLTabs();
+							mainTabPane.getTabs().get(0).setText("Orders");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
+							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
+						}
+						case "Orders4" -> {
+							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_4(graph);
+							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_4(mappingTextArea);
+							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_4(ddlStatementTextArea);
+							selectDDLTabs();
+							mainTabPane.getTabs().get(0).setText("Orders");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
+							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
+						}
+						case "Orders5" -> {
+							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_5(graph);
+							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_5(mappingTextArea);
+							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_5(ddlStatementTextArea);
+							selectDDLTabs();
+							mainTabPane.getTabs().get(0).setText("Orders");
+							nameChoiceBox.setDisable(true);
+							nameChoiceBox.setValue("Inherit");
+							nameTextField.setDisable(true);
+							nameTextField.setText("");
+							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
+						}
+//						case "Product" -> {
+//							DummyGraphScenario.INSTANCE.buildProduct(graph);
+//							DummyMappingScenario.INSTANCE.buildProduct(mappingTextArea);
+//							DummyDDLScenario.INSTANCE.buildProduct(mappingTextArea);
+////							DummyGraphScenario.INSTANCE.buildProductKind2(graph);
+////							DummyMappingScenario.INSTANCE.buildProductKind2(mappingTextArea);
+////							DummyGraphScenario.INSTANCE.buildProductKind3(graph);
+////							DummyMappingScenario.INSTANCE.buildProductKind3(mappingTextArea);
+//							selectMappingTabs();
+//							mainTabPane.getTabs().get(0).setText("Product");
+//							nameChoiceBox.setDisable(true);
+//							nameChoiceBox.setValue("Inherit");
+//							nameTextField.setDisable(true);
+//							nameTextField.setText("");
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(graphTab);
+//						}
 						case "Type" -> {
 							DummyGraphScenario.INSTANCE.buildType(graph);
 							DummyMappingScenario.INSTANCE.buildType(mappingTextArea);
+							DummyDDLScenario.INSTANCE.buildType(mappingTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Type");
 							nameChoiceBox.setDisable(true);
@@ -891,18 +1008,17 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(graphTab);
 
 						}
-						case "Neo4j-Inst" -> {
-							DummyGraphScenario.INSTANCE.buildNeo4j(graph);
-							mainTabPane.getTabs().get(0).setText("Neo4j");
-//							DummyGraphScenario.INSTANCE.buildNeo4jInstance(graph);
-//                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
-							selectInstanceTabs();
-							mainTabPane.getTabs().add(1, graphTab);
-							instanceMainTab.setText("Graph");
-							mainTabPane.getTabs().remove(documentTab);
-							mainTabPane.getTabs().remove(instanceMainTab);
-
-						}
+//						case "Neo4j-Inst" -> {
+//							DummyGraphScenario.INSTANCE.buildNeo4j(graph);
+//							mainTabPane.getTabs().get(0).setText("Neo4j");
+////							DummyGraphScenario.INSTANCE.buildNeo4jInstance(graph);
+////                            DummyMappingScenario.INSTANCE.buildMongoOrder_8_Complete(mappingTextArea);
+//							selectInstanceTabs();
+//							mainTabPane.getTabs().add(1, graphTab);
+//							instanceMainTab.setText("Graph");
+//							mainTabPane.getTabs().remove(documentTab);
+//							mainTabPane.getTabs().remove(instanceMainTab);
+//						}
 						case "PostgreSQL-Inst" -> {
 							DummyGraphScenario.INSTANCE.buildPostgreSQL(graph);
 							mainTabPane.getTabs().get(0).setText("PostgreSQL");

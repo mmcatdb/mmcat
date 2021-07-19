@@ -745,15 +745,15 @@ public enum DummyGraphScenario {
 		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_KIND);
 		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
 		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_KIND);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
 		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
 		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_KIND);
 		model.addCell("114", "Type", 410, 170, CellType.MAPPING_KIND);
 		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
 		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_KIND);
+		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
 		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_KIND);
+		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
 		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
 		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
 		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
@@ -953,71 +953,6 @@ public enum DummyGraphScenario {
 		model.addEdge("1.-2.3.9", "117", "101", EdgeType.PROPERTY_CATEGORICAL);
 		model.addEdge("5.9", "117", "112", EdgeType.PROPERTY_CATEGORICAL);
 		model.addEdge("12.11", "117", "122", EdgeType.PROPERTY_CATEGORICAL);
-	}
-
-	public void buildOrder(Graph graph) {
-		Model model = graph.getModel();
-
-		graph.beginUpdate();
-
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
-
-		addCategoryOrderArrows(model);
-		graph.endUpdate();
-	}
-
-	private void addCategoryOrderArrows(Model model) {
-		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
-		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
-
-		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
-		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
-		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
-		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
-
-		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
-		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
-
-		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
-		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
-
-		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
-		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
-		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
-		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
-
-		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
-		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
-
-		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
-		model.addEdge("-9", "111", "117", EdgeType.CATEGORICAL);
-		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
-		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
-		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
-		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
-
-		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
-		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
-		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
-		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
-		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
-		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
-
-		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
 	}
 
 	public void buildOrders(Graph graph) {
@@ -1374,5 +1309,488 @@ public enum DummyGraphScenario {
 //	public void buildCassandraInstance(Graph graph) {
 //		System.out.println("TODO");
 //	}
+	public void buildPostgreSQLOrder_0(Graph graph) {
+		Model model = graph.getModel();
 
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 170, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+
+		addCategoryPostgreSQLOrderArrows_0(model);
+		graph.endUpdate();
+	}
+
+	private void addCategoryPostgreSQLOrderArrows_0(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+//		model.addEdge("1.-2.3", "111", "101", EdgeType.CATEGORICAL);
+	}
+
+	public void buildPostgreSQLOrder_1(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 170, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+
+		addCategoryPostgreSQLOrderArrows_1(model);
+		graph.endUpdate();
+	}
+
+	private void addCategoryPostgreSQLOrderArrows_1(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_NONBASE_CATEGORICAL);
+	}
+
+	public void buildPostgreSQLOrder_2(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 170, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+
+		addCategoryPostgreSQLOrderArrows_2(model);
+		graph.endUpdate();
+	}
+
+	private void addCategoryPostgreSQLOrderArrows_2(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+	}
+
+	public void buildPostgreSQLOrder_3(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 170, 290, CellType.MAPPING_PROPERTY);
+		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 170, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+
+		addCategoryPostgreSQLOrderArrows_3(model);
+		graph.endUpdate();
+	}
+
+	private void addCategoryPostgreSQLOrderArrows_3(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+	}
+
+	public void buildPostgreSQLOrder_4(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 170, 290, CellType.MAPPING_PROPERTY);
+		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 170, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+
+		addCategoryPostgreSQLOrderArrows_4(model);
+		graph.endUpdate();
+	}
+
+	private void addCategoryPostgreSQLOrderArrows_4(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+	}
+
+	public void buildPostgreSQLOrder_5(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 170, 290, CellType.MAPPING_PROPERTY);
+		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 170, 530, CellType.MAPPING_PROPERTY);
+		model.addCell("123", "Name", 290, 530, CellType.MAPPING_PROPERTY);
+		model.addCell("124", "Price", 290, 410, CellType.MAPPING_PROPERTY);
+
+		addCategoryPostgreSQLOrderArrows_5(model);
+		graph.endUpdate();
+	}
+
+	private void addCategoryPostgreSQLOrderArrows_5(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+
+		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("12.11", "117", "122", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("13.11", "117", "123", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("14.11", "117", "124", EdgeType.PROPERTY_CATEGORICAL);
+	}
+
+//	public void buildOrder(Graph graph) {
+//		Model model = graph.getModel();
+//
+//		graph.beginUpdate();
+//
+//		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("122", "Id", 170, 530, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+//
+//		addCategoryOrderArrows(model);
+//		graph.endUpdate();
+//	}
+	
+	
+	
+	
+	public void buildMongoDBOrder_0(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 170, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+
+		addCategoryMongoDBOrderArrows_0(model);
+		graph.endUpdate();
+	}
+
+	private void addCategoryMongoDBOrderArrows_0(Model model) {
+		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
+		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
+
+//		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
+
+		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
+		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
+		model.addEdge("-3", "110", "111", EdgeType.CATEGORICAL);
+
+		model.addEdge("4", "113", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-4", "111", "113", EdgeType.CATEGORICAL);
+		model.addEdge("-5", "112", "111", EdgeType.CATEGORICAL);
+		model.addEdge("5", "111", "112", EdgeType.CATEGORICAL);
+
+		model.addEdge("6", "113", "114", EdgeType.CATEGORICAL);
+		model.addEdge("-6", "114", "113", EdgeType.CATEGORICAL);
+		model.addEdge("7", "113", "116", EdgeType.CATEGORICAL);
+		model.addEdge("-7", "116", "113", EdgeType.CATEGORICAL);
+
+		model.addEdge("8", "114", "115", EdgeType.CATEGORICAL);
+		model.addEdge("-8", "115", "114", EdgeType.CATEGORICAL);
+
+		model.addEdge("9", "117", "111", EdgeType.CATEGORICAL);
+		model.addEdge("-9", "111", "117", EdgeType.CATEGORICAL);
+		model.addEdge("10", "117", "118", EdgeType.CATEGORICAL);
+		model.addEdge("-10", "118", "117", EdgeType.CATEGORICAL);
+		model.addEdge("11", "117", "121", EdgeType.CATEGORICAL);
+		model.addEdge("-11", "121", "117", EdgeType.CATEGORICAL);
+
+		model.addEdge("12", "121", "122", EdgeType.CATEGORICAL);
+		model.addEdge("-12", "122", "121", EdgeType.CATEGORICAL);
+		model.addEdge("13", "121", "123", EdgeType.CATEGORICAL);
+		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
+		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
+		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+	}
 }

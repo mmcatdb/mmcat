@@ -219,4 +219,28 @@ public enum DummyMappingScenario {
                          }""");
 	}
 
+	public void buildPostgreSQLOrder_0(TextArea mappingTextArea) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	public void buildPostgreSQLOrder_1(TextArea mappingTextArea) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	public void buildPostgreSQLOrder_2(TextArea mappingTextArea) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	public void buildPostgreSQLOrder_3(TextArea mappingTextArea) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	public void buildPostgreSQLOrder_4(TextArea mappingTextArea) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	public void buildPostgreSQLOrder_5(TextArea mappingTextArea) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
 }
