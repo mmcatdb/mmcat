@@ -73,6 +73,9 @@ public class FXMLControllerDEMO {
 	private ScrollPane scrollPane;
 
 	@FXML
+	private ScrollPane scrollPane2;
+
+	@FXML
 	private ChoiceBox<String> zoom;
 
 	@FXML
@@ -112,6 +115,9 @@ public class FXMLControllerDEMO {
 	private Tab accessPathTab;
 
 	@FXML
+	private Tab erTab;
+
+	@FXML
 	private Tab ddlTab;
 
 	@FXML
@@ -134,6 +140,9 @@ public class FXMLControllerDEMO {
 
 	@FXML
 	private TabPane mainTabPane;
+
+	@FXML
+	private TabPane secondaryTabPane;
 
 	@FXML
 	private TableView instanceTable;
@@ -206,24 +215,25 @@ public class FXMLControllerDEMO {
 
 	@FXML
 	private void magicButton(ActionEvent event) {
-		AnchorPane parent = (AnchorPane) mainTabPane.getParent();
-		System.out.println(parent + " IS PARENT!");
+		secondaryTabPane.setPrefWidth(500);
+		mainTabPane.setPrefWidth(426);
 
-		var children = parent.getChildren();
-		children.clear();
 
-		TabPane erTabPane = new TabPane();
-		Tab erTab = new Tab();
-		AnchorPane anchor = new AnchorPane();
-		erTab.setContent(anchor);
-
-		ScrollPane scrollPane2 = new ScrollPane();
-		anchor.getChildren().add(scrollPane2);
-
-		AnchorPane.setTopAnchor(scrollPane2, 0.0);
-		AnchorPane.setLeftAnchor(scrollPane2, 0.0);
-		AnchorPane.setRightAnchor(scrollPane2, 0.0);
-		AnchorPane.setBottomAnchor(scrollPane2, 0.0);
+//		var children = parent.getChildren();
+//		children.clear();
+//
+//		TabPane erTabPane = new TabPane();
+//		Tab erTab = new Tab();
+//		AnchorPane anchor = new AnchorPane();
+//		erTab.setContent(anchor);
+//
+//		ScrollPane scrollPane2 = new ScrollPane();
+//		anchor.getChildren().add(scrollPane2);
+//
+//		AnchorPane.setTopAnchor(scrollPane2, 0.0);
+//		AnchorPane.setLeftAnchor(scrollPane2, 0.0);
+//		AnchorPane.setRightAnchor(scrollPane2, 0.0);
+//		AnchorPane.setBottomAnchor(scrollPane2, 0.0);
 
 		graph2 = new Graph();
 		scrollPane2.setContent(graph2.getScrollPane());
@@ -242,28 +252,28 @@ public class FXMLControllerDEMO {
 //							selectEditorTabs();
 //							selectedER();
 //							initERPalette();
-		erTabPane.getTabs().add(0, erTab);
-		erTabPane.getTabs().get(0).setText("ER Schema");
+//		secondaryTabPane.getTabs().add(0, erTab);
+		secondaryTabPane.getTabs().get(0).setText("ER Schema");
 //		erTabPane.getTabs().remove(instanceMainTab);
 //		erTabPane.getTabs().remove(documentTab);
 //		erTabPane.getTabs().remove(graphTab);
 		Layout layout = new RandomLayout(graph2);
 		layout.execute();
 
-		HBox box = new HBox();
-		box.setPrefWidth(Region.USE_COMPUTED_SIZE);
-		box.setPrefHeight(Region.USE_COMPUTED_SIZE);
-		box.getChildren().add(erTabPane);
-		box.getChildren().add(mainTabPane);
-
-		erTabPane.setPrefWidth(500);
-		erTabPane.setPrefHeight(Region.USE_COMPUTED_SIZE);
-		mainTabPane.setPrefWidth(426);
-		mainTabPane.setPrefHeight(Region.USE_COMPUTED_SIZE);
-
+//		HBox box = new HBox();
+//		box.setPrefWidth(Region.USE_COMPUTED_SIZE);
+//		box.setPrefHeight(Region.USE_COMPUTED_SIZE);
+//		box.getChildren().add(erTabPane);
 //		box.getChildren().add(mainTabPane);
-		boolean add = children.add(box);
-		System.out.println("added: " + add);
+//
+//		erTabPane.setPrefWidth(500);
+//		erTabPane.setPrefHeight(Region.USE_COMPUTED_SIZE);
+//		mainTabPane.setPrefWidth(426);
+//		mainTabPane.setPrefHeight(Region.USE_COMPUTED_SIZE);
+//
+////		box.getChildren().add(mainTabPane);
+//		boolean add = children.add(box);
+//		System.out.println("added: " + add);
 
 	}
 
@@ -311,7 +321,7 @@ public class FXMLControllerDEMO {
 		FXMLControllerAddDatabaseDialog dialogController = fxmlLoader.<FXMLControllerAddDatabaseDialog>getController();
 //        dialogController.setAppMainObservableList(tvObservableList);
 
-		Scene scene = new Scene(parent, 480, 380);
+		Scene scene = new Scene(parent, 480, 428);
 		Stage stage = new Stage();
 		stage.initModality(Modality.APPLICATION_MODAL);
 		stage.setScene(scene);
@@ -926,7 +936,7 @@ public class FXMLControllerDEMO {
 			@Override
 			public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {
 				currentProjectDividerPosition = (double) t1;
-				System.out.println("PROJECT: " + currentProjectDividerPosition+ ":::" + t);
+				System.out.println("PROJECT: " + currentProjectDividerPosition + ":::" + t);
 			}
 		});
 
