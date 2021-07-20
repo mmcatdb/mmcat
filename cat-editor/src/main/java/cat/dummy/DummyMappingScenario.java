@@ -219,28 +219,166 @@ public enum DummyMappingScenario {
                          }""");
 	}
 
-	public void buildPostgreSQLOrder_0(TextArea mappingTextArea) {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void buildPostgreSQLOrder_0(TextArea textArea) {
+		textArea.setText("""
+                         {
+                         }""");
+
 	}
 
-	public void buildPostgreSQLOrder_1(TextArea mappingTextArea) {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void buildPostgreSQLOrder_1(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1.-2.3
+                         }""");
 	}
 
-	public void buildPostgreSQLOrder_2(TextArea mappingTextArea) {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void buildPostgreSQLOrder_2(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1.-2.3,
+                           number : 5
+                         }""");
 	}
 
-	public void buildPostgreSQLOrder_3(TextArea mappingTextArea) {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void buildPostgreSQLOrder_3(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1.-2.3,
+                           number : 5,
+                           items : -9 {
+                           }
+                         }""");
 	}
 
-	public void buildPostgreSQLOrder_4(TextArea mappingTextArea) {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void buildPostgreSQLOrder_4(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1.-2.3,
+                           number : 5,
+                           items : -9 {
+                             quantity : 10
+                           }
+                         }""");
 	}
 
-	public void buildPostgreSQLOrder_5(TextArea mappingTextArea) {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public void buildPostgreSQLOrder_5(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           id : 1.-2.3,
+                           number : 5,
+                           items : -9 {
+                             quantity : 10,
+                             id : 12.11,
+                             name : 13.11,
+                             price : 14.11
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_0(TextArea textArea) {
+		textArea.setText("""
+                         {
+                         }""");
+	}
+
+	public void buildMongoDBOrder_1(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_2(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                             id : 1.-2.3
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_3(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                             id : 1.-2.3,
+                             number : 5
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_4(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                             id : 1.-2.3,
+                             number : 5
+                           },
+                           contact : -4 {
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_5(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                             id : 1.-2.3,
+                             number : 5
+                           },
+                           contact : -4 {
+                             : 7
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_6(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                             id : 1.-2.3,
+                             number : 5
+                           },
+                           contact : -4 {
+                             6.8 : 7
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_7(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                             id : 1.-2.3,
+                             number : 5
+                           },
+                           contact : -4 {
+                             6.8 : 7
+                           },
+                           items : -9 {
+                           }
+                         }""");
+	}
+
+	public void buildMongoDBOrder_8(TextArea textArea) {
+		textArea.setText("""
+                         {
+                           _id : {
+                             id : 1.-2.3,
+                             number : 5
+                           },
+                           contact : -4 {
+                             6.8 : 7
+                           },
+                           items : -9 {
+                             quantity : 10,
+                             id : 12.11,
+                             name : 13.11,
+                             price : 14.11
+                           }
+                         }""");
 	}
 
 }

@@ -541,16 +541,15 @@ public class FXMLControllerDEMO {
 //		TreeItem item32 = new TreeItem("Neo4j");
 		TreeItem item33 = new TreeItem("PostgreSQL");
 
-		TreeItem item311 = new TreeItem("OrderCollection");
-		TreeItem item312 = new TreeItem("Order1");
-		TreeItem item313 = new TreeItem("Order2");
-//		TreeItem item314 = new TreeItem("Order3");
-//		TreeItem item315 = new TreeItem("Order4");
-//		TreeItem item316 = new TreeItem("Order5");
-		TreeItem item317 = new TreeItem("Order60");
-		TreeItem item318 = new TreeItem("Order6");
-		TreeItem item319 = new TreeItem("Order7");
-		TreeItem item3110 = new TreeItem("Order8");
+		TreeItem item310 = new TreeItem("OrderCollection");
+		TreeItem item311 = new TreeItem("Order1");
+		TreeItem item312 = new TreeItem("Order2");
+		TreeItem item313 = new TreeItem("Order3");
+		TreeItem item314 = new TreeItem("Order4");
+		TreeItem item315 = new TreeItem("Order5");
+		TreeItem item316 = new TreeItem("Order6");
+		TreeItem item317 = new TreeItem("Order7");
+		TreeItem item318 = new TreeItem("Order8");
 
 //		TreeItem item321 = new TreeItem("CustomerNode");
 //		TreeItem item322 = new TreeItem("OrderNode");
@@ -582,7 +581,7 @@ public class FXMLControllerDEMO {
 		base.setExpanded(true);
 		base.getChildren().addAll(item1, item2, item3, item4, item5);
 		item3.getChildren().addAll(item31, /*item32,*/ item33);
-		item31.getChildren().addAll(item311, item312, item313, item317, item318, item319, item3110);
+		item31.getChildren().addAll(item310, item311, item312, item313, item314, item315, item316, item317, item318);
 //		item32.getChildren().addAll(item321, item322, item323);
 		item33.getChildren().addAll(item331, item332, /*item333, item334,*/ item335, item3351, item3352, item3353, item3354, item3355, /*item336,*/ item337);
 		item5.getChildren().addAll(item51, /*item52,*/ item53);
@@ -643,8 +642,8 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "OrderCollection" -> {
-							DummyGraphScenario.INSTANCE.buildOrderCollection(graph);
-							DummyMappingScenario.INSTANCE.buildOrderCollection(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_0(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_0(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
@@ -656,8 +655,8 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order1" -> {
-							DummyGraphScenario.INSTANCE.buildOrderCollection_GroupingId(graph);
-							DummyMappingScenario.INSTANCE.buildOrderCollection_GroupingId(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_1(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_1(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
@@ -669,8 +668,35 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order2" -> {
-							DummyGraphScenario.INSTANCE.buildOrderCollection_CompleteId(graph);
-							DummyMappingScenario.INSTANCE.buildOrderCollection_CompleteId(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_2(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_2(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
+							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("User Defined");
+							nameTextField.setDisable(false);
+							nameTextField.setText("_id");
+							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
+						}
+						case "Order3" -> {
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_3(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_3(mappingTextArea);
+							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
+							selectMappingTabs();
+							mainTabPane.getTabs().get(0).setText("OrderCollection");
+							nameChoiceBox.setValue("User Defined");
+							nameTextField.setDisable(false);
+							nameTextField.setText("_id");
+							mainTabPane.getTabs().remove(instanceMainTab);
+							mainTabPane.getTabs().remove(documentTab);
+							mainTabPane.getTabs().remove(graphTab);
+						}
+
+						case "Order4" -> {
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_4(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_4(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
@@ -681,28 +707,13 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(documentTab);
 							mainTabPane.getTabs().remove(graphTab);
 						}
-//						case "Order3" -> {
-//							DummyGraphScenario.INSTANCE.buildMongoOrder_3_Contact(graph);
-//							DummyMappingScenario.INSTANCE.buildMongoOrder_3_Contact(mappingTextArea);
-//							selectMappingTabs();
-//						}
-//						case "Order4" -> {
-//							DummyGraphScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(graph);
-//							DummyMappingScenario.INSTANCE.buildMongoOrder_4_ContactTypeName(mappingTextArea);
-//							selectMappingTabs();
-//						}
-//						case "Order5" -> {
-//							DummyGraphScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(graph);
-//							DummyMappingScenario.INSTANCE.buildMongoOrder_5_ContactTypeSelectedName(mappingTextArea);
-//							selectMappingTabs();
-//						}
-						case "Order60" -> {
-							DummyGraphScenario.INSTANCE.buildOrderCollection_Items(graph);
-							DummyMappingScenario.INSTANCE.buildOrderCollection_Items(mappingTextArea);
+						case "Order5" -> {
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_5(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_5(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
-							nameChoiceBox.setValue("Inherit");
+							nameChoiceBox.setValue("Dynamic");
 							nameTextField.setDisable(true);
 							nameTextField.setText("");
 							mainTabPane.getTabs().remove(instanceMainTab);
@@ -710,8 +721,8 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order6" -> {
-							DummyGraphScenario.INSTANCE.buildOrderCollection_Items2(graph);
-							DummyMappingScenario.INSTANCE.buildOrderCollection_Items2(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_6(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_6(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
@@ -723,8 +734,8 @@ public class FXMLControllerDEMO {
 							mainTabPane.getTabs().remove(graphTab);
 						}
 						case "Order7" -> {
-							DummyGraphScenario.INSTANCE.buildOrderCollection_InliningProduct(graph);
-							DummyMappingScenario.INSTANCE.buildOrderCollection_InliningProduct(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_7(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_7(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");
@@ -737,8 +748,8 @@ public class FXMLControllerDEMO {
 
 						}
 						case "Order8" -> {
-							DummyGraphScenario.INSTANCE.buildOrderCollection_Complete(graph);
-							DummyMappingScenario.INSTANCE.buildOrderCollection_Complete(mappingTextArea);
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_8(graph);
+							DummyMappingScenario.INSTANCE.buildMongoDBOrder_8(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("OrderCollection");

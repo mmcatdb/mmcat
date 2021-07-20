@@ -32,6 +32,7 @@ import cat.editor.view.edge.Edge;
 import cat.editor.view.edge.EdgeType;
 import cat.editor.view.edge.NameCategoricalEdge;
 import cat.editor.view.edge.PropertyCategoricalEdge;
+import cat.editor.view.edge.PropertyIncompleteCategoricalEdge;
 import cat.editor.view.edge.PropertyNonbaseCategoricalEdge;
 import cat.editor.view.edge.SelectedCategoricalEdge;
 import java.util.ArrayList;
@@ -171,6 +172,8 @@ public class Model {
 				edge = new PropertyCategoricalEdge(id, sourceCell, targetCell);
 			case PROPERTY_NONBASE_CATEGORICAL ->
 				edge = new PropertyNonbaseCategoricalEdge(id, sourceCell, targetCell);
+			case PROPERTY_INCOMPLETE_CATEGORICAL ->
+				edge = new PropertyIncompleteCategoricalEdge(id, sourceCell, targetCell);
 			case SELECTED_CATEGORICAL ->
 				edge = new SelectedCategoricalEdge(id, sourceCell, targetCell);
 			case NAME_CATEGORICAL ->
