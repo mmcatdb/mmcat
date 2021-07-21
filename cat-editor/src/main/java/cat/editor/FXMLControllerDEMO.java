@@ -119,9 +119,8 @@ public class FXMLControllerDEMO {
 	@FXML
 	private Tab erTab;
 
-	@FXML
-	private Tab ddlTab;
-
+//	@FXML
+//	private Tab ddlTab;
 	@FXML
 	private TextArea mappingTextArea;
 
@@ -468,7 +467,7 @@ public class FXMLControllerDEMO {
 		tabPane.getTabs().remove(componentTab);
 		tabPane.getTabs().remove(instanceTab);
 		tabPane.getTabs().remove(accessPathTab);
-		tabPane.getTabs().remove(ddlTab);
+//		tabPane.getTabs().remove(ddlTab);
 
 		tabPane.getSelectionModel().select(diagramTab);
 	}
@@ -483,26 +482,25 @@ public class FXMLControllerDEMO {
 		tabPane.getTabs().remove(componentTab);
 		tabPane.getTabs().remove(instanceTab);
 		tabPane.getTabs().add(2, accessPathTab);
-		tabPane.getTabs().add(3, ddlTab);
+//		tabPane.getTabs().add(3, ddlTab);
 
 		tabPane.getSelectionModel().select(accessPathTab);
 	}
 
-	private void selectDDLTabs() {
-		tabPane.getTabs().add(0, diagramTab);
-		tabPane.getTabs().remove(elementTab);
-		tabPane.getTabs().remove(styleTab);
-		tabPane.getTabs().remove(textTab);
-		tabPane.getTabs().remove(positionTab);
-		tabPane.getTabs().add(1, mappingTab);
-		tabPane.getTabs().remove(componentTab);
-		tabPane.getTabs().remove(instanceTab);
-		tabPane.getTabs().add(2, accessPathTab);
-		tabPane.getTabs().add(3, ddlTab);
-
-		tabPane.getSelectionModel().select(ddlTab);
-	}
-
+//	private void selectDDLTabs() {
+//		tabPane.getTabs().add(0, diagramTab);
+//		tabPane.getTabs().remove(elementTab);
+//		tabPane.getTabs().remove(styleTab);
+//		tabPane.getTabs().remove(textTab);
+//		tabPane.getTabs().remove(positionTab);
+//		tabPane.getTabs().add(1, mappingTab);
+//		tabPane.getTabs().remove(componentTab);
+//		tabPane.getTabs().remove(instanceTab);
+//		tabPane.getTabs().add(2, accessPathTab);
+//		tabPane.getTabs().add(3, ddlTab);
+//
+//		tabPane.getSelectionModel().select(ddlTab);
+//	}
 	private void selectComponentTabs() {
 		tabPane.getTabs().add(0, diagramTab);
 		tabPane.getTabs().remove(elementTab);
@@ -513,7 +511,7 @@ public class FXMLControllerDEMO {
 		tabPane.getTabs().add(1, componentTab);
 		tabPane.getTabs().remove(instanceTab);
 		tabPane.getTabs().remove(accessPathTab);
-		tabPane.getTabs().remove(ddlTab);
+//		tabPane.getTabs().remove(ddlTab);
 
 		tabPane.getSelectionModel().select(componentTab);
 	}
@@ -528,7 +526,7 @@ public class FXMLControllerDEMO {
 		tabPane.getTabs().remove(componentTab);
 		tabPane.getTabs().add(1, instanceTab);
 		tabPane.getTabs().remove(accessPathTab);
-		tabPane.getTabs().remove(ddlTab);
+//		tabPane.getTabs().remove(ddlTab);
 		tabPane.getSelectionModel().select(instanceTab);
 
 	}
@@ -829,7 +827,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildContact(graph);
 							DummyMappingScenario.INSTANCE.buildContact(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildContact(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Contact");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -843,7 +841,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildCustomer(graph);
 							DummyMappingScenario.INSTANCE.buildCustomer(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildCustomer(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Customer");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -885,7 +883,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_0(graph);
 							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_0(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_0(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -899,7 +897,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_1(graph);
 							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_1(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_1(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -913,7 +911,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_2(graph);
 							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_2(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_2(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -927,7 +925,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_3(graph);
 							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_3(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_3(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -941,7 +939,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_4(graph);
 							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_4(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_4(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -955,7 +953,7 @@ public class FXMLControllerDEMO {
 							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_5(graph);
 							DummyMappingScenario.INSTANCE.buildPostgreSQLOrder_5(mappingTextArea);
 							DummyDDLScenario.INSTANCE.buildPostgreSQLOrder_5(ddlStatementTextArea);
-							selectDDLTabs();
+							selectMappingTabs();
 							mainTabPane.getTabs().get(0).setText("Orders");
 							nameChoiceBox.setDisable(true);
 							nameChoiceBox.setValue("Inherit");
@@ -1061,7 +1059,6 @@ public class FXMLControllerDEMO {
 //		} else {
 //			System.out.println("DIVIDER IS NULL");
 //		}
-
 //		splitPane.setDividerPosition(0, 0.15);
 //		splitPane.setDividerPosition(1, 0.75);
 		currentProjectDividerPosition = splitPane.getDividerPositions()[0];

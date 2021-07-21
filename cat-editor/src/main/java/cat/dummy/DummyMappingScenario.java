@@ -342,7 +342,7 @@ public enum DummyMappingScenario {
                              number : 5
                            },
                            contact : -4 {
-                             6.8 : 7
+                             8.6 : 7
                            }
                          }""");
 	}
@@ -355,7 +355,7 @@ public enum DummyMappingScenario {
                              number : 5
                            },
                            contact : -4 {
-                             6.8 : 7
+                             8.6 : 7
                            },
                            items : -9 {
                            }
@@ -370,7 +370,7 @@ public enum DummyMappingScenario {
                              number : 5
                            },
                            contact : -4 {
-                             6.8 : 7
+                             8.6 : 7
                            },
                            items : -9 {
                              quantity : 10,
