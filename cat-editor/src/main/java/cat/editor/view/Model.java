@@ -20,9 +20,12 @@ import cat.editor.view.cell.ERIdentifierCell;
 import cat.editor.view.cell.ERRelationshipCell;
 import cat.editor.view.cell.ERWeakIdentifierCell;
 import cat.editor.view.cell.KindCell;
+import cat.editor.view.cell.MongoDBKindCell;
 import cat.editor.view.cell.NameCell;
+import cat.editor.view.cell.PostgreSQLKindCell;
 import cat.editor.view.cell.PropertyCell;
 import cat.editor.view.cell.RootCell;
+import cat.editor.view.cell.SelectedCell;
 import cat.editor.view.cell.SelectedKindCell;
 import cat.editor.view.cell.SelectedNameCell;
 import cat.editor.view.cell.SelectedPropertyObjectCell;
@@ -142,6 +145,12 @@ public class Model {
 				cell = new ERIdentifierCell(id, name, x, y);
 			case ER_WEAK_IDENTIFIER ->
 				cell = new ERWeakIdentifierCell(id, name, x, y);
+			case SELECTED ->
+				cell = new SelectedCell(id, name, x, y);
+			case MONGODB_KIND ->
+				cell = new MongoDBKindCell(id, name, x, y);
+			case POSTGRESQL_KIND ->
+				cell = new PostgreSQLKindCell(id, name, x, y);
 			default ->
 				cell = null;
 		}

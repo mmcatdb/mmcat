@@ -23,5 +23,11 @@ public abstract class CellColors {
 	public static final Color PROPERTY_FILL_COLOR = Color.web("FFE6CC");
 	public static final Color NAME_FILL_COLOR = Color.web("DAE8FC");
 	public static final Color OBJECT_FILL_COLOR = Color.web("FFFFFF");
+	
+	public static final Color MONGODB_STROKE_COLOR = Color.web("82B366");
+	public static final Color POSTGRESQL_STROKE_COLOR = Color.web("9673A6");
+	
+	public static final Color MONGODB_FILL_COLOR = Color.web("D5E8D4");
+	public static final Color POSTGRESQL_FILL_COLOR = Color.web("E1D5E7");
 
 }

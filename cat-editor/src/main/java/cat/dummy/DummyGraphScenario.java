@@ -61,21 +61,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryArrows(model);
 		graph.endUpdate();
@@ -122,21 +122,21 @@ public enum DummyGraphScenario {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.MONGODB_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryArrows(model);
 		graph.endUpdate();
@@ -147,21 +147,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryArrows(model);
 		graph.endUpdate();
@@ -172,21 +172,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryArrows(model);
 		graph.endUpdate();
@@ -197,21 +197,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryOrder2Arrows(model);
 		graph.endUpdate();
@@ -261,21 +261,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_SELECTED_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_SELECTED_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryOrder60Arrows(model);
 		graph.endUpdate();
@@ -325,21 +325,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryOrder6Arrows(model);
 		graph.endUpdate();
@@ -389,21 +389,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryOrder7Arrows(model);
 		graph.endUpdate();
@@ -455,21 +455,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_PROPERTY);
 
 		addCategoryOrder8Arrows(model);
 		graph.endUpdate();
@@ -523,21 +523,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_KIND);
-		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_KIND);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_KIND);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_KIND);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryArrows(model);
 		graph.endUpdate();
@@ -548,21 +548,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_KIND);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_KIND);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryCustomerNodeArrows(model);
 		graph.endUpdate();
@@ -610,21 +610,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_NAME);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_NAME);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryOrderNodeArrows(model);
 		graph.endUpdate();
@@ -677,21 +677,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_KIND);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_KIND);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryOrderEdgeArrows(model);
 		graph.endUpdate();
@@ -742,21 +742,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_KIND);
-		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_KIND);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_KIND);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.POSTGRESQL_KIND);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.POSTGRESQL_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.POSTGRESQL_KIND);
+		model.addCell("114", "Type", 370, 140, CellType.POSTGRESQL_KIND);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryArrows(model);
 		graph.endUpdate();
@@ -767,21 +767,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_KIND);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_KIND);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryContactArrows(model);
 		graph.endUpdate();
@@ -825,6 +825,7 @@ public enum DummyGraphScenario {
 
 		model.addEdge("5.4", "113", "112", EdgeType.PROPERTY_CATEGORICAL);
 		model.addEdge("8.6", "113", "115", EdgeType.PROPERTY_CATEGORICAL);
+		model.addEdge("1.-2.3.4", "113", "101", EdgeType.PROPERTY_CATEGORICAL);
 	}
 
 	public void buildCustomer(Graph graph) {
@@ -832,21 +833,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_KIND);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_KIND);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryCustomerArrows(model);
 		graph.endUpdate();
@@ -894,21 +895,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_KIND);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_KIND);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryItemsArrows(model);
 		graph.endUpdate();
@@ -961,21 +962,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_KIND);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_KIND);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryOrdersArrows(model);
 		graph.endUpdate();
@@ -1026,21 +1027,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_KIND);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_KIND);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_PROPERTY);
 
 		addCategoryProductArrows(model);
 		graph.endUpdate();
@@ -1090,21 +1091,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_KIND);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_KIND);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryTypeArrows(model);
 		graph.endUpdate();
@@ -1315,21 +1316,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_SELECTED_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_SELECTED_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryPostgreSQLOrderArrows_0(model);
 		graph.endUpdate();
@@ -1380,21 +1381,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_SELECTED_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_SELECTED_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryPostgreSQLOrderArrows_1(model);
 		graph.endUpdate();
@@ -1445,21 +1446,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_SELECTED_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_SELECTED_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryPostgreSQLOrderArrows_2(model);
 		graph.endUpdate();
@@ -1510,21 +1511,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryPostgreSQLOrderArrows_3(model);
 		graph.endUpdate();
@@ -1575,21 +1576,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryPostgreSQLOrderArrows_4(model);
 		graph.endUpdate();
@@ -1640,21 +1641,21 @@ public enum DummyGraphScenario {
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_PROPERTY);
 
 		addCategoryPostgreSQLOrderArrows_5(model);
 		graph.endUpdate();
@@ -1708,49 +1709,45 @@ public enum DummyGraphScenario {
 //
 //		graph.beginUpdate();
 //
-//		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("101", "Id", 50, 410, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("111", "Order", 170, 170, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("112", "Number", 170, 50, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("113", "Contact", 290, 170, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("115", "Name", 410, 50, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("116", "Value", 290, 50, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-//		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+//		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 //
 //		addCategoryOrderArrows(model);
 //		graph.endUpdate();
 //	}
-	
-	
-	
-	
 	public void buildMongoDBOrder_0(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_SELECTED_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_SELECTED_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryMongoDBOrderArrows_0(model);
 		graph.endUpdate();
@@ -1761,7 +1758,6 @@ public enum DummyGraphScenario {
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
 
 //		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
-
 		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
 		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
 		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
@@ -1794,38 +1790,37 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_1(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryMongoDBOrderArrows_1(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_1(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
 
 //		model.addEdge("1.-2.3", "111", "101", EdgeType.PROPERTY_CATEGORICAL);
-
 		model.addEdge("2", "100", "110", EdgeType.CATEGORICAL);
 		model.addEdge("-2", "110", "100", EdgeType.CATEGORICAL);
 		model.addEdge("3", "111", "110", EdgeType.CATEGORICAL);
@@ -1858,32 +1853,32 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_2(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryMongoDBOrderArrows_2(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_2(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
@@ -1922,32 +1917,32 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_3(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_SELECTED_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_SELECTED_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryMongoDBOrderArrows_3(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_3(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
@@ -1986,32 +1981,32 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_4(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryMongoDBOrderArrows_4(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_4(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
@@ -2050,32 +2045,32 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_5(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("117", "Items", 170, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("118", "Quantity", 290, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("123", "Name", 290, 530, CellType.CATEGORICAL_OBJECT);
-		model.addCell("124", "Price", 290, 410, CellType.CATEGORICAL_OBJECT);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
 
 		addCategoryMongoDBOrderArrows_5(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_5(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
@@ -2114,32 +2109,32 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_6(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_SELECTED_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE_NAME);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_SELECTED_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE_NAME);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryMongoDBOrderArrows_6(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_6(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
@@ -2179,32 +2174,32 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_7(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_AVAILABLE_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("114", "Type", 410, 170, CellType.MAPPING_AVAILABLE);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_AVAILABLE_NAME);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_AVAILABLE_PROPERTY);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_SELECTED_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_AVAILABLE);
-		model.addCell("121", "Product", 170, 410, CellType.MAPPING_AVAILABLE);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_AVAILABLE);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_AVAILABLE);
+		model.addCell("100", "Customer", 10, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_AVAILABLE_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("114", "Type", 370, 140, CellType.MAPPING_AVAILABLE);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_AVAILABLE_NAME);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_AVAILABLE_PROPERTY);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_SELECTED_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_AVAILABLE);
+		model.addCell("121", "Product", 130, 380, CellType.MAPPING_AVAILABLE);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_AVAILABLE);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_AVAILABLE);
 
 		addCategoryMongoDBOrderArrows_7(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_7(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
@@ -2244,32 +2239,32 @@ public enum DummyGraphScenario {
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
 	}
-	
+
 	public void buildMongoDBOrder_8(Graph graph) {
 		Model model = graph.getModel();
 
 		graph.beginUpdate();
 
-		model.addCell("100", "Customer", 50, 290, CellType.CATEGORICAL_OBJECT);
-		model.addCell("101", "Id", 50, 410, CellType.MAPPING_PROPERTY);
-		model.addCell("110", "Orders", 50, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("111", "Order", 170, 170, CellType.MAPPING_KIND);
-		model.addCell("112", "Number", 170, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("113", "Contact", 290, 170, CellType.MAPPING_PROPERTY);
-		model.addCell("114", "Type", 410, 170, CellType.CATEGORICAL_OBJECT);
-		model.addCell("115", "Name", 410, 50, CellType.MAPPING_NAME);
-		model.addCell("116", "Value", 290, 50, CellType.MAPPING_PROPERTY);
-		model.addCell("117", "Items", 170, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("118", "Quantity", 290, 290, CellType.MAPPING_PROPERTY);
-		model.addCell("121", "Product", 170, 410, CellType.CATEGORICAL_OBJECT);
-		model.addCell("122", "Id", 50, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("123", "Name", 290, 530, CellType.MAPPING_PROPERTY);
-		model.addCell("124", "Price", 290, 410, CellType.MAPPING_PROPERTY);
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.MAPPING_PROPERTY);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.MAPPING_KIND);
+		model.addCell("112", "Number", 130, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("113", "Contact", 250, 140, CellType.MAPPING_PROPERTY);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.MAPPING_NAME);
+		model.addCell("116", "Value", 250, 20, CellType.MAPPING_PROPERTY);
+		model.addCell("117", "Items", 130, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("118", "Quantity", 250, 260, CellType.MAPPING_PROPERTY);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("123", "Name", 250, 500, CellType.MAPPING_PROPERTY);
+		model.addCell("124", "Price", 250, 380, CellType.MAPPING_PROPERTY);
 
 		addCategoryMongoDBOrderArrows_8(model);
 		graph.endUpdate();
 	}
-	
+
 	private void addCategoryMongoDBOrderArrows_8(Model model) {
 		model.addEdge("1", "100", "101", EdgeType.CATEGORICAL);
 		model.addEdge("-1", "101", "100", EdgeType.CATEGORICAL);
@@ -2311,5 +2306,55 @@ public enum DummyGraphScenario {
 		model.addEdge("-13", "123", "121", EdgeType.CATEGORICAL);
 		model.addEdge("14", "121", "124", EdgeType.CATEGORICAL);
 		model.addEdge("-14", "124", "121", EdgeType.CATEGORICAL);
+	}
+
+	public void buildMongoDBInstance(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
+
+		addCategoryArrows(model);
+		graph.endUpdate();
+	}
+
+	public void buildPostgreSQLInstance(Graph graph) {
+		Model model = graph.getModel();
+
+		graph.beginUpdate();
+
+		model.addCell("100", "Customer", 10, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("101", "Id", 10, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("110", "Orders", 10, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("111", "Order", 130, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("112", "Number", 130, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("113", "Contact", 250, 140, CellType.SELECTED);
+		model.addCell("114", "Type", 370, 140, CellType.CATEGORICAL_OBJECT);
+		model.addCell("115", "Name", 370, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("116", "Value", 250, 20, CellType.CATEGORICAL_OBJECT);
+		model.addCell("117", "Items", 130, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("118", "Quantity", 250, 260, CellType.CATEGORICAL_OBJECT);
+		model.addCell("121", "Product", 130, 380, CellType.CATEGORICAL_OBJECT);
+		model.addCell("122", "Id", 10, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("123", "Name", 250, 500, CellType.CATEGORICAL_OBJECT);
+		model.addCell("124", "Price", 250, 380, CellType.CATEGORICAL_OBJECT);
+
+		addCategoryArrows(model);
+		graph.endUpdate();
 	}
 }

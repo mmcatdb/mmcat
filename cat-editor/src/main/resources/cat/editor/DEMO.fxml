@@ -58,7 +58,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1440.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cat.editor.FXMLControllerDEMO">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cat.editor.FXMLControllerDEMO">
   <children>
       <HBox maxHeight="62.0">
          <children>
@@ -96,7 +96,7 @@
                   </VBox>
                </children>
             </AnchorPane>
-            <AnchorPane prefHeight="30.0" prefWidth="680.0">
+            <AnchorPane prefHeight="30.0" prefWidth="1000.0">
                <children>
                   <VBox AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                      <children>
@@ -192,7 +192,7 @@
             </AnchorPane>
          </children>
       </HBox>
-      <SplitPane fx:id="splitPane" dividerPositions="0.2506, 0.1, 0.5" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+      <SplitPane fx:id="splitPane" dividerPositions="0.15, 0.5, 0.8" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
          <items>
             <AnchorPane maxWidth="200.0" prefWidth="150.0" style="-fx-border-width: 111;">
                <children>
@@ -233,25 +233,45 @@
                         <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <TableView fx:id="instanceTable" layoutX="155.0" layoutY="78.0" prefHeight="523.0" prefWidth="279.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                      <columns>
-                                        <TableColumn prefWidth="75.0" text="C1" />
-                                        <TableColumn prefWidth="75.0" text="C2" />
-                                          <TableColumn prefWidth="75.0" text="Column X" />
-                                      </columns>
-                                    </TableView>
+                                    <TableView fx:id="instanceTable" layoutX="155.0" layoutY="78.0" prefHeight="523.0" prefWidth="279.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                               </AnchorPane>
                         </content>
                       </Tab>
-                        <Tab fx:id="documentTab" text="Untitled Tab">
+                        <Tab fx:id="migrationPrimaryTab" text="Migration Tab">
                           <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                          </content>
-                        </Tab>
-                        <Tab fx:id="graphTab" text="Untitled Tab">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <TableView fx:id="sourceView" layoutX="27.0" layoutY="156.0" prefHeight="200.0" prefWidth="241.0" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="66.0">
+                                      <columns>
+                                        <TableColumn prefWidth="75.0" text="Checked" />
+                                        <TableColumn prefWidth="75.0" text="Name" />
+                                          <TableColumn prefWidth="75.0" text="Root" />
+                                      </columns>
+                                    </TableView>
+                                    <TableView fx:id="targetView" layoutX="280.0" layoutY="66.0" prefHeight="200.0" prefWidth="241.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="66.0">
+                                       <columns>
+                                          <TableColumn prefWidth="75.0" text="Checked" />
+                                          <TableColumn prefWidth="75.0" text="Name" />
+                                          <TableColumn prefWidth="75.0" text="Root" />
+                                       </columns>
+                                    </TableView>
+                                    <Label layoutX="27.0" layoutY="121.0" prefWidth="241.0" text="Source" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Label layoutX="288.0" layoutY="38.0" prefWidth="241.0" text="Target" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Button layoutX="92.0" layoutY="277.0" mnemonicParsing="false" prefWidth="70.0" text="Add" AnchorPane.leftAnchor="92.0" AnchorPane.topAnchor="272.0" />
+                                    <Button layoutX="339.0" layoutY="277.0" mnemonicParsing="false" prefWidth="70.0" text="Add" AnchorPane.rightAnchor="91.0" AnchorPane.topAnchor="272.0" />
+                                    <TextArea layoutX="35.0" layoutY="449.0" prefHeight="200.0" prefWidth="200.0" text="INFO: Executing data migration from PostgreSQL to MongoDB.&#10;INFO: Pulling data from [PostgreSQL, Contacts] ... finished&#10;INFO: Pulling data from [PostgreSQL, Orders] ... finished&#10;INFO: Creating kind [MongoDB,  Orders] ... finished&#10;INFO: Schema-less approach. No valid schema.&#10;INFO: Pushing data [MongoDB, Orders] ... finished&#10;INFO: Altering kind [MongoDB, Orders] ... finished&#10;INFO: Schema-less approach. No valid schema.&#10;---------------------------------------------------------------------------&#10;Data migration is complete.&#10;---------------------------------------------------------------------------&#10;Total time:   00:02 min&#10;Finished at:  16/07/2021T17:54:50+02:00&#10;---------------------------------------------------------------------------" AnchorPane.bottomAnchor="6.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0">
+                                       <font>
+                                          <Font name="Monospaced Regular" size="13.0" />
+                                       </font>
+                                    </TextArea>
+                                    <Button layoutX="280.0" layoutY="436.0" mnemonicParsing="false" prefWidth="70.0" text="Execute" AnchorPane.rightAnchor="82.0" />
+                                    <Button layoutX="349.0" layoutY="436.0" mnemonicParsing="false" prefWidth="70.0" text="Stop" AnchorPane.rightAnchor="6.0" />
+                                    <Button layoutX="168.0" layoutY="36.0" mnemonicParsing="false" prefWidth="70.0" text="Remove" AnchorPane.leftAnchor="177.0" />
+                                    <ChoiceBox fx:id="targetBox" layoutX="336.0" layoutY="32.0" prefWidth="165.0" AnchorPane.rightAnchor="82.0" AnchorPane.topAnchor="36.0" />
+                                    <Button layoutX="418.0" layoutY="36.0" mnemonicParsing="false" prefWidth="70.0" text="Remove" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="36.0" />
+                                    <ChoiceBox fx:id="sourceBox" layoutX="87.0" layoutY="32.0" prefWidth="165.0" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="36.0" />
+                                 </children></AnchorPane>
                           </content>
                         </Tab>
                     </tabs>
@@ -404,7 +424,7 @@
                                     <Button layoutX="53.0" layoutY="358.0" mnemonicParsing="false" prefWidth="90.0" text="Pull" AnchorPane.rightAnchor="108.0" AnchorPane.topAnchor="318.0" />
                                     <Button layoutX="191.0" layoutY="277.0" mnemonicParsing="false" prefWidth="90.0" text="Push" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="318.0" />
                                     <Button layoutX="69.0" layoutY="288.0" mnemonicParsing="false" onAction="#handleStatementAction" prefWidth="90.0" text="Create" AnchorPane.rightAnchor="108.0" AnchorPane.topAnchor="288.0" />
-                                    <Button layoutX="24.0" layoutY="371.0" mnemonicParsing="false" prefWidth="90.0" text="Apply" AnchorPane.rightAnchor="108.0" AnchorPane.topAnchor="348.0" />
+                                    <Button layoutX="24.0" layoutY="371.0" mnemonicParsing="false" onAction="#handleICAction" prefWidth="90.0" text="Create" AnchorPane.rightAnchor="108.0" AnchorPane.topAnchor="348.0" />
                                     <Button layoutX="142.0" layoutY="371.0" mnemonicParsing="false" prefWidth="90.0" text="Disable" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="348.0" />
                                     <Button layoutX="156.0" layoutY="323.0" mnemonicParsing="false" prefWidth="90.0" text="Update" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="288.0" />
                                     <TextArea fx:id="statementArea" layoutX="42.0" layoutY="449.0" prefHeight="200.0" prefWidth="250.0" AnchorPane.leftAnchor="6.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="414.0" />
@@ -426,19 +446,22 @@
                                  <children>
                                     <Label layoutX="39.0" layoutY="331.0" text="Limit" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="130.5" />
                                     <Label layoutX="40.0" layoutY="369.0" text="Skip" AnchorPane.rightAnchor="112.0" AnchorPane.topAnchor="130.5" />
-                                    <TextField layoutX="43.0" layoutY="135.0" prefWidth="100.0" text="100" AnchorPane.leftAnchor="43.0" AnchorPane.topAnchor="135.0" />
+                                    <TextField layoutX="43.0" layoutY="135.0" prefWidth="100.0" text="100" AnchorPane.leftAnchor="43.0" AnchorPane.topAnchor="126.0" />
                                     <TextField layoutX="114.0" layoutY="364.0" prefWidth="100.0" text="0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="126.0" />
                                     <Button layoutX="25.0" layoutY="250.0" mnemonicParsing="false" prefWidth="67.5" text="First" AnchorPane.leftAnchor="6.0" />
                                     <Button layoutX="151.0" layoutY="250.0" mnemonicParsing="false" prefWidth="67.5" text="Next" AnchorPane.rightAnchor="79.5" />
                                     <Button layoutX="90.0" layoutY="250.0" mnemonicParsing="false" prefWidth="67.5" text="Prev" AnchorPane.leftAnchor="79.5" />
                                     <Button layoutX="209.0" layoutY="250.0" mnemonicParsing="false" prefWidth="67.5" text="Last" AnchorPane.rightAnchor="6.0" />
                                     <Button layoutX="40.0" layoutY="151.0" mnemonicParsing="false" prefWidth="67.5" text="Select" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="186.0" />
-                                    <ChoiceBox fx:id="elementChoiceBox" layoutX="119.0" layoutY="26.0" prefWidth="150.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
-                                    <ChoiceBox fx:id="userNameChoiceBox" layoutX="119.0" layoutY="63.0" prefWidth="150.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="36.0" />
-                                    <ChoiceBox fx:id="signatureChoiceBox" layoutX="128.0" layoutY="97.0" prefWidth="150.0" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="66.0" />
-                                    <CheckBox layoutX="42.0" layoutY="322.0" mnemonicParsing="false" text="Element" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="6.0" />
-                                    <CheckBox layoutX="39.0" layoutY="355.0" mnemonicParsing="false" text="User Name" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="36.0" />
-                                    <CheckBox layoutX="39.0" layoutY="403.0" mnemonicParsing="false" text="Signature" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="66.0" />
+                                    <ChoiceBox fx:id="elementChoiceBox" layoutX="101.0" layoutY="586.0" prefWidth="150.0" visible="false" />
+                                    <ChoiceBox fx:id="userNameChoiceBox" layoutX="89.0" layoutY="534.0" prefWidth="150.0" visible="false" />
+                                    <ChoiceBox fx:id="signatureChoiceBox" layoutX="101.0" layoutY="480.0" prefWidth="150.0" visible="false" />
+                                    <TextField layoutX="84.0" layoutY="353.0" prefWidth="140.0" text="Object" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <TextField layoutX="13.0" layoutY="413.0" prefWidth="140.0" text="Contact" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="36.0" />
+                                    <TextField layoutX="45.0" layoutY="472.0" prefWidth="140.0" text="113" AnchorPane.rightAnchor="6.0" AnchorPane.topAnchor="66.0" />
+                                    <Label layoutX="59.0" layoutY="369.0" text="Element" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="6.0" />
+                                    <Label layoutX="34.0" layoutY="407.0" text="User Name" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="36.0" />
+                                    <Label layoutX="44.0" layoutY="463.0" text="Signature" AnchorPane.leftAnchor="6.0" AnchorPane.topAnchor="66.0" />
                                  </children>
                               </AnchorPane>
                           </content>
