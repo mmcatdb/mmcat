@@ -24,6 +24,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -1053,9 +1054,16 @@ public class FXMLControllerDEMO {
 
 	public void initialize() {
 
-		splitPane.setDividerPosition(0, 0.15);
-		splitPane.setDividerPosition(1, 0.75);
+//		Node divider = splitPane.lookup(".split-pane-divider");
+//		if (divider != null) {
+//			divider.setStyle("-fx-background-color: transparent;");
+//			System.out.println(divider);
+//		} else {
+//			System.out.println("DIVIDER IS NULL");
+//		}
 
+//		splitPane.setDividerPosition(0, 0.15);
+//		splitPane.setDividerPosition(1, 0.75);
 		currentProjectDividerPosition = splitPane.getDividerPositions()[0];
 		currentDetailDividerPosition = splitPane.getDividerPositions()[1];
 

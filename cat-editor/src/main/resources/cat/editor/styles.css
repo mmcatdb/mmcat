@@ -9,32 +9,11 @@
         linear-gradient(from 0.0px 0.5px to  0.0px 10.5px, repeat, black 5%, transparent 5%);
 }
 
-.split-pane *.vertical-grabber {
-    -fx-padding: 0;
-/*    -fx-background-color: transparent;*/
-    -fx-background-color: yellow;
-    -fx-background-insets: 0;
-    -fx-shape: " ";
+.split-pane:horizontal > .split-pane-divider {
+	/*-fx-background-color: orange;*/
+	-fx-padding: 0;
 }
 
-.split-pane:vertical > * > .split-pane-divider {
-   -fx-border-color:  orange;/*transparent;*/
-   -fx-background-color: transparent;
-   -fx-background-insets: 0;
-}
-
-/* horizontal the two nodes are placed to the left/right of each other. */
-.split-pane:horizontal > * > .split-pane-divider {
-    -fx-border-color:  red;
-   /*-fx-border-color: transparent -fx-box-border transparent #BBBBBB;*/
-   -fx-background-color: transparent, -fx-inner-border-horizontal;
-   -fx-background-insets: 0, 0 1 0 1;
-}
-
-/* vertical the two nodes are placed on top of each other. */
-.split-pane:vertical > * > .split-pane-divider {
-    -fx-border-color:  purple;
-   /*-fx-border-color:  #BBBBBB transparent -fx-box-border transparent;*/
-   -fx-background-color: transparent, -fx-inner-border;
-   -fx-background-insets: 0, 1 0 1 0;
-}
+/*.split-pane:vertical > .split-pane-divider {
+   -fx-background-color: red;
+}*/
