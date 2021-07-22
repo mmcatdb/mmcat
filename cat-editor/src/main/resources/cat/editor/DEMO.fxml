@@ -203,7 +203,7 @@
                <children>
                   <TabPane fx:id="secondaryTabPane" prefWidth="0.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
-                      <Tab fx:id="erTab" text="Untitled Tab 1">
+                      <Tab fx:id="erTab" text="erTab">
                         <content>
                           <AnchorPane prefWidth="0.0">
                                  <children>
@@ -212,6 +212,15 @@
                               </AnchorPane>
                         </content>
                       </Tab>
+                        <Tab fx:id="secondTab" text="secondTab">
+                          <content>
+                            <AnchorPane prefWidth="0.0">
+                                 <children>
+                                    <ScrollPane fx:id="scrollPane3" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                        </Tab>
                     </tabs>
                   </TabPane>
                </children>
