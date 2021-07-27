@@ -957,14 +957,14 @@ public class FXMLControllerDEMO {
 			TreeItem item33 = new TreeItem("PostgreSQL");
 
 			TreeItem item310 = new TreeItem("Orders");
-			TreeItem item311 = new TreeItem("Order1");
-			TreeItem item312 = new TreeItem("Order2");
-			TreeItem item313 = new TreeItem("Order3");
-			TreeItem item314 = new TreeItem("Order4");
-			TreeItem item315 = new TreeItem("Order5");
-			TreeItem item316 = new TreeItem("Order6");
-			TreeItem item317 = new TreeItem("Order7");
-			TreeItem item318 = new TreeItem("Order8");
+			TreeItem item311 = new TreeItem("OrdersM1");
+			TreeItem item312 = new TreeItem("OrdersM2");
+			TreeItem item313 = new TreeItem("OrdersM3");
+			TreeItem item314 = new TreeItem("OrdersM4");
+			TreeItem item315 = new TreeItem("OrdersM5");
+			TreeItem item316 = new TreeItem("OrdersM6");
+			TreeItem item317 = new TreeItem("OrdersM7");
+			TreeItem item318 = new TreeItem("OrdersM8");
 
 			TreeItem item331 = new TreeItem("Contact");
 			TreeItem item332 = new TreeItem("Customer");
@@ -986,8 +986,8 @@ public class FXMLControllerDEMO {
 			root.setExpanded(true);
 			root.getChildren().addAll(item1, item2, item3, item4, item5);
 			item3.getChildren().addAll(item31, item33);
-			item31.getChildren().addAll(item310/*, item311, item312, item313, item314, item315, item316, item317, item318*/);
-			item33.getChildren().addAll(item331, item332, item335/*, item3351, item3352, item3353, item3354, item3355*/, item337);
+			item31.getChildren().addAll(item310, item311, item312, item313, item314, item315, item316, item317, item318);
+			item33.getChildren().addAll(item331, item332, item335, item3351, item3352, item3353, item3354, item3355, item337);
 			item4.getChildren().addAll(item40);
 			item5.getChildren().addAll(item53);
 

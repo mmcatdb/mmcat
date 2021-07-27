@@ -1,148 +1,148 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <groupId>mff</groupId>
-    <artifactId>cat-editor</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+	<groupId>mff</groupId>
+	<artifactId>cat-editor</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
-    <name>cat-editor</name>
+	<name>cat-editor</name>
 
-    <!--    <repositories>
-        <repository>
-            <id>java-fx-ui</id>
-            <name>xxx</name>
-            <url>http://maven.imagej.net/content/repositories/public/</url>
-        </repository>
-    </repositories>-->
+	<!--    <repositories>
+		<repository>
+			<id>java-fx-ui</id>
+			<name>xxx</name>
+			<url>http://maven.imagej.net/content/repositories/public/</url>
+		</repository>
+	</repositories>-->
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--<mainClass>cat.editor.MainApp</mainClass>-->
-    </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!--<mainClass>cat.editor.MainApp</mainClass>-->
+	</properties>
 
-    <organization>
-        <!-- Used as the 'Vendor' for JNLP generation -->
-        <name>Your Organisation</name>
-    </organization>
+	<organization>
+		<!-- Used as the 'Vendor' for JNLP generation -->
+		<name>Your Organisation</name>
+	</organization>
 
-    <dependencies>
+	<dependencies>
         
-        <!-- https://mvnrepository.com/artifact/net.sf.jung/jung-visualization -->
-        <dependency>
-            <groupId>net.sf.jung</groupId>
-            <artifactId>jung-visualization</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/net.sf.jung/jung-api -->
-        <dependency>
-            <groupId>net.sf.jung</groupId>
-            <artifactId>jung-api</artifactId>
-            <version>2.0.1</version>
-        </dependency>
+		<!-- https://mvnrepository.com/artifact/net.sf.jung/jung-visualization -->
+		<dependency>
+			<groupId>net.sf.jung</groupId>
+			<artifactId>jung-visualization</artifactId>
+			<version>2.0.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.sf.jung/jung-api -->
+		<dependency>
+			<groupId>net.sf.jung</groupId>
+			<artifactId>jung-api</artifactId>
+			<version>2.0.1</version>
+		</dependency>
 
-        <!-- https://mvnrepository.com/artifact/net.sf.jung/jung-graph-impl -->
-        <dependency>
-            <groupId>net.sf.jung</groupId>
-            <artifactId>jung-graph-impl</artifactId>
-            <version>2.0.1</version>
-        </dependency>
-
-
+		<!-- https://mvnrepository.com/artifact/net.sf.jung/jung-graph-impl -->
+		<dependency>
+			<groupId>net.sf.jung</groupId>
+			<artifactId>jung-graph-impl</artifactId>
+			<version>2.0.1</version>
+		</dependency>
 
 
-        
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>16</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.graphstream/gs-ui -->
-        <dependency>
-            <groupId>org.graphstream</groupId>
-            <artifactId>gs-ui</artifactId>
-            <version>1.3</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.github.graphstream/gs-ui-javafx -->
-        <!--        <dependency>
-            <groupId>com.github.graphstream</groupId>
-            <artifactId>gs-ui-javafx</artifactId>
-            <version>2.0-alpha</version>
-        </dependency>-->
-        
-        
-        <!--        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics </artifactId>
-            <version>16</version>
-            <classifier>win</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics </artifactId>
-            <version>16</version>
-            <classifier>linux</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics </artifactId>
-            <version>16</version>
-            <classifier>mac</classifier>
-        </dependency>-->
 
 
         
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>16</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+			<version>16</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.graphstream/gs-ui -->
+		<dependency>
+			<groupId>org.graphstream</groupId>
+			<artifactId>gs-ui</artifactId>
+			<version>1.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.github.graphstream/gs-ui-javafx -->
+		<!--        <dependency>
+			<groupId>com.github.graphstream</groupId>
+			<artifactId>gs-ui-javafx</artifactId>
+			<version>2.0-alpha</version>
+		</dependency>-->
+        
+        
+		<!--        <dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics </artifactId>
+			<version>16</version>
+			<classifier>win</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics </artifactId>
+			<version>16</version>
+			<classifier>linux</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics </artifactId>
+			<version>16</version>
+			<classifier>mac</classifier>
+		</dependency>-->
 
 
-        <dependency>
-            <groupId>com.github.vlsi.mxgraph</groupId>
-            <artifactId>jgraphx</artifactId>
-            <version>4.2.2</version>
-            <type>jar</type>
-        </dependency>
-    </dependencies>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <release>16</release>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <mainClass>cat.editor.MainApp</mainClass>
-                    <!--<mainClass>application.Main</mainClass>-->
+        
+
+
+		<dependency>
+			<groupId>com.github.vlsi.mxgraph</groupId>
+			<artifactId>jgraphx</artifactId>
+			<version>4.2.2</version>
+			<type>jar</type>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<release>16</release>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>cat.editor.MainApp</mainClass>
+					<!--<mainClass>application.Main</mainClass>-->
                     
-                    <!--<mainClass>cat.tutorial.ImageDB</mainClass>-->
-                    <!--<mainClass>cat.tutorial.Test</mainClass>-->
-                    <!--<mainClass>cat.tutorial.AppMain</mainClass>-->
-                    <!--<mainClass>cat.tutorial.DialogFXMLExample</mainClass>-->
-                    <!--<mainClass>cat.tutorial.TreeViewB</mainClass>-->
-                    <!--<mainClass>cat.tutorial.Main</mainClass>-->
-                    <!--<mainClass>cat.tutorial.GraphVisTester</mainClass>-->
-                    <!--<mainClass>cat.tutorial.TutorialDiagram</mainClass>-->
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+					<!--<mainClass>cat.tutorial.ImageDB</mainClass>-->
+					<!--<mainClass>cat.tutorial.Test</mainClass>-->
+					<!--<mainClass>cat.tutorial.AppMain</mainClass>-->
+					<!--<mainClass>cat.tutorial.DialogFXMLExample</mainClass>-->
+					<!--<mainClass>cat.tutorial.TreeViewB</mainClass>-->
+					<!--<mainClass>cat.tutorial.Main</mainClass>-->
+					<!--<mainClass>cat.tutorial.GraphVisTester</mainClass>-->
+					<!--<mainClass>cat.tutorial.TutorialDiagram</mainClass>-->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
