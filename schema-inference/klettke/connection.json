@@ -1,0 +1,11 @@
+{
+	host : "localhost",
+	port : 27017,
+	database : "contos",
+	authDb : "contos",
+	authUsername : "contos",
+	authPassword : "33coherentA",
+	entityTypes : ["Species", "Protocols"],
+	timestampIdentifier : "ts"
+}
+

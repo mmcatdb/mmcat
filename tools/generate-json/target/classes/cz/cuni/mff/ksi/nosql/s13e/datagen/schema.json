@@ -1,0 +1,220 @@
+{
+  "$id": "http://ksi.mff.cuni.cz/schemas/inferred",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Inference DB",
+  "definitions": {
+    "#location.0": {
+      "$id": "#location.0",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "address"
+      ],
+      "properties": {
+        "address": {
+          "type": "string"
+        }
+      }
+    },
+    "#location.1": {
+      "$id": "#location.1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "properties": {
+        "latitude": {
+          "type": "string"
+        },
+        "longitude": {
+          "type": "string"
+        }
+      }
+    },
+    "#author.0": {
+      "$id": "#author.0",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "first_name",
+        "last_name",
+        "location",
+        "phone_number"
+      ],
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#location.0"
+        },
+        "phone_number": {
+          "type": "number"
+        }
+      }
+    },
+    "#attachment.0": {
+      "$id": "#attachment.0",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "#author.1": {
+      "$id": "#author.1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "first_name",
+        "last_name",
+        "location",
+        "phone_number"
+      ],
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#location.1"
+        },
+        "phone_number": {
+          "type": "string"
+        }
+      }
+    },
+    "#body.0": {
+      "$id": "#body.0",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "content",
+        "mime_type"
+      ],
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "mime_type": {
+          "type": "string"
+        }
+      }
+    },
+    "#article.0": {
+      "$id": "#article.0",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "article_id",
+        "author",
+        "body",
+        "comments",
+        "published",
+        "ratings",
+        "timestamp"
+      ],
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "article_id": {
+          "description": "A reference to the 'article' entity",
+          "type": "number"
+        },
+        "author": {
+          "$ref": "#author.0"
+        },
+        "body": {
+          "type": "string"
+        },
+        "comments": {
+          "type": "string"
+        },
+        "published": {
+          "type": "boolean"
+        },
+        "ratings": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      }
+    },
+    "#article.1": {
+      "$id": "#article.1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "attachments",
+        "author",
+        "body",
+        "comments",
+        "published",
+        "ratings",
+        "timestamp"
+      ],
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "$ref": "#attachment.0"
+          }
+        },
+        "author": {
+          "$ref": "#author.1"
+        },
+        "body": {
+          "$ref": "#body.0"
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "published": {
+          "type": "boolean"
+        },
+        "ratings": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "#article.0"
+    },
+    {
+      "$ref": "#article.1"
+    }
+  ]
+}
