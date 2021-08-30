@@ -12,9 +12,11 @@
 		<module>editor</module>
         <module>transformations</module>
 		<module>wrappers</module>
-        <module>mm-target</module>
+        <module>product</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>16</maven.compiler.source>
+		<maven.compiler.target>16</maven.compiler.target>
     </properties>
 </project>

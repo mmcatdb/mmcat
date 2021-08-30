@@ -1,0 +1,77 @@
+<project default="product">
+  <!--<import file="../dependencies/ant_settings.xml"/>-->
+
+  <!-- If the manual has been built... -->
+  <target name="-check-doc">
+    <available property="have.doc" file="../docs/build/html/index.html"/>
+  </target>
+
+  <!-- .. copy manual into product/doc -->
+  <target name="copy-doc" depends="-check-doc" if="have.doc">
+    <copy todir="${build}/doc">
+      <fileset dir="../docs/build/html"/>
+    </copy>
+  </target>
+
+  <target name="product" depends="copy-doc" description="Assemble product">
+    <mkdir dir="${classes}"/>
+  
+    <!-- Assemble lib/ -->
+    <copy todir="${build}/lib" flatten="true">
+      <!-- Copy all application dependencies -->
+      <path refid="app-classpath" />
+      <!-- Copy applications -->
+      <fileset dir="..">
+        <include name="**/*.jar"/>
+		<include name="applications/**/*.jar"/>
+		<include name="wrappers/**/*.jar"/>
+        <!-- Exclude what's not part of the UI product -->
+        <!-- Site-specific build might remove more     -->
+        <!--<exclude name="app/**/app-alarm-server*.jar"/>-->
+        <!--<exclude name="app/**/app-scan-server*.jar"/>-->
+        <!--<exclude name="app/alarm/examples/**/*.jar"/>-->
+      </fileset>
+    </copy>
+
+    <!-- Create classpath for lib/*jar -->
+    <manifestclasspath property="manifest-classpath"
+                       jarfile="${build}/product-${version}.jar">
+      <classpath>
+        <path>
+          <fileset dir="${build}/lib">
+            <include name="*.jar"/>
+          </fileset>
+        </path>
+      </classpath>
+    </manifestclasspath>
+
+    <!-- <echo message="Manifest classpath: ${manifest-classpath}"/> -->
+
+    <jar destfile="${build}/product-${version}.jar">
+      <fileset dir="${classes}"/>
+      <manifest>
+        <attribute name="Main-Class" value="cz.cuni.matfyz.editor.MainApp" />
+        <attribute name="Class-Path" value="${manifest-classpath}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- Create ZIP of the product.jar, lib/, [doc/,] phoebus.sh launcher -->
+  <!--<target name="dist" depends="jfxarch, product" description="Pack for distribution">-->
+  <target name="dist" depends="product" description="Pack for distribution">
+    <zip destfile="${build}/mm-cat-${version}.zip">
+      <zipfileset dir="${build}" includes="**/*.jar" prefix="mm-cat-${version}"/>
+      <!--<zipfileset dir="." includes="settings.ini" fullpath="phoebus-${version}/settings.ini"/>-->
+      <zipfileset dir="." includes="mmcat.sh" fullpath="mm-cat-${version}/mmcat.sh" filemode="755"/>
+      <!--<zipfileset dir="." includes="phoebus.bat" fullpath="phoebus-${version}/phoebus.bat"/>-->
+      <!--<zipfileset dir="." includes="phoebus.xml" fullpath="phoebus-${version}/phoebus.xml"/>-->
+      <!--<zipfileset dir="." includes="phoebus.desktop" fullpath="phoebus-${version}/phoebus.desktop"/>-->
+      <!--<zipfileset dir="${build}" includes="doc/**" prefix="phoebus-${version}"/>-->
+    </zip>
+  </target>
+
+  <target name="run" depends="product" description="Run the product">
+    <java jar="${build}/product-${version}.jar" fork="true">
+    </java>
+  </target>
+</project>

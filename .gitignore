@@ -15,5 +15,5 @@ experiment*.json
 /mm-cat/wrappers/wrapper-postgresql/target/
 /mm-cat/wrappers/wrapper-cassandra/target/
 /mm-cat/wrappers/wrapper-riak/target/
-/mm-cat/mm-target/target/
 /mm-cat/transformations/target/
+/mm-cat/product/target/

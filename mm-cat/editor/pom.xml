@@ -134,16 +134,6 @@
 				</executions>
 				<configuration>
 					<mainClass>cz.cuni.matfyz.editor.MainApp</mainClass>
-					<!--<mainClass>application.Main</mainClass>-->
-                    
-					<!--<mainClass>cat.tutorial.ImageDB</mainClass>-->
-					<!--<mainClass>cat.tutorial.Test</mainClass>-->
-					<!--<mainClass>cat.tutorial.AppMain</mainClass>-->
-					<!--<mainClass>cat.tutorial.DialogFXMLExample</mainClass>-->
-					<!--<mainClass>cat.tutorial.TreeViewB</mainClass>-->
-					<!--<mainClass>cat.tutorial.Main</mainClass>-->
-					<!--<mainClass>cat.tutorial.GraphVisTester</mainClass>-->
-					<!--<mainClass>cat.tutorial.TutorialDiagram</mainClass>-->
 				</configuration>
 			</plugin>
 		</plugins>
