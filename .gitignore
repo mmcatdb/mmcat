@@ -3,3 +3,4 @@
 */target/*
 experiment*.json
 /mm-cat/wrappers/target/
+/mm-cat/core/target/

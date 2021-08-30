@@ -5,10 +5,17 @@
  */
 package cz.cuni.matfyz.abstractwrappers;
 
+import cz.cuni.matfyz.core.mapping.AccessPath;
+import cz.cuni.matfyz.core.Forest;
+
 /**
  *
  * @author pavel.koupil
  */
 public interface AbstractPullWrapper {
-	
+
+	public abstract Forest pullForest(String selectAll, AccessPath path);
+
+	public abstract Forest pullForest(String selectAll, AccessPath path, int limit, int offset);
+
 }
