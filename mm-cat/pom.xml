@@ -12,6 +12,7 @@
 		<module>editor</module>
 		<module>transformations</module>
         <module>wrappers</module>
+        <module>target</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
