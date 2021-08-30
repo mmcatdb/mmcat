@@ -10,9 +10,9 @@
 		<module>applications</module>
 		<module>core</module>
 		<module>editor</module>
-		<module>transformations</module>
-        <module>wrappers</module>
-        <module>target</module>
+        <module>transformations</module>
+		<module>wrappers</module>
+        <module>mm-target</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

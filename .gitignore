@@ -5,3 +5,15 @@ experiment*.json
 /mm-cat/wrappers/target/
 /mm-cat/core/target/
 /mm-cat/editor/target/
+/mm-cat/applications/evolution/target/
+/mm-cat/applications/querying/target/
+/mm-cat/applications/inference/target/
+/mm-cat/applications/migration/target/
+/mm-cat/abstractWrappers/target/
+/mm-cat/wrappers/wrapper-mongodb/target/
+/mm-cat/wrappers/wrapper-neo4j/target/
+/mm-cat/wrappers/wrapper-postgresql/target/
+/mm-cat/wrappers/wrapper-cassandra/target/
+/mm-cat/wrappers/wrapper-riak/target/
+/mm-cat/mm-target/target/
+/mm-cat/transformations/target/
