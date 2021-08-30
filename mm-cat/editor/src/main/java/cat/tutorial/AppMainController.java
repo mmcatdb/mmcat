@@ -9,7 +9,7 @@ package cat.tutorial;
  *
  * @author pavel.koupil
  */
-import cat.editor.FXMLControllerAddDatabaseDialog;
+import cz.cuni.matfyz.editor.FXMLControllerAddDatabaseDialog;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;

@@ -133,7 +133,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>cat.editor.MainApp</mainClass>
+					<mainClass>cz.cuni.matfyz.editor.MainApp</mainClass>
 					<!--<mainClass>application.Main</mainClass>-->
                     
 					<!--<mainClass>cat.tutorial.ImageDB</mainClass>-->
