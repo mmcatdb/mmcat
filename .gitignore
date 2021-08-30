@@ -2,3 +2,4 @@
 */MyNeo4jDB/*
 */target/*
 experiment*.json
+/mm-cat/wrappers/target/

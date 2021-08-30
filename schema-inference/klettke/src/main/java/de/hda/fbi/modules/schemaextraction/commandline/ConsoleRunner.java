@@ -66,7 +66,7 @@ import org.springframework.context.annotation.ComponentScan;
 @Profile("gitlab")
 public class ConsoleRunner implements CommandLineRunner {
 
-	public static final int PERFORMACE_EXECUTIONS = 30;
+	public static final int PERFORMACE_EXECUTIONS = 50;
 
 //	@Autowired
 //	private ExtractionFacade facade;
