@@ -3,21 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cuni.matfyz.core.mapping;
-
-import cz.cuni.matfyz.core.category.Signature;
+package cz.cuni.matfyz.core.category;
 
 /**
  *
  * @author pavel.koupil
  */
-public class AccessPath {
+public class Functor {
 
-	public AccessPath getSubpathBySignature(Signature signature) {
+	public static CategoricalObject object(Category schema, Category instance, CategoricalObject rootObject) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
-	public AccessPath minus(AccessPath... accessPaths) {
+	public static Morphism morphism(Category schema, Category instance, Morphism rootMorphism) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 

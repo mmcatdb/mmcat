@@ -6,7 +6,7 @@
 package cz.cuni.matfyz.abstractwrappers;
 
 import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.Forest;
+import cz.cuni.matfyz.core.ForestOfRecords;
 
 /**
  *
@@ -14,8 +14,8 @@ import cz.cuni.matfyz.core.Forest;
  */
 public interface AbstractPullWrapper {
 
-	public abstract Forest pullForest(String selectAll, AccessPath path);
+	public abstract ForestOfRecords pullForest(String selectAll, AccessPath path);
 
-	public abstract Forest pullForest(String selectAll, AccessPath path, int limit, int offset);
+	public abstract ForestOfRecords pullForest(String selectAll, AccessPath path, int limit, int offset);
 
 }
