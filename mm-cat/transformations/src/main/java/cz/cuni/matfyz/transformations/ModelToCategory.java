@@ -12,10 +12,18 @@ import cz.cuni.matfyz.core.category.Functor;
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.AccessPath;
+import cz.cuni.matfyz.core.mapping.AccessPathProperty;
+import cz.cuni.matfyz.core.mapping.Context;
 import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.mapping.Name;
+import cz.cuni.matfyz.core.mapping.Value;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 /**
  *
@@ -105,11 +113,46 @@ public class ModelToCategory {
 	}
 
 	private Set<ContextValue> children(AccessPath accessPath) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		Set<ContextValue> result = new TreeSet<>();
+		for (AccessPathProperty property : accessPath.properties()) {
+			result.addAll(process(property.name, null, null));
+			result.addAll(process(null, property.context, property.value));
+		}
+		return result;
 	}
 
 	private void addRelation(Morphism mI, Superid sid_dom, Superid sid_cod, Object r) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	private Collection<? extends ContextValue> process(Name name, Context context, Value value) {
+		List<ContextValue> result = new ArrayList<>();
+		switch (name.type) {
+			case STATIC_NAME -> {
+				return result;
+			}
+			case SIGNATURE -> {
+				result.add(new ContextValue(name.context, null));
+				return result;
+			}
+
+		}
+
+		switch (value.type) {
+			case SIGNATURE, EPSILON -> {
+				result.add(new ContextValue(new Context(context, value), null));
+				return result;
+			}
+
+		}
+
+		if (context.type == Context.Type.SIGNATURE) {
+			result.add(new ContextValue(context, value));
+			return result;
+		}
+
+		return children(value);
+
 	}
 
 }

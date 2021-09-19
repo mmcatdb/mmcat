@@ -3,23 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cuni.matfyz.transformations;
-
-import cz.cuni.matfyz.core.mapping.Context;
-import cz.cuni.matfyz.core.mapping.Name;
-import cz.cuni.matfyz.core.mapping.Value;
+package cz.cuni.matfyz.core.mapping;
 
 /**
  *
  * @author pavel.koupil
  */
-public class ContextValue {
-	
-	public Context context;
-	public Value value;
+public class Context {
 
-	public ContextValue(Context context, Value object) {
+	public Type type;
+
+	public enum Type {
+		SIGNATURE;
+	}
+
+	public Context(Context context, Value value) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
-	
+
 }
