@@ -3,24 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cuni.matfyz.core.schema;
-
-import java.util.List;
+package cz.cuni.matfyz.core.category;
 
 /**
  *
  * @author pavel.koupil
  */
-public class Key {
+public class Signature2 {
 
-	private List<Property> ids;
+	private int[] ids;
 
-	public Key(List<Property> ids) {
+	public Signature2(int... ids) {
 		this.ids = ids;
-	}
-
-	public Key(Property... ids) {
-		this.ids = List.of(ids);
 	}
 
 }

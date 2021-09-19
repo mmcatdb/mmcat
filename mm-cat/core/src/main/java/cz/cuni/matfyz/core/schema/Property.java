@@ -5,10 +5,20 @@
  */
 package cz.cuni.matfyz.core.schema;
 
+import cz.cuni.matfyz.core.category.Signature2;
+
 /**
  *
  * @author pavel.koupil
  */
 public class Property {
-	
+
+	private Signature2 signature;
+	private String name;
+
+	public Property(Signature2 signature, String name) {
+		this.signature = signature;
+		this.name = name;
+	}
+
 }
