@@ -10,5 +10,15 @@ package cz.cuni.matfyz.core.category;
  * @author pavel.koupil
  */
 public class Signature {
-	
+
+	private int signature;
+
+	public Signature(int signature) {
+		this.signature = signature;
+	}
+
+	public Signature dual() {
+		return new Signature(signature * -1);
+	}
+
 }

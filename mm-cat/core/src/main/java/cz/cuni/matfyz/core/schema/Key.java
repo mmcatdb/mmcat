@@ -3,14 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cuni.matfyz.core.category;
+package cz.cuni.matfyz.core.schema;
+
+import java.util.List;
 
 /**
  *
  * @author pavel.koupil
  */
-public interface CategoricalObject extends Comparable<CategoricalObject>{
+public class Key {
 
-	public int objectId();
-	
+	private List<Property> id;
+
 }

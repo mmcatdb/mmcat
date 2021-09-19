@@ -17,7 +17,9 @@ import cz.cuni.matfyz.core.mapping.Context;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.Name;
 import cz.cuni.matfyz.core.mapping.Value;
+import cz.cuni.matfyz.core.schema.Property;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -51,13 +53,13 @@ public class ModelToCategory {
 
 			} else {
 				// K with root morphism
-				CategoricalObject qI_dom = Functor.object(schema, instance, mapping.rootObject);
+				SchemaObject qI_dom = (SchemaObject) Functor.object(schema, instance, mapping.rootObject);
 				Set<Superid> sidsDom = this.fetchSids(mapping.rootObject.superid(), r, null);
 				Superid sid_dom = this.modify(qI_dom, sidsDom.iterator().next());
 
-				CategoricalObject qS_cod = mapping.rootMorphism.cod();
+				SchemaObject qS_cod = (SchemaObject) mapping.rootMorphism.cod();
 				Set<Superid> sids_cod = this.fetchSids(qS_cod.superid(), r, null);
-				CategoricalObject qI_cod = Functor.object(schema, instance, qS_cod);
+				SchemaObject qI_cod = (SchemaObject) Functor.object(schema, instance, qS_cod);
 				Superid sid_cod = this.modify(qI_cod, sids_cod.iterator().next());
 
 				Morphism mI = Functor.morphism(schema, instance, mapping.rootMorphism);
@@ -84,8 +86,8 @@ public class ModelToCategory {
 			while (!M.empty()) {
 				var triple = M.pop();
 				Morphism mI = Functor.morphism(schema, instance, triple.mS);
-				CategoricalObject oS = triple.mS.cod();
-				CategoricalObject qI = Functor.object(schema, instance, oS);
+				SchemaObject oS = (SchemaObject) triple.mS.cod();
+				SchemaObject qI = (SchemaObject) Functor.object(schema, instance, oS);
 				Set<Superid> sids = this.fetchSids(oS.superid(), r, triple.pid);
 
 				for (Superid sid : sids) {
@@ -104,7 +106,7 @@ public class ModelToCategory {
 
 	}
 
-	private Set<Superid> fetchSids(Object superid, Object record, Object todo) {
+	private Set<Superid> fetchSids(Set<Property> superid, Object record, Object todo) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 

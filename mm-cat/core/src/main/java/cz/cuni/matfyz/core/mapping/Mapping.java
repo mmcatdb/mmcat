@@ -7,6 +7,7 @@ package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Morphism;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 
 /**
  *
@@ -14,7 +15,7 @@ import cz.cuni.matfyz.core.category.Morphism;
  */
 public class Mapping {
 
-	public CategoricalObject rootObject;
+	public SchemaObject rootObject;
 	public Morphism rootMorphism;
 	public AccessPath accessPath;
 
