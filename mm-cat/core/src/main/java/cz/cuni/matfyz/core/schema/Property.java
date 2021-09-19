@@ -11,7 +11,7 @@ import cz.cuni.matfyz.core.category.Signature2;
  *
  * @author pavel.koupil
  */
-public class Property {
+public class Property implements Comparable<Property> {
 
 	private Signature2 signature;
 	private String name;
@@ -19,6 +19,11 @@ public class Property {
 	public Property(Signature2 signature, String name) {
 		this.signature = signature;
 		this.name = name;
+	}
+
+	@Override
+	public int compareTo(Property o) {
+		return name.compareTo(o.name);
 	}
 
 }

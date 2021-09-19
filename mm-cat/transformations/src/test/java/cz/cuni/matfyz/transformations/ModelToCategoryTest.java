@@ -121,60 +121,60 @@ public class ModelToCategoryTest {
 		Set<Property> superid102 = new TreeSet<>();
 		Set<Key> ids102 = new TreeSet<>();
 		superid102.add(name_epsilon);
-		ids100.add(new Key(id_1));
+		ids102.add(new Key(name_epsilon));
 
 		Set<Property> superid103 = new TreeSet<>();
 		Set<Key> ids103 = new TreeSet<>();
 		superid103.add(tag_epsilon);
-		ids100.add(new Key(id_1));
+		ids103.add(new Key(tag_epsilon));
 
 		Set<Property> superid104 = new TreeSet<>();
 		Set<Key> ids104 = new TreeSet<>();
 		superid104.add(surname_epsilon);
-		ids100.add(new Key(id_1));
+		ids104.add(new Key(surname_epsilon));
 
 		Set<Property> superid105 = new TreeSet<>();
 		Set<Key> ids105 = new TreeSet<>();
 		superid105.add(address_epsilon);
-		ids100.add(new Key(id_1));
+		ids105.add(new Key(address_epsilon));
 
 		Set<Property> superid106 = new TreeSet<>();
 		Set<Key> ids106 = new TreeSet<>();
 		superid106.add(street_epsilon);
-		ids100.add(new Key(id_1));
+		ids106.add(new Key(street_epsilon));
 
 		Set<Property> superid107 = new TreeSet<>();
 		Set<Key> ids107 = new TreeSet<>();
 		superid107.add(city_epsilon);
-		ids100.add(new Key(id_1));
+		ids107.add(new Key(city_epsilon));
 
 		Set<Property> superid108 = new TreeSet<>();
 		Set<Key> ids108 = new TreeSet<>();
 		superid108.add(postalCode_epsilon);
-		ids100.add(new Key(id_1));
+		ids108.add(new Key(postalCode_epsilon));
 
 		Set<Property> superid109 = new TreeSet<>();
 		Set<Key> ids109 = new TreeSet<>();
 		superid109.add(customer_17);
 		superid109.add(customer_19);
-		ids100.add(new Key(id_1));
+		ids109.add(new Key(customer_17, customer_19));
 
 		Set<Property> superid110 = new TreeSet<>();
 		Set<Key> ids110 = new TreeSet<>();
 		superid110.add(id_1_21);
 		superid110.add(number_25_23);
-		ids100.add(new Key(id_1));
+		ids110.add(new Key(id_1_21, number_25_23));
 
 		Set<Property> superid111 = new TreeSet<>();
 		Set<Key> ids111 = new TreeSet<>();
 		superid111.add(id_1_21_24);
 		superid111.add(number_25);
-		ids100.add(new Key(id_1));
+		ids111.add(new Key(id_1_21_24, number_25));
 
 		Set<Property> superid112 = new TreeSet<>();
 		Set<Key> ids112 = new TreeSet<>();
 		superid112.add(number_epsilon);
-		ids100.add(new Key(id_1));
+		ids112.add(new Key(number_epsilon));
 
 		Set<Property> superid113 = new TreeSet<>();
 		Set<Key> ids113 = new TreeSet<>();
@@ -182,101 +182,101 @@ public class ModelToCategoryTest {
 		superid113.add(number_25_28);
 		superid113.add(name_31_29);
 		superid113.add(value_33);
-		ids100.add(new Key(id_1));
+		ids113.add(new Key(id_1_21_24_28, number_25_28, name_31_29, value_33));
 
 		Set<Property> superid114 = new TreeSet<>();
 		Set<Key> ids114 = new TreeSet<>();
 		superid114.add(name_31);
-		ids100.add(new Key(id_1));
+		ids114.add(new Key(name_31));
 
 		Set<Property> superid115 = new TreeSet<>();
 		Set<Key> ids115 = new TreeSet<>();
 		superid115.add(name_115_epsilon);
-		ids100.add(new Key(id_1));
+		ids115.add(new Key(name_115_epsilon));
 
 		Set<Property> superid116 = new TreeSet<>();
 		Set<Key> ids116 = new TreeSet<>();
 		superid116.add(value_epsilon);
-		ids100.add(new Key(id_1));
+		ids116.add(new Key(value_epsilon));
 
 		Set<Property> superid117 = new TreeSet<>();
 		Set<Key> ids117 = new TreeSet<>();
 		superid117.add(id_1_21_24_36);
 		superid117.add(number_25_36);
 		superid117.add(id_47_39);
-		ids100.add(new Key(id_1));
+		ids117.add(new Key(id_1_21_24_36, number_25_36, id_47_39));
 
 		Set<Property> superid118 = new TreeSet<>();
 		Set<Key> ids118 = new TreeSet<>();
 		superid118.add(quantity_epsilon);
-		ids100.add(new Key(id_1));
+		ids118.add(new Key(quantity_epsilon));
 
 		Set<Property> superid119 = new TreeSet<>();
 		Set<Key> ids119 = new TreeSet<>();
 		superid119.add(id_1_42);
 		superid119.add(id_47_45);
-		ids100.add(new Key(id_1));
+		ids119.add(new Key(id_1_42, id_47_45));
 
 		Set<Property> superid120 = new TreeSet<>();
 		Set<Key> ids120 = new TreeSet<>();
 		superid120.add(quantity_120_epsilon);
-		ids100.add(new Key(id_1));
+		ids120.add(new Key(quantity_120_epsilon));
 
 		Set<Property> superid121 = new TreeSet<>();
 		Set<Key> ids121 = new TreeSet<>();
 		superid121.add(id_47);
-		ids100.add(new Key(id_1));
+		ids121.add(new Key(id_47));
 
 		Set<Property> superid122 = new TreeSet<>();
 		Set<Key> ids122 = new TreeSet<>();
 		superid122.add(id_122_epsilon);
-		ids100.add(new Key(id_1));
+		ids122.add(new Key(id_122_epsilon));
 
 		Set<Property> superid123 = new TreeSet<>();
 		Set<Key> ids123 = new TreeSet<>();
 		superid123.add(name_123_epsilon);
-		ids100.add(new Key(id_1));
+		ids123.add(new Key(name_123_epsilon));
 
 		Set<Property> superid124 = new TreeSet<>();
 		Set<Key> ids124 = new TreeSet<>();
 		superid124.add(price_epsilon);
-		ids100.add(new Key(id_1));
+		ids124.add(new Key(price_epsilon));
 
 		Set<Property> superid125 = new TreeSet<>();
 		Set<Key> ids125 = new TreeSet<>();
 		superid125.add(id_47_54);
-		ids100.add(new Key(id_1));
+		ids125.add(new Key(id_47_54));
 
 		Set<Property> superid126 = new TreeSet<>();
 		Set<Key> ids126 = new TreeSet<>();
 		superid126.add(length_epsilon);
-		ids100.add(new Key(id_1));
+		ids126.add(new Key(length_epsilon));
 
 		Set<Property> superid127 = new TreeSet<>();
 		Set<Key> ids127 = new TreeSet<>();
 		superid127.add(id_47_58);
-		ids100.add(new Key(id_1));
+		ids127.add(new Key(id_47_58));
 
 		Set<Property> superid128 = new TreeSet<>();
 		Set<Key> ids128 = new TreeSet<>();
 		superid128.add(pages_epsilon);
-		ids100.add(new Key(id_1));
+		ids128.add(new Key(pages_epsilon));
 
 		Set<Property> superid129 = new TreeSet<>();
 		Set<Key> ids129 = new TreeSet<>();
 		superid129.add(id_47_58_62);
 		superid129.add(name_65_63);
-		ids100.add(new Key(id_1));
+		ids129.add(new Key(id_47_58_62, name_65_63));
 
 		Set<Property> superid130 = new TreeSet<>();
 		Set<Key> ids130 = new TreeSet<>();
 		superid130.add(name_65);
-		ids100.add(new Key(id_1));
+		ids130.add(new Key(name_65));
 
 		Set<Property> superid131 = new TreeSet<>();
 		Set<Key> ids131 = new TreeSet<>();
 		superid131.add(name_131_epsilon);
-		ids100.add(new Key(id_1));
+		ids131.add(new Key(name_131_epsilon));
 
 		SchemaObject _100 = new SchemaObject(100, "Customer", superid100, ids100);
 		SchemaObject _101 = new SchemaObject(101, "Id", superid101, ids101);

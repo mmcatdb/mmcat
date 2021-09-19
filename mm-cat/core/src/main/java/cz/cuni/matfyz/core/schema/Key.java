@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author pavel.koupil
  */
-public class Key {
+public class Key implements Comparable<Key> {
 
 	private List<Property> ids;
 
@@ -21,6 +21,12 @@ public class Key {
 
 	public Key(Property... ids) {
 		this.ids = List.of(ids);
+	}
+
+	@Override
+	public int compareTo(Key o) {
+		System.out.println("TODO: Key implementation of Comparable");
+		return -1;
 	}
 
 }
