@@ -547,6 +547,12 @@ public class ModelToCategoryTest {
 		return schema;
 	}
 
+	private InstanceCategory buildInstanceScenario(SchemaCategory schema) {
+		InstanceCategory instance = new InstanceCategory(schema);
+
+		return instance;
+	}
+
 	/**
 	 * Test of algorithm method, of class ModelToCategory.
 	 */
@@ -554,7 +560,7 @@ public class ModelToCategoryTest {
 	public void testAlgorithm() {
 		System.out.println("algorithm");
 		SchemaCategory schema = buildSchemaCategoryScenario();
-		InstanceCategory instance = null;
+		InstanceCategory instance = buildInstanceScenario(schema);
 		ForestOfRecords forest = null;
 		Mapping mapping = null;
 		ModelToCategory transformation = new ModelToCategory();

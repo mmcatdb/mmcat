@@ -13,6 +13,10 @@ public class Signature {
 
 	private int signature;
 
+	public Signature(Signature signature) {
+		this.signature = signature.signature;
+	}
+
 	public Signature(int signature) {
 		this.signature = signature;
 	}

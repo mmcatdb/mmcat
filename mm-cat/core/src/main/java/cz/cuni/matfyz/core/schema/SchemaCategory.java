@@ -19,6 +19,14 @@ public class SchemaCategory implements Category {
 	private final List<SchemaObject> objects = new ArrayList<>();
 	private final List<SchemaMorphism> morphisms = new ArrayList<>();
 
+	public Iterable<SchemaObject> objects() {
+		return objects;
+	}
+
+	public Iterable<SchemaMorphism> morphisms() {
+		return morphisms;
+	}
+
 	public SchemaCategory() {
 	}
 

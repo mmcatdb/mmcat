@@ -61,7 +61,6 @@ public class SchemaObject implements CategoricalObject {
 		} else {
 			return 0;
 		}
-
 	}
 
 	@Override
