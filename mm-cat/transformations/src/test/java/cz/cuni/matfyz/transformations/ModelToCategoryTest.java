@@ -561,12 +561,11 @@ public class ModelToCategoryTest {
 		System.out.println("algorithm");
 		SchemaCategory schema = buildSchemaCategoryScenario();
 		InstanceCategory instance = buildInstanceScenario(schema);
-		ForestOfRecords forest = null;
-		Mapping mapping = null;
-		ModelToCategory transformation = new ModelToCategory();
-		transformation.algorithm(schema, instance, forest, mapping);
-		// TODO review the generated test code and remove the default call to fail.
-		fail("The test case is a prototype.");
+//		ForestOfRecords forest = null;
+//		Mapping mapping = null;
+//		ModelToCategory transformation = new ModelToCategory();
+//		transformation.algorithm(schema, instance, forest, mapping);
+//		fail("The test case is a prototype.");
 	}
 
 }

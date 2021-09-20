@@ -5,7 +5,6 @@
  */
 package cz.cuni.matfyz.core;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,31 +17,30 @@ import java.util.function.Consumer;
  *
  * @author pavel.koupil
  */
-public class ForestOfRecords/*<T> extends AbstractList<T>*/ {
-	
+public class ForestOfRecords<T> implements Iterable {
+
 	// tady mas list recordu
 	private List<RecordRoot> records = new ArrayList<>();
 	// a navic tu mas mapu, ktera jako klic ma kategoricky identifikator objektu a jako hodnotu ma ukazatel do recordu, tedy do stromu, na konkretni misto!
 	private Map<Object, RecordProperty> quickAccess = new TreeMap<>();
-	
 
-	public Iterable<RecordRoot> records() {
+	public Iterable<DataRecord> records() {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
-//	@Override
-//	public Iterator iterator() {
-//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//	}
+	@Override
+	public Iterator iterator() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
-//	@Override
-//	public void forEach(Consumer action) {
-//		Iterable.super.forEach(action); //To change body of generated methods, choose Tools | Templates.
-//	}
-//
-//	@Override
-//	public Spliterator spliterator() {
-//		return Iterable.super.spliterator(); //To change body of generated methods, choose Tools | Templates.
-//	}
+	@Override
+	public void forEach(Consumer action) {
+		Iterable.super.forEach(action); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public Spliterator spliterator() {
+		return Iterable.super.spliterator(); //To change body of generated methods, choose Tools | Templates.
+	}
 
 }
