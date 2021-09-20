@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	
-	    <parent>
-        <groupId>cz.cuni.matfyz</groupId>
-        <artifactId>mm-cat</artifactId>
-        <version>1.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>cz.cuni.matfyz</groupId>
+		<artifactId>mm-cat</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
 
 
 	<artifactId>editor</artifactId>
@@ -108,6 +108,12 @@
 			<groupId>com.github.vlsi.mxgraph</groupId>
 			<artifactId>jgraphx</artifactId>
 			<version>4.2.2</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>cz.cuni.matfyz</groupId>
+			<artifactId>core</artifactId>
+			<version>1.0-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
 	</dependencies>

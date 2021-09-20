@@ -19,6 +19,8 @@ public class SchemaObject implements CategoricalObject {
 	private String label;
 	private Set<Property> superid;
 	private Set<Key> ids;
+	private double x;
+	private double y;
 
 	public SchemaObject(int key) {
 		this(key, "", new TreeSet<>(), new TreeSet<>());
@@ -33,6 +35,20 @@ public class SchemaObject implements CategoricalObject {
 		this.label = label;
 		this.superid = superid;
 		this.ids = ids;
+	}
+
+	public SchemaObject(int key, String label, Set<Property> superid, Set<Key> ids, double x, double y) {
+		this(key, label, superid, ids);
+		this.x = x;
+		this.y = y;
+	}
+
+	public double x() {
+		return x;
+	}
+
+	public double y() {
+		return y;
 	}
 
 	@Override

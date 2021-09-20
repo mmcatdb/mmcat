@@ -86,25 +86,25 @@ public class EREdge extends Edge {
 //			y = sourceY.get() + py * yOrientation;
 		}
 
-		StringBuilder builder = new StringBuilder();
-		builder.append("X:[");
-		builder.append(sourceX.get());
-		builder.append(",");
-		builder.append(sourceY.get());
-		builder.append("] Y:[");
-		builder.append(targetX.get());
-		builder.append(",");
-		builder.append(targetY.get());
-		builder.append("] MID:[");
-		builder.append(x);
-		builder.append(",");
-		builder.append(y);
-		builder.append("] DIFF:[");
-		builder.append(diffX);
-		builder.append(",");
-		builder.append(diffY);
-		builder.append("]");
-		System.out.println(builder);
+//		StringBuilder builder = new StringBuilder();
+//		builder.append("X:[");
+//		builder.append(sourceX.get());
+//		builder.append(",");
+//		builder.append(sourceY.get());
+//		builder.append("] Y:[");
+//		builder.append(targetX.get());
+//		builder.append(",");
+//		builder.append(targetY.get());
+//		builder.append("] MID:[");
+//		builder.append(x);
+//		builder.append(",");
+//		builder.append(y);
+//		builder.append("] DIFF:[");
+//		builder.append(diffX);
+//		builder.append(",");
+//		builder.append(diffY);
+//		builder.append("]");
+//		System.out.println(builder);
 
 		edgeId.relocate(x, y);
 		getChildren().add(edgeId);

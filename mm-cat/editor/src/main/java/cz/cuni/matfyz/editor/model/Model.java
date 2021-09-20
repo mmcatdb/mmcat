@@ -5,6 +5,9 @@
  */
 package cz.cuni.matfyz.editor.model;
 
+import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.editor.model.widgets.CategoricalMorphismWidget;
+import cz.cuni.matfyz.editor.model.widgets.CategoricalObjectWidget;
 import cz.cuni.matfyz.editor.model.widgets.RootWidget;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,19 @@ import java.util.TreeMap;
  * @author pavel.koupil
  */
 public class Model {
+
+	public static Model load(SchemaCategory category) {
+		Model result = new Model();
+		for (var object : category.objects()) {
+			result.addWidget(object.objectId() + "", object.label(), object.x(), object.y(), WidgetType.CATEGORICAL_OBJECT);
+		}
+
+		for (var edge : category.morphisms()) {
+			result.addEdge(edge.signature().toString(), edge.dom().objectId() + "", edge.cod().objectId() + "", EdgeType.CATEGORICAL);
+		}
+
+		return result;
+	}
 
 	private Widget parent;
 
@@ -118,7 +134,8 @@ public class Model {
 //			case POSTGRESQL_KIND ->
 //				widget = new PostgreSQLKindCell(id, name, x, y);
 			default ->
-				widget = null;
+//				widget = null;
+				widget = new CategoricalObjectWidget("NAME", id, name, x, y, 50, 50);
 		}
 
 		addWidget(widget);
@@ -153,39 +170,40 @@ public class Model {
 //			case ER ->
 //				edge = new EREdge(id, source, target);
 			default ->
-				edge = null;
+				edge = new CategoricalMorphismWidget(id, source, target);
+//				edge = null;
 		}
+		System.out.println("TODO: ODKOMENTUJ EDGE V MODELU! JINAK SE NEBUDOU PRIDAVAT");
 		addedEdges.add(edge);
 
 	}
 
-	/**
-	 * Attach all cells which don't have a parent to graphParent
-	 *
-	 * @param orphans
-	 */
-	public void attachOrphansToGraphParent(List<Widget> orphans) {
-
-		for (Widget widget : orphans) {
-			if (widget.getParents().isEmpty()) {
-				parent.addChild(widget);
-			}
-		}
-
-	}
-
-	/**
-	 * Remove the graphParent reference if it is set
-	 *
-	 * @param widgets
-	 */
-	public void disconnectFromGraphParent(List<Widget> widgets) {
-
-		widgets.forEach(widget -> {
-			parent.removeChild(widget);
-		});
-	}
-
+//	/**
+//	 * Attach all cells which don't have a parent to graphParent
+//	 *
+//	 * @param orphans
+//	 */
+//	public void attachOrphansToGraphParent(List<Widget> orphans) {
+//
+//		for (Widget widget : orphans) {
+//			if (widget.getParents().isEmpty()) {
+//				parent.addChild(widget);
+//			}
+//		}
+//
+//	}
+//
+//	/**
+//	 * Remove the graphParent reference if it is set
+//	 *
+//	 * @param widgets
+//	 */
+//	public void disconnectFromGraphParent(List<Widget> widgets) {
+//
+//		widgets.forEach(widget -> {
+//			parent.removeChild(widget);
+//		});
+//	}
 	public void merge() {
 		widgets.addAll(addedWidgets);
 		widgets.removeAll(removedWidgets);

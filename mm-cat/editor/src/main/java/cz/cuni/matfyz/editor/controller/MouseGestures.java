@@ -8,10 +8,16 @@ package cz.cuni.matfyz.editor.controller;
 //import cz.cuni.matfyz.editor.view.Graph;
 //import cz.cuni.matfyz.editor.view.cell.Cell;
 //import cz.cuni.matfyz.editor.model.Widget;
+import cz.cuni.matfyz.editor.FXMLControllerDEMO;
+import cz.cuni.matfyz.editor.model.Widget;
+import cz.cuni.matfyz.editor.representation.MappingRepresentation;
 import cz.cuni.matfyz.editor.representation.WidgetRepresentation;
 import cz.cuni.matfyz.editor.view.ZoomableScrollPane;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -27,10 +33,21 @@ public class MouseGestures {
 
 	private ZoomableScrollPane pane;
 
+//	private Tab mappingTab;
+	private FXMLControllerDEMO demo;
+
+//	private TextField nameTextField;
 	private Paint save;
 
 	public MouseGestures(ZoomableScrollPane pane) {
 		this.pane = pane;
+	}
+
+	public MouseGestures(ZoomableScrollPane pane, FXMLControllerDEMO demo) {
+		this.pane = pane;
+		this.demo = demo;
+//		this.nameChoiceBox = nameChoiceBox;
+//		this.nameTextField = nameTextField;
 	}
 
 	public void makeDraggable(Node node) {
@@ -47,6 +64,11 @@ public class MouseGestures {
 
 			Node node = (Node) event.getSource();
 			WidgetRepresentation representation = (WidgetRepresentation) event.getSource();
+			
+			Widget model = representation.getModel();
+			
+			demo.nameChoiceBox.setValue("Inherit");
+			demo.nameTextField.setText(model.getName());
 
 			double scale = pane.getScaleValue();
 

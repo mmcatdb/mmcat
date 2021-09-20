@@ -5,9 +5,11 @@
  */
 package cz.cuni.matfyz.editor.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
+//import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -19,6 +21,10 @@ import javafx.beans.property.StringProperty;
 public abstract class Widget {
 
 	private Widget parent = null;
+
+	private List<Widget> adjacent = new ArrayList<>();
+
+	private List<Widget> adjacentBase = new ArrayList<>();
 
 	private StringProperty type;
 
@@ -48,6 +54,14 @@ public abstract class Widget {
 		this.height = new SimpleDoubleProperty(height);
 	}
 
+	public List<Widget> getAdjacent() {
+		return adjacent;
+	}
+
+	public List<Widget> getAdjacentBase() {
+		return adjacentBase;
+	}
+
 	public String getId() {
 		return id.getValue();
 	}
@@ -68,16 +82,23 @@ public abstract class Widget {
 		return height.doubleValue();
 	}
 
-	public List<Widget> getParents() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	public String getName() {
+		return name.getValue();
 	}
 
-	public void addChild(Widget widget) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	public void removeChild(Widget widget) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
+//	public List<Widget> getParents() {
+//		System.out.println("TOHLE PATRI DO REPRESENTATION! NEBO DO MODELU? DO REPRESENTATION!!! PROTOZE TAM JE DULEZITA HIERARCHIE!");
+//		var result = Collections.EMPTY_LIST;
+//		result.add(parent);
+//		return result;
+////		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//	}
+//
+//	public void addChild(Widget widget) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//	}
+//
+//	public void removeChild(Widget widget) {
+//		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//	}
 }

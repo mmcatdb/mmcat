@@ -5,6 +5,8 @@
  */
 package cz.cuni.matfyz.editor;
 
+import cz.cuni.matfyz.core.dummy.Dummy;
+import cz.cuni.matfyz.editor.controller.MouseGestures;
 import cz.cuni.matfyz.editor.mockup.scenario.DummyDDLScenario;
 import cz.cuni.matfyz.editor.mockup.scenario.DummyGraphScenario;
 import cz.cuni.matfyz.editor.mockup.scenario.DummyMappingScenario;
@@ -19,6 +21,8 @@ import cz.cuni.matfyz.editor.view.cell.EREntityCell;
 import cz.cuni.matfyz.editor.view.cell.ERIdentifierCell;
 import cz.cuni.matfyz.editor.view.cell.ERRelationshipCell;
 import cz.cuni.matfyz.editor.mockup.scenario.DummyObservableData;
+import cz.cuni.matfyz.editor.model.Model;
+import cz.cuni.matfyz.editor.representation.MappingRepresentation;
 import cz.cuni.matfyz.editor.utils.Constants;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -98,7 +102,7 @@ public class FXMLControllerDEMO {
 	private ChoiceBox<String> zoom;
 
 	@FXML
-	private ChoiceBox<String> nameChoiceBox;
+	public ChoiceBox<String> nameChoiceBox;
 
 	@FXML
 	private Tab diagramTab;
@@ -204,7 +208,7 @@ public class FXMLControllerDEMO {
 	private CheckBox kindsCheckbox;
 
 	@FXML
-	private TextField nameTextField;
+	public TextField nameTextField;
 
 	@FXML
 	private TableView kindsTable;
@@ -580,9 +584,26 @@ public class FXMLControllerDEMO {
 							MOCKUP.buildMappingTab_name(false, "User Defined", false, "id");
 						}
 						case "Orders" -> {
+
+							Model model = Model.load(Dummy.buildSchemaCategoryScenario());
+							MappingRepresentation graphX = new MappingRepresentation(model);
+
+							MouseGestures gestures = new MouseGestures(graphX, FXMLControllerDEMO.this);
+							graphX.setGestures(gestures);
+							scrollPane.setContent(graphX.getScrollPane());
+
+							graphX.getCellLayer().getChildren().add(view);
+
+							graphX.getScrollPane().minWidthProperty().bind(Bindings.createDoubleBinding(()
+									-> scrollPane.getViewportBounds().getWidth(), scrollPane.viewportBoundsProperty()));
+							graphX.getScrollPane().minHeightProperty().bind(Bindings.createDoubleBinding(()
+									-> scrollPane.getViewportBounds().getHeight(), scrollPane.viewportBoundsProperty()));
+
 							MOCKUP.selectPrimaryTabPane_Diagram("Orders");
 							MOCKUP.selectSecondaryTabPane_ER();
-							DummyGraphScenario.INSTANCE.buildMongoDBOrder_8(graph);
+//							DummyGraphScenario.INSTANCE.buildMongoDBOrder_8(graphX);
+							graphX.beginUpdate();
+							graphX.endUpdate();
 							DummyMappingScenario.INSTANCE.buildMongoDBOrder_8(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							MOCKUP.selectMappingTabs();
