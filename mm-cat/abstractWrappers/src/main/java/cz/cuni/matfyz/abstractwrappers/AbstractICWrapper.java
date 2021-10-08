@@ -16,9 +16,9 @@ import java.util.Set;
  */
 public interface AbstractICWrapper {
 
-	public abstract void appendIdentifier(String name, IdentifierStructure identifier);
+	public abstract void appendIdentifier(String kindName, IdentifierStructure identifier);
 
-	public abstract void appendReference(String name, Set<Pair<String, String>> atts);
+	public abstract void appendReference(String kindName, String kindName2, Set<Pair<String, String>> attributePairs);
 
 	public abstract ICStatement createICStatement();
 
