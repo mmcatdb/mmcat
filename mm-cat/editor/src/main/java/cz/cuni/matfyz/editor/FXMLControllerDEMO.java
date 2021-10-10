@@ -584,31 +584,39 @@ public class FXMLControllerDEMO {
 							MOCKUP.buildMappingTab_name(false, "User Defined", false, "id");
 						}
 						case "Orders" -> {
-
-							Model model = Model.load(Dummy.buildSchemaCategoryScenario());
-							MappingRepresentation graphX = new MappingRepresentation(model);
-
-							MouseGestures gestures = new MouseGestures(graphX, FXMLControllerDEMO.this);
-							graphX.setGestures(gestures);
-							scrollPane.setContent(graphX.getScrollPane());
-
-							graphX.getCellLayer().getChildren().add(view);
-
-							graphX.getScrollPane().minWidthProperty().bind(Bindings.createDoubleBinding(()
-									-> scrollPane.getViewportBounds().getWidth(), scrollPane.viewportBoundsProperty()));
-							graphX.getScrollPane().minHeightProperty().bind(Bindings.createDoubleBinding(()
-									-> scrollPane.getViewportBounds().getHeight(), scrollPane.viewportBoundsProperty()));
-
 							MOCKUP.selectPrimaryTabPane_Diagram("Orders");
 							MOCKUP.selectSecondaryTabPane_ER();
-//							DummyGraphScenario.INSTANCE.buildMongoDBOrder_8(graphX);
-							graphX.beginUpdate();
-							graphX.endUpdate();
+							DummyGraphScenario.INSTANCE.buildMongoDBOrder_8LEG(graph);
 							DummyMappingScenario.INSTANCE.buildMongoDBOrder_8(mappingTextArea);
 							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
 							MOCKUP.selectMappingTabs();
-							MOCKUP.buildMappingTab_name(true, "Inherit", true, "");
+							MOCKUP.buildMappingTab_name(false, "User Defined", false, "id");
 						}
+//						case "Orders" -> {
+//							Model model = Model.load(Dummy.buildSchemaCategoryScenario());
+//							MappingRepresentation graphX = new MappingRepresentation(model);
+//
+//							MouseGestures gestures = new MouseGestures(graphX, FXMLControllerDEMO.this);
+//							graphX.setGestures(gestures);
+//							scrollPane.setContent(graphX.getScrollPane());
+//
+//							graphX.getCellLayer().getChildren().add(view);
+//
+//							graphX.getScrollPane().minWidthProperty().bind(Bindings.createDoubleBinding(()
+//									-> scrollPane.getViewportBounds().getWidth(), scrollPane.viewportBoundsProperty()));
+//							graphX.getScrollPane().minHeightProperty().bind(Bindings.createDoubleBinding(()
+//									-> scrollPane.getViewportBounds().getHeight(), scrollPane.viewportBoundsProperty()));
+//
+//							MOCKUP.selectPrimaryTabPane_Diagram("Orders");
+//							MOCKUP.selectSecondaryTabPane_ER();
+////							DummyGraphScenario.INSTANCE.buildMongoDBOrder_8(graphX);
+//							graphX.beginUpdate();
+//							graphX.endUpdate();
+//							DummyMappingScenario.INSTANCE.buildMongoDBOrder_8(mappingTextArea);
+//							DummyDDLScenario.INSTANCE.createMongoKinds(ddlStatementTextArea);
+//							MOCKUP.selectMappingTabs();
+//							MOCKUP.buildMappingTab_name(true, "Inherit", true, "");
+//						}
 						case "PostgreSQL" -> {
 							MOCKUP.selectPrimaryTabPane_Diagram("PostgreSQL");
 							MOCKUP.selectSecondaryTabPane_ER();
