@@ -25,6 +25,10 @@ import cz.cuni.matfyz.editor.model.Model;
 import cz.cuni.matfyz.editor.representation.MappingRepresentation;
 import cz.cuni.matfyz.editor.utils.Constants;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -152,6 +156,64 @@ public class FXMLControllerDEMO {
 
 	@FXML
 	private TextArea statementArea;
+
+	@FXML
+	private TextArea migrationTextArea;
+
+	@FXML
+	private Button executeMigrationButton;
+
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
+	@FXML
+	private void migrationAction(ActionEvent event) {
+		try {
+			migrationTextArea.setText("");
+			LocalDateTime start = LocalDateTime.now();
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(start) + " INFO: Executing data migration from PostgreSQL to MongoDB.\n");
+			Thread.sleep(20);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Pulling data from [PostgreSQL, Contacts].\n");
+			Thread.sleep(375);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Finished.\n");
+			Thread.sleep(100);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Pulling data from [PostgreSQL, Orders].\n");
+			Thread.sleep(451);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Finished.\n");
+			Thread.sleep(100);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Creating kind [MongoDB,  Orders].\n");
+			Thread.sleep(65);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Schema-less approach. No valid schema.\n");
+			Thread.sleep(30);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Finished.\n");
+			Thread.sleep(45);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Pushing data [MongoDB, Orders].\n");
+			Thread.sleep(497);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Finished.\n");
+			Thread.sleep(100);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Altering kind [MongoDB, Orders].\n");
+			Thread.sleep(70);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Schema-less approach. No valid schema.\n");
+			Thread.sleep(30);
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Finished.\n");
+			Thread.sleep(48);
+			LocalDateTime end = LocalDateTime.now();
+
+			int duration = (end.getHour() * 3600 + end.getMinute() * 60 + end.getSecond()) - (start.getHour() * 3600 + start.getMinute() * 60 + start.getSecond());
+			migrationTextArea.appendText("---------------------------------------------------------------------------\n");
+			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Data migration is complete.\n");
+			migrationTextArea.appendText("---------------------------------------------------------------------------\n");
+			migrationTextArea.appendText("Total time:   00:0" + duration + " min\n");
+			migrationTextArea.appendText("Finished at:  " + DATE_TIME_FORMATTER.format(end) + "\n");
+			migrationTextArea.appendText("---------------------------------------------------------------------------\n");
+//			Thread.sleep(100);
+//			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Finished.\n");
+//			Thread.sleep(100);
+//			migrationTextArea.appendText(DATE_TIME_FORMATTER.format(LocalDateTime.now()) + " INFO: Finished.\n");
+//			Thread.sleep(100);
+		} catch (InterruptedException ex) {
+			Logger.getLogger(FXMLControllerDEMO.class.getName()).log(Level.SEVERE, null, ex);
+		}
+	}
 
 	@FXML
 	private TreeView treeView;
@@ -986,39 +1048,39 @@ public class FXMLControllerDEMO {
 			TreeItem item33 = new TreeItem("PostgreSQL");
 
 			TreeItem item310 = new TreeItem("Orders");
-			TreeItem item311 = new TreeItem("OrdersM1");
-			TreeItem item312 = new TreeItem("OrdersM2");
-			TreeItem item313 = new TreeItem("OrdersM3");
-			TreeItem item314 = new TreeItem("OrdersM4");
-			TreeItem item315 = new TreeItem("OrdersM5");
-			TreeItem item316 = new TreeItem("OrdersM6");
-			TreeItem item317 = new TreeItem("OrdersM7");
-			TreeItem item318 = new TreeItem("OrdersM8");
+//			TreeItem item311 = new TreeItem("OrdersM1");
+//			TreeItem item312 = new TreeItem("OrdersM2");
+//			TreeItem item313 = new TreeItem("OrdersM3");
+//			TreeItem item314 = new TreeItem("OrdersM4");
+//			TreeItem item315 = new TreeItem("OrdersM5");
+//			TreeItem item316 = new TreeItem("OrdersM6");
+//			TreeItem item317 = new TreeItem("OrdersM7");
+//			TreeItem item318 = new TreeItem("OrdersM8");
 
 			TreeItem item331 = new TreeItem("Contact");
 			TreeItem item332 = new TreeItem("Customer");
 
 			TreeItem item335 = new TreeItem("Orders ");
-			TreeItem item3351 = new TreeItem("Orders1");
-			TreeItem item3352 = new TreeItem("Orders2");
-			TreeItem item3353 = new TreeItem("Orders3");
-			TreeItem item3354 = new TreeItem("Orders4");
-			TreeItem item3355 = new TreeItem("Orders5");
+//			TreeItem item3351 = new TreeItem("Orders1");
+//			TreeItem item3352 = new TreeItem("Orders2");
+//			TreeItem item3353 = new TreeItem("Orders3");
+//			TreeItem item3354 = new TreeItem("Orders4");
+//			TreeItem item3355 = new TreeItem("Orders5");
 
 			TreeItem item337 = new TreeItem("Type");
 
 			TreeItem item4 = new TreeItem("Data Migrations");
 			TreeItem item40 = new TreeItem("My Migration");
-			TreeItem item5 = new TreeItem("Instance");
-			TreeItem item53 = new TreeItem("PostgreSQL-Inst");
+//			TreeItem item5 = new TreeItem("Instance");
+//			TreeItem item53 = new TreeItem("PostgreSQL-Inst");
 
 			root.setExpanded(true);
-			root.getChildren().addAll(item1, item2, item3, item4, item5);
+			root.getChildren().addAll(item1, item2, item3, item4/*, item5*/);
 			item3.getChildren().addAll(item31, item33);
-			item31.getChildren().addAll(item310, item311, item312, item313, item314, item315, item316, item317, item318);
-			item33.getChildren().addAll(item331, item332, item335, item3351, item3352, item3353, item3354, item3355, item337);
+			item31.getChildren().addAll(item310/*, item311, item312, item313, item314, item315, item316, item317, item318*/);
+			item33.getChildren().addAll(item331, item332, item335/*, item3351, item3352, item3353, item3354, item3355*/, item337);
 			item4.getChildren().addAll(item40);
-			item5.getChildren().addAll(item53);
+//			item5.getChildren().addAll(item53);
 
 			return root;
 		}
