@@ -681,7 +681,7 @@ public class FXMLControllerDEMO {
 							MOCKUP.selectMappingTabs();
 							MOCKUP.buildMappingTab_name(false, "Inherit", true, "");
 						}
-						case "Orders_WARNING_TODO!" -> {
+						case "Orders " -> {
 							MOCKUP.selectPrimaryTabPane_Diagram("Orders");
 							MOCKUP.selectSecondaryTabPane_ER();
 							DummyGraphScenario.INSTANCE.buildPostgreSQLOrder_5(graph);
@@ -990,7 +990,7 @@ public class FXMLControllerDEMO {
 			TreeItem item331 = new TreeItem("Contact");
 			TreeItem item332 = new TreeItem("Customer");
 
-			TreeItem item335 = new TreeItem("Orders");
+			TreeItem item335 = new TreeItem("Orders ");
 			TreeItem item3351 = new TreeItem("Orders1");
 			TreeItem item3352 = new TreeItem("Orders2");
 			TreeItem item3353 = new TreeItem("Orders3");
