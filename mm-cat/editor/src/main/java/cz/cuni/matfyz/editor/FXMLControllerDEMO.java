@@ -51,6 +51,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
@@ -164,6 +165,9 @@ public class FXMLControllerDEMO {
 	private Button executeMigrationButton;
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
+	@FXML
+	private Label currentDateLabel;
 
 	@FXML
 	private void migrationAction(ActionEvent event) {
@@ -801,6 +805,10 @@ public class FXMLControllerDEMO {
 	}
 
 	public void initialize() {
+		DateTimeFormatter DATE_TIME_FORMATTER2 = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+		LocalDateTime start = LocalDateTime.now();
+
+		currentDateLabel.setText(DATE_TIME_FORMATTER2.format(start));
 		MOCKUP.mockupMigrationSource();
 		MOCKUP.mockupMigrationTarget();
 
