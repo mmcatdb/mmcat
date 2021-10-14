@@ -4,7 +4,7 @@ package cz.cuni.matfyz.core.record;
  *
  * This class represents a general node of the record tree.
  */
-public class Property
+public abstract class Property
 {
     private final String name;
     private final ComplexProperty parent;
