@@ -1,14 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
-import cz.cuni.matfyz.statements.DMLStatement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 class PropertyValue
 {
@@ -24,24 +17,26 @@ class PropertyValue
 
 /**
  *
- * @author jachym.bartik
  */
 public class PostgreSQLPushWrapper implements AbstractPushWrapper
 {
     private String kindName = null;
-    private ArrayList<PropertyValue> propertyValues = new ArrayList<PropertyValue>();
+    private List<PropertyValue> propertyValues = new ArrayList<>();
     
+    @Override
 	public void setKindName(String name)
     {
         kindName = name;
     }
 
+    @Override
 	public void append(String name, Object value)
     {
         propertyValues.add(new PropertyValue(name, value.toString()));
     }
 
-	public DMLStatement createDMLStatement()
+    @Override
+	public PostgreSQLDMLStatement createDMLStatement()
     {
         List<String> names = propertyValues.stream().map(propertyValue -> propertyValue.name).toList();
         List<String> values = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
@@ -55,18 +50,10 @@ public class PostgreSQLPushWrapper implements AbstractPushWrapper
         return "'" + input.replaceAll("'", "''") + "'";
     }
 
+    @Override
 	public void clear()
     {
         kindName = null;
-        propertyValues = new ArrayList<PropertyValue>();
-    }
-}
-
-class PostgreSQLDMLStatement implements DMLStatement
-{
-    private String content;
-    
-    public PostgreSQLDMLStatement(String content) {
-        this.content = content;
+        propertyValues = new ArrayList<>();
     }
 }

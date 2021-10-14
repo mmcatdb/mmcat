@@ -1,16 +1,52 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.core.util.Pair;
-import cz.cuni.matfyz.statements.ICStatement;
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.*;
+
+/**
+ *
+ */
+public class PostgreSQLICWrapper implements AbstractICWrapper
+{
+    private final List<Constraint> constraints = new ArrayList<>();
+    
+    @Override
+	public void appendIdentifier(String kindName, IdentifierStructure identifier)
+    {
+        // TODO IndentifierStructure is empty
+    }
+
+    @Override
+	public void appendReference(String kindName, String kindName2, Set<Pair<String, String>> attributePairs)
+    {
+        for (Pair<String, String> attributePair : attributePairs)
+        {
+            // TODO There should be a way how to get attribute names from the pairs
+            ReferenceConstraint newConstraint = new ReferenceConstraint(kindName, kindName2, "TODO1", "TODO2");
+            
+            if (constraints.stream().anyMatch(constraint -> constraint.getName() == newConstraint.getName()))
+                return;
+            
+            constraints.add(newConstraint);
+        }
+    }
+
+    @Override
+	public PostgreSQLICStatement createICStatement()
+    {
+        String content = String.join("\n\n", constraints.stream().map(constraint -> constraint.addCommand()).toList());
+        return new PostgreSQLICStatement(content);
+    }
+
+    @Override
+	public PostgreSQLICStatement createICRemoveStatement()
+    {
+        String content = String.join("\n\n", constraints.stream().map(constraint -> constraint.dropCommand()).toList());
+        return new PostgreSQLICStatement(content);
+    }
+}
 
 interface Constraint
 {
@@ -51,54 +87,5 @@ class ReferenceConstraint implements Constraint
     {
         return "ALTER TABLE " + sourceKindName
             + "\nDROP CONSTRAINT " + getName();
-    }
-}
-
-/**
- *
- * @author jachym.bartik
- */
-public class PostgreSQLICWrapper implements AbstractICWrapper
-{
-    private ArrayList<Constraint> constraints = new ArrayList<Constraint>();
-    
-	public void appendIdentifier(String kindName, IdentifierStructure identifier)
-    {
-        // TODO IndentifierStructure is empty
-    }
-
-	public void appendReference(String kindName, String kindName2, Set<Pair<String, String>> attributePairs)
-    {
-        for (Pair<String, String> attributePair : attributePairs)
-        {
-            // TODO There should be a way how to get attribute names from the pairs
-            ReferenceConstraint newConstraint = new ReferenceConstraint(kindName, kindName2, "TODO1", "TODO2");
-            
-            if (constraints.stream().anyMatch(constraint -> constraint.getName() == newConstraint.getName()))
-                return;
-            
-            constraints.add(newConstraint);
-        }
-    }
-
-	public ICStatement createICStatement()
-    {
-        String content = String.join("\n\n", constraints.stream().map(constraint -> constraint.addCommand()).toList());
-        return new PostgreSQLICStatement(content);
-    }
-
-	public ICStatement createICRemoveStatement()
-    {
-        String content = String.join("\n\n", constraints.stream().map(constraint -> constraint.dropCommand()).toList());
-        return new PostgreSQLICStatement(content);
-    }
-}
-
-class PostgreSQLICStatement implements ICStatement
-{
-    private String content;
-    
-    public PostgreSQLICStatement(String content) {
-        this.content = content;
     }
 }

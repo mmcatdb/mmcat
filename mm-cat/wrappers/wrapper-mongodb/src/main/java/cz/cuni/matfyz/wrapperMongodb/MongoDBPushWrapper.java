@@ -1,14 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.wrapperMongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.statements.DMLStatement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 class PropertyValue
 {
@@ -24,24 +18,26 @@ class PropertyValue
 
 /**
  *
- * @author jachym.bartik
  */
 public class MongoDBPushWrapper implements AbstractPushWrapper
 {
     private String kindName = null;
-    private ArrayList<PropertyValue> propertyValues = new ArrayList<PropertyValue>();
+    private List<PropertyValue> propertyValues = new ArrayList<>();
     
+    @Override
 	public void setKindName(String name)
     {
         kindName = name;
     }
 
+    @Override
 	public void append(String name, Object value)
     {
         propertyValues.add(new PropertyValue(name, value.toString()));
     }
 
-	public DMLStatement createDMLStatement()
+    @Override
+	public MongoDBDMLStatement createDMLStatement()
     {
         List<String> dataValues = propertyValues.stream().map(propertyValue -> String.format("%s: %s", propertyValue.name, escapeString(propertyValue.value))).toList();
         
@@ -54,18 +50,10 @@ public class MongoDBPushWrapper implements AbstractPushWrapper
         return "\"" + input.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"") + "\"";
     }
 
+    @Override
 	public void clear()
     {
         kindName = null;
-        propertyValues = new ArrayList<PropertyValue>();
-    }
-}
-
-class MongoDBDMLStatement implements DMLStatement
-{
-    private String content;
-    
-    public MongoDBDMLStatement(String content) {
-        this.content = content;
+        propertyValues = new ArrayList<>();
     }
 }

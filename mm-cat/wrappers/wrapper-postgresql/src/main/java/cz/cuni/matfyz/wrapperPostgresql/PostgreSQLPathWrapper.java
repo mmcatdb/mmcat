@@ -1,35 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
+import java.util.*;
 
 /**
  *
- * @author jachym.bartik
  */
 public class PostgreSQLPathWrapper implements AbstractPathWrapper
 {
+    private final List<String> properties = new ArrayList<>();
+    
+    @Override
 	public void addProperty(String hierarchy)
     {
-        // Maybe this could return some more structured object so we doesn't have to parse it's information from string?
+        this.properties.add(hierarchy);
     }
 
-	public boolean check()
+	@Override
+    public boolean check()
     {
         return true; // This should be ok
     }
-
-	public boolean isRootObjectAllowed() { return true; }
-	public boolean isPropertyToOneAllowed() { return true; }
-	public boolean isPropertyToManyAllowed() { return false; }
-	public boolean isInliningToOneAllowed() { return true; }
-	public boolean isInliningToManyAllowed() { return false; }
-	public boolean isGrouppingAllowed() { return false; }
-	public boolean isDynamicNamingAllowed() { return false; }
-	public boolean isAnonymousNamingAllowed() { return false; }
-	public boolean isReferenceAllowed() { return true; }
+    
+    @Override public boolean isRootObjectAllowed() { return true; }
+	@Override public boolean isPropertyToOneAllowed() { return true; }
+	@Override public boolean isPropertyToManyAllowed() { return false; }
+	@Override public boolean isInliningToOneAllowed() { return true; }
+	@Override public boolean isInliningToManyAllowed() { return false; }
+	@Override public boolean isGrouppingAllowed() { return false; }
+	@Override public boolean isDynamicNamingAllowed() { return false; }
+	@Override public boolean isAnonymousNamingAllowed() { return false; }
+	@Override public boolean isReferenceAllowed() { return true; }
 }

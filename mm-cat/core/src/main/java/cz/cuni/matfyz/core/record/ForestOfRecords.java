@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cz.cuni.matfyz.core;
+package cz.cuni.matfyz.core.record;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,14 +17,14 @@ import java.util.function.Consumer;
  *
  * @author pavel.koupil
  */
-public class ForestOfRecords<T> implements Iterable {
+public class ForestOfRecords implements Iterable {
 
 	// tady mas list recordu
-	private List<RecordRoot> records = new ArrayList<>();
+	private List<DataRecord> records = new ArrayList<>();
 	// a navic tu mas mapu, ktera jako klic ma kategoricky identifikator objektu a jako hodnotu ma ukazatel do recordu, tedy do stromu, na konkretni misto!
-	private Map<Object, RecordProperty> quickAccess = new TreeMap<>();
+	private Map<Object, Property> quickAccess = new TreeMap<>();
 
-	public Iterable<DataRecord> records() {
+	public Iterable<SimpleProperty> records() {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
@@ -42,5 +42,9 @@ public class ForestOfRecords<T> implements Iterable {
 	public Spliterator spliterator() {
 		return Iterable.super.spliterator(); //To change body of generated methods, choose Tools | Templates.
 	}
-
+    
+    public void addRecord(DataRecord record)
+    {
+        records.add(record); // TODO
+    }
 }

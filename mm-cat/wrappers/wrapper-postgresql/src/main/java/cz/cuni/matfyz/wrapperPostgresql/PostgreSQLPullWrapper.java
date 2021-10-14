@@ -1,31 +1,24 @@
-/*
- * To change this license header, choose License HeaderesultSet in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.ForestOfRecords;
-import cz.cuni.matfyz.core.RecordData;
-import cz.cuni.matfyz.core.RecordRoot;
 import cz.cuni.matfyz.core.mapping.AccessPathProperty;
+import cz.cuni.matfyz.core.record.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
+import java.sql.*;
 
 /**
  *
- * @author jachym.bartik
  */
 public class PostgreSQLPullWrapper implements AbstractPullWrapper
 {
-    private ConnectionProvider connectionProvider; // TODO inject?
+    private ConnectionProvider connectionProvider;
+
+    public void injectConnectionProvider(ConnectionProvider connectionProvider) {
+        this.connectionProvider = connectionProvider;
+    }
     
+    @Override
 	public ForestOfRecords pullForest(String selectAll, AccessPath path)
     {
         ResultSet resultSet = getData(selectAll);
@@ -38,27 +31,22 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
             
             while (resultSet.next())
             {
-                ArrayList<RecordData> data = new ArrayList<RecordData>();
-                for (AccessPathProperty property: path.properties())
+                var record = new DataRecord();
+                
+                for (AccessPathProperty property : path.properties())
                 {
-                    String propertyName = "TODO it should be contained in property.name";
-                    String value = resultSet.getString(propertyName);
-                    
-                    // TODO create RecordData from name and value?
-                    data.add(new RecordData());
+                    String name = "TODO it should be contained in property.name";
+                    String value = resultSet.getString(name);
+                    record.addSimpleProperty(name, value);
                 }
                 
-                // TODO add record data to the root of the tree?
-                RecordRoot tree = new RecordRoot();
-                
-                // TODO add tree to the forest?
+                forest.addRecord(record);
             }
             
             resultSet.close();
-            
             return forest;
         }
-        catch (Exception exception)
+        catch (SQLException exception)
         {
             System.err.println("Can't get result: " + exception.getMessage());
         }
@@ -66,6 +54,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         return null;
     }
 
+    @Override
 	public ForestOfRecords pullForest(String selectAll, AccessPath path, int limit, int offset)
     {
         String newSelectAll = String.format("%s\nLIMIT %d\nOFFSET %d", selectAll, limit, offset);
@@ -86,16 +75,11 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
            
             return resultSet;
         }
-        catch (Exception exception)
+        catch (SQLException exception)
         {
             System.err.println("Can't get result: " + exception.getMessage());
         }
         
         return null;
     }
-}
-
-interface ConnectionProvider
-{
-    Connection getConnection();
 }

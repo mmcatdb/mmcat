@@ -6,7 +6,7 @@
 package cz.cuni.matfyz.abstractwrappers;
 
 import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.ForestOfRecords;
+import cz.cuni.matfyz.core.record.ForestOfRecords;
 
 /**
  *
