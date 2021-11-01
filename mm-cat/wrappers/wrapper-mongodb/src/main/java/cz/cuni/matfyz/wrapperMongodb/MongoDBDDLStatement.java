@@ -4,10 +4,11 @@ import cz.cuni.matfyz.statements.DDLStatement;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class MongoDBDDLStatement implements DDLStatement {
     
-    private String content;
+    private final String content;
     
     public MongoDBDDLStatement(String content) {
         this.content = content;

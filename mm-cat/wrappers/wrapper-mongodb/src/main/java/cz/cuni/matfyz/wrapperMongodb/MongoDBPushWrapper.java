@@ -1,23 +1,11 @@
 package cz.cuni.matfyz.wrapperMongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
-import cz.cuni.matfyz.statements.DMLStatement;
 import java.util.*;
-
-class PropertyValue
-{
-    public String name;
-    public String value;
-    
-    public PropertyValue(String name, String value)
-    {
-        this.name = name;
-        this.value = value;
-    }
-}
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class MongoDBPushWrapper implements AbstractPushWrapper
 {
@@ -55,5 +43,17 @@ public class MongoDBPushWrapper implements AbstractPushWrapper
     {
         kindName = null;
         propertyValues = new ArrayList<>();
+    }
+}
+
+class PropertyValue
+{
+    public String name;
+    public String value;
+    
+    public PropertyValue(String name, String value)
+    {
+        this.name = name;
+        this.value = value;
     }
 }

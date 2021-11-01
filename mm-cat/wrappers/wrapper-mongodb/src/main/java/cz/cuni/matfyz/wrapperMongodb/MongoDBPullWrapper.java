@@ -1,8 +1,7 @@
 package cz.cuni.matfyz.wrapperMongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.mapping.AccessPathProperty;
+import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.*;
 
 import com.mongodb.client.*;
@@ -11,6 +10,7 @@ import org.bson.Document;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class MongoDBPullWrapper implements AbstractPullWrapper
 {
@@ -21,18 +21,18 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     }
     
     @Override
-	public ForestOfRecords pullForest(String selectAll, AccessPath path)
+	public ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception
     {
         return pullForest(selectAll, path, false, 0, 0);
     }
 
     @Override
-    public ForestOfRecords pullForest(String selectAll, AccessPath path, int limit, int offset)
+    public ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset) throws Exception
     {
         return pullForest(selectAll, path, true, limit, offset);
     }
     
-	public ForestOfRecords pullForest(String selectAll, AccessPath path, boolean doLimitAndOffset, int limit, int offset)
+	public ForestOfRecords pullForest(String selectAll, ComplexProperty path, boolean doLimitAndOffset, int limit, int offset) throws Exception
     {
         // selectAll should be in the form of "database.getCollection("<kindName>");"
         var database = databaseProvider.getDatabase();
@@ -53,38 +53,36 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
                     continue;
                 
             var record = new DataRecord();
-            addChildrenToProperty(document, record);
-            forest.addRecord(record);
-            
-            /*
-            for (AccessPathProperty property : path.properties())
-            {
-                String name = "TODO it should be contained in property.name";
-                String value = TODO extract property from document?
-                //record.addSimpleProperty(name, value);
-            
-                TODO the path needs to be traversed as a tree so we can construct complex properties first
-            }
-            */
-
+            processPath(path, record, document);
             forest.addRecord(record);
         }
         
         return forest;
     }
     
-    private void addChildrenToProperty(Document document, ComplexProperty property)
+    private void processPath(AccessPath path, ComplexRecord record, Document document) throws Exception
     {
-        document.forEach((key, value) -> {
-            if (value instanceof Document documentValue)
-            {
-                var childProperty = property.addComplexProperty(key);
-                addChildrenToProperty(documentValue, childProperty);
-            }
-            else
-            {
-                property.addSimpleProperty(key, value);
-            }
-        });
+        String stringName = path.getName().getStringName();
+        Object value = (document == null || !document.containsKey(stringName)) ? null : document.get(stringName);
+
+        if (path instanceof ComplexProperty innerNode)
+            processNode(innerNode, record, value);
+        else if (path instanceof SimpleProperty leafNode)
+            processNode(leafNode, record, value);
+    }
+    
+    private void processNode(ComplexProperty innerNode, ComplexRecord record, Object value) throws Exception
+    {
+        for (AccessPath subpath : innerNode.getSubpaths())
+        {
+            ComplexRecord childRecord = record.addComplexRecord(innerNode.getName().toRecordName());
+            Document childDocument = value instanceof Document documentValue ? documentValue : null;
+            processPath(subpath, childRecord, childDocument);
+        }
+    }
+    
+    private void processNode(SimpleProperty leafNode, ComplexRecord record, Object value) throws Exception
+    {
+        record.addSimpleRecord(leafNode.getName().toRecordName(), value);
     }
 }

@@ -1,14 +1,14 @@
 package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.mapping.AccessPathProperty;
+import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.*;
 
 import java.sql.*;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class PostgreSQLPullWrapper implements AbstractPullWrapper
 {
@@ -19,7 +19,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
     }
     
     @Override
-	public ForestOfRecords pullForest(String selectAll, AccessPath path)
+	public ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception
     {
         ResultSet resultSet = getData(selectAll);
         if (resultSet == null)
@@ -33,13 +33,13 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
             {
                 var record = new DataRecord();
                 
-                for (AccessPathProperty property : path.properties())
+                for (AccessPath subpath : path.getSubpaths())
                 {
-                    String name = "TODO it should be contained in property.name";
+                    String name = subpath.getName().getStringName();
                     String value = resultSet.getString(name);
-                    record.addSimpleProperty(name, value);
+                    record.addSimpleRecord(subpath.getName().toRecordName(), value);
                 }
-                
+                        
                 forest.addRecord(record);
             }
             
@@ -55,7 +55,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
     }
 
     @Override
-	public ForestOfRecords pullForest(String selectAll, AccessPath path, int limit, int offset)
+	public ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset) throws Exception
     {
         String newSelectAll = String.format("%s\nLIMIT %d\nOFFSET %d", selectAll, limit, offset);
         return pullForest(newSelectAll, path);

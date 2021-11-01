@@ -4,6 +4,7 @@ import com.mongodb.client.MongoDatabase;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public interface DatabaseProvider
 {

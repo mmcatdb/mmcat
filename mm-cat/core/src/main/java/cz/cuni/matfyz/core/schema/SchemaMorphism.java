@@ -1,11 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.core.schema;
 
-import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 
@@ -13,8 +7,8 @@ import cz.cuni.matfyz.core.category.Signature;
  *
  * @author pavel.koupil
  */
-public class SchemaMorphism implements Morphism {
-
+public class SchemaMorphism implements Morphism
+{
 	private final Signature signature;
 	private final SchemaObject dom;
 	private final SchemaObject cod;
@@ -63,12 +57,14 @@ public class SchemaMorphism implements Morphism {
 	}
 
 	@Override
-	public SchemaMorphism dual() {
-		return category.dual(signature.dual());
+	public SchemaMorphism dual()
+    {
+		return category.dual(signature);
 	}
 
 	@Override
-	public Signature signature() {
+	public Signature signature()
+    {
 		return signature;
 	}
 

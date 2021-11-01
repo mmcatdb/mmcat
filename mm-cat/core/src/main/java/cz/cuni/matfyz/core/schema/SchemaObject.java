@@ -1,11 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.CategoricalObject;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,31 +9,31 @@ import java.util.TreeSet;
  *
  * @author pavel.koupil
  */
-public class SchemaObject implements CategoricalObject {
-
-	private final int key;
-	private String label;
-	private Set<Property> superid;
-	private Set<Key> ids;
+public class SchemaObject implements CategoricalObject
+{
+	private final Key key;
+	private final String label;
+	private final SuperId superid;
+	private final Set<SuperId> ids;
 	private double x;
 	private double y;
 
-	public SchemaObject(int key) {
-		this(key, "", new TreeSet<>(), new TreeSet<>());
+	public SchemaObject(Key key) {
+		this(key, "", new SuperId(), new TreeSet<>());
 	}
 
-	public SchemaObject(int key, String label) {
-		this(key, label, new TreeSet<>(), new TreeSet<>());
+	public SchemaObject(Key key, String label) {
+		this(key, label, new SuperId(), new TreeSet<>());
 	}
 
-	public SchemaObject(int key, String label, Set<Property> superid, Set<Key> ids) {
+	public SchemaObject(Key key, String label, SuperId superid, Set<SuperId> ids) {
 		this.key = key;
 		this.label = label;
 		this.superid = superid;
 		this.ids = ids;
 	}
 
-	public SchemaObject(int key, String label, Set<Property> superid, Set<Key> ids, double x, double y) {
+	public SchemaObject(Key key, String label, SuperId superid, Set<SuperId> ids, double x, double y) {
 		this(key, label, superid, ids);
 		this.x = x;
 		this.y = y;
@@ -51,52 +47,60 @@ public class SchemaObject implements CategoricalObject {
 		return y;
 	}
 
+    public Key key()
+    {
+        return key;
+    }
+    
 	@Override
-	public int objectId() {
-		return key;
+	public int objectId()
+    {
+		return key.getValue();
 	}
 
 	public String label() {
 		return label;
 	}
 
-	public Set<Property> superid() {
+	public SuperId superid() {
 		return superid;
 	}
 
-	public Set<Key> ids() {
+	public Set<SuperId> ids() {
 		return ids;
 	}
 
 	@Override
-	public int compareTo(CategoricalObject o) {
-		if (key > o.objectId()) {
-			return 1;
-		} else if (key < o.objectId()) {
-			return -1;
-		} else {
-			return 0;
-		}
+	public int compareTo(CategoricalObject categoricalObject)
+    {
+        return objectId() - categoricalObject.objectId();
 	}
+    
+    public boolean equals(CategoricalObject categoricalObject)
+    {
+        return compareTo(categoricalObject) == 0;
+    }
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof CategoricalObject) {
-			return objectId() == ((CategoricalObject) obj).objectId();
-		} else {
-			return false;
-		}
+	public boolean equals(Object obj)
+    {
+        return obj instanceof CategoricalObject categoricalObject ? equals(categoricalObject) : false;
 	}
+
+    /**
+     * Auto-generated, constants doesn't have any special meaning.
+     * @return 
+     */
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 79 * hash + Objects.hashCode(this.key);
+        return hash;
+    }
 
 	@Override
-	public String toString() {
-		return super.toString(); //To change body of generated methods, choose Tools | Templates.
+	public String toString()
+    {
+        throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		return hash;
-	}
-
 }

@@ -2,11 +2,12 @@ package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
-import cz.cuni.matfyz.core.util.Pair;
+import cz.cuni.matfyz.core.utils.Pair;
 import java.util.*;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class PostgreSQLICWrapper implements AbstractICWrapper
 {

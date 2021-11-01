@@ -4,6 +4,7 @@ import cz.cuni.matfyz.statements.DDLStatement;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class PostgreSQLDDLStatement implements DDLStatement
 {

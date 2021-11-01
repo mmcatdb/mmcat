@@ -4,6 +4,7 @@ import java.sql.Connection;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public interface ConnectionProvider
 {

@@ -5,10 +5,11 @@ import java.util.*;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class MongoDBPathWrapper implements AbstractPathWrapper
 {
-    private List<String> properties = new ArrayList<>();
+    private final List<String> properties = new ArrayList<>();
     
     @Override
 	public void addProperty(String hierarchy)

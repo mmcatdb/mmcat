@@ -1,26 +1,57 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.core.mapping;
+
+import cz.cuni.matfyz.core.category.Signature;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.koupil, jachym.bartik
  */
-public class Name {
-	
-	public Context context;
+public class Name
+{
+    private String name;
+    private Signature signature;
 
-	public Type type;
+	private Type type;
+    
+    public Type getType()
+    {
+        return type;
+    }
+    
+    public Signature getSignature()
+    {
+        return signature;
+    }
 
-	public static enum Type {
+	public enum Type
+    {
 		STATIC_NAME,
-		SIGNATURE,
-		DYNAMIC_NAME,
-		TODO;
-
+        ANONYMOUS,
+		DYNAMIC_NAME;
+        
+        public cz.cuni.matfyz.core.record.Name.Type toRecordType()
+        {
+            return switch (this)
+            {
+                case STATIC_NAME -> cz.cuni.matfyz.core.record.Name.Type.STATIC_NAME;
+                case ANONYMOUS -> cz.cuni.matfyz.core.record.Name.Type.ANONYMOUS;
+                case DYNAMIC_NAME -> cz.cuni.matfyz.core.record.Name.Type.DYNAMIC_NAME;
+            };
+        }
 	}
-
+    
+    public cz.cuni.matfyz.core.record.Name toRecordName()
+    {
+        return new cz.cuni.matfyz.core.record.Name(name, type.toRecordType());
+    }
+    
+    public String getStringName() throws Exception
+    {
+        return switch (type)
+        {
+            case STATIC_NAME -> name;
+            case ANONYMOUS -> "";
+            case DYNAMIC_NAME -> throw new Exception();
+        };
+    }
 }

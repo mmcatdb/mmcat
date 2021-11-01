@@ -6,7 +6,7 @@
 package cz.cuni.matfyz.abstractwrappers;
 
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
-import cz.cuni.matfyz.core.util.Pair;
+import cz.cuni.matfyz.core.utils.Pair;
 import cz.cuni.matfyz.statements.ICStatement;
 import java.util.Set;
 

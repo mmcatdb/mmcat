@@ -5,7 +5,7 @@
  */
 package cz.cuni.matfyz.abstractwrappers;
 
-import cz.cuni.matfyz.core.mapping.AccessPath;
+import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 
 /**
@@ -14,8 +14,8 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
  */
 public interface AbstractPullWrapper {
 
-	public abstract ForestOfRecords pullForest(String selectAll, AccessPath path);
+	public abstract ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception;
 
-	public abstract ForestOfRecords pullForest(String selectAll, AccessPath path, int limit, int offset);
+	public abstract ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset) throws Exception;
 
 }

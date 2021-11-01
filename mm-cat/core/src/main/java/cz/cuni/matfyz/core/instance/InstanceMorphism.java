@@ -5,13 +5,11 @@
  */
 package cz.cuni.matfyz.core.instance;
 
-import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -43,8 +41,8 @@ public class InstanceMorphism implements Morphism {
 		signature = new Signature(morphism.signature());
 		this.category = category;
 
-		dom = this.category.object(morphism.dom().objectId());
-		cod = this.category.object(morphism.cod().objectId());
+		dom = this.category.object(morphism.dom().key());
+		cod = this.category.object(morphism.cod().key());
 
 		activeDomain = new ArrayList<>();
 
@@ -65,12 +63,14 @@ public class InstanceMorphism implements Morphism {
 	}
 
 	@Override
-	public Morphism dual() {
-		return category.dual(signature.dual());
+	public Morphism dual()
+    {
+		return category.dual(signature);
 	}
 
 	@Override
-	public Signature signature() {
+	public Signature signature()
+    {
 		return signature;
 	}
 

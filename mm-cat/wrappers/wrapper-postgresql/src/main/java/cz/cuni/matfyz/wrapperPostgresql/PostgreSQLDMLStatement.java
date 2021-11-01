@@ -4,6 +4,7 @@ import cz.cuni.matfyz.statements.DMLStatement;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class PostgreSQLDMLStatement implements DMLStatement
 {

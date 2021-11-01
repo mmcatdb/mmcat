@@ -3,20 +3,9 @@ package cz.cuni.matfyz.wrapperPostgresql;
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import java.util.*;
 
-class PropertyValue
-{
-    public String name;
-    public String value;
-    
-    public PropertyValue(String name, String value)
-    {
-        this.name = name;
-        this.value = value;
-    }
-}
-
 /**
  *
+ * @author jachymb.bartik
  */
 public class PostgreSQLPushWrapper implements AbstractPushWrapper
 {
@@ -55,5 +44,17 @@ public class PostgreSQLPushWrapper implements AbstractPushWrapper
     {
         kindName = null;
         propertyValues = new ArrayList<>();
+    }
+}
+
+class PropertyValue
+{
+    public String name;
+    public String value;
+    
+    public PropertyValue(String name, String value)
+    {
+        this.name = name;
+        this.value = value;
     }
 }

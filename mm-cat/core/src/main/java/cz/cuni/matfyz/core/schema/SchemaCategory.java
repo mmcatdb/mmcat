@@ -1,54 +1,56 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Category;
 import cz.cuni.matfyz.core.category.Signature;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaCategory implements Category {
+public class SchemaCategory implements Category
+{
+	private final Map<Key, SchemaObject> objects = new TreeMap<>();
+	private final Map<Signature, SchemaMorphism> morphisms = new TreeMap<>();
 
-	private final List<SchemaObject> objects = new ArrayList<>();
-	private final List<SchemaMorphism> morphisms = new ArrayList<>();
-
-	public Iterable<SchemaObject> objects() {
-		return objects;
+	public Iterable<SchemaObject> objects()
+    {
+		return objects.values();
 	}
 
-	public Iterable<SchemaMorphism> morphisms() {
-		return morphisms;
+	public Iterable<SchemaMorphism> morphisms()
+    {
+		return morphisms.values();
 	}
 
-	public SchemaCategory() {
+	public SchemaCategory()
+    {
+        
 	}
 
-	public boolean addObject(SchemaObject object) {
-		objects.add(object);
+	public boolean addObject(SchemaObject object)
+    {
+        if (objects.containsKey(object.key()))
+            return false;
+        
+		objects.put(object.key(), object);
 		return true;
 	}
 
-	public boolean addMorphism(SchemaMorphism morphism) {
-		morphisms.add(morphism);
+	public boolean addMorphism(SchemaMorphism morphism)
+    {
+        if (morphisms.containsKey(morphism.signature()))
+            return false;
+        
+		morphisms.put(morphism.signature(), morphism);
 		morphism.setCategory(this);
 		return true;
 	}
 
-	public SchemaMorphism dual(Signature signature) {
-		for (SchemaMorphism morphism : morphisms) {
-			if (morphism.signature().equals(signature)) {
-				return morphism;
-			}
-		}
-
-		return null;	// WARN: CHYBA! TOHLE NESMI NASTAT, PROTOZE KAZDY MORFISMUS MUSI MIT SVUJ DUALNI!
+	public SchemaMorphism dual(Signature signatureOfOriginal)
+    {
+        final SchemaMorphism result = morphisms.get(signatureOfOriginal.dual());
+        assert result != null : "Schema morphism with signature " + signatureOfOriginal + " doesn't have its dual.";
+        return result;
 	}
-
 }

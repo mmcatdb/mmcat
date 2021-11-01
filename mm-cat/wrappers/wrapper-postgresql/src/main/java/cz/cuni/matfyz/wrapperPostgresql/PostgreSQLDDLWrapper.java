@@ -5,6 +5,7 @@ import java.util.*;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class PostgreSQLDDLWrapper implements AbstractDDLWrapper
 {    

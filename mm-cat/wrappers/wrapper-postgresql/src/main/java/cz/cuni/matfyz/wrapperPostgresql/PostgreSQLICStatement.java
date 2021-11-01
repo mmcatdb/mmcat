@@ -4,6 +4,7 @@ import cz.cuni.matfyz.statements.ICStatement;
 
 /**
  *
+ * @author jachymb.bartik
  */
 public class PostgreSQLICStatement implements ICStatement
 {
