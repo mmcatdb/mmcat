@@ -33,11 +33,11 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
             {
                 var record = new DataRecord();
                 
-                for (AccessPath subpath : path.getSubpaths())
+                for (AccessPath subpath : path.subpaths())
                 {
-                    String name = subpath.getName().getStringName();
+                    String name = subpath.name().getStringName();
                     String value = resultSet.getString(name);
-                    record.addSimpleRecord(subpath.getName().toRecordName(), value);
+                    record.addSimpleRecord(subpath.name().toRecordName(), value);
                 }
                         
                 forest.addRecord(record);

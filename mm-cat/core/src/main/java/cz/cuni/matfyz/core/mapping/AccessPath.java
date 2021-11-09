@@ -11,14 +11,14 @@ public abstract class AccessPath
 {
     protected final Name name;
     
-    public Name getName()
+    public Name name()
     {
         return name;
     }
     
-    public abstract Context getContext();
+    public abstract Context context();
     
-    public abstract IValue getValue();
+    public abstract IValue value();
     
     protected AccessPath(Name name)
     {

@@ -1,14 +1,28 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.core.instance;
 
 /**
- *
- * @author pavel.koupil
+ * This class represents a relation between two members of two active domains ({@link ActiveDomainRow}).
+ * It corresponds to a single {@link InstanceMorphism}.
+ * @author jachym.bartik
  */
-public class ActiveMappingRow {
-	
+public class ActiveMappingRow
+{
+	private final ActiveDomainRow domainRow;
+    private final ActiveDomainRow codomainRow;
+    
+    public ActiveDomainRow domainRow()
+    {
+        return domainRow;
+    }
+    
+    public ActiveDomainRow codomainRow()
+    {
+        return codomainRow;
+    }
+    
+    public ActiveMappingRow(ActiveDomainRow domainRow, ActiveDomainRow codomainRow)
+    {
+        this.domainRow = domainRow;
+        this.codomainRow = codomainRow;
+    }
 }

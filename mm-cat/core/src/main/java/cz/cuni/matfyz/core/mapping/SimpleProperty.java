@@ -9,7 +9,7 @@ import cz.cuni.matfyz.core.category.Signature;
 public class SimpleProperty extends AccessPath
 {
     @Override
-    public Context getContext()
+    public Context context()
     {
         return null;
     }
@@ -17,7 +17,7 @@ public class SimpleProperty extends AccessPath
     private final SimpleValue value;
     
     @Override
-    public SimpleValue getValue()
+    public SimpleValue value()
     {
         return value;
     }
@@ -33,8 +33,8 @@ public class SimpleProperty extends AccessPath
     protected boolean hasSignature(Signature signature)
     {
         if (signature == null)
-            return value.getSignature().getType() == Signature.Type.EMPTY;
+            return value.signature().getType() == Signature.Type.EMPTY;
         
-        return value.getSignature().equals(signature);
+        return value.signature().equals(signature);
     }
 }

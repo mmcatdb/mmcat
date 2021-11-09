@@ -11,40 +11,24 @@ import java.util.TreeSet;
  */
 public class SchemaObject implements CategoricalObject
 {
-	private final Key key;
+	private final Key key; // Identifies the object, in the paper it's a number >= 100
 	private final String label;
-	private final SuperId superid;
-	private final Set<SuperId> ids;
-	private double x;
-	private double y;
-
+	private final Id superId; // Should be a union of all ids (super key).
+	private final Set<Id> ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
+             
 	public SchemaObject(Key key) {
-		this(key, "", new SuperId(), new TreeSet<>());
+		this(key, "", new Id(), new TreeSet<>());
 	}
 
 	public SchemaObject(Key key, String label) {
-		this(key, label, new SuperId(), new TreeSet<>());
+		this(key, label, new Id(), new TreeSet<>());
 	}
 
-	public SchemaObject(Key key, String label, SuperId superid, Set<SuperId> ids) {
+	public SchemaObject(Key key, String label, Id superId, Set<Id> ids) {
 		this.key = key;
 		this.label = label;
-		this.superid = superid;
+		this.superId = superId;
 		this.ids = ids;
-	}
-
-	public SchemaObject(Key key, String label, SuperId superid, Set<SuperId> ids, double x, double y) {
-		this(key, label, superid, ids);
-		this.x = x;
-		this.y = y;
-	}
-
-	public double x() {
-		return x;
-	}
-
-	public double y() {
-		return y;
 	}
 
     public Key key()
@@ -62,11 +46,11 @@ public class SchemaObject implements CategoricalObject
 		return label;
 	}
 
-	public SuperId superid() {
-		return superid;
+	public Id superId() {
+		return superId;
 	}
 
-	public Set<SuperId> ids() {
+	public Set<Id> ids() {
 		return ids;
 	}
 

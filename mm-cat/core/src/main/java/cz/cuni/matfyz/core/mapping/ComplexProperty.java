@@ -15,20 +15,20 @@ public class ComplexProperty extends AccessPath implements IValue
     private final Context context;
     
     @Override
-    public Context getContext()
+    public Context context()
     {
         return context;
     }
     
     @Override
-    public ComplexProperty getValue()
+    public ComplexProperty value()
     {
         return this;
     }
     
     private final List<AccessPath> subpaths;
     
-    public Iterable<AccessPath> getSubpaths()
+    public Iterable<AccessPath> subpaths()
     {
         return subpaths;
     }
@@ -71,7 +71,7 @@ public class ComplexProperty extends AccessPath implements IValue
         if (signature == null || context == null)
             return false;
         
-        return context.getSignature().equals(signature);
+        return context.signature().equals(signature);
     }
     
     /**
@@ -100,8 +100,8 @@ public class ComplexProperty extends AccessPath implements IValue
         
         for (AccessPath subpath : subpaths)
         {
-            output.addAll(process(subpath.getName(), null, null));
-            output.addAll(process(null, subpath.getContext(), subpath.getValue()));
+            output.addAll(process(subpath.name(), null, null));
+            output.addAll(process(null, subpath.context(), subpath.value()));
         }
         
         return output;
@@ -123,8 +123,8 @@ public class ComplexProperty extends AccessPath implements IValue
         }
         else
         {
-            if (name.getType() == Name.Type.DYNAMIC_NAME)
-                return List.of(new Pair(name.getSignature(), null));
+            if (name.type() == Name.Type.DYNAMIC_NAME)
+                return List.of(new Pair(name.signature(), null));
             else
                 return Collections.EMPTY_LIST;
         }
@@ -133,7 +133,7 @@ public class ComplexProperty extends AccessPath implements IValue
     @Override
     public Collection<Pair<Signature, ComplexProperty>> process(Context context)
     {
-        if (context.getSignature() != null)
+        if (context.signature() != null)
             return List.of(new Pair(context, this));
         else
             return children();

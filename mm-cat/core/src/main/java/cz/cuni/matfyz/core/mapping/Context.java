@@ -10,7 +10,7 @@ public class Context
 {
     private final Signature signature;
     
-    public Signature getSignature()
+    public Signature signature()
     {
         return signature;
     }

@@ -1,45 +1,37 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cz.cuni.matfyz.transformations;
 
-import cz.cuni.matfyz.core.ForestOfRecords;
+import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.Superid;
 import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Functor;
-import cz.cuni.matfyz.core.category.Morphism;
+import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.mapping.AccessPathProperty;
 import cz.cuni.matfyz.core.mapping.Context;
-import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.mapping.Name;
 import cz.cuni.matfyz.core.mapping.Value;
-import cz.cuni.matfyz.core.schema.Property;
+import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
-import java.util.TreeSet;
+import java.util.*;
+
+import org.javatuples.Pair;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.koupil, jachym.bartik
  */
-public class ModelToCategory {
-
+public class ModelToCategory
+{
 	public void algorithm(SchemaCategory schema, InstanceCategory instance, ForestOfRecords forest, Mapping mapping) {
 
 		Stack<StackTriple> M = new Stack<>();
 
 		forest.forEach(r -> {
 			// preparation phase
-			if (mapping.rootMorphism == null) {
+			if (mapping.rootMorphism == null)
+            {
 				// K with root object
 				CategoricalObject qI = Functor.object(schema, instance, mapping.rootObject);
 				Set<Superid> sids = this.fetchSids(mapping.rootObject.superid(), r, null);
@@ -51,7 +43,9 @@ public class ModelToCategory {
 					}
 				}
 
-			} else {
+			}
+            else
+            {
 				// K with root morphism
 				SchemaObject qI_dom = (SchemaObject) Functor.object(schema, instance, mapping.rootObject);
 				Set<Superid> sidsDom = this.fetchSids(mapping.rootObject.superid(), r, null);
@@ -71,15 +65,21 @@ public class ModelToCategory {
 				AccessPath t_cod = mapping.accessPath.getSubpathBySignature(mapping.rootMorphism.signature());
 
 				AccessPath ap = mapping.accessPath.minus(t_dom, t_cod);
+                
+				//for (var contextValue : children(ap))
+				//	M.push(new StackTriple(sid_dom, contextValue.context, contextValue.value));
+                
+                if (ap instanceof ComplexProperty apComplex)
+                    for (Pair<Signature, ComplexProperty> child : apComplex.children())
+                        //M.push(new StackTriple(sid, contextValue.context, contextValue.value));
+                        M.push(new StackTriple(sid_dom, child.getValue0(), child.getValue1()));
 
-				for (var contextValue : children(ap)) {
-					M.push(new StackTriple(sid_dom, contextValue.context, contextValue.value));
-				}
-
-				for (var contextValue : children(t_cod)) {
-					M.push(new StackTriple(sid_cod, contextValue.context, contextValue.value));
-				}
-
+				//for (var contextValue : children(t_cod))
+				//	M.push(new StackTriple(sid_cod, contextValue.context, contextValue.value));
+                
+                if (t_cod instanceof ComplexProperty t_codComplex)
+                    for (Pair<Signature, ComplexProperty> child : t_codComplex.children())
+                        M.push(new StackTriple(sid_cod, child.getValue0(), child.getValue1()));
 			}
 
 			// processing of the tree
@@ -88,7 +88,7 @@ public class ModelToCategory {
 				Morphism mI = Functor.morphism(schema, instance, triple.mS);
 				SchemaObject oS = (SchemaObject) triple.mS.cod();
 				SchemaObject qI = (SchemaObject) Functor.object(schema, instance, oS);
-				Set<Superid> sids = this.fetchSids(oS.superid(), r, triple.pid);
+				Set<Superid> sids = this.fetchSids(oS.superId(), r, triple.pid);
 
 				for (Superid sid : sids) {
 					sid = this.modify(qI, sid);
@@ -96,9 +96,11 @@ public class ModelToCategory {
 					this.addRelation(mI, triple.pid, sid, r);
 					this.addRelation(mI.dual(), sid, triple.pid, r);
 
-					for (var contextValue : children(triple.t)) {
-						M.push(new StackTriple(sid, contextValue.context, contextValue.value));
-					}
+					//for (var contextValue : children(triple.t)) {
+                    if (triple.t instanceof ComplexProperty complexProperty)
+                        for (Pair<Signature, ComplexProperty> child : complexProperty.children())
+                            //M.push(new StackTriple(sid, contextValue.context, contextValue.value));
+                            M.push(new StackTriple(sid, child.getValue0(), child.getValue1()));
 				}
 
 			}
@@ -106,7 +108,7 @@ public class ModelToCategory {
 
 	}
 
-	private Set<Superid> fetchSids(Set<Property> superid, Object record, Object todo) {
+	private Set<Superid> fetchSids(Id superId, Object record, Object todo) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
@@ -114,6 +116,7 @@ public class ModelToCategory {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
+    /*
 	private Set<ContextValue> children(AccessPath accessPath) {
 		Set<ContextValue> result = new TreeSet<>();
 		for (AccessPathProperty property : accessPath.properties()) {
@@ -122,11 +125,13 @@ public class ModelToCategory {
 		}
 		return result;
 	}
+    */
 
 	private void addRelation(Morphism mI, Superid sid_dom, Superid sid_cod, Object r) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 
+    /*
 	private Collection<? extends ContextValue> process(Name name, Context context, Value value) {
 		List<ContextValue> result = new ArrayList<>();
 		switch (name.type) {
@@ -156,5 +161,5 @@ public class ModelToCategory {
 		return children(value);
 
 	}
-
+    */
 }

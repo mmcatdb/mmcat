@@ -62,7 +62,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     
     private void processPath(AccessPath path, ComplexRecord record, Document document) throws Exception
     {
-        String stringName = path.getName().getStringName();
+        String stringName = path.name().getStringName();
         Object value = (document == null || !document.containsKey(stringName)) ? null : document.get(stringName);
 
         if (path instanceof ComplexProperty innerNode)
@@ -73,9 +73,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     
     private void processNode(ComplexProperty innerNode, ComplexRecord record, Object value) throws Exception
     {
-        for (AccessPath subpath : innerNode.getSubpaths())
+        for (AccessPath subpath : innerNode.subpaths())
         {
-            ComplexRecord childRecord = record.addComplexRecord(innerNode.getName().toRecordName());
+            ComplexRecord childRecord = record.addComplexRecord(innerNode.name().toRecordName());
             Document childDocument = value instanceof Document documentValue ? documentValue : null;
             processPath(subpath, childRecord, childDocument);
         }
@@ -83,6 +83,6 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     
     private void processNode(SimpleProperty leafNode, ComplexRecord record, Object value) throws Exception
     {
-        record.addSimpleRecord(leafNode.getName().toRecordName(), value);
+        record.addSimpleRecord(leafNode.name().toRecordName(), value);
     }
 }

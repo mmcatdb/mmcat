@@ -13,12 +13,12 @@ public class Name
 
 	private Type type;
     
-    public Type getType()
+    public Type type()
     {
         return type;
     }
     
-    public Signature getSignature()
+    public Signature signature()
     {
         return signature;
     }

@@ -7,39 +7,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Each object from instance category is modeled as a set of tuples ({@link ActiveDomainRow}).
  * @author pavel.koupil
  */
 public class InstanceObject implements CategoricalObject
 {
-	private final Key key;
-//	private String label;
-	private final List<ActiveDomainRow> activeDomain;
-//	private Set<Key> ids;
+	private final SchemaObject schemaObject;
+	private final List<ActiveDomainRow> activeDomain = new ArrayList<>();
 
-	public void addRecord(ActiveDomainRow record) {
+	public void addRecord(ActiveDomainRow record)
+    {
 		activeDomain.add(record);
 	}
 
-	public InstanceObject(Key key) {
-		this.key = key;
-		activeDomain = new ArrayList<>();
-	}
-
-	public InstanceObject(SchemaObject object) {
-		key = object.key();
-		activeDomain = new ArrayList<>();
-
+	InstanceObject(SchemaObject schemaObject)
+    {
+		this.schemaObject = schemaObject;
 	}
     
     public Key key()
     {
-        return key;
+        return schemaObject.key();
     }
     
 	@Override
 	public int objectId() {
-		return key.getValue();
+		return key().getValue();
 	}
 
 	@Override

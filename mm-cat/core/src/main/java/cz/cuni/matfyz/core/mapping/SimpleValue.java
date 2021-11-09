@@ -12,7 +12,7 @@ public class SimpleValue implements IValue
 {
     private final Signature signature;
     
-    public Signature getSignature()
+    public Signature signature()
     {
         return signature;
     }
@@ -25,7 +25,7 @@ public class SimpleValue implements IValue
     @Override
     public Collection<Pair<Signature, ComplexProperty>> process(Context context)
     {
-        final Signature newSignature = Signature.combine(context.getSignature(), getSignature());
+        final Signature newSignature = Signature.combine(context.signature(), signature());
         return List.of(new Pair(newSignature, null));
     }
 }

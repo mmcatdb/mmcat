@@ -2,7 +2,7 @@ package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
-import cz.cuni.matfyz.core.utils.Pair;
+import cz.cuni.matfyz.core.utils.ComparablePair;
 import java.util.*;
 
 /**
@@ -20,9 +20,9 @@ public class PostgreSQLICWrapper implements AbstractICWrapper
     }
 
     @Override
-	public void appendReference(String kindName, String kindName2, Set<Pair<String, String>> attributePairs)
+	public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs)
     {
-        for (Pair<String, String> attributePair : attributePairs)
+        for (ComparablePair<String, String> attributePair : attributePairs)
         {
             // TODO There should be a way how to get attribute names from the pairs
             ReferenceConstraint newConstraint = new ReferenceConstraint(kindName, kindName2, "TODO1", "TODO2");
