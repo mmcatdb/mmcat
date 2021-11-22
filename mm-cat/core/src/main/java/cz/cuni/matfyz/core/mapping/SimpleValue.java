@@ -1,8 +1,6 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
-import java.util.*;
-import org.javatuples.Pair;
 
 /**
  * A simple value is a signature of morphism ?(which maps the parent property to this value)?
@@ -22,10 +20,8 @@ public class SimpleValue implements IValue
         this.signature = signature;
     }
     
-    @Override
-    public Collection<Pair<Signature, ComplexProperty>> process(Context context)
+    public SimpleValue Empty()
     {
-        final Signature newSignature = Signature.combine(context.signature(), signature());
-        return List.of(new Pair(newSignature, null));
+        return new SimpleValue(Signature.Empty());
     }
 }

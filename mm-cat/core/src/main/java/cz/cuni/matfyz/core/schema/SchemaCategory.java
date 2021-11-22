@@ -13,15 +13,20 @@ public class SchemaCategory implements Category
 	private final Map<Key, SchemaObject> objects = new TreeMap<>();
 	private final Map<Signature, SchemaMorphism> morphisms = new TreeMap<>();
 
-	public Iterable<SchemaObject> objects()
+	public Collection<SchemaObject> objects()
     {
 		return objects.values();
 	}
 
-	public Iterable<SchemaMorphism> morphisms()
+	public Collection<SchemaMorphism> morphisms()
     {
 		return morphisms.values();
 	}
+    
+    public SchemaMorphism signatureToMorphism(Signature signature)
+    {
+        return morphisms.get(signature);
+    }
 
 	public SchemaCategory()
     {

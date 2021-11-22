@@ -52,37 +52,32 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
                 if (index <= offset || index > limit)
                     continue;
                 
-            var record = new DataRecord();
-            processPath(path, record, document);
+            var record = new RootRecord();
+            processSubpaths(path, record, document);
             forest.addRecord(record);
         }
         
         return forest;
     }
     
-    private void processPath(AccessPath path, ComplexRecord record, Document document) throws Exception
+    private void processSubpaths(ComplexProperty path, ComplexRecord record, Document document) throws Exception
     {
-        String stringName = path.name().getStringName();
-        Object value = (document == null || !document.containsKey(stringName)) ? null : document.get(stringName);
-
-        if (path instanceof ComplexProperty innerNode)
-            processNode(innerNode, record, value);
-        else if (path instanceof SimpleProperty leafNode)
-            processNode(leafNode, record, value);
-    }
-    
-    private void processNode(ComplexProperty innerNode, ComplexRecord record, Object value) throws Exception
-    {
-        for (AccessPath subpath : innerNode.subpaths())
+        for (AccessPath subpath : path.subpaths())
         {
-            ComplexRecord childRecord = record.addComplexRecord(innerNode.name().toRecordName());
-            Document childDocument = value instanceof Document documentValue ? documentValue : null;
-            processPath(subpath, childRecord, childDocument);
+            String stringName = subpath.name().getStringName();
+            Object value = (document == null || !document.containsKey(stringName)) ? null : document.get(stringName);
+
+            if (subpath instanceof ComplexProperty complexProperty)
+                processComplexProperty(complexProperty, record, value);
+            else if (subpath instanceof SimpleProperty simpleProperty)
+                record.addSimpleRecord(simpleProperty.name().toRecordName(), value, simpleProperty.value().signature());
         }
     }
     
-    private void processNode(SimpleProperty leafNode, ComplexRecord record, Object value) throws Exception
+    private void processComplexProperty(ComplexProperty complexProperty, ComplexRecord parentRecord, Object value) throws Exception
     {
-        record.addSimpleRecord(leafNode.name().toRecordName(), value);
+        ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.name().toRecordName(), complexProperty.signature());
+        Document childDocument = value instanceof Document documentValue ? documentValue : null;
+        processSubpaths(complexProperty, childRecord, childDocument);
     }
 }

@@ -21,6 +21,11 @@ public class Id implements Comparable<Id>
     {
 		this.signatures = signatures;
 	}
+    
+    public Id(Collection<Signature> signatures)
+    {
+		this.signatures = new TreeSet(signatures);
+	}
 
 	public Id(Signature... signatures)
     {

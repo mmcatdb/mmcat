@@ -9,7 +9,7 @@ import cz.cuni.matfyz.core.category.Signature;
 public class SimpleProperty extends AccessPath
 {
     @Override
-    public Context context()
+    public IContext context()
     {
         return null;
     }

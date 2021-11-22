@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.core.category;
 
 import cz.cuni.matfyz.core.utils.ArrayUtils;
+import cz.cuni.matfyz.core.mapping.IContext;
 
 import java.util.Arrays;
 
@@ -8,7 +9,7 @@ import java.util.Arrays;
  * This class represents a signature of a morphism. It can be empty, base or composite.
  * @author jachym.bartik
  */
-public class Signature implements Comparable<Signature>
+public class Signature implements Comparable<Signature>, IContext
 {
 	private final int[] ids;
     
@@ -21,6 +22,11 @@ public class Signature implements Comparable<Signature>
     {
 		this.ids = signature.ids;
 	}
+    
+    public static Signature Empty()
+    {
+        return new Signature();
+    }
     
     public static Signature combine(Signature a, Signature b)
     {
@@ -96,5 +102,31 @@ public class Signature implements Comparable<Signature>
                 return idDifference;
         }
         return 0;
+    }
+    
+    public Boolean hasDualOfAsSuffix(Signature signature)
+    {
+        if (signature == null)
+            return false;
+        
+        Signature dual = signature.dual();
+        int dualLength = dual.ids.length;
+        
+        if (ids.length < dualLength)
+            return false;
+        
+        for (int i = 0; i < dualLength; i++)
+            if (dual.ids[i] != ids[i + ids.length - dualLength])
+                return false;
+        
+        return true;
+    }
+    
+    public Signature traverseThrough(Signature signature)
+    {
+        if (!hasDualOfAsSuffix(signature))
+            return null;
+        
+        return new Signature(Arrays.copyOfRange(ids, 0, ids.length - signature.ids.length));
     }
 }

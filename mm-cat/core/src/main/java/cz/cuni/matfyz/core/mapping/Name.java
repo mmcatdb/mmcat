@@ -26,7 +26,7 @@ public class Name
 	public enum Type
     {
 		STATIC_NAME,
-        ANONYMOUS,
+        ANONYMOUS, // Also known as Empty
 		DYNAMIC_NAME;
         
         public cz.cuni.matfyz.core.record.Name.Type toRecordType()

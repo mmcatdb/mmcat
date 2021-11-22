@@ -8,7 +8,7 @@ import java.util.*;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.koupil, jachym.bartik
  */
 public class InstanceCategory implements Category {
 
@@ -24,7 +24,14 @@ public class InstanceCategory implements Category {
 	public InstanceObject object(Key key)
     {
         final InstanceObject result = objects.get(key);
-        assert result != null : "Instance object with key " + key + " not found in instance category";
+        assert result != null : "Instance object with key " + key + " not found in instance category.";
+        return result;
+	}
+    
+    public InstanceMorphism morphism(Signature signature)
+    {
+        final InstanceMorphism result = morphisms.get(signature);
+        assert result != null : "Instance morphism with signature " + signature + " not found in instance category.";
         return result;
 	}
     

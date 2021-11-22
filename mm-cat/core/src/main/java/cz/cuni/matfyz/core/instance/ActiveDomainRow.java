@@ -2,23 +2,32 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.Id;
-import cz.cuni.matfyz.core.utils.IterableUtils;
 
 import java.util.*;
 
 /**
  * An instance of this class represents a tuple from the {@link InstanceObject}.
  * The tuple is made of pairs (signature, value) for each signature in the superid. This structure is implemented by a map.
- * Each value is unique among all the values associated with the same signature.
+ * Each value is unique among all the values associated with the same signature. (TODO maybe not)
  * @author jachym.bartik
  */
 public class ActiveDomainRow
 {
-	private final Map<Signature, String> tuples = new TreeMap<>();
+    //private final Id superId;
     
+    private final SuperIdWithValues superIdWithValues;
+	private final Map<Signature, String> tuples;
+    
+    /*
     public Id superId()
     {
-        return new Id(tuples.keySet());
+        return superId;
+    }
+    */
+    
+    public SuperIdWithValues superIdWithValues()
+    {
+        return superIdWithValues;
     }
     
     public Map<Signature, String> tuples()
@@ -26,15 +35,9 @@ public class ActiveDomainRow
         return tuples;
     }
     
-    public ActiveDomainRow(Id superId, String ...values)
+    public ActiveDomainRow(SuperIdWithValues superIdWithValues)
     {
-        this(superId, Arrays.asList(values));
-    }
-    
-    public ActiveDomainRow(Id superId, Iterable<String> values)
-    {
-        boolean haveSameLength = IterableUtils.iterateTwo(superId.signatures(), values, (signature, value) -> tuples.put(signature, value));
-        
-        assert haveSameLength : "Active domain row input superId and values lengths are not equal.";
+        this.superIdWithValues = superIdWithValues;
+        this.tuples = new TreeMap<>(superIdWithValues.map());
     }
 }

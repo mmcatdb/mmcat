@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.core.record;
 
+import cz.cuni.matfyz.core.category.Signature;
+
 import java.util.Set;
 
 /**
@@ -8,14 +10,16 @@ import java.util.Set;
  * @author jachymb.bartik
  * @param <DataType> a type of the value of this property.
  */
-public class SimpleRecord<DataType> extends Record
+public class SimpleRecord<DataType> extends DataRecord
 {
 	private final DataType value;
+    private final Signature signature;
     
-    SimpleRecord(Name name, DataType value, ComplexRecord parent)
+    SimpleRecord(Name name, ComplexRecord parent, RootRecord root, DataType value, Signature signature)
     {
-        super(name, parent);
+        super(name, parent, root);
         this.value = value;
+        this.signature = signature;
     }
 	
     public DataType getValue()
@@ -23,9 +27,16 @@ public class SimpleRecord<DataType> extends Record
         return value;
     }
     
+    public Signature signature()
+    {
+        return signature;
+    }
+    
+    /*
     @Override
-    public Set<Record> records()
+    public Set<DataRecord> records()
     {
         return Set.of(this);
     }
+    */
 }

@@ -16,7 +16,7 @@ public abstract class AccessPath
         return name;
     }
     
-    public abstract Context context();
+    public abstract IContext context();
     
     public abstract IValue value();
     

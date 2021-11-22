@@ -1,21 +1,14 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.record.ForestOfRecords;
-import cz.cuni.matfyz.core.Superid;
-import cz.cuni.matfyz.core.category.CategoricalObject;
-import cz.cuni.matfyz.core.category.Functor;
+import cz.cuni.matfyz.core.record.RootRecord;
+import cz.cuni.matfyz.core.record.ComplexRecord;
 import cz.cuni.matfyz.core.category.*;
-import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.mapping.Context;
+import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.mapping.Name;
-import cz.cuni.matfyz.core.mapping.Value;
 import cz.cuni.matfyz.core.schema.*;
-import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.core.schema.SchemaObject;
-import java.util.*;
 
+import java.util.*;
 import org.javatuples.Pair;
 
 /**
@@ -24,142 +17,219 @@ import org.javatuples.Pair;
  */
 public class ModelToCategory
 {
-	public void algorithm(SchemaCategory schema, InstanceCategory instance, ForestOfRecords forest, Mapping mapping) {
-
-		Stack<StackTriple> M = new Stack<>();
-
-		forest.forEach(r -> {
+    SchemaCategory schema; // TODO
+    InstanceCategory instance; // TODO
+    ForestOfRecords forest; // TODO
+    Mapping mapping; // TODO
+            
+    private final InstanceFunctor instanceFunctor = new InstanceFunctor(instance, schema);
+    
+    public void input(SchemaCategory schema, InstanceCategory instance, ForestOfRecords forest, Mapping mapping)
+    {
+        this.schema = schema;
+        this.instance = instance;
+        this.forest = forest;
+        this.mapping = mapping;
+    }
+    
+	public void algorithm()
+    {
+        for (RootRecord rootRecord : forest)
+        {
 			// preparation phase
-			if (mapping.rootMorphism == null)
-            {
-				// K with root object
-				CategoricalObject qI = Functor.object(schema, instance, mapping.rootObject);
-				Set<Superid> sids = this.fetchSids(mapping.rootObject.superid(), r, null);
-
-				for (Superid sid : sids) {
-					sid = this.modify(qI, sid);
-					for (var contextValue : children(mapping.accessPath)) {
-						M.push(new StackTriple(sid, contextValue.context, contextValue.value));
-					}
-				}
-
-			}
-            else
-            {
-				// K with root morphism
-				SchemaObject qI_dom = (SchemaObject) Functor.object(schema, instance, mapping.rootObject);
-				Set<Superid> sidsDom = this.fetchSids(mapping.rootObject.superid(), r, null);
-				Superid sid_dom = this.modify(qI_dom, sidsDom.iterator().next());
-
-				SchemaObject qS_cod = (SchemaObject) mapping.rootMorphism.cod();
-				Set<Superid> sids_cod = this.fetchSids(qS_cod.superid(), r, null);
-				SchemaObject qI_cod = (SchemaObject) Functor.object(schema, instance, qS_cod);
-				Superid sid_cod = this.modify(qI_cod, sids_cod.iterator().next());
-
-				Morphism mI = Functor.morphism(schema, instance, mapping.rootMorphism);
-
-				this.addRelation(mI, sid_dom, sid_cod, r);
-				this.addRelation(mI.dual(), sid_cod, sid_dom, r);
-
-				AccessPath t_dom = mapping.accessPath.getSubpathBySignature(null);
-				AccessPath t_cod = mapping.accessPath.getSubpathBySignature(mapping.rootMorphism.signature());
-
-				AccessPath ap = mapping.accessPath.minus(t_dom, t_cod);
-                
-				//for (var contextValue : children(ap))
-				//	M.push(new StackTriple(sid_dom, contextValue.context, contextValue.value));
-                
-                if (ap instanceof ComplexProperty apComplex)
-                    for (Pair<Signature, ComplexProperty> child : apComplex.children())
-                        //M.push(new StackTriple(sid, contextValue.context, contextValue.value));
-                        M.push(new StackTriple(sid_dom, child.getValue0(), child.getValue1()));
-
-				//for (var contextValue : children(t_cod))
-				//	M.push(new StackTriple(sid_cod, contextValue.context, contextValue.value));
-                
-                if (t_cod instanceof ComplexProperty t_codComplex)
-                    for (Pair<Signature, ComplexProperty> child : t_codComplex.children())
-                        M.push(new StackTriple(sid_cod, child.getValue0(), child.getValue1()));
-			}
+			Stack<StackTriple> M = mapping.rootMorphism == null ?
+                createStackWithObject(mapping.rootObject, rootRecord) : // K with root object
+                createStackWithMorphism(mapping.rootObject, mapping.rootMorphism, rootRecord); // K with root morphism
 
 			// processing of the tree
-			while (!M.empty()) {
-				var triple = M.pop();
-				Morphism mI = Functor.morphism(schema, instance, triple.mS);
-				SchemaObject oS = (SchemaObject) triple.mS.cod();
-				SchemaObject qI = (SchemaObject) Functor.object(schema, instance, oS);
-				Set<Superid> sids = this.fetchSids(oS.superId(), r, triple.pid);
-
-				for (Superid sid : sids) {
-					sid = this.modify(qI, sid);
-
-					this.addRelation(mI, triple.pid, sid, r);
-					this.addRelation(mI.dual(), sid, triple.pid, r);
-
-					//for (var contextValue : children(triple.t)) {
-                    if (triple.t instanceof ComplexProperty complexProperty)
-                        for (Pair<Signature, ComplexProperty> child : complexProperty.children())
-                            //M.push(new StackTriple(sid, contextValue.context, contextValue.value));
-                            M.push(new StackTriple(sid, child.getValue0(), child.getValue1()));
-				}
-
-			}
-		});
-
-	}
-
-	private Set<Superid> fetchSids(Id superId, Object record, Object todo) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-	private Superid modify(CategoricalObject qI, Superid sid) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-
-    /*
-	private Set<ContextValue> children(AccessPath accessPath) {
-		Set<ContextValue> result = new TreeSet<>();
-		for (AccessPathProperty property : accessPath.properties()) {
-			result.addAll(process(property.name, null, null));
-			result.addAll(process(null, property.context, property.value));
+			while (!M.empty())
+				processTopOfStack(M);
 		}
-		return result;
 	}
-    */
+    
+    private Stack<StackTriple> createStackWithObject(SchemaObject object, RootRecord record)
+    {
+        InstanceObject qI = instanceFunctor.object(object);
+        SuperIdWithValues sid = fetchSid(object.superId(), record);
+        Stack<StackTriple> M = new Stack<>();
+        
+        ActiveDomainRow row = modify(qI, sid);
+        addPathChildrenToStack(M, mapping.accessPath, row, record);
+        
+        return M;
+    }
+    
+    private Stack<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord record)
+    {
+        Stack<StackTriple> M = new Stack<>();
+        
+        InstanceObject qI_dom = instanceFunctor.object(object);
+        SuperIdWithValues sids_dom = fetchSid(object.superId(), record);
+        ActiveDomainRow sid_dom = modify(qI_dom, sids_dom);
 
-	private void addRelation(Morphism mI, Superid sid_dom, Superid sid_cod, Object r) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        SchemaObject qS_cod = morphism.cod();
+        SuperIdWithValues sids_cod = fetchSid(qS_cod.superId(), record);
+        
+        InstanceObject qI_cod = instanceFunctor.object(qS_cod);
+        ActiveDomainRow sid_cod = modify(qI_cod, sids_cod);
+
+        InstanceMorphism mI = instanceFunctor.morphism(morphism);
+
+        addRelation(mI, sid_dom, sid_cod);
+        addRelation(mI.dual(), sid_cod, sid_dom);
+
+        AccessPath t_dom = mapping.accessPath.getSubpathBySignature(Signature.Empty());
+        AccessPath t_cod = mapping.accessPath.getSubpathBySignature(morphism.signature());
+
+        AccessPath ap = mapping.accessPath.minusSubpath(t_dom).minusSubpath(t_cod);
+
+        addPathChildrenToStack(M, ap, sid_dom, record);
+        addPathChildrenToStack(M, t_cod, sid_cod, record);
+        
+        return M;
+    }
+    
+    private void processTopOfStack(Stack<StackTriple> M)
+    {
+        StackTriple triple = M.pop();
+        InstanceMorphism mI = instanceFunctor.morphism(triple.mS);
+        SchemaObject oS = triple.mS.cod();
+        InstanceObject qI = instanceFunctor.object(oS);
+        Set<Pair<SuperIdWithValues, ComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
+
+        for (Pair<SuperIdWithValues, ComplexRecord> sid : sids)
+        {
+            ActiveDomainRow row = modify(qI, sid.getValue0());
+
+            addRelation(mI, triple.pid, row);
+            addRelation(mI.dual(), row, triple.pid);
+
+            addPathChildrenToStack(M, triple.t, row, sid.getValue1());
+        }
+    }
+
+    // Fetch id with values for given record
+	//private SuperIdWithValues fetchSid(Id superId, RootRecord record)
+    private static SuperIdWithValues fetchSid(Id superId, RootRecord rootRecord)
+    {
+        var builder = new SuperIdWithValues.Builder();
+        
+        for (Signature signature : superId.signatures())
+            builder.add(signature, (String) rootRecord.values().get(signature).getValue());
+        
+        return builder.build();
 	}
+    
+    // Fetch id with values for given record
+    // The return value is a set of (Signature, String) for each Signature in superId and its corresponding value from record
+    // Actually, there can be multiple values in the record, so the set of sets is returned
+    private static Set<Pair<SuperIdWithValues, ComplexRecord>> fetchSids(Id superId, ComplexRecord parentRecord, ActiveDomainRow parentRow, SchemaMorphism morphism)
+    {
+        Set<Pair<SuperIdWithValues, ComplexRecord>> output = new TreeSet<>();
+        var childRecords = parentRecord.children().get(morphism.signature());
+        
+        if (childRecords != null)
+            for (ComplexRecord childRecord: childRecords)
+            {
+                var builder = new SuperIdWithValues.Builder();
+                for (Signature signature: superId.signatures())
+                {
+                    var signatureInParentRow = signature.traverseThrough(morphism.signature());
+                    
+                    // Why java still doesn't support output arguments?
+                    String value = signatureInParentRow != null ? parentRow.tuples().get(signatureInParentRow)
+                        : (String) childRecord.values().get(signature).getValue();
+                    
+                    builder.add(signature, value);
+                }
+                
+                output.add(new Pair<>(builder.build(), childRecord));
+            }
+        
+        return output;
+    }
 
-    /*
-	private Collection<? extends ContextValue> process(Name name, Context context, Value value) {
-		List<ContextValue> result = new ArrayList<>();
-		switch (name.type) {
-			case STATIC_NAME -> {
-				return result;
-			}
-			case SIGNATURE -> {
-				result.add(new ContextValue(name.context, null));
-				return result;
-			}
-
-		}
-
-		switch (value.type) {
-			case SIGNATURE, EPSILON -> {
-				result.add(new ContextValue(new Context(context, value), null));
-				return result;
-			}
-
-		}
-
-		if (context.type == Context.Type.SIGNATURE) {
-			result.add(new ContextValue(context, value));
-			return result;
-		}
-
-		return children(value);
-
+    // Create ActiveDomainRow from given SuperIdWithValues and add it to the instance object
+	private static ActiveDomainRow modify(InstanceObject qI, SuperIdWithValues sid)
+    {
+        ActiveDomainRow row = qI.activeDomain().get(sid);
+        if (row == null)
+        {
+            row = new ActiveDomainRow(sid);
+            qI.addRecord(row);
+        }
+        
+        return row;
 	}
-    */
+    
+    private static void addRelation(InstanceMorphism morphism, ActiveDomainRow sid_dom, ActiveDomainRow sid_cod)
+    {
+		morphism.addMapping(new ActiveMappingRow(sid_dom, sid_cod));
+	}
+    
+    private void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, ComplexRecord record)
+    //private static void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, ComplexRecord record)
+    {
+        if (path instanceof ComplexProperty complexPath)
+            for (Pair<Signature, ComplexProperty> child : children(complexPath))
+            {
+                // TODO signature to schema morphism
+                SchemaMorphism morphism = schema.signatureToMorphism(child.getValue0());
+                stack.push(new StackTriple(sid, morphism, child.getValue1(), record));
+            }
+    }
+
+    /**
+     * Determine possible sub-paths to be traversed from this complex property (inner node of an access path).
+     * According to the paper, this function should return pairs of (context, value). But value of such sub-path can only be an {@link ComplexProperty}.
+     * Similarly, context must be a signature of a morphism.
+     * @return set of pairs (morphism signature, complex property) of all possible sub-paths.
+     */
+	private static Collection<Pair<Signature, ComplexProperty>> children(ComplexProperty complexProperty)
+    {
+        final List<Pair<Signature, ComplexProperty>> output = new ArrayList<>();
+        
+        for (AccessPath subpath : complexProperty.subpaths())
+        {
+            output.addAll(process(subpath.name()));
+            output.addAll(process(subpath.context(), subpath.value()));
+        }
+        
+        return output;
+	}
+    
+    /**
+     * Process (name, context and value) according to the "process" function from the paper.
+     * This function is divided to two parts - one for name and other for context and value.
+     * @param name
+     * @return see {@link #children()}
+     */
+    private static Collection<Pair<Signature, ComplexProperty>> process(Name name)
+    {
+        if (name.type() == Name.Type.DYNAMIC_NAME)
+            return List.of(new Pair(name.signature(), ComplexProperty.Empty()));
+        else // Static or anonymous (empty) name
+            return Collections.EMPTY_LIST;
+    }
+    
+    private static Collection<Pair<Signature, ComplexProperty>> process(IContext context, IValue value)
+    {
+        if (value instanceof SimpleValue simpleValue)
+        {
+            final Signature contextSignature = context instanceof Signature signature ? signature : Signature.Empty();
+            final Signature newSignature = Signature.combine(contextSignature, simpleValue.signature());
+            
+            return List.of(new Pair(newSignature, ComplexProperty.Empty()));
+        }
+        
+        if (value instanceof ComplexProperty complexProperty)
+        {
+            if (context instanceof Signature signature)
+                return List.of(new Pair(signature, complexProperty));
+            else
+                return children(complexProperty);
+        }
+        
+        throw new UnsupportedOperationException();
+    }
 }

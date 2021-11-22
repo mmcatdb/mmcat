@@ -7,12 +7,13 @@ import java.util.function.Consumer;
  *
  * @author pavel.koupil
  */
-public class ForestOfRecords implements Iterable {
+public class ForestOfRecords implements Iterable<RootRecord> {
 
 	// tady mas list recordu
-	private final List<DataRecord> records = new ArrayList<>();
-	// a navic tu mas mapu, ktera jako klic ma kategoricky identifikator objektu a jako hodnotu ma ukazatel do recordu, tedy do stromu, na konkretni misto!
-	private final Map<Name, Record> quickAccess = new TreeMap<>(); // Name = StaticName | AnonymousName | DerivedName
+	private final List<RootRecord> records = new ArrayList<>();
+	// This map should map a categorical identifier (Name) of each property in given kind to the list of respective nodes in the forest.
+    // However, this is not very useful because we need to find one value for one particular record instead.
+	// private final Map<Name, DataRecord> quickAccess = new TreeMap<>(); // Name = StaticName | AnonymousName | DerivedName
     
 	@Override
 	public Iterator iterator() {
@@ -29,9 +30,9 @@ public class ForestOfRecords implements Iterable {
 		return records.spliterator();
 	}
     
-    public void addRecord(DataRecord record)
+    public void addRecord(RootRecord record)
     {
         records.add(record);
-        record.records().forEach(r -> quickAccess.put(r.getName(), r));
+        //record.records().forEach(r -> quickAccess.put(r.getName(), r));
     }
 }
