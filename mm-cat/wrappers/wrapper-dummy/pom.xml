@@ -3,17 +3,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>cz.cuni.matfyz</groupId>
-        <artifactId>mm-cat</artifactId>
+        <artifactId>wrappers</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>wrappers</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>wrapper-mongodb</module>
-        <module>wrapper-neo4j</module>
-        <module>wrapper-postgresql</module>
-        <module>wrapper-cassandra</module>
-        <module>wrapper-riak</module>
-        <module>wrapper-dummy</module>
-    </modules>
+    <artifactId>wrapper-dummy</artifactId>
+    <packaging>jar</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>cz.cuni.matfyz</groupId>
+            <artifactId>abstractWrappers</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 </project>

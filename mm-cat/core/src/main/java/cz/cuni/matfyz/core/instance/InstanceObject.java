@@ -56,4 +56,9 @@ public class InstanceObject implements CategoricalObject
     {
         return objectId() - categoricalObject.objectId();
 	}
+	
+	@Override
+	public String toString() {
+		return null;
+	}
 }

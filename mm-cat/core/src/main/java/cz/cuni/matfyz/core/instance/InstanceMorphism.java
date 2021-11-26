@@ -63,5 +63,10 @@ public class InstanceMorphism implements Morphism
     {
 		return schemaMorphism.signature();
 	}
+	
+	@Override
+	public String toString() {
+		return null;
+	}
 
 }
