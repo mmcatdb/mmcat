@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.schema.Id;
 
 import java.util.*;
 
@@ -8,13 +9,21 @@ import java.util.*;
  *
  * @author jachymb.bartik
  */
-public class SuperIdWithValues
+public class IdWithValues implements Comparable<IdWithValues>
 {
     private final Map<Signature, String> map;
     
-    public Collection<Signature> signatures()
+    public Set<Signature> signatures()
     {
         return map.keySet();
+    }
+    
+    private Id id;
+    public Id id()
+    {
+        if (id == null)
+            id = new Id(map.keySet());
+        return id;
     }
     
     public Collection<String> values()
@@ -27,7 +36,7 @@ public class SuperIdWithValues
         return map;
     }
 
-    private SuperIdWithValues(Map<Signature, String> map)
+    private IdWithValues(Map<Signature, String> map)
     {
 		this.map = map;
 	}
@@ -41,9 +50,9 @@ public class SuperIdWithValues
             map.put(signature, value);
         }
 
-        public SuperIdWithValues build()
+        public IdWithValues build()
         {
-            var output = new SuperIdWithValues(map);
+            var output = new IdWithValues(map);
             map = new TreeMap<>();
             return output;
         }
@@ -87,7 +96,7 @@ public class SuperIdWithValues
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final SuperIdWithValues other = (SuperIdWithValues) obj;
+        final IdWithValues other = (IdWithValues) obj;
         if (!Objects.equals(this.map, other.map)) {
             return false;
         }
@@ -99,6 +108,23 @@ public class SuperIdWithValues
         int hash = 3;
         hash = 83 * hash + Objects.hashCode(this.map);
         return hash;
+    }
+    
+    @Override
+    public int compareTo(IdWithValues sid)
+    {
+        int idCompareResult = id().compareTo(sid.id());
+        if (idCompareResult != 0)
+            return idCompareResult;
+        
+        for (Signature signature : signatures())
+        {
+            int signatureCompareResult = map.get(signature).compareTo(sid.map.get(signature));
+            if (signatureCompareResult != 0)
+                return signatureCompareResult;
+        }
+        
+        return 0;
     }
 }
 

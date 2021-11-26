@@ -16,7 +16,7 @@ public class InstanceMorphism implements Morphism
 	private final InstanceObject cod;
 	private final InstanceCategory category;
     
-    private final Map<ActiveDomainRow, Map<ActiveDomainRow, ActiveMappingRow>> mappingsByDomain = new TreeMap<>();
+    private final Set<ActiveMappingRow> mappings = new TreeSet<>();
     
     /*
 	private final List<ActiveMappingRow> activeDomain = new ArrayList<>();
@@ -37,16 +37,7 @@ public class InstanceMorphism implements Morphism
     
     public void addMapping(ActiveMappingRow mapping)
     {
-        Map<ActiveDomainRow, ActiveMappingRow> mappingsByCodomain = mappingsByDomain.get(mapping.domainRow());
-        
-        if (mappingsByCodomain == null)
-        {
-            mappingsByCodomain = new TreeMap<>();
-            mappingsByDomain.put(mapping.domainRow(), mappingsByCodomain);
-        }
-        
-        if (mappingsByCodomain.get(mapping.codomainRow()) == null)
-            mappingsByCodomain.put(mapping.codomainRow(), mapping);
+        mappings.add(mapping);
     }
     
 	@Override

@@ -5,7 +5,7 @@ package cz.cuni.matfyz.core.instance;
  * It corresponds to a single {@link InstanceMorphism}.
  * @author jachym.bartik
  */
-public class ActiveMappingRow
+public class ActiveMappingRow implements Comparable<ActiveMappingRow>
 {
 	private final ActiveDomainRow domainRow;
     private final ActiveDomainRow codomainRow;
@@ -24,5 +24,12 @@ public class ActiveMappingRow
     {
         this.domainRow = domainRow;
         this.codomainRow = codomainRow;
+    }
+
+    @Override
+    public int compareTo(ActiveMappingRow row)
+    {
+        int domainCompareResult = domainRow.compareTo(row.codomainRow);
+        return domainCompareResult != 0 ? domainCompareResult : codomainRow.compareTo(row.codomainRow);
     }
 }

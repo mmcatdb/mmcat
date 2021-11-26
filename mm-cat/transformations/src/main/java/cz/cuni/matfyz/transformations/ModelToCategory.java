@@ -50,7 +50,7 @@ public class ModelToCategory
     private Stack<StackTriple> createStackWithObject(SchemaObject object, RootRecord record)
     {
         InstanceObject qI = instanceFunctor.object(object);
-        SuperIdWithValues sid = fetchSid(object.superId(), record);
+        IdWithValues sid = fetchSid(object.superId(), record);
         Stack<StackTriple> M = new Stack<>();
         
         ActiveDomainRow row = modify(qI, sid);
@@ -64,11 +64,11 @@ public class ModelToCategory
         Stack<StackTriple> M = new Stack<>();
         
         InstanceObject qI_dom = instanceFunctor.object(object);
-        SuperIdWithValues sids_dom = fetchSid(object.superId(), record);
+        IdWithValues sids_dom = fetchSid(object.superId(), record);
         ActiveDomainRow sid_dom = modify(qI_dom, sids_dom);
 
         SchemaObject qS_cod = morphism.cod();
-        SuperIdWithValues sids_cod = fetchSid(qS_cod.superId(), record);
+        IdWithValues sids_cod = fetchSid(qS_cod.superId(), record);
         
         InstanceObject qI_cod = instanceFunctor.object(qS_cod);
         ActiveDomainRow sid_cod = modify(qI_cod, sids_cod);
@@ -95,9 +95,9 @@ public class ModelToCategory
         InstanceMorphism mI = instanceFunctor.morphism(triple.mS);
         SchemaObject oS = triple.mS.cod();
         InstanceObject qI = instanceFunctor.object(oS);
-        Set<Pair<SuperIdWithValues, ComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
+        Set<Pair<IdWithValues, ComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
 
-        for (Pair<SuperIdWithValues, ComplexRecord> sid : sids)
+        for (Pair<IdWithValues, ComplexRecord> sid : sids)
         {
             ActiveDomainRow row = modify(qI, sid.getValue0());
 
@@ -109,13 +109,17 @@ public class ModelToCategory
     }
 
     // Fetch id with values for given record
-	//private SuperIdWithValues fetchSid(Id superId, RootRecord record)
-    private static SuperIdWithValues fetchSid(Id superId, RootRecord rootRecord)
+	//private IdWithValues fetchSid(Id superId, RootRecord record)
+    private static IdWithValues fetchSid(Id superId, RootRecord rootRecord)
     {
-        var builder = new SuperIdWithValues.Builder();
+        var builder = new IdWithValues.Builder();
         
         for (Signature signature : superId.signatures())
-            builder.add(signature, (String) rootRecord.values().get(signature).getValue());
+        {
+            Object value = rootRecord.values().get(signature).getValue();
+            if (value instanceof String stringValue)
+                builder.add(signature, stringValue);
+        }
         
         return builder.build();
 	}
@@ -123,15 +127,15 @@ public class ModelToCategory
     // Fetch id with values for given record
     // The return value is a set of (Signature, String) for each Signature in superId and its corresponding value from record
     // Actually, there can be multiple values in the record, so the set of sets is returned
-    private static Set<Pair<SuperIdWithValues, ComplexRecord>> fetchSids(Id superId, ComplexRecord parentRecord, ActiveDomainRow parentRow, SchemaMorphism morphism)
+    private static Set<Pair<IdWithValues, ComplexRecord>> fetchSids(Id superId, ComplexRecord parentRecord, ActiveDomainRow parentRow, SchemaMorphism morphism)
     {
-        Set<Pair<SuperIdWithValues, ComplexRecord>> output = new TreeSet<>();
+        Set<Pair<IdWithValues, ComplexRecord>> output = new TreeSet<>();
         var childRecords = parentRecord.children().get(morphism.signature());
         
         if (childRecords != null)
             for (ComplexRecord childRecord: childRecords)
             {
-                var builder = new SuperIdWithValues.Builder();
+                var builder = new IdWithValues.Builder();
                 for (Signature signature: superId.signatures())
                 {
                     var signatureInParentRow = signature.traverseThrough(morphism.signature());
@@ -149,18 +153,73 @@ public class ModelToCategory
         return output;
     }
 
-    // Create ActiveDomainRow from given SuperIdWithValues and add it to the instance object
-	private static ActiveDomainRow modify(InstanceObject qI, SuperIdWithValues sid)
+    // Create ActiveDomainRow from given IdWithValues and add it to the instance object
+	private static ActiveDomainRow modify(InstanceObject qI, IdWithValues sid)
     {
-        ActiveDomainRow row = qI.activeDomain().get(sid);
-        if (row == null)
+        Set<ActiveDomainRow> rows = new TreeSet<>();
+        Set<IdWithValues> idsWithValues = getIdsWithValues(qI.schemaObject().ids(), sid);
+        
+        for (IdWithValues idWithValues : idsWithValues)
         {
-            row = new ActiveDomainRow(sid);
-            qI.addRecord(row);
+            Map<IdWithValues, ActiveDomainRow> map = qI.activeDomain().get(idWithValues.id());
+            if (map == null)
+                continue;
+            
+            ActiveDomainRow row = map.get(idWithValues);
+            if (!rows.contains(row))
+                rows.add(row);
         }
         
-        return row;
+        var builder = new IdWithValues.Builder();
+        for (ActiveDomainRow row : rows)
+            for (Signature signature : row.tuples().keySet())
+                builder.add(signature, row.tuples().get(signature));
+        
+        for (Signature signature : sid.signatures())
+            builder.add(signature, sid.map().get(signature));
+        
+        ActiveDomainRow newRow = new ActiveDomainRow(builder.build());
+        for (IdWithValues idWithValues : idsWithValues)
+        {
+            Map<IdWithValues, ActiveDomainRow> map = qI.activeDomain().get(idWithValues.id());
+            if (map == null)
+            {
+                map = new TreeMap<>();
+                qI.activeDomain().put(idWithValues.id(), map);
+            }
+            map.put(idWithValues, newRow);
+        }
+        
+        // TODO: předělat existující morfizmy
+        // WARNING: může se stát, že tu sloučím více řádků do jednoho - potom bude nutné sloučit jejich morfizmy do jednoho, což se nejlépe vyřeší lazy algoritmem
+        // právě až to bude potřeba
+        // TODO: optimalizovat
+        
+        return newRow;
 	}
+    
+    private static Set<IdWithValues> getIdsWithValues(Set<Id> ids, IdWithValues sid)
+    {
+        Set<IdWithValues> output = new TreeSet<>();
+        for (Id id : ids)
+        {
+            var builder = new IdWithValues.Builder();
+            boolean idIsInSuperId = true;
+            for (Signature signature : id.signatures())
+            {
+                String value = sid.map().get(signature);
+                if (value == null)
+                {
+                    idIsInSuperId = false;
+                    break;
+                }
+                builder.add(signature, value);
+            }
+            if (idIsInSuperId)
+                output.add(builder.build());
+        }
+        return output;
+    }
     
     private static void addRelation(InstanceMorphism morphism, ActiveDomainRow sid_dom, ActiveDomainRow sid_cod)
     {

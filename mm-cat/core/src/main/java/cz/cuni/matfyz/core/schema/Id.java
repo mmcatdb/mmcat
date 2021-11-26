@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class Id implements Comparable<Id>
 {
-    private final Set<Signature> signatures;
+    private final SortedSet<Signature> signatures;
     
     public Iterable<Signature> signatures()
     {
@@ -19,22 +19,35 @@ public class Id implements Comparable<Id>
 
 	public Id(Set<Signature> signatures)
     {
-		this.signatures = signatures;
+		this.signatures = new TreeSet<>(signatures);
 	}
     
     public Id(Collection<Signature> signatures)
     {
-		this.signatures = new TreeSet(signatures);
+		this.signatures = new TreeSet<>(signatures);
 	}
 
 	public Id(Signature... signatures)
     {
-		this.signatures = new TreeSet(List.of(signatures));
+		this.signatures = new TreeSet<>(List.of(signatures));
 	}
 
 	@Override
 	public int compareTo(Id id)
     {
-        throw new UnsupportedOperationException();
+        int sizeResult = signatures.size() - id.signatures.size();
+        if (sizeResult != 0)
+            return sizeResult;
+        
+        Iterator<Signature> iterator = id.signatures.iterator();
+        
+        for (Signature signature : signatures)
+        {
+            int signatureResult = signature.compareTo(iterator.next());
+            if (signatureResult != 0)
+                return signatureResult;
+        }
+        
+        return 0;
 	}
 }

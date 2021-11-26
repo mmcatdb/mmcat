@@ -11,11 +11,11 @@ import java.util.*;
  * Each value is unique among all the values associated with the same signature. (TODO maybe not)
  * @author jachym.bartik
  */
-public class ActiveDomainRow
+public class ActiveDomainRow implements Comparable<ActiveDomainRow>
 {
     //private final Id superId;
     
-    private final SuperIdWithValues superIdWithValues;
+    private final IdWithValues idWithValues;
 	private final Map<Signature, String> tuples;
     
     /*
@@ -25,9 +25,9 @@ public class ActiveDomainRow
     }
     */
     
-    public SuperIdWithValues superIdWithValues()
+    public IdWithValues idWithValues()
     {
-        return superIdWithValues;
+        return idWithValues;
     }
     
     public Map<Signature, String> tuples()
@@ -35,9 +35,15 @@ public class ActiveDomainRow
         return tuples;
     }
     
-    public ActiveDomainRow(SuperIdWithValues superIdWithValues)
+    public ActiveDomainRow(IdWithValues idWithValues)
     {
-        this.superIdWithValues = superIdWithValues;
-        this.tuples = new TreeMap<>(superIdWithValues.map());
+        this.idWithValues = idWithValues;
+        this.tuples = new TreeMap<>(idWithValues.map());
+    }
+
+    @Override
+    public int compareTo(ActiveDomainRow row)
+    {
+        return idWithValues.compareTo(row.idWithValues());
     }
 }
