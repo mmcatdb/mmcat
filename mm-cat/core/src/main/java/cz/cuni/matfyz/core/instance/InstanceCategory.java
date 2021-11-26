@@ -15,10 +15,19 @@ public class InstanceCategory implements Category {
 	private final Map<Key, InstanceObject> objects;
 	private final Map<Signature, InstanceMorphism> morphisms;
 
-	InstanceCategory(Map<Key, InstanceObject> objects, Map<Signature, InstanceMorphism> morphisms)
+	public InstanceCategory(Map<Key, InstanceObject> objects, Map<Signature, InstanceMorphism> morphisms)
     {
 		this.objects = objects;
         this.morphisms = morphisms;
+	}
+	
+	public InstanceCategory() {
+		objects = new TreeMap<>();
+		morphisms = new TreeMap<>();
+	}
+
+	public InstanceCategory(SchemaCategory schema) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
     
 	public InstanceObject object(Key key)
