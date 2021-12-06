@@ -32,7 +32,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
         return pullForest(selectAll, path, true, limit, offset);
     }
     
-	public ForestOfRecords pullForest(String selectAll, ComplexProperty path, boolean doLimitAndOffset, int limit, int offset) throws Exception
+	private ForestOfRecords pullForest(String selectAll, ComplexProperty path, boolean doLimitAndOffset, int limit, int offset) throws Exception
     {
         // selectAll should be in the form of "database.getCollection("<kindName>");"
         var database = databaseProvider.getDatabase();

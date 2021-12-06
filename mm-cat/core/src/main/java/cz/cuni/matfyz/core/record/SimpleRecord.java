@@ -15,9 +15,9 @@ public class SimpleRecord<DataType> extends DataRecord
 	private final DataType value;
     private final Signature signature;
     
-    SimpleRecord(Name name, ComplexRecord parent, RootRecord root, DataType value, Signature signature)
+    SimpleRecord(Name name, ComplexRecord parent, DataType value, Signature signature)
     {
-        super(name, parent, root);
+        super(name, parent);
         this.value = value;
         this.signature = signature;
     }
@@ -39,4 +39,14 @@ public class SimpleRecord<DataType> extends DataRecord
         return Set.of(this);
     }
     */
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(Name: \"").append(name)
+            .append("\",\tValue: \"").append(value).append("\")\n");
+        
+        return builder.toString();
+    }
 }

@@ -37,4 +37,15 @@ public class SimpleProperty extends AccessPath
         
         return value.signature().equals(signature);
     }
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("(Name: \"").append(name)
+            .append("\",\tContext: \"").append(context())
+            .append("\",\tValue: \"").append(value).append("\")\n");
+        
+        return builder.toString();
+    }
 }

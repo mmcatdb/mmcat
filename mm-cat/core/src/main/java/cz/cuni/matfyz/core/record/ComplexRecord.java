@@ -12,12 +12,14 @@ import java.util.*;
 public class ComplexRecord extends DataRecord
 {
     //private final List<DataRecord> children = new ArrayList<>();
+    //private final Map<Signature, Set<DataRecord>> children = new TreeMap<>();
+    
     private final Map<Signature, Set<ComplexRecord>> children = new TreeMap<>();
     private final Map<Signature, SimpleRecord> values = new TreeMap<>();
     
-	protected ComplexRecord(Name name, ComplexRecord parent, RootRecord root)
+	protected ComplexRecord(Name name, ComplexRecord parent)
     {
-		super(name, parent, root);
+		super(name, parent);
 	}
     
     public Map<Signature, Set<ComplexRecord>> children()
@@ -32,7 +34,7 @@ public class ComplexRecord extends DataRecord
     
     public ComplexRecord addComplexRecord(Name name, Signature signature)
     {
-        ComplexRecord record = new ComplexRecord(name, this, root());
+        ComplexRecord record = new ComplexRecord(name, this);
         
         Set<ComplexRecord> childSet = children.get(signature);
         if (childSet == null)
@@ -48,7 +50,7 @@ public class ComplexRecord extends DataRecord
     
     public <DataType> SimpleRecord<DataType> addSimpleRecord(Name name, DataType value, Signature signature)
     {
-        SimpleRecord record = new SimpleRecord(name, this, root(), value, signature);
+        SimpleRecord record = new SimpleRecord(name, this, value, signature);
         values.put(signature, record);
         
         return record;
@@ -64,4 +66,25 @@ public class ComplexRecord extends DataRecord
         return output;
     }
     */
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder childrenBuilder = new StringBuilder();
+        for (Signature signature : children.keySet())
+            childrenBuilder.append(children.get(signature));
+        String childrenResult = childrenBuilder.toString();
+        
+        StringBuilder builder = new StringBuilder();
+        builder.append("Name: ").append(name).append("\n")
+            .append("Simple values:\n");
+        for (Signature signature : values.keySet())
+            builder.append("\t").append(values.get(signature));
+        
+        builder.append("Complex values:\n");
+        for (String line : childrenResult.lines().toList())
+            builder.append("\t").append(line).append("\n");
+        
+        return builder.toString();
+    }
 }

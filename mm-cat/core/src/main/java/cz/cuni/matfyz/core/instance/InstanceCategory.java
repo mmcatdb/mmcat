@@ -15,13 +15,14 @@ public class InstanceCategory implements Category {
 	private final Map<Key, InstanceObject> objects;
 	private final Map<Signature, InstanceMorphism> morphisms;
 
-//	public InstanceCategory(Map<Key, InstanceObject> objects, Map<Signature, InstanceMorphism> morphisms)
-//    {
-//		this.objects = objects;
-//        this.morphisms = morphisms;
-//	}
+    InstanceCategory(Map<Key, InstanceObject> objects, Map<Signature, InstanceMorphism> morphisms)
+    {
+		this.objects = objects;
+        this.morphisms = morphisms;
+	}
 	
-	public InstanceCategory() {
+    /*
+	InstanceCategory() {
 		objects = new TreeMap<>();
 		morphisms = new TreeMap<>();
 	}
@@ -34,13 +35,7 @@ public class InstanceCategory implements Category {
 	public void addMorphism(Object... TODO) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
-
-	public InstanceCategory(SchemaCategory schema) {
-		// vezme kazdy objekt schematicke kategorie
-		// vytvori kopii v instancni kategorii, 1:1
-		// totez udela s morfismy
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    */
     
 	public InstanceObject object(Key key)
     {
@@ -64,26 +59,33 @@ public class InstanceCategory implements Category {
 	}
 	
 	@Override
-	public String toString() {
+	public String toString()
+    {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("Objects:\t");
-		for (String key : objects.keySet()) {
+		builder.append("Keys: ");
+		for (Key key : objects.keySet())
 			builder.append(key).append(", ");
+		builder.append("\n");
+        
+        builder.append("Objects:\n");
+		for (Key key : objects.keySet())
+        {
+			InstanceObject object = objects.get(key);
+			builder.append(object).append("\n");
 		}
 		builder.append("\n");
 
-		for (String key : objects.keySet()) {
-			var object = objects.get(key);
-			builder.append(object);
-			builder.append("\n");
-		}
+        builder.append("Signatures: ");
+		for (Signature signature : morphisms.keySet())
+			builder.append(signature).append(", ");
 		builder.append("\n");
-
-		for (String key : morphisms_TODOSIMPLE.keySet()) {
-			var object = morphisms_TODOSIMPLE.get(key);
-			builder.append(object);
-			builder.append("\n");
+        
+        builder.append("Morphisms:\n");
+		for (Signature signature : morphisms.keySet())
+        {
+			InstanceMorphism morphism = morphisms.get(signature);
+			builder.append(morphism).append("\n");
 		}
 		builder.append("\n");
 

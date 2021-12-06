@@ -3,6 +3,7 @@ package cz.cuni.matfyz.transformations;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.RootRecord;
 import cz.cuni.matfyz.core.record.ComplexRecord;
+import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
@@ -17,29 +18,33 @@ import org.javatuples.Pair;
  */
 public class ModelToCategory
 {
-    SchemaCategory schema; // TODO
-    InstanceCategory instance; // TODO
-    ForestOfRecords forest; // TODO
-    Mapping mapping; // TODO
+    private SchemaCategory schema; // TODO
+    //private InstanceCategory instance; // TODO
+    private ForestOfRecords forest; // TODO
+    private Mapping mapping; // TODO
             
-    private final InstanceFunctor instanceFunctor = new InstanceFunctor(instance, schema);
+    private InstanceFunctor instanceFunctor;
     
     public void input(SchemaCategory schema, InstanceCategory instance, ForestOfRecords forest, Mapping mapping)
     {
         this.schema = schema;
-        this.instance = instance;
+        //this.instance = instance;
         this.forest = forest;
         this.mapping = mapping;
+        
+        instanceFunctor = new InstanceFunctor(instance, schema);
     }
     
 	public void algorithm()
     {
+        System.out.println("# ALGORITHM");
         for (RootRecord rootRecord : forest)
         {
+            System.out.println("# Process of Root Record");
 			// preparation phase
-			Stack<StackTriple> M = mapping.rootMorphism == null ?
-                createStackWithObject(mapping.rootObject, rootRecord) : // K with root object
-                createStackWithMorphism(mapping.rootObject, mapping.rootMorphism, rootRecord); // K with root morphism
+			Stack<StackTriple> M = mapping.hasRootMorphism() ?
+                createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord) : // K with root morphism
+                createStackWithObject(mapping.rootObject(), rootRecord); // K with root object
 
 			// processing of the tree
 			while (!M.empty())
@@ -49,18 +54,23 @@ public class ModelToCategory
     
     private Stack<StackTriple> createStackWithObject(SchemaObject object, RootRecord record)
     {
+        System.out.println("# Create Stack With Object");
+        
         InstanceObject qI = instanceFunctor.object(object);
         IdWithValues sid = fetchSid(object.superId(), record);
         Stack<StackTriple> M = new Stack<>();
         
         ActiveDomainRow row = modify(qI, sid);
-        addPathChildrenToStack(M, mapping.accessPath, row, record);
+        addPathChildrenToStack(M, mapping.accessPath(), row, record);
         
+        System.out.println("# End: " + M.size());
         return M;
     }
     
     private Stack<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord record)
     {
+        System.out.println("# Create Stack With Morphism");
+        
         Stack<StackTriple> M = new Stack<>();
         
         InstanceObject qI_dom = instanceFunctor.object(object);
@@ -78,24 +88,27 @@ public class ModelToCategory
         addRelation(mI, sid_dom, sid_cod);
         addRelation(mI.dual(), sid_cod, sid_dom);
 
-        AccessPath t_dom = mapping.accessPath.getSubpathBySignature(Signature.Empty());
-        AccessPath t_cod = mapping.accessPath.getSubpathBySignature(morphism.signature());
+        AccessPath t_dom = mapping.accessPath().getSubpathBySignature(Signature.Empty());
+        AccessPath t_cod = mapping.accessPath().getSubpathBySignature(morphism.signature());
 
-        AccessPath ap = mapping.accessPath.minusSubpath(t_dom).minusSubpath(t_cod);
+        AccessPath ap = mapping.accessPath().minusSubpath(t_dom).minusSubpath(t_cod);
 
         addPathChildrenToStack(M, ap, sid_dom, record);
         addPathChildrenToStack(M, t_cod, sid_cod, record);
         
+        System.out.println("# End: " + M.size());
         return M;
     }
     
     private void processTopOfStack(Stack<StackTriple> M)
     {
+        System.out.println("# Process Top of Stack");
+        
         StackTriple triple = M.pop();
         InstanceMorphism mI = instanceFunctor.morphism(triple.mS);
         SchemaObject oS = triple.mS.cod();
         InstanceObject qI = instanceFunctor.object(oS);
-        Set<Pair<IdWithValues, ComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
+        Iterable<Pair<IdWithValues, ComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
 
         for (Pair<IdWithValues, ComplexRecord> sid : sids)
         {
@@ -103,9 +116,10 @@ public class ModelToCategory
 
             addRelation(mI, triple.pid, row);
             addRelation(mI.dual(), row, triple.pid);
-
+            
             addPathChildrenToStack(M, triple.t, row, sid.getValue1());
         }
+        System.out.println("# End, Stack size: " + M.size());
     }
 
     // Fetch id with values for given record
@@ -127,28 +141,41 @@ public class ModelToCategory
     // Fetch id with values for given record
     // The return value is a set of (Signature, String) for each Signature in superId and its corresponding value from record
     // Actually, there can be multiple values in the record, so the set of sets is returned
-    private static Set<Pair<IdWithValues, ComplexRecord>> fetchSids(Id superId, ComplexRecord parentRecord, ActiveDomainRow parentRow, SchemaMorphism morphism)
+    private static Iterable<Pair<IdWithValues, ComplexRecord>> fetchSids(Id superId, ComplexRecord parentRecord, ActiveDomainRow parentRow, SchemaMorphism morphism)
     {
-        Set<Pair<IdWithValues, ComplexRecord>> output = new TreeSet<>();
-        var childRecords = parentRecord.children().get(morphism.signature());
+        List<Pair<IdWithValues, ComplexRecord>> output = new ArrayList<>();
         
-        if (childRecords != null)
-            for (ComplexRecord childRecord: childRecords)
+        if (superId.compareTo(new Id(Signature.Empty())) == 0)
+        {
+            SimpleRecord<String> childValue = parentRecord.values().get(morphism.signature());
+            if (childValue != null)
             {
                 var builder = new IdWithValues.Builder();
-                for (Signature signature: superId.signatures())
-                {
-                    var signatureInParentRow = signature.traverseThrough(morphism.signature());
-                    
-                    // Why java still doesn't support output arguments?
-                    String value = signatureInParentRow != null ? parentRow.tuples().get(signatureInParentRow)
-                        : (String) childRecord.values().get(signature).getValue();
-                    
-                    builder.add(signature, value);
-                }
-                
-                output.add(new Pair<>(builder.build(), childRecord));
+                builder.add(Signature.Empty(), childValue.getValue());
+                output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
             }
+        }
+        else
+        {
+            Set<ComplexRecord> childRecords = parentRecord.children().get(morphism.signature());
+            if (childRecords != null)
+                for (ComplexRecord childRecord : childRecords)
+                {
+                    var builder = new IdWithValues.Builder();
+                    for (Signature signature : superId.signatures())
+                    {
+                        var signatureInParentRow = signature.traverseThrough(morphism.signature());
+
+                        // Why java still doesn't support output arguments?
+                        String value = signatureInParentRow != null ? parentRow.tuples().get(signatureInParentRow)
+                            : (String) childRecord.values().get(signature).getValue();
+
+                        builder.add(signature, value);
+                    }
+
+                    output.add(new Pair<>(builder.build(), childRecord));
+                }
+        }
         
         return output;
     }
@@ -166,7 +193,7 @@ public class ModelToCategory
                 continue;
             
             ActiveDomainRow row = map.get(idWithValues);
-            if (!rows.contains(row))
+            if (row != null && !rows.contains(row))
                 rows.add(row);
         }
         

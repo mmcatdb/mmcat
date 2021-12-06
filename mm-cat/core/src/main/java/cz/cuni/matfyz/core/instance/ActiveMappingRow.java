@@ -32,4 +32,14 @@ public class ActiveMappingRow implements Comparable<ActiveMappingRow>
         int domainCompareResult = domainRow.compareTo(row.codomainRow);
         return domainCompareResult != 0 ? domainCompareResult : codomainRow.compareTo(row.codomainRow);
     }
+    
+    @Override
+	public String toString()
+    {
+		StringBuilder builder = new StringBuilder();
+
+        builder.append(domainRow).append(" -> ").append(codomainRow);
+        
+        return builder.toString();
+	}
 }

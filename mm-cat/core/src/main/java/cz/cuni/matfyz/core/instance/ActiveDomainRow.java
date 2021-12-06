@@ -46,4 +46,10 @@ public class ActiveDomainRow implements Comparable<ActiveDomainRow>
     {
         return idWithValues.compareTo(row.idWithValues());
     }
+    
+    @Override
+    public String toString()
+    {
+        return idWithValues.toString();
+    }
 }

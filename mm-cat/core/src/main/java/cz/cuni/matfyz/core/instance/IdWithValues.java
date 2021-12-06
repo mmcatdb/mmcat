@@ -126,6 +126,27 @@ public class IdWithValues implements Comparable<IdWithValues>
         
         return 0;
     }
+    
+    @Override
+	public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        
+        builder.append("{");
+        boolean notFirst = false;
+        for (Signature signature : map.keySet())
+        {
+            if (notFirst)
+                builder.append(", ");
+            else
+                notFirst = true;
+            
+            builder.append("(").append(signature).append(": \"").append(map.get(signature)).append("\")");
+        }
+        builder.append("}");
+            
+        return builder.toString();
+	}
 }
 
 /*

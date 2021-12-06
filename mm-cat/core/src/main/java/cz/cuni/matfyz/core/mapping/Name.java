@@ -8,10 +8,23 @@ import cz.cuni.matfyz.core.category.Signature;
  */
 public class Name
 {
-    private String name;
-    private Signature signature;
-
-	private Type type;
+    private final String name;
+    private final Signature signature;
+    private final Type type;
+    
+    public Name(Signature signature)
+    {
+        name = "";
+        this.signature = signature;
+        type = Type.DYNAMIC_NAME;
+    }
+    
+    public Name(String name)
+    {
+        this.name = name;
+        signature = null;
+        type = name == "" ? Type.ANONYMOUS : Type.STATIC_NAME;
+    }
     
     public Type type()
     {
@@ -29,6 +42,7 @@ public class Name
         ANONYMOUS, // Also known as Empty
 		DYNAMIC_NAME;
         
+        /*
         public cz.cuni.matfyz.core.record.Name.Type toRecordType()
         {
             return switch (this)
@@ -38,11 +52,17 @@ public class Name
                 case DYNAMIC_NAME -> cz.cuni.matfyz.core.record.Name.Type.DYNAMIC_NAME;
             };
         }
+        */
 	}
     
     public cz.cuni.matfyz.core.record.Name toRecordName()
     {
-        return new cz.cuni.matfyz.core.record.Name(name, type.toRecordType());
+        return switch (type)
+        {
+            case STATIC_NAME -> new cz.cuni.matfyz.core.record.Name(name);
+            case ANONYMOUS -> new cz.cuni.matfyz.core.record.Name("");
+            case DYNAMIC_NAME -> new cz.cuni.matfyz.core.record.Name(signature);
+        };
     }
     
     public String getStringName() throws Exception
@@ -52,6 +72,17 @@ public class Name
             case STATIC_NAME -> name;
             case ANONYMOUS -> "";
             case DYNAMIC_NAME -> throw new Exception();
+        };
+    }
+    
+    @Override
+	public String toString()
+    {
+        return switch (type)
+        {
+            case STATIC_NAME -> name;
+            case ANONYMOUS -> "_ANONYMOUS";
+            case DYNAMIC_NAME -> signature.toString();
         };
     }
 }

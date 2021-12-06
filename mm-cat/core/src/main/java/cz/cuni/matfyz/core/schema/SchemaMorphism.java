@@ -12,21 +12,37 @@ public class SchemaMorphism implements Morphism
 	private final Signature signature;
 	private final SchemaObject dom;
 	private final SchemaObject cod;
-	private final int min;
-	private final int max;
+	private final Min min;
+	private final Max max;
+    
+    public enum Min
+    {
+        ZERO,
+        ONE
+    }
+    
+    public enum Max
+    {
+        ONE,
+        STAR
+    }
 
 	private SchemaCategory category;
 
+    /*
 	public static SchemaMorphism dual(SchemaMorphism morphism) {
 		return SchemaMorphism.dual(morphism, 1, 1);
 	}
+    */
 
-	public static SchemaMorphism dual(SchemaMorphism morphism, int min, int max) {
-		SchemaMorphism result = new SchemaMorphism(morphism.signature().dual(), morphism.cod(), morphism.dom(), min, max);
+	public SchemaMorphism createDual(Min min, Max max)
+    {
+		SchemaMorphism result = new SchemaMorphism(signature.dual(), cod, dom, min, max);
 		return result;
 	}
 
-	public SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, int min, int max) {
+	public SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max)
+    {
 		this.signature = signature;
 		this.dom = dom;
 		this.cod = cod;
@@ -48,11 +64,11 @@ public class SchemaMorphism implements Morphism
 		return cod;
 	}
 
-	public int min() {
+	public Min min() {
 		return min;
 	}
 
-	public int max() {
+	public Max max() {
 		return max;
 	}
 

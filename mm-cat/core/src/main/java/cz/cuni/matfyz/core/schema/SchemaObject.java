@@ -15,16 +15,21 @@ public class SchemaObject implements CategoricalObject
 	private final String label;
 	private final Id superId; // Should be a union of all ids (super key).
 	private final Set<Id> ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
-             
-	public SchemaObject(Key key) {
+    
+    /*
+	public SchemaObject(Key key)
+    {
 		this(key, "", new Id(), new TreeSet<>());
 	}
 
-	public SchemaObject(Key key, String label) {
+	public SchemaObject(Key key, String label)
+    {
 		this(key, label, new Id(), new TreeSet<>());
 	}
+    */
 
-	public SchemaObject(Key key, String label, Id superId, Set<Id> ids) {
+	public SchemaObject(Key key, String label, Id superId, Set<Id> ids)
+    {
 		this.key = key;
 		this.label = label;
 		this.superId = superId;

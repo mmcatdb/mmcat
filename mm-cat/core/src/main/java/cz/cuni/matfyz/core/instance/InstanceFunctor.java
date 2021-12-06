@@ -19,11 +19,13 @@ public class InstanceFunctor
     
     public InstanceObject object(SchemaObject schemaObject)
     {
-        throw new UnsupportedOperationException(); // TODO
+        return instanceCategory.object(schemaObject.key());
+        //throw new UnsupportedOperationException(); // TODO
     }
     
     public InstanceMorphism morphism(SchemaMorphism schemaMorphism)
     {
-        throw new UnsupportedOperationException(); // TODO   
+        return instanceCategory.morphism(schemaMorphism.signature());
+        //throw new UnsupportedOperationException(); // TODO
     }
 }

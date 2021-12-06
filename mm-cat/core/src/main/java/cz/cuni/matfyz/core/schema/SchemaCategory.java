@@ -23,6 +23,11 @@ public class SchemaCategory implements Category
 		return morphisms.values();
 	}
     
+    public SchemaObject keyToObject(Key key)
+    {
+        return objects.get(key);
+    }
+    
     public SchemaMorphism signatureToMorphism(Signature signature)
     {
         return morphisms.get(signature);

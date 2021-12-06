@@ -19,18 +19,33 @@ public class Id implements Comparable<Id>
 
 	public Id(Set<Signature> signatures)
     {
+        assert signatures.size() > 0 : "Empty signature array passed to Id constructor.";
 		this.signatures = new TreeSet<>(signatures);
 	}
     
     public Id(Collection<Signature> signatures)
     {
+        assert signatures.size() > 0 : "Empty signature array passed to Id constructor.";
 		this.signatures = new TreeSet<>(signatures);
 	}
 
+    // There must be at least one signature
 	public Id(Signature... signatures)
     {
+        assert signatures.length > 0 : "Empty signature array passed to Id constructor.";
 		this.signatures = new TreeSet<>(List.of(signatures));
 	}
+    
+    private Id()
+    {
+        signatures = new TreeSet<>();
+    }
+    
+    public static Id Empty()
+    {
+        return new Id();
+    }
+            
 
 	@Override
 	public int compareTo(Id id)
@@ -49,5 +64,18 @@ public class Id implements Comparable<Id>
         }
         
         return 0;
+	}
+    
+    @Override
+	public String toString()
+    {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("(");
+        for (Signature signature : signatures.headSet(signatures.last()))
+            builder.append(signature).append(", ");
+        builder.append(signatures.last()).append(")");
+
+        return builder.toString();
 	}
 }

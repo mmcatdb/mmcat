@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.core.record;
 
+import cz.cuni.matfyz.core.category.Signature;
+
 import java.util.Objects;
 
 /**
@@ -9,7 +11,7 @@ import java.util.Objects;
 public class Name implements Comparable<Name>
 {
     private final String name;
-
+    private final Signature signature;
 	private final Type type;
 
 	public enum Type
@@ -19,10 +21,18 @@ public class Name implements Comparable<Name>
 		DYNAMIC_NAME
 	}
     
-    public Name(String name, Type type)
+    public Name(Signature signature)
+    {
+        name = "";
+        this.signature = signature;
+        type = Type.DYNAMIC_NAME;
+    }
+    
+    public Name(String name)
     {
         this.name = name;
-        this.type = type;
+        signature = null;
+        type = name == "" ? Type.ANONYMOUS : Type.STATIC_NAME;
     }
     
     public String getStringName() throws Exception
@@ -62,5 +72,16 @@ public class Name implements Comparable<Name>
     public int compareTo(Name anotherName)
     {
         return name.compareTo(anotherName.name);
+    }
+    
+    @Override
+	public String toString()
+    {
+        return switch (type)
+        {
+            case STATIC_NAME -> name;
+            case ANONYMOUS -> "_ANONYMOUS";
+            case DYNAMIC_NAME -> signature.toString();
+        };
     }
 }

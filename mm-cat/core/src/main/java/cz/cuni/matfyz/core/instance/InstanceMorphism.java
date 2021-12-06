@@ -64,9 +64,19 @@ public class InstanceMorphism implements Morphism
 		return schemaMorphism.signature();
 	}
 	
-	@Override
-	public String toString() {
-		return null;
-	}
+    @Override
+	public String toString()
+    {
+		StringBuilder builder = new StringBuilder();
 
+		builder.append("\tSignature: ").append(signature())
+                .append("\tDom: ").append(dom.key())
+                .append("\tCod: ").append(cod.key()).append("\n");
+        
+        builder.append("\tValues:\n");
+		for (ActiveMappingRow row : mappings)
+            builder.append("\t\t").append(row).append("\n");
+        
+        return builder.toString();
+	}
 }

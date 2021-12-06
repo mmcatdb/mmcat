@@ -35,4 +35,13 @@ public class ForestOfRecords implements Iterable<RootRecord> {
         records.add(record);
         //record.records().forEach(r -> quickAccess.put(r.getName(), r));
     }
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        for (RootRecord record : records)
+            builder.append(record).append("\n");
+        return builder.toString();
+    }
 }

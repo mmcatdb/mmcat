@@ -58,7 +58,19 @@ public class InstanceObject implements CategoricalObject
 	}
 	
 	@Override
-	public String toString() {
-		return null;
+	public String toString()
+    {
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("\tKey: ").append(key()).append("\n");
+        builder.append("\tValues:\n");
+		for (Id id : activeDomain.keySet())
+        {
+            var subdomain = activeDomain.get(id);
+            for (IdWithValues idWithValues : subdomain.keySet())
+                builder.append("\t\t").append(subdomain.get(idWithValues)).append("\n");
+        }
+        
+        return builder.toString();
 	}
 }

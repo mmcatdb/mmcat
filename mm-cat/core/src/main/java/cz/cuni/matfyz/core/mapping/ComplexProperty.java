@@ -19,6 +19,11 @@ public class ComplexProperty extends AccessPath implements IValue
         return signature;
     }
     
+    public boolean isAuxiliary()
+    {
+        return context() == null;
+    }
+    
     public Signature signature()
     {
         return signature;
@@ -60,6 +65,7 @@ public class ComplexProperty extends AccessPath implements IValue
      *      * L.context == M, or
      *      * L.value == M, or
      *      * exists an ancestor A of L in S where A.context == M.
+     * If there are more such subpaths (i.e. when some of them are auxiliary), the closest one is returned.
      * If M == null, a leaf L with L.value == epsion is returned.
      * If none of above exists, a null is returned;
      * @param signature
@@ -67,9 +73,55 @@ public class ComplexProperty extends AccessPath implements IValue
      */
 	public AccessPath getSubpathBySignature(Signature signature)
     {
+        if (context().equals(signature))
+            return this;
+        
+        // If M == null, a leaf L with L.value == epsion is returned.
+        if (signature == null)
+        {
+            for (AccessPath subpath : subpaths)
+                if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.value() == SimpleValue.Empty())
+                    return simpleProperty;
+            
+            for (AccessPath subpath : subpaths)
+                if (subpath instanceof ComplexProperty complexProperty)
+                {
+                    AccessPath result = complexProperty.getSubpathBySignature(null);
+                    if (result != null)
+                        return result;
+                }
+        }
+        
+        // If this is an auxiliary property, we must find if all of the descendats of this property have M in their contexts or values.
+        // If so, this is returned even if this context is null.
+        if (isAuxiliary())
+        {
+            boolean returnThis = true;
+            for (AccessPath subpath : subpaths)
+            {
+                if (!subpath.hasSignature(signature) && subpath instanceof ComplexProperty complexProperty)
+                    if (complexProperty.getSubpathBySignature(signature) != complexProperty)
+                    {
+                        returnThis = false;
+                        break;
+                    }
+            }
+            
+            if (returnThis)
+                return this;
+        }
+        
         for (AccessPath subpath : subpaths)
             if (subpath.hasSignature(signature))
                 return subpath;
+        
+        for (AccessPath subpath : subpaths)
+            if (subpath instanceof ComplexProperty complexProperty)
+            {
+                AccessPath result = complexProperty.getSubpathBySignature(signature);
+                if (result != null)
+                    return result;
+            }
         
         return null;
 	}
@@ -96,4 +148,22 @@ public class ComplexProperty extends AccessPath implements IValue
         
         return new ComplexProperty(name, signature, newSubpaths);
 	}
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder subpathBuilder = new StringBuilder();
+        for (AccessPath path : subpaths)
+            subpathBuilder.append(path);
+        String subpathResult = subpathBuilder.toString();
+        
+        StringBuilder builder = new StringBuilder();
+        builder.append("Name: ").append(name).append("\n")
+            .append("Signature (Context): ").append(signature).append("\n")
+            .append("Value:\n");
+        for (String line : subpathResult.lines().toList())
+            builder.append("\t").append(line).append("\n");
+        
+        return builder.toString();
+    }
 }

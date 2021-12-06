@@ -14,14 +14,8 @@ public class RootRecord extends ComplexRecord
     
 	public RootRecord()
     {
-        super(null, null, null);
+        super(null, null);
 	}
-    
-    @Override
-    protected RootRecord root()
-    {
-        return this;
-    }
     
     /*
     protected void register(SimpleRecord record)

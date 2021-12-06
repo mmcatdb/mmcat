@@ -19,3 +19,4 @@ experiment*.json
 /mm-cat/product/target/
 /mm-cat/transformations/nbproject/
 /mm-cat/wrappers/wrapper-dummy/target/
+/mm-cat/tests/target/

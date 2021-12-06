@@ -20,8 +20,16 @@ public class SimpleValue implements IValue
         this.signature = signature;
     }
     
-    public SimpleValue Empty()
+    private final static SimpleValue empty = new SimpleValue(Signature.Empty());
+    
+    public static SimpleValue Empty()
     {
-        return new SimpleValue(Signature.Empty());
+        return empty;
     }
+    
+    @Override
+	public String toString()
+    {
+        return signature.toString();
+	}
 }
