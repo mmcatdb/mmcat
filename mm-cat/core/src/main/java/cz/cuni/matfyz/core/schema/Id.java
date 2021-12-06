@@ -36,14 +36,9 @@ public class Id implements Comparable<Id>
 		this.signatures = new TreeSet<>(List.of(signatures));
 	}
     
-    private Id()
-    {
-        signatures = new TreeSet<>();
-    }
-    
     public static Id Empty()
     {
-        return new Id();
+        return new Id(Signature.Empty());
     }
             
 

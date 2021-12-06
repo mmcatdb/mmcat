@@ -14,7 +14,7 @@ public class ComplexRecord extends DataRecord
     //private final List<DataRecord> children = new ArrayList<>();
     //private final Map<Signature, Set<DataRecord>> children = new TreeMap<>();
     
-    private final Map<Signature, Set<ComplexRecord>> children = new TreeMap<>();
+    private final Map<Signature, List<ComplexRecord>> children = new TreeMap<>();
     private final Map<Signature, SimpleRecord> values = new TreeMap<>();
     
 	protected ComplexRecord(Name name, ComplexRecord parent)
@@ -22,7 +22,7 @@ public class ComplexRecord extends DataRecord
 		super(name, parent);
 	}
     
-    public Map<Signature, Set<ComplexRecord>> children()
+    public Map<Signature, List<ComplexRecord>> children()
     {
         return children;
     }
@@ -36,10 +36,10 @@ public class ComplexRecord extends DataRecord
     {
         ComplexRecord record = new ComplexRecord(name, this);
         
-        Set<ComplexRecord> childSet = children.get(signature);
+        List<ComplexRecord> childSet = children.get(signature);
         if (childSet == null)
         {
-            childSet = new TreeSet<>();
+            childSet = new ArrayList<>();
             children.put(signature, childSet);
         }
         

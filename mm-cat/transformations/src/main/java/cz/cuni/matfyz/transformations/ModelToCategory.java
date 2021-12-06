@@ -145,7 +145,7 @@ public class ModelToCategory
     {
         List<Pair<IdWithValues, ComplexRecord>> output = new ArrayList<>();
         
-        if (superId.compareTo(new Id(Signature.Empty())) == 0)
+        if (superId.compareTo(Id.Empty()) == 0)
         {
             SimpleRecord<String> childValue = parentRecord.values().get(morphism.signature());
             if (childValue != null)
@@ -303,7 +303,7 @@ public class ModelToCategory
         if (value instanceof SimpleValue simpleValue)
         {
             final Signature contextSignature = context instanceof Signature signature ? signature : Signature.Empty();
-            final Signature newSignature = Signature.combine(contextSignature, simpleValue.signature());
+            final Signature newSignature = simpleValue.signature().concatenate(contextSignature);
             
             return List.of(new Pair(newSignature, ComplexProperty.Empty()));
         }
