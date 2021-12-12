@@ -157,7 +157,7 @@ public class ModelToCategory
         }
         else
         {
-            Set<ComplexRecord> childRecords = parentRecord.children().get(morphism.signature());
+            List<ComplexRecord> childRecords = parentRecord.children().get(morphism.signature());
             if (childRecords != null)
                 for (ComplexRecord childRecord : childRecords)
                 {

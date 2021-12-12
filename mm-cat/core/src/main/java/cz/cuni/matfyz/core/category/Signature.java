@@ -157,6 +157,7 @@ public class Signature implements Comparable<Signature>, IContext
         if (!hasDualOfAsSuffix(signature))
             return null;
         
-        return new Signature(Arrays.copyOfRange(ids, 0, ids.length - signature.ids.length));
+        int length = ids.length - signature.ids.length;
+        return length == 0 ? Signature.Empty() : new Signature(Arrays.copyOfRange(ids, 0, length));
     }
 }

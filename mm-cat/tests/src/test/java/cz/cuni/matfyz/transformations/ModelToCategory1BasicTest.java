@@ -12,7 +12,7 @@ import java.util.*;
  *
  * @author jachymb.bartik
  */
-public class ModelToCategoryBasicTest extends ModelToCategoryBase
+public class ModelToCategory1BasicTest extends ModelToCategoryBase
 {
     private final Signature orderToId = new Signature(1);
     private final Signature orderToTotalPrice = new Signature(2);
@@ -81,24 +81,15 @@ public class ModelToCategoryBasicTest extends ModelToCategoryBase
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var idValue = new SimpleValue(orderToId);
         String idLabel = schema.keyToObject(idKey).label();
-        var id = new SimpleProperty(new Name(idLabel), idValue);
-        
-        var totalPriceValue = new SimpleValue(orderToTotalPrice);
         String totalPriceLabel = schema.keyToObject(totalPriceKey).label();
-        var totalPrice = new SimpleProperty(new Name(totalPriceLabel), totalPriceValue);
-        
-        var addressValue = new SimpleValue(orderToAddress);
         String addressLabel = schema.keyToObject(addressKey).label();
-        var address = new SimpleProperty(new Name(addressLabel), addressValue);
-        
         
         String orderLabel = schema.keyToObject(orderKey).label();
-        var order = new ComplexProperty(
-            new Name(orderLabel),
-            Signature.Empty(),
-            id, totalPrice, address
+        var order = new ComplexProperty(orderLabel, Signature.Empty(),
+            new SimpleProperty(idLabel, orderToId),
+            new SimpleProperty(totalPriceLabel, orderToTotalPrice),
+            new SimpleProperty(addressLabel, orderToAddress)
         );
         
         System.out.println("# Access Path");
@@ -110,7 +101,7 @@ public class ModelToCategoryBasicTest extends ModelToCategoryBase
 	protected ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception
     {
 		DummyPullWrapper wrapper = new DummyPullWrapper();
-		ForestOfRecords forest = wrapper.pullForest("basicTest.json", path);
+		ForestOfRecords forest = wrapper.pullForest("1BasicTest.json", path);
         
         System.out.println("# Forest of Records");
 		System.out.println(forest);

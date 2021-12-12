@@ -1,0 +1,16 @@
+[
+    {
+        "number": 2043,
+        "nested": {
+            "propertyA": "hodnotaA",
+            "propertyB": null
+        }
+    },
+    {
+        "number": 1653,
+        "nested": {
+            "propertyA": "hodnotaA2",
+            "propertyC": "hodnotaC2"
+        }
+    }
+]

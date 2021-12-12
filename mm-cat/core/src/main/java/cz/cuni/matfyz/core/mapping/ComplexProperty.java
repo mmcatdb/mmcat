@@ -55,6 +55,16 @@ public class ComplexProperty extends AccessPath implements IValue
         this(name, signature, Arrays.asList(subpaths));
     }
     
+    public ComplexProperty(String name, Signature signature, AccessPath... subpaths)
+    {
+        this(new Name(name), signature, Arrays.asList(subpaths));
+    }
+    
+    public ComplexProperty(Signature name, Signature signature, AccessPath... subpaths)
+    {
+        this(new Name(name), signature, Arrays.asList(subpaths));
+    }
+    
     public static ComplexProperty Empty()
     {
         return new ComplexProperty(null, null, Collections.EMPTY_LIST);
@@ -153,16 +163,25 @@ public class ComplexProperty extends AccessPath implements IValue
     public String toString()
     {
         StringBuilder subpathBuilder = new StringBuilder();
-        for (AccessPath path : subpaths)
-            subpathBuilder.append(path);
+        
+        if (subpaths.size() > 0)
+            subpathBuilder.append(subpaths.get(0));
+            
+        for (int i = 1; i < subpaths.size(); i++)
+            subpathBuilder.append(",\n").append(subpaths.get(i));
+        subpathBuilder.append("\n");
         String subpathResult = subpathBuilder.toString();
         
         StringBuilder builder = new StringBuilder();
-        builder.append("Name: ").append(name).append("\n")
-            .append("Signature (Context): ").append(signature).append("\n")
-            .append("Value:\n");
+        builder.append(name).append(": ");
+        if (!isAuxiliary())
+            builder.append(context()).append(" ");
+        builder.append("{\n");
+        
         for (String line : subpathResult.lines().toList())
             builder.append("\t").append(line).append("\n");
+        
+        builder.append("}");
         
         return builder.toString();
     }

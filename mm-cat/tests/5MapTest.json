@@ -1,0 +1,16 @@
+[
+    {
+    "number": 2043,
+    "contact": {
+        "email": "anna@seznam.cz",
+        "cellphone": "+420777123456"
+        }
+    },
+    {
+        "number": 1653,
+        "contact": {
+            "skype": "skype123",
+            "cellphone": "+420123456789"
+        }
+    }
+]

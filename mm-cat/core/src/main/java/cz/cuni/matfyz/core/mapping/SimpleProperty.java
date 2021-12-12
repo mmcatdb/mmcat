@@ -29,6 +29,16 @@ public class SimpleProperty extends AccessPath
         this.value = value;
     }
     
+    public SimpleProperty(String name, Signature value)
+    {
+        this(new Name(name), new SimpleValue(value));
+    }
+    
+    public SimpleProperty(Signature name, Signature value)
+    {
+        this(new Name(name), new SimpleValue(value));
+    }
+    
     @Override
     protected boolean hasSignature(Signature signature)
     {
@@ -42,9 +52,7 @@ public class SimpleProperty extends AccessPath
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
-        builder.append("(Name: \"").append(name)
-            .append("\",\tContext: \"").append(context())
-            .append("\",\tValue: \"").append(value).append("\")\n");
+        builder.append(name).append(": ").append(value);
         
         return builder.toString();
     }
