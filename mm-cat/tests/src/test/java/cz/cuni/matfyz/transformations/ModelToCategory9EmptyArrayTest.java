@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.transformations;
 
+import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 
@@ -20,7 +21,7 @@ public class ModelToCategory9EmptyArrayTest extends ModelToCategoryExtendedBase
     {
         SchemaCategory schema = new SchemaCategory();
         var order = buildOrder(schema);
-        addItems(schema, order);
+        addItems(schema, order, schema.keyToObject(numberKey));
         
         System.out.println("# Schema Category");
 		System.out.println(schema);
@@ -30,7 +31,7 @@ public class ModelToCategory9EmptyArrayTest extends ModelToCategoryExtendedBase
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var orderProperty = new ComplexProperty("", null,
+        var orderProperty = new ComplexProperty("", Signature.Null(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("items", orderToItems,
                 new SimpleProperty("productId", itemsToProduct.concatenate(productToPid)),

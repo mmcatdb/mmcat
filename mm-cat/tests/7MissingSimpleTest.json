@@ -3,7 +3,8 @@
         "number": 2043,
         "nested": {
             "propertyA": "hodnotaA",
-            "propertyB": null
+            "propertyB": null,
+            "propertyC": "hodnotaC2"
         }
     },
     {

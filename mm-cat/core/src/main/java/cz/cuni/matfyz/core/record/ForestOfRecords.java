@@ -40,8 +40,15 @@ public class ForestOfRecords implements Iterable<RootRecord> {
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
+        String comma = "";
         for (RootRecord record : records)
-            builder.append(record).append("\n");
+        {
+            builder.append(comma);
+            comma = ",\n";
+            builder.append(record);
+        }
+        builder.append("\n");
+        
         return builder.toString();
     }
 }

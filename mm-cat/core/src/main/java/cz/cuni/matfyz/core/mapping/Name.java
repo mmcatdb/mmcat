@@ -55,13 +55,13 @@ public class Name
         */
 	}
     
-    public cz.cuni.matfyz.core.record.Name toRecordName()
+    public cz.cuni.matfyz.core.record.Name toRecordName(String dynamicNameValue)
     {
         return switch (type)
         {
             case STATIC_NAME -> new cz.cuni.matfyz.core.record.Name(name);
             case ANONYMOUS -> new cz.cuni.matfyz.core.record.Name("");
-            case DYNAMIC_NAME -> new cz.cuni.matfyz.core.record.Name(signature);
+            case DYNAMIC_NAME -> new cz.cuni.matfyz.core.record.Name(signature, dynamicNameValue);
         };
     }
     

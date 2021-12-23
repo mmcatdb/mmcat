@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.core.record;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.utils.*;
 
 import java.util.*;
 
@@ -48,10 +49,18 @@ public class ComplexRecord extends DataRecord
         return record;
     }
     
-    public <DataType> SimpleRecord<DataType> addSimpleRecord(Name name, DataType value, Signature signature)
+    public <DataType> SimpleRecord<DataType> addSimpleValueRecord(Name name, Signature signature, DataType value)
     {
-        SimpleRecord record = new SimpleRecord(name, this, value, signature);
+        SimpleRecord record = new SimpleValueRecord(name, this, signature, value);
         values.put(signature, record);
+        
+        return record;
+    }
+    
+    public <DataType> SimpleRecord<DataType> addSimpleArrayRecord(Name name, Signature signature, List<DataType> values)
+    {
+        SimpleRecord record = new SimpleArrayRecord(name, this, signature, values);
+        this.values.put(signature, record);
         
         return record;
     }
@@ -70,20 +79,43 @@ public class ComplexRecord extends DataRecord
     @Override
     public String toString()
     {
-        StringBuilder childrenBuilder = new StringBuilder();
-        for (Signature signature : children.keySet())
-            childrenBuilder.append(children.get(signature));
-        String childrenResult = childrenBuilder.toString();
-        
         StringBuilder builder = new StringBuilder();
-        builder.append("Name: ").append(name).append("\n")
-            .append("Simple values:\n");
-        for (Signature signature : values.keySet())
-            builder.append("\t").append(values.get(signature));
+        builder.append("{\n");
         
-        builder.append("Complex values:\n");
-        for (String line : childrenResult.lines().toList())
-            builder.append("\t").append(line).append("\n");
+        var childrenBuilder = new IntendedStringBuilder(1);
+        for (Signature signature : values.keySet())
+            childrenBuilder.append(values.get(signature)).append(",\n");
+        for (Signature signature : children.keySet())
+        {
+            List<ComplexRecord> list = children.get(signature);
+            ComplexRecord firstItem = list.get(0);
+            
+            childrenBuilder.append(firstItem.name).append(": ");
+            if (list.size() > 1)
+            {
+                childrenBuilder.append("[\n");
+            
+                var innerBuilder = new IntendedStringBuilder(1);
+                innerBuilder.append(firstItem);
+                for (int i = 1; i < list.size(); i++)
+                    innerBuilder.append(",\n").append(list.get(i));
+
+                childrenBuilder.append(innerBuilder);
+                if (list.size() > 1)
+                    childrenBuilder.append("]");
+            }
+            else
+            {
+                childrenBuilder.append(firstItem);
+            }
+            
+            childrenBuilder.append(",\n");
+        }
+        String childrenResult = childrenBuilder.toString();
+        childrenResult = childrenResult.substring(0, childrenResult.length() - 2);
+        
+        builder.append(childrenResult);
+        builder.append("\n}");
         
         return builder.toString();
     }

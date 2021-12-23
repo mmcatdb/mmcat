@@ -2,8 +2,9 @@ package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.mapping.AccessPath;
-import cz.cuni.matfyz.core.record.*;
+import cz.cuni.matfyz.core.mapping.*;
+import cz.cuni.matfyz.core.record.ComplexRecord;
+import cz.cuni.matfyz.core.utils.*;
 
 /**
  *
@@ -29,5 +30,20 @@ public class StackTriple {
         this.mS = mS;
         this.t = t;
         this.record = record;
+    }
+    
+    @Override
+    public String toString()
+    {
+        var innerBuilder = new IntendedStringBuilder(1);
+        innerBuilder.append("mS: ").append(mS.signature()).append(",\n");
+        innerBuilder.append("pid: ").append(pid).append(",\n");
+        innerBuilder.append("t: ").append(t).append(",\n");
+        innerBuilder.append("record: ").append(record);
+        
+        StringBuilder builder = new StringBuilder();
+        builder.append("<\n").append(innerBuilder).append(">");
+        
+        return builder.toString();
     }
 }

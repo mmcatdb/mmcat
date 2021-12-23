@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.utils.*;
 
 import java.util.*;
 
@@ -21,7 +22,7 @@ public class ComplexProperty extends AccessPath implements IValue
     
     public boolean isAuxiliary()
     {
-        return context() == null;
+        return context().equals(Signature.Null());
     }
     
     public Signature signature()
@@ -162,26 +163,20 @@ public class ComplexProperty extends AccessPath implements IValue
     @Override
     public String toString()
     {
-        StringBuilder subpathBuilder = new StringBuilder();
+        var subpathBuilder = new IntendedStringBuilder(1);
         
         if (subpaths.size() > 0)
             subpathBuilder.append(subpaths.get(0));
-            
         for (int i = 1; i < subpaths.size(); i++)
             subpathBuilder.append(",\n").append(subpaths.get(i));
         subpathBuilder.append("\n");
-        String subpathResult = subpathBuilder.toString();
         
         StringBuilder builder = new StringBuilder();
         builder.append(name).append(": ");
         if (!isAuxiliary())
             builder.append(context()).append(" ");
-        builder.append("{\n");
         
-        for (String line : subpathResult.lines().toList())
-            builder.append("\t").append(line).append("\n");
-        
-        builder.append("}");
+        builder.append("{\n").append(subpathBuilder).append("}");
         
         return builder.toString();
     }

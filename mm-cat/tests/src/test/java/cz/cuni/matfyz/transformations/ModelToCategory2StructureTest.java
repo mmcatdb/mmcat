@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.transformations;
 
+import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 
@@ -30,7 +31,7 @@ public class ModelToCategory2StructureTest extends ModelToCategoryExtendedBase
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var orderProperty = new ComplexProperty("", null,
+        var orderProperty = new ComplexProperty("", Signature.Null(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("nested", orderToNestedDoc,
                 new SimpleProperty("propertyA", nestedDocToPropertyA),

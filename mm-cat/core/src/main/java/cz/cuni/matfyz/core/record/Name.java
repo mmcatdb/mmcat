@@ -13,7 +13,7 @@ public class Name implements Comparable<Name>
     private final String name;
     private final Signature signature;
 	private final Type type;
-
+    
 	public enum Type
     {
 		STATIC_NAME,
@@ -21,9 +21,9 @@ public class Name implements Comparable<Name>
 		DYNAMIC_NAME
 	}
     
-    public Name(Signature signature)
+    public Name(Signature signature, String name)
     {
-        name = "";
+        this.name = name;
         this.signature = signature;
         type = Type.DYNAMIC_NAME;
     }
@@ -81,7 +81,7 @@ public class Name implements Comparable<Name>
         {
             case STATIC_NAME -> name;
             case ANONYMOUS -> "_ANONYMOUS";
-            case DYNAMIC_NAME -> signature.toString();
+            case DYNAMIC_NAME -> "\"" + name + "\"";
         };
     }
 }

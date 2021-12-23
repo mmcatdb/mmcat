@@ -95,7 +95,7 @@ public class DummyPullWrapper implements AbstractPullWrapper
     
     private void getFieldWithKeyForSubpathFromObject(ComplexRecord parentRecord, JSONObject object, String key, AccessPath subpath) throws Exception
     {
-        var value = object.get(key);
+        var value = object.get(key); // TODO nejdřív se zeptat, jestli to tam je, a potom až se ptát na hodnotu
         //Object value = (object == null || !object.has(stringName)) ? null : object.get(stringName);
         
         if (subpath instanceof ComplexProperty complexProperty)
@@ -103,24 +103,38 @@ public class DummyPullWrapper implements AbstractPullWrapper
             if (value instanceof JSONArray childArray)
             {
                 for (int i = 0; i < childArray.length(); i++)
-                    addComplexValueToRecord(parentRecord, childArray.getJSONObject(i), complexProperty);
+                    addComplexValueToRecord(parentRecord, childArray.getJSONObject(i), key, complexProperty);
             }
             else if (value instanceof JSONObject childObject)
-                addComplexValueToRecord(parentRecord, childObject, complexProperty);
+                addComplexValueToRecord(parentRecord, childObject, key, complexProperty);
         }
         else if (subpath instanceof SimpleProperty simpleProperty)
-            parentRecord.addSimpleRecord(simpleProperty.name().toRecordName(), value.toString(), simpleProperty.value().signature());
+        {
+            if (value instanceof JSONArray simpleArray)
+            {
+                var values = new ArrayList<String>();
+                
+                for (int i = 0; i < simpleArray.length(); i++)
+                    values.add(simpleArray.get(i).toString());
+                    
+                parentRecord.addSimpleArrayRecord(simpleProperty.name().toRecordName(key), simpleProperty.value().signature(), values);
+            }
+            else
+                parentRecord.addSimpleValueRecord(simpleProperty.name().toRecordName(key), simpleProperty.value().signature(), value.toString());
+        }
     }
     
-    private void addComplexValueToRecord(ComplexRecord parentRecord, JSONObject value, ComplexProperty complexProperty) throws Exception
+    private void addComplexValueToRecord(ComplexRecord parentRecord, JSONObject value, String key, ComplexProperty complexProperty) throws Exception
     {
         // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
         // We do so by passing the parent record instead of creating a new one.
+        System.out.println("AUX: ");
+        System.out.println(complexProperty.isAuxiliary());
         if (complexProperty.isAuxiliary())
             getDataFromObject(parentRecord, value, complexProperty);
         else
         {
-            ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.name().toRecordName(), complexProperty.signature());
+            ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.name().toRecordName(key), complexProperty.signature());
             getDataFromObject(childRecord, value, complexProperty);
         }
     }

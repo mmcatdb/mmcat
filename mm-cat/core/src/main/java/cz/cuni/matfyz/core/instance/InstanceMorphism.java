@@ -3,6 +3,7 @@ package cz.cuni.matfyz.core.instance;
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
+
 import java.util.*;
 
 /**
@@ -67,7 +68,7 @@ public class InstanceMorphism implements Morphism
     @Override
 	public String toString()
     {
-		StringBuilder builder = new StringBuilder();
+		var builder = new StringBuilder();
 
 		builder.append("\tSignature: ").append(signature())
                 .append("\tDom: ").append(dom.key())

@@ -46,6 +46,11 @@ public class Signature implements Comparable<Signature>, IContext
         return new Signature();
     }
     
+    public static Signature Null()
+    {
+        return new Signature(-Integer.MAX_VALUE); // TODO edit
+    }
+    
     /*
     public static Signature combine(Signature a, Signature b)
     {
@@ -88,7 +93,7 @@ public class Signature implements Comparable<Signature>, IContext
         
         builder.append(ids[0]);
         for (int i = 1; i < ids.length; i++)
-            builder.append(", ").append(ids[i]);
+            builder.append(".").append(ids[i]);
             
         return builder.toString();
 	}

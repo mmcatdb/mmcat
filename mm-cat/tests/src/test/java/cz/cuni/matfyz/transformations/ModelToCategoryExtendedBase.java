@@ -59,6 +59,8 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
     
     protected final Signature itemsToNumber = orderToItems.dual().concatenate(orderToNumber);
     protected final Signature itemsToPid = itemsToProduct.concatenate(productToPid);
+    protected final Signature itemsToPname = itemsToProduct.concatenate(productToPname);
+    protected final Signature itemsToPrice = itemsToProduct.concatenate(productToPrice);
     
     protected final Signature contactToNumber = orderToContact.dual().concatenate(orderToNumber);
     protected final Signature contactToName = contactToType.concatenate(typeToName);
@@ -86,7 +88,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         return order;
     }
     
-    protected void addItems(SchemaCategory schema, SchemaObject order)
+    protected void addItems(SchemaCategory schema, SchemaObject order, SchemaObject number)
     {
         var items = createSchemaObject(
             itemsKey,
@@ -95,6 +97,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         );
         schema.addObject(items);
         addMorphismWithDual(schema, orderToItems, order, items);
+        addMorphismWithDual(schema, itemsToNumber, items, number);
         
         var quantity = createSchemaObject(
             quantityKey,
@@ -111,7 +114,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         );
         schema.addObject(product);
         addMorphismWithDual(schema, itemsToProduct, items, product);
-
+        
         var pid = createSchemaObject(
             pidKey,
             "Id",
@@ -119,6 +122,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         );
         schema.addObject(pid);
         addMorphismWithDual(schema, productToPid, product, pid);
+        addMorphismWithDual(schema, itemsToPid, items, pid);
 
         var price = createSchemaObject(
             priceKey,
@@ -127,6 +131,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         );
         schema.addObject(price);
         addMorphismWithDual(schema, productToPrice, product, price);
+        addMorphismWithDual(schema, itemsToPrice, items, price);
 
         var pname = createSchemaObject(
             pnameKey,
@@ -135,6 +140,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         );
         schema.addObject(pname);
         addMorphismWithDual(schema, productToPname, product, pname);
+        addMorphismWithDual(schema, itemsToPname, items, pname);
     }
     
     protected void addContact(SchemaCategory schema, SchemaObject order)

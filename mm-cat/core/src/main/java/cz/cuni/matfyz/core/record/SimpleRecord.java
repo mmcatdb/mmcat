@@ -10,22 +10,24 @@ import java.util.Set;
  * @author jachymb.bartik
  * @param <DataType> a type of the value of this property.
  */
-public class SimpleRecord<DataType> extends DataRecord
+public abstract class SimpleRecord<DataType> extends DataRecord
 {
-	private final DataType value;
-    private final Signature signature;
+//	private final DataType value;
+    protected final Signature signature;
     
-    SimpleRecord(Name name, ComplexRecord parent, DataType value, Signature signature)
+//    SimpleRecord(Name name, ComplexRecord parent, DataType value, Signature signature)
+    SimpleRecord(Name name, ComplexRecord parent, Signature signature)
     {
         super(name, parent);
-        this.value = value;
         this.signature = signature;
     }
 	
+    /*
     public DataType getValue()
     {
         return value;
     }
+    */
     
     public Signature signature()
     {
@@ -40,6 +42,7 @@ public class SimpleRecord<DataType> extends DataRecord
     }
     */
     
+    /*
     @Override
     public String toString()
     {
@@ -49,4 +52,5 @@ public class SimpleRecord<DataType> extends DataRecord
         
         return builder.toString();
     }
+*/
 }

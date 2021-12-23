@@ -64,6 +64,8 @@ public abstract class ModelToCategoryBase
 		
 		// budeme potrebovat equals a toString metody nad vsemi tridami - schema/instance category, forestOfRecords, record, ...
 //		fail("The test case is a prototype.");
+        
+        
 	}
 
     protected abstract SchemaCategory buildSchemaCategoryScenario();

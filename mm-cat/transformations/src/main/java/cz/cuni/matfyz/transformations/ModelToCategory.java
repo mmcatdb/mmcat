@@ -4,6 +4,8 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.RootRecord;
 import cz.cuni.matfyz.core.record.ComplexRecord;
 import cz.cuni.matfyz.core.record.SimpleRecord;
+import cz.cuni.matfyz.core.record.SimpleValueRecord;
+import cz.cuni.matfyz.core.record.SimpleArrayRecord;
 import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
@@ -40,7 +42,7 @@ public class ModelToCategory
         System.out.println("# ALGORITHM");
         for (RootRecord rootRecord : forest)
         {
-            System.out.println("# Process of Root Record");
+            System.out.println("################ Process of Root Record ################");
 			// preparation phase
 			Stack<StackTriple> M = mapping.hasRootMorphism() ?
                 createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord) : // K with root morphism
@@ -63,13 +65,13 @@ public class ModelToCategory
         ActiveDomainRow row = modify(qI, sid);
         addPathChildrenToStack(M, mapping.accessPath(), row, record);
         
-        System.out.println("# End: " + M.size());
+        System.out.println("# Stack size: " + M.size());
         return M;
     }
     
     private Stack<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord record)
     {
-        System.out.println("# Create Stack With Morphism");
+        System.out.println("#### Create Stack With Morphism ####");
         
         Stack<StackTriple> M = new Stack<>();
         
@@ -102,7 +104,8 @@ public class ModelToCategory
     
     private void processTopOfStack(Stack<StackTriple> M)
     {
-        System.out.println("# Process Top of Stack");
+        System.out.println("#### Process Top of Stack ####");
+        printStack(M);
         
         StackTriple triple = M.pop();
         InstanceMorphism mI = instanceFunctor.morphism(triple.mS);
@@ -119,7 +122,19 @@ public class ModelToCategory
             
             addPathChildrenToStack(M, triple.t, row, sid.getValue1());
         }
-        System.out.println("# End, Stack size: " + M.size());
+    }
+    
+    private void printStack(Stack<StackTriple> M)
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("\nSize: ").append(M.size());
+        
+        var array = M.toArray();
+        for (int i = array.length - 1; i >= 0; i--)
+            builder.append("\n").append(array[i]);
+        builder.append("\n");
+        
+        System.out.println(builder.toString());
     }
 
     // Fetch id with values for given record
@@ -130,9 +145,20 @@ public class ModelToCategory
         
         for (Signature signature : superId.signatures())
         {
+            /*
             Object value = rootRecord.values().get(signature).getValue();
             if (value instanceof String stringValue)
                 builder.add(signature, stringValue);
+            */
+            SimpleRecord<String> simpleRecord = rootRecord.values().get(signature);
+            if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+            {
+                builder.add(signature, simpleValueRecord.getValue());
+            }
+            else
+            {
+                throw new UnsupportedOperationException("FetchSid doesn't support array values.");
+            }
         }
         
         return builder.build();
@@ -147,12 +173,42 @@ public class ModelToCategory
         
         if (superId.compareTo(Id.Empty()) == 0)
         {
-            SimpleRecord<String> childValue = parentRecord.values().get(morphism.signature());
-            if (childValue != null)
+            // Pokud je v recordu hodnota - což odpovídá simple property
+            SimpleRecord<String> simpleRecord = parentRecord.values().get(morphism.signature());
+            if (simpleRecord != null)
             {
-                var builder = new IdWithValues.Builder();
-                builder.add(Signature.Empty(), childValue.getValue());
-                output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
+                if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+                {
+                    var builder = new IdWithValues.Builder();
+                    builder.add(Signature.Empty(), simpleValueRecord.getValue());
+                    output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
+                }
+                else if (simpleRecord instanceof SimpleArrayRecord<String> simpleArrayRecord)
+                {
+                    for (String value : simpleArrayRecord.getValues())
+                    {
+                        var builder = new IdWithValues.Builder();
+                        builder.add(Signature.Empty(), value);
+                        output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
+                    }
+                }
+                else
+                {
+                    throw new UnsupportedOperationException("Simple record must be either SimpleValueRecord<String> or SimpleArrayRecord<String>.");
+                }
+            }
+            else
+            {
+                // Pokud tu není hodnota, je potřeba vrátit nějakou unikátní hodnotu
+                    // - 
+                List<ComplexRecord> childRecords = parentRecord.children().get(morphism.signature());
+                if (childRecords != null)
+                    for (ComplexRecord childRecord : childRecords)
+                    {
+                        var builder = new IdWithValues.Builder();
+                        builder.add(Signature.Empty(), UniqueIdProvider.getNext());
+                        output.add(new Pair<>(builder.build(), childRecord));
+                    }
             }
         }
         else
@@ -167,8 +223,18 @@ public class ModelToCategory
                         var signatureInParentRow = signature.traverseThrough(morphism.signature());
 
                         // Why java still doesn't support output arguments?
-                        String value = signatureInParentRow != null ? parentRow.tuples().get(signatureInParentRow)
-                            : (String) childRecord.values().get(signature).getValue();
+                        String value;
+                        if (signatureInParentRow == null)
+                        {
+                            SimpleRecord<String> simpleRecord = childRecord.values().get(signature);
+                            if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+                                value = simpleValueRecord.getValue();
+                            else
+                                // Opravit pro dynamické pole
+                                throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
+                        }
+                        else
+                            value = parentRow.tuples().get(signatureInParentRow);
 
                         builder.add(signature, value);
                     }
@@ -257,9 +323,11 @@ public class ModelToCategory
     //private static void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, ComplexRecord record)
     {
         if (path instanceof ComplexProperty complexPath)
-            for (Pair<Signature, ComplexProperty> child : children(complexPath))
+            for (Pair<Signature, ComplexProperty> child: children(complexPath))
             {
                 // TODO signature to schema morphism
+                System.out.println("$$$ Signature: ");
+                System.out.println(child.getValue(0));
                 SchemaMorphism morphism = schema.signatureToMorphism(child.getValue0());
                 stack.push(new StackTriple(sid, morphism, child.getValue1(), record));
             }
@@ -275,7 +343,7 @@ public class ModelToCategory
     {
         final List<Pair<Signature, ComplexProperty>> output = new ArrayList<>();
         
-        for (AccessPath subpath : complexProperty.subpaths())
+        for (AccessPath subpath: complexProperty.subpaths())
         {
             output.addAll(process(subpath.name()));
             output.addAll(process(subpath.context(), subpath.value()));
