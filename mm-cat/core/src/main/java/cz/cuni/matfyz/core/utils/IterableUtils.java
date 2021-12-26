@@ -23,9 +23,35 @@ public class IterableUtils
         Iterator<TypeA> iteratorA = a.iterator();
         Iterator<TypeB> iteratorB = b.iterator();
         
-        while(iteratorA.hasNext() && iteratorB.hasNext())
+        while (iteratorA.hasNext() && iteratorB.hasNext())
             action.accept(iteratorA.next(), iteratorB.next());
         
-        return iteratorA.hasNext() || iteratorB.hasNext();
+        return !iteratorA.hasNext() && !iteratorB.hasNext();
+    }
+    
+    /**
+     * Iterate through two iterables and call function on values with same indices. If the function returns false, the iteration is stopped.
+     * Returns if both of the iterables have same length and if the function didn't return false.
+     * @param <TypeA>
+     * @param <TypeB>
+     * @param a
+     * @param b
+     * @param continueFunction
+     * @return 
+     */
+    public static <TypeA, TypeB> boolean iterateTwo(Iterable<TypeA> a, Iterable<TypeB> b, BiPredicate<TypeA, TypeB> continueFunction)
+    {
+        Iterator<TypeA> iteratorA = a.iterator();
+        Iterator<TypeB> iteratorB = b.iterator();
+        
+        boolean result = true;
+        while (iteratorA.hasNext() && iteratorB.hasNext())
+            if (!continueFunction.test(iteratorA.next(), iteratorB.next()))
+            {
+                result = false;
+                break;
+            }
+        
+        return result && !iteratorA.hasNext() && !iteratorB.hasNext();
     }
 }

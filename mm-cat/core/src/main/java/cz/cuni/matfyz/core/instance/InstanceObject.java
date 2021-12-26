@@ -73,4 +73,47 @@ public class InstanceObject implements CategoricalObject
         
         return builder.toString();
 	}
+    
+    @Override
+    public boolean equals(Object object)
+    {
+        return object instanceof InstanceObject instanceObject ? equals(instanceObject) : false;
+    }
+    
+    public boolean equals(InstanceObject object)
+    {
+        if (object == null)
+            return false;
+        
+        if (!activeDomain.equals(object.activeDomain))
+            System.out.println("INSTANCE OBJECTS NOT EQUAL");
+        
+        return activeDomain.equals(object.activeDomain);
+    }  
+    /*
+        if (activeDomain.keySet().size() != object.activeDomain.keySet().size())
+            return false;
+        
+        for (Id id : activeDomain.keySet())
+            if (!innerMapEquals(activeDomain.get(id), object.activeDomain.get(id)))
+                return false;
+        
+        return true;
+    }
+    
+    private boolean innerMapEquals(Map<IdWithValues, ActiveDomainRow> map, Map<IdWithValues, ActiveDomainRow> otherMap)
+    {
+        if (map == null || otherMap == null)
+            return false;
+        
+        if (map.keySet().size() != otherMap.keySet().size())
+            return false;
+        
+        for (IdWithValues id : map.keySet())
+            if (map.get(id) != otherMap.get(id))
+                return false;
+        
+        return true;
+    }
+    */
 }

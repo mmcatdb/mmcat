@@ -3,7 +3,9 @@ package cz.cuni.matfyz.transformations;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.*;
+import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.category.*;
+import cz.cuni.matfyz.core.utils.Debug;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 
 import java.util.*;
@@ -73,8 +75,6 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
         schema.addMorphism(orderToAddressMorphism);
         schema.addMorphism(orderToAddressMorphism.createDual(SchemaMorphism.Min.ZERO, SchemaMorphism.Max.STAR));
         
-        System.out.println("# Schema Category");
-		System.out.println(schema);
 		return schema;
     }
 
@@ -92,8 +92,6 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
             new SimpleProperty(addressLabel, orderToAddress)
         );
         
-        System.out.println("# Access Path");
-		System.out.println(order);
 		return order;
 	}
 
@@ -103,8 +101,6 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
 		DummyPullWrapper wrapper = new DummyPullWrapper();
 		ForestOfRecords forest = wrapper.pullForest("1BasicTest.json", path);
         
-        System.out.println("# Forest of Records");
-		System.out.println(forest);
 		return forest;
 	}
 	
@@ -113,4 +109,31 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
     {
 		return new Mapping(schema.keyToObject(orderKey), path);
 	}
+    
+    @Override
+    protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema)
+    {
+        InstanceCategory instance = buildInstanceScenario(schema);
+        var builder = new SimpleInstanceCategoryBuilder(instance);
+        
+        var order1 = builder.value(orderToId, "1").object(orderKey);
+        var order_id1 = builder.value(Signature.Empty(), "1").object(idKey);
+        var order_totalPrice1 = builder.value(Signature.Empty(), "20").object(totalPriceKey);
+        var order_address1 = builder.value(Signature.Empty(), "Street No., ZIP City").object(addressKey);
+        
+        builder.morphism(orderToId, order1, order_id1);
+        builder.morphism(orderToTotalPrice, order1, order_totalPrice1);
+        builder.morphism(orderToAddress, order1, order_address1);
+        
+        var order2 = builder.value(orderToId, "2").object(orderKey);
+        var order_id2 = builder.value(Signature.Empty(), "2").object(idKey);
+        var order_totalPrice2 = builder.value(Signature.Empty(), "40").object(totalPriceKey);
+        var order_address2 = builder.value(Signature.Empty(), "Another address").object(addressKey);
+        
+        builder.morphism(orderToId, order2, order_id2);
+        builder.morphism(orderToTotalPrice, order2, order_totalPrice2);
+        builder.morphism(orderToAddress, order2, order_address2);
+        
+        return instance;
+    }
 }

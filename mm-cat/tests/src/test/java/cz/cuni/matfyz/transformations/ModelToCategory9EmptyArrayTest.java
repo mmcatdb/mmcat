@@ -23,8 +23,6 @@ public class ModelToCategory9EmptyArrayTest extends ModelToCategoryExtendedBase
         var order = buildOrder(schema);
         addItems(schema, order, schema.keyToObject(numberKey));
         
-        System.out.println("# Schema Category");
-		System.out.println(schema);
 		return schema;
     }
 
@@ -41,8 +39,6 @@ public class ModelToCategory9EmptyArrayTest extends ModelToCategoryExtendedBase
             )
         );
         
-        System.out.println("# Access Path");
-		System.out.println(orderProperty);
         return orderProperty;
 	}
 }

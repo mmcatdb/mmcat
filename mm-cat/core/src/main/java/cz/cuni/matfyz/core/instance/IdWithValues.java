@@ -45,9 +45,10 @@ public class IdWithValues implements Comparable<IdWithValues>
     {
         private Map<Signature, String> map = new TreeMap<>();
 
-        public void add(Signature signature, String value)
+        public Builder add(Signature signature, String value)
         {
             map.put(signature, value);
+            return this;
         }
 
         public IdWithValues build()

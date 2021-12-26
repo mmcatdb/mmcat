@@ -100,7 +100,7 @@ public class Signature implements Comparable<Signature>, IContext
     
     public boolean equals(Signature signature)
     {
-        return compareTo(signature) == 0;
+        return signature != null ? compareTo(signature) == 0 : false;
     }
     
     @Override

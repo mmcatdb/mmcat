@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 
@@ -23,8 +24,6 @@ public class ModelToCategory4ComplexArrayTest extends ModelToCategoryExtendedBas
         var order = buildOrder(schema);
         addItems(schema, order, schema.keyToObject(numberKey));
         
-        System.out.println("# Schema Category");
-		System.out.println(schema);
 		return schema;
     }
 
@@ -41,8 +40,53 @@ public class ModelToCategory4ComplexArrayTest extends ModelToCategoryExtendedBas
             )
         );
         
-        System.out.println("# Access Path");
-		System.out.println(orderProperty);
         return orderProperty;
 	}
+    
+    @Override
+    protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema)
+    {
+        InstanceCategory instance = buildInstanceScenario(schema);
+        var builder = new SimpleInstanceCategoryBuilder(instance);
+        
+        var order1 = builder.value(orderToNumber, "2043").object(orderKey);
+        var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
+        builder.morphism(orderToNumber, order1, number1);
+        
+        var items1 = buildExpectedItemInstance(builder, "123", "Toy", "125", "1");
+        var items2 = buildExpectedItemInstance(builder, "765", "Book", "199", "2");
+        var items3 = buildExpectedItemInstance(builder, "457", "Knife", "299", "7");
+        var items4 = buildExpectedItemInstance(builder, "734", "Doll", "350", "3");
+        
+        builder.morphism(orderToItems, order1, items1);
+        builder.morphism(orderToItems, order1, items2);
+        builder.morphism(orderToItems, order1, items3);
+        builder.morphism(orderToItems, order1, items4);
+        
+        return instance;
+    }
+    
+    private ActiveDomainRow buildExpectedItemInstance(SimpleInstanceCategoryBuilder builder, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    {
+        var items = builder.value(itemsToNumber, "2043").value(itemsToPid, pidValue).object(itemsKey);
+        //var product = builder.value(productToPid, pidValue).object(productKey);
+        var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
+        var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
+        var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
+        var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
+        
+        //builder.morphism(itemsToProduct, items, product);
+        builder.morphism(itemsToQuantity, items, quantity);
+        
+        /*
+        builder.morphism(productToPid, product, pid);
+        builder.morphism(productToPname, product, pname);
+        builder.morphism(productToPrice, product, price);
+        */
+        builder.morphism(itemsToPid, items, pid);
+        builder.morphism(itemsToPname, items, pname);
+        builder.morphism(itemsToPrice, items, price);
+        
+        return items;
+    }
 }

@@ -3,6 +3,7 @@ package cz.cuni.matfyz.core.instance;
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
+import cz.cuni.matfyz.core.utils.*;
 
 import java.util.*;
 
@@ -80,4 +81,18 @@ public class InstanceMorphism implements Morphism
         
         return builder.toString();
 	}
+    
+    @Override
+    public boolean equals(Object object)
+    {
+        return object instanceof InstanceMorphism instanceMorphism ? equals(instanceMorphism) : false;
+    }
+    
+    public boolean equals(InstanceMorphism morphism)
+    {
+        if (morphism == null)
+            return false;
+        
+        return mappings.equals(morphism.mappings);
+    }
 }

@@ -258,8 +258,6 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
 		DummyPullWrapper wrapper = new DummyPullWrapper();
 		ForestOfRecords forest = wrapper.pullForest(getFileName(), path);
         
-        System.out.println("# Forest of Records");
-		System.out.println(forest);
 		return forest;
 	}
 	

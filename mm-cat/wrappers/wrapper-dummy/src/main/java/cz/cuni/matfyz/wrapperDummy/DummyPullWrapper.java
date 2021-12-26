@@ -128,8 +128,6 @@ public class DummyPullWrapper implements AbstractPullWrapper
     {
         // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
         // We do so by passing the parent record instead of creating a new one.
-        System.out.println("AUX: ");
-        System.out.println(complexProperty.isAuxiliary());
         if (complexProperty.isAuxiliary())
             getDataFromObject(parentRecord, value, complexProperty);
         else

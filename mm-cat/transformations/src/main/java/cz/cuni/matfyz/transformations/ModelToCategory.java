@@ -10,6 +10,7 @@ import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
+import cz.cuni.matfyz.core.utils.Debug;
 
 import java.util.*;
 import org.javatuples.Pair;
@@ -39,10 +40,13 @@ public class ModelToCategory
     
 	public void algorithm()
     {
-        System.out.println("# ALGORITHM");
+        if (Debug.shouldLog(5))
+            System.out.println("# ALGORITHM");
+        
         for (RootRecord rootRecord : forest)
         {
-            System.out.println("################ Process of Root Record ################");
+            if (Debug.shouldLog(4))
+                System.out.println("################ Process of Root Record ################");
 			// preparation phase
 			Stack<StackTriple> M = mapping.hasRootMorphism() ?
                 createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord) : // K with root morphism
@@ -56,7 +60,8 @@ public class ModelToCategory
     
     private Stack<StackTriple> createStackWithObject(SchemaObject object, RootRecord record)
     {
-        System.out.println("# Create Stack With Object");
+        if (Debug.shouldLog(3))
+            System.out.println("#### Create Stack With Object ####");
         
         InstanceObject qI = instanceFunctor.object(object);
         IdWithValues sid = fetchSid(object.superId(), record);
@@ -65,13 +70,16 @@ public class ModelToCategory
         ActiveDomainRow row = modify(qI, sid);
         addPathChildrenToStack(M, mapping.accessPath(), row, record);
         
-        System.out.println("# Stack size: " + M.size());
+        if (Debug.shouldLog(3))
+            System.out.println("# Stack size: " + M.size());
+        
         return M;
     }
     
     private Stack<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord record)
     {
-        System.out.println("#### Create Stack With Morphism ####");
+        if (Debug.shouldLog(3))
+            System.out.println("#### Create Stack With Morphism ####");
         
         Stack<StackTriple> M = new Stack<>();
         
@@ -98,14 +106,18 @@ public class ModelToCategory
         addPathChildrenToStack(M, ap, sid_dom, record);
         addPathChildrenToStack(M, t_cod, sid_cod, record);
         
-        System.out.println("# End: " + M.size());
+        if (Debug.shouldLog(3))
+            System.out.println("# Stack size: " + M.size());
+        
         return M;
     }
     
     private void processTopOfStack(Stack<StackTriple> M)
     {
-        System.out.println("#### Process Top of Stack ####");
-        printStack(M);
+        if (Debug.shouldLog(3))
+            System.out.println("#### Process Top of Stack ####");
+        if (Debug.shouldLog(2))
+            printStack(M);
         
         StackTriple triple = M.pop();
         InstanceMorphism mI = instanceFunctor.morphism(triple.mS);
@@ -326,8 +338,11 @@ public class ModelToCategory
             for (Pair<Signature, ComplexProperty> child: children(complexPath))
             {
                 // TODO signature to schema morphism
-                System.out.println("$$$ Signature: ");
-                System.out.println(child.getValue(0));
+                if (Debug.shouldLog(1))
+                {
+                    System.out.println("$$$ Signature: ");
+                    System.out.println(child.getValue(0));
+                }
                 SchemaMorphism morphism = schema.signatureToMorphism(child.getValue0());
                 stack.push(new StackTriple(sid, morphism, child.getValue1(), record));
             }

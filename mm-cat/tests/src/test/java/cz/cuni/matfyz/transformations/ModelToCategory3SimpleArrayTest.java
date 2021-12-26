@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 
@@ -30,8 +31,6 @@ public class ModelToCategory3SimpleArrayTest extends ModelToCategoryExtendedBase
         schema.addObject(array);
         addMorphismWithDual(schema, orderToArray, order, array);
         
-        System.out.println("# Schema Category");
-		System.out.println(schema);
 		return schema;
     }
 
@@ -43,8 +42,36 @@ public class ModelToCategory3SimpleArrayTest extends ModelToCategoryExtendedBase
             new SimpleProperty("array", orderToArray)
         );
         
-        System.out.println("# Access Path");
-		System.out.println(orderProperty);
         return orderProperty;
 	}
+    
+    @Override
+    protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema)
+    {
+        InstanceCategory instance = buildInstanceScenario(schema);
+        var builder = new SimpleInstanceCategoryBuilder(instance);
+        
+        var order1 = builder.value(orderToNumber, "2043").object(orderKey);
+        var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
+        var array1 = builder.value(Signature.Empty(), "123").object(arrayKey);
+        var array2 = builder.value(Signature.Empty(), "456").object(arrayKey);
+        var array3 = builder.value(Signature.Empty(), "789").object(arrayKey);
+        
+        builder.morphism(orderToNumber, order1, number1);
+        builder.morphism(orderToArray, order1, array1);
+        builder.morphism(orderToArray, order1, array2);
+        builder.morphism(orderToArray, order1, array3);
+        
+        var order2 = builder.value(orderToNumber, "1653").object(orderKey);
+        var number2 = builder.value(Signature.Empty(), "1653").object(numberKey);
+        var array4 = builder.value(Signature.Empty(), "String456").object(arrayKey);
+        var array5 = builder.value(Signature.Empty(), "String789").object(arrayKey);
+        
+        builder.morphism(orderToNumber, order2, number2);
+        builder.morphism(orderToArray, order2, array1);
+        builder.morphism(orderToArray, order2, array4);
+        builder.morphism(orderToArray, order2, array5);
+        
+        return instance;
+    }
 }

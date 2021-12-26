@@ -52,4 +52,18 @@ public class ActiveDomainRow implements Comparable<ActiveDomainRow>
     {
         return idWithValues.toString();
     }
+    
+    @Override
+    public boolean equals(Object object)
+    {
+        return object instanceof ActiveDomainRow activeDomainRow ? equals(activeDomainRow) : false;
+    }
+    
+    public boolean equals(ActiveDomainRow row)
+    {
+        if (row == null)
+            return false;
+        
+        return idWithValues.equals(row.idWithValues);
+    }
 }

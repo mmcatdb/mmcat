@@ -25,9 +25,7 @@ public class InstanceFunctor
     
     public InstanceMorphism morphism(SchemaMorphism schemaMorphism)
     {
-        System.out.println(schemaMorphism);
         var a = instanceCategory.morphism(schemaMorphism.signature());
-        System.out.println(a);
         return a;
         //throw new UnsupportedOperationException(); // TODO
     }

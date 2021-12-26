@@ -23,8 +23,6 @@ public class ModelToCategory7MissingSimpleTest extends ModelToCategoryExtendedBa
         var order = buildOrder(schema);
         addNestedDoc(schema, order);
         
-        System.out.println("# Schema Category");
-		System.out.println(schema);
 		return schema;
     }
 
@@ -40,8 +38,6 @@ public class ModelToCategory7MissingSimpleTest extends ModelToCategoryExtendedBa
             )
         );
         
-        System.out.println("# Access Path");
-		System.out.println(orderProperty);
         return orderProperty;
 	}
 }

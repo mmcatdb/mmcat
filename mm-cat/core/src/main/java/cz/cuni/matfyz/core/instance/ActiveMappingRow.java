@@ -29,7 +29,7 @@ public class ActiveMappingRow implements Comparable<ActiveMappingRow>
     @Override
     public int compareTo(ActiveMappingRow row)
     {
-        int domainCompareResult = domainRow.compareTo(row.codomainRow);
+        int domainCompareResult = domainRow.compareTo(row.domainRow);
         return domainCompareResult != 0 ? domainCompareResult : codomainRow.compareTo(row.codomainRow);
     }
     
@@ -42,4 +42,18 @@ public class ActiveMappingRow implements Comparable<ActiveMappingRow>
         
         return builder.toString();
 	}
+    
+    @Override
+    public boolean equals(Object object)
+    {
+        return object instanceof ActiveMappingRow activeMappingRow ? equals(activeMappingRow) : false;
+    }
+    
+    public boolean equals(ActiveMappingRow row)
+    {
+        if (row == null)
+            return false;
+        
+        return domainRow.equals(row.domainRow) && codomainRow.equals(row.codomainRow);
+    }
 }

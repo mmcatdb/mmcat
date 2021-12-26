@@ -23,8 +23,6 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
         var order = buildOrder(schema);
         addOrdered(schema, order);
         
-        System.out.println("# Schema Category");
-		System.out.println(schema);
 		return schema;
     }
 
@@ -47,8 +45,6 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
         //    - 27 - 28, domluvit se dopředu
         //    - 4 ve 20:00
         
-        System.out.println("# Access Path");
-		System.out.println(orderProperty);
         return orderProperty;
 	}
 }
