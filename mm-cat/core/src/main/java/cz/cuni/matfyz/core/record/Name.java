@@ -21,6 +21,21 @@ public class Name implements Comparable<Name>
 		DYNAMIC_NAME
 	}
     
+    public String value()
+    {
+        return name;
+    }
+    
+    public Signature signature()
+    {
+        return signature;
+    }
+    
+    public static Name LeftDynamic()
+    {
+        return new Name("_LEFT_DYNAMIC");
+    }
+    
     public Name(Signature signature, String name)
     {
         this.name = name;

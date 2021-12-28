@@ -29,21 +29,12 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var orderProperty = new ComplexProperty("", Signature.Null(),
+        var orderProperty = new ComplexProperty(Name.Anonymous(), Signature.Null(),
             new ComplexProperty("_id", Signature.Null(),
                 new SimpleProperty("customer", orderedToOrder.dual().concatenate(customerToOrdered.dual()).concatenate(customerToId)),
                 new SimpleProperty("number", orderToNumber)
             )
         );
-        
-        // TODO upravit všude signature na null
-        // TODO testSuite - vytvoření množiny testů, co se provede najednou
-        // TODO assert - equals podle příkladů
-        //      - upravit porovnávání řádků z domén
-        //      - porovnání instančních objektů
-        // další meetingy
-        //    - 27 - 28, domluvit se dopředu
-        //    - 4 ve 20:00
         
         return orderProperty;
 	}

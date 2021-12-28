@@ -12,7 +12,7 @@ public class Id implements Comparable<Id>
 {
     private final SortedSet<Signature> signatures;
     
-    public Iterable<Signature> signatures()
+    public SortedSet<Signature> signatures()
     {
         return signatures;
     }

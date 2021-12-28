@@ -26,6 +26,11 @@ public class Name
         type = name == "" ? Type.ANONYMOUS : Type.STATIC_NAME;
     }
     
+    public static Name Anonymous()
+    {
+        return new Name("");
+    }
+    
     public Type type()
     {
         return type;

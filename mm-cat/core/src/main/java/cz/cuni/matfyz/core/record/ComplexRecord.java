@@ -17,6 +17,8 @@ public class ComplexRecord extends DataRecord
     
     private final Map<Signature, List<ComplexRecord>> children = new TreeMap<>();
     private final Map<Signature, SimpleRecord> values = new TreeMap<>();
+    private final List<SimpleValueRecord> dynamicValues = new ArrayList<>();
+    private SimpleValueRecord firstDynamicValue = null;
     
 	protected ComplexRecord(Name name, ComplexRecord parent)
     {
@@ -31,6 +33,21 @@ public class ComplexRecord extends DataRecord
     public Map<Signature, SimpleRecord> values()
     {
         return values;
+    }
+    
+    public List<SimpleValueRecord> dynamicValues()
+    {
+        return dynamicValues;
+    }
+    
+    public SimpleValueRecord firstDynamicValue()
+    {
+        return firstDynamicValue;
+    }
+    
+    public boolean containsDynamicSignature(Signature signature)
+    {
+        return signature.equals(firstDynamicValue.name().signature()) || signature.equals(firstDynamicValue.signature());
     }
     
     public ComplexRecord addComplexRecord(Name name, Signature signature)
@@ -51,7 +68,7 @@ public class ComplexRecord extends DataRecord
     
     public <DataType> SimpleRecord<DataType> addSimpleValueRecord(Name name, Signature signature, DataType value)
     {
-        SimpleRecord record = new SimpleValueRecord(name, this, signature, value);
+        var record = new SimpleValueRecord(name, this, signature, value);
         values.put(signature, record);
         
         return record;
@@ -59,8 +76,27 @@ public class ComplexRecord extends DataRecord
     
     public <DataType> SimpleRecord<DataType> addSimpleArrayRecord(Name name, Signature signature, List<DataType> values)
     {
-        SimpleRecord record = new SimpleArrayRecord(name, this, signature, values);
+        var record = new SimpleArrayRecord(name, this, signature, values);
         this.values.put(signature, record);
+        
+        return record;
+    }
+    
+    public <DataType> SimpleValueRecord<DataType> addSimpleDynamicRecord(Name name, Signature signature, DataType value)
+    {
+        var record = new SimpleValueRecord(name, this, signature, value);
+        
+        if (firstDynamicValue == null)
+        {
+            firstDynamicValue = record;
+        }
+        else
+        {
+            assert name.signature().equals(firstDynamicValue.name().signature()) : "Trying to add a dynamic name with different name signature";
+            assert signature.equals(firstDynamicValue.signature()) : "Trying to add a dynamic name with different value signature";
+        }
+        
+        dynamicValues.add(record);
         
         return record;
     }
@@ -83,8 +119,13 @@ public class ComplexRecord extends DataRecord
         builder.append("{\n");
         
         var childrenBuilder = new IntendedStringBuilder(1);
+        
         for (Signature signature : values.keySet())
             childrenBuilder.append(values.get(signature)).append(",\n");
+        
+        for (SimpleValueRecord dynamicValue : dynamicValues)
+            childrenBuilder.append(dynamicValue).append(",\n");
+        
         for (Signature signature : children.keySet())
         {
             List<ComplexRecord> list = children.get(signature);

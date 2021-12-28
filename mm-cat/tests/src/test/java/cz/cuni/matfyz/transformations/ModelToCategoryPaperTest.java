@@ -152,7 +152,7 @@ public class ModelToCategoryPaperTest extends ModelToCategoryBase
         );
         
         var orderProperty = new ComplexProperty(
-            new Name(""),
+            Name.Anonymous(),
             Signature.Empty(),
             idProperty, contactProperty
         );

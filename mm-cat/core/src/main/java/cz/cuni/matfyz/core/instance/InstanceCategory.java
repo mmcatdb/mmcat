@@ -105,31 +105,16 @@ public class InstanceCategory implements Category {
     @Override
     public boolean equals(Object object)
     {
-        System.out.println("COMPARING INSTANCES");
         return object instanceof InstanceCategory instance ? equals(instance) : false;
     }
     
     public boolean equals(InstanceCategory instance)
     {
-        System.out.println("COMPARING INSTANCES SECOND");
         if (instance == null)
             return false;
         
         if (!objects.equals(instance.objects))
             return false;
-        
-        
-        if (morphisms.keySet().size() != instance.morphisms.keySet().size())
-            System.out.println("MORPHISMS LENGHTS DIFFER");
-        
-        for (Signature signature : morphisms.keySet())
-            if (!morphisms.get(signature).equals(instance.morphisms.get(signature)))
-            {
-                System.out.println("MORPHISMS DIFFER:");
-                System.out.println(signature);
-                System.out.println(morphisms.get(signature));
-                System.out.println(instance.morphisms.get(signature));
-            }
         
         return (morphisms.equals(instance.morphisms));
         /*

@@ -14,7 +14,8 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
     @Override
     protected int getDebugLevel()
     {
-        return 0;
+        //return 0;
+        return 5;
     }
     
     @Override
@@ -36,10 +37,10 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var orderProperty = new ComplexProperty("", Signature.Null(),
+        var orderProperty = new ComplexProperty(Name.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("contact", orderToContact,
-                new SimpleProperty(contactToType.concatenate(typeToName), contactToValue)
+                new SimpleProperty(contactToName, contactToValue)
             )
         );
         
@@ -65,7 +66,7 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
         var number2 = builder.value(Signature.Empty(), "1653").object(numberKey);
         builder.morphism(orderToNumber, order2, number2);
         
-        var contact3 = buildExpectedContactInstance(builder, "1653", "skype123", "email");
+        var contact3 = buildExpectedContactInstance(builder, "1653", "skype123", "skype");
         var contact4 = buildExpectedContactInstance(builder, "1653", "+420123456789", "cellphone");
         builder.morphism(orderToContact, order2, contact3);
         builder.morphism(orderToContact, order2, contact4);
@@ -73,14 +74,14 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
         return instance;
     }
     
-    private ActiveDomainRow buildExpectedContactInstance(SimpleInstanceCategoryBuilder builder, String numberValue, String valueValue, String typeValue)
+    private ActiveDomainRow buildExpectedContactInstance(SimpleInstanceCategoryBuilder builder, String numberValue, String valueValue, String nameValue)
     {
-        var contact = builder.value(contactToNumber, numberValue).value(contactToValue, valueValue).value(contactToName, typeValue).object(contactKey);
+        var contact = builder.value(contactToNumber, numberValue).value(contactToValue, valueValue).value(contactToName, nameValue).object(contactKey);
         var value = builder.value(Signature.Empty(), valueValue).object(valueKey);
-        var type = builder.value(Signature.Empty(), typeValue).object(typeKey);
+        var name = builder.value(Signature.Empty(), nameValue).object(nameKey);
         
         builder.morphism(contactToValue, contact, value);
-        builder.morphism(contactToType, contact, type);
+        builder.morphism(contactToName, contact, name);
         
         return contact;
     }

@@ -176,6 +176,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         );
         schema.addObject(name);
         addMorphismWithDual(schema, typeToName, type, name);
+        addMorphismWithDual(schema, contactToName, contact, name);
     }
     
     protected void addNestedDoc(SchemaCategory schema, SchemaObject order)

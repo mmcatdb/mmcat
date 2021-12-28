@@ -15,12 +15,12 @@ public abstract class DataRecord
         this.parent = parent;
 	}
     
-    public Name getName()
+    public Name name()
     {
         return this.name;
     }
     
-    public DataRecord getParent()
+    public DataRecord parent()
     {
         return this.parent;
     }

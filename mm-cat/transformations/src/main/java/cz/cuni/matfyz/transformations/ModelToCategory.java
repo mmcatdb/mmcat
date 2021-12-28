@@ -40,7 +40,7 @@ public class ModelToCategory
     
 	public void algorithm()
     {
-        if (Debug.shouldLog(5))
+        if (Debug.shouldLog(4))
             System.out.println("# ALGORITHM");
         
         for (RootRecord rootRecord : forest)
@@ -185,42 +185,52 @@ public class ModelToCategory
         
         if (superId.compareTo(Id.Empty()) == 0)
         {
-            // Pokud je v recordu hodnota - což odpovídá simple property
-            SimpleRecord<String> simpleRecord = parentRecord.values().get(morphism.signature());
-            if (simpleRecord != null)
+            // Nejdřív zkusíme najít hodnotu v pidu
+            String valueFromParentRow = parentRow.tuples().get(morphism.signature());
+            if (valueFromParentRow != null)
             {
-                if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+                var builder = new IdWithValues.Builder();
+                builder.add(Signature.Empty(), valueFromParentRow);
+                output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
+            }
+            else
+            {
+                // Pokud je v recordu hodnota - což odpovídá simple property
+                SimpleRecord<String> simpleRecord = parentRecord.values().get(morphism.signature());
+                if (simpleRecord != null)
                 {
-                    var builder = new IdWithValues.Builder();
-                    builder.add(Signature.Empty(), simpleValueRecord.getValue());
-                    output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
-                }
-                else if (simpleRecord instanceof SimpleArrayRecord<String> simpleArrayRecord)
-                {
-                    for (String value : simpleArrayRecord.getValues())
+                    if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
                     {
                         var builder = new IdWithValues.Builder();
-                        builder.add(Signature.Empty(), value);
+                        builder.add(Signature.Empty(), simpleValueRecord.getValue());
                         output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
+                    }
+                    else if (simpleRecord instanceof SimpleArrayRecord<String> simpleArrayRecord)
+                    {
+                        for (String value : simpleArrayRecord.getValues())
+                        {
+                            var builder = new IdWithValues.Builder();
+                            builder.add(Signature.Empty(), value);
+                            output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
+                        }
+                    }
+                    else
+                    {
+                        throw new UnsupportedOperationException("Simple record must be either SimpleValueRecord<String> or SimpleArrayRecord<String>.");
                     }
                 }
                 else
                 {
-                    throw new UnsupportedOperationException("Simple record must be either SimpleValueRecord<String> or SimpleArrayRecord<String>.");
+                    // Pokud tu není hodnota, je potřeba vrátit nějakou unikátní hodnotu
+                    List<ComplexRecord> childRecords = parentRecord.children().get(morphism.signature());
+                    if (childRecords != null)
+                        for (ComplexRecord childRecord : childRecords)
+                        {
+                            var builder = new IdWithValues.Builder();
+                            builder.add(Signature.Empty(), UniqueIdProvider.getNext());
+                            output.add(new Pair<>(builder.build(), childRecord));
+                        }
                 }
-            }
-            else
-            {
-                // Pokud tu není hodnota, je potřeba vrátit nějakou unikátní hodnotu
-                    // - 
-                List<ComplexRecord> childRecords = parentRecord.children().get(morphism.signature());
-                if (childRecords != null)
-                    for (ComplexRecord childRecord : childRecords)
-                    {
-                        var builder = new IdWithValues.Builder();
-                        builder.add(Signature.Empty(), UniqueIdProvider.getNext());
-                        output.add(new Pair<>(builder.build(), childRecord));
-                    }
             }
         }
         else
@@ -229,33 +239,90 @@ public class ModelToCategory
             if (childRecords != null)
                 for (ComplexRecord childRecord : childRecords)
                 {
-                    var builder = new IdWithValues.Builder();
-                    for (Signature signature : superId.signatures())
-                    {
-                        var signatureInParentRow = signature.traverseThrough(morphism.signature());
-
-                        // Why java still doesn't support output arguments?
-                        String value;
-                        if (signatureInParentRow == null)
-                        {
-                            SimpleRecord<String> simpleRecord = childRecord.values().get(signature);
-                            if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
-                                value = simpleValueRecord.getValue();
-                            else
-                                // Opravit pro dynamické pole
-                                throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
-                        }
-                        else
-                            value = parentRow.tuples().get(signatureInParentRow);
-
-                        builder.add(signature, value);
-                    }
-
-                    output.add(new Pair<>(builder.build(), childRecord));
+                    if (childRecord.firstDynamicValue() == null)
+                        handleNonDynamicCase(superId, parentRow, morphism, childRecord, output);
+                    else
+                        handleDynamicCase(superId, parentRow, morphism, childRecord, output);
                 }
         }
         
         return output;
+    }
+    
+    private static void handleDynamicCase(Id superId, ActiveDomainRow parentRow, SchemaMorphism morphism, ComplexRecord childRecord, List<Pair<IdWithValues, ComplexRecord>> output)
+    {
+        Set<Signature> dynamicSignatures = new TreeSet<>();
+        Set<Signature> nonDynamicSignatures = new TreeSet<>();
+        
+        for (Signature signature : superId.signatures())
+            if (childRecord.containsDynamicSignature(signature))
+                dynamicSignatures.add(signature);
+            else
+                nonDynamicSignatures.add(signature);
+        
+        if (nonDynamicSignatures.size() == superId.signatures().size())
+        {
+            handleNonDynamicCase(superId, parentRow, morphism, childRecord, output);
+            return;
+        }
+        
+        for (SimpleValueRecord<String> dynamicRecord : childRecord.dynamicValues())
+        {
+            var builder = new IdWithValues.Builder();
+            for (Signature signature : nonDynamicSignatures)
+            {
+                var signatureInParentRow = signature.traverseThrough(morphism.signature());
+
+                // Why java still doesn't support output arguments?
+                String value;
+                if (signatureInParentRow == null)
+                {
+                    SimpleRecord<String> simpleRecord = childRecord.values().get(signature);
+                    if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+                        value = simpleValueRecord.getValue();
+                    else
+                        throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
+                }
+                else
+                    value = parentRow.tuples().get(signatureInParentRow);
+
+                builder.add(signature, value);
+            }
+            
+            for (Signature signature : dynamicSignatures)
+            {
+                String value = dynamicRecord.signature().equals(signature) ? dynamicRecord.getValue() : dynamicRecord.name().value();
+                builder.add(signature, value);
+            }
+
+            output.add(new Pair<>(builder.build(), childRecord));
+        }
+    }
+    
+    private static void handleNonDynamicCase(Id superId, ActiveDomainRow parentRow, SchemaMorphism morphism, ComplexRecord childRecord, List<Pair<IdWithValues, ComplexRecord>> output)
+    {
+        var builder = new IdWithValues.Builder();
+        for (Signature signature : superId.signatures())
+        {
+            var signatureInParentRow = signature.traverseThrough(morphism.signature());
+
+            // Why java still doesn't support output arguments?
+            String value;
+            if (signatureInParentRow == null)
+            {
+                SimpleRecord<String> simpleRecord = childRecord.values().get(signature);
+                if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+                    value = simpleValueRecord.getValue();
+                else
+                    throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
+            }
+            else
+                value = parentRow.tuples().get(signatureInParentRow);
+
+            builder.add(signature, value);
+        }
+
+        output.add(new Pair<>(builder.build(), childRecord));
     }
 
     // Create ActiveDomainRow from given IdWithValues and add it to the instance object
@@ -356,6 +423,12 @@ public class ModelToCategory
      */
 	private static Collection<Pair<Signature, ComplexProperty>> children(ComplexProperty complexProperty)
     {
+        if (Debug.shouldLog(0))
+        {
+            System.out.println("$ Children:");
+            System.out.println(complexProperty);
+        }
+        
         final List<Pair<Signature, ComplexProperty>> output = new ArrayList<>();
         
         for (AccessPath subpath: complexProperty.subpaths())
@@ -375,6 +448,12 @@ public class ModelToCategory
      */
     private static Collection<Pair<Signature, ComplexProperty>> process(Name name)
     {
+        if (Debug.shouldLog(0))
+        {
+            System.out.println("$ Process name:");
+            System.out.println(name);
+        }
+        
         if (name.type() == Name.Type.DYNAMIC_NAME)
             return List.of(new Pair(name.signature(), ComplexProperty.Empty()));
         else // Static or anonymous (empty) name
@@ -383,6 +462,13 @@ public class ModelToCategory
     
     private static Collection<Pair<Signature, ComplexProperty>> process(IContext context, IValue value)
     {
+        if (Debug.shouldLog(0))
+        {
+            System.out.println("$ Process context, value:");
+            System.out.println(context);
+            System.out.println(value);
+        }
+        
         if (value instanceof SimpleValue simpleValue)
         {
             final Signature contextSignature = context instanceof Signature signature ? signature : Signature.Empty();

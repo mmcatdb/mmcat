@@ -2,6 +2,7 @@ package cz.cuni.matfyz.wrapperDummy;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.mapping.*;
+import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.record.ComplexRecord;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.RootRecord;
@@ -98,17 +99,17 @@ public class DummyPullWrapper implements AbstractPullWrapper
         var value = object.get(key); // TODO nejdřív se zeptat, jestli to tam je, a potom až se ptát na hodnotu
         //Object value = (object == null || !object.has(stringName)) ? null : object.get(stringName);
         
-        if (subpath instanceof ComplexProperty complexProperty)
+        if (subpath instanceof ComplexProperty complexSubpath)
         {
             if (value instanceof JSONArray childArray)
             {
                 for (int i = 0; i < childArray.length(); i++)
-                    addComplexValueToRecord(parentRecord, childArray.getJSONObject(i), key, complexProperty);
+                    addComplexValueToRecord(parentRecord, childArray.getJSONObject(i), key, complexSubpath);
             }
             else if (value instanceof JSONObject childObject)
-                addComplexValueToRecord(parentRecord, childObject, key, complexProperty);
+                addComplexValueToRecord(parentRecord, childObject, key, complexSubpath);
         }
-        else if (subpath instanceof SimpleProperty simpleProperty)
+        else if (subpath instanceof SimpleProperty simpleSubpath)
         {
             if (value instanceof JSONArray simpleArray)
             {
@@ -117,10 +118,15 @@ public class DummyPullWrapper implements AbstractPullWrapper
                 for (int i = 0; i < simpleArray.length(); i++)
                     values.add(simpleArray.get(i).toString());
                     
-                parentRecord.addSimpleArrayRecord(simpleProperty.name().toRecordName(key), simpleProperty.value().signature(), values);
+                parentRecord.addSimpleArrayRecord(simpleSubpath.name().toRecordName(key), simpleSubpath.value().signature(), values);
             }
             else
-                parentRecord.addSimpleValueRecord(simpleProperty.name().toRecordName(key), simpleProperty.value().signature(), value.toString());
+            {
+                if (simpleSubpath.name().type() == Name.Type.DYNAMIC_NAME)
+                    parentRecord.addSimpleDynamicRecord(simpleSubpath.name().toRecordName(key), simpleSubpath.value().signature(), value.toString());
+                else
+                    parentRecord.addSimpleValueRecord(simpleSubpath.name().toRecordName(key), simpleSubpath.value().signature(), value.toString());
+            }
         }
     }
     
@@ -134,6 +140,9 @@ public class DummyPullWrapper implements AbstractPullWrapper
         {
             ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.name().toRecordName(key), complexProperty.signature());
             getDataFromObject(childRecord, value, complexProperty);
+            
+            if (complexProperty.name().type() == Name.Type.DYNAMIC_NAME)
+                childRecord.addSimpleValueRecord(cz.cuni.matfyz.core.record.Name.LeftDynamic(), complexProperty.name().signature(), childRecord.name().value());
         }
     }
 }

@@ -85,9 +85,6 @@ public class InstanceObject implements CategoricalObject
         if (object == null)
             return false;
         
-        if (!activeDomain.equals(object.activeDomain))
-            System.out.println("INSTANCE OBJECTS NOT EQUAL");
-        
         return activeDomain.equals(object.activeDomain);
     }  
     /*
