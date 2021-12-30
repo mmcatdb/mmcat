@@ -9,6 +9,9 @@ import cz.cuni.matfyz.core.utils.Debug;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 
 import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -16,6 +19,9 @@ import java.util.*;
  */
 public class ModelToCategory1BasicTest extends ModelToCategoryBase
 {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory1BasicTest.class);
+	
     private final Signature orderToId = new Signature(1);
     private final Signature orderToTotalPrice = new Signature(2);
     private final Signature orderToAddress = new Signature(3);
@@ -136,4 +142,9 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
         
         return instance;
     }
+	
+	@Test
+	public void execute() throws Exception {
+		super.testAlgorithm();
+	}
 }
