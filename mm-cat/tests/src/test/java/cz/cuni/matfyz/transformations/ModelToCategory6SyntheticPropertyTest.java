@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 
@@ -37,5 +38,10 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
         );
         
         return orderProperty;
+	}
+
+	@Override
+	protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 }

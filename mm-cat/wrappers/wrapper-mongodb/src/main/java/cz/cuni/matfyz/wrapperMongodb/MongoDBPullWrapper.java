@@ -69,7 +69,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
 
             if (subpath instanceof ComplexProperty complexProperty)
                 processComplexProperty(complexProperty, record, value);
-            else if (subpath instanceof SimpleProperty simpleProperty)
+            else if (subpath instanceof SimpleProperty simpleProperty) {}
                 record.addSimpleRecord(simpleProperty.name().toRecordName(), value, simpleProperty.value().signature());
         }
     }

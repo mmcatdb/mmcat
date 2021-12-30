@@ -4,6 +4,7 @@ import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.category.*;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 
 import java.util.*;
@@ -197,5 +198,10 @@ public class ModelToCategoryPaperTest extends ModelToCategoryBase
 	protected Mapping buildMapping(SchemaCategory schema, ComplexProperty path)
     {
 		return new Mapping(schema.keyToObject(orderKey), path);
+	}
+
+	@Override
+	protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 }

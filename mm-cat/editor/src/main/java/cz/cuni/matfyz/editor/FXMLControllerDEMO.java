@@ -5,7 +5,6 @@
  */
 package cz.cuni.matfyz.editor;
 
-import cz.cuni.matfyz.core.dummy.Dummy;
 import cz.cuni.matfyz.editor.controller.MouseGestures;
 import cz.cuni.matfyz.editor.mockup.scenario.DummyDDLScenario;
 import cz.cuni.matfyz.editor.mockup.scenario.DummyGraphScenario;
