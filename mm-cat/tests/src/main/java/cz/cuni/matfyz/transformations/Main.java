@@ -16,6 +16,9 @@ public class Main {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
 	public static void main(String... args) {
-		LOGGER.info("TEST");
+		LOGGER.debug("TEST - DEBUG");
+		LOGGER.info("TEST - INFO");
+		LOGGER.warn("TEST - WARN");
+		LOGGER.error("TEST - ERROR");
 	}
 }

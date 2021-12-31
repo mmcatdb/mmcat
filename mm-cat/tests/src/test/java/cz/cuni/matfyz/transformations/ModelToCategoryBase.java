@@ -10,6 +10,7 @@ import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.Debug;
+import java.net.MalformedURLException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
@@ -17,8 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ModelToCategoryBase
 {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryBase.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryBase.class);
 	
     protected int getDebugLevel()
     {
@@ -50,20 +51,20 @@ public abstract class ModelToCategoryBase
 		SchemaCategory schema = buildSchemaCategoryScenario();
         if (Debug.shouldLog(3))
         {
-			LOGGER.debug("# Schema Category\n{}", schema);
+			System.out.println(String.format("# Schema Category\n%s", schema));
         }
         
 		InstanceCategory instance = buildInstanceScenario(schema);
 		ComplexProperty path = buildComplexPropertyPath(schema);
         if (Debug.shouldLog(3))
         {
-			LOGGER.debug("# Access Path\n{}", path);
+			System.out.println(String.format("# Access Path\n%s", path));
         }
         
 		ForestOfRecords forest = buildForestOfRecords(path);
         if (Debug.shouldLog(3))
         {
-			LOGGER.debug("# Forest of Records\n{}", forest);
+			System.out.println(String.format("# Forest of Records\n%s", forest));
         }
         
 		Mapping mapping = buildMapping(schema, path);
@@ -74,7 +75,7 @@ public abstract class ModelToCategoryBase
 
         if (Debug.shouldLog(4))
         {
-			LOGGER.debug("# Instance Category\n{}", instance);
+			System.out.println(String.format("# Instance CategoryRecords\n%s", instance));
         }
 		
         InstanceCategory expectedInstance = buildExpectedInstanceCategory(schema);

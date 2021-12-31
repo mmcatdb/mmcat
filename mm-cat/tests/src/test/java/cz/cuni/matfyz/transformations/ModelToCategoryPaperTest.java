@@ -8,8 +8,8 @@ import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class ModelToCategoryPaperTest extends ModelToCategoryBase
 {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryPaperTest.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryPaperTest.class);
 	
     private final Signature orderToOrders = new Signature(24);
     private final Signature ordersToCustomer = new Signature(21);

@@ -5,8 +5,8 @@ import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ModelToCategory4ComplexArrayTest extends ModelToCategoryExtendedBase
 {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory4ComplexArrayTest.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory4ComplexArrayTest.class);
 	
     @Override
     protected String getFileName()

@@ -5,8 +5,8 @@ import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.category.*;
 
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class SimpleInstanceCategoryBuilder
 {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInstanceCategoryBuilder.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInstanceCategoryBuilder.class);
 	
     private final InstanceCategory instance;
     
