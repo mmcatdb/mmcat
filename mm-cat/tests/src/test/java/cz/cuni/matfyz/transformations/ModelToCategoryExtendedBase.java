@@ -67,6 +67,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
     
     protected final Signature orderedToNumber = orderedToOrder.concatenate(orderToNumber);
     protected final Signature orderedToId = customerToOrdered.dual().concatenate(customerToId);
+    protected final Signature orderToId = orderedToOrder.dual().concatenate(orderedToId);
     
     protected SchemaObject buildOrder(SchemaCategory schema)
     {
@@ -239,6 +240,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         );
         schema.addObject(id);
         addMorphismWithDual(schema, customerToId, customer, id);
+        addMorphismWithDual(schema, orderToId, order, id);
     }
     
     protected SchemaObject createSchemaObject(Key key, String name, Id id)

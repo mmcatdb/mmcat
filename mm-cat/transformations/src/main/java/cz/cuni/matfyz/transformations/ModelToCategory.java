@@ -25,6 +25,7 @@ public class ModelToCategory
     //private InstanceCategory instance; // TODO
     private ForestOfRecords forest; // TODO
     private Mapping mapping; // TODO
+    private ComplexProperty rootAccessPath;
             
     private InstanceFunctor instanceFunctor;
     
@@ -34,6 +35,7 @@ public class ModelToCategory
         //this.instance = instance;
         this.forest = forest;
         this.mapping = mapping;
+        this.rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
         
         instanceFunctor = new InstanceFunctor(instance, schema);
     }
@@ -68,7 +70,7 @@ public class ModelToCategory
         Stack<StackTriple> M = new Stack<>();
         
         ActiveDomainRow row = modify(qI, sid);
-        addPathChildrenToStack(M, mapping.accessPath(), row, record);
+        addPathChildrenToStack(M, rootAccessPath, row, record);
         
         if (Debug.shouldLog(3))
             System.out.println("# Stack size: " + M.size());
@@ -98,10 +100,10 @@ public class ModelToCategory
         addRelation(mI, sid_dom, sid_cod);
         addRelation(mI.dual(), sid_cod, sid_dom);
 
-        AccessPath t_dom = mapping.accessPath().getSubpathBySignature(Signature.Empty());
-        AccessPath t_cod = mapping.accessPath().getSubpathBySignature(morphism.signature());
+        AccessPath t_dom = rootAccessPath.getSubpathBySignature(Signature.Empty());
+        AccessPath t_cod = rootAccessPath.getSubpathBySignature(morphism.signature());
 
-        AccessPath ap = mapping.accessPath().minusSubpath(t_dom).minusSubpath(t_cod);
+        AccessPath ap = rootAccessPath.minusSubpath(t_dom).minusSubpath(t_cod);
 
         addPathChildrenToStack(M, ap, sid_dom, record);
         addPathChildrenToStack(M, t_cod, sid_cod, record);

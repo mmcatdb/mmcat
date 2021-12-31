@@ -19,14 +19,27 @@ public class InstanceFunctor
     
     public InstanceObject object(SchemaObject schemaObject)
     {
-        return instanceCategory.object(schemaObject.key());
+        var object = instanceCategory.object(schemaObject.key());
+        if (object == null)
+        {
+            System.out.println("Requested object is null: ");
+            System.out.println(object);
+        }
+        
+        return object;
         //throw new UnsupportedOperationException(); // TODO
     }
     
     public InstanceMorphism morphism(SchemaMorphism schemaMorphism)
     {
-        var a = instanceCategory.morphism(schemaMorphism.signature());
-        return a;
+        var morphism = instanceCategory.morphism(schemaMorphism.signature());
+        if (morphism == null)
+        {
+            System.out.println("Requested morphism is null: ");
+            System.out.println(morphism);
+        }
+        
+        return morphism;
         //throw new UnsupportedOperationException(); // TODO
     }
 }

@@ -14,6 +14,11 @@ public class ComplexProperty extends AccessPath implements IValue
 {
     private final Signature signature;
     
+    public Signature signature()
+    {
+        return signature;
+    }
+    
     @Override
     public IContext context()
     {
@@ -23,11 +28,6 @@ public class ComplexProperty extends AccessPath implements IValue
     public boolean isAuxiliary()
     {
         return context().equals(Signature.Null());
-    }
-    
-    public Signature signature()
-    {
-        return signature;
     }
     
     @Override
@@ -179,5 +179,36 @@ public class ComplexProperty extends AccessPath implements IValue
         builder.append("{\n").append(subpathBuilder).append("}");
         
         return builder.toString();
+    }
+    
+    /**
+     * Properties from given synthetic nodes are moved to their parent paths
+     * @return 
+     */
+    public ComplexProperty copyWithoutAuxiliaryNodes()
+    {
+        List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();
+        return new ComplexProperty(name, signature, newSubpaths);
+    }
+    
+    private List<AccessPath> getContentWithoutAuxiliaryNodes()
+    {
+        List<AccessPath> newSubpaths = new ArrayList<>();
+        for (AccessPath path : subpaths)
+        {
+            if (path instanceof SimpleProperty) // Not making a copy because the path is expected to be immutable.
+            {
+                newSubpaths.add(path);
+            }
+            else if (path instanceof ComplexProperty complexProperty)
+            {
+                if (complexProperty.isAuxiliary())
+                    newSubpaths.addAll(complexProperty.getContentWithoutAuxiliaryNodes());
+                else
+                    newSubpaths.add(complexProperty.copyWithoutAuxiliaryNodes());
+            }
+        }
+        
+        return newSubpaths;
     }
 }
