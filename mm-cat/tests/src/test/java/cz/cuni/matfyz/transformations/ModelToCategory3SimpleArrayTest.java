@@ -4,6 +4,9 @@ import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -11,6 +14,9 @@ import cz.cuni.matfyz.core.schema.*;
  */
 public class ModelToCategory3SimpleArrayTest extends ModelToCategoryExtendedBase
 {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory3SimpleArrayTest.class);
+	
     @Override
     protected String getFileName()
     {
@@ -74,4 +80,10 @@ public class ModelToCategory3SimpleArrayTest extends ModelToCategoryExtendedBase
         
         return instance;
     }
+	
+	@Test
+	public void execute() throws Exception {
+		super.testAlgorithm();
+	}
+	
 }

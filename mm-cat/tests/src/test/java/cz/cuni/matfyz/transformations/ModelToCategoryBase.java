@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,6 +26,9 @@ import org.junit.jupiter.api.Assertions;
  */
 public abstract class ModelToCategoryBase
 {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryBase.class);
+	
     protected int getDebugLevel()
     {
         return 5;
@@ -40,31 +45,25 @@ public abstract class ModelToCategoryBase
 	/**
 	 * Test of algorithm method, of class ModelToCategory.
 	 */
-	@Test
 	public void testAlgorithm() throws Exception
     {
 		SchemaCategory schema = buildSchemaCategoryScenario();
         if (Debug.shouldLog(3))
         {
-            System.out.println("# Schema Category");
-            System.out.println(schema);
-            System.out.println();
+			LOGGER.debug("# Schema Category\n{}", schema);
         }
         
 		InstanceCategory instance = buildInstanceScenario(schema);
 		ComplexProperty path = buildComplexPropertyPath(schema);
         if (Debug.shouldLog(3))
         {
-            System.out.println("# Access Path");
-    		System.out.println(path);
-            System.out.println();
+			LOGGER.debug("# Access Path\n{}", path);
         }
         
 		ForestOfRecords forest = buildForestOfRecords(path);
         if (Debug.shouldLog(3))
         {
-            System.out.println("# Forest of Records");
-            System.out.println(forest);
+			LOGGER.debug("# Forest of Records\n{}", forest);
         }
         
 		Mapping mapping = buildMapping(schema, path);
@@ -75,8 +74,7 @@ public abstract class ModelToCategoryBase
 
         if (Debug.shouldLog(4))
         {
-            System.out.println("# Instance Category");
-            System.out.println(instance);
+			LOGGER.debug("# Instance Category\n{}", instance);
         }
 		
         InstanceCategory expectedInstance = buildExpectedInstanceCategory(schema);

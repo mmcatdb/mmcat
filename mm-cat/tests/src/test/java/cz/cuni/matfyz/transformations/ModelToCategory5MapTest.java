@@ -4,6 +4,9 @@ import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -11,6 +14,9 @@ import cz.cuni.matfyz.core.schema.*;
  */
 public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
 {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory5MapTest.class);
+	
     @Override
     protected int getDebugLevel()
     {
@@ -85,4 +91,9 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
         
         return contact;
     }
+	
+	@Test
+	public void execute() throws Exception {
+		super.testAlgorithm();
+	}
 }

@@ -1,8 +1,12 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -10,6 +14,9 @@ import cz.cuni.matfyz.core.schema.*;
  */
 public class ModelToCategory8MissingComplexTest extends ModelToCategoryExtendedBase
 {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory8MissingComplexTest.class);
+	
     @Override
     protected String getFileName()
     {
@@ -39,5 +46,15 @@ public class ModelToCategory8MissingComplexTest extends ModelToCategoryExtendedB
         );
         
         return orderProperty;
+	}
+
+	@Override
+	protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema) {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+	
+	@Test
+	public void execute() throws Exception {
+		super.testAlgorithm();
 	}
 }
