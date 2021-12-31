@@ -20,6 +20,10 @@ public class Main {
 		LOGGER.info("TEST - INFO");
 		LOGGER.warn("TEST - WARN");
 		LOGGER.error("TEST - ERROR");
+		
+		int age = 20;
+		
+		LOGGER.info("I am {}.", age);
 	}
 
 }
