@@ -1,11 +1,7 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.category.Signature;
-<<<<<<< HEAD
 import cz.cuni.matfyz.core.instance.*;
-=======
-import cz.cuni.matfyz.core.instance.InstanceCategory;
->>>>>>> 66f706ae0835f5d7d324eaeb2884a9aa4c9b3376
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 import org.junit.jupiter.api.Test;
@@ -56,7 +52,6 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
         
         return orderProperty;
 	}
-<<<<<<< HEAD
     
     @Override
     protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema)
@@ -78,16 +73,4 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
         
         return instance;
     }
-=======
-
-	@Override
-	protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-	
-	@Test
-	public void execute() throws Exception {
-		super.testAlgorithm();
-	}
->>>>>>> 66f706ae0835f5d7d324eaeb2884a9aa4c9b3376
 }
