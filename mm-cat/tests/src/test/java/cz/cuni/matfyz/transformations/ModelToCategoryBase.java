@@ -41,10 +41,8 @@ public abstract class ModelToCategoryBase
         Debug.setLevel(getDebugLevel());
     }
 
-	protected static final int EPSILON = -1;
-
 	/**
-	 * Test of algorithm method, of class ModelToCategory.
+	 * Test of algorithm method of class ModelToCategory.
 	 */
 	public void testAlgorithm() throws Exception
     {

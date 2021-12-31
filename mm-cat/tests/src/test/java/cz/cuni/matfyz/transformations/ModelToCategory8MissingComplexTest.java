@@ -48,10 +48,24 @@ public class ModelToCategory8MissingComplexTest extends ModelToCategoryExtendedB
         return orderProperty;
 	}
 
-	@Override
-	protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema)
+    {
+        InstanceCategory instance = buildInstanceScenario(schema);
+        var builder = new SimpleInstanceCategoryBuilder(instance);
+        
+        var order1 = builder.value(orderToNumber, "2043").object(orderKey);
+        var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
+        
+        builder.morphism(orderToNumber, order1, number1);
+        
+        var order2 = builder.value(orderToNumber, "1653").object(orderKey);
+        var number2 = builder.value(Signature.Empty(), "1653").object(numberKey);
+        
+        builder.morphism(orderToNumber, order2, number2);
+        
+        return instance;
+    }
 	
 	@Test
 	public void execute() throws Exception {

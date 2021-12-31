@@ -48,10 +48,38 @@ public class ModelToCategory7MissingSimpleTest extends ModelToCategoryExtendedBa
         return orderProperty;
 	}
 
-	@Override
-	protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    protected InstanceCategory buildExpectedInstanceCategory(SchemaCategory schema)
+    {
+        InstanceCategory instance = buildInstanceScenario(schema);
+        var builder = new SimpleInstanceCategoryBuilder(instance);
+        
+        var order1 = builder.value(orderToNumber, "2043").object(orderKey);
+        var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
+        var nestedDoc1 = builder.value(Signature.Empty(), "0").object(nestedDocKey);
+        var propertyA1 = builder.value(Signature.Empty(), "hodnotaA").object(propertyAKey);
+        //var propertyB1 = builder.value(Signature.Empty(), "hodnotaB").object(propertyBKey);
+        var propertyC1 = builder.value(Signature.Empty(), "hodnotaC").object(propertyCKey);
+        
+        builder.morphism(orderToNumber, order1, number1);
+        builder.morphism(orderToNestedDoc, order1, nestedDoc1);
+        builder.morphism(nestedDocToPropertyA, nestedDoc1, propertyA1);
+        //builder.morphism(nestedDocToPropertyB, nestedDoc1, propertyB1);
+        builder.morphism(nestedDocToPropertyC, nestedDoc1, propertyC1);
+        
+        var order2 = builder.value(orderToNumber, "1653").object(orderKey);
+        var number2 = builder.value(Signature.Empty(), "1653").object(numberKey);
+        var nestedDoc2 = builder.value(Signature.Empty(), "1").object(nestedDocKey);
+        var propertyA2 = builder.value(Signature.Empty(), "hodnotaA2").object(propertyAKey);
+        var propertyC2 = builder.value(Signature.Empty(), "hodnotaC2").object(propertyCKey);
+        
+        builder.morphism(orderToNumber, order2, number2);
+        builder.morphism(orderToNestedDoc, order2, nestedDoc2);
+        builder.morphism(nestedDocToPropertyA, nestedDoc2, propertyA2);
+        builder.morphism(nestedDocToPropertyC, nestedDoc2, propertyC2);
+        
+        return instance;
+    }
 	
 	@Test
 	public void execute() throws Exception {

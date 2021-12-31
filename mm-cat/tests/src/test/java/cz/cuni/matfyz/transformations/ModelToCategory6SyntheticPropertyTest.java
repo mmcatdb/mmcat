@@ -73,4 +73,9 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
         
         return instance;
     }
+    
+    @Test
+	public void execute() throws Exception {
+		super.testAlgorithm();
+	}
 }

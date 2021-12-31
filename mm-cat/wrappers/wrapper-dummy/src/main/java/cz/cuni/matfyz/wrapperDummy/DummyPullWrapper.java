@@ -96,8 +96,10 @@ public class DummyPullWrapper implements AbstractPullWrapper
     
     private void getFieldWithKeyForSubpathFromObject(ComplexRecord parentRecord, JSONObject object, String key, AccessPath subpath) throws Exception
     {
-        var value = object.get(key); // TODO nejdřív se zeptat, jestli to tam je, a potom až se ptát na hodnotu
-        //Object value = (object == null || !object.has(stringName)) ? null : object.get(stringName);
+        if (object.isNull(key)) // Returns if the value is null or if the value doesn't exist.
+            return;
+        
+        var value = object.get(key);
         
         if (subpath instanceof ComplexProperty complexSubpath)
         {
