@@ -5,8 +5,8 @@ import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
 {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory5MapTest.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory5MapTest.class);
 	
     @Override
     protected int getDebugLevel()

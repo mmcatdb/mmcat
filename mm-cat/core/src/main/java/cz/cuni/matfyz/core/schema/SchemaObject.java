@@ -4,6 +4,8 @@ import cz.cuni.matfyz.core.category.CategoricalObject;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -11,6 +13,9 @@ import java.util.TreeSet;
  */
 public class SchemaObject implements CategoricalObject
 {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(SchemaObject.class);
+	
 	private final Key key; // Identifies the object, in the paper it's a number >= 100
 	private final String label;
 	private final Id superId; // Should be a union of all ids (super key).
@@ -40,6 +45,8 @@ public class SchemaObject implements CategoricalObject
 
 	public SchemaObject(Key key, String label, Id superId, Set<Id> ids)
     {
+		
+		LOGGER.debug("Creating object...");
 		this.key = key;
 		this.label = label;
 		this.superId = superId;

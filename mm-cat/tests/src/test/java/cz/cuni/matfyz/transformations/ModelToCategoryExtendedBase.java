@@ -7,8 +7,8 @@ import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
 {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryExtendedBase.class);
+//	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryExtendedBase.class);
 	
     protected abstract String getFileName();
     
