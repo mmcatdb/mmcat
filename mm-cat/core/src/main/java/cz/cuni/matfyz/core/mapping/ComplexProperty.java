@@ -14,6 +14,7 @@ public class ComplexProperty extends AccessPath implements IValue
 {
     private final Signature signature;
     
+    @Override
     public Signature signature()
     {
         return signature;

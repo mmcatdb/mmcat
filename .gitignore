@@ -1,6 +1,5 @@
 *DS_Store
 */MyNeo4jDB/*
-*/target/*
 experiment*.json
 /mm-cat/wrappers/target/
 /mm-cat/core/target/
@@ -21,3 +20,4 @@ experiment*.json
 /mm-cat/wrappers/wrapper-dummy/target/
 /mm-cat/tests/target/
 /mm-cat/tests/nbproject/
+**/target/**

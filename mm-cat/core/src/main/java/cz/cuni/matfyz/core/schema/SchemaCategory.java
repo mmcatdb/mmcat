@@ -13,14 +13,14 @@ public class SchemaCategory implements Category
 	private final Map<Key, SchemaObject> objects = new TreeMap<>();
 	private final Map<Signature, SchemaMorphism> morphisms = new TreeMap<>();
 
-	public Collection<SchemaObject> objects()
+	public Map<Key, SchemaObject> objects()
     {
-		return objects.values();
+		return objects;
 	}
 
-	public Collection<SchemaMorphism> morphisms()
+	public Map<Signature, SchemaMorphism> morphisms()
     {
-		return morphisms.values();
+		return morphisms;
 	}
     
     public SchemaObject keyToObject(Key key)

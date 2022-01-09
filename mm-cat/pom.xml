@@ -9,10 +9,12 @@
 		<module>abstractWrappers</module>
 		<module>applications</module>
 		<module>core</module>
-		<module>editor</module>
 		<module>transformations</module>
 		<module>wrappers</module>
+<!--
+		<module>editor</module>
 		<module>product</module>
+-->
 		<module>tests</module>
 	</modules>
 	<properties>

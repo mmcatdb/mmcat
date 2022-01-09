@@ -31,4 +31,6 @@ public abstract class AccessPath
     {
         return name.equals(path.name);
     }
+    
+    public abstract Signature signature();
 }

@@ -56,4 +56,10 @@ public class SimpleProperty extends AccessPath
         
         return builder.toString();
     }
+    
+    @Override
+    public Signature signature()
+    {
+        return value.signature();
+    }
 }
