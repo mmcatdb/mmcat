@@ -10,7 +10,6 @@
 	<packaging>jar</packaging>
 	
 	<dependencies>
-	<dependency>
 		<dependency>
 			<groupId>cz.cuni.matfyz</groupId>
 			<artifactId>core</artifactId>
