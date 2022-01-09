@@ -7,6 +7,7 @@ import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.utils.Debug;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
+import java.nio.file.Paths;
 
 import java.util.*;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,10 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
 	protected ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception
     {
 		DummyPullWrapper wrapper = new DummyPullWrapper();
-		ForestOfRecords forest = wrapper.pullForest("1BasicTest.json", path);
+        
+        var url = ClassLoader.getSystemResource("1BasicTest.json");
+        String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
+		ForestOfRecords forest = wrapper.pullForest(fileName, path);
         
 		return forest;
 	}

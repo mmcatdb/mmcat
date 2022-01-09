@@ -7,21 +7,17 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>abstractWrappers</module>
-		<module>applications</module>
 		<module>core</module>
 		<module>transformations</module>
 		<module>wrappers</module>
-<!--
-		<module>editor</module>
-		<module>product</module>
--->
-		<module>tests</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>16</maven.compiler.source>
 		<maven.compiler.target>16</maven.compiler.target>
 		<slf4j.version>1.7.32</slf4j.version>
+		<junit.jupiter.version>5.8.2</junit.jupiter.version>
+		<junit.platform.version>1.8.1</junit.platform.version>
 	</properties>
 	
 	<dependencies>
@@ -43,7 +39,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.32</version>
+			<version>${slf4j.version}</version>
 			<!--<scope>test</scope>-->
 		</dependency>
 		<!--		<dependency>

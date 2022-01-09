@@ -5,6 +5,7 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
+import java.nio.file.Paths;
 
 import java.util.*;
 //import org.slf4j.Logger;
@@ -264,9 +265,11 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
 	protected ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception
     {
 		DummyPullWrapper wrapper = new DummyPullWrapper();
-		ForestOfRecords forest = wrapper.pullForest(getFileName(), path);
         
-		return forest;
+        var url = ClassLoader.getSystemResource(getFileName());
+        String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
+        
+		return wrapper.pullForest(fileName, path);
 	}
 	
     @Override
