@@ -8,6 +8,9 @@ import cz.cuni.matfyz.core.category.Signature;
  */
 public class Name
 {
+    //TODO rozdělit na tři třídy
+
+
     private final String name;
     private final Signature signature;
     private final Type type;

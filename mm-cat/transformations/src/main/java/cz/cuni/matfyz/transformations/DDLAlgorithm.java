@@ -15,6 +15,7 @@ import java.util.*;
  */
 public class DDLAlgorithm
 {
+    /*
     private SchemaCategory schema; // TODO
     private InstanceFunctor instanceFunctor;
     private Name name; // TODO
@@ -30,7 +31,7 @@ public class DDLAlgorithm
         this.wrapper = wrapper;
     }
     
-    public DDLStatement algorithm() throws Exception
+    public DDLStatement algorithm()
     {
         wrapper.setKindName(name.getStringName());
         
@@ -46,7 +47,7 @@ public class DDLAlgorithm
         return wrapper.createDDLStatement();
     }
     
-    private void processTopOfStack(Stack<StackPair> M) throws Exception
+    private void processTopOfStack(Stack<StackPair> M)
     {
         StackPair pair = M.pop();
         AccessPath path = pair.accessPath;
@@ -60,7 +61,7 @@ public class DDLAlgorithm
             processPath(complexProperty, N);
     }
     
-    private Set<String> determinePropertyName(AccessPath path) throws Exception
+    private Set<String> determinePropertyName(AccessPath path)
     {
         var name = path.name();
         if (name.type() != Name.Type.DYNAMIC_NAME)
@@ -115,4 +116,5 @@ public class DDLAlgorithm
     {
         return morphism.max() == SchemaMorphism.Max.STAR;
     }
+    */
 }

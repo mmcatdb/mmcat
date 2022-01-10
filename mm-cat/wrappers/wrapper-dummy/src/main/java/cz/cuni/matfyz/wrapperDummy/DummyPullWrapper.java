@@ -16,7 +16,6 @@ import org.json.*;
  */
 public class DummyPullWrapper implements AbstractPullWrapper
 {
-
 	@Override
 	public ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception
     {
