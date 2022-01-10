@@ -15,14 +15,13 @@ import java.util.*;
  */
 public class DDLAlgorithm
 {
-    /*
     private SchemaCategory schema; // TODO
     private InstanceFunctor instanceFunctor;
-    private Name name; // TODO
+    private String name; // TODO
     private ComplexProperty rootAccessPath;
     private AbstractDDLWrapper wrapper;
     
-    public void input(SchemaCategory schema, InstanceCategory instance, Name name, ComplexProperty rootAccessPath, AbstractDDLWrapper wrapper)
+    public void input(SchemaCategory schema, InstanceCategory instance, String name, ComplexProperty rootAccessPath, AbstractDDLWrapper wrapper)
     {
         this.schema = schema;
         instanceFunctor = new InstanceFunctor(instance, schema);
@@ -31,9 +30,9 @@ public class DDLAlgorithm
         this.wrapper = wrapper;
     }
     
-    public DDLStatement algorithm()
+    public DDLStatement algorithm() throws Exception
     {
-        wrapper.setKindName(name.getStringName());
+        wrapper.setKindName(name);
         
         if (!wrapper.isSchemaLess())
         {
@@ -47,7 +46,7 @@ public class DDLAlgorithm
         return wrapper.createDDLStatement();
     }
     
-    private void processTopOfStack(Stack<StackPair> M)
+    private void processTopOfStack(Stack<StackPair> M) throws Exception
     {
         StackPair pair = M.pop();
         AccessPath path = pair.accessPath;
@@ -61,7 +60,7 @@ public class DDLAlgorithm
             processPath(complexProperty, N);
     }
     
-    private Set<String> determinePropertyName(AccessPath path)
+    private Set<String> determinePropertyName(AccessPath path) throws Exception
     {
         var name = path.name();
         if (name.type() != Name.Type.DYNAMIC_NAME)
@@ -116,5 +115,4 @@ public class DDLAlgorithm
     {
         return morphism.max() == SchemaMorphism.Max.STAR;
     }
-    */
 }
