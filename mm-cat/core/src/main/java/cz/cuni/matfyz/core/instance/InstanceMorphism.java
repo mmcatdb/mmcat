@@ -3,7 +3,6 @@ package cz.cuni.matfyz.core.instance;
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.core.utils.*;
 
 import java.util.*;
 

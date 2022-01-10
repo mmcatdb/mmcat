@@ -5,13 +5,8 @@ import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.Debug;
-import java.net.MalformedURLException;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -34,6 +29,7 @@ public abstract class ModelToCategoryBase
 	public void setUp()
     {
         Debug.setLevel(getDebugLevel());
+        UniqueIdProvider.reset();
     }
 
 	/**

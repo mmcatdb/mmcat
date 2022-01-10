@@ -27,7 +27,6 @@ public class InstanceFunctor
         }
         
         return object;
-        //throw new UnsupportedOperationException(); // TODO
     }
     
     public InstanceMorphism morphism(SchemaMorphism schemaMorphism)
@@ -40,6 +39,5 @@ public class InstanceFunctor
         }
         
         return morphism;
-        //throw new UnsupportedOperationException(); // TODO
     }
 }

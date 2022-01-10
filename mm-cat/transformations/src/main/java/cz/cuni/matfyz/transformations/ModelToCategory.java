@@ -164,10 +164,10 @@ public class ModelToCategory
             if (value instanceof String stringValue)
                 builder.add(signature, stringValue);
             */
-            SimpleRecord<String> simpleRecord = rootRecord.values().get(signature);
-            if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+            SimpleRecord<?> simpleRecord = rootRecord.values().get(signature);
+            if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
             {
-                builder.add(signature, simpleValueRecord.getValue());
+                builder.add(signature, simpleValueRecord.getValue().toString());
             }
             else
             {
@@ -198,21 +198,21 @@ public class ModelToCategory
             else
             {
                 // Pokud je v recordu hodnota - což odpovídá simple property
-                SimpleRecord<String> simpleRecord = parentRecord.values().get(morphism.signature());
+                SimpleRecord<?> simpleRecord = parentRecord.values().get(morphism.signature());
                 if (simpleRecord != null)
                 {
-                    if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
+                    if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
                     {
                         var builder = new IdWithValues.Builder();
-                        builder.add(Signature.Empty(), simpleValueRecord.getValue());
+                        builder.add(Signature.Empty(), simpleValueRecord.getValue().toString());
                         output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
                     }
-                    else if (simpleRecord instanceof SimpleArrayRecord<String> simpleArrayRecord)
+                    else if (simpleRecord instanceof SimpleArrayRecord<?> simpleArrayRecord)
                     {
-                        for (String value : simpleArrayRecord.getValues())
+                        for (Object value : simpleArrayRecord.getValues())
                         {
                             var builder = new IdWithValues.Builder();
-                            builder.add(Signature.Empty(), value);
+                            builder.add(Signature.Empty(), value.toString());
                             output.add(new Pair<>(builder.build(), null)); // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
                         }
                     }
@@ -268,7 +268,7 @@ public class ModelToCategory
             return;
         }
         
-        for (SimpleValueRecord<String> dynamicRecord : childRecord.dynamicValues())
+        for (SimpleValueRecord<?> dynamicRecord : childRecord.dynamicValues())
         {
             var builder = new IdWithValues.Builder();
             for (Signature signature : nonDynamicSignatures)
@@ -279,9 +279,9 @@ public class ModelToCategory
                 String value;
                 if (signatureInParentRow == null)
                 {
-                    SimpleRecord<String> simpleRecord = childRecord.values().get(signature);
-                    if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
-                        value = simpleValueRecord.getValue();
+                    SimpleRecord<?> simpleRecord = childRecord.values().get(signature);
+                    if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
+                        value = simpleValueRecord.getValue().toString();
                     else
                         throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
                 }
@@ -293,7 +293,7 @@ public class ModelToCategory
             
             for (Signature signature : dynamicSignatures)
             {
-                String value = dynamicRecord.signature().equals(signature) ? dynamicRecord.getValue() : dynamicRecord.name().value();
+                String value = dynamicRecord.signature().equals(signature) ? dynamicRecord.getValue().toString() : dynamicRecord.name().value();
                 builder.add(signature, value);
             }
 
@@ -312,9 +312,9 @@ public class ModelToCategory
             String value;
             if (signatureInParentRow == null)
             {
-                SimpleRecord<String> simpleRecord = childRecord.values().get(signature);
-                if (simpleRecord instanceof SimpleValueRecord<String> simpleValueRecord)
-                    value = simpleValueRecord.getValue();
+                SimpleRecord<?> simpleRecord = childRecord.values().get(signature);
+                if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
+                    value = simpleValueRecord.getValue().toString();
                 else
                     throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
             }
@@ -457,9 +457,9 @@ public class ModelToCategory
         }
         
         if (name.type() == Name.Type.DYNAMIC_NAME)
-            return List.of(new Pair(name.signature(), ComplexProperty.Empty()));
+            return List.of(new Pair<>(name.signature(), ComplexProperty.Empty()));
         else // Static or anonymous (empty) name
-            return Collections.EMPTY_LIST;
+            return Collections.<Pair<Signature, ComplexProperty>>emptyList();
     }
     
     private static Collection<Pair<Signature, ComplexProperty>> process(IContext context, IValue value)
@@ -476,13 +476,13 @@ public class ModelToCategory
             final Signature contextSignature = context instanceof Signature signature ? signature : Signature.Empty();
             final Signature newSignature = simpleValue.signature().concatenate(contextSignature);
             
-            return List.of(new Pair(newSignature, ComplexProperty.Empty()));
+            return List.of(new Pair<>(newSignature, ComplexProperty.Empty()));
         }
         
         if (value instanceof ComplexProperty complexProperty)
         {
             if (context instanceof Signature signature)
-                return List.of(new Pair(signature, complexProperty));
+                return List.of(new Pair<>(signature, complexProperty));
             else
                 return children(complexProperty);
         }

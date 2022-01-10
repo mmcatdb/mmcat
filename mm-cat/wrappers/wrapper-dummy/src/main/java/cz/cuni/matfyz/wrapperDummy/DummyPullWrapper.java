@@ -2,7 +2,6 @@ package cz.cuni.matfyz.wrapperDummy;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.record.ComplexRecord;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.RootRecord;
@@ -84,13 +83,14 @@ public class DummyPullWrapper implements AbstractPullWrapper
         }
         
         // For all keys in the object where the key is not a known static name do ...
-        Iterator<String> iterator = object.keys();
+        Iterator<?> iterator = object.keys();
         while (iterator.hasNext())
         {
-            String key = iterator.next();
-            
-            if (!otherSubpathNames.contains(key))
-                getFieldWithKeyForSubpathFromObject(parentRecord, object, key, subpathWithDynamicName);
+            if (iterator.next() instanceof String key)
+            {
+                if (!otherSubpathNames.contains(key))
+                    getFieldWithKeyForSubpathFromObject(parentRecord, object, key, subpathWithDynamicName);
+            }
         }
     }
     

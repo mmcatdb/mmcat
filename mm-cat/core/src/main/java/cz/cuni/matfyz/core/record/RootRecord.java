@@ -1,9 +1,5 @@
 package cz.cuni.matfyz.core.record;
 
-import cz.cuni.matfyz.core.category.Signature;
-
-import java.util.*;
-
 /**
  * This class represents a root of the record tree.
  * @author jachymb.bartik

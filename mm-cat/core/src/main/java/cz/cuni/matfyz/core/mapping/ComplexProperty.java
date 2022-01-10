@@ -69,7 +69,7 @@ public class ComplexProperty extends AccessPath implements IValue
     
     public static ComplexProperty Empty()
     {
-        return new ComplexProperty(null, Signature.Null(), Collections.EMPTY_LIST);
+        return new ComplexProperty(null, Signature.Null(), Collections.<AccessPath>emptyList());
     }
     
     /**

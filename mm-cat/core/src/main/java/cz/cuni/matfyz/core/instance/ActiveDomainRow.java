@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.schema.Id;
 
 import java.util.*;
 

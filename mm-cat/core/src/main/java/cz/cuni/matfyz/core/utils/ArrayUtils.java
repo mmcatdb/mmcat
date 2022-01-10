@@ -8,12 +8,14 @@ import java.util.*;
  */
 public class ArrayUtils
 {
+    @SafeVarargs
     public static <T> T[] concatenate(T[]... arrays)
     {
         int length = 0;
         for (T[] array : arrays)
             length += array.length;
         
+        @SuppressWarnings("unchecked")
         final T[] output = (T[]) new Object[length];
         
         int startIndex = 0;

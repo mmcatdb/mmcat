@@ -5,7 +5,6 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.category.*;
-import cz.cuni.matfyz.core.utils.Debug;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 import java.nio.file.Paths;
 

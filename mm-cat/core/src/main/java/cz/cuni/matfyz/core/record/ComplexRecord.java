@@ -16,9 +16,9 @@ public class ComplexRecord extends DataRecord
     //private final Map<Signature, Set<DataRecord>> children = new TreeMap<>();
     
     private final Map<Signature, List<ComplexRecord>> children = new TreeMap<>();
-    private final Map<Signature, SimpleRecord> values = new TreeMap<>();
-    private final List<SimpleValueRecord> dynamicValues = new ArrayList<>();
-    private SimpleValueRecord firstDynamicValue = null;
+    private final Map<Signature, SimpleRecord<?>> values = new TreeMap<>();
+    private final List<SimpleValueRecord<?>> dynamicValues = new ArrayList<>();
+    private SimpleValueRecord<?> firstDynamicValue = null;
     
 	protected ComplexRecord(Name name, ComplexRecord parent)
     {
@@ -30,17 +30,17 @@ public class ComplexRecord extends DataRecord
         return children;
     }
     
-    public Map<Signature, SimpleRecord> values()
+    public Map<Signature, SimpleRecord<?>> values()
     {
         return values;
     }
     
-    public List<SimpleValueRecord> dynamicValues()
+    public List<SimpleValueRecord<?>> dynamicValues()
     {
         return dynamicValues;
     }
     
-    public SimpleValueRecord firstDynamicValue()
+    public SimpleValueRecord<?> firstDynamicValue()
     {
         return firstDynamicValue;
     }
@@ -68,7 +68,7 @@ public class ComplexRecord extends DataRecord
     
     public <DataType> SimpleRecord<DataType> addSimpleValueRecord(Name name, Signature signature, DataType value)
     {
-        var record = new SimpleValueRecord(name, this, signature, value);
+        var record = new SimpleValueRecord<>(name, this, signature, value);
         values.put(signature, record);
         
         return record;
@@ -76,7 +76,7 @@ public class ComplexRecord extends DataRecord
     
     public <DataType> SimpleRecord<DataType> addSimpleArrayRecord(Name name, Signature signature, List<DataType> values)
     {
-        var record = new SimpleArrayRecord(name, this, signature, values);
+        var record = new SimpleArrayRecord<>(name, this, signature, values);
         this.values.put(signature, record);
         
         return record;
@@ -84,7 +84,7 @@ public class ComplexRecord extends DataRecord
     
     public <DataType> SimpleValueRecord<DataType> addSimpleDynamicRecord(Name name, Signature signature, DataType value)
     {
-        var record = new SimpleValueRecord(name, this, signature, value);
+        var record = new SimpleValueRecord<>(name, this, signature, value);
         
         if (firstDynamicValue == null)
         {
@@ -123,7 +123,7 @@ public class ComplexRecord extends DataRecord
         for (Signature signature : values.keySet())
             childrenBuilder.append(values.get(signature)).append(",\n");
         
-        for (SimpleValueRecord dynamicValue : dynamicValues)
+        for (SimpleValueRecord<?> dynamicValue : dynamicValues)
             childrenBuilder.append(dynamicValue).append(",\n");
         
         for (Signature signature : children.keySet())

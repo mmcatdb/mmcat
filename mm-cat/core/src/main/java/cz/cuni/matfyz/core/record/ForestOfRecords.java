@@ -16,17 +16,17 @@ public class ForestOfRecords implements Iterable<RootRecord> {
 	// private final Map<Name, DataRecord> quickAccess = new TreeMap<>(); // Name = StaticName | AnonymousName | DerivedName
     
 	@Override
-	public Iterator iterator() {
+	public Iterator<RootRecord> iterator() {
 		return records.iterator();
 	}
 
 	@Override
-	public void forEach(Consumer action) {
+	public void forEach(Consumer<? super RootRecord> action) {
         records.forEach(action);
 	}
 
 	@Override
-	public Spliterator spliterator() {
+	public Spliterator<RootRecord> spliterator() {
 		return records.spliterator();
 	}
     

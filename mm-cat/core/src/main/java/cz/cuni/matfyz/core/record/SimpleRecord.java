@@ -2,8 +2,6 @@ package cz.cuni.matfyz.core.record;
 
 import cz.cuni.matfyz.core.category.Signature;
 
-import java.util.Set;
-
 /**
  * Simple property cannot have children so it is a leaf node in the record tree.
  * However, it can have value.
