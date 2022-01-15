@@ -3,3 +3,4 @@
 /mm-cat/transformations/nbproject/
 /mm-cat/tests/nbproject/
 **/target/**
+.vscode
