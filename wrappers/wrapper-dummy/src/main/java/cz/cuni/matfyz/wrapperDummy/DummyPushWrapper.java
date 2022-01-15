@@ -12,6 +12,11 @@ import java.util.*;
 public class DummyPushWrapper implements AbstractPushWrapper
 {
     private List<String> methods = new ArrayList<>();
+
+    public Iterable<String> methods()
+    {
+        return methods;
+    }
     
     @Override
     public void setKindName(String name)
@@ -35,7 +40,6 @@ public class DummyPushWrapper implements AbstractPushWrapper
     public DMLStatement createDMLStatement()
     {
         methods.add("createDMLStatement()");
-
-        return new DummyDMLStatement(String.join("\n", methods));
+        return new DummyDMLStatement("");
     }
 }

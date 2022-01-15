@@ -12,7 +12,12 @@ import java.util.*;
 public class DummyDDLWrapper implements AbstractDDLWrapper
 {
     private List<String> methods = new ArrayList<>();
-    
+
+    public Iterable<String> methods()
+    {
+        return methods;
+    }
+
     @Override
     public void setKindName(String name)
     {
@@ -58,8 +63,7 @@ public class DummyDDLWrapper implements AbstractDDLWrapper
     public DDLStatement createDDLStatement()
     {
         methods.add("createDDLStatement()");
-
-        return new DummyDDLStatement(String.join("\n", methods));
+        return new DummyDDLStatement("");
     }
 
     private String setToString(Set<String> strings)

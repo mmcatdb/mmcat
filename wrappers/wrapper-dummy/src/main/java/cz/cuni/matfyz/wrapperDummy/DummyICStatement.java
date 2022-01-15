@@ -1,16 +1,16 @@
 package cz.cuni.matfyz.wrapperDummy;
 
-import cz.cuni.matfyz.statements.DDLStatement;
+import cz.cuni.matfyz.statements.ICStatement;
 
 /**
  *
  * @author jachymb.bartik
  */
-public class DummyDDLStatement implements DDLStatement
-{    
+public class DummyICStatement implements ICStatement
+{
     private final String content;
     
-    public DummyDDLStatement(String content)
+    public DummyICStatement(String content)
     {
         this.content = content;
     }
