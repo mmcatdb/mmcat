@@ -8,7 +8,6 @@ import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.statements.DMLStatement;
 
 import java.util.*;
-import org.javatuples.Pair;
 
 /**
  *
@@ -16,18 +15,17 @@ import org.javatuples.Pair;
  */
 public class DMLAlgorithm
 {
-    /*
-    private SchemaCategory schema; // TODO
+    private InstanceCategory instance;
     private InstanceFunctor instanceFunctor;
-    private String name; // TODO
+    private String rootName; // TODO
     private Mapping mapping;
     private AbstractPushWrapper wrapper;
 
-    public void input(SchemaCategory schema, InstanceCategory instance, String name, Mapping mapping, AbstractPushWrapper wrapper)
+    public void input(SchemaCategory schema, InstanceCategory instance, String rootName, Mapping mapping, AbstractPushWrapper wrapper)
     {
-        this.schema = schema;
+        this.instance = instance;
         instanceFunctor = new InstanceFunctor(instance, schema);
-        this.name = name;
+        this.rootName = rootName; // Maybe it could be found as mapping.accessPath.Name.getStringName()
         this.mapping = mapping;
         this.wrapper = wrapper;
     }
@@ -42,7 +40,7 @@ public class DMLAlgorithm
     private List<DMLStatement> processWithObject(SchemaObject object) throws Exception
     {
         InstanceObject qI = instanceFunctor.object(object);
-        List<ActiveDomainRow> S = fetchSids(qI);
+        Set<ActiveDomainRow> S = fetchSids(qI);
         Stack<DMLStackTriple> M = new Stack<>();
         List<DMLStatement> output = new ArrayList<>();
 
@@ -58,58 +56,147 @@ public class DMLAlgorithm
     private List<DMLStatement> processWithMorphism(SchemaMorphism morphism) throws Exception
     {
         InstanceMorphism mI = instanceFunctor.morphism(morphism);
-        List<ActiveMappingRow> S = fetchRelations(mI);
+        Set<ActiveMappingRow> S = fetchRelations(mI);
         AccessPath codomainPath = mapping.accessPath().getSubpathBySignature(morphism.signature());
         Stack<DMLStackTriple> M = new Stack<>();
         List<DMLStatement> output = new ArrayList<>();
 
-        for (ActiveMappingRow row : S)
+        if (codomainPath instanceof ComplexProperty complexPath)
         {
-            M.push(new DMLStackTriple(row.domainRow(), Name.Anonymous().getStringName(), mapping.accessPath().minusSubpath(codomainPath)));
-            M.push(new DMLStackTriple(row.codomainRow(), Name.Anonymous().getStringName(), codomainPath));
-            output.add(buildStatement(M));
+            for (ActiveMappingRow row : S)
+            {
+                M.push(new DMLStackTriple(row.domainRow(), Name.Anonymous().getStringName(), mapping.accessPath().minusSubpath(codomainPath)));
+                M.push(new DMLStackTriple(row.codomainRow(), Name.Anonymous().getStringName(), complexPath));
+                output.add(buildStatement(M));
+            }
+
+            return output;
         }
+
+        throw new UnsupportedOperationException();
+    }
+
+    private Set<ActiveDomainRow> fetchSids(InstanceObject object)
+    {
+        Set<ActiveDomainRow> output = new TreeSet<>();
+
+        for (var innerMap : object.activeDomain().values())
+            output.addAll(innerMap.values());
 
         return output;
     }
 
-    private List<ActiveDomainRow> fetchSids(InstanceObject object)
+    private Set<ActiveMappingRow> fetchRelations(InstanceMorphism morphism)
     {
-
-    }
-
-    private List<ActiveMappingRow> fetchRelations(InstanceMorphism morphism)
-    {
-
+        return morphism.mappings();
     }
 
     private DMLStatement buildStatement(Stack<DMLStackTriple> M)
     {
         wrapper.clear();
-        wrapper.setKindName(name.getStringName());
+        wrapper.setKindName(rootName);
 
         while (!M.empty())
         {
             DMLStackTriple triple = M.pop();
-            List<Pair<String, IValue>> pairs = collectNameValuePairs(triple.t, triple.pid);
+            List<NameValuePair> pairs = collectNameValuePairs(triple.t, triple.pid);
 
             for (var pair : pairs)
             {
-                String newName = triple.name.getStringName() + "/" + pair.getValue0().getStringName();
+                String newName = triple.name + "/" + pair.name;
 
-                if (pair.getValue1() instanceof SimpleProperty simpleProperty)
-                    wrapper.append(newName, simpleProperty);
-                else if (pair.getValue1() instanceof ComplexProperty complexProperty)
-                    for (AccessPath subpath : complexProperty.subpaths())
-                    M.push(new DMLStackTriple(complexProperty, newName, subpath));
+                if (pair.isSimple)
+                    wrapper.append(newName, pair.simpleValue);
+                else
+                    M.push(new DMLStackTriple(pair.complexValue, newName, pair.subpath));
             }
         }
 
+        return wrapper.createDMLStatement();
     }
 
-    private List<Pair<String, IValue>> collectNameValuePairs(AccessPath path, ActiveMappingRow row)
+    private List<NameValuePair> collectNameValuePairs(ComplexProperty path, ActiveDomainRow row)
     {
-        
+        List<NameValuePair> output = new ArrayList<>();
+
+        for (AccessPath subpath : path.subpaths())
+        {
+            // Get all mapping rows that have signature of this subpath and originate in given row.
+            InstanceMorphism morphism = instance.morphism(subpath.signature());
+            morphism.mappings().stream().filter(mapping -> mapping.domainRow().equals(row))
+                .forEach(mappingRow -> output.add(getNameValuePair(subpath, mappingRow)));
+        }
+
+        return output;
     }
-    */
+
+    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveMappingRow parentToObjectMapping)
+    {
+        ActiveDomainRow objectRow = parentToObjectMapping.codomainRow();
+        String name = getStringName(objectPath, parentToObjectMapping);
+
+        if (objectPath instanceof SimpleProperty simplePath)
+        {
+            String value = objectRow.tuples().get(Signature.Empty());
+
+            return new NameValuePair(name, value);
+        }
+        else if (objectPath instanceof ComplexProperty complexPath)
+        {
+            return new NameValuePair(name, objectRow, complexPath);
+        }
+
+        throw new UnsupportedOperationException();
+    }
+
+    private String getStringName(AccessPath objectPath, ActiveMappingRow parentToObjectMapping)
+    {
+        Name name = objectPath.name();
+
+        if (name.type() != Name.Type.DYNAMIC_NAME)
+        {
+            try { // Just a workaround
+                return name.getStringName();
+            }
+            catch (Exception e) {}
+        }
+
+        // If the name is dynamic, we have to find its string value.
+        ActiveDomainRow parentRow = parentToObjectMapping.domainRow();
+        InstanceMorphism nameMorphism = instance.morphism(name.signature());
+        Optional<ActiveMappingRow> nameRow = nameMorphism.mappings().stream().filter(mapping -> mapping.domainRow().equals(parentRow))
+            .findFirst();
+
+        if (nameRow.isPresent())
+            return nameRow.get().codomainRow().tuples().get(Signature.Empty());
+
+        throw new UnsupportedOperationException("Dynamic name value not found.");
+    }
+
+    private class NameValuePair
+    {
+        public final String name;
+        public final String simpleValue;
+        public final ActiveDomainRow complexValue;
+        public final ComplexProperty subpath;
+        public final boolean isSimple;
+
+        public NameValuePair(String name, String simpleValue)
+        {
+            this.name = name;
+            this.simpleValue = simpleValue;
+            this.complexValue = null;
+            this.subpath = null;
+            this.isSimple = true;
+        }
+
+        public NameValuePair(String name, ActiveDomainRow complexValue, ComplexProperty subpath)
+        {
+            this.name = name;
+            this.simpleValue = null;
+            this.complexValue = complexValue;
+            this.subpath = subpath;
+            this.isSimple = false;
+        }
+    }
 }

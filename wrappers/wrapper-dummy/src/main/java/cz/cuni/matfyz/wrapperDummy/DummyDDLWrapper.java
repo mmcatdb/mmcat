@@ -12,6 +12,7 @@ import java.util.*;
 public class DummyDDLWrapper implements AbstractDDLWrapper
 {
     private List<String> methods = new ArrayList<>();
+    
     @Override
     public void setKindName(String name)
     {

@@ -20,8 +20,8 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
     @Override
     protected int getDebugLevel()
     {
-        //return 0;
-        return 5;
+        return 0;
+        //return 5;
     }
     
     @Override

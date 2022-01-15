@@ -142,6 +142,7 @@ public class DummyPullWrapper implements AbstractPullWrapper
             ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.name().toRecordName(key), complexProperty.signature());
             getDataFromObject(childRecord, value, complexProperty);
             
+            // Dynamic complex property is just a normal complex property with additional simple property for name.
             if (complexProperty.name().type() == Name.Type.DYNAMIC_NAME)
                 childRecord.addSimpleValueRecord(cz.cuni.matfyz.core.record.Name.LeftDynamic(), complexProperty.name().signature(), childRecord.name().value());
         }

@@ -74,9 +74,9 @@ public class ComplexProperty extends AccessPath implements IValue
     
     /**
      * Given a signature M, this function finds such a direct subpath S of this path that for each of the leaves L of S holds:
-     *      * L.context == M, or
-     *      * L.value == M, or
-     *      * exists an ancestor A of L in S where A.context == M.
+     *      - L.context == M, or
+     *      - L.value == M, or
+     *      - exists an ancestor A of L in S where A.context == M.
      * If there are more such subpaths (i.e. when some of them are auxiliary), the closest one is returned.
      * If M == null, a leaf L with L.value == epsion is returned.
      * If none of above exists, a null is returned;

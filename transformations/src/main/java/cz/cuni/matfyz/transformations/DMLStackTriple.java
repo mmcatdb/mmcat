@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.transformations;
 
-import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.utils.*;
@@ -13,9 +12,9 @@ public class DMLStackTriple {
 	
     public final ActiveDomainRow pid;
 	public final String name;
-	public final AccessPath t;
+	public final ComplexProperty t;
 	
-    public DMLStackTriple(ActiveDomainRow pid, String name, AccessPath t)
+    public DMLStackTriple(ActiveDomainRow pid, String name, ComplexProperty t)
     {
         this.pid = pid;
         this.name = name;

@@ -40,6 +40,11 @@ public class InstanceMorphism implements Morphism
     {
         mappings.add(mapping);
     }
+
+    public Set<ActiveMappingRow> mappings()
+    {
+        return mappings();
+    }
     
 	@Override
 	public InstanceObject dom()
