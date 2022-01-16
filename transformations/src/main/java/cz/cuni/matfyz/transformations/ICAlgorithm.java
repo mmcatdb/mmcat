@@ -29,7 +29,7 @@ public class ICAlgorithm
         this.wrapper = wrapper;
     }
     
-    public ICStatement algorithm() throws Exception
+    public ICStatement algorithm()
     {
         throw new UnsupportedOperationException();
         /*

@@ -21,18 +21,18 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     }
     
     @Override
-	public ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception
+	public ForestOfRecords pullForest(String selectAll, ComplexProperty path)
     {
         return pullForest(selectAll, path, false, 0, 0);
     }
 
     @Override
-    public ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset) throws Exception
+    public ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset)
     {
         return pullForest(selectAll, path, true, limit, offset);
     }
     
-	private ForestOfRecords pullForest(String selectAll, ComplexProperty path, boolean doLimitAndOffset, int limit, int offset) throws Exception
+	private ForestOfRecords pullForest(String selectAll, ComplexProperty path, boolean doLimitAndOffset, int limit, int offset)
     {
         // selectAll should be in the form of "database.getCollection("<kindName>");"
         var database = databaseProvider.getDatabase();
@@ -60,7 +60,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
         return forest;
     }
     
-    private void processSubpaths(ComplexProperty path, ComplexRecord record, Document document) throws Exception
+    private void processSubpaths(ComplexProperty path, ComplexRecord record, Document document)
     {
         for (AccessPath subpath : path.subpaths())
         {
@@ -74,7 +74,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
         }
     }
     
-    private void processComplexProperty(ComplexProperty complexProperty, ComplexRecord parentRecord, Object value) throws Exception
+    private void processComplexProperty(ComplexProperty complexProperty, ComplexRecord parentRecord, Object value)
     {
         ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.name().toRecordName(), complexProperty.signature());
         Document childDocument = value instanceof Document documentValue ? documentValue : null;

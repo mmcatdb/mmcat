@@ -7,6 +7,7 @@ import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.Debug;
 
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Assertions;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public abstract class ModelToCategoryBase
 	/**
 	 * Test of algorithm method of class ModelToCategory.
 	 */
-	public void testAlgorithm() throws Exception
+	public void testAlgorithm()
     {
 		SchemaCategory schema = buildSchemaCategoryScenario();
         if (Debug.shouldLog(3))
@@ -50,7 +51,17 @@ public abstract class ModelToCategoryBase
 			System.out.println(String.format("# Access Path\n%s", path));
         }
         
-		ForestOfRecords forest = buildForestOfRecords(path);
+        ForestOfRecords forest;
+        try
+        {
+		    forest = buildForestOfRecords(path);
+        }
+        catch (Exception e)
+        {
+            Assertions.fail("Exception thrown when building forest.");
+            return;
+        }
+
         if (Debug.shouldLog(3))
         {
 			System.out.println(String.format("# Forest of Records\n%s", forest));

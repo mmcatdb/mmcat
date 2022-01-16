@@ -43,7 +43,7 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var orderProperty = new ComplexProperty(Name.Anonymous(), Signature.Null(),
+        var orderProperty = new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new ComplexProperty("_id", Signature.Null(),
                 new SimpleProperty("customer", orderedToOrder.dual().concatenate(customerToOrdered.dual()).concatenate(customerToId)),
                 new SimpleProperty("number", orderToNumber)
@@ -75,7 +75,8 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
     }
     
     @Test
-	public void execute() throws Exception {
+	public void execute()
+    {
 		super.testAlgorithm();
 	}
 }

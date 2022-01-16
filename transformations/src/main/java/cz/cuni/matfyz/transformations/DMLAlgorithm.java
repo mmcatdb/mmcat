@@ -30,14 +30,14 @@ public class DMLAlgorithm
         this.wrapper = wrapper;
     }
     
-    public List<DMLStatement> algorithm() throws Exception
+    public List<DMLStatement> algorithm()
     {
         return mapping.hasRootMorphism() ?
             processWithMorphism(mapping.rootMorphism()) : // K with root morphism
             processWithObject(mapping.rootObject()); // K with root object
     }
 
-    private List<DMLStatement> processWithObject(SchemaObject object) throws Exception
+    private List<DMLStatement> processWithObject(SchemaObject object)
     {
         InstanceObject qI = instanceFunctor.object(object);
         Set<ActiveDomainRow> S = fetchSids(qI);
@@ -46,14 +46,14 @@ public class DMLAlgorithm
 
         for (ActiveDomainRow sid : S)
         {
-            M.push(new DMLStackTriple(sid, Name.Anonymous().getStringName(), mapping.accessPath()));
+            M.push(new DMLStackTriple(sid, StaticName.Anonymous().getStringName(), mapping.accessPath()));
             output.add(buildStatement(M));
         }
 
         return output;
     }
 
-    private List<DMLStatement> processWithMorphism(SchemaMorphism morphism) throws Exception
+    private List<DMLStatement> processWithMorphism(SchemaMorphism morphism)
     {
         InstanceMorphism mI = instanceFunctor.morphism(morphism);
         Set<ActiveMappingRow> S = fetchRelations(mI);
@@ -65,8 +65,8 @@ public class DMLAlgorithm
         {
             for (ActiveMappingRow row : S)
             {
-                M.push(new DMLStackTriple(row.domainRow(), Name.Anonymous().getStringName(), mapping.accessPath().minusSubpath(codomainPath)));
-                M.push(new DMLStackTriple(row.codomainRow(), Name.Anonymous().getStringName(), complexPath));
+                M.push(new DMLStackTriple(row.domainRow(), StaticName.Anonymous().getStringName(), mapping.accessPath().minusSubpath(codomainPath)));
+                M.push(new DMLStackTriple(row.codomainRow(), StaticName.Anonymous().getStringName(), complexPath));
                 output.add(buildStatement(M));
             }
 
@@ -151,19 +151,13 @@ public class DMLAlgorithm
 
     private String getStringName(AccessPath objectPath, ActiveMappingRow parentToObjectMapping)
     {
-        Name name = objectPath.name();
+        if (objectPath.name() instanceof StaticName staticName)
+            return staticName.getStringName();
 
-        if (name.type() != Name.Type.DYNAMIC_NAME)
-        {
-            try { // Just a workaround
-                return name.getStringName();
-            }
-            catch (Exception e) {}
-        }
-
+        var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
         ActiveDomainRow parentRow = parentToObjectMapping.domainRow();
-        InstanceMorphism nameMorphism = instance.morphism(name.signature());
+        InstanceMorphism nameMorphism = instance.morphism(dynamicName.signature());
         Optional<ActiveMappingRow> nameRow = nameMorphism.mappings().stream().filter(mapping -> mapping.domainRow().equals(parentRow))
             .findFirst();
 

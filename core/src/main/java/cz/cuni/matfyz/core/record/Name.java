@@ -20,7 +20,7 @@ public class Name implements Comparable<Name>
         ANONYMOUS,
 		DYNAMIC_NAME
 	}
-    
+
     public String value()
     {
         return name;
@@ -33,31 +33,21 @@ public class Name implements Comparable<Name>
     
     public static Name LeftDynamic()
     {
-        return new Name("_LEFT_DYNAMIC");
+        return new Name("_LEFT_DYNAMIC", cz.cuni.matfyz.core.mapping.StaticName.Type.STATIC_NAME);
     }
     
     public Name(Signature signature, String name)
     {
         this.name = name;
         this.signature = signature;
-        type = Type.DYNAMIC_NAME;
+        this.type = Type.DYNAMIC_NAME;
     }
     
-    public Name(String name)
+    public Name(String name, cz.cuni.matfyz.core.mapping.StaticName.Type type)
     {
         this.name = name;
-        signature = null;
-        type = name == "" ? Type.ANONYMOUS : Type.STATIC_NAME;
-    }
-    
-    public String getStringName() throws Exception
-    {
-        return switch (type)
-        {
-            case STATIC_NAME -> name;
-            case ANONYMOUS -> "";
-            case DYNAMIC_NAME -> throw new Exception();
-        };
+        this.signature = null;
+        this.type = type == cz.cuni.matfyz.core.mapping.StaticName.Type.STATIC_NAME ? Type.STATIC_NAME : Type.ANONYMOUS;
     }
     
     public boolean equals(Name anotherName)

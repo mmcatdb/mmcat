@@ -31,12 +31,12 @@ public class SimpleProperty extends AccessPath
     
     public SimpleProperty(String name, Signature value)
     {
-        this(new Name(name), new SimpleValue(value));
+        this(new StaticName(name), new SimpleValue(value));
     }
     
     public SimpleProperty(Signature name, Signature value)
     {
-        this(new Name(name), new SimpleValue(value));
+        this(new DynamicName(name), new SimpleValue(value));
     }
     
     @Override

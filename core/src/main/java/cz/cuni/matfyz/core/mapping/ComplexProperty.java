@@ -59,12 +59,12 @@ public class ComplexProperty extends AccessPath implements IValue
     
     public ComplexProperty(String name, Signature signature, AccessPath... subpaths)
     {
-        this(new Name(name), signature, Arrays.asList(subpaths));
+        this(new StaticName(name), signature, Arrays.asList(subpaths));
     }
     
     public ComplexProperty(Signature name, Signature signature, AccessPath... subpaths)
     {
-        this(new Name(name), signature, Arrays.asList(subpaths));
+        this(new DynamicName(name), signature, Arrays.asList(subpaths));
     }
     
     public static ComplexProperty Empty()

@@ -456,8 +456,8 @@ public class ModelToCategory
             System.out.println(name);
         }
         
-        if (name.type() == Name.Type.DYNAMIC_NAME)
-            return List.of(new Pair<>(name.signature(), ComplexProperty.Empty()));
+        if (name instanceof DynamicName dynamicName)
+            return List.of(new Pair<>(dynamicName.signature(), ComplexProperty.Empty()));
         else // Static or anonymous (empty) name
             return Collections.<Pair<Signature, ComplexProperty>>emptyList();
     }

@@ -57,10 +57,10 @@ public class DummyPullWrapper implements AbstractPullWrapper
         
         for (AccessPath subpath : path.subpaths())
         {
-            if (subpath.name().type() == Name.Type.DYNAMIC_NAME)
-                hasSubpathWithDynamicName = true;
+            if (subpath.name() instanceof StaticName staticName)
+                getFieldWithKeyForSubpathFromObject(parentRecord, object, staticName.getStringName(), subpath);
             else
-                getFieldWithKeyForSubpathFromObject(parentRecord, object, subpath.name().getStringName(), subpath);
+                hasSubpathWithDynamicName = true;
         }
         
         if (hasSubpathWithDynamicName)
@@ -75,10 +75,11 @@ public class DummyPullWrapper implements AbstractPullWrapper
         
         for (AccessPath subpath : path.subpaths())
         {
-            if (subpath.name().type() == Name.Type.DYNAMIC_NAME)
-                subpathWithDynamicName = subpath;
+            if (subpath.name() instanceof StaticName staticName)
+                otherSubpathNames.add(staticName.getStringName());
             else
-                otherSubpathNames.add(subpath.name().getStringName());
+                subpathWithDynamicName = subpath;
+                
         }
         
         // For all keys in the object where the key is not a known static name do ...
@@ -118,15 +119,16 @@ public class DummyPullWrapper implements AbstractPullWrapper
                 
                 for (int i = 0; i < simpleArray.length(); i++)
                     values.add(simpleArray.get(i).toString());
-                    
-                parentRecord.addSimpleArrayRecord(simpleSubpath.name().toRecordName(key), simpleSubpath.value().signature(), values);
+                
+                parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), key), simpleSubpath.value().signature(), values);
             }
             else
             {
-                if (simpleSubpath.name().type() == Name.Type.DYNAMIC_NAME)
-                    parentRecord.addSimpleDynamicRecord(simpleSubpath.name().toRecordName(key), simpleSubpath.value().signature(), value.toString());
+                cz.cuni.matfyz.core.record.Name recordName = toRecordName(simpleSubpath.name(), key);
+                if (simpleSubpath.name() instanceof StaticName staticName)
+                    parentRecord.addSimpleValueRecord(recordName, simpleSubpath.value().signature(), value.toString());
                 else
-                    parentRecord.addSimpleValueRecord(simpleSubpath.name().toRecordName(key), simpleSubpath.value().signature(), value.toString());
+                    parentRecord.addSimpleDynamicRecord(recordName, simpleSubpath.value().signature(), value.toString());
             }
         }
     }
@@ -139,12 +141,21 @@ public class DummyPullWrapper implements AbstractPullWrapper
             getDataFromObject(parentRecord, value, complexProperty);
         else
         {
-            ComplexRecord childRecord = parentRecord.addComplexRecord(complexProperty.name().toRecordName(key), complexProperty.signature());
+            ComplexRecord childRecord = parentRecord.addComplexRecord(toRecordName(complexProperty.name(), key), complexProperty.signature());
             getDataFromObject(childRecord, value, complexProperty);
             
             // Dynamic complex property is just a normal complex property with additional simple property for name.
-            if (complexProperty.name().type() == Name.Type.DYNAMIC_NAME)
-                childRecord.addSimpleValueRecord(cz.cuni.matfyz.core.record.Name.LeftDynamic(), complexProperty.name().signature(), childRecord.name().value());
+            if (complexProperty.name() instanceof DynamicName dynamicName)
+                childRecord.addSimpleValueRecord(cz.cuni.matfyz.core.record.Name.LeftDynamic(), dynamicName.signature(), childRecord.name().value());
         }
+    }
+
+    private cz.cuni.matfyz.core.record.Name toRecordName(Name name, String valueIfDynamic)
+    {
+        if (name instanceof DynamicName dynamicName)
+            return dynamicName.toRecordName(valueIfDynamic);
+        
+        var staticName = (StaticName) name;
+        return staticName.toRecordName();
     }
 }

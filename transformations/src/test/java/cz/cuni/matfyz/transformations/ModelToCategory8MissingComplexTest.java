@@ -36,7 +36,7 @@ public class ModelToCategory8MissingComplexTest extends ModelToCategoryExtendedB
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var orderProperty = new ComplexProperty(Name.Anonymous(), Signature.Null(),
+        var orderProperty = new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("nested", orderToNestedDoc,
                 new SimpleProperty("propertyA", nestedDocToPropertyA),
@@ -68,7 +68,8 @@ public class ModelToCategory8MissingComplexTest extends ModelToCategoryExtendedB
     }
 	
 	@Test
-	public void execute() throws Exception {
+	public void execute()
+    {
 		super.testAlgorithm();
 	}
 }

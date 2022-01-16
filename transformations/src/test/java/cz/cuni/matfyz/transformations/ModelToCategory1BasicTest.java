@@ -147,7 +147,8 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
     }
 	
 	@Test
-	public void execute() throws Exception {
+	public void execute()
+    {
 		super.testAlgorithm();
 	}
 }

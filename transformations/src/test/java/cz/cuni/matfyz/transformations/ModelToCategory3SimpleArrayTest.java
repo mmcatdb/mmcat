@@ -43,7 +43,7 @@ public class ModelToCategory3SimpleArrayTest extends ModelToCategoryExtendedBase
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        var orderProperty = new ComplexProperty(Name.Anonymous(), Signature.Null(),
+        var orderProperty = new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
             new SimpleProperty("array", orderToArray)
         );
@@ -82,7 +82,8 @@ public class ModelToCategory3SimpleArrayTest extends ModelToCategoryExtendedBase
     }
 	
 	@Test
-	public void execute() throws Exception {
+	public void execute()
+    {
 		super.testAlgorithm();
 	}
 	

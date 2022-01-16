@@ -30,14 +30,14 @@ public class DDLAlgorithm
         this.wrapper = wrapper;
     }
     
-    public DDLStatement algorithm() throws Exception
+    public DDLStatement algorithm()
     {
         wrapper.setKindName(name);
         
         if (!wrapper.isSchemaLess())
         {
             Stack<StackPair> M = new Stack<>();
-            M.add(new StackPair(Set.of(Name.Anonymous().toString()), rootAccessPath));
+            M.add(new StackPair(Set.of(StaticName.Anonymous().toString()), rootAccessPath));
 
             while (!M.isEmpty())
                 processTopOfStack(M);
@@ -46,7 +46,7 @@ public class DDLAlgorithm
         return wrapper.createDDLStatement();
     }
     
-    private void processTopOfStack(Stack<StackPair> M) throws Exception
+    private void processTopOfStack(Stack<StackPair> M)
     {
         StackPair pair = M.pop();
         AccessPath path = pair.accessPath;
@@ -60,13 +60,14 @@ public class DDLAlgorithm
             processPath(complexProperty, N);
     }
     
-    private Set<String> determinePropertyName(AccessPath path) throws Exception
+    private Set<String> determinePropertyName(AccessPath path)
     {
-        var name = path.name();
-        if (name.type() != Name.Type.DYNAMIC_NAME)
-            return Set.of(name.getStringName());
+        if (path.name() instanceof StaticName staticName)
+            return Set.of(staticName.getStringName());
         
-        SchemaObject schemaObject = schema.morphisms().get(name.signature()).cod();
+        var dynamicName = (DynamicName) path.name();
+            
+        SchemaObject schemaObject = schema.morphisms().get(dynamicName.signature()).cod();
         InstanceObject instanceObject = instanceFunctor.object(schemaObject);
         
         var output = new TreeSet<String>();
