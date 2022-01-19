@@ -19,8 +19,13 @@ import org.junit.jupiter.api.Test;
  */
 public class ModelToCategory1BasicTest extends ModelToCategoryBase
 {
-	
 //	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory1BasicTest.class);
+	
+    @Override
+    protected String getFileName()
+    {
+        return "1BasicTest.json";
+    }
 	
     private final Signature orderToId = new Signature(1);
     private final Signature orderToTotalPrice = new Signature(2);
@@ -99,18 +104,6 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
         );
         
 		return order;
-	}
-
-    @Override
-	protected ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception
-    {
-		DummyPullWrapper wrapper = new DummyPullWrapper();
-        
-        var url = ClassLoader.getSystemResource("1BasicTest.json");
-        String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
-		ForestOfRecords forest = wrapper.pullForest(fileName, path);
-        
-		return forest;
 	}
 	
     @Override

@@ -1,11 +1,8 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.category.*;
-import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
-import java.nio.file.Paths;
 
 import java.util.*;
 //import org.slf4j.Logger;
@@ -19,9 +16,7 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
 {
 	
 //	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryExtendedBase.class);
-	
-    protected abstract String getFileName();
-    
+	  
     protected final Key customerKey = new Key(100);
     protected final Key idKey = new Key(101);
     protected final Key orderedKey = new Key(102);
@@ -260,17 +255,6 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         schema.addMorphism(morphism);
         schema.addMorphism(morphism.createDual(SchemaMorphism.Min.ZERO, SchemaMorphism.Max.STAR));
     }
-
-    @Override
-	protected ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception
-    {
-		DummyPullWrapper wrapper = new DummyPullWrapper();
-        
-        var url = ClassLoader.getSystemResource(getFileName());
-        String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
-        
-		return wrapper.pullForest(fileName, path);
-	}
 	
     @Override
 	protected Mapping buildMapping(SchemaCategory schema, ComplexProperty path)

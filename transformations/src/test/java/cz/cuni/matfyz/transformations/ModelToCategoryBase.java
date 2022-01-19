@@ -5,9 +5,11 @@ import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.Debug;
+import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
+
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.BeforeEach;
-
 import org.junit.jupiter.api.Assertions;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -20,7 +22,9 @@ public abstract class ModelToCategoryBase
 {
 	
 //	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategoryBase.class);
-	
+    
+    protected abstract String getFileName();
+
     protected int getDebugLevel()
     {
         return 5;
@@ -93,7 +97,15 @@ public abstract class ModelToCategoryBase
 
 	protected abstract ComplexProperty buildComplexPropertyPath(SchemaCategory schema);
 
-	protected abstract ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception;
+	protected ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception
+    {
+		DummyPullWrapper wrapper = new DummyPullWrapper();
+        
+        var url = ClassLoader.getSystemResource(getFileName());
+        String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
+        
+		return wrapper.pullForest(fileName, path);
+	}
 	
 	protected abstract Mapping buildMapping(SchemaCategory schema, ComplexProperty path);
     
