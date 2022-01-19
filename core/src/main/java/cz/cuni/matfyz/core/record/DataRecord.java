@@ -6,16 +6,16 @@ package cz.cuni.matfyz.core.record;
  */
 public abstract class DataRecord
 {
-    protected final Name name;
+    protected final RecordName name;
     private final DataRecord parent;
     
-	protected DataRecord(Name name, DataRecord parent)
+	protected DataRecord(RecordName name, DataRecord parent)
     {
 		this.name = name;
         this.parent = parent;
 	}
     
-    public Name name()
+    public RecordName name()
     {
         return this.name;
     }

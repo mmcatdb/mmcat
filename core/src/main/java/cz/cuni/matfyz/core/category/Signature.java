@@ -97,16 +97,11 @@ public class Signature implements Comparable<Signature>, IContext
             
         return builder.toString();
 	}
-    
-    public boolean equals(Signature signature)
-    {
-        return signature != null ? compareTo(signature) == 0 : false;
-    }
-    
+
     @Override
     public boolean equals(Object obj)
     {
-        return obj instanceof Signature signature ? equals(signature) : false;
+        return obj instanceof Signature signature && compareTo(signature) == 0;
     }
 
     /**

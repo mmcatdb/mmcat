@@ -30,15 +30,10 @@ public class Key implements Comparable<Key>
 		return value + "";
 	}
     
-    public boolean equals(Key key)
-    {
-        return compareTo(key) == 0;
-    }
-    
     @Override
     public boolean equals(Object obj)
     {
-        return obj instanceof Key key ? equals(key) : false;
+        return obj instanceof Key key && compareTo(key) == 0;
     }
 
     /**

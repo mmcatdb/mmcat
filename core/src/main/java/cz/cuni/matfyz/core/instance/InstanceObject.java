@@ -77,16 +77,8 @@ public class InstanceObject implements CategoricalObject
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof InstanceObject instanceObject ? equals(instanceObject) : false;
+        return object instanceof InstanceObject instanceObject && activeDomain.equals(instanceObject.activeDomain);
     }
-    
-    public boolean equals(InstanceObject object)
-    {
-        if (object == null)
-            return false;
-        
-        return activeDomain.equals(object.activeDomain);
-    }  
     /*
         if (activeDomain.keySet().size() != object.activeDomain.keySet().size())
             return false;

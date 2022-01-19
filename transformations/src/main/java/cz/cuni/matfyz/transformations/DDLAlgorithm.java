@@ -72,7 +72,7 @@ public class DDLAlgorithm
         
         var output = new TreeSet<String>();
         for (ActiveDomainRow row : instanceObject.activeDomain().get(new Id(Signature.Empty())).values())
-            output.add(row.tuples().get(Signature.Empty()));
+            output.add(row.getValue(Signature.Empty()));
         
         return output;
     }

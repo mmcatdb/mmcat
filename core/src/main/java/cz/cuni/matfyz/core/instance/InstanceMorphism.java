@@ -89,14 +89,6 @@ public class InstanceMorphism implements Morphism
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof InstanceMorphism instanceMorphism ? equals(instanceMorphism) : false;
-    }
-    
-    public boolean equals(InstanceMorphism morphism)
-    {
-        if (morphism == null)
-            return false;
-        
-        return mappings.equals(morphism.mappings);
+        return object instanceof InstanceMorphism instanceMorphism && mappings.equals(instanceMorphism.mappings);
     }
 }

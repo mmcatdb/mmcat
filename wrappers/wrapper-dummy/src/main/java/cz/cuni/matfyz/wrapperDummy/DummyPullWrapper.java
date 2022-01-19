@@ -2,9 +2,7 @@ package cz.cuni.matfyz.wrapperDummy;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.record.ComplexRecord;
-import cz.cuni.matfyz.core.record.ForestOfRecords;
-import cz.cuni.matfyz.core.record.RootRecord;
+import cz.cuni.matfyz.core.record.*;
 
 import java.nio.file.*;
 import java.util.*;
@@ -124,11 +122,8 @@ public class DummyPullWrapper implements AbstractPullWrapper
             }
             else
             {
-                cz.cuni.matfyz.core.record.Name recordName = toRecordName(simpleSubpath.name(), key);
-                if (simpleSubpath.name() instanceof StaticName staticName)
-                    parentRecord.addSimpleValueRecord(recordName, simpleSubpath.value().signature(), value.toString());
-                else
-                    parentRecord.addSimpleDynamicRecord(recordName, simpleSubpath.value().signature(), value.toString());
+                RecordName recordName = toRecordName(simpleSubpath.name(), key);
+                parentRecord.addSimpleValueRecord(recordName, simpleSubpath.value().signature(), value.toString());
             }
         }
     }
@@ -145,12 +140,14 @@ public class DummyPullWrapper implements AbstractPullWrapper
             getDataFromObject(childRecord, value, complexProperty);
             
             // Dynamic complex property is just a normal complex property with additional simple property for name.
+            /*
             if (complexProperty.name() instanceof DynamicName dynamicName)
-                childRecord.addSimpleValueRecord(cz.cuni.matfyz.core.record.Name.LeftDynamic(), dynamicName.signature(), childRecord.name().value());
+                childRecord.addSimpleValueRecord(RecordName.LeftDynamic(), dynamicName.signature(), childRecord.name().value());
+            */
         }
     }
 
-    private cz.cuni.matfyz.core.record.Name toRecordName(Name name, String valueIfDynamic)
+    private RecordName toRecordName(Name name, String valueIfDynamic)
     {
         if (name instanceof DynamicName dynamicName)
             return dynamicName.toRecordName(valueIfDynamic);

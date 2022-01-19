@@ -20,19 +20,43 @@ public class ComplexRecord extends DataRecord
     private final List<SimpleValueRecord<?>> dynamicValues = new ArrayList<>();
     private SimpleValueRecord<?> firstDynamicValue = null;
     
-	protected ComplexRecord(Name name, ComplexRecord parent)
+	protected ComplexRecord(RecordName name, ComplexRecord parent)
     {
 		super(name, parent);
 	}
     
+    /*
     public Map<Signature, List<ComplexRecord>> children()
     {
         return children;
     }
+    */
+
+    public boolean hasComplexRecords(Signature signature)
+    {
+        return children.containsKey(signature);
+    }
+
+    public List<ComplexRecord> getComplexRecords(Signature signature)
+    {
+        return children.get(signature);
+    }
     
+    /*
     public Map<Signature, SimpleRecord<?>> values()
     {
         return values;
+    }
+    */
+
+    public boolean hasSimpleRecord(Signature signature)
+    {
+        return values.containsKey(signature);
+    }
+
+    public SimpleRecord<?> getSimpleRecord(Signature signature)
+    {
+        return values.get(signature);
     }
     
     public List<SimpleValueRecord<?>> dynamicValues()
@@ -40,17 +64,21 @@ public class ComplexRecord extends DataRecord
         return dynamicValues;
     }
     
-    public SimpleValueRecord<?> firstDynamicValue()
+    public boolean hasDynamicValues()
     {
-        return firstDynamicValue;
+        return firstDynamicValue != null;
     }
     
     public boolean containsDynamicSignature(Signature signature)
     {
-        return signature.equals(firstDynamicValue.name().signature()) || signature.equals(firstDynamicValue.signature());
+        if (firstDynamicValue == null)
+            return false;
+
+        return signature.equals(firstDynamicValue.signature) ||
+            firstDynamicValue.name() instanceof DynamicRecordName dynamicName && signature.equals(dynamicName.signature());
     }
     
-    public ComplexRecord addComplexRecord(Name name, Signature signature)
+    public ComplexRecord addComplexRecord(RecordName name, Signature signature)
     {
         ComplexRecord record = new ComplexRecord(name, this);
         
@@ -66,15 +94,7 @@ public class ComplexRecord extends DataRecord
         return record;
     }
     
-    public <DataType> SimpleRecord<DataType> addSimpleValueRecord(Name name, Signature signature, DataType value)
-    {
-        var record = new SimpleValueRecord<>(name, this, signature, value);
-        values.put(signature, record);
-        
-        return record;
-    }
-    
-    public <DataType> SimpleRecord<DataType> addSimpleArrayRecord(Name name, Signature signature, List<DataType> values)
+    public <DataType> SimpleArrayRecord<DataType> addSimpleArrayRecord(RecordName name, Signature signature, List<DataType> values)
     {
         var record = new SimpleArrayRecord<>(name, this, signature, values);
         this.values.put(signature, record);
@@ -82,21 +102,25 @@ public class ComplexRecord extends DataRecord
         return record;
     }
     
-    public <DataType> SimpleValueRecord<DataType> addSimpleDynamicRecord(Name name, Signature signature, DataType value)
+    public <DataType> SimpleValueRecord<DataType> addSimpleValueRecord(RecordName name, Signature signature, DataType value)
     {
         var record = new SimpleValueRecord<>(name, this, signature, value);
-        
-        if (firstDynamicValue == null)
+
+        if (name instanceof StaticRecordName)
+            values.put(signature, record);
+        else if (name instanceof DynamicRecordName dynamicName)
         {
-            firstDynamicValue = record;
+            if (firstDynamicValue == null)
+                firstDynamicValue = record;
+            else
+            {
+                assert firstDynamicValue.name() instanceof DynamicRecordName firstDynamicName && dynamicName.signature().equals(firstDynamicName.signature()) : "Trying to add a dynamic name with different name signature";
+                assert signature.equals(firstDynamicValue.signature()) : "Trying to add a dynamic name with different value signature";
+            }
+            
+            dynamicValues.add(record);
         }
-        else
-        {
-            assert name.signature().equals(firstDynamicValue.name().signature()) : "Trying to add a dynamic name with different name signature";
-            assert signature.equals(firstDynamicValue.signature()) : "Trying to add a dynamic name with different value signature";
-        }
-        
-        dynamicValues.add(record);
+
         
         return record;
     }

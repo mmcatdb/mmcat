@@ -70,16 +70,11 @@ public class SchemaObject implements CategoricalObject
     {
         return objectId() - categoricalObject.objectId();
 	}
-    
-    public boolean equals(CategoricalObject categoricalObject)
-    {
-        return compareTo(categoricalObject) == 0;
-    }
 
 	@Override
 	public boolean equals(Object obj)
     {
-        return obj instanceof CategoricalObject categoricalObject ? equals(categoricalObject) : false;
+        return obj instanceof CategoricalObject categoricalObject && compareTo(categoricalObject) == 0;
 	}
 
     /**

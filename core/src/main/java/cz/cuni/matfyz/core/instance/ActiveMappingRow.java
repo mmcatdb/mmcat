@@ -46,14 +46,6 @@ public class ActiveMappingRow implements Comparable<ActiveMappingRow>
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof ActiveMappingRow activeMappingRow ? equals(activeMappingRow) : false;
-    }
-    
-    public boolean equals(ActiveMappingRow row)
-    {
-        if (row == null)
-            return false;
-        
-        return domainRow.equals(row.domainRow) && codomainRow.equals(row.codomainRow);
+        return object instanceof ActiveMappingRow row && domainRow.equals(row.domainRow) && codomainRow.equals(row.codomainRow);
     }
 }

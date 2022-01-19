@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.core.mapping;
 
+import cz.cuni.matfyz.core.record.DynamicRecordName;
 import cz.cuni.matfyz.core.category.Signature;
 
 /**
@@ -20,9 +21,9 @@ public class DynamicName extends Name
         this.signature = signature;
     }
     
-    public cz.cuni.matfyz.core.record.Name toRecordName(String dynamicNameValue)
+    public DynamicRecordName toRecordName(String dynamicNameValue)
     {
-        return new cz.cuni.matfyz.core.record.Name(signature, dynamicNameValue);
+        return new DynamicRecordName(dynamicNameValue, signature);
     }
     
     @Override
@@ -34,6 +35,6 @@ public class DynamicName extends Name
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof DynamicName dynamicName ? signature.equals(dynamicName.signature) : false;
+        return object instanceof DynamicName dynamicName && signature.equals(dynamicName.signature);
     }
 }

@@ -105,34 +105,8 @@ public class InstanceCategory implements Category {
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof InstanceCategory instance ? equals(instance) : false;
-    }
-    
-    public boolean equals(InstanceCategory instance)
-    {
-        if (instance == null)
-            return false;
-        
-        if (!objects.equals(instance.objects))
-            return false;
-        
-        return (morphisms.equals(instance.morphisms));
-        /*
-        if (objects.keySet().size() != instance.objects.keySet().size())
-            return false;
-        
-        for (Key key : objects.keySet())
-            if (!objects.get(key).equals(instance.objects.get(key)))
-                return false;
-        
-        if (morphisms.keySet().size() != instance.morphisms.keySet().size())
-            return false;
-        
-        for (Signature signature : morphisms.keySet())
-            if (!morphisms.get(signature).equals(instance.morphisms.get(signature)))
-                return false;
-        */
-        
-        //return true;
+        return object instanceof InstanceCategory instance
+            && objects.equals(instance.objects)
+            && morphisms.equals(instance.morphisms);
     }
 }

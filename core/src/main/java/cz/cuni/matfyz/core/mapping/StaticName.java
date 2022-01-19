@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.core.mapping;
 
-import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.record.StaticRecordName;
 
 /**
  *
@@ -16,6 +16,7 @@ public class StaticName extends Name
         super();
         this.value = name;
         this.type = Type.STATIC_NAME;
+        this.staticRecordNameFlyweight = new StaticRecordName(value, type);
     }
 
     // Anonymous name
@@ -24,9 +25,10 @@ public class StaticName extends Name
         super();
         this.value = "";
         this.type = Type.ANONYMOUS;
+        this.staticRecordNameFlyweight = new StaticRecordName(value, type);
     }
 
-    private static StaticName anonymous = new StaticName();
+    private final static StaticName anonymous = new StaticName();
     
     public static StaticName Anonymous()
     {
@@ -46,9 +48,11 @@ public class StaticName extends Name
         ANONYMOUS, // Also known as Empty
 	}
     
-    public cz.cuni.matfyz.core.record.Name toRecordName()
+    private final StaticRecordName staticRecordNameFlyweight;
+
+    public StaticRecordName toRecordName()
     {
-        return new cz.cuni.matfyz.core.record.Name(value, type);
+        return staticRecordNameFlyweight;
     }
     
     public String getStringName()
@@ -74,7 +78,7 @@ public class StaticName extends Name
     public boolean equals(Object object)
     {
         return object instanceof StaticName staticName
-            ? type == staticName.type && value.equals(staticName.value)
-            : false;
+            && type == staticName.type
+            && value.equals(staticName.value);
     }
 }

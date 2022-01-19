@@ -137,7 +137,7 @@ public class DMLAlgorithm
 
         if (objectPath instanceof SimpleProperty simplePath)
         {
-            String value = objectRow.tuples().get(Signature.Empty());
+            String value = objectRow.getValue(Signature.Empty());
 
             return new NameValuePair(name, value);
         }
@@ -162,7 +162,7 @@ public class DMLAlgorithm
             .findFirst();
 
         if (nameRow.isPresent())
-            return nameRow.get().codomainRow().tuples().get(Signature.Empty());
+            return nameRow.get().codomainRow().getValue(Signature.Empty());
 
         throw new UnsupportedOperationException("Dynamic name value not found.");
     }

@@ -28,10 +28,27 @@ public class ActiveDomainRow implements Comparable<ActiveDomainRow>
     {
         return idWithValues;
     }
-    
+
+    /*
     public Map<Signature, String> tuples()
     {
         return tuples;
+    }
+    */
+
+    public boolean hasSignature(Signature signature)
+    {
+        return tuples.containsKey(signature);
+    }
+
+    public Set<Signature> signatures()
+    {
+        return tuples.keySet();
+    }
+
+    public String getValue(Signature signature)
+    {
+        return tuples.get(signature);
     }
     
     public ActiveDomainRow(IdWithValues idWithValues)
@@ -55,14 +72,6 @@ public class ActiveDomainRow implements Comparable<ActiveDomainRow>
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof ActiveDomainRow activeDomainRow ? equals(activeDomainRow) : false;
-    }
-    
-    public boolean equals(ActiveDomainRow row)
-    {
-        if (row == null)
-            return false;
-        
-        return idWithValues.equals(row.idWithValues);
+        return object instanceof ActiveDomainRow row && idWithValues.equals(row.idWithValues);
     }
 }
