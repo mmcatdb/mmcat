@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.ActiveDomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
@@ -63,31 +64,33 @@ public class ModelToCategory2StructureTest extends ModelToCategoryExtendedBase
         
         var order1 = builder.value(orderToNumber, "2043").object(orderKey);
         var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
-        var nestedDoc1 = builder.value(Signature.Empty(), "0").object(nestedDocKey);
-        var propertyA1 = builder.value(Signature.Empty(), "hodnotaA").object(propertyAKey);
-        var propertyB1 = builder.value(Signature.Empty(), "hodnotaB").object(propertyBKey);
-        var propertyC1 = builder.value(Signature.Empty(), "hodnotaC").object(propertyCKey);
+        var nestedDoc1 = buildExpectedNestedDocInstance(builder, "0", "hodnotaA", "hodnotaB", "hodnotaC");
         
         builder.morphism(orderToNumber, order1, number1);
         builder.morphism(orderToNestedDoc, order1, nestedDoc1);
-        builder.morphism(nestedDocToPropertyA, nestedDoc1, propertyA1);
-        builder.morphism(nestedDocToPropertyB, nestedDoc1, propertyB1);
-        builder.morphism(nestedDocToPropertyC, nestedDoc1, propertyC1);
         
         var order2 = builder.value(orderToNumber, "1653").object(orderKey);
         var number2 = builder.value(Signature.Empty(), "1653").object(numberKey);
-        var nestedDoc2 = builder.value(Signature.Empty(), "1").object(nestedDocKey);
-        var propertyA2 = builder.value(Signature.Empty(), "hodnotaA2").object(propertyAKey);
-        var propertyB2 = builder.value(Signature.Empty(), "hodnotaB2").object(propertyBKey);
-        var propertyC2 = builder.value(Signature.Empty(), "hodnotaC2").object(propertyCKey);
+        var nestedDoc2 = buildExpectedNestedDocInstance(builder, "1", "hodnotaA2", "hodnotaB2", "hodnotaC2");
         
         builder.morphism(orderToNumber, order2, number2);
         builder.morphism(orderToNestedDoc, order2, nestedDoc2);
-        builder.morphism(nestedDocToPropertyA, nestedDoc2, propertyA2);
-        builder.morphism(nestedDocToPropertyB, nestedDoc2, propertyB2);
-        builder.morphism(nestedDocToPropertyC, nestedDoc2, propertyC2);
         
         return instance;
+    }
+
+    private ActiveDomainRow buildExpectedNestedDocInstance(SimpleInstanceCategoryBuilder builder, String uniqueId, String valueA, String valueB, String valueC)
+    {
+        var nestedDoc = builder.value(Signature.Empty(), uniqueId).object(nestedDocKey);
+        var propertyA = builder.value(Signature.Empty(), valueA).object(propertyAKey);
+        var propertyB = builder.value(Signature.Empty(), valueB).object(propertyBKey);
+        var propertyC = builder.value(Signature.Empty(), valueC).object(propertyCKey);
+        
+        builder.morphism(nestedDocToPropertyA, nestedDoc, propertyA);
+        builder.morphism(nestedDocToPropertyB, nestedDoc, propertyB);
+        builder.morphism(nestedDocToPropertyC, nestedDoc, propertyC);
+
+        return nestedDoc;
     }
 	
 	@Test

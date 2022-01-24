@@ -39,9 +39,9 @@ public class ModelToCategory9EmptyArrayTest extends ModelToCategoryExtendedBase
         var orderProperty = new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("items", orderToItems,
-                new SimpleProperty("productId", itemsToProduct.concatenate(productToPid)),
-                new SimpleProperty("name", itemsToProduct.concatenate(productToPname)),
-                new SimpleProperty("price", itemsToProduct.concatenate(productToPrice)),
+                new SimpleProperty("productId", itemsToPid),
+                new SimpleProperty("name", itemsToPname),
+                new SimpleProperty("price", itemsToPrice),
                 new SimpleProperty("quantity", itemsToQuantity)
             )
         );

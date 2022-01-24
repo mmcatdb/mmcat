@@ -63,24 +63,20 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
         var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
         builder.morphism(orderToNumber, order1, number1);
         
-        var contact1 = buildExpectedContactInstance(builder, "2043", "anna@seznam.cz", "email");
-        var contact2 = buildExpectedContactInstance(builder, "2043", "+420777123456", "cellphone");
-        builder.morphism(orderToContact, order1, contact1);
-        builder.morphism(orderToContact, order1, contact2);
+        addExpectedContactInstance(builder, order1, "2043", "anna@seznam.cz", "email");
+        addExpectedContactInstance(builder, order1, "2043", "+420777123456", "cellphone");
         
         var order2 = builder.value(orderToNumber, "1653").object(orderKey);
         var number2 = builder.value(Signature.Empty(), "1653").object(numberKey);
         builder.morphism(orderToNumber, order2, number2);
         
-        var contact3 = buildExpectedContactInstance(builder, "1653", "skype123", "skype");
-        var contact4 = buildExpectedContactInstance(builder, "1653", "+420123456789", "cellphone");
-        builder.morphism(orderToContact, order2, contact3);
-        builder.morphism(orderToContact, order2, contact4);
+        addExpectedContactInstance(builder, order2, "1653", "skype123", "skype");
+        addExpectedContactInstance(builder, order2, "1653", "+420123456789", "cellphone");
         
         return instance;
     }
     
-    private ActiveDomainRow buildExpectedContactInstance(SimpleInstanceCategoryBuilder builder, String numberValue, String valueValue, String nameValue)
+    private void addExpectedContactInstance(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String numberValue, String valueValue, String nameValue)
     {
         var contact = builder.value(contactToNumber, numberValue).value(contactToValue, valueValue).value(contactToName, nameValue).object(contactKey);
         var value = builder.value(Signature.Empty(), valueValue).object(valueKey);
@@ -88,8 +84,7 @@ public class ModelToCategory5MapTest extends ModelToCategoryExtendedBase
         
         builder.morphism(contactToValue, contact, value);
         builder.morphism(contactToName, contact, name);
-        
-        return contact;
+        builder.morphism(orderToContact, order, contact);
     }
 	
 	@Test

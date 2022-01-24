@@ -37,6 +37,11 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
     protected final Key pidKey = new Key(117);
     protected final Key pnameKey = new Key(118);
     protected final Key priceKey = new Key(119);
+    protected final Key addressKey = new Key(120);
+    protected final Key labelKey = new Key(121);
+    protected final Key contentKey = new Key(122);
+    protected final Key textKey = new Key(123);
+    protected final Key localeKey = new Key(124);
     
     protected final Signature customerToId = new Signature(1);
     protected final Signature customerToOrdered = new Signature(2);
@@ -57,6 +62,11 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
     protected final Signature contactToValue = new Signature(17);
     protected final Signature orderToArray = new Signature(18);
     protected final Signature orderToNumber = new Signature(19);
+    protected final Signature orderToAddress = new Signature(20);
+    protected final Signature addressToLabel = new Signature(21);
+    protected final Signature addressToContent = new Signature(22);
+    protected final Signature contentToText = new Signature(23);
+    protected final Signature contentToLocale = new Signature(24);
     
     protected final Signature itemsToNumber = orderToItems.dual().concatenate(orderToNumber);
     protected final Signature itemsToPid = itemsToProduct.concatenate(productToPid);
@@ -69,7 +79,10 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
     protected final Signature orderedToNumber = orderedToOrder.concatenate(orderToNumber);
     protected final Signature orderedToId = customerToOrdered.dual().concatenate(customerToId);
     protected final Signature orderToId = orderedToOrder.dual().concatenate(orderedToId);
+    protected final Signature orderToCustomer = orderedToOrder.dual().concatenate(customerToOrdered.dual()).concatenate(customerToId);
     
+    protected final Signature addressToNumber = orderToAddress.dual().concatenate(orderToNumber);
+
     protected SchemaObject buildOrder(SchemaCategory schema)
     {
         var order = createSchemaObject(
@@ -242,6 +255,50 @@ public abstract class ModelToCategoryExtendedBase extends ModelToCategoryBase
         schema.addObject(id);
         addMorphismWithDual(schema, customerToId, customer, id);
         addMorphismWithDual(schema, orderToId, order, id);
+    }
+
+    protected void addAddress(SchemaCategory schema, SchemaObject order)
+    {
+        var address = createSchemaObject(
+            addressKey,
+            "address",
+            new Id(addressToNumber, addressToLabel)
+        );
+        schema.addObject(address);
+        addMorphismWithDual(schema, orderToAddress, order, address);
+
+        var label = createSchemaObject(
+            labelKey,
+            "label",
+            Id.Empty()
+        );
+        schema.addObject(label);
+        addMorphismWithDual(schema, addressToLabel, address, label);        
+
+        var content = createSchemaObject(
+            contentKey,
+            "content",
+            Id.Empty()
+        );
+        schema.addObject(content);
+        addMorphismWithDual(schema, addressToContent, address, content);
+        
+        var text = createSchemaObject(
+            textKey,
+            "text",
+            Id.Empty()
+        );
+        schema.addObject(text);
+        addMorphismWithDual(schema, contentToText, content, text);
+        
+        var locale = new SchemaObject(
+            localeKey,
+            "locale",
+            Id.Empty(),
+            Set.of(Id.Empty())
+        );
+        schema.addObject(locale);
+        addMorphismWithDual(schema, contentToLocale, content, locale);
     }
     
     protected SchemaObject createSchemaObject(Key key, String name, Id id)

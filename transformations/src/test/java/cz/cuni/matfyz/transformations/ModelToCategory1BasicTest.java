@@ -1,11 +1,9 @@
 package cz.cuni.matfyz.transformations;
 
+import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
-import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.category.*;
-
-import java.util.*;
 import org.junit.jupiter.api.Test;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -14,7 +12,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jachymb.bartik
  */
-public class ModelToCategory1BasicTest extends ModelToCategoryBase
+public class ModelToCategory1BasicTest extends ModelToCategoryExtendedBase
 {
 //	private static final Logger LOGGER = LoggerFactory.getLogger(ModelToCategory1BasicTest.class);
 	
@@ -24,64 +22,11 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
         return "1BasicTest.json";
     }
 	
-    private final Signature orderToId = new Signature(1);
-    private final Signature orderToTotalPrice = new Signature(2);
-    private final Signature orderToAddress = new Signature(3);
-    
-    private final Key orderKey = new Key(100);
-    private final Key idKey = new Key(101);
-    private final Key totalPriceKey = new Key(102);
-    private final Key addressKey = new Key(103);
-            
     @Override
     protected SchemaCategory buildSchemaCategoryScenario()
     {
         SchemaCategory schema = new SchemaCategory();
-        
-        var order = new SchemaObject(
-            orderKey,
-            "order",
-            //new Id(orderToId, orderToTotalPrice, orderToAddress),
-            new Id(orderToId),
-            Set.of(new Id(orderToId))
-        );
-        schema.addObject(order);
-        
-        var id = new SchemaObject(
-            idKey,
-            "_id",
-            Id.Empty(),
-            Set.of(Id.Empty())
-        );
-        schema.addObject(id);
-        
-        var orderToIdMorphism = new SchemaMorphism(orderToId, order, id, SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE);
-        schema.addMorphism(orderToIdMorphism);
-        schema.addMorphism(orderToIdMorphism.createDual(SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE));
-        
-        var totalPrice = new SchemaObject(
-            totalPriceKey,
-            "totalPrice",
-            Id.Empty(),
-            Set.of(Id.Empty())
-        );
-        schema.addObject(totalPrice);
-        
-        var orderToTotalPriceMorphism = new SchemaMorphism(orderToTotalPrice, order, totalPrice, SchemaMorphism.Min.ZERO, SchemaMorphism.Max.ONE);
-        schema.addMorphism(orderToTotalPriceMorphism);
-        schema.addMorphism(orderToTotalPriceMorphism.createDual(SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE));
-        
-        var address = new SchemaObject(
-            addressKey,
-            "address",
-            Id.Empty(),
-            Set.of(Id.Empty())
-        );
-        schema.addObject(address);
-        
-        var orderToAddressMorphism = new SchemaMorphism(orderToAddress, order, address, SchemaMorphism.Min.ZERO, SchemaMorphism.Max.ONE);
-        schema.addMorphism(orderToAddressMorphism);
-        schema.addMorphism(orderToAddressMorphism.createDual(SchemaMorphism.Min.ZERO, SchemaMorphism.Max.STAR));
+        buildOrder(schema);
         
 		return schema;
     }
@@ -89,24 +34,11 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
     @Override
 	protected ComplexProperty buildComplexPropertyPath(SchemaCategory schema)
     {
-        String idLabel = schema.keyToObject(idKey).label();
-        String totalPriceLabel = schema.keyToObject(totalPriceKey).label();
-        String addressLabel = schema.keyToObject(addressKey).label();
-        
-        String orderLabel = schema.keyToObject(orderKey).label();
-        var order = new ComplexProperty(orderLabel, Signature.Empty(),
-            new SimpleProperty(idLabel, orderToId),
-            new SimpleProperty(totalPriceLabel, orderToTotalPrice),
-            new SimpleProperty(addressLabel, orderToAddress)
+        var orderProperty = new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
+            new SimpleProperty("number", orderToNumber)
         );
         
-		return order;
-	}
-	
-    @Override
-	protected Mapping buildMapping(SchemaCategory schema, ComplexProperty path)
-    {
-		return new Mapping(schema.keyToObject(orderKey), path);
+        return orderProperty;
 	}
     
     @Override
@@ -115,23 +47,15 @@ public class ModelToCategory1BasicTest extends ModelToCategoryBase
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        var order1 = builder.value(orderToId, "1").object(orderKey);
-        var order_id1 = builder.value(Signature.Empty(), "1").object(idKey);
-        var order_totalPrice1 = builder.value(Signature.Empty(), "20").object(totalPriceKey);
-        var order_address1 = builder.value(Signature.Empty(), "Street No., ZIP City").object(addressKey);
+        var order1 = builder.value(orderToNumber, "2043").object(orderKey);
+        var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
         
-        builder.morphism(orderToId, order1, order_id1);
-        builder.morphism(orderToTotalPrice, order1, order_totalPrice1);
-        builder.morphism(orderToAddress, order1, order_address1);
+        builder.morphism(orderToNumber, order1, number1);
         
-        var order2 = builder.value(orderToId, "2").object(orderKey);
-        var order_id2 = builder.value(Signature.Empty(), "2").object(idKey);
-        var order_totalPrice2 = builder.value(Signature.Empty(), "40").object(totalPriceKey);
-        var order_address2 = builder.value(Signature.Empty(), "Another address").object(addressKey);
+        var order2 = builder.value(orderToNumber, "1653").object(orderKey);
+        var number2 = builder.value(Signature.Empty(), "1653").object(numberKey);
         
-        builder.morphism(orderToId, order2, order_id2);
-        builder.morphism(orderToTotalPrice, order2, order_totalPrice2);
-        builder.morphism(orderToAddress, order2, order_address2);
+        builder.morphism(orderToNumber, order2, number2);
         
         return instance;
     }

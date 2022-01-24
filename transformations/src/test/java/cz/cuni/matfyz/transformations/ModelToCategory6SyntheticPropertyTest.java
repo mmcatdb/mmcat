@@ -45,7 +45,7 @@ public class ModelToCategory6SyntheticPropertyTest extends ModelToCategoryExtend
     {
         var orderProperty = new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new ComplexProperty("_id", Signature.Null(),
-                new SimpleProperty("customer", orderedToOrder.dual().concatenate(customerToOrdered.dual()).concatenate(customerToId)),
+                new SimpleProperty("customer", orderToCustomer),
                 new SimpleProperty("number", orderToNumber)
             )
         );

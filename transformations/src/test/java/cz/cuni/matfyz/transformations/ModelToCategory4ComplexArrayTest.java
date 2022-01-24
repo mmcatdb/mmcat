@@ -65,10 +65,10 @@ public class ModelToCategory4ComplexArrayTest extends ModelToCategoryExtendedBas
         var number1 = builder.value(Signature.Empty(), "2043").object(numberKey);
         builder.morphism(orderToNumber, order1, number1);
         
-        var items1 = buildExpectedItemInstance(builder, "123", "Toy", "125", "1");
-        var items2 = buildExpectedItemInstance(builder, "765", "Book", "199", "2");
-        var items3 = buildExpectedItemInstance(builder, "457", "Knife", "299", "7");
-        var items4 = buildExpectedItemInstance(builder, "734", "Doll", "350", "3");
+        var items1 = buildExpectedItemInstance(builder, "2043", "123", "Toy", "125", "1");
+        var items2 = buildExpectedItemInstance(builder, "2043", "765", "Book", "199", "2");
+        var items3 = buildExpectedItemInstance(builder, "2043", "457", "Knife", "299", "7");
+        var items4 = buildExpectedItemInstance(builder, "2043", "734", "Doll", "350", "3");
         
         builder.morphism(orderToItems, order1, items1);
         builder.morphism(orderToItems, order1, items2);
@@ -78,23 +78,15 @@ public class ModelToCategory4ComplexArrayTest extends ModelToCategoryExtendedBas
         return instance;
     }
     
-    private ActiveDomainRow buildExpectedItemInstance(SimpleInstanceCategoryBuilder builder, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    private ActiveDomainRow buildExpectedItemInstance(SimpleInstanceCategoryBuilder builder, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
     {
-        var items = builder.value(itemsToNumber, "2043").value(itemsToPid, pidValue).object(itemsKey);
-        //var product = builder.value(productToPid, pidValue).object(productKey);
+        var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
         var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
         var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
         var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
         var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
         
-        //builder.morphism(itemsToProduct, items, product);
         builder.morphism(itemsToQuantity, items, quantity);
-        
-        /*
-        builder.morphism(productToPid, product, pid);
-        builder.morphism(productToPname, product, pname);
-        builder.morphism(productToPrice, product, price);
-        */
         builder.morphism(itemsToPid, items, pid);
         builder.morphism(itemsToPname, items, pname);
         builder.morphism(itemsToPrice, items, price);

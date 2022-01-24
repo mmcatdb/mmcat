@@ -1,0 +1,201 @@
+package cz.cuni.matfyz.transformations;
+
+import cz.cuni.matfyz.core.schema.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import cz.cuni.matfyz.core.utils.Debug;
+
+/**
+ *
+ * @author jachymb.bartik
+ */
+public class ModelToCategoryTests
+{
+    @BeforeEach
+    public void setUp()
+    {
+        UniqueIdProvider.reset();
+    }
+
+	@Test
+	public void basicTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+
+        new ModelToCategoryTestBase("1BasicTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_order(),
+            data.buildExpectedInstanceCategory_basic(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void structureTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addNestedDoc(schema, order);
+
+        new ModelToCategoryTestBase("2StructureTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_structure(),
+            data.buildExpectedInstanceCategory_structure(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void simpleArrayTest()
+    {
+        var data = new TestData();
+        Debug.setLevel(0);
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addArray(schema, order);
+
+        new ModelToCategoryTestBase("3SimpleArrayTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_array(),
+            data.buildExpectedInstanceCategory_simpleArray(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void complexArrayTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addItems(schema, order);
+
+        new ModelToCategoryTestBase("4ComplexArrayTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_items(),
+            data.buildExpectedInstanceCategory_complexArray(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void mapTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addContact(schema, order);
+
+        new ModelToCategoryTestBase("5MapTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_contact(),
+            data.buildExpectedInstanceCategory_map(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void syntheticPropertyTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addOrdered(schema, order);
+
+        new ModelToCategoryTestBase("6SyntheticPropertyTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_ordered(),
+            data.buildExpectedInstanceCategory_syntheticProperty(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void missingSimpleTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addNestedDoc(schema, order);
+
+        new ModelToCategoryTestBase("7MissingSimpleTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_structure(),
+            data.buildExpectedInstanceCategory_missingSimple(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void missingComplexTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addNestedDoc(schema, order);
+
+        new ModelToCategoryTestBase("8MissingComplexTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_structure(),
+            data.buildExpectedInstanceCategory_missingComplex(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void emptyArrayTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addItems(schema, order);
+
+        new ModelToCategoryTestBase("9EmptyArrayTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_items(),
+            data.buildExpectedInstanceCategory_emptyArray(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void complexMapTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addAddress(schema, order);
+
+        new ModelToCategoryTestBase("10ComplexMapTest.json").setAll(
+            schema,
+            order,
+            data.buildPath_address(),
+            data.buildExpectedInstanceCategory_complexMap(schema)
+        )
+        .testAlgorithm();
+	}
+}
