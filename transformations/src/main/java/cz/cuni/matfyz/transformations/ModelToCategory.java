@@ -120,9 +120,9 @@ public class ModelToCategory
         InstanceMorphism mI = instanceFunctor.morphism(triple.mS);
         SchemaObject oS = triple.mS.cod();
         InstanceObject qI = instanceFunctor.object(oS);
-        Iterable<Pair<IdWithValues, ComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
+        Iterable<Pair<IdWithValues, IComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
 
-        for (Pair<IdWithValues, ComplexRecord> sid : sids)
+        for (Pair<IdWithValues, IComplexRecord> sid : sids)
         {
             ActiveDomainRow row = modify(qI, sid.getValue0());
 
@@ -176,11 +176,11 @@ public class ModelToCategory
     // Fetch id with values for given record.
     // The return value is a set of (Signature, String) for each Signature in superId and its corresponding value from record.
     // Actually, there can be multiple values in the record, so the set of sets is returned.
-    private static Iterable<Pair<IdWithValues, ComplexRecord>> fetchSids(Id superId, ComplexRecord parentRecord, ActiveDomainRow parentRow, SchemaMorphism morphism)
+    private static Iterable<Pair<IdWithValues, IComplexRecord>> fetchSids(Id superId, IComplexRecord parentRecord, ActiveDomainRow parentRow, SchemaMorphism morphism)
     {
-        List<Pair<IdWithValues, ComplexRecord>> output = new ArrayList<>();
+        List<Pair<IdWithValues, IComplexRecord>> output = new ArrayList<>();
         Signature signature = morphism.signature();
-        
+
         // If the id is empty, the output ids with values will have only one tuple: (<signature>, <value>).
         // This means they represent either singular values (SimpleValueRecord) or a nested document without identifier (not auxilliary).
         if (superId.compareTo(Id.Empty()) == 0)
@@ -201,7 +201,7 @@ public class ModelToCategory
             // But their complex value will be processed later.
             else if (parentRecord.hasComplexRecords(signature))
             {
-                List<ComplexRecord> childRecords = parentRecord.getComplexRecords(signature);
+                List<? extends IComplexRecord> childRecords = parentRecord.getComplexRecords(signature);
                 childRecords.stream().forEach(childRecord -> addSimpleValueToOutput(output, UniqueIdProvider.getNext(), childRecord));
             }
         }
@@ -209,15 +209,20 @@ public class ModelToCategory
         // Because there are multiple signatures in the superId, we are dealing with a complex property (resp. properties, ie. children of given parentRecord).
         else if (parentRecord.hasComplexRecords(signature))
         {
-            List<ComplexRecord> childRecords = parentRecord.getComplexRecords(signature);
-            for (ComplexRecord childRecord : childRecords)
-                handleDynamicCase(superId, parentRow, signature, childRecord, output);
+            List<? extends IComplexRecord> childRecords = parentRecord.getComplexRecords(signature);
+            for (IComplexRecord childRecord : childRecords)
+            {
+                if (childRecord.hasDynamicChildren())
+                    processDynamicComplexRecord(superId, parentRow, signature, childRecord, output);
+                else
+                    processNonDynamicComplexRecord(superId, parentRow, signature, childRecord, output);
+            }
         }
         
         return output;
     }
 
-    private static void addSidsFromSimpleRecordToOutput(List<Pair<IdWithValues, ComplexRecord>> output, SimpleRecord<?> simpleRecord, Signature signature)
+    private static void addSidsFromSimpleRecordToOutput(List<Pair<IdWithValues, IComplexRecord>> output, SimpleRecord<?> simpleRecord, Signature signature)
     {
         if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
             addSimpleValueToOutput(output, simpleValueRecord.getValue().toString());
@@ -226,26 +231,36 @@ public class ModelToCategory
                 .forEach(valueObject -> addSimpleValueToOutput(output, valueObject.toString()));
     }
 
-    private static void addSimpleValueToOutput(List<Pair<IdWithValues, ComplexRecord>> output, String value)
+    private static void addSimpleValueToOutput(List<Pair<IdWithValues, IComplexRecord>> output, String value)
     {
         // Doesn't matter if there is null because the accessPath is also null so it isn't further traversed
         addSimpleValueToOutput(output, value, null);
     }
 
-    private static void addSimpleValueToOutput(List<Pair<IdWithValues, ComplexRecord>> output, String value, ComplexRecord childRecord)
+    private static void addSimpleValueToOutput(List<Pair<IdWithValues, IComplexRecord>> output, String value, IComplexRecord childRecord)
     {
         var builder = new IdWithValues.Builder();
         builder.add(Signature.Empty(), value);
         output.add(new Pair<>(builder.build(), childRecord));
     }
+
+    private static void processDynamicComplexRecord(Id superId, ActiveDomainRow parentRow, Signature pathSignature, IComplexRecord childRecord, List<Pair<IdWithValues, IComplexRecord>> output)
+    {
+        for (IComplexRecord dynamicChild : childRecord.getDynamicChildren())
+        {
+            var builder = new IdWithValues.Builder();
+            addNonDynamicSignaturesToBuilder(superId.signatures(), builder, parentRow, pathSignature, dynamicChild);
+            output.add(new Pair<>(builder.build(), new DynamicRecordWrapper(childRecord, dynamicChild)));
+        }
+    }
     
-    private static void handleDynamicCase(Id superId, ActiveDomainRow parentRow, Signature pathSignature, ComplexRecord childRecord, List<Pair<IdWithValues, ComplexRecord>> output)
+    private static void processNonDynamicComplexRecord(Id superId, ActiveDomainRow parentRow, Signature pathSignature, IComplexRecord childRecord, List<Pair<IdWithValues, IComplexRecord>> output)
     {
         Set<Signature> dynamicSignatures = new TreeSet<>();
         Set<Signature> nonDynamicSignatures = new TreeSet<>();
         
         for (Signature signature : superId.signatures())
-            if (childRecord.containsDynamicSignature(signature))
+            if (childRecord.containsDynamicValue(signature))
                 dynamicSignatures.add(signature);
             else
                 nonDynamicSignatures.add(signature);
@@ -258,7 +273,7 @@ public class ModelToCategory
             return;
         }
 
-        for (SimpleValueRecord<?> dynamicRecord : childRecord.dynamicValues())
+        for (SimpleValueRecord<?> dynamicRecord : childRecord.getDynamicValues())
         {
             var builder = new IdWithValues.Builder();
             addNonDynamicSignaturesToBuilder(nonDynamicSignatures, builder, parentRow, pathSignature, childRecord);
@@ -273,7 +288,7 @@ public class ModelToCategory
         }
     }
 
-    private static void addNonDynamicSignaturesToBuilder(Set<Signature> signatures, IdWithValues.Builder builder, ActiveDomainRow parentRow, Signature pathSignature, ComplexRecord childRecord)
+    private static void addNonDynamicSignaturesToBuilder(Set<Signature> signatures, IdWithValues.Builder builder, ActiveDomainRow parentRow, Signature pathSignature, IComplexRecord childRecord)
     {
         for (Signature signature : signatures)
         {
@@ -286,6 +301,8 @@ public class ModelToCategory
                 SimpleRecord<?> simpleRecord = childRecord.getSimpleRecord(signature);
                 if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
                     value = simpleValueRecord.getValue().toString();
+                else if (childRecord.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))
+                    value = dynamicName.value();
                 else
                     throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
             }
@@ -369,8 +386,8 @@ public class ModelToCategory
 		morphism.addMapping(new ActiveMappingRow(sid_dom, sid_cod));
 	}
     
-    private void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, ComplexRecord record)
-    //private static void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, ComplexRecord record)
+    private void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, IComplexRecord record)
+    //private static void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, IComplexRecord record)
     {
         if (path instanceof ComplexProperty complexPath)
             for (Pair<Signature, ComplexProperty> child: children(complexPath))

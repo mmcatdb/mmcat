@@ -21,6 +21,13 @@ public class ModelToCategory4ComplexArrayTest extends ModelToCategoryExtendedBas
     {
         return "4ComplexArrayTest.json";
     }
+
+    @Override
+    protected int getDebugLevel()
+    {
+        return 0;
+        //return 5;
+    }
     
     @Override
     protected SchemaCategory buildSchemaCategoryScenario()

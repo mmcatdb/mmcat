@@ -12,9 +12,9 @@ public class SimpleArrayRecord<DataType> extends SimpleRecord<DataType>
 {
     private final List<DataType> values;
     
-    SimpleArrayRecord(RecordName name, ComplexRecord parent, Signature signature, List<DataType> values)
+    SimpleArrayRecord(RecordName name, Signature signature, List<DataType> values)
     {
-        super(name, parent, signature);
+        super(name, signature);
         this.values = values;
     }
 	

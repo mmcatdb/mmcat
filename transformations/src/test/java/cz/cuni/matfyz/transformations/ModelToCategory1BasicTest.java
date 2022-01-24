@@ -1,12 +1,9 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.category.*;
-import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
-import java.nio.file.Paths;
 
 import java.util.*;
 import org.junit.jupiter.api.Test;

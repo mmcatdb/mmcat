@@ -3,7 +3,7 @@ package cz.cuni.matfyz.transformations;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.record.ComplexRecord;
+import cz.cuni.matfyz.core.record.*;
 import cz.cuni.matfyz.core.utils.*;
 
 /**
@@ -15,7 +15,7 @@ public class StackTriple {
 	public final SchemaMorphism mS;
 	public final ActiveDomainRow pid;
 	public final AccessPath t;
-    public final ComplexRecord record;
+    public final IComplexRecord record;
 	
 /*
 	public StackTriple(IdWithValues sid_dom, Object context, Object value)
@@ -24,7 +24,7 @@ public class StackTriple {
 	}
 */
     
-    public StackTriple(ActiveDomainRow pid, SchemaMorphism mS, AccessPath t, ComplexRecord record)
+    public StackTriple(ActiveDomainRow pid, SchemaMorphism mS, AccessPath t, IComplexRecord record)
     {
         this.pid = pid;
         this.mS = mS;

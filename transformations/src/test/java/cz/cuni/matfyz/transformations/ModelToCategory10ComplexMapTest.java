@@ -1,12 +1,9 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.category.*;
-import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
-import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 import java.util.*;
@@ -27,19 +24,30 @@ public class ModelToCategory10ComplexMapTest extends ModelToCategoryBase
     {
         return "10ComplexMapTest.json";
     }
+
+    @Override
+    protected int getDebugLevel()
+    {
+        return 0;
+        //return 5;
+    }
 	
     private final Key rootKey = new Key(100);
     private final Key idKey = new Key(101);
-    private final Key itemKey = new Key(102);
+    private final Key innerKey = new Key(102);
     private final Key nameKey = new Key(103);
-    private final Key contentKey = new Key(104);
-    private final Key languageKey = new Key(105);
+    private final Key itemKey = new Key(104);
+    private final Key contentKey = new Key(105);
+    private final Key languageKey = new Key(106);
 
     private final Signature rootToId = new Signature(1);
-    private final Signature rootToItem = new Signature(2);
-    private final Signature itemToName = new Signature(3);
-    private final Signature itemToContent = new Signature(4);
-    private final Signature itemToLanguage = new Signature(5);
+    private final Signature rootToInner = new Signature(2);
+    private final Signature innerToName = new Signature(3);
+    private final Signature innerToItem = new Signature(4);
+    private final Signature itemToContent = new Signature(5);
+    private final Signature itemToLanguage = new Signature(6);
+
+    private final Signature innerToId = rootToInner.dual().concatenate(rootToId);
             
     @Override
     protected SchemaCategory buildSchemaCategoryScenario()
@@ -66,18 +74,19 @@ public class ModelToCategory10ComplexMapTest extends ModelToCategoryBase
         schema.addMorphism(rootToIdMorphism);
         schema.addMorphism(rootToIdMorphism.createDual(SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE));
         
-        var item = new SchemaObject(
-            itemKey,
-            "item",
-            Id.Empty(),
-            Set.of(Id.Empty())
+        var innerId = new Id(innerToId, innerToName);
+        var inner = new SchemaObject(
+            innerKey,
+            "inner",
+            innerId,
+            Set.of(innerId)
         );
-        schema.addObject(item);
-        
-        var rootToItemMorphism = new SchemaMorphism(rootToItem, root, item, SchemaMorphism.Min.ONE, SchemaMorphism.Max.STAR);
-        schema.addMorphism(rootToItemMorphism);
-        schema.addMorphism(rootToItemMorphism.createDual(SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE));
-        
+        schema.addObject(inner);
+
+        var rootToInnerMorphism = new SchemaMorphism(rootToInner, root, inner, SchemaMorphism.Min.ZERO, SchemaMorphism.Max.STAR);
+        schema.addMorphism(rootToInnerMorphism);
+        schema.addMorphism(rootToInnerMorphism.createDual(SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE));
+
         var name = new SchemaObject(
             nameKey,
             "name",
@@ -86,9 +95,21 @@ public class ModelToCategory10ComplexMapTest extends ModelToCategoryBase
         );
         schema.addObject(name);
         
-        var itemToNameMorphism = new SchemaMorphism(itemToName, item, name, SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE);
-        schema.addMorphism(itemToNameMorphism);
-        schema.addMorphism(itemToNameMorphism.createDual(SchemaMorphism.Min.ZERO, SchemaMorphism.Max.STAR));
+        var innerToNameMorphism = new SchemaMorphism(innerToName, inner, name, SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE);
+        schema.addMorphism(innerToNameMorphism);
+        schema.addMorphism(innerToNameMorphism.createDual(SchemaMorphism.Min.ONE, SchemaMorphism.Max.STAR));
+
+        var item = new SchemaObject(
+            itemKey,
+            "item",
+            Id.Empty(),
+            Set.of(Id.Empty())
+        );
+        schema.addObject(item);
+        
+        var innerToItemMorphism = new SchemaMorphism(innerToItem, inner, item, SchemaMorphism.Min.ONE, SchemaMorphism.Max.STAR);
+        schema.addMorphism(innerToItemMorphism);
+        schema.addMorphism(innerToItemMorphism.createDual(SchemaMorphism.Min.ONE, SchemaMorphism.Max.ONE));
         
         var content = new SchemaObject(
             contentKey,
@@ -122,9 +143,11 @@ public class ModelToCategory10ComplexMapTest extends ModelToCategoryBase
     {
         var rootProperty = new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("id", rootToId),
-            new ComplexProperty(itemToName, rootToItem,
-                new SimpleProperty("content", itemToContent),
-                new SimpleProperty("language", itemToLanguage)
+            new ComplexProperty("inner", rootToInner,
+                new ComplexProperty(innerToName, innerToItem,
+                    new SimpleProperty("content", itemToContent),
+                    new SimpleProperty("language", itemToLanguage)
+                )
             )
         );
         
@@ -145,37 +168,41 @@ public class ModelToCategory10ComplexMapTest extends ModelToCategoryBase
         
         var root1 = builder.value(rootToId, "1").object(rootKey);
         var root_id1 = builder.value(Signature.Empty(), "1").object(idKey);
-        var item1 = buildExpectedItemInstance(builder, "0", "city", "Praha", "cs");
-        var item2 = buildExpectedItemInstance(builder, "1", "country", "Czech republic", "en");
+        
+        var inner1 = buildExpectedInnerInstance(builder, "0", "1", "city", "Praha", "cs");
+        var inner2 = buildExpectedInnerInstance(builder, "1", "1", "country", "Czech republic", "en");
         
         builder.morphism(rootToId, root1, root_id1);
-        builder.morphism(rootToItem, root1, item1);
-        builder.morphism(rootToItem, root1, item2);
+        builder.morphism(rootToInner, root1, inner1);
+        builder.morphism(rootToInner, root1, inner2);
         
         var root2 = builder.value(rootToId, "2").object(rootKey);
         var root_id2 = builder.value(Signature.Empty(), "2").object(idKey);
-        var item3 = buildExpectedItemInstance(builder, "2", "location", "Praha", "cs");
-        var item4 = buildExpectedItemInstance(builder, "3", "country", "Česká republika", "cs");
+        var inner3 = buildExpectedInnerInstance(builder, "2", "2", "location", "Praha", "cs");
+        var inner4 = buildExpectedInnerInstance(builder, "3", "2", "country", "Česká republika", "cs");
         
         builder.morphism(rootToId, root2, root_id2);
-        builder.morphism(rootToItem, root2, item3);
-        builder.morphism(rootToItem, root2, item4);
+        builder.morphism(rootToInner, root2, inner3);
+        builder.morphism(rootToInner, root2, inner4);
         
         return instance;
     }
 
-    private ActiveDomainRow buildExpectedItemInstance(SimpleInstanceCategoryBuilder builder, String uniqueId, String name, String content, String language)
+    private ActiveDomainRow buildExpectedInnerInstance(SimpleInstanceCategoryBuilder builder, String uniqueId, String id, String name, String content, String language)
     {
-        var itemRow = builder.value(Signature.Empty(), uniqueId).object(itemKey);
+        var innerRow = builder.value(innerToId, id).value(innerToName, name).object(innerKey);
         var nameRow = builder.value(Signature.Empty(), name).object(nameKey);
+
+        var itemRow = builder.value(Signature.Empty(), uniqueId).object(itemKey);
         var contentRow = builder.value(Signature.Empty(), content).object(contentKey);
         var languageRow = builder.value(Signature.Empty(), language).object(languageKey);
         
-        builder.morphism(itemToName, itemRow, nameRow);
+        builder.morphism(innerToName, innerRow, nameRow);
+        builder.morphism(innerToItem, innerRow, itemRow);
         builder.morphism(itemToContent, itemRow, contentRow);
         builder.morphism(itemToLanguage, itemRow, languageRow);
         
-        return itemRow;
+        return innerRow;
     }
 
     @Test

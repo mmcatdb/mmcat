@@ -22,6 +22,13 @@ public class ModelToCategory2StructureTest extends ModelToCategoryExtendedBase
     {
         return "2StructureTest.json";
     }
+
+    @Override
+    protected int getDebugLevel()
+    {
+        return 0;
+        //return 5;
+    }
     
     @Override
     protected SchemaCategory buildSchemaCategoryScenario()

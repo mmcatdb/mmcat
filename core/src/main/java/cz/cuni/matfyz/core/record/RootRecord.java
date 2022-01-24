@@ -10,7 +10,7 @@ public class RootRecord extends ComplexRecord
     
 	public RootRecord()
     {
-        super(null, null);
+        super(null);
 	}
     
     /*

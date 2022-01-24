@@ -14,9 +14,9 @@ public abstract class SimpleRecord<DataType> extends DataRecord
     protected final Signature signature;
     
 //    SimpleRecord(Name name, ComplexRecord parent, DataType value, Signature signature)
-    SimpleRecord(RecordName name, ComplexRecord parent, Signature signature)
+    SimpleRecord(RecordName name, Signature signature)
     {
-        super(name, parent);
+        super(name);
         this.signature = signature;
     }
 	

@@ -7,22 +7,15 @@ package cz.cuni.matfyz.core.record;
 public abstract class DataRecord
 {
     protected final RecordName name;
-    private final DataRecord parent;
     
-	protected DataRecord(RecordName name, DataRecord parent)
+	protected DataRecord(RecordName name)
     {
 		this.name = name;
-        this.parent = parent;
 	}
     
     public RecordName name()
     {
         return this.name;
-    }
-    
-    public DataRecord parent()
-    {
-        return this.parent;
     }
     
     // Iterate through all simple properties of this tree

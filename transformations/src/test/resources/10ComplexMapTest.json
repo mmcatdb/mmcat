@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "content": {
+        "inner": {
             "city": {
                 "content": "Praha",
                 "language": "cs"
@@ -14,7 +14,7 @@
     },
     {
         "id": 2,
-        "content": {
+        "inner": {
             "location": {
                 "content": "Praha",
                 "language": "cs"

@@ -88,7 +88,7 @@ public class DMLAlgorithm
 
     private Set<ActiveMappingRow> fetchRelations(InstanceMorphism morphism)
     {
-        return morphism.mappings();
+        return morphism.allMappings();
     }
 
     private DMLStatement buildStatement(Stack<DMLStackTriple> M)
@@ -123,8 +123,12 @@ public class DMLAlgorithm
         {
             // Get all mapping rows that have signature of this subpath and originate in given row.
             InstanceMorphism morphism = instance.morphism(subpath.signature());
-            morphism.mappings().stream().filter(mapping -> mapping.domainRow().equals(row))
-                .forEach(mappingRow -> output.add(getNameValuePair(subpath, mappingRow)));
+            morphism.mappingsFromRow(row).forEach(mappingRow -> output.add(getNameValuePair(subpath, mappingRow)));
+
+            // Pro cassandru se nyní nerozlišuje mezi množinou (array bez duplicit) a polem (array).
+                // Potom se to ale vyřeší.
+                // Moderní databázové koncepty
+                // https://www.ksi.mff.cuni.cz/~koupil/212-NDBI040/index.html
         }
 
         return output;
@@ -158,11 +162,12 @@ public class DMLAlgorithm
         // If the name is dynamic, we have to find its string value.
         ActiveDomainRow parentRow = parentToObjectMapping.domainRow();
         InstanceMorphism nameMorphism = instance.morphism(dynamicName.signature());
-        Optional<ActiveMappingRow> nameRow = nameMorphism.mappings().stream().filter(mapping -> mapping.domainRow().equals(parentRow))
-            .findFirst();
+        var nameRowSet = nameMorphism.mappingsFromRow(parentRow);
 
-        if (nameRow.isPresent())
-            return nameRow.get().codomainRow().getValue(Signature.Empty());
+        if (nameRowSet != null && nameRowSet.size() > 0)
+        {
+            return nameRowSet.iterator().next().codomainRow().getValue(Signature.Empty());
+        }
 
         throw new UnsupportedOperationException("Dynamic name value not found.");
     }

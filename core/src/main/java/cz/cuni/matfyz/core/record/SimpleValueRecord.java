@@ -10,9 +10,9 @@ public class SimpleValueRecord<DataType> extends SimpleRecord<DataType>
 {
     private final DataType value;
     
-    SimpleValueRecord(RecordName name, ComplexRecord parent, Signature signature, DataType value)
+    SimpleValueRecord(RecordName name, Signature signature, DataType value)
     {
-        super(name, parent, signature);
+        super(name, signature);
         this.value = value;
     }
 	

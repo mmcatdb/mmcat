@@ -5,6 +5,7 @@ import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -16,8 +17,8 @@ public class InstanceMorphism implements Morphism
 	private final InstanceObject dom;
 	private final InstanceObject cod;
 	private final InstanceCategory category;
-    
-    private final Set<ActiveMappingRow> mappings = new TreeSet<>();
+
+    private final Map<ActiveDomainRow, Set<ActiveMappingRow>> mappings = new TreeMap<>();
     
     /*
 	private final List<ActiveMappingRow> activeDomain = new ArrayList<>();
@@ -38,13 +39,25 @@ public class InstanceMorphism implements Morphism
     
     public void addMapping(ActiveMappingRow mapping)
     {
-        mappings.add(mapping);
+		Set<ActiveMappingRow> set = mappings.get(mapping.domainRow());
+		if (set == null)
+		{
+			set = new TreeSet<>();
+			mappings.put(mapping.domainRow(), set);
+		}
+
+        set.add(mapping);
     }
 
-    public Set<ActiveMappingRow> mappings()
+    public Set<ActiveMappingRow> mappingsFromRow(ActiveDomainRow row)
     {
-        return mappings();
+        return mappings.get(row);
     }
+
+	public Set<ActiveMappingRow> allMappings()
+	{
+		return mappings.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+	}
     
 	@Override
 	public InstanceObject dom()
@@ -80,8 +93,10 @@ public class InstanceMorphism implements Morphism
                 .append("\tCod: ").append(cod.key()).append("\n");
         
         builder.append("\tValues:\n");
-		for (ActiveMappingRow row : mappings)
-            builder.append("\t\t").append(row).append("\n");
+		//for (Set<ActiveMappingRow> set : mappings.values())
+		//	for (ActiveMappingRow row : set)
+		for (ActiveMappingRow row : allMappings())
+            	builder.append("\t\t").append(row).append("\n");
         
         return builder.toString();
 	}
