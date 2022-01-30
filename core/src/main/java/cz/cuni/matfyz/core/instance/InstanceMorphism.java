@@ -51,7 +51,8 @@ public class InstanceMorphism implements Morphism
 
     public Set<ActiveMappingRow> mappingsFromRow(ActiveDomainRow row)
     {
-        return mappings.get(row);
+        var mappingsFromRow = mappings.get(row);
+		return mappingsFromRow == null ? new TreeSet<>() : mappingsFromRow;
     }
 
 	public Set<ActiveMappingRow> allMappings()

@@ -13,7 +13,7 @@ public class DummyDDLWrapper implements AbstractDDLWrapper
 {
     private List<String> methods = new ArrayList<>();
 
-    public Iterable<String> methods()
+    public Collection<String> methods()
     {
         return methods;
     }

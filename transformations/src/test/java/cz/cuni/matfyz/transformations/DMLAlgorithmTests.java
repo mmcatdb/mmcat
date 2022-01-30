@@ -1,24 +1,18 @@
 package cz.cuni.matfyz.transformations;
 
-import cz.cuni.matfyz.core.schema.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
+import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.Debug;
+
+import org.junit.jupiter.api.Test;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jachymb.bartik
  */
-public class ModelToCategoryTests
+public class DMLAlgorithmTests
 {
-    @BeforeEach
-    public void setUp()
-    {
-        UniqueIdProvider.reset();
-    }
-
 	@Test
 	public void basicTest()
     {
@@ -27,9 +21,10 @@ public class ModelToCategoryTests
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
 
-        new ModelToCategoryTestBase("1BasicTest.json").setAll(
+        new DMLAlgorithmTestBase("1BasicTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_order(),
             data.expectedInstance_order(schema)
         )
@@ -45,9 +40,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
 
-        new ModelToCategoryTestBase("2StructureTest.json").setAll(
+        new DMLAlgorithmTestBase("2StructureTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDoc(schema)
         )
@@ -64,9 +60,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addArray(schema, order);
 
-        new ModelToCategoryTestBase("3SimpleArrayTest.json").setAll(
+        new DMLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_array(),
             data.expectedInstance_array(schema)
         )
@@ -82,9 +79,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addItems(schema, order);
 
-        new ModelToCategoryTestBase("4ComplexArrayTest.json").setAll(
+        new DMLAlgorithmTestBase("4ComplexArrayTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_items(),
             data.expectedInstance_items(schema)
         )
@@ -100,9 +98,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addContact(schema, order);
 
-        new ModelToCategoryTestBase("5MapTest.json").setAll(
+        new DMLAlgorithmTestBase("5MapTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_contact(),
             data.expectedInstance_contact(schema)
         )
@@ -112,15 +111,18 @@ public class ModelToCategoryTests
     @Test
 	public void syntheticPropertyTest()
     {
+        Debug.setLevel(0);
+        
         var data = new TestData();
 
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addOrdered(schema, order);
 
-        new ModelToCategoryTestBase("6SyntheticPropertyTest.json").setAll(
+        new DMLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_ordered(),
             data.expectedInstance_ordered(schema)
         )
@@ -136,9 +138,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
 
-        new ModelToCategoryTestBase("7MissingSimpleTest.json").setAll(
+        new DMLAlgorithmTestBase("7MissingSimpleTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingSimple(schema)
         )
@@ -154,9 +157,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
 
-        new ModelToCategoryTestBase("8MissingComplexTest.json").setAll(
+        new DMLAlgorithmTestBase("8MissingComplexTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingComplex(schema)
         )
@@ -172,9 +176,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addItems(schema, order);
 
-        new ModelToCategoryTestBase("9EmptyArrayTest.json").setAll(
+        new DMLAlgorithmTestBase("9EmptyArrayTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_items(),
             data.expectedInstance_itemsMissing(schema)
         )
@@ -190,9 +195,10 @@ public class ModelToCategoryTests
         var order = data.buildOrder(schema);
         data.addAddress(schema, order);
 
-        new ModelToCategoryTestBase("10ComplexMapTest.json").setAll(
+        new DMLAlgorithmTestBase("10ComplexMapTest.json").setAll(
             schema,
             order,
+            "order",
             data.path_address(),
             data.expectedInstance_address(schema)
         )

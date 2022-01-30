@@ -75,7 +75,7 @@ public class ModelToCategoryTestBase
 
 	private ForestOfRecords buildForestOfRecords(ComplexProperty path) throws Exception
     {
-		DummyPullWrapper wrapper = new DummyPullWrapper();
+		var wrapper = new DummyPullWrapper();
         
         var url = ClassLoader.getSystemResource(fileNamePrefix + dataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
@@ -101,16 +101,16 @@ public class ModelToCategoryTestBase
         if (Debug.shouldLog(3))
 			System.out.println(String.format("# Forest of Records\n%s", forest));
         
-		Mapping mapping = new Mapping(rootObject, path);
+		var mapping = new Mapping(rootObject, path);
 
-		ModelToCategory transformation = new ModelToCategory();
+		var transformation = new ModelToCategory();
 		transformation.input(schema, instance, forest, mapping);
 		transformation.algorithm();
 
         if (Debug.shouldLog(4))
 			System.out.println(String.format("# Instance CategoryRecords\n%s", instance));
         
-        Assertions.assertEquals(expectedInstance.objects(), instance.objects(), "Test objects differs from the expected objects.");
-        Assertions.assertEquals(expectedInstance.morphisms(), instance.morphisms(), "Test morphisms differs from the expected morphisms.");
+        Assertions.assertEquals(expectedInstance.objects(), instance.objects(), "Test objects differ from the expected objects.");
+        Assertions.assertEquals(expectedInstance.morphisms(), instance.morphisms(), "Test morphisms differ from the expected morphisms.");
 	}
 }

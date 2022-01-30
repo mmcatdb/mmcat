@@ -327,18 +327,18 @@ public class TestData
         return new InstanceCategoryBuilder().setSchemaCategory(schema).build();
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_basic(SchemaCategory schema)
+    public InstanceCategory expectedInstance_order(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        buildExpectedOrder_basic(builder, "2043");
-        buildExpectedOrder_basic(builder, "1653");
+        expectedOrder(builder, "2043");
+        expectedOrder(builder, "1653");
         
         return instance;
     }
 
-    private ActiveDomainRow buildExpectedOrder_basic(SimpleInstanceCategoryBuilder builder, String orderNumber)
+    private ActiveDomainRow expectedOrder(SimpleInstanceCategoryBuilder builder, String orderNumber)
     {
         var order = builder.value(orderToNumber, orderNumber).object(orderKey);
         var number = builder.value(Signature.Empty(), orderNumber).object(numberKey);
@@ -346,20 +346,20 @@ public class TestData
         return order;
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_structure(SchemaCategory schema)
+    public InstanceCategory expectedInstance_nestedDoc(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        buildExpectedOrder_structure(builder, "2043", "0", "hodnotaA", "hodnotaB", "hodnotaC");
-        buildExpectedOrder_structure(builder, "1653", "1", "hodnotaA2", "hodnotaB2", "hodnotaC2");
+        expectedOrder_nestedDoc(builder, "2043", "0", "hodnotaA", "hodnotaB", "hodnotaC");
+        expectedOrder_nestedDoc(builder, "1653", "1", "hodnotaA2", "hodnotaB2", "hodnotaC2");
         
         return instance;
     }
 
-    private void buildExpectedOrder_structure(SimpleInstanceCategoryBuilder builder, String orderNumber, String uniqueId, String valueA, String valueB, String valueC)
+    private void expectedOrder_nestedDoc(SimpleInstanceCategoryBuilder builder, String orderNumber, String uniqueId, String valueA, String valueB, String valueC)
     {
-        var order = buildExpectedOrder_basic(builder, orderNumber);
+        var order = expectedOrder(builder, orderNumber);
         var nestedDoc = builder.value(Signature.Empty(), uniqueId).object(nestedDocKey);
         var propertyA = builder.value(Signature.Empty(), valueA).object(propertyAKey);
         var propertyB = builder.value(Signature.Empty(), valueB).object(propertyBKey);
@@ -371,20 +371,20 @@ public class TestData
         builder.morphism(nestedDocToPropertyC, nestedDoc, propertyC);
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_simpleArray(SchemaCategory schema)
+    public InstanceCategory expectedInstance_array(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        buildExpectedOrder_simpleArray(builder, "2043", new String[]{ "123", "456", "789" });
-        buildExpectedOrder_simpleArray(builder, "1653", new String[]{ "123", "String456", "String789" });
+        expectedOrder_array(builder, "2043", new String[]{ "123", "456", "789" });
+        expectedOrder_array(builder, "1653", new String[]{ "123", "String456", "String789" });
         
         return instance;
     }
 
-    private void buildExpectedOrder_simpleArray(SimpleInstanceCategoryBuilder builder, String orderNumber, String[] array)
+    private void expectedOrder_array(SimpleInstanceCategoryBuilder builder, String orderNumber, String[] array)
     {
-        var order = buildExpectedOrder_basic(builder, orderNumber);
+        var order = expectedOrder(builder, orderNumber);
         for (String value : array)
         {
             var arrayItem = builder.value(Signature.Empty(), value).object(arrayKey);
@@ -392,21 +392,21 @@ public class TestData
         }
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_complexArray(SchemaCategory schema)
+    public InstanceCategory expectedInstance_items(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
 
-        var order = buildExpectedOrder_basic(builder, "2043");
-        buildExpectedItem_complexArray(builder, order, "2043", "123", "Toy", "125", "1");
-        buildExpectedItem_complexArray(builder, order, "2043", "765", "Book", "199", "2");
-        buildExpectedItem_complexArray(builder, order, "2043", "457", "Knife", "299", "7");
-        buildExpectedItem_complexArray(builder, order, "2043", "734", "Doll", "350", "3");
+        var order = expectedOrder(builder, "2043");
+        expectedItem(builder, order, "2043", "123", "Toy", "125", "1");
+        expectedItem(builder, order, "2043", "765", "Book", "199", "2");
+        expectedItem(builder, order, "2043", "457", "Knife", "299", "7");
+        expectedItem(builder, order, "2043", "734", "Doll", "350", "3");
         
         return instance;
     }
 
-    private void buildExpectedItem_complexArray(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    private void expectedItem(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
     {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
         var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
@@ -421,23 +421,23 @@ public class TestData
         builder.morphism(orderToItems, order, items);
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_map(SchemaCategory schema)
+    public InstanceCategory expectedInstance_contact(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        var order1 = buildExpectedOrder_basic(builder, "2043");
-        addExpectedContactInstance_map(builder, order1, "2043", "anna@seznam.cz", "email");
-        addExpectedContactInstance_map(builder, order1, "2043", "+420777123456", "cellphone");
+        var order1 = expectedOrder(builder, "2043");
+        addExpectedContact(builder, order1, "2043", "anna@seznam.cz", "email");
+        addExpectedContact(builder, order1, "2043", "+420777123456", "cellphone");
         
-        var order2 = buildExpectedOrder_basic(builder, "1653");
-        addExpectedContactInstance_map(builder, order2, "1653", "skype123", "skype");
-        addExpectedContactInstance_map(builder, order2, "1653", "+420123456789", "cellphone");
+        var order2 = expectedOrder(builder, "1653");
+        addExpectedContact(builder, order2, "1653", "skype123", "skype");
+        addExpectedContact(builder, order2, "1653", "+420123456789", "cellphone");
         
         return instance;
     }
 
-    private void addExpectedContactInstance_map(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String numberValue, String valueValue, String nameValue)
+    private void addExpectedContact(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String numberValue, String valueValue, String nameValue)
     {
         var contact = builder.value(contactToNumber, numberValue).value(contactToValue, valueValue).value(contactToName, nameValue).object(contactKey);
         var value = builder.value(Signature.Empty(), valueValue).object(valueKey);
@@ -448,31 +448,31 @@ public class TestData
         builder.morphism(orderToContact, order, contact);
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_syntheticProperty(SchemaCategory schema)
+    public InstanceCategory expectedInstance_ordered(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        buildExpectedOrder_syntheticProperty(builder, "2043", "1");
-        buildExpectedOrder_syntheticProperty(builder, "1653", "1");
+        expectedOrder_ordered(builder, "2043", "1");
+        expectedOrder_ordered(builder, "1653", "1");
         
         return instance;
     }
 
-    public ActiveDomainRow buildExpectedOrder_syntheticProperty(SimpleInstanceCategoryBuilder builder, String orderNumber, String customerId)
+    public ActiveDomainRow expectedOrder_ordered(SimpleInstanceCategoryBuilder builder, String orderNumber, String customerId)
     {
-        var order = buildExpectedOrder_basic(builder, orderNumber);
+        var order = expectedOrder(builder, orderNumber);
         var id = builder.value(Signature.Empty(), customerId).object(idKey);
         builder.morphism(orderToId, order, id);
         return order;
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_missingSimple(SchemaCategory schema)
+    public InstanceCategory expectedInstance_nestedDocMissingSimple(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        var order1 = buildExpectedOrder_basic(builder, "2043");
+        var order1 = expectedOrder(builder, "2043");
         var nestedDoc1 = builder.value(Signature.Empty(), "0").object(nestedDocKey);
         var propertyA1 = builder.value(Signature.Empty(), "hodnotaA").object(propertyAKey);
         var propertyC1 = builder.value(Signature.Empty(), "hodnotaC").object(propertyCKey);
@@ -481,7 +481,7 @@ public class TestData
         builder.morphism(nestedDocToPropertyA, nestedDoc1, propertyA1);
         builder.morphism(nestedDocToPropertyC, nestedDoc1, propertyC1);
         
-        var order2 = buildExpectedOrder_basic(builder, "1653");
+        var order2 = expectedOrder(builder, "1653");
         var nestedDoc2 = builder.value(Signature.Empty(), "1").object(nestedDocKey);
         var propertyA2 = builder.value(Signature.Empty(), "hodnotaA2").object(propertyAKey);
         var propertyC2 = builder.value(Signature.Empty(), "hodnotaC2").object(propertyCKey);
@@ -493,44 +493,44 @@ public class TestData
         return instance;
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_missingComplex(SchemaCategory schema)
+    public InstanceCategory expectedInstance_nestedDocMissingComplex(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        buildExpectedOrder_basic(builder, "2043");
-        buildExpectedOrder_basic(builder, "1653");
+        expectedOrder(builder, "2043");
+        expectedOrder(builder, "1653");
         
         return instance;
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_emptyArray(SchemaCategory schema)
+    public InstanceCategory expectedInstance_itemsMissing(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        buildExpectedOrder_basic(builder, "2043");
+        expectedOrder(builder, "2043");
         
         return instance;
     }
 
-    public InstanceCategory buildExpectedInstanceCategory_complexMap(SchemaCategory schema)
+    public InstanceCategory expectedInstance_address(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
         
-        var order1 = buildExpectedOrder_basic(builder, "2043");
-        addExpectedAddressInstance(builder, order1, "0", "2043", "city", "Praha", "cs");
-        addExpectedAddressInstance(builder, order1, "1", "2043", "country", "Czech republic", "en");
+        var order1 = expectedOrder(builder, "2043");
+        addExpectedAddress(builder, order1, "0", "2043", "city", "Praha", "cs");
+        addExpectedAddress(builder, order1, "1", "2043", "country", "Czech republic", "en");
 
-        var order2 = buildExpectedOrder_basic(builder, "1653");
-        addExpectedAddressInstance(builder, order2, "2", "1653", "location", "Praha", "cs");
-        addExpectedAddressInstance(builder, order2, "3", "1653", "country", "Česká republika", "cs");
+        var order2 = expectedOrder(builder, "1653");
+        addExpectedAddress(builder, order2, "2", "1653", "location", "Praha", "cs");
+        addExpectedAddress(builder, order2, "3", "1653", "country", "Česká republika", "cs");
         
         return instance;
     }
 
-    private void addExpectedAddressInstance(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String uniqueId, String number, String label, String text, String locale)
+    private void addExpectedAddress(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String uniqueId, String number, String label, String text, String locale)
     {
         var address = builder.value(addressToNumber, number).value(addressToLabel, label).object(addressKey);
         var labelRow = builder.value(Signature.Empty(), label).object(labelKey);
@@ -545,14 +545,14 @@ public class TestData
         builder.morphism(orderToAddress, order, address);
     }
 
-    public ComplexProperty buildPath_order()
+    public ComplexProperty path_order()
     {
         return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber)
         );
     }
 
-    public ComplexProperty buildPath_structure()
+    public ComplexProperty path_nestedDoc()
     {
         return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
@@ -564,7 +564,7 @@ public class TestData
         );
     }
 
-    public ComplexProperty buildPath_array()
+    public ComplexProperty path_array()
     {
         return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
@@ -572,7 +572,7 @@ public class TestData
         );
     }
 
-    public ComplexProperty buildPath_items()
+    public ComplexProperty path_items()
     {
         return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
@@ -585,7 +585,7 @@ public class TestData
         );
     }
 
-    public ComplexProperty buildPath_contact()
+    public ComplexProperty path_contact()
     {
         return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),
@@ -595,7 +595,7 @@ public class TestData
         );
     }
 
-    public ComplexProperty buildPath_ordered()
+    public ComplexProperty path_ordered()
     {
         return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new ComplexProperty("_id", Signature.Null(),
@@ -605,7 +605,7 @@ public class TestData
         );
     }
 
-    public ComplexProperty buildPath_address()
+    public ComplexProperty path_address()
     {
         return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
             new SimpleProperty("number", orderToNumber),

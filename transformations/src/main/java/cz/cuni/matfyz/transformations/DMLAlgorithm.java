@@ -117,27 +117,38 @@ public class DMLAlgorithm
 
     private List<NameValuePair> collectNameValuePairs(ComplexProperty path, ActiveDomainRow row)
     {
+        return collectNameValuePairs(path, row, "");
+    }
+
+    private List<NameValuePair> collectNameValuePairs(ComplexProperty path, ActiveDomainRow row, String prefix)
+    {
         List<NameValuePair> output = new ArrayList<>();
 
         for (AccessPath subpath : path.subpaths())
         {
-            // Get all mapping rows that have signature of this subpath and originate in given row.
-            InstanceMorphism morphism = instance.morphism(subpath.signature());
-            morphism.mappingsFromRow(row).forEach(mappingRow -> output.add(getNameValuePair(subpath, mappingRow)));
-
-            // Pro cassandru se nyní nerozlišuje mezi množinou (array bez duplicit) a polem (array).
-                // Potom se to ale vyřeší.
-                // Moderní databázové koncepty
-                // https://www.ksi.mff.cuni.cz/~koupil/212-NDBI040/index.html
+            if (subpath instanceof ComplexProperty complexSubpath && complexSubpath.isAuxiliary())
+            {
+                if (complexSubpath.name() instanceof StaticName staticName)
+                    output.addAll(collectNameValuePairs(complexSubpath, row, prefix + staticName.getStringName() + "/"));
+            }
+            else
+            {
+                // Get all mapping rows that have signature of this subpath and originate in given row.
+                InstanceMorphism morphism = instance.morphism(subpath.signature());
+                morphism.mappingsFromRow(row).forEach(mappingRow -> output.add(getNameValuePair(subpath, mappingRow, prefix)));
+    
+                // Pro cassandru se nyní nerozlišuje mezi množinou (array bez duplicit) a polem (array).
+                    // Potom se to ale vyřeší.
+            }
         }
 
         return output;
     }
 
-    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveMappingRow parentToObjectMapping)
+    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveMappingRow parentToObjectMapping, String prefix)
     {
         ActiveDomainRow objectRow = parentToObjectMapping.codomainRow();
-        String name = getStringName(objectPath, parentToObjectMapping);
+        String name = prefix + getStringName(objectPath, parentToObjectMapping);
 
         if (objectPath instanceof SimpleProperty simplePath)
         {
