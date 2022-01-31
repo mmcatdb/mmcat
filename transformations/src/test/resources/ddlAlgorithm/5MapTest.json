@@ -1,0 +1,8 @@
+[
+    "setKindName(order)",
+    "isSchemaLess()",
+    "createDDLStatement()",
+    "addSimpleProperty([ /number ], true)",
+    "addComplexArrayProperty([ /contact ], false)",
+    "addSimpleProperty([ /contact/cellphone, /contact/email, /contact/skype ], true)"
+]

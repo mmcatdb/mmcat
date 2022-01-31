@@ -1,0 +1,10 @@
+[
+    "setKindName(order)",
+    "isSchemaLess()",
+    "createDDLStatement()",
+    "addSimpleProperty([ /number ], true)",
+    "addComplexProperty([ /nested ], true)",
+    "addSimpleProperty([ /nested/propertyA ], true)",
+    "addSimpleProperty([ /nested/propertyB ], true)",
+    "addSimpleProperty([ /nested/propertyC ], true)"
+]

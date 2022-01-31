@@ -18,10 +18,10 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper
     }
 
     @Override public boolean isSchemaLess() { return true; }
-    @Override public boolean addSimpleProperty(Set<String> names, boolean optional) throws UnsupportedOperationException { return false; }
-    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean optional) throws UnsupportedOperationException { return false; }
-    @Override public boolean addComplexProperty(Set<String> names, boolean optional) throws UnsupportedOperationException { return false; }
-    @Override public boolean addComplexArrayProperty(Set<String> names, boolean optional) throws UnsupportedOperationException { return false; }
+    @Override public boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedOperationException { return false; }
+    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException { return false; }
+    @Override public boolean addComplexProperty(Set<String> names, boolean required) throws UnsupportedOperationException { return false; }
+    @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException { return false; }
 
     @Override
     public MongoDBDDLStatement createDDLStatement()

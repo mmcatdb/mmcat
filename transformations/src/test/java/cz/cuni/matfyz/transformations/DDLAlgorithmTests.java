@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jachymb.bartik
  */
-public class DMLAlgorithmTests
+public class DDLAlgorithmTests
 {
 	@Test
 	public void basicTest()
@@ -19,11 +19,10 @@ public class DMLAlgorithmTests
         var data = new TestData();
 
         SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
+        data.buildOrder(schema);
 
-        new DMLAlgorithmTestBase("1BasicTest.json").setAll(
+        new DDLAlgorithmTestBase("1BasicTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_order(),
             data.expectedInstance_order(schema)
@@ -40,9 +39,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
 
-        new DMLAlgorithmTestBase("2StructureTest.json").setAll(
+        new DDLAlgorithmTestBase("2StructureTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDoc(schema)
@@ -60,9 +58,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addArray(schema, order);
 
-        new DMLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
+        new DDLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_array(),
             data.expectedInstance_array(schema)
@@ -70,7 +67,6 @@ public class DMLAlgorithmTests
         .testAlgorithm();
 	}
 
-    // This isn't a comprehensive test because it doesn't check if the order is correct. However, to implement a complete test would be such an overkill.
     @Test
 	public void complexArrayTest()
     {
@@ -80,9 +76,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addItems(schema, order);
 
-        new DMLAlgorithmTestBase("4ComplexArrayTest.json").setAll(
+        new DDLAlgorithmTestBase("4ComplexArrayTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_items(),
             data.expectedInstance_items(schema)
@@ -99,9 +94,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addContact(schema, order);
 
-        new DMLAlgorithmTestBase("5MapTest.json").setAll(
+        new DDLAlgorithmTestBase("5MapTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_contact(),
             data.expectedInstance_contact(schema)
@@ -120,9 +114,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addOrdered(schema, order);
 
-        new DMLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
+        new DDLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_ordered(),
             data.expectedInstance_ordered(schema)
@@ -139,9 +132,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
 
-        new DMLAlgorithmTestBase("7MissingSimpleTest.json").setAll(
+        new DDLAlgorithmTestBase("7MissingSimpleTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingSimple(schema)
@@ -158,9 +150,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
 
-        new DMLAlgorithmTestBase("8MissingComplexTest.json").setAll(
+        new DDLAlgorithmTestBase("8MissingComplexTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingComplex(schema)
@@ -177,9 +168,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addItems(schema, order);
 
-        new DMLAlgorithmTestBase("9EmptyArrayTest.json").setAll(
+        new DDLAlgorithmTestBase("9EmptyArrayTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_items(),
             data.expectedInstance_itemsMissing(schema)
@@ -196,9 +186,8 @@ public class DMLAlgorithmTests
         var order = data.buildOrder(schema);
         data.addAddress(schema, order);
 
-        new DMLAlgorithmTestBase("10ComplexMapTest.json").setAll(
+        new DDLAlgorithmTestBase("10ComplexMapTest.json").setAll(
             schema,
-            order,
             "order",
             data.path_address(),
             data.expectedInstance_address(schema)
@@ -206,6 +195,3 @@ public class DMLAlgorithmTests
         .testAlgorithm();
 	}
 }
-
-// TODO Dodělat test 11, bude to toto s tím, že tam budou chybět jen konkrétní hodnoty, celé prvky pole
-// - místo nich se má vypsat null

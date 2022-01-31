@@ -34,7 +34,7 @@ public class ICAlgorithm
         throw new UnsupportedOperationException();
         /*
         var N = collectNames(mapping.accessPath(), mapping.primaryIdentifier());
-        wrapper.appendIdentifier(mapping.name(), N);
+        wrapper.appendIdentifier(mapping.kindName(), N);
         
         for (Pair<String, Set<AccessPath>> referencePair : mapping.references())
         {
@@ -42,7 +42,7 @@ public class ICAlgorithm
             Mapping n = allMappings.get(referencePair.getValue0());
             Set<Pair<Signature, Name>> R = collectSigNamePairs(n.accessPath(), referencePair.getValue1());
             Set<ComparablePair<String, String>> S = makeReferencePairs(O, R);
-            wrapper.appendReference(mapping.name(), n.name(), S);
+            wrapper.appendReference(mapping.kindName(), n.name(), S);
         }
         */
     }

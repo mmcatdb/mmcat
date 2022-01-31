@@ -17,33 +17,39 @@ public class DDLAlgorithm
 {
     private SchemaCategory schema; // TODO
     private InstanceFunctor instanceFunctor;
-    private String name; // TODO
+    private String rootName; // TODO
     private ComplexProperty rootAccessPath;
     private AbstractDDLWrapper wrapper;
     
-    public void input(SchemaCategory schema, InstanceCategory instance, String name, ComplexProperty rootAccessPath, AbstractDDLWrapper wrapper)
+    public void input(SchemaCategory schema, InstanceCategory instance, String rootName, ComplexProperty rootAccessPath, AbstractDDLWrapper wrapper)
     {
         this.schema = schema;
         instanceFunctor = new InstanceFunctor(instance, schema);
-        this.name = name;
+        this.rootName = rootName;
         this.rootAccessPath = rootAccessPath;
         this.wrapper = wrapper;
     }
     
     public DDLStatement algorithm()
     {
-        wrapper.setKindName(name);
+        wrapper.setKindName(rootName);
         
         if (!wrapper.isSchemaLess())
         {
             Stack<StackPair> M = new Stack<>();
-            M.add(new StackPair(Set.of(StaticName.Anonymous().toString()), rootAccessPath));
+            addSubpathsToStack(M, rootAccessPath, Set.of(StaticName.Anonymous().getStringName()));
 
             while (!M.isEmpty())
                 processTopOfStack(M);
         }
         
         return wrapper.createDDLStatement();
+    }
+
+    private void addSubpathsToStack(Stack<StackPair> M, ComplexProperty path, Set<String> names)
+    {
+        for (AccessPath subpath : path.subpaths())
+            M.add(new StackPair(names, subpath));
     }
     
     private void processTopOfStack(Stack<StackPair> M)
@@ -55,9 +61,16 @@ public class DDLAlgorithm
         Set<String> N = concatenate(pair.names, Nt);
         
         if (path instanceof SimpleProperty simpleProperty)
+        {
             processPath(simpleProperty, N);
+        }
         else if (path instanceof ComplexProperty complexProperty)
-            processPath(complexProperty, N);
+        {
+            if (!complexProperty.isAuxiliary())
+                processPath(complexProperty, N);
+
+            addSubpathsToStack(M, complexProperty, N);
+        }
     }
     
     private Set<String> determinePropertyName(AccessPath path)
@@ -92,9 +105,9 @@ public class DDLAlgorithm
         var morphism = schema.morphisms().get(property.value().signature());
         
         if (isArray(morphism))
-            wrapper.addSimpleArrayProperty(names, isOptional(morphism));
+            wrapper.addSimpleArrayProperty(names, isRequired(morphism));
         else
-            wrapper.addSimpleProperty(names, isOptional(morphism));
+            wrapper.addSimpleProperty(names, isRequired(morphism));
     }
     
     private void processPath(ComplexProperty property, Set<String> names)
@@ -102,14 +115,14 @@ public class DDLAlgorithm
         var morphism = schema.morphisms().get(property.signature());
         
         if (isArray(morphism))
-            wrapper.addComplexArrayProperty(names, isOptional(morphism));
+            wrapper.addComplexArrayProperty(names, isRequired(morphism));
         else
-            wrapper.addComplexProperty(names, isOptional(morphism));
+            wrapper.addComplexProperty(names, isRequired(morphism));
     }
     
-    private static boolean isOptional(SchemaMorphism morphism)
+    private static boolean isRequired(SchemaMorphism morphism)
     {
-        return morphism.min() == SchemaMorphism.Min.ZERO;
+        return morphism.min() != SchemaMorphism.Min.ZERO;
     }
     
     private static boolean isArray(SchemaMorphism morphism)

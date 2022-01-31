@@ -2,13 +2,23 @@
     {
         "name": "order",
         "values": [
-            "append(/number, 2043)"
-        ]
-    },
-    {
-        "name": "order",
-        "values": [
-            "append(/number, 1653)"
+            "append(/number, 2043)",
+            "append(/items/productId, 123)",
+            "append(/items/productId, 765)",
+            "append(/items/productId, 457)",
+            "append(/items/productId, 734)",
+            "append(/items/name, Toy)",
+            "append(/items/name, Book)",
+            "append(/items/name, Knife)",
+            "append(/items/name, Doll)",
+            "append(/items/price, 125)",
+            "append(/items/price, 199)",
+            "append(/items/price, 299)",
+            "append(/items/price, 350)",
+            "append(/items/quantity, 1)",
+            "append(/items/quantity, 2)",
+            "append(/items/quantity, 7)",
+            "append(/items/quantity, 3)"
         ]
     }
 ]

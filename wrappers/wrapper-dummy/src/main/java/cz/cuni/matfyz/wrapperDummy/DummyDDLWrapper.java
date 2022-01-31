@@ -13,7 +13,7 @@ public class DummyDDLWrapper implements AbstractDDLWrapper
 {
     private List<String> methods = new ArrayList<>();
 
-    public Collection<String> methods()
+    public List<String> methods()
     {
         return methods;
     }
@@ -28,34 +28,34 @@ public class DummyDDLWrapper implements AbstractDDLWrapper
     public boolean isSchemaLess()
     {
         methods.add("isSchemaLess()");
+        return false;
+    }
+
+    @Override
+    public boolean addSimpleProperty(Set<String> names, boolean required)
+    {
+        methods.add("addSimpleProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 
     @Override
-    public boolean addSimpleProperty(Set<String> names, boolean optional)
+    public boolean addSimpleArrayProperty(Set<String> names, boolean required)
     {
-        methods.add("addSimpleProperty(" + setToString(names) + ", " + optional + ")");
+        methods.add("addSimpleArrayProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 
     @Override
-    public boolean addSimpleArrayProperty(Set<String> names, boolean optional)
+    public boolean addComplexProperty(Set<String> names, boolean required)
     {
-        methods.add("addSimpleArrayProperty(" + setToString(names) + ", " + optional + ")");
+        methods.add("addComplexProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 
     @Override
-    public boolean addComplexProperty(Set<String> names, boolean optional)
+    public boolean addComplexArrayProperty(Set<String> names, boolean required)
     {
-        methods.add("addComplexProperty(" + setToString(names) + ", " + optional + ")");
-        return true;
-    }
-
-    @Override
-    public boolean addComplexArrayProperty(Set<String> names, boolean optional)
-    {
-        methods.add("addComplexArrayProperty(" + setToString(names) + ", " + optional + ")");
+        methods.add("addComplexArrayProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 

@@ -12,6 +12,10 @@ public class Mapping
 	private final SchemaObject rootObject;
 	private final SchemaMorphism rootMorphism;
 	private final ComplexProperty accessPath;
+
+    private String kindName;
+    private IdentifierStructure primaryIdentifier;
+    
     
     public Mapping(SchemaObject rootObject, ComplexProperty accessPath)
     {
@@ -43,5 +47,15 @@ public class Mapping
     public ComplexProperty accessPath()
     {
         return accessPath;
+    }
+
+    public String kindName()
+    {
+        return kindName;
+    }
+
+    public IdentifierStructure primaryIdentifier()
+    {
+        return primaryIdentifier;
     }
 }

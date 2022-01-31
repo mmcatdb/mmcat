@@ -2,6 +2,7 @@ package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.schema.*;
+import cz.cuni.matfyz.core.schema.SchemaMorphism.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 
@@ -79,6 +80,14 @@ public class TestData
     
     private final Signature addressToNumber = orderToAddress.dual().concatenate(orderToNumber);
 
+    private enum Cardinality
+    {
+        ONE_TO_ONE,
+        ONE_TO_MANY,
+        MANY_TO_ONE,
+        MANY_TO_MANY
+    }
+
     public SchemaObject buildOrder(SchemaCategory schema)
     {
         var order = createSchemaObject(
@@ -94,7 +103,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(number);
-        addMorphismWithDual(schema, orderToNumber, order, number);
+        addMorphismWithDual(schema, orderToNumber, order, number, Cardinality.ONE_TO_ONE);
         
         return order;
     }
@@ -107,7 +116,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(array);
-        addMorphismWithDual(schema, orderToArray, order, array);
+        addMorphismWithDual(schema, orderToArray, order, array, Cardinality.ONE_TO_MANY);
     }
     
     public void addItems(SchemaCategory schema, SchemaObject order)
@@ -120,8 +129,8 @@ public class TestData
             new Id(itemsToNumber, itemsToPid)
         );
         schema.addObject(items);
-        addMorphismWithDual(schema, orderToItems, order, items);
-        addMorphismWithDual(schema, itemsToNumber, items, number);
+        addMorphismWithDual(schema, orderToItems, order, items, Cardinality.ONE_TO_MANY);
+        addMorphismWithDual(schema, itemsToNumber, items, number, Cardinality.MANY_TO_ONE);
         
         var quantity = createSchemaObject(
             quantityKey,
@@ -129,7 +138,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(quantity);
-        addMorphismWithDual(schema, itemsToQuantity, items, quantity);
+        addMorphismWithDual(schema, itemsToQuantity, items, quantity, Cardinality.ONE_TO_ONE);
         
         var product = createSchemaObject(
             productKey,
@@ -137,7 +146,7 @@ public class TestData
             new Id(productToPid)
         );
         schema.addObject(product);
-        addMorphismWithDual(schema, itemsToProduct, items, product);
+        addMorphismWithDual(schema, itemsToProduct, items, product, Cardinality.MANY_TO_ONE);
         
         var pid = createSchemaObject(
             pidKey,
@@ -145,8 +154,8 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(pid);
-        addMorphismWithDual(schema, productToPid, product, pid);
-        addMorphismWithDual(schema, itemsToPid, items, pid);
+        addMorphismWithDual(schema, productToPid, product, pid, Cardinality.ONE_TO_ONE);
+        addMorphismWithDual(schema, itemsToPid, items, pid, Cardinality.MANY_TO_ONE);
 
         var price = createSchemaObject(
             priceKey,
@@ -154,8 +163,8 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(price);
-        addMorphismWithDual(schema, productToPrice, product, price);
-        addMorphismWithDual(schema, itemsToPrice, items, price);
+        addMorphismWithDual(schema, productToPrice, product, price, Cardinality.ONE_TO_ONE);
+        addMorphismWithDual(schema, itemsToPrice, items, price, Cardinality.MANY_TO_ONE);
 
         var pname = createSchemaObject(
             pnameKey,
@@ -163,8 +172,8 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(pname);
-        addMorphismWithDual(schema, productToPname, product, pname);
-        addMorphismWithDual(schema, itemsToPname, items, pname);
+        addMorphismWithDual(schema, productToPname, product, pname, Cardinality.ONE_TO_ONE);
+        addMorphismWithDual(schema, itemsToPname, items, pname, Cardinality.MANY_TO_ONE);
     }
     
     public void addContact(SchemaCategory schema, SchemaObject order)
@@ -175,7 +184,7 @@ public class TestData
             new Id(contactToNumber, contactToValue, contactToName)
         );
         schema.addObject(contact);
-        addMorphismWithDual(schema, orderToContact, order, contact);
+        addMorphismWithDual(schema, orderToContact, order, contact, Cardinality.MANY_TO_MANY);
 
         var value = createSchemaObject(
             valueKey,
@@ -183,7 +192,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(value);
-        addMorphismWithDual(schema, contactToValue, contact, value);
+        addMorphismWithDual(schema, contactToValue, contact, value, Cardinality.ONE_TO_ONE);
 
         var type = createSchemaObject(
             typeKey,
@@ -191,7 +200,7 @@ public class TestData
             new Id(typeToName)
         );
         schema.addObject(type);
-        addMorphismWithDual(schema, contactToType, contact, type);
+        addMorphismWithDual(schema, contactToType, contact, type, Cardinality.MANY_TO_ONE);
 
         var name = createSchemaObject(
             nameKey,
@@ -199,8 +208,8 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(name);
-        addMorphismWithDual(schema, typeToName, type, name);
-        addMorphismWithDual(schema, contactToName, contact, name);
+        addMorphismWithDual(schema, typeToName, type, name, Cardinality.ONE_TO_ONE);
+        addMorphismWithDual(schema, contactToName, contact, name, Cardinality.MANY_TO_ONE);
     }
     
     public void addNestedDoc(SchemaCategory schema, SchemaObject order)
@@ -211,7 +220,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(nestedDoc);
-        addMorphismWithDual(schema, orderToNestedDoc, order, nestedDoc);
+        addMorphismWithDual(schema, orderToNestedDoc, order, nestedDoc, Cardinality.ONE_TO_ONE);
         
         var propertyA = createSchemaObject(
             propertyAKey,
@@ -219,7 +228,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(propertyA);
-        addMorphismWithDual(schema, nestedDocToPropertyA, nestedDoc, propertyA);
+        addMorphismWithDual(schema, nestedDocToPropertyA, nestedDoc, propertyA, Cardinality.ONE_TO_ONE);
 
         var propertyB = createSchemaObject(
             propertyBKey,
@@ -227,7 +236,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(propertyB);
-        addMorphismWithDual(schema, nestedDocToPropertyB, nestedDoc, propertyB);
+        addMorphismWithDual(schema, nestedDocToPropertyB, nestedDoc, propertyB, Cardinality.ONE_TO_ONE);
 
         var propertyC = createSchemaObject(
             propertyCKey,
@@ -235,7 +244,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(propertyC);
-        addMorphismWithDual(schema, nestedDocToPropertyC, nestedDoc, propertyC);
+        addMorphismWithDual(schema, nestedDocToPropertyC, nestedDoc, propertyC, Cardinality.ONE_TO_ONE);
     }
     
     public void addOrdered(SchemaCategory schema, SchemaObject order)
@@ -246,7 +255,7 @@ public class TestData
             new Id(orderedToNumber, orderedToId)
         );
         schema.addObject(ordered);
-        addMorphismWithDual(schema, orderedToOrder.dual(), order, ordered);
+        addMorphismWithDual(schema, orderedToOrder.dual(), order, ordered, Cardinality.ONE_TO_ONE);
 
         var customer = createSchemaObject(
             customerKey,
@@ -254,7 +263,7 @@ public class TestData
             new Id(customerToId)
         );
         schema.addObject(customer);
-        addMorphismWithDual(schema, customerToOrdered.dual(), ordered, customer);
+        addMorphismWithDual(schema, customerToOrdered.dual(), ordered, customer, Cardinality.ONE_TO_MANY);
 
         var id = createSchemaObject(
             idKey,
@@ -262,8 +271,8 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(id);
-        addMorphismWithDual(schema, customerToId, customer, id);
-        addMorphismWithDual(schema, orderToId, order, id);
+        addMorphismWithDual(schema, customerToId, customer, id, Cardinality.ONE_TO_ONE);
+        addMorphismWithDual(schema, orderToId, order, id, Cardinality.MANY_TO_ONE);
     }
 
     public void addAddress(SchemaCategory schema, SchemaObject order)
@@ -274,7 +283,7 @@ public class TestData
             new Id(addressToNumber, addressToLabel)
         );
         schema.addObject(address);
-        addMorphismWithDual(schema, orderToAddress, order, address);
+        addMorphismWithDual(schema, orderToAddress, order, address, Cardinality.MANY_TO_MANY);
 
         var label = createSchemaObject(
             labelKey,
@@ -282,7 +291,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(label);
-        addMorphismWithDual(schema, addressToLabel, address, label);        
+        addMorphismWithDual(schema, addressToLabel, address, label, Cardinality.ONE_TO_ONE);
 
         var content = createSchemaObject(
             contentKey,
@@ -290,7 +299,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(content);
-        addMorphismWithDual(schema, addressToContent, address, content);
+        addMorphismWithDual(schema, addressToContent, address, content, Cardinality.ONE_TO_ONE);
         
         var text = createSchemaObject(
             textKey,
@@ -298,7 +307,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(text);
-        addMorphismWithDual(schema, contentToText, content, text);
+        addMorphismWithDual(schema, contentToText, content, text, Cardinality.ONE_TO_ONE);
         
         var locale = new SchemaObject(
             localeKey,
@@ -307,19 +316,38 @@ public class TestData
             Set.of(Id.Empty())
         );
         schema.addObject(locale);
-        addMorphismWithDual(schema, contentToLocale, content, locale);
+        addMorphismWithDual(schema, contentToLocale, content, locale, Cardinality.ONE_TO_ONE);
     }
     
     private SchemaObject createSchemaObject(Key key, String name, Id id)
     {
         return new SchemaObject(key, name, id, Set.of(id));
     }
-    
-    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod)
+
+    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Cardinality cardinality)
     {
-        var morphism = new SchemaMorphism(signature, dom, cod, SchemaMorphism.Min.ZERO, SchemaMorphism.Max.STAR);
+        switch (cardinality)
+        {
+            case ONE_TO_ONE:
+                addMorphismWithDual(schema, signature, dom, cod, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
+                break;
+            case ONE_TO_MANY:
+                addMorphismWithDual(schema, signature, dom, cod, Min.ZERO, Max.STAR, Min.ONE, Max.ONE);
+                break;
+            case MANY_TO_ONE:
+                addMorphismWithDual(schema, signature, dom, cod, Min.ONE, Max.ONE, Min.ZERO, Max.STAR);
+                break;
+            case MANY_TO_MANY:
+                addMorphismWithDual(schema, signature, dom, cod, Min.ZERO, Max.STAR, Min.ZERO, Max.STAR);
+                break;
+        }
+    }
+    
+    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax)
+    {
+        var morphism = new SchemaMorphism(signature, dom, cod, min, max);
         schema.addMorphism(morphism);
-        schema.addMorphism(morphism.createDual(SchemaMorphism.Min.ZERO, SchemaMorphism.Max.STAR));
+        schema.addMorphism(morphism.createDual(dualMin, dualMax));
     }
     
     private InstanceCategory buildInstanceScenario(SchemaCategory schema)
