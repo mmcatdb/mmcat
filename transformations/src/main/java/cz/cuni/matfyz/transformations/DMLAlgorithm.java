@@ -144,6 +144,10 @@ public class DMLAlgorithm
                     index++;
                 }
 
+                // If it's aray but there aren't any items in it, we return a simple pair with 'null' value.
+                if (index == 0 && showIndex && subpath.name() instanceof StaticName staticName)
+                    output.add(new NameValuePair(prefix + staticName.getStringName(), null));
+
                 // Pro cassandru se nyní nerozlišuje mezi množinou (array bez duplicit) a polem (array).
                     // Potom se to ale vyřeší.
             }
