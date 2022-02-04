@@ -135,8 +135,15 @@ public class DMLAlgorithm
             {
                 // Get all mapping rows that have signature of this subpath and originate in given row.
                 InstanceMorphism morphism = instance.morphism(subpath.signature());
-                morphism.mappingsFromRow(row).forEach(mappingRow -> output.add(getNameValuePair(subpath, mappingRow, prefix)));
-    
+                boolean showIndex = morphism.schemaMorphism().isArray();
+                int index = 0;
+
+                for (ActiveMappingRow mappingRow : morphism.mappingsFromRow(row))
+                {
+                    output.add(getNameValuePair(subpath, mappingRow, prefix, index, showIndex));
+                    index++;
+                }
+
                 // Pro cassandru se nyní nerozlišuje mezi množinou (array bez duplicit) a polem (array).
                     // Potom se to ale vyřeší.
             }
@@ -145,10 +152,10 @@ public class DMLAlgorithm
         return output;
     }
 
-    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveMappingRow parentToObjectMapping, String prefix)
+    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveMappingRow parentToObjectMapping, String prefix, int index, boolean showIndex)
     {
         ActiveDomainRow objectRow = parentToObjectMapping.codomainRow();
-        String name = prefix + getStringName(objectPath, parentToObjectMapping);
+        String name = prefix + getStringName(objectPath, parentToObjectMapping) + (showIndex ? "[" + index + "]" : "");
 
         if (objectPath instanceof SimpleProperty simplePath)
         {

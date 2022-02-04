@@ -58,9 +58,9 @@ public class DMLTestStructure
         
         builder.append(name).append(": {\n");
         for (String value : values)
-            builder.append("    ").append(value);
+            builder.append("    ").append(value).append("\n");
 
-        builder.append(name).append("}\n");
+        builder.append("}\n");
 
         return builder.toString();
     }

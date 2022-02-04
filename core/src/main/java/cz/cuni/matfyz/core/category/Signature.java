@@ -134,7 +134,7 @@ public class Signature implements Comparable<Signature>, IContext
         return 0;
     }
     
-    public Boolean hasDualOfAsSuffix(Signature signature)
+    public boolean hasDualOfAsSuffix(Signature signature)
     {
         if (signature == null)
             return false;

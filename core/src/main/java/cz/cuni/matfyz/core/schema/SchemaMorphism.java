@@ -30,7 +30,8 @@ public class SchemaMorphism implements Morphism
 	private SchemaCategory category;
 
     /*
-	public static SchemaMorphism dual(SchemaMorphism morphism) {
+	public static SchemaMorphism dual(SchemaMorphism morphism)
+	{
 		return SchemaMorphism.dual(morphism, 1, 1);
 	}
     */
@@ -50,26 +51,36 @@ public class SchemaMorphism implements Morphism
 		this.max = max;
 	}
 
-	public void setCategory(SchemaCategory category) {
+	public void setCategory(SchemaCategory category)
+	{
 		this.category = category;
 	}
 
 	@Override
-	public SchemaObject dom() {
+	public SchemaObject dom()
+	{
 		return dom;
 	}
 
 	@Override
-	public SchemaObject cod() {
+	public SchemaObject cod()
+	{
 		return cod;
 	}
 
-	public Min min() {
+	public Min min()
+	{
 		return min;
 	}
 
-	public Max max() {
+	public Max max()
+	{
 		return max;
+	}
+
+	public boolean isArray()
+	{
+		return max == Max.STAR;
 	}
 
 	@Override

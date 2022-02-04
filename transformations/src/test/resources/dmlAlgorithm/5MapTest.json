@@ -3,16 +3,16 @@
         "name": "order",
         "values": [
             "append(/number, 2043)",
-            "append(/contact/email, anna@seznam.cz)",
-            "append(/contact/cellphone, +420777123456)"
+            "append(/contact[1]/email, anna@seznam.cz)",
+            "append(/contact[0]/cellphone, +420777123456)"
         ]
     },
     {
         "name": "order",
         "values": [
             "append(/number, 1653)",
-            "append(/contact/skype, skype123)",
-            "append(/contact/cellphone, +420123456789)"
+            "append(/contact[1]/skype, skype123)",
+            "append(/contact[0]/cellphone, +420123456789)"
         ]
     }
 ]

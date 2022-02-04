@@ -182,7 +182,7 @@ public class DMLAlgorithmTests
             order,
             "order",
             data.path_items(),
-            data.expectedInstance_itemsMissing(schema)
+            data.expectedInstance_itemsEmpty(schema)
         )
         .testAlgorithm();
 	}
@@ -205,7 +205,23 @@ public class DMLAlgorithmTests
         )
         .testAlgorithm();
 	}
-}
 
-// TODO Dodělat test 11, bude to toto s tím, že tam budou chybět jen konkrétní hodnoty, celé prvky pole
-// - místo nich se má vypsat null
+    @Test
+	public void missingArrayTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addItems(schema, order);
+
+        new DMLAlgorithmTestBase("11MissingArrayTest.json").setAll(
+            schema,
+            order,
+            "order",
+            data.path_items(),
+            data.expectedInstance_itemsMissing(schema)
+        )
+        .testAlgorithm();
+	}
+}

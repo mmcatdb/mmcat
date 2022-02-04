@@ -172,7 +172,7 @@ public class DDLAlgorithmTests
             schema,
             "order",
             data.path_items(),
-            data.expectedInstance_itemsMissing(schema)
+            data.expectedInstance_itemsEmpty(schema)
         )
         .testAlgorithm();
 	}
@@ -191,6 +191,24 @@ public class DDLAlgorithmTests
             "order",
             data.path_address(),
             data.expectedInstance_address(schema)
+        )
+        .testAlgorithm();
+	}
+
+    @Test
+	public void missingArrayTest()
+    {
+        var data = new TestData();
+
+        SchemaCategory schema = new SchemaCategory();
+        var order = data.buildOrder(schema);
+        data.addItems(schema, order);
+
+        new DDLAlgorithmTestBase("11MissingArrayTest.json").setAll(
+            schema,
+            "order",
+            data.path_items(),
+            data.expectedInstance_itemsMissing(schema)
         )
         .testAlgorithm();
 	}

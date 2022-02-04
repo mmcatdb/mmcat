@@ -59,6 +59,11 @@ public class InstanceMorphism implements Morphism
 	{
 		return mappings.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
 	}
+
+	public SchemaMorphism schemaMorphism()
+	{
+		return schemaMorphism;
+	}
     
 	@Override
 	public InstanceObject dom()

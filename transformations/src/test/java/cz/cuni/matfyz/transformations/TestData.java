@@ -532,7 +532,7 @@ public class TestData
         return instance;
     }
 
-    public InstanceCategory expectedInstance_itemsMissing(SchemaCategory schema)
+    public InstanceCategory expectedInstance_itemsEmpty(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new SimpleInstanceCategoryBuilder(instance);
@@ -571,6 +571,51 @@ public class TestData
         builder.morphism(contentToText, contentRow, textRow);
         builder.morphism(contentToLocale, contentRow, localeRow);
         builder.morphism(orderToAddress, order, address);
+    }
+
+    public InstanceCategory expectedInstance_itemsMissing(SchemaCategory schema)
+    {
+        InstanceCategory instance = buildInstanceScenario(schema);
+        var builder = new SimpleInstanceCategoryBuilder(instance);
+        
+        var order = expectedOrder(builder, "2043");
+        expectedItemMissing(builder, order, "2043", "123", "Toy", "125", null);
+        expectedItemMissing(builder, order, "2043", "456", null, "500", "4");
+        expectedItemMissing(builder, order, "2043", "765", "Book", null, "2");
+        expectedItemMissing(builder, order, "2043", "457", null, "299", "7");
+        expectedItemMissing(builder, order, "2043", "734", null, "350", "3");
+        
+        return instance;
+    }
+
+    private void expectedItemMissing(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    {
+        var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
+        builder.morphism(orderToItems, order, items);
+
+        if (pidValue != null)
+        {
+            var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
+            builder.morphism(itemsToPid, items, pid);
+        }
+
+        if (pnameValue != null)
+        {
+            var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
+            builder.morphism(itemsToPname, items, pname);
+        }
+
+        if (priceValue != null)
+        {
+            var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
+            builder.morphism(itemsToPrice, items, price);
+        }
+
+        if (quantityValue != null)
+        {
+            var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
+            builder.morphism(itemsToQuantity, items, quantity);
+        }
     }
 
     public ComplexProperty path_order()

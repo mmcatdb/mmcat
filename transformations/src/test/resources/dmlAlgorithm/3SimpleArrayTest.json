@@ -3,18 +3,18 @@
         "name": "order",
         "values": [
             "append(/number, 2043)",
-            "append(/array, 123)",
-            "append(/array, 456)",
-            "append(/array, 789)"
+            "append(/array[0], 123)",
+            "append(/array[1], 456)",
+            "append(/array[2], 789)"
         ]
     },
     {
         "name": "order",
         "values": [
             "append(/number, 1653)",
-            "append(/array, 123)",
-            "append(/array, String456)",
-            "append(/array, String789)"
+            "append(/array[0], 123)",
+            "append(/array[1], String456)",
+            "append(/array[2], String789)"
         ]
     }
 ]

@@ -111,18 +111,29 @@ public class DDLAlgorithmTestBase
 
         List<String> result = wrapper.methods();
 
-        System.out.println(result);
+        printResult(result);
 
         Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
 	}
 
-    private boolean resultsEquals(List<String> result1, List<String> result2)
+    private static void printResult(List<String> result)
+    {
+        var builder = new StringBuilder();
+
+        builder.append("[\n");
+        result.forEach(line -> builder.append("    ").append(line).append("\n"));
+        builder.append("]");
+
+        System.out.println(builder.toString());
+    }
+
+    private static boolean resultsEquals(List<String> result1, List<String> result2)
     {
         if (result1.size() != result2.size())
             return false;
 
-        var set1 = new TreeSet(result1);
-        var set2 = new TreeSet(result2);
+        var set1 = new TreeSet<>(result1);
+        var set2 = new TreeSet<>(result2);
 
         return set1.equals(set2);
     }

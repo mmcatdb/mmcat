@@ -126,7 +126,7 @@ public class DMLAlgorithmTestBase
         Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
 	}
 
-    private boolean resultsEquals(List<DMLTestStructure> result1, List<DMLTestStructure> result2)
+    private static boolean resultsEquals(List<DMLTestStructure> result1, List<DMLTestStructure> result2)
     {
         if (result1.size() != result2.size())
             return false;

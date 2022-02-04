@@ -104,7 +104,7 @@ public class DDLAlgorithm
     {
         var morphism = schema.morphisms().get(property.value().signature());
         
-        if (isArray(morphism))
+        if (morphism.isArray())
             wrapper.addSimpleArrayProperty(names, isRequired(morphism));
         else
             wrapper.addSimpleProperty(names, isRequired(morphism));
@@ -114,7 +114,7 @@ public class DDLAlgorithm
     {
         var morphism = schema.morphisms().get(property.signature());
         
-        if (isArray(morphism))
+        if (morphism.isArray())
             wrapper.addComplexArrayProperty(names, isRequired(morphism));
         else
             wrapper.addComplexProperty(names, isRequired(morphism));
@@ -123,10 +123,5 @@ public class DDLAlgorithm
     private static boolean isRequired(SchemaMorphism morphism)
     {
         return morphism.min() != SchemaMorphism.Min.ZERO;
-    }
-    
-    private static boolean isArray(SchemaMorphism morphism)
-    {
-        return morphism.max() == SchemaMorphism.Max.STAR;
     }
 }
