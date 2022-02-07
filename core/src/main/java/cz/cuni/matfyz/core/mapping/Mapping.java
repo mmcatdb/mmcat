@@ -3,6 +3,8 @@ package cz.cuni.matfyz.core.mapping;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
+import java.util.*;
+
 /**
  *
  * @author pavel.koupil, jachym.bartik
@@ -57,5 +59,18 @@ public class Mapping
     public IdentifierStructure primaryIdentifier()
     {
         return primaryIdentifier;
+    }
+
+    private final List<Reference> references = new ArrayList<Reference>();
+
+    public List<Reference> references()
+    {
+        return references;
+    }
+
+    public void setReferences(Iterable<Reference> references)
+    {
+        this.references.clear();
+        references.forEach(reference -> this.references.add(reference));
     }
 }

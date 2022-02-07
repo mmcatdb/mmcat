@@ -10,8 +10,6 @@ import cz.cuni.matfyz.statements.ICStatement;
 
 import java.util.*;
 
-import org.javatuples.Pair;
-
 /**
  *
  * @author jachymb.bartik
@@ -19,10 +17,10 @@ import org.javatuples.Pair;
 public class ICAlgorithm
 {
     private Mapping mapping;
-    private Map<String, Mapping> allMappings;
+    private Map<Name, Mapping> allMappings;
     private AbstractICWrapper wrapper;
     
-    public void input(Mapping mapping, Map<String, Mapping> allMappings, AbstractICWrapper wrapper)
+    public void input(Mapping mapping, Map<Name, Mapping> allMappings, AbstractICWrapper wrapper)
     {
         this.mapping = mapping;
         this.allMappings = allMappings;
@@ -31,34 +29,67 @@ public class ICAlgorithm
     
     public ICStatement algorithm()
     {
-        throw new UnsupportedOperationException();
-        /*
-        var N = collectNames(mapping.accessPath(), mapping.primaryIdentifier());
-        wrapper.appendIdentifier(mapping.kindName(), N);
+        // N
+        IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryIdentifier());
+        wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
         
-        for (Pair<String, Set<AccessPath>> referencePair : mapping.references())
+        for (Reference reference : mapping.references())
         {
-            Set<Pair<Signature, Name>> O = collectSigNamePairs(mapping.accessPath(), referencePair.getValue1());
-            Mapping n = allMappings.get(referencePair.getValue0());
-            Set<Pair<Signature, Name>> R = collectSigNamePairs(n.accessPath(), referencePair.getValue1());
-            Set<ComparablePair<String, String>> S = makeReferencePairs(O, R);
-            wrapper.appendReference(mapping.kindName(), n.name(), S);
+            // O
+            Map<Signature, Name> referencingAttributes = collectSigNamePairs(mapping.accessPath(), reference.properties());
+
+            // n
+            Mapping referencedMapping = allMappings.get(reference.name());
+
+            // R
+            Map<Signature, Name> referencedAttributes = collectSigNamePairs(referencedMapping.accessPath(), reference.properties());
+
+            // S
+            Set<ComparablePair<String, String>> referencingReferencedNames = makeReferences(referencingAttributes, referencedAttributes);
+
+            wrapper.appendReference(mapping.kindName(), referencedMapping.kindName(), referencingReferencedNames);
         }
-        */
+
+        return wrapper.createICRemoveStatement();
     }
     
-    private IdentifierStructure collectNames(AccessPath path, Set<Signature> primaryIdentifier)
+    private IdentifierStructure collectNames(AccessPath path, IdentifierStructure primaryIdentifier)
     {
         throw new UnsupportedOperationException();
     }
 
-    private Set<Pair<Signature, Name>> collectSigNamePairs(AccessPath path, Set<AccessPath> references)
+    private Map<Signature, Name> collectSigNamePairs(AccessPath path, Set<AccessPath> referenceProperties)
     {
-        throw new UnsupportedOperationException();
+        var output = new TreeMap<Signature, Name>();
+
+        if (path instanceof ComplexProperty complexPath)
+        {
+            for (AccessPath referenceProperty : referenceProperties)
+            {
+                for (AccessPath subpath : complexPath.subpaths())
+                {
+                    if (referenceProperty.equals(subpath))
+                    {
+                        output.put(subpath.signature(), subpath.name()); // TODO - nejspíš b se mělo vyhledávat podle něčeho jiného?
+                    }
+                }
+            }
+        }
+
+        return output;
     }
 
-    private Set<ComparablePair<String, String>> makeReferencePairs(Set<Pair<Signature, Name>> a, Set<Pair<Signature, Name>> b)
+    private Set<ComparablePair<String, String>> makeReferences(Map<Signature, Name> a, Map<Signature, Name> b)
     {
-        throw new UnsupportedOperationException();
+        var output = new TreeSet<ComparablePair<String, String>>();
+
+        for (Signature signature : a.keySet())
+        {
+            String nameA = a.get(signature).toString(); // TODO - toto nefunguje správně - mělo by se použít getStringName(), ale k tomu je potřeba, aby jména byla statická
+            String nameB = b.get(signature).toString(); // TODO
+            output.add(new ComparablePair<>(nameA, nameB));
+        }
+
+        return output;
     }
 }
