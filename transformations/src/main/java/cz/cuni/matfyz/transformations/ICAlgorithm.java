@@ -1,8 +1,6 @@
 package cz.cuni.matfyz.transformations;
 
-import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.utils.ComparablePair;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
@@ -30,22 +28,19 @@ public class ICAlgorithm
     public ICStatement algorithm()
     {
         // N
-        IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryIdentifier());
+        IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.pkey());
         wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
         
         for (Reference reference : mapping.references())
         {
             // O
-            Map<Signature, Name> referencingAttributes = collectSigNamePairs(mapping.accessPath(), reference.properties());
-
-            // R_{\kappa} je množina signatur
-            // Signatury jsou unikátní napříč celou schematickou kategorií (na rozdíl od jmen)
+            Map<Signature, String> referencingAttributes = collectSigNamePairs(mapping.accessPath(), reference.properties());
 
             // n
             Mapping referencedMapping = allMappings.get(reference.name());
 
             // R
-            Map<Signature, Name> referencedAttributes = collectSigNamePairs(referencedMapping.accessPath(), reference.properties());
+            Map<Signature, String> referencedAttributes = collectSigNamePairs(referencedMapping.accessPath(), reference.properties());
 
             // S
             Set<ComparablePair<String, String>> referencingReferencedNames = makeReferences(referencingAttributes, referencedAttributes);
@@ -55,50 +50,60 @@ public class ICAlgorithm
 
         return wrapper.createICRemoveStatement();
     }
-    
-    private IdentifierStructure collectNames(AccessPath path, IdentifierStructure primaryIdentifier)
+
+    /**
+     * For each signature from pkey, we look to the access path to find a subpath with given signature.
+     * The set of these names is then returned.
+     * @param path Access path corresponding to the kind of the mapping.
+     * @param pkey An eventually ordered collection of signatures of morphisms whose codomains correspond to properties forming the primary identifier of given kind.
+     * @return The set of names corresponding to signatures from pkey.
+     */
+    private IdentifierStructure collectNames(ComplexProperty path, Collection<Signature> pkey)
     {
-        // primaryIdentifier je množina signatur privátního klíče
-        // podíváme se do přístupové cesty a najdeme všechny výskyty se signaturou z primaryIdentifier
-        // vrátíme množinu jim odpovídajících jmen
-        // Nemůže se stát, že by byla dynamická (resp. v tom případě máme vyhodit výjimku)
-            // Jde o to, že to jsou identifikátory, takže musíme vědět, čím dané prvky identifikujeme a tedy nemohou být dynamické
-            // musíme vědět, podle čeho jsou unikátní
-        throw new UnsupportedOperationException();
+        Collection<String> output = new ArrayList<>();
+
+        for (Signature signature : pkey)
+        {
+            if (path.getSubpathBySignature(signature).name() instanceof StaticName staticName)
+                output.add(staticName.getStringName());
+            else
+                // These names are identifiers of given kind so they must be unique among all names.
+                // This quality can't be achieved by dynamic names so they aren't supported here.
+                throw new UnsupportedOperationException();
+        }
+        
+        return new IdentifierStructure(output);
     }
 
-    private Map<Signature, Name> collectSigNamePairs(AccessPath path, Set<Signature> referenceProperties)
+    /**
+     * 
+     * @param path
+     * @param referenceProperties A set of signatures.
+     * @return
+     */
+    private Map<Signature, String> collectSigNamePairs(ComplexProperty path, Set<Signature> referenceProperties)
     {
-        var output = new TreeMap<Signature, Name>();
+        var output = new TreeMap<Signature, String>();
 
-        if (path instanceof ComplexProperty complexPath)
+        for (Signature signature : referenceProperties)
         {
-            /*
-            for (AccessPath referenceProperty : referenceProperties)
-            {
-                for (AccessPath subpath : complexPath.subpaths())
-                {
-                    if (referenceProperty.equals(subpath))
-                    {
-                        output.put(subpath.signature(), subpath.name()); // TODO - nejspíš b se mělo vyhledávat podle něčeho jiného?
-                    }
-                }
-            }
-            */
+            if (path.getSubpathBySignature(signature).name() instanceof StaticName staticName)
+                output.put(signature, staticName.getStringName());
+            else
+                throw new UnsupportedOperationException();
         }
 
         return output;
     }
 
-    private Set<ComparablePair<String, String>> makeReferences(Map<Signature, Name> a, Map<Signature, Name> b)
+    private Set<ComparablePair<String, String>> makeReferences(Map<Signature, String> a, Map<Signature, String> b)
     {
         var output = new TreeSet<ComparablePair<String, String>>();
 
         for (Signature signature : a.keySet())
         {
-            // Jména musí být statická, jinak vyhodit výjimku
-            String nameA = a.get(signature).toString(); // TODO - toto nefunguje správně - mělo by se použít getStringName(), ale k tomu je potřeba, aby jména byla statická
-            String nameB = b.get(signature).toString(); // TODO
+            String nameA = a.get(signature);
+            String nameB = b.get(signature);
             output.add(new ComparablePair<>(nameA, nameB));
         }
 

@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.core.mapping;
 
+import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
@@ -16,7 +17,7 @@ public class Mapping
 	private final ComplexProperty accessPath;
 
     private String kindName;
-    private IdentifierStructure primaryIdentifier;
+    private Collection<Signature> pkey;
     
     
     public Mapping(SchemaObject rootObject, ComplexProperty accessPath)
@@ -56,9 +57,9 @@ public class Mapping
         return kindName;
     }
 
-    public IdentifierStructure primaryIdentifier()
+    public Collection<Signature> pkey()
     {
-        return primaryIdentifier;
+        return pkey;
     }
 
     private final List<Reference> references = new ArrayList<Reference>();
