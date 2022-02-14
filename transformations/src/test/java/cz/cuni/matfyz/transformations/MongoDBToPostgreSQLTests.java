@@ -1,8 +1,6 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
-import cz.cuni.matfyz.core.schema.*;
-import cz.cuni.matfyz.core.utils.Debug;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;

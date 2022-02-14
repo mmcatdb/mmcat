@@ -9,7 +9,7 @@ import cz.cuni.matfyz.core.schema.*;
 public class InstanceFunctor
 {
     private final InstanceCategory instanceCategory;
-    private final SchemaCategory schemaCategory;
+    private final SchemaCategory schemaCategory; // TODO
     
     public InstanceFunctor(InstanceCategory instanceCategory, SchemaCategory schemaCategory)
     {
