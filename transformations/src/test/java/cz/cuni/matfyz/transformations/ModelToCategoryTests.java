@@ -184,6 +184,8 @@ public class ModelToCategoryTests
     @Test
 	public void complexMapTest()
     {
+        Debug.setLevel(3);
+
         var data = new TestData();
 
         SchemaCategory schema = new SchemaCategory();

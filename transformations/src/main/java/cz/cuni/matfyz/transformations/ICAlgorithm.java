@@ -38,6 +38,9 @@ public class ICAlgorithm
             // O
             Map<Signature, Name> referencingAttributes = collectSigNamePairs(mapping.accessPath(), reference.properties());
 
+            // R_{\kappa} je množina signatur
+            // Signatury jsou unikátní napříč celou schematickou kategorií (na rozdíl od jmen)
+
             // n
             Mapping referencedMapping = allMappings.get(reference.name());
 
@@ -55,15 +58,22 @@ public class ICAlgorithm
     
     private IdentifierStructure collectNames(AccessPath path, IdentifierStructure primaryIdentifier)
     {
+        // primaryIdentifier je množina signatur privátního klíče
+        // podíváme se do přístupové cesty a najdeme všechny výskyty se signaturou z primaryIdentifier
+        // vrátíme množinu jim odpovídajících jmen
+        // Nemůže se stát, že by byla dynamická (resp. v tom případě máme vyhodit výjimku)
+            // Jde o to, že to jsou identifikátory, takže musíme vědět, čím dané prvky identifikujeme a tedy nemohou být dynamické
+            // musíme vědět, podle čeho jsou unikátní
         throw new UnsupportedOperationException();
     }
 
-    private Map<Signature, Name> collectSigNamePairs(AccessPath path, Set<AccessPath> referenceProperties)
+    private Map<Signature, Name> collectSigNamePairs(AccessPath path, Set<Signature> referenceProperties)
     {
         var output = new TreeMap<Signature, Name>();
 
         if (path instanceof ComplexProperty complexPath)
         {
+            /*
             for (AccessPath referenceProperty : referenceProperties)
             {
                 for (AccessPath subpath : complexPath.subpaths())
@@ -74,6 +84,7 @@ public class ICAlgorithm
                     }
                 }
             }
+            */
         }
 
         return output;
@@ -85,6 +96,7 @@ public class ICAlgorithm
 
         for (Signature signature : a.keySet())
         {
+            // Jména musí být statická, jinak vyhodit výjimku
             String nameA = a.get(signature).toString(); // TODO - toto nefunguje správně - mělo by se použít getStringName(), ale k tomu je potřeba, aby jména byla statická
             String nameB = b.get(signature).toString(); // TODO
             output.add(new ComparablePair<>(nameA, nameB));

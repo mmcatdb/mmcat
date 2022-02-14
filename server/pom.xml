@@ -6,14 +6,12 @@
         <artifactId>mm-cat</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>wrappers</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>wrapper-mongodb</module>
-        <module>wrapper-neo4j</module>
-        <!--<module>wrapper-postgresql</module>-->
-        <module>wrapper-cassandra</module>
-        <module>wrapper-riak</module>
-        <module>wrapper-dummy</module>
-    </modules>
+    <artifactId>server</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>1.2</version>
+        </dependency>
+    </dependencies>
 </project>

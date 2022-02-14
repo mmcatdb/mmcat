@@ -2,12 +2,14 @@ package cz.cuni.matfyz.core.mapping;
 
 import java.util.*;
 
+import cz.cuni.matfyz.core.category.Signature;
+
 public class Reference
 {
     private final Name name;
-    private final Set<AccessPath> properties;
+    private final Set<Signature> properties;
 
-    public Reference(Name name, Collection<AccessPath> properties)
+    public Reference(Name name, Collection<Signature> properties)
     {
         this.name = name;
         this.properties = new TreeSet<>(properties);
@@ -18,7 +20,7 @@ public class Reference
         return name;
     }
 
-    public Set<AccessPath> properties()
+    public Set<Signature> properties()
     {
         return properties;
     }

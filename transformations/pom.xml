@@ -28,6 +28,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>cz.cuni.matfyz</groupId>
+			<artifactId>wrapper-mongodb</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<version>${junit.jupiter.version}</version>

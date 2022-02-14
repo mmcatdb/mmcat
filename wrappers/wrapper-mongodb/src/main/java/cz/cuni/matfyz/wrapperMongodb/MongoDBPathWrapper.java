@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.wrapperMongoDB;
+package cz.cuni.matfyz.wrapperMongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import java.util.*;
