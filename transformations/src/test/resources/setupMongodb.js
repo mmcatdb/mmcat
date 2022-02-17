@@ -1,4 +1,5 @@
-db.basic.drop();
+db.dropDatabase();
+
 db.basic.insertMany([
     {
         "number": "2043"
@@ -8,7 +9,6 @@ db.basic.insertMany([
     }
 ]);
 
-db.structure.drop();
 db.structure.insertMany([
     {
         "number": "2043",
@@ -28,7 +28,6 @@ db.structure.insertMany([
     }
 ]);
 
-db.simple_array.drop();
 db.simple_array.insertMany([
     {
         "number": "2043",
@@ -48,7 +47,6 @@ db.simple_array.insertMany([
     }
 ]);
 
-db.complex_array.drop();
 db.complex_array.insertMany([
     {
         "number": "2043",
@@ -86,7 +84,6 @@ db.complex_array.insertMany([
     }
 ]);
 
-db.empty_array.drop();
 db.empty_array.insertMany([
     {
         "number": "2043",
@@ -98,7 +95,6 @@ db.empty_array.insertMany([
     }
 ]);
 
-db.complex_map.drop();
 db.complex_map.insertMany([ // The order of address elements differ from the original test file because of the tests by string comparison.
     {
         "number": "2043",
