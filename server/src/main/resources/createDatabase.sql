@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS `job`;
+CREATE TABLE `job` (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    content TEXT NOT NULL
+);
+
+INSERT INTO `job` (content)
+VALUES ("Test job.");

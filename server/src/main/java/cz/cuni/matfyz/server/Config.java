@@ -1,23 +1,56 @@
 package cz.cuni.matfyz.server;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import java.util.Properties;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
-@Configuration
-public class Config
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ *
+ * @author jachymb.bartik
+ */
+public abstract class Config
 {
-    @Bean
-    public WebMvcConfigurer corsConfigurer()
+    private static Properties properties;
+    private static Logger logger = LoggerFactory.getLogger(Config.class);
+
+    private Config() {}
+
+    public static String get(String key)
     {
-        return new WebMvcConfigurer()
+        if (properties == null)
+            loadProperties();
+
+        return properties.getProperty(key);
+    }
+
+    private static void loadProperties()
+    {
+        try
         {
-            @Override
-            public void addCorsMappings(CorsRegistry registry)
-            {
-                registry.addMapping("/**").allowedOrigins("http://localhost:3000");
-            }
-        };
+            properties = new Properties();
+            
+            var url = ClassLoader.getSystemResource("application.properties");
+            String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
+            var configFile = new File(pathToFile);
+            var reader = new FileReader(configFile);
+    
+            properties.load(reader);
+        }
+        catch (URISyntaxException exception)
+        {
+            logger.error(exception.toString());
+        }
+        catch (FileNotFoundException exception)
+        {
+            logger.error(exception.toString());
+        }
+        catch (IOException exception)
+        {
+            logger.error(exception.toString());
+        }
     }
 }

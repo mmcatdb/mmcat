@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.server;
+package cz.cuni.matfyz.server.entity;
 
 /**
  * 

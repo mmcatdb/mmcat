@@ -76,8 +76,8 @@ public class DDLAlgorithmTestBase
 	private List<String> buildExpectedResult() throws Exception
     {
         var url = ClassLoader.getSystemResource(fileNamePrefix + dataFileName);
-        Path pathToDataFileName = Paths.get(url.toURI()).toAbsolutePath();
-		String jsonString = Files.readString(pathToDataFileName);
+        Path pathToDataFile = Paths.get(url.toURI()).toAbsolutePath();
+		String jsonString = Files.readString(pathToDataFile);
         var json = new JSONArray(jsonString);
         var lines = new ArrayList<String>();
         

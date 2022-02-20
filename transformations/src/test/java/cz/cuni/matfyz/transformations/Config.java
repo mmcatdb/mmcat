@@ -33,9 +33,9 @@ abstract class Config
         {
             properties = new Properties();
             
-            var url = ClassLoader.getSystemResource("config.properties");
-            String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
-            var configFile = new File(fileName);
+            var url = ClassLoader.getSystemResource("application.properties");
+            String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
+            var configFile = new File(pathToFile);
             var reader = new FileReader(configFile);
     
             properties.load(reader);

@@ -1,10 +1,10 @@
-package cz.cuni.matfyz.server;
+package cz.cuni.matfyz.server.controller;
 
-import java.util.ArrayList;
+import cz.cuni.matfyz.server.service.JobService;
+import cz.cuni.matfyz.server.entity.Job;
 
 import java.util.*;
-
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,12 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class JobController
 {
+    @Autowired
+    private JobService jobService;
+
     @GetMapping("/jobs")
     public List<Job> getAllJobs()
     {
-        var output = new ArrayList<Job>(); // TODO
-        output.add(new Job("1", "new job"));
-        return output;
+        return jobService.findAll();
     }
 
     @GetMapping("/jobs/{id}")
