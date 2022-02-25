@@ -2,5 +2,5 @@
 </script>
 
 <template>
-    <h1>Index</h1>
+    <h1>Page not found</h1>
 </template>

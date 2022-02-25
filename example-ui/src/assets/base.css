@@ -53,14 +53,14 @@
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
   margin: 0;
-  position: relative;
   font-weight: normal;
+  box-sizing: border-box;
 }
 
 body {
   min-height: 100vh;
+  margin: 0;
   color: var(--color-text);
   background: var(--color-background);
   transition: color 0.5s, background-color 0.5s;
