@@ -24,7 +24,11 @@ public abstract class Config
         if (properties == null)
             loadProperties();
 
-        return properties.getProperty(key);
+        String property = properties.getProperty(key);
+        if (property == null)
+            System.out.println("Property '" + key + "' not found in configuration.");
+
+        return property;
     }
 
     private static void loadProperties()

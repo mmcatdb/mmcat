@@ -2,6 +2,7 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.repository.JobRepository;
 import cz.cuni.matfyz.server.entity.Job;
+import cz.cuni.matfyz.server.entity.JobData;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,5 +22,18 @@ public class JobService
     public List<Job> findAll()
     {
         return repository.findAll();
+    }
+
+    public Job find(String id)
+    {
+        return repository.find(id);
+    }
+
+    public Job createNew(String accessPathAsString)
+    {
+        var jobData = new JobData(accessPathAsString);
+        String generatedId = repository.add(jobData);
+
+        return generatedId == null ? null : new Job(generatedId, jobData);
     }
 }

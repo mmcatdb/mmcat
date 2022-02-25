@@ -4,14 +4,19 @@ package cz.cuni.matfyz.server.entity;
  * 
  * @author jachym.bartik
  */
-public class Job
+public class Job extends JobData
 {
     public final String id;
-    public String value;
 
     public Job(String id, String value)
     {
+        super(value);
         this.id = id;
-        this.value = value;
+    }
+
+    public Job(String id, JobData data)
+    {
+        super(data);
+        this.id = id;
     }
 }
