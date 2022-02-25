@@ -1,16 +1,17 @@
-package cz.cuni.matfyz.wrapperMongodb;
+package cz.cuni.matfyz.wrapperPostgresql;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
  *
  * @author jachymb.bartik
  */
-public class MongoDBDatabaseProvider implements DatabaseProvider
+public class PostgreSQLConnectionProvider implements ConnectionProvider
 {
     private String host;
     private String port;
@@ -18,9 +19,9 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
     private String username;
     private String password;
 
-    private MongoDatabase databaseInstance;
+    private Connection connection;
 
-    public MongoDBDatabaseProvider(String host, String port, String database, String username, String password)
+    public PostgreSQLConnectionProvider(String host, String port, String database, String username, String password)
     {
         this.host = host;
         this.port = port;
@@ -29,57 +30,66 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
         this.password = password;
     }
 
-    public MongoDatabase getDatabase()
+    public Connection getConnection()
     {
-        if (databaseInstance == null)
-            buildDatabase();
+        if (connection == null)
+        {
+            try
+            {
+                buildConnection();
+            }
+            catch (SQLException exception)
+            {
+                System.out.println(exception);
+            }
+        }
 
-        return databaseInstance;
+        return connection;
     }
 
-    public void buildDatabase()
+    public void buildConnection() throws SQLException
     {
-        this.databaseInstance = createDatabaseFromCredentials(host, port, database, username, password);
+        this.connection = createConnectionFromCredentials(host, port, database, username, password);
     }
 
-    private static MongoDatabase createDatabaseFromCredentials(String host, String port, String database, String username, String password)
+    private static Connection createConnectionFromCredentials(String host, String port, String database, String username, String password) throws SQLException
     {
         var connectionBuilder = new StringBuilder();
         var connectionString = connectionBuilder
-            .append("mongodb://")
+            .append("jdbc:postgresql://")
+            .append(host)
+            .append(":")
+            .append(port)
+            .append("/")
+            .append(database)
+            .append("?user=")
+            .append(username)
+            .append("&password=")
+            .append(password)
+            .toString();
+
+        return DriverManager.getConnection(connectionString);
+    }
+
+    public void executeScript(String pathToFile) throws Exception
+    {
+        String beforePasswordString = new StringBuilder()
+            .append("psql postgresql://")
             .append(username)
             .append(":")
-            .append(password)
+            .toString();
+
+        String afterPasswordString = new StringBuilder()
             .append("@")
             .append(host)
             .append(":")
             .append(port)
             .append("/")
             .append(database)
-            .toString();
-
-        var client = MongoClients.create(connectionString);
-        return client.getDatabase(database);
-    }
-
-    public void executeScript(String pathToFile) throws Exception
-    {
-        String beforePasswordString = new StringBuilder()
-            .append("mongo --username ")
-            .append(username)
-            .append(" --password ").toString();
-
-        String afterPasswordString = new StringBuilder()
-            .append(" ")
-            .append(host)
-            .append(":")
-            .append(port)
-            .append("/")
-            .append(database)
-            .append(" ")
+            .append(" -f ")
             .append(pathToFile)
             .toString();
-
+        
         System.out.println("Executing: " + beforePasswordString + "********" + afterPasswordString);
 
         String commandString = beforePasswordString + password + afterPasswordString;

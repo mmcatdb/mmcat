@@ -4,3 +4,4 @@
 /mm-cat/tests/nbproject/
 **/target/**
 .vscode
+*.sample

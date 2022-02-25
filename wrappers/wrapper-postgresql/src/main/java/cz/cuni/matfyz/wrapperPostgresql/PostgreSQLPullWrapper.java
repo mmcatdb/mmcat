@@ -21,33 +21,41 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
     @Override
 	public ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception
     {
+        /*
         ResultSet resultSet = getData(selectAll);
         if (resultSet == null)
             return null;
+        */
         
-        try
+        try (
+            Connection connection = connectionProvider.getConnection();
+            Statement statement = connection.createStatement();
+        )
         {
-            ForestOfRecords forest = new ForestOfRecords();
-            
-            while (resultSet.next())
+            try (ResultSet resultSet = statement.executeQuery(selectAll))
             {
-                var record = new RootRecord();
+                ForestOfRecords forest = new ForestOfRecords();
                 
-                for (AccessPath subpath : path.subpaths())
+                while (resultSet.next())
                 {
-                    if (subpath instanceof SimpleProperty simpleProperty)
+                    var record = new RootRecord();
+                    
+                    for (AccessPath subpath : path.subpaths())
                     {
-                        String name = simpleProperty.name().getStringName();
-                        String value = resultSet.getString(name);
-                        record.addSimpleRecord(simpleProperty.name().toRecordName(), value, simpleProperty.value().signature());
+                        if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.name() instanceof StaticName staticName)
+                        {
+                            String name = staticName.getStringName();
+                            String value = resultSet.getString(name);
+                            record.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.value().signature(), value);
+                        }
                     }
+                            
+                    forest.addRecord(record);
                 }
-                        
-                forest.addRecord(record);
+                
+                resultSet.close();
+                return forest;
             }
-            
-            resultSet.close();
-            return forest;
         }
         catch (SQLException exception)
         {
@@ -64,15 +72,17 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         return pullForest(newSelectAll, path);
     }
     
+/*
     private ResultSet getData(String command)
     {
         Connection connection = connectionProvider.getConnection();
         try
         {
-            connection.setAutoCommit(false);
+//            connection.setAutoCommit(false);
 
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(command);
+
             statement.close();
             connection.close();
            
@@ -84,5 +94,29 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         }
         
         return null;
+    }
+*/
+    public String readTableAsStringForTests(String selectAll) throws SQLException
+    {
+        try (
+            Connection connection = connectionProvider.getConnection();
+            Statement statement = connection.createStatement();
+        )
+        {
+            try (ResultSet resultSet = statement.executeQuery(selectAll))
+            {
+                var output = new StringBuilder();
+                while (resultSet.next())
+                    output.append(resultSet.getInt("number")).append("\n");
+
+                return output.toString();
+            }
+        }
+        catch (SQLException exception)
+        {
+            System.err.println("Can't get result: " + exception.getMessage());
+        }
+
+        throw new SQLException();
     }
 }
