@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.transformations;
 
+import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
@@ -68,20 +69,18 @@ public class PostgreSQLTests
         });
     }
 
-    /*
-
-    private void pullForestTestAlgorithm(String collectionName, String dataFileName, ComplexProperty accessPath) throws Exception
+    private void pullForestTestAlgorithm(String databaseName, String dataFileName, ComplexProperty accessPath) throws Exception
     {
         var inputWrapper = createPullWrapper();
 
-        var forest = inputWrapper.pullForest("database.getCollection(\"" + collectionName + "\");", accessPath);
+        var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(databaseName));
         System.out.println(forest);
 
         var dummyWrapper = new DummyPullWrapper();
-        var url = ClassLoader.getSystemResource("modelToCategory/" + dataFileName);
+        var url = ClassLoader.getSystemResource("postgresql/" + dataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
-        var expectedForest = dummyWrapper.pullForest(fileName, accessPath);
+        var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));
         
         assertEquals(expectedForest.toString(), forest.toString());
     }
@@ -89,15 +88,16 @@ public class PostgreSQLTests
     @Test
     public void getForestForBasicTest() throws Exception
     {
-        pullForestTestAlgorithm("basic", "1BasicTest.json", new TestData().path_order());
+        pullForestTestAlgorithm("order_basic", "1BasicTest.json", new TestData().path_order());
     }
 
     @Test
     public void getForestForStructureTest() throws Exception
     {
-        pullForestTestAlgorithm("structure", "2StructureTest.json", new TestData().path_nestedDoc());
+        pullForestTestAlgorithm("order_structure", "2StructureTest.json", new TestData().path_nestedDoc());
     }
 
+/*
     @Test
     public void getForestForSimpleArrayTest() throws Exception
     {

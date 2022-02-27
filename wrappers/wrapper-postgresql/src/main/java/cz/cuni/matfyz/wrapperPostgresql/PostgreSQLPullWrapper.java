@@ -6,6 +6,8 @@ import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.*;
 
 import java.sql.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,6 +15,8 @@ import java.sql.*;
  */
 public class PostgreSQLPullWrapper implements AbstractPullWrapper
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLPullWrapper.class);
+
     private ConnectionProvider connectionProvider;
 
     public void injectConnectionProvider(ConnectionProvider connectionProvider)
@@ -28,7 +32,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
             return command.endsWith(";") ? command.substring(0, command.length() - 1) : command;
         }
         
-        return "SELECT * FROM ?";
+        return "SELECT * FROM \"" + options.getKindName() + "\""; // TODO prevent SQL injection
     }
 
     private PreparedStatement prepareStatement(Connection connection, PullWrapperOptions options) throws SQLException
@@ -41,24 +45,15 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         if (options.hasOffset())
             command += "\nOFFSET " + options.getOffset();
 
-        command += ";";
-
         PreparedStatement statement = connection.prepareStatement(command);
-        if (!options.hasCommand())
-            statement.setString(1, options.getKindName());
-
+        LOGGER.debug("SQL statement: " + statement);
+        
         return statement;
     }
 
     @Override
 	public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception
     {
-        /*
-        ResultSet resultSet = getData(selectAll);
-        if (resultSet == null)
-            return null;
-        */
-        
         try (
             Connection connection = connectionProvider.getConnection();
             PreparedStatement statement = prepareStatement(connection, options);
@@ -91,38 +86,11 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         }
         catch (SQLException exception)
         {
-            System.err.println("Can't get result: " + exception.getMessage());
+            LOGGER.error("PostgeSQL exception: ", exception);
+            throw exception;
         }
-        
-        return null;
     }
 
-    
-    
-/*
-    private ResultSet getData(String command)
-    {
-        Connection connection = connectionProvider.getConnection();
-        try
-        {
-//            connection.setAutoCommit(false);
-
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(command);
-
-            statement.close();
-            connection.close();
-           
-            return resultSet;
-        }
-        catch (SQLException exception)
-        {
-            System.err.println("Can't get result: " + exception.getMessage());
-        }
-        
-        return null;
-    }
-*/
     public String readTableAsStringForTests(String selectAll) throws SQLException
     {
         try (
@@ -141,7 +109,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         }
         catch (SQLException exception)
         {
-            System.err.println("Can't get result: " + exception.getMessage());
+            LOGGER.error("Cannot create prepared statement or connection.", exception);
         }
 
         throw new SQLException();

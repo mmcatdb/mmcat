@@ -1,0 +1,14 @@
+[
+    {
+        "number": 2043,
+        "nested/propertyA": "hodnotaA",
+        "nested/propertyB": "hodnotaB",
+        "nested/propertyC": "hodnotaC"
+    },
+    {
+        "number": 1653,
+        "nested/propertyA": "hodnotaA2",
+        "nested/propertyB": "hodnotaB2",
+        "nested/propertyC": "hodnotaC2"
+    }
+]
