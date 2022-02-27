@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
@@ -11,6 +13,8 @@ import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPushWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +47,7 @@ public class MongoDBToPostgreSQLTests
         Config.get("postgresql.password")
     );
 
-    @BeforeAll
+    //@BeforeAll
     public static void setupMongoDB()
     {
         try
@@ -58,7 +62,7 @@ public class MongoDBToPostgreSQLTests
         }
     }
 
-    @BeforeAll
+    //@BeforeAll
     public static void setupPostgresql()
     {
         try
@@ -84,7 +88,7 @@ public class MongoDBToPostgreSQLTests
 
     private PullToDDLAndDMLTestBase testBase;
 
-    @BeforeEach
+    //@BeforeEach
     public void setupTestBase()
     {
         testBase = new PullToDDLAndDMLTestBase(createPullWrapper(), new PostgreSQLDDLWrapper(), new PostgreSQLPushWrapper());
@@ -107,4 +111,21 @@ public class MongoDBToPostgreSQLTests
 
         testBase.testAlgorithm();
     }
+
+    /*
+    @Test
+    public void test() throws Exception
+    {
+        var data = new TestData();
+        ComplexProperty path = data.path_order();
+        LOGGER.info(path.toString());
+        var json = path.toJSON();
+        LOGGER.info(json.toString());
+
+        var parsedPath = new AccessPath.Converter().fromJSON(new JSONObject(json.toString()));
+        LOGGER.info(parsedPath.toString());
+
+        assertEquals(path.toString(), parsedPath.toString());
+    }
+    */
 }

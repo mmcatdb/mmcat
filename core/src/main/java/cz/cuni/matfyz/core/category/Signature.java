@@ -1,7 +1,13 @@
 package cz.cuni.matfyz.core.category;
 
 import cz.cuni.matfyz.core.utils.ArrayUtils;
+import cz.cuni.matfyz.core.utils.JSONConverterBase;
+import cz.cuni.matfyz.core.utils.JSONConvertible;
 import cz.cuni.matfyz.core.mapping.IContext;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.*;
 
@@ -9,8 +15,9 @@ import java.util.*;
  * This class represents a signature of a morphism. It can be empty, base or composite.
  * @author jachym.bartik
  */
-public class Signature implements Comparable<Signature>, IContext
+public class Signature implements Comparable<Signature>, IContext, JSONConvertible
 {
+
 	private final int[] ids;
     
     private Signature()
@@ -20,8 +27,8 @@ public class Signature implements Comparable<Signature>, IContext
     
     private Signature(int[] ids)
     {
-        assert ids.length > 0 : "Empty ids array passed to Signature constructor.";
-        this.ids = ids;
+        //assert ids.length > 0 : "Empty ids array passed to Signature constructor.";
+        this.ids = ids.clone();
 	}
     
     public Signature(int id)
@@ -159,5 +166,33 @@ public class Signature implements Comparable<Signature>, IContext
         
         int length = ids.length - signature.ids.length;
         return length == 0 ? Signature.Empty() : new Signature(Arrays.copyOfRange(ids, 0, length));
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return new Converter().toJSON(this);
+    }
+
+    public static class Converter extends JSONConverterBase<Signature> {
+
+        @Override
+        protected JSONObject _toJSON(Signature object) throws JSONException {
+            var output = new JSONObject();
+            var ids = new JSONArray(object.ids);
+            output.put("ids", ids);
+
+            return output;
+        }
+
+        @Override
+        protected Signature _fromJSON(JSONObject jsonObject) throws JSONException {
+            var idsArray = jsonObject.getJSONArray("ids");
+            var ids = new int[idsArray.length()];
+            for (int i = 0; i < idsArray.length(); i++)
+                ids[i] = idsArray.getInt(i);
+                
+            return new Signature(ids);
+        }
+
     }
 }

@@ -1,7 +1,11 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.record.DynamicRecordName;
+import cz.cuni.matfyz.core.utils.JSONConverterBase;
 import cz.cuni.matfyz.core.category.Signature;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
@@ -36,5 +40,30 @@ public class DynamicName extends Name
     public boolean equals(Object object)
     {
         return object instanceof DynamicName dynamicName && signature.equals(dynamicName.signature);
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return new Converter().toJSON(this);
+    }
+
+    public static class Converter extends JSONConverterBase<DynamicName> {
+
+        @Override
+        protected JSONObject _toJSON(DynamicName object) throws JSONException {
+            var output = new JSONObject();
+
+            output.put("signature", object.signature.toJSON());
+
+            return output;
+        }
+
+        @Override
+        protected DynamicName _fromJSON(JSONObject jsonObject) throws JSONException {
+            var signature = new Signature.Converter().fromJSON(jsonObject.getJSONObject("signature"));
+            
+            return new DynamicName(signature);
+        }
+        
     }
 }

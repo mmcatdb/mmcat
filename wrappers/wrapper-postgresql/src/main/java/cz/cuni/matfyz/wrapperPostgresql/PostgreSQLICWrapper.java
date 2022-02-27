@@ -27,7 +27,7 @@ public class PostgreSQLICWrapper implements AbstractICWrapper
             // TODO There should be a way how to get attribute names from the pairs
             ReferenceConstraint newConstraint = new ReferenceConstraint(kindName, kindName2, "TODO1", "TODO2");
             
-            if (constraints.stream().anyMatch(constraint -> constraint.getName() == newConstraint.getName()))
+            if (constraints.stream().anyMatch(constraint -> constraint.getName().equals(newConstraint.getName())))
                 return;
             
             constraints.add(newConstraint);
