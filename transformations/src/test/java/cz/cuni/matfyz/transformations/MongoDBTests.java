@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.transformations;
 
+import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
@@ -71,14 +72,14 @@ public class MongoDBTests
     {
         var inputWrapper = createPullWrapper();
 
-        var forest = inputWrapper.pullForest("database.getCollection(\"" + collectionName + "\");", accessPath);
+        var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(collectionName));
         System.out.println(forest);
 
         var dummyWrapper = new DummyPullWrapper();
         var url = ClassLoader.getSystemResource("modelToCategory/" + dataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
-        var expectedForest = dummyWrapper.pullForest(fileName, accessPath);
+        var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));
         
         assertEquals(expectedForest.toString(), forest.toString());
     }

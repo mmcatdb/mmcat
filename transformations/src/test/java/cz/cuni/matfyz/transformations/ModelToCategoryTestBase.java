@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.transformations;
 
+import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
@@ -80,7 +81,7 @@ public class ModelToCategoryTestBase
         var url = ClassLoader.getSystemResource(fileNamePrefix + dataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
         
-		return wrapper.pullForest(fileName, path);
+		return wrapper.pullForest(path, new PullWrapperOptions.Builder().buildWithKindName(fileName));
 	}
 
 	public void testAlgorithm()

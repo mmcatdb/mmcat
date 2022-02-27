@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.wrapperPostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.*;
 
@@ -14,12 +15,43 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
 {
     private ConnectionProvider connectionProvider;
 
-    public void injectConnectionProvider(ConnectionProvider connectionProvider) {
+    public void injectConnectionProvider(ConnectionProvider connectionProvider)
+    {
         this.connectionProvider = connectionProvider;
     }
-    
+
+    private String createBasicCommand(PullWrapperOptions options)
+    {
+        if (options.hasCommand())
+        {
+            String command = options.getCommand();
+            return command.endsWith(";") ? command.substring(0, command.length() - 1) : command;
+        }
+        
+        return "SELECT * FROM ?";
+    }
+
+    private PreparedStatement prepareStatement(Connection connection, PullWrapperOptions options) throws SQLException
+    {
+        String command = createBasicCommand(options);
+
+        if (options.hasLimit())
+            command += "\nLIMIT " + options.getLimit();
+
+        if (options.hasOffset())
+            command += "\nOFFSET " + options.getOffset();
+
+        command += ";";
+
+        PreparedStatement statement = connection.prepareStatement(command);
+        if (!options.hasCommand())
+            statement.setString(1, options.getKindName());
+
+        return statement;
+    }
+
     @Override
-	public ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception
+	public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception
     {
         /*
         ResultSet resultSet = getData(selectAll);
@@ -29,10 +61,10 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         
         try (
             Connection connection = connectionProvider.getConnection();
-            Statement statement = connection.createStatement();
+            PreparedStatement statement = prepareStatement(connection, options);
         )
         {
-            try (ResultSet resultSet = statement.executeQuery(selectAll))
+            try (ResultSet resultSet = statement.executeQuery())
             {
                 ForestOfRecords forest = new ForestOfRecords();
                 
@@ -65,12 +97,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         return null;
     }
 
-    @Override
-	public ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset) throws Exception
-    {
-        String newSelectAll = String.format("%s\nLIMIT %d\nOFFSET %d", selectAll, limit, offset);
-        return pullForest(newSelectAll, path);
-    }
+    
     
 /*
     private ResultSet getData(String command)

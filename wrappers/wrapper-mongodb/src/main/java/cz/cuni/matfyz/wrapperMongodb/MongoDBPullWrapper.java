@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.wrapperMongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.*;
 
@@ -22,42 +23,43 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     {
         this.databaseProvider = databaseProvider;
     }
-    
-    @Override
-	public ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception
-    {
-        return pullForest(selectAll, path, false, 0, 0);
-    }
 
-    @Override
-    public ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset) throws Exception
-    {
-        return pullForest(selectAll, path, true, limit, offset);
-    }
-
-    private ForestOfRecords pullForest(String selectAll, ComplexProperty path, boolean doLimitAndOffset, int limit, int offset) throws Exception
+    private static String getKindNameFromSelectAllCommand(String selectAllCommand)
     {
         // selectAll should be in the form of "database.getCollection("<kindName>");"
+        return selectAllCommand.substring("database.getCollection(\"".length(), selectAllCommand.length() - "\");".length());
+    }
+
+    @Override
+    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception
+    {
+        String kindName = options.hasCommand() ? getKindNameFromSelectAllCommand(options.getCommand()) : options.getKindName();
+
         var database = databaseProvider.getDatabase();
-        String kindName = selectAll.substring("database.getCollection(\"".length(), selectAll.length() - "\");".length());
         MongoCollection<Document> collection = database.getCollection(kindName);
         Iterator<Document> iterator = collection.find().iterator();
         
         var forest = new ForestOfRecords();
-        int index = 0;
+        int offsetIndex = 0;
+        int limitIndex = 0;
         
         while (iterator.hasNext())
         {
             Document document = iterator.next();
             
-            if (doLimitAndOffset)
-                if (index <= offset || index > limit)
-                    continue;
+            if (options.hasOffset() && offsetIndex < options.getOffset())
+                continue;
+            offsetIndex++;
+            
+            if (options.hasLimit() && limitIndex >= options.getLimit())
+                break;
+            limitIndex++;
                 
             var record = new RootRecord();
 
             getDataFromDocument(record, document, path);
             forest.addRecord(record);
+
         }
         
         return forest;

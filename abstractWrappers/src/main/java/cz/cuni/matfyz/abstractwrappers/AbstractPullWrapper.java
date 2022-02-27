@@ -5,12 +5,10 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.koupil, jachym.bartik
  */
 public interface AbstractPullWrapper {
 
-	public abstract ForestOfRecords pullForest(String selectAll, ComplexProperty path) throws Exception;
-
-	public abstract ForestOfRecords pullForest(String selectAll, ComplexProperty path, int limit, int offset) throws Exception;
+	public abstract ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception;
 
 }
