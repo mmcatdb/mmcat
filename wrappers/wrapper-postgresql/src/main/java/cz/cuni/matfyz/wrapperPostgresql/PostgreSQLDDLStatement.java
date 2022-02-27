@@ -14,7 +14,8 @@ public class PostgreSQLDDLStatement implements DDLStatement
         this.content = content;
     }
     
-    public String getContent()
+    @Override
+    public String toString()
     {
         return content;
     }

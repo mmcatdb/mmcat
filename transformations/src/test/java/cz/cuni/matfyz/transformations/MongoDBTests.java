@@ -8,11 +8,13 @@ import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
 import java.nio.file.Paths;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  *
@@ -20,6 +22,8 @@ import java.nio.file.Paths;
  */
 public class MongoDBTests
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBTests.class);
+
     private static final MongoDBDatabaseProvider databaseProvider = new MongoDBDatabaseProvider(
         Config.get("mongodb.host"),
         Config.get("mongodb.port"),
@@ -39,7 +43,7 @@ public class MongoDBTests
         }
         catch (Exception exception)
         {
-            System.out.println(exception);
+            LOGGER.error("MongoDB setup error: ", exception);
         }
     }
 
@@ -64,19 +68,19 @@ public class MongoDBTests
         assertDoesNotThrow(() -> {
             var inputWrapper = createPullWrapper();
             var dbContent = inputWrapper.readCollectionAsStringForTests("database.getCollection(\"basic_order\");");
-            System.out.println(dbContent);
+            LOGGER.debug("DB content:\n" + dbContent);
         });
     }
 
-    private void pullForestTestAlgorithm(String collectionName, String dataFileName, ComplexProperty accessPath) throws Exception
+    private void pullForestTestAlgorithm(String collectionName, String expectedDataFileName, ComplexProperty accessPath) throws Exception
     {
         var inputWrapper = createPullWrapper();
 
         var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(collectionName));
-        System.out.println(forest);
+        LOGGER.debug("Pulled forest:\n" + forest);
 
         var dummyWrapper = new DummyPullWrapper();
-        var url = ClassLoader.getSystemResource("modelToCategory/" + dataFileName);
+        var url = ClassLoader.getSystemResource("modelToCategory/" + expectedDataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
         var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));

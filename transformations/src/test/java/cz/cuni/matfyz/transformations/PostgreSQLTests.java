@@ -8,12 +8,14 @@ import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPullWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
 import java.nio.file.Paths;
 import java.sql.SQLException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  *
@@ -21,6 +23,8 @@ import java.sql.SQLException;
  */
 public class PostgreSQLTests
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLTests.class);
+
     private static final PostgreSQLConnectionProvider connectionProvider = new PostgreSQLConnectionProvider(
         Config.get("postgresql.host"),
         Config.get("postgresql.port"),
@@ -40,7 +44,7 @@ public class PostgreSQLTests
         }
         catch (Exception exception)
         {
-            System.out.println(exception);
+            LOGGER.error("PostgreSQL setup error: ", exception);
         }
     }
 
@@ -65,19 +69,19 @@ public class PostgreSQLTests
         assertDoesNotThrow(() -> {
             var inputWrapper = createPullWrapper();
             var dbContent = inputWrapper.readTableAsStringForTests("SELECT * FROM \"order\";");
-            System.out.println(dbContent);
+            LOGGER.debug("DB content:\n" + dbContent);
         });
     }
 
-    private void pullForestTestAlgorithm(String databaseName, String dataFileName, ComplexProperty accessPath) throws Exception
+    private void pullForestTestAlgorithm(String databaseName, String expectedDataFileName, ComplexProperty accessPath) throws Exception
     {
         var inputWrapper = createPullWrapper();
 
         var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(databaseName));
-        System.out.println(forest);
+        LOGGER.debug("Pulled forest:\n" + forest);
 
         var dummyWrapper = new DummyPullWrapper();
-        var url = ClassLoader.getSystemResource("postgresql/" + dataFileName);
+        var url = ClassLoader.getSystemResource("postgresql/" + expectedDataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
         var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));

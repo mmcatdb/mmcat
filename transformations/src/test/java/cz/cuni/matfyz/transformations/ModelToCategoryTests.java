@@ -13,17 +13,18 @@ import cz.cuni.matfyz.core.utils.Debug;
  */
 public class ModelToCategoryTests
 {
+    private TestData data;
+
     @BeforeEach
     public void setUp()
     {
         UniqueIdProvider.reset();
+        data = new TestData();
     }
 
 	@Test
 	public void basicTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
 
@@ -39,8 +40,6 @@ public class ModelToCategoryTests
     @Test
 	public void structureTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
@@ -57,8 +56,6 @@ public class ModelToCategoryTests
     @Test
 	public void simpleArrayTest()
     {
-        var data = new TestData();
-        Debug.setLevel(0);
 
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
@@ -76,8 +73,6 @@ public class ModelToCategoryTests
     @Test
 	public void complexArrayTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addItems(schema, order);
@@ -94,8 +89,6 @@ public class ModelToCategoryTests
     @Test
 	public void mapTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addContact(schema, order);
@@ -112,8 +105,6 @@ public class ModelToCategoryTests
     @Test
 	public void syntheticPropertyTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addOrdered(schema, order);
@@ -130,8 +121,6 @@ public class ModelToCategoryTests
     @Test
 	public void missingSimpleTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
@@ -148,8 +137,6 @@ public class ModelToCategoryTests
     @Test
 	public void missingComplexTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addNestedDoc(schema, order);
@@ -166,8 +153,6 @@ public class ModelToCategoryTests
     @Test
 	public void emptyArrayTest()
     {
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addItems(schema, order);
@@ -185,8 +170,6 @@ public class ModelToCategoryTests
 	public void complexMapTest()
     {
         Debug.setLevel(3);
-
-        var data = new TestData();
 
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
@@ -206,8 +189,6 @@ public class ModelToCategoryTests
     {
         Debug.setLevel(0);
         
-        var data = new TestData();
-
         SchemaCategory schema = new SchemaCategory();
         var order = data.buildOrder(schema);
         data.addItems(schema, order);
