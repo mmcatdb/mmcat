@@ -1,10 +1,10 @@
 package cz.cuni.matfyz.core.mapping;
 
-import cz.cuni.matfyz.core.utils.JSONConverterBase;
-import cz.cuni.matfyz.core.utils.JSONConvertible;
-import cz.cuni.matfyz.core.utils.JSONSwitchConverterBase;
-
 import java.util.Set;
+
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.FromJSONSwitchBuilderBase;
 
 /**
  *
@@ -12,13 +12,13 @@ import java.util.Set;
  */
 public abstract class Name implements JSONConvertible
 {
-    public static class Converter extends JSONSwitchConverterBase<Name> {
+    public static class Builder extends FromJSONSwitchBuilderBase<Name> {
 
         @Override
-        protected Set<JSONConverterBase<? extends Name>> getChildConverters() {
+        protected Set<FromJSONBuilderBase<? extends Name>> getChildConverters() {
             return Set.of(
-                new StaticName.Converter(),
-                new DynamicName.Converter()
+                new StaticName.Builder(),
+                new DynamicName.Builder()
             );
         }
         

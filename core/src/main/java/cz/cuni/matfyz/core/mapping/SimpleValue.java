@@ -1,8 +1,9 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.utils.JSONConverterBase;
-import cz.cuni.matfyz.core.utils.JSONConvertible;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
 
 import org.json.JSONObject;
 import org.json.JSONException;
@@ -43,23 +44,27 @@ public class SimpleValue implements IValue, JSONConvertible
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends JSONConverterBase<SimpleValue> {
+    public static class Converter extends ToJSONConverterBase<SimpleValue> {
 
         @Override
         protected JSONObject _toJSON(SimpleValue object) throws JSONException {
             var output = new JSONObject();
-
+    
             output.put("signature", object.signature.toJSON());
-
+            
             return output;
         }
-
+    
+    }
+    
+    public static class Builder extends FromJSONBuilderBase<SimpleValue> {
+    
         @Override
         protected SimpleValue _fromJSON(JSONObject jsonObject) throws JSONException {
-            var signature = new Signature.Converter().fromJSON(jsonObject.getJSONObject("signature"));
+            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
             
             return new SimpleValue(signature);
         }
-
+    
     }
 }

@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.record.StaticRecordName;
-import cz.cuni.matfyz.core.utils.JSONConverterBase;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,24 +92,28 @@ public class StaticName extends Name
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends JSONConverterBase<StaticName> {
+    public static class Converter extends ToJSONConverterBase<StaticName> {
 
         @Override
         protected JSONObject _toJSON(StaticName object) throws JSONException {
             var output = new JSONObject();
-
+    
             output.put("value", object.value);
             output.put("type", object.type);
             
             return output;
         }
-
+    
+    }
+    
+    public static class Builder extends FromJSONBuilderBase<StaticName> {
+    
         @Override
         protected StaticName _fromJSON(JSONObject jsonObject) throws JSONException {
-            return Type.ANONYMOUS.toString().equals(jsonObject.getString("type"))
-                ? StaticName.Anonymous()
-                : new StaticName(jsonObject.getString("value"));
+            return Type.valueOf(jsonObject.getString("type")) == Type.ANONYMOUS
+            ? StaticName.Anonymous()
+            : new StaticName(jsonObject.getString("value"));
         }
-        
+    
     }
 }

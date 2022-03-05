@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.core.utils;
+package cz.cuni.matfyz.core.serialization;
 
 import java.util.Set;
 
@@ -10,17 +10,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author jachymb.bartik
  */
-public abstract class JSONSwitchConverterBase<Type extends JSONConvertible> implements JSONConverter<Type> {
+public abstract class FromJSONSwitchBuilderBase<Type extends JSONConvertible> implements FromJSONBuilder<Type> {
 
     protected String name() {
-        return this.getClass().getDeclaringClass().getName();
+        return this.getClass().getDeclaringClass().getSimpleName();
     }
 
-    protected abstract Set<JSONConverterBase<? extends Type>> getChildConverters();
-
-    public JSONObject toJSON(Type object) {
-        return object.toJSON();
-    }
+    protected abstract Set<FromJSONBuilderBase<? extends Type>> getChildConverters();
 
     public Type fromJSON(JSONObject jsonObject) {
         for (var converter : getChildConverters()) {

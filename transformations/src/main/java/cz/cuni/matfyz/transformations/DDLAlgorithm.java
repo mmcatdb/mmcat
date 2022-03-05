@@ -80,7 +80,7 @@ public class DDLAlgorithm
         
         var dynamicName = (DynamicName) path.name();
             
-        SchemaObject schemaObject = schema.morphisms().get(dynamicName.signature()).cod();
+        SchemaObject schemaObject = schema.signatureToMorphism(dynamicName.signature()).cod();
         InstanceObject instanceObject = instanceFunctor.object(schemaObject);
         
         var output = new TreeSet<String>();
@@ -102,7 +102,7 @@ public class DDLAlgorithm
     
     private void processPath(SimpleProperty property, Set<String> names)
     {
-        var morphism = schema.morphisms().get(property.value().signature());
+        var morphism = schema.signatureToMorphism(property.value().signature());
         
         if (morphism.isArray())
             wrapper.addSimpleArrayProperty(names, isRequired(morphism));
@@ -112,7 +112,7 @@ public class DDLAlgorithm
     
     private void processPath(ComplexProperty property, Set<String> names)
     {
-        var morphism = schema.morphisms().get(property.signature());
+        var morphism = schema.signatureToMorphism(property.signature());
         
         if (morphism.isArray())
             wrapper.addComplexArrayProperty(names, isRequired(morphism));

@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.utils.JSONConverterBase;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,26 +73,29 @@ public class SimpleProperty extends AccessPath
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends JSONConverterBase<SimpleProperty> {
+    public static class Converter extends ToJSONConverterBase<SimpleProperty> {
 
         @Override
-        protected JSONObject _toJSON(SimpleProperty object) throws JSONException
-        {
+        protected JSONObject _toJSON(SimpleProperty object) throws JSONException {
             var output = new JSONObject();
-
+            
             output.put("name", object.name.toJSON());
             output.put("value", object.value.toJSON());
             
             return output;
         }
-
+    
+    }
+    
+    public static class Builder extends FromJSONBuilderBase<SimpleProperty> {
+    
         @Override
         protected SimpleProperty _fromJSON(JSONObject jsonObject) throws JSONException {
-            var name = new Name.Converter().fromJSON(jsonObject.getJSONObject("name"));
-            var value = new SimpleValue.Converter().fromJSON(jsonObject.getJSONObject("value"));
+            var name = new Name.Builder().fromJSON(jsonObject.getJSONObject("name"));
+            var value = new SimpleValue.Builder().fromJSON(jsonObject.getJSONObject("value"));
             
             return new SimpleProperty(name, value);
         }
-
+    
     }
 }

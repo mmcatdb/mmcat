@@ -27,13 +27,13 @@ public class InstanceCategoryBuilder
     {
         result = new InstanceCategory(objects, morphisms);
         
-        for (SchemaObject schemaObject : schemaCategory.objects().values())
+        for (SchemaObject schemaObject : schemaCategory.allObjects())
         {
             InstanceObject instanceObject = createObject(schemaObject);
             objects.put(instanceObject.key(), instanceObject);
         }
 
-		for (SchemaMorphism schemaMorphism : schemaCategory.morphisms().values())
+		for (SchemaMorphism schemaMorphism : schemaCategory.allMorphisms())
         {
             InstanceMorphism instanceMorphism = createMorphism(schemaMorphism);
             morphisms.put(schemaMorphism.signature(), instanceMorphism);

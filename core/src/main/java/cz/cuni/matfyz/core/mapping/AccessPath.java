@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.utils.JSONConverterBase;
-import cz.cuni.matfyz.core.utils.JSONConvertible;
-import cz.cuni.matfyz.core.utils.JSONSwitchConverterBase;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.FromJSONSwitchBuilderBase;
 
 import java.util.Set;
 
@@ -39,13 +39,13 @@ public abstract class AccessPath implements JSONConvertible
     
     public abstract Signature signature();
 
-    public static class Converter extends JSONSwitchConverterBase<AccessPath> {
+    public static class Builder extends FromJSONSwitchBuilderBase<AccessPath> {
 
         @Override
-        protected Set<JSONConverterBase<? extends AccessPath>> getChildConverters() {
+        protected Set<FromJSONBuilderBase<? extends AccessPath>> getChildConverters() {
             return Set.of(
-                new ComplexProperty.Converter(),
-                new SimpleProperty.Converter()
+                new ComplexProperty.Builder(),
+                new SimpleProperty.Builder()
             );
         }
 

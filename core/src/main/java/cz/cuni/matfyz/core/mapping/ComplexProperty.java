@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.core.utils.*;
 
 import org.json.JSONArray;
@@ -221,12 +223,12 @@ public class ComplexProperty extends AccessPath implements IValue
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends JSONConverterBase<ComplexProperty> {
+    public static class Converter extends ToJSONConverterBase<ComplexProperty> {
 
         @Override
         protected JSONObject _toJSON(ComplexProperty object) throws JSONException {
             var output = new JSONObject();
-
+    
             output.put("name", object.name.toJSON());
             output.put("signature", object.signature.toJSON());
 
@@ -235,20 +237,24 @@ public class ComplexProperty extends AccessPath implements IValue
             
             return output;
         }
-
+    
+    }
+    
+    public static class Builder extends FromJSONBuilderBase<ComplexProperty> {
+    
         @Override
         protected ComplexProperty _fromJSON(JSONObject jsonObject) throws JSONException {
-            var name = new Name.Converter().fromJSON(jsonObject.getJSONObject("name"));
-            var signature = new Signature.Converter().fromJSON(jsonObject.getJSONObject("signature"));
+            var name = new Name.Builder().fromJSON(jsonObject.getJSONObject("name"));
+            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
 
             var subpathsArray = jsonObject.getJSONArray("subpaths");
             var subpaths = new ArrayList<AccessPath>();
-            var converter = new AccessPath.Converter();
+            var builder = new AccessPath.Builder();
             for (int i = 0; i < subpathsArray.length(); i++)
-                subpaths.add(converter.fromJSON(subpathsArray.getJSONObject(i)));
+                subpaths.add(builder.fromJSON(subpathsArray.getJSONObject(i)));
 
             return new ComplexProperty(name, signature, subpaths);
         }
-
+    
     }
 }

@@ -38,6 +38,9 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
         var database = databaseProvider.getDatabase();
         MongoCollection<Document> collection = database.getCollection(kindName);
         Iterator<Document> iterator = collection.find().iterator();
+
+        //TODO
+        //var a = collection.find().skip(options.getOffset()).limit(options.getLimit());
         
         var forest = new ForestOfRecords();
         int offsetIndex = 0;

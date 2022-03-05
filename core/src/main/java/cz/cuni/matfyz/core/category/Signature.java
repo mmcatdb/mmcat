@@ -1,9 +1,10 @@
 package cz.cuni.matfyz.core.category;
 
 import cz.cuni.matfyz.core.utils.ArrayUtils;
-import cz.cuni.matfyz.core.utils.JSONConverterBase;
-import cz.cuni.matfyz.core.utils.JSONConvertible;
 import cz.cuni.matfyz.core.mapping.IContext;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -173,17 +174,22 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends JSONConverterBase<Signature> {
+    public static class Converter extends ToJSONConverterBase<Signature> {
 
         @Override
         protected JSONObject _toJSON(Signature object) throws JSONException {
             var output = new JSONObject();
+    
             var ids = new JSONArray(object.ids);
             output.put("ids", ids);
-
+            
             return output;
         }
-
+    
+    }
+    
+    public static class Builder extends FromJSONBuilderBase<Signature> {
+    
         @Override
         protected Signature _fromJSON(JSONObject jsonObject) throws JSONException {
             var idsArray = jsonObject.getJSONArray("ids");
@@ -193,6 +199,6 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
                 
             return new Signature(ids);
         }
-
+    
     }
 }

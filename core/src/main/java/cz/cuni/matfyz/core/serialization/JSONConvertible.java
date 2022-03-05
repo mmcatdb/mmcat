@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.core.utils;
+package cz.cuni.matfyz.core.serialization;
 
 import org.json.JSONObject;
 

@@ -2,7 +2,8 @@ package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Category;
 import cz.cuni.matfyz.core.category.Signature;
-import java.util.*;
+import cz.cuni.matfyz.core.serialization.MapUniqueContext;
+import cz.cuni.matfyz.core.serialization.UniqueContext;
 
 /**
  *
@@ -10,57 +11,50 @@ import java.util.*;
  */
 public class SchemaCategory implements Category
 {
-	private final Map<Key, SchemaObject> objects = new TreeMap<>();
-	private final Map<Signature, SchemaMorphism> morphisms = new TreeMap<>();
+    private final UniqueContext<SchemaObject, Key> objectContext = new MapUniqueContext<>();
+    private final UniqueContext<SchemaMorphism, Signature> morphismContext = new MapUniqueContext<>();
 
-	public Map<Key, SchemaObject> objects()
-    {
-		return objects;
-	}
-
-	public Map<Signature, SchemaMorphism> morphisms()
-    {
-		return morphisms;
-	}
-    
-    public SchemaObject keyToObject(Key key)
-    {
-        return objects.get(key);
-    }
-    
-    public SchemaMorphism signatureToMorphism(Signature signature)
-    {
-        return morphisms.get(signature);
-    }
-
-	public SchemaCategory()
+    public SchemaCategory()
     {
         
 	}
 
-	public boolean addObject(SchemaObject object)
+    public SchemaObject addObject(SchemaObject object)
     {
-        if (objects.containsKey(object.key()))
-            return false;
-        
-		objects.put(object.key(), object);
-		return true;
+        return objectContext.createUniqueObject(object);
 	}
 
-	public boolean addMorphism(SchemaMorphism morphism)
+	public SchemaMorphism addMorphism(SchemaMorphism morphism)
     {
-        if (morphisms.containsKey(morphism.signature()))
-            return false;
-        
-		morphisms.put(morphism.signature(), morphism);
-		morphism.setCategory(this);
-		return true;
+        var newMorphism = morphismContext.createUniqueObject(morphism);
+        newMorphism.setCategory(this);
+		return newMorphism;
 	}
 
 	public SchemaMorphism dual(Signature signatureOfOriginal)
     {
-        final SchemaMorphism result = morphisms.get(signatureOfOriginal.dual());
+        final SchemaMorphism result = signatureToMorphism(signatureOfOriginal.dual());
         assert result != null : "Schema morphism with signature " + signatureOfOriginal + " doesn't have its dual.";
         return result;
 	}
+
+    public SchemaObject keyToObject(Key key)
+    {
+        return objectContext.getUniqueObject(key);
+    }
+    
+    public SchemaMorphism signatureToMorphism(Signature signature)
+    {
+        return morphismContext.getUniqueObject(signature);
+    }
+
+    public Iterable<SchemaObject> allObjects()
+    {
+        return objectContext.getAllUniqueObjects();
+    }
+
+    public Iterable<SchemaMorphism> allMorphisms()
+    {
+        return morphismContext.getAllUniqueObjects();
+    }
 }
