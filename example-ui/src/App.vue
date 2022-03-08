@@ -19,6 +19,9 @@ import Content from './components/layout/Content.vue';
         <RouterLink :to="{ name: 'newJob' }">
             New job
         </RouterLink>
+        <RouterLink :to="{ name: 'schema' }">
+            Schema category
+        </RouterLink>
         <RouterLink :to="{ name: 'test' }">
             Test
         </RouterLink>

@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.core.serialization;
 
+import java.util.Collection;
+
 /**
  *
  * @author jachymb.bartik
@@ -10,6 +12,6 @@ public interface UniqueContext<ObjectType extends Identified<IdType>, IdType ext
 
     public ObjectType getUniqueObject(IdType id);
 
-    public Iterable<ObjectType> getAllUniqueObjects();
+    public Collection<ObjectType> getAllUniqueObjects();
 
 }

@@ -14,20 +14,22 @@ import cz.cuni.matfyz.core.utils.Debug;
 public class ModelToCategoryTests
 {
     private TestData data;
+    private SchemaCategory schema;
+    private SchemaObject order;
+
 
     @BeforeEach
     public void setUp()
     {
         UniqueIdProvider.reset();
         data = new TestData();
+        schema = data.createDefaultSchemaCategory();
+        order = schema.keyToObject(data.getOrderKey());
     }
 
 	@Test
 	public void basicTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-
         new ModelToCategoryTestBase("1BasicTest.json").setAll(
             schema,
             order,
@@ -40,10 +42,6 @@ public class ModelToCategoryTests
     @Test
 	public void structureTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addNestedDoc(schema, order);
-
         new ModelToCategoryTestBase("2StructureTest.json").setAll(
             schema,
             order,
@@ -56,11 +54,6 @@ public class ModelToCategoryTests
     @Test
 	public void simpleArrayTest()
     {
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addArray(schema, order);
-
         new ModelToCategoryTestBase("3SimpleArrayTest.json").setAll(
             schema,
             order,
@@ -73,10 +66,6 @@ public class ModelToCategoryTests
     @Test
 	public void complexArrayTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addItems(schema, order);
-
         new ModelToCategoryTestBase("4ComplexArrayTest.json").setAll(
             schema,
             order,
@@ -89,10 +78,6 @@ public class ModelToCategoryTests
     @Test
 	public void mapTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addContact(schema, order);
-
         new ModelToCategoryTestBase("5MapTest.json").setAll(
             schema,
             order,
@@ -105,10 +90,6 @@ public class ModelToCategoryTests
     @Test
 	public void syntheticPropertyTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addOrdered(schema, order);
-
         new ModelToCategoryTestBase("6SyntheticPropertyTest.json").setAll(
             schema,
             order,
@@ -121,10 +102,6 @@ public class ModelToCategoryTests
     @Test
 	public void missingSimpleTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addNestedDoc(schema, order);
-
         new ModelToCategoryTestBase("7MissingSimpleTest.json").setAll(
             schema,
             order,
@@ -137,10 +114,6 @@ public class ModelToCategoryTests
     @Test
 	public void missingComplexTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addNestedDoc(schema, order);
-
         new ModelToCategoryTestBase("8MissingComplexTest.json").setAll(
             schema,
             order,
@@ -153,10 +126,6 @@ public class ModelToCategoryTests
     @Test
 	public void emptyArrayTest()
     {
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addItems(schema, order);
-
         new ModelToCategoryTestBase("9EmptyArrayTest.json").setAll(
             schema,
             order,
@@ -170,10 +139,6 @@ public class ModelToCategoryTests
 	public void complexMapTest()
     {
         Debug.setLevel(3);
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addAddress(schema, order);
 
         new ModelToCategoryTestBase("10ComplexMapTest.json").setAll(
             schema,
@@ -189,10 +154,6 @@ public class ModelToCategoryTests
     {
         Debug.setLevel(0);
         
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addItems(schema, order);
-
         new ModelToCategoryTestBase("11MissingArrayTest.json").setAll(
             schema,
             order,

@@ -2,8 +2,6 @@ package cz.cuni.matfyz.server.repository;
 
 import cz.cuni.matfyz.server.Config;
 
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

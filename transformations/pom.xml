@@ -11,9 +11,9 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>cz.cuni.matfyz</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>core</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<type>jar</type>
 		</dependency>
 		<dependency>
@@ -22,21 +22,21 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>cz.cuni.matfyz</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>wrapper-dummy</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>cz.cuni.matfyz</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>wrapper-mongodb</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>cz.cuni.matfyz</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>wrapper-postgresql</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

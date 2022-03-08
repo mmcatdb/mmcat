@@ -98,8 +98,8 @@ public class MongoDBToPostgreSQLTests
     public void basicTest()
     {
         var data = new TestData();
-        var schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
+        var schema = data.createDefaultSchemaCategory();
+        var order = schema.keyToObject(data.getOrderKey());
         
         testBase.setAll(
             "TODO",

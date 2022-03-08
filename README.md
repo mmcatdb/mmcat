@@ -1,10 +1,21 @@
 # Server
 ## Run
-- Must be done from the `server/` directory.
+- Required Maven ^3.8.4.
+- In the root directory: (must be done after any change in the dependent modules)
 ```console
-./mvnw spring-boot:run
+mvn install
 ```
 
+- In the `server/` directory:
+```console
+mvn spring-boot:run
+```
+
+## Setup database
+- From the `thesis/` directory.
+```console
+sqlite3 data/test.db < server/src/main/resources/createDatabase.sql
+```
 
 # Databases
 ## MongoDB

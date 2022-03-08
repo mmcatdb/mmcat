@@ -1,8 +1,10 @@
 package cz.cuni.matfyz.transformations;
 
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.Debug;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -13,14 +15,21 @@ import org.junit.jupiter.api.Test;
  */
 public class DMLAlgorithmTests
 {
+    private TestData data;
+    private SchemaCategory schema;
+    private SchemaObject order;
+
+    @BeforeEach
+    public void setupTestData()
+    {
+        data = new TestData();
+        schema = data.createDefaultSchemaCategory();
+        order = schema.keyToObject(data.getOrderKey());
+    }
+    
 	@Test
 	public void basicTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-
         new DMLAlgorithmTestBase("1BasicTest.json").setAll(
             schema,
             order,
@@ -34,12 +43,6 @@ public class DMLAlgorithmTests
     @Test
 	public void structureTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addNestedDoc(schema, order);
-
         new DMLAlgorithmTestBase("2StructureTest.json").setAll(
             schema,
             order,
@@ -53,12 +56,7 @@ public class DMLAlgorithmTests
     @Test
 	public void simpleArrayTest()
     {
-        var data = new TestData();
         Debug.setLevel(0);
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addArray(schema, order);
 
         new DMLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
@@ -74,12 +72,6 @@ public class DMLAlgorithmTests
     @Test
 	public void complexArrayTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addItems(schema, order);
-
         new DMLAlgorithmTestBase("4ComplexArrayTest.json").setAll(
             schema,
             order,
@@ -93,12 +85,6 @@ public class DMLAlgorithmTests
     @Test
 	public void mapTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addContact(schema, order);
-
         new DMLAlgorithmTestBase("5MapTest.json").setAll(
             schema,
             order,
@@ -113,12 +99,6 @@ public class DMLAlgorithmTests
 	public void syntheticPropertyTest()
     {
         Debug.setLevel(0);
-        
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addOrdered(schema, order);
 
         new DMLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,
@@ -133,12 +113,6 @@ public class DMLAlgorithmTests
     @Test
 	public void missingSimpleTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addNestedDoc(schema, order);
-
         new DMLAlgorithmTestBase("7MissingSimpleTest.json").setAll(
             schema,
             order,
@@ -152,12 +126,6 @@ public class DMLAlgorithmTests
     @Test
 	public void missingComplexTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addNestedDoc(schema, order);
-
         new DMLAlgorithmTestBase("8MissingComplexTest.json").setAll(
             schema,
             order,
@@ -171,12 +139,6 @@ public class DMLAlgorithmTests
     @Test
 	public void emptyArrayTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addItems(schema, order);
-
         new DMLAlgorithmTestBase("9EmptyArrayTest.json").setAll(
             schema,
             order,
@@ -190,12 +152,6 @@ public class DMLAlgorithmTests
     @Test
 	public void complexMapTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addAddress(schema, order);
-
         new DMLAlgorithmTestBase("10ComplexMapTest.json").setAll(
             schema,
             order,
@@ -209,12 +165,6 @@ public class DMLAlgorithmTests
     @Test
 	public void missingArrayTest()
     {
-        var data = new TestData();
-
-        SchemaCategory schema = new SchemaCategory();
-        var order = data.buildOrder(schema);
-        data.addItems(schema, order);
-
         new DMLAlgorithmTestBase("11MissingArrayTest.json").setAll(
             schema,
             order,

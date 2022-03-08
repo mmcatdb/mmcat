@@ -88,7 +88,26 @@ public class TestData
         MANY_TO_MANY
     }
 
-    public SchemaObject buildOrder(SchemaCategory schema)
+    public SchemaCategory createDefaultSchemaCategory()
+    {
+        var schema = new SchemaCategory();
+        var order = buildOrder(schema);
+        addArray(schema, order);
+        addItems(schema, order);
+        addContact(schema, order);
+        addNestedDoc(schema, order);
+        addOrdered(schema, order);
+        addAddress(schema, order);
+
+        return schema;
+    }
+
+    public Key getOrderKey()
+    {
+        return orderKey;
+    }
+
+    private SchemaObject buildOrder(SchemaCategory schema)
     {
         var order = createSchemaObject(
             orderKey,
@@ -108,7 +127,7 @@ public class TestData
         return order;
     }
 
-    public void addArray(SchemaCategory schema, SchemaObject order)
+    private void addArray(SchemaCategory schema, SchemaObject order)
     {
         var array = createSchemaObject(
             arrayKey,
@@ -119,7 +138,7 @@ public class TestData
         addMorphismWithDual(schema, orderToArray, order, array, Cardinality.ONE_TO_MANY);
     }
     
-    public void addItems(SchemaCategory schema, SchemaObject order)
+    private void addItems(SchemaCategory schema, SchemaObject order)
     {
         var number = schema.keyToObject(numberKey);
 
@@ -176,7 +195,7 @@ public class TestData
         addMorphismWithDual(schema, itemsToPname, items, pname, Cardinality.MANY_TO_ONE);
     }
     
-    public void addContact(SchemaCategory schema, SchemaObject order)
+    private void addContact(SchemaCategory schema, SchemaObject order)
     {
         var contact = createSchemaObject(
             contactKey,
@@ -212,7 +231,7 @@ public class TestData
         addMorphismWithDual(schema, contactToName, contact, name, Cardinality.MANY_TO_ONE);
     }
     
-    public void addNestedDoc(SchemaCategory schema, SchemaObject order)
+    private void addNestedDoc(SchemaCategory schema, SchemaObject order)
     {   
         var nestedDoc = createSchemaObject(
             nestedDocKey,
@@ -247,7 +266,7 @@ public class TestData
         addMorphismWithDual(schema, nestedDocToPropertyC, nestedDoc, propertyC, Cardinality.ONE_TO_ONE);
     }
     
-    public void addOrdered(SchemaCategory schema, SchemaObject order)
+    private void addOrdered(SchemaCategory schema, SchemaObject order)
     {
         var ordered = createSchemaObject(
             orderedKey,
@@ -275,7 +294,7 @@ public class TestData
         addMorphismWithDual(schema, orderToId, order, id, Cardinality.MANY_TO_ONE);
     }
 
-    public void addAddress(SchemaCategory schema, SchemaObject order)
+    private void addAddress(SchemaCategory schema, SchemaObject order)
     {
         var address = createSchemaObject(
             addressKey,

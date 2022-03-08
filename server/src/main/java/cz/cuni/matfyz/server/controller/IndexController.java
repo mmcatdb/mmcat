@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.server;
+package cz.cuni.matfyz.server.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.core.serialization;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -25,7 +26,7 @@ public class MapUniqueContext<ObjectType extends Identified<IdType>, IdType exte
     }
 
     @Override
-    public Iterable<ObjectType> getAllUniqueObjects() {
+    public Collection<ObjectType> getAllUniqueObjects() {
         return uniqueObjects.values();
     }
 

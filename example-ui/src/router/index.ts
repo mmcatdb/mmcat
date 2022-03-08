@@ -25,6 +25,11 @@ const router = createRouter({
             component: () => import('@/views/JobView.vue')
         },
         {
+            path: '/schema',
+            name: 'schema',
+            component: () => import('@/views/SchemaCategoryView.vue')
+        },
+        {
             path: '/test',
             name: 'test',
             component: () => import('@/views/LongPageForTestsView.vue')
