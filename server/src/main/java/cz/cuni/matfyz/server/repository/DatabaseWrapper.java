@@ -14,16 +14,9 @@ import java.util.function.Function;
  */
 public abstract class DatabaseWrapper
 {
-    // TODO pro každou úlohu dělat nové connection a pak jej zavřít
-
-    private static Connection connection;
-
     public static Connection getConnection()
     {
-        if (connection == null)
-            connection = createConnection();
-
-        return connection;
+        return createConnection();
     }
 
     private static Connection createConnection()
@@ -33,12 +26,30 @@ public abstract class DatabaseWrapper
             // TODO soubor s databází - zjistit, pokud existuje, a když ne, tak vytvořit
                 // konfigurační možnost databáze
                 // kdyžtak do .gitignore
+                // platí to stále po změně na postgress?
 
+            var connectionBuilder = new StringBuilder();
+            var connectionString = connectionBuilder
+                .append("jdbc:postgresql://")
+                .append(Config.get("postgresql.host"))
+                .append(":")
+                .append(Config.get("postgresql.port"))
+                .append("/")
+                .append(Config.get("postgresql.database"))
+                .append("?user=")
+                .append(Config.get("postgresql.username"))
+                .append("&password=")
+                .append(Config.get("postgresql.password"))
+                .toString();
+    
+            return DriverManager.getConnection(connectionString);
+/*
             String configuredDbPath = Config.get("databaseFile.path");
             String databasePath = configuredDbPath != null ? configuredDbPath : "dbPathNotSet.db";
             String connectionUrl = "jdbc:sqlite:" + databasePath;
 
             return DriverManager.getConnection(connectionUrl);
+*/
         }
         catch (SQLException exception)
         {

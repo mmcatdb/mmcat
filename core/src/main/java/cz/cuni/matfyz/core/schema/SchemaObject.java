@@ -18,7 +18,7 @@ import org.json.JSONObject;
 
 /**
  *
- * @author pavel.koupil
+ * @author pavel.koupil, jachymb.bartik
  */
 public class SchemaObject implements CategoricalObject, JSONConvertible, Identified<Key>
 {

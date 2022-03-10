@@ -18,6 +18,6 @@ public class SerializationTests
         var data = new TestData();
         var schema = data.createDefaultSchemaCategory();
 
-        LOGGER.info(schema.toJSON().toString());
+        //LOGGER.info(schema.toJSON().toString());
     }
 }

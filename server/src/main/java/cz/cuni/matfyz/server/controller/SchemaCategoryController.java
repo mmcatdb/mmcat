@@ -32,8 +32,10 @@ public class SchemaCategoryController
     public String getCategoryById(@PathVariable String id)
     {
         IdentifiedSchemaCategory schema = categoryService.find(id);
-        if (schema != null)
-            return schema.category.toJSON().toString();
+
+
+        //if (schema != null)
+        //    return schema.category.toJSON().toString();
         
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }

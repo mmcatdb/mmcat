@@ -16,7 +16,7 @@ import cz.cuni.matfyz.core.serialization.UniqueContext;
  *
  * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaCategory implements Category, JSONConvertible
+public class SchemaCategory implements Category//, JSONConvertible
 {
     private final UniqueContext<SchemaObject, Key> objectContext = new MapUniqueContext<>();
     private final UniqueContext<SchemaMorphism, Signature> morphismContext = new MapUniqueContext<>();
@@ -65,6 +65,7 @@ public class SchemaCategory implements Category, JSONConvertible
         return morphismContext.getAllUniqueObjects();
     }
 
+    /*
     @Override
     public JSONObject toJSON() {
         return new Converter().toJSON(this);
@@ -107,4 +108,5 @@ public class SchemaCategory implements Category, JSONConvertible
         }
 
     }
+    */
 }

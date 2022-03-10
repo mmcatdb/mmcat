@@ -6,15 +6,15 @@ package cz.cuni.matfyz.server.entity;
  */
 public class Job extends JobData
 {
-    public final String id;
+    public final int id;
 
-    public Job(String id, String value)
+    public Job(int id, String value)
     {
         super(value);
         this.id = id;
     }
 
-    public Job(String id, JobData data)
+    public Job(int id, JobData data)
     {
         super(data);
         this.id = id;

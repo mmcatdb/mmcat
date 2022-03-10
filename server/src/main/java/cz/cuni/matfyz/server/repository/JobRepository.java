@@ -30,9 +30,9 @@ public class JobRepository
 
             while (resultSet.next())
             {
-                String id = Integer.toString(resultSet.getInt("id"));
-                String content = resultSet.getString("content");
-                output.add(new Job(id, content));
+                int id = resultSet.getInt("id");
+                String jsonValue = resultSet.getString("json_value");
+                output.add(new Job(id, jsonValue));
             }
         }
         catch (Exception exception)
@@ -43,20 +43,20 @@ public class JobRepository
         return output;
     }
 
-    public Job find(String id)
+    public Job find(int id)
     {
         try
         {
             var connection = DatabaseWrapper.getConnection();
             var statement = connection.prepareStatement("SELECT * FROM job WHERE id = ?;");
-            statement.setString(1, id);
+            statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next())
             {
-                String foundId = Integer.toString(resultSet.getInt("id"));
-                String content = resultSet.getString("content");
-                return new Job(foundId, content);
+                int foundId = resultSet.getInt("id");
+                String jsonValue = resultSet.getString("json_value");
+                return new Job(foundId, jsonValue);
             }
         }
         catch (Exception exception)
@@ -67,13 +67,13 @@ public class JobRepository
         return null;
     }
 
-    public String add(JobData jobData)
+    public Integer add(JobData jobData)
     {
         Connection connection = null;
         try
         {
             connection = DatabaseWrapper.getConnection();
-            var statement = connection.prepareStatement("INSERT INTO job(value) VALUES(?);", Statement.RETURN_GENERATED_KEYS);
+            var statement = connection.prepareStatement("INSERT INTO job (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, jobData.value);
             int affectedRows = statement.executeUpdate();
 
@@ -82,7 +82,7 @@ public class JobRepository
 
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
-                return Integer.toString(generatedKeys.getInt("id"));
+                return generatedKeys.getInt("id");
         }
         catch (Exception exception)
         {

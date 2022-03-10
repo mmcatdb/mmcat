@@ -31,12 +31,12 @@ public class SchemaCategoryRepository
             var statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM schema_category;");
 
-            var builder = new SchemaCategory.Builder();
+            //var builder = new SchemaCategory.Builder();
             while (resultSet.next())
             {
                 var jsonObject = new JSONObject(resultSet.getString("json_value"));
-                var schema = builder.fromJSON(jsonObject);
-                output.add(new IdentifiedSchemaCategory(Integer.toString(resultSet.getInt("id")), schema));
+                //var schema = builder.fromJSON(jsonObject);
+                //output.add(new IdentifiedSchemaCategory(Integer.toString(resultSet.getInt("id")), schema));
             }
         }
         catch (Exception exception)
@@ -59,8 +59,8 @@ public class SchemaCategoryRepository
             if (resultSet.next())
             {
                 var jsonObject = new JSONObject(resultSet.getString("json_value"));
-                var schema = new SchemaCategory.Builder().fromJSON(jsonObject);
-                return new IdentifiedSchemaCategory(Integer.toString(resultSet.getInt("id")), schema);
+                //var schema = new SchemaCategory.Builder().fromJSON(jsonObject);
+                //return new IdentifiedSchemaCategory(Integer.toString(resultSet.getInt("id")), schema);
             }
         }
         catch (Exception exception)
@@ -76,6 +76,7 @@ public class SchemaCategoryRepository
         Connection connection = null;
         try
         {
+            /*
             connection = DatabaseWrapper.getConnection();
             var statement = connection.prepareStatement("INSERT INTO schema_category (json_value) VALUES (?);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, schema.toJSON().toString());
@@ -87,6 +88,7 @@ public class SchemaCategoryRepository
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
                 return Integer.toString(generatedKeys.getInt("id"));
+                */
         }
         catch (Exception exception)
         {

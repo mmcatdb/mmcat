@@ -24,7 +24,7 @@ public class JobService
         return repository.findAll();
     }
 
-    public Job find(String id)
+    public Job find(int id)
     {
         return repository.find(id);
     }
@@ -32,7 +32,7 @@ public class JobService
     public Job createNew(String accessPathAsString)
     {
         var jobData = new JobData(accessPathAsString);
-        String generatedId = repository.add(jobData);
+        Integer generatedId = repository.add(jobData);
 
         return generatedId == null ? null : new Job(generatedId, jobData);
     }

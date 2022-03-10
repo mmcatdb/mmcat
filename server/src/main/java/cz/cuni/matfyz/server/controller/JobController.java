@@ -30,7 +30,7 @@ public class JobController
     }
 
     @GetMapping("/jobs/{id}")
-    public Job getJobById(@PathVariable String id)
+    public Job getJobById(@PathVariable Integer id)
     {
         Job job = jobService.find(id);
         if (job != null)
