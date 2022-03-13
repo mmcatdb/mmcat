@@ -31,6 +31,7 @@ module.exports = {
         } ],
         curly: [ 2, 'multi', 'consistent' ],
         'brace-style': [ 'warn', 'stroustrup' ],
-        'vue/html-indent': [ 'warn', 4 ]
+        'vue/html-indent': [ 'warn', 4 ],
+        'no-empty-function': [ "error", { "allow": [ "private-constructors " ] } ]
     }
 };

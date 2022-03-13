@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { GET } from '@/utils/backendAPI';
-import { SchemaObject, SchemaMorphism } from '@/types/schema';
+import { SchemaObject, SchemaMorphism, SchemaCategoryFromServer, SchemaCategory } from '@/types/schema';
 import cytoscape from 'cytoscape';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
@@ -15,11 +15,12 @@ export default defineComponent({
     props: {},
     data() {
         return {
-            schema: null as unknown | null,
+            schema: null as SchemaCategory | null,
             schemaFetched: false
         };
     },
     async mounted() {
+        /*
         const result = await GET<any>(`/schemaCategories/1`);
         if (result.status && 'data' in result) {
             console.log(result.data);
@@ -33,21 +34,30 @@ export default defineComponent({
 
             const cy = this.createCytoscape(objects, morphisms);
         }
+        */
+
+        const result = await GET<SchemaCategoryFromServer>(`/schemaCategories/1`);
+        if (result.status && 'data' in result) {
+            console.log(result.data);
+            this.schema = SchemaCategory.fromServer(result.data);
+
+            const cy = this.createCytoscape(this.schema);
+        }
 
         this.schemaFetched = true;
     },
     methods: {
-        createCytoscape(objects: SchemaObject[], morphisms: SchemaMorphism[]) {
+        createCytoscape(schema: SchemaCategory) {
             const elements = [] as any[];
 
-            objects.forEach(object => elements.push({ data: {
-                id: object.key,
-                label: object.label
+            schema.objects.forEach(object => elements.push({ data: {
+                id: object.id,
+                label: object.jsonValue
             } }));
-            morphisms.forEach(morphism => elements.push({ data: {
-                id: morphism.domKey + '-' + morphism.codKey,
-                source: morphism.domKey,
-                target: morphism.codKey
+            schema.morphisms.forEach(morphism => elements.push({ data: {
+                id: morphism.id,
+                source: morphism.domId,
+                target: morphism.codId
             } }));
 
             console.log(document.getElementById('cytoscape'));

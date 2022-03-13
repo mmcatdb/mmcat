@@ -4,6 +4,8 @@ CREATE TABLE job (
     json_value JSONB NOT NULL
 );
 
+DROP TABLE IF EXISTS schema_morphism_in_category;
+DROP TABLE IF EXISTS schema_object_in_category;
 DROP TABLE IF EXISTS schema_morphism;
 DROP TABLE IF EXISTS schema_object;
 DROP TABLE IF EXISTS schema_category;
@@ -15,32 +17,212 @@ CREATE TABLE schema_category (
 
 CREATE TABLE schema_object (
     id SERIAL PRIMARY KEY,
-    schema_category_id INTEGER NOT NULL,
-    json_value JSONB NOT NULL,
-    CONSTRAINT fk_schema_category
-        FOREIGN KEY (schema_category_id)
-            REFERENCES schema_category (id)
-            ON DELETE CASCADE
+    json_value JSONB NOT NULL
 );
 
 CREATE TABLE schema_morphism (
     id SERIAL PRIMARY KEY,
-    domain_object_id INTEGER NOT NULL,
-    codomain_object_id INTEGER NOT NULL,
-    json_value JSONB NOT NULL,
-    CONSTRAINT fk_domain_object
-        FOREIGN KEY (domain_object_id)
-            REFERENCES schema_object (id)
-            ON DELETE CASCADE,
-    CONSTRAINT fk_codomain_object
-        FOREIGN KEY (codomain_object_id)
-            REFERENCES schema_object (id)
-            ON DELETE CASCADE
+    domain_object_id INTEGER NOT NULL REFERENCES schema_object,
+    codomain_object_id INTEGER NOT NULL REFERENCES schema_object,
+    json_value JSONB NOT NULL
+);
+
+CREATE TABLE schema_object_in_category (
+    schema_category_id INTEGER REFERENCES schema_category,
+    schema_object_id INTEGER REFERENCES schema_object,
+    PRIMARY KEY (schema_category_id, schema_object_id)
+);
+
+CREATE TABLE schema_morphism_in_category (
+    schema_category_id INTEGER REFERENCES schema_category,
+    schema_morphism_id INTEGER REFERENCES schema_morphism,
+    PRIMARY KEY (schema_category_id, schema_morphism_id)
 );
 
 INSERT INTO job (json_value)
 VALUES ('{ "name": "Test job." }');
 
+INSERT INTO schema_category (json_value)
+VALUES ('{ "name": "test schema category" }');
 
--- INSERT INTO schema_category (json_value)
--- VALUES ('{"objects":[{"ids":[{"_class":"Id","signatures":[{"ids":[1],"_class":"Signature"}]}],"label":"Customer","superId":{"_class":"Id","signatures":[{"ids":[1],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":100}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Id","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":101}},{"ids":[{"_class":"Id","signatures":[{"ids":[1,-2],"_class":"Signature"},{"ids":[19,3],"_class":"Signature"}]}],"label":"Ordered","superId":{"_class":"Id","signatures":[{"ids":[1,-2],"_class":"Signature"},{"ids":[19,3],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":102}},{"ids":[{"_class":"Id","signatures":[{"ids":[19],"_class":"Signature"}]}],"label":"Order","superId":{"_class":"Id","signatures":[{"ids":[19],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":103}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Number","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":104}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Array","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":105}},{"ids":[{"_class":"Id","signatures":[{"ids":[17],"_class":"Signature"},{"ids":[16,15],"_class":"Signature"},{"ids":[19,-14],"_class":"Signature"}]}],"label":"Contact","superId":{"_class":"Id","signatures":[{"ids":[17],"_class":"Signature"},{"ids":[16,15],"_class":"Signature"},{"ids":[19,-14],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":106}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Value","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":107}},{"ids":[{"_class":"Id","signatures":[{"ids":[16],"_class":"Signature"}]}],"label":"Type","superId":{"_class":"Id","signatures":[{"ids":[16],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":108}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Name","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":109}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"NestedDoc","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":110}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"PropertyA","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":111}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"PropertyB","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":112}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"PropertyC","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":113}},{"ids":[{"_class":"Id","signatures":[{"ids":[10,9],"_class":"Signature"},{"ids":[19,-8],"_class":"Signature"}]}],"label":"Items","superId":{"_class":"Id","signatures":[{"ids":[10,9],"_class":"Signature"},{"ids":[19,-8],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":114}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Quantity","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":115}},{"ids":[{"_class":"Id","signatures":[{"ids":[10],"_class":"Signature"}]}],"label":"Product","superId":{"_class":"Id","signatures":[{"ids":[10],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":116}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Id","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":117}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Name","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":118}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Price","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":119}},{"ids":[{"_class":"Id","signatures":[{"ids":[21],"_class":"Signature"},{"ids":[19,-20],"_class":"Signature"}]}],"label":"address","superId":{"_class":"Id","signatures":[{"ids":[21],"_class":"Signature"},{"ids":[19,-20],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":120}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"label","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":121}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"content","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":122}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"text","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":123}},{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"locale","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":124}}],"_class":"SchemaCategory","morphisms":[{"codIdentifier":{"_class":"Key","value":122},"min":"ONE","domIdentifier":{"_class":"Key","value":124},"signature":{"ids":[-24],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":122},"min":"ONE","domIdentifier":{"_class":"Key","value":123},"signature":{"ids":[-23],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":120},"min":"ONE","domIdentifier":{"_class":"Key","value":122},"signature":{"ids":[-22],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":120},"min":"ONE","domIdentifier":{"_class":"Key","value":121},"signature":{"ids":[-21],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ZERO","domIdentifier":{"_class":"Key","value":120},"signature":{"ids":[-20],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ONE","domIdentifier":{"_class":"Key","value":104},"signature":{"ids":[-19],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ONE","domIdentifier":{"_class":"Key","value":105},"signature":{"ids":[-18],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":106},"min":"ONE","domIdentifier":{"_class":"Key","value":107},"signature":{"ids":[-17],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":108},"min":"ONE","domIdentifier":{"_class":"Key","value":109},"signature":{"ids":[-16],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":106},"min":"ZERO","domIdentifier":{"_class":"Key","value":108},"signature":{"ids":[-15],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ZERO","domIdentifier":{"_class":"Key","value":106},"signature":{"ids":[-14],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":114},"min":"ONE","domIdentifier":{"_class":"Key","value":115},"signature":{"ids":[-13],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":116},"min":"ONE","domIdentifier":{"_class":"Key","value":118},"signature":{"ids":[-12],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":116},"min":"ONE","domIdentifier":{"_class":"Key","value":119},"signature":{"ids":[-11],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":116},"min":"ONE","domIdentifier":{"_class":"Key","value":117},"signature":{"ids":[-10],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":114},"min":"ZERO","domIdentifier":{"_class":"Key","value":116},"signature":{"ids":[-9],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ONE","domIdentifier":{"_class":"Key","value":114},"signature":{"ids":[-8],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":110},"min":"ONE","domIdentifier":{"_class":"Key","value":113},"signature":{"ids":[-7],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":110},"min":"ONE","domIdentifier":{"_class":"Key","value":112},"signature":{"ids":[-6],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":110},"min":"ONE","domIdentifier":{"_class":"Key","value":111},"signature":{"ids":[-5],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ONE","domIdentifier":{"_class":"Key","value":110},"signature":{"ids":[-4],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":102},"min":"ONE","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[-3],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":100},"min":"ZERO","domIdentifier":{"_class":"Key","value":102},"signature":{"ids":[-2],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":100},"min":"ONE","domIdentifier":{"_class":"Key","value":101},"signature":{"ids":[-1],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":101},"min":"ONE","domIdentifier":{"_class":"Key","value":100},"signature":{"ids":[1],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":102},"min":"ONE","domIdentifier":{"_class":"Key","value":100},"signature":{"ids":[2],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ONE","domIdentifier":{"_class":"Key","value":102},"signature":{"ids":[3],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":110},"min":"ONE","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[4],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":111},"min":"ONE","domIdentifier":{"_class":"Key","value":110},"signature":{"ids":[5],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":112},"min":"ONE","domIdentifier":{"_class":"Key","value":110},"signature":{"ids":[6],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":113},"min":"ONE","domIdentifier":{"_class":"Key","value":110},"signature":{"ids":[7],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":114},"min":"ZERO","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[8],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":116},"min":"ONE","domIdentifier":{"_class":"Key","value":114},"signature":{"ids":[9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":117},"min":"ONE","domIdentifier":{"_class":"Key","value":116},"signature":{"ids":[10],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":119},"min":"ONE","domIdentifier":{"_class":"Key","value":116},"signature":{"ids":[11],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":118},"min":"ONE","domIdentifier":{"_class":"Key","value":116},"signature":{"ids":[12],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":115},"min":"ONE","domIdentifier":{"_class":"Key","value":114},"signature":{"ids":[13],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":106},"min":"ZERO","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[14],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":108},"min":"ONE","domIdentifier":{"_class":"Key","value":106},"signature":{"ids":[15],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":109},"min":"ONE","domIdentifier":{"_class":"Key","value":108},"signature":{"ids":[16],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":107},"min":"ONE","domIdentifier":{"_class":"Key","value":106},"signature":{"ids":[17],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":105},"min":"ZERO","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[18],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":104},"min":"ONE","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[19],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":120},"min":"ZERO","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[20],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":121},"min":"ONE","domIdentifier":{"_class":"Key","value":120},"signature":{"ids":[21],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":122},"min":"ONE","domIdentifier":{"_class":"Key","value":120},"signature":{"ids":[22],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":123},"min":"ONE","domIdentifier":{"_class":"Key","value":122},"signature":{"ids":[23],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":124},"min":"ONE","domIdentifier":{"_class":"Key","value":122},"signature":{"ids":[24],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":106},"min":"ZERO","domIdentifier":{"_class":"Key","value":109},"signature":{"ids":[-15,-16],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":114},"min":"ZERO","domIdentifier":{"_class":"Key","value":118},"signature":{"ids":[-9,-12],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":114},"min":"ZERO","domIdentifier":{"_class":"Key","value":119},"signature":{"ids":[-9,-11],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":114},"min":"ZERO","domIdentifier":{"_class":"Key","value":117},"signature":{"ids":[-9,-10],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":114},"min":"ZERO","domIdentifier":{"_class":"Key","value":104},"signature":{"ids":[8,-19],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":117},"min":"ONE","domIdentifier":{"_class":"Key","value":114},"signature":{"ids":[10,9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":119},"min":"ONE","domIdentifier":{"_class":"Key","value":114},"signature":{"ids":[11,9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":118},"min":"ONE","domIdentifier":{"_class":"Key","value":114},"signature":{"ids":[12,9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":109},"min":"ONE","domIdentifier":{"_class":"Key","value":106},"signature":{"ids":[16,15],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":104},"min":"ONE","domIdentifier":{"_class":"Key","value":114},"signature":{"ids":[19,-8],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":101},"min":"ONE","domIdentifier":{"_class":"Key","value":103},"signature":{"ids":[1,-2,-3],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"},{"codIdentifier":{"_class":"Key","value":103},"min":"ZERO","domIdentifier":{"_class":"Key","value":101},"signature":{"ids":[3,2,-1],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}]}');
+INSERT INTO schema_object (json_value)
+VALUES
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[1],"_class":"Signature"}]}],"label":"Customer","superId":{"_class":"Id","signatures":[{"ids":[1],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":100}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Id","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":101}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[1,-2],"_class":"Signature"},{"ids":[19,3],"_class":"Signature"}]}],"label":"Ordered","superId":{"_class":"Id","signatures":[{"ids":[1,-2],"_class":"Signature"},{"ids":[19,3],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":102}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[19],"_class":"Signature"}]}],"label":"Order","superId":{"_class":"Id","signatures":[{"ids":[19],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":103}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Number","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":104}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Array","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":105}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[17],"_class":"Signature"},{"ids":[16,15],"_class":"Signature"},{"ids":[19,-14],"_class":"Signature"}]}],"label":"Contact","superId":{"_class":"Id","signatures":[{"ids":[17],"_class":"Signature"},{"ids":[16,15],"_class":"Signature"},{"ids":[19,-14],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":106}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Value","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":107}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[16],"_class":"Signature"}]}],"label":"Type","superId":{"_class":"Id","signatures":[{"ids":[16],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":108}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Name","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":109}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"NestedDoc","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":110}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"PropertyA","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":111}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"PropertyB","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":112}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"PropertyC","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":113}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[10,9],"_class":"Signature"},{"ids":[19,-8],"_class":"Signature"}]}],"label":"Items","superId":{"_class":"Id","signatures":[{"ids":[10,9],"_class":"Signature"},{"ids":[19,-8],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":114}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Quantity","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":115}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[10],"_class":"Signature"}]}],"label":"Product","superId":{"_class":"Id","signatures":[{"ids":[10],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":116}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Id","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":117}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Name","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":118}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"Price","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":119}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[21],"_class":"Signature"},{"ids":[19,-20],"_class":"Signature"}]}],"label":"address","superId":{"_class":"Id","signatures":[{"ids":[21],"_class":"Signature"},{"ids":[19,-20],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":120}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"label","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":121}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"content","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":122}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"text","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":123}}'),
+    ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"locale","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":124}}');
+
+INSERT INTO schema_object_in_category (schema_category_id, schema_object_id)
+VALUES
+    (1, 1),
+    (1, 2),
+    (1, 3),
+    (1, 4),
+    (1, 5),
+    (1, 6),
+    (1, 7),
+    (1, 8),
+    (1, 9),
+    (1, 10),
+    (1, 11),
+    (1, 12),
+    (1, 13),
+    (1, 14),
+    (1, 15),
+    (1, 16),
+    (1, 17),
+    (1, 18),
+    (1, 19),
+    (1, 20),
+    (1, 21),
+    (1, 22),
+    (1, 23),
+    (1, 24),
+    (1, 25);
+
+INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value)
+VALUES
+    (25, 23, '{"min":"ONE","signature":{"ids":[-24],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (24, 23, '{"min":"ONE","signature":{"ids":[-23],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (23, 21, '{"min":"ONE","signature":{"ids":[-22],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (22, 21, '{"min":"ONE","signature":{"ids":[-21],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (21, 4, '{"min":"ZERO","signature":{"ids":[-20],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (5, 4, '{"min":"ONE","signature":{"ids":[-19],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (6, 4, '{"min":"ONE","signature":{"ids":[-18],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (8, 7, '{"min":"ONE","signature":{"ids":[-17],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (10, 9, '{"min":"ONE","signature":{"ids":[-16],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (9, 7, '{"min":"ZERO","signature":{"ids":[-15],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (7, 4, '{"min":"ZERO","signature":{"ids":[-14],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (16, 15, '{"min":"ONE","signature":{"ids":[-13],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (19, 17, '{"min":"ONE","signature":{"ids":[-12],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (20, 17, '{"min":"ONE","signature":{"ids":[-11],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (18, 17, '{"min":"ONE","signature":{"ids":[-10],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (17, 15, '{"min":"ZERO","signature":{"ids":[-9],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (15, 4, '{"min":"ONE","signature":{"ids":[-8],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (14, 11, '{"min":"ONE","signature":{"ids":[-7],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (13, 11, '{"min":"ONE","signature":{"ids":[-6],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (12, 11, '{"min":"ONE","signature":{"ids":[-5],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (11, 4, '{"min":"ONE","signature":{"ids":[-4],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (4, 3, '{"min":"ONE","signature":{"ids":[-3],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (3, 1, '{"min":"ZERO","signature":{"ids":[-2],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (2, 1, '{"min":"ONE","signature":{"ids":[-1],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (1, 2, '{"min":"ONE","signature":{"ids":[1],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (1, 3, '{"min":"ONE","signature":{"ids":[2],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (3, 4, '{"min":"ONE","signature":{"ids":[3],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (4, 11, '{"min":"ONE","signature":{"ids":[4],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (11, 12, '{"min":"ONE","signature":{"ids":[5],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (11, 13, '{"min":"ONE","signature":{"ids":[6],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (11, 14, '{"min":"ONE","signature":{"ids":[7],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (4, 15, '{"min":"ZERO","signature":{"ids":[8],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (15, 17, '{"min":"ONE","signature":{"ids":[9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (17, 18, '{"min":"ONE","signature":{"ids":[10],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (17, 20, '{"min":"ONE","signature":{"ids":[11],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (17, 19, '{"min":"ONE","signature":{"ids":[12],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (15, 16, '{"min":"ONE","signature":{"ids":[13],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (4, 7, '{"min":"ZERO","signature":{"ids":[14],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (7, 9, '{"min":"ONE","signature":{"ids":[15],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (9, 10, '{"min":"ONE","signature":{"ids":[16],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (7, 8, '{"min":"ONE","signature":{"ids":[17],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (4, 6, '{"min":"ZERO","signature":{"ids":[18],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (4, 5, '{"min":"ONE","signature":{"ids":[19],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (4, 21, '{"min":"ZERO","signature":{"ids":[20],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (21, 22, '{"min":"ONE","signature":{"ids":[21],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (21, 23, '{"min":"ONE","signature":{"ids":[22],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (23, 24, '{"min":"ONE","signature":{"ids":[23],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (23, 25, '{"min":"ONE","signature":{"ids":[24],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (10, 7, '{"min":"ZERO","signature":{"ids":[-15,-16],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (19, 15, '{"min":"ZERO","signature":{"ids":[-9,-12],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (20, 15, '{"min":"ZERO","signature":{"ids":[-9,-11],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (18, 15, '{"min":"ZERO","signature":{"ids":[-9,-10],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (5, 15, '{"min":"ZERO","signature":{"ids":[8,-19],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}'),
+    (15, 18, '{"min":"ONE","signature":{"ids":[10,9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (15, 20, '{"min":"ONE","signature":{"ids":[11,9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (15, 19, '{"min":"ONE","signature":{"ids":[12,9],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (7, 10, '{"min":"ONE","signature":{"ids":[16,15],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (15, 5, '{"min":"ONE","signature":{"ids":[19,-8],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (4, 2, '{"min":"ONE","signature":{"ids":[1,-2,-3],"_class":"Signature"},"max":"ONE","_class":"SchemaMorphism"}'),
+    (2, 4, '{"min":"ZERO","signature":{"ids":[3,2,-1],"_class":"Signature"},"max":"STAR","_class":"SchemaMorphism"}');
+
+INSERT INTO schema_morphism_in_category (schema_category_id, schema_morphism_id)
+VALUES
+    (1, 1),
+    (1, 2),
+    (1, 3),
+    (1, 4),
+    (1, 5),
+    (1, 6),
+    (1, 7),
+    (1, 8),
+    (1, 9),
+    (1, 10),
+    (1, 11),
+    (1, 12),
+    (1, 13),
+    (1, 14),
+    (1, 15),
+    (1, 16),
+    (1, 17),
+    (1, 18),
+    (1, 19),
+    (1, 20),
+    (1, 21),
+    (1, 22),
+    (1, 23),
+    (1, 24),
+    (1, 25),
+    (1, 26),
+    (1, 27),
+    (1, 28),
+    (1, 29),
+    (1, 30),
+    (1, 31),
+    (1, 32),
+    (1, 33),
+    (1, 34),
+    (1, 35),
+    (1, 36),
+    (1, 37),
+    (1, 38),
+    (1, 39),
+    (1, 40),
+    (1, 41),
+    (1, 42),
+    (1, 43),
+    (1, 44),
+    (1, 45),
+    (1, 46),
+    (1, 47),
+    (1, 48),
+    (1, 49),
+    (1, 50),
+    (1, 51),
+    (1, 52),
+    (1, 53),
+    (1, 54),
+    (1, 55),
+    (1, 56),
+    (1, 57),
+    (1, 58),
+    (1, 59),
+    (1, 60);

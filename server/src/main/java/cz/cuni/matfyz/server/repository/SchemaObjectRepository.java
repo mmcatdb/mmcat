@@ -1,12 +1,15 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
+import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
 
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
+import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 
@@ -16,25 +19,31 @@ import org.springframework.stereotype.Repository;
  * @author jachym.bartik
  */
 @Repository
-public class SchemaCategoryRepository
+public class SchemaObjectRepository
 {
-    public List<SchemaCategoryInfo> findAll()
+    public List<SchemaObjectWrapper> findAllInCategory(int categoryId)
     {
-        var output = new ArrayList<SchemaCategoryInfo>();
+        var output = new ArrayList<SchemaObjectWrapper>();
 
         try
         {
             var connection = DatabaseWrapper.getConnection();
-            var statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM schema_category;");
+            var statement = connection.prepareStatement("""
+                SELECT *
+                FROM schema_object
+                JOIN schema_object_in_category ON (schema_object_id = schema_object.id)
+                WHERE schema_category_id = ?;
+            """);
+            statement.setInt(1, categoryId);
+            ResultSet resultSet = statement.executeQuery();
 
-            //var builder = new SchemaCategory.Builder();
+            //var builder = new SchemaObject.Builder();
             while (resultSet.next())
             {
-                var id = resultSet.getInt("id");
-                //var jsonValue = new JSONObject(resultSet.getString("json_value"));
-                var jsonValue = resultSet.getString("json_value");
-                output.add(new SchemaCategoryInfo(id, jsonValue));
+                //var jsonObject = new JSONObject(resultSet.getString("json_value"));
+                var jsonObject = resultSet.getString("json_value");
+                //var schema = builder.fromJSON(jsonObject);
+                output.add(new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject));
             }
         }
         catch (Exception exception)
@@ -45,19 +54,21 @@ public class SchemaCategoryRepository
         return output;
     }
 
-    public SchemaCategoryInfo find(int id)
+    public SchemaObjectWrapper find(int id)
     {
         try
         {
             var connection = DatabaseWrapper.getConnection();
-            var statement = connection.prepareStatement("SELECT * FROM schema_category WHERE id = ?;");
+            var statement = connection.prepareStatement("SELECT * FROM schema_object WHERE id = ?;");
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next())
             {
-                var jsonValue = resultSet.getString("json_value");
-                return new SchemaCategoryInfo(id, jsonValue);
+                //var jsonObject = new JSONObject(resultSet.getString("json_value"));
+                var jsonObject = resultSet.getString("json_value");
+                //var schema = new SchemaObject.Builder().fromJSON(jsonObject);
+                return new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject);
             }
         }
         catch (Exception exception)
@@ -68,12 +79,12 @@ public class SchemaCategoryRepository
         return null;
     }
 
-    public Integer add(SchemaCategory schema)
+    /*
+    public String add(SchemaObject object)
     {
         Connection connection = null;
         try
         {
-            /*
             connection = DatabaseWrapper.getConnection();
             var statement = connection.prepareStatement("INSERT INTO schema_category (json_value) VALUES (?);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, schema.toJSON().toString());
@@ -85,7 +96,6 @@ public class SchemaCategoryRepository
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
                 return Integer.toString(generatedKeys.getInt("id"));
-                */
         }
         catch (Exception exception)
         {
@@ -106,4 +116,5 @@ public class SchemaCategoryRepository
 
         return null;
     }
+    */
 }

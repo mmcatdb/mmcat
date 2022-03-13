@@ -21,18 +21,18 @@ import org.springframework.web.server.ResponseStatusException;
 public class JobController
 {
     @Autowired
-    private JobService jobService;
+    private JobService service;
 
     @GetMapping("/jobs")
     public List<Job> getAllJobs()
     {
-        return jobService.findAll();
+        return service.findAll();
     }
 
     @GetMapping("/jobs/{id}")
     public Job getJobById(@PathVariable Integer id)
     {
-        Job job = jobService.find(id);
+        Job job = service.find(id);
         if (job != null)
             return job;
         
@@ -42,7 +42,7 @@ public class JobController
     @PostMapping("/jobs")
     public Job createNewJob(@RequestBody String accessPathAsString)
     {
-        Job job = jobService.createNew(accessPathAsString);
+        Job job = service.createNew(accessPathAsString);
         /*
         if (job != null)
             return job;

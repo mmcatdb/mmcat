@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.IdentifiedSchemaCategory;
+import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
+import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 
 import java.util.*;
@@ -19,23 +20,22 @@ import org.springframework.web.server.ResponseStatusException;
 public class SchemaCategoryController
 {
     @Autowired
-    private SchemaCategoryService categoryService;
+    private SchemaCategoryService service;
 
     @GetMapping("/schemaCategories")
-    public List<IdentifiedSchemaCategory> getAllCategories()
+    public List<SchemaCategoryInfo> getAllCategoryInfos()
     {
-        return categoryService.findAll();
+        return service.findAllInfos();
     }
 
     @GetMapping("/schemaCategories/{id}")
     //public IdentifiedSchemaCategory getCategoryById(@PathVariable String id) // TODO
-    public String getCategoryById(@PathVariable String id)
+    public SchemaCategoryWrapper getCategoryWrapperById(@PathVariable int id)
     {
-        IdentifiedSchemaCategory schema = categoryService.find(id);
+        SchemaCategoryWrapper schema = service.findWrapper(id);
 
-
-        //if (schema != null)
-        //    return schema.category.toJSON().toString();
+        if (schema != null)
+            return schema;
         
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }

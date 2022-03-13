@@ -1,8 +1,13 @@
 package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
+import cz.cuni.matfyz.server.repository.SchemaMorphismRepository;
+import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.server.entity.IdentifiedSchemaCategory;
+import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
+import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
+import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,32 +25,30 @@ public class SchemaCategoryService
     @Autowired
     private SchemaCategoryRepository repository;
 
-    private Map<String, IdentifiedSchemaCategory> schemas;
+    @Autowired
+    private SchemaObjectRepository objectRepository;
 
-    private void loadCategories()
+    @Autowired
+    private SchemaMorphismRepository morphismRepository;
+
+    public List<SchemaCategoryInfo> findAllInfos()
     {
-        schemas = new TreeMap<>();
-        var schemaList = repository.findAll();
-        schemaList.stream().forEach(schema -> schemas.put(schema.id, schema));
+        return repository.findAll();
     }
 
-    public List<IdentifiedSchemaCategory> findAll()
+    public SchemaCategoryWrapper findWrapper(int id)
     {
-        if (schemas == null)
-            loadCategories();
-        
-        return schemas.values().stream().toList();
+        SchemaCategoryInfo info = repository.find(id);
+        if (info == null)
+            return null;
+            
+        List<SchemaObjectWrapper> objects = objectRepository.findAllInCategory(id);
+        List<SchemaMorphismWrapper> morphisms = morphismRepository.findAllInCategory(id);
+
+        return new SchemaCategoryWrapper(info, objects, morphisms);
     }
 
-    public IdentifiedSchemaCategory find(String id)
-    {
-        if (schemas == null)
-            loadCategories();
-
-        return schemas.get(id);
-    }
-
-    public String add(SchemaCategory schema)
+    public Integer add(SchemaCategory schema)
     {
         return repository.add(schema);
     }
