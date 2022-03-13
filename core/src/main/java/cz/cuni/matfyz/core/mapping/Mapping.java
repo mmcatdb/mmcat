@@ -3,14 +3,20 @@ package cz.cuni.matfyz.core.mapping;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.util.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  *
  * @author pavel.koupil, jachym.bartik
  */
-public class Mapping
+public class Mapping implements JSONConvertible
 {
 	private final SchemaObject rootObject;
 	private final SchemaMorphism rootMorphism;
@@ -73,5 +79,37 @@ public class Mapping
     {
         this.references.clear();
         references.forEach(reference -> this.references.add(reference));
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return new Converter().toJSON(this);
+    }
+
+    public static class Converter extends ToJSONConverterBase<Mapping> {
+
+        @Override
+        protected JSONObject _toJSON(Mapping object) throws JSONException {
+            var output = new JSONObject();
+    
+            // TODO root object and morphism
+            output.put("kindName", object.kindName);
+            output.put("accessPath", object.accessPath.toJSON());
+            
+            return output;
+        }
+    
+    }
+    
+    public static class Builder extends FromJSONBuilderBase<Mapping> {
+    
+        @Override
+        protected Mapping _fromJSON(JSONObject jsonObject) throws JSONException {
+            String kindName = jsonObject.getString("kindName");
+            ComplexProperty accessPath = new ComplexProperty.Builder().fromJSON(jsonObject.getJSONObject("accessPath"));
+
+            return new Mapping(null, accessPath);
+        }
+    
     }
 }

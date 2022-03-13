@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
-import cz.cuni.matfyz.server.service.SchemaMorphismService;
+import cz.cuni.matfyz.server.entity.MappingWrapper;
+import cz.cuni.matfyz.server.service.MappingService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,20 +15,21 @@ import org.springframework.web.server.ResponseStatusException;
  * @author jachym.bartik
  */
 @RestController
-public class SchemaMorphismController
+public class MappingController
 {
     @Autowired
-    private SchemaMorphismService service;
+    private MappingService service;
 
-    @GetMapping("/schemaMorphisms/{id}")
-    //public SchemaMorphismWrapper getMorphismById(@PathVariable String id) // TODO
-    public SchemaMorphismWrapper getMorphismById(@PathVariable int id)
+    @GetMapping("/mappings/{id}")
+    public MappingWrapper getObjectById(@PathVariable int id) // TODO
+    //public String getObjectById(@PathVariable int id)
     {
-        SchemaMorphismWrapper morphism = service.find(id);
+        MappingWrapper object = service.find(id);
 
-        if (morphism != null)
-            return morphism;
-        
+        if (object != null)
+            //return object.toJSON().toString();
+            return object;
+
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }

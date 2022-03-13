@@ -17,7 +17,7 @@ psql -U mmcat_user -h localhost -f src/main/resources/createDatabase.sql mmcat_s
 - Required Maven ^3.8.4.
 - In the root directory: (must be done after any change in the dependent modules)
 ```console
-mvn install
+mvn install -Dmaven.test.skip
 ```
 
 - In the `server/` directory:
