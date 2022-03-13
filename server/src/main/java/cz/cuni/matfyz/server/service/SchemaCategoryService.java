@@ -4,6 +4,7 @@ import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
 import cz.cuni.matfyz.server.repository.SchemaMorphismRepository;
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.server.entity.Position;
 import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;

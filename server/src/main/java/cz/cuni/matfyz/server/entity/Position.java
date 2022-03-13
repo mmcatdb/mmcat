@@ -13,8 +13,10 @@ import org.json.JSONObject;
  */
 public class Position implements JSONConvertible
 {
-	private final double x;
-	private final double y;
+	private double x;
+	private double y;
+
+    public Position() {}
 	
 	public Position(double x, double y)
 	{
@@ -27,10 +29,20 @@ public class Position implements JSONConvertible
         return x;
     }
 
+    public void setX(double value)
+    {
+        x = value;
+    }
+
 	public double getY()
 	{
 		return y;
 	}
+
+    public void setY(double value)
+    {
+        y = value;
+    }
 
 	@Override
     public JSONObject toJSON() {

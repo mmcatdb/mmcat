@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
+import cz.cuni.matfyz.server.entity.Position;
 import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
 
 import java.util.List;
@@ -26,5 +27,10 @@ public class SchemaObjectService
     public SchemaObjectWrapper find(int id)
     {
         return repository.find(id);
+    }
+
+    public boolean updatePosition(int categoryId, int objectId, Position newPosition)
+    {
+        return repository.updatePosition(categoryId, objectId, newPosition);
     }
 }

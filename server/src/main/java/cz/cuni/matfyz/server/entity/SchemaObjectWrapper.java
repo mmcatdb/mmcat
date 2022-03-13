@@ -16,12 +16,14 @@ public class SchemaObjectWrapper // implements JSONConvertible
     public final int id;
     //public final JSONObject jsonValue;
     public final String jsonValue;
+    public final Position position;
 
     //public SchemaObjectWrapper(int id, JSONObject jsonValue)
-    public SchemaObjectWrapper(int id, String jsonValue)
+    public SchemaObjectWrapper(int id, String jsonValue, Position position)
     {
         this.id = id;
         this.jsonValue = jsonValue;
+        this.position = position;
     }
 
     public SchemaObject toSchemaObject() throws Exception

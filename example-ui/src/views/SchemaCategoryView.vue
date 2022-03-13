@@ -1,8 +1,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { GET } from '@/utils/backendAPI';
-import { SchemaObject, SchemaMorphism, SchemaCategoryFromServer, SchemaCategory } from '@/types/schema';
+import { GET, PUT } from '@/utils/backendAPI';
+import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
 import cytoscape from 'cytoscape';
+import type { ElementDefinition } from 'cytoscape';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
@@ -16,7 +17,8 @@ export default defineComponent({
     data() {
         return {
             schema: null as SchemaCategory | null,
-            schemaFetched: false
+            schemaFetched: false,
+            saveButtonDisabled: false,
         };
     },
     async mounted() {
@@ -48,22 +50,27 @@ export default defineComponent({
     },
     methods: {
         createCytoscape(schema: SchemaCategory) {
-            const elements = [] as any[];
+            const elements = [] as ElementDefinition[];
 
-            schema.objects.forEach(object => elements.push({ data: {
-                id: object.id,
-                label: object.jsonValue
-            } }));
+            schema.objects.forEach(object => elements.push({
+                data: {
+                    id: object.id.toString(),
+                    label: JSON.parse(object.jsonValue).label
+                },
+                position: object.position
+            }));
             schema.morphisms.forEach(morphism => elements.push({ data: {
-                id: morphism.id,
+                id: morphism.id.toString(),
                 source: morphism.domId,
                 target: morphism.codId
             } }));
 
+            console.log(elements);
             console.log(document.getElementById('cytoscape'));
 
             return cytoscape({
                 container: document.getElementById('cytoscape'),
+                layout: { name: 'preset' },
                 elements,
                 style: [
                     {
@@ -77,6 +84,18 @@ export default defineComponent({
                     }
                 ]
             });
+        },
+        async savePositionChanges() {
+            this.saveButtonDisabled = true;
+            console.log('Saving position changes');
+
+            const updatedPositions = this.schema?.objects
+                .map(object => object.toPositionUpdateToServer())
+                .filter(update => update != null);
+            const result = await PUT<PositionUpdateToServer[]>(`/schemaCategories/positions/${this.schema?.id}`, updatedPositions);
+            console.log('UPDATE RESULT:', result);
+
+            this.saveButtonDisabled = false;
         }
     }
 });
@@ -84,6 +103,12 @@ export default defineComponent({
 
 <template>
     <h1>There is a schema category</h1>
+    <button
+        :disabled="saveButtonDisabled"
+        @click="savePositionChanges"
+    >
+        Uložit změny
+    </button>
     <div
         id="cytoscape"
     />

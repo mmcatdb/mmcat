@@ -30,6 +30,7 @@ CREATE TABLE schema_morphism (
 CREATE TABLE schema_object_in_category (
     schema_category_id INTEGER REFERENCES schema_category,
     schema_object_id INTEGER REFERENCES schema_object,
+    position JSONB NOT NULL,
     PRIMARY KEY (schema_category_id, schema_object_id)
 );
 
@@ -73,33 +74,33 @@ VALUES
     ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"text","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":123}}'),
     ('{"ids":[{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]}],"label":"locale","superId":{"_class":"Id","signatures":[{"ids":[],"_class":"Signature"}]},"_class":"SchemaObject","key":{"_class":"Key","value":124}}');
 
-INSERT INTO schema_object_in_category (schema_category_id, schema_object_id)
+INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position)
 VALUES
-    (1, 1),
-    (1, 2),
-    (1, 3),
-    (1, 4),
-    (1, 5),
-    (1, 6),
-    (1, 7),
-    (1, 8),
-    (1, 9),
-    (1, 10),
-    (1, 11),
-    (1, 12),
-    (1, 13),
-    (1, 14),
-    (1, 15),
-    (1, 16),
-    (1, 17),
-    (1, 18),
-    (1, 19),
-    (1, 20),
-    (1, 21),
-    (1, 22),
-    (1, 23),
-    (1, 24),
-    (1, 25);
+    (1, 1, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 2, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 3, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 4, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 5, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 6, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 7, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 8, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 9, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 10, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 11, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 12, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 13, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 14, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 15, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 16, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 17, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 18, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 19, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 20, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 21, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 22, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 23, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 24, '{"x":100,"y":100,"_class":"Position"}'),
+    (1, 25, '{"x":100,"y":100,"_class":"Position"}');
 
 INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value)
 VALUES

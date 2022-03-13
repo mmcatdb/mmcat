@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.repository;
 
 import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.server.entity.Position;
 import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
 
 import java.sql.Statement;
@@ -41,9 +42,11 @@ public class SchemaObjectRepository
             while (resultSet.next())
             {
                 //var jsonObject = new JSONObject(resultSet.getString("json_value"));
-                var jsonObject = resultSet.getString("json_value");
+                String jsonObject = resultSet.getString("json_value");
+                JSONObject positionJsonObject = new JSONObject(resultSet.getString("position"));
+                Position position = new Position.Builder().fromJSON(positionJsonObject);
                 //var schema = builder.fromJSON(jsonObject);
-                output.add(new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject));
+                output.add(new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject, position));
             }
         }
         catch (Exception exception)
@@ -68,7 +71,7 @@ public class SchemaObjectRepository
                 //var jsonObject = new JSONObject(resultSet.getString("json_value"));
                 var jsonObject = resultSet.getString("json_value");
                 //var schema = new SchemaObject.Builder().fromJSON(jsonObject);
-                return new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject);
+                return new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject, null);
             }
         }
         catch (Exception exception)
@@ -77,6 +80,36 @@ public class SchemaObjectRepository
         }
 
         return null;
+    }
+
+    public boolean updatePosition(int categoryId, int objectId, Position newPosition)
+    {
+        try
+        {
+            var connection = DatabaseWrapper.getConnection();
+            var statement = connection.prepareStatement("""
+                UPDATE schema_object_in_category
+                SET position = ?::jsonb
+                WHERE schema_category_id = ?
+                    AND schema_object_id = ?;
+            """);
+            statement.setString(1, newPosition.toJSON().toString());
+            statement.setInt(2, categoryId);
+            statement.setInt(3, objectId);
+
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows == 0)
+                throw new SQLException("Update position failed, no rows affected.");
+
+            return true;
+        }
+        catch (Exception exception)
+        {
+            System.out.println(exception);
+        }
+
+        return false;
     }
 
     /*

@@ -1,3 +1,17 @@
+import type { Position } from "cytoscape";
+
+export class ComparablePosition implements Position {
+    public x!: number;
+    public y!: number;
+
+    public constructor(input: Position) {
+        Object.assign(this, input);
+    }
+
+    public equals(object?: Position) : boolean {
+        return !!object && this.x === object.x && this.y === object.y;
+    }
+}
 /*
 export class SchemaObject {
     public key: number | undefined;
@@ -38,6 +52,8 @@ export class SchemaObject {
 
     public id!: number;
     public jsonValue!: string;
+    public position?: ComparablePosition;
+    private originalPosition?: ComparablePosition;
 
     private constructor() {};
 
@@ -48,14 +64,32 @@ export class SchemaObject {
         //object.label = input.label;
         object.id = input.id;
         object.jsonValue = input.jsonValue;
+        if (input.position) {
+            object.position = new ComparablePosition(input.position);
+            object.originalPosition = new ComparablePosition(input.position);
+        }
 
         return object;
+    }
+
+    public toPositionUpdateToServer(): PositionUpdateToServer | null {
+        return this.position?.equals(this.originalPosition) ? null : new PositionUpdateToServer({ schemaObjectId: this.id, position: this.position });
     }
 }
 
 export class SchemaObjectFromServer {
     public id!: number;
     public jsonValue!: string;
+    public position?: Position;
+}
+
+export class PositionUpdateToServer {
+    public schemaObjectId!: number;
+    public position!: Position;
+
+    public constructor(input?: Partial<PositionUpdateToServer>) {
+        Object.assign(this, input);
+    }
 }
 
 export class SchemaMorphism {

@@ -21,7 +21,9 @@ class Settings
             public void addCorsMappings(CorsRegistry registry)
             {
                 // TODO konfigurace portu pro clienta
-                registry.addMapping("/**").allowedOrigins("http://localhost:3000");
+                registry.addMapping("/**")
+                    .allowedOrigins("http://localhost:3000")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
     }
