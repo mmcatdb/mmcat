@@ -2,6 +2,7 @@ package cz.cuni.matfyz.server.repository;
 
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
+import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

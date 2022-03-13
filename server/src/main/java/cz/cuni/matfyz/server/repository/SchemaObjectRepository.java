@@ -3,6 +3,7 @@ package cz.cuni.matfyz.server.repository;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.server.entity.Position;
 import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
+import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
 import java.sql.Connection;

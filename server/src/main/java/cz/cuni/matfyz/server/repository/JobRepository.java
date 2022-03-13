@@ -2,6 +2,7 @@ package cz.cuni.matfyz.server.repository;
 
 import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.entity.JobData;
+import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
 import java.sql.Connection;
@@ -20,11 +21,7 @@ public class JobRepository
 {
     public List<Job> findAll()
     {
-        var output = new ArrayList<Job>();
-
-        try
-        {
-            var connection = DatabaseWrapper.getConnection();
+        return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM job;");
 
@@ -34,37 +31,21 @@ public class JobRepository
                 String jsonValue = resultSet.getString("json_value");
                 output.add(new Job(id, jsonValue));
             }
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-
-        return output;
+        });
     }
 
-    public Job find(int id)
-    {
-        try
-        {
-            var connection = DatabaseWrapper.getConnection();
+    public Job find(int id) {
+        return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM job WHERE id = ?;");
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
 
-            if (resultSet.next())
-            {
+            if (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
                 String jsonValue = resultSet.getString("json_value");
-                return new Job(foundId, jsonValue);
+                output.set(new Job(foundId, jsonValue));
             }
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-
-        return null;
+        });
     }
 
     public Integer add(JobData jobData)
