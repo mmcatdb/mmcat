@@ -8,9 +8,9 @@ public class Job extends JobData
 {
     public final int id;
 
-    public Job(int id, String value)
+    public Job(int id, int databaseId, int mappingId, String value)
     {
-        super(value);
+        super(databaseId, mappingId, value);
         this.id = id;
     }
 

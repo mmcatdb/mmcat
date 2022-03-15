@@ -65,6 +65,11 @@ public class SchemaCategory implements Category//, JSONConvertible
         return morphismContext.getAllUniqueObjects();
     }
 
+    public UniqueContext<SchemaObject, Key> objectContext() // TODO
+    {
+        return this.objectContext;
+    }
+
     /*
     @Override
     public JSONObject toJSON() {

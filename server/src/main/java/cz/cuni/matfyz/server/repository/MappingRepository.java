@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.server.repository;
 
 import cz.cuni.matfyz.server.entity.MappingWrapper;
+import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.sql.Connection;
@@ -57,30 +59,22 @@ public class MappingRepository
         return output;
     }
 
-    public MappingWrapper find(int id)
-    {
-        /*
-        try
-        {
-            var connection = DatabaseWrapper.getConnection();
-            var statement = connection.prepareStatement("SELECT * FROM schema_object WHERE id = ?;");
+    public MappingWrapper find(int id) {
+        return DatabaseWrapper.get((connection, output) -> {
+            var statement = connection.prepareStatement("SELECT * FROM mapping WHERE id = ?;");
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
 
-            if (resultSet.next())
-            {
-                //var jsonObject = new JSONObject(resultSet.getString("json_value"));
-                var jsonObject = resultSet.getString("json_value");
-                //var schema = new Mapping.Builder().fromJSON(jsonObject);
-                return new MappingWrapper(resultSet.getInt("id"), jsonObject, null);
-            }
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-        */
+            if (resultSet.next()) {
+                int foundId = resultSet.getInt("id");
+                int schemaId = resultSet.getInt("schema_category_id");
+                int databaseId = resultSet.getInt("database_id");
+                Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
+                Integer rootMorphismId = Utils.getIntOrNull(resultSet.getInt("root_morphism_id"));
+                String jsonValue = resultSet.getString("json_value");
 
-        return null;
+                output.set(new MappingWrapper(foundId, schemaId, databaseId, rootObjectId, rootMorphismId, jsonValue));
+            }
+        });
     }
 }

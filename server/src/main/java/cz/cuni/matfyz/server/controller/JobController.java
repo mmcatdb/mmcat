@@ -40,9 +40,9 @@ public class JobController
     }
 
     @PostMapping("/jobs")
-    public Job createNewJob(@RequestBody String accessPathAsString)
+    public Job createNewJob(@RequestBody int mappingId, @RequestBody String jsonValue)
     {
-        Job job = service.createNew(accessPathAsString);
+        Job job = service.createNew(mappingId, jsonValue);
         /*
         if (job != null)
             return job;
@@ -51,5 +51,17 @@ public class JobController
         */
 
         return job;
+    }
+
+    // jsf - funkce, které zjistí kód chyby a na to reagují
+
+    @GetMapping("/jobs/{id}/execute")
+    public boolean executeJobById(@PathVariable int id)
+    {
+        Job job = service.find(id);
+        if (job == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not foud ... TODO"); // TODO
+
+        return service.execute(job);
     }
 }

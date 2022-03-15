@@ -1,8 +1,6 @@
 DROP TABLE IF EXISTS job;
-CREATE TABLE job (
-    id SERIAL PRIMARY KEY,
-    json_value JSONB NOT NULL
-);
+DROP TABLE IF EXISTS mapping;
+DROP TABLE IF EXISTS database_for_mapping;
 
 DROP TABLE IF EXISTS schema_morphism_in_category;
 DROP TABLE IF EXISTS schema_object_in_category;
@@ -10,10 +8,14 @@ DROP TABLE IF EXISTS schema_morphism;
 DROP TABLE IF EXISTS schema_object;
 DROP TABLE IF EXISTS schema_category;
 
+
 CREATE TABLE schema_category (
     id SERIAL PRIMARY KEY,
     json_value JSONB NOT NULL
 );
+
+INSERT INTO schema_category (json_value)
+VALUES ('{ "name": "test schema category" }');
 
 CREATE TABLE schema_object (
     id SERIAL PRIMARY KEY,
@@ -28,23 +30,17 @@ CREATE TABLE schema_morphism (
 );
 
 CREATE TABLE schema_object_in_category (
-    schema_category_id INTEGER REFERENCES schema_category,
-    schema_object_id INTEGER REFERENCES schema_object,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    schema_object_id INTEGER NOT NULL REFERENCES schema_object,
     position JSONB NOT NULL,
     PRIMARY KEY (schema_category_id, schema_object_id)
 );
 
 CREATE TABLE schema_morphism_in_category (
-    schema_category_id INTEGER REFERENCES schema_category,
-    schema_morphism_id INTEGER REFERENCES schema_morphism,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    schema_morphism_id INTEGER NOT NULL REFERENCES schema_morphism,
     PRIMARY KEY (schema_category_id, schema_morphism_id)
 );
-
-INSERT INTO job (json_value)
-VALUES ('{ "name": "Test job." }');
-
-INSERT INTO schema_category (json_value)
-VALUES ('{ "name": "test schema category" }');
 
 INSERT INTO schema_object (json_value)
 VALUES
@@ -227,3 +223,45 @@ VALUES
     (1, 58),
     (1, 59),
     (1, 60);
+
+CREATE TABLE database_for_mapping (
+    id SERIAL PRIMARY KEY,
+    json_value JSONB NOT NULL
+);
+
+INSERT INTO database_for_mapping (json_value)
+VALUES
+    ('{"type":"mongodb","label":"MongoDB","_class":"Database"}'),
+    ('{"type":"postgresql","label":"PostgreSQL","_class":"Database"}');
+
+CREATE TABLE mapping (
+    id SERIAL PRIMARY KEY,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    database_id INTEGER NOT NULL REFERENCES database_for_mapping,
+    root_object_id INTEGER REFERENCES schema_object,
+    root_morphism_id INTEGER REFERENCES schema_morphism,
+    json_value JSONB NOT NULL
+);
+
+-- databázový systém může obsahovat více databázových instancí
+    -- - v jedné db instanci musí být jména kindů atd unikátní
+
+
+INSERT INTO mapping (schema_category_id, database_id, root_object_id, root_morphism_id, json_value)
+VALUES
+    (1, 1, 4, NULL, '{"kindName":"order","accessPath":{"signature":{"ids":[-2147483647],"_class":"Signature"},"name":{"_class":"StaticName","type":"ANONYMOUS","value":""},"_class":"ComplexProperty","subpaths":[{"name":{"_class":"StaticName","type":"STATIC_NAME","value":"number"},"_class":"SimpleProperty","value":{"signature":{"ids":[19],"_class":"Signature"},"_class":"SimpleValue"}}]},"_class":"Mapping"}');
+
+CREATE TABLE job (
+    id SERIAL PRIMARY KEY,
+    mapping_id INTEGER NOT NULL REFERENCES mapping,
+    json_value JSONB NOT NULL
+    -- přidat typ jobu, vstup, výstup, vše serializované v jsonu
+        -- podobně jako ukládání logování
+        -- součástí log4j je nastavení kam se to dá ukládat, resp. do libovolné kombinace uložišť
+            -- např. prometheus, zabbix, kibana - monitorování stavu aplikace
+
+);
+
+INSERT INTO job (mapping_id, json_value)
+VALUES (1, '{ "name": "Test job." }');
+

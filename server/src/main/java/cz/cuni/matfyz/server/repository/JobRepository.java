@@ -25,11 +25,11 @@ public class JobRepository
             var statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM job;");
 
-            while (resultSet.next())
-            {
+            while (resultSet.next()) {
                 int id = resultSet.getInt("id");
+                int mappingId = resultSet.getInt("mapping_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(new Job(id, jsonValue));
+                output.add(new Job(id, mappingId, jsonValue));
             }
         });
     }
@@ -42,8 +42,9 @@ public class JobRepository
 
             if (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
+                int mappingId = resultSet.getInt("mapping_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.set(new Job(foundId, jsonValue));
+                output.set(new Job(foundId, mappingId, jsonValue));
             }
         });
     }
@@ -54,7 +55,7 @@ public class JobRepository
         try
         {
             connection = DatabaseWrapper.getConnection();
-            var statement = connection.prepareStatement("INSERT INTO job (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            var statement = connection.prepareStatement("INSERT INTO job (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS); // TODO
             statement.setString(1, jobData.value);
             int affectedRows = statement.executeUpdate();
 

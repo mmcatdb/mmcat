@@ -20,4 +20,13 @@ public class SerializationTests
 
         //LOGGER.info(schema.toJSON().toString());
     }
+
+    @Test
+    public void createBasicAccessPath()
+    {
+        var data = new TestData();
+        var path = data.path_order();
+
+        LOGGER.info(path.toJSON().toString());
+    }
 }

@@ -14,18 +14,21 @@ import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 public class MappingWrapper
 {
     public final int id;
+    public final int schemaId;
+    public final int databaseId;
     public final Integer rootObjectId;
     public final Integer rootMorphismId;
     //public final JSONObject jsonValue;
     public final String jsonValue;
 
     //public SchemaObjectWrapper(int id, JSONObject jsonValue)
-    public MappingWrapper(int id, Integer rootObjectId, Integer rootMorphismId, String jsonValue)
+    public MappingWrapper(int id, int schemaId, int databaseId, Integer rootObjectId, Integer rootMorphismId, String jsonValue)
     {
         this.id = id;
+        this.schemaId = schemaId;
+        this.databaseId = databaseId;
         this.rootObjectId = rootObjectId;
         this.rootMorphismId = rootMorphismId;
         this.jsonValue = jsonValue;
     }
-
 }

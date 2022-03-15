@@ -18,7 +18,8 @@ import org.json.JSONObject;
  */
 public class Mapping implements JSONConvertible
 {
-	private final SchemaObject rootObject;
+	//private final SchemaObject rootObject;
+    private SchemaObject rootObject;
 	private final SchemaMorphism rootMorphism;
 	private final ComplexProperty accessPath;
 
@@ -41,6 +42,11 @@ public class Mapping implements JSONConvertible
     public boolean hasRootMorphism()
     {
         return rootMorphism != null;
+    }
+
+    public void setRootObject(SchemaObject object) // TODO remove later
+    {
+        this.rootObject = object;
     }
     
     public SchemaObject rootObject()
