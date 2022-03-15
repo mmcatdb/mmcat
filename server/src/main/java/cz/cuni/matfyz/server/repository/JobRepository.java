@@ -5,9 +5,6 @@ import cz.cuni.matfyz.server.entity.JobData;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 import org.springframework.stereotype.Repository;
 
@@ -17,13 +14,12 @@ import org.springframework.stereotype.Repository;
  * @author jachym.bartik
  */
 @Repository
-public class JobRepository
-{
-    public List<Job> findAll()
-    {
+public class JobRepository {
+
+    public List<Job> findAll() {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM job;");
+            var resultSet = statement.executeQuery("SELECT * FROM job;");
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
@@ -38,7 +34,7 @@ public class JobRepository
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM job WHERE id = ?;");
             statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
+            var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
@@ -49,40 +45,19 @@ public class JobRepository
         });
     }
 
-    public Integer add(JobData jobData)
-    {
-        Connection connection = null;
-        try
-        {
-            connection = DatabaseWrapper.getConnection();
-            var statement = connection.prepareStatement("INSERT INTO job (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS); // TODO
+    public Integer add(JobData jobData) {
+        return DatabaseWrapper.get((connection, output) -> {
+            var statement = connection.prepareStatement("INSERT INTO job (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, jobData.value);
+
             int affectedRows = statement.executeUpdate();
-
             if (affectedRows == 0)
-                throw new SQLException("Create new job failed, no rows affected.");
+                return;
 
-            ResultSet generatedKeys = statement.getGeneratedKeys();
+            var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
-                return generatedKeys.getInt("id");
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-        finally
-        {
-            try
-            {
-                if (connection != null)
-                    connection.close();
-            }
-            catch(Exception e)
-            {
-
-            }
-        }
-
-        return null;
+                output.set(generatedKeys.getInt("id"));
+        });
     }
+
 }

@@ -4,13 +4,7 @@ import cz.cuni.matfyz.server.entity.MappingWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import cz.cuni.matfyz.server.repository.utils.Utils;
 
-import java.sql.Statement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
-
-import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 
@@ -20,12 +14,11 @@ import org.springframework.stereotype.Repository;
  * @author jachym.bartik
  */
 @Repository
-public class MappingRepository
-{
-    public List<MappingWrapper> findAllInCategory(int categoryId)
-    {
-        var output = new ArrayList<MappingWrapper>();
+public class MappingRepository {
 
+    public List<MappingWrapper> findAllInCategory(int categoryId) {
+        var output = new ArrayList<MappingWrapper>();
+        // TODO
         /*
         try
         {
@@ -37,7 +30,7 @@ public class MappingRepository
                 WHERE schema_category_id = ?;
             """);
             statement.setInt(1, categoryId);
-            ResultSet resultSet = statement.executeQuery();
+            var resultSet = statement.executeQuery();
 
             //var builder = new Mapping.Builder();
             while (resultSet.next())
@@ -63,7 +56,7 @@ public class MappingRepository
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE id = ?;");
             statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
+            var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
@@ -77,4 +70,5 @@ public class MappingRepository
             }
         });
     }
+
 }

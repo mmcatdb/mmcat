@@ -5,7 +5,6 @@ import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.*;
 
 import org.springframework.stereotype.Repository;
@@ -17,60 +16,38 @@ import org.springframework.stereotype.Repository;
  * @author jachym.bartik
  */
 @Repository
-public class SchemaCategoryRepository
-{
-    public List<SchemaCategoryInfo> findAll()
-    {
-        var output = new ArrayList<SchemaCategoryInfo>();
+public class SchemaCategoryRepository {
 
-        try
-        {
-            var connection = DatabaseWrapper.getConnection();
+    public List<SchemaCategoryInfo> findAll() {
+        return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM schema_category;");
+            var resultSet = statement.executeQuery("SELECT * FROM schema_category;");
 
-            //var builder = new SchemaCategory.Builder();
-            while (resultSet.next())
-            {
+            while (resultSet.next()) {
                 var id = resultSet.getInt("id");
                 //var jsonValue = new JSONObject(resultSet.getString("json_value"));
                 var jsonValue = resultSet.getString("json_value");
                 output.add(new SchemaCategoryInfo(id, jsonValue));
             }
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-
-        return output;
+        });
     }
 
-    public SchemaCategoryInfo find(int id)
-    {
-        try
-        {
-            var connection = DatabaseWrapper.getConnection();
+    public SchemaCategoryInfo find(int id) {
+        return DatabaseWrapper.get((connection, output) -> {
+
             var statement = connection.prepareStatement("SELECT * FROM schema_category WHERE id = ?;");
             statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next())
-            {
+            var resultSet = statement.executeQuery();
+            
+            if (resultSet.next()) {
                 var jsonValue = resultSet.getString("json_value");
-                return new SchemaCategoryInfo(id, jsonValue);
+                output.set(new SchemaCategoryInfo(id, jsonValue));
             }
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-
-        return null;
+        });
     }
 
-    public Integer add(SchemaCategory schema)
-    {
+    public Integer add(SchemaCategory schema) {
+        // TODO
         Connection connection = null;
         try
         {
@@ -107,4 +84,5 @@ public class SchemaCategoryRepository
 
         return null;
     }
+
 }

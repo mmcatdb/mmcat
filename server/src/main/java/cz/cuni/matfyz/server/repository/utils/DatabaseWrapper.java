@@ -48,33 +48,6 @@ public abstract class DatabaseWrapper {
     }
 
     public static <OutputType> OutputType get(DatabaseGetSingleFunction<OutputType> function) {
-        /*
-        Connection connection = null;
-
-        try {
-            connection = createConnection();
-            SingleOutput<OutputType> output = new SingleOutput<>();
-            function.execute(connection, output);
-
-            return output.get();
-        }
-        catch (SQLException exception) {
-            LOGGER.error("Cannot execute SQL query on the server database.", exception);
-        }
-        finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                }
-                catch (SQLException exception) {
-                    LOGGER.error("Cannot close connection to the server database.", exception);
-                }
-            }
-        }
-
-        return null;
-        */
-
         return resolveDatabaseFunction(connection -> {
             SingleOutput<OutputType> output = new SingleOutput<>();
             function.execute(connection, output);
@@ -86,6 +59,15 @@ public abstract class DatabaseWrapper {
     public static <OutputType> List<OutputType> getMultiple(DatabaseGetArrayFunction<OutputType> function) {
         return resolveDatabaseFunction(connection -> {
             ArrayOutput<OutputType> output = new ArrayOutput<>();
+            function.execute(connection, output);
+
+            return output.get();
+        });
+    }
+
+    public static boolean getBoolean(DatabaseGetBooleanFunction function) {
+        return resolveDatabaseFunction(connection -> {
+            BooleanOutput output = new BooleanOutput();
             function.execute(connection, output);
 
             return output.get();

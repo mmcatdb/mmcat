@@ -45,4 +45,17 @@ public abstract class FromJSONBuilderBase<Type extends JSONConvertible> implemen
 
     protected abstract Type _fromJSON(JSONObject jsonObject) throws JSONException;
 
+    public Type fromJSON(String jsonValue) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonValue);
+            return fromJSON(jsonObject);
+        }
+        catch (JSONException exception) {
+            Logger logger = LoggerFactory.getLogger(this.getClass());
+            logger.error("From JSON failed for " + name() + " because invalid input string.", exception);
+        }
+
+        return null;
+    }
+
 }

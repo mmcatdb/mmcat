@@ -2,6 +2,7 @@ package cz.cuni.matfyz.core.serialization;
 
 import java.util.Set;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,19 @@ public abstract class FromJSONSwitchBuilderBase<Type extends JSONConvertible> im
 
         Logger logger = LoggerFactory.getLogger(this.getClass());
         logger.error("From JSON failed for switch class " + name() + ".");
+
+        return null;
+    }
+
+    public Type fromJSON(String jsonValue) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonValue);
+            return fromJSON(jsonObject);
+        }
+        catch (JSONException exception) {
+            Logger logger = LoggerFactory.getLogger(this.getClass());
+            logger.error("From JSON failed for " + name() + " because invalid input string.", exception);
+        }
 
         return null;
     }

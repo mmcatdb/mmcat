@@ -1,17 +1,11 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
-import java.sql.Statement;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
-
-import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 
@@ -21,15 +15,10 @@ import org.springframework.stereotype.Repository;
  * @author jachym.bartik
  */
 @Repository
-public class SchemaMorphismRepository
-{
-    public List<SchemaMorphismWrapper> findAllInCategory(int categoryId)
-    {
-        var output = new ArrayList<SchemaMorphismWrapper>();
-
-        try
-        {
-            var connection = DatabaseWrapper.getConnection();
+public class SchemaMorphismRepository {
+    
+    public List<SchemaMorphismWrapper> findAllInCategory(int categoryId) {
+        return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT *
                 FROM schema_morphism
@@ -37,11 +26,9 @@ public class SchemaMorphismRepository
                 WHERE schema_category_id = ?;
             """);
             statement.setInt(1, categoryId);
-            ResultSet resultSet = statement.executeQuery();
+            var resultSet = statement.executeQuery();
 
-            //var builder = new SchemaCategory.Builder();
-            while (resultSet.next())
-            {
+            while (resultSet.next()) {
                 var id = resultSet.getInt("id");
                 //var jsonValue = new JSONObject(resultSet.getString("json_value"));
                 var domId = resultSet.getInt("domain_object_id");
@@ -50,44 +37,28 @@ public class SchemaMorphismRepository
                 //var schema = builder.fromJSON(jsonObject);
                 output.add(new SchemaMorphismWrapper(id, domId, codId, jsonValue));
             }
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-
-        return output;
+        });
     }
 
-    public SchemaMorphismWrapper find(int id)
-    {
-        try
-        {
-            var connection = DatabaseWrapper.getConnection();
+    public SchemaMorphismWrapper find(int id) {
+        return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM schema_morphism WHERE id = ?;");
             statement.setInt(1, id);
-            ResultSet resultSet = statement.executeQuery();
+            var resultSet = statement.executeQuery();
 
-            if (resultSet.next())
-            {
+            if (resultSet.next()) {
                 //var jsonValue = new JSONObject(resultSet.getString("json_value"));
                 var domId = resultSet.getInt("domain_object_id");
                 var codId = resultSet.getInt("codomain_object_id");
                 var jsonValue = resultSet.getString("json_value");
                 //var schema = new SchemaCategory.Builder().fromJSON(jsonObject);
-                return new SchemaMorphismWrapper(id, domId, codId, jsonValue);
+                output.set(new SchemaMorphismWrapper(id, domId, codId, jsonValue));
             }
-        }
-        catch (Exception exception)
-        {
-            System.out.println(exception);
-        }
-
-        return null;
+        });
     }
 
-    public Integer add(SchemaMorphism morphism)
-    {
+    public Integer add(SchemaMorphism morphism) {
+        // TODO
         Connection connection = null;
         try
         {
