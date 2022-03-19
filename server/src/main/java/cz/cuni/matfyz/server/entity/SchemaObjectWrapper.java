@@ -1,9 +1,5 @@
 package cz.cuni.matfyz.server.entity;
 
-import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
-
 /**
  * 
  * @author jachym.bartik

@@ -1,15 +1,5 @@
 package cz.cuni.matfyz.server.entity;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
-
 /**
  * 
  * @author jachym.bartik

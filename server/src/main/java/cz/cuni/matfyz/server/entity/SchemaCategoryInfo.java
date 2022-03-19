@@ -1,7 +1,5 @@
 package cz.cuni.matfyz.server.entity;
 
-import org.json.JSONObject;
-
 /**
  * 
  * @author jachym.bartik

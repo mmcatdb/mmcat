@@ -1,17 +1,5 @@
 package cz.cuni.matfyz.server.entity;
 
-import cz.cuni.matfyz.core.serialization.Identified;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import cz.cuni.matfyz.core.schema.Key;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
-import cz.cuni.matfyz.core.serialization.UniqueContext;
-
 /**
  * 
  * @author jachym.bartik

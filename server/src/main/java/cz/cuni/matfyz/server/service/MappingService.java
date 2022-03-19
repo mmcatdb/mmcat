@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.repository.MappingRepository;
-import cz.cuni.matfyz.server.entity.Position;
 import cz.cuni.matfyz.server.entity.MappingWrapper;
 
 import java.util.List;

@@ -1,8 +1,5 @@
 package cz.cuni.matfyz.core.serialization;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.json.JSONObject;
 
 /**

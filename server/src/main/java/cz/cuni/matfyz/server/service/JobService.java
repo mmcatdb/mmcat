@@ -1,27 +1,14 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.server.repository.DatabaseRepository;
 import cz.cuni.matfyz.server.repository.JobRepository;
-import cz.cuni.matfyz.server.repository.MappingRepository;
-import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
-import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
-import cz.cuni.matfyz.transformations.algorithms.ModelToCategory;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
-import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.Result;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
-import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.entity.JobData;
-import cz.cuni.matfyz.server.entity.MappingWrapper;
-import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -91,7 +78,7 @@ public class JobService
 
         var process = new DatabaseToInstance();
         process.input(pullWrapper, mapping);
-        
+
         return process.run();
     }
 }
