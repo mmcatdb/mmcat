@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.transformations;
+package cz.cuni.matfyz.transformations.algorithms;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

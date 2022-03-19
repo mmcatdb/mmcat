@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.transformations;
+package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
@@ -11,6 +11,9 @@ import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.statements.DDLStatement;
 import cz.cuni.matfyz.statements.DMLStatement;
+import cz.cuni.matfyz.transformations.algorithms.DDLAlgorithm;
+import cz.cuni.matfyz.transformations.algorithms.DMLAlgorithm;
+import cz.cuni.matfyz.transformations.algorithms.ModelToCategory;
 
 import java.nio.file.Paths;
 import java.util.List;

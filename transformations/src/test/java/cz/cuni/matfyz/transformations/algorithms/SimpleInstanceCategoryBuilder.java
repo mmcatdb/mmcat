@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.transformations;
+package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.core.instance.*;

@@ -1,16 +1,17 @@
-package cz.cuni.matfyz.transformations;
+package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
+import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
+import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPullWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,16 +21,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author jachymb.bartik
  */
-public class MongoDBTests
+public class PostgreSQLTests
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLTests.class);
 
-    private static final MongoDBDatabaseProvider databaseProvider = new MongoDBDatabaseProvider(
-        Config.get("mongodb.host"),
-        Config.get("mongodb.port"),
-        Config.get("mongodb.database"),
-        Config.get("mongodb.username"),
-        Config.get("mongodb.password")
+    private static final PostgreSQLConnectionProvider connectionProvider = new PostgreSQLConnectionProvider(
+        Config.get("postgresql.host"),
+        Config.get("postgresql.port"),
+        Config.get("postgresql.database"),
+        Config.get("postgresql.username"),
+        Config.get("postgresql.password")
     );
 
     @BeforeAll
@@ -37,21 +38,21 @@ public class MongoDBTests
     {
         try
         {
-            var url = ClassLoader.getSystemResource("setupMongodb.js");
+            var url = ClassLoader.getSystemResource("setupPostgresql.sql");
             String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
-            databaseProvider.executeScript(pathToFile);
+            connectionProvider.executeScript(pathToFile);
         }
         catch (Exception exception)
         {
-            LOGGER.error("MongoDB setup error: ", exception);
+            LOGGER.error("PostgreSQL setup error: ", exception);
         }
     }
 
-    private static MongoDBPullWrapper createPullWrapper()
+    private static PostgreSQLPullWrapper createPullWrapper() throws SQLException
     {
-        databaseProvider.buildDatabase();
-        var wrapper = new MongoDBPullWrapper();
-        wrapper.injectDatabaseProvider(databaseProvider);
+        connectionProvider.buildConnection();
+        var wrapper = new PostgreSQLPullWrapper();
+        wrapper.injectConnectionProvider(connectionProvider);
 
         return wrapper;
     }
@@ -67,20 +68,20 @@ public class MongoDBTests
     {
         assertDoesNotThrow(() -> {
             var inputWrapper = createPullWrapper();
-            var dbContent = inputWrapper.readCollectionAsStringForTests("database.getCollection(\"basic_order\");");
+            var dbContent = inputWrapper.readTableAsStringForTests("SELECT * FROM \"order\";");
             LOGGER.debug("DB content:\n" + dbContent);
         });
     }
 
-    private void pullForestTestAlgorithm(String collectionName, String expectedDataFileName, ComplexProperty accessPath) throws Exception
+    private void pullForestTestAlgorithm(String databaseName, String expectedDataFileName, ComplexProperty accessPath) throws Exception
     {
         var inputWrapper = createPullWrapper();
 
-        var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(collectionName));
+        var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(databaseName));
         LOGGER.debug("Pulled forest:\n" + forest);
 
         var dummyWrapper = new DummyPullWrapper();
-        var url = ClassLoader.getSystemResource("modelToCategory/" + expectedDataFileName);
+        var url = ClassLoader.getSystemResource("postgresql/" + expectedDataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
         var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));
@@ -91,15 +92,16 @@ public class MongoDBTests
     @Test
     public void getForestForBasicTest() throws Exception
     {
-        pullForestTestAlgorithm("basic", "1BasicTest.json", new TestData().path_order());
+        pullForestTestAlgorithm("order_basic", "1BasicTest.json", new TestData().path_order());
     }
 
     @Test
     public void getForestForStructureTest() throws Exception
     {
-        pullForestTestAlgorithm("structure", "2StructureTest.json", new TestData().path_nestedDoc());
+        pullForestTestAlgorithm("order_structure", "2StructureTest.json", new TestData().path_nestedDoc());
     }
 
+/*
     @Test
     public void getForestForSimpleArrayTest() throws Exception
     {
@@ -123,4 +125,5 @@ public class MongoDBTests
     {
         pullForestTestAlgorithm("complex_map", "10ComplexMapTest.json", new TestData().path_address());
     }
+    */
 }

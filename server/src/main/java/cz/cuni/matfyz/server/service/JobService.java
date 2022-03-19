@@ -5,7 +5,7 @@ import cz.cuni.matfyz.server.repository.JobRepository;
 import cz.cuni.matfyz.server.repository.MappingRepository;
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
-import cz.cuni.matfyz.transformations.ModelToCategory;
+import cz.cuni.matfyz.transformations.algorithms.ModelToCategory;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
