@@ -7,7 +7,6 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.Debug;
-import cz.cuni.matfyz.transformations.algorithms.ModelToCategory;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 
 import java.nio.file.Paths;

@@ -1,17 +1,13 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
-import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
-import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLDDLWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPushWrapper;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.json.JSONObject;

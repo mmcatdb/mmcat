@@ -6,12 +6,14 @@ import cz.cuni.matfyz.server.repository.MappingRepository;
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
 import cz.cuni.matfyz.transformations.algorithms.ModelToCategory;
+import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.core.utils.Result;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
 import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.server.entity.Job;
@@ -67,39 +69,29 @@ public class JobService
         //if (job.type != "modelToCategory") // TODO
         //    return false
 
-        try {
-            return modelToCategoryAlgorithm(job);
-        }
-        catch (Exception e) {
-            System.out.println(e);
-        }
+        var result = modelToCategoryAlgorithm(job);
 
-        return false;
+        return result.status; // TODO
+
+        //return false;
     }
 
-    private boolean modelToCategoryAlgorithm(Job job) throws Exception
+    private Result<InstanceCategory> modelToCategoryAlgorithm(Job job)
     {       
         var mappingWrapper = mappingService.find(job.mappingId);
         var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
-
-        AbstractPullWrapper pullWrapper = databaseService.find(mappingWrapper.databaseId)
-            .getPullWraper();
 
         var mapping = new SchemaBuilder()
             .setMappingWrapper(mappingWrapper)
             .setCategoryWrapper(categoryWrapper)
             .build();
 
-        var forest = pullWrapper.pullForest(mapping.accessPath(), new PullWrapperOptions.Builder().buildWithKindName(mapping.kindName()));
+        AbstractPullWrapper pullWrapper = databaseService.find(mappingWrapper.databaseId)
+            .getPullWraper();
 
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
+        var process = new DatabaseToInstance();
+        process.input(pullWrapper, mapping);
         
-        var transformation = new ModelToCategory();
-		transformation.input(mapping, instance, forest);
-		transformation.algorithm();
-
-        System.out.println(instance);
-
-        return true;
+        return process.run();
     }
 }

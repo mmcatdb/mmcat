@@ -4,7 +4,6 @@ import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.Debug;
-import cz.cuni.matfyz.transformations.algorithms.DDLAlgorithm;
 import cz.cuni.matfyz.wrapperDummy.DummyDDLWrapper;
 
 import java.nio.file.*;

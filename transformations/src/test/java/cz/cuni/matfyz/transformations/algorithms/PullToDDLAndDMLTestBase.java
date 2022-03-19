@@ -11,15 +11,9 @@ import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.statements.DDLStatement;
 import cz.cuni.matfyz.statements.DMLStatement;
-import cz.cuni.matfyz.transformations.algorithms.DDLAlgorithm;
-import cz.cuni.matfyz.transformations.algorithms.DMLAlgorithm;
-import cz.cuni.matfyz.transformations.algorithms.ModelToCategory;
 
-import java.nio.file.Paths;
 import java.util.List;
-
 import org.junit.jupiter.api.Assertions;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

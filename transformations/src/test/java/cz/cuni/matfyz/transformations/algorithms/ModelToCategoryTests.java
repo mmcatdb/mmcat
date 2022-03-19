@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import cz.cuni.matfyz.core.utils.Debug;
-import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 
 /**
  *
