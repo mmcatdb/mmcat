@@ -37,7 +37,7 @@ public class SchemaCategoryService
         return repository.findAll();
     }
 
-    public SchemaCategoryWrapper findWrapper(int id)
+    public SchemaCategoryWrapper find(int id)
     {
         SchemaCategoryInfo info = repository.find(id);
         if (info == null)

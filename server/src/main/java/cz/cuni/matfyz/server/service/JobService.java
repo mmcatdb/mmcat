@@ -6,10 +6,13 @@ import cz.cuni.matfyz.server.repository.MappingRepository;
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
 import cz.cuni.matfyz.transformations.ModelToCategory;
+import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.server.builder.SchemaBuilder;
 import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.entity.JobData;
@@ -33,16 +36,13 @@ public class JobService
     private JobRepository repository;
 
     @Autowired
-    private MappingRepository mappingRepository;
+    private MappingService mappingService;
 
     @Autowired
-    private DatabaseRepository databaseRepository;
+    private DatabaseService databaseService;
 
     @Autowired
-    private SchemaObjectRepository schemaObjectRepository;
-
-    @Autowired
-    private SchemaCategoryService schemaCategoryService;
+    private SchemaCategoryService categoryService;
 
     public List<Job> findAll()
     {
@@ -78,48 +78,24 @@ public class JobService
     }
 
     private boolean modelToCategoryAlgorithm(Job job) throws Exception
-    {
-        // službě se předají informace z vyplněného formuláře
-        // klasicky post pošle data, bude tu víc věcí než jenom job
-            // najít jednoduchý spring formulář (především POST)
+    {       
+        var mappingWrapper = mappingService.find(job.mappingId);
+        var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
 
-        /*
-        - session fungující na principu key-value databáze
-            - tu si mám pamatovat instanční kategorii
-            - uživatel se může rozhodnut, že jí chce materializovat a uložit přes jiné mapování do nějaké další databáze
-            - resp. očekává se, že to tak udělá 
-        - druhý případ - uživatel nakliká několik kroků najednou, uloží se výsledek (opět do session) a zbytek se zahodí
-            - nemusíme uvažovat, že by instanční kategorie byla příliš velká, takže lze předpokládat, že se to do session vejde
-            - je to dáno tím, že implementujeme jenom prototyp (proof of concept) - to je nutné napsat i do diplomky
-                - podívat se na reddis a jak pracuje se sdílenou pamětí (nebo jiné in-memory datazábe)
-        - Martin Svoboda má roota na nosql server - zeptat se jeho, jestli stačí skript nebo návod
-            - zmínit od koho mám kontakt, přidat do kopie
-        */
+        AbstractPullWrapper pullWrapper = databaseService.find(mappingWrapper.databaseId)
+            .getPullWraper();
 
-        /*
-            faster xml / json (jackson)
-        */
+        var mapping = new SchemaBuilder()
+            .setMappingWrapper(mappingWrapper)
+            .setCategoryWrapper(categoryWrapper)
+            .build();
 
-        
-        MappingWrapper mappingWrapper = mappingRepository.find(job.mappingId);
-        Database database = databaseRepository.find(mappingWrapper.databaseId);
-        var pullWrapper = database.getPullWraper();
-        
-        var jsonObject = new JSONObject(mappingWrapper.jsonValue);
-        Mapping mapping = new Mapping.Builder().fromJSON(jsonObject);
+        var forest = pullWrapper.pullForest(mapping.accessPath(), new PullWrapperOptions.Builder().buildWithKindName(mapping.kindName()));
 
-        var rootObjectWrapper = schemaObjectRepository.find(mappingWrapper.rootObjectId);
-        SchemaCategoryWrapper schemaWrapper = schemaCategoryService.findWrapper(mappingWrapper.schemaId);
-
-        var category = schemaWrapper.toSchemaCategory();
-        var rootObjectKey = rootObjectWrapper.toSchemaObject().key();
-        mapping.setRootObject(category.keyToObject(rootObjectKey));
-        var forest = pullWrapper.pullForest(mapping.accessPath(), new PullWrapperOptions.Builder().buildWithKindName(jsonObject.getString("kindName")));
-
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(category).build();
+        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
         
         var transformation = new ModelToCategory();
-		transformation.input(category, instance, forest, mapping);
+		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 
         System.out.println(instance);

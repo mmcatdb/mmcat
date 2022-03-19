@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
 import cz.cuni.matfyz.core.serialization.Identified;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
@@ -17,11 +18,11 @@ import cz.cuni.matfyz.core.serialization.UniqueContext;
  */
 public class SchemaMorphism implements Morphism, JSONConvertible, Identified<Signature>
 {
-	private final Signature signature;
-	private final SchemaObject dom;
-	private final SchemaObject cod;
-	private final Min min;
-	private final Max max;
+	private Signature signature;
+	private SchemaObject dom;
+	private SchemaObject cod;
+	private Min min;
+	private Max max;
     
     public enum Min
     {
@@ -44,19 +45,22 @@ public class SchemaMorphism implements Morphism, JSONConvertible, Identified<Sig
 	}
     */
 
+	/*
 	public SchemaMorphism createDual(Min min, Max max)
     {
 		SchemaMorphism result = new SchemaMorphism(signature.dual(), cod, dom, min, max);
 		return result;
 	}
+	*/
 
-	public SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max)
+	//private SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max)
+	private SchemaMorphism(SchemaObject dom, SchemaObject cod)
     {
-		this.signature = signature;
+		//this.signature = signature;
 		this.dom = dom;
 		this.cod = cod;
-		this.min = min;
-		this.max = max;
+		//this.min = min;
+		//this.max = max;
 	}
 
 	public void setCategory(SchemaCategory category)
@@ -130,29 +134,56 @@ public class SchemaMorphism implements Morphism, JSONConvertible, Identified<Sig
 
 	}
 
-	public static class Builder extends FromJSONBuilderBase<SchemaMorphism> {
+	public static class Builder extends FromJSONLoaderBase<SchemaMorphism> {
 
-		private final UniqueContext<SchemaObject, Key> context;
+		//private final UniqueContext<SchemaObject, Key> context;
 
+		/*
 		public Builder(UniqueContext<SchemaObject, Key> context) {
-			this.context = context;
+			//this.context = context;
+		}
+		*/
+
+		public SchemaMorphism fromJSON(SchemaObject dom, SchemaObject cod, JSONObject jsonObject) {
+			var morphism = new SchemaMorphism(dom, cod);
+			loadFromJSON(morphism, jsonObject);
+			return morphism;
+		}
+
+		public SchemaMorphism fromJSON(SchemaObject dom, SchemaObject cod, String jsonValue) {
+			var morphism = new SchemaMorphism(dom, cod);
+			loadFromJSON(morphism, jsonValue);
+			return morphism;
 		}
 
         @Override
-        protected SchemaMorphism _fromJSON(JSONObject jsonObject) throws JSONException {
-            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
+        protected void _loadFromJSON(SchemaMorphism morphism, JSONObject jsonObject) throws JSONException {
+            morphism.signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
 
-			var domKey = new Key.Builder().fromJSON(jsonObject.getJSONObject("domIdentifier"));
-			SchemaObject dom = context.getUniqueObject(domKey);
+		//	var domKey = new Key.Builder().fromJSON(jsonObject.getJSONObject("domIdentifier"));
+		//	SchemaObject dom = context.getUniqueObject(domKey);
 
-			var codKey = new Key.Builder().fromJSON(jsonObject.getJSONObject("codIdentifier"));
-			SchemaObject cod = context.getUniqueObject(codKey);
+		//	var codKey = new Key.Builder().fromJSON(jsonObject.getJSONObject("codIdentifier"));
+		//	SchemaObject cod = context.getUniqueObject(codKey);
 
-			var min = Min.valueOf(jsonObject.getString("min"));
-			var max = Max.valueOf(jsonObject.getString("max"));
+			morphism.min = Min.valueOf(jsonObject.getString("min"));
+			morphism.max = Max.valueOf(jsonObject.getString("max"));
 
-            return new SchemaMorphism(signature, dom, cod, min, max);
+            //return new SchemaMorphism(signature, dom, cod, min, max);
+
         }
+
+		public SchemaMorphism fromArguments(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max) {
+			var morphism = new SchemaMorphism(dom, cod);
+			morphism.signature = signature;
+			morphism.min = min;
+			morphism.max = max;
+			return morphism;
+		}
+
+		public SchemaMorphism fromDual(SchemaMorphism dualMorphism, Min min, Max max) {
+			return fromArguments(dualMorphism.signature.dual(), dualMorphism.cod, dualMorphism.dom, min, max);
+		}
 
     }
 }

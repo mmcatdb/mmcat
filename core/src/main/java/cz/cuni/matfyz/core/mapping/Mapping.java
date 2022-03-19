@@ -1,14 +1,17 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
+import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.util.*;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,25 +21,32 @@ import org.json.JSONObject;
  */
 public class Mapping implements JSONConvertible
 {
-	//private final SchemaObject rootObject;
-    private SchemaObject rootObject;
+    private final SchemaCategory category;
+	private final SchemaObject rootObject;
 	private final SchemaMorphism rootMorphism;
-	private final ComplexProperty accessPath;
-
+    
+	private ComplexProperty accessPath;
     private String kindName;
     private Collection<Signature> pkey;
     
-    
+    /*
     public Mapping(SchemaObject rootObject, ComplexProperty accessPath)
     {
         this(rootObject, null, accessPath);
     }
+    */
     
-    public Mapping(SchemaObject rootObject, SchemaMorphism rootMorphism, ComplexProperty accessPath)
+    private Mapping(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism)//, ComplexProperty accessPath)
     {
+        this.category = category;
         this.rootObject = rootObject;
         this.rootMorphism = rootMorphism;
-        this.accessPath = accessPath;
+        //this.accessPath = accessPath;
+    }
+
+    public SchemaCategory category()
+    {
+        return category;
     }
     
     public boolean hasRootMorphism()
@@ -44,11 +54,6 @@ public class Mapping implements JSONConvertible
         return rootMorphism != null;
     }
 
-    public void setRootObject(SchemaObject object) // TODO remove later
-    {
-        this.rootObject = object;
-    }
-    
     public SchemaObject rootObject()
     {
         return rootObject;
@@ -98,24 +103,51 @@ public class Mapping implements JSONConvertible
         protected JSONObject _toJSON(Mapping object) throws JSONException {
             var output = new JSONObject();
     
-            // TODO root object and morphism
             output.put("kindName", object.kindName);
             output.put("accessPath", object.accessPath.toJSON());
+
+            var pkey = new JSONArray(object.pkey.stream().map(signature -> signature.toJSON()).toList());
+            output.put("pkey", pkey);
             
             return output;
         }
     
     }
     
-    public static class Builder extends FromJSONBuilderBase<Mapping> {
+    public static class Builder extends FromJSONLoaderBase<Mapping> {
     
-        @Override
-        protected Mapping _fromJSON(JSONObject jsonObject) throws JSONException {
-            String kindName = jsonObject.getString("kindName");
-            ComplexProperty accessPath = new ComplexProperty.Builder().fromJSON(jsonObject.getJSONObject("accessPath"));
+        public Mapping fromJSON(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, JSONObject jsonObject) {
+			var mapping = new Mapping(category, rootObject, rootMorphism);
+			loadFromJSON(mapping, jsonObject);
+			return mapping;
+		}
 
-            return new Mapping(null, accessPath);
+        public Mapping fromJSON(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, String jsonValue) {
+			var mapping = new Mapping(category, rootObject, rootMorphism);
+			loadFromJSON(mapping, jsonValue);
+			return mapping;
+		}
+
+        @Override
+        protected void _loadFromJSON(Mapping mapping, JSONObject jsonObject) throws JSONException {
+            mapping.accessPath = new ComplexProperty.Builder().fromJSON(jsonObject.getJSONObject("accessPath"));
+            mapping.kindName = jsonObject.getString("kindName");
+
+            var pkeyArray = jsonObject.getJSONArray("pkey");
+            var pkey = new ArrayList<Signature>();
+            var builder = new Signature.Builder();
+            for (int i = 0; i < pkeyArray.length(); i++)
+                pkey.add(builder.fromJSON(pkeyArray.getJSONObject(i)));
+            mapping.pkey = pkey;
         }
+
+        public Mapping fromArguments(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, ComplexProperty accessPath, String kindName, Collection<Signature> pkey) {
+			var mapping = new Mapping(category, rootObject, rootMorphism);
+			mapping.accessPath = accessPath;
+            mapping.kindName = kindName;
+            mapping.pkey = pkey;
+			return mapping;
+		}
     
     }
 }

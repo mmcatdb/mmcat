@@ -11,22 +11,19 @@ import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
  * 
  * @author jachym.bartik
  */
-public class Database
-{
-    public final int id;
+public class Database extends Entity {
+
     public final String type;
     public final String label;
 
-    private Database(int id, String type, String label)
-    {
-        this.id = id;
+    private Database(Integer id, String type, String label) {
+        super(id);
         this.type = type;
         this.label = label;
     }
 
     // TODO
-    public static Database fromJSON(int id, String jsonValue)
-    {
+    public static Database fromJSON(Integer id, String jsonValue) {
         try
         {
             var json = new JSONObject(jsonValue);
@@ -44,16 +41,14 @@ public class Database
         return null;
     }
 
-    public AbstractPullWrapper getPullWraper()
-    {
+    public AbstractPullWrapper getPullWraper() {
         if (type != "mongodb")
             return null;
 
         return getMongodbPullWrapper();
     }
 
-    private AbstractPullWrapper getMongodbPullWrapper()
-    {
+    private AbstractPullWrapper getMongodbPullWrapper() {
         var databaseProvider = new MongoDBDatabaseProvider(
             Config.get("data.mongodb.host"),
             Config.get("data.mongodb.port"),
@@ -68,4 +63,5 @@ public class Database
 
         return wrapper;
     }
+    
 }

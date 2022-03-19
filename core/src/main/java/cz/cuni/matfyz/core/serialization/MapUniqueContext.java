@@ -10,7 +10,17 @@ import java.util.TreeMap;
  */
 public class MapUniqueContext<ObjectType extends Identified<IdType>, IdType extends Comparable<IdType>> implements UniqueContext<ObjectType, IdType> {
     
-    private final Map<IdType, ObjectType> uniqueObjects = new TreeMap<>();
+    private final Map<IdType, ObjectType> uniqueObjects;
+
+    public MapUniqueContext() {
+        uniqueObjects = new TreeMap<>();
+    }
+
+    public MapUniqueContext(Collection<ObjectType> collection) {
+        uniqueObjects = new TreeMap<>();
+        for (ObjectType object : collection)
+            createUniqueObject(object);
+    }
 
     @Override
     public ObjectType createUniqueObject(ObjectType object) {

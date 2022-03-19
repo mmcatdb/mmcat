@@ -39,7 +39,7 @@ public class SchemaCategoryController
     //public IdentifiedSchemaCategory getCategoryById(@PathVariable String id) // TODO
     public SchemaCategoryWrapper getCategoryWrapperById(@PathVariable int id)
     {
-        SchemaCategoryWrapper schema = service.findWrapper(id);
+        SchemaCategoryWrapper schema = service.find(id);
 
         if (schema != null)
             return schema;

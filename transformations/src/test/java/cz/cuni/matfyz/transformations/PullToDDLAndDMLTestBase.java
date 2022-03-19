@@ -111,10 +111,10 @@ public class PullToDDLAndDMLTestBase
 
         LOGGER.debug("Pulled Forest Of Records:\n" + forest);
         
-		var mapping = new Mapping(rootObject, path);
+		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
 		var transformation = new ModelToCategory();
-		transformation.input(schema, instance, forest, mapping);
+		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 
         LOGGER.debug("Created Instance Category:\n" + instance);

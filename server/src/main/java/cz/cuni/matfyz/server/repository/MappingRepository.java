@@ -60,13 +60,13 @@ public class MappingRepository {
 
             if (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
-                int schemaId = resultSet.getInt("schema_category_id");
+                int categoryId = resultSet.getInt("schema_category_id");
                 int databaseId = resultSet.getInt("database_id");
                 Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
                 Integer rootMorphismId = Utils.getIntOrNull(resultSet.getInt("root_morphism_id"));
                 String jsonValue = resultSet.getString("json_value");
 
-                output.set(new MappingWrapper(foundId, schemaId, databaseId, rootObjectId, rootMorphismId, jsonValue));
+                output.set(new MappingWrapper(foundId, databaseId, categoryId, rootObjectId, rootMorphismId, jsonValue));
             }
         });
     }

@@ -6,14 +6,13 @@ import org.json.JSONObject;
  * 
  * @author jachym.bartik
  */
-public class SchemaCategoryInfo
-{
-    public final int id;
+public class SchemaCategoryInfo extends Entity {
+
     public final String jsonValue;
 
-    public SchemaCategoryInfo(int id, String jsonValue)
-    {
-        this.id = id;
+    public SchemaCategoryInfo(Integer id, String jsonValue) {
+        super(id);
         this.jsonValue = jsonValue;
     }
+
 }

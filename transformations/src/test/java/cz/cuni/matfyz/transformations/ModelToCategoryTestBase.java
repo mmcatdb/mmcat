@@ -102,10 +102,10 @@ public class ModelToCategoryTestBase
         if (Debug.shouldLog(3))
 			System.out.println(String.format("# Forest of Records\n%s", forest));
         
-		var mapping = new Mapping(rootObject, path);
+        Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
 		var transformation = new ModelToCategory();
-		transformation.input(schema, instance, forest, mapping);
+		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 
         if (Debug.shouldLog(4))

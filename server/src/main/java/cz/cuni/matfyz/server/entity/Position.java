@@ -11,36 +11,31 @@ import org.json.JSONObject;
  *
  * @author jachymb.bartik
  */
-public class Position implements JSONConvertible
-{
+public class Position implements JSONConvertible {
+
 	private double x;
 	private double y;
 
     public Position() {}
 	
-	public Position(double x, double y)
-	{
+	public Position(double x, double y) {
 		this.x = x;
 		this.y = y;
 	}
 
-    public double getX()
-    {
+    public double getX() {
         return x;
     }
 
-    public void setX(double value)
-    {
+    public void setX(double value) {
         x = value;
     }
 
-	public double getY()
-	{
+	public double getY() {
 		return y;
 	}
 
-    public void setY(double value)
-    {
+    public void setY(double value) {
         y = value;
     }
 
@@ -74,4 +69,5 @@ public class Position implements JSONConvertible
         }
 
     }
+    
 }

@@ -113,7 +113,7 @@ public class DMLAlgorithmTestBase
 
         var wrapper = new DummyPushWrapper();
 
-		Mapping mapping = new Mapping(rootObject, path);
+		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
 		var transformation = new DMLAlgorithm();
 		transformation.input(schema, inputInstance, rootName, mapping, wrapper);

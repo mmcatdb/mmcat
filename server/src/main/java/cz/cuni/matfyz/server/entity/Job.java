@@ -4,19 +4,21 @@ package cz.cuni.matfyz.server.entity;
  * 
  * @author jachym.bartik
  */
-public class Job extends JobData
-{
-    public final int id;
+public class Job extends Entity {
 
-    public Job(int id, int mappingId, String value)
-    {
-        super(mappingId, value);
-        this.id = id;
+    public final int mappingId;
+    public final String value;
+
+    public Job(Integer id, int mappingId, String value) {
+        super(id);
+        this.mappingId = mappingId;
+        this.value = value;
     }
 
-    public Job(int id, JobData data)
-    {
-        super(data);
-        this.id = id;
+    public Job(Integer id, JobData data) {
+        super(id);
+        this.mappingId = data.mappingId;
+        this.value = data.value;
     }
+    
 }

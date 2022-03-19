@@ -24,9 +24,9 @@ public class ModelToCategory
             
     private InstanceFunctor instanceFunctor;
     
-    public void input(SchemaCategory schema, InstanceCategory instance, ForestOfRecords forest, Mapping mapping)
+    public void input(Mapping mapping, InstanceCategory instance, ForestOfRecords forest)
     {
-        this.schema = schema;
+        this.schema = mapping.category();
         //this.instance = instance;
         this.forest = forest;
         this.mapping = mapping;

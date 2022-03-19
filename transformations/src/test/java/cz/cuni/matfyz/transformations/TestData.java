@@ -364,9 +364,12 @@ public class TestData
     
     private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax)
     {
-        var morphism = new SchemaMorphism(signature, dom, cod, min, max);
+        var builder = new SchemaMorphism.Builder();
+        var morphism = builder.fromArguments(signature, dom, cod, min, max);
+        var dual = builder.fromDual(morphism, dualMin, dualMax);
+
         schema.addMorphism(morphism);
-        schema.addMorphism(morphism.createDual(dualMin, dualMax));
+        schema.addMorphism(dual);
     }
     
     private InstanceCategory buildInstanceScenario(SchemaCategory schema)

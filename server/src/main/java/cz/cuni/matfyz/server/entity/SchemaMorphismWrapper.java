@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.server.entity;
 
+import cz.cuni.matfyz.core.serialization.Identified;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,26 +16,18 @@ import cz.cuni.matfyz.core.serialization.UniqueContext;
  * 
  * @author jachym.bartik
  */
-public class SchemaMorphismWrapper // implements JSONConvertible
-{
-    public final int id;
+public class SchemaMorphismWrapper extends Entity { // implements JSONConvertible
+
     //public final JSONObject jsonValue;
     public final int domId;
     public final int codId;
     public final String jsonValue;
 
-    public SchemaMorphismWrapper(int id, int domId, int codId, String jsonValue)
-    {
-        this.id = id;
+    public SchemaMorphismWrapper(Integer id, int domId, int codId, String jsonValue) {
+        super(id);
         this.domId = domId;
         this.codId = codId;
         this.jsonValue = jsonValue;
-    }
-
-    public SchemaMorphism toSchemaMorphism(UniqueContext<SchemaObject, Key> context) throws Exception // TODO
-    {
-        //return new SchemaMorphism.Builder(context).fromJSON(jsonValue);
-        return new SchemaMorphism.Builder(context).fromJSON(new JSONObject(jsonValue));
     }
 
     /*
@@ -56,4 +50,5 @@ public class SchemaMorphismWrapper // implements JSONConvertible
 
 	}
     */
+
 }
