@@ -37,7 +37,7 @@ public class AsyncJobService {
     @Autowired
     private SchemaCategoryService categoryService;
 
-    @Async
+    @Async("jobExecutor")
     public void runJob(Job job, UserStore store) {
         LOGGER.info("RUN JOB");
         try {
@@ -58,7 +58,7 @@ public class AsyncJobService {
         LOGGER.info("RUN JOB END");
     }
 
-    @Async
+    @Async("jobExecutor")
     private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job) throws InterruptedException {       
         var mappingWrapper = mappingService.find(job.mappingId);
         var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
@@ -75,7 +75,7 @@ public class AsyncJobService {
         process.input(pullWrapper, mapping);
 
         var result = process.run();
-        Thread.sleep(10000);
+        Thread.sleep(10 * 1000);
 
         return CompletableFuture.completedFuture(result);
     }
