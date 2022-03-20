@@ -98,9 +98,15 @@ export class SchemaMorphism {
     public id!: number;
     public domId!: number;
     public codId!: number;
-    public jsonValue!: string;
+    public signature!: number[];
 
-    public static fromServer(input: SchemaMorphism): SchemaMorphism {
+    private jsonValue!: string;
+
+    public get isBase(): boolean {
+        return this.signature.length === 1;
+    }
+
+    public static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
         const morphism = new SchemaMorphism();
 
         //morphism.domKey = input.domIdentifier.value;
@@ -109,6 +115,8 @@ export class SchemaMorphism {
         morphism.id = input.id;
         morphism.domId = input.domId;
         morphism.codId = input.codId;
+        morphism.signature = JSON.parse(input.jsonValue).signature.ids;
+
         morphism.jsonValue = input.jsonValue;
 
         return morphism;
@@ -131,7 +139,6 @@ export class SchemaCategory {
     private constructor() {};
 
     public static fromServer(input: SchemaCategoryFromServer): SchemaCategory {
-
         const category = new SchemaCategory;
         category.id = input.id;
         category.jsonValue = input.jsonValue;

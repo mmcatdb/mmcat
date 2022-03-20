@@ -21,7 +21,8 @@ export default defineComponent({
     mounted() {
         (this.cytoscape as Core).addListener('tap', 'node', (event) => {
             let node = event.target;
-            console.log('Tap on node:', node, node.id);
+            console.log('Tap on node:', node, node.id());
+            console.log(this.cytoscape);
             this.lastUpdate = node.id();
         });
     }

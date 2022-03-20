@@ -62,8 +62,8 @@ export default defineComponent({
                 },
                 position: object.position
             }));
-            schema.morphisms.forEach(morphism => elements.push({ data: {
-                id: morphism.id.toString(),
+            schema.morphisms.filter(morphism => morphism.isBase).forEach(morphism => elements.push({ data: {
+                id: 'm' + morphism.id.toString(),
                 source: morphism.domId,
                 target: morphism.codId
             } }));
