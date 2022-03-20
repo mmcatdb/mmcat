@@ -15,21 +15,19 @@ import org.springframework.web.server.ResponseStatusException;
  * @author jachym.bartik
  */
 @RestController
-public class MappingController
-{
+public class MappingController {
+
     @Autowired
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
-    public MappingWrapper getObjectById(@PathVariable int id) // TODO
-    //public String getObjectById(@PathVariable int id)
-    {
+    public MappingWrapper getObjectById(@PathVariable int id) {
         MappingWrapper object = service.find(id);
 
         if (object != null)
-            //return object.toJSON().toString();
             return object;
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+
 }

@@ -2,23 +2,26 @@
 import { defineComponent } from 'vue';
 import { GET, PUT } from '@/utils/backendAPI';
 import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
-import cytoscape from 'cytoscape';
+import cytoscape, { type Core } from 'cytoscape';
 import type { ElementDefinition } from 'cytoscape';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
+import AccessPathGraphicEditor from '../components/category/AccessPathGraphicEditor.vue';
 
 export default defineComponent({
     components: {
-        ResourceNotFound,
-        ResourceLoading
-    },
+    ResourceNotFound,
+    ResourceLoading,
+    AccessPathGraphicEditor
+},
     props: {},
     data() {
         return {
             schema: null as SchemaCategory | null,
             schemaFetched: false,
             saveButtonDisabled: false,
+            cy: null as Core | null
         };
     },
     async mounted() {
@@ -43,7 +46,7 @@ export default defineComponent({
             console.log(result.data);
             this.schema = SchemaCategory.fromServer(result.data);
 
-            const cy = this.createCytoscape(this.schema);
+            this.cy = this.createCytoscape(this.schema);
         }
 
         this.schemaFetched = true;
@@ -112,9 +115,12 @@ export default defineComponent({
     <div
         id="cytoscape"
     />
-    <p v-if="schema">
-        Fetched!
-    </p>
+    <template v-if="schema">
+        <p>
+            Fetched!
+        </p>
+        <AccessPathGraphicEditor :cytoscape="cy" />
+    </template>
     <ResourceNotFound v-else-if="schemaFetched" />
     <ResourceLoading v-else />
 </template>
@@ -122,7 +128,7 @@ export default defineComponent({
 <style scoped>
 #cytoscape {
     width: 1600px;
-    height: 700px;
+    height: 500px;
     background-color: whitesmoke;
 }
 </style>

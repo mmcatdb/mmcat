@@ -3,8 +3,10 @@ package cz.cuni.matfyz.server.controller;
 import cz.cuni.matfyz.server.entity.Position;
 import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 import cz.cuni.matfyz.server.service.SchemaObjectService;
+import cz.cuni.matfyz.server.view.MappingOptionsView;
 
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class SchemaCategoryController
 
     @Autowired
     private SchemaObjectService objectService;
+
+    @Autowired
+    private DatabaseService databaseService;
 
     @GetMapping("/schemaCategories")
     public List<SchemaCategoryInfo> getAllCategoryInfos()
@@ -66,5 +71,14 @@ public class SchemaCategoryController
         public Position position;
 
         //public PositionUpdate() {}
+    }
+
+    @GetMapping("/schemaCategories/{id}/mappingOptions")
+    public MappingOptionsView getMappingOptions(@PathVariable int id)
+    {
+        var output = new MappingOptionsView();
+        output.categoryId = id;
+        output.databases = databaseService.findAll();
+        return output;
     }
 }
