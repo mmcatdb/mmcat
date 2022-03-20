@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service;
  * @author jachym.bartik
  */
 @Service
-public class DatabaseService
-{
+public class DatabaseService {
+
     @Autowired
     private DatabaseRepository repository;
 
-    public Database find(int id)
-    {
+    public Database find(int id) {
         return repository.find(id);
     }
+    
 }

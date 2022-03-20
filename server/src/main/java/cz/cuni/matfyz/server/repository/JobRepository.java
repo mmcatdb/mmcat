@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.server.repository;
 
 import cz.cuni.matfyz.server.entity.Job;
-import cz.cuni.matfyz.server.entity.JobData;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
@@ -25,7 +24,7 @@ public class JobRepository {
                 int id = resultSet.getInt("id");
                 int mappingId = resultSet.getInt("mapping_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(new Job(id, mappingId, jsonValue));
+                output.add(new Job.Builder().fromJSON(id, mappingId, jsonValue));
             }
         });
     }
@@ -37,18 +36,18 @@ public class JobRepository {
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                int foundId = resultSet.getInt("id");
                 int mappingId = resultSet.getInt("mapping_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.set(new Job(foundId, mappingId, jsonValue));
+                output.set(new Job.Builder().fromJSON(id, mappingId, jsonValue));
             }
         });
     }
 
-    public Integer add(JobData jobData) {
+    public Integer add(Job job) {
         return DatabaseWrapper.get((connection, output) -> {
-            var statement = connection.prepareStatement("INSERT INTO job (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, jobData.value);
+            var statement = connection.prepareStatement("INSERT INTO job (mapping_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            statement.setInt(1, job.mappingId);
+            statement.setString(2, job.toJSON().toString());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -57,6 +56,21 @@ public class JobRepository {
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
                 output.set(generatedKeys.getInt("id"));
+        });
+    }
+
+    public boolean updateJSONValue(Job job) {
+        return DatabaseWrapper.getBoolean((connection, output) -> {
+            var statement = connection.prepareStatement("""
+                UPDATE job
+                SET json_value = ?::jsonb
+                WHERE id = ?;
+            """);
+            statement.setString(1, job.toJSON().toString());
+            statement.setInt(2, job.id);
+
+            int affectedRows = statement.executeUpdate();
+            output.set(affectedRows != 0);
         });
     }
 

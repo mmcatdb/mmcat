@@ -1,9 +1,13 @@
 package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.service.JobService;
+import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.server.entity.Job;
 
 import java.util.*;
+
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,28 +44,25 @@ public class JobController
     }
 
     @PostMapping("/jobs")
-    public Job createNewJob(@RequestBody int mappingId, @RequestBody String jsonValue)
+    public Job createNewJob(@RequestBody Job job)
     {
-        Job job = service.createNew(mappingId, jsonValue);
-        /*
-        if (job != null)
-            return job;
+        Job newJob = service.createNew(job);
+        if (newJob != null)
+            return newJob;
         
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        */
-
-        return job;
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
     // jsf - funkce, které zjistí kód chyby a na to reagují
 
-    @GetMapping("/jobs/{id}/execute")
-    public boolean executeJobById(@PathVariable int id)
+    @PostMapping("/jobs/{id}/start")
+    public Job startJobById(@PathVariable int id, HttpSession session)
     {
         Job job = service.find(id);
         if (job == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not foud ... TODO"); // TODO
 
-        return service.execute(job);
+        var store = UserStore.fromSession(session);
+        return service.start(job, store);
     }
 }

@@ -249,7 +249,7 @@ CREATE TABLE mapping (
 
 INSERT INTO mapping (schema_category_id, database_id, root_object_id, root_morphism_id, json_value)
 VALUES
-    (1, 1, 4, NULL, '{"kindName":"order","accessPath":{"signature":{"ids":[-2147483647],"_class":"Signature"},"name":{"_class":"StaticName","type":"ANONYMOUS","value":""},"_class":"ComplexProperty","subpaths":[{"name":{"_class":"StaticName","type":"STATIC_NAME","value":"number"},"_class":"SimpleProperty","value":{"signature":{"ids":[19],"_class":"Signature"},"_class":"SimpleValue"}}]},"_class":"Mapping"}');
+    (1, 1, 4, NULL, '{"kindName":"order","pkey":[],"accessPath":{"signature":{"ids":[-2147483647],"_class":"Signature"},"name":{"_class":"StaticName","type":"ANONYMOUS","value":""},"_class":"ComplexProperty","subpaths":[{"name":{"_class":"StaticName","type":"STATIC_NAME","value":"number"},"_class":"SimpleProperty","value":{"signature":{"ids":[19],"_class":"Signature"},"_class":"SimpleValue"}}]},"_class":"Mapping"}');
 
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
@@ -263,5 +263,5 @@ CREATE TABLE job (
 );
 
 INSERT INTO job (mapping_id, json_value)
-VALUES (1, '{ "name": "Test job." }');
+VALUES (1, '{ "status": "Default" }');
 

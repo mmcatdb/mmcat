@@ -1,84 +1,61 @@
 package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.repository.JobRepository;
-import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.utils.Result;
-import cz.cuni.matfyz.server.builder.SchemaBuilder;
+import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.server.entity.Job;
-import cz.cuni.matfyz.server.entity.JobData;
+import cz.cuni.matfyz.server.entity.Job.Status;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
  * @author jachym.bartik
  */
 @Service
-public class JobService
-{
+public class JobService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
+
     @Autowired
     private JobRepository repository;
 
     @Autowired
-    private MappingService mappingService;
+    private AsyncJobService asyncService;
 
-    @Autowired
-    private DatabaseService databaseService;
-
-    @Autowired
-    private SchemaCategoryService categoryService;
-
-    public List<Job> findAll()
-    {
+    public List<Job> findAll() {
         return repository.findAll();
     }
 
-    public Job find(int id)
-    {
+    public Job find(int id) {    
         return repository.find(id);
     }
 
-    public Job createNew(int mappingId, String jsonValue)
-    {
-        var jobData = new JobData(mappingId, jsonValue);
-        Integer generatedId = repository.add(jobData);
+    public Job createNew(Job job) {
+        job.status = Status.Ready;
+        Integer generatedId = repository.add(job);
 
-        return generatedId == null ? null : new Job(generatedId, jobData);
+        return generatedId == null ? null : new Job.Builder().fromArguments(generatedId, job.mappingId, job.status);
     }
 
-    public boolean execute(Job job)
-    {
+    public Job start(Job job, UserStore store) {
         //if (job.type != "modelToCategory") // TODO
         //    return false
+        LOGGER.info("START JOB");
+        setJobStatus(job, Job.Status.Running);
+        asyncService.runJob(job, store);
+        LOGGER.info("START JOB END");
+        return job;
 
-        var result = modelToCategoryAlgorithm(job);
-
-        return result.status; // TODO
-
-        //return false;
+        //
     }
 
-    private Result<InstanceCategory> modelToCategoryAlgorithm(Job job)
-    {       
-        var mappingWrapper = mappingService.find(job.mappingId);
-        var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
-
-        var mapping = new SchemaBuilder()
-            .setMappingWrapper(mappingWrapper)
-            .setCategoryWrapper(categoryWrapper)
-            .build();
-
-        AbstractPullWrapper pullWrapper = databaseService.find(mappingWrapper.databaseId)
-            .getPullWraper();
-
-        var process = new DatabaseToInstance();
-        process.input(pullWrapper, mapping);
-
-        return process.run();
+    private void setJobStatus(Job job, Job.Status status) {
+        job.status = status;
+        repository.updateJSONValue(job);
     }
+
 }

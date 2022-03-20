@@ -42,7 +42,7 @@ export default defineComponent({
             >
                 <RouterLink :to="{ name: 'job', params: { id: job.id } }">
                     {{ job.id }}<br>
-                    {{ job.value }}
+                    {{ job.status }}
                 </RouterLink>
             </p>
         </template>

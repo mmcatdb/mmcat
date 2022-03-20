@@ -24,8 +24,7 @@ public class Database extends Entity {
 
     // TODO
     public static Database fromJSON(Integer id, String jsonValue) {
-        try
-        {
+        try {
             var json = new JSONObject(jsonValue);
 
             String type = json.getString("type");
@@ -33,8 +32,7 @@ public class Database extends Entity {
 
             return new Database(id, type, label);
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             System.out.println(e);
         }
 
@@ -42,7 +40,7 @@ public class Database extends Entity {
     }
 
     public AbstractPullWrapper getPullWraper() {
-        if (type != "mongodb")
+        if (!"mongodb".equals(type))
             return null;
 
         return getMongodbPullWrapper();

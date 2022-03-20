@@ -24,7 +24,7 @@ instance.interceptors.request.use(
     }
 );
 
-function generateErrorObject(error) {
+function generateErrorObject(error: any) {
     if (!error.response)
         return error;
 

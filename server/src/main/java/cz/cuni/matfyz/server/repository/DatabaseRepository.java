@@ -22,7 +22,7 @@ public class DatabaseRepository {
 
             if (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
-                String jsonValue = resultSet.getString("jsonValue");
+                String jsonValue = resultSet.getString("json_value");
                 output.set(Database.fromJSON(foundId, jsonValue));
             }
         });
