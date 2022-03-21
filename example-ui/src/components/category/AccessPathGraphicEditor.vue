@@ -4,13 +4,10 @@ import { defineComponent } from 'vue';
 
 export default defineComponent({
     props: {
-        /*
         cytoscape: {
-            type: Object,
-            default: null
+            type: Object as () => Core,
+            required: true
         }
-        */
-        cytoscape: null
     },
     //emits: [ 'update:modelValue' ],
     data() {

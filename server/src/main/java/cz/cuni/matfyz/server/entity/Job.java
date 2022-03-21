@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,6 +17,18 @@ public class Job extends Entity implements JSONConvertible {
 
     public final int mappingId;
     public Status status;
+
+    /*
+    public Job(
+        @JsonProperty("id") Integer id,
+        @JsonProperty("mappingId") int mappingId,
+        @JsonProperty("status") Status status
+    ) {
+        super(id);
+        this.mappingId = mappingId;
+        this.status = status;
+    }
+    */
 
     private Job(Integer id, int mappingId) {
         super(id);

@@ -6,20 +6,24 @@ import { GET } from '@/utils/backendAPI';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { RouterLink } from 'vue-router';
+import JobDisplay from '../components/job/JobDisplay.vue';
+import NewJob from '../components/job/NewJob.vue';
 
 export default defineComponent({
     components: {
-        ResourceNotFound,
-        ResourceLoading,
-        RouterLink
-    },
+    ResourceNotFound,
+    ResourceLoading,
+    RouterLink,
+    JobDisplay,
+    NewJob
+},
     props: {
 
     },
     data() {
         return {
             jobs: null as Job[] | null,
-            jobsFetched: false
+            fetched: false
         };
     },
     async mounted() {
@@ -27,7 +31,7 @@ export default defineComponent({
         if (result.status)
             this.jobs = [ ...result.data ];
 
-        this.jobsFetched = true;
+        this.fetched = true;
     }
 });
 </script>
@@ -35,22 +39,19 @@ export default defineComponent({
 <template>
     <div>
         <h1>This is a jobs page</h1>
-        <template v-if="jobs">
-            <p
-                v-for="job in jobs"
-                :key="job.id"
-            >
-                <RouterLink :to="{ name: 'job', params: { id: job.id } }">
-                    {{ job.id }}<br>
-                    {{ job.status }}
-                </RouterLink>
-            </p>
-        </template>
-        <ResourceNotFound v-else-if="jobsFetched" />
+        <div class="jobs" v-if="jobs">
+            <div v-for="job in jobs">
+                <JobDisplay :job="job" />
+            </div>
+            <NewJob />
+        </div>
+        <ResourceNotFound v-else-if="fetched" />
         <ResourceLoading v-else />
     </div>
 </template>
 
-<style>
-
+<style scoped>
+.jobs {
+    display: flex;
+}
 </style>

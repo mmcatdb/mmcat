@@ -2,6 +2,7 @@ package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.service.JobService;
 import cz.cuni.matfyz.server.utils.UserStore;
+import cz.cuni.matfyz.server.view.NewJobView;
 import cz.cuni.matfyz.server.entity.Job;
 
 import java.util.*;
@@ -44,9 +45,9 @@ public class JobController
     }
 
     @PostMapping("/jobs")
-    public Job createNewJob(@RequestBody Job job)
+    public Job createNewJob(@RequestBody NewJobView jobView)
     {
-        Job newJob = service.createNew(job);
+        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobView.mappingId, Job.Status.Ready));
         if (newJob != null)
             return newJob;
         

@@ -41,16 +41,17 @@ export default defineComponent({
 
 <template>
     <h1>This is going to be a new job</h1>
+    <span style="color: red">TODO remove this later</span>
     <AccessPathJsonEditor v-model="accessPath" />
     <br>
     <button
-        :disabled="buttonDisabled"
+        :disabled="buttonDisabled || true"
         @click="createNewJob"
     >
         Create job
     </button>
 </template>
 
-<style>
+<style scoped>
 
 </style>

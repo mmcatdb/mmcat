@@ -1,15 +1,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import type { Job } from '@/types/job';
-import { GET, POST } from '@/utils/backendAPI';
+import { GET } from '@/utils/backendAPI';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
+import JobDisplay from '@/components/job/JobDisplay.vue';
 
 export default defineComponent({
     components: {
         ResourceNotFound,
-        ResourceLoading
+        ResourceLoading,
+        JobDisplay
     },
     props: {},
     data() {
@@ -25,42 +27,21 @@ export default defineComponent({
             this.job = result.data;
 
         this.jobFetched = true;
-    },
-    methods: {
-        async startJob() {
-            this.startJobDisabled = true;
-            console.log('Starting job:', this.job);
-
-            const result = await POST<Job>(`/jobs/${this.job!.id}/start`);
-            if (result.status)
-                this.job = result.data;
-
-            console.log({ result });
-
-            this.startJobDisabled = false;
-        }
     }
 });
 </script>
 
 <template>
     <h1>This is a job</h1>
-    <template v-if="job">
-        <p>
-            {{ job.id }}<br>
-            {{ job.status }}
-        </p>
-        <button
-            :disabled="startJobDisabled"
-            @click="startJob"
-        >
-            Start job
-        </button>
-    </template>
+    <div class="job" v-if="job">
+        <JobDisplay :job="job" />
+    </div>
     <ResourceNotFound v-else-if="jobFetched" />
     <ResourceLoading v-else />
 </template>
 
-<style>
-
+<style scoped>
+.job {
+    display: flex;
+}
 </style>

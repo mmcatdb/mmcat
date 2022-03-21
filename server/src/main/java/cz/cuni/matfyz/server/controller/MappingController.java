@@ -3,6 +3,8 @@ package cz.cuni.matfyz.server.controller;
 import cz.cuni.matfyz.server.entity.MappingWrapper;
 import cz.cuni.matfyz.server.service.MappingService;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +23,19 @@ public class MappingController {
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
-    public MappingWrapper getObjectById(@PathVariable int id) {
+    public MappingWrapper getMappingById(@PathVariable int id) {
         MappingWrapper object = service.find(id);
 
         if (object != null)
             return object;
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/mappings")
+    public List<MappingWrapper> getAllMappings() {
+        // TODO
+        return service.findAllInCategory(1);
     }
 
 }

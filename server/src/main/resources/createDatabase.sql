@@ -240,6 +240,7 @@ CREATE TABLE mapping (
     database_id INTEGER NOT NULL REFERENCES database_for_mapping,
     root_object_id INTEGER REFERENCES schema_object,
     root_morphism_id INTEGER REFERENCES schema_morphism,
+    mapping_json_value JSONB NOT NULL,
     json_value JSONB NOT NULL
 );
 
@@ -247,9 +248,9 @@ CREATE TABLE mapping (
     -- - v jedné db instanci musí být jména kindů atd unikátní
 
 
-INSERT INTO mapping (schema_category_id, database_id, root_object_id, root_morphism_id, json_value)
+INSERT INTO mapping (schema_category_id, database_id, root_object_id, root_morphism_id, mapping_json_value, json_value)
 VALUES
-    (1, 1, 4, NULL, '{"kindName":"order","pkey":[],"accessPath":{"signature":{"ids":[-2147483647],"_class":"Signature"},"name":{"_class":"StaticName","type":"ANONYMOUS","value":""},"_class":"ComplexProperty","subpaths":[{"name":{"_class":"StaticName","type":"STATIC_NAME","value":"number"},"_class":"SimpleProperty","value":{"signature":{"ids":[19],"_class":"Signature"},"_class":"SimpleValue"}}]},"_class":"Mapping"}');
+    (1, 1, 4, NULL, '{"kindName":"order","pkey":[],"accessPath":{"signature":{"ids":[-2147483647],"_class":"Signature"},"name":{"_class":"StaticName","type":"ANONYMOUS","value":""},"_class":"ComplexProperty","subpaths":[{"name":{"_class":"StaticName","type":"STATIC_NAME","value":"number"},"_class":"SimpleProperty","value":{"signature":{"ids":[19],"_class":"Signature"},"_class":"SimpleValue"}}]},"_class":"Mapping"}', '{"name":"Basic mapping"}');
 
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
@@ -263,5 +264,5 @@ CREATE TABLE job (
 );
 
 INSERT INTO job (mapping_id, json_value)
-VALUES (1, '{ "status": "Default" }');
+VALUES (1, '{ "status": "Ready" }');
 

@@ -18,7 +18,7 @@ public class JobRepository {
     public List<Job> findAll() {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.createStatement();
-            var resultSet = statement.executeQuery("SELECT * FROM job;");
+            var resultSet = statement.executeQuery("SELECT * FROM job ORDER BY id;");
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("id");
