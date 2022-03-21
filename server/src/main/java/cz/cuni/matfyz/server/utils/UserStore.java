@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.server.utils;
 
 import cz.cuni.matfyz.core.instance.InstanceCategory;
+
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -33,6 +35,10 @@ public class UserStore {
 
     public InstanceCategory getInstance(int jobId) {
         return instaces.get(jobId);
+    }
+
+    public Collection<InstanceCategory> getAllInstances() {
+        return instaces.values();
     }
     
 }

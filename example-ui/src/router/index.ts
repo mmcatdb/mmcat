@@ -30,6 +30,11 @@ const router = createRouter({
             component: () => import('@/views/SchemaCategoryView.vue')
         },
         {
+            path: '/instances',
+            name: 'instances',
+            component: () => import('@/views/InstancesView.vue')
+        },
+        {
             path: '/test',
             name: 'test',
             component: () => import('@/views/LongPageForTestsView.vue')

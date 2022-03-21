@@ -11,10 +11,10 @@ import AccessPathGraphicEditor from '../components/category/AccessPathGraphicEdi
 
 export default defineComponent({
     components: {
-    ResourceNotFound,
-    ResourceLoading,
-    AccessPathGraphicEditor
-},
+        ResourceNotFound,
+        ResourceLoading,
+        AccessPathGraphicEditor
+    },
     props: {},
     data() {
         return {

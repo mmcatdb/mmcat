@@ -8,6 +8,7 @@ const API_URL = 'http://localhost:27500';
 
 const instance = axios.create({
     baseURL: API_URL,
+    withCredentials: true,
     // timeout: false,
     params: {} // do not remove this, its added to add params later in the config
 });
