@@ -26,6 +26,7 @@ export default defineComponent({
 
         this.fetched = true;
     },
+    emits: [ 'newJob' ],
     methods: {
         async createJob() {
             this.createJobDisabled = true;
@@ -33,6 +34,8 @@ export default defineComponent({
 
             const result = await POST<Job>('/jobs', { mappingId: this.mappingId });
             console.log(result);
+            if (result.status)
+                this.$emit('newJob', result.data);
 
             this.createJobDisabled = false;
         }

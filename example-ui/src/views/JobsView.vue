@@ -32,6 +32,11 @@ export default defineComponent({
             this.jobs = [ ...result.data ];
 
         this.fetched = true;
+    },
+    methods: {
+        addNewJob(job: Job) {
+            this.jobs?.push(job);
+        }
     }
 });
 </script>
@@ -43,7 +48,7 @@ export default defineComponent({
             <div v-for="job in jobs">
                 <JobDisplay :job="job" />
             </div>
-            <NewJob />
+            <NewJob @new-job="addNewJob" />
         </div>
         <ResourceNotFound v-else-if="fetched" />
         <ResourceLoading v-else />
