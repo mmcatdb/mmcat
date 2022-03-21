@@ -36,6 +36,9 @@ export default defineComponent({
     methods: {
         addNewJob(job: Job) {
             this.jobs?.push(job);
+        },
+        deleteJob(id: number) {
+            this.jobs = this.jobs?.filter(job => job.id !== id) ?? [];
         }
     }
 });
@@ -46,7 +49,7 @@ export default defineComponent({
         <h1>This is a jobs page</h1>
         <div class="jobs" v-if="jobs">
             <div v-for="job in jobs">
-                <JobDisplay :job="job" />
+                <JobDisplay @delete-job="() => deleteJob(job.id)" :job="job" />
             </div>
             <NewJob @new-job="addNewJob" />
         </div>

@@ -36,6 +36,16 @@
   --section-gap: 160px;
 }
 
+/* @tuaki my additions */
+:root {
+  --color-primary: hsla(160, 100%, 37%, 1);
+  --color-primary-dark: hsla(160, 100%, 37%, 0.2);
+  --color-error: #FF5252;
+  --color-info: #2196F3;
+  --color-success: #4CAF50;
+  --color-warning: #FFC107;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: var(--vt-c-black);
@@ -71,4 +81,20 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button.error {
+  color: var(--color-error);
+}
+
+button.info {
+  color: var(--color-info);
+}
+
+button.success {
+  color: var(--color-success);
+}
+
+button.warning {
+  color: var(--color-warning);
 }

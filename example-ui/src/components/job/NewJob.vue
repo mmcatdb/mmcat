@@ -62,7 +62,7 @@ export default defineComponent({
 <style scoped>
 .newJob {
     padding: 8px;
-    border: 1px solid hsla(160, 100%, 37%, 1);
+    border: 1px solid var(--color-primary);
     margin-right: 16px;
 }
 </style>

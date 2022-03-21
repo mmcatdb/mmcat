@@ -11,6 +11,6 @@
     width: 100%;
     height: 64px;
     overflow: hidden;
-    background-color: hsla(160, 100%, 37%, 1)
+    background-color: var(--color-primary);
 }
 </style>

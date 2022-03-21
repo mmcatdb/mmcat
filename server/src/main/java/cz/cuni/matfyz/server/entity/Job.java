@@ -40,7 +40,7 @@ public class Job extends Entity implements JSONConvertible {
         Ready, // The job can be started now.
         Running, // The job is currently being processed.
         Finished, // The job is finished, either with a success or with an error.
-        Cancelled // The job was cancelled while being in one of the previous states. It can never be started (again).
+        Canceled // The job was canceled while being in one of the previous states. It can never be started (again).
     }
 
     @Override public JSONObject toJSON() {

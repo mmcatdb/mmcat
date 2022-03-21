@@ -74,4 +74,17 @@ public class JobRepository {
         });
     }
 
+    public boolean delete(Integer id) {
+        return DatabaseWrapper.getBoolean((connection, output) -> {
+            var statement = connection.prepareStatement("""
+                DELETE FROM job
+                WHERE id = ?;
+            """);
+            statement.setInt(1, id);
+
+            int affectedRows = statement.executeUpdate();
+            output.set(affectedRows != 0);
+        });
+    }
+
 }

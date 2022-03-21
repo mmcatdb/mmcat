@@ -57,4 +57,8 @@ public class JobService {
         repository.updateJSONValue(job);
     }
 
+    public boolean delete(Integer id) {
+        return repository.delete(id);
+    }
+
 }

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,5 +66,13 @@ public class JobController
 
         var store = UserStore.fromSession(session);
         return service.start(job, store);
+    }
+
+    @DeleteMapping("/jobs/{id}")
+    public void deleteJobById(@PathVariable Integer id)
+    {
+        boolean result = service.delete(id);
+        if (!result)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 }

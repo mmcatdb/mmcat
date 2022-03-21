@@ -27,6 +27,11 @@ export default defineComponent({
             this.job = result.data;
 
         this.jobFetched = true;
+    },
+    methods: {
+        deleteJob(): void {
+            this.$router.push({ name: 'jobs' });
+        }
     }
 });
 </script>
@@ -34,7 +39,7 @@ export default defineComponent({
 <template>
     <h1>This is a job</h1>
     <div class="job" v-if="job">
-        <JobDisplay :job="job" />
+        <JobDisplay @delete-job="deleteJob" :job="job" />
     </div>
     <ResourceNotFound v-else-if="jobFetched" />
     <ResourceLoading v-else />

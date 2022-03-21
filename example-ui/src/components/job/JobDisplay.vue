@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Job } from '@/types/job';
-import { POST } from '@/utils/backendAPI';
+import { DELETE, POST } from '@/utils/backendAPI';
 import { defineComponent } from 'vue';
 import { RouterLink } from 'vue-router';
 
@@ -13,9 +13,11 @@ export default defineComponent({
     },
     data() {
         return {
-            startJobDisabled: false
+            startJobDisabled: false,
+            deleteJobDisabled: false
         };
     },
+    emits: [ 'deleteJob' ],
     methods: {
         async startJob() {
             this.startJobDisabled = true;
@@ -28,6 +30,18 @@ export default defineComponent({
             console.log({ result });
 
             this.startJobDisabled = false;
+        },
+        async deleteJob() {
+            this.deleteJobDisabled = true;
+            console.log('Deleting job:', this.job);
+
+            const result = await DELETE<Job>(`/jobs/${this.job!.id}`);
+            if (result.status)
+                this.$emit('deleteJob');
+
+            console.log({ result });
+
+            this.deleteJobDisabled = false;
         }
     }
 });
@@ -47,8 +61,17 @@ export default defineComponent({
         v-if="job.status === 'Ready'"
         :disabled="startJobDisabled"
         @click="startJob"
+        class="success"
     >
         Start job
+    </button>
+    <button
+        v-if="job.status === 'Finished' || job.status === 'Canceled'"
+        :disabled="deleteJobDisabled"
+        @click="deleteJob"
+        class="error"
+    >
+        Delete job
     </button>
 </div>
 </template>
@@ -56,7 +79,7 @@ export default defineComponent({
 <style scoped>
 .jobDisplay {
     padding: 8px;
-    border: 1px solid hsla(160, 100%, 37%, 1);
+    border: 1px solid var(--color-primary);
     margin-right: 16px;
 }
 </style>

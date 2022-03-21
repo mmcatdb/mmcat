@@ -49,7 +49,7 @@ public class AsyncJobService {
                 setJobStatus(job, Job.Status.Finished);
             }
             else {
-                setJobStatus(job, Job.Status.Cancelled);
+                setJobStatus(job, Job.Status.Canceled);
             }
         }
         catch (InterruptedException exception) {
