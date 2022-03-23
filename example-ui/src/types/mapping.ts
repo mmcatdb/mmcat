@@ -5,4 +5,5 @@ export class Mapping {
     public rootObjectId!: number;
     public rootMorphismId!: number;
     public jsonValue!: string;
+    public mappingJsonValue!: string;
 }

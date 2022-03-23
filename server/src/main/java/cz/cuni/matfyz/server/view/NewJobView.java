@@ -9,5 +9,6 @@ import java.io.Serializable;
 public class NewJobView implements Serializable {
 
     public int mappingId;
+    public String name;
 
 }

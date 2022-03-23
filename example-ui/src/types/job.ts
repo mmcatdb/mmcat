@@ -1,5 +1,6 @@
 export type Job = {
     id: number,
     mappingId: number,
-    status: string
+    status: string,
+    name: string
 };

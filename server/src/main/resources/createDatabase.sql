@@ -264,5 +264,5 @@ CREATE TABLE job (
 );
 
 INSERT INTO job (mapping_id, json_value)
-VALUES (1, '{ "status": "Ready" }');
+VALUES (1, '{"status": "Ready","name":"Job Name"}');
 

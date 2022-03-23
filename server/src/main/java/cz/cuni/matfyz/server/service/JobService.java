@@ -37,7 +37,7 @@ public class JobService {
     public Job createNew(Job job) {
         Integer generatedId = repository.add(job);
 
-        return generatedId == null ? null : new Job.Builder().fromArguments(generatedId, job.mappingId, job.status);
+        return generatedId == null ? null : new Job.Builder().fromArguments(generatedId, job.mappingId, job.status, job.name);
     }
 
     public Job start(Job job, UserStore store) {

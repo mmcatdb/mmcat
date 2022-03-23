@@ -50,7 +50,7 @@ export default defineComponent({
 <template>
 <div class="jobDisplay">
     <RouterLink :to="{ name: 'job', params: { id: job.id } }">
-        <h2>Job name</h2>
+        <h2>{{ job.name }}</h2>
     </RouterLink>
     <p>
         Id: {{ job.id }}<br>
