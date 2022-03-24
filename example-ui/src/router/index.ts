@@ -25,6 +25,11 @@ const router = createRouter({
             component: () => import('@/views/JobView.vue')
         },
         {
+            path: '/accessPathEditor',
+            name: 'accessPathEditor',
+            component: () => import('@/views/AccessPathEditorView.vue')
+        },
+        {
             path: '/schema',
             name: 'schema',
             component: () => import('@/views/SchemaCategoryView.vue')

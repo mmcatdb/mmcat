@@ -14,7 +14,7 @@ export type SimpleValueJSON = { _class: 'SimpleValue', signature: SignatureJSON 
 export type SimplePropertyJSON = { _class: 'SimpleProperty', name: NameJSON, value: SimpleValueJSON };
 
 export class SimpleProperty {
-    private name: Name;
+    public name: Name;
     private value: Signature;
 
     public constructor(name: Name, value: Signature) {
@@ -42,11 +42,11 @@ export class SimpleProperty {
 export type ComplexPropertyJSON = { _class: 'ComplexProperty', name: NameJSON, signature: SignatureJSON, subpaths: AccessPathJSON[] };
 
 export class ComplexProperty {
-    private name: Name;
+    public name: Name;
     private _signature: Signature;
     private _subpaths: AccessPath[];
 
-    public constructor(name: Name, signature: Signature, subpaths: AccessPath[]) {
+    public constructor(name: Name, signature: Signature, subpaths: AccessPath[] = []) {
         this.name = name;
         this._signature = signature;
         this._subpaths = [ ...subpaths ];

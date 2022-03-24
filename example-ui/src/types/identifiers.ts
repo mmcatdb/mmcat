@@ -29,13 +29,13 @@ export class Signature {
         return new Signature(other.ids.concat(this.ids));
     }
 
-    private static emptyInstance = new Signature([]);
+    private static emptyInstance = new Signature([], SignatureType.Empty);
 
     public static get empty(): Signature {
         return this.emptyInstance;
     }
 
-    private static nullInstance = new Signature(0);
+    private static nullInstance = new Signature(0, SignatureType.Null);
 
     public static get null(): Signature {
         return this.nullInstance;
@@ -91,7 +91,7 @@ export type Name = StaticName | DynamicName;
 export type StaticNameJSON = { _class: 'StaticName', value: string, type: 'STATIC_NAME' | 'ANONYMOUS' };
 
 export class StaticName {
-    private value: string;
+    public value: string;
     private isAnonymous: boolean;
 
     private constructor(value: string, anonymous = false) {
