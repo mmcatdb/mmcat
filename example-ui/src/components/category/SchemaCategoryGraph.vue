@@ -2,11 +2,12 @@
 import { defineComponent } from 'vue';
 import { GET, PUT } from '@/utils/backendAPI';
 import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
-import cytoscape, { type Core } from 'cytoscape';
+import cytoscape, { type Core, type NodeSingular } from 'cytoscape';
 import type { ElementDefinition } from 'cytoscape';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
+import { NodeSchemaData } from '@/types/categoryGraph';
 
 export default defineComponent({
     components: {
@@ -38,14 +39,21 @@ export default defineComponent({
         createCytoscape(schema: SchemaCategory) {
             const elements = [] as ElementDefinition[];
 
-            schema.objects.forEach(object => elements.push({
-                data: {
-                    id: object.id.toString(),
-                    label: object.label,
-                    schemaObject: object
-                },
-                position: object.position
-            }));
+            const schemaDataOfNodes = [] as NodeSchemaData[];
+            schema.objects.forEach(object => {
+                const schemaData = new NodeSchemaData(object);
+                schemaDataOfNodes.push(schemaData);
+
+                const definition = {
+                    data: {
+                        id: object.id.toString(),
+                        label: object.label,
+                        schemaData
+                    },
+                    position: object.position
+                };
+                elements.push(definition);
+            });
 
             schema.morphisms.filter(morphism => morphism.isBase).forEach(morphism => elements.push({ data: {
                 id: 'm' + morphism.id.toString(),
@@ -56,7 +64,7 @@ export default defineComponent({
             console.log(elements);
             console.log(document.getElementById('cytoscape'));
 
-            return cytoscape({
+            const output = cytoscape({
                 container: document.getElementById('cytoscape'),
                 layout: { name: 'preset' },
                 elements,
@@ -69,9 +77,26 @@ export default defineComponent({
                             'border-width': '1px',
                             label: 'data(label)'
                         }
+                    },
+                    {
+                        selector: '.root',
+                        style: {
+                            'background-color': 'red'
+                        }
+                    },
+                    {
+                        selector: '.selected',
+                        style: {
+                            'border-color': 'blue',
+                            'border-width': '4px',
+                        }
                     }
                 ]
             });
+
+            schemaDataOfNodes.forEach(schemaData => schemaData.setNode(output.nodes('#' + schemaData.schemaObject.id).first()));
+
+            return output;
         },
         async savePositionChanges() {
             this.saveButtonDisabled = true;

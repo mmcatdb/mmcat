@@ -59,7 +59,7 @@ export class SchemaObject {
 
     public neighbours = new Map() as Map<SchemaObject, SchemaMorphism>;
 
-    private constructor() {};
+    private constructor() {}
 
     public static fromServer(input: SchemaObjectFromServer): SchemaObject {
         const object = new SchemaObject();
@@ -163,7 +163,7 @@ export class SchemaCategory {
     public objects!: SchemaObject[];
     public morphisms!: SchemaMorphism[];
 
-    private constructor() {};
+    private constructor() {}
 
     public static fromServer(input: SchemaCategoryFromServer): SchemaCategory {
         const category = new SchemaCategory;

@@ -35,7 +35,7 @@ export class SimpleProperty {
         return new SimpleProperty(
             nameFromJSON(jsonObject.name),
             Signature.fromJSON(jsonObject.value.signature)
-        )
+        );
     }
 }
 
@@ -73,9 +73,9 @@ export class ComplexProperty {
         builder.append('{\n');
 
         const subpathsAsString = this.subpaths.map(path => path.toString(level + 1)).join(',\n');
-        builder.append(subpathsAsString)
+        builder.append(subpathsAsString);
 
-        builder.appendIntendedLine('}')
+        builder.appendIntendedLine('}');
 
         return builder.toString();
     }
@@ -85,6 +85,6 @@ export class ComplexProperty {
             nameFromJSON(jsonObject.name),
             Signature.fromJSON(jsonObject.signature),
             jsonObject.subpaths.map(subpath => accessPathFromJSON(subpath))
-        )
+        );
     }
 }
