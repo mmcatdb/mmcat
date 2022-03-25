@@ -57,8 +57,6 @@ export class SchemaObject {
     public position?: ComparablePosition;
     private originalPosition?: ComparablePosition;
 
-    public neighbours = new Map() as Map<SchemaObject, SchemaMorphism>;
-
     private constructor() {}
 
     public static fromServer(input: SchemaObjectFromServer): SchemaObject {
@@ -75,10 +73,6 @@ export class SchemaObject {
         }
 
         return object;
-    }
-
-    public addNeighbour(object: SchemaObject, morphism: SchemaMorphism): void {
-        this.neighbours.set(object, morphism);
     }
 
     public toPositionUpdateToServer(): PositionUpdateToServer | null {
@@ -109,8 +103,8 @@ export class SchemaMorphism {
     public codId!: number;
     public signature!: Signature;
 
-    public domObject!: SchemaObject;
-    public codObject!: SchemaObject;
+    //public domObject!: SchemaObject;
+    //public codObject!: SchemaObject;
 
     //private jsonValue!: string;
 
@@ -118,7 +112,8 @@ export class SchemaMorphism {
         return this.signature.isBase;
     }
 
-    public static fromServer(input: SchemaMorphismFromServer, objects: SchemaObject[]): SchemaMorphism {
+    //public static fromServer(input: SchemaMorphismFromServer, objects: SchemaObject[]): SchemaMorphism {
+    public static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
         const morphism = new SchemaMorphism();
 
         //morphism.domKey = input.domIdentifier.value;
@@ -129,6 +124,7 @@ export class SchemaMorphism {
         morphism.codId = input.codId;
         morphism.signature = Signature.fromJSON(JSON.parse(input.jsonValue).signature);
 
+        /*
         const domObject = objects.find(object => object.id === morphism.domId);
         if (!domObject)
             throw new Error(`Domain object with id ${morphism.domId} not found for morphism ${morphism.signature.toString()}.`);
@@ -143,6 +139,7 @@ export class SchemaMorphism {
             domObject.addNeighbour(codObject, morphism);
             codObject.addNeighbour(domObject, morphism);
         }
+        */
 
         //morphism.jsonValue = input.jsonValue;
 
@@ -170,7 +167,8 @@ export class SchemaCategory {
         category.id = input.id;
         category.jsonValue = input.jsonValue;
         category.objects = input.objects.map(object => SchemaObject.fromServer(object));
-        category.morphisms = input.morphisms.map(morphism => SchemaMorphism.fromServer(morphism, category.objects));
+        //category.morphisms = input.morphisms.map(morphism => SchemaMorphism.fromServer(morphism, category.objects));
+        category.morphisms = input.morphisms.map(morphism => SchemaMorphism.fromServer(morphism));
 
         return category;
     }

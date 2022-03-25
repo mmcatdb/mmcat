@@ -52,6 +52,10 @@ export class ComplexProperty {
         this._subpaths = [ ...subpaths ];
     }
 
+    public update(signature: Signature) {
+        this._signature = signature;
+    }
+
     public get isAuxiliary(): boolean {
         return this.signature.isNull;
     }

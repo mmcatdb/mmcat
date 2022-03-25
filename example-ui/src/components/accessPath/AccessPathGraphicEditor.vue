@@ -1,25 +1,31 @@
 <script lang="ts">
-import { ComplexProperty } from '@/types/accessPath';
+import { ComplexProperty, SimpleProperty } from '@/types/accessPath';
 import { Signature, StaticName } from '@/types/identifiers';
 import type { SchemaObject, SchemaCategory } from '@/types/schema';
-import { NodeSchemaData, SchemaObjectSequence } from '@/types/categoryGraph';
+import type { NodeSchemaData } from '@/types/categoryGraph';
 import type { Core, NodeSingular } from 'cytoscape';
 import { defineComponent } from 'vue';
 import SchemaCategoryGraph from '../category/SchemaCategoryGraph.vue';
 import AccessPathJsonDisplay from './AccessPathJsonDisplay.vue';
 import SelectRoot from './SelectRoot.vue';
+import AddProperty from './AddProperty.vue';
+import ComplexPropertyDisplay from './display/ComplexPropertyDisplay.vue';
+import EditComplexProperty from './EditComplexProperty.vue';
 
 enum State {
     Default,
     RootSelected,
+    EditComplexProperty
 }
 
 export default defineComponent({
     components: {
-        SchemaCategoryGraph,
-        AccessPathJsonDisplay,
-        SelectRoot
-    },
+    SchemaCategoryGraph,
+    SelectRoot,
+    AddProperty,
+    ComplexPropertyDisplay,
+    EditComplexProperty
+},
     data() {
         return {
             //schemaCategory: null as SchemaCategory | null,
@@ -28,35 +34,17 @@ export default defineComponent({
             accessPath: null as ComplexProperty | null,
             rootObjectName: 'pathName',
             rootNodeData: null as NodeSchemaData | null,
-            choosingSignature: false,
-            signaturePath: null as SchemaObjectSequence | null,
-            chosenSignature: null as Signature | null,
             state: State.Default,
-            State: State
+            State: State,
+
+            editingComplexProperty: false,
+            property: null as ComplexProperty | null
         };
     },
     methods: {
         cytoscapeCreated(cytoscape: Core, schemaCategory: SchemaCategory) {
             this.cytoscape = cytoscape;
             this.schemaCategory = schemaCategory;
-
-            this.cytoscape.addListener("tap", "node", (event) => {
-                const node = event.target as NodeSingular;
-                console.log("Tap on node:", node, node.id());
-                this.lastClickedObject = this.schemaCategory?.objects.find(object => object.id == node.id()) || null;
-                console.log(this.lastClickedObject);
-
-                if (this.choosingSignature)
-                    if (this.lastClickedObject) {
-                        const result = this.signaturePath?.tryAddObject(this.lastClickedObject);
-                        if (result)
-                            node.style('background-color', 'yellow');
-                    }
-
-                node.toggleClass('selected');
-                //node.addClass('selected');
-                console.log('OBJECT:', node.data('schemaObject'));
-            });
         },
         onRootNodeSelect(data: NodeSchemaData) {
             const name = data.schemaObject.label;
@@ -69,22 +57,20 @@ export default defineComponent({
             if (this.accessPath.name instanceof StaticName)
                 this.accessPath.name.value = this.rootObjectName;
         },
-        startChoosingSignature() {
-            this.choosingSignature = true;
-            if (this.rootNodeData)
-                this.signaturePath = new SchemaObjectSequence(this.rootNodeData.schemaObject);
+        addNewProperty(property: ComplexProperty): void {
+            this.accessPath?.subpaths.push(property);
         },
-        confirmChoosingSignature() {
-            this.choosingSignature = false;
-            this.signaturePath?.objectIds.slice(1).forEach(id => this.cytoscape?.getElementById(id).style('background-color', 'white'));
-            this.chosenSignature = this.signaturePath!.toCompositeSignature();
+        complexPropertyClicked(property: ComplexProperty) {
+            console.log(property);
+            this.property = property;
+            this.editingComplexProperty = true;
         },
-        cancelChoosingSignature() {
-            this.choosingSignature = false;
-            this.signaturePath?.objectIds.slice(1).forEach(id => this.cytoscape?.getElementById(id).style('background-color', 'white'));
+        simplePropertyClicked(property: SimpleProperty) {
+            console.log(property);
         },
-        addNewProperty() {
-            this.accessPath?.subpaths.push(new ComplexProperty(StaticName.fromString('todo'), this.chosenSignature || Signature.null));
+        editPropertySave(): void {
+            this.editingComplexProperty = false;
+            this.property = null;
         }
     }
 });
@@ -109,30 +95,27 @@ export default defineComponent({
                     v-model="rootObjectName"
                     @input="rootNameInput"
                 >
-                <br>
-                <h2>Add property:</h2>
-                <label>Name:</label><br>
-                <label>Signature: {{ chosenSignature }} </label>
-                <button
-                    v-if="!choosingSignature"
-                    @click="startChoosingSignature"
-                >
-                    Start
-                </button>
-                <template v-else>
-                    <button @click="confirmChoosingSignature">
-                        Confirm
-                    </button>
-                    <button @click="cancelChoosingSignature">
-                        Cancel
-                    </button>
-                </template>
-                <br>
-                <label>Value?:</label>
-                <br>
-                <button @click="addNewProperty">Add property</button>
+                <AddProperty
+                    :cytoscape="cytoscape"
+                    :property-root-node="rootNodeData"
+                    @property:add="addNewProperty"
+                />
+
+                <EditComplexProperty
+                    v-if="editingComplexProperty"
+                    :cytoscape="cytoscape"
+                    :property="property"
+                    :property-root-node="rootNodeData"
+                    @property:save="editPropertySave"
+                />
             </div>
-            <AccessPathJsonDisplay :accessPath="accessPath" />
+            <ComplexPropertyDisplay
+                v-if="accessPath !== null"
+                :property="accessPath"
+                :is-last="true"
+                @complex:click="complexPropertyClicked"
+                @simple:click="simplePropertyClicked"
+            />
         </div>
     </div>
 </template>

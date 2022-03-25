@@ -2,30 +2,44 @@ import type { NodeSingular } from "cytoscape";
 import { Signature } from "./identifiers";
 import type { SchemaMorphism, SchemaObject } from "./schema";
 
-export class SchemaObjectSequence {
-    private objectSequence = [] as SchemaObject[];
+export class NodeSequence {
+    private nodeSequence: NodeSchemaData[];
     private morphismSequence = [] as SchemaMorphism[];
 
-    public constructor(rootObject: SchemaObject) {
-        this.objectSequence.push(rootObject);
+    public constructor(rootNode: NodeSchemaData) {
+        this.nodeSequence = [ rootNode ];
     }
 
-    public get lastObject(): SchemaObject | null {
-        return this.objectSequence[this.objectSequence.length - 1];
+    private get rootNode(): NodeSchemaData {
+        return this.nodeSequence[0];
     }
 
-    public canAddObject(object: SchemaObject): boolean {
-        return !!this.lastObject!.neighbours.get(object) && !this.objectSequence.find(o => o === object);
+    private get lastNode(): NodeSchemaData {
+        return this.nodeSequence[this.nodeSequence.length - 1];
     }
 
-    public tryAddObject(object: SchemaObject): boolean {
-        const morphism = this.lastObject!.neighbours.get(object);
+    public get allNodes(): NodeSchemaData[] {
+        return this.nodeSequence;
+    }
 
-        if (!morphism || this.objectSequence.find(o => o === object))
+    public tryAddNode(node: NodeSchemaData): boolean {
+        const morphism = this.lastNode.neighbours.get(node);
+
+        if (!morphism || this.nodeSequence.find(o => o === node))
             return false;
 
-        this.objectSequence.push(object);
+        this.nodeSequence.push(node);
         this.morphismSequence.push(morphism);
+
+        return true;
+    }
+
+    public tryRemoveNode(node: NodeSchemaData): boolean {
+        if (this.lastNode !== node || this.rootNode === node)
+            return false;
+
+        this.nodeSequence.pop();
+        this.morphismSequence.pop();
 
         return true;
     }
@@ -35,10 +49,6 @@ export class SchemaObjectSequence {
         this.morphismSequence.forEach(morphism => output = output.concatenate(morphism.signature));
 
         return output;
-    }
-
-    public get objectIds(): string[] {
-        return this.objectSequence.map(object => object.id.toString());
     }
 }
 
@@ -52,6 +62,8 @@ export class NodeSchemaData {
     public node!: NodeSingular;
     private tags = new Set() as Set<NodeTag>;
 
+    public neighbours = new Map() as Map<NodeSchemaData, SchemaMorphism>;
+
     public constructor(schemaObject: SchemaObject) {
     //public constructor(schemaObject: SchemaObject, nodeObject: NodeSingular) {
         this.schemaObject = schemaObject;
@@ -62,6 +74,10 @@ export class NodeSchemaData {
 
     public setNode(node: NodeSingular) {
         this.node = node;
+    }
+
+    public addNeighbour(object: NodeSchemaData, morphism: SchemaMorphism): void {
+        this.neighbours.set(object, morphism);
     }
 
     /*

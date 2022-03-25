@@ -96,6 +96,19 @@ export default defineComponent({
 
             schemaDataOfNodes.forEach(schemaData => schemaData.setNode(output.nodes('#' + schemaData.schemaObject.id).first()));
 
+            schema.morphisms.filter(morphism => morphism.isBase).forEach(morphism => {
+                const domNode = schemaDataOfNodes.find(node => node.schemaObject.id === morphism.domId);
+                if (!domNode)
+                    throw new Error(`Domain object node with id ${morphism.domId} not found for morphism ${morphism.signature.toString()}.`);
+
+                const codNode = schemaDataOfNodes.find(node => node.schemaObject.id === morphism.codId);
+                if (!codNode)
+                    throw new Error(`Codomain object node with id ${morphism.codId} not found for morphism ${morphism.signature.toString()}.`);
+
+                domNode.addNeighbour(codNode, morphism);
+                codNode.addNeighbour(domNode, morphism);
+            });
+
             return output;
         },
         async savePositionChanges() {
@@ -115,24 +128,24 @@ export default defineComponent({
 </script>
 
 <template>
-<div class="outer">
-    <div>
-        <button
-            :disabled="saveButtonDisabled"
-            @click="savePositionChanges"
-        >
-            Uložit změny
-        </button>
+    <div class="outer">
+        <div>
+            <button
+                :disabled="saveButtonDisabled"
+                @click="savePositionChanges"
+            >
+                Uložit změny
+            </button>
+        </div>
+        <div
+            id="cytoscape"
+        />
+        <template v-if="schemaCategory">
+            Schema category fetched!
+        </template>
+        <ResourceNotFound v-else-if="schemaFetched" />
+        <ResourceLoading v-else />
     </div>
-    <div
-        id="cytoscape"
-    />
-    <template v-if="schemaCategory">
-        Schema category fetched!
-    </template>
-    <ResourceNotFound v-else-if="schemaFetched" />
-    <ResourceLoading v-else />
-</div>
 </template>
 
 <style scoped>

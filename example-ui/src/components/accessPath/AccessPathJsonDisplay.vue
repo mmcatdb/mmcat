@@ -16,14 +16,14 @@ export default defineComponent({
 </script>
 
 <template>
-<div>
-    <textarea
-        :value="accessPath?.toString()"
-        :disabled="true"
-        class="accessPathDisplay"
-        spellcheck="false"
-    />
-</div>
+    <div>
+        <textarea
+            :value="accessPath?.toString()"
+            :disabled="true"
+            class="accessPathDisplay"
+            spellcheck="false"
+        />
+    </div>
 </template>
 
 <style scoped>

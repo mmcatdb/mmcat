@@ -24,18 +24,17 @@ export default defineComponent({
     },
     methods: {
         onNodeTapHandler(event: EventObject): void {
-            const node = event.target as NodeSingular;
             if (this.lastClickedNode)
                 this.lastClickedNode.unselect();
 
-            const currentNode = node.data('schemaData') as NodeSchemaData;
-            if (currentNode.equals(this.lastClickedNode)) {
+            const node = (event.target as NodeSingular).data('schemaData') as NodeSchemaData;
+            if (node.equals(this.lastClickedNode)) {
                 // If we double tap current node, it become unselected.
                 this.lastClickedNode = null;
             }
             else {
-                currentNode.select();
-                this.lastClickedNode = currentNode;
+                node.select();
+                this.lastClickedNode = node;
             }
         },
         confirm() {
