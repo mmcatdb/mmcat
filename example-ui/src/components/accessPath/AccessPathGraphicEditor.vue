@@ -3,14 +3,12 @@ import { ComplexProperty, SimpleProperty } from '@/types/accessPath';
 import { Signature, StaticName } from '@/types/identifiers';
 import type { SchemaObject, SchemaCategory } from '@/types/schema';
 import type { NodeSchemaData } from '@/types/categoryGraph';
-import type { Core, NodeSingular } from 'cytoscape';
+import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
 import SchemaCategoryGraph from '../category/SchemaCategoryGraph.vue';
-import AccessPathJsonDisplay from './AccessPathJsonDisplay.vue';
 import SelectRoot from './SelectRoot.vue';
-import AddProperty from './AddProperty.vue';
 import ComplexPropertyDisplay from './display/ComplexPropertyDisplay.vue';
-import EditComplexProperty from './EditComplexProperty.vue';
+import EditComplexProperty from './edit/EditComplexProperty.vue';
 
 enum State {
     Default,
@@ -20,12 +18,11 @@ enum State {
 
 export default defineComponent({
     components: {
-    SchemaCategoryGraph,
-    SelectRoot,
-    AddProperty,
-    ComplexPropertyDisplay,
-    EditComplexProperty
-},
+        SchemaCategoryGraph,
+        SelectRoot,
+        ComplexPropertyDisplay,
+        EditComplexProperty
+    },
     data() {
         return {
             //schemaCategory: null as SchemaCategory | null,
@@ -38,7 +35,9 @@ export default defineComponent({
             State: State,
 
             editingComplexProperty: false,
-            property: null as ComplexProperty | null
+            property: null as ComplexProperty | null,
+
+            addingProperty: false
         };
     },
     methods: {
@@ -57,8 +56,15 @@ export default defineComponent({
             if (this.accessPath.name instanceof StaticName)
                 this.accessPath.name.value = this.rootObjectName;
         },
-        addNewProperty(property: ComplexProperty): void {
-            this.accessPath?.subpaths.push(property);
+        startAddProperty() {
+            this.addingProperty = true;
+            this.property = new ComplexProperty(StaticName.fromString(''), Signature.empty);
+        },
+        //addNewProperty(property: ComplexProperty): void {
+        addNewProperty(): void {
+            //this.accessPath?.subpaths.push(property);
+            this.accessPath?.subpaths.push(this.property);
+            this.addingProperty = false;
         },
         complexPropertyClicked(property: ComplexProperty) {
             console.log(property);
@@ -71,6 +77,10 @@ export default defineComponent({
         editPropertySave(): void {
             this.editingComplexProperty = false;
             this.property = null;
+        },
+        editPropertyCancel(): void {
+            this.editingComplexProperty = false;
+            this.property = null;
         }
     }
 });
@@ -81,41 +91,59 @@ export default defineComponent({
         <SchemaCategoryGraph @cytoscape:ready="cytoscapeCreated" />
         <div
             v-if="cytoscape"
-            class="editor"
+            class="divide"
         >
-            <div v-if="state === State.Default">
-                <SelectRoot
-                    :cytoscape="cytoscape"
-                    @root-node:confirm="onRootNodeSelect"
-                />
-            </div>
-            <div v-else>
-                <label>Root object name:</label><br>
-                <input
-                    v-model="rootObjectName"
-                    @input="rootNameInput"
-                >
-                <AddProperty
-                    :cytoscape="cytoscape"
-                    :property-root-node="rootNodeData"
-                    @property:add="addNewProperty"
-                />
+            <div class="editor">
+                <div v-if="state === State.Default">
+                    <SelectRoot
+                        :cytoscape="cytoscape"
+                        @root-node:confirm="onRootNodeSelect"
+                    />
+                </div>
+                <div v-else>
+                    <label>Root object name:</label><br>
+                    <input
+                        v-model="rootObjectName"
+                        @input="rootNameInput"
+                    />
 
-                <EditComplexProperty
-                    v-if="editingComplexProperty"
-                    :cytoscape="cytoscape"
-                    :property="property"
-                    :property-root-node="rootNodeData"
-                    @property:save="editPropertySave"
+                    <template v-if="addingProperty">
+                        <EditComplexProperty
+                            :cytoscape="cytoscape"
+                            :property-node="rootNodeData"
+                            :property="property"
+                            :is-new="true"
+                            @save="addNewProperty"
+                            @cancel="() => addingProperty = false"
+                        />
+                    </template>
+                    <template v-else>
+                        <div class="createProperty">
+                            <button @click="startAddProperty">
+                                Create new Property
+                            </button>
+                        </div>
+                    </template>
+
+                    <EditComplexProperty
+                        v-if="editingComplexProperty"
+                        :cytoscape="cytoscape"
+                        :property-node="rootNodeData"
+                        :property="property"
+                        @save="editPropertySave"
+                        @cancel="editPropertyCancel"
+                    />
+                </div>
+            </div>
+            <div class="display">
+                <ComplexPropertyDisplay
+                    v-if="accessPath !== null"
+                    :property="accessPath"
+                    :is-last="true"
+                    @complex:click="complexPropertyClicked"
+                    @simple:click="simplePropertyClicked"
                 />
             </div>
-            <ComplexPropertyDisplay
-                v-if="accessPath !== null"
-                :property="accessPath"
-                :is-last="true"
-                @complex:click="complexPropertyClicked"
-                @simple:click="simplePropertyClicked"
-            />
         </div>
     </div>
 </template>
@@ -133,5 +161,20 @@ export default defineComponent({
     padding: 12px;
     display: flex;
     flex-direction: column;
+}
+
+.divide {
+    display: flex;
+}
+
+.display {
+    padding: 16px;
+    margin: 16px;
+}
+
+.createProperty {
+    padding: 16px;
+    margin: 16px;
+    border: 1px solid white;
 }
 </style>

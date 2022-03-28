@@ -3,50 +3,72 @@ import { Signature } from "./identifiers";
 import type { SchemaMorphism, SchemaObject } from "./schema";
 
 export class NodeSequence {
-    private nodeSequence: NodeSchemaData[];
-    private morphismSequence = [] as SchemaMorphism[];
+    private nodes: NodeSchemaData[];
+    private morphisms: SchemaMorphism[];
 
-    public constructor(rootNode: NodeSchemaData) {
-        this.nodeSequence = [ rootNode ];
+    private constructor(nodes: NodeSchemaData[], morphisms: SchemaMorphism[]) {
+        this.nodes = nodes;
+        this.morphisms = morphisms;
+    }
+
+    public static withRootNode(rootNode: NodeSchemaData): NodeSequence {
+        return new NodeSequence([ rootNode ], []);
+    }
+
+    public static copy(sequence: NodeSequence): NodeSequence {
+        return new NodeSequence(sequence.nodes, sequence.morphisms);
     }
 
     private get rootNode(): NodeSchemaData {
-        return this.nodeSequence[0];
+        return this.nodes[0];
     }
 
     private get lastNode(): NodeSchemaData {
-        return this.nodeSequence[this.nodeSequence.length - 1];
+        return this.nodes[this.nodes.length - 1];
     }
 
     public get allNodes(): NodeSchemaData[] {
-        return this.nodeSequence;
+        return this.nodes;
+    }
+
+    public addSignature(signature: Signature): void {
+        signature.toBase().reverse().forEach(baseSignature => this.addBaseSignature(baseSignature));
+    }
+
+    public addBaseSignature(baseSignature: Signature): void {
+        for (const [ node, morphism ] of this.lastNode.neighbours.entries())
+            if (morphism.signature.equals(baseSignature)) {
+                this.morphisms.push(morphism);
+                this.nodes.push(node);
+                return;
+            }
     }
 
     public tryAddNode(node: NodeSchemaData): boolean {
         const morphism = this.lastNode.neighbours.get(node);
 
-        if (!morphism || this.nodeSequence.find(o => o === node))
+        if (!morphism || this.nodes.find(o => o === node))
             return false;
 
-        this.nodeSequence.push(node);
-        this.morphismSequence.push(morphism);
+        this.nodes.push(node);
+        this.morphisms.push(morphism);
 
         return true;
     }
 
     public tryRemoveNode(node: NodeSchemaData): boolean {
-        if (this.lastNode !== node || this.rootNode === node)
+        if (!this.lastNode.equals(node) || this.rootNode.equals(node))
             return false;
 
-        this.nodeSequence.pop();
-        this.morphismSequence.pop();
+        this.nodes.pop();
+        this.morphisms.pop();
 
         return true;
     }
 
-    public toCompositeSignature(): Signature {
+    public toSignature(): Signature {
         let output = Signature.empty;
-        this.morphismSequence.forEach(morphism => output = output.concatenate(morphism.signature));
+        this.morphisms.forEach(morphism => output = output.concatenate(morphism.signature));
 
         return output;
     }
@@ -62,7 +84,7 @@ export class NodeSchemaData {
     public node!: NodeSingular;
     private tags = new Set() as Set<NodeTag>;
 
-    public neighbours = new Map() as Map<NodeSchemaData, SchemaMorphism>;
+    public neighbours = new Map() as Map<NodeSchemaData, SchemaMorphism>; // TODO
 
     public constructor(schemaObject: SchemaObject) {
     //public constructor(schemaObject: SchemaObject, nodeObject: NodeSingular) {

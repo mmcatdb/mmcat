@@ -26,11 +26,11 @@ export class IntendedStringBuilder {
         return this;
     }
 
-    public appendIntendedLine(line: string = ''): IntendedStringBuilder {
+    public appendIntendedLine(line = ''): IntendedStringBuilder {
         return this.appendLine(line, true);
     }
 
-    public appendLine(line: string = '', intended = false): IntendedStringBuilder {
+    public appendLine(line = '', intended = false): IntendedStringBuilder {
         this.lines.push((intended ? this.intendationString : '') + line);
 
         return this;

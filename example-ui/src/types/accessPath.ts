@@ -1,4 +1,4 @@
-import { nameFromJSON, Signature, type Name, type NameJSON, type SignatureJSON } from "./identifiers";
+import { DynamicName, nameFromJSON, Signature, StaticName, type Name, type NameJSON, type SignatureJSON } from "./identifiers";
 import { IntendedStringBuilder } from "@/utils/string";
 
 export type AccessPathJSON = SimplePropertyJSON | ComplexPropertyJSON;
@@ -52,8 +52,19 @@ export class ComplexProperty {
         this._subpaths = [ ...subpaths ];
     }
 
-    public update(signature: Signature) {
-        this._signature = signature;
+    public static copy(property: ComplexProperty): ComplexProperty {
+        const name = property.name instanceof DynamicName ? DynamicName.copy(property.name) : StaticName.copy(property.name);
+        return new ComplexProperty(name, Signature.copy(property.signature), property.subpaths);
+    }
+
+    public update(newName: Name, newSignature: Signature) {
+        if (!this.name.equals(newName))
+            this.name = newName;
+
+        if (!this._signature.equals(newSignature)) {
+            this._signature = newSignature;
+            this._subpaths = [];
+        }
     }
 
     public get isAuxiliary(): boolean {

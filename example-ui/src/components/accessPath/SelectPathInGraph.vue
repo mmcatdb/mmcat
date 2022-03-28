@@ -17,7 +17,7 @@ export default defineComponent({
     emits: [ 'pathInGraph:update', 'pathInGraph:confirm', 'pathInGraph:cancel' ],
     data() {
         return {
-            sequence: new NodeSequence(this.rootNode),
+            sequence: NodeSequence.withRootNode(this.rootNode),
         };
     },
     mounted() {
@@ -41,7 +41,7 @@ export default defineComponent({
         },
         confirm() {
             this.sequence.allNodes.forEach(node => node.unselect());
-            this.$emit('pathInGraph:confirm', this.sequence.toCompositeSignature());
+            this.$emit('pathInGraph:confirm', this.sequence.toSignature());
         },
         cancel() {
             this.sequence.allNodes.forEach(node => node.unselect());

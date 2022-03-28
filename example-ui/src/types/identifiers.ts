@@ -13,16 +13,23 @@ export class Signature {
 
     private constructor(input: number | number[], type?: SignatureType) {
         this.ids = typeof input === 'number' ? [ input ] : [ ...input ];
-        this.type = !!type ? type : this.ids.length === 1 ? SignatureType.Base : SignatureType.Composite;
+        this.type = type !== undefined ? type : this.ids.length === 1 ? SignatureType.Base : SignatureType.Composite;
     }
 
     public static base(id: number): Signature {
         return new Signature(id);
     }
 
-    public static composite(signatures: Signature[]): Signature {
-        const idsArray = signatures.map(signature => signature.ids);
-        return new Signature(idsArray.flat());
+    public static fromIds(ids: number[]) {
+        return ids.length === 0 ? Signature.empty : new Signature(ids);
+    }
+
+    public static copy(signature: Signature): Signature {
+        return new Signature(signature.ids, signature.type);
+    }
+
+    public copy(): Signature {
+        return new Signature(this.ids, this.type);
     }
 
     public concatenate(other: Signature): Signature {
@@ -59,6 +66,10 @@ export class Signature {
         return this.ids.join('.');
     }
 
+    public toBase(): Signature[] {
+        return this.ids.map(id => new Signature(id));
+    }
+
     public equals(other: Signature): boolean {
         return this.type === other.type
             && this.ids.length === other.ids.length
@@ -92,31 +103,43 @@ export type StaticNameJSON = { _class: 'StaticName', value: string, type: 'STATI
 
 export class StaticName {
     public value: string;
-    private isAnonymous: boolean;
+    private _isAnonymous: boolean;
 
     private constructor(value: string, anonymous = false) {
         this.value = value;
-        this.isAnonymous = anonymous;
+        this._isAnonymous = anonymous;
     }
 
     public static fromString(value: string): StaticName {
         return new StaticName(value);
     }
 
+    public static copy(name: StaticName): StaticName {
+        return name._isAnonymous ? StaticName.anonymous : new StaticName(name.value);
+    }
+
+    public copy(): StaticName {
+        return this._isAnonymous ? StaticName.anonymous : new StaticName(this.value);
+    }
+
     private static anonymousInstance = new StaticName('', true);
 
-    public static anonymous(): StaticName {
+    public static get anonymous(): StaticName {
         return this.anonymousInstance;
+    }
+
+    public get isAnonymous(): boolean {
+        return this._isAnonymous;
     }
 
     public equals(other: Name): boolean {
         return other instanceof StaticName
-            && other.isAnonymous === this.isAnonymous
+            && other._isAnonymous === this._isAnonymous
             && other.value === this.value;
     }
 
     public toString(): string {
-        return this.isAnonymous ? '_ANONYMOUS' : this.value;
+        return this._isAnonymous ? '_ANONYMOUS' : this.value;
     }
 
     public static fromJSON(jsonObject: StaticNameJSON): StaticName {
@@ -127,7 +150,7 @@ export class StaticName {
 export type DynamicNameJSON = { _class: 'DynamicName', signature: SignatureJSON }
 
 export class DynamicName {
-    private signature: Signature;
+    public signature: Signature;
 
     private constructor(signature: Signature) {
         this.signature = signature;
@@ -135,6 +158,14 @@ export class DynamicName {
 
     public static fromSignature(signature: Signature) {
         return new DynamicName(signature);
+    }
+
+    public static copy(name: DynamicName): DynamicName {
+        return new DynamicName(Signature.copy(name.signature));
+    }
+
+    public copy(): DynamicName {
+        return new DynamicName(Signature.copy(this.signature));
     }
 
     public equals(other: Name): boolean {

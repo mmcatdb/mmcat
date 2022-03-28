@@ -19,6 +19,11 @@ module.exports = {
     ],
     rules: {
         'vue/no-multiple-template-root': 'off',
+        'vue/html-self-closing': [ 'warn', {
+            'html': {
+                'void': 'always'
+            }
+        } ],
         'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
         'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
         semi: [ 'error', 'always' ],
