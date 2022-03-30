@@ -1,11 +1,12 @@
 import { IntendedStringBuilder } from "@/utils/string";
-import { nameFromJSON, type Name } from "../identifiers";
+import { nameFromJSON, Signature, type Name } from "../identifiers";
 import type { ComplexPropertyJSON } from "./ComplexProperty";
 import { subpathFromJSON, type ChildProperty } from "./compositeTypes";
 
 export class RootProperty {
     public name: Name; // TODO should be static name
     private _subpaths: ChildProperty[];
+    private _signature = Signature.null;
 
     public constructor(name: Name, subpaths: ChildProperty[] = []) {
         this.name = name;

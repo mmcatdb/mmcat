@@ -1,7 +1,7 @@
 <script lang="ts">
-import { ComplexProperty, SimpleProperty } from '@/types/accessPath';
+import { RootProperty } from '@/types/accessPath';
 import { Signature, StaticName } from '@/types/identifiers';
-import type { SchemaObject, SchemaCategory } from '@/types/schema';
+import type { SchemaCategory } from '@/types/schema';
 import type { NodeSchemaData } from '@/types/categoryGraph';
 import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
@@ -19,12 +19,9 @@ export default defineComponent({
         return {
             //schemaCategory: null as SchemaCategory | null,
             cytoscape: null as Core | null,
-            lastClickedObject: null as SchemaObject | null,
-            accessPath: null as ComplexProperty | null,
+            accessPath: null as RootProperty | null,
             rootObjectName: 'pathName',
             rootNodeData: null as NodeSchemaData | null,
-            property: null as ComplexProperty | null,
-            addingProperty: false
         };
     },
     methods: {
@@ -34,13 +31,9 @@ export default defineComponent({
         },
         onRootNodeSelect(data: NodeSchemaData) {
             const name = data.schemaObject.label;
-            this.accessPath = new ComplexProperty(StaticName.fromString(name), Signature.null);
+            this.accessPath = new RootProperty(StaticName.fromString(name));
             this.rootObjectName = name;
             this.rootNodeData = data;
-        },
-        rootNameInput() {
-            if (this.accessPath.name instanceof StaticName)
-                this.accessPath.name.value = this.rootObjectName;
         }
     }
 });
@@ -62,7 +55,6 @@ export default defineComponent({
                 </div>
                 <div v-else>
                     <AccessPathEditor
-                        v-if="accessPath !== null && rootNodeData !== null"
                         :cytoscape="cytoscape"
                         :root-node="rootNodeData"
                         :access-path="accessPath"

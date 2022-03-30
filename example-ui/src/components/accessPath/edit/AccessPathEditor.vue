@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ComplexProperty, RootProperty, type ChildProperty, type ParentProperty } from '@/types/accessPath';
+import { ComplexProperty, RootProperty, SimpleProperty, type ChildProperty, type ParentProperty } from '@/types/accessPath';
 import { Signature, StaticName } from '@/types/identifiers';
 import type { NodeSchemaData } from '@/types/categoryGraph';
 import type { Core } from 'cytoscape';
@@ -78,7 +78,7 @@ export default defineComponent({
         addPropertyClicked(parentProperty: ComplexProperty) {
             this.state = {
                 type: State.AddProperty,
-                property: new ComplexProperty(StaticName.fromString(''), Signature.empty),
+                property: new SimpleProperty(StaticName.fromString(''), Signature.empty),
                 parent: parentProperty
             };
         },

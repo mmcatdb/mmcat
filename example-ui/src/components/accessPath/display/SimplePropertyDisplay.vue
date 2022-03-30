@@ -18,11 +18,22 @@ export default defineComponent({
 </script>
 
 <template>
-    <span @click="$emit('simple:click', property)">
+    <span
+        class="name-text"
+        @click="$emit('simple:click', property)"
+    >
         {{ property.name }}: {{ property.signature }}{{ isLast ? '' : ',' }}
     </span>
 </template>
 
 <style scoped>
+.name-text:hover {
+    background-color: black;
+}
 
+.name-text {
+    width: fit-content;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
 </style>

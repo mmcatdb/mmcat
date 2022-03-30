@@ -2,11 +2,14 @@
 import { SimpleProperty, ComplexProperty } from '@/types/accessPath';
 import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
+import IconCommunity from '../../icons/IconCommunity.vue';
+import IconPlusSquare from '../../icons/IconPlusSquare.vue';
 
 export default defineComponent({
     name: 'ComplexPropertyDisplay',
     components: {
         SimplePropertyDisplay,
+        IconPlusSquare
     },
     props: {
         property: {
@@ -21,7 +24,8 @@ export default defineComponent({
     emits: [ 'complex:click', 'simple:click', 'add:click' ],
     data() {
         return {
-            SimpleProperty: SimpleProperty
+            SimpleProperty: SimpleProperty,
+            highlighted: false
         };
     },
     computed: {
@@ -49,11 +53,31 @@ export default defineComponent({
 
 <template>
     <div class="outer">
-        <span @click="$emit('complex:click', property)">{{ property.name }}: {{ property.isAuxiliary ? '' : (property.signature + ' ') }}{</span>
+        <div class="row">
+            <span
+                class="name-text"
+                :class="{ highlighted }"
+                @click="$emit('complex:click', property)"
+                @mouseenter="highlighted = true;"
+                @mouseleave="highlighted = false"
+            >
+                {{ property.name }}: {{ property.isAuxiliary ? '' : (property.signature + ' ') }}{
+            </span>
+        </div>
         <div class="divider">
-            <div class="filler" />
+            <div class="filler">
+                <div
+                    class="filler-line"
+                    :class="{ highlighted }"
+                />
+            </div>
             <div class="inner">
-                <span @click="$emit('add:click', property)">+</span>
+                <span
+                    class="button-icon"
+                    @click="$emit('add:click', property)"
+                >
+                    <IconPlusSquare />
+                </span>
                 <SimplePropertyDisplay
                     v-for="(subpath, index) in simpleSubpaths"
                     :key="index"
@@ -78,7 +102,17 @@ export default defineComponent({
                 </span>
             </div>
         </div>
-        <span>}{{ isLast ? '' : ',' }}</span>
+        <div class="row">
+            <span
+                ref="bracketText"
+                class="bracket-text"
+                :class="{ highlighted }"
+                @mouseenter="highlighted = true"
+                @mouseleave="highlighted = false"
+            >
+                }{{ isLast ? '' : ',' }}
+            </span>
+        </div>
     </div>
 </template>
 
@@ -95,11 +129,35 @@ export default defineComponent({
 
 .filler {
     width: 32px;
+    padding-left: 3px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.filler-line {
+    width: 6px;
+    height: 100%;
+    border-radius: 3px;
 }
 
 .inner {
     display: flex;
     flex-direction: column;
+}
+
+.button-icon:hover {
+    background-color: black;
+}
+
+.highlighted {
+    background-color: black;
+}
+
+.name-text, .bracket-text, .button-icon {
+    cursor: pointer;
+    width: fit-content;
+    padding: 2px 4px;
+    border-radius: 4px;
 }
 
 .fillerRow {
