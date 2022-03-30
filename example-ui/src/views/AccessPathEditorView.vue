@@ -1,12 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import AccessPathGraphicEditor from '@/components/accessPath/AccessPathGraphicEditor.vue';
+import AccessPathCreator from '../components/accessPath/AccessPathCreator.vue';
 
 export default defineComponent({
     components: {
-        AccessPathGraphicEditor
-    },
+    AccessPathCreator
+},
     props: {},
     data() {
         return {
@@ -21,7 +21,7 @@ export default defineComponent({
 
 <template>
     <h1>Access path editor</h1>
-    <AccessPathGraphicEditor />
+    <AccessPathCreator />
 </template>
 
 <style scoped>

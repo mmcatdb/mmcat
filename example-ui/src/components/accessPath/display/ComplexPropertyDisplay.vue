@@ -4,8 +4,9 @@ import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
 
 export default defineComponent({
+    name: 'ComplexPropertyDisplay',
     components: {
-        SimplePropertyDisplay
+        SimplePropertyDisplay,
     },
     props: {
         property: {
@@ -44,6 +45,7 @@ export default defineComponent({
     }
 });
 </script>
+
 
 <template>
     <div class="outer">

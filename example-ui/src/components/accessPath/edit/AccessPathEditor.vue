@@ -1,12 +1,11 @@
 <script lang="ts">
-import { ComplexProperty, RootProperty, SimpleProperty, type ChildProperty, type ParentProperty } from '@/types/accessPath';
+import { ComplexProperty, RootProperty, type ChildProperty, type ParentProperty } from '@/types/accessPath';
 import { Signature, StaticName } from '@/types/identifiers';
-import type { SchemaObject, SchemaCategory } from '@/types/schema';
 import type { NodeSchemaData } from '@/types/categoryGraph';
 import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
-import EditProperty from './edit/EditProperty.vue';
-import ComplexPropertyDisplay from './display/ComplexPropertyDisplay.vue';
+import EditProperty from './EditProperty.vue';
+import ComplexPropertyDisplay from '../display/ComplexPropertyDisplay.vue';
 
 enum State {
     Default,
@@ -91,43 +90,45 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="editor">
-        <template v-if="state.type === State.Default">
-            DEFAULT
+    <div class="divide">
+        <div class="editor">
+            <template v-if="state.type === State.Default">
+                DEFAULT
 
-            <div class="createProperty">
-                <button @click="startAddingProperty">
-                    Create new Property
-                </button>
-            </div>
-        </template>
-        <template v-else-if="state.type === State.EditProperty">
-            <EditProperty
-                :cytoscape="cytoscape"
-                :parent-node="rootNode"
-                :property="state.property"
-                @save="editProperty"
-                @cancel="setStateToDefault"
+                <div class="createProperty">
+                    <button @click="startAddingProperty">
+                        Create new Property
+                    </button>
+                </div>
+            </template>
+            <template v-else-if="state.type === State.EditProperty">
+                <EditProperty
+                    :cytoscape="cytoscape"
+                    :parent-node="rootNode"
+                    :property="state.property"
+                    @save="editProperty"
+                    @cancel="setStateToDefault"
+                />
+            </template>
+            <template v-else-if="state.type === State.AddProperty">
+                <EditProperty
+                    :cytoscape="cytoscape"
+                    :parent-node="rootNode"
+                    :property="state.property"
+                    @save="addProperty"
+                    @cancel="setStateToDefault"
+                />
+            </template>
+        </div>
+        <div class="display">
+            <ComplexPropertyDisplay
+                :property="accessPath"
+                :is-last="true"
+                @complex:click="editPropertyClicked"
+                @simple:click="editPropertyClicked"
+                @add:click="addPropertyClicked"
             />
-        </template>
-        <template v-else-if="state.type === State.AddProperty">
-            <EditProperty
-                :cytoscape="cytoscape"
-                :parent-node="rootNode"
-                :property="state.property"
-                @save="addProperty"
-                @cancel="setStateToDefault"
-            />
-        </template>
-    </div>
-    <div class="display">
-        <ComplexPropertyDisplay
-            :property="accessPath"
-            :is-last="true"
-            @complex:click="editPropertyClicked"
-            @simple:click="editPropertyClicked"
-            @add:click="addPropertyClicked"
-        />
+        </div>
     </div>
 </template>
 

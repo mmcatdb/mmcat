@@ -4,8 +4,8 @@ import type { NodeSchemaData } from '@/types/categoryGraph';
 import { Signature, type Name } from '@/types/identifiers';
 import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
-import SignatureInput from './SignatureInput.vue';
-import NameInput from './NameInput.vue';
+import SignatureInput from '../input/SignatureInput.vue';
+import NameInput from '../input/NameInput.vue';
 
 enum State {
     SelectName,

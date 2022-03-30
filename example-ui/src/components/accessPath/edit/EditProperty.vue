@@ -4,8 +4,8 @@ import type { NodeSchemaData } from '@/types/categoryGraph';
 import type { Signature, Name } from '@/types/identifiers';
 import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
-import SignatureInput from './SignatureInput.vue';
-import NameInput from './NameInput.vue';
+import SignatureInput from '../input/SignatureInput.vue';
+import NameInput from '../input/NameInput.vue';
 
 enum State {
     SelectType,
@@ -40,12 +40,15 @@ export default defineComponent({
             newType: this.propertyToType(this.property),
             newSignature: this.property.signature.copy() as Signature,
             newName: this.property.name.copy() as Name,
-            state: State.SelectName,
+            state: State.SelectType,
             State: State,
             PropertyType: PropertyType
         };
     },
     computed: {
+        typeChanged(): boolean {
+            return this.newType !== this.propertyToType(this.property);
+        },
         nameChanged(): boolean {
             return !this.property.name.equals(this.newName as Name);
         },
@@ -53,7 +56,7 @@ export default defineComponent({
             return !this.property.signature.equals(this.newSignature as Signature);
         },
         isNew(): boolean {
-            return !!this.property.parent;
+            return !this.property.parent;
         }
     },
     methods: {
@@ -111,21 +114,43 @@ export default defineComponent({
     <div class="outer">
         <h2>Edit property</h2>
         <template v-if="state === State.SelectType">
-            Type:
+            Type:<br />
             <input
-                id="static"
+                id="simple"
                 v-model="newType"
                 type="radio"
                 :value="PropertyType.Simple"
             />
-            <label for="static">Simple</label><br />
+            <label
+                :class="{ value: newType === PropertyType.Simple }"
+                for="simple"
+            >
+                Simple
+            </label><br />
             <input
-                id="static"
+                id="complex"
                 v-model="newType"
                 type="radio"
                 :value="PropertyType.Complex"
             />
-            <label for="static">Compley</label><br />
+            <label
+                :class="{ value: newType === PropertyType.Complex }"
+                for="complex"
+            >
+                Complex
+            </label><br />
+            <button
+                :disabled="!(typeChanged || isNew)"
+                @click="confirmNewType"
+            >
+                Confirm
+            </button>
+            <button
+                v-if="!isNew"
+                @click="keepOldName"
+            >
+                Keep current
+            </button>
         </template>
         <template v-else-if="state === State.SelectName">
             Name: <span class="value">{{ newName }}</span>
@@ -188,12 +213,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.outer {
-    padding: 16px;
-    margin: 16px;
-    border: 1px solid white;
-}
-
 .value {
     font-weight: bold;
 }

@@ -7,25 +7,12 @@ import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
 import SchemaCategoryGraph from '../category/SchemaCategoryGraph.vue';
 import SelectRoot from './SelectRoot.vue';
-import ComplexPropertyDisplay from './display/ComplexPropertyDisplay.vue';
-import EditComplexProperty from './edit/EditComplexProperty.vue';
-import AccessPathEditor from './AccessPathEditor.vue';
-
-enum State {
-    Default,
-    RootSelected,
-    AddComplexProperty,
-    EditComplexProperty,
-    AddSimpleProperty,
-    EditSimpleProperty
-}
+import AccessPathEditor from './edit/AccessPathEditor.vue';
 
 export default defineComponent({
     components: {
         SchemaCategoryGraph,
         SelectRoot,
-        ComplexPropertyDisplay,
-        EditComplexProperty,
         AccessPathEditor
     },
     data() {
@@ -36,12 +23,7 @@ export default defineComponent({
             accessPath: null as ComplexProperty | null,
             rootObjectName: 'pathName',
             rootNodeData: null as NodeSchemaData | null,
-            state: State.Default,
-            State: State,
-
-            editingComplexProperty: false,
             property: null as ComplexProperty | null,
-
             addingProperty: false
         };
     },
@@ -55,7 +37,6 @@ export default defineComponent({
             this.accessPath = new ComplexProperty(StaticName.fromString(name), Signature.null);
             this.rootObjectName = name;
             this.rootNodeData = data;
-            this.state = State.RootSelected;
         },
         rootNameInput() {
             if (this.accessPath.name instanceof StaticName)
