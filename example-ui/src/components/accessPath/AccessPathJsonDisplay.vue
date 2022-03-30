@@ -1,11 +1,11 @@
 <script lang="ts">
-import type { AccessPath } from '@/types/accessPath';
+import type { RootProperty, ChildProperty } from '@/types/accessPath';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
     props: {
         accessPath: {
-            type: Object as () => AccessPath | null,
+            type: Object as () => RootProperty | ChildProperty | null,
             required: true
         }
     },

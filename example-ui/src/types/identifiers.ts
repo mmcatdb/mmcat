@@ -8,12 +8,12 @@ enum SignatureType {
 export type SignatureJSON = { _class: 'Signature', ids: number[] };
 
 export class Signature {
-    private ids: number[];
-    private type: SignatureType;
+    public readonly _ids: number[];  // TODO private
+    public readonly _type: SignatureType; // TODO private
 
     private constructor(input: number | number[], type?: SignatureType) {
-        this.ids = typeof input === 'number' ? [ input ] : [ ...input ];
-        this.type = type !== undefined ? type : this.ids.length === 1 ? SignatureType.Base : SignatureType.Composite;
+        this._ids = typeof input === 'number' ? [ input ] : [ ...input ];
+        this._type = type !== undefined ? type : this._ids.length === 1 ? SignatureType.Base : SignatureType.Composite;
     }
 
     public static base(id: number): Signature {
@@ -25,15 +25,15 @@ export class Signature {
     }
 
     public static copy(signature: Signature): Signature {
-        return new Signature(signature.ids, signature.type);
+        return new Signature(signature._ids, signature._type);
     }
 
     public copy(): Signature {
-        return new Signature(this.ids, this.type);
+        return new Signature(this._ids, this._type);
     }
 
     public concatenate(other: Signature): Signature {
-        return new Signature(other.ids.concat(this.ids));
+        return new Signature(other._ids.concat(this._ids));
     }
 
     private static emptyInstance = new Signature([], SignatureType.Empty);
@@ -49,31 +49,31 @@ export class Signature {
     }
 
     public get isBase(): boolean {
-        return this.type === SignatureType.Base;
+        return this._type === SignatureType.Base;
     }
 
     public get isNull(): boolean {
-        return this.type === SignatureType.Null;
+        return this._type === SignatureType.Null;
     }
 
     public toString(): string {
-        if (this.type === SignatureType.Empty)
+        if (this._type === SignatureType.Empty)
             return '_EMPTY';
 
-        if (this.type === SignatureType.Null)
+        if (this._type === SignatureType.Null)
             return '_NULL';
 
-        return this.ids.join('.');
+        return this._ids.join('.');
     }
 
     public toBase(): Signature[] {
-        return this.ids.map(id => new Signature(id));
+        return this._ids.map(id => new Signature(id));
     }
 
     public equals(other: Signature): boolean {
-        return this.type === other.type
-            && this.ids.length === other.ids.length
-            && Signature.compareIdsWithSameLength(this.ids, other.ids) === 0;
+        return this._type === other._type
+            && this._ids.length === other._ids.length
+            && Signature.compareIdsWithSameLength(this._ids, other._ids) === 0;
     }
 
     private static compareIdsWithSameLength(ids1: number[], ids2: number[]): number {
@@ -102,8 +102,8 @@ export type Name = StaticName | DynamicName;
 export type StaticNameJSON = { _class: 'StaticName', value: string, type: 'STATIC_NAME' | 'ANONYMOUS' };
 
 export class StaticName {
-    public value: string;
-    private _isAnonymous: boolean;
+    readonly value: string;
+    readonly _isAnonymous: boolean; // TODO private
 
     private constructor(value: string, anonymous = false) {
         this.value = value;
@@ -150,7 +150,7 @@ export class StaticName {
 export type DynamicNameJSON = { _class: 'DynamicName', signature: SignatureJSON }
 
 export class DynamicName {
-    public signature: Signature;
+    readonly signature: Signature;
 
     private constructor(signature: Signature) {
         this.signature = signature;

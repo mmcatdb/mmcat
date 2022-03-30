@@ -3,7 +3,8 @@ import { defineComponent } from 'vue';
 import type { Job } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
 import type { Mapping } from '@/types/mapping';
-import { accessPathFromJSON } from '@/types/accessPath';
+import { RootProperty } from '@/types/accessPath';
+//import { accessPathFromJSON } from '@/types/accessPath';
 
 export default defineComponent({
     components: {
@@ -28,7 +29,7 @@ export default defineComponent({
             const jsonString = this.mappings[0].mappingJsonValue;
             console.log(jsonString);
             const jsonObject = JSON.parse(jsonString);
-            const path = accessPathFromJSON(jsonObject.accessPath);
+            const path = RootProperty.fromJSON(jsonObject.accessPath);
             console.log({ path });
             console.log(path.toString());
         }
@@ -53,25 +54,25 @@ export default defineComponent({
 </script>
 
 <template>
-<div class="newJob">
-    <h2>This is going to be a new job</h2>
-    <label>Name:</label>
-    <br>
-    <input v-model="jobName" />
-    <br>
-    <label>Select mapping:</label>
-    <br>
-    <select v-model="mappingId">
-        <option v-for="mapping in mappings" :value="mapping.id">{{ mapping.jsonValue }}</option>
-    </select>
-    <br>
-    <button
-        :disabled="createJobDisabled"
-        @click="createJob"
-    >
-        Create job
-    </button>
-</div>
+    <div class="newJob">
+        <h2>This is going to be a new job</h2>
+        <label>Name:</label>
+        <br>
+        <input v-model="jobName" />
+        <br>
+        <label>Select mapping:</label>
+        <br>
+        <select v-model="mappingId">
+            <option v-for="mapping in mappings" :value="mapping.id">{{ mapping.jsonValue }}</option>
+        </select>
+        <br>
+        <button
+            :disabled="createJobDisabled"
+            @click="createJob"
+        >
+            Create job
+        </button>
+    </div>
 </template>
 
 <style scoped>

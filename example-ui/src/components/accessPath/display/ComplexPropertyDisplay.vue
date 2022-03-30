@@ -17,7 +17,7 @@ export default defineComponent({
             required: true
         }
     },
-    emits: [ 'complex:click', 'simple:click' ],
+    emits: [ 'complex:click', 'simple:click', 'add:click' ],
     data() {
         return {
             SimpleProperty: SimpleProperty
@@ -37,6 +37,9 @@ export default defineComponent({
         },
         reEmitSimpleClick(property: SimpleProperty): void {
             this.$emit('simple:click', property);
+        },
+        reEmitAddClick(property: ComplexProperty): void {
+            this.$emit('add:click', property);
         }
     }
 });
@@ -48,6 +51,7 @@ export default defineComponent({
         <div class="divider">
             <div class="filler" />
             <div class="inner">
+                <span @click="$emit('add:click', property)">+</span>
                 <SimplePropertyDisplay
                     v-for="(subpath, index) in simpleSubpaths"
                     :key="index"
@@ -62,6 +66,7 @@ export default defineComponent({
                     :is-last="index === complexSubpaths.length - 1"
                     @complex:click="reEmitComplexClick"
                     @simple:click="reEmitSimpleClick"
+                    @add:click="reEmitAddClick"
                 />
                 <span
                     v-if="property.subpaths.length === 0"

@@ -9,11 +9,15 @@ import SchemaCategoryGraph from '../category/SchemaCategoryGraph.vue';
 import SelectRoot from './SelectRoot.vue';
 import ComplexPropertyDisplay from './display/ComplexPropertyDisplay.vue';
 import EditComplexProperty from './edit/EditComplexProperty.vue';
+import AccessPathEditor from './AccessPathEditor.vue';
 
 enum State {
     Default,
     RootSelected,
-    EditComplexProperty
+    AddComplexProperty,
+    EditComplexProperty,
+    AddSimpleProperty,
+    EditSimpleProperty
 }
 
 export default defineComponent({
@@ -21,7 +25,8 @@ export default defineComponent({
         SchemaCategoryGraph,
         SelectRoot,
         ComplexPropertyDisplay,
-        EditComplexProperty
+        EditComplexProperty,
+        AccessPathEditor
     },
     data() {
         return {
@@ -55,32 +60,6 @@ export default defineComponent({
         rootNameInput() {
             if (this.accessPath.name instanceof StaticName)
                 this.accessPath.name.value = this.rootObjectName;
-        },
-        startAddProperty() {
-            this.addingProperty = true;
-            this.property = new ComplexProperty(StaticName.fromString(''), Signature.empty);
-        },
-        //addNewProperty(property: ComplexProperty): void {
-        addNewProperty(): void {
-            //this.accessPath?.subpaths.push(property);
-            this.accessPath?.subpaths.push(this.property);
-            this.addingProperty = false;
-        },
-        complexPropertyClicked(property: ComplexProperty) {
-            console.log(property);
-            this.property = property;
-            this.editingComplexProperty = true;
-        },
-        simplePropertyClicked(property: SimpleProperty) {
-            console.log(property);
-        },
-        editPropertySave(): void {
-            this.editingComplexProperty = false;
-            this.property = null;
-        },
-        editPropertyCancel(): void {
-            this.editingComplexProperty = false;
-            this.property = null;
         }
     }
 });
@@ -94,55 +73,20 @@ export default defineComponent({
             class="divide"
         >
             <div class="editor">
-                <div v-if="state === State.Default">
+                <div v-if="accessPath === null || rootNodeData === null">
                     <SelectRoot
                         :cytoscape="cytoscape"
                         @root-node:confirm="onRootNodeSelect"
                     />
                 </div>
                 <div v-else>
-                    <label>Root object name:</label><br>
-                    <input
-                        v-model="rootObjectName"
-                        @input="rootNameInput"
-                    />
-
-                    <template v-if="addingProperty">
-                        <EditComplexProperty
-                            :cytoscape="cytoscape"
-                            :property-node="rootNodeData"
-                            :property="property"
-                            :is-new="true"
-                            @save="addNewProperty"
-                            @cancel="() => addingProperty = false"
-                        />
-                    </template>
-                    <template v-else>
-                        <div class="createProperty">
-                            <button @click="startAddProperty">
-                                Create new Property
-                            </button>
-                        </div>
-                    </template>
-
-                    <EditComplexProperty
-                        v-if="editingComplexProperty"
+                    <AccessPathEditor
+                        v-if="accessPath !== null && rootNodeData !== null"
                         :cytoscape="cytoscape"
-                        :property-node="rootNodeData"
-                        :property="property"
-                        @save="editPropertySave"
-                        @cancel="editPropertyCancel"
+                        :root-node="rootNodeData"
+                        :access-path="accessPath"
                     />
                 </div>
-            </div>
-            <div class="display">
-                <ComplexPropertyDisplay
-                    v-if="accessPath !== null"
-                    :property="accessPath"
-                    :is-last="true"
-                    @complex:click="complexPropertyClicked"
-                    @simple:click="simplePropertyClicked"
-                />
             </div>
         </div>
     </div>
