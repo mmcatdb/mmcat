@@ -6,6 +6,7 @@ import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import NameInput from '../input/NameInput.vue';
+import type { Database } from '@/types/database';
 
 enum State {
     SelectType,
@@ -23,6 +24,10 @@ export default defineComponent({
     props: {
         cytoscape: {
             type: Object as () => Core,
+            required: true
+        },
+        database: {
+            type: Object as () => Database,
             required: true
         },
         parentNode: { // TODO should be parentNode
@@ -157,6 +162,7 @@ export default defineComponent({
             <NameInput
                 v-model="newName"
                 :cytoscape="cytoscape"
+                :database="database"
                 :root-node="parentNode"
             />
             <br />
@@ -184,6 +190,7 @@ export default defineComponent({
             <SignatureInput
                 v-model="newSignature"
                 :cytoscape="cytoscape"
+                :database="database"
                 :root-node="parentNode"
             />
             <br />

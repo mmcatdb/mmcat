@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { NodeSchemaData } from '@/types/categoryGraph';
+import type { Database } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
 import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
@@ -16,6 +17,10 @@ export default defineComponent({
     props: {
         cytoscape: {
             type: Object as () => Core,
+            required: true
+        },
+        database: {
+            type: Object as () => Database,
             required: true
         },
         rootNode: {
@@ -118,6 +123,7 @@ export default defineComponent({
             <SignatureInput
                 v-model="dynamicValue"
                 :cytoscape="cytoscape"
+                :database="database"
                 :root-node="rootNode"
                 :disabled="disabled"
                 @input="updateInnerValue"

@@ -6,6 +6,7 @@ import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
 import EditProperty from './EditProperty.vue';
 import ComplexPropertyDisplay from '../display/ComplexPropertyDisplay.vue';
+import type { Database } from '@/types/database';
 
 enum State {
     Default,
@@ -31,6 +32,10 @@ export default defineComponent({
     props: {
         cytoscape: {
             type: Object as () => Core,
+            required: true
+        },
+        database: {
+            type: Object as () => Database,
             required: true
         },
         rootNode: {
@@ -104,6 +109,7 @@ export default defineComponent({
             <template v-else-if="state.type === State.EditProperty">
                 <EditProperty
                     :cytoscape="cytoscape"
+                    :database="database"
                     :parent-node="rootNode"
                     :property="state.property"
                     @save="editProperty"
@@ -113,6 +119,7 @@ export default defineComponent({
             <template v-else-if="state.type === State.AddProperty">
                 <EditProperty
                     :cytoscape="cytoscape"
+                    :database="database"
                     :parent-node="rootNode"
                     :property="state.property"
                     @save="addProperty"

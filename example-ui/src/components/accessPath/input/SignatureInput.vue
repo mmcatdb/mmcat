@@ -1,5 +1,6 @@
 <script lang="ts">
 import { NodeSchemaData, NodeSequence, resetAvailabilityStatus } from '@/types/categoryGraph';
+import type { Database } from '@/types/database';
 import { TEST_CONFIGURATION } from '@/types/database/Configuration';
 import { Signature } from '@/types/identifiers';
 import type { Core, EventObject, NodeSingular } from 'cytoscape';
@@ -9,6 +10,10 @@ export default defineComponent({
     props: {
         cytoscape: {
             type: Object as () => Core,
+            required: true
+        },
+        database: {
+            type: Object as () => Database,
             required: true
         },
         rootNode: {
@@ -47,7 +52,7 @@ export default defineComponent({
         this.cytoscape.addListener('tap', 'node', this.onNodeTapHandler);
 
         // TODO
-        this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
+        this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
 
         //this.sequence.allNodes.forEach(node => node.select());
     },
@@ -65,13 +70,13 @@ export default defineComponent({
             if (this.sequence.tryRemoveNode(node)) {
                 //node.unselect();
                 resetAvailabilityStatus(this.cytoscape);
-                this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
+                this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
                 this.updateInnerValueFromSequenceChange();
             }
             else if (this.sequence.tryAddNode(node)) {
                 //node.select();
                 resetAvailabilityStatus(this.cytoscape);
-                this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
+                this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
                 this.updateInnerValueFromSequenceChange();
             }
         },
@@ -85,7 +90,7 @@ export default defineComponent({
             this.sequence.unselectAll();
             resetAvailabilityStatus(this.cytoscape);
             this.sequence = this.sequenceFromSignature(signature);
-            this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
+            this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
             this.innerValue = signature;
             //this.sequence.allNodes.forEach(node => node.select());
 

@@ -24,15 +24,16 @@ export default defineComponent({
             accessPath: null as RootProperty | null,
             rootObjectName: 'pathName',
             rootNodeData: null as NodeSchemaData | null,
+            databases: [] as Database[],
+            selectingDatabase: null as Database | null,
+            selectedDatabase: null as Database | null
         };
     },
     async mounted() {
         // TODO
         const result = await GET<DatabaseFromServer[]>('/databases');
-        if (result.status) {
-            const databases = result.data.map(databaseFromServer => new Database(databaseFromServer));
-            console.log(databases);
-        }
+        if (result.status)
+            this.databases = result.data.map(databaseFromServer => new Database(databaseFromServer));
     },
     methods: {
         cytoscapeCreated(cytoscape: Core, schemaCategory: SchemaCategory) {
@@ -57,19 +58,37 @@ export default defineComponent({
             class="divide"
         >
             <div class="editor">
-                <div v-if="accessPath === null || rootNodeData === null">
-                    <SelectRoot
-                        :cytoscape="cytoscape"
-                        @root-node:confirm="onRootNodeSelect"
-                    />
-                </div>
-                <div v-else>
-                    <AccessPathEditor
-                        :cytoscape="cytoscape"
-                        :root-node="rootNodeData"
-                        :access-path="accessPath"
-                    />
-                </div>
+                <template v-if="!!selectedDatabase">
+                    <div v-if="accessPath === null || rootNodeData === null">
+                        <SelectRoot
+                            :cytoscape="cytoscape"
+                            @root-node:confirm="onRootNodeSelect"
+                        />
+                    </div>
+                    <div v-else>
+                        <AccessPathEditor
+                            :cytoscape="cytoscape"
+                            :database="selectedDatabase"
+                            :root-node="rootNodeData"
+                            :access-path="accessPath"
+                        />
+                    </div>
+                </template>
+                <template v-else>
+                    <label>Select database:</label>
+                    <select v-model="selectingDatabase">
+                        <option
+                            v-for="database in databases"
+                            :key="database.id"
+                            :value="database"
+                        >
+                            {{ database.label }}
+                        </option>
+                    </select>
+                    <button @click="selectedDatabase = selectingDatabase">
+                        Confirm
+                    </button>
+                </template>
             </div>
         </div>
     </div>
