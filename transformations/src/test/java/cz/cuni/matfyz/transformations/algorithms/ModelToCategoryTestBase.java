@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.ForestOfRecords;

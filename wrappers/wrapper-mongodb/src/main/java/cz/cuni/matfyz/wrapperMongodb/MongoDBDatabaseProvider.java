@@ -3,6 +3,7 @@ package cz.cuni.matfyz.wrapperMongodb;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
@@ -18,7 +19,9 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
     private String username;
     private String password;
 
-    private MongoDatabase databaseInstance;
+    // The client itself handles connection pooling so there should be only one client per application.
+    // This also means that there should be at most one instance of this class so it should be cached somewhere.
+    private MongoClient mongoClient;
 
     public MongoDBDatabaseProvider(String host, String port, String database, String username, String password)
     {
@@ -31,18 +34,13 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
 
     public MongoDatabase getDatabase()
     {
-        if (databaseInstance == null)
-            buildDatabase();
+        if (mongoClient == null)
+            mongoClient = createClientFromCredentials(host, port, database, username, password);
 
-        return databaseInstance;
+        return mongoClient.getDatabase(database);
     }
 
-    public void buildDatabase()
-    {
-        this.databaseInstance = createDatabaseFromCredentials(host, port, database, username, password);
-    }
-
-    private static MongoDatabase createDatabaseFromCredentials(String host, String port, String database, String username, String password)
+    private static MongoClient createClientFromCredentials(String host, String port, String database, String username, String password)
     {
         var connectionBuilder = new StringBuilder();
         var connectionString = connectionBuilder
@@ -58,8 +56,7 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
             .append(database)
             .toString();
 
-        var client = MongoClients.create(connectionString);
-        return client.getDatabase(database);
+        return MongoClients.create(connectionString);
     }
 
     public void executeScript(String pathToFile) throws Exception

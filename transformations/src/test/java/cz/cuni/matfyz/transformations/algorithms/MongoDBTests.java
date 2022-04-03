@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
@@ -49,17 +49,10 @@ public class MongoDBTests
 
     private static MongoDBPullWrapper createPullWrapper()
     {
-        databaseProvider.buildDatabase();
         var wrapper = new MongoDBPullWrapper();
         wrapper.injectDatabaseProvider(databaseProvider);
 
         return wrapper;
-    }
-
-    @Test
-    public void createDBProvider_DoesNotThrow()
-    {
-        assertDoesNotThrow(() -> createPullWrapper());
     }
 
     @Test

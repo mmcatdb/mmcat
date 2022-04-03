@@ -2,8 +2,8 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.utils.ComparablePair;
+import cz.cuni.matfyz.abstractWrappers.AbstractICWrapper;
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.statements.ICStatement;
 
 import java.util.*;

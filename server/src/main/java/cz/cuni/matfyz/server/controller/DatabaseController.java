@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.service.DatabaseService;
+import cz.cuni.matfyz.server.service.WrapperService;
+import cz.cuni.matfyz.server.view.DatabaseConfiguration;
 import cz.cuni.matfyz.server.view.DatabaseView;
 import cz.cuni.matfyz.server.entity.Database;
 
@@ -18,24 +20,32 @@ import org.springframework.web.server.ResponseStatusException;
  * @author jachym.bartik
  */
 @RestController
-public class DatabaseController
-{
+public class DatabaseController {
+
     @Autowired
     private DatabaseService service;
 
+    @Autowired
+    private WrapperService wrapperService;
+
     @GetMapping("/databases")
-    public List<DatabaseView> getAllDatabases()
-    {
-        return service.findAll().stream().map(database -> new DatabaseView(database)).toList();
+    public List<DatabaseView> getAllDatabases() {
+        var output = service.findAll().stream().map(database -> createDatabaseView(database)).toList();
+        return output;
     }
 
     @GetMapping("/databases/{id}")
-    public DatabaseView getDatabaseById(@PathVariable Integer id)
-    {
+    public DatabaseView getDatabaseById(@PathVariable Integer id) {
         Database database = service.find(id);
         if (database != null)
-            return new DatabaseView(database);
+            return createDatabaseView(database);
         
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+
+    private DatabaseView createDatabaseView(Database database) {
+        var configuration = new DatabaseConfiguration(wrapperService.getPathWrapper(database));
+        return new DatabaseView(database, configuration);
+    }
+
 }

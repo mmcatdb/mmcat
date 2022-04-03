@@ -37,7 +37,7 @@ public abstract class DatabaseWrapper {
                 .append("&password=")
                 .append(Config.get("postgresql.password"))
                 .toString();
-    
+
             return DriverManager.getConnection(connectionString);
         }
         catch (SQLException exception) {

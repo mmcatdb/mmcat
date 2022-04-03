@@ -7,8 +7,6 @@ import cz.cuni.matfyz.server.repository.utils.Utils;
 import java.util.*;
 import org.springframework.stereotype.Repository;
 
-
-
 /**
  * 
  * @author jachym.bartik

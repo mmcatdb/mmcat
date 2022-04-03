@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.wrapperDummy;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.cuni.matfyz.abstractWrappers.AbstractICWrapper;
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.core.utils.ComparablePair;
 import cz.cuni.matfyz.statements.ICStatement;

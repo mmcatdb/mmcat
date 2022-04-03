@@ -11,15 +11,15 @@ import cz.cuni.matfyz.server.entity.Database;
 public class DatabaseView implements Serializable {
 
     public int id;
-    public String type;
+    public Database.Type type;
     public String label;
     public DatabaseConfiguration configuration;
 
-    public DatabaseView(Database database) {
+    public DatabaseView(Database database, DatabaseConfiguration configuration) {
         this.id = database.id;
         this.type = database.type;
         this.label = database.label;
-        this.configuration = new DatabaseConfiguration(database.getPathWrapper());
+        this.configuration = configuration;
     }
 
 }

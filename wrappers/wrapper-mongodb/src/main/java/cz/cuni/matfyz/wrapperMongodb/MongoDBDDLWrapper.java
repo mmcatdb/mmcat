@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.wrapperMongodb;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import java.util.Set;
+
+import cz.cuni.matfyz.abstractWrappers.AbstractDDLWrapper;
 
 /**
  *

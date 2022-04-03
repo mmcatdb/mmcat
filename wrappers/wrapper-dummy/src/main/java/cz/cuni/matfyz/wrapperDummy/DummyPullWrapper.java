@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.wrapperDummy;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.record.*;
 

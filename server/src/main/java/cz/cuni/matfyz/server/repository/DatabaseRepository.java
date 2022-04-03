@@ -7,8 +7,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
-
-
 /**
  * 
  * @author jachym.bartik
@@ -35,7 +33,7 @@ public class DatabaseRepository {
             var statement = connection.prepareStatement("SELECT * FROM database_for_mapping;");
             var resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
+            while (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
                 String jsonValue = resultSet.getString("json_value");
                 output.add(Database.fromJSON(foundId, jsonValue));

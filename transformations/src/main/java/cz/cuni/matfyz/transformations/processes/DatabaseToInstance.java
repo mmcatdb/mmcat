@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.transformations.processes;
 
 import cz.cuni.matfyz.core.record.*;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.utils.Result;

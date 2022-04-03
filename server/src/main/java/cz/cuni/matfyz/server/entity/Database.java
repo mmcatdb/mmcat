@@ -2,23 +2,16 @@ package cz.cuni.matfyz.server.entity;
 
 import org.json.JSONObject;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.server.Config;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBPathWrapper;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
-
 /**
  * 
  * @author jachym.bartik
  */
 public class Database extends Entity {
 
-    public final String type;
+    public final Type type;
     public final String label;
 
-    private Database(Integer id, String type, String label) {
+    private Database(Integer id, Type type, String label) {
         super(id);
         this.type = type;
         this.label = label;
@@ -29,7 +22,7 @@ public class Database extends Entity {
         try {
             var json = new JSONObject(jsonValue);
 
-            String type = json.getString("type");
+            Type type = Type.valueOf(json.getString("type"));
             String label = json.getString("label");
 
             return new Database(id, type, label);
@@ -41,34 +34,9 @@ public class Database extends Entity {
         return null;
     }
 
-    public AbstractPullWrapper getPullWraper() {
-        if (!"mongodb".equals(type))
-            return null;
-
-        return getMongodbPullWrapper();
-    }
-
-    public AbstractPathWrapper getPathWrapper() {
-        if (!"mongodb".equals(type))
-            return null;
-
-        return new MongoDBPathWrapper();
-    }
-
-    private AbstractPullWrapper getMongodbPullWrapper() {
-        var databaseProvider = new MongoDBDatabaseProvider(
-            Config.get("data.mongodb.host"),
-            Config.get("data.mongodb.port"),
-            Config.get("data.mongodb.database"),
-            Config.get("data.mongodb.username"),
-            Config.get("data.mongodb.password")
-        );
-
-        databaseProvider.buildDatabase();
-        var wrapper = new MongoDBPullWrapper();
-        wrapper.injectDatabaseProvider(databaseProvider);
-
-        return wrapper;
+    public enum Type {
+        mongodb,
+        postgresql
     }
     
 }

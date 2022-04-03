@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import java.nio.file.Paths;
-import java.sql.SQLException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,19 +47,12 @@ public class PostgreSQLTests
         }
     }
 
-    private static PostgreSQLPullWrapper createPullWrapper() throws SQLException
+    private static PostgreSQLPullWrapper createPullWrapper()
     {
-        connectionProvider.buildConnection();
         var wrapper = new PostgreSQLPullWrapper();
         wrapper.injectConnectionProvider(connectionProvider);
 
         return wrapper;
-    }
-
-    @Test
-    public void createDBProvider_DoesNotThrow()
-    {
-        assertDoesNotThrow(() -> createPullWrapper());
     }
 
     @Test

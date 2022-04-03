@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.wrapperDummy;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractWrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.statements.DDLStatement;
 
 import java.util.*;

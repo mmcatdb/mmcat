@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.wrapperPostgresql;
 
+import cz.cuni.matfyz.abstractWrappers.AbstractICWrapper;
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
-import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.core.utils.ComparablePair;
 import java.util.*;
 

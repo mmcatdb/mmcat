@@ -2,10 +2,11 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.utils.Result;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
+import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.repository.JobRepository;
 
@@ -36,6 +37,9 @@ public class AsyncJobService {
 
     @Autowired
     private SchemaCategoryService categoryService;
+
+    @Autowired
+    private WrapperService wrapperService;
 
     @Async("jobExecutor")
     public void runJob(Job job, UserStore store) {
@@ -68,8 +72,8 @@ public class AsyncJobService {
             .setCategoryWrapper(categoryWrapper)
             .build();
 
-        AbstractPullWrapper pullWrapper = databaseService.find(mappingWrapper.databaseId)
-            .getPullWraper();
+        Database database = databaseService.find(mappingWrapper.databaseId);
+        AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
 
         var process = new DatabaseToInstance();
         process.input(pullWrapper, mapping);

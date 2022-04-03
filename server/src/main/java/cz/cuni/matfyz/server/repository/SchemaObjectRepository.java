@@ -8,8 +8,6 @@ import java.util.*;
 
 import org.springframework.stereotype.Repository;
 
-
-
 /**
  * 
  * @author jachym.bartik

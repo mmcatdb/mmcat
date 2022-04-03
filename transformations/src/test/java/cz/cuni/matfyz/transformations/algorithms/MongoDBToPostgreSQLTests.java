@@ -75,7 +75,6 @@ public class MongoDBToPostgreSQLTests
 
     private static MongoDBPullWrapper createPullWrapper()
     {
-        mongodbProvider.buildDatabase();
         var wrapper = new MongoDBPullWrapper();
         wrapper.injectDatabaseProvider(mongodbProvider);
 

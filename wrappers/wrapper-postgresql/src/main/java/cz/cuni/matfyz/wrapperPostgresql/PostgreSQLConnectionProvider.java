@@ -6,6 +6,11 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -13,13 +18,17 @@ import java.sql.SQLException;
  */
 public class PostgreSQLConnectionProvider implements ConnectionProvider
 {
+    private static Logger logger = LoggerFactory.getLogger(PostgreSQLConnectionProvider.class);
+
     private String host;
     private String port;
     private String database;
     private String username;
     private String password;
 
-    private Connection connection;
+    // This class is also meant to be instantiated only once (see the MongoDB wrapper) but it currently doesn't use any caching itself.
+    // However, some connection pooling can be added in the future.
+    //private Connection connection;
 
     public PostgreSQLConnectionProvider(String host, String port, String database, String username, String password)
     {
@@ -32,24 +41,14 @@ public class PostgreSQLConnectionProvider implements ConnectionProvider
 
     public Connection getConnection()
     {
-        if (connection == null)
-        {
-            try
-            {
-                buildConnection();
-            }
-            catch (SQLException exception)
-            {
-                System.out.println(exception);
-            }
+        try {
+            return createConnectionFromCredentials(host, port, database, username, password);
+        }
+        catch (SQLException exception) {
+            logger.error("Cannot create connection to PostgreSQL.", exception);
         }
 
-        return connection;
-    }
-
-    public void buildConnection() throws SQLException
-    {
-        this.connection = createConnectionFromCredentials(host, port, database, username, password);
+        return null;
     }
 
     private static Connection createConnectionFromCredentials(String host, String port, String database, String username, String password) throws SQLException
@@ -90,7 +89,7 @@ public class PostgreSQLConnectionProvider implements ConnectionProvider
             .append(pathToFile)
             .toString();
         
-        System.out.println("Executing: " + beforePasswordString + "********" + afterPasswordString);
+        logger.info("Executing: " + beforePasswordString + "********" + afterPasswordString);
 
         String commandString = beforePasswordString + password + afterPasswordString;
         Runtime runtime = Runtime.getRuntime();
@@ -98,8 +97,7 @@ public class PostgreSQLConnectionProvider implements ConnectionProvider
         process.waitFor();
 
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        String line;
-        while ((line = bufferReader.readLine()) != null)
-            System.out.println(line);
+        String info = bufferReader.lines().collect(Collectors.joining());
+        logger.info(info);
     }
 }

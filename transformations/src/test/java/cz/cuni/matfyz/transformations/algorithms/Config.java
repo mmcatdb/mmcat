@@ -26,7 +26,7 @@ abstract class Config
 
         String property = properties.getProperty(key);
         if (property == null)
-            System.out.println("Property '" + key + "' not found in configuration.");
+            logger.error("Property '" + key + "' not found in configuration.");
 
         return property;
     }

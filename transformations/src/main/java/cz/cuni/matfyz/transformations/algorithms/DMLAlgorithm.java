@@ -3,7 +3,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.statements.DMLStatement;
 

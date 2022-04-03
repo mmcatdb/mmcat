@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.wrapperPostgresql;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import java.util.*;
+
+import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
 
 /**
  *
