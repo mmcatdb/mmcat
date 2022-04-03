@@ -1,7 +1,5 @@
 package cz.cuni.matfyz.server.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

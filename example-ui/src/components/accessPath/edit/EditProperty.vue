@@ -147,7 +147,7 @@ export default defineComponent({
             </button>
             <button
                 v-if="!isNew"
-                @click="keepOldName"
+                @click="keepOldType"
             >
                 Keep current
             </button>

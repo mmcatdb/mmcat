@@ -95,6 +95,12 @@ export class PositionUpdateToServer {
     }
 }
 
+export enum Cardinality {
+    Zero = 'ZERO',
+    One = 'ONE',
+    Star = 'STAR'
+}
+
 export class SchemaMorphism {
     //public domKey: number | undefined;
     //public codKey: number | undefined;
@@ -102,6 +108,8 @@ export class SchemaMorphism {
     public domId!: number;
     public codId!: number;
     public signature!: Signature;
+    public min!: Cardinality.Zero | Cardinality.One;
+    public max!: Cardinality.One | Cardinality.Star;
 
     //public domObject!: SchemaObject;
     //public codObject!: SchemaObject;
@@ -122,7 +130,11 @@ export class SchemaMorphism {
         morphism.id = input.id;
         morphism.domId = input.domId;
         morphism.codId = input.codId;
-        morphism.signature = Signature.fromJSON(JSON.parse(input.jsonValue).signature);
+
+        const parsedJson = JSON.parse(input.jsonValue);
+        morphism.signature = Signature.fromJSON(parsedJson.signature);
+        morphism.min = parsedJson.min;
+        morphism.max = parsedJson.max;
 
         /*
         const domObject = objects.find(object => object.id === morphism.domId);

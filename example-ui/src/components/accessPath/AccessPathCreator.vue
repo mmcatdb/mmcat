@@ -1,6 +1,6 @@
 <script lang="ts">
 import { RootProperty } from '@/types/accessPath';
-import { Signature, StaticName } from '@/types/identifiers';
+import { StaticName } from '@/types/identifiers';
 import type { SchemaCategory } from '@/types/schema';
 import type { NodeSchemaData } from '@/types/categoryGraph';
 import type { Core } from 'cytoscape';
@@ -8,6 +8,8 @@ import { defineComponent } from 'vue';
 import SchemaCategoryGraph from '../category/SchemaCategoryGraph.vue';
 import SelectRoot from './SelectRoot.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
+import { GET } from '@/utils/backendAPI';
+import { Database, type DatabaseFromServer } from '@/types/database';
 
 export default defineComponent({
     components: {
@@ -23,6 +25,14 @@ export default defineComponent({
             rootObjectName: 'pathName',
             rootNodeData: null as NodeSchemaData | null,
         };
+    },
+    async mounted() {
+        // TODO
+        const result = await GET<DatabaseFromServer[]>('/databases');
+        if (result.status) {
+            const databases = result.data.map(databaseFromServer => new Database(databaseFromServer));
+            console.log(databases);
+        }
     },
     methods: {
         cytoscapeCreated(cytoscape: Core, schemaCategory: SchemaCategory) {

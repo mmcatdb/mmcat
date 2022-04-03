@@ -1,5 +1,6 @@
 <script lang="ts">
-import { NodeSchemaData, NodeSequence } from '@/types/categoryGraph';
+import { NodeSchemaData, NodeSequence, resetAvailabilityStatus } from '@/types/categoryGraph';
+import { TEST_CONFIGURATION } from '@/types/database/Configuration';
 import { Signature } from '@/types/identifiers';
 import type { Core, EventObject, NodeSingular } from 'cytoscape';
 import { defineComponent } from 'vue';
@@ -44,11 +45,16 @@ export default defineComponent({
     },
     mounted() {
         this.cytoscape.addListener('tap', 'node', this.onNodeTapHandler);
-        this.sequence.allNodes.forEach(node => node.select());
+
+        // TODO
+        this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
+
+        //this.sequence.allNodes.forEach(node => node.select());
     },
     unmounted() {
         this.cytoscape.removeListener('tap', this.onNodeTapHandler);
-        this.sequence.allNodes.forEach(node => node.unselect());
+        this.sequence.unselectAll();
+        resetAvailabilityStatus(this.cytoscape);
     },
     methods: {
         onNodeTapHandler(event: EventObject): void {
@@ -57,11 +63,15 @@ export default defineComponent({
 
             const node = (event.target as NodeSingular).data('schemaData') as NodeSchemaData;
             if (this.sequence.tryRemoveNode(node)) {
-                node.unselect();
+                //node.unselect();
+                resetAvailabilityStatus(this.cytoscape);
+                this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
                 this.updateInnerValueFromSequenceChange();
             }
             else if (this.sequence.tryAddNode(node)) {
-                node.select();
+                //node.select();
+                resetAvailabilityStatus(this.cytoscape);
+                this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
                 this.updateInnerValueFromSequenceChange();
             }
         },
@@ -71,10 +81,13 @@ export default defineComponent({
             return sequence;
         },
         setSignature(signature: Signature, sendUpdate = true) {
-            this.sequence.allNodes.forEach(node => node.unselect());
+            //this.sequence.allNodes.forEach(node => node.unselect());
+            this.sequence.unselectAll();
+            resetAvailabilityStatus(this.cytoscape);
             this.sequence = this.sequenceFromSignature(signature);
+            this.sequence.lastNode.markAvailablePaths(TEST_CONFIGURATION, this.sequence.lastNode !== this.rootNode);
             this.innerValue = signature;
-            this.sequence.allNodes.forEach(node => node.select());
+            //this.sequence.allNodes.forEach(node => node.select());
 
             if (sendUpdate) {
                 this.$emit('update:modelValue', this.innerValue);

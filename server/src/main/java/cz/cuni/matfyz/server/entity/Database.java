@@ -2,9 +2,11 @@ package cz.cuni.matfyz.server.entity;
 
 import org.json.JSONObject;
 
+import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.server.Config;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
+import cz.cuni.matfyz.wrapperMongodb.MongoDBPathWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
 
 /**
@@ -44,6 +46,13 @@ public class Database extends Entity {
             return null;
 
         return getMongodbPullWrapper();
+    }
+
+    public AbstractPathWrapper getPathWrapper() {
+        if (!"mongodb".equals(type))
+            return null;
+
+        return new MongoDBPathWrapper();
     }
 
     private AbstractPullWrapper getMongodbPullWrapper() {

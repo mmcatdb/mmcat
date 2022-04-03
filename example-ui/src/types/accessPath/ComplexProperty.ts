@@ -2,6 +2,7 @@ import { DynamicName, nameFromJSON, Signature, StaticName, type Name, type NameJ
 import { IntendedStringBuilder } from "@/utils/string";
 import { subpathFromJSON, type AccessPathJSON } from "./AccessPath";
 import type { ChildProperty, ParentProperty } from "./compositeTypes";
+import type { NodeSchemaData } from "../categoryGraph";
 
 export type ComplexPropertyJSON = { _class: 'ComplexProperty', name: NameJSON, signature: SignatureJSON, subpaths: AccessPathJSON[] };
 
@@ -9,6 +10,7 @@ export class ComplexProperty {
     public name: Name;
     private _signature: Signature;
     public parent?: ParentProperty;
+    private _node?: NodeSchemaData;
     private _subpaths: ChildProperty[];
     //private _subpaths = new ComparableMap<Signature, string, AccessPath>(signature => signature.toString());
 
@@ -43,6 +45,9 @@ export class ComplexProperty {
             this._subpaths.push(newSubpath);
         else
             this._subpaths[index] = newSubpath;
+
+        if (this._node)
+            newSubpath.node = this._node.getNeighbour(newSubpath.signature);
     }
 
     public get isAuxiliary(): boolean {
@@ -51,6 +56,14 @@ export class ComplexProperty {
 
     public get signature(): Signature {
         return this._signature;
+    }
+
+    public get node(): NodeSchemaData | undefined {
+        return this._node;
+    }
+
+    public set node(value: NodeSchemaData | undefined) {
+        this._node = value;
     }
 
     public get subpaths(): ChildProperty[] {

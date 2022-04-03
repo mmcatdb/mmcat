@@ -52,6 +52,10 @@ export class Signature {
         return this._type === SignatureType.Base;
     }
 
+    public get isEmpty(): boolean {
+        return this._type === SignatureType.Empty;
+    }
+
     public get isNull(): boolean {
         return this._type === SignatureType.Null;
     }
@@ -68,6 +72,12 @@ export class Signature {
 
     public toBase(): Signature[] {
         return this._ids.map(id => new Signature(id));
+    }
+
+    public getFirstBase(): { first: Signature, rest: Signature } | undefined {
+        return this._type === SignatureType.Base || this._type === SignatureType.Composite
+            ? { first: Signature.fromIds([ this._ids[0] ]), rest: Signature.fromIds(this._ids.slice(1)) }
+            : undefined;
     }
 
     public equals(other: Signature): boolean {

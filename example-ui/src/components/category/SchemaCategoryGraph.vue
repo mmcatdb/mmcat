@@ -85,6 +85,27 @@ export default defineComponent({
                         }
                     },
                     {
+                        selector: '.available',
+                        style: {
+                            'border-color': 'greenyellow',
+                            'border-width': '4px',
+                        }
+                    },
+                    {
+                        selector: '.certainlyAvailable',
+                        style: {
+                            'border-color': 'darkgreen',
+                            'border-width': '4px',
+                        }
+                    },
+                    {
+                        selector: '.maybe',
+                        style: {
+                            'border-color': 'orange',
+                            'border-width': '4px',
+                        }
+                    },
+                    {
                         selector: '.selected',
                         style: {
                             'border-color': 'blue',
