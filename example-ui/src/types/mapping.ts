@@ -1,5 +1,5 @@
 export class Mapping {
-    public id!: number;
+    public id!: number | null;
     public databaseId!: number;
     public categoryId!: number;
     public rootObjectId!: number;

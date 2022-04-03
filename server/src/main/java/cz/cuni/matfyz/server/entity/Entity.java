@@ -1,14 +1,12 @@
 package cz.cuni.matfyz.server.entity;
 
-import java.io.Serializable;
-
 import cz.cuni.matfyz.core.serialization.Identified;
 
 /**
  * 
  * @author jachym.bartik
  */
-public class Entity implements Identified<Integer>, Serializable {
+public class Entity implements Identified<Integer> {
     
     public final Integer id;
 

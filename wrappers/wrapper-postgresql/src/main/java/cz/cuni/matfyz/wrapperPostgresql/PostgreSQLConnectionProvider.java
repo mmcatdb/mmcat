@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -66,7 +65,7 @@ public class PostgreSQLConnectionProvider implements ConnectionProvider
             .append("&password=")
             .append(password)
             .toString();
-
+            
         return DriverManager.getConnection(connectionString);
     }
 

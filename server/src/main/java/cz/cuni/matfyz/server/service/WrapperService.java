@@ -65,10 +65,10 @@ public class WrapperService {
         if (postgreSQLConnectionProvider == null) {
             postgreSQLConnectionProvider = new PostgreSQLConnectionProvider(
                 Config.get("data.postgresql.host"),
-                Config.get("data.mongodb.port"),
-                Config.get("data.mongodb.database"),
-                Config.get("data.mongodb.username"),
-                Config.get("data.mongodb.password")
+                Config.get("data.postgresql.port"),
+                Config.get("data.postgresql.database"),
+                Config.get("data.postgresql.username"),
+                Config.get("data.postgresql.password")
             );
         }
 

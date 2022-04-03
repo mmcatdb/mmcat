@@ -97,4 +97,13 @@ export class ComplexProperty {
 
         return property;
     }
+
+    public toJSON(): ComplexPropertyJSON {
+        return {
+            _class: 'ComplexProperty',
+            name: this.name.toJSON(),
+            signature: this._signature.toJSON(),
+            subpaths: this._subpaths.map(subpath => subpath.toJSON())
+        };
+    }
 }

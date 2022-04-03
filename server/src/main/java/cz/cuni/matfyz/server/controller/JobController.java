@@ -55,8 +55,6 @@ public class JobController
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    // jsf - funkce, které zjistí kód chyby a na to reagují
-
     @PostMapping("/jobs/{id}/start")
     public Job startJobById(@PathVariable int id, HttpSession session)
     {

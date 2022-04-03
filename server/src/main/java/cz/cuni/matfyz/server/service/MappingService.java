@@ -27,4 +27,18 @@ public class MappingService
     {
         return repository.find(id);
     }
+
+    public MappingWrapper createNew(MappingWrapper wrapper) {
+        Integer generatedId = repository.add(wrapper);
+
+        return generatedId == null ? null : new MappingWrapper(
+            generatedId,
+            wrapper.databaseId,
+            wrapper.categoryId,
+            wrapper.rootObjectId,
+            wrapper.rootMorphismId,
+            wrapper.mappingJsonValue,
+            wrapper.jsonValue
+        );
+    }
 }

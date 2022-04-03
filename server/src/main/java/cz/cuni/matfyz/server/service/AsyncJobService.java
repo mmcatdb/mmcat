@@ -79,7 +79,7 @@ public class AsyncJobService {
         process.input(pullWrapper, mapping);
 
         var result = process.run();
-        Thread.sleep(20 * 1000);
+        Thread.sleep(10 * 1000);
 
         return CompletableFuture.completedFuture(result);
     }

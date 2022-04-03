@@ -11,6 +11,7 @@ export default defineComponent({
 
     },
     props: {},
+    emits: [ 'newJob' ],
     data() {
         return {
             mappings: null as Mapping[] | null,
@@ -36,7 +37,6 @@ export default defineComponent({
 
         this.fetched = true;
     },
-    emits: [ 'newJob' ],
     methods: {
         async createJob() {
             this.createJobDisabled = true;

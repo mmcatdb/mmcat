@@ -79,8 +79,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
                             
                     forest.addRecord(record);
                 }
-                
+
                 resultSet.close();
+                
                 return forest;
             }
         }

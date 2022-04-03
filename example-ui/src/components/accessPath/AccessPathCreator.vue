@@ -8,8 +8,9 @@ import { defineComponent } from 'vue';
 import SchemaCategoryGraph from '../category/SchemaCategoryGraph.vue';
 import SelectRoot from './SelectRoot.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
-import { GET } from '@/utils/backendAPI';
+import { GET, POST } from '@/utils/backendAPI';
 import { Database, type DatabaseFromServer } from '@/types/database';
+import type { Mapping } from '@/types/mapping';
 
 export default defineComponent({
     components: {
@@ -19,14 +20,15 @@ export default defineComponent({
     },
     data() {
         return {
-            //schemaCategory: null as SchemaCategory | null,
+            schemaCategory: null as SchemaCategory | null,
             cytoscape: null as Core | null,
             accessPath: null as RootProperty | null,
             rootObjectName: 'pathName',
             rootNodeData: null as NodeSchemaData | null,
             databases: [] as Database[],
             selectingDatabase: null as Database | null,
-            selectedDatabase: null as Database | null
+            selectedDatabase: null as Database | null,
+            mappingName: 'new mapping'
         };
     },
     async mounted() {
@@ -45,12 +47,34 @@ export default defineComponent({
             this.accessPath = new RootProperty(StaticName.fromString(name));
             this.rootObjectName = name;
             this.rootNodeData = data;
+        },
+        async createMapping() {
+            const result = await POST<Mapping>('/mappings', {
+                id: null,
+                databaseId: this.selectedDatabase?.id,
+                categoryId: this.schemaCategory?.id,
+                rootObjectId: this.rootNodeData?.schemaObject.id,
+                rootMorphismId: null, // TODO
+                jsonValue: JSON.stringify({
+                    name: this.mappingName
+                }),
+                mappingJsonValue: JSON.stringify({
+                    kindName: this.accessPath?.name.toString(),
+                    pkey: [], // TODO
+                    accessPath: this.accessPath?.toJSON()
+                })
+            });
+            console.log(result);
+            if (result.status)
+                this.$router.push({ name: 'jobs' });
         }
     }
 });
 </script>
 
 <template>
+    <label>Mapping name:</label>
+    <input v-model="mappingName" />
     <div class="divide">
         <SchemaCategoryGraph @cytoscape:ready="cytoscapeCreated" />
         <div
@@ -72,6 +96,9 @@ export default defineComponent({
                             :root-node="rootNodeData"
                             :access-path="accessPath"
                         />
+                        <button @click="createMapping">
+                            Confirm and create mapping
+                        </button>
                     </div>
                 </template>
                 <template v-else>

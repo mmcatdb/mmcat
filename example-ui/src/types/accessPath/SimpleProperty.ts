@@ -51,4 +51,15 @@ export class SimpleProperty {
             parent
         );
     }
+
+    public toJSON(): SimplePropertyJSON {
+        return {
+            _class: 'SimpleProperty',
+            name: this.name.toJSON(),
+            value: {
+                _class: 'SimpleValue',
+                signature: this._signature.toJSON()
+            }
+        };
+    }
 }

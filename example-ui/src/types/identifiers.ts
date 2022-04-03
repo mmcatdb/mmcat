@@ -99,6 +99,13 @@ export class Signature {
     public static fromJSON(jsonObject: SignatureJSON): Signature {
         return new Signature(jsonObject.ids);
     }
+
+    public toJSON(): SignatureJSON {
+        return {
+            _class: 'Signature',
+            ids: this._ids
+        };
+    }
 }
 
 export type NameJSON = StaticNameJSON | DynamicNameJSON;
@@ -155,6 +162,14 @@ export class StaticName {
     public static fromJSON(jsonObject: StaticNameJSON): StaticName {
         return new StaticName(jsonObject.value, jsonObject.type === 'ANONYMOUS');
     }
+
+    public toJSON(): StaticNameJSON {
+        return {
+            _class: 'StaticName',
+            value: this.value,
+            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC_NAME'
+        };
+    }
 }
 
 export type DynamicNameJSON = { _class: 'DynamicName', signature: SignatureJSON }
@@ -188,5 +203,12 @@ export class DynamicName {
 
     public static fromJSON(jsonObject: DynamicNameJSON): DynamicName {
         return new DynamicName(Signature.fromJSON(jsonObject.signature));
+    }
+
+    public toJSON(): DynamicNameJSON {
+        return {
+            _class: 'DynamicName',
+            signature: this.signature.toJSON()
+        };
     }
 }

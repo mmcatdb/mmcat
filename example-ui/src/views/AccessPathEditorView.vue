@@ -20,7 +20,7 @@ export default defineComponent({
 </script>
 
 <template>
-    <h1>Access path editor</h1>
+    <h1>Mapping creator</h1>
     <AccessPathCreator />
 </template>
 

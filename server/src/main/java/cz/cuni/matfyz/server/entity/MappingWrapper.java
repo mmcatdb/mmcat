@@ -1,5 +1,8 @@
 package cz.cuni.matfyz.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 
  * @author jachym.bartik
@@ -13,7 +16,16 @@ public class MappingWrapper extends Entity {
     public final String mappingJsonValue;
     public final String jsonValue;
 
-    public MappingWrapper(Integer id, int databaseId, int categoryId, Integer rootObjectId, Integer rootMorphismId, String mappingJsonValue, String jsonValue) {
+    @JsonCreator
+    public MappingWrapper(
+        @JsonProperty("id") Integer id,
+        @JsonProperty("databaseId") int databaseId,
+        @JsonProperty("categoryId") int categoryId,
+        @JsonProperty("rootObjectId") Integer rootObjectId,
+        @JsonProperty("rootMorphismId") Integer rootMorphismId,
+        @JsonProperty("mappingJsonValue") String mappingJsonValue,
+        @JsonProperty("jsonValue") String jsonValue
+    ) {
         super(id);
         this.databaseId = databaseId;
         this.categoryId = categoryId;

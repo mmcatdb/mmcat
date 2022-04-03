@@ -1,14 +1,12 @@
 package cz.cuni.matfyz.server.view;
 
-import java.io.Serializable;
-
 import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
 
 /**
  * 
  * @author jachym.bartik
  */
-public class DatabaseConfiguration implements Serializable {
+public class DatabaseConfiguration {
 
     public Boolean isRootObjectAllowed;
 	public Boolean isPropertyToOneAllowed;
