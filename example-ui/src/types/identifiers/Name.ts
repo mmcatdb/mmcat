@@ -19,43 +19,43 @@ export class StaticName {
         this._isAnonymous = anonymous;
     }
 
-    public static fromString(value: string): StaticName {
+    static fromString(value: string): StaticName {
         return new StaticName(value);
     }
 
-    public static copy(name: StaticName): StaticName {
+    static copy(name: StaticName): StaticName {
         return name._isAnonymous ? StaticName.anonymous : new StaticName(name.value);
     }
 
-    public copy(): StaticName {
+    copy(): StaticName {
         return this._isAnonymous ? StaticName.anonymous : new StaticName(this.value);
     }
 
-    private static anonymousInstance = new StaticName('', true);
+    static _anonymousInstance = new StaticName('', true);
 
-    public static get anonymous(): StaticName {
-        return this.anonymousInstance;
+    static get anonymous(): StaticName {
+        return this._anonymousInstance;
     }
 
-    public get isAnonymous(): boolean {
+    get isAnonymous(): boolean {
         return this._isAnonymous;
     }
 
-    public equals(other: Name): boolean {
+    equals(other: Name): boolean {
         return other instanceof StaticName
             && other._isAnonymous === this._isAnonymous
             && other.value === this.value;
     }
 
-    public toString(): string {
+    toString(): string {
         return this._isAnonymous ? '_ANONYMOUS' : this.value;
     }
 
-    public static fromJSON(jsonObject: StaticNameJSON): StaticName {
+    static fromJSON(jsonObject: StaticNameJSON): StaticName {
         return new StaticName(jsonObject.value, jsonObject.type === 'ANONYMOUS');
     }
 
-    public toJSON(): StaticNameJSON {
+    toJSON(): StaticNameJSON {
         return {
             _class: 'StaticName',
             value: this.value,
@@ -73,31 +73,31 @@ export class DynamicName {
         this.signature = signature;
     }
 
-    public static fromSignature(signature: Signature) {
+    static fromSignature(signature: Signature) {
         return new DynamicName(signature);
     }
 
-    public static copy(name: DynamicName): DynamicName {
+    static copy(name: DynamicName): DynamicName {
         return new DynamicName(Signature.copy(name.signature));
     }
 
-    public copy(): DynamicName {
+    copy(): DynamicName {
         return new DynamicName(Signature.copy(this.signature));
     }
 
-    public equals(other: Name): boolean {
+    equals(other: Name): boolean {
         return other instanceof DynamicName && this.signature.equals(other.signature);
     }
 
-    public toString(): string {
+    toString(): string {
         return `<${this.signature.toString()}>`;
     }
 
-    public static fromJSON(jsonObject: DynamicNameJSON): DynamicName {
+    static fromJSON(jsonObject: DynamicNameJSON): DynamicName {
         return new DynamicName(Signature.fromJSON(jsonObject.signature));
     }
 
-    public toJSON(): DynamicNameJSON {
+    toJSON(): DynamicNameJSON {
         return {
             _class: 'DynamicName',
             signature: this.signature.toJSON()

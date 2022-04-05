@@ -2,18 +2,18 @@ import type { Position } from "cytoscape";
 import { ComparablePosition, PositionUpdateToServer } from "./Position";
 
 export class SchemaObject {
-    //public key: number | undefined;
-    //public label: number | undefined;
+    //key: number | undefined;
+    //label: number | undefined;
 
-    public id!: number;
-    public label!: string;
-    public jsonValue!: string;
-    public position?: ComparablePosition;
-    private originalPosition?: ComparablePosition;
+    id!: number;
+    label!: string;
+    jsonValue!: string;
+    position?: ComparablePosition;
+    _originalPosition?: ComparablePosition;
 
     private constructor() {}
 
-    public static fromServer(input: SchemaObjectFromServer): SchemaObject {
+    static fromServer(input: SchemaObjectFromServer): SchemaObject {
         const object = new SchemaObject();
 
         //object.key = input.key.value;
@@ -23,19 +23,19 @@ export class SchemaObject {
         object.jsonValue = input.jsonValue;
         if (input.position) {
             object.position = new ComparablePosition(input.position);
-            object.originalPosition = new ComparablePosition(input.position);
+            object._originalPosition = new ComparablePosition(input.position);
         }
 
         return object;
     }
 
-    public toPositionUpdateToServer(): PositionUpdateToServer | null {
-        return this.position?.equals(this.originalPosition) ? null : new PositionUpdateToServer({ schemaObjectId: this.id, position: this.position });
+    toPositionUpdateToServer(): PositionUpdateToServer | null {
+        return this.position?.equals(this._originalPosition) ? null : new PositionUpdateToServer({ schemaObjectId: this.id, position: this.position });
     }
 }
 
 export class SchemaObjectFromServer {
-    public id!: number;
-    public jsonValue!: string;
-    public position?: Position;
+    id!: number;
+    jsonValue!: string;
+    position?: Position;
 }

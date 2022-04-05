@@ -1,10 +1,8 @@
 <script lang="ts">
-import { Graph, Node, NodeSequence } from '@/types/categoryGraph';
+import type { Graph, Node } from '@/types/categoryGraph';
 import type { Database } from '@/types/database';
-import { Signature } from '@/types/identifiers';
+import { SequenceSignature } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
-
-type OutputType = { signature: Signature, node?: Node };
 
 export default defineComponent({
     props: {
@@ -16,13 +14,9 @@ export default defineComponent({
             type: Object as () => Database,
             required: true
         },
-        rootNode: {
-            type: Object as () => Node,
-            required: true
-        },
         modelValue: {
-            type: Object as () => OutputType,
-            default: () => ({ signature: Signature.empty })
+            type: Object as () => SequenceSignature,
+            required: true
         },
         disabled: {
             type: Boolean,
@@ -32,19 +26,15 @@ export default defineComponent({
     },
     emits: [ 'update:modelValue', 'input' ],
     data() {
-        const sequence = this.sequenceFromSignature(this.modelValue.signature);
-
         return {
-            sequence: sequence as NodeSequence,
-            innerValue: { signature: sequence.toSignature(), node: sequence.lastNode },
-            Signature: Signature
+            innerValue: this.modelValue.copy()
         };
     },
     watch: {
         modelValue: {
-            handler(newValue: OutputType): void {
-                if (!newValue.signature.equals(this.innerValue.signature))
-                    this.setSignature(newValue.signature, false);
+            handler(newValue: SequenceSignature): void {
+                if (!this.innerValue.equals(newValue))
+                    this.setSignature(newValue, false);
             }
         }
     },
@@ -52,13 +42,13 @@ export default defineComponent({
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
 
         // TODO
-        this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
+        this.innerValue.markAvailablePaths(this.database.configuration);
 
         //this.sequence.allNodes.forEach(node => node.select());
     },
     unmounted() {
         this.graph.removeListener('tap', this.onNodeTapHandler);
-        this.sequence.unselectAll();
+        this.innerValue.sequence.unselectAll();
         this.graph.resetAvailabilityStatus();
     },
     methods: {
@@ -66,42 +56,39 @@ export default defineComponent({
             if (this.disabled)
                 return;
 
-            if (this.sequence.tryRemoveNode(node)) {
+            if (this.innerValue.sequence.tryRemoveNode(node)) {
                 //node.unselect();
                 this.graph.resetAvailabilityStatus();
-                this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
-                this.updateInnerValueFromSequenceChange();
+                this.innerValue.markAvailablePaths(this.database.configuration);
+                this.sendUpdate();
             }
-            else if (this.sequence.tryAddNode(node)) {
+            else if (this.innerValue.sequence.tryAddNode(node)) {
                 //node.select();
                 this.graph.resetAvailabilityStatus();
-                this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
-                this.updateInnerValueFromSequenceChange();
+                this.innerValue.markAvailablePaths(this.database.configuration);
+                this.sendUpdate();
             }
         },
-        sequenceFromSignature(signature: Signature): NodeSequence {
-            const sequence = NodeSequence.withRootNode(this.rootNode);
-            sequence.addSignature(signature);
-            return sequence;
-        },
-        setSignature(signature: Signature, sendUpdate = true) {
+        setSignature(signature: SequenceSignature, sendUpdate = true) {
             //this.sequence.allNodes.forEach(node => node.unselect());
-            this.sequence.unselectAll();
+            this.innerValue.sequence.unselectAll();
             this.graph.resetAvailabilityStatus();
-            this.sequence = this.sequenceFromSignature(signature);
-            this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
-            this.innerValue = { signature, node: this.sequence.lastNode };
+            this.innerValue = signature;
+            this.innerValue.markAvailablePaths(this.database.configuration);
             //this.sequence.allNodes.forEach(node => node.select());
 
-            if (sendUpdate) {
-                this.$emit('update:modelValue', this.innerValue);
-                this.$emit('input');
-            }
+            if (sendUpdate)
+                this.sendUpdate();
         },
-        updateInnerValueFromSequenceChange() {
-            this.innerValue = { signature: this.sequence.toSignature(), node: this.sequence.lastNode };
+        sendUpdate() {
             this.$emit('update:modelValue', this.innerValue);
             this.$emit('input');
+        },
+        setSignatureNull() {
+            this.setSignature(SequenceSignature.null(this.innerValue.sequence.rootNode));
+        },
+        setSignatureEmpty() {
+            this.setSignature(SequenceSignature.empty(this.innerValue.sequence.rootNode));
         }
     }
 });
@@ -111,12 +98,12 @@ export default defineComponent({
     <div class="outer">
         <template v-if="!disabled">
             <button
-                @click="() => setSignature(Signature.null)"
+                @click="setSignatureNull"
             >
                 Null
             </button>
             <button
-                @click="() => setSignature(Signature.empty)"
+                @click="setSignatureEmpty"
             >
                 Empty
             </button>

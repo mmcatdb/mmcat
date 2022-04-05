@@ -20,38 +20,38 @@ export enum AvailabilityStatus {
 }
 
 export class Node {
-    public schemaObject: SchemaObject;
-    public node!: NodeSingular;
-    private tags = new Set() as Set<NodeTag>;
-    private _availabilityStatus = AvailabilityStatus.Default;
-    public availablePathData = null as MorphismData | null;
+    schemaObject: SchemaObject;
+    node!: NodeSingular;
+    _tags = new Set() as Set<NodeTag>;
+    _availabilityStatus = AvailabilityStatus.Default;
+    availablePathData = null as MorphismData | null;
 
-    public neighbours = new TwoWayMap<Node, SchemaMorphism>();
-    private signatureToMorphism = new Map() as Map<Signature, SchemaMorphism>;
+    neighbours = new TwoWayMap<Node, SchemaMorphism>();
+    _signatureToMorphism = new Map() as Map<Signature, SchemaMorphism>;
 
-    public constructor(schemaObject: SchemaObject) {
-    //public constructor(schemaObject: SchemaObject, nodeObject: NodeSingular) {
+    constructor(schemaObject: SchemaObject) {
+    //constructor(schemaObject: SchemaObject, nodeObject: NodeSingular) {
         this.schemaObject = schemaObject;
         //this.nodeObject = nodeObject;
 
         //nodeObject.
     }
 
-    public setNode(node: NodeSingular) {
+    setNode(node: NodeSingular) {
         this.node = node;
     }
 
-    public addNeighbour(object: Node, morphism: SchemaMorphism): void {
+    addNeighbour(object: Node, morphism: SchemaMorphism): void {
         this.neighbours.set(object, morphism);
-        this.signatureToMorphism.set(morphism.signature, morphism);
+        this._signatureToMorphism.set(morphism.signature, morphism);
     }
 
-    public getNeighbour(signature: Signature): Node | undefined {
+    getNeighbour(signature: Signature): Node | undefined {
         const split = signature.getFirstBase();
         if (!split)
             return undefined;
 
-        const morphism = this.signatureToMorphism.get(split.first);
+        const morphism = this._signatureToMorphism.get(split.first);
         if (!morphism)
             return undefined;
 
@@ -60,15 +60,15 @@ export class Node {
     }
 
     /*
-    public addTag(tag: NodeTag): void {
+    addTag(tag: NodeTag): void {
         this.tags.add(tag);
     }
 
-    public removeTag(tag: NodeTag): void {
+    removeTag(tag: NodeTag): void {
         this.tags.delete(tag);
     }
 
-    public get style(): string {
+    get style(): string {
         let output = '';
 
         if (this.tags.has(NodeTag.Root))
@@ -78,18 +78,18 @@ export class Node {
     }
     */
 
-    public get availabilityStatus(): AvailabilityStatus {
+    get availabilityStatus(): AvailabilityStatus {
         return this._availabilityStatus;
     }
 
-    public select(availabilityStatus: AvailabilityStatus = AvailabilityStatus.Selected): void {
+    select(availabilityStatus: AvailabilityStatus = AvailabilityStatus.Selected): void {
         //this.tags.add(NodeTag.Selected);
         this.node.removeClass(this._availabilityStatus);
         this._availabilityStatus = availabilityStatus;
         this.node.addClass(availabilityStatus);
     }
 
-    public unselect(availabilityStatus?: AvailabilityStatus): void {
+    unselect(availabilityStatus?: AvailabilityStatus): void {
         //this.tags.delete(NodeTag.Selected);
         if (availabilityStatus === undefined || this._availabilityStatus === availabilityStatus) {
             this.node.removeClass(this._availabilityStatus);
@@ -97,23 +97,23 @@ export class Node {
         }
     }
 
-    public resetAvailabilityStatus(): void {
+    resetAvailabilityStatus(): void {
         if (this._availabilityStatus === AvailabilityStatus.Available || this._availabilityStatus === AvailabilityStatus.CertainlyAvailable || this._availabilityStatus === AvailabilityStatus.Maybe) {
             this.node.removeClass(this._availabilityStatus);
             this._availabilityStatus = AvailabilityStatus.Default;
         }
     }
 
-    public becomeRoot(): void {
-        this.tags.add(NodeTag.Root);
+    becomeRoot(): void {
+        this._tags.add(NodeTag.Root);
         this.node.addClass('root');
     }
 
-    public equals(other: Node | null): boolean {
+    equals(other: Node | null): boolean {
         return !!other && this.schemaObject.id === other.schemaObject.id;
     }
 
-    public markAvailablePaths(configuration: DatabaseConfiguration, temporary = false): void {
+    markAvailablePaths(configuration: DatabaseConfiguration, temporary = false): void {
         if (!temporary)
             this.select(AvailabilityStatus.Root);
 

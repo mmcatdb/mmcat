@@ -1,4 +1,5 @@
 <script lang="ts">
+import { SequenceSignature } from '@/types/accessPath/graph';
 import type { Graph, Node } from '@/types/categoryGraph';
 import type { Database } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
@@ -42,18 +43,18 @@ export default defineComponent({
             innerValue: this.modelValue,
             type: this.getNameType(this.modelValue),
             staticValue: this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue.value : '',
-            dynamicValue: { signature: this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty },
+            dynamicValue: SequenceSignature.fromSignature(this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty, this.rootNode),
             NameType
         };
     },
     watch: {
         modelValue: {
             handler(newValue: Name): void {
-                if (!newValue.equals(this.innerValue as Name)) {
+                if (!newValue.equals(this.innerValue)) {
                     this.innerValue = this.modelValue;
                     this.type = this.getNameType(this.modelValue);
                     this.staticValue = this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue.value : '';
-                    this.dynamicValue = { signature: this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty };
+                    this.dynamicValue = SequenceSignature.fromSignature(this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty, this.rootNode);
                 }
             }
         }
@@ -70,7 +71,7 @@ export default defineComponent({
                 this.innerValue = StaticName.fromString(this.staticValue);
                 break;
             case NameType.Dynamic:
-                this.innerValue = DynamicName.fromSignature(this.dynamicValue.signature as Signature);
+                this.innerValue = DynamicName.fromSignature(this.dynamicValue.toSignature());
                 break;
             case NameType.Anonymous:
                 this.innerValue = StaticName.anonymous;
@@ -123,7 +124,6 @@ export default defineComponent({
                 v-model="dynamicValue"
                 :graph="graph"
                 :database="database"
-                :root-node="rootNode"
                 :disabled="disabled"
                 @input="updateInnerValue"
             />

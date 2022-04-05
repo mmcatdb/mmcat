@@ -1,7 +1,7 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty, type ChildProperty } from '@/types/accessPath/graph';
+import { SimpleProperty, ComplexProperty, type ChildProperty, SequenceSignature, type ParentProperty } from '@/types/accessPath/graph';
 import type { Graph } from '@/types/categoryGraph';
-import type { Name } from '@/types/identifiers';
+import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import NameInput from '../input/NameInput.vue';
@@ -29,8 +29,8 @@ export default defineComponent({
             type: Object as () => Database,
             required: true
         },
-        property: {
-            type: Object as () => ChildProperty,
+        parentProperty: {
+            type: Object as () => ParentProperty,
             required: true
         }
     },
@@ -39,34 +39,24 @@ export default defineComponent({
         return {
             type: this.propertyToType(this.property),
             PropertyType,
-            signature: this.property.signature.copy(),
-            newName: this.property.name.copy() as Name,
+            signature: SequenceSignature.empty(this.parentProperty.node),
+            name: StaticName.fromString('name') as Name,
             state: State.SelectType,
             State
         };
-    },
-    computed: {
-        typeChanged(): boolean {
-            return this.type !== this.propertyToType(this.property);
-        },
-        nameChanged(): boolean {
-            return !this.property.name.equals(this.newName);
-        },
-        signatureChanged(): boolean {
-            return !this.property.signature.equals(this.signature);
-        }
     },
     methods: {
         propertyToType(property: ChildProperty): PropertyType {
             return property instanceof SimpleProperty ? PropertyType.Simple : PropertyType.Complex;
         },
         save() {
-            const subpaths = !this.signatureChanged && !this.typeChanged && this.property instanceof ComplexProperty ? this.property.subpaths : [];
             const newProperty = this.type === PropertyType.Simple
-                ? new SimpleProperty(this.newName, this.signature, this.property.parent)
-                : new ComplexProperty(this.newName, this.signature, this.property.parent, subpaths);
+                ? new SimpleProperty(this.name, this.signature, this.parentProperty)
+                : new ComplexProperty(this.name, this.signature, this.parentProperty);
 
-            this.property.parent.updateOrAddSubpath(newProperty);
+            this.parentProperty.updateOrAddSubpath(newProperty);
+
+            this.$emit('save');
         },
         cancel() {
             this.$emit('cancel');
@@ -74,21 +64,12 @@ export default defineComponent({
         confirmType() {
             this.state = State.SelectName;
         },
-        resetType() {
-            this.type = this.propertyToType(this.property);
-        },
         confirmName() {
             // TODO change signature to empty if it's not valid now
             this.state = State.SelectSignature;
         },
-        resetName() {
-            this.newName = this.property.name.copy();
-        },
         confirmSignature() {
             this.save();
-        },
-        resetSignature() {
-            this.signature = this.property.signature.copy();
         }
     }
 });
@@ -106,7 +87,7 @@ export default defineComponent({
                 :value="PropertyType.Simple"
             />
             <label
-                :class="{ selected: type === PropertyType.Simple }"
+                :class="{ value: type === PropertyType.Simple }"
                 for="simple"
             >
                 Simple
@@ -118,7 +99,7 @@ export default defineComponent({
                 :value="PropertyType.Complex"
             />
             <label
-                :class="{ selected: type === PropertyType.Complex }"
+                :class="{ value: type === PropertyType.Complex }"
                 for="complex"
             >
                 Complex
@@ -126,38 +107,26 @@ export default defineComponent({
             <button
                 @click="confirmType"
             >
-                {{ typeChanged ? 'Confirm change' : 'Keep current' }}
-            </button>
-            <button
-                v-if="typeChanged"
-                @click="resetType"
-            >
-                Reset
+                Confirm
             </button>
         </template>
         <template v-else-if="state === State.SelectName">
-            Name: <span class="selected">{{ newName }}</span>
+            Name: <span class="value">{{ name }}</span>
             <NameInput
-                v-model="newName"
+                v-model="name"
                 :graph="graph"
                 :database="database"
-                :root-node="property.parentNode"
+                :root-node="parentProperty.node"
             />
             <br />
             <button
                 @click="confirmName"
             >
-                {{ nameChanged ? 'Confirm change' : 'Keep current' }}
-            </button>
-            <button
-                v-if="nameChanged"
-                @click="resetName"
-            >
-                Reset
+                Confirm
             </button>
         </template>
         <template v-else-if="state === State.SelectSignature">
-            Signature: <span class="selected">{{ signature }}</span>
+            Signature: <span class="value">{{ signature }}</span>
             <SignatureInput
                 v-model="signature"
                 :graph="graph"
@@ -167,13 +136,7 @@ export default defineComponent({
             <button
                 @click="confirmSignature"
             >
-                {{ signatureChanged ? 'Confirm change' : 'Keep current' }}
-            </button>
-            <button
-                v-if="signatureChanged"
-                @click="resetSignature"
-            >
-                Reset
+                Confirm
             </button>
         </template>
         <button @click="cancel">
@@ -183,7 +146,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.selected {
+.value {
     font-weight: bold;
 }
 </style>

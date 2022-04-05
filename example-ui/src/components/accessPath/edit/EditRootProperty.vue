@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ComplexProperty } from '@/types/accessPath';
+import type { ComplexProperty } from '@/types/accessPath/graph';
 import type { Graph, Node } from '@/types/categoryGraph';
 import { Signature, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
@@ -43,15 +43,15 @@ export default defineComponent({
     },
     computed: {
         nameChanged(): boolean {
-            return !this.property.name.equals(this.newName as Name);
+            return !this.property.name.equals(this.newName);
         },
         signatureChanged(): boolean {
-            return !this.property.signature.equals(this.newSignature as Signature);
+            return !this.property.signature.equals(this.newSignature);
         }
     },
     methods: {
         save() {
-            this.property.update(this.newName as Name, this.newSignature as Signature);
+            this.property.update(this.newName, this.newSignature);
             this.$emit('save');
         },
         cancel() {

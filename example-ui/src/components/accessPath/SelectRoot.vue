@@ -26,7 +26,7 @@ export default defineComponent({
             if (this.lastClickedNode)
                 this.lastClickedNode.unselect();
 
-            if (node.equals(this.lastClickedNode as Node | null)) {
+            if (node.equals(this.lastClickedNode)) {
                 // If we double tap current node, it become unselected.
                 this.lastClickedNode = null;
             }

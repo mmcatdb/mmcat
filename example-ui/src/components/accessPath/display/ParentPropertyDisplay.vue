@@ -1,5 +1,5 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty } from '@/types/accessPath';
+import { SimpleProperty, ComplexProperty } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
 import IconPlusSquare from '../../icons/IconPlusSquare.vue';

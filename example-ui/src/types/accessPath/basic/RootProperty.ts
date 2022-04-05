@@ -1,40 +1,16 @@
 import { IntendedStringBuilder } from "@/utils/string";
-import type { Node } from "../categoryGraph";
-import { nameFromJSON, Signature, type Name } from "../identifiers";
+import { nameFromJSON, Signature, type Name } from "@/types/identifiers";
 import type { ComplexPropertyJSON } from "./ComplexProperty";
 import { subpathFromJSON, type ChildProperty } from "./compositeTypes";
 
 export class RootProperty {
     public name: Name; // TODO should be static name
-    private _node?: Node;
     private _subpaths: ChildProperty[];
     private _signature = Signature.null;
 
     public constructor(name: Name, subpaths: ChildProperty[] = []) {
         this.name = name;
         this._subpaths = [ ...subpaths ];
-    }
-
-    public update(newName: Name): void {
-        if (!this.name.equals(newName))
-            this.name = newName;
-    }
-
-    public updateOrAddSubpath(newSubpath: ChildProperty, oldSubpath?: ChildProperty): void {
-        newSubpath.parent = this;
-        const index = oldSubpath ? this._subpaths.findIndex(subpath => subpath.signature.equals(oldSubpath.signature)) : -1;
-        if (index === -1)
-            this._subpaths.push(newSubpath);
-        else
-            this._subpaths[index] = newSubpath;
-    }
-
-    public get node(): Node | undefined {
-        return this._node;
-    }
-
-    public set node(value: Node | undefined) {
-        this._node = value;
     }
 
     public get subpaths(): ChildProperty[] {

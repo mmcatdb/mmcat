@@ -1,8 +1,7 @@
-import { DynamicName, nameFromJSON, Signature, StaticName, type Name, type NameJSON, type SignatureJSON } from "../identifiers";
+import { DynamicName, nameFromJSON, Signature, StaticName, type Name, type NameJSON, type SignatureJSON } from "@/types/identifiers";
 import { IntendedStringBuilder } from "@/utils/string";
 import { subpathFromJSON, type AccessPathJSON } from "./AccessPath";
 import type { ChildProperty, ParentProperty } from "./compositeTypes";
-import type { Node } from "../categoryGraph";
 
 export type ComplexPropertyJSON = { _class: 'ComplexProperty', name: NameJSON, signature: SignatureJSON, subpaths: AccessPathJSON[] };
 
@@ -10,7 +9,6 @@ export class ComplexProperty {
     public name: Name;
     private _signature: Signature;
     public parent?: ParentProperty;
-    private _node?: Node;
     private _subpaths: ChildProperty[];
     //private _subpaths = new ComparableMap<Signature, string, AccessPath>(signature => signature.toString());
 
@@ -27,43 +25,12 @@ export class ComplexProperty {
         return new ComplexProperty(name, Signature.copy(property.signature), property.parent, property.subpaths);
     }
 
-    public update(newName: Name, newSignature: Signature): void {
-        if (!this.name.equals(newName))
-            this.name = newName;
-
-        if (!this._signature.equals(newSignature)) {
-            this._signature = newSignature;
-            //this._subpaths.clear();
-            this._subpaths = [];
-        }
-    }
-
-    public updateOrAddSubpath(newSubpath: ChildProperty, oldSubpath?: ChildProperty): void {
-        newSubpath.parent = this;
-        const index = oldSubpath ? this._subpaths.findIndex(subpath => subpath.signature.equals(oldSubpath.signature)) : -1;
-        if (index === -1)
-            this._subpaths.push(newSubpath);
-        else
-            this._subpaths[index] = newSubpath;
-
-        if (this._node)
-            newSubpath.node = this._node.getNeighbour(newSubpath.signature);
-    }
-
     public get isAuxiliary(): boolean {
         return this.signature.isNull;
     }
 
     public get signature(): Signature {
         return this._signature;
-    }
-
-    public get node(): Node | undefined {
-        return this._node;
-    }
-
-    public set node(value: Node | undefined) {
-        this._node = value;
     }
 
     public get subpaths(): ChildProperty[] {

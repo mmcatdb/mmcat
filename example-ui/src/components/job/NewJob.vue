@@ -3,8 +3,7 @@ import { defineComponent } from 'vue';
 import type { Job } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
 import type { Mapping } from '@/types/mapping';
-import { RootProperty } from '@/types/accessPath';
-//import { accessPathFromJSON } from '@/types/accessPath';
+import { RootProperty } from '@/types/accessPath/basic';
 
 export default defineComponent({
     components: {

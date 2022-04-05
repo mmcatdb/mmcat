@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { SimpleProperty } from '@/types/accessPath';
+import type { SimpleProperty } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
 
 export default defineComponent({

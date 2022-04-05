@@ -1,5 +1,5 @@
 <script lang="ts">
-import { RootProperty } from '@/types/accessPath';
+import { RootProperty } from '@/types/accessPath/graph';
 import { StaticName } from '@/types/identifiers';
 import type { Node, Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
@@ -21,7 +21,6 @@ export default defineComponent({
             graph: null as Graph | null,
             accessPath: null as RootProperty | null,
             rootObjectName: 'pathName',
-            rootNodeData: null as Node | null,
             databases: [] as Database[],
             selectingDatabase: null as Database | null,
             selectedDatabase: null as Database | null,
@@ -38,19 +37,17 @@ export default defineComponent({
         cytoscapeCreated(graph: Graph) {
             this.graph = graph;
         },
-        onRootNodeSelect(data: Node) {
-            const name = data.schemaObject.label;
-            this.accessPath = new RootProperty(StaticName.fromString(name));
-            this.accessPath.node = data;
+        selectRootNode(node: Node) {
+            const name = node.schemaObject.label;
+            this.accessPath = new RootProperty(StaticName.fromString(name), node);
             this.rootObjectName = name;
-            this.rootNodeData = data;
         },
         async createMapping() {
             const result = await POST<Mapping>('/mappings', {
                 id: null,
                 databaseId: this.selectedDatabase?.id,
                 categoryId: this.graph?.schemaCategory.id,
-                rootObjectId: this.rootNodeData?.schemaObject.id,
+                rootObjectId: this.accessPath?.node.schemaObject.id,
                 rootMorphismId: null, // TODO
                 jsonValue: JSON.stringify({
                     name: this.mappingName
@@ -80,18 +77,17 @@ export default defineComponent({
         >
             <div class="editor">
                 <template v-if="!!selectedDatabase">
-                    <div v-if="accessPath === null || rootNodeData === null">
+                    <div v-if="accessPath === null">
                         <SelectRoot
                             :graph="graph"
-                            @root-node:confirm="onRootNodeSelect"
+                            @root-node:confirm="selectRootNode"
                         />
                     </div>
                     <div v-else>
                         <AccessPathEditor
                             :graph="graph"
                             :database="selectedDatabase"
-                            :root-node="rootNodeData"
-                            :access-path="accessPath"
+                            :root-property="accessPath"
                         />
                         <button @click="createMapping">
                             Confirm and create mapping
