@@ -1,8 +1,7 @@
 <script lang="ts">
-import type { NodeSchemaData } from '@/types/categoryGraph';
+import type { Graph, Node } from '@/types/categoryGraph';
 import type { Database } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
-import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
 import SignatureInput from './SignatureInput.vue';
 
@@ -15,8 +14,8 @@ enum NameType {
 export default defineComponent({
     components: { SignatureInput },
     props: {
-        cytoscape: {
-            type: Object as () => Core,
+        graph: {
+            type: Object as () => Graph,
             required: true
         },
         database: {
@@ -24,7 +23,7 @@ export default defineComponent({
             required: true
         },
         rootNode: {
-            type: Object as () => NodeSchemaData,
+            type: Object as () => Node,
             required: true
         },
         modelValue: {
@@ -43,7 +42,7 @@ export default defineComponent({
             innerValue: this.modelValue,
             type: this.getNameType(this.modelValue),
             staticValue: this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue.value : '',
-            dynamicValue: this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty,
+            dynamicValue: { signature: this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty },
             NameType
         };
     },
@@ -54,7 +53,7 @@ export default defineComponent({
                     this.innerValue = this.modelValue;
                     this.type = this.getNameType(this.modelValue);
                     this.staticValue = this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue.value : '';
-                    this.dynamicValue = this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty;
+                    this.dynamicValue = { signature: this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty };
                 }
             }
         }
@@ -71,7 +70,7 @@ export default defineComponent({
                 this.innerValue = StaticName.fromString(this.staticValue);
                 break;
             case NameType.Dynamic:
-                this.innerValue = DynamicName.fromSignature(this.dynamicValue as Signature);
+                this.innerValue = DynamicName.fromSignature(this.dynamicValue.signature as Signature);
                 break;
             case NameType.Anonymous:
                 this.innerValue = StaticName.anonymous;
@@ -122,7 +121,7 @@ export default defineComponent({
         <div v-if="type === NameType.Dynamic">
             <SignatureInput
                 v-model="dynamicValue"
-                :cytoscape="cytoscape"
+                :graph="graph"
                 :database="database"
                 :root-node="rootNode"
                 :disabled="disabled"

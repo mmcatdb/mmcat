@@ -1,10 +1,12 @@
 import { IntendedStringBuilder } from "@/utils/string";
+import type { Node } from "../categoryGraph";
 import { nameFromJSON, Signature, type Name } from "../identifiers";
 import type { ComplexPropertyJSON } from "./ComplexProperty";
 import { subpathFromJSON, type ChildProperty } from "./compositeTypes";
 
 export class RootProperty {
     public name: Name; // TODO should be static name
+    private _node?: Node;
     private _subpaths: ChildProperty[];
     private _signature = Signature.null;
 
@@ -25,6 +27,14 @@ export class RootProperty {
             this._subpaths.push(newSubpath);
         else
             this._subpaths[index] = newSubpath;
+    }
+
+    public get node(): Node | undefined {
+        return this._node;
+    }
+
+    public set node(value: Node | undefined) {
+        this._node = value;
     }
 
     public get subpaths(): ChildProperty[] {

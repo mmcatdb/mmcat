@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { ComplexProperty } from '@/types/accessPath';
-import type { NodeSchemaData } from '@/types/categoryGraph';
+import type { Graph, Node } from '@/types/categoryGraph';
 import { Signature, type Name } from '@/types/identifiers';
-import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import NameInput from '../input/NameInput.vue';
@@ -15,12 +14,12 @@ enum State {
 export default defineComponent({
     components: { SignatureInput, NameInput },
     props: {
-        cytoscape: {
-            type: Object as () => Core,
+        graph: {
+            type: Object as () => Graph,
             required: true
         },
         propertyNode: {
-            type: Object as () => NodeSchemaData,
+            type: Object as () => Node,
             required: true
         },
         property: {
@@ -93,7 +92,7 @@ export default defineComponent({
             Name: <span class="value">{{ newName }}</span>
             <NameInput
                 v-model="newName"
-                :cytoscape="cytoscape"
+                :graph="graph"
                 :root-node="propertyNode"
             />
 
@@ -123,7 +122,7 @@ export default defineComponent({
             Signature: <span class="value">{{ newSignature }}</span>
             <SignatureInput
                 v-model="newSignature"
-                :cytoscape="cytoscape"
+                :graph="graph"
                 :root-node="propertyNode"
             />
             <br />

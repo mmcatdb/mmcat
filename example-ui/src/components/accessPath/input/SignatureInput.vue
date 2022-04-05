@@ -1,15 +1,15 @@
 <script lang="ts">
-import { NodeSchemaData, NodeSequence, resetAvailabilityStatus } from '@/types/categoryGraph';
+import { Graph, Node, NodeSequence } from '@/types/categoryGraph';
 import type { Database } from '@/types/database';
-import { TEST_CONFIGURATION } from '@/types/database/Configuration';
 import { Signature } from '@/types/identifiers';
-import type { Core, EventObject, NodeSingular } from 'cytoscape';
 import { defineComponent } from 'vue';
+
+type OutputType = { signature: Signature, node?: Node };
 
 export default defineComponent({
     props: {
-        cytoscape: {
-            type: Object as () => Core,
+        graph: {
+            type: Object as () => Graph,
             required: true
         },
         database: {
@@ -17,12 +17,12 @@ export default defineComponent({
             required: true
         },
         rootNode: {
-            type: Object as () => NodeSchemaData,
+            type: Object as () => Node,
             required: true
         },
         modelValue: {
-            type: Object as () => Signature,
-            default: Signature.empty
+            type: Object as () => OutputType,
+            default: () => ({ signature: Signature.empty })
         },
         disabled: {
             type: Boolean,
@@ -32,24 +32,24 @@ export default defineComponent({
     },
     emits: [ 'update:modelValue', 'input' ],
     data() {
-        const sequence = this.sequenceFromSignature(this.modelValue);
+        const sequence = this.sequenceFromSignature(this.modelValue.signature);
 
         return {
             sequence: sequence as NodeSequence,
-            innerValue: sequence.toSignature(),
+            innerValue: { signature: sequence.toSignature(), node: sequence.lastNode },
             Signature: Signature
         };
     },
     watch: {
         modelValue: {
-            handler(newValue: Signature): void {
-                if (!newValue.equals(this.innerValue))
-                    this.setSignature(newValue, false);
+            handler(newValue: OutputType): void {
+                if (!newValue.signature.equals(this.innerValue.signature))
+                    this.setSignature(newValue.signature, false);
             }
         }
     },
     mounted() {
-        this.cytoscape.addListener('tap', 'node', this.onNodeTapHandler);
+        this.graph.addNodeListener('tap', this.onNodeTapHandler);
 
         // TODO
         this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
@@ -57,25 +57,24 @@ export default defineComponent({
         //this.sequence.allNodes.forEach(node => node.select());
     },
     unmounted() {
-        this.cytoscape.removeListener('tap', this.onNodeTapHandler);
+        this.graph.removeListener('tap', this.onNodeTapHandler);
         this.sequence.unselectAll();
-        resetAvailabilityStatus(this.cytoscape);
+        this.graph.resetAvailabilityStatus();
     },
     methods: {
-        onNodeTapHandler(event: EventObject): void {
+        onNodeTapHandler(node: Node): void {
             if (this.disabled)
                 return;
 
-            const node = (event.target as NodeSingular).data('schemaData') as NodeSchemaData;
             if (this.sequence.tryRemoveNode(node)) {
                 //node.unselect();
-                resetAvailabilityStatus(this.cytoscape);
+                this.graph.resetAvailabilityStatus();
                 this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
                 this.updateInnerValueFromSequenceChange();
             }
             else if (this.sequence.tryAddNode(node)) {
                 //node.select();
-                resetAvailabilityStatus(this.cytoscape);
+                this.graph.resetAvailabilityStatus();
                 this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
                 this.updateInnerValueFromSequenceChange();
             }
@@ -88,10 +87,10 @@ export default defineComponent({
         setSignature(signature: Signature, sendUpdate = true) {
             //this.sequence.allNodes.forEach(node => node.unselect());
             this.sequence.unselectAll();
-            resetAvailabilityStatus(this.cytoscape);
+            this.graph.resetAvailabilityStatus();
             this.sequence = this.sequenceFromSignature(signature);
             this.sequence.lastNode.markAvailablePaths(this.database.configuration, this.sequence.lastNode !== this.rootNode);
-            this.innerValue = signature;
+            this.innerValue = { signature, node: this.sequence.lastNode };
             //this.sequence.allNodes.forEach(node => node.select());
 
             if (sendUpdate) {
@@ -100,7 +99,7 @@ export default defineComponent({
             }
         },
         updateInnerValueFromSequenceChange() {
-            this.innerValue = this.sequence.toSignature();
+            this.innerValue = { signature: this.sequence.toSignature(), node: this.sequence.lastNode };
             this.$emit('update:modelValue', this.innerValue);
             this.$emit('input');
         }

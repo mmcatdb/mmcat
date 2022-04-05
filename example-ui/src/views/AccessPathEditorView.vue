@@ -5,8 +5,8 @@ import AccessPathCreator from '../components/accessPath/AccessPathCreator.vue';
 
 export default defineComponent({
     components: {
-    AccessPathCreator
-},
+        AccessPathCreator
+    },
     props: {},
     data() {
         return {

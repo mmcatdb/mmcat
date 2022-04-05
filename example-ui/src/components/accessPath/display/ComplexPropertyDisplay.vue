@@ -2,7 +2,6 @@
 import { SimpleProperty, ComplexProperty } from '@/types/accessPath';
 import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
-import IconCommunity from '../../icons/IconCommunity.vue';
 import IconPlusSquare from '../../icons/IconPlusSquare.vue';
 
 export default defineComponent({

@@ -1,31 +1,31 @@
 import { Signature } from "../identifiers";
 import type { SchemaMorphism } from "../schema";
-import { AvailabilityStatus, type NodeSchemaData } from "./NodeSchemaData";
+import { AvailabilityStatus, type Node } from "./Node";
 
 export class NodeSequence {
-    private nodes: NodeSchemaData[];
+    private nodes: Node[];
     private morphisms: SchemaMorphism[];
 
-    private constructor(nodes: NodeSchemaData[], morphisms: SchemaMorphism[]) {
+    private constructor(nodes: Node[], morphisms: SchemaMorphism[]) {
         this.nodes = nodes;
         this.morphisms = morphisms;
     }
 
-    public static withRootNode(rootNode: NodeSchemaData): NodeSequence {
+    public static withRootNode(rootNode: Node): NodeSequence {
         const sequence = new NodeSequence([ rootNode ], []);
         sequence.rootNode.select(AvailabilityStatus.Root);
         return sequence;
     }
 
-    public get rootNode(): NodeSchemaData {
+    public get rootNode(): Node {
         return this.nodes[0];
     }
 
-    public get lastNode(): NodeSchemaData {
+    public get lastNode(): Node {
         return this.nodes[this.nodes.length - 1];
     }
     /*
-    public get allNodes(): NodeSchemaData[] {
+    public get allNodes(): Node[] {
         return this.nodes;
     }
     */
@@ -47,7 +47,7 @@ export class NodeSequence {
         this.nodes.forEach(node => node.unselect());
     }
 
-    public tryAddNode(node: NodeSchemaData): boolean {
+    public tryAddNode(node: Node): boolean {
         /*
         const morphism = this.lastNode.neighbours.get(node);
 
@@ -69,7 +69,7 @@ export class NodeSequence {
         return true;
     }
 
-    public tryRemoveNode(node: NodeSchemaData): boolean {
+    public tryRemoveNode(node: Node): boolean {
         if (!this.lastNode.equals(node) || this.rootNode.equals(node))
             return false;
 

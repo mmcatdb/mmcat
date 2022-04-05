@@ -1,11 +1,9 @@
 <script lang="ts">
 import { RootProperty } from '@/types/accessPath';
 import { StaticName } from '@/types/identifiers';
-import type { SchemaCategory } from '@/types/schema';
-import type { NodeSchemaData } from '@/types/categoryGraph';
-import type { Core } from 'cytoscape';
+import type { Node, Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
-import SchemaCategoryGraph from '../category/SchemaCategoryGraph.vue';
+import GraphDisplay from '../category/GraphDisplay.vue';
 import SelectRoot from './SelectRoot.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { GET, POST } from '@/utils/backendAPI';
@@ -14,17 +12,16 @@ import type { Mapping } from '@/types/mapping';
 
 export default defineComponent({
     components: {
-        SchemaCategoryGraph,
+        GraphDisplay,
         SelectRoot,
         AccessPathEditor
     },
     data() {
         return {
-            schemaCategory: null as SchemaCategory | null,
-            cytoscape: null as Core | null,
+            graph: null as Graph | null,
             accessPath: null as RootProperty | null,
             rootObjectName: 'pathName',
-            rootNodeData: null as NodeSchemaData | null,
+            rootNodeData: null as Node | null,
             databases: [] as Database[],
             selectingDatabase: null as Database | null,
             selectedDatabase: null as Database | null,
@@ -38,13 +35,13 @@ export default defineComponent({
             this.databases = result.data.map(databaseFromServer => new Database(databaseFromServer));
     },
     methods: {
-        cytoscapeCreated(cytoscape: Core, schemaCategory: SchemaCategory) {
-            this.cytoscape = cytoscape;
-            this.schemaCategory = schemaCategory;
+        cytoscapeCreated(graph: Graph) {
+            this.graph = graph;
         },
-        onRootNodeSelect(data: NodeSchemaData) {
+        onRootNodeSelect(data: Node) {
             const name = data.schemaObject.label;
             this.accessPath = new RootProperty(StaticName.fromString(name));
+            this.accessPath.node = data;
             this.rootObjectName = name;
             this.rootNodeData = data;
         },
@@ -52,7 +49,7 @@ export default defineComponent({
             const result = await POST<Mapping>('/mappings', {
                 id: null,
                 databaseId: this.selectedDatabase?.id,
-                categoryId: this.schemaCategory?.id,
+                categoryId: this.graph?.schemaCategory.id,
                 rootObjectId: this.rootNodeData?.schemaObject.id,
                 rootMorphismId: null, // TODO
                 jsonValue: JSON.stringify({
@@ -76,22 +73,22 @@ export default defineComponent({
     <label>Mapping name:</label>
     <input v-model="mappingName" />
     <div class="divide">
-        <SchemaCategoryGraph @cytoscape:ready="cytoscapeCreated" />
+        <GraphDisplay @graph:created="cytoscapeCreated" />
         <div
-            v-if="cytoscape"
+            v-if="graph"
             class="divide"
         >
             <div class="editor">
                 <template v-if="!!selectedDatabase">
                     <div v-if="accessPath === null || rootNodeData === null">
                         <SelectRoot
-                            :cytoscape="cytoscape"
+                            :graph="graph"
                             @root-node:confirm="onRootNodeSelect"
                         />
                     </div>
                     <div v-else>
                         <AccessPathEditor
-                            :cytoscape="cytoscape"
+                            :graph="graph"
                             :database="selectedDatabase"
                             :root-node="rootNodeData"
                             :access-path="accessPath"

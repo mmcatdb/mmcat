@@ -1,8 +1,7 @@
 <script lang="ts">
 import { SimpleProperty, ComplexProperty, type ChildProperty } from '@/types/accessPath';
-import type { NodeSchemaData } from '@/types/categoryGraph';
+import type { Graph, Node } from '@/types/categoryGraph';
 import type { Signature, Name } from '@/types/identifiers';
-import type { Core } from 'cytoscape';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import NameInput from '../input/NameInput.vue';
@@ -22,16 +21,16 @@ enum PropertyType {
 export default defineComponent({
     components: { SignatureInput, NameInput },
     props: {
-        cytoscape: {
-            type: Object as () => Core,
+        graph: {
+            type: Object as () => Graph,
             required: true
         },
         database: {
             type: Object as () => Database,
             required: true
         },
-        parentNode: { // TODO should be parentNode
-            type: Object as () => NodeSchemaData,
+        parentNode: {
+            type: Object as () => Node,
             required: true
         },
         property: {
@@ -43,7 +42,7 @@ export default defineComponent({
     data() {
         return {
             newType: this.propertyToType(this.property),
-            newSignature: this.property.signature.copy() as Signature,
+            newSignature: { signature: this.property.signature.copy() as Signature, node: this.property.node },
             newName: this.property.name.copy() as Name,
             state: State.SelectType,
             State: State,
@@ -58,7 +57,7 @@ export default defineComponent({
             return !this.property.name.equals(this.newName as Name);
         },
         signatureChanged(): boolean {
-            return !this.property.signature.equals(this.newSignature as Signature);
+            return !this.property.signature.equals(this.newSignature.signature as Signature);
         },
         isNew(): boolean {
             return !this.property.parent;
@@ -69,7 +68,10 @@ export default defineComponent({
             return property instanceof SimpleProperty ? PropertyType.Simple : PropertyType.Complex;
         },
         save() {
-            const newProperty = this.newType === PropertyType.Simple ? new SimpleProperty(this.newName, this.newSignature) : new ComplexProperty(this.newName, this.newSignature);
+            const newProperty = this.newType === PropertyType.Simple
+                ? new SimpleProperty(this.newName, this.newSignature.signature)
+                : new ComplexProperty(this.newName, this.newSignature.signature);
+            newProperty.node = this.newSignature.node as Node | undefined;
 
             this.$emit('save', newProperty);
         },
@@ -109,7 +111,7 @@ export default defineComponent({
             this.confirmNewSignature();
         },
         resetSignature() {
-            this.newSignature = this.property.signature.copy();
+            this.newSignature = { signature: this.property.signature.copy(), node: this.property.node };
         }
     }
 });
@@ -161,7 +163,7 @@ export default defineComponent({
             Name: <span class="value">{{ newName }}</span>
             <NameInput
                 v-model="newName"
-                :cytoscape="cytoscape"
+                :graph="graph"
                 :database="database"
                 :root-node="parentNode"
             />
@@ -186,10 +188,10 @@ export default defineComponent({
             </button>
         </template>
         <template v-else-if="state === State.SelectSignature">
-            Signature: <span class="value">{{ newSignature }}</span>
+            Signature: <span class="value">{{ newSignature.signature }}</span>
             <SignatureInput
                 v-model="newSignature"
-                :cytoscape="cytoscape"
+                :graph="graph"
                 :database="database"
                 :root-node="parentNode"
             />

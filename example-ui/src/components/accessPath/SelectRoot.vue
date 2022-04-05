@@ -1,34 +1,32 @@
 <script lang="ts">
-import type { NodeSchemaData } from '@/types/categoryGraph';
-import type { Core, EventObject, NodeSingular } from 'cytoscape';
+import type { Graph, Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
     props: {
-        cytoscape: {
-            type: Object as () => Core,
+        graph: {
+            type: Object as () => Graph,
             required: true
         }
     },
     emits: [ 'rootNode:confirm' ],
     data() {
         return {
-            lastClickedNode: null as NodeSchemaData | null,
+            lastClickedNode: null as Node | null,
         };
     },
     mounted() {
-        this.cytoscape.addListener('tap', 'node', this.onNodeTapHandler);
+        this.graph.addNodeListener('tap', this.onNodeTapHandler);
     },
     unmounted() {
-        this.cytoscape.removeListener('tap', this.onNodeTapHandler);
+        this.graph.removeListener('tap', this.onNodeTapHandler);
     },
     methods: {
-        onNodeTapHandler(event: EventObject): void {
+        onNodeTapHandler(node: Node): void {
             if (this.lastClickedNode)
                 this.lastClickedNode.unselect();
 
-            const node = (event.target as NodeSingular).data('schemaData') as NodeSchemaData;
-            if (node.equals(this.lastClickedNode)) {
+            if (node.equals(this.lastClickedNode as Node | null)) {
                 // If we double tap current node, it become unselected.
                 this.lastClickedNode = null;
             }
@@ -48,7 +46,8 @@ export default defineComponent({
 
 <template>
     <div class="outer">
-        Choose root object: {{ lastClickedNode?.schemaObject.label }}<br>
+        Choose root object: {{ lastClickedNode?.schemaObject.label }}
+        <br />
         <button
             :disabled="!lastClickedNode"
             @click="confirm"
@@ -59,8 +58,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.outer {
 
-}
 </style>
 

@@ -19,14 +19,14 @@ export enum AvailabilityStatus {
     Root = 'root'
 }
 
-export class NodeSchemaData {
+export class Node {
     public schemaObject: SchemaObject;
     public node!: NodeSingular;
     private tags = new Set() as Set<NodeTag>;
     private _availabilityStatus = AvailabilityStatus.Default;
     public availablePathData = null as MorphismData | null;
 
-    public neighbours = new TwoWayMap<NodeSchemaData, SchemaMorphism>();
+    public neighbours = new TwoWayMap<Node, SchemaMorphism>();
     private signatureToMorphism = new Map() as Map<Signature, SchemaMorphism>;
 
     public constructor(schemaObject: SchemaObject) {
@@ -41,12 +41,12 @@ export class NodeSchemaData {
         this.node = node;
     }
 
-    public addNeighbour(object: NodeSchemaData, morphism: SchemaMorphism): void {
+    public addNeighbour(object: Node, morphism: SchemaMorphism): void {
         this.neighbours.set(object, morphism);
         this.signatureToMorphism.set(morphism.signature, morphism);
     }
 
-    public getNeighbour(signature: Signature): NodeSchemaData | undefined {
+    public getNeighbour(signature: Signature): Node | undefined {
         const split = signature.getFirstBase();
         if (!split)
             return undefined;
@@ -109,7 +109,7 @@ export class NodeSchemaData {
         this.node.addClass('root');
     }
 
-    public equals(other: NodeSchemaData | null): boolean {
+    public equals(other: Node | null): boolean {
         return !!other && this.schemaObject.id === other.schemaObject.id;
     }
 
@@ -119,7 +119,7 @@ export class NodeSchemaData {
 
         const neighbours = [ ...this.neighbours.entries() ].map(([ node, morphism ]) => ({
             node,
-            previousNode: this as NodeSchemaData,
+            previousNode: this as Node,
             morphism: morphismToData(morphism),
         }));
 

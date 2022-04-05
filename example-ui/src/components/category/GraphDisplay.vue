@@ -2,25 +2,25 @@
 import { defineComponent } from 'vue';
 import { GET, PUT } from '@/utils/backendAPI';
 import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
-import cytoscape, { type Core, type NodeSingular } from 'cytoscape';
+import cytoscape from 'cytoscape';
 import type { ElementDefinition } from 'cytoscape';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import { NodeSchemaData } from '@/types/categoryGraph';
+import { Graph, Node } from '@/types/categoryGraph';
 
 export default defineComponent({
     components: {
         ResourceNotFound,
         ResourceLoading
     },
-    emits: [ 'cytoscape:ready' ],
+    emits: [ 'graph:created' ],
     data() {
         return {
             schemaCategory: null as SchemaCategory | null,
             schemaFetched: false,
             saveButtonDisabled: false,
-            cytoscapeInstance: null as Core | null
+            graph: null as Graph | null
         };
     },
     async mounted() {
@@ -29,19 +29,20 @@ export default defineComponent({
             console.log(result.data);
             this.schemaCategory = SchemaCategory.fromServer(result.data);
 
-            this.cytoscapeInstance = this.createCytoscape(this.schemaCategory);
-        }
+            const cytoscapeInstance = this.createCytoscape(this.schemaCategory);
+            this.graph = new Graph(cytoscapeInstance, this.schemaCategory);
 
-        this.schemaFetched = true;
-        this.$emit('cytoscape:ready', this.cytoscapeInstance, this.schemaCategory);
+            this.schemaFetched = true;
+            this.$emit('graph:created', this.graph);
+        }
     },
     methods: {
         createCytoscape(schema: SchemaCategory) {
             const elements = [] as ElementDefinition[];
 
-            const schemaDataOfNodes = [] as NodeSchemaData[];
+            const schemaDataOfNodes = [] as Node[];
             schema.objects.forEach(object => {
-                const schemaData = new NodeSchemaData(object);
+                const schemaData = new Node(object);
                 schemaDataOfNodes.push(schemaData);
 
                 const definition = {

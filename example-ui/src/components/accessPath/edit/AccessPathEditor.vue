@@ -1,8 +1,7 @@
 <script lang="ts">
 import { ComplexProperty, RootProperty, SimpleProperty, type ChildProperty, type ParentProperty } from '@/types/accessPath';
 import { Signature, StaticName } from '@/types/identifiers';
-import type { NodeSchemaData } from '@/types/categoryGraph';
-import type { Core } from 'cytoscape';
+import type { Graph, Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import EditProperty from './EditProperty.vue';
 import ComplexPropertyDisplay from '../display/ComplexPropertyDisplay.vue';
@@ -17,7 +16,7 @@ enum State {
 type GenericStateValue<State, Value> = { type: State } & Value;
 
 type StateValue = GenericStateValue<State.Default, unknown>
-    | GenericStateValue<State.EditProperty, { property: ChildProperty }>
+    | GenericStateValue<State.EditProperty, { property: ChildProperty, parentNode: Node }>
     | GenericStateValue<State.AddProperty, { property: ChildProperty, parent: ParentProperty }>;
 /*
 type State = { default: string }
@@ -30,8 +29,8 @@ export default defineComponent({
         ComplexPropertyDisplay
     },
     props: {
-        cytoscape: {
-            type: Object as () => Core,
+        graph: {
+            type: Object as () => Graph,
             required: true
         },
         database: {
@@ -39,7 +38,7 @@ export default defineComponent({
             required: true
         },
         rootNode: {
-            type: Object as () => NodeSchemaData,
+            type: Object as () => Node,
             required: true
         },
         accessPath: {
@@ -78,7 +77,7 @@ export default defineComponent({
             this.setStateToDefault();
         },
         editPropertyClicked(property: ChildProperty) {
-            this.state = { type: State.EditProperty, property };
+            this.state = { type: State.EditProperty, property, parentNode: property.parent?.node ?? this.rootNode };
         },
         addPropertyClicked(parentProperty: ComplexProperty) {
             this.state = {
@@ -108,9 +107,9 @@ export default defineComponent({
             </template>
             <template v-else-if="state.type === State.EditProperty">
                 <EditProperty
-                    :cytoscape="cytoscape"
+                    :graph="graph"
                     :database="database"
-                    :parent-node="rootNode"
+                    :parent-node="state.parentNode"
                     :property="state.property"
                     @save="editProperty"
                     @cancel="setStateToDefault"
@@ -118,9 +117,9 @@ export default defineComponent({
             </template>
             <template v-else-if="state.type === State.AddProperty">
                 <EditProperty
-                    :cytoscape="cytoscape"
+                    :graph="graph"
                     :database="database"
-                    :parent-node="rootNode"
+                    :parent-node="state.parent.node"
                     :property="state.property"
                     @save="addProperty"
                     @cancel="setStateToDefault"
