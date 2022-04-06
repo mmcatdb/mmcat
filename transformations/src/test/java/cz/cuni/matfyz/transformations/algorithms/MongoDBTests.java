@@ -28,6 +28,7 @@ public class MongoDBTests
         Config.get("mongodb.host"),
         Config.get("mongodb.port"),
         Config.get("mongodb.database"),
+        Config.get("mongodb.authenticationDatabase"),
         Config.get("mongodb.username"),
         Config.get("mongodb.password")
     );

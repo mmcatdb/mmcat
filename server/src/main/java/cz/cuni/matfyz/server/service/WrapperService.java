@@ -49,6 +49,7 @@ public class WrapperService {
                 Config.get("data.mongodb.host"),
                 Config.get("data.mongodb.port"),
                 Config.get("data.mongodb.database"),
+                Config.get("data.mongodb.authenticationDatabase"),
                 Config.get("data.mongodb.username"),
                 Config.get("data.mongodb.password")
             );

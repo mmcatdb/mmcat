@@ -16,6 +16,7 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
     private String host;
     private String port;
     private String database;
+    private String authenticationDatabase;
     private String username;
     private String password;
 
@@ -23,11 +24,12 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
     // This also means that there should be at most one instance of this class so it should be cached somewhere.
     private MongoClient mongoClient;
 
-    public MongoDBDatabaseProvider(String host, String port, String database, String username, String password)
+    public MongoDBDatabaseProvider(String host, String port, String database, String authenticationDatabase, String username, String password)
     {
         this.host = host;
         this.port = port;
         this.database = database;
+        this.authenticationDatabase = authenticationDatabase;
         this.username = username;
         this.password = password;
     }
@@ -35,12 +37,12 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
     public MongoDatabase getDatabase()
     {
         if (mongoClient == null)
-            mongoClient = createClientFromCredentials(host, port, database, username, password);
+            mongoClient = createClientFromCredentials(host, port, authenticationDatabase, username, password);
 
         return mongoClient.getDatabase(database);
     }
 
-    private static MongoClient createClientFromCredentials(String host, String port, String database, String username, String password)
+    private static MongoClient createClientFromCredentials(String host, String port, String authenticationDatabase, String username, String password)
     {
         var connectionBuilder = new StringBuilder();
         var connectionString = connectionBuilder
@@ -53,7 +55,7 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
             .append(":")
             .append(port)
             .append("/")
-            .append(database)
+            .append(authenticationDatabase)
             .toString();
 
         return MongoClients.create(connectionString);
@@ -67,6 +69,8 @@ public class MongoDBDatabaseProvider implements DatabaseProvider
             .append(" --password ").toString();
 
         String afterPasswordString = new StringBuilder()
+            .append(" --authenticationDatabase ")
+            .append(authenticationDatabase)
             .append(" ")
             .append(host)
             .append(":")
