@@ -1,85 +1,55 @@
 <script lang="ts">
-import type { ComplexProperty } from '@/types/accessPath/graph';
-import type { Graph, Node } from '@/types/categoryGraph';
-import { Signature, type Name } from '@/types/identifiers';
+import { RootProperty } from '@/types/accessPath/graph';
+import type { Graph } from '@/types/categoryGraph';
+import type { StaticName } from '@/types/identifiers';
 import { defineComponent } from 'vue';
-import SignatureInput from '../input/SignatureInput.vue';
-import NameInput from '../input/NameInput.vue';
-
-enum State {
-    SelectName,
-    SelectSignature
-}
+import StaticNameInput from '../input/StaticNameInput.vue';
+import type { Database } from '@/types/database';
 
 export default defineComponent({
-    components: { SignatureInput, NameInput },
+    components: {
+        StaticNameInput
+    },
     props: {
         graph: {
             type: Object as () => Graph,
             required: true
         },
-        propertyNode: {
-            type: Object as () => Node,
+        database: {
+            type: Object as () => Database,
             required: true
         },
         property: {
-            type: Object as () => ComplexProperty,
+            type: Object as () => RootProperty,
             required: true
-        },
-        isNew: {
-            type: Boolean,
-            default: false,
-            required: false
         }
     },
     emits: [ 'save', 'cancel' ],
     data() {
         return {
-            newSignature: Signature.empty,
-            newName: this.property.name.copy(),
-            state: State.SelectName,
-            State: State
+            name: this.property.name.copy() as StaticName
         };
     },
     computed: {
         nameChanged(): boolean {
-            return !this.property.name.equals(this.newName);
-        },
-        signatureChanged(): boolean {
-            return !this.property.signature.equals(this.newSignature);
+            return !this.property.name.equals(this.name);
         }
     },
     methods: {
         save() {
-            this.property.update(this.newName, this.newSignature);
+            if (this.nameChanged)
+                this.property.update(this.name);
+
             this.$emit('save');
         },
         cancel() {
             this.$emit('cancel');
         },
-        confirmNewName() {
-            this.state = State.SelectSignature;
-        },
-        keepOldName() {
-            if (this.nameChanged)
-                this.resetName();
-
-            this.confirmNewName();
-        },
-        resetName() {
-            this.newName = this.property.name.copy();
-        },
-        confirmNewSignature() {
+        confirmName() {
             this.save();
         },
-        keepOldSignature() {
-            if (this.signatureChanged)
-                this.resetSignature();
-
-            this.confirmNewSignature();
-        },
-        resetSignature() {
-            this.newSignature = this.property.signature.copy();
+        resetName() {
+            this.name = this.property.name.copy();
         }
     }
 });
@@ -87,64 +57,23 @@ export default defineComponent({
 
 <template>
     <div class="outer">
-        <h2>Edit complex property</h2>
-        <template v-if="state === State.SelectName">
-            Name: <span class="value">{{ newName }}</span>
-            <NameInput
-                v-model="newName"
-                :graph="graph"
-                :root-node="propertyNode"
-            />
-
-                TODO
-
-            <br />
-            <button
-                :disabled="!(nameChanged || isNew)"
-                @click="confirmNewName"
-            >
-                Confirm
-            </button>
-            <button
-                v-if="!isNew"
-                @click="keepOldName"
-            >
-                Keep current
-            </button>
-            <button
-                :disabled="!nameChanged"
-                @click="resetName"
-            >
-                Reset
-            </button>
-        </template>
-        <template v-else>
-            Signature: <span class="value">{{ newSignature }}</span>
-            <SignatureInput
-                v-model="newSignature"
-                :graph="graph"
-                :root-node="propertyNode"
-            />
-            <br />
-            <button
-                :disabled="!(signatureChanged || isNew)"
-                @click="confirmNewSignature"
-            >
-                Confirm
-            </button>
-            <button
-                v-if="!isNew"
-                @click="keepOldSignature"
-            >
-                Keep current
-            </button>
-            <button
-                :disabled="!signatureChanged"
-                @click="resetSignature"
-            >
-                Reset
-            </button>
-        </template>
+        <h2>Edit root property</h2>
+        Name: <span class="selected">{{ name }}</span>
+        <StaticNameInput
+            v-model="name"
+        />
+        <br />
+        <button
+            @click="confirmName"
+        >
+            {{ nameChanged ? 'Confirm change' : 'Keep current' }}
+        </button>
+        <button
+            v-if="nameChanged"
+            @click="resetName"
+        >
+            Reset
+        </button>
         <button @click="cancel">
             Cancel
         </button>
@@ -152,13 +81,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.outer {
-    padding: 16px;
-    margin: 16px;
-    border: 1px solid white;
-}
-
-.value {
+.selected {
     font-weight: bold;
 }
 </style>

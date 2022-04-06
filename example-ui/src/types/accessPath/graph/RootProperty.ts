@@ -1,21 +1,21 @@
 import type { Node } from "@/types/categoryGraph";
-import type { Name } from "@/types/identifiers";
+import type { StaticName } from "@/types/identifiers";
 import type { ComplexPropertyJSON } from "./ComplexProperty";
 import type { ChildProperty } from "./compositeTypes";
 import { SequenceSignature } from "./SequenceSignature";
 
 export class RootProperty {
-    name: Name; // TODO should be static name
+    name: StaticName;
     _subpaths: ChildProperty[];
     _signature: SequenceSignature;
 
-    constructor(name: Name, rootNode: Node, subpaths: ChildProperty[] = []) {
+    constructor(name: StaticName, rootNode: Node, subpaths: ChildProperty[] = []) {
         this.name = name;
         this._subpaths = [ ...subpaths ];
         this._signature = SequenceSignature.null(rootNode);
     }
 
-    update(newName: Name): void {
+    update(newName: StaticName): void {
         if (!this.name.equals(newName))
             this.name = newName;
     }

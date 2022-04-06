@@ -19,7 +19,9 @@ enum PropertyType {
 }
 
 export default defineComponent({
-    components: { SignatureInput, NameInput },
+    components: {
+        SignatureInput, NameInput
+    },
     props: {
         graph: {
             type: Object as () => Graph,
@@ -77,7 +79,7 @@ export default defineComponent({
 
 <template>
     <div class="outer">
-        <h2>Edit property</h2>
+        <h2>Add property</h2>
         <template v-if="state === State.SelectType">
             Type:<br />
             <input

@@ -19,7 +19,9 @@ enum PropertyType {
 }
 
 export default defineComponent({
-    components: { SignatureInput, NameInput },
+    components: {
+        SignatureInput, NameInput
+    },
     props: {
         graph: {
             type: Object as () => Graph,
@@ -40,7 +42,7 @@ export default defineComponent({
             type: this.propertyToType(this.property),
             PropertyType,
             signature: this.property.signature.copy(),
-            newName: this.property.name.copy() as Name,
+            name: this.property.name.copy() as Name,
             state: State.SelectType,
             State
         };
@@ -50,7 +52,7 @@ export default defineComponent({
             return this.type !== this.propertyToType(this.property);
         },
         nameChanged(): boolean {
-            return !this.property.name.equals(this.newName);
+            return !this.property.name.equals(this.name);
         },
         signatureChanged(): boolean {
             return !this.property.signature.equals(this.signature);
@@ -63,10 +65,12 @@ export default defineComponent({
         save() {
             const subpaths = !this.signatureChanged && !this.typeChanged && this.property instanceof ComplexProperty ? this.property.subpaths : [];
             const newProperty = this.type === PropertyType.Simple
-                ? new SimpleProperty(this.newName, this.signature, this.property.parent)
-                : new ComplexProperty(this.newName, this.signature, this.property.parent, subpaths);
+                ? new SimpleProperty(this.name, this.signature, this.property.parent)
+                : new ComplexProperty(this.name, this.signature, this.property.parent, subpaths);
 
-            this.property.parent.updateOrAddSubpath(newProperty);
+            this.property.parent.updateOrAddSubpath(newProperty, this.property);
+
+            this.$emit('save');
         },
         cancel() {
             this.$emit('cancel');
@@ -82,7 +86,7 @@ export default defineComponent({
             this.state = State.SelectSignature;
         },
         resetName() {
-            this.newName = this.property.name.copy();
+            this.name = this.property.name.copy();
         },
         confirmSignature() {
             this.save();
@@ -136,9 +140,9 @@ export default defineComponent({
             </button>
         </template>
         <template v-else-if="state === State.SelectName">
-            Name: <span class="selected">{{ newName }}</span>
+            Name: <span class="selected">{{ name }}</span>
             <NameInput
-                v-model="newName"
+                v-model="name"
                 :graph="graph"
                 :database="database"
                 :root-node="property.parentNode"
