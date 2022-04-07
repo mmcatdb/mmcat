@@ -40,5 +40,15 @@ public class UserStore {
     public Collection<InstanceCategory> getAllInstances() {
         return instaces.values();
     }
+
+    private InstanceCategory defaultInstance = null;
+
+    public InstanceCategory getDefaultInstace() {
+        return defaultInstance;
+    }
+    
+    public void setDefaultInstance(InstanceCategory instance) {
+        this.defaultInstance = instance;
+    }
     
 }

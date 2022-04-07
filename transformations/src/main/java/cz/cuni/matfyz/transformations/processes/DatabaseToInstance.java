@@ -21,10 +21,12 @@ public class DatabaseToInstance {
 
     private AbstractPullWrapper pullWrapper;
     private Mapping mapping;
+    private InstanceCategory defaultInstance;
 
-    public void input(AbstractPullWrapper pullWrapper, Mapping mapping) {
+    public void input(AbstractPullWrapper pullWrapper, Mapping mapping, InstanceCategory defaultInstance) {
         this.pullWrapper = pullWrapper;
         this.mapping = mapping;
+        this.defaultInstance = defaultInstance;
     }
     
     public Result<InstanceCategory> run() {
@@ -37,7 +39,9 @@ public class DatabaseToInstance {
             return new Result<InstanceCategory>("Pull forest failed.");
         }
 
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
+        InstanceCategory instance = defaultInstance != null ?
+            defaultInstance :
+            new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
         
         var transformation = new ModelToCategory();
 		transformation.input(mapping, instance, forest);

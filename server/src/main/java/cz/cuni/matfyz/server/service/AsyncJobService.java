@@ -46,10 +46,13 @@ public class AsyncJobService {
         LOGGER.info("RUN JOB");
         try {
             // TODO
-            var result = modelToCategoryAlgorithm(job).join();
+            var defaultInstance = store.getDefaultInstace();
+            var result = modelToCategoryAlgorithm(job, defaultInstance).join();
 
             if (result.status) {
-                store.addInstance(job.id, result.data);
+                //store.addInstance(job.id, result.data);
+                if (defaultInstance == null)
+                    store.setDefaultInstance(result.data);
                 setJobStatus(job, Job.Status.Finished);
             }
             else {
@@ -58,12 +61,13 @@ public class AsyncJobService {
         }
         catch (InterruptedException exception) {
             LOGGER.error("Job " + job.id + " was interrupted.", exception);
+            setJobStatus(job, Job.Status.Canceled);
         }
         LOGGER.info("RUN JOB END");
     }
 
     @Async("jobExecutor")
-    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job) throws InterruptedException {       
+    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory defaultInstance) throws InterruptedException {       
         var mappingWrapper = mappingService.find(job.mappingId);
         var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
 
@@ -76,10 +80,10 @@ public class AsyncJobService {
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
 
         var process = new DatabaseToInstance();
-        process.input(pullWrapper, mapping);
+        process.input(pullWrapper, mapping, defaultInstance);
 
         var result = process.run();
-        Thread.sleep(10 * 1000);
+        Thread.sleep(2 * 1000);
 
         return CompletableFuture.completedFuture(result);
     }

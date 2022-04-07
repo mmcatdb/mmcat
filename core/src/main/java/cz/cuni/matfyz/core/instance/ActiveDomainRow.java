@@ -1,8 +1,14 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.util.*;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * An instance of this class represents a tuple from the {@link InstanceObject}.
@@ -10,7 +16,7 @@ import java.util.*;
  * Each value is unique among all the values associated with the same signature. (TODO maybe not)
  * @author jachym.bartik
  */
-public class ActiveDomainRow implements Comparable<ActiveDomainRow>
+public class ActiveDomainRow implements Comparable<ActiveDomainRow>, JSONConvertible
 {
     //private final Id superId;
     
@@ -73,5 +79,34 @@ public class ActiveDomainRow implements Comparable<ActiveDomainRow>
     public boolean equals(Object object)
     {
         return object instanceof ActiveDomainRow row && idWithValues.equals(row.idWithValues);
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return new Converter().toJSON(this);
+    }
+
+    public static class Converter extends ToJSONConverterBase<ActiveDomainRow> {
+
+        @Override
+        protected JSONObject _toJSON(ActiveDomainRow object) throws JSONException {
+            var output = new JSONObject();
+
+            var map = object.idWithValues.map();
+            var tuples = new ArrayList<JSONObject>();
+            
+            for (Signature signature : map.keySet()) {
+                var jsonTuple = new JSONObject();
+                jsonTuple.put("signature", signature.toJSON());
+                jsonTuple.put("value", map.get(signature));
+
+                tuples.add(jsonTuple);
+            }
+
+            output.put("tuples", new JSONArray(tuples));
+            
+            return output;
+        }
+    
     }
 }
