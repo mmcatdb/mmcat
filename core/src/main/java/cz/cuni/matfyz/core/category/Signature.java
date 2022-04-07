@@ -18,23 +18,30 @@ import java.util.*;
  */
 public class Signature implements Comparable<Signature>, IContext, JSONConvertible
 {
-
 	private final int[] ids;
+    private final boolean isNull;
     
-    private Signature()
+    private Signature(boolean isNull)
     {
         this.ids = new int[] {};
+        this.isNull = isNull;
     }
     
     private Signature(int[] ids)
     {
         //assert ids.length > 0 : "Empty ids array passed to Signature constructor.";
         this.ids = ids.clone();
+        this.isNull = false;
 	}
     
     public Signature(int id)
     {
         this.ids = new int[] { id };
+        this.isNull = false;
+    }
+
+    public int[] ids() {
+        return this.ids.clone();
     }
 
     /*
@@ -51,12 +58,12 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
     
     public static Signature Empty()
     {
-        return new Signature();
+        return new Signature(false);
     }
     
     public static Signature Null()
     {
-        return new Signature(-Integer.MAX_VALUE); // TODO edit
+        return new Signature(true); // TODO edit
     }
     
     /*
@@ -83,12 +90,19 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
     {
         EMPTY,
         BASE,
-        COMPOSITE
+        COMPOSITE,
+        NULL
     }
     
     public Type getType()
     {
-        return ids.length == 0 ? Type.EMPTY : ids.length == 1 ? Type.BASE : Type.COMPOSITE;
+        return isNull ? 
+            Type.NULL :
+            ids.length == 0 ?
+                Type.EMPTY :
+                ids.length == 1 ?
+                    Type.BASE :
+                    Type.COMPOSITE;
     }
 
     @Override
@@ -182,6 +196,7 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
     
             var ids = new JSONArray(object.ids);
             output.put("ids", ids);
+            output.put("isNull", object.isNull);
             
             return output;
         }
@@ -196,8 +211,10 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
             var ids = new int[idsArray.length()];
             for (int i = 0; i < idsArray.length(); i++)
                 ids[i] = idsArray.getInt(i);
+            
+            var isNull = jsonObject.getBoolean("isNull");
                 
-            return new Signature(ids);
+            return isNull ? new Signature(true) : new Signature(ids);
         }
     
     }

@@ -35,46 +35,16 @@ public class InstanceCategoryController {
     }
 
     @GetMapping("/instances/default/object/{objectKey}")
-    public String getInstanceObject(HttpSession session, @PathVariable Integer objectKey) {
+    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Integer objectKey) {
         var key = new Key(objectKey);
 
         var object = service.findObject(session, key);
-        /*
-        System.out.println(object);
-        if (object != null) {
-            var view = new InstanceObjectView();
-            view.key = object.key();
 
-            var rows = new ArrayList<List<SignatureValueTuple>>();
-            for (var innerMap : object.activeDomain().values()) {
-                for (ActiveDomainRow row : innerMap.values()) {
-                    var map = row.idWithValues().map();
-
-                    var newRow = new ArrayList<SignatureValueTuple>();
-                    
-                    map.keySet().stream().forEach(signature -> {
-                        var tuple = new SignatureValueTuple();
-                        tuple.signature = signature;
-                        tuple.value = map.get(signature);
-                        newRow.add(tuple);
-                    });
-
-                    rows.add(newRow);
-                }
-            }
-
-            view.rows = rows;
-
-            System.out.println(view);
-
-            return view;
-        }
-        */
-
-        if (object != null)
-            return object.toJSON().toString();
-            
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        if (object == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        
+        //return object.toJSON().toString();
+        return new InstanceObjectView(object);
     }
 
 }

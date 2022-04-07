@@ -78,11 +78,11 @@ export class DynamicName {
     }
 
     static copy(name: DynamicName): DynamicName {
-        return new DynamicName(Signature.copy(name.signature));
+        return new DynamicName(name.signature.copy());
     }
 
     copy(): DynamicName {
-        return new DynamicName(Signature.copy(this.signature));
+        return new DynamicName(this.signature.copy());
     }
 
     equals(other: Name): boolean {

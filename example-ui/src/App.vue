@@ -28,6 +28,9 @@ import Content from './components/layout/Content.vue';
         <RouterLink :to="{ name: 'instances' }">
             Instances
         </RouterLink>
+        <RouterLink :to="{ name: 'instanceCategory' }">
+            Instance Category
+        </RouterLink>
         <RouterLink :to="{ name: 'test' }">
             Test
         </RouterLink>

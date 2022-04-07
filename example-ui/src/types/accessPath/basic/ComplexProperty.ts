@@ -22,7 +22,7 @@ export class ComplexProperty {
 
     public static copy(property: ComplexProperty): ComplexProperty {
         const name = property.name instanceof DynamicName ? DynamicName.copy(property.name) : StaticName.copy(property.name);
-        return new ComplexProperty(name, Signature.copy(property.signature), property.parent, property.subpaths);
+        return new ComplexProperty(name, property.signature.copy(), property.parent, property.subpaths);
     }
 
     public get isAuxiliary(): boolean {

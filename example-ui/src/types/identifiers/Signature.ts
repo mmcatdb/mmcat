@@ -5,15 +5,25 @@ enum SignatureType {
     Null
 }
 
-export type SignatureJSON = { _class: 'Signature', ids: number[] };
+export type SignatureJSON = { _class: 'Signature', ids: number[], isNull: boolean };
 
 export class Signature {
     readonly _ids: number[];  // TODO private
     readonly _type: SignatureType; // TODO private
 
-    private constructor(input: number | number[], type?: SignatureType) {
+    private constructor(input: number | number[], isNull = false) {
         this._ids = typeof input === 'number' ? [ input ] : [ ...input ];
-        this._type = type !== undefined ? type : this._ids.length === 1 ? SignatureType.Base : SignatureType.Composite;
+        this._type = isNull ?
+            SignatureType.Null :
+            this._ids.length === 0 ?
+                SignatureType.Empty :
+                this._ids.length === 1 ?
+                    SignatureType.Base :
+                    SignatureType.Composite;
+    }
+
+    static fromServer(input: SignatureFromServer): Signature {
+        return new Signature(input.ids, input.isNull);
     }
 
     static base(id: number): Signature {
@@ -24,25 +34,21 @@ export class Signature {
         return ids.length === 0 ? Signature.empty : new Signature(ids);
     }
 
-    static copy(signature: Signature): Signature {
-        return new Signature(signature._ids, signature._type);
-    }
-
     copy(): Signature {
-        return new Signature(this._ids, this._type);
+        return new Signature(this._ids, this._type === SignatureType.Null);
     }
 
     concatenate(other: Signature): Signature {
         return new Signature(other._ids.concat(this._ids));
     }
 
-    static _emptyInstance = new Signature([], SignatureType.Empty);
+    static _emptyInstance = new Signature([]);
 
     static get empty(): Signature {
         return this._emptyInstance;
     }
 
-    static _nullInstance = new Signature(0, SignatureType.Null);
+    static _nullInstance = new Signature(0, true);
 
     static get null(): Signature {
         return this._nullInstance;
@@ -75,9 +81,12 @@ export class Signature {
     }
 
     getFirstBase(): { first: Signature, rest: Signature } | undefined {
-        return this._type === SignatureType.Base || this._type === SignatureType.Composite
-            ? { first: Signature.fromIds([ this._ids[0] ]), rest: Signature.fromIds(this._ids.slice(1)) }
-            : undefined;
+        return this._type === SignatureType.Base || this._type === SignatureType.Composite ?
+            {
+                first: Signature.fromIds([ this._ids[this._ids.length - 1] ]),
+                rest: Signature.fromIds(this._ids.slice(0, -1))
+            } :
+            undefined;
     }
 
     equals(other: Signature): boolean {
@@ -97,13 +106,19 @@ export class Signature {
     }
 
     static fromJSON(jsonObject: SignatureJSON): Signature {
-        return new Signature(jsonObject.ids);
+        return new Signature(jsonObject.ids, jsonObject.isNull);
     }
 
     toJSON(): SignatureJSON {
         return {
             _class: 'Signature',
-            ids: this._ids
+            ids: this._ids,
+            isNull: this.isNull
         };
     }
+}
+
+export type SignatureFromServer = {
+    ids: number[];
+    isNull: boolean;
 }

@@ -1,4 +1,5 @@
 import type { Position } from "cytoscape";
+import { Key } from "../identifiers";
 import { ComparablePosition, PositionUpdateToServer } from "./Position";
 
 export class SchemaObject {
@@ -11,6 +12,8 @@ export class SchemaObject {
     position?: ComparablePosition;
     _originalPosition?: ComparablePosition;
 
+    key!: Key;
+
     private constructor() {}
 
     static fromServer(input: SchemaObjectFromServer): SchemaObject {
@@ -18,7 +21,9 @@ export class SchemaObject {
 
         //object.key = input.key.value;
         //object.label = input.label;
-        object.label = JSON.parse(input.jsonValue).label;
+        const jsonObject = JSON.parse(input.jsonValue);
+        object.key = Key.fromServer(jsonObject.key);
+        object.label = jsonObject.label;
         object.id = input.id;
         object.jsonValue = input.jsonValue;
         if (input.position) {

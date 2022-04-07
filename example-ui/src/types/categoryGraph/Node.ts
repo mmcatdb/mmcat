@@ -1,8 +1,9 @@
+import { ComparableMap } from "@/utils/ComparableMap";
 import { TwoWayMap } from "@/utils/TwoWayMap";
 import type { NodeSingular } from "cytoscape";
 import type { DatabaseConfiguration } from "../database";
 import type { Signature } from "../identifiers";
-import { Cardinality, type SchemaMorphism, type SchemaObject } from "../schema";
+import { Cardinality, SchemaMorphism, type SchemaObject } from "../schema";
 
 
 export enum NodeTag {
@@ -27,7 +28,7 @@ export class Node {
     availablePathData = null as MorphismData | null;
 
     neighbours = new TwoWayMap<Node, SchemaMorphism>();
-    _signatureToMorphism = new Map() as Map<Signature, SchemaMorphism>;
+    _signatureToMorphism = new ComparableMap<Signature, string, SchemaMorphism>(signature => signature.toString());
 
     constructor(schemaObject: SchemaObject) {
     //constructor(schemaObject: SchemaObject, nodeObject: NodeSingular) {
@@ -47,6 +48,9 @@ export class Node {
     }
 
     getNeighbour(signature: Signature): Node | undefined {
+        if (signature.isEmpty)
+            return this;
+
         const split = signature.getFirstBase();
         if (!split)
             return undefined;

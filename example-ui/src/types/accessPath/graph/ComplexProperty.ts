@@ -21,13 +21,6 @@ export class ComplexProperty {
         //subpaths.forEach(subpath => this._subpaths.set(subpath.signature, subpath));
     }
 
-    /*
-    static copy(property: ComplexProperty): ComplexProperty {
-        const name = property.name instanceof DynamicName ? DynamicName.copy(property.name) : StaticName.copy(property.name);
-        return new ComplexProperty(name, Signature.copy(property.signature), property.parent, property.subpaths);
-    }
-    */
-
     update(newName: Name, newSignature: SequenceSignature): void {
         if (!this.name.equals(newName))
             this.name = newName;

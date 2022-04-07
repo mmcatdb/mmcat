@@ -40,6 +40,11 @@ const router = createRouter({
             component: () => import('@/views/InstancesView.vue')
         },
         {
+            path: '/instanceCategory',
+            name: 'instanceCategory',
+            component: () => import('@/views/InstanceCategoryView.vue')
+        },
+        {
             path: '/test',
             name: 'test',
             component: () => import('@/views/LongPageForTestsView.vue')

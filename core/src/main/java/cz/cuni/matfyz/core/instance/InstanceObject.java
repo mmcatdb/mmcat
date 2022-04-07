@@ -50,6 +50,17 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
     {
         return schemaObject;
     }
+
+    public List<ActiveDomainRow> rows()
+    {
+        var output = new ArrayList<ActiveDomainRow>();
+
+        for (var innerMap : activeDomain.values())
+            for (ActiveDomainRow row : innerMap.values())
+                output.add(row);
+
+        return output;
+    }
     
 	@Override
 	public int objectId()
@@ -85,32 +96,6 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
     {
         return object instanceof InstanceObject instanceObject && activeDomain.equals(instanceObject.activeDomain);
     }
-    /*
-        if (activeDomain.keySet().size() != object.activeDomain.keySet().size())
-            return false;
-        
-        for (Id id : activeDomain.keySet())
-            if (!innerMapEquals(activeDomain.get(id), object.activeDomain.get(id)))
-                return false;
-        
-        return true;
-    }
-    
-    private boolean innerMapEquals(Map<IdWithValues, ActiveDomainRow> map, Map<IdWithValues, ActiveDomainRow> otherMap)
-    {
-        if (map == null || otherMap == null)
-            return false;
-        
-        if (map.keySet().size() != otherMap.keySet().size())
-            return false;
-        
-        for (IdWithValues id : map.keySet())
-            if (map.get(id) != otherMap.get(id))
-                return false;
-        
-        return true;
-    }
-    */
 
     @Override
     public JSONObject toJSON() {
@@ -125,12 +110,7 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
     
             output.put("key", object.key().toJSON());
 
-            var activeDomain = new ArrayList<JSONObject>();
-
-            for (var innerMap : object.activeDomain().values())
-                for (ActiveDomainRow row : innerMap.values())
-                    activeDomain.add(row.toJSON());
-
+            var activeDomain = object.rows().stream().map(row -> row.toJSON()).toList();
             output.put("activeDomain", new JSONArray(activeDomain));
             
             return output;

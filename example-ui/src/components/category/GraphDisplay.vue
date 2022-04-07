@@ -128,7 +128,7 @@ export default defineComponent({
                     throw new Error(`Codomain object node with id ${morphism.codId} not found for morphism ${morphism.signature.toString()}.`);
 
                 domNode.addNeighbour(codNode, morphism);
-                codNode.addNeighbour(domNode, morphism);
+                //codNode.addNeighbour(domNode, morphism); // This will be added by the dual morphism
             });
 
             return output;
