@@ -1,5 +1,5 @@
 import type { Position } from "cytoscape";
-import { Key } from "../identifiers";
+import { Key, SchemaId, type SchemaIdJSON } from "../identifiers";
 import { ComparablePosition, PositionUpdateToServer } from "./Position";
 
 export class SchemaObject {
@@ -7,6 +7,7 @@ export class SchemaObject {
     //label: number | undefined;
 
     id!: number;
+    schemaIds!: SchemaId[];
     label!: string;
     jsonValue!: string;
     position?: ComparablePosition;
@@ -25,6 +26,7 @@ export class SchemaObject {
         object.key = Key.fromServer(jsonObject.key);
         object.label = jsonObject.label;
         object.id = input.id;
+        object.schemaIds = jsonObject.ids.map((schemaId: SchemaIdJSON) => SchemaId.fromJSON(schemaId));
         object.jsonValue = input.jsonValue;
         if (input.position) {
             object.position = new ComparablePosition(input.position);
@@ -32,6 +34,17 @@ export class SchemaObject {
         }
 
         return object;
+    }
+
+    get hasComplexId(): boolean {
+        if (this.schemaIds.length < 1)
+            return false;
+
+        for (const id of this.schemaIds)
+            if (id.signatures.length < 2)
+                return false;
+
+        return true;
     }
 
     toPositionUpdateToServer(): PositionUpdateToServer | null {

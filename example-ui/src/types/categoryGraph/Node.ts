@@ -63,6 +63,10 @@ export class Node {
         return !nextNeighbour ? undefined : split.rest.isEmpty ? nextNeighbour : nextNeighbour.getNeighbour(split.rest);
     }
 
+    public get isLeaf(): boolean {
+        return this.neighbours.size < 2;
+    }
+
     /*
     addTag(tag: NodeTag): void {
         this.tags.add(tag);

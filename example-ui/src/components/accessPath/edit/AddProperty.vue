@@ -8,14 +8,14 @@ import NameInput from '../input/NameInput.vue';
 import type { Database } from '@/types/database';
 
 enum State {
+    SelectSignature,
     SelectType,
-    SelectName,
-    SelectSignature
+    SelectName
 }
 
 enum PropertyType {
-    Simple,
-    Complex
+    Simple = 'Simple',
+    Complex = 'Complex'
 }
 
 export default defineComponent({
@@ -42,8 +42,8 @@ export default defineComponent({
             type: this.propertyToType(this.property),
             PropertyType,
             signature: SequenceSignature.empty(this.parentProperty.node),
-            name: StaticName.fromString('name') as Name,
-            state: State.SelectType,
+            name: StaticName.fromString('') as Name,
+            state: State.SelectSignature,
             State
         };
     },
@@ -63,14 +63,28 @@ export default defineComponent({
         cancel() {
             this.$emit('cancel');
         },
+        confirmSignature() {
+            const node = this.signature.sequence.lastNode;
+            this.name = StaticName.fromString(node.schemaObject.label);
+            if (node.isLeaf) {
+                this.type = PropertyType.Simple;
+                this.state = State.SelectName;
+                return;
+            }
+
+            if (node.schemaObject.hasComplexId) {
+                this.type = PropertyType.Complex;
+                this.state = State.SelectName;
+                return;
+            }
+
+            this.state = State.SelectType;
+        },
         confirmType() {
             this.state = State.SelectName;
         },
         confirmName() {
             // TODO change signature to empty if it's not valid now
-            this.state = State.SelectSignature;
-        },
-        confirmSignature() {
             this.save();
         }
     }
@@ -80,6 +94,14 @@ export default defineComponent({
 <template>
     <div class="outer">
         <h2>Add property</h2>
+        <template v-if="state >= State.SelectType">
+            Signature: {{ signature }}
+            <br />
+        </template>
+        <template v-if="state >= State.SelectName">
+            Type: {{ type }}
+            <br />
+        </template>
         <template v-if="state === State.SelectType">
             Type:<br />
             <input

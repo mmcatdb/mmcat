@@ -1,18 +1,18 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty } from '@/types/accessPath/graph';
+import { SimpleProperty, ComplexProperty, type ParentProperty } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
-import IconPlusSquare from '../../icons/IconPlusSquare.vue';
+import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 
 export default defineComponent({
     name: 'ComplexPropertyDisplay',
     components: {
         SimplePropertyDisplay,
-        IconPlusSquare
+        IconPlusSquare,
     },
     props: {
         property: {
-            type: Object as () => ComplexProperty,
+            type: Object as () => ParentProperty,
             required: true
         },
         isLast: {
@@ -23,7 +23,6 @@ export default defineComponent({
     emits: [ 'complex:click', 'simple:click', 'add:click' ],
     data() {
         return {
-            SimpleProperty: SimpleProperty,
             highlighted: false
         };
     },
@@ -71,12 +70,6 @@ export default defineComponent({
                 />
             </div>
             <div class="inner">
-                <span
-                    class="button-icon"
-                    @click="$emit('add:click', property)"
-                >
-                    <IconPlusSquare />
-                </span>
                 <SimplePropertyDisplay
                     v-for="(subpath, index) in simpleSubpaths"
                     :key="index"
@@ -94,11 +87,21 @@ export default defineComponent({
                     @add:click="reEmitAddClick"
                 />
                 <span
+                    class="button-icon"
+                    @click="$emit('add:click', property)"
+                    @mouseenter="highlighted = true;"
+                    @mouseleave="highlighted = false"
+                >
+                    <IconPlusSquare />
+                </span>
+                <!--
+                <span
                     v-if="property.subpaths.length === 0"
                     class="fillerRow"
                 >
                     &nbsp;
                 </span>
+                -->
             </div>
         </div>
         <div class="row">
@@ -145,7 +148,8 @@ export default defineComponent({
 }
 
 .button-icon:hover {
-    background-color: black;
+
+    color: var(--color-primary);
 }
 
 .highlighted {

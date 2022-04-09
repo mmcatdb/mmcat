@@ -29,6 +29,10 @@ export class RootProperty {
             this._subpaths[index] = newSubpath;
     }
 
+    removeSubpath(oldSubpath: ChildProperty): void {
+        this._subpaths = this._subpaths.filter(subpath => !subpath.signature.equals(oldSubpath.signature));
+    }
+
     get isAuxiliary(): boolean {
         return true;
     }
