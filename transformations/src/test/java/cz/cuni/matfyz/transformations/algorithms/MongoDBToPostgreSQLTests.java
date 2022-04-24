@@ -4,7 +4,6 @@ import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLDDLWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPushWrapper;
 

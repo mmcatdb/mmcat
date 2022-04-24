@@ -5,8 +5,6 @@ import cz.cuni.matfyz.core.schema.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import cz.cuni.matfyz.core.utils.Debug;
-
 /**
  *
  * @author jachymb.bartik

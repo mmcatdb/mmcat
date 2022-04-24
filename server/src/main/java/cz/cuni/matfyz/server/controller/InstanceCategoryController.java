@@ -1,13 +1,9 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.core.instance.ActiveDomainRow;
-import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.server.service.InstanceCategoryService;
 import cz.cuni.matfyz.server.view.InstanceObjectView;
-import cz.cuni.matfyz.server.view.SignatureValueTuple;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;

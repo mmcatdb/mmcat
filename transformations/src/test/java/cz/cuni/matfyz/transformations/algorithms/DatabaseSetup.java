@@ -2,7 +2,6 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;

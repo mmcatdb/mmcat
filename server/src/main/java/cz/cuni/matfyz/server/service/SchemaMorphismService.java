@@ -30,8 +30,10 @@ public class SchemaMorphismService
         return repository.find(id);
     }
 
+    /*
     public Integer add(SchemaMorphism morphism)
     {
         return repository.add(morphism);
     }
+    */
 }

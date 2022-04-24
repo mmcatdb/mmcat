@@ -48,8 +48,10 @@ public class SchemaCategoryService
         return new SchemaCategoryWrapper(info, objects, morphisms);
     }
 
+    /*
     public Integer add(SchemaCategory schema)
     {
         return repository.add(schema);
     }
+    */
 }

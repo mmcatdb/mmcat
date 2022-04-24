@@ -16,9 +16,10 @@ public class SerializationTests
     public void createExampleSchemaCategory()
     {
         var data = new TestData();
-        var schema = data.createDefaultSchemaCategory();
+        data.createDefaultSchemaCategory();
+        //var schema = data.createDefaultSchemaCategory();
 
-        //LOGGER.info(schema.toJSON().toString());
+        //LOGGER.debug(schema.toString());
     }
 
     @Test
@@ -27,6 +28,6 @@ public class SerializationTests
         var data = new TestData();
         var path = data.path_order();
 
-        LOGGER.info(path.toJSON().toString());
+        LOGGER.debug(path.toJSON().toString());
     }
 }
