@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import java.util.*;
 
 /**
- * This class represents a signature of a morphism. It can be empty, base or composite.
+ * This class represents a signature of a morphism. It can be empty, base, composite or null.
  * @author jachym.bartik
  */
 public class Signature implements Comparable<Signature>, IContext, JSONConvertible
@@ -88,10 +88,10 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
     
     public enum Type
     {
-        EMPTY,
-        BASE,
-        COMPOSITE,
-        NULL
+        EMPTY,      // The corresponding morphism is an identity.
+        BASE,       // The length of the signature is exactly one (i.e. it's a signature of morphism between two neigbours in the schema category graph).
+        COMPOSITE,  // The signature consists of multiple (i.e. >= 2) base signatures.
+        NULL        // There is no morphism corresponding to given signature. This means the access path's property accessible via this signature is an auxiliary property grouping one or more properties together.
     }
     
     public Type getType()

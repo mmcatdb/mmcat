@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, setBlockTracking } from 'vue';
 import { GET, PUT } from '@/utils/backendAPI';
 import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
 import cytoscape from 'cytoscape';
@@ -59,7 +59,8 @@ export default defineComponent({
             schema.morphisms.filter(morphism => morphism.isBase).forEach(morphism => elements.push({ data: {
                 id: 'm' + morphism.id.toString(),
                 source: morphism.domId,
-                target: morphism.codId
+                target: morphism.codId,
+                label: ((value: string) => value.startsWith('-') ? undefined : value )(morphism.signature.toString())
             } }));
 
             console.log(elements);
@@ -111,6 +112,13 @@ export default defineComponent({
                         style: {
                             'border-color': 'blue',
                             'border-width': '4px',
+                        }
+                    },
+                    {
+                        selector: "edge[label]",
+                        style: {
+                            "font-weight": "bold",
+                            label: 'data(label)'
                         }
                     }
                 ]

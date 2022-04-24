@@ -156,7 +156,8 @@ export class Node {
 
         let entry = stack.pop();
         while (entry) {
-            //console.log('entry: ' + entry.node.schemaObject.label + ': ' + entry.morphism.signature.toString());
+
+            console.log('entry: ' + entry.node.schemaObject.label + ': ' + entry.morphism.signature.toString());
             //console.log('stack: ' + stack.map(e => '\n' + e.node.schemaObject.label + ': ' + e.morphism.signature.toString()).concat());
             if (entry.node._availabilityStatus === AvailabilityStatus.Default) {
                 entry.node.select(entry.previousNode === this ? AvailabilityStatus.CertainlyAvailable : AvailabilityStatus.Available);

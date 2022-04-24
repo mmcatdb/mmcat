@@ -202,6 +202,7 @@ export default defineComponent({
             />
             <br />
             <button
+                :disabled="signature.isEmpty"
                 @click="confirmSignature"
             >
                 {{ signatureChanged ? 'Confirm change' : 'Keep current' }}

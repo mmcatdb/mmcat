@@ -12,6 +12,8 @@ public interface AbstractPathWrapper {
 
 	public abstract boolean isRootObjectAllowed();
 
+	public abstract boolean isRootMorphismAllowed();
+
 	public abstract boolean isPropertyToOneAllowed();
 
 	public abstract boolean isPropertyToManyAllowed();

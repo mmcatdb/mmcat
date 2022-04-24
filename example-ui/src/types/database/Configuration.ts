@@ -1,16 +1,18 @@
 export class DatabaseConfiguration {
-    public readonly isRootObjectAllowed: boolean;
+    public readonly isRootObjectAllowed: boolean; // TODO
+    public readonly isRootMorphismAllowed: boolean; // TODO
     public readonly isPropertyToOneAllowed: boolean;
     public readonly isPropertyToManyAllowed: boolean;
     public readonly isInliningToOneAllowed: boolean;
     public readonly isInliningToManyAllowed: boolean;
-    public readonly isGrouppingAllowed: boolean;
+    public readonly isGrouppingAllowed: boolean; // TODO
     public readonly isDynamicNamingAllowed: boolean;
     public readonly isAnonymousNamingAllowed: boolean;
-    public readonly isReferenceAllowed: boolean;
+    public readonly isReferenceAllowed: boolean; // TODO
 
     public constructor(fromServer: DatabaseConfigurationFromServer) {
         this.isRootObjectAllowed = fromServer.isRootObjectAllowed;
+        this.isRootMorphismAllowed = fromServer.isRootMorphismAllowed;
         this.isPropertyToOneAllowed = fromServer.isPropertyToOneAllowed;
         this.isPropertyToManyAllowed = fromServer.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = fromServer.isInliningToOneAllowed;
@@ -24,6 +26,7 @@ export class DatabaseConfiguration {
 
 export type DatabaseConfigurationFromServer = {
     isRootObjectAllowed: boolean,
+    isRootMorphismAllowed: boolean,
     isPropertyToOneAllowed: boolean,
     isPropertyToManyAllowed: boolean,
     isInliningToOneAllowed: boolean,
@@ -33,17 +36,3 @@ export type DatabaseConfigurationFromServer = {
     isAnonymousNamingAllowed: boolean,
     isReferenceAllowed: boolean
 }
-
-export const TEST_CONFIGURATION = {
-    isRootObjectAllowed: true,
-    isPropertyToOneAllowed: true,
-    //isPropertyToManyAllowed: true,
-    isPropertyToManyAllowed: false,
-    isInliningToOneAllowed: true,
-    //isInliningToManyAllowed: true,
-    isInliningToManyAllowed: false,
-    isGrouppingAllowed: true,
-    isDynamicNamingAllowed: true,
-    isAnonymousNamingAllowed: true,
-    isReferenceAllowed: true
-};

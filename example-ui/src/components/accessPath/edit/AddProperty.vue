@@ -148,6 +148,7 @@ export default defineComponent({
             />
             <br />
             <button
+                :disabled="signature.isEmpty"
                 @click="confirmSignature"
             >
                 Confirm

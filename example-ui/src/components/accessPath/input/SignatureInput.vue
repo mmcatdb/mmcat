@@ -97,15 +97,18 @@ export default defineComponent({
 <template>
     <div class="outer">
         <template v-if="!disabled">
+            <!-- This shouldn't be alowed during the creation of the access path.
+                <button
+                    @click="setSignatureEmpty"
+                >
+                    Identity
+                </button>
+            -->
             <button
+                :disabled="!database.configuration.isGrouppingAllowed"
                 @click="setSignatureNull"
             >
-                Null
-            </button>
-            <button
-                @click="setSignatureEmpty"
-            >
-                Empty
+                Auxiliary property
             </button>
         </template>
     </div>

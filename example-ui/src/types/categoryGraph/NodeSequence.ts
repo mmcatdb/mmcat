@@ -28,6 +28,10 @@ export class NodeSequence {
     get lastNode(): Node {
         return this._nodes[this._nodes.length - 1];
     }
+
+    get lengthOfMorphisms(): number {
+        return this._morphisms.length;
+    }
     /*
     get allNodes(): Node[] {
         return this.nodes;
@@ -38,13 +42,14 @@ export class NodeSequence {
     }
 
     addBaseSignature(baseSignature: Signature): void {
-        for (const [ node, morphism ] of this.lastNode.neighbours.entries())
+        for (const [ node, morphism ] of this.lastNode.neighbours.entries()) {
             if (morphism.signature.equals(baseSignature)) {
                 this._morphisms.push(morphism);
                 this._nodes.push(node);
                 node.select();
                 return;
             }
+        }
     }
 
     unselectAll(): void {
@@ -98,9 +103,10 @@ export class NodeSequence {
         if (this._morphisms.length !== sequence._morphisms.length)
             return false;
 
-        for (let i = 0; i < this._morphisms.length; i++)
+        for (let i = 0; i < this._morphisms.length; i++) {
             if (!this._morphisms[i].signature.equals(sequence._morphisms[i].signature))
                 return false;
+        }
 
         return true;
     }

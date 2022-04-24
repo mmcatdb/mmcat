@@ -100,7 +100,7 @@ export default defineComponent({
             v-model="type"
             type="radio"
             :value="NameType.Dynamic"
-            :disabled="disabled"
+            :disabled="disabled || !database.configuration.isDynamicNamingAllowed"
             @change="updateInnerValue"
         />
         <label for="dynamic">Dynamic</label><br />
@@ -109,7 +109,7 @@ export default defineComponent({
             v-model="type"
             type="radio"
             :value="NameType.Anonymous"
-            :disabled="disabled"
+            :disabled="disabled || !database.configuration.isAnonymousNamingAllowed"
             @change="updateInnerValue"
         />
         <label for="anonymous">Anonymous</label><br />
