@@ -138,7 +138,7 @@ public class ModelToCategoryTests
     @Test
 	public void complexMapTest()
     {
-        Debug.setLevel(3);
+        //Debug.setLevel(3);
 
         new ModelToCategoryTestBase("10ComplexMapTest.json").setAll(
             schema,
@@ -152,7 +152,7 @@ public class ModelToCategoryTests
     @Test
 	public void missingArrayTest()
     {
-        Debug.setLevel(0);
+        //Debug.setLevel(0);
         
         new ModelToCategoryTestBase("11MissingArrayTest.json").setAll(
             schema,

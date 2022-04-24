@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.server.entity;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -8,13 +10,17 @@ import org.json.JSONObject;
  */
 public class Database extends Entity {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(Database.class);
+
     public final Type type;
     public final String label;
+    public final String jsonSettings;
 
-    private Database(Integer id, Type type, String label) {
+    private Database(Integer id, Type type, String label, String jsonSettings) {
         super(id);
         this.type = type;
         this.label = label;
+        this.jsonSettings = jsonSettings;
     }
 
     // TODO
@@ -24,11 +30,12 @@ public class Database extends Entity {
 
             Type type = Type.valueOf(json.getString("type"));
             String label = json.getString("label");
+            String jsonSettings = json.getJSONObject("settings").toString();
 
-            return new Database(id, type, label);
+            return new Database(id, type, label, jsonSettings);
         }
-        catch (Exception e) {
-            System.out.println(e);
+        catch (Exception exception) {
+            LOGGER.error("Database with id " + id + " and jsonValue:\n" + jsonValue + "\ncannot be created from JSON.", exception);
         }
 
         return null;

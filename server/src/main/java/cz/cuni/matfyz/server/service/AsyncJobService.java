@@ -59,7 +59,7 @@ public class AsyncJobService {
                 setJobStatus(job, Job.Status.Canceled);
             }
         }
-        catch (InterruptedException exception) {
+        catch (Exception exception) {
             LOGGER.error("Job " + job.id + " was interrupted.", exception);
             setJobStatus(job, Job.Status.Canceled);
         }
@@ -67,7 +67,7 @@ public class AsyncJobService {
     }
 
     @Async("jobExecutor")
-    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory defaultInstance) throws InterruptedException {       
+    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory defaultInstance) throws Exception {       
         var mappingWrapper = mappingService.find(job.mappingId);
         var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
 

@@ -57,7 +57,7 @@ public class PullToDDLAndDMLTestBase
     {
         this.schema = schema;
         
-        LOGGER.debug("Schema Category set:\n" + schema);
+        LOGGER.trace("Schema Category set:\n" + schema);
 
         return this;
     }
@@ -86,7 +86,7 @@ public class PullToDDLAndDMLTestBase
     {
         this.path = path;
 
-        LOGGER.debug("Access Path set:\n" + path);
+        LOGGER.trace("Access Path set:\n" + path);
 
         return this;
     }
@@ -106,7 +106,7 @@ public class PullToDDLAndDMLTestBase
             return;
         }
 
-        LOGGER.debug("Pulled Forest Of Records:\n" + forest);
+        LOGGER.trace("Pulled Forest Of Records:\n" + forest);
         
 		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
@@ -114,7 +114,7 @@ public class PullToDDLAndDMLTestBase
 		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 
-        LOGGER.debug("Created Instance Category:\n" + instance);
+        LOGGER.trace("Created Instance Category:\n" + instance);
         
         var ddlAlgorithm = new DDLAlgorithm();
         ddlAlgorithm.input(schema, instance, rootName, path, ddlWrapper);

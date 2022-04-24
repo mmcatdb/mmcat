@@ -8,6 +8,10 @@ export class Key {
     static fromServer(input: KeyFromServer): Key {
         return new Key(input.value);
     }
+
+    static createNew(value: number): Key {
+        return new Key(value);
+    }
 }
 
 export type KeyFromServer = {

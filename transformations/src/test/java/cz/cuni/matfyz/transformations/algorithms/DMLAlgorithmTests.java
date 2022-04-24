@@ -56,7 +56,7 @@ public class DMLAlgorithmTests
     @Test
 	public void simpleArrayTest()
     {
-        Debug.setLevel(0);
+        //Debug.setLevel(0);
 
         new DMLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
@@ -98,7 +98,7 @@ public class DMLAlgorithmTests
     @Test
 	public void syntheticPropertyTest()
     {
-        Debug.setLevel(0);
+        //Debug.setLevel(0);
 
         new DMLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,

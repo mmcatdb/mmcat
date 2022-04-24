@@ -7,6 +7,7 @@ export class SchemaObject {
     //label: number | undefined;
 
     id!: number;
+
     schemaIds!: SchemaId[];
     label!: string;
     jsonValue!: string;
@@ -36,15 +37,27 @@ export class SchemaObject {
         return object;
     }
 
-    get hasComplexId(): boolean {
+    static createNew(id: number, label: string, key: Key, schemaIds: SchemaId[]): SchemaObject {
+        const object = new SchemaObject();
+
+        object.id = id;
+        object.label = label;
+        object.key = key;
+        object.schemaIds = schemaIds;
+
+        return object;
+    }
+
+    get canBeSimpleProperty(): boolean {
         if (this.schemaIds.length < 1)
             return false;
 
-        for (const id of this.schemaIds)
+        for (const id of this.schemaIds) {
             if (id.signatures.length < 2)
-                return false;
+                return true;
+        }
 
-        return true;
+        return false;
     }
 
     toPositionUpdateToServer(): PositionUpdateToServer | null {

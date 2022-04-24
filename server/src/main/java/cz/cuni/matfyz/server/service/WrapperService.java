@@ -3,14 +3,19 @@ package cz.cuni.matfyz.server.service;
 import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.server.Config;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPathWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
+import cz.cuni.matfyz.wrapperMongodb.MongoDBSettings;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPathWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPullWrapper;
+import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLSettings;
 
+import java.util.Map;
+import java.util.TreeMap;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,14 +25,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class WrapperService {
     
-    public AbstractPullWrapper getPullWraper(Database database) {
-        switch (database.type) {
-            case mongodb:
-                return getMongoDBPullWrapper();
-            case postgresql:
-                return getPostgreSQLPullWrapper();
-            default:
-                return null;
+    public AbstractPullWrapper getPullWraper(Database database) throws WrapperNotFoundException, WrapperCreationErrorException {
+        try {
+            switch (database.type) {
+                case mongodb:
+                    return getMongoDBPullWrapper(database);
+                case postgresql:
+                    return getPostgreSQLPullWrapper(database);
+                default:
+                    throw new WrapperNotFoundException("Pull wrapper for database " + database.id + " with JSON settings: " + database.jsonSettings + " not found.");
+            }
+        }
+        catch (Exception exception) {
+            throw new WrapperCreationErrorException("Pull wrapper for database " + database.id + " with JSON settings: " + database.jsonSettings + " can't be created due to following exception: " + exception.getMessage());
         }
     }
 
@@ -42,41 +52,60 @@ public class WrapperService {
         }
     }
 
-    private MongoDBDatabaseProvider mongoDBDatabaseProvider;
-    private MongoDBPullWrapper getMongoDBPullWrapper() {
-        if (mongoDBDatabaseProvider == null) {
-            mongoDBDatabaseProvider = new MongoDBDatabaseProvider(
-                Config.get("data.mongodb.host"),
-                Config.get("data.mongodb.port"),
-                Config.get("data.mongodb.database"),
-                Config.get("data.mongodb.authenticationDatabase"),
-                Config.get("data.mongodb.username"),
-                Config.get("data.mongodb.password")
-            );
-        }
+    private Map<Integer, MongoDBDatabaseProvider> mongoDBCache = new TreeMap<>();
+
+    private MongoDBPullWrapper getMongoDBPullWrapper(Database database) throws Exception {
+        if (!mongoDBCache.containsKey(database.id))
+            mongoDBCache.put(database.id, createMongoDBProvider(database));        
 
         var wrapper = new MongoDBPullWrapper();
-        wrapper.injectDatabaseProvider(mongoDBDatabaseProvider);
+        var provider = mongoDBCache.get(database.id);
+        wrapper.injectDatabaseProvider(provider);
 
         return wrapper;
     }
 
-    private PostgreSQLConnectionProvider postgreSQLConnectionProvider;
-    private PostgreSQLPullWrapper getPostgreSQLPullWrapper() {
-        if (postgreSQLConnectionProvider == null) {
-            postgreSQLConnectionProvider = new PostgreSQLConnectionProvider(
-                Config.get("data.postgresql.host"),
-                Config.get("data.postgresql.port"),
-                Config.get("data.postgresql.database"),
-                Config.get("data.postgresql.username"),
-                Config.get("data.postgresql.password")
-            );
-        }
+    private static MongoDBDatabaseProvider createMongoDBProvider(Database database) throws Exception {
+        var mapper = new ObjectMapper();
+        var settings = mapper.readValue(database.jsonSettings, MongoDBSettings.class);
+
+        return new MongoDBDatabaseProvider(settings);
+    }
+
+    private Map<Integer, PostgreSQLConnectionProvider> postgreSQLCache = new TreeMap<>();
+
+    private PostgreSQLPullWrapper getPostgreSQLPullWrapper(Database database) throws Exception {
+        if (!postgreSQLCache.containsKey(database.id))
+            postgreSQLCache.put(database.id, createPostgreSQLProvider(database));
 
         var wrapper = new PostgreSQLPullWrapper();
-        wrapper.injectConnectionProvider(postgreSQLConnectionProvider);
+        var provider = postgreSQLCache.get(database.id);
+        wrapper.injectConnectionProvider(provider);
 
         return wrapper;
+    }
+
+    private static PostgreSQLConnectionProvider createPostgreSQLProvider(Database database) throws Exception {
+        var mapper = new ObjectMapper();
+        var settings = mapper.readValue(database.jsonSettings, PostgreSQLSettings.class);
+
+        return new PostgreSQLConnectionProvider(settings);
+    }
+
+    public class WrapperCreationErrorException extends Exception {
+
+        public WrapperCreationErrorException(String errorMessage) {
+            super(errorMessage);
+        }
+
+    }
+
+    public class WrapperNotFoundException extends Exception {
+
+        public WrapperNotFoundException(String errorMessage) {
+            super(errorMessage);
+        }
+
     }
 
 }

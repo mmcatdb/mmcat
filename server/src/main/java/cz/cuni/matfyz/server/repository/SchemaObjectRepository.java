@@ -92,7 +92,6 @@ public class SchemaObjectRepository {
         }
         catch (Exception exception)
         {
-            System.out.println(exception);
         }
         finally
         {

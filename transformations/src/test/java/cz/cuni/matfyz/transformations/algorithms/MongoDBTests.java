@@ -24,14 +24,7 @@ public class MongoDBTests
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBTests.class);
 
-    private static final MongoDBDatabaseProvider databaseProvider = new MongoDBDatabaseProvider(
-        Config.get("mongodb.host"),
-        Config.get("mongodb.port"),
-        Config.get("mongodb.database"),
-        Config.get("mongodb.authenticationDatabase"),
-        Config.get("mongodb.username"),
-        Config.get("mongodb.password")
-    );
+    private static final MongoDBDatabaseProvider databaseProvider = DatabaseSetup.createMongoDBDatabaseProvider();
 
     @BeforeAll
     public static void setupDB()
@@ -40,7 +33,7 @@ public class MongoDBTests
         {
             var url = ClassLoader.getSystemResource("setupMongodb.js");
             String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
-            databaseProvider.executeScript(pathToFile);
+            DatabaseSetup.executeMongoDBScript(pathToFile);
         }
         catch (Exception exception)
         {
@@ -62,7 +55,7 @@ public class MongoDBTests
         assertDoesNotThrow(() -> {
             var inputWrapper = createPullWrapper();
             var dbContent = inputWrapper.readCollectionAsStringForTests("database.getCollection(\"basic_order\");");
-            LOGGER.debug("DB content:\n" + dbContent);
+            LOGGER.trace("DB content:\n" + dbContent);
         });
     }
 
@@ -71,7 +64,7 @@ public class MongoDBTests
         var inputWrapper = createPullWrapper();
 
         var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(collectionName));
-        LOGGER.debug("Pulled forest:\n" + forest);
+        LOGGER.trace("Pulled forest:\n" + forest);
 
         var dummyWrapper = new DummyPullWrapper();
         var url = ClassLoader.getSystemResource("modelToCategory/" + expectedDataFileName);

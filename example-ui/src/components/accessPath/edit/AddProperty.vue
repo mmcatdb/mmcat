@@ -1,6 +1,6 @@
 <script lang="ts">
 import { SimpleProperty, ComplexProperty, type ChildProperty, SequenceSignature, type ParentProperty } from '@/types/accessPath/graph';
-import type { Graph } from '@/types/categoryGraph';
+import { PropertyType, type Graph } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
@@ -11,11 +11,6 @@ enum State {
     SelectSignature,
     SelectType,
     SelectName
-}
-
-enum PropertyType {
-    Simple = 'Simple',
-    Complex = 'Complex'
 }
 
 export default defineComponent({
@@ -66,16 +61,11 @@ export default defineComponent({
         confirmSignature() {
             const node = this.signature.sequence.lastNode;
             this.name = StaticName.fromString(node.schemaObject.label);
-            if (node.isLeaf) {
-                this.type = PropertyType.Simple;
-                this.state = State.SelectName;
-                return;
-            }
 
-            if (node.schemaObject.hasComplexId) {
-                this.type = PropertyType.Complex;
+            const type = node.determinedPropertyType;
+            if (type !== null) {
+                this.type = type;
                 this.state = State.SelectName;
-                return;
             }
 
             this.state = State.SelectType;

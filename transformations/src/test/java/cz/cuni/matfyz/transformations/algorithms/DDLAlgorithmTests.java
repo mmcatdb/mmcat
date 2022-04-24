@@ -51,7 +51,7 @@ public class DDLAlgorithmTests
     @Test
 	public void simpleArrayTest()
     {
-        Debug.setLevel(0);
+        //Debug.setLevel(0);
 
         new DDLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
@@ -89,7 +89,7 @@ public class DDLAlgorithmTests
     @Test
 	public void syntheticPropertyTest()
     {
-        Debug.setLevel(0);
+        //Debug.setLevel(0);
         
         new DDLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,

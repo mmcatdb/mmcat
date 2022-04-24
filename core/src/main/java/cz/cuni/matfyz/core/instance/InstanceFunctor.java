@@ -2,12 +2,17 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.schema.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  * @author jachymb.bartik
  */
 public class InstanceFunctor
 {
+    private static Logger LOGGER = LoggerFactory.getLogger(InstanceFunctor.class);
+
     private final InstanceCategory instanceCategory;
     private final SchemaCategory schemaCategory; // TODO
     
@@ -21,10 +26,7 @@ public class InstanceFunctor
     {
         var object = instanceCategory.object(schemaObject.key());
         if (object == null)
-        {
-            System.out.println("Requested object is null: ");
-            System.out.println(object);
-        }
+            LOGGER.error("Requested schema object with key " + schemaObject.key() + " not found in instance functor.");
         
         return object;
     }
@@ -33,10 +35,7 @@ public class InstanceFunctor
     {
         var morphism = instanceCategory.morphism(schemaMorphism.signature());
         if (morphism == null)
-        {
-            System.out.println("Requested morphism is null: ");
-            System.out.println(morphism);
-        }
+            LOGGER.error("Requested schema morphism with signature " + schemaMorphism.signature() + " not found in instance functor.");
         
         return morphism;
     }

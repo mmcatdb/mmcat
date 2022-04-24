@@ -1,5 +1,5 @@
 <script lang="ts">
-import { RootProperty } from '@/types/accessPath/graph';
+import type { RootProperty } from '@/types/accessPath/graph';
 import type { Graph } from '@/types/categoryGraph';
 import type { StaticName } from '@/types/identifiers';
 import { defineComponent } from 'vue';

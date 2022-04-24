@@ -20,6 +20,11 @@ export enum AvailabilityStatus {
     Root = 'root'
 }
 
+export enum PropertyType {
+    Simple = 'Simple',
+    Complex = 'Complex'
+}
+
 export class Node {
     schemaObject: SchemaObject;
     node!: NodeSingular;
@@ -38,7 +43,7 @@ export class Node {
         //nodeObject.
     }
 
-    setNode(node: NodeSingular) {
+    setCytoscapeNode(node: NodeSingular) {
         this.node = node;
     }
 
@@ -63,8 +68,21 @@ export class Node {
         return !nextNeighbour ? undefined : split.rest.isEmpty ? nextNeighbour : nextNeighbour.getNeighbour(split.rest);
     }
 
+    /*
     public get isLeaf(): boolean {
+        // TODO this condition should be for all morphisms (i.e. also for their duals).
+        // There aren't any leaves under current setting.
         return this.neighbours.size < 2;
+    }
+    */
+
+    public get determinedPropertyType(): PropertyType | null {
+        /*
+        if (this.isLeaf)
+            return PropertyType.Simple;
+        */
+
+        return this.schemaObject.canBeSimpleProperty ? null : PropertyType.Complex;
     }
 
     /*

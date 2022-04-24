@@ -1,6 +1,6 @@
 import type { Core, EventHandler, EventObject, NodeSingular } from "cytoscape";
-import type { SchemaCategory } from "../schema";
-import type { Node } from "./Node";
+import { ComparablePosition, SchemaMorphism, SchemaObject, type SchemaCategory } from "../schema";
+import { Node } from "./Node";
 
 export type NodeEventFunction = (node: Node) => void;
 
@@ -33,5 +33,37 @@ export class Graph {
 
     resetAvailabilityStatus(): void {
         this._cytoscape.nodes().forEach(node => (node.data('schemaData') as Node).resetAvailabilityStatus());
+    }
+
+    createNode(object: SchemaObject): void {
+        const node = new Node(object);
+        object.position = new ComparablePosition({ x: 0, y: 0});
+
+        this._cytoscape.add({
+            data: {
+                id: object.id.toString(),
+                label: object.label,
+                schemaData: node
+            },
+            position: object.position
+        });
+
+        node.setCytoscapeNode(this._cytoscape.nodes('#' + node.schemaObject.id).first());
+    }
+
+    createEdge(morphism: SchemaMorphism, dualMorphism: SchemaMorphism): void {
+        this._cytoscape.add({
+            data: {
+                id: 'm' + morphism.id.toString(),
+                source: morphism.domId,
+                target: morphism.codId
+            }
+        });
+
+        const domNode = this._cytoscape.nodes('#' + morphism.domId).first().data('schemaData') as Node;
+        const codNode = this._cytoscape.nodes('#' + morphism.codId).first().data('schemaData') as Node;
+
+        domNode.addNeighbour(codNode, morphism);
+        codNode.addNeighbour(domNode, dualMorphism);
     }
 }

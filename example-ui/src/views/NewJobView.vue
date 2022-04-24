@@ -9,7 +9,6 @@ export default defineComponent({
     components: {
         AccessPathJsonEditor
     },
-    props: {},
     data() {
         return {
             buttonDisabled: false,
@@ -43,7 +42,7 @@ export default defineComponent({
     <h1>This is going to be a new job</h1>
     <span style="color: red">TODO remove this later</span>
     <AccessPathJsonEditor v-model="accessPath" />
-    <br>
+    <br />
     <button
         :disabled="buttonDisabled || true"
         @click="createNewJob"

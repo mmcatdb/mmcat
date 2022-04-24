@@ -1,66 +1,66 @@
 type Injection<Input, Output> = (input: Input) => Output;
 
 export class TwoWayComparableMap<Key, KeyId, Value, ValueId> {
-    private keyToIdFunction: Injection<Key, KeyId>;
-    private valueToIdFunction: Injection<Value, ValueId>;
-    private map = new Map() as Map<KeyId, Value>;
-    private reverseMap = new Map() as Map<ValueId, Key>;
+    _keyToIdFunction: Injection<Key, KeyId>;
+    _valueToIdFunction: Injection<Value, ValueId>;
+    _map = new Map() as Map<KeyId, Value>;
+    _reverseMap = new Map() as Map<ValueId, Key>;
 
     public constructor(keyToIdFunction: Injection<Key, KeyId>, valueToIdFunction: Injection<Value, ValueId>) {
-        this.keyToIdFunction = keyToIdFunction;
-        this.valueToIdFunction = valueToIdFunction;
+        this._keyToIdFunction = keyToIdFunction;
+        this._valueToIdFunction = valueToIdFunction;
     }
 
     clear(): void {
-        this.map.clear();
-        this.reverseMap.clear();
+        this._map.clear();
+        this._reverseMap.clear();
     }
 
     delete(key: Key): boolean {
-        const keyId = this.keyToIdFunction(key);
-        const value = this.map.get(keyId);
+        const keyId = this._keyToIdFunction(key);
+        const value = this._map.get(keyId);
         if (value === undefined)
             return false;
 
-        const result = this.map.delete(keyId);
-        return this.reverseMap.delete(this.valueToIdFunction(value)) && result;
+        const result = this._map.delete(keyId);
+        return this._reverseMap.delete(this._valueToIdFunction(value)) && result;
     }
 
     deleteValue(value: Value) {
-        const valueId = this.valueToIdFunction(value);
-        const key = this.reverseMap.get(valueId);
+        const valueId = this._valueToIdFunction(value);
+        const key = this._reverseMap.get(valueId);
         if (key === undefined)
             return false;
 
-        const result = this.reverseMap.delete(valueId);
-        return this.map.delete(this.keyToIdFunction(key)) && result;
+        const result = this._reverseMap.delete(valueId);
+        return this._map.delete(this._keyToIdFunction(key)) && result;
     }
 
     has(key: Key): boolean {
-        return this.map.has(this.keyToIdFunction(key));
+        return this._map.has(this._keyToIdFunction(key));
     }
 
     hasValue(value: Value): boolean {
-        return this.reverseMap.has(this.valueToIdFunction(value));
+        return this._reverseMap.has(this._valueToIdFunction(value));
     }
 
     get(key: Key): Value | undefined {
-        return this.map.get(this.keyToIdFunction(key));
+        return this._map.get(this._keyToIdFunction(key));
     }
 
     getKey(value: Value): Key | undefined {
-        return this.reverseMap.get(this.valueToIdFunction(value));
+        return this._reverseMap.get(this._valueToIdFunction(value));
     }
 
     set(key: Key, value: Value): this {
-        this.map.set(this.keyToIdFunction(key), value);
-        this.reverseMap.set(this.valueToIdFunction(value), key);
+        this._map.set(this._keyToIdFunction(key), value);
+        this._reverseMap.set(this._valueToIdFunction(value), key);
 
         return this;
     }
 
     get size(): number {
-        return this.map.size;
+        return this._map.size;
     }
 
     /*
@@ -70,10 +70,10 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> {
     */
 
     keys(): IterableIterator<Key> {
-        return this.reverseMap.values();
+        return this._reverseMap.values();
     }
 
     values(): IterableIterator<Value> {
-        return this.map.values();
+        return this._map.values();
     }
 }

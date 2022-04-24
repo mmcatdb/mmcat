@@ -121,7 +121,8 @@ public class DMLAlgorithmTestBase
 
         List<DMLTestStructure> result = wrapper.structures();
 
-        System.out.println(result);
+        if (Debug.shouldLog(3))
+            System.out.println(result);
 
         Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
 	}

@@ -3,7 +3,7 @@ import { RootProperty } from '@/types/accessPath/graph';
 import { StaticName } from '@/types/identifiers';
 import type { Node, Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
-import GraphDisplay from '../category/GraphDisplay.vue';
+import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import SelectRoot from './SelectRoot.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { GET, POST } from '@/utils/backendAPI';

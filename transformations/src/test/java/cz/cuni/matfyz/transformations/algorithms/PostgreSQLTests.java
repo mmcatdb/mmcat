@@ -24,13 +24,7 @@ public class PostgreSQLTests
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLTests.class);
 
-    private static final PostgreSQLConnectionProvider connectionProvider = new PostgreSQLConnectionProvider(
-        Config.get("postgresql.host"),
-        Config.get("postgresql.port"),
-        Config.get("postgresql.database"),
-        Config.get("postgresql.username"),
-        Config.get("postgresql.password")
-    );
+    private static final PostgreSQLConnectionProvider connectionProvider = DatabaseSetup.createPostgreSQLConnectionProvider();
 
     @BeforeAll
     public static void setupDB()
@@ -39,7 +33,7 @@ public class PostgreSQLTests
         {
             var url = ClassLoader.getSystemResource("setupPostgresql.sql");
             String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
-            connectionProvider.executeScript(pathToFile);
+            DatabaseSetup.executePostgreSQLScript(pathToFile);
         }
         catch (Exception exception)
         {

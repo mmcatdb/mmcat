@@ -44,12 +44,12 @@ public class SchemaCategoryRepository {
         });
     }
 
+    /*
     public Integer add(SchemaCategory schema) {
         // TODO
         Connection connection = null;
         try
         {
-            /*
             connection = DatabaseWrapper.getConnection();
             var statement = connection.prepareStatement("INSERT INTO schema_category (json_value) VALUES (?);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, schema.toJSON().toString());
@@ -61,11 +61,9 @@ public class SchemaCategoryRepository {
             ResultSet generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
                 return Integer.toString(generatedKeys.getInt("id"));
-                */
         }
         catch (Exception exception)
         {
-            System.out.println(exception);
         }
         finally
         {
@@ -82,5 +80,6 @@ public class SchemaCategoryRepository {
 
         return null;
     }
+    */
 
 }

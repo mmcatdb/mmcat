@@ -5,7 +5,6 @@ import { GET } from '@/utils/backendAPI';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import { RouterLink } from 'vue-router';
 import JobDisplay from '../components/job/JobDisplay.vue';
 import NewJob from '../components/job/NewJob.vue';
 
@@ -13,7 +12,6 @@ export default defineComponent({
     components: {
         ResourceNotFound,
         ResourceLoading,
-        RouterLink,
         JobDisplay,
         NewJob
     },
@@ -27,9 +25,7 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<Job[]>('/jobs');
-        if (result.status)
-            this.jobs = [ ...result.data ];
+        await this.fetchNew();
 
         this.fetched = true;
     },
@@ -39,6 +35,13 @@ export default defineComponent({
         },
         deleteJob(id: number) {
             this.jobs = this.jobs?.filter(job => job.id !== id) ?? [];
+        },
+        async fetchNew() {
+            const result = await GET<Job[]>('/jobs');
+            if (result.status)
+                this.jobs = [ ...result.data ];
+
+            setTimeout(this.fetchNew, 1000);
         }
     }
 });
@@ -48,7 +51,7 @@ export default defineComponent({
     <div>
         <h1>This is a jobs page</h1>
         <div class="jobs" v-if="jobs">
-            <div v-for="job in jobs">
+            <div v-for="(job, index) in jobs" :key="index">
                 <JobDisplay @delete-job="() => deleteJob(job.id)" :job="job" />
             </div>
             <NewJob @new-job="addNewJob" />

@@ -9,7 +9,6 @@ export default defineComponent({
     components: {
 
     },
-    props: {},
     emits: [ 'newJob' ],
     data() {
         return {
@@ -62,7 +61,13 @@ export default defineComponent({
         <label>Select mapping:</label>
         <br>
         <select v-model="mappingId">
-            <option v-for="mapping in mappings" :value="mapping.id">{{ mapping.jsonValue }}</option>
+            <option
+                v-for="(mapping, index) in mappings"
+                :key="index"
+                :value="mapping.id"
+            >
+                {{ mapping.jsonValue }}
+            </option>
         </select>
         <br>
         <button

@@ -40,16 +40,16 @@ export default defineComponent({
         createCytoscape(schema: SchemaCategory) {
             const elements = [] as ElementDefinition[];
 
-            const schemaDataOfNodes = [] as Node[];
+            const nodes = [] as Node[];
             schema.objects.forEach(object => {
-                const schemaData = new Node(object);
-                schemaDataOfNodes.push(schemaData);
+                const node = new Node(object);
+                nodes.push(node);
 
                 const definition = {
                     data: {
                         id: object.id.toString(),
                         label: object.label,
-                        schemaData
+                        schemaData: node
                     },
                     position: object.position
                 };
@@ -116,14 +116,14 @@ export default defineComponent({
                 ]
             });
 
-            schemaDataOfNodes.forEach(schemaData => schemaData.setNode(output.nodes('#' + schemaData.schemaObject.id).first()));
+            nodes.forEach(node => node.setCytoscapeNode(output.nodes('#' + node.schemaObject.id).first()));
 
             schema.morphisms.filter(morphism => morphism.isBase).forEach(morphism => {
-                const domNode = schemaDataOfNodes.find(node => node.schemaObject.id === morphism.domId);
+                const domNode = nodes.find(node => node.schemaObject.id === morphism.domId);
                 if (!domNode)
                     throw new Error(`Domain object node with id ${morphism.domId} not found for morphism ${morphism.signature.toString()}.`);
 
-                const codNode = schemaDataOfNodes.find(node => node.schemaObject.id === morphism.codId);
+                const codNode = nodes.find(node => node.schemaObject.id === morphism.codId);
                 if (!codNode)
                     throw new Error(`Codomain object node with id ${morphism.codId} not found for morphism ${morphism.signature.toString()}.`);
 

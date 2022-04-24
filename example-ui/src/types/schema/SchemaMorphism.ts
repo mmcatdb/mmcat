@@ -18,6 +18,8 @@ export class SchemaMorphism {
         return this.signature.isBase;
     }
 
+    private constructor() {}
+
     public static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
         const morphism = new SchemaMorphism();
 
@@ -29,6 +31,28 @@ export class SchemaMorphism {
         morphism.signature = Signature.fromJSON(parsedJson.signature);
         morphism.min = parsedJson.min;
         morphism.max = parsedJson.max;
+
+        return morphism;
+    }
+
+    public static createNew(id: number, domId: number, codId: number): SchemaMorphism {
+        // TODO
+        const morphism = new SchemaMorphism();
+
+        morphism.id = id;
+        morphism.domId = domId;
+        morphism.codId = codId;
+
+        return morphism;
+    }
+
+    public static fromDual(id: number, dualMorphism: SchemaMorphism): SchemaMorphism {
+        // TODO
+        const morphism = new SchemaMorphism();
+
+        morphism.id = id;
+        morphism.domId = dualMorphism.codId;
+        morphism.codId = dualMorphism.domId;
 
         return morphism;
     }

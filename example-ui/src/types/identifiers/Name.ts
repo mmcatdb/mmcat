@@ -48,7 +48,7 @@ export class StaticName {
     }
 
     toString(): string {
-        return this._isAnonymous ? '_ANONYMOUS' : this.value;
+        return this._isAnonymous ? '_' : this.value;
     }
 
     static fromJSON(jsonObject: StaticNameJSON): StaticName {

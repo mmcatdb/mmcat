@@ -231,8 +231,21 @@ CREATE TABLE database_for_mapping (
 
 INSERT INTO database_for_mapping (json_value)
 VALUES
-    ('{"type":"mongodb","label":"MongoDB","_class":"Database"}'),
-    ('{"type":"postgresql","label":"PostgreSQL","_class":"Database"}');
+    ('{"type":"mongodb","label":"MongoDB","_class":"Database",
+        "settings": {
+            "host": "localhost",
+            "port": "27017",
+            "database": "mmcat_server_data",
+            "authenticationDatabase": "admin",
+            "username": "mmcat_user",
+            "password": "mmcat_password"
+        }
+    }'),
+    ('{"type":"postgresql","label":"PostgreSQL","_class":"Database",
+        "settings": {
+            "connectionString": "jdbc:postgresql://localhost:5432/mmcat_server_data?user=mmcat_user&password=mmcat_password"
+        }
+    }');
 
 CREATE TABLE mapping (
     id SERIAL PRIMARY KEY,

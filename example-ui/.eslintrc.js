@@ -34,7 +34,7 @@ module.exports = {
             named: 'never',
             asyncArrow: 'always'
         } ],
-        curly: [ 2, 'multi', 'consistent' ],
+        curly: [ 2, 'multi-or-nest', 'consistent' ],
         'brace-style': [ 'warn', 'stroustrup' ],
         'vue/html-indent': [ 'warn', 4 ],
         'no-empty-function': 'off',

@@ -108,7 +108,8 @@ public class DDLAlgorithmTestBase
 
         List<String> result = wrapper.methods();
 
-        printResult(result);
+        if (Debug.shouldLog(3))
+            printResult(result);
 
         Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
 	}

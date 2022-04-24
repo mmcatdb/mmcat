@@ -27,22 +27,9 @@ public class MongoDBToPostgreSQLTests
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToPostgreSQLTests.class);
 
-    private static final MongoDBDatabaseProvider mongodbProvider = new MongoDBDatabaseProvider(
-        Config.get("mongodb.host"),
-        Config.get("mongodb.port"),
-        Config.get("mongodb.database"),
-        Config.get("mongodb.authenticationDatabase"),
-        Config.get("mongodb.username"),
-        Config.get("mongodb.password")
-    );
+    private static final MongoDBDatabaseProvider mongodbProvider = DatabaseSetup.createMongoDBDatabaseProvider();
 
-    private static final PostgreSQLConnectionProvider postgresqlProvider = new PostgreSQLConnectionProvider(
-        Config.get("postgresql.host"),
-        Config.get("postgresql.port"),
-        Config.get("postgresql.database"),
-        Config.get("postgresql.username"),
-        Config.get("postgresql.password")
-    );
+    //private static final PostgreSQLConnectionProvider postgresqlProvider = DatabaseSetup.createPostgreSQLConnectionProvider();
 
     @BeforeAll
     public static void setupMongoDB()
@@ -51,7 +38,7 @@ public class MongoDBToPostgreSQLTests
         {
             var url = ClassLoader.getSystemResource("setupMongodb.js");
             String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
-            mongodbProvider.executeScript(pathToFile);
+            DatabaseSetup.executeMongoDBScript(pathToFile);
         }
         catch (Exception exception)
         {
@@ -66,7 +53,7 @@ public class MongoDBToPostgreSQLTests
         {
             var url = ClassLoader.getSystemResource("setupPostgresql.sql");
             String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
-            postgresqlProvider.executeScript(pathToFile);
+            DatabaseSetup.executePostgreSQLScript(pathToFile);
         }
         catch (Exception exception)
         {
@@ -113,12 +100,12 @@ public class MongoDBToPostgreSQLTests
     {
         var data = new TestData();
         ComplexProperty path = data.path_order();
-        LOGGER.info(path.toString());
+        LOGGER.trace(path.toString());
         var json = path.toJSON();
-        LOGGER.info(json.toString());
+        LOGGER.trace(json.toString());
 
         var parsedPath = new AccessPath.Builder().fromJSON(new JSONObject(json.toString()));
-        LOGGER.info(parsedPath.toString());
+        LOGGER.trace(parsedPath.toString());
 
         assertEquals(path.toString(), parsedPath.toString());
     }

@@ -45,7 +45,7 @@ public class StaticRecordName extends RecordName
         return switch (type)
         {
             case STATIC_NAME -> value;
-            case ANONYMOUS -> "_ANONYMOUS";
+            case ANONYMOUS -> "_";
         };
     }
 }

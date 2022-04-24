@@ -73,7 +73,7 @@ export default defineComponent({
     <div class="outer">
         <ResourceLoading v-if="loading" />
         <template v-else-if="fetchedInstanceObject">
-            <table>
+            <table v-if="fetchedInstanceObject.columns.length > 0">
                 <tr>
                     <th
                         v-for="(column, index) in fetchedInstanceObject.columns"
@@ -96,6 +96,9 @@ export default defineComponent({
                     </td>
                 </tr>
             </table>
+            <span v-else>
+                Instance object is empty.
+            </span>
         </template>
         <ResourceNotFound v-else />
     </div>
@@ -105,6 +108,7 @@ export default defineComponent({
 .outer {
     display: flex;
     flex-direction: column;
+    padding: 16px;
 }
 
 tr {
@@ -113,5 +117,10 @@ tr {
 
 td, th {
     padding: 0 16px;
+    background-color: var(--vt-c-black-mute);
+}
+
+tr:nth-of-type(2n) td {
+    background-color: var(--vt-c-black-soft);
 }
 </style>

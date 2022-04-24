@@ -1,11 +1,10 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-
-import GraphDisplay from '@/components/category/GraphDisplay.vue';
+import SchemaCategoryEditor from '@/components/category/ScemaCategoryEditor.vue';
 
 export default defineComponent({
     components: {
-        GraphDisplay
+        SchemaCategoryEditor
     },
     props: {},
     data() {
@@ -16,7 +15,7 @@ export default defineComponent({
 
 <template>
     <h1>There is a schema category</h1>
-    <GraphDisplay />
+    <SchemaCategoryEditor />
 </template>
 
 <style scoped>
