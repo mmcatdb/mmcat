@@ -1,6 +1,14 @@
 import type { Position } from "cytoscape";
-import { Key, SchemaId, type SchemaIdJSON } from "../identifiers";
+import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
 import { ComparablePosition, PositionUpdateToServer } from "./Position";
+
+export type SchemaObjectJSON = {
+    _class: 'SchemaObject',
+    label: string,
+    key: KeyJSON,
+    ids: SchemaIdJSON[],
+    superId: SchemaIdJSON
+}
 
 export class SchemaObject {
     //key: number | undefined;
@@ -9,8 +17,9 @@ export class SchemaObject {
     id!: number;
 
     schemaIds!: SchemaId[];
+    superId!: SchemaId;
     label!: string;
-    jsonValue!: string;
+    _jsonValue!: string;
     position?: ComparablePosition;
     _originalPosition?: ComparablePosition;
 
@@ -23,13 +32,14 @@ export class SchemaObject {
 
         //object.key = input.key.value;
         //object.label = input.label;
-        const jsonObject = JSON.parse(input.jsonValue);
+        const jsonObject = JSON.parse(input.jsonValue) as SchemaObjectJSON;
         object.key = Key.fromServer(jsonObject.key);
         object.label = jsonObject.label;
         object.id = input.id;
         object.schemaIds = jsonObject.ids.map((schemaId: SchemaIdJSON) => SchemaId.fromJSON(schemaId));
-        object.jsonValue = input.jsonValue;
-        if (input.position) {
+        object.superId = SchemaId.fromJSON(jsonObject.superId);
+        object._jsonValue = input.jsonValue;
+        if (input.position) { // This should be mandatory since all objects should have defined position.
             object.position = new ComparablePosition(input.position);
             object._originalPosition = new ComparablePosition(input.position);
         }
@@ -44,6 +54,9 @@ export class SchemaObject {
         object.label = label;
         object.key = key;
         object.schemaIds = schemaIds;
+        object.superId = SchemaId.union(schemaIds);
+
+        object.position = new ComparablePosition({ x: 0, y: 0});
 
         return object;
     }
@@ -63,10 +76,20 @@ export class SchemaObject {
     toPositionUpdateToServer(): PositionUpdateToServer | null {
         return this.position?.equals(this._originalPosition) ? null : new PositionUpdateToServer({ schemaObjectId: this.id, position: this.position });
     }
+
+    toJSON(): SchemaObjectJSON {
+        return {
+            _class: "SchemaObject",
+            label: this.label,
+            key: this.key.toJSON(),
+            ids: this.schemaIds.map(id => id.toJSON()),
+            superId: this.superId.toJSON()
+        };
+    }
 }
 
-export class SchemaObjectFromServer {
-    id!: number;
-    jsonValue!: string;
+export type SchemaObjectFromServer = {
+    id: number;
+    jsonValue: string;
     position?: Position;
 }

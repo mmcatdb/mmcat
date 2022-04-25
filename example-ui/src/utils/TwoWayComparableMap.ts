@@ -63,11 +63,9 @@ export class TwoWayComparableMap<Key, KeyId, Value, ValueId> {
         return this._map.size;
     }
 
-    /*
-    entries(): IterableIterator<[Key, Value]> {
-        return this.map.entries();
+    entries(): [Key, Value][] {
+        return [ ...this._map.values() ].map(value => [ this._reverseMap.get(this._valueToIdFunction(value)) as Key, value ]);
     }
-    */
 
     keys(): IterableIterator<Key> {
         return this._reverseMap.values();

@@ -34,6 +34,18 @@ export class Signature {
         return ids.length === 0 ? Signature.empty : new Signature(ids);
     }
 
+    dual(): Signature {
+        const n = this._ids.length;
+        if (n == 0)
+            return this;
+
+        const array = [] as number[];
+        for (let i = 0; i < n; i++)
+            array.push(- this._ids[n - i - 1]);
+
+        return new Signature(array);
+    }
+
     copy(): Signature {
         return new Signature(this._ids, this._type === SignatureType.Null);
     }
@@ -64,6 +76,10 @@ export class Signature {
 
     get isNull(): boolean {
         return this._type === SignatureType.Null;
+    }
+
+    get baseValue(): number | null {
+        return this.isBase ? this._ids[0] : null;
     }
 
     toString(): string {

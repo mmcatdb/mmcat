@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.server.entity;
 
+import cz.cuni.matfyz.server.utils.Position;
+
 /**
  * 
  * @author jachym.bartik

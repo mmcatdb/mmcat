@@ -21,13 +21,18 @@ export default defineComponent({
     data() {
         return {
             jobs: null as Job[] | null,
-            fetched: false
+            fetched: false,
+            timeoutId: null as number | null
         };
     },
     async mounted() {
         await this.fetchNew();
 
         this.fetched = true;
+    },
+    unmounted() {
+        if (this.timeoutId !== null)
+            clearTimeout(this.timeoutId);
     },
     methods: {
         addNewJob(job: Job) {
@@ -41,7 +46,7 @@ export default defineComponent({
             if (result.status)
                 this.jobs = [ ...result.data ];
 
-            setTimeout(this.fetchNew, 1000);
+            this.timeoutId = setTimeout(this.fetchNew, 1000);
         }
     }
 });

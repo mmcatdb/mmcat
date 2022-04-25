@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, setBlockTracking } from 'vue';
+import { defineComponent } from 'vue';
 import { GET, PUT } from '@/utils/backendAPI';
 import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
 import cytoscape from 'cytoscape';

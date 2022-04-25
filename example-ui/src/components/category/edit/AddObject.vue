@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { Graph } from '@/types/categoryGraph';
+import { Key } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -14,15 +15,18 @@ export default defineComponent({
     },
     emits: [ 'save', 'cancel' ],
     data() {
+        const key = this.graph.schemaCategory.suggestKey();
         return {
-            label: ''
+            label: '',
+            key,
+            keyValue: key.value,
+            keyIsValid: true
         };
     },
     methods: {
         save() {
             // TODO
-            const todo = 1111;
-            const object = this.graph.schemaCategory.createObject(this.label, todo);
+            const object = this.graph.schemaCategory.createObject(this.label, this.key, []);
             this.graph.createNode(object);
 
             this.$emit('save');
@@ -32,6 +36,10 @@ export default defineComponent({
         },
         confirm() {
             this.save();
+        },
+        keyValueChanged() {
+            this.key = Key.createNew(this.keyValue);
+            this.keyIsValid = this.graph.schemaCategory.isKeyAvailable(this.key);
         }
     }
 });
@@ -45,7 +53,17 @@ export default defineComponent({
             v-model="label"
         />
         <br />
+        Key
+        <input
+            v-model="keyValue"
+            type="number"
+            min="0"
+            step="1"
+            @input="keyValueChanged"
+        />
+        <br />
         <button
+            :disabled="!keyIsValid || !label"
             @click="confirm"
         >
             Confirm

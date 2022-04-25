@@ -1,10 +1,10 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.cuni.matfyz.server.view.SchemaCategoryUpdate;
 
-import java.sql.Connection;
+import java.sql.Statement;
 import java.util.*;
 import org.springframework.stereotype.Repository;
 
@@ -55,41 +55,34 @@ public class SchemaMorphismRepository {
         });
     }
 
-    /*
-    public Integer add(SchemaMorphism morphism) {
-        // TODO
-        Connection connection = null;
-        try
-        {
-            connection = DatabaseWrapper.getConnection();
-            var statement = connection.prepareStatement("INSERT INTO schema_category (json_value) VALUES (?);", Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, schema.toJSON().toString());
+    public Integer add(SchemaCategoryUpdate.MorphismUpdate morphism, int categoryId) {
+        return DatabaseWrapper.get((connection, output) -> {
+            var statement = connection.prepareStatement("INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value) VALUES (?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            
+            statement.setInt(1, morphism.domId);
+            statement.setInt(2, morphism.codId);
+            statement.setString(3, morphism.jsonValue);
+
             int affectedRows = statement.executeUpdate();
-
             if (affectedRows == 0)
-                throw new SQLException("Create new schema category failed, no rows affected.");
+                return;
 
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next())
-                return Integer.toString(generatedKeys.getInt("id"));
-        }
-        catch (Exception exception)
-        {
-        }
-        finally
-        {
-            try
-            {
-                if (connection != null)
-                    connection.close();
-            }
-            catch(Exception e)
-            {
+            var generatedKeys = statement.getGeneratedKeys();
+            if (!generatedKeys.next())
+                return;
 
-            }
-        }
+            var generatedId = generatedKeys.getInt("id");
 
-        return null;
+            var categoryStatement = connection.prepareStatement("INSERT INTO schema_morphism_in_category (schema_category_id, schema_morphism_id) VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS);
+            categoryStatement.setInt(1, categoryId);
+            categoryStatement.setInt(2, generatedId);
+
+            int categoryAffectedRows = categoryStatement.executeUpdate();
+            if (categoryAffectedRows == 0)
+                return;
+
+            output.set(generatedId);
+        });
     }
-    */
+
 }

@@ -9,7 +9,7 @@
     position: fixed;
     top: 64px;
     bottom: 0px;
-    width: 200px;
+    width: var(--left-panel-width);
     overflow: hidden;
     display: flex;
     flex-direction: column;

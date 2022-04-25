@@ -12,8 +12,20 @@ export class Key {
     static createNew(value: number): Key {
         return new Key(value);
     }
+
+    public toJSON(): KeyJSON {
+        return {
+            _class: 'Key',
+            value: this.value
+        };
+    }
 }
 
 export type KeyFromServer = {
     value: number;
+}
+
+export type KeyJSON = {
+    _class: 'Key',
+    value: number
 }

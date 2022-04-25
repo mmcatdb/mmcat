@@ -44,6 +44,8 @@
   --color-info: #2196F3;
   --color-success: #4CAF50;
   --color-warning: #FFC107;
+
+  --left-panel-width: 220px;
 }
 
 @media (prefers-color-scheme: dark) {

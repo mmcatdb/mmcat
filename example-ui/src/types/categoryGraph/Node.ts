@@ -1,9 +1,9 @@
 import { ComparableMap } from "@/utils/ComparableMap";
-import { TwoWayMap } from "@/utils/TwoWayMap";
+import { TwoWayComparableMap } from "@/utils/TwoWayComparableMap";
 import type { NodeSingular } from "cytoscape";
 import type { DatabaseConfiguration } from "../database";
 import type { Signature } from "../identifiers";
-import { Cardinality, SchemaMorphism, type SchemaObject } from "../schema";
+import { Cardinality, SchemaMorphism, type Max, type Min, type SchemaObject } from "../schema";
 
 
 export enum NodeTag {
@@ -32,7 +32,10 @@ export class Node {
     _availabilityStatus = AvailabilityStatus.Default;
     availablePathData = null as MorphismData | null;
 
-    neighbours = new TwoWayMap<Node, SchemaMorphism>();
+    neighbours = new TwoWayComparableMap<Node, number, SchemaMorphism, string>(
+        node => node.schemaObject.key.value,
+        morphism => morphism.signature.toString()
+    );
     _signatureToMorphism = new ComparableMap<Signature, string, SchemaMorphism>(signature => signature.toString());
 
     constructor(schemaObject: SchemaObject) {
@@ -140,14 +143,18 @@ export class Node {
     }
 
     markAvailablePaths(configuration: DatabaseConfiguration, temporary = false): void {
+        console.log('################################# START #################################');
         if (!temporary)
             this.select(AvailabilityStatus.Root);
 
-        const neighbours = [ ...this.neighbours.entries() ].map(([ node, morphism ]) => ({
-            node,
-            previousNode: this as Node,
-            morphism: morphismToData(morphism),
-        }));
+        const neighbours = [ ...this.neighbours.entries() ]
+            .filter(([ node ]) => node.availabilityStatus !== AvailabilityStatus.Selected)
+            .map(([ node, morphism ]) => ({
+                node,
+                previousNode: this as Node,
+                morphism: morphismToData(morphism),
+            }));
+
 
         const stack = neighbours.filter(data => data.morphism.max === Cardinality.One
             ? configuration.isPropertyToOneAllowed
@@ -159,8 +166,12 @@ export class Node {
 
             console.log('entry: ' + entry.node.schemaObject.label + ': ' + entry.morphism.signature.toString());
             //console.log('stack: ' + stack.map(e => '\n' + e.node.schemaObject.label + ': ' + e.morphism.signature.toString()).concat());
-            if (entry.node._availabilityStatus === AvailabilityStatus.Default) {
-                entry.node.select(entry.previousNode === this ? AvailabilityStatus.CertainlyAvailable : AvailabilityStatus.Available);
+            if (entry.previousNode === this && entry.node.availabilityStatus !== AvailabilityStatus.Selected && entry.node.availabilityStatus !== AvailabilityStatus.Root) {
+                entry.node.select(AvailabilityStatus.CertainlyAvailable);
+                entry.node.availablePathData = entry.morphism;
+            }
+            else if (entry.node._availabilityStatus === AvailabilityStatus.Default) {
+                entry.node.select(AvailabilityStatus.Available);
                 //entry.node.availabilityStatus = AvailabilityStatus.Available;
                 entry.node.availablePathData = entry.morphism;
             }
@@ -182,7 +193,7 @@ export class Node {
                 morphism: combineData(entrymorphism, morphismToData(morphism))
             }));
 
-            const stackAddition = nodeNeighbours.filter(data => data.node !== previousNode)
+            const stackAddition = nodeNeighbours.filter(data => data.node !== previousNode && data.node.availabilityStatus !== AvailabilityStatus.Selected)
                 .filter(data => data.morphism.max === Cardinality.One
                     ? configuration.isInliningToOneAllowed
                     : configuration.isInliningToManyAllowed
@@ -193,13 +204,15 @@ export class Node {
 
             entry = stack.pop();
         }
+
+        console.log('################################# END #################################');
     }
 }
 
 type MorphismData = {
     signature: Signature,
-    min: Cardinality.Zero | Cardinality.One,
-    max: Cardinality.One | Cardinality.Star
+    min: Min,
+    max: Max
 }
 
 function morphismToData(morphism: SchemaMorphism): MorphismData {

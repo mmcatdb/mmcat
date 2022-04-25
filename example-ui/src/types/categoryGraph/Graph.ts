@@ -1,5 +1,5 @@
 import type { Core, EventHandler, EventObject, NodeSingular } from "cytoscape";
-import { ComparablePosition, SchemaMorphism, SchemaObject, type SchemaCategory } from "../schema";
+import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Node } from "./Node";
 
 export type NodeEventFunction = (node: Node) => void;
@@ -37,7 +37,6 @@ export class Graph {
 
     createNode(object: SchemaObject): void {
         const node = new Node(object);
-        object.position = new ComparablePosition({ x: 0, y: 0});
 
         this._cytoscape.add({
             data: {
@@ -56,7 +55,8 @@ export class Graph {
             data: {
                 id: 'm' + morphism.id.toString(),
                 source: morphism.domId,
-                target: morphism.codId
+                target: morphism.codId,
+                label: ((value: string) => value.startsWith('-') ? undefined : value )(morphism.signature.toString())
             }
         });
 

@@ -1,12 +1,13 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.Position;
 import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 import cz.cuni.matfyz.server.service.SchemaObjectService;
+import cz.cuni.matfyz.server.utils.Position;
 import cz.cuni.matfyz.server.view.MappingOptionsView;
+import cz.cuni.matfyz.server.view.SchemaCategoryUpdate;
 
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,16 @@ public class SchemaCategoryController
             return schema;
         
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @PutMapping("/schemaCategories/{id}")
+    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable int id, @RequestBody SchemaCategoryUpdate update)
+    {
+        SchemaCategoryWrapper result = service.update(id, update);
+        if (result != null)
+            return result;
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
     @PutMapping("/schemaCategories/positions/{id}")

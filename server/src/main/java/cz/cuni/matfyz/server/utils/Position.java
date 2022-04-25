@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.server.entity;
+package cz.cuni.matfyz.server.utils;
 
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
