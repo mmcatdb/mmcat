@@ -1,0 +1,24 @@
+<ifModule mod_headers.c>
+<filesMatch "^index\.html$">
+    Header set Cache-Control "no-store"
+</filesMatch>
+
+# Not sure if necessary now (but it might be later).
+<filesMatch "^service-worker\.js$">
+    Header set Cache-Control "no-store"
+</filesMatch>
+</ifModule>
+
+<ifModule mod_rewrite.c>
+RewriteEngine On
+
+#    RewriteBase /
+
+#RewriteCond %{HTTPS} off
+#RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.html [L]
+</ifModule>
