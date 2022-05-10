@@ -8,6 +8,7 @@ import type { ElementDefinition } from 'cytoscape';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph, Node } from '@/types/categoryGraph';
+import { style } from './defaultGraphStyle';
 
 export default defineComponent({
     components: {
@@ -70,58 +71,7 @@ export default defineComponent({
                 container: document.getElementById('cytoscape'),
                 layout: { name: 'preset' },
                 elements,
-                style: [
-                    {
-                        selector: 'node',
-                        style: {
-                            'background-color': 'white',
-                            'border-color': 'black',
-                            'border-width': '1px',
-                            label: 'data(label)'
-                        }
-                    },
-                    {
-                        selector: '.root',
-                        style: {
-                            'background-color': 'red'
-                        }
-                    },
-                    {
-                        selector: '.available',
-                        style: {
-                            'border-color': 'greenyellow',
-                            'border-width': '4px',
-                        }
-                    },
-                    {
-                        selector: '.certainlyAvailable',
-                        style: {
-                            'border-color': 'darkgreen',
-                            'border-width': '4px',
-                        }
-                    },
-                    {
-                        selector: '.maybe',
-                        style: {
-                            'border-color': 'orange',
-                            'border-width': '4px',
-                        }
-                    },
-                    {
-                        selector: '.selected',
-                        style: {
-                            'border-color': 'blue',
-                            'border-width': '4px',
-                        }
-                    },
-                    {
-                        selector: "edge[label]",
-                        style: {
-                            "font-weight": "bold",
-                            label: 'data(label)'
-                        }
-                    }
-                ]
+                style
             });
 
             nodes.forEach(node => node.setCytoscapeNode(output.nodes('#' + node.schemaObject.id).first()));

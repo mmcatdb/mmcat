@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
-        <action>
-            <actionName>CUSTOM-skipTests</actionName>
-            <displayName>skipTests</displayName>
-            <goals>
-                <goal>clean</goal>
-                <goal>install</goal>
-                <goal>-DskipTests=true</goal>
-            </goals>
-        </action>
-    </actions>
+    <action>
+        <actionName>CUSTOM-skipTests</actionName>
+        <displayName>skipTests</displayName>
+        <goals>
+            <goal>clean</goal>
+            <goal>install</goal>
+            <goal>-DskipTests=true</goal>
+        </goals>
+    </action>
+</actions>

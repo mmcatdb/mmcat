@@ -34,4 +34,5 @@ public class MongoDBPathWrapper implements AbstractPathWrapper
 	@Override public boolean isDynamicNamingAllowed() { return true; }
 	@Override public boolean isAnonymousNamingAllowed() { return true; }
 	@Override public boolean isReferenceAllowed() { return true; }
+	@Override public boolean isComplexPropertyAllowed() { return true; }
 }

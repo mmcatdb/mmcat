@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Graph, Node } from '@/types/categoryGraph';
+import { SelectionType, type Graph, type Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -31,7 +31,7 @@ export default defineComponent({
                 this.lastClickedNode = null;
             }
             else {
-                node.select();
+                node.select({ type: SelectionType.Root, level: 0 });
                 this.lastClickedNode = node;
             }
         },

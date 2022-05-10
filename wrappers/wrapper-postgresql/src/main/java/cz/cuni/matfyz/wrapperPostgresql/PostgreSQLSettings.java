@@ -11,7 +11,6 @@ public class PostgreSQLSettings {
     private String database;
     private String username;
     private String password;
-    private String connectionString = null;
 
     public PostgreSQLSettings(String host, String port, String database, String username, String password) {
         this.host = host;
@@ -21,12 +20,8 @@ public class PostgreSQLSettings {
         this.password = password;
     }
 
-    public PostgreSQLSettings(String connectionString) {
-        this.connectionString = connectionString;
-    }
-
     public String getConnectionString() {
-        return connectionString != null ? connectionString : createConnectionStringFromCredentials();
+        return createConnectionStringFromCredentials();
     }
 
     private String createConnectionStringFromCredentials(){
@@ -65,10 +60,6 @@ public class PostgreSQLSettings {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setConnectionString(String connectionString) {
-        this.connectionString = connectionString;
     }
 
 }

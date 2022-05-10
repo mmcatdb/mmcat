@@ -81,7 +81,10 @@ export default defineComponent({
         confirmSignature() {
             const node = this.signature.sequence.lastNode;
 
-            const type = node.determinedPropertyType;
+            const type = this.database.configuration.isComplexPropertyAllowed ?
+                node.determinedPropertyType :
+                PropertyType.Simple;
+
             if (type !== null) {
                 this.type = type;
                 this.state = State.SelectName;

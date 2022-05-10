@@ -1,4 +1,4 @@
-import { Node, NodeSequence } from "@/types/categoryGraph";
+import { Node, NodeSequence, SelectionType } from "@/types/categoryGraph";
 import type { DatabaseConfiguration } from "@/types/database";
 import { Signature } from "@/types/identifiers";
 
@@ -49,6 +49,11 @@ export class SequenceSignature {
     }
 
     markAvailablePaths(configuration: DatabaseConfiguration): void {
-        this.sequence.lastNode.markAvailablePaths(configuration, this.sequence.lastNode !== this.sequence.rootNode);
+        if (this.sequence.lengthOfMorphisms === 0) {
+            this.sequence.rootNode.unselect();
+            this.sequence.rootNode.selectNext();
+        }
+
+        this.sequence.lastNode.markAvailablePaths(configuration);
     }
 }

@@ -34,4 +34,5 @@ public class PostgreSQLPathWrapper implements AbstractPathWrapper
 	@Override public boolean isDynamicNamingAllowed() { return false; }
 	@Override public boolean isAnonymousNamingAllowed() { return false; }
 	@Override public boolean isReferenceAllowed() { return true; }
+    @Override public boolean isComplexPropertyAllowed() { return false; }
 }

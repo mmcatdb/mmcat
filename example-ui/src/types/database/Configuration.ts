@@ -1,14 +1,15 @@
 export class DatabaseConfiguration {
-    public readonly isRootObjectAllowed: boolean; // TODO
-    public readonly isRootMorphismAllowed: boolean; // TODO
-    public readonly isPropertyToOneAllowed: boolean;
-    public readonly isPropertyToManyAllowed: boolean;
-    public readonly isInliningToOneAllowed: boolean;
-    public readonly isInliningToManyAllowed: boolean;
-    public readonly isGrouppingAllowed: boolean; // TODO
-    public readonly isDynamicNamingAllowed: boolean;
-    public readonly isAnonymousNamingAllowed: boolean;
-    public readonly isReferenceAllowed: boolean; // TODO
+    readonly isRootObjectAllowed: boolean; // TODO
+    readonly isRootMorphismAllowed: boolean; // TODO
+    readonly isPropertyToOneAllowed: boolean;
+    readonly isPropertyToManyAllowed: boolean;
+    readonly isInliningToOneAllowed: boolean;
+    readonly isInliningToManyAllowed: boolean;
+    readonly isGrouppingAllowed: boolean;
+    readonly isDynamicNamingAllowed: boolean;
+    readonly isAnonymousNamingAllowed: boolean;
+    readonly isReferenceAllowed: boolean; // TODO
+    readonly isComplexPropertyAllowed: boolean; // TODO upraveno add a edit property, ale ještě podle toho nejsou povoleny či zakázány nody při vybírání signatury
 
     public constructor(fromServer: DatabaseConfigurationFromServer) {
         this.isRootObjectAllowed = fromServer.isRootObjectAllowed;
@@ -21,6 +22,7 @@ export class DatabaseConfiguration {
         this.isDynamicNamingAllowed = fromServer.isDynamicNamingAllowed;
         this.isAnonymousNamingAllowed = fromServer.isAnonymousNamingAllowed;
         this.isReferenceAllowed = fromServer.isReferenceAllowed;
+        this.isComplexPropertyAllowed = fromServer.isComplexPropertyAllowed;
     }
 }
 
@@ -34,5 +36,6 @@ export type DatabaseConfigurationFromServer = {
     isGrouppingAllowed: boolean,
     isDynamicNamingAllowed: boolean,
     isAnonymousNamingAllowed: boolean,
-    isReferenceAllowed: boolean
+    isReferenceAllowed: boolean,
+    isComplexPropertyAllowed: boolean
 }

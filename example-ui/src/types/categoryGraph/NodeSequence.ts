@@ -17,7 +17,6 @@ export class NodeSequence {
 
     static fromRootNode(rootNode: Node): NodeSequence {
         const sequence = new NodeSequence([ rootNode ], []);
-        sequence.rootNode.select(AvailabilityStatus.Root);
         return sequence;
     }
 
@@ -46,7 +45,7 @@ export class NodeSequence {
             if (morphism.signature.equals(baseSignature)) {
                 this._morphisms.push(morphism);
                 this._nodes.push(node);
-                node.select();
+                node.selectNext();
                 return;
             }
         }
@@ -79,10 +78,10 @@ export class NodeSequence {
     }
 
     tryRemoveNode(node: Node): boolean {
-        if (!this.lastNode.equals(node) || this.rootNode.equals(node))
+        if (!this.lastNode.equals(node) || this._nodes.length === 1)
             return false;
 
-        this.lastNode.unselect();
+        this.lastNode.unselectPrevious();
         this._nodes.pop();
         this._morphisms.pop();
 

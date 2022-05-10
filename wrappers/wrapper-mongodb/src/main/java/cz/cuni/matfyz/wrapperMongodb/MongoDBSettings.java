@@ -12,7 +12,6 @@ public class MongoDBSettings {
     private String authenticationDatabase;
     private String username;
     private String password;
-    private String connectionString = null;
 
     public MongoDBSettings(String host, String port, String database, String authenticationDatabase, String username, String password) {
         this.host = host;
@@ -23,13 +22,8 @@ public class MongoDBSettings {
         this.password = password;
     }
 
-    public MongoDBSettings(String database, String connectionString) {
-        this.database = database;
-        this.connectionString = connectionString;
-    }
-
     public String getConnectionString() {
-        return connectionString != null ? connectionString : createConnectionStringFromCredentials();
+        return createConnectionStringFromCredentials();
     }
 
     public String getDatabase() {
@@ -76,10 +70,6 @@ public class MongoDBSettings {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public void setConnectionString(String connectionString) {
-        this.connectionString = connectionString;
     }
 
 }

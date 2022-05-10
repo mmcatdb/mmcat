@@ -29,4 +29,6 @@ public interface AbstractPathWrapper {
 	public abstract boolean isAnonymousNamingAllowed();
 
 	public abstract boolean isReferenceAllowed();
+
+	public abstract boolean isComplexPropertyAllowed();
 }

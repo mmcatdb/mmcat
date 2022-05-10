@@ -18,6 +18,7 @@ public class DatabaseConfiguration {
 	public Boolean isDynamicNamingAllowed;
 	public Boolean isAnonymousNamingAllowed;
 	public Boolean isReferenceAllowed;
+    public Boolean isComplexPropertyAllowed;
 
     public DatabaseConfiguration(AbstractPathWrapper wrapper) {
         this.isRootObjectAllowed = wrapper.isRootObjectAllowed();
@@ -30,6 +31,7 @@ public class DatabaseConfiguration {
         this.isDynamicNamingAllowed = wrapper.isDynamicNamingAllowed();
         this.isAnonymousNamingAllowed = wrapper.isAnonymousNamingAllowed();
         this.isReferenceAllowed = wrapper.isReferenceAllowed();
+        this.isComplexPropertyAllowed = wrapper.isComplexPropertyAllowed();
     }
 
 }

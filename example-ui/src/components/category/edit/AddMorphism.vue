@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Graph, Node } from '@/types/categoryGraph';
+import { SelectionType, type Graph, type Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers';
 import { Cardinality, type CardinalitySettings } from '@/types/schema';
 import { defineComponent } from 'vue';
@@ -79,7 +79,7 @@ export default defineComponent({
             if (this.state === State.SelectNode1) {
                 if (!node.equals(this.node1)) {
                     this.node1?.unselect();
-                    node.select();
+                    node.select({ type: SelectionType.Selected, level: 0 });
                     this.node1 = node;
                 }
             }
@@ -89,7 +89,7 @@ export default defineComponent({
                 console.log(node.neighbours);
                 if (!node.equals(this.node2) && !node.neighbours.get(this.node1 as Node)) {
                     this.node2?.unselect();
-                    node.select();
+                    node.select({ type: SelectionType.Selected, level: 1 });
                     this.node2 = node;
                 }
             }

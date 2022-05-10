@@ -46,6 +46,10 @@ export class Signature {
         return new Signature(array);
     }
 
+    isBaseAndDualOf(signature: Signature): boolean {
+        return this.baseValue !== null && signature.baseValue !== null && this.baseValue === - signature.baseValue;
+    }
+
     copy(): Signature {
         return new Signature(this._ids, this._type === SignatureType.Null);
     }
@@ -101,6 +105,15 @@ export class Signature {
             {
                 first: Signature.fromIds([ this._ids[this._ids.length - 1] ]),
                 rest: Signature.fromIds(this._ids.slice(0, -1))
+            } :
+            undefined;
+    }
+
+    getLastBase(): { rest: Signature, last: Signature} | undefined {
+        return this._type === SignatureType.Base || this._type === SignatureType.Composite ?
+            {
+                rest: Signature.fromIds(this._ids.slice(1)),
+                last: Signature.fromIds([ this._ids[0] ])
             } :
             undefined;
     }

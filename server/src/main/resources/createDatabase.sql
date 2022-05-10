@@ -243,7 +243,11 @@ VALUES
     }'),
     ('{"type":"postgresql","label":"PostgreSQL","_class":"Database",
         "settings": {
-            "connectionString": "jdbc:postgresql://localhost:5432/mmcat_server_data?user=mmcat_user&password=mmcat_password"
+            "host": "localhost",
+            "port": "5432",
+            "database": "mmcat_server_data",
+            "username": "mmcat_user",
+            "password": "mmcat_password"
         }
     }');
 

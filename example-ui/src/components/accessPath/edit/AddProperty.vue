@@ -62,7 +62,10 @@ export default defineComponent({
             const node = this.signature.sequence.lastNode;
             this.name = StaticName.fromString(node.schemaObject.label);
 
-            const type = node.determinedPropertyType;
+            const type = this.database.configuration.isComplexPropertyAllowed ?
+                node.determinedPropertyType :
+                PropertyType.Simple;
+
             if (type !== null) {
                 this.type = type;
                 this.state = State.SelectName;
