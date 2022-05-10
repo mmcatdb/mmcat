@@ -57,10 +57,15 @@ export default defineComponent({
     },
     methods: {
         editPropertyClicked(property: RootProperty | ChildProperty) {
-            this.state = {
-                type: property instanceof RootProperty ? State.EditRootProperty : State.EditProperty,
-                property
-            };
+            this.state = property instanceof RootProperty ?
+                {
+                    type: State.EditRootProperty,
+                    property
+                } :
+                {
+                    type: State.EditProperty,
+                    property
+                };
         },
         addPropertyClicked(parentProperty: ComplexProperty) {
             this.state = {

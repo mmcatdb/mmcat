@@ -1,4 +1,4 @@
-import type { ComplexProperty } from "./accessPath/";
+import type { ComplexProperty } from "./accessPath/graph";
 
 export enum StateType {
     Default,
