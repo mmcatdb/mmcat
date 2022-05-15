@@ -232,7 +232,6 @@ class PathMarker {
     }
 
     getTraversableNeighbours(parentNode: Node, parentNeighbour?: NodeNeigbour): NodeNeigbour[] {
-        console.log('GET TRAVERSABLE NEIGHBOURS', { name: parentNode.schemaObject.label, entryMorphism: parentNeighbour?.morphism.signature.toString() });
         const combineFunction = parentNeighbour ?
             (morphism: SchemaMorphism) => combineData(parentNeighbour.morphism, morphism) :
             (morphism: SchemaMorphism) => morphismToData(morphism);
@@ -259,8 +258,6 @@ class PathMarker {
         if (parentNeighbour && neighbours.length > 1)
             neighbours = neighbours.filter(entry => !entry.node.equals(parentNode));
 
-        console.log('neighbours:\n\t' + neighbours.map(neigbour => neigbour.node.schemaObject.label).join('\n\t'));
-
         return neighbours;
     }
 
@@ -279,8 +276,6 @@ class PathMarker {
     }
 
     processNeighbour(neighbour: NodeNeigbour, isDirect = false): void {
-        console.log('Process neighbour: ' + neighbour.node.schemaObject.label + ': ' + neighbour.morphism.signature.toString());
-
         // If the previous node was the root node, this node is definitely available so we mark it this way.
         if (isDirect) {
             neighbour.node.setAvailabilityStatus(AvailabilityStatus.CertainlyAvailable);
@@ -315,7 +310,6 @@ class PathMarker {
     }
 
     processAmbiguousPath(lastNeighbour: NodeNeigbour): void {
-        console.log('Process ambiguous path: ' + lastNeighbour?.node.schemaObject.label);
         let currentNeigbour = lastNeighbour.previousNeighbour;
 
         while (
@@ -325,7 +319,6 @@ class PathMarker {
         ) {
             currentNeigbour.node.setAvailabilityStatus(AvailabilityStatus.Maybe);
             this.processAmbiguousDependentNeighbours(currentNeigbour);
-            console.log('Node ' + currentNeigbour.node.schemaObject.label + ' set to maybe.');
             currentNeigbour = currentNeigbour.previousNeighbour;
         }
     }
@@ -340,8 +333,6 @@ class PathMarker {
     }
 
     markPathsFromRootNode(): void {
-        console.log('################################# START #################################');
-
         this.rootNode.setAvailabilityStatus(AvailabilityStatus.Removable);
 
         /*
@@ -363,7 +354,5 @@ class PathMarker {
             this.processNeighbour(neighbour);
             neighbour = this.stack.pop();
         }
-
-        console.log('################################# END #################################');
     }
 }

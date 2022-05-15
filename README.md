@@ -4,6 +4,10 @@
 ```console
 sudo -u postgres psql
 ```
+- Create role (user):
+```sql
+CREATE ROLE mmcat_user LOGIN PASSWORD 'mmcat_password';
+```
 - Create database:
 ```sql
 CREATE DATABASE mmcat_server OWNER mmcat_user;

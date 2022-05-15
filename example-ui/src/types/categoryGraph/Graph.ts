@@ -4,11 +4,16 @@ import { Node } from "./Node";
 
 export type NodeEventFunction = (node: Node) => void;
 
+export type TemporaryEdge = {
+    delete: () => void;
+}
+
 export class Graph {
     _cytoscape: Core;
     readonly schemaCategory: SchemaCategory;
 
     constructor(cytoscape: Core, schemaCategory: SchemaCategory) {
+        console.log('NEW GRAPH CREATED', cytoscape);
         this._cytoscape = cytoscape;
         this.schemaCategory = schemaCategory;
     }
@@ -38,7 +43,7 @@ export class Graph {
     createNode(object: SchemaObject): void {
         const node = new Node(object);
 
-        this._cytoscape.add({
+        const cytoscapeNode = this._cytoscape.add({
             data: {
                 id: object.id.toString(),
                 label: object.label,
@@ -46,12 +51,13 @@ export class Graph {
             },
             position: object.position
         });
+        cytoscapeNode.addClass('new');
 
-        node.setCytoscapeNode(this._cytoscape.nodes('#' + node.schemaObject.id).first());
+        node.setCytoscapeNode(cytoscapeNode);
     }
 
     createEdge(morphism: SchemaMorphism, dualMorphism: SchemaMorphism): void {
-        this._cytoscape.add({
+        const edge = this._cytoscape.add({
             data: {
                 id: 'm' + morphism.id.toString(),
                 source: morphism.domId,
@@ -59,11 +65,31 @@ export class Graph {
                 label: ((value: string) => value.startsWith('-') ? undefined : value )(morphism.signature.toString())
             }
         });
+        edge.addClass('new');
 
         const domNode = this._cytoscape.nodes('#' + morphism.domId).first().data('schemaData') as Node;
         const codNode = this._cytoscape.nodes('#' + morphism.codId).first().data('schemaData') as Node;
 
         domNode.addNeighbour(codNode, morphism);
         codNode.addNeighbour(domNode, dualMorphism);
+    }
+
+    lastTemporaryEdgeId = 0;
+
+    createTemporaryEdge(node1: Node, node2: Node): TemporaryEdge {
+        const id = 'te' + this.lastTemporaryEdgeId;
+        this.lastTemporaryEdgeId++;
+
+        const edge = this._cytoscape.add({
+            data: {
+                id,
+                source: node1.schemaObject.id,
+                target: node2.schemaObject.id,
+                label: ''
+            }
+        });
+        edge.addClass('temporary');
+
+        return { delete: () => edge.remove() };
     }
 }

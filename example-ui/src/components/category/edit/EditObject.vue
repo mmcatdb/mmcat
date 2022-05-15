@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Graph } from '@/types/categoryGraph';
+import type { Graph, Node } from '@/types/categoryGraph';
 import { Key } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 
@@ -11,22 +11,28 @@ export default defineComponent({
         graph: {
             type: Object as () => Graph,
             required: true
+        },
+        node: {
+            type: Object as () => Node,
+            required: true
         }
     },
     emits: [ 'save', 'cancel' ],
     data() {
-        const key = this.graph.schemaCategory.suggestKey();
         return {
-            label: '',
-            key,
-            keyValue: key.value,
-            keyIsValid: true
+            label: this.node.label,
+            key: this.node.schemaObject.key
         };
     },
     methods: {
         save() {
-            const object = this.graph.schemaCategory.createObject(this.label, this.key, []);
-            this.graph.createNode(object);
+            // TODO
+
+
+            //const object = this.graph.schemaCategory.createObject(this.label, this.key, []);
+            //this.graph.createNode(object);
+
+
 
             this.$emit('save');
         },
@@ -36,9 +42,11 @@ export default defineComponent({
         confirm() {
             this.save();
         },
-        keyValueChanged() {
-            this.key = Key.createNew(this.keyValue);
-            this.keyIsValid = this.graph.schemaCategory.isKeyAvailable(this.key);
+        deleteNewNode() {
+
+            // TODO
+
+            this.$emit('save');
         }
     }
 });
@@ -46,7 +54,7 @@ export default defineComponent({
 
 <template>
     <div>
-        <h2>Add Schema Object</h2>
+        <h2>Edit Schema Object</h2>
         <table>
             <tr>
                 <td class="label">
@@ -63,20 +71,18 @@ export default defineComponent({
                     Key:
                 </td>
                 <td class="value">
-                    <input
-                        v-model="keyValue"
-                        class="number-input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        @input="keyValueChanged"
-                    />
+                    {{ key.value }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Id:
                 </td>
             </tr>
         </table>
         <div class="button-row">
             <button
-                :disabled="!keyIsValid || !label"
+                :disabled="!label"
                 @click="confirm"
             >
                 Confirm
@@ -85,6 +91,12 @@ export default defineComponent({
                 @click="cancel"
             >
                 Cancel
+            </button>
+            <button
+                v-if="node.schemaObject.isNew"
+                @click="deleteNewNode"
+            >
+                Delete
             </button>
         </div>
     </div>

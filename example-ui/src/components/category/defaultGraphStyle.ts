@@ -60,5 +60,24 @@ export const style: cytoscape.Stylesheet[] = [
             "font-weight": "bold",
             label: 'data(label)',
         }
+    },
+    {
+        selector: 'edge.temporary',
+        style: {
+            "line-style": "dashed",
+            "line-color": "blue"
+        }
+    },
+    {
+        selector: 'node.new',
+        style: {
+            "border-style": "dashed"
+        }
+    },
+    {
+        selector: 'edge.new',
+        style: {
+            "line-style": "dashed",
+        }
     }
 ];

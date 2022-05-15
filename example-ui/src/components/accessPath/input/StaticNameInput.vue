@@ -44,20 +44,8 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="outer">
-        <div>
-            <input
-                v-model="staticValue"
-                @input="updateInnerValue"
-            />
-        </div>
-    </div>
+    <input
+        v-model="staticValue"
+        @input="updateInnerValue"
+    />
 </template>
-
-<style scoped>
-.outer {
-    background-color: darkgreen;
-    padding: 12px;
-}
-</style>
-

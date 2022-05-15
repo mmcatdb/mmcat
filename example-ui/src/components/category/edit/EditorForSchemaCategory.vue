@@ -1,27 +1,31 @@
 <script lang="ts">
-import type { Graph } from '@/types/categoryGraph';
+import { SelectionType, type Graph, type Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
-import AddObject from './AddObject.vue';
-import AddMorphism from './AddMorphism.vue';
 import type { SchemaCategoryFromServer } from '@/types/schema';
 import { PUT } from '@/utils/backendAPI';
+import AddObject from './AddObject.vue';
+import AddMorphism from './AddMorphism.vue';
+import EditObject from './EditObject.vue';
 
 enum State {
     Default,
     AddObject,
-    AddMorphism
+    AddMorphism,
+    EditObject
 }
 
 type GenericStateValue<State, Value> = { type: State } & Value;
 
 type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddObject, unknown> |
-    GenericStateValue<State.AddMorphism, unknown>;
+    GenericStateValue<State.AddMorphism, unknown> |
+    GenericStateValue<State.EditObject, { node: Node }>;
 
 export default defineComponent({
     components: {
         AddObject,
-        AddMorphism
+        AddMorphism,
+        EditObject
     },
     props: {
         graph: {
@@ -35,6 +39,12 @@ export default defineComponent({
             State
         };
     },
+    mounted() {
+        this.graph.addNodeListener('tap', this.onNodeTapHandler);
+    },
+    unmounted() {
+        this.graph.removeListener('tap', this.onNodeTapHandler);
+    },
     methods: {
         addObjectClicked() {
             this.state = { type: State.AddObject };
@@ -42,8 +52,18 @@ export default defineComponent({
         addMorphismClicked() {
             this.state = { type: State.AddMorphism };
         },
-        setStateToDefault(): void {
+        setStateToDefault() {
+            if (this.state.type === State.EditObject)
+                this.state.node.unselect();
+
             this.state = { type: State.Default };
+        },
+        onNodeTapHandler(node: Node) {
+            if (this.state.type !== State.Default)
+                return;
+
+            node.select({ type: SelectionType.Root, level: 0 });
+            this.state = { type: State.EditObject, node };
         },
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
@@ -63,7 +83,10 @@ export default defineComponent({
 
 <template>
     <div class="editor">
-        <template v-if="state.type === State.Default">
+        <div
+            v-if="state.type === State.Default"
+            class="options"
+        >
             <button @click="addObjectClicked">
                 Add object
             </button>
@@ -73,7 +96,7 @@ export default defineComponent({
             <button @click="save">
                 Save
             </button>
-        </template>
+        </div>
         <template v-else-if="state.type === State.AddObject">
             <AddObject
                 :graph="graph"
@@ -88,13 +111,29 @@ export default defineComponent({
                 @cancel="setStateToDefault"
             />
         </template>
+        <template v-else-if="state.type === State.EditObject">
+            <EditObject
+                :graph="graph"
+                :node="state.node"
+                @save="setStateToDefault"
+                @cancel="setStateToDefault"
+            />
+        </template>
     </div>
 </template>
 
 <style scoped>
 .editor {
+    border: 2px solid var(--color-border);
     padding: 12px;
+}
+
+.options {
     display: flex;
     flex-direction: column;
+}
+
+.options button + button {
+    margin-top: 12px;
 }
 </style>

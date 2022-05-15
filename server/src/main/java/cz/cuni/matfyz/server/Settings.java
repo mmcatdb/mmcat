@@ -23,7 +23,7 @@ class Settings
                 // TODO konfigurace portu pro clienta
                 registry.addMapping("/**")
                     .allowedMethods("GET", "POST", "PUT", "DELETE")
-                    .allowedOrigins("http://localhost:3000")
+                    .allowedOrigins("http://localhost:3000", "http://localhost")
                     .allowCredentials(true);
             }
         };

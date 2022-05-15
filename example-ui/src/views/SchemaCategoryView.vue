@@ -17,11 +17,3 @@ export default defineComponent({
     <h1>There is a schema category</h1>
     <SchemaCategoryEditor />
 </template>
-
-<style scoped>
-#cytoscape {
-    width: 1600px;
-    height: 500px;
-    background-color: whitesmoke;
-}
-</style>

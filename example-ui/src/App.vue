@@ -16,9 +16,6 @@ import Content from './components/layout/Content.vue';
         <RouterLink :to="{ name: 'jobs' }">
             Jobs
         </RouterLink>
-        <RouterLink :to="{ name: 'newJob' }">
-            New job
-        </RouterLink>
         <RouterLink :to="{ name: 'accessPathEditor' }">
             Access path editor
         </RouterLink>
@@ -40,6 +37,7 @@ import Content from './components/layout/Content.vue';
 
 <style>
 @import "@/assets/base.css";
+@import "@/assets/tableProperties.css";
 
 #app {
     font-weight: normal;

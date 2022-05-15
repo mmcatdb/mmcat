@@ -53,35 +53,50 @@ export default defineComponent({
 
 <template>
     <div class="newJob">
-        <h2>This is going to be a new job</h2>
-        <label>Name:</label>
-        <br>
-        <input v-model="jobName" />
-        <br>
-        <label>Select mapping:</label>
-        <br>
-        <select v-model="mappingId">
-            <option
-                v-for="(mapping, index) in mappings"
-                :key="index"
-                :value="mapping.id"
+        <h2>Create a new job</h2>
+        <table>
+            <tr>
+                <td class="label">
+                    Name:
+                </td>
+                <td class="value">
+                    <input v-model="jobName" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Mapping:
+                </td>
+                <td class="value">
+                    <select v-model="mappingId">
+                        <option
+                            v-for="(mapping, index) in mappings"
+                            :key="index"
+                            :value="mapping.id"
+                        >
+                            {{ mapping.jsonValue }}
+                        </option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                &nbsp;<!-- To make the NewJob tile look the same as the JobDisplay tile. -->
+            </tr>
+        </table>
+        <div class="button-row">
+            <button
+                :disabled="createJobDisabled"
+                @click="createJob"
             >
-                {{ mapping.jsonValue }}
-            </option>
-        </select>
-        <br>
-        <button
-            :disabled="createJobDisabled"
-            @click="createJob"
-        >
-            Create job
-        </button>
+                Create job
+            </button>
+        </div>
     </div>
 </template>
 
 <style scoped>
 .newJob {
-    padding: 8px;
+    padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;
     /*

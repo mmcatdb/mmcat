@@ -153,7 +153,7 @@ export default defineComponent({
 }
 
 .highlighted {
-    background-color: black;
+    background-color: var(--color-background-dark);
 }
 
 .name-text, .bracket-text, .button-icon {

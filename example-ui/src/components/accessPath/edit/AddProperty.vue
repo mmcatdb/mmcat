@@ -87,76 +87,96 @@ export default defineComponent({
 <template>
     <div class="outer">
         <h2>Add property</h2>
-        <template v-if="state >= State.SelectType">
-            Signature: {{ signature }}
-            <br />
-        </template>
-        <template v-if="state >= State.SelectName">
-            Type: {{ type }}
-            <br />
-        </template>
-        <template v-if="state === State.SelectType">
-            Type:<br />
-            <input
-                id="simple"
-                v-model="type"
-                type="radio"
-                :value="PropertyType.Simple"
-            />
-            <label
-                :class="{ value: type === PropertyType.Simple }"
-                for="simple"
-            >
-                Simple
-            </label><br />
-            <input
-                id="complex"
-                v-model="type"
-                type="radio"
-                :value="PropertyType.Complex"
-            />
-            <label
-                :class="{ value: type === PropertyType.Complex }"
-                for="complex"
-            >
-                Complex
-            </label><br />
-            <button
-                @click="confirmType"
-            >
-                Confirm
-            </button>
-        </template>
-        <template v-else-if="state === State.SelectName">
-            Name: <span class="value">{{ name }}</span>
-            <NameInput
-                v-model="name"
-                :graph="graph"
-                :database="database"
-                :root-node="parentProperty.node"
-            />
-            <br />
-            <button
-                @click="confirmName"
-            >
-                Confirm
-            </button>
-        </template>
-        <template v-else-if="state === State.SelectSignature">
-            Signature: <span class="value">{{ signature }}</span>
-            <SignatureInput
-                v-model="signature"
-                :graph="graph"
-                :database="database"
-            />
-            <br />
-            <button
-                :disabled="signature.isEmpty"
-                @click="confirmSignature"
-            >
-                Confirm
-            </button>
-        </template>
+        <table>
+            <template v-if="state >= State.SelectType">
+                <tr>
+                    <td class="label">
+                        Signature:
+                    </td>
+                    <td class="value">
+                        {{ signature }}
+                    </td>
+                </tr>
+            </template>
+            <template v-if="state >= State.SelectName">
+                <tr>
+                    <td class="label">
+                        Type:
+                    </td>
+                    <td class="value">
+                        {{ type }}
+                    </td>
+                </tr>
+            </template>
+            <template v-if="state === State.SelectType">
+                <tr>
+                    <td class="label">
+                        Type:
+                    </td>
+                    <td class="value">
+                        <input
+                            id="simple"
+                            v-model="type"
+                            type="radio"
+                            :value="PropertyType.Simple"
+                        />
+                        <label
+                            :class="{ value: type === PropertyType.Simple }"
+                            for="simple"
+                        >
+                            Simple
+                        </label><br />
+                        <input
+                            id="complex"
+                            v-model="type"
+                            type="radio"
+                            :value="PropertyType.Complex"
+                        />
+                        <label
+                            :class="{ value: type === PropertyType.Complex }"
+                            for="complex"
+                        >
+                            Complex
+                        </label><br />
+                    </td>
+                </tr>
+                <button
+                    @click="confirmType"
+                >
+                    Confirm
+                </button>
+            </template>
+            <template v-else-if="state === State.SelectName">
+                Name: <span class="value">{{ name }}</span>
+                <NameInput
+                    v-model="name"
+                    :graph="graph"
+                    :database="database"
+                    :root-node="parentProperty.node"
+                />
+                <br />
+                <button
+                    @click="confirmName"
+                >
+                    Confirm
+                </button>
+            </template>
+            <template v-else-if="state === State.SelectSignature">
+                Signature: <span class="value">{{ signature }}</span>
+                <SignatureInput
+                    v-model="signature"
+                    :graph="graph"
+                    :database="database"
+                />
+                <br />
+                <button
+                    :disabled="signature.isEmpty"
+                    @click="confirmSignature"
+                >
+                    Confirm
+                </button>
+            </template>
+        </table>
         <button @click="cancel">
             Cancel
         </button>

@@ -65,10 +65,24 @@ export default defineComponent({
             } }));
 
             console.log(elements);
-            console.log(document.getElementById('cytoscape'));
+
+            const container = document.getElementById('cytoscape');
+            console.log(container);
+
+            // This is needed because of some weird bug.
+            // It has to do something with the cache (because it doesn't appear after hard refresh).
+            // It causes the cytoscape div to contain two cytoscape canvases (the first one is empty, probably it's here from the previous instance).
+            // Weird is this only occurs after 'build', not 'dev' (meaning 'serve').
+            if (container) {
+                var child = container.lastElementChild;
+                while (child) {
+                    container.removeChild(child);
+                    child = container.lastElementChild;
+                }
+            }
 
             const output = cytoscape({
-                container: document.getElementById('cytoscape'),
+                container,
                 layout: { name: 'preset' },
                 elements,
                 style
@@ -108,20 +122,19 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="outer">
-        <div>
-            <button
-                :disabled="saveButtonDisabled"
-                @click="savePositionChanges"
-            >
-                Uložit změny
-            </button>
-        </div>
+    <div class="graph-display">
         <div
             id="cytoscape"
         />
         <template v-if="schemaCategory">
-            Schema category fetched!
+            <div class="category-command-panel">
+                <button
+                    :disabled="saveButtonDisabled"
+                    @click="savePositionChanges"
+                >
+                    Uložit změny
+                </button>
+            </div>
         </template>
         <ResourceNotFound v-else-if="schemaFetched" />
         <ResourceLoading v-else />
@@ -130,13 +143,19 @@ export default defineComponent({
 
 <style scoped>
 #cytoscape {
-    width: 800px;
+    width: var(--schema-category-canvas-width);
     height: 500px;
-    background-color: whitesmoke;
+    background-color: var(--color-background-inverse);
 }
 
-.outer {
+.graph-display {
     display: flex;
     flex-direction: column;
+    margin-right: 16px;
+}
+
+.category-command-panel {
+    padding: 8px 8px;
+    background-color: var(--color-background-dark);
 }
 </style>

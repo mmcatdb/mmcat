@@ -119,15 +119,24 @@ export default defineComponent({
 <template>
     <div class="outer">
         <h2>Edit property</h2>
-        Schema object: {{ schemaObject.label }}
-        <br />
-        Ids:
-        <SchemaIds :schema-object="schemaObject" />
-        <button
-            @click="deleteProperty"
-        >
-            Delete property
-        </button>
+        <table>
+            <tr>
+                <td class="label">
+                    Object:
+                </td>
+                <td class="value">
+                    {{ schemaObject.label }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Ids:
+                </td>
+                <td class="value">
+                    <SchemaIds :schema-object="schemaObject" />
+                </td>
+            </tr>
+        </table>
         <br />
         <template v-if="state >= State.SelectType">
             Signature: {{ signature }}
@@ -163,17 +172,19 @@ export default defineComponent({
             >
                 Complex
             </label><br />
-            <button
-                @click="confirmType"
-            >
-                {{ typeChanged ? 'Confirm change' : 'Keep current' }}
-            </button>
-            <button
-                v-if="typeChanged"
-                @click="resetType"
-            >
-                Reset
-            </button>
+            <div class="button-row">
+                <button
+                    @click="confirmType"
+                >
+                    {{ typeChanged ? 'Confirm change' : 'Keep current' }}
+                </button>
+                <button
+                    v-if="typeChanged"
+                    @click="resetType"
+                >
+                    Reset
+                </button>
+            </div>
         </template>
         <template v-else-if="state === State.SelectName">
             Name: <span class="selected">{{ name }}</span>
@@ -184,17 +195,19 @@ export default defineComponent({
                 :root-node="property.parentNode"
             />
             <br />
-            <button
-                @click="confirmName"
-            >
-                {{ nameChanged ? 'Confirm change' : 'Keep current' }}
-            </button>
-            <button
-                v-if="nameChanged"
-                @click="resetName"
-            >
-                Reset
-            </button>
+            <div class="button-row">
+                <button
+                    @click="confirmName"
+                >
+                    {{ nameChanged ? 'Confirm change' : 'Keep current' }}
+                </button>
+                <button
+                    v-if="nameChanged"
+                    @click="resetName"
+                >
+                    Reset
+                </button>
+            </div>
         </template>
         <template v-else-if="state === State.SelectSignature">
             Signature: <span class="selected">{{ signature }}</span>
@@ -203,23 +216,31 @@ export default defineComponent({
                 :graph="graph"
                 :database="database"
             />
-            <br />
-            <button
-                :disabled="signature.isEmpty"
-                @click="confirmSignature"
-            >
-                {{ signatureChanged ? 'Confirm change' : 'Keep current' }}
-            </button>
-            <button
-                v-if="signatureChanged"
-                @click="resetSignature"
-            >
-                Reset
-            </button>
+            <div class="button-row">
+                <button
+                    :disabled="signature.isEmpty"
+                    @click="confirmSignature"
+                >
+                    {{ signatureChanged ? 'Confirm change' : 'Keep current' }}
+                </button>
+                <button
+                    v-if="signatureChanged"
+                    @click="resetSignature"
+                >
+                    Reset
+                </button>
+            </div>
         </template>
-        <button @click="cancel">
-            Cancel
-        </button>
+        <div class="button-row">
+            <button @click="cancel">
+                Cancel
+            </button>
+            <button
+                @click="deleteProperty"
+            >
+                Delete property
+            </button>
+        </div>
     </div>
 </template>
 

@@ -88,10 +88,8 @@ export default defineComponent({
                             :graph="graph"
                             :database="selectedDatabase"
                             :root-property="accessPath"
+                            @finish="createMapping"
                         />
-                        <button @click="createMapping">
-                            Confirm and create mapping
-                        </button>
                     </div>
                 </template>
                 <template v-else>
@@ -124,7 +122,6 @@ export default defineComponent({
 }
 
 .editor {
-    padding: 12px;
     display: flex;
     flex-direction: column;
 }

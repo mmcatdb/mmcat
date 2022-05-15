@@ -47,6 +47,7 @@ export default defineComponent({
             required: true
         }
     },
+    emits: [ 'finish' ],
     data() {
         return {
             rootObjectName: 'pathName',
@@ -73,8 +74,11 @@ export default defineComponent({
                 parent: parentProperty
             };
         },
-        setStateToDefault(): void {
+        setStateToDefault() {
             this.state = { type: State.Default };
+        },
+        finishMapping() {
+            this.$emit('finish');
         }
     }
 });
@@ -83,9 +87,14 @@ export default defineComponent({
 <template>
     <div class="divide">
         <div class="editor">
-            <template v-if="state.type === State.Default">
-                DEFAULT
-            </template>
+            <div
+                v-if="state.type === State.Default"
+                class="options"
+            >
+                <button @click="finishMapping">
+                    Finish mapping
+                </button>
+            </div>
             <template v-else-if="state.type === State.AddProperty">
                 <AddProperty
                     :graph="graph"
@@ -114,15 +123,13 @@ export default defineComponent({
                 />
             </template>
         </div>
-        <div class="display">
-            <ComplexPropertyDisplay
-                :property="rootProperty"
-                :is-last="true"
-                @complex:click="editPropertyClicked"
-                @simple:click="editPropertyClicked"
-                @add:click="addPropertyClicked"
-            />
-        </div>
+        <ComplexPropertyDisplay
+            :property="rootProperty"
+            :is-last="true"
+            @complex:click="editPropertyClicked"
+            @simple:click="editPropertyClicked"
+            @add:click="addPropertyClicked"
+        />
     </div>
 </template>
 
@@ -136,18 +143,18 @@ export default defineComponent({
 }
 
 .editor {
+    border: 2px solid var(--color-border);
     padding: 12px;
+    margin-right: 16px;
+}
+
+.options {
     display: flex;
     flex-direction: column;
 }
 
 .divide {
     display: flex;
-}
-
-.display {
-    padding: 16px;
-    margin: 16px;
 }
 
 .createProperty {

@@ -1,15 +1,9 @@
 <script lang="ts">
-import { SelectionType, type Graph, type Node } from '@/types/categoryGraph';
+import { SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers';
 import { Cardinality, type CardinalitySettings } from '@/types/schema';
 import { defineComponent } from 'vue';
 import CardinalityInput from './CardinalityInput.vue';
-
-enum State {
-    SelectNode1,
-    SelectNode2,
-    SelectValue
-}
 
 export default defineComponent({
     components: {
@@ -27,8 +21,8 @@ export default defineComponent({
         return {
             node1: null as Node | null,
             node2: null as Node | null,
-            state: State.SelectNode1,
-            State,
+            lastSelectedNode: 1,
+            temporayEdge: null as TemporaryEdge | null,
             signature,
             signatureValue: signature.baseValue ?? 0,
             signatureIsValid: true,
@@ -39,6 +33,11 @@ export default defineComponent({
                 codDomMax: Cardinality.One
             } as CardinalitySettings,
         };
+    },
+    computed: {
+        nodesSelected() {
+            return !!this.node1 && !!this.node2;
+        }
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
@@ -62,37 +61,56 @@ export default defineComponent({
             this.unselectAll();
             this.$emit('cancel');
         },
-        confirmNode1() {
-            this.state = State.SelectNode2;
-        },
-        confirmNode2() {
-            this.state = State.SelectValue;
-        },
-        confirmValue() {
-            this.save();
-        },
         unselectAll() {
             this.node1?.unselect();
             this.node2?.unselect();
+            this.temporayEdge?.delete();
         },
         onNodeTapHandler(node: Node): void {
-            if (this.state === State.SelectNode1) {
-                if (!node.equals(this.node1)) {
-                    this.node1?.unselect();
-                    node.select({ type: SelectionType.Selected, level: 0 });
-                    this.node1 = node;
-                }
+            if (node.equals(this.node1)) {
+                node.unselect();
+                this.node1 = null;
+            }
+            else if (node.equals(this.node2)) {
+                node.unselect();
+                this.node2 = null;
+            }
+            else if (this.node1 === null) {
+                node.select({ type: SelectionType.Selected, level: 0 });
+                this.node1 = node;
+                this.lastSelectedNode = 1;
+            }
+            else if (this.node2 === null) {
+                node.select({ type: SelectionType.Selected, level: 1 });
+                this.node2 = node;
+                this.lastSelectedNode = 2;
+            }
+            else if (this.lastSelectedNode === 1) {
+                this.node1.unselect();
+                node.select({ type: SelectionType.Selected, level: 0 });
+                this.node1 = node;
             }
             else {
-                // If node 2 isn't currently selected node 1 and also they aren't neighbours.
-                console.log(node.neighbours.get(this.node1 as Node));
-                console.log(node.neighbours);
-                if (!node.equals(this.node2) && !node.neighbours.get(this.node1 as Node)) {
-                    this.node2?.unselect();
-                    node.select({ type: SelectionType.Selected, level: 1 });
-                    this.node2 = node;
-                }
+                this.node2.unselect();
+                node.select({ type: SelectionType.Selected, level: 1 });
+                this.node2 = node;
             }
+
+            console.log('1: ' + this.node1 + ' 2: ' + this.node2);
+
+            this.temporayEdge?.delete();
+            this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
+        },
+        switchNodes() {
+            if (this.node1 === null || this.node2 === null)
+                return;
+
+            const swap = this.node1;
+            this.node1 = this.node2;
+            this.node2 = swap;
+
+            this.node1.select({ type: SelectionType.Selected, level: 0 });
+            this.node2.select({ type: SelectionType.Selected, level: 1 });
         },
         signatureValueChanged() {
             this.signature = Signature.base(this.signatureValue);
@@ -103,68 +121,67 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="outer">
+    <div class="add-morphism">
         <h2>Add Schema Morphism</h2>
-        <template v-if="node1">
-            First node: {{ node1.schemaObject.label }}
-        </template>
-        <template v-else>
-            Select first node.
-        </template>
-        <br />
-        <template v-if="state >= State.SelectNode2">
-            <template v-if="node2">
-                Second node: {{ node2.schemaObject.label }}
-            </template>
-            <template v-else>
-                Select second node.
-            </template>
-            <br />
-        </template>
-        <template v-if="state === State.SelectNode1">
-            <button
-                :disabled="!node1"
-                @click="confirmNode1"
-            >
-                Confirm
-            </button>
-        </template>
-        <template v-else-if="state === State.SelectNode2">
-            <button
-                :disabled="!node2"
-                @click="confirmNode2"
-            >
-                Confirm
-            </button>
-        </template>
-        <template v-else-if="state === State.SelectValue">
-            Signature value:
-            <input
-                v-model="signatureValue"
-                type="number"
-                min="0"
-                step="1"
-                @input="signatureValueChanged"
+        <table>
+            <tr>
+                <td class="label">
+                    First node:
+                </td>
+                <td class="value">
+                    {{ node1?.schemaObject.label }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Second node:
+                </td>
+                <td class="value">
+                    {{ node2?.schemaObject.label }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Signature value:
+                </td>
+                <td class="value">
+                    <input
+                        v-model="signatureValue"
+                        type="number"
+                        min="0"
+                        step="1"
+                        class="number-input"
+                        @input="signatureValueChanged"
+                    />
+                </td>
+            </tr>
+            <CardinalityInput
+                v-model="cardinality"
             />
-            <br />
-            <CardinalityInput v-model="cardinality" />
-            <br />
+        </table>
+        <div class="button-row">
             <button
-                :disabled="!signatureIsValid"
-                @click="confirmValue"
+                :disabled="!nodesSelected || !signatureIsValid"
+                @click="save"
             >
                 Confirm
             </button>
-        </template>
-        <button @click="cancel">
-            Cancel
-        </button>
+            <button
+                :disabled="!nodesSelected"
+                @click="switchNodes"
+            >
+                Switch
+            </button>
+            <button @click="cancel">
+                Cancel
+            </button>
+        </div>
     </div>
 </template>
 
-<style scoped>
-.value {
-    font-weight: bold;
+<style>
+.number-input {
+    max-width: 80px;
 }
 </style>
 

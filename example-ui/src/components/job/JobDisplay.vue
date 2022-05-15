@@ -61,45 +61,68 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="jobDisplay">
+    <div class="job-display">
         <RouterLink :to="{ name: 'job', params: { id: job.id } }">
             <h2>{{ job.name }}</h2>
         </RouterLink>
-        <p>
-            Id: {{ job.id }}<br>
-            Mapping id: {{ job.mappingId }}<br>
-            Status: {{ job.status }}
-        </p>
-        <button
-            v-if="job.status === 'Ready'"
-            :disabled="startJobDisabled"
-            class="success"
-            @click="startJob"
-        >
-            Start job
-        </button>
-        <button
-            v-if="job.status === 'Finished' || job.status === 'Canceled'"
-            :disabled="deleteJobDisabled"
-            class="error"
-            @click="deleteJob"
-        >
-            Delete job
-        </button>
-        <button
-            v-if="job.status === 'Finished' || job.status === 'Canceled'"
-            :disabled="restartJobDisabled"
-            class="warning"
-            @click="restartJob"
-        >
-            Restart job
-        </button>
+        <table>
+            <tr>
+                <td class="label">
+                    Id:
+                </td>
+                <td class="value">
+                    {{ job.id }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Mapping id:
+                </td>
+                <td class="value">
+                    {{ job.mappingId }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Status:
+                </td>
+                <td class="value">
+                    {{ job.status }}
+                </td>
+            </tr>
+        </table>
+        <div class="button-row">
+            <button
+                v-if="job.status === 'Ready'"
+                :disabled="startJobDisabled"
+                class="success"
+                @click="startJob"
+            >
+                Start job
+            </button>
+            <button
+                v-if="job.status === 'Finished' || job.status === 'Canceled'"
+                :disabled="deleteJobDisabled"
+                class="error"
+                @click="deleteJob"
+            >
+                Delete job
+            </button>
+            <button
+                v-if="job.status === 'Finished' || job.status === 'Canceled'"
+                :disabled="restartJobDisabled"
+                class="warning"
+                @click="restartJob"
+            >
+                Restart job
+            </button>
+        </div>
     </div>
 </template>
 
 <style scoped>
-.jobDisplay {
-    padding: 8px;
+.job-display {
+    padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;
 }

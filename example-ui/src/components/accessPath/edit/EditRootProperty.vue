@@ -58,10 +58,18 @@ export default defineComponent({
 <template>
     <div class="outer">
         <h2>Edit root property</h2>
-        Name: <span class="selected">{{ name }}</span>
-        <StaticNameInput
-            v-model="name"
-        />
+        <table>
+            <tr>
+                <td class="label">
+                    Name:
+                </td>
+                <td class="value">
+                    <StaticNameInput
+                        v-model="name"
+                    />
+                </td>
+            </tr>
+        </table>
         <br />
         <button
             @click="confirmName"

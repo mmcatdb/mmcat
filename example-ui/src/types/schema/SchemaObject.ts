@@ -22,6 +22,7 @@ export class SchemaObject {
     _jsonValue!: string;
     position?: ComparablePosition;
     _originalPosition?: ComparablePosition;
+    _isNew!: boolean;
 
     key!: Key;
 
@@ -39,6 +40,7 @@ export class SchemaObject {
         object.schemaIds = jsonObject.ids.map((schemaId: SchemaIdJSON) => SchemaId.fromJSON(schemaId));
         object.superId = SchemaId.fromJSON(jsonObject.superId);
         object._jsonValue = input.jsonValue;
+        object._isNew = false;
         if (input.position) { // This should be mandatory since all objects should have defined position.
             object.position = new ComparablePosition(input.position);
             object._originalPosition = new ComparablePosition(input.position);
@@ -57,6 +59,7 @@ export class SchemaObject {
         object.superId = SchemaId.union(schemaIds);
 
         object.position = new ComparablePosition({ x: 0, y: 0});
+        object._isNew = true;
 
         return object;
     }
@@ -71,6 +74,10 @@ export class SchemaObject {
         }
 
         return false;
+    }
+
+    get isNew(): boolean {
+        return this._isNew;
     }
 
     toPositionUpdateToServer(): PositionUpdateToServer | null {
