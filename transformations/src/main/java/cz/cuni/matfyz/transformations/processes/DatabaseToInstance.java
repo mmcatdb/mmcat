@@ -6,7 +6,7 @@ import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.utils.Result;
-import cz.cuni.matfyz.transformations.algorithms.ModelToCategory;
+import cz.cuni.matfyz.transformations.algorithms.MTCAlgorithm;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +36,14 @@ public class DatabaseToInstance {
         }
         catch (Exception exception) {
             LOGGER.error("Pull forest failed.", exception);
-            return new Result<InstanceCategory>("Pull forest failed.");
+            return new Result<InstanceCategory>(null, "Pull forest failed.");
         }
 
         InstanceCategory instance = defaultInstance != null ?
             defaultInstance :
             new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
         
-        var transformation = new ModelToCategory();
+        var transformation = new MTCAlgorithm();
 		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 

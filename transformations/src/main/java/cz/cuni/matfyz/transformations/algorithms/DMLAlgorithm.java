@@ -16,18 +16,18 @@ import java.util.*;
  */
 public class DMLAlgorithm
 {
+    private Mapping mapping;
     private InstanceCategory instance;
     private InstanceFunctor instanceFunctor;
     private String rootName; // TODO
-    private Mapping mapping;
     private AbstractPushWrapper wrapper;
 
-    public void input(SchemaCategory schema, InstanceCategory instance, String rootName, Mapping mapping, AbstractPushWrapper wrapper)
+    public void input(Mapping mapping, InstanceCategory instance, String rootName, AbstractPushWrapper wrapper)
     {
-        this.instance = instance;
-        instanceFunctor = new InstanceFunctor(instance, schema);
-        this.rootName = rootName; // Maybe it could be found as mapping.accessPath.Name.getStringName()
         this.mapping = mapping;
+        this.instance = instance;
+        instanceFunctor = new InstanceFunctor(instance, mapping.category());
+        this.rootName = rootName; // Maybe it could be found as mapping.accessPath.Name.getStringName()
         this.wrapper = wrapper;
     }
     

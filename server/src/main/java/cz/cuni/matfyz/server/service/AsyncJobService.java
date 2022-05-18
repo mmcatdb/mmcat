@@ -2,12 +2,16 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
+import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
 import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
+import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.Result;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
 import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.server.entity.Job;
+import cz.cuni.matfyz.server.entity.MappingWrapper;
 import cz.cuni.matfyz.server.repository.JobRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,18 +49,13 @@ public class AsyncJobService {
     public void runJob(Job job, UserStore store) {
         LOGGER.info("RUN JOB");
         try {
-            // TODO
-            var defaultInstance = store.getDefaultInstace();
-            var result = modelToCategoryAlgorithm(job, defaultInstance).join();
-
-            if (result.status) {
-                //store.addInstance(job.id, result.data);
-                if (defaultInstance == null)
-                    store.setDefaultInstance(result.data);
-                setJobStatus(job, Job.Status.Finished);
-            }
-            else {
-                setJobStatus(job, Job.Status.Canceled);
+            switch (job.type) {
+                case CategoryToModel:
+                    modelToCategoryProcess(job, store);
+                    break;
+                case ModelToCategory:
+                    modelToCategoryProcess(job, store);
+                    break;
             }
         }
         catch (Exception exception) {
@@ -66,21 +65,37 @@ public class AsyncJobService {
         LOGGER.info("RUN JOB END");
     }
 
-    @Async("jobExecutor")
-    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory defaultInstance) throws Exception {       
-        var mappingWrapper = mappingService.find(job.mappingId);
-        var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
+    private void setJobStatus(Job job, Job.Status status) {
+        job.status = status;
+        repository.updateJSONValue(job);
+    }
 
-        var mapping = new SchemaBuilder()
-            .setMappingWrapper(mappingWrapper)
-            .setCategoryWrapper(categoryWrapper)
-            .build();
+    @Async("jobExecutor")
+    private void modelToCategoryProcess(Job job, UserStore store) throws Exception {
+        var defaultInstance = store.getDefaultInstace();
+        var result = modelToCategoryAlgorithm(job, defaultInstance).join();
+
+        if (result.status) {
+            //store.addInstance(job.id, result.data);
+            if (defaultInstance == null)
+                store.setDefaultInstance(result.data);
+            setJobStatus(job, Job.Status.Finished);
+        }
+        else {
+            setJobStatus(job, Job.Status.Canceled);
+        }
+    }
+
+    @Async("jobExecutor")
+    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws Exception {       
+        var mappingWrapper = mappingService.find(job.mappingId);
+        var mapping = createMapping(mappingWrapper);
 
         Database database = databaseService.find(mappingWrapper.databaseId);
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
 
         var process = new DatabaseToInstance();
-        process.input(pullWrapper, mapping, defaultInstance);
+        process.input(pullWrapper, mapping, instance);
 
         var result = process.run();
         Thread.sleep(2 * 1000);
@@ -88,9 +103,48 @@ public class AsyncJobService {
         return CompletableFuture.completedFuture(result);
     }
 
-    private void setJobStatus(Job job, Job.Status status) {
-        job.status = status;
-        repository.updateJSONValue(job);
+    @Async("jobExecutor")
+    private void categoryToModelProcess(Job job, UserStore store) throws Exception {
+        var defaultInstance = store.getDefaultInstace();
+        var result = categoryToModelAlgorithm(job, defaultInstance).join();
+
+        if (result.status) {
+            // TODO Do something with the result.
+            setJobStatus(job, Job.Status.Finished);
+        }
+        else {
+            setJobStatus(job, Job.Status.Canceled);
+        }
+    }
+
+    @Async("jobExecutor")
+    private CompletableFuture<Result<String>> categoryToModelAlgorithm(Job job, InstanceCategory instance) throws Exception {
+        var mappingWrapper = mappingService.find(job.mappingId);
+        var mapping = createMapping(mappingWrapper);
+
+        Database database = databaseService.find(mappingWrapper.databaseId);
+        AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
+
+        var process = new InstanceToDatabase();
+        process.input(pushWrapper, mapping, instance);
+
+        var result = process.run();
+        Thread.sleep(2 * 1000);
+
+        // TODO The DDL and IC algorithms should be here.
+
+        return CompletableFuture.completedFuture(result);
+    }
+
+    private Mapping createMapping(MappingWrapper mappingWrapper) {
+        var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
+
+        var mapping = new SchemaBuilder()
+            .setMappingWrapper(mappingWrapper)
+            .setCategoryWrapper(categoryWrapper)
+            .build();
+        
+        return mapping;
     }
 
 }

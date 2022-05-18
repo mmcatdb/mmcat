@@ -46,8 +46,7 @@ export default defineComponent({
             if (result.status)
                 this.jobs = [ ...result.data ];
 
-            if (this.timeoutId === null)
-                this.timeoutId = setTimeout(this.fetchNew, 1000);
+            this.timeoutId = setTimeout(this.fetchNew, 1000);
         }
     }
 });

@@ -8,5 +8,6 @@ public class NewJobView {
 
     public int mappingId;
     public String name;
+    public String type;
 
 }

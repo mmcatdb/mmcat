@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author jachymb.bartik
  */
-public class ModelToCategoryTests
+public class MTCAlgorithmTests
 {
     private TestData data;
     private SchemaCategory schema;
@@ -28,7 +28,7 @@ public class ModelToCategoryTests
 	@Test
 	public void basicTest()
     {
-        new ModelToCategoryTestBase("1BasicTest.json").setAll(
+        new MTCAlgorithmTestBase("1BasicTest.json").setAll(
             schema,
             order,
             data.path_order(),
@@ -40,7 +40,7 @@ public class ModelToCategoryTests
     @Test
 	public void structureTest()
     {
-        new ModelToCategoryTestBase("2StructureTest.json").setAll(
+        new MTCAlgorithmTestBase("2StructureTest.json").setAll(
             schema,
             order,
             data.path_nestedDoc(),
@@ -52,7 +52,7 @@ public class ModelToCategoryTests
     @Test
 	public void simpleArrayTest()
     {
-        new ModelToCategoryTestBase("3SimpleArrayTest.json").setAll(
+        new MTCAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
             order,
             data.path_array(),
@@ -64,7 +64,7 @@ public class ModelToCategoryTests
     @Test
 	public void complexArrayTest()
     {
-        new ModelToCategoryTestBase("4ComplexArrayTest.json").setAll(
+        new MTCAlgorithmTestBase("4ComplexArrayTest.json").setAll(
             schema,
             order,
             data.path_items(),
@@ -76,7 +76,7 @@ public class ModelToCategoryTests
     @Test
 	public void mapTest()
     {
-        new ModelToCategoryTestBase("5MapTest.json").setAll(
+        new MTCAlgorithmTestBase("5MapTest.json").setAll(
             schema,
             order,
             data.path_contact(),
@@ -88,7 +88,7 @@ public class ModelToCategoryTests
     @Test
 	public void syntheticPropertyTest()
     {
-        new ModelToCategoryTestBase("6SyntheticPropertyTest.json").setAll(
+        new MTCAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,
             order,
             data.path_ordered(),
@@ -100,7 +100,7 @@ public class ModelToCategoryTests
     @Test
 	public void missingSimpleTest()
     {
-        new ModelToCategoryTestBase("7MissingSimpleTest.json").setAll(
+        new MTCAlgorithmTestBase("7MissingSimpleTest.json").setAll(
             schema,
             order,
             data.path_nestedDoc(),
@@ -112,7 +112,7 @@ public class ModelToCategoryTests
     @Test
 	public void missingComplexTest()
     {
-        new ModelToCategoryTestBase("8MissingComplexTest.json").setAll(
+        new MTCAlgorithmTestBase("8MissingComplexTest.json").setAll(
             schema,
             order,
             data.path_nestedDoc(),
@@ -124,7 +124,7 @@ public class ModelToCategoryTests
     @Test
 	public void emptyArrayTest()
     {
-        new ModelToCategoryTestBase("9EmptyArrayTest.json").setAll(
+        new MTCAlgorithmTestBase("9EmptyArrayTest.json").setAll(
             schema,
             order,
             data.path_items(),
@@ -138,7 +138,7 @@ public class ModelToCategoryTests
     {
         //Debug.setLevel(3);
 
-        new ModelToCategoryTestBase("10ComplexMapTest.json").setAll(
+        new MTCAlgorithmTestBase("10ComplexMapTest.json").setAll(
             schema,
             order,
             data.path_address(),
@@ -152,7 +152,7 @@ public class ModelToCategoryTests
     {
         //Debug.setLevel(0);
         
-        new ModelToCategoryTestBase("11MissingArrayTest.json").setAll(
+        new MTCAlgorithmTestBase("11MissingArrayTest.json").setAll(
             schema,
             order,
             data.path_items(),

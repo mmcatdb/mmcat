@@ -110,7 +110,7 @@ public class PullToDDLAndDMLTestBase
         
 		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
-		var transformation = new ModelToCategory();
+		var transformation = new MTCAlgorithm();
 		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 

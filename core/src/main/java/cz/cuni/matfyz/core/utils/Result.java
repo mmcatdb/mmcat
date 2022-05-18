@@ -16,8 +16,8 @@ public class Result<OutputType> {
         this.error = "";
     }
 
-    public Result(String error) {
-        this.data = null;
+    public Result(OutputType data, String error) {
+        this.data = data;
         this.status = false;
         this.error = error;
     }

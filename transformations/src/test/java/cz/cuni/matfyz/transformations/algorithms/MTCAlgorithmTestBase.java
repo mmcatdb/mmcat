@@ -17,24 +17,24 @@ import org.junit.jupiter.api.Assertions;
  *
  * @author jachymb.bartik
  */
-public class ModelToCategoryTestBase
+public class MTCAlgorithmTestBase
 {
     private final String fileNamePrefix = "modelToCategory/";
     private final String dataFileName;
 
-    public ModelToCategoryTestBase(String dataFileName)
+    public MTCAlgorithmTestBase(String dataFileName)
     {
         this.dataFileName = dataFileName;
     }
 
-    public ModelToCategoryTestBase setAll(SchemaCategory schema, SchemaObject rootObject, ComplexProperty path, InstanceCategory expectedInstance)
+    public MTCAlgorithmTestBase setAll(SchemaCategory schema, SchemaObject rootObject, ComplexProperty path, InstanceCategory expectedInstance)
     {
         return setSchema(schema).setRootObject(rootObject).setPath(path).setExpectedInstance(expectedInstance);
     }
 
     private SchemaCategory schema;
 
-    public ModelToCategoryTestBase setSchema(SchemaCategory schema)
+    public MTCAlgorithmTestBase setSchema(SchemaCategory schema)
     {
         this.schema = schema;
         
@@ -46,7 +46,7 @@ public class ModelToCategoryTestBase
 
     private InstanceCategory expectedInstance;
 
-    public ModelToCategoryTestBase setExpectedInstance(InstanceCategory expectedInstance)
+    public MTCAlgorithmTestBase setExpectedInstance(InstanceCategory expectedInstance)
     {
         this.expectedInstance = expectedInstance;
 
@@ -55,7 +55,7 @@ public class ModelToCategoryTestBase
 
     private SchemaObject rootObject;
 
-    public ModelToCategoryTestBase setRootObject(SchemaObject rootObject)
+    public MTCAlgorithmTestBase setRootObject(SchemaObject rootObject)
     {
         this.rootObject = rootObject;
 
@@ -64,7 +64,7 @@ public class ModelToCategoryTestBase
 
     private ComplexProperty path;
 
-    public ModelToCategoryTestBase setPath(ComplexProperty path)
+    public MTCAlgorithmTestBase setPath(ComplexProperty path)
     {
         this.path = path;
 
@@ -104,7 +104,7 @@ public class ModelToCategoryTestBase
         
         Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
-		var transformation = new ModelToCategory();
+		var transformation = new MTCAlgorithm();
 		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 

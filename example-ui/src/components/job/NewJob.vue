@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { Job } from '@/types/job';
+import { type Job, JOB_TYPES } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
 import type { Mapping } from '@/types/mapping';
 import { RootProperty } from '@/types/accessPath/basic';
@@ -16,6 +16,8 @@ export default defineComponent({
             fetched: false,
             mappingId: null as number | null,
             jobName: '',
+            jobType: '',
+            availableJobTypes: JOB_TYPES,
             createJobDisabled: false
         };
     },
@@ -40,7 +42,7 @@ export default defineComponent({
             this.createJobDisabled = true;
             console.log('New job is being created.');
 
-            const result = await POST<Job>('/jobs', { mappingId: this.mappingId, name: this.jobName });
+            const result = await POST<Job>('/jobs', { mappingId: this.mappingId, name: this.jobName, type: this.jobType });
             console.log(result);
             if (result.status)
                 this.$emit('newJob', result.data);
@@ -61,6 +63,22 @@ export default defineComponent({
                 </td>
                 <td class="value">
                     <input v-model="jobName" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Type:
+                </td>
+                <td class="value">
+                    <select v-model="jobType">
+                        <option
+                            v-for="availableType in availableJobTypes"
+                            :key="availableType.value"
+                            :value="availableType.value"
+                        >
+                            {{ availableType.label }}
+                        </option>
+                    </select>
                 </td>
             </tr>
             <tr>

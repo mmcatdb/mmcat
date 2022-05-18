@@ -48,7 +48,7 @@ public class JobController
     @PostMapping("/jobs")
     public Job createNewJob(@RequestBody NewJobView jobView)
     {
-        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobView.mappingId, Job.Status.Ready, jobView.name));
+        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobView.mappingId, jobView.name, Job.Type.valueOf(jobView.type), Job.Status.Ready));
         if (newJob != null)
             return newJob;
         

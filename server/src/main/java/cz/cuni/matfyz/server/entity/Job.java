@@ -14,8 +14,9 @@ import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 public class Job extends Entity implements JSONConvertible {
 
     public final int mappingId;
-    public Status status;
     public String name;
+    public Type type;
+    public Status status;
 
     /*
     public Job(
@@ -42,6 +43,11 @@ public class Job extends Entity implements JSONConvertible {
         Canceled // The job was canceled while being in one of the previous states. It can never be started (again).
     }
 
+    public enum Type {
+        ModelToCategory,
+        CategoryToModel
+    }
+
     @Override public JSONObject toJSON() {
         return new Converter().toJSON(this);
     }
@@ -52,8 +58,9 @@ public class Job extends Entity implements JSONConvertible {
         protected JSONObject _toJSON(Job object) throws JSONException {
             var output = new JSONObject();
 
-			output.put("status", object.status.toString());
             output.put("name", object.name.toString());
+            output.put("type", object.type.toString());
+			output.put("status", object.status.toString());
 
             return output;
         }
@@ -70,14 +77,17 @@ public class Job extends Entity implements JSONConvertible {
 
         @Override
         protected void _loadFromJSON(Job job, JSONObject jsonObject) throws JSONException {
-            job.status = Status.valueOf(jsonObject.getString("status"));
             job.name = jsonObject.getString("name");
+            job.type = Type.valueOf(jsonObject.getString("type"));
+            job.status = Status.valueOf(jsonObject.getString("status"));
         }
 
-        public Job fromArguments(Integer id, int mappingId, Status status, String name) {
+        public Job fromArguments(Integer id, int mappingId, String name, Type type, Status status) {
             var job = new Job(id, mappingId);
-            job.status = status;
             job.name = name;
+            job.type = type;
+            job.status = status;
+
             return job;
         }
 

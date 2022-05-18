@@ -3,13 +3,16 @@ package cz.cuni.matfyz.server.service;
 import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPathWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
+import cz.cuni.matfyz.wrapperMongodb.MongoDBPushWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBSettings;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPathWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPullWrapper;
+import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPushWrapper;
 import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLSettings;
 
 import java.util.Map;
@@ -47,6 +50,17 @@ public class WrapperService {
                 return new MongoDBPathWrapper();
             case postgresql:
                 return new PostgreSQLPathWrapper();
+            default:
+                return null;
+        }
+    }
+
+    public AbstractPushWrapper getPushWrapper(Database database) {
+        switch (database.type) {
+            case mongodb:
+                return new MongoDBPushWrapper();
+            case postgresql:
+                return new PostgreSQLPushWrapper();
             default:
                 return null;
         }

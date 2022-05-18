@@ -84,6 +84,14 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
+                    Type:
+                </td>
+                <td class="value">
+                    {{ job.type }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
                     Status:
                 </td>
                 <td class="value">

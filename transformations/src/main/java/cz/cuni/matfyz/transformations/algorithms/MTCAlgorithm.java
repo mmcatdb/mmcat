@@ -14,7 +14,7 @@ import org.javatuples.Pair;
  *
  * @author pavel.koupil, jachym.bartik
  */
-public class ModelToCategory
+public class MTCAlgorithm
 {
     private SchemaCategory schema; // TODO
     //private InstanceCategory instance; // TODO

@@ -281,5 +281,5 @@ CREATE TABLE job (
 );
 
 INSERT INTO job (mapping_id, json_value)
-VALUES (1, '{"status": "Ready","name":"Job Name"}');
+VALUES (1, '{"name":"Job Name","type":"ModelToCategory","status": "Ready"}');
 
