@@ -147,16 +147,11 @@ export default defineComponent({
     flex-direction: column;
 }
 
-.button-icon:hover {
-
-    color: var(--color-primary);
-}
-
 .highlighted {
     background-color: var(--color-background-dark);
 }
 
-.name-text, .bracket-text, .button-icon {
+.name-text, .bracket-text {
     cursor: pointer;
     width: fit-content;
     padding: 2px 4px;

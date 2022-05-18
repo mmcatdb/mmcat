@@ -1,11 +1,15 @@
 <script lang="ts">
 import type { Graph, Node } from '@/types/categoryGraph';
-import { Key } from '@/types/identifiers';
 import { defineComponent } from 'vue';
+import SchemaIds from '@/components/category/SchemaIds.vue';
+import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
+import AddId from './AddId.vue';
 
 export default defineComponent({
     components: {
-
+        SchemaIds,
+        AddId,
+        IconPlusSquare
     },
     props: {
         graph: {
@@ -21,7 +25,8 @@ export default defineComponent({
     data() {
         return {
             label: this.node.label,
-            key: this.node.schemaObject.key
+            key: this.node.schemaObject.key,
+            addingId: false
         };
     },
     methods: {
@@ -39,14 +44,20 @@ export default defineComponent({
         cancel() {
             this.$emit('cancel');
         },
-        confirm() {
-            this.save();
-        },
         deleteNewNode() {
 
             // TODO
 
             this.$emit('save');
+        },
+        startAddingId() {
+            this.addingId = true;
+        },
+        finishAddingId() {
+            this.addingId = false;
+        },
+        cancelAddingId() {
+            this.addingId = false;
         }
     }
 });
@@ -76,14 +87,35 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
-                    Id:
+                    Ids:
+                </td>
+                <td class="value">
+                    <SchemaIds :schema-object="node.schemaObject" />
+                    <span
+                        v-if="!addingId"
+                        class="button-icon"
+                        @click="startAddingId"
+                    >
+                        <IconPlusSquare />
+                    </span>
                 </td>
             </tr>
         </table>
+        <div
+            v-if="addingId"
+            class="editor"
+        >
+            <AddId
+                :graph="graph"
+                :node="node"
+                @save="finishAddingId"
+                @cancel="cancelAddingId"
+            />
+        </div>
         <div class="button-row">
             <button
                 :disabled="!label"
-                @click="confirm"
+                @click="save"
             >
                 Confirm
             </button>

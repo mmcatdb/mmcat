@@ -37,7 +37,8 @@ import Content from './components/layout/Content.vue';
 
 <style>
 @import "@/assets/base.css";
-@import "@/assets/tableProperties.css";
+@import "@/assets/componentLayout.css";
+@import "@/assets/buttons.css";
 
 #app {
     font-weight: normal;

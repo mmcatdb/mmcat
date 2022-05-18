@@ -147,13 +147,24 @@ export default defineComponent({
                 </button>
             </template>
             <template v-else-if="state === State.SelectName">
-                Name: <span class="value">{{ name }}</span>
-                <NameInput
-                    v-model="name"
-                    :graph="graph"
-                    :database="database"
-                    :root-node="parentProperty.node"
-                />
+                <tr>
+                    <td class="label">
+                        Name:
+                    </td>
+                    <td class="value">
+                        {{ name }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <NameInput
+                            v-model="name"
+                            :graph="graph"
+                            :database="database"
+                            :root-node="parentProperty.node"
+                        />
+                    </td>
+                </tr>
                 <br />
                 <button
                     @click="confirmName"
@@ -166,7 +177,7 @@ export default defineComponent({
                 <SignatureInput
                     v-model="signature"
                     :graph="graph"
-                    :database="database"
+                    :constraint="database.configuration"
                 />
                 <br />
                 <button
@@ -177,9 +188,11 @@ export default defineComponent({
                 </button>
             </template>
         </table>
-        <button @click="cancel">
-            Cancel
-        </button>
+        <div class="button-row">
+            <button @click="cancel">
+                Cancel
+            </button>
+        </div>
     </div>
 </template>
 

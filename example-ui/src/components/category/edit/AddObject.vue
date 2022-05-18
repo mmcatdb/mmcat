@@ -33,9 +33,6 @@ export default defineComponent({
         cancel() {
             this.$emit('cancel');
         },
-        confirm() {
-            this.save();
-        },
         keyValueChanged() {
             this.key = Key.createNew(this.keyValue);
             this.keyIsValid = this.graph.schemaCategory.isKeyAvailable(this.key);
@@ -77,7 +74,7 @@ export default defineComponent({
         <div class="button-row">
             <button
                 :disabled="!keyIsValid || !label"
-                @click="confirm"
+                @click="save"
             >
                 Confirm
             </button>

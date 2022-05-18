@@ -214,7 +214,7 @@ export default defineComponent({
             <SignatureInput
                 v-model="signature"
                 :graph="graph"
-                :database="database"
+                :constraint="database.configuration"
             />
             <div class="button-row">
                 <button

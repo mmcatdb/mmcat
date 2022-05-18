@@ -45,15 +45,16 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="outer">
+    <div class="editor">
         Choose root object: {{ lastClickedNode?.schemaObject.label }}
-        <br />
-        <button
-            :disabled="!lastClickedNode"
-            @click="confirm"
-        >
-            Confirm
-        </button>
+        <div class="button-row">
+            <button
+                :disabled="!lastClickedNode"
+                @click="confirm"
+            >
+                Confirm
+            </button>
+        </div>
     </div>
 </template>
 

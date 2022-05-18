@@ -1,0 +1,24 @@
+td.label {
+    text-align: right;
+    vertical-align: top;
+}
+
+td.value {
+    padding-left: 8px;
+    font-weight: bold;
+    vertical-align: top;
+}
+
+.editor {
+    border: 2px solid var(--color-border);
+    padding: 12px;
+}
+
+.divide {
+    display: flex;
+    flex-direction: row;
+}
+
+.divide > :first-of-type {
+    margin-right: 16px;
+}

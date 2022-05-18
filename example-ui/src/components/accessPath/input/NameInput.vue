@@ -123,7 +123,7 @@ export default defineComponent({
             <SignatureInput
                 v-model="dynamicValue"
                 :graph="graph"
-                :database="database"
+                :constraint="database.configuration"
                 :disabled="disabled"
                 @input="updateInnerValue"
             />

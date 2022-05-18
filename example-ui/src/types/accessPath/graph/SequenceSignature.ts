@@ -1,4 +1,4 @@
-import { Node, NodeSequence, SelectionType } from "@/types/categoryGraph";
+import { Node, NodeSequence, type CustomPathFilter } from "@/types/categoryGraph";
 import type { DatabaseConfiguration } from "@/types/database";
 import { Signature } from "@/types/identifiers";
 
@@ -48,12 +48,12 @@ export class SequenceSignature {
         return this.isNull === signature.isNull && this.sequence.equals(signature.sequence);
     }
 
-    markAvailablePaths(configuration: DatabaseConfiguration): void {
+    markAvailablePaths(constraint: DatabaseConfiguration | { filter:  CustomPathFilter }): void {
         if (this.sequence.lengthOfMorphisms === 0) {
             this.sequence.rootNode.unselect();
             this.sequence.rootNode.selectNext();
         }
 
-        this.sequence.lastNode.markAvailablePaths(configuration);
+        this.sequence.lastNode.markAvailablePaths(constraint);
     }
 }

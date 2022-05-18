@@ -86,42 +86,44 @@ export default defineComponent({
 
 <template>
     <div class="divide">
-        <div class="editor">
-            <div
-                v-if="state.type === State.Default"
-                class="options"
-            >
-                <button @click="finishMapping">
-                    Finish mapping
-                </button>
+        <div>
+            <div class="editor">
+                <div
+                    v-if="state.type === State.Default"
+                    class="options"
+                >
+                    <button @click="finishMapping">
+                        Finish mapping
+                    </button>
+                </div>
+                <template v-else-if="state.type === State.AddProperty">
+                    <AddProperty
+                        :graph="graph"
+                        :database="database"
+                        :parent-property="state.parent"
+                        @save="setStateToDefault"
+                        @cancel="setStateToDefault"
+                    />
+                </template>
+                <template v-else-if="state.type === State.EditProperty">
+                    <EditProperty
+                        :graph="graph"
+                        :database="database"
+                        :property="state.property"
+                        @save="setStateToDefault"
+                        @cancel="setStateToDefault"
+                    />
+                </template>
+                <template v-else-if="state.type === State.EditRootProperty">
+                    <EditRootProperty
+                        :graph="graph"
+                        :database="database"
+                        :property="state.property"
+                        @save="setStateToDefault"
+                        @cancel="setStateToDefault"
+                    />
+                </template>
             </div>
-            <template v-else-if="state.type === State.AddProperty">
-                <AddProperty
-                    :graph="graph"
-                    :database="database"
-                    :parent-property="state.parent"
-                    @save="setStateToDefault"
-                    @cancel="setStateToDefault"
-                />
-            </template>
-            <template v-else-if="state.type === State.EditProperty">
-                <EditProperty
-                    :graph="graph"
-                    :database="database"
-                    :property="state.property"
-                    @save="setStateToDefault"
-                    @cancel="setStateToDefault"
-                />
-            </template>
-            <template v-else-if="state.type === State.EditRootProperty">
-                <EditRootProperty
-                    :graph="graph"
-                    :database="database"
-                    :property="state.property"
-                    @save="setStateToDefault"
-                    @cancel="setStateToDefault"
-                />
-            </template>
         </div>
         <ComplexPropertyDisplay
             :property="rootProperty"
@@ -142,19 +144,9 @@ export default defineComponent({
     font-size: 15px;
 }
 
-.editor {
-    border: 2px solid var(--color-border);
-    padding: 12px;
-    margin-right: 16px;
-}
-
 .options {
     display: flex;
     flex-direction: column;
-}
-
-.divide {
-    display: flex;
 }
 
 .createProperty {

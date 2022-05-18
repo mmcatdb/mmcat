@@ -25,7 +25,5 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.divide {
-    display: flex;
-}
+
 </style>

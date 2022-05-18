@@ -1,8 +1,9 @@
 <script lang="ts">
 import type { Graph, Node } from '@/types/categoryGraph';
-import type { Database } from '@/types/database';
+import { DatabaseConfiguration } from '@/types/database';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
+import type { CustomPathFilter } from '@/types/categoryGraph';
 
 export default defineComponent({
     props: {
@@ -10,8 +11,8 @@ export default defineComponent({
             type: Object as () => Graph,
             required: true
         },
-        database: {
-            type: Object as () => Database,
+        constraint: {
+            type: Object as () => DatabaseConfiguration | { filter: CustomPathFilter },
             required: true
         },
         modelValue: {
@@ -30,6 +31,14 @@ export default defineComponent({
             innerValue: this.modelValue.copy()
         };
     },
+    computed: {
+        hasDatabaseConstraint(): boolean {
+            return this.constraint instanceof DatabaseConfiguration;
+        },
+        allowAuxiliaryProperty(): boolean {
+            return this.constraint instanceof DatabaseConfiguration && this.constraint.isGrouppingAllowed;
+        }
+    },
     watch: {
         modelValue: {
             handler(newValue: SequenceSignature): void {
@@ -42,7 +51,7 @@ export default defineComponent({
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
 
         // TODO
-        this.innerValue.markAvailablePaths(this.database.configuration);
+        this.innerValue.markAvailablePaths(this.constraint);
 
         //this.sequence.allNodes.forEach(node => node.select());
     },
@@ -59,13 +68,13 @@ export default defineComponent({
             if (this.innerValue.sequence.tryRemoveNode(node)) {
                 //node.unselect();
                 this.graph.resetAvailabilityStatus();
-                this.innerValue.markAvailablePaths(this.database.configuration);
+                this.innerValue.markAvailablePaths(this.constraint);
                 this.sendUpdate();
             }
             else if (this.innerValue.sequence.tryAddNode(node)) {
                 //node.select();
                 this.graph.resetAvailabilityStatus();
-                this.innerValue.markAvailablePaths(this.database.configuration);
+                this.innerValue.markAvailablePaths(this.constraint);
                 this.sendUpdate();
             }
         },
@@ -74,7 +83,7 @@ export default defineComponent({
             this.innerValue.sequence.unselectAll();
             this.graph.resetAvailabilityStatus();
             this.innerValue = signature;
-            this.innerValue.markAvailablePaths(this.database.configuration);
+            this.innerValue.markAvailablePaths(this.constraint);
             //this.sequence.allNodes.forEach(node => node.select());
 
             if (sendUpdate)
@@ -95,22 +104,16 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="outer">
-        <template v-if="!disabled">
-            <!-- This shouldn't be alowed during the creation of the access path.
-                <button
-                    @click="setSignatureEmpty"
-                >
-                    Identity
-                </button>
-            -->
-            <button
-                :disabled="!database.configuration.isGrouppingAllowed"
-                @click="setSignatureNull"
-            >
-                Auxiliary property
-            </button>
-        </template>
+    <div
+        v-if="hasDatabaseConstraint"
+        class="outer"
+    >
+        <button
+            :disabled="!allowAuxiliaryProperty || disabled"
+            @click="setSignatureNull"
+        >
+            Auxiliary property
+        </button>
     </div>
 </template>
 

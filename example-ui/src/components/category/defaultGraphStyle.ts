@@ -79,5 +79,11 @@ export const style: cytoscape.Stylesheet[] = [
         style: {
             "line-style": "dashed",
         }
+    },
+    {
+        selector: 'node.no-ids[label]',
+        style: {
+            "color": "red"
+        }
     }
 ];

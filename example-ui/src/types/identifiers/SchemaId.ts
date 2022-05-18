@@ -8,7 +8,7 @@ export type SchemaIdJSON = {
 export class SchemaId {
     _signatures: Signature[];
 
-    private constructor(signatures: Signature[]) {
+    constructor(signatures: Signature[]) {
         this._signatures = signatures;
     }
 
@@ -42,5 +42,30 @@ export class SchemaId {
             _class: 'Id',
             signatures: this._signatures.map(signature => signature.toJSON())
         };
+    }
+}
+
+export class SchemaIdFactory {
+    _signatures = [] as Signature[];
+    _schemaId: SchemaId;
+
+    constructor(signatures?: Signature[]) {
+        if (signatures)
+            this._signatures = signatures;
+
+        this._schemaId = new SchemaId(this._signatures);
+    }
+
+    get schemaId(): SchemaId {
+        return this._schemaId;
+    }
+
+    get isEmpty(): boolean {
+        return this._signatures.length === 0;
+    }
+
+    addSignature(signature: Signature): void {
+        this._signatures.push(signature);
+        this._schemaId = new SchemaId(this._signatures);
     }
 }

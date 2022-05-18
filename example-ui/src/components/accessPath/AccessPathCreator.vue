@@ -71,28 +71,26 @@ export default defineComponent({
     <input v-model="mappingName" />
     <div class="divide">
         <GraphDisplay @graph:created="cytoscapeCreated" />
-        <div
-            v-if="graph"
-            class="divide"
-        >
-            <div class="editor">
+        <div v-if="graph">
+            <div>
                 <template v-if="!!selectedDatabase">
-                    <div v-if="accessPath === null">
-                        <SelectRoot
-                            :graph="graph"
-                            @root-node:confirm="selectRootNode"
-                        />
-                    </div>
-                    <div v-else>
-                        <AccessPathEditor
-                            :graph="graph"
-                            :database="selectedDatabase"
-                            :root-property="accessPath"
-                            @finish="createMapping"
-                        />
-                    </div>
+                    <SelectRoot
+                        v-if="accessPath === null"
+                        :graph="graph"
+                        @root-node:confirm="selectRootNode"
+                    />
+                    <AccessPathEditor
+                        v-else
+                        :graph="graph"
+                        :database="selectedDatabase"
+                        :root-property="accessPath"
+                        @finish="createMapping"
+                    />
                 </template>
-                <template v-else>
+                <div
+                    v-else
+                    class="editor"
+                >
                     <label>Select database:</label>
                     <select v-model="selectingDatabase">
                         <option
@@ -103,10 +101,12 @@ export default defineComponent({
                             {{ database.label }}
                         </option>
                     </select>
-                    <button @click="selectedDatabase = selectingDatabase">
-                        Confirm
-                    </button>
-                </template>
+                    <div class="button-row">
+                        <button @click="selectedDatabase = selectingDatabase">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -124,10 +124,6 @@ export default defineComponent({
 .editor {
     display: flex;
     flex-direction: column;
-}
-
-.divide {
-    display: flex;
 }
 
 .display {

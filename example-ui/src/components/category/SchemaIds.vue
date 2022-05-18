@@ -1,8 +1,10 @@
 <script lang="ts">
 import type { SchemaObject } from '@/types/schema';
 import { defineComponent } from 'vue';
+import SchemaId from './SchemaId.vue';
 
 export default defineComponent({
+    components: { SchemaId },
     props: {
         schemaObject: {
             type: Object as () => SchemaObject,
@@ -14,26 +16,11 @@ export default defineComponent({
 
 <template>
     <div class="outer">
-        <div
+        <SchemaId
             v-for="(schemaId, idIndex) in schemaObject.schemaIds"
             :key="idIndex"
-            class="innerRow"
-        >
-            <template
-                v-for="(signature, signatureIndex) in schemaId.signatures"
-                :key="signatureIndex"
-            >
-                <span class="signatureSpan">
-                    {{ signature }}
-                </span>
-                <span
-                    v-if="signatureIndex < schemaId.signatures.length - 1"
-                    class="commaSpan"
-                >
-                    ,
-                </span>
-            </template>
-        </div>
+            :schema-id="schemaId"
+        />
     </div>
 </template>
 
@@ -41,21 +28,5 @@ export default defineComponent({
 .outer {
     display: flex;
     flex-direction: column;
-}
-
-.innerRow {
-    display: flex;
-    flex-direction: row;
-}
-
-.signatureSpan {
-    background-color: var(--vt-c-black-mute);
-    border-radius: 4px;
-    padding: 0px 6px 0px 4px;
-}
-
-.commaSpan {
-    margin-right: 8px;
-    margin-left: 2px;
 }
 </style>
