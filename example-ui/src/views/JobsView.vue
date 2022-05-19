@@ -22,7 +22,7 @@ export default defineComponent({
         return {
             jobs: null as Job[] | null,
             fetched: false,
-            timeoutId: null as number | null
+            continueFetching: true
         };
     },
     async mounted() {
@@ -31,8 +31,9 @@ export default defineComponent({
         this.fetched = true;
     },
     unmounted() {
-        if (this.timeoutId !== null)
-            clearTimeout(this.timeoutId);
+        // The reason for this variable is that we want to stop additional fetches while the fetchNew is in the middle of the fetching.
+        // So just clearing the timeout isn't enough.
+        this.continueFetching = false;
     },
     methods: {
         addNewJob(job: Job) {
@@ -46,7 +47,8 @@ export default defineComponent({
             if (result.status)
                 this.jobs = [ ...result.data ];
 
-            this.timeoutId = setTimeout(this.fetchNew, 1000);
+            if (this.continueFetching)
+                setTimeout(this.fetchNew, 1000);
         }
     }
 });
