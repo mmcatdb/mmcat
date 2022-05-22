@@ -53,7 +53,7 @@ export default defineComponent({
                     name: this.mappingName
                 }),
                 mappingJsonValue: JSON.stringify({
-                    kindName: this.accessPath?.name.toString(),
+                    kindName: this.accessPath?.name.toString().toLowerCase(),
                     pkey: [], // TODO
                     accessPath: this.accessPath?.toJSON()
                 })

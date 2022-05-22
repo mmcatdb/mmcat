@@ -2,84 +2,90 @@ db.dropDatabase();
 
 db.order.insertMany([
     {
-        number: "2043",
-        array: [ 123, 456, 789 ],
-        nested: {
-            propertyA: "hodnotaA",
-            propertyB: "hodnotaB",
-            propertyC: "hodnotaC"
+        _id: {
+            customer: '1',
+            number: '1'
         },
         contact: {
-            email: "anna@seznam.cz",
-            cellphone: "+420777123456"
+            email: 'alice@gmail.com'
         },
         items: [
             {
-                product: {
-                    id: 123
-                }
-
+                id: 'B1',
+                name: 'Pyramids',
+                price: '200',
+                quantity: '2'
             },
             {
-                product: {
-                    id: 765
-                }
-
+                id: 'A7',
+                name: 'Colosseum',
+                price: '400',
+                quantity: '1'
+            }
+        ]
+    },    
+    {
+        _id: {
+            customer: '1',
+            number: '2'
+        },
+        contact: {
+            cellphone: '+420123456789',
+            email: 'alice@gmail.com'
+        },
+        items: [
+            {
+                id: 'B2',
+                name: 'Sphynx',
+                price: '100',
+                quantity: '3'
+            },
+            {
+                id: 'A8',
+                name: 'Pantheon',
+                price: '300',
+                quantity: '2'
             }
         ]
     },
     {
-        number: "1653",
-        array: [ "123", "String456", "String789" ],
-        nested: {
-            propertyA: "hodnotaA2",
-            propertyB: "hodnotaB2",
-            propertyC: "hodnotaC2"
+        _id: {
+            customer: '2',
+            number: '1'
         },
         contact: {
-            skype: "skype123",
-            cellphone: "+420123456789"
+            email: 'bob@gmail.com'
         },
         items: [
             {
-                product: {
-                    id: 457
-                }
-
-            },
-            {
-                product: {
-                    id: 734
-                }
-
+                id: 'B3',
+                name: 'Luxor',
+                price: '500',
+                quantity: '1'
             }
         ]
-    }
+    },    
+    {
+        _id: {
+            customer: '2',
+            number: '2'
+        },
+        contact: {
+            facebook: 'bob.fb'
+        },
+        items: [
+            {
+                id: 'A6',
+                name: 'Forum Romanum',
+                price: '150',
+                quantity: '1'
+            },
+            {
+                id: 'A9',
+                name: 'Spanish Steps',
+                price: '300',
+                quantity: '9'
+            }
+        ]
+    },
 ]);
-
-db.items.insertMany([
-    {
-        id: 123,
-        name: "Toy",
-        price: 125,
-        quantity: 1
-    },
-    {
-        id: 765,
-        name: "Book",
-        price: 199,
-        quantity: 2
-    },
-    {
-        id: 457,
-        name: "Knife",
-        price: 299,
-        quantity: 7
-    },
-    {
-        id: 734,
-        name: "Doll",
-        price: 350,
-        quantity: 3
-    }
-])

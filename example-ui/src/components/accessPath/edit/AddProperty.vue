@@ -1,5 +1,5 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty, type ChildProperty, SequenceSignature, type ParentProperty } from '@/types/accessPath/graph';
+import { SimpleProperty, ComplexProperty, SequenceSignature, type ParentProperty } from '@/types/accessPath/graph';
 import { PropertyType, type Graph } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
@@ -34,7 +34,7 @@ export default defineComponent({
     emits: [ 'save', 'cancel' ],
     data() {
         return {
-            type: this.propertyToType(this.property),
+            type: PropertyType.Simple,
             PropertyType,
             signature: SequenceSignature.empty(this.parentProperty.node),
             name: StaticName.fromString('') as Name,
@@ -43,9 +43,6 @@ export default defineComponent({
         };
     },
     methods: {
-        propertyToType(property: ChildProperty): PropertyType {
-            return property instanceof SimpleProperty ? PropertyType.Simple : PropertyType.Complex;
-        },
         save() {
             const newProperty = this.type === PropertyType.Simple
                 ? new SimpleProperty(this.name, this.signature, this.parentProperty)
@@ -60,7 +57,7 @@ export default defineComponent({
         },
         confirmSignature() {
             const node = this.signature.sequence.lastNode;
-            this.name = StaticName.fromString(node.schemaObject.label);
+            this.name = StaticName.fromString(node.schemaObject.label.toLowerCase());
 
             const type = this.database.configuration.isComplexPropertyAllowed ?
                 node.determinedPropertyType :
@@ -181,7 +178,6 @@ export default defineComponent({
                 />
                 <br />
                 <button
-                    :disabled="signature.isEmpty"
                     @click="confirmSignature"
                 >
                     Confirm

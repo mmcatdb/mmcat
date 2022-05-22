@@ -51,7 +51,7 @@ public class AsyncJobService {
         try {
             switch (job.type) {
                 case CategoryToModel:
-                    modelToCategoryProcess(job, store);
+                    categoryToModelProcess(job, store);
                     break;
                 case ModelToCategory:
                     modelToCategoryProcess(job, store);
@@ -87,7 +87,7 @@ public class AsyncJobService {
     }
 
     @Async("jobExecutor")
-    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws Exception {       
+    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws Exception {
         var mappingWrapper = mappingService.find(job.mappingId);
         var mapping = createMapping(mappingWrapper);
 

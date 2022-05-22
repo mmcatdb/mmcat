@@ -16,6 +16,10 @@ CREATE DATABASE mmcat_server OWNER mmcat_user;
 ```console
 psql -U mmcat_user -h localhost -f src/main/resources/createDatabase.sql mmcat_server
 ```
+- Better way (no need to write password):
+```
+psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server?sslmode=require -f src/main/resources/createDatabase.sql
+```
 
 ## Run
 - Required Maven ^3.8.4.
@@ -64,3 +68,21 @@ mongo --username mmcat_user --password mmcat_password --authenticationDatabase a
 ```console
 psql -U mmcat_user -h localhost mmcat_server_data
 ```
+
+# Complete server setup
+- TODO
+```¨console
+psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server?sslmode=require -f src/main/resources/createDatabase.sql
+psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_data?sslmode=require -f src/main/resources/setupPostgresql.sql
+mongo --username mmcat_user --password mmcat_password --authenticationDatabase admin localhost:27017/mmcat_server_data src/main/resources/setupMongodb.js
+```
+
+# Backlog
+- Při vytváření ID komplexního ID mají být ty cesty, které alespoň v nějaké své části obsahují jinou kardinalitu než 1..1.
+    - V současnosti jsou zakázány všechny 1..1 přechody, ale to je špatně.
+- Při vytváření schematické kategorie lze definovat pouze base morfizmy, ale v algoritmech jsou požadovány i composed.
+    - Bude nutné zajistit, aby se v případě potřeby vytvořily.
+    - Nejlepší bude provést to hned při vytvoření mapování + při doplnění ID do objektů.
+- Při přidávání properties do morfizmů se postupuje podle maximální kardinality všech morfizmů na cestě.
+    - Pokud to není 1, uvažují se konfigurační vlastnosti "is...ToManyAllowed", které jsou pro postgresql vždy zakázané.
+    - Nicméně díky tomu nejde třeba zvolit Number, protože ten je k Order připojený přes 1..*.

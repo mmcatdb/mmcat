@@ -10,12 +10,17 @@ import cz.cuni.matfyz.core.utils.Debug;
 import java.util.*;
 import org.javatuples.Pair;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  * @author pavel.koupil, jachym.bartik
  */
 public class MTCAlgorithm
 {
+    private static Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
+
     private SchemaCategory schema; // TODO
     //private InstanceCategory instance; // TODO
     private ForestOfRecords forest; // TODO

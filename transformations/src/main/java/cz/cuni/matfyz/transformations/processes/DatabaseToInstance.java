@@ -42,7 +42,7 @@ public class DatabaseToInstance {
         InstanceCategory instance = defaultInstance != null ?
             defaultInstance :
             new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
-        
+
         var transformation = new MTCAlgorithm();
 		transformation.input(mapping, instance, forest);
 		transformation.algorithm();

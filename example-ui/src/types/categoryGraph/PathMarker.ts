@@ -25,35 +25,31 @@ function combineData(first: MorphismData, second: MorphismData): MorphismData {
     };
 }
 
-type NodeNeigbour = {
+export type NodeNeighbour = {
     node: Node,
     previousNode: Node,
     morphism: MorphismData,
-    previousNeighbour?: NodeNeigbour,
-    dependentNeighbours: NodeNeigbour[]
+    previousNeighbour: NodeNeighbour | undefined,
+    dependentNeighbours: NodeNeighbour[]
 }
 
-export type CustomPathFilter = (parentNode: Node, childNode: Node, morphism: MorphismData) => boolean;
-
-type FilterFunction = (neighbour: NodeNeigbour) => boolean;
+export type FilterFunction = (neighbour: NodeNeighbour) => boolean;
 
 export class PathMarker {
     // It's actually important this is a stack and not a queue, because the paths has to be traversed from in one go.
     rootNode: Node;
-    configuration?: DatabaseConfiguration;
-    customPathFilter?: CustomPathFilter;
+    filterFunction: FilterFunction;
 
-    readonly stack = [] as NodeNeigbour[];
+    readonly stack = [] as NodeNeighbour[];
 
-    constructor(rootNode: Node, filterOptions: DatabaseConfiguration | CustomPathFilter) {
+    constructor(rootNode: Node, filterOptions: DatabaseConfiguration | FilterFunction) {
         this.rootNode = rootNode;
-        if (filterOptions instanceof DatabaseConfiguration)
-            this.configuration = filterOptions;
-        else
-            this.customPathFilter = filterOptions;
+        this.filterFunction = filterOptions instanceof DatabaseConfiguration ?
+            createDefaultFilterFunction(filterOptions) :
+            filterOptions;
     }
 
-    getTraversableNeighbours(parentNode: Node, parentNeighbour?: NodeNeigbour): NodeNeigbour[] {
+    getTraversableNeighbours(parentNode: Node, parentNeighbour?: NodeNeighbour): NodeNeighbour[] {
         const combineFunction = parentNeighbour ?
             (morphism: SchemaMorphism) => combineData(parentNeighbour.morphism, morphism) :
             (morphism: SchemaMorphism) => morphismToData(morphism);
@@ -64,27 +60,26 @@ export class PathMarker {
                 previousNode: parentNode,
                 morphism: combineFunction(morphism),
                 previousNeighbour: parentNeighbour,
-                dependentNeighbours: []
+                dependentNeighbours: [] as NodeNeighbour[]
             }))
             .filter(neighbour => !neighbour.node.equals(this.rootNode));
 
-        if (this.configuration) {
-            const configurationFilterFunction = createConfigurationFilterFunction(this.configuration, parentNeighbour);
-            neighbours = neighbours.filter(configurationFilterFunction);
-        }
+        if (parentNeighbour)
+            neighbours = filterBackwardPaths(neighbours, parentNeighbour.morphism);
 
-        if (this.customPathFilter) {
-            const customFilterFunction = createCustomFilterFunction(this.customPathFilter);
-            neighbours = neighbours.filter(customFilterFunction);
-        }
+        neighbours = neighbours.filter(this.filterFunction);
 
+        // We have to check that we are not going back to the same node.
+        // It's permitted, but the user has to specifically require it.
+        // To do so, the user has to choose the node as CertainlyAvailable, i.e. as a direct neighbour.
+        // However, this is not required for the leaves because for them there is no other option than to go back.
         if (parentNeighbour && neighbours.length > 1)
             neighbours = neighbours.filter(entry => !entry.node.equals(parentNode));
 
         return neighbours;
     }
 
-    processNeighbour(neighbour: NodeNeigbour, isDirect = false): void {
+    processNeighbour(neighbour: NodeNeighbour, isDirect = false): void {
         // If the previous node was the root node, this node is definitely available so we mark it this way.
         if (isDirect) {
             neighbour.node.setAvailabilityStatus(AvailabilityStatus.CertainlyAvailable);
@@ -118,7 +113,7 @@ export class PathMarker {
         this.stack.push(...addition);
     }
 
-    processAmbiguousPath(lastNeighbour: NodeNeigbour): void {
+    processAmbiguousPath(lastNeighbour: NodeNeighbour): void {
         let currentNeigbour = lastNeighbour.previousNeighbour;
 
         while (
@@ -132,7 +127,7 @@ export class PathMarker {
         }
     }
 
-    processAmbiguousDependentNeighbours(neigbour: NodeNeigbour): void {
+    processAmbiguousDependentNeighbours(neigbour: NodeNeighbour): void {
         neigbour.dependentNeighbours.forEach(dependentNeighbour => {
             if (dependentNeighbour.node.availabilityStatus !== AvailabilityStatus.Maybe) {
                 dependentNeighbour.node.setAvailabilityStatus(AvailabilityStatus.Maybe);
@@ -166,30 +161,19 @@ export class PathMarker {
     }
 }
 
-function createConfigurationFilterFunction(configuration: DatabaseConfiguration, parentNeighbour: NodeNeigbour | undefined): FilterFunction {
-    return parentNeighbour ?
-        createFilterWithEntryMorphismFunction(configuration, parentNeighbour.morphism) :
-        (
-            (entry: NodeNeigbour) => entry.morphism.max === Cardinality.One ?
-                configuration.isPropertyToOneAllowed :
-                configuration.isPropertyToManyAllowed
-        );
+
+function createDefaultFilterFunction(configuration: DatabaseConfiguration): FilterFunction {
+    return (neighbour: NodeNeighbour) => neighbour.previousNeighbour ?
+        (neighbour.morphism.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed) :
+        (neighbour.morphism.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed);
 }
 
-function createFilterWithEntryMorphismFunction(configuration: DatabaseConfiguration, entryMorphism: MorphismData): FilterFunction {
-    return (neighbour: NodeNeigbour) => {
-        // The path backwards is not allowed unless this node is the current root (ie. entry morphism is empty)
+// The path backwards is not allowed unless this node is the current root (i.e. entry morphism is empty)
+function filterBackwardPaths(neighbours: NodeNeighbour[], entryMorphism: MorphismData): NodeNeighbour[] {
+    const entryBase = entryMorphism.signature.getLastBase();
+
+    return neighbours.filter(neighbour => {
         const base = neighbour.morphism.signature.getLastBase();
-        const entryBase = entryMorphism.signature.getLastBase();
-        if (base && entryBase && base.last.isBaseAndDualOf(entryBase.last))
-            return false;
-
-        return neighbour.morphism.max === Cardinality.One ?
-            configuration.isInliningToOneAllowed :
-            configuration.isInliningToManyAllowed;
-    };
-}
-
-function createCustomFilterFunction(pathFilter: CustomPathFilter): FilterFunction {
-    return (neighbour: NodeNeigbour) => pathFilter(neighbour.previousNode, neighbour.node, neighbour.morphism);
+        return !(base && entryBase && base.last.isBaseAndDualOf(entryBase.last));
+    });
 }

@@ -3,7 +3,7 @@ import type { Graph, Node } from '@/types/categoryGraph';
 import { DatabaseConfiguration } from '@/types/database';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
-import type { CustomPathFilter } from '@/types/categoryGraph';
+import type { FilterFunction } from '@/types/categoryGraph';
 
 export default defineComponent({
     props: {
@@ -12,7 +12,7 @@ export default defineComponent({
             required: true
         },
         constraint: {
-            type: Object as () => DatabaseConfiguration | { filter: CustomPathFilter },
+            type: Object as () => DatabaseConfiguration | { filter: FilterFunction },
             required: true
         },
         modelValue: {

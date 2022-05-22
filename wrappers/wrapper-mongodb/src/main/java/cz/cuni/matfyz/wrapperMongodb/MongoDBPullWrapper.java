@@ -11,12 +11,17 @@ import org.bson.*;
 
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  *
  * @author jachymb.bartik
  */
 public class MongoDBPullWrapper implements AbstractPullWrapper
 {
+    private static Logger LOGGER = LoggerFactory.getLogger(AbstractPullWrapper.class);
+
     private DatabaseProvider databaseProvider;
     
     public void injectDatabaseProvider(DatabaseProvider databaseProvider)

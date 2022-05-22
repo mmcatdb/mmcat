@@ -64,8 +64,16 @@ export class SchemaIdFactory {
         return this._signatures.length === 0;
     }
 
+    get length(): number {
+        return this._signatures.length;
+    }
+
     addSignature(signature: Signature): void {
         this._signatures.push(signature);
         this._schemaId = new SchemaId(this._signatures);
+    }
+
+    static createEmpty(): SchemaId {
+        return new SchemaId([ Signature.empty ]);
     }
 }
