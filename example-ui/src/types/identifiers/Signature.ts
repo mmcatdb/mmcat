@@ -96,7 +96,7 @@ export class Signature {
         return this._ids.join('.');
     }
 
-    toBase(): Signature[] {
+    toBases(): Signature[] {
         return this._ids.map(id => new Signature(id));
     }
 

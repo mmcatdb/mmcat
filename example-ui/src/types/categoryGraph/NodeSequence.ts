@@ -37,7 +37,7 @@ export class NodeSequence {
     }
     */
     addSignature(signature: Signature): void {
-        signature.toBase().reverse().forEach(baseSignature => this.addBaseSignature(baseSignature));
+        signature.toBases().reverse().forEach(baseSignature => this.addBaseSignature(baseSignature));
     }
 
     addBaseSignature(baseSignature: Signature): void {

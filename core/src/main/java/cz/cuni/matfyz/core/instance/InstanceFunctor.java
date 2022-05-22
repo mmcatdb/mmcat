@@ -36,7 +36,7 @@ public class InstanceFunctor
         var morphism = instanceCategory.morphism(schemaMorphism.signature());
         if (morphism == null)
             LOGGER.error("Requested schema morphism with signature " + schemaMorphism.signature() + " not found in instance functor.");
-        
+            
         return morphism;
     }
 }

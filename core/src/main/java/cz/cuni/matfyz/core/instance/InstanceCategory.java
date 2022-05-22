@@ -12,11 +12,13 @@ import java.util.*;
  */
 public class InstanceCategory implements Category {
 
+	private final SchemaCategory schema;
 	private final Map<Key, InstanceObject> objects;
 	private final Map<Signature, InstanceMorphism> morphisms;
 
-    InstanceCategory(Map<Key, InstanceObject> objects, Map<Signature, InstanceMorphism> morphisms)
+    InstanceCategory(SchemaCategory schema, Map<Key, InstanceObject> objects, Map<Signature, InstanceMorphism> morphisms)
     {
+		this.schema = schema;
 		this.objects = objects;
         this.morphisms = morphisms;
 	}
@@ -56,16 +58,29 @@ public class InstanceCategory implements Category {
     
     public InstanceMorphism morphism(Signature signature)
     {
-        final InstanceMorphism result = morphisms.get(signature);
-        assert result != null : "Instance morphism with signature " + signature + " not found in instance category.";
-        return result;
+        InstanceMorphism morphism = morphisms.get(signature);
+		if (morphism == null)
+		{
+			// This must be a composite morphism. These are created dynamically so we have to add it dynamically.
+			SchemaMorphism schemaMorphism = schema.signatureToMorphism(signature);
+			InstanceObject dom = object(schemaMorphism.dom().key());
+			InstanceObject cod = object(schemaMorphism.cod().key());
+
+			morphism = new InstanceMorphism(schemaMorphism, dom, cod, this);
+			morphisms.put(signature, morphism);
+		}
+        
+        return morphism;
 	}
     
     public InstanceMorphism dual(Signature signatureOfOriginal)
     {
+		/*
         final InstanceMorphism result = morphisms.get(signatureOfOriginal.dual());
         assert result != null : "Instance morphism with signature " + signatureOfOriginal + " doesn't have its dual.";
         return result;
+		*/
+		return morphism(signatureOfOriginal.dual());
 	}
 	
 	@Override

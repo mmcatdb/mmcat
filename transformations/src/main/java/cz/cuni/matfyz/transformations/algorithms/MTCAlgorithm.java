@@ -116,6 +116,7 @@ public class MTCAlgorithm
     
     private void processTopOfStack(Stack<StackTriple> M)
     {
+        LOGGER.warn("Process top of stack");
         if (Debug.shouldLog(3))
             System.out.println("#### Process Top of Stack ####");
         if (Debug.shouldLog(2))

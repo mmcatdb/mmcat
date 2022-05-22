@@ -25,7 +25,7 @@ public class InstanceCategoryBuilder
     
     public InstanceCategory build()
     {
-        result = new InstanceCategory(objects, morphisms);
+        result = new InstanceCategory(schemaCategory, objects, morphisms);
         
         for (SchemaObject schemaObject : schemaCategory.allObjects())
         {

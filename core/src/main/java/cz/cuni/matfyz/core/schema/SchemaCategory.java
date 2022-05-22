@@ -2,8 +2,15 @@ package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Category;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
+import cz.cuni.matfyz.core.schema.SchemaMorphism.Min;
 import cz.cuni.matfyz.core.serialization.MapUniqueContext;
 import cz.cuni.matfyz.core.serialization.UniqueContext;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -11,6 +18,8 @@ import cz.cuni.matfyz.core.serialization.UniqueContext;
  */
 public class SchemaCategory implements Category//, JSONConvertible
 {
+    private static Logger LOGGER = LoggerFactory.getLogger(SchemaCategory.class);
+
     private final UniqueContext<SchemaObject, Key> objectContext = new MapUniqueContext<>();
     private final UniqueContext<SchemaMorphism, Signature> morphismContext = new MapUniqueContext<>();
 
@@ -45,7 +54,14 @@ public class SchemaCategory implements Category//, JSONConvertible
     
     public SchemaMorphism signatureToMorphism(Signature signature)
     {
-        return morphismContext.getUniqueObject(signature);
+        SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
+        if (morphism == null)
+        {
+            SchemaMorphism  newMorphism = createCompositeMorphism(signature);
+            morphism = this.morphismContext.createUniqueObject(newMorphism);
+        }
+
+        return morphism;
     }
 
     public Iterable<SchemaObject> allObjects()
@@ -61,6 +77,29 @@ public class SchemaCategory implements Category//, JSONConvertible
     public UniqueContext<SchemaObject, Key> objectContext() // TODO
     {
         return this.objectContext;
+    }
+
+    private SchemaMorphism createCompositeMorphism(Signature signature)
+    {
+        Signature[] bases = signature.toBases().toArray(new Signature[0]);
+
+        Signature lastSignature = bases[bases.length - 1];
+        SchemaMorphism lastMorphism = this.signatureToMorphism(lastSignature);
+        SchemaObject dom = lastMorphism.dom();
+        SchemaObject cod = lastMorphism.cod();
+        Min min = lastMorphism.min();
+        Max max = lastMorphism.max();
+
+        for (int i = 2; i <= bases.length; i++)
+        {
+            lastSignature = bases[bases.length - i];
+            lastMorphism = this.signatureToMorphism(lastSignature);
+            cod = lastMorphism.cod();
+            min = SchemaMorphism.combineMin(min, lastMorphism.min());
+            max = SchemaMorphism.combineMax(max, lastMorphism.max());
+        }
+
+        return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min, max);
     }
 
     /*

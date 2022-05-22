@@ -37,6 +37,16 @@ public class SchemaMorphism implements Morphism, JSONConvertible, Identified<Sig
         STAR
     }
 
+	public static Min combineMin(Min min1, Min min2)
+	{
+		return (min1 == Min.ONE && min2 == Min.ONE) ? Min.ONE : Min.ZERO;
+	}
+
+	public static Max combineMax(Max max1, Max max2)
+	{
+		return (max1 == Max.ONE && max2 == Max.ONE) ? Max.ONE : Max.STAR;
+	}
+
 	private SchemaCategory category;
 
     /*

@@ -194,8 +194,7 @@ export class Node {
     }
 
     addId(schemaId: SchemaId): void {
-        // TODO
-        this.schemaObject.schemaIds.push(schemaId);
+        this.schemaObject.addId(schemaId);
         this.node.removeClass('no-ids');
     }
 }

@@ -64,6 +64,11 @@ export class SchemaObject {
         return object;
     }
 
+    addId(id: SchemaId): void {
+        this.schemaIds.push(id);
+        this.superId = SchemaId.union([ this.superId, id ]);
+    }
+
     get canBeSimpleProperty(): boolean {
         if (this.schemaIds.length < 1)
             return false;

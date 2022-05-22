@@ -40,8 +40,21 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         this.isNull = false;
     }
 
-    public int[] ids() {
+    public int[] ids()
+    {
         return this.ids.clone();
+    }
+
+    public List<Signature> toBases()
+    {
+        if (this.isNull)
+            return List.of(this);
+
+        var output = new ArrayList<Signature>();
+        for (int id : ids)
+            output.add(new Signature(id));
+
+        return output;
     }
 
     /*
