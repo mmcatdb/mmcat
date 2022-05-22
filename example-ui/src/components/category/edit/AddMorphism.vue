@@ -41,6 +41,7 @@ export default defineComponent({
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
+        console.log({ cy: this.graph._cytoscape });
     },
     unmounted() {
         this.graph.removeListener('tap', this.onNodeTapHandler);

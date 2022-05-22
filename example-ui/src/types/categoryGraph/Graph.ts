@@ -1,4 +1,4 @@
-import type { Core, EventHandler, EventObject, NodeSingular } from "cytoscape";
+import type { Core, ElementDefinition, EventHandler, EventObject, NodeSingular } from "cytoscape";
 import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Node } from "./Node";
 
@@ -49,23 +49,19 @@ export class Graph {
                 label: object.label,
                 schemaData: node
             },
-            position: object.position
+            position: object.position,
+            classes: 'new'
         });
-        cytoscapeNode.addClass('new');
 
         node.setCytoscapeNode(cytoscapeNode);
     }
 
     createEdge(morphism: SchemaMorphism, dualMorphism: SchemaMorphism): void {
-        const edge = this._cytoscape.add({
-            data: {
-                id: 'm' + morphism.id.toString(),
-                source: morphism.domId,
-                target: morphism.codId,
-                label: ((value: string) => value.startsWith('-') ? undefined : value )(morphism.signature.toString())
-            }
-        });
-        edge.addClass('new');
+        const definitions = [ this.createEdgeDefinition(morphism), this.createEdgeDefinition(dualMorphism) ];
+
+        // This ensures the bezier morphism pairs have allways the same chirality.
+        const primalFirst = morphism.domId < morphism.codId;
+        this._cytoscape.add(primalFirst ? definitions : definitions.reverse());
 
         const domNode = this._cytoscape.nodes('#' + morphism.domId).first().data('schemaData') as Node;
         const codNode = this._cytoscape.nodes('#' + morphism.codId).first().data('schemaData') as Node;
@@ -74,22 +70,34 @@ export class Graph {
         codNode.addNeighbour(domNode, dualMorphism);
     }
 
+    private createEdgeDefinition(morphism: SchemaMorphism): ElementDefinition {
+        return {
+            data: {
+                id: 'm' + morphism.id.toString(),
+                source: morphism.domId,
+                target: morphism.codId,
+                label: morphism.signature.toString()
+            },
+            classes: 'new'
+        };
+    }
+
     lastTemporaryEdgeId = 0;
 
     createTemporaryEdge(node1: Node, node2: Node): TemporaryEdge {
         const id = 'te' + this.lastTemporaryEdgeId;
         this.lastTemporaryEdgeId++;
 
-        const edge = this._cytoscape.add({
+        this._cytoscape.add({
             data: {
                 id,
                 source: node1.schemaObject.id,
                 target: node2.schemaObject.id,
                 label: ''
-            }
+            },
+            classes: 'tmeporary'
         });
-        edge.addClass('temporary');
 
-        return { delete: () => edge.remove() };
+        return { delete: () => this._cytoscape.remove('#' + id) };
     }
 }

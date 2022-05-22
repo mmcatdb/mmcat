@@ -57,14 +57,16 @@ export default defineComponent({
                 elements.push(definition);
             });
 
-            schema.morphisms.filter(morphism => morphism.isBase).forEach(morphism => elements.push({ data: {
-                id: 'm' + morphism.id.toString(),
-                source: morphism.domId,
-                target: morphism.codId,
-                label: ((value: string) => value.startsWith('-') ? undefined : value )(morphism.signature.toString())
-            } }));
-
-            console.log(elements);
+            schema.morphisms.filter(morphism => morphism.isBase)
+                // This ensures the bezier morphism pairs have allways the same chirality.
+                .sort((m1, m2) => m1.domId !== m2.domId ? m2.domId - m1.domId : m2.codId - m1.codId)
+                .forEach(morphism => elements.push({ data: {
+                    id: 'm' + morphism.id.toString(),
+                    source: morphism.domId,
+                    target: morphism.codId,
+                    //label: ((value: string) => value.startsWith('-') ? undefined : value )(morphism.signature.toString())
+                    label: morphism.signature.toString()
+                } }));
 
             const container = document.getElementById('cytoscape');
             console.log(container);

@@ -55,35 +55,37 @@ export const style: cytoscape.Stylesheet[] = [
         }
     },
     {
-        selector: "edge[label]",
+        selector: 'edge[label]',
         style: {
-            "font-weight": "bold",
+            'font-weight': 'bold',
             label: 'data(label)',
+            'curve-style': 'bezier',
+            'target-arrow-shape': 'triangle'
         }
     },
     {
         selector: 'edge.temporary',
         style: {
-            "line-style": "dashed",
-            "line-color": "blue"
+            'line-style': 'dashed',
+            'line-color': 'blue'
         }
     },
     {
         selector: 'node.new',
         style: {
-            "border-style": "dashed"
+            'border-style': 'dashed'
         }
     },
     {
         selector: 'edge.new',
         style: {
-            "line-style": "dashed",
+            'line-style': 'dashed',
         }
     },
     {
         selector: 'node.no-ids[label]',
         style: {
-            "color": "red"
+            'color': 'red'
         }
-    }
+    },
 ];
