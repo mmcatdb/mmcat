@@ -46,7 +46,6 @@ public class DatabaseToInstance {
         var transformation = new MTCAlgorithm();
 		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
-        LOGGER.warn(instance.toString());
 
         return new Result<InstanceCategory>(instance);
     }
