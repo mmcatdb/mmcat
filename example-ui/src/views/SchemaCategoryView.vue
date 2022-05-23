@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import SchemaCategoryEditor from '@/components/category/ScemaCategoryEditor.vue';
+import SchemaCategoryEditor from '@/components/category/SchemaCategoryEditor.vue';
 
 export default defineComponent({
     components: {

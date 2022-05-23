@@ -72,6 +72,8 @@ psql -U mmcat_user -h localhost mmcat_server_data
 # Complete server setup
 - TODO
 ```¨console
+mvn install -Dmaven.test.skip
+cd server
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server?sslmode=require -f src/main/resources/createDatabase.sql
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_data?sslmode=require -f src/main/resources/setupPostgresql.sql
 mongo --username mmcat_user --password mmcat_password --authenticationDatabase admin localhost:27017/mmcat_server_data src/main/resources/setupMongodb.js

@@ -57,7 +57,7 @@ export class Graph {
     }
 
     createEdge(morphism: SchemaMorphism, dualMorphism: SchemaMorphism): void {
-        const definitions = [ this.createEdgeDefinition(morphism), this.createEdgeDefinition(dualMorphism) ];
+        const definitions = [ createEdgeDefinition(morphism), createEdgeDefinition(dualMorphism) ];
 
         // This ensures the bezier morphism pairs have allways the same chirality.
         const primalFirst = morphism.domId < morphism.codId;
@@ -68,18 +68,6 @@ export class Graph {
 
         domNode.addNeighbour(codNode, morphism);
         codNode.addNeighbour(domNode, dualMorphism);
-    }
-
-    private createEdgeDefinition(morphism: SchemaMorphism): ElementDefinition {
-        return {
-            data: {
-                id: 'm' + morphism.id.toString(),
-                source: morphism.domId,
-                target: morphism.codId,
-                label: morphism.signature.toString()
-            },
-            classes: 'new'
-        };
     }
 
     lastTemporaryEdgeId = 0;
@@ -100,4 +88,16 @@ export class Graph {
 
         return { delete: () => this._cytoscape.remove('#' + id) };
     }
+}
+
+function createEdgeDefinition(morphism: SchemaMorphism): ElementDefinition {
+    return {
+        data: {
+            id: 'm' + morphism.id.toString(),
+            source: morphism.domId,
+            target: morphism.codId,
+            label: morphism.signature.toString()
+        },
+        classes: 'new'
+    };
 }
