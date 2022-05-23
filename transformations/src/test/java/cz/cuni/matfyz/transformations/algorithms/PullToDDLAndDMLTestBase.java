@@ -123,7 +123,7 @@ public class PullToDDLAndDMLTestBase
         LOGGER.info("Created DDL Statement:\n" + ddlStatement);
 
         var dmlAlgorithm = new DMLAlgorithm();
-        dmlAlgorithm.input(schema, instance, rootName, mapping, pushWrapper);
+        dmlAlgorithm.input(mapping, instance, rootName, pushWrapper);
         List<DMLStatement> dmlStatements = dmlAlgorithm.algorithm();
 
         LOGGER.info("Created DML Statement-s:\n" + dmlStatements);

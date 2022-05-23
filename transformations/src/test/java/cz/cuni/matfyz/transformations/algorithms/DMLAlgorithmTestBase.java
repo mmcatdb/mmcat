@@ -116,7 +116,7 @@ public class DMLAlgorithmTestBase
 		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
 		var transformation = new DMLAlgorithm();
-		transformation.input(schema, inputInstance, rootName, mapping, wrapper);
+		transformation.input(mapping, inputInstance, rootName, wrapper);
 		transformation.algorithm();
 
         List<DMLTestStructure> result = wrapper.structures();
