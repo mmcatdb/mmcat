@@ -1,9 +1,8 @@
 <script lang="ts">
 import type { Graph, Node } from '@/types/categoryGraph';
-import { DatabaseConfiguration } from '@/types/database';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
-import type { FilterFunction } from '@/types/categoryGraph';
+import type { Filter } from '@/types/categoryGraph';
 
 export default defineComponent({
     props: {
@@ -11,13 +10,18 @@ export default defineComponent({
             type: Object as () => Graph,
             required: true
         },
-        constraint: {
-            type: Object as () => DatabaseConfiguration | { filter: FilterFunction },
+        filters: {
+            type: Object as () => Filter | Filter[],
             required: true
         },
         modelValue: {
             type: Object as () => SequenceSignature,
             required: true
+        },
+        allowNull: {
+            type: Boolean,
+            default: false,
+            required: false
         },
         disabled: {
             type: Boolean,
@@ -31,14 +35,6 @@ export default defineComponent({
             innerValue: this.modelValue.copy()
         };
     },
-    computed: {
-        hasDatabaseConstraint(): boolean {
-            return this.constraint instanceof DatabaseConfiguration;
-        },
-        allowAuxiliaryProperty(): boolean {
-            return this.constraint instanceof DatabaseConfiguration && this.constraint.isGrouppingAllowed;
-        }
-    },
     watch: {
         modelValue: {
             handler(newValue: SequenceSignature): void {
@@ -51,7 +47,7 @@ export default defineComponent({
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
 
         // TODO
-        this.innerValue.markAvailablePaths(this.constraint);
+        this.innerValue.markAvailablePaths(this.filters);
 
         //this.sequence.allNodes.forEach(node => node.select());
     },
@@ -68,13 +64,13 @@ export default defineComponent({
             if (this.innerValue.sequence.tryRemoveNode(node)) {
                 //node.unselect();
                 this.graph.resetAvailabilityStatus();
-                this.innerValue.markAvailablePaths(this.constraint);
+                this.innerValue.markAvailablePaths(this.filters);
                 this.sendUpdate();
             }
             else if (this.innerValue.sequence.tryAddNode(node)) {
                 //node.select();
                 this.graph.resetAvailabilityStatus();
-                this.innerValue.markAvailablePaths(this.constraint);
+                this.innerValue.markAvailablePaths(this.filters);
                 this.sendUpdate();
             }
         },
@@ -83,7 +79,7 @@ export default defineComponent({
             this.innerValue.sequence.unselectAll();
             this.graph.resetAvailabilityStatus();
             this.innerValue = signature;
-            this.innerValue.markAvailablePaths(this.constraint);
+            this.innerValue.markAvailablePaths(this.filters);
             //this.sequence.allNodes.forEach(node => node.select());
 
             if (sendUpdate)
@@ -105,13 +101,14 @@ export default defineComponent({
 
 <template>
     <div
-        v-if="hasDatabaseConstraint"
+        v-if="allowNull"
         class="outer"
     >
         <button
-            :disabled="!allowAuxiliaryProperty || disabled"
+            :disabled="disabled"
             @click="setSignatureNull"
         >
+            <slot name="nullButton" />
             Auxiliary property
         </button>
     </div>

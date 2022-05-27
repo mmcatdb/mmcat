@@ -6,6 +6,7 @@ import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import AddId from './AddId.vue';
 
 export default defineComponent({
+    expose: [ 'changed' ],
     components: {
         SchemaIds,
         AddId,
@@ -21,13 +22,19 @@ export default defineComponent({
             required: true
         }
     },
-    emits: [ 'save', 'cancel' ],
+    emits: [ 'save', 'cancel', 'update' ],
     data() {
         return {
             label: this.node.label,
+            originalLabel: this.node.label,
             key: this.node.schemaObject.key,
             addingId: false
         };
+    },
+    computed: {
+        changed(): boolean {
+            return this.originalLabel !== this.label || this.addingId;
+        }
     },
     methods: {
         save() {

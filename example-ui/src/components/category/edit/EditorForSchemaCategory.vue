@@ -59,8 +59,17 @@ export default defineComponent({
             this.state = { type: State.Default };
         },
         onNodeTapHandler(node: Node) {
-            if (this.state.type !== State.Default)
+            if (this.state.type !== State.Default && this.state.type !== State.EditObject)
                 return;
+
+            if (this.state.type === State.EditObject) {
+                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed)
+                    return;
+                else if (this.state.node.equals(node))
+                    this.setStateToDefault();
+                else
+                    this.state.node.unselect();
+            }
 
             node.select({ type: SelectionType.Root, level: 0 });
             this.state = { type: State.EditObject, node };
@@ -113,6 +122,8 @@ export default defineComponent({
         </template>
         <template v-else-if="state.type === State.EditObject">
             <EditObject
+                ref="editedObject"
+                :key="state.node.schemaObject.id"
                 :graph="graph"
                 :node="state.node"
                 @save="setStateToDefault"

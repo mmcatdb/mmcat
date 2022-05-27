@@ -1,10 +1,9 @@
 import { ComparableMap } from "@/utils/ComparableMap";
 import { TwoWayComparableMap } from "@/utils/TwoWayComparableMap";
 import type { NodeSingular } from "cytoscape";
-import { DatabaseConfiguration } from "../database";
 import type { SchemaId, Signature } from "../identifiers";
 import type { SchemaMorphism, SchemaObject } from "../schema";
-import { PathMarker, type FilterFunction, type MorphismData } from "./PathMarker";
+import { PathMarker, type Filter, type MorphismData } from "./PathMarker";
 
 export enum NodeTag {
     Root = 'tag-root'
@@ -187,9 +186,8 @@ export class Node {
         return !!other && this.schemaObject.id === other.schemaObject.id;
     }
 
-    markAvailablePaths(constraint: DatabaseConfiguration | { filter: FilterFunction }): void {
-        const filterOptions = constraint instanceof DatabaseConfiguration ? constraint : constraint.filter;
-        const pathMarker = new PathMarker(this, filterOptions);
+    markAvailablePaths(filters: Filter | Filter[]): void {
+        const pathMarker = new PathMarker(this, filters);
         pathMarker.markPathsFromRootNode();
     }
 

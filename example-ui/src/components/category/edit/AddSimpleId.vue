@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Graph, NodeNeighbour, Node } from '@/types/categoryGraph';
+import { type Graph, type NodeNeighbour, type Node, FilterType } from '@/types/categoryGraph';
 import { SchemaIdFactory } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
@@ -23,7 +23,15 @@ export default defineComponent({
     emits: [ 'save', 'cancel' ],
     data() {
         return {
-            signature: SequenceSignature.empty(this.node)
+            signature: SequenceSignature.empty(this.node),
+            filter: {
+                type: FilterType.Base,
+                function: (neighbour: NodeNeighbour) => {
+                    return neighbour.morphism.min === Cardinality.One
+                        && neighbour.morphism.max === Cardinality.One
+                        && neighbour.dualMorphism.max === Cardinality.One;
+                }
+            }
         };
     },
     methods: {
@@ -35,9 +43,6 @@ export default defineComponent({
         },
         cancel() {
             this.$emit('cancel');
-        },
-        onlyOneToOnePathFilter(neighbour: NodeNeighbour): boolean {
-            return neighbour.morphism.min === Cardinality.One && neighbour.morphism.max === Cardinality.One;
         }
     }
 });
@@ -58,7 +63,7 @@ export default defineComponent({
     <SignatureInput
         v-model="signature"
         :graph="graph"
-        :constraint="{ filter: onlyOneToOnePathFilter }"
+        :filters="filter"
     />
     <div class="button-row">
         <button

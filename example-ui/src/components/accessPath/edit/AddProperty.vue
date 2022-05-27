@@ -1,6 +1,6 @@
 <script lang="ts">
 import { SimpleProperty, ComplexProperty, SequenceSignature, type ParentProperty } from '@/types/accessPath/graph';
-import { PropertyType, type Graph } from '@/types/categoryGraph';
+import { PropertyType, type Graph, createDefaultFilter } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
@@ -39,7 +39,8 @@ export default defineComponent({
             signature: SequenceSignature.empty(this.parentProperty.node),
             name: StaticName.fromString('') as Name,
             state: State.SelectSignature,
-            State
+            State,
+            filter: createDefaultFilter(this.database.configuration)
         };
     },
     methods: {
@@ -174,8 +175,13 @@ export default defineComponent({
                 <SignatureInput
                     v-model="signature"
                     :graph="graph"
-                    :constraint="database.configuration"
-                />
+                    :filters="filter"
+                    :allow-null="database.configuration.isGrouppingAllowed"
+                >
+                    <template #nullButton>
+                        Auxiliary property
+                    </template>
+                </SignatureInput>
                 <br />
                 <button
                     @click="confirmSignature"

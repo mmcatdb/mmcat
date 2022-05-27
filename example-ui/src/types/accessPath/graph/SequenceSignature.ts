@@ -1,5 +1,4 @@
-import { Node, NodeSequence, type FilterFunction } from "@/types/categoryGraph";
-import type { DatabaseConfiguration } from "@/types/database";
+import { Node, NodeSequence, type Filter } from "@/types/categoryGraph";
 import { Signature } from "@/types/identifiers";
 
 export class SequenceSignature {
@@ -48,12 +47,12 @@ export class SequenceSignature {
         return this.isNull === signature.isNull && this.sequence.equals(signature.sequence);
     }
 
-    markAvailablePaths(constraint: DatabaseConfiguration | { filter:  FilterFunction }): void {
+    markAvailablePaths(filters: Filter | Filter[]): void {
         if (this.sequence.lengthOfMorphisms === 0) {
             this.sequence.rootNode.unselect();
             this.sequence.rootNode.selectNext();
         }
 
-        this.sequence.lastNode.markAvailablePaths(constraint);
+        this.sequence.lastNode.markAvailablePaths(filters);
     }
 }

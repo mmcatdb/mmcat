@@ -23,9 +23,18 @@ export class SchemaMorphism {
     public signature!: Signature;
     public min!: Min;
     public max!: Max;
+    public _dual!: SchemaMorphism;
 
     public get isBase(): boolean {
         return this.signature.isBase;
+    }
+
+    public get dual(): SchemaMorphism {
+        return this._dual;
+    }
+
+    public set dual(value: SchemaMorphism) {
+        this._dual = value;
     }
 
     private constructor() {}

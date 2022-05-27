@@ -1,6 +1,6 @@
 <script lang="ts">
 import { SimpleProperty, ComplexProperty, type ChildProperty } from '@/types/accessPath/graph';
-import { PropertyType, type Graph } from '@/types/categoryGraph';
+import { PropertyType, type Graph, createDefaultFilter } from '@/types/categoryGraph';
 import type { Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import type { Database } from '@/types/database';
@@ -44,7 +44,8 @@ export default defineComponent({
             signature: this.property.signature.copy(),
             name: this.property.name.copy() as Name,
             state: State.SelectSignature,
-            State
+            State,
+            filter: createDefaultFilter(this.database.configuration)
         };
     },
     computed: {
@@ -214,8 +215,13 @@ export default defineComponent({
             <SignatureInput
                 v-model="signature"
                 :graph="graph"
-                :constraint="database.configuration"
-            />
+                :filters="filter"
+                :allow-null="database.configuration.isGrouppingAllowed"
+            >
+                <template #nullButton>
+                    Auxiliary property
+                </template>
+            </SignatureInput>
             <div class="button-row">
                 <button
                     :disabled="signature.isEmpty"

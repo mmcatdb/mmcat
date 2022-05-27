@@ -45,11 +45,19 @@ export class SchemaCategory {
     }
 
     static fromServer(input: SchemaCategoryFromServer): SchemaCategory {
+        const morphisms = input.morphisms.map(morphism => SchemaMorphism.fromServer(morphism));
+        morphisms.forEach(morphism => {
+            const dualSignature = morphism.signature.dual();
+            const dualMorphism = morphisms.find(otherMorphism => otherMorphism.signature.equals(dualSignature));
+            if (dualMorphism)
+                morphism.dual = dualMorphism;
+        });
+
         return new SchemaCategory(
             input.id,
             input.jsonValue,
             input.objects.map(object => SchemaObject.fromServer(object)),
-            input.morphisms.map(morphism => SchemaMorphism.fromServer(morphism))
+            morphisms
         );
     }
 
@@ -75,6 +83,9 @@ export class SchemaCategory {
         const dualId = this._morphismIdProvider.createAndAdd();
         const dualMorphism = SchemaMorphism.fromDual(dualId, morphism, dualSignature, cardinality.codDomMin, cardinality.codDomMax);
         this._createdMorphisms.push(dualMorphism);
+
+        morphism.dual = dualMorphism;
+        dualMorphism.dual = morphism;
 
         return { morphism, dualMorphism };
     }

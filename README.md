@@ -72,6 +72,9 @@ psql -U mmcat_user -h localhost mmcat_server_data
 # Complete server setup
 - TODO
 ```¨console
+cd example-ui
+npm run build
+cd ..
 mvn install -Dmaven.test.skip
 cd server
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server?sslmode=require -f src/main/resources/createDatabase.sql
@@ -80,11 +83,3 @@ mongo --username mmcat_user --password mmcat_password --authenticationDatabase a
 ```
 
 # Backlog
-- Při vytváření ID komplexního ID mají být ty cesty, které alespoň v nějaké své části obsahují jinou kardinalitu než 1..1.
-    - V současnosti jsou zakázány všechny 1..1 přechody, ale to je špatně.
-- Při vytváření schematické kategorie lze definovat pouze base morfizmy, ale v algoritmech jsou požadovány i composed.
-    - Bude nutné zajistit, aby se v případě potřeby vytvořily.
-    - Nejlepší bude provést to hned při vytvoření mapování + při doplnění ID do objektů.
-- Při přidávání properties do morfizmů se postupuje podle maximální kardinality všech morfizmů na cestě.
-    - Pokud to není 1, uvažují se konfigurační vlastnosti "is...ToManyAllowed", které jsou pro postgresql vždy zakázané.
-    - Nicméně díky tomu nejde třeba zvolit Number, protože ten je k Order připojený přes 1..*.
