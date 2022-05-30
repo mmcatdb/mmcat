@@ -1,6 +1,6 @@
 <script lang="ts">
 import { SequenceSignature } from '@/types/accessPath/graph';
-import type { Graph, Node } from '@/types/categoryGraph';
+import { type Graph, type Node, createDefaultFilter } from '@/types/categoryGraph';
 import type { Database } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
@@ -44,7 +44,8 @@ export default defineComponent({
             type: this.getNameType(this.modelValue),
             staticValue: this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue.value : '',
             dynamicValue: SequenceSignature.fromSignature(this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty, this.rootNode),
-            NameType
+            NameType,
+            filter: createDefaultFilter(this.database.configuration)
         };
     },
     watch: {
@@ -123,7 +124,7 @@ export default defineComponent({
             <SignatureInput
                 v-model="dynamicValue"
                 :graph="graph"
-                :constraint="database.configuration"
+                :filters="filter"
                 :disabled="disabled"
                 @input="updateInnerValue"
             />
