@@ -2,6 +2,7 @@ package cz.cuni.matfyz.server.repository.utils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * 
@@ -9,6 +10,6 @@ import java.sql.SQLException;
  */
 public interface DatabaseGetSingleFunction<OutputType> {
 
-    void execute(Connection connection, SingleOutput<OutputType> output) throws SQLException;
+    void execute(Connection connection, SingleOutput<OutputType> output) throws SQLException, JsonProcessingException;
 
 }

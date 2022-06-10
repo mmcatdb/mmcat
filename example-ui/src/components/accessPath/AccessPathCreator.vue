@@ -7,7 +7,7 @@ import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import SelectRoot from './SelectRoot.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { GET, POST } from '@/utils/backendAPI';
-import { Database, type DatabaseFromServer } from '@/types/database';
+import { DatabaseView, type DatabaseViewFromServer } from '@/types/database';
 import type { Mapping } from '@/types/mapping';
 
 export default defineComponent({
@@ -21,17 +21,17 @@ export default defineComponent({
             graph: null as Graph | null,
             accessPath: null as RootProperty | null,
             rootObjectName: 'pathName',
-            databases: [] as Database[],
-            selectingDatabase: null as Database | null,
-            selectedDatabase: null as Database | null,
+            databases: [] as DatabaseView[],
+            selectingDatabase: null as DatabaseView | null,
+            selectedDatabase: null as DatabaseView | null,
             mappingName: 'new mapping'
         };
     },
     async mounted() {
         // TODO
-        const result = await GET<DatabaseFromServer[]>('/databases');
+        const result = await GET<DatabaseViewFromServer[]>('/database-views');
         if (result.status)
-            this.databases = result.data.map(databaseFromServer => new Database(databaseFromServer));
+            this.databases = result.data.map(databaseFromServer => new DatabaseView(databaseFromServer));
     },
     methods: {
         cytoscapeCreated(graph: Graph) {

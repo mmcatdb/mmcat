@@ -48,7 +48,8 @@ public class Job extends Entity implements JSONConvertible {
         CategoryToModel
     }
 
-    @Override public JSONObject toJSON() {
+    @Override
+    public JSONObject toJSON() {
         return new Converter().toJSON(this);
     }
 

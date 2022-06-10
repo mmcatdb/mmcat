@@ -3,7 +3,7 @@ package cz.cuni.matfyz.transformations.processes;
 import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.utils.Result;
+import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.statements.DMLStatement;
 import cz.cuni.matfyz.transformations.algorithms.DMLAlgorithm;
 
@@ -30,7 +30,7 @@ public class InstanceToDatabase {
         this.instance = instance;
     }
     
-    public Result<String> run() {
+    public DataResult<String> run() {
         var transformation = new DMLAlgorithm();
 		transformation.input(mapping, instance, "rootName", pushWrapper);
 		List<DMLStatement> dmlStatements = transformation.algorithm();
@@ -41,7 +41,7 @@ public class InstanceToDatabase {
             output.append("\n");
         }
 
-        return new Result<String>(output.toString());
+        return new DataResult<String>(output.toString());
     }
 
 }

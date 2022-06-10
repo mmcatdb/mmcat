@@ -147,7 +147,7 @@ CREATE TABLE database_for_mapping (
 
 INSERT INTO database_for_mapping (json_value)
 VALUES
-    ('{"type":"mongodb","label":"MongoDB","_class":"Database",
+    ('{"type":"mongodb","label":"MongoDB",
         "settings": {
             "host": "localhost",
             "port": "27017",
@@ -157,7 +157,7 @@ VALUES
             "password": "mmcat_password"
         }
     }'),
-    ('{"type":"postgresql","label":"PostgreSQL","_class":"Database",
+    ('{"type":"postgresql","label":"PostgreSQL",
         "settings": {
             "host": "localhost",
             "port": "5432",

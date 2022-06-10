@@ -40,6 +40,16 @@ const router = createRouter({
             component: () => import('@/views/InstanceCategoryView.vue')
         },
         {
+            path: '/databases',
+            name: 'databases',
+            component: () => import('@/views/DatabasesView.vue')
+        },
+        {
+            path: '/databases/:id',
+            name: 'database',
+            component: () => import('@/views/DatabaseView.vue')
+        },
+        {
             path: '/test',
             name: 'test',
             component: () => import('@/views/LongPageForTestsView.vue')

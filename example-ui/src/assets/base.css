@@ -45,6 +45,7 @@
   --color-background-dark: #040404;
   --color-background-inverse: var(--vt-c-black-soft);
   --color-background-disabled: var(--vt-c-black-mute);
+  --color-text-disabled: #484848;
 
   --color-primary: hsla(160, 100%, 37%, 1);
   --color-primary-dark: hsla(160, 100%, 37%, 0.2);
@@ -71,6 +72,7 @@
 
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
+    --color-text-disabled: #484848;
   }
 }
 

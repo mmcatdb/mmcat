@@ -7,11 +7,11 @@ import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.utils.Result;
+import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
-import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.entity.MappingWrapper;
+import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.repository.JobRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +87,7 @@ public class AsyncJobService {
     }
 
     @Async("jobExecutor")
-    private CompletableFuture<Result<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws Exception {
+    private CompletableFuture<DataResult<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws Exception {
         var mappingWrapper = mappingService.find(job.mappingId);
         var mapping = createMapping(mappingWrapper);
 
@@ -118,7 +118,7 @@ public class AsyncJobService {
     }
 
     @Async("jobExecutor")
-    private CompletableFuture<Result<String>> categoryToModelAlgorithm(Job job, InstanceCategory instance) throws Exception {
+    private CompletableFuture<DataResult<String>> categoryToModelAlgorithm(Job job, InstanceCategory instance) throws Exception {
         var mappingWrapper = mappingService.find(job.mappingId);
         var mapping = createMapping(mappingWrapper);
 

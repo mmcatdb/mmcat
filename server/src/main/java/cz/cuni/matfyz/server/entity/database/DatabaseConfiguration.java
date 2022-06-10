@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.server.view;
+package cz.cuni.matfyz.server.entity.database;
 
 import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
 
@@ -8,17 +8,17 @@ import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
  */
 public class DatabaseConfiguration {
 
-    public Boolean isRootObjectAllowed;
-    public Boolean isRootMorphismAllowed;
-	public Boolean isPropertyToOneAllowed;
-	public Boolean isPropertyToManyAllowed;
-	public Boolean isInliningToOneAllowed;
-	public Boolean isInliningToManyAllowed;
-	public Boolean isGrouppingAllowed;
-	public Boolean isDynamicNamingAllowed;
-	public Boolean isAnonymousNamingAllowed;
-	public Boolean isReferenceAllowed;
-    public Boolean isComplexPropertyAllowed;
+    public boolean isRootObjectAllowed;
+    public boolean isRootMorphismAllowed;
+	public boolean isPropertyToOneAllowed;
+	public boolean isPropertyToManyAllowed;
+	public boolean isInliningToOneAllowed;
+	public boolean isInliningToManyAllowed;
+	public boolean isGrouppingAllowed;
+	public boolean isDynamicNamingAllowed;
+	public boolean isAnonymousNamingAllowed;
+	public boolean isReferenceAllowed;
+    public boolean isComplexPropertyAllowed;
 
     public DatabaseConfiguration(AbstractPathWrapper wrapper) {
         this.isRootObjectAllowed = wrapper.isRootObjectAllowed();

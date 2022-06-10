@@ -22,3 +22,10 @@ td.value {
 .divide > :first-of-type {
     margin-right: 16px;
 }
+
+/* This rule hide the input but leave its width intact. */
+tr.hidden {
+    /*color: var(--color-text-disabled);*/
+    visibility: collapse;
+    height: 0px;
+}

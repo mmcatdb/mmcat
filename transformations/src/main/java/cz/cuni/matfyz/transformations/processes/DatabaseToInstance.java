@@ -5,7 +5,7 @@ import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.utils.Result;
+import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.transformations.algorithms.MTCAlgorithm;
 
 import org.slf4j.Logger;
@@ -29,14 +29,14 @@ public class DatabaseToInstance {
         this.defaultInstance = defaultInstance;
     }
     
-    public Result<InstanceCategory> run() {
+    public DataResult<InstanceCategory> run() {
         ForestOfRecords forest;
         try {
             forest = pullWrapper.pullForest(mapping.accessPath(), new PullWrapperOptions.Builder().buildWithKindName(mapping.kindName()));
         }
         catch (Exception exception) {
             LOGGER.error("Pull forest failed.", exception);
-            return new Result<InstanceCategory>(null, "Pull forest failed.");
+            return new DataResult<InstanceCategory>(null, "Pull forest failed.");
         }
 
         InstanceCategory instance = defaultInstance != null ?
@@ -47,7 +47,7 @@ public class DatabaseToInstance {
 		transformation.input(mapping, instance, forest);
 		transformation.algorithm();
 
-        return new Result<InstanceCategory>(instance);
+        return new DataResult<InstanceCategory>(instance);
     }
 
 }

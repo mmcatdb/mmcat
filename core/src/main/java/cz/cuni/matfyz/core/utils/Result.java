@@ -4,22 +4,24 @@ package cz.cuni.matfyz.core.utils;
  * 
  * @author jachym.bartik
  */
-public class Result<OutputType> {
+public class Result {
     
-    public final OutputType data;
     public final String error;
     public final boolean status;
 
-    public Result(OutputType data) {
-        this.data = data;
+    public Result() {
         this.status = true;
         this.error = "";
     }
 
-    public Result(OutputType data, String error) {
-        this.data = data;
+    public Result(String error) {
         this.status = false;
         this.error = error;
+    }
+
+    public Result(boolean condition, String error) {
+        this.status = condition;
+        this.error = condition ? "" : error;
     }
 
 }

@@ -109,7 +109,6 @@ export default defineComponent({
             @click="setSignatureNull"
         >
             <slot name="nullButton" />
-            Auxiliary property
         </button>
     </div>
 </template>

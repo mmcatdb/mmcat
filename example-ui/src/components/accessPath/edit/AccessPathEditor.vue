@@ -3,7 +3,7 @@ import { type ComplexProperty, RootProperty, type ChildProperty, type ParentProp
 import type { Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import ComplexPropertyDisplay from '../display/ParentPropertyDisplay.vue';
-import type { Database } from '@/types/database';
+import type { DatabaseView } from '@/types/database';
 import AddProperty from './AddProperty.vue';
 import EditProperty from './EditProperty.vue';
 import EditRootProperty from './EditRootProperty.vue';
@@ -39,7 +39,7 @@ export default defineComponent({
             required: true
         },
         database: {
-            type: Object as () => Database,
+            type: Object as () => DatabaseView,
             required: true
         },
         rootProperty: {

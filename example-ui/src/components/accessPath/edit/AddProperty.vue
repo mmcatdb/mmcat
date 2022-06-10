@@ -5,7 +5,7 @@ import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import NameInput from '../input/NameInput.vue';
-import type { Database } from '@/types/database';
+import type { DatabaseView } from '@/types/database';
 
 enum State {
     SelectSignature,
@@ -15,7 +15,8 @@ enum State {
 
 export default defineComponent({
     components: {
-        SignatureInput, NameInput
+        SignatureInput,
+        NameInput
     },
     props: {
         graph: {
@@ -23,7 +24,7 @@ export default defineComponent({
             required: true
         },
         database: {
-            type: Object as () => Database,
+            type: Object as () => DatabaseView,
             required: true
         },
         parentProperty: {

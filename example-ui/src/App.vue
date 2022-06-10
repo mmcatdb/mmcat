@@ -3,6 +3,26 @@ import { RouterLink } from 'vue-router';
 import TopBar from './components/layout/TopBar.vue';
 import LeftBar from './components/layout/LeftBar.vue';
 import Content from './components/layout/Content.vue';
+
+type Link = {
+    pathName: string,
+    label: string
+}
+
+function defineLink(pathName: string, label: string): Link {
+    return { pathName, label };
+}
+
+const links = [
+    defineLink('home', 'Home'),
+    defineLink('jobs', 'Jobs'),
+    defineLink('accessPathEditor', 'Access path editor'),
+    defineLink('schema', 'Schema category'),
+    defineLink('instances', 'Instances'),
+    defineLink('instanceCategory', 'Instance Category'),
+    defineLink('databases', 'Databases'),
+    defineLink('test', 'Test')
+];
 </script>
 
 <template>
@@ -10,26 +30,12 @@ import Content from './components/layout/Content.vue';
 
     </TopBar>
     <LeftBar>
-        <RouterLink :to="{ name: 'home' }">
-            Home
-        </RouterLink>
-        <RouterLink :to="{ name: 'jobs' }">
-            Jobs
-        </RouterLink>
-        <RouterLink :to="{ name: 'accessPathEditor' }">
-            Access path editor
-        </RouterLink>
-        <RouterLink :to="{ name: 'schema' }">
-            Schema category
-        </RouterLink>
-        <RouterLink :to="{ name: 'instances' }">
-            Instances
-        </RouterLink>
-        <RouterLink :to="{ name: 'instanceCategory' }">
-            Instance Category
-        </RouterLink>
-        <RouterLink :to="{ name: 'test' }">
-            Test
+        <RouterLink
+            v-for="link in links"
+            :key="link.pathName"
+            :to="{ name: link.pathName }"
+        >
+            {{ link.label }}
         </RouterLink>
     </LeftBar>
     <Content />

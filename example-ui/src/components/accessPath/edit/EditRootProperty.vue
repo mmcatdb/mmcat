@@ -4,7 +4,7 @@ import type { Graph } from '@/types/categoryGraph';
 import type { StaticName } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import StaticNameInput from '../input/StaticNameInput.vue';
-import type { Database } from '@/types/database';
+import type { DatabaseView } from '@/types/database';
 
 export default defineComponent({
     components: {
@@ -16,7 +16,7 @@ export default defineComponent({
             required: true
         },
         database: {
-            type: Object as () => Database,
+            type: Object as () => DatabaseView,
             required: true
         },
         property: {

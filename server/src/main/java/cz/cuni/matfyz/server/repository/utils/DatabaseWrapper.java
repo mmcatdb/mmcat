@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,12 +68,16 @@ public abstract class DatabaseWrapper {
     }
 
     public static boolean getBoolean(DatabaseGetBooleanFunction function) {
-        return resolveDatabaseFunction(connection -> {
+        Boolean resolvedOutput = resolveDatabaseFunction(connection -> {
             BooleanOutput output = new BooleanOutput();
             function.execute(connection, output);
 
             return output.get();
         });
+
+        // This is necessary because the resolveDatabaseFunction returns null in case of any error.
+        // Null as a Boolean cannot be casted to boolean so we have to check it manually.
+        return resolvedOutput == null ? false : resolvedOutput;
     }
 
     private static <ReturnType> ReturnType resolveDatabaseFunction(DatabaseFunction<ReturnType> function) {
@@ -84,6 +90,9 @@ public abstract class DatabaseWrapper {
         }
         catch (SQLException exception) {
             LOGGER.error("Cannot execute SQL query on the server database.", exception);
+        }
+        catch (JsonProcessingException exception) {
+            LOGGER.error("Cannot parse from or to JSON.", exception);
         }
         finally {
             if (connection != null) {

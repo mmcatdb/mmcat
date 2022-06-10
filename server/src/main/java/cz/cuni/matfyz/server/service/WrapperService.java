@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.server.entity.Database;
 import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPathWrapper;
 import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
@@ -36,11 +36,11 @@ public class WrapperService {
                 case postgresql:
                     return getPostgreSQLPullWrapper(database);
                 default:
-                    throw new WrapperNotFoundException("Pull wrapper for database " + database.id + " with JSON settings: " + database.jsonSettings + " not found.");
+                    throw new WrapperNotFoundException("Pull wrapper for database " + database.id + " with JSON settings: " + database.settings + " not found.");
             }
         }
         catch (Exception exception) {
-            throw new WrapperCreationErrorException("Pull wrapper for database " + database.id + " with JSON settings: " + database.jsonSettings + " can't be created due to following exception: " + exception.getMessage());
+            throw new WrapperCreationErrorException("Pull wrapper for database " + database.id + " with JSON settings: " + database.settings + " can't be created due to following exception: " + exception.getMessage());
         }
     }
 
@@ -81,7 +81,7 @@ public class WrapperService {
 
     private static MongoDBDatabaseProvider createMongoDBProvider(Database database) throws Exception {
         var mapper = new ObjectMapper();
-        var settings = mapper.readValue(database.jsonSettings, MongoDBSettings.class);
+        var settings = mapper.treeToValue(database.settings, MongoDBSettings.class);
 
         return new MongoDBDatabaseProvider(settings);
     }
@@ -101,7 +101,7 @@ public class WrapperService {
 
     private static PostgreSQLConnectionProvider createPostgreSQLProvider(Database database) throws Exception {
         var mapper = new ObjectMapper();
-        var settings = mapper.readValue(database.jsonSettings, PostgreSQLSettings.class);
+        var settings = mapper.treeToValue(database.settings, PostgreSQLSettings.class);
 
         return new PostgreSQLConnectionProvider(settings);
     }

@@ -2,7 +2,6 @@
 import type { Job } from '@/types/job';
 import { DELETE, POST } from '@/utils/backendAPI';
 import { defineComponent } from 'vue';
-import { RouterLink } from 'vue-router';
 
 export default defineComponent({
     props: {

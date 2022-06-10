@@ -2,7 +2,7 @@ package cz.cuni.matfyz.server.view;
 
 import java.util.List;
 
-import cz.cuni.matfyz.server.entity.Database;
+import cz.cuni.matfyz.server.entity.database.Database;
 
 /**
  * 

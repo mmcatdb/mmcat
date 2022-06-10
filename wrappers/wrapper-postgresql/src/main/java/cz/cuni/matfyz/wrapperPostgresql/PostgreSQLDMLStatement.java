@@ -15,7 +15,7 @@ public class PostgreSQLDMLStatement implements DMLStatement
     }
     
     @Override
-    public String toString()
+    public String getContent()
     {
         return content;
     }
