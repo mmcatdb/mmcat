@@ -70,7 +70,7 @@ export default defineComponent({
             for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
                 morphismDublets.push({ morphism: sortedBaseMorphisms[i], dualMorphism: sortedBaseMorphisms[i + 1] });
 
-            morphismDublets.forEach(dublet => graph.createEdgeWithDual(dublet.morphism, dublet.dualMorphism));
+            morphismDublets.forEach(dublet => graph.createEdgeWithDual(dublet.morphism));
 
             // Position the object to the center of the canvas.
             graph.center();
