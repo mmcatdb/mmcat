@@ -117,7 +117,7 @@ export default defineComponent({
 #cytoscape {
     width: var(--schema-category-canvas-width);
     height: 500px;
-    background-color: var(--color-background-inverse);
+    background-color: var(--color-background-canvas);
 }
 
 .graph-display {

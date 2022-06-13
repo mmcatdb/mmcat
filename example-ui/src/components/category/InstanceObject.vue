@@ -117,7 +117,7 @@ tr {
 
 td, th {
     padding: 0 16px;
-    background-color: var(--vt-c-black-mute);
+    background-color: var(--color-background-mute);
 }
 
 tr:nth-of-type(2n) td {

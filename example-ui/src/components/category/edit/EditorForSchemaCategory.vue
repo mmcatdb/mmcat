@@ -176,11 +176,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.editor {
-    border: 2px solid var(--color-border);
-    padding: 12px;
-}
-
 .options {
     display: flex;
     flex-direction: column;

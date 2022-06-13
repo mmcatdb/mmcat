@@ -31,7 +31,7 @@ export default defineComponent({
 
 <style scoped>
 .signature-span {
-    background-color: var(--vt-c-black-mute);
+    background-color: var(--color-background-dark);
     border-radius: 4px;
     padding: 0px 6px 0px 4px;
 }

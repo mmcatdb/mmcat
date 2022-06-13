@@ -10,8 +10,10 @@
 
   --vt-c-indigo: #2c3e50;
 
+  --vt-c-gray: #484848;
+
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
-  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
+  --vt-c-divider-light-2: rgba(60, 60, 60, 0.16);
   --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
   --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
 
@@ -25,10 +27,6 @@
 
 /* semantic color variables for this project */
 :root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
-
   --color-border: var(--vt-c-divider-light-2);
   --color-border-hover: var(--vt-c-divider-light-1);
 
@@ -38,13 +36,14 @@
   --section-gap: 160px;
 }
 
-/* @tuaki my additions */
 :root {
-  --vt-c-gray: #484848;
-
-  --color-background-dark: #040404;
-  --color-background-inverse: var(--vt-c-black-soft);
-  --color-background-disabled: var(--vt-c-black-mute);
+  --color-background: var(--vt-c-white);
+  --color-background-soft: var(--vt-c-white-soft);
+  --color-background-mute: #E0E0E0;
+  --color-background-dark: #BDBDBD;
+  --color-background-canvas: #E0E0E0;
+  --color-background-disabled: #9E9E9E;
+  
   --color-text-disabled: #484848;
 
   --color-primary: hsla(160, 100%, 37%, 1);
@@ -63,8 +62,8 @@
     --color-background: var(--vt-c-black);
     --color-background-soft: var(--vt-c-black-soft);
     --color-background-mute: var(--vt-c-black-mute);
-
-    --color-background-inverse: var(--vt-c-white-soft);
+    --color-background-dark: #040404;
+    --color-background-canvas: var(--vt-c-white-soft);
     --color-background-disabled: var(--vt-c-gray);
 
     --color-border: var(--vt-c-divider-dark-2);
