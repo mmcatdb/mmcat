@@ -10,6 +10,13 @@ export type CardinalitySettings = {
     codDomMax: Max
 }
 
+export function compareCardinalitySettings(settings1: CardinalitySettings, settings2: CardinalitySettings): boolean {
+    return settings1.domCodMin === settings2.domCodMin &&
+        settings1.domCodMax === settings2.domCodMax &&
+        settings1.codDomMin === settings2.codDomMin &&
+        settings1.codDomMax === settings2.codDomMax;
+}
+
 export class SchemaCategory {
     id: number;
     jsonValue: string;
@@ -71,7 +78,7 @@ export class SchemaCategory {
         return object;
     }
 
-    createMorphism(dom: SchemaObject, cod: SchemaObject, signature: Signature, cardinality: CardinalitySettings): { morphism: SchemaMorphism, dualMorphism: SchemaMorphism } {
+    createMorphismWithDual(dom: SchemaObject, cod: SchemaObject, signature: Signature, cardinality: CardinalitySettings): SchemaMorphism {
         const dualSignature = signature.dual();
         this._signatureProvider.add(signature);
         this._signatureProvider.add(dualSignature);
@@ -81,13 +88,26 @@ export class SchemaCategory {
         this._createdMorphisms.push(morphism);
 
         const dualId = this._morphismIdProvider.createAndAdd();
-        const dualMorphism = SchemaMorphism.fromDual(dualId, morphism, dualSignature, cardinality.codDomMin, cardinality.codDomMax);
+        const dualMorphism = SchemaMorphism.createNewFromDual(dualId, morphism, dualSignature, cardinality.codDomMin, cardinality.codDomMax);
         this._createdMorphisms.push(dualMorphism);
 
         morphism.dual = dualMorphism;
         dualMorphism.dual = morphism;
 
-        return { morphism, dualMorphism };
+        return morphism;
+    }
+
+    editMorphismWithDual(morphism: SchemaMorphism, dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings) {
+        morphism.update(dom.id, cod.id, cardinality.domCodMin, cardinality.domCodMax);
+        morphism.dual.update(cod.id, dom.id, cardinality.codDomMin, cardinality.codDomMax);
+    }
+
+    deleteObject(object: SchemaObject) {
+        this._createdObjects = this._createdObjects.filter(o => o.id === object.id);
+    }
+
+    deleteMorphismWithDual(morphism: SchemaMorphism) {
+        this._createdMorphisms = this._createdMorphisms.filter(m => m.id === morphism.id || m.id === morphism.dual.id);
     }
 
     getUpdateObject() {

@@ -64,7 +64,7 @@ export class SchemaObject {
         return object;
     }
 
-    addId(id: SchemaId): void {
+    addSchemaId(id: SchemaId): void {
         this.schemaIds.push(id);
         this.superId = SchemaId.union([ this.superId, id ]);
     }
@@ -83,6 +83,10 @@ export class SchemaObject {
 
     get isNew(): boolean {
         return this._isNew;
+    }
+
+    setLabel(label: string) {
+        this.label = label;
     }
 
     toPositionUpdateToServer(): PositionUpdateToServer | null {

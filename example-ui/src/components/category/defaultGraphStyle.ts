@@ -22,7 +22,7 @@ export const style: cytoscape.Stylesheet[] = [
         }
     },
     {
-        selector: '.availability-certainlyAvailable',
+        selector: '.availability-certainly-available',
         style: {
             'border-color': 'darkgreen',
             'border-width': '4px',

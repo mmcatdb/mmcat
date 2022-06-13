@@ -1,18 +1,10 @@
 <script lang="ts">
-import { SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
-import { Signature } from '@/types/identifiers';
-import { Cardinality, type CardinalitySettings } from '@/types/schema';
+import { Edge, SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
+import { compareCardinalitySettings, type CardinalitySettings } from '@/types/schema';
 import { defineComponent } from 'vue';
 import CardinalityInput from './CardinalityInput.vue';
 
-export enum NodeIndices {
-    First = 0,
-    Second = 1
-}
-
-export function negateIndex(index: NodeIndices): NodeIndices {
-    return 1 - index;
-}
+import { NodeIndices, negateIndex } from './AddMorphism.vue';
 
 export default defineComponent({
     components: {
@@ -22,34 +14,48 @@ export default defineComponent({
         graph: {
             type: Object as () => Graph,
             required: true
+        },
+        edge: {
+            type: Object as () => Edge,
+            required: true
         }
     },
     emits: [ 'save', 'cancel' ],
     data() {
-        const signature = this.graph.schemaCategory.suggestBaseSignature();
         return {
             node1: null as Node | null,
             node2: null as Node | null,
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
-            signature,
-            signatureValue: signature.baseValue ?? 0,
-            signatureIsValid: true,
+            signatureValue: this.edge.schemaMorphism.signature.baseValue ?? 0,
             cardinality: {
-                domCodMin: Cardinality.One,
-                domCodMax: Cardinality.One,
-                codDomMin: Cardinality.One,
-                codDomMax: Cardinality.One
+                domCodMin: this.edge.schemaMorphism.min,
+                domCodMax: this.edge.schemaMorphism.max,
+                codDomMin: this.edge.schemaMorphism.dual.min,
+                codDomMax: this.edge.schemaMorphism.dual.max
             } as CardinalitySettings,
         };
     },
     computed: {
         nodesSelected() {
             return !!this.node1 && !!this.node2;
+        },
+        changed(): boolean {
+            return !this.edge.domainNode.equals(this.node1) || !this.edge.codomainNode.equals(this.node2) || !compareCardinalitySettings(this.cardinality, {
+                domCodMin: this.edge.schemaMorphism.min,
+                domCodMax: this.edge.schemaMorphism.max,
+                codDomMin: this.edge.schemaMorphism.dual.min,
+                codDomMax: this.edge.schemaMorphism.dual.max
+            });
+        },
+        nodesChanged(): boolean {
+            return !this.edge.domainNode.equals(this.node1) || !this.edge.codomainNode.equals(this.node2);
         }
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
+        this.onNodeTapHandler(this.edge.domainNode);
+        this.onNodeTapHandler(this.edge.codomainNode);
     },
     unmounted() {
         this.graph.removeNodeListener('tap', this.onNodeTapHandler);
@@ -60,14 +66,24 @@ export default defineComponent({
             if (!this.node1 || !this.node2)
                 return;
 
+            // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
+
+            this.graph.schemaCategory.editMorphismWithDual(this.edge.schemaMorphism, this.node1.schemaObject, this.node2.schemaObject, this.cardinality);
+
             this.temporayEdge?.delete();
-            const morphism = this.graph.schemaCategory.createMorphismWithDual(this.node1.schemaObject, this.node2.schemaObject, this.signature, this.cardinality);
-            this.graph.createEdgeWithDual(morphism, 'new');
+            this.graph.deleteEdgeWithDual(this.edge);
+            this.graph.createEdgeWithDual(this.edge.schemaMorphism, 'new');
 
             this.$emit('save');
         },
         cancel() {
             this.$emit('cancel');
+        },
+        deleteFunction() {
+            this.graph.schemaCategory.deleteMorphismWithDual(this.edge.schemaMorphism);
+            this.graph.deleteEdgeWithDual(this.edge);
+
+            this.$emit('save');
         },
         unselectAll() {
             this.node1?.unselect();
@@ -88,7 +104,8 @@ export default defineComponent({
             }
 
             this.temporayEdge?.delete();
-            this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
+            if (this.nodesChanged)
+                this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
         },
         handleTapOnNotSelectedNode(node: Node) {
             // Which node should be changed.
@@ -101,7 +118,7 @@ export default defineComponent({
             const changingNode = this.indexToNode(changingNodeIndex);
             const stationaryNode = this.indexToNode(negateIndex(changingNodeIndex));
 
-            if (this.morphismAlreadyExists(node, stationaryNode))
+            if (this.morphismAlreadyExists(node, stationaryNode) && !node.equals(this.edge.domainNode) && !node.equals(this.edge.codomainNode))
                 return;
 
             changingNode?.unselect();
@@ -123,6 +140,9 @@ export default defineComponent({
             if (!node1 || !node2)
                 return false;
 
+            if (node1.equals(this.edge.codomainNode) && node2.equals(this.edge.domainNode))
+                return false;
+
             return !!node1.neighbours.get(node2);
         },
         switchNodes() {
@@ -135,10 +155,6 @@ export default defineComponent({
 
             this.node1.select({ type: SelectionType.Selected, level: 0 });
             this.node2.select({ type: SelectionType.Selected, level: 1 });
-        },
-        signatureValueChanged() {
-            this.signature = Signature.base(this.signatureValue);
-            this.signatureIsValid = this.graph.schemaCategory.isBaseSignatureAvailable(this.signature);
         }
     }
 });
@@ -146,7 +162,7 @@ export default defineComponent({
 
 <template>
     <div class="add-morphism">
-        <h2>Add Schema Morphism</h2>
+        <h2>Edit Schema Morphism</h2>
         <table>
             <tr>
                 <td class="label">
@@ -172,10 +188,8 @@ export default defineComponent({
                     <input
                         v-model="signatureValue"
                         type="number"
-                        min="0"
-                        step="1"
                         class="number-input"
-                        @input="signatureValueChanged"
+                        disabled
                     />
                 </td>
             </tr>
@@ -185,7 +199,7 @@ export default defineComponent({
         </table>
         <div class="button-row">
             <button
-                :disabled="!nodesSelected || !signatureIsValid"
+                :disabled="!nodesSelected || !changed || !edge.schemaMorphism.isNew"
                 @click="save"
             >
                 Confirm
@@ -198,6 +212,12 @@ export default defineComponent({
             </button>
             <button @click="cancel">
                 Cancel
+            </button>
+            <button
+                :disabled="!edge.schemaMorphism.isNew"
+                @click="deleteFunction"
+            >
+                Delete
             </button>
         </div>
     </div>

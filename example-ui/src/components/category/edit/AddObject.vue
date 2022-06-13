@@ -26,7 +26,7 @@ export default defineComponent({
     methods: {
         save() {
             const object = this.graph.schemaCategory.createObject(this.label, this.key, []);
-            this.graph.createNode(object);
+            this.graph.createNode(object, 'new');
 
             this.$emit('save');
         },

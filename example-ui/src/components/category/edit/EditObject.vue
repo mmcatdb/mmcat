@@ -25,35 +25,35 @@ export default defineComponent({
     emits: [ 'save', 'cancel', 'update' ],
     data() {
         return {
-            label: this.node.label,
-            originalLabel: this.node.label,
+            label: this.node.schemaObject.label,
             key: this.node.schemaObject.key,
-            addingId: false
+            addingId: false,
+            addedId: false
         };
     },
     computed: {
         changed(): boolean {
-            return this.originalLabel !== this.label || this.addingId;
+            // TODO Add a proper condition for an ID change
+            return this.label !== this.node.schemaObject.label || this.addingId || this.addedId;
         }
     },
     methods: {
         save() {
-            // TODO
-
-
-            //const object = this.graph.schemaCategory.createObject(this.label, this.key, []);
-            //this.graph.createNode(object);
-
-
+            this.node.schemaObject.setLabel(this.label);
 
             this.$emit('save');
         },
         cancel() {
             this.$emit('cancel');
         },
-        deleteNewNode() {
+        deleteFunction() {
+            for (const edge of this.node.neighbours.values()) {
+                this.graph.schemaCategory.deleteMorphismWithDual(edge.schemaMorphism);
+                this.graph.deleteEdgeWithDual(edge);
+            }
 
-            // TODO
+            this.graph.schemaCategory.deleteObject(this.node.schemaObject);
+            this.graph.deleteNode(this.node);
 
             this.$emit('save');
         },
@@ -62,6 +62,7 @@ export default defineComponent({
         },
         finishAddingId() {
             this.addingId = false;
+            this.addedId = true;
         },
         cancelAddingId() {
             this.addingId = false;
@@ -121,7 +122,7 @@ export default defineComponent({
         </div>
         <div class="button-row">
             <button
-                :disabled="!label"
+                :disabled="!label || !changed || addingId || !node.schemaObject.isNew"
                 @click="save"
             >
                 Confirm
@@ -132,8 +133,8 @@ export default defineComponent({
                 Cancel
             </button>
             <button
-                v-if="node.schemaObject.isNew"
-                @click="deleteNewNode"
+                :disabled="!node.schemaObject.isNew"
+                @click="deleteFunction"
             >
                 Delete
             </button>

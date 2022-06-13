@@ -43,7 +43,7 @@ export default defineComponent({
     },
     methods: {
         save() {
-            this.node.addId(this.schemaIdFactory.schemaId);
+            this.node.addSchemaId(this.schemaIdFactory.schemaId);
 
             this.$emit('save');
         },

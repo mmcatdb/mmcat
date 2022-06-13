@@ -2,7 +2,8 @@ import { ComparableMap } from "@/utils/ComparableMap";
 import { TwoWayComparableMap } from "@/utils/TwoWayComparableMap";
 import type { NodeSingular } from "cytoscape";
 import type { SchemaId, Signature } from "../identifiers";
-import type { SchemaMorphism, SchemaObject } from "../schema";
+import type { SchemaObject } from "../schema";
+import type { Edge } from "./Edge";
 import { PathMarker, type Filter, type MorphismData } from "./PathMarker";
 
 export enum NodeTag {
@@ -12,9 +13,10 @@ export enum NodeTag {
 export enum AvailabilityStatus {
     Default = 'availability-default',
     Available = 'availability-available',
-    CertainlyAvailable = 'availability-certainlyAvailable',
+    CertainlyAvailable = 'availability-certainly-available',
     Maybe = 'availability-maybe',
-    Removable = 'availability-removable'
+    Removable = 'availability-removable',
+    NotAvailable = 'availability-not-available'
 }
 
 export enum SelectionType {
@@ -49,11 +51,11 @@ export class Node {
     _tags = new Set() as Set<NodeTag>;
     availablePathData = null as MorphismData | null;
 
-    neighbours = new TwoWayComparableMap<Node, number, SchemaMorphism, string>(
+    neighbours = new TwoWayComparableMap<Node, number, Edge, string>(
         node => node.schemaObject.key.value,
-        morphism => morphism.signature.toString()
+        edge => edge.schemaMorphism.signature.toString()
     );
-    _signatureToMorphism = new ComparableMap<Signature, string, SchemaMorphism>(signature => signature.toString());
+    _signatureToEdge = new ComparableMap<Signature, string, Edge>(signature => signature.toString());
 
     constructor(schemaObject: SchemaObject) {
     //constructor(schemaObject: SchemaObject, nodeObject: NodeSingular) {
@@ -68,9 +70,16 @@ export class Node {
         node.toggleClass('no-ids', this.schemaObject.schemaIds.length === 0);
     }
 
-    addNeighbour(object: Node, morphism: SchemaMorphism): void {
-        this.neighbours.set(object, morphism);
-        this._signatureToMorphism.set(morphism.signature, morphism);
+    addNeighbour(node: Node, edge: Edge): void {
+        this.neighbours.set(node, edge);
+        this._signatureToEdge.set(edge.schemaMorphism.signature, edge);
+    }
+
+    removeNeighbour(node: Node): void {
+        const edge = this.neighbours.get(node);
+        this.neighbours.delete(node);
+        if (edge)
+            this._signatureToEdge.delete(edge.schemaMorphism.signature);
     }
 
     getNeighbour(signature: Signature): Node | undefined {
@@ -81,11 +90,11 @@ export class Node {
         if (!split)
             return undefined;
 
-        const morphism = this._signatureToMorphism.get(split.first);
-        if (!morphism)
+        const edge = this._signatureToEdge.get(split.first);
+        if (!edge)
             return undefined;
 
-        const nextNeighbour = this.neighbours.getKey(morphism);
+        const nextNeighbour = this.neighbours.getKey(edge);
         return !nextNeighbour ? undefined : split.rest.isEmpty ? nextNeighbour : nextNeighbour.getNeighbour(split.rest);
     }
 
@@ -191,8 +200,8 @@ export class Node {
         pathMarker.markPathsFromRootNode();
     }
 
-    addId(schemaId: SchemaId): void {
-        this.schemaObject.addId(schemaId);
+    addSchemaId(schemaId: SchemaId): void {
+        this.schemaObject.addSchemaId(schemaId);
         this.node.removeClass('no-ids');
     }
 }

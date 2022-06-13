@@ -37,7 +37,7 @@ export default defineComponent({
     methods: {
         save() {
             const factory = new SchemaIdFactory([ this.signature.toSignature() ]);
-            this.node.addId(factory.schemaId);
+            this.node.addSchemaId(factory.schemaId);
 
             this.$emit('save');
         },

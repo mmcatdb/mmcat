@@ -25,7 +25,7 @@ export default defineComponent({
 
             const result = await POST<Job>(`/jobs/${this.job.id}/start`);
             if (result.status)
-                this.job.status = result.data.status;
+                this.job.setStatus(result.data.status);
 
             console.log({ result });
 
@@ -49,7 +49,7 @@ export default defineComponent({
 
             const result = await POST<Job>(`/jobs/${this.job.id}/start`);
             if (result.status)
-                this.job.status = result.data.status;
+                this.job.setStatus(result.data.status);
 
             console.log({ result });
 

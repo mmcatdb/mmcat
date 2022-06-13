@@ -75,11 +75,11 @@ export class PathMarker {
             (dualMorphism: SchemaMorphism) => morphismToData(dualMorphism);
 
         let neighbours = [ ...parentNode.neighbours.entries() ]
-            .map(([ childNode, morphism ]) => ({
+            .map(([ childNode, edge ]) => ({
                 node: childNode,
                 previousNode: parentNode,
-                morphism: combineFunction(morphism),
-                dualMorphism: dualCombineFunction(morphism.dual),
+                morphism: combineFunction(edge.schemaMorphism),
+                dualMorphism: dualCombineFunction(edge.schemaMorphism.dual),
                 previousNeighbour: parentNeighbour,
                 dependentNeighbours: [] as NodeNeighbour[]
             }))
@@ -102,8 +102,9 @@ export class PathMarker {
     }
 
     processNeighbour(neighbour: NodeNeighbour, isDirect = false): void {
-        if (this.checkCompositeFilters(neighbour))
-            markNeighbour(neighbour, isDirect);
+        const continueAdding = markNeighbour(neighbour, isDirect);
+        if (!continueAdding)
+            return;
 
         const addition = this.getTraversableNeighbours(neighbour.node, neighbour);
         this.stack.push(...addition);
@@ -128,18 +129,27 @@ export class PathMarker {
 
         // For the direct neighbours of the root the queue is needed.
         const queue = this.getTraversableNeighbours(this.rootNode);
+        const allProcessedNeighbours = [] as NodeNeighbour[];
 
         let directNeighbour = queue.shift();
         while (directNeighbour) {
+            allProcessedNeighbours.push(directNeighbour);
             this.processNeighbour(directNeighbour, true);
             directNeighbour = queue.shift();
         }
 
-        let neighbour = this.stack.pop();
-        while (neighbour) {
-            this.processNeighbour(neighbour);
-            neighbour = this.stack.pop();
+        let indirectNeighbour = this.stack.pop();
+        while (indirectNeighbour) {
+            allProcessedNeighbours.push(indirectNeighbour);
+            this.processNeighbour(indirectNeighbour);
+            indirectNeighbour = this.stack.pop();
         }
+
+        // Filter out the not available ones.
+        allProcessedNeighbours.forEach(neighbour => {
+            if (!this.checkCompositeFilters(neighbour))
+                neighbour.node.setAvailabilityStatus(AvailabilityStatus.NotAvailable);
+        });
     }
 }
 
@@ -163,15 +173,18 @@ function filterBackwardPaths(neighbours: NodeNeighbour[], entryMorphism: Morphis
     });
 }
 
-function markNeighbour(neighbour: NodeNeighbour, isDirect: boolean): void {
+function markNeighbour(neighbour: NodeNeighbour, isDirect: boolean): boolean {
     // If the previous node was the root node, this node is definitely available so we mark it this way.
     if (isDirect) {
         neighbour.node.setAvailabilityStatus(AvailabilityStatus.CertainlyAvailable);
         neighbour.node.availablePathData = neighbour.morphism;
+
+        return true;
     }
+
     // If the node hasn't been traversed yet, it becomes available.
     // Unless it's previous node has been found ambigous - then this node is also ambiguous.
-    else if (neighbour.node.availabilityStatus === AvailabilityStatus.Default) {
+    if (neighbour.node.availabilityStatus === AvailabilityStatus.Default) {
         if (neighbour.previousNode?.availabilityStatus === AvailabilityStatus.Maybe) {
             neighbour.node.setAvailabilityStatus(AvailabilityStatus.Maybe);
         }
@@ -183,15 +196,16 @@ function markNeighbour(neighbour: NodeNeighbour, isDirect: boolean): void {
             if (neighbour.previousNeighbour)
                 neighbour.previousNeighbour.dependentNeighbours.push(neighbour);
         }
-    }
-    // Already traversed path detected. This means we have mark all potentially ambiguous nodes.
-    else {
-        // If the node is already in the maybe state, it means we have already processed all its ambiguous paths
-        if (neighbour.node.availabilityStatus !== AvailabilityStatus.Maybe)
-            processAmbiguousPath(neighbour);
 
-        return;
+        return true;
     }
+
+    // Already traversed path detected. This means we have marked all potentially ambiguous nodes.
+    // If the node is in the maybe state, it means we have already processed all its ambiguous paths
+    if (neighbour.node.availabilityStatus !== AvailabilityStatus.Maybe)
+        processAmbiguousPath(neighbour);
+
+    return false;
 }
 
 function processAmbiguousPath(lastNeighbour: NodeNeighbour): void {

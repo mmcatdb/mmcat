@@ -52,7 +52,7 @@ export default defineComponent({
         //this.sequence.allNodes.forEach(node => node.select());
     },
     unmounted() {
-        this.graph.removeListener('tap', this.onNodeTapHandler);
+        this.graph.removeNodeListener('tap', this.onNodeTapHandler);
         this.innerValue.sequence.unselectAll();
         this.graph.resetAvailabilityStatus();
     },

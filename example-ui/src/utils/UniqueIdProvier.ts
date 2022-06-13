@@ -27,6 +27,11 @@ export class UniqueIdProvider<Identifier> {
         this._maxValue = Math.max(this._maxValue, value);
     }
 
+    remove(identifier: Identifier): void {
+        const value = this._mapping.function(identifier);
+        this._currentValues.delete(value);
+    }
+
     update(newId: Identifier, oldId: Identifier): void {
         this._currentValues.delete(this._mapping.function(oldId));
         this.add(newId);

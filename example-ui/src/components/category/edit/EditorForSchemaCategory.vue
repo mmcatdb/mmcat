@@ -1,17 +1,19 @@
 <script lang="ts">
-import { SelectionType, type Graph, type Node } from '@/types/categoryGraph';
+import { Edge, SelectionType, type Graph, type Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import type { SchemaCategoryFromServer } from '@/types/schema';
 import { PUT } from '@/utils/backendAPI';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import EditObject from './EditObject.vue';
+import EditMorphism from './EditMorphism.vue';
 
 enum State {
     Default,
     AddObject,
     AddMorphism,
-    EditObject
+    EditObject,
+    EditMorphism
 }
 
 type GenericStateValue<State, Value> = { type: State } & Value;
@@ -19,13 +21,15 @@ type GenericStateValue<State, Value> = { type: State } & Value;
 type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddObject, unknown> |
     GenericStateValue<State.AddMorphism, unknown> |
-    GenericStateValue<State.EditObject, { node: Node }>;
+    GenericStateValue<State.EditObject, { node: Node }> |
+    GenericStateValue<State.EditMorphism, { edge: Edge }>;
 
 export default defineComponent({
     components: {
         AddObject,
         AddMorphism,
-        EditObject
+        EditObject,
+        EditMorphism
     },
     props: {
         graph: {
@@ -41,9 +45,11 @@ export default defineComponent({
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
+        this.graph.addEdgeListener('tap', this.onEdgeTapHandler);
     },
     unmounted() {
-        this.graph.removeListener('tap', this.onNodeTapHandler);
+        this.graph.removeNodeListener('tap', this.onNodeTapHandler);
+        this.graph.removeEdgeListener('tap', this.onEdgeTapHandler);
     },
     methods: {
         addObjectClicked() {
@@ -56,6 +62,9 @@ export default defineComponent({
             if (this.state.type === State.EditObject)
                 this.state.node.unselect();
 
+            if (this.state.type === State.EditMorphism)
+                this.state.edge.unselect();
+
             this.state = { type: State.Default };
         },
         onNodeTapHandler(node: Node) {
@@ -63,16 +72,39 @@ export default defineComponent({
                 return;
 
             if (this.state.type === State.EditObject) {
-                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed)
+                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed) {
                     return;
-                else if (this.state.node.equals(node))
+                }
+                else if (this.state.node.equals(node)) {
                     this.setStateToDefault();
-                else
+                    return;
+                }
+                else {
                     this.state.node.unselect();
+                }
             }
 
             node.select({ type: SelectionType.Root, level: 0 });
             this.state = { type: State.EditObject, node };
+        },
+        onEdgeTapHandler(edge: Edge) {
+            if (this.state.type !== State.Default && this.state.type !== State.EditMorphism)
+                return;
+
+            if (this.state.type === State.EditMorphism) {
+                if ((this.$refs.editedMorphism as InstanceType<typeof EditMorphism>).changed) {
+                    return;
+                }
+                else if (this.state.edge.equals(edge)) {
+                    this.setStateToDefault();
+                    return;
+                }
+                else {
+                    this.state.edge.unselect();
+                }
+            }
+
+            this.state = { type: State.EditMorphism, edge };
         },
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
@@ -126,6 +158,16 @@ export default defineComponent({
                 :key="state.node.schemaObject.id"
                 :graph="graph"
                 :node="state.node"
+                @save="setStateToDefault"
+                @cancel="setStateToDefault"
+            />
+        </template>
+        <template v-else-if="state.type === State.EditMorphism">
+            <EditMorphism
+                ref="editedMorphism"
+                :key="state.edge.schemaMorphism.id"
+                :graph="graph"
+                :edge="state.edge"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />

@@ -3,11 +3,10 @@ import { defineComponent } from 'vue';
 import { GET, PUT } from '@/utils/backendAPI';
 import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
 import cytoscape from 'cytoscape';
-import type { ElementDefinition } from 'cytoscape';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import { Graph, Node } from '@/types/categoryGraph';
+import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
 
 export default defineComponent({
@@ -30,46 +29,15 @@ export default defineComponent({
             console.log(result.data);
             this.schemaCategory = SchemaCategory.fromServer(result.data);
 
-            const cytoscapeInstance = this.createCytoscape(this.schemaCategory);
-            this.graph = new Graph(cytoscapeInstance, this.schemaCategory);
+            this.graph = this.createGraph(this.schemaCategory);
 
             this.schemaFetched = true;
             this.$emit('graph:created', this.graph);
         }
     },
     methods: {
-        createCytoscape(schema: SchemaCategory) {
-            const elements = [] as ElementDefinition[];
-
-            const nodes = [] as Node[];
-            schema.objects.forEach(object => {
-                const node = new Node(object);
-                nodes.push(node);
-
-                const definition = {
-                    data: {
-                        id: object.id.toString(),
-                        label: object.label,
-                        schemaData: node
-                    },
-                    position: object.position
-                };
-                elements.push(definition);
-            });
-
-            schema.morphisms.filter(morphism => morphism.isBase)
-                // This ensures the bezier morphism pairs have allways the same chirality.
-                .sort((m1, m2) => m1.domId !== m2.domId ? m2.domId - m1.domId : m2.codId - m1.codId)
-                .forEach(morphism => elements.push({ data: {
-                    id: 'm' + morphism.id.toString(),
-                    source: morphism.domId,
-                    target: morphism.codId,
-                    //label: ((value: string) => value.startsWith('-') ? undefined : value )(morphism.signature.toString())
-                    label: morphism.signature.toString()
-                } }));
-
+        createGraph(schema: SchemaCategory): Graph {
             const container = document.getElementById('cytoscape');
-            console.log(container);
 
             // This is needed because of some weird bug.
             // It has to do something with the cache (because it doesn't appear after hard refresh).
@@ -83,29 +51,31 @@ export default defineComponent({
                 }
             }
 
-            const output = cytoscape({
+            const cytoscapeInstance = cytoscape({
                 container,
                 layout: { name: 'preset' },
-                elements,
+                //elements,
                 style
             });
 
-            nodes.forEach(node => node.setCytoscapeNode(output.nodes('#' + node.schemaObject.id).first()));
+            const graph = new Graph(cytoscapeInstance, schema);
 
-            schema.morphisms.filter(morphism => morphism.isBase).forEach(morphism => {
-                const domNode = nodes.find(node => node.schemaObject.id === morphism.domId);
-                if (!domNode)
-                    throw new Error(`Domain object node with id ${morphism.domId} not found for morphism ${morphism.signature.toString()}.`);
+            schema.objects.forEach(object => graph.createNode(object));
 
-                const codNode = nodes.find(node => node.schemaObject.id === morphism.codId);
-                if (!codNode)
-                    throw new Error(`Codomain object node with id ${morphism.codId} not found for morphism ${morphism.signature.toString()}.`);
+            // First we create a dublets of morphisms. Then we create edges from them.
+            const sortedBaseMorphisms = schema.morphisms.filter(morphism => morphism.isBase)
+                .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
+            const morphismDublets = [];
+            //for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
+            for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
+                morphismDublets.push({ morphism: sortedBaseMorphisms[i], dualMorphism: sortedBaseMorphisms[i + 1] });
 
-                domNode.addNeighbour(codNode, morphism);
-                //codNode.addNeighbour(domNode, morphism); // This will be added by the dual morphism
-            });
+            morphismDublets.forEach(dublet => graph.createEdgeWithDual(dublet.morphism, dublet.dualMorphism));
 
-            return output;
+            // Position the object to the center of the canvas.
+            graph.center();
+
+            return graph;
         },
         async savePositionChanges() {
             this.saveButtonDisabled = true;

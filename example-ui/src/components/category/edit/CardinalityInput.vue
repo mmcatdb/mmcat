@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Cardinality, type CardinalitySettings } from '@/types/schema';
+import { Cardinality, compareCardinalitySettings, type CardinalitySettings, type Max, type Min } from '@/types/schema';
 import RadioInput from '@/components/RadioInput.vue';
 
 enum CardinalityType {
@@ -23,8 +23,8 @@ export default defineComponent({
     emits: [ 'update:modelValue' ],
     data() {
         return {
-            morphismCardinality: CardinalityType.OneOne,
-            dualCardinality: CardinalityType.OneOne,
+            morphismCardinality: this.getCardinalityTypeFromMinMax(this.modelValue.domCodMin, this.modelValue.domCodMax),
+            dualCardinality: this.getCardinalityTypeFromMinMax(this.modelValue.codDomMin, this.modelValue.codDomMax),
             innerValue: Object.assign({}, this.modelValue),
             CardinalityType
         };
@@ -32,13 +32,11 @@ export default defineComponent({
     watch: {
         modelValue: {
             handler(newValue: CardinalitySettings): void {
-                if (
-                    newValue.domCodMin !== this.innerValue.domCodMin ||
-                    newValue.domCodMax !== this.innerValue.domCodMax ||
-                    newValue.codDomMin !== this.innerValue.codDomMin ||
-                    newValue.codDomMax !== this.innerValue.codDomMax
-                )
+                if (!compareCardinalitySettings(newValue, this.innerValue)) {
                     this.innerValue = Object.assign({}, this.modelValue);
+                    this.morphismCardinality = this.getCardinalityTypeFromMinMax(newValue.domCodMin, newValue.domCodMax);
+                    this.dualCardinality = this.getCardinalityTypeFromMinMax(newValue.codDomMin, newValue.codDomMax);
+                }
             }
         }
     },
@@ -65,6 +63,9 @@ export default defineComponent({
         },
         updateInnerValue() {
             this.$emit('update:modelValue', this.innerValue);
+        },
+        getCardinalityTypeFromMinMax(min: Min, max: Max): CardinalityType {
+            return (min === Cardinality.Zero ? 0 : 1) * 2 + (max === Cardinality.One ? 0 : 1);
         }
     }
 });

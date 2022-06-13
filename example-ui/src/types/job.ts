@@ -9,10 +9,14 @@ export const JOB_TYPES = [
     }
 ];
 
-export type Job = {
-    id: number,
-    mappingId: number,
-    name: string,
-    type: string,
-    status: string
-};
+export class Job {
+    id!: number;
+    mappingId!: number;
+    name!: string;
+    type!: string;
+    status!: string;
+
+    setStatus(status: string) {
+        this.status = status;
+    }
+}

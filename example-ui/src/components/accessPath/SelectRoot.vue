@@ -19,7 +19,7 @@ export default defineComponent({
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
     },
     unmounted() {
-        this.graph.removeListener('tap', this.onNodeTapHandler);
+        this.graph.removeNodeListener('tap', this.onNodeTapHandler);
     },
     methods: {
         onNodeTapHandler(node: Node): void {

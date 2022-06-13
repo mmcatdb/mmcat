@@ -1,18 +1,18 @@
 import { Signature } from "../identifiers";
-import type { SchemaMorphism } from "../schema";
+import type { Edge } from "./Edge";
 import { AvailabilityStatus, type Node } from "./Node";
 
 export class NodeSequence {
     _nodes: Node[];
-    _morphisms: SchemaMorphism[];
+    _edges: Edge[];
 
-    private constructor(nodes: Node[], morphisms: SchemaMorphism[]) {
+    private constructor(nodes: Node[], edges: Edge[]) {
         this._nodes = [ ...nodes ];
-        this._morphisms = [ ...morphisms ];
+        this._edges = [ ...edges ];
     }
 
     copy(): NodeSequence {
-        return new NodeSequence(this._nodes, this._morphisms);
+        return new NodeSequence(this._nodes, this._edges);
     }
 
     static fromRootNode(rootNode: Node): NodeSequence {
@@ -29,7 +29,7 @@ export class NodeSequence {
     }
 
     get lengthOfMorphisms(): number {
-        return this._morphisms.length;
+        return this._edges.length;
     }
     /*
     get allNodes(): Node[] {
@@ -41,9 +41,9 @@ export class NodeSequence {
     }
 
     addBaseSignature(baseSignature: Signature): void {
-        for (const [ node, morphism ] of this.lastNode.neighbours.entries()) {
-            if (morphism.signature.equals(baseSignature)) {
-                this._morphisms.push(morphism);
+        for (const [ node, edge ] of this.lastNode.neighbours.entries()) {
+            if (edge.schemaMorphism.signature.equals(baseSignature)) {
+                this._edges.push(edge);
                 this._nodes.push(node);
                 node.selectNext();
                 return;
@@ -83,14 +83,14 @@ export class NodeSequence {
 
         this.lastNode.unselectPrevious();
         this._nodes.pop();
-        this._morphisms.pop();
+        this._edges.pop();
 
         return true;
     }
 
     toSignature(): Signature {
         let output = Signature.empty;
-        this._morphisms.forEach(morphism => output = output.concatenate(morphism.signature));
+        this._edges.forEach(edge => output = output.concatenate(edge.schemaMorphism.signature));
 
         return output;
     }
@@ -99,11 +99,11 @@ export class NodeSequence {
         if (this.rootNode !== sequence.rootNode)
             return false;
 
-        if (this._morphisms.length !== sequence._morphisms.length)
+        if (this._edges.length !== sequence._edges.length)
             return false;
 
-        for (let i = 0; i < this._morphisms.length; i++) {
-            if (!this._morphisms[i].signature.equals(sequence._morphisms[i].signature))
+        for (let i = 0; i < this._edges.length; i++) {
+            if (!this._edges[i].equals(sequence._edges[i]))
                 return false;
         }
 
