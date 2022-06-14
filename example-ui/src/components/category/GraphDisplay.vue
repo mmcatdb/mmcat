@@ -104,7 +104,7 @@ export default defineComponent({
                     :disabled="saveButtonDisabled"
                     @click="savePositionChanges"
                 >
-                    Uložit změny
+                    Save position changes
                 </button>
             </div>
         </template>

@@ -56,7 +56,7 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>This is a jobs page</h1>
+        <h1>Jobs</h1>
         <div class="jobs" v-if="jobs">
             <div v-for="(job, index) in jobs" :key="index">
                 <JobDisplay @delete-job="() => deleteJob(job.id)" :job="job" />

@@ -54,7 +54,7 @@
   --color-warning: #FFC107;
 
   --left-panel-width: 220px;
-  --schema-category-canvas-width: 800px;
+  --schema-category-canvas-width: 1000px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,6 +72,18 @@
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
     --color-text-disabled: #484848;
+  }
+}
+
+@media screen and (max-width: 1440px) {
+  :root {
+    --schema-category-canvas-width: 800px;
+  }
+}
+
+@media screen and (max-width: 1280px) {
+  :root {
+    --schema-category-canvas-width: 700px;
   }
 }
 

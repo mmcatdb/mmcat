@@ -23,8 +23,7 @@ export default defineComponent({
             rootObjectName: 'pathName',
             databases: [] as DatabaseView[],
             selectingDatabase: null as DatabaseView | null,
-            selectedDatabase: null as DatabaseView | null,
-            mappingName: 'new mapping'
+            selectedDatabase: null as DatabaseView | null
         };
     },
     async mounted() {
@@ -42,7 +41,7 @@ export default defineComponent({
             this.accessPath = new RootProperty(StaticName.fromString(name), node);
             this.rootObjectName = name;
         },
-        async createMapping() {
+        async createMapping(name: string) {
             const result = await POST<Mapping>('/mappings', {
                 id: null,
                 databaseId: this.selectedDatabase?.id,
@@ -50,7 +49,7 @@ export default defineComponent({
                 rootObjectId: this.accessPath?.node.schemaObject.id,
                 rootMorphismId: null, // TODO
                 jsonValue: JSON.stringify({
-                    name: this.mappingName
+                    name
                 }),
                 mappingJsonValue: JSON.stringify({
                     kindName: this.accessPath?.name.toString().toLowerCase(),
@@ -67,8 +66,6 @@ export default defineComponent({
 </script>
 
 <template>
-    <label>Mapping name:</label>
-    <input v-model="mappingName" />
     <div class="divide">
         <GraphDisplay @graph:created="cytoscapeCreated" />
         <div v-if="graph">

@@ -37,7 +37,7 @@ export default defineComponent({
 </script>
 
 <template>
-    <h1>This is a job</h1>
+    <h1>Job</h1>
     <div class="job" v-if="job">
         <JobDisplay @delete-job="deleteJob" :job="job" />
     </div>

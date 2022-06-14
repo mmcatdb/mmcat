@@ -72,14 +72,17 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>This is a database page</h1>
         <template v-if="isNew">
-            <DatabaseEditor
-                @save="save"
-                @cancel="cancel"
-            />
+            <h1>Create new database</h1>
+            <div class="database">
+                <DatabaseEditor
+                    @save="save"
+                    @cancel="cancel"
+                />
+            </div>
         </template>
         <template v-else>
+            <h1>Database</h1>
             <div
                 v-if="database"
                 class="database"

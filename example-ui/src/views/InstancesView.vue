@@ -28,9 +28,15 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>This is an instance page</h1>
-        <div class="instances" v-if="instances">
-            <div v-for="instance in instances">
+        <h1>Instances</h1>
+        <div
+            v-if="instances"
+            class="instances"
+        >
+            <div
+                v-for="(instance, index) in instances"
+                :key="index"
+            >
                 {{ instance }}
             </div>
         </div>

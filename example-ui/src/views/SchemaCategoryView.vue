@@ -14,6 +14,6 @@ export default defineComponent({
 </script>
 
 <template>
-    <h1>There is a schema category</h1>
+    <h1>Schema Category</h1>
     <SchemaCategoryEditor />
 </template>

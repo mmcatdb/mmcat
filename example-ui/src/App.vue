@@ -16,12 +16,11 @@ function defineLink(pathName: string, label: string): Link {
 const links = [
     defineLink('home', 'Home'),
     defineLink('jobs', 'Jobs'),
-    defineLink('accessPathEditor', 'Access path editor'),
-    defineLink('schema', 'Schema category'),
+    defineLink('accessPathEditor', 'Create Mapping'),
+    defineLink('schema', 'Schema Category'),
     defineLink('instances', 'Instances'),
     defineLink('instanceCategory', 'Instance Category'),
     defineLink('databases', 'Databases'),
-    defineLink('test', 'Test')
 ];
 </script>
 

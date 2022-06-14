@@ -11,7 +11,7 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>This is an instance category page</h1>
+        <h1>Instance Category</h1>
         <InstanceCategoryDisplay />
     </div>
 </template>

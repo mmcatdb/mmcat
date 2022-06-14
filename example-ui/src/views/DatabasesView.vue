@@ -42,7 +42,7 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>This is a databases page</h1>
+        <h1>Databases</h1>
         <template v-if="databases">
             <div
                 class="databases"

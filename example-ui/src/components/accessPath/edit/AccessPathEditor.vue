@@ -50,8 +50,7 @@ export default defineComponent({
     emits: [ 'finish' ],
     data() {
         return {
-            rootObjectName: 'pathName',
-            //state: { default: '' } as State,
+            mappingName: 'New mapping',
             state: { type: State.Default } as StateValue,
             State,
         };
@@ -78,7 +77,7 @@ export default defineComponent({
             this.state = { type: State.Default };
         },
         finishMapping() {
-            this.$emit('finish');
+            this.$emit('finish', this.mappingName);
         }
     }
 });
@@ -88,14 +87,23 @@ export default defineComponent({
     <div class="divide">
         <div>
             <div class="editor">
-                <div
-                    v-if="state.type === State.Default"
-                    class="options"
-                >
-                    <button @click="finishMapping">
-                        Finish mapping
-                    </button>
-                </div>
+                <template v-if="state.type === State.Default">
+                    <table>
+                        <tr>
+                            <td class="label">
+                                Mapping name:
+                            </td>
+                            <td class="value">
+                                <input v-model="mappingName" />
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="button-row">
+                        <button @click="finishMapping">
+                            Finish mapping
+                        </button>
+                    </div>
+                </template>
                 <template v-else-if="state.type === State.AddProperty">
                     <AddProperty
                         :graph="graph"

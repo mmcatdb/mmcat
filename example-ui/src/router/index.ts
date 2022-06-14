@@ -50,11 +50,6 @@ const router = createRouter({
             component: () => import('@/views/DatabaseView.vue')
         },
         {
-            path: '/test',
-            name: 'test',
-            component: () => import('@/views/LongPageForTestsView.vue')
-        },
-        {
             path: '/404',
             name: 'notFound',
             component: () => import('@/views/PageNotFoundView.vue')
