@@ -134,6 +134,15 @@ export default defineComponent({
             <button @click="addMorphismClicked">
                 Add morphism
             </button>
+            <button>
+                Move / Copy
+            </button>
+            <button>
+                Group / Ungroup
+            </button>
+            <button>
+                Split / Join
+            </button>
             <button @click="save">
                 Save
             </button>
