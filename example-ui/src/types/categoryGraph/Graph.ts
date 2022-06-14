@@ -79,23 +79,31 @@ export class Graph {
         edges[0].dual = edges[1];
         edges[1].dual = edges[0];
 
-        const definitions = [ createEdgeDefinition(morphism, edges[0], classes), createEdgeDefinition(morphism.dual, edges[1], classes) ];
+        //const definitions = [ createEdgeDefinition(morphism, edges[0], classes), createEdgeDefinition(morphism.dual, edges[1], classes) ];
 
         // This ensures the Bezier morphism pairs have allways the same chirality.
-        const noSwitchNeeded = morphism.domId > morphism.codId;
+        //const noSwitchNeeded = morphism.domId > morphism.codId;
 
+        /*
         const cytoscapeEdges = this._cytoscape.add(noSwitchNeeded ? definitions : definitions.reverse());
         const orderedCytoscapeEdges = noSwitchNeeded ? cytoscapeEdges : cytoscapeEdges;
         edges[0].setCytoscapeEdge(orderedCytoscapeEdges[0]);
         edges[1].setCytoscapeEdge(orderedCytoscapeEdges[1]);
+        */
+
+        const definition = createEdgeDefinition(morphism, edges[0], classes);
+        const cytoscapeEdge = this._cytoscape.add(definition);
+        edges[0].setCytoscapeEdge(cytoscapeEdge);
 
         domNode.addNeighbour(codNode, edges[0]);
         codNode.addNeighbour(domNode, edges[1]);
     }
 
     deleteEdgeWithDual(edge: Edge) {
-        this._cytoscape.remove(edge.edge);
-        this._cytoscape.remove(edge.dual.edge);
+        //this._cytoscape.remove(edge.edge);
+        //this._cytoscape.remove(edge.dual.edge);
+        const cytoscapeEdge = edge.edge ? edge.edge : edge.dual.edge;
+        this._cytoscape.remove(cytoscapeEdge);
 
         edge.domainNode.removeNeighbour(edge.codomainNode);
         edge.codomainNode.removeNeighbour(edge.domainNode);
