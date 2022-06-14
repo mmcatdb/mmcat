@@ -10,10 +10,6 @@ export enum NodeIndices {
     Second = 1
 }
 
-export function negateIndex(index: NodeIndices): NodeIndices {
-    return 1 - index;
-}
-
 export default defineComponent({
     components: {
         CardinalityInput
@@ -99,10 +95,6 @@ export default defineComponent({
                     this.lastSelectedNode;
 
             const changingNode = this.indexToNode(changingNodeIndex);
-            const stationaryNode = this.indexToNode(negateIndex(changingNodeIndex));
-
-            if (this.morphismAlreadyExists(node, stationaryNode))
-                return;
 
             changingNode?.unselect();
             node.select({ type: SelectionType.Selected, level: changingNodeIndex });
@@ -118,12 +110,6 @@ export default defineComponent({
                 this.node1 = node;
             else
                 this.node2 = node;
-        },
-        morphismAlreadyExists(node1: Node | null, node2: Node | null): boolean {
-            if (!node1 || !node2)
-                return false;
-
-            return !!node1.neighbours.get(node2);
         },
         switchNodes() {
             if (this.node1 === null || this.node2 === null)

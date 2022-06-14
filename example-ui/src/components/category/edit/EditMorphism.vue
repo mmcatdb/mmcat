@@ -4,7 +4,7 @@ import { compareCardinalitySettings, type CardinalitySettings } from '@/types/sc
 import { defineComponent } from 'vue';
 import CardinalityInput from './CardinalityInput.vue';
 
-import { NodeIndices, negateIndex } from './AddMorphism.vue';
+import { NodeIndices } from './AddMorphism.vue';
 
 export default defineComponent({
     components: {
@@ -116,10 +116,6 @@ export default defineComponent({
                     this.lastSelectedNode;
 
             const changingNode = this.indexToNode(changingNodeIndex);
-            const stationaryNode = this.indexToNode(negateIndex(changingNodeIndex));
-
-            if (this.morphismAlreadyExists(node, stationaryNode) && !node.equals(this.edge.domainNode) && !node.equals(this.edge.codomainNode))
-                return;
 
             changingNode?.unselect();
             node.select({ type: SelectionType.Selected, level: changingNodeIndex });
@@ -135,15 +131,6 @@ export default defineComponent({
                 this.node1 = node;
             else
                 this.node2 = node;
-        },
-        morphismAlreadyExists(node1: Node | null, node2: Node | null): boolean {
-            if (!node1 || !node2)
-                return false;
-
-            if (node1.equals(this.edge.codomainNode) && node2.equals(this.edge.domainNode))
-                return false;
-
-            return !!node1.neighbours.get(node2);
         },
         switchNodes() {
             if (this.node1 === null || this.node2 === null)
