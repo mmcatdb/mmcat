@@ -125,6 +125,16 @@ export default defineComponent({
         signatureValueChanged() {
             this.signature = Signature.base(this.signatureValue);
             this.signatureIsValid = this.graph.schemaCategory.isBaseSignatureAvailable(this.signature);
+        },
+        selectSameNode() {
+            this.node2?.unselect();
+
+            this.node2 = this.node1;
+            this.node2?.select({ type: SelectionType.Selected, level: 3 });
+            this.lastSelectedNode = NodeIndices.Second;
+
+            this.temporayEdge?.delete();
+            this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
         }
     }
 });
@@ -148,6 +158,18 @@ export default defineComponent({
                 </td>
                 <td class="value">
                     {{ node2?.schemaObject.label }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="button-row mb-2">
+                        <button
+                            :disabled="!node1"
+                            @click="selectSameNode"
+                        >
+                            Select same node
+                        </button>
+                    </div>
                 </td>
             </tr>
             <tr>

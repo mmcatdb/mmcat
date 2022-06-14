@@ -54,8 +54,12 @@ export default defineComponent({
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
+
         this.onNodeTapHandler(this.edge.domainNode);
-        this.onNodeTapHandler(this.edge.codomainNode);
+        if (!this.edge.domainNode.equals(this.edge.codomainNode))
+            this.onNodeTapHandler(this.edge.codomainNode);
+        else
+            this.selectSameNode();
     },
     unmounted() {
         this.graph.removeNodeListener('tap', this.onNodeTapHandler);
@@ -142,6 +146,17 @@ export default defineComponent({
 
             this.node1.select({ type: SelectionType.Selected, level: 0 });
             this.node2.select({ type: SelectionType.Selected, level: 1 });
+        },
+        selectSameNode() {
+            this.node2?.unselect();
+
+            this.node2 = this.node1;
+            this.node2?.select({ type: SelectionType.Selected, level: 3 });
+            this.lastSelectedNode = NodeIndices.Second;
+
+            this.temporayEdge?.delete();
+            if (this.nodesChanged)
+                this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
         }
     }
 });
@@ -165,6 +180,18 @@ export default defineComponent({
                 </td>
                 <td class="value">
                     {{ node2?.schemaObject.label }}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <div class="button-row mb-2">
+                        <button
+                            :disabled="!node1"
+                            @click="selectSameNode"
+                        >
+                            Select same node
+                        </button>
+                    </div>
                 </td>
             </tr>
             <tr>

@@ -29,3 +29,7 @@ tr.hidden {
     visibility: collapse;
     height: 0px;
 }
+
+.mb-2 {
+    margin-bottom: 8px;
+}
