@@ -135,18 +135,20 @@ export const style: cytoscape.Stylesheet[] = [
         selector: '.mongodb',
         style: {
             'background-color': 'green',
-            'background-opacity': 0.05,
-            'border-color': 'green'
+            'background-opacity': 0.01,
+            'border-color': 'green',
+            'padding-right': '10px'
         }
     },
     {
         selector: '.postgresql',
         style: {
             'background-color': 'red',
-            'background-opacity': 0.05,
+            'background-opacity': 0.01,
             'border-style': 'dashed',
             'shape': 'round-rectangle',
-            'border-color': 'red'
+            'border-color': 'red',
+            'padding-right': '15px'
         }
     }
 ];
