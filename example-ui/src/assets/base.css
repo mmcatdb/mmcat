@@ -37,6 +37,11 @@
 }
 
 :root {
+  /*--top-bar-height: 64px;*/
+  --top-bar-height: 0px;
+}
+
+:root {
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: #E0E0E0;

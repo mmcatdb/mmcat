@@ -9,7 +9,7 @@
     position: fixed;
     top: 0;
     width: 100%;
-    height: 64px;
+    height: var(--top-bar-height);
     overflow: hidden;
     background-color: var(--color-primary);
 }

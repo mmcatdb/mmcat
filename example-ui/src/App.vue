@@ -25,9 +25,7 @@ const links = [
 </script>
 
 <template>
-    <TopBar>
-
-    </TopBar>
+    <TopBar />
     <LeftBar>
         <RouterLink
             v-for="link in links"

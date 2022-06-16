@@ -7,7 +7,7 @@
 <style>
 .leftBar {
     position: fixed;
-    top: 64px;
+    top: var(--top-bar-height);
     bottom: 0px;
     width: var(--left-panel-width);
     overflow: hidden;
