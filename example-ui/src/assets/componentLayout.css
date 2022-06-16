@@ -34,3 +34,9 @@ tr.hidden {
 .mb-2 {
     margin-bottom: 8px;
 }
+
+div.divider {
+    height: 2px;
+    background-color: var(--color-primary);
+    margin: 3px 0px;
+}

@@ -128,21 +128,50 @@ export default defineComponent({
             v-if="state.type === State.Default"
             class="options"
         >
+            <!--
             <button @click="addObjectClicked">
                 Add object
             </button>
             <button @click="addMorphismClicked">
                 Add morphism
             </button>
+            -->
             <button>
-                Move / Copy
+                Add
+            </button>
+            <button>
+                Delete
+            </button>
+            <button>
+                Rename
+            </button>
+            <div class="divider" />
+            <button>
+                Copy / Move
             </button>
             <button>
                 Group / Ungroup
             </button>
             <button>
-                Split / Join
+                Split
             </button>
+            <div class="divider" />
+            <button>
+                Add Id
+            </button>
+            <button>
+                Drop Id
+            </button>
+            <button>
+                Add Reference
+            </button>
+            <button>
+                Drop Reference
+            </button>
+            <button>
+                Change Cardinality
+            </button>
+            <div class="divider" />
             <button @click="save">
                 Save
             </button>
@@ -190,7 +219,22 @@ export default defineComponent({
     flex-direction: column;
 }
 
+/*
 .options button + button {
     margin-top: 12px;
+}
+*/
+
+.options button {
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.options button:first-of-type {
+    margin-top: 0px;
+}
+
+.options button:last-of-type {
+    margin-bottom: 0px;
 }
 </style>

@@ -116,7 +116,7 @@ export default defineComponent({
 <style scoped>
 #cytoscape {
     width: var(--schema-category-canvas-width);
-    height: 500px;
+    height: var(--schema-category-canvas-height);
     background-color: var(--color-background-canvas);
 }
 

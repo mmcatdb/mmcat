@@ -55,6 +55,7 @@
 
   --left-panel-width: 220px;
   --schema-category-canvas-width: 900px;
+  --schema-category-canvas-height: 600px;
 }
 
 @media (prefers-color-scheme: dark) {
