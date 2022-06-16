@@ -44,11 +44,15 @@ CREATE TABLE schema_morphism_in_category (
 
 INSERT INTO schema_object (json_value)
 VALUES
-    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [1], "_class": "Signature", "isNull": false}]}], "key": {"value": 1, "_class": "Key"}, "label": "Customer", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [1], "_class": "Signature", "isNull": false}]}}'),
-    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 2, "_class": "Key"}, "label": "Id", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}}'),
-    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 3, "_class": "Key"}, "label": "Name", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}}'),
-    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 4, "_class": "Key"}, "label": "Surname", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}}'),
-    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [4], "_class": "Signature", "isNull": false}, {"ids": [5], "_class": "Signature", "isNull": false}]}], "key": {"value": 5, "_class": "Key"}, "label": "Friend", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [5], "_class": "Signature", "isNull": false}]}}');
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [1], "_class": "Signature", "isNull": false}]}], "key": {"value": 1, "_class": "Key"}, "label": "Customer", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [1], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 2, "_class": "Key"}, "label": "Id", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 3, "_class": "Key"}, "label": "Name", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 4, "_class": "Key"}, "label": "Surname", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [4], "_class": "Signature", "isNull": false}, {"ids": [5], "_class": "Signature", "isNull": false}]}], "key": {"value": 5, "_class": "Key"}, "label": "Friend", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [5], "_class": "Signature", "isNull": false}]}, "databases": ["mongodb"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 6, "_class": "Key"}, "label": "Address", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 7, "_class": "Key"}, "label": "Street", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 8, "_class": "Key"}, "label": "City", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql"]}'),
+    ('{"ids": [{"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}], "key": {"value": 9, "_class": "Key"}, "label": "Post code", "_class": "SchemaObject", "superId": {"_class": "Id", "signatures": [{"ids": [], "_class": "Signature", "isNull": false}]}, "databases": ["postgresql"]}');
 
 INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position)
 VALUES
@@ -56,7 +60,11 @@ VALUES
     (1, 2, '{"x": 271, "y": -97, "_class": "Position"}'),
     (1, 3, '{"x": 272, "y": -8, "_class": "Position"}'),
     (1, 4, '{"x": 279, "y": 70, "_class": "Position"}'),
-    (1, 5, '{"x": 89, "y": -125, "_class": "Position"}');
+    (1, 5, '{"x": 89, "y": -125, "_class": "Position"}'),
+    (1, 6, '{"x": -52, "y": -28, "_class": "Position"}'),
+    (1, 7, '{"x": -179, "y": -129, "_class": "Position"}'),
+    (1, 8, '{"x": -192, "y": -29, "_class": "Position"}'),
+    (1, 9, '{"x": -180, "y": 73, "_class": "Position"}');
 
 INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value)
 VALUES
@@ -69,7 +77,15 @@ VALUES
     (5, 1, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [4], "_class": "Signature", "isNull": false}}'),
     (1, 5, '{"max": "STAR", "min": "ZERO", "_class": "SchemaMorphism", "signature": {"ids": [-4], "_class": "Signature", "isNull": false}}'),
     (5, 1, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [5], "_class": "Signature", "isNull": false}}'),
-    (1, 5, '{"max": "STAR", "min": "ZERO", "_class": "SchemaMorphism", "signature": {"ids": [-5], "_class": "Signature", "isNull": false}}');
+    (1, 5, '{"max": "STAR", "min": "ZERO", "_class": "SchemaMorphism", "signature": {"ids": [-5], "_class": "Signature", "isNull": false}}'),
+    (6, 7, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [6], "_class": "Signature", "isNull": false}}'),
+    (7, 6, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [-6], "_class": "Signature", "isNull": false}}'),
+    (6, 8, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [7], "_class": "Signature", "isNull": false}}'),
+    (8, 6, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [-7], "_class": "Signature", "isNull": false}}'),
+    (6, 9, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [8], "_class": "Signature", "isNull": false}}'),
+    (9, 6, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [-8], "_class": "Signature", "isNull": false}}'),
+    (1, 6, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [9], "_class": "Signature", "isNull": false}}'),
+    (6, 1, '{"max": "ONE", "min": "ONE", "_class": "SchemaMorphism", "signature": {"ids": [-9], "_class": "Signature", "isNull": false}}');
 
 INSERT INTO schema_morphism_in_category (schema_category_id, schema_morphism_id)
 VALUES
@@ -82,7 +98,15 @@ VALUES
     (1, 7),
     (1, 8),
     (1, 9),
-    (1, 10);
+    (1, 10),
+    (1, 11),
+    (1, 12),
+    (1, 13),
+    (1, 14),
+    (1, 15),
+    (1, 16),
+    (1, 17),
+    (1, 18);
 
 
 CREATE TABLE database_for_mapping (

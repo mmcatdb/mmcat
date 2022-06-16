@@ -1,4 +1,5 @@
 import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, NodeSingular } from "cytoscape";
+import { Type } from "../database";
 import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Edge } from "./Edge";
 import { Node } from "./Node";
@@ -9,6 +10,8 @@ export type EdgeEventFunction = (edge: Edge) => void;
 export type TemporaryEdge = {
     delete: () => void;
 }
+
+type Group = { label: string, node: NodeSingular };
 
 export class Graph {
     _cytoscape: Core;
@@ -59,10 +62,47 @@ export class Graph {
         this._cytoscape.nodes().forEach(node => (node.data('schemaData') as Node).resetAvailabilityStatus());
     }
 
+    groups = [] as Group[];
+
+    getGroupOrAddIt(label: string): Group {
+        const results = this.groups.filter(group => group.label === label);
+        if (results[0])
+            return results[0];
+
+        const newGroup = {
+            label,
+            node: this._cytoscape.add({
+                data: {
+                    id: 'group_' + label
+                },
+                classes: 'group ' + label
+            })
+        };
+
+        this.groups.push(newGroup);
+        return newGroup;
+    }
+
     createNode(object: SchemaObject, classes?: string): Node {
         const node = new Node(object);
+
+        const groupObjects = object.databases.map(database => this.getGroupOrAddIt(database));
+
+        const groupPlaceholders = [] as NodeSingular[];
+        groupObjects.forEach(group => groupPlaceholders.push(this._cytoscape.add(createGroupPlaceholderDefinition(object, group.label))));
+
+        //const coloringNode = this._cytoscape.add(createColoringNodeDefinition(object, Math.random() < 0.5 ? Type.mongodb : Type.postgresql));
         const cytoscapeNode = this._cytoscape.add(createNodeDefinition(object, node, classes));
         node.setCytoscapeNode(cytoscapeNode);
+
+        //cytoscapeNode.json();
+
+        cytoscapeNode.on('drag', () => {
+            groupPlaceholders.forEach(placeholder => {
+                placeholder.remove();
+                placeholder.restore();
+            });
+        });
 
         return node;
     }
@@ -142,6 +182,30 @@ function createNodeDefinition(object: SchemaObject, node: Node, classes?: string
         },
         position: object.position,
         ...classes ? { classes } : {}
+    };
+}
+/*
+function createColoringNodeDefinition(object: SchemaObject, databaseType: Type): ElementDefinition {
+    console.log('coloring ' + databaseType);
+    return {
+        data: {
+            id: 'co' + object.id.toString()
+        },
+        position: object.position,
+        classes: 'coloring ' + databaseType
+    };
+}
+*/
+
+function createGroupPlaceholderDefinition(object: SchemaObject, groupLabel: string): ElementDefinition {
+    return {
+        data: {
+            id: groupLabel + '_' + object.id.toString(),
+            parent: 'group_' + groupLabel,
+            label: object.label
+        },
+        position: object.position,
+        classes: 'group-placeholder'
     };
 }
 

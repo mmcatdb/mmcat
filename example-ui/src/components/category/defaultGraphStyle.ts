@@ -5,7 +5,7 @@ export const style: cytoscape.Stylesheet[] = [
             'background-color': 'white',
             'border-color': 'black',
             'border-width': '1px',
-            label: 'data(label)',
+            label: 'data(label)'
         }
     },
     {
@@ -88,4 +88,65 @@ export const style: cytoscape.Stylesheet[] = [
             'color': 'red'
         }
     },
+    /*
+    {
+        selector: 'node.coloring',
+        style: {
+            'border-width': '0px',
+            width: '100px',
+            height: '100px',
+            label: '',
+            events: 'no'
+        }
+    },
+    {
+        selector: 'node.mongodb',
+        style: {
+            'background-color': 'green',
+            'background-opacity': 0.15,
+        }
+    },
+    {
+        selector: 'node.postgresql',
+        style: {
+            'background-color': 'red',
+            'background-opacity': 0.15,
+        }
+    }
+    */
+    {
+        selector: '.group-placeholder',
+        style: {
+            label: 'data(label)',
+            events: 'no',
+            opacity: 0,
+        }
+    },
+    {
+        selector: '.group',
+        style: {
+            label: '',
+            events: 'no',
+            'border-style': 'dashed',
+            'shape': 'round-rectangle'
+        }
+    },
+    {
+        selector: '.mongodb',
+        style: {
+            'background-color': 'green',
+            'background-opacity': 0.05,
+            'border-color': 'green'
+        }
+    },
+    {
+        selector: '.postgresql',
+        style: {
+            'background-color': 'red',
+            'background-opacity': 0.05,
+            'border-style': 'dashed',
+            'shape': 'round-rectangle',
+            'border-color': 'red'
+        }
+    }
 ];

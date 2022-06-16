@@ -7,7 +7,8 @@ export type SchemaObjectJSON = {
     label: string,
     key: KeyJSON,
     ids: SchemaIdJSON[],
-    superId: SchemaIdJSON
+    superId: SchemaIdJSON,
+    databases?: string[]
 }
 
 export class SchemaObject {
@@ -23,6 +24,7 @@ export class SchemaObject {
     position?: ComparablePosition;
     _originalPosition?: ComparablePosition;
     _isNew!: boolean;
+    databases!: string[];
 
     key!: Key;
 
@@ -41,6 +43,7 @@ export class SchemaObject {
         object.superId = SchemaId.fromJSON(jsonObject.superId);
         object._jsonValue = input.jsonValue;
         object._isNew = false;
+        object.databases = jsonObject.databases || [];
         if (input.position) { // This should be mandatory since all objects should have defined position.
             object.position = new ComparablePosition(input.position);
             object._originalPosition = new ComparablePosition(input.position);
@@ -60,6 +63,7 @@ export class SchemaObject {
 
         object.position = new ComparablePosition({ x: 0, y: 0});
         object._isNew = true;
+        object.databases = [];
 
         return object;
     }
@@ -99,7 +103,8 @@ export class SchemaObject {
             label: this.label,
             key: this.key.toJSON(),
             ids: this.schemaIds.map(id => id.toJSON()),
-            superId: this.superId.toJSON()
+            superId: this.superId.toJSON(),
+            databases: this.databases
         };
     }
 }
