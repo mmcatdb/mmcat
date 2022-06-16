@@ -12,6 +12,7 @@ td.value {
 .editor {
     border: 2px solid var(--color-border);
     padding: 12px;
+    font-size: 20px;
 }
 
 .divide {

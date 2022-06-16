@@ -7,8 +7,9 @@ button {
   /*background-color: var(--color-background);*/
   background-color: transparent;
   background-repeat: no-repeat;
-  padding: 6px 12px 6px 12px;
+  padding: 2px 12px 6px 12px;
   cursor: pointer;
+  font-size: 20px;/*temp*/
 }
 
 button:hover, button.selected {
