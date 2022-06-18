@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.server.entity.database;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * 
@@ -12,7 +12,7 @@ public class CreationData extends UpdateData {
 
     public CreationData() {}
     
-    public CreationData(String label, JsonNode settings, Database.Type type) {
+    public CreationData(String label, ObjectNode settings, Database.Type type) {
         this.label = label;
         this.settings = settings;
         this.type = type;

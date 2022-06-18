@@ -3,10 +3,10 @@ package cz.cuni.matfyz.server.entity.database;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +22,11 @@ public class Database extends Entity {
     private static Logger LOGGER = LoggerFactory.getLogger(Database.class);
     private static ObjectReader dataJSONReader = new ObjectMapper().readerFor(CreationData.class);
     private static ObjectWriter dataJSONWriter = new ObjectMapper().writer();
+    public static final String PASSWORD_FIELD_NAME = "password";
 
     public Type type;
     public String label;
-    public JsonNode settings;
+    public ObjectNode settings;
 
     public enum Type {
         mongodb,
@@ -46,6 +47,10 @@ public class Database extends Entity {
 
     public Database(Integer id, Database database) {
         this(id, database.toCreationData());
+    }
+
+    public void hidePassword() {
+        this.settings.remove(PASSWORD_FIELD_NAME);
     }
 
     public void updateFrom(UpdateData data) {

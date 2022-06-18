@@ -34,29 +34,13 @@ export default defineComponent({
                 !!this.innerValue.settings.port &&
                 !!this.innerValue.settings.database &&
                 !!this.innerValue.settings.username &&
-                !!this.innerValue.settings.password && (
+                //!!this.innerValue.settings.password &&
+                (
                     !!this.innerValue.settings.authenticationDatabase ||
                     this.innerValue.type !== Type.mongodb
                 )
             );
         }
-    },
-    watch: {
-        /*
-        portString: {
-            handler(newValue: string, oldValue: string): void {
-                console.log({ newValue, oldValue });
-                if (!newValue.match(/^[0-9]*$/)) {
-                    console.log("nope");
-                    this.portString = oldValue;
-                    return;
-                }
-
-                this.innerValue.settings.port = parseInt(newValue);
-                console.log("A");
-            }
-        }
-        */
     },
     methods: {
         async save() {
@@ -71,6 +55,8 @@ export default defineComponent({
             return await POST<Database>('/databases', this.innerValue);
         },
         async updateOld() {
+            if (this.innerValue.settings.password === '')
+                this.innerValue.settings.password = undefined;
             return await PUT<Database>(`/databases/${this.database?.id}`, this.innerValue);
         },
         cancel() {

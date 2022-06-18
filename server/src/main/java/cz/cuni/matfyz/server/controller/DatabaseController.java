@@ -35,8 +35,7 @@ public class DatabaseController {
 
     @GetMapping("/database-views")
     public List<View> getAllDatabaseViews() {
-        var output = service.findAll().stream().map(database -> createDatabaseView(database)).toList();
-        return output;
+        return service.findAll().stream().map(database -> createDatabaseView(database)).toList();
     }
 
     private View createDatabaseView(Database database) {
@@ -46,7 +45,9 @@ public class DatabaseController {
 
     @GetMapping("/databases")
     public List<Database> getAllDatabases() {
-        return service.findAll();
+        var databases = service.findAll();
+        databases.stream().forEach(database -> database.hidePassword());
+        return databases;
     }
 
     @GetMapping("/databases/{id}")
@@ -55,6 +56,7 @@ public class DatabaseController {
         if (database == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         
+        database.hidePassword();
         return database;
     }
 
@@ -64,15 +66,21 @@ public class DatabaseController {
         if (database == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
+        database.hidePassword();
         return database;
     }
 
     @PutMapping("/databases/{id}")
     public Database updateDatabase(@PathVariable int id, @RequestBody UpdateData update) {
+        if (!update.hasPassword()) {
+            var originalDatabase = service.find(id);
+            update.setPasswordFrom(originalDatabase);
+        }
         Database database = service.update(id, update);
         if (database == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
+        database.hidePassword();
         return database;
     }
 

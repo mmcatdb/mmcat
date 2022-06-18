@@ -28,7 +28,7 @@ export type Settings = {
     database: string;
     authenticationDatabase: string;
     username: string;
-    password: string;
+    password?: string;
 }
 
 export type Database = {
