@@ -47,7 +47,6 @@ export default defineComponent({
                 databaseId: this.selectedDatabase?.id,
                 categoryId: this.graph?.schemaCategory.id,
                 rootObjectId: this.accessPath?.node.schemaObject.id,
-                rootMorphismId: null, // TODO
                 jsonValue: JSON.stringify({
                     name
                 }),
