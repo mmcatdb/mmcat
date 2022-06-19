@@ -7,7 +7,7 @@ export class DatabaseConfiguration {
     readonly isDynamicNamingAllowed: boolean;
     readonly isAnonymousNamingAllowed: boolean;
     readonly isReferenceAllowed: boolean; // TODO The reference algorithm.
-    readonly isComplexPropertyAllowed: boolean; // TODO upraveno add a edit property, ale ještě podle toho nejsou povoleny či zakázány nody při vybírání signatury
+    readonly isComplexPropertyAllowed: boolean;
 
     public constructor(fromServer: DatabaseConfigurationFromServer) {
         this.isPropertyToOneAllowed = fromServer.isPropertyToOneAllowed;

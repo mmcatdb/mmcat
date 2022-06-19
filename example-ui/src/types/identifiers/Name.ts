@@ -12,7 +12,7 @@ export type StaticNameJSON = { _class: 'StaticName', value: string, type: 'STATI
 
 export class StaticName {
     readonly value: string;
-    readonly _isAnonymous: boolean; // TODO private
+    readonly _isAnonymous: boolean;
 
     private constructor(value: string, anonymous = false) {
         this.value = value;

@@ -27,7 +27,6 @@ export default defineComponent({
         };
     },
     async mounted() {
-        // TODO
         const result = await GET<DatabaseViewFromServer[]>('/database-views');
         if (result.status)
             this.databases = result.data.map(databaseFromServer => new DatabaseView(databaseFromServer));
@@ -52,7 +51,7 @@ export default defineComponent({
                 }),
                 mappingJsonValue: JSON.stringify({
                     kindName: this.accessPath?.name.toString().toLowerCase(),
-                    pkey: [], // TODO
+                    pkey: [], // TODO this is important for the IC algorithm
                     accessPath: this.accessPath?.toJSON()
                 })
             });

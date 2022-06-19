@@ -33,7 +33,6 @@ export default defineComponent({
     },
     computed: {
         changed(): boolean {
-            // TODO Add a proper condition for an ID change
             return this.label !== this.node.schemaObject.label || this.addingId || this.addedId;
         }
     },

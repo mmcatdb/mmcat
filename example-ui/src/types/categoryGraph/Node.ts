@@ -36,7 +36,6 @@ const defaultSelectionStatus = {
 };
 
 function getStatusClass(status: SelectionStatus) {
-    //return status.type + (status.type !== SelectionType.Default ? '-' + status.level : '');
     return status.type;
 }
 
@@ -58,11 +57,7 @@ export class Node {
     _signatureToEdge = new ComparableMap<Signature, string, Edge>(signature => signature.toString());
 
     constructor(schemaObject: SchemaObject) {
-    //constructor(schemaObject: SchemaObject, nodeObject: NodeSingular) {
         this.schemaObject = schemaObject;
-        //this.nodeObject = nodeObject;
-
-        //nodeObject.
     }
 
     setCytoscapeNode(node: NodeSingular) {
@@ -98,41 +93,9 @@ export class Node {
         return !nextNeighbour ? undefined : split.rest.isEmpty ? nextNeighbour : nextNeighbour.getNeighbour(split.rest);
     }
 
-    /*
-    public get isLeaf(): boolean {
-        // TODO this condition should be for all morphisms (i.e. also for their duals).
-        // There aren't any leaves under current setting.
-        return this.neighbours.size < 2;
-    }
-    */
-
     get determinedPropertyType(): PropertyType | null {
-        /*
-        if (this.isLeaf)
-            return PropertyType.Simple;
-        */
-
         return this.schemaObject.canBeSimpleProperty ? null : PropertyType.Complex;
     }
-
-    /*
-    addTag(tag: NodeTag): void {
-        this.tags.add(tag);
-    }
-
-    removeTag(tag: NodeTag): void {
-        this.tags.delete(tag);
-    }
-
-    get style(): string {
-        let output = '';
-
-        if (this.tags.has(NodeTag.Root))
-            output += 'background-color: red';
-
-        return output;
-    }
-    */
 
     _availabilityStatus = AvailabilityStatus.Default;
     _selectionStatus = defaultSelectionStatus;
@@ -153,7 +116,6 @@ export class Node {
         this.node.removeClass(getStatusClass(this._selectionStatus));
         this._selectionStatus = status;
         this.node.addClass(getStatusClass(status));
-        //this.node.data('label', this.label); // This is only lazily evaluated due to performance reasons
         this.node.css({ content: this.label });
     }
 

@@ -89,6 +89,7 @@ export default defineComponent({
             if (type !== null) {
                 this.type = type;
                 this.state = State.SelectName;
+                return;
             }
 
             this.state = State.SelectType;
@@ -103,7 +104,6 @@ export default defineComponent({
             this.type = this.propertyToType(this.property);
         },
         confirmName() {
-            // TODO change signature to empty if it's not valid now
             this.save();
         },
         resetName() {

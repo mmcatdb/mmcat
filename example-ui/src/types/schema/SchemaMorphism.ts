@@ -47,52 +47,36 @@ export class SchemaMorphism {
         return Math.abs(baseValue ? baseValue : 0);
     }
 
-    private constructor() {}
+    private constructor(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, isNew: boolean) {
+        this.id = id;
+        this.domId = domId;
+        this.codId = codId;
+        this.signature = signature;
+        this.min = min;
+        this.max = max;
+        this._isNew = isNew;
+    }
 
     static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
-        const morphism = new SchemaMorphism();
-
-        morphism.id = input.id;
-        morphism.domId = input.domId;
-        morphism.codId = input.codId;
-
         const parsedJson = JSON.parse(input.jsonValue) as SchemaMorphismJSON;
-        morphism.signature = Signature.fromJSON(parsedJson.signature);
-        morphism.min = parsedJson.min;
-        morphism.max = parsedJson.max;
-        morphism._isNew = false;
 
-        return morphism;
+        return new SchemaMorphism(
+            input.id,
+            input.domId,
+            input.codId,
+            Signature.fromJSON(parsedJson.signature),
+            parsedJson.min,
+            parsedJson.max,
+            false
+        );
     }
 
     static createNew(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max): SchemaMorphism {
-        // TODO
-        const morphism = new SchemaMorphism();
-
-        morphism.id = id;
-        morphism.domId = domId;
-        morphism.codId = codId;
-        morphism.signature = signature;
-        morphism.min = min;
-        morphism.max = max;
-        morphism._isNew = true;
-
-        return morphism;
+        return new SchemaMorphism(id, domId, codId, signature, min, max, true);
     }
 
-    static createNewFromDual(id: number, dualMorphism: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
-        // TODO
-        const morphism = new SchemaMorphism();
-
-        morphism.id = id;
-        morphism.domId = dualMorphism.codId;
-        morphism.codId = dualMorphism.domId;
-        morphism.signature = signature;
-        morphism.min = min;
-        morphism.max = max;
-        morphism._isNew = true;
-
-        return morphism;
+    static createNewFromDual(id: number, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
+        return new SchemaMorphism(id, dual.domId, dual.codId, signature, min, max, true);
     }
 
     update(domId: number, codId: number, min: Min, max: Max) {

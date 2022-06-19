@@ -11,8 +11,8 @@ export type SignatureJSON = {
 };
 
 export class Signature {
-    readonly _ids: number[];  // TODO private
-    readonly _type: SignatureType; // TODO private
+    readonly _ids: number[];
+    readonly _type: SignatureType;
 
     private constructor(input: number | number[], isNull = false) {
         this._ids = typeof input === 'number' ? [ input ] : [ ...input ];

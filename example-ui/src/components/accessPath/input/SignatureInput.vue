@@ -45,11 +45,7 @@ export default defineComponent({
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
-
-        // TODO
         this.innerValue.markAvailablePaths(this.filters);
-
-        //this.sequence.allNodes.forEach(node => node.select());
     },
     unmounted() {
         this.graph.removeNodeListener('tap', this.onNodeTapHandler);
@@ -62,25 +58,21 @@ export default defineComponent({
                 return;
 
             if (this.innerValue.sequence.tryRemoveNode(node)) {
-                //node.unselect();
                 this.graph.resetAvailabilityStatus();
                 this.innerValue.markAvailablePaths(this.filters);
                 this.sendUpdate();
             }
             else if (this.innerValue.sequence.tryAddNode(node)) {
-                //node.select();
                 this.graph.resetAvailabilityStatus();
                 this.innerValue.markAvailablePaths(this.filters);
                 this.sendUpdate();
             }
         },
         setSignature(signature: SequenceSignature, sendUpdate = true) {
-            //this.sequence.allNodes.forEach(node => node.unselect());
             this.innerValue.sequence.unselectAll();
             this.graph.resetAvailabilityStatus();
             this.innerValue = signature;
             this.innerValue.markAvailablePaths(this.filters);
-            //this.sequence.allNodes.forEach(node => node.select());
 
             if (sendUpdate)
                 this.sendUpdate();

@@ -1,14 +1,16 @@
 import { IntendedStringBuilder } from "@/utils/string";
-import { nameFromJSON, Signature, type Name } from "@/types/identifiers";
+import { Signature, StaticName, type StaticNameJSON } from "@/types/identifiers";
 import type { ComplexPropertyJSON } from "./ComplexProperty";
 import { subpathFromJSON, type ChildProperty } from "./compositeTypes";
 
+export type RootPropertyJSON = ComplexPropertyJSON & { name: StaticNameJSON };
+
 export class RootProperty {
-    public name: Name; // TODO should be static name
+    public name: StaticName;
     private _subpaths: ChildProperty[];
     private _signature = Signature.null;
 
-    public constructor(name: Name, subpaths: ChildProperty[] = []) {
+    public constructor(name: StaticName, subpaths: ChildProperty[] = []) {
         this.name = name;
         this._subpaths = [ ...subpaths ];
     }
@@ -17,8 +19,8 @@ export class RootProperty {
         return this._subpaths;
     }
 
-    public static fromJSON(jsonObject: ComplexPropertyJSON): RootProperty {
-        const property = new RootProperty(nameFromJSON(jsonObject.name));
+    public static fromJSON(jsonObject: RootPropertyJSON): RootProperty {
+        const property = new RootProperty(StaticName.fromJSON(jsonObject.name));
 
         property._subpaths = jsonObject.subpaths.map(subpath => subpathFromJSON(subpath, property));
 

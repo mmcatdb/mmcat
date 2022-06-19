@@ -68,6 +68,7 @@ export default defineComponent({
             if (type !== null) {
                 this.type = type;
                 this.state = State.SelectName;
+                return;
             }
 
             this.state = State.SelectType;
@@ -76,7 +77,6 @@ export default defineComponent({
             this.state = State.SelectName;
         },
         confirmName() {
-            // TODO change signature to empty if it's not valid now
             this.save();
         }
     }
