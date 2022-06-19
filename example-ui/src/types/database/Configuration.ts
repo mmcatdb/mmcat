@@ -1,6 +1,5 @@
 export class DatabaseConfiguration {
     readonly isRootObjectAllowed: boolean; // TODO
-    readonly isRootMorphismAllowed: boolean; // TODO
     readonly isPropertyToOneAllowed: boolean;
     readonly isPropertyToManyAllowed: boolean;
     readonly isInliningToOneAllowed: boolean;
@@ -13,7 +12,6 @@ export class DatabaseConfiguration {
 
     public constructor(fromServer: DatabaseConfigurationFromServer) {
         this.isRootObjectAllowed = fromServer.isRootObjectAllowed;
-        this.isRootMorphismAllowed = fromServer.isRootMorphismAllowed;
         this.isPropertyToOneAllowed = fromServer.isPropertyToOneAllowed;
         this.isPropertyToManyAllowed = fromServer.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = fromServer.isInliningToOneAllowed;
@@ -28,7 +26,6 @@ export class DatabaseConfiguration {
 
 export type DatabaseConfigurationFromServer = {
     isRootObjectAllowed: boolean,
-    isRootMorphismAllowed: boolean,
     isPropertyToOneAllowed: boolean,
     isPropertyToManyAllowed: boolean,
     isInliningToOneAllowed: boolean,
