@@ -24,7 +24,6 @@ public class MongoDBPathWrapper implements AbstractPathWrapper
         return properties.stream().anyMatch(property -> "_id".equals(property.substring(property.indexOf('/') + 1)));
     }
 
-	@Override public boolean isRootObjectAllowed() { return true; }
 	@Override public boolean isPropertyToOneAllowed() { return true; }
 	@Override public boolean isPropertyToManyAllowed() { return true; }
 	@Override public boolean isInliningToOneAllowed() { return true; }

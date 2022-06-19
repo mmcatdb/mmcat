@@ -8,7 +8,6 @@ import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
  */
 public class DatabaseConfiguration {
 
-    public boolean isRootObjectAllowed;
 	public boolean isPropertyToOneAllowed;
 	public boolean isPropertyToManyAllowed;
 	public boolean isInliningToOneAllowed;
@@ -20,7 +19,6 @@ public class DatabaseConfiguration {
     public boolean isComplexPropertyAllowed;
 
     public DatabaseConfiguration(AbstractPathWrapper wrapper) {
-        this.isRootObjectAllowed = wrapper.isRootObjectAllowed();
         this.isPropertyToOneAllowed = wrapper.isPropertyToOneAllowed();
         this.isPropertyToManyAllowed = wrapper.isPropertyToManyAllowed();
         this.isInliningToOneAllowed = wrapper.isInliningToOneAllowed();

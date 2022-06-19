@@ -1,5 +1,4 @@
 export class DatabaseConfiguration {
-    readonly isRootObjectAllowed: boolean; // TODO
     readonly isPropertyToOneAllowed: boolean;
     readonly isPropertyToManyAllowed: boolean;
     readonly isInliningToOneAllowed: boolean;
@@ -7,11 +6,10 @@ export class DatabaseConfiguration {
     readonly isGrouppingAllowed: boolean;
     readonly isDynamicNamingAllowed: boolean;
     readonly isAnonymousNamingAllowed: boolean;
-    readonly isReferenceAllowed: boolean; // TODO
+    readonly isReferenceAllowed: boolean; // TODO The reference algorithm.
     readonly isComplexPropertyAllowed: boolean; // TODO upraveno add a edit property, ale ještě podle toho nejsou povoleny či zakázány nody při vybírání signatury
 
     public constructor(fromServer: DatabaseConfigurationFromServer) {
-        this.isRootObjectAllowed = fromServer.isRootObjectAllowed;
         this.isPropertyToOneAllowed = fromServer.isPropertyToOneAllowed;
         this.isPropertyToManyAllowed = fromServer.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = fromServer.isInliningToOneAllowed;
@@ -25,7 +23,6 @@ export class DatabaseConfiguration {
 }
 
 export type DatabaseConfigurationFromServer = {
-    isRootObjectAllowed: boolean,
     isPropertyToOneAllowed: boolean,
     isPropertyToManyAllowed: boolean,
     isInliningToOneAllowed: boolean,
