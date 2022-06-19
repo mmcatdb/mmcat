@@ -25,7 +25,6 @@ public class PostgreSQLPathWrapper implements AbstractPathWrapper
     }
 
     @Override public boolean isRootObjectAllowed() { return true; }
-    @Override public boolean isRootMorphismAllowed() { return true; }
 	@Override public boolean isPropertyToOneAllowed() { return true; }
 	@Override public boolean isPropertyToManyAllowed() { return false; }
 	@Override public boolean isInliningToOneAllowed() { return true; }
