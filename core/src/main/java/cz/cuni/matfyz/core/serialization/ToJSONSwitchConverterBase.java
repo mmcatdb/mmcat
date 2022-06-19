@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jachymb.bartik
  */
-public abstract class ToJSONConverterBase<Type extends JSONConvertible> implements ToJSONConverter<Type> {
+public abstract class ToJSONSwitchConverterBase<Type extends JSONConvertible> implements ToJSONConverter<Type> {
 
     /**
      * A default name-of-the-Type-class implementation which expects the JSONConverter<Type> class to be an inner class of the Type.
@@ -22,6 +22,7 @@ public abstract class ToJSONConverterBase<Type extends JSONConvertible> implemen
     public JSONObject toJSON(Type object) {
         try {
             var output = _toJSON(object);
+            output.put("_class", name());
             return output;
         }
         catch (JSONException exception) {

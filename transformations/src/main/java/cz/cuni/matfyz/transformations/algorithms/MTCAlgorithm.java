@@ -22,22 +22,18 @@ public class MTCAlgorithm
     private static Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
 
     private SchemaCategory schema; // TODO
-    //private InstanceCategory instance; // TODO
     private ForestOfRecords forest; // TODO
     private Mapping mapping; // TODO
     private ComplexProperty rootAccessPath;
-            
-    private InstanceFunctor instanceFunctor;
+    private InstanceCategory instance;
     
     public void input(Mapping mapping, InstanceCategory instance, ForestOfRecords forest)
     {
         this.schema = mapping.category();
-        //this.instance = instance;
         this.forest = forest;
         this.mapping = mapping;
         this.rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
-        
-        instanceFunctor = new InstanceFunctor(instance, schema);
+        this.instance = instance;
     }
     
 	public void algorithm()
@@ -65,7 +61,7 @@ public class MTCAlgorithm
         if (Debug.shouldLog(3))
             System.out.println("#### Create Stack With Object ####");
         
-        InstanceObject qI = instanceFunctor.object(object);
+        InstanceObject qI = instance.getObject(object);
         IdWithValues sid = fetchSid(object.superId(), record);
         Stack<StackTriple> M = new Stack<>();
         
@@ -85,17 +81,17 @@ public class MTCAlgorithm
         
         Stack<StackTriple> M = new Stack<>();
         
-        InstanceObject qI_dom = instanceFunctor.object(object);
+        InstanceObject qI_dom = instance.getObject(object);
         IdWithValues sids_dom = fetchSid(object.superId(), record);
         ActiveDomainRow sid_dom = modify(qI_dom, sids_dom);
 
         SchemaObject qS_cod = morphism.cod();
         IdWithValues sids_cod = fetchSid(qS_cod.superId(), record);
         
-        InstanceObject qI_cod = instanceFunctor.object(qS_cod);
+        InstanceObject qI_cod = instance.getObject(qS_cod);
         ActiveDomainRow sid_cod = modify(qI_cod, sids_cod);
 
-        InstanceMorphism mI = instanceFunctor.morphism(morphism);
+        InstanceMorphism mI = instance.getMorphism(morphism);
 
         addRelation(mI, sid_dom, sid_cod);
         addRelation(mI.dual(), sid_cod, sid_dom);
@@ -122,9 +118,9 @@ public class MTCAlgorithm
             printStack(M);
         
         StackTriple triple = M.pop();
-        InstanceMorphism mI = instanceFunctor.morphism(triple.mS);
+        InstanceMorphism mI = instance.getMorphism(triple.mS);
         SchemaObject oS = triple.mS.cod();
-        InstanceObject qI = instanceFunctor.object(oS);
+        InstanceObject qI = instance.getObject(oS);
         Iterable<Pair<IdWithValues, IComplexRecord>> sids = fetchSids(oS.superId(), triple.record, triple.pid, triple.mS);
 
         for (Pair<IdWithValues, IComplexRecord> sid : sids)
@@ -151,8 +147,7 @@ public class MTCAlgorithm
         System.out.println(builder.toString());
     }
 
-    // Fetch id with values for given record
-	//private IdWithValues fetchSid(Id superId, RootRecord record)
+    // Fetch id with values for given record.
     private static IdWithValues fetchSid(Id superId, RootRecord rootRecord)
     {
         var builder = new IdWithValues.Builder();
@@ -171,6 +166,7 @@ public class MTCAlgorithm
             }
             else
             {
+                LOGGER.warn("A simple record with signature " + signature + " is an array record:\n" + simpleRecord + "\n");
                 throw new UnsupportedOperationException("FetchSid doesn't support array values.");
             }
         }
@@ -397,7 +393,7 @@ public class MTCAlgorithm
         if (path instanceof ComplexProperty complexPath)
             for (Pair<Signature, ComplexProperty> child: children(complexPath))
             {
-                SchemaMorphism morphism = schema.signatureToMorphism(child.getValue0());
+                SchemaMorphism morphism = schema.getMorphism(child.getValue0());
                 stack.push(new StackTriple(sid, morphism, child.getValue1(), record));
             }
     }

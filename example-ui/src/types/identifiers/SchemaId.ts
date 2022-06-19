@@ -1,7 +1,6 @@
 import { Signature, type SignatureJSON } from "./Signature";
 
 export type SchemaIdJSON = {
-    _class: 'Id',
     signatures: SignatureJSON[]
 }
 
@@ -39,7 +38,6 @@ export class SchemaId {
 
     toJSON(): SchemaIdJSON {
         return {
-            _class: 'Id',
             signatures: this._signatures.map(signature => signature.toJSON())
         };
     }

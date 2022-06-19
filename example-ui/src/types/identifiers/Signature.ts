@@ -5,7 +5,10 @@ enum SignatureType {
     Null
 }
 
-export type SignatureJSON = { _class: 'Signature', ids: number[], isNull: boolean };
+export type SignatureJSON = {
+    ids: number[],
+    isNull: boolean
+};
 
 export class Signature {
     readonly _ids: number[];  // TODO private
@@ -140,7 +143,6 @@ export class Signature {
 
     toJSON(): SignatureJSON {
         return {
-            _class: 'Signature',
             ids: this._ids,
             isNull: this.isNull
         };

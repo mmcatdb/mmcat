@@ -15,7 +15,6 @@ export class Key {
 
     public toJSON(): KeyJSON {
         return {
-            _class: 'Key',
             value: this.value
         };
     }
@@ -26,6 +25,5 @@ export type KeyFromServer = {
 }
 
 export type KeyJSON = {
-    _class: 'Key',
     value: number
 }

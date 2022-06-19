@@ -140,7 +140,7 @@ public class TestData
     
     private void addItems(SchemaCategory schema, SchemaObject order)
     {
-        var number = schema.keyToObject(numberKey);
+        var number = schema.getObject(numberKey);
 
         var items = createSchemaObject(
             itemsKey,
@@ -380,7 +380,7 @@ public class TestData
     public InstanceCategory expectedInstance_order(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         expectedOrder(builder, "2043");
         expectedOrder(builder, "1653");
@@ -388,7 +388,7 @@ public class TestData
         return instance;
     }
 
-    private ActiveDomainRow expectedOrder(SimpleInstanceCategoryBuilder builder, String orderNumber)
+    private ActiveDomainRow expectedOrder(TestInstanceCategoryBuilder builder, String orderNumber)
     {
         var order = builder.value(orderToNumber, orderNumber).object(orderKey);
         var number = builder.value(Signature.Empty(), orderNumber).object(numberKey);
@@ -399,7 +399,7 @@ public class TestData
     public InstanceCategory expectedInstance_nestedDoc(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         expectedOrder_nestedDoc(builder, "2043", "0", "hodnotaA", "hodnotaB", "hodnotaC");
         expectedOrder_nestedDoc(builder, "1653", "1", "hodnotaA2", "hodnotaB2", "hodnotaC2");
@@ -407,7 +407,7 @@ public class TestData
         return instance;
     }
 
-    private void expectedOrder_nestedDoc(SimpleInstanceCategoryBuilder builder, String orderNumber, String uniqueId, String valueA, String valueB, String valueC)
+    private void expectedOrder_nestedDoc(TestInstanceCategoryBuilder builder, String orderNumber, String uniqueId, String valueA, String valueB, String valueC)
     {
         var order = expectedOrder(builder, orderNumber);
         var nestedDoc = builder.value(Signature.Empty(), uniqueId).object(nestedDocKey);
@@ -424,7 +424,7 @@ public class TestData
     public InstanceCategory expectedInstance_array(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         expectedOrder_array(builder, "2043", new String[]{ "123", "456", "789" });
         expectedOrder_array(builder, "1653", new String[]{ "123", "String456", "String789" });
@@ -432,7 +432,7 @@ public class TestData
         return instance;
     }
 
-    private void expectedOrder_array(SimpleInstanceCategoryBuilder builder, String orderNumber, String[] array)
+    private void expectedOrder_array(TestInstanceCategoryBuilder builder, String orderNumber, String[] array)
     {
         var order = expectedOrder(builder, orderNumber);
         for (String value : array)
@@ -445,7 +445,7 @@ public class TestData
     public InstanceCategory expectedInstance_items(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
 
         var order = expectedOrder(builder, "2043");
         expectedItem(builder, order, "2043", "123", "Toy", "125", "1");
@@ -456,7 +456,7 @@ public class TestData
         return instance;
     }
 
-    private void expectedItem(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    private void expectedItem(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
     {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
         var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
@@ -474,7 +474,7 @@ public class TestData
     public InstanceCategory expectedInstance_contact(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         var order1 = expectedOrder(builder, "2043");
         addExpectedContact(builder, order1, "2043", "anna@seznam.cz", "email");
@@ -487,7 +487,7 @@ public class TestData
         return instance;
     }
 
-    private void addExpectedContact(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String numberValue, String valueValue, String nameValue)
+    private void addExpectedContact(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String numberValue, String valueValue, String nameValue)
     {
         var contact = builder.value(contactToNumber, numberValue).value(contactToValue, valueValue).value(contactToName, nameValue).object(contactKey);
         var value = builder.value(Signature.Empty(), valueValue).object(valueKey);
@@ -501,7 +501,7 @@ public class TestData
     public InstanceCategory expectedInstance_ordered(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         expectedOrder_ordered(builder, "2043", "1");
         expectedOrder_ordered(builder, "1653", "1");
@@ -509,7 +509,7 @@ public class TestData
         return instance;
     }
 
-    public ActiveDomainRow expectedOrder_ordered(SimpleInstanceCategoryBuilder builder, String orderNumber, String customerId)
+    public ActiveDomainRow expectedOrder_ordered(TestInstanceCategoryBuilder builder, String orderNumber, String customerId)
     {
         var order = expectedOrder(builder, orderNumber);
         var id = builder.value(Signature.Empty(), customerId).object(idKey);
@@ -520,7 +520,7 @@ public class TestData
     public InstanceCategory expectedInstance_nestedDocMissingSimple(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         var order1 = expectedOrder(builder, "2043");
         var nestedDoc1 = builder.value(Signature.Empty(), "0").object(nestedDocKey);
@@ -546,7 +546,7 @@ public class TestData
     public InstanceCategory expectedInstance_nestedDocMissingComplex(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         expectedOrder(builder, "2043");
         expectedOrder(builder, "1653");
@@ -557,7 +557,7 @@ public class TestData
     public InstanceCategory expectedInstance_itemsEmpty(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         expectedOrder(builder, "2043");
         
@@ -567,7 +567,7 @@ public class TestData
     public InstanceCategory expectedInstance_address(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         var order1 = expectedOrder(builder, "2043");
         addExpectedAddress(builder, order1, "0", "2043", "city", "Praha", "cs");
@@ -580,7 +580,7 @@ public class TestData
         return instance;
     }
 
-    private void addExpectedAddress(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String uniqueId, String number, String label, String text, String locale)
+    private void addExpectedAddress(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String uniqueId, String number, String label, String text, String locale)
     {
         var address = builder.value(addressToNumber, number).value(addressToLabel, label).object(addressKey);
         var labelRow = builder.value(Signature.Empty(), label).object(labelKey);
@@ -598,7 +598,7 @@ public class TestData
     public InstanceCategory expectedInstance_itemsMissing(SchemaCategory schema)
     {
         InstanceCategory instance = buildInstanceScenario(schema);
-        var builder = new SimpleInstanceCategoryBuilder(instance);
+        var builder = new TestInstanceCategoryBuilder(instance);
         
         var order = expectedOrder(builder, "2043");
         expectedItemMissing(builder, order, "2043", "123", "Toy", "125", null);
@@ -610,7 +610,7 @@ public class TestData
         return instance;
     }
 
-    private void expectedItemMissing(SimpleInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    private void expectedItemMissing(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
     {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
         builder.morphism(orderToItems, order, items);

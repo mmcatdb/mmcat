@@ -18,21 +18,9 @@ public abstract class FromJSONLoaderBase<Type extends JSONConvertible> {
         return this.getClass().getDeclaringClass().getSimpleName();
     }
 
-    protected boolean silenceClassMismatchError() {
-        return false;
-    }
-
     protected void loadFromJSON(Type object, JSONObject jsonObject) {
         try {
-            String className = jsonObject.getString("_class");
-            if (className.equals(name()))
-                _loadFromJSON(object, jsonObject);
-
-            if (!silenceClassMismatchError()) {
-                Logger logger = LoggerFactory.getLogger(this.getClass());
-                logger.error("From JSON failed for " + name() + " because of mismatch in \"_class\": \"" + className + "\".");
-            }
-
+            _loadFromJSON(object, jsonObject);
         }
         catch (JSONException exception) {
             Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,7 +37,7 @@ public abstract class FromJSONLoaderBase<Type extends JSONConvertible> {
         }
         catch (JSONException exception) {
             Logger logger = LoggerFactory.getLogger(this.getClass());
-            logger.error("From JSON failed for " + name() + " because invalid input string.", exception);
+            logger.error("From JSON failed for " + name() + " because of invalid input string \"" + jsonValue + "\".", exception);
         }
     }
 

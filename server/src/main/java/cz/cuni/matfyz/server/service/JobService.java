@@ -40,15 +40,11 @@ public class JobService {
     }
 
     public Job start(Job job, UserStore store) {
-        //if (job.type != "modelToCategory") // TODO
-        //    return false
         LOGGER.info("START JOB");
         setJobStatus(job, Job.Status.Running);
         asyncService.runJob(job, store);
         LOGGER.info("START JOB END");
         return job;
-
-        //
     }
 
     private void setJobStatus(Job job, Job.Status status) {

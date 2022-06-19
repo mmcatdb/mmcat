@@ -2,7 +2,7 @@ package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.serialization.ToJSONSwitchConverterBase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +73,7 @@ public class SimpleProperty extends AccessPath
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends ToJSONConverterBase<SimpleProperty> {
+    public static class Converter extends ToJSONSwitchConverterBase<SimpleProperty> {
 
         @Override
         protected JSONObject _toJSON(SimpleProperty object) throws JSONException {

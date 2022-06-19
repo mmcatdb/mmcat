@@ -5,28 +5,23 @@ import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.category.*;
 
 import java.util.*;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author jachymb.bartik
  */
-public class SimpleInstanceCategoryBuilder
+public class TestInstanceCategoryBuilder
 {
-	
-//	private static final Logger LOGGER = LoggerFactory.getLogger(SimpleInstanceCategoryBuilder.class);
-	
     private final InstanceCategory instance;
     
-    public SimpleInstanceCategoryBuilder(InstanceCategory instance)
+    public TestInstanceCategoryBuilder(InstanceCategory instance)
     {
         this.instance = instance;
     }
     
     private final IdWithValues.Builder builder = new IdWithValues.Builder();
     
-    public SimpleInstanceCategoryBuilder value(Signature signature, String value)
+    public TestInstanceCategoryBuilder value(Signature signature, String value)
     {
         builder.add(signature, value);
         
@@ -38,11 +33,11 @@ public class SimpleInstanceCategoryBuilder
         IdWithValues idWithValues = builder.build();
         var activeDomainRow = new ActiveDomainRow(idWithValues);
         
-        Map<IdWithValues, ActiveDomainRow> innerMap = instance.object(key).activeDomain().get(idWithValues.id());
+        Map<IdWithValues, ActiveDomainRow> innerMap = instance.getObject(key).activeDomain().get(idWithValues.id());
         if (innerMap == null)
         {
             innerMap = new TreeMap<>();
-            instance.object(key).activeDomain().put(idWithValues.id(), innerMap);
+            instance.getObject(key).activeDomain().put(idWithValues.id(), innerMap);
         }
         
         innerMap.put(idWithValues, activeDomainRow);
@@ -53,10 +48,10 @@ public class SimpleInstanceCategoryBuilder
     public ActiveMappingRow morphism(Signature signature, ActiveDomainRow domainRow, ActiveDomainRow codomainRow)
     {
         var row = new ActiveMappingRow(domainRow, codomainRow);
-        instance.morphism(signature).addMapping(row);
+        instance.getMorphism(signature).addMapping(row);
         
         var dualRow = new ActiveMappingRow(codomainRow, domainRow);
-        instance.morphism(signature.dual()).addMapping(dualRow);
+        instance.getMorphism(signature.dual()).addMapping(dualRow);
         
         return row;
     }

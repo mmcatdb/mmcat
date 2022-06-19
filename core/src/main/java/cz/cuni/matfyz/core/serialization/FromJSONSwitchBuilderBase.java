@@ -20,14 +20,17 @@ public abstract class FromJSONSwitchBuilderBase<Type extends JSONConvertible> im
     protected abstract Set<FromJSONBuilderBase<? extends Type>> getChildConverters();
 
     public Type fromJSON(JSONObject jsonObject) {
-        for (var converter : getChildConverters()) {
-            Type output = converter.fromJSON(jsonObject, true);
-            if (output != null)
-                return output;
+        try {
+            for (var converter : getChildConverters()) {
+                final String className = jsonObject.getString("_class");
+                if (converter.name().equals(className))
+                    return converter.fromJSON(jsonObject);
+            }
         }
-
-        Logger logger = LoggerFactory.getLogger(this.getClass());
-        logger.error("From JSON failed for switch class " + name() + ".");
+        catch (JSONException exception) {
+            Logger logger = LoggerFactory.getLogger(this.getClass());
+            logger.error("From JSON failed for switch class " + name() + ".", exception);
+        }
 
         return null;
     }
@@ -39,7 +42,7 @@ public abstract class FromJSONSwitchBuilderBase<Type extends JSONConvertible> im
         }
         catch (JSONException exception) {
             Logger logger = LoggerFactory.getLogger(this.getClass());
-            logger.error("From JSON failed for " + name() + " because invalid input string.", exception);
+            logger.error("From JSON failed for " + name() + " because of invalid input string.", exception);
         }
 
         return null;

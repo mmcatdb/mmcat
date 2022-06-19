@@ -3,7 +3,6 @@ import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
 import { ComparablePosition, PositionUpdateToServer } from "./Position";
 
 export type SchemaObjectJSON = {
-    _class: 'SchemaObject',
     label: string,
     key: KeyJSON,
     ids: SchemaIdJSON[],
@@ -99,7 +98,6 @@ export class SchemaObject {
 
     toJSON(): SchemaObjectJSON {
         return {
-            _class: "SchemaObject",
             label: this.label,
             key: this.key.toJSON(),
             ids: this.schemaIds.map(id => id.toJSON()),

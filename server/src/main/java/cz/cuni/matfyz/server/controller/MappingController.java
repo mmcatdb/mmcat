@@ -25,7 +25,7 @@ public class MappingController {
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
-    public MappingWrapper getMappingById(@PathVariable int id) {
+    public MappingWrapper getMapping(@PathVariable int id) {
         MappingWrapper object = service.find(id);
 
         if (object != null)
@@ -36,7 +36,7 @@ public class MappingController {
 
     @GetMapping("/mappings")
     public List<MappingWrapper> getAllMappings() {
-        // TODO
+        // TODO multiple schema categories
         return service.findAllInCategory(1);
     }
 

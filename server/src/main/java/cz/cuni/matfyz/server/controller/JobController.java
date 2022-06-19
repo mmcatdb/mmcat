@@ -36,7 +36,7 @@ public class JobController
     }
 
     @GetMapping("/jobs/{id}")
-    public Job getJobById(@PathVariable Integer id)
+    public Job getJob(@PathVariable Integer id)
     {
         Job job = service.find(id);
         if (job != null)
@@ -56,7 +56,7 @@ public class JobController
     }
 
     @PostMapping("/jobs/{id}/start")
-    public Job startJobById(@PathVariable int id, HttpSession session)
+    public Job startJob(@PathVariable int id, HttpSession session)
     {
         Job job = service.find(id);
         if (job == null)
@@ -67,7 +67,7 @@ public class JobController
     }
 
     @DeleteMapping("/jobs/{id}")
-    public void deleteJobById(@PathVariable Integer id)
+    public void deleteJob(@PathVariable Integer id)
     {
         boolean result = service.delete(id);
         if (!result)

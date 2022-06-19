@@ -2,12 +2,13 @@ package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.serialization.ToJSONSwitchConverterBase;
 import cz.cuni.matfyz.core.utils.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.*;
 
 /**
@@ -223,7 +224,7 @@ public class ComplexProperty extends AccessPath implements IValue
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends ToJSONConverterBase<ComplexProperty> {
+    public static class Converter extends ToJSONSwitchConverterBase<ComplexProperty> {
 
         @Override
         protected JSONObject _toJSON(ComplexProperty object) throws JSONException {

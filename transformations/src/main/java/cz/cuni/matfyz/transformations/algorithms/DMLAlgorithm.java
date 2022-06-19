@@ -18,7 +18,6 @@ public class DMLAlgorithm
 {
     private Mapping mapping;
     private InstanceCategory instance;
-    private InstanceFunctor instanceFunctor;
     private String rootName; // TODO
     private AbstractPushWrapper wrapper;
 
@@ -26,7 +25,6 @@ public class DMLAlgorithm
     {
         this.mapping = mapping;
         this.instance = instance;
-        instanceFunctor = new InstanceFunctor(instance, mapping.category());
         this.rootName = rootName; // Maybe it could be found as mapping.accessPath.Name.getStringName()
         this.wrapper = wrapper;
     }
@@ -40,7 +38,7 @@ public class DMLAlgorithm
 
     private List<DMLStatement> processWithObject(SchemaObject object)
     {
-        InstanceObject qI = instanceFunctor.object(object);
+        InstanceObject qI = instance.getObject(object);
         Set<ActiveDomainRow> S = fetchSids(qI);
         Stack<DMLStackTriple> M = new Stack<>();
         List<DMLStatement> output = new ArrayList<>();
@@ -56,7 +54,7 @@ public class DMLAlgorithm
 
     private List<DMLStatement> processWithMorphism(SchemaMorphism morphism)
     {
-        InstanceMorphism mI = instanceFunctor.morphism(morphism);
+        InstanceMorphism mI = instance.getMorphism(morphism);
         Set<ActiveMappingRow> S = fetchRelations(mI);
         AccessPath codomainPath = mapping.accessPath().getSubpathBySignature(morphism.signature());
         Stack<DMLStackTriple> M = new Stack<>();
@@ -135,7 +133,7 @@ public class DMLAlgorithm
             else
             {
                 // Get all mapping rows that have signature of this subpath and originate in given row.
-                InstanceMorphism morphism = instance.morphism(subpath.signature());
+                InstanceMorphism morphism = instance.getMorphism(subpath.signature());
                 boolean showIndex = morphism.schemaMorphism().isArray();
                 int index = 0;
 
@@ -184,7 +182,7 @@ public class DMLAlgorithm
         var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
         ActiveDomainRow parentRow = parentToObjectMapping.domainRow();
-        InstanceMorphism nameMorphism = instance.morphism(dynamicName.signature());
+        InstanceMorphism nameMorphism = instance.getMorphism(dynamicName.signature());
         var nameRowSet = nameMorphism.mappingsFromRow(parentRow);
 
         if (nameRowSet != null && nameRowSet.size() > 0)

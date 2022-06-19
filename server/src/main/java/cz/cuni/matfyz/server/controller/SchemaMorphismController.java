@@ -21,8 +21,7 @@ public class SchemaMorphismController
     private SchemaMorphismService service;
 
     @GetMapping("/schemaMorphisms/{id}")
-    //public SchemaMorphismWrapper getMorphismById(@PathVariable String id) // TODO
-    public SchemaMorphismWrapper getMorphismById(@PathVariable int id)
+    public SchemaMorphismWrapper getMorphism(@PathVariable int id)
     {
         SchemaMorphismWrapper morphism = service.find(id);
 

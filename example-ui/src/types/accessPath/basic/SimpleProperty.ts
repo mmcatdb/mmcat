@@ -2,7 +2,7 @@ import { IntendedStringBuilder } from "@/utils/string";
 import { nameFromJSON, Signature, type Name, type NameJSON, type SignatureJSON } from "@/types/identifiers";
 import type { ParentProperty } from "./compositeTypes";
 
-export type SimpleValueJSON = { _class: 'SimpleValue', signature: SignatureJSON };
+export type SimpleValueJSON = { signature: SignatureJSON };
 
 export type SimplePropertyJSON = { _class: 'SimpleProperty', name: NameJSON, value: SimpleValueJSON };
 
@@ -47,7 +47,6 @@ export class SimpleProperty {
             _class: 'SimpleProperty',
             name: this.name.toJSON(),
             value: {
-                _class: 'SimpleValue',
                 signature: this._signature.toJSON()
             }
         };

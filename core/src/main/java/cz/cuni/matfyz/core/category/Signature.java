@@ -21,18 +21,11 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
 	private final int[] ids;
     private final boolean isNull;
     
-    private Signature(boolean isNull)
+    private Signature(int[] ids, boolean isNull)
     {
-        this.ids = new int[] {};
+        this.ids = isNull ? new int[] {} : ids;
         this.isNull = isNull;
     }
-    
-    private Signature(int[] ids)
-    {
-        //assert ids.length > 0 : "Empty ids array passed to Signature constructor.";
-        this.ids = ids.clone();
-        this.isNull = false;
-	}
     
     public Signature(int id)
     {
@@ -57,35 +50,21 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         return output;
     }
 
-    /*
-	public Signature(Signature signature)
-    {
-		this.ids = signature.ids;
-	}
-    */
-    
     public Signature concatenate(Signature other)
     {
-        return new Signature(ArrayUtils.concatenate(other.ids, ids));
+        return new Signature(ArrayUtils.concatenate(other.ids, ids), false);
 	}
     
     public static Signature Empty()
     {
-        return new Signature(false);
+        return new Signature(new int[] {}, false);
     }
     
     public static Signature Null()
     {
-        return new Signature(true); // TODO edit
+        return new Signature(new int[] {}, true);
     }
     
-    /*
-    public static Signature combine(Signature a, Signature b)
-    {
-        return new Signature(ArrayUtils.concatenate(a.ids, b.ids));
-    }
-    */
-
 	public Signature dual()
     {
         int n = ids.length;
@@ -96,7 +75,7 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         for (int i = 0; i < n; i++)
             array[i] = - ids[n - i - 1];
         
-        return new Signature(array);
+        return new Signature(array, false);
 	}
     
     public enum Type
@@ -193,7 +172,7 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
             return null;
         
         int length = ids.length - signature.ids.length;
-        return length == 0 ? Signature.Empty() : new Signature(Arrays.copyOfRange(ids, 0, length));
+        return length == 0 ? Signature.Empty() : new Signature(Arrays.copyOfRange(ids, 0, length), false);
     }
 
     @Override
@@ -226,8 +205,8 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
                 ids[i] = idsArray.getInt(i);
             
             var isNull = jsonObject.getBoolean("isNull");
-                
-            return isNull ? new Signature(true) : new Signature(ids);
+
+            return new Signature(ids, isNull);
         }
     
     }

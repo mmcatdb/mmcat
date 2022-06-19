@@ -2,7 +2,7 @@ package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.record.DynamicRecordName;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.serialization.ToJSONSwitchConverterBase;
 import cz.cuni.matfyz.core.category.Signature;
 
 import org.json.JSONException;
@@ -48,7 +48,7 @@ public class DynamicName extends Name
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends ToJSONConverterBase<DynamicName> {
+    public static class Converter extends ToJSONSwitchConverterBase<DynamicName> {
 
         @Override
         protected JSONObject _toJSON(DynamicName object) throws JSONException {

@@ -22,22 +22,6 @@ public class InstanceCategory implements Category {
 		this.objects = objects;
         this.morphisms = morphisms;
 	}
-	
-    /*
-	InstanceCategory() {
-		objects = new TreeMap<>();
-		morphisms = new TreeMap<>();
-	}
-	
-	public void addObject(InstanceObject object) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-		
-	}
-	
-	public void addMorphism(Object... TODO) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-    */
     
     public Map<Key, InstanceObject> objects()
     {
@@ -49,22 +33,25 @@ public class InstanceCategory implements Category {
         return morphisms;
     }
     
-	public InstanceObject object(Key key)
+	public InstanceObject getObject(Key key)
     {
-        final InstanceObject result = objects.get(key);
-        assert result != null : "Instance object with key " + key + " not found in instance category.";
-        return result;
+        return objects.get(key);
+	}
+
+	public InstanceObject getObject(SchemaObject schemaObject)
+	{
+		return this.getObject(schemaObject.key());
 	}
     
-    public InstanceMorphism morphism(Signature signature)
+    public InstanceMorphism getMorphism(Signature signature)
     {
         InstanceMorphism morphism = morphisms.get(signature);
 		if (morphism == null)
 		{
 			// This must be a composite morphism. These are created dynamically so we have to add it dynamically.
-			SchemaMorphism schemaMorphism = schema.signatureToMorphism(signature);
-			InstanceObject dom = object(schemaMorphism.dom().key());
-			InstanceObject cod = object(schemaMorphism.cod().key());
+			SchemaMorphism schemaMorphism = schema.getMorphism(signature);
+			InstanceObject dom = getObject(schemaMorphism.dom().key());
+			InstanceObject cod = getObject(schemaMorphism.cod().key());
 
 			morphism = new InstanceMorphism(schemaMorphism, dom, cod, this);
 			morphisms.put(signature, morphism);
@@ -72,15 +59,15 @@ public class InstanceCategory implements Category {
         
         return morphism;
 	}
+
+    public InstanceMorphism getMorphism(SchemaMorphism schemaMorphism)
+	{
+		return this.getMorphism(schemaMorphism.signature());
+	}
     
     public InstanceMorphism dual(Signature signatureOfOriginal)
     {
-		/*
-        final InstanceMorphism result = morphisms.get(signatureOfOriginal.dual());
-        assert result != null : "Instance morphism with signature " + signatureOfOriginal + " doesn't have its dual.";
-        return result;
-		*/
-		return morphism(signatureOfOriginal.dual());
+		return getMorphism(signatureOfOriginal.dual());
 	}
 	
 	@Override

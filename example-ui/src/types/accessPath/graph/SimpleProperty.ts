@@ -3,7 +3,7 @@ import type { Name, NameJSON, SignatureJSON } from "@/types/identifiers";
 import type { ParentProperty } from "./compositeTypes";
 import type { SequenceSignature } from "./SequenceSignature";
 
-export type SimpleValueJSON = { _class: 'SimpleValue', signature: SignatureJSON };
+export type SimpleValueJSON = { signature: SignatureJSON };
 
 export type SimplePropertyJSON = { _class: 'SimpleProperty', name: NameJSON, value: SimpleValueJSON };
 
@@ -43,7 +43,6 @@ export class SimpleProperty {
             _class: 'SimpleProperty',
             name: this.name.toJSON(),
             value: {
-                _class: 'SimpleValue',
                 signature: this._signature.toSignature().toJSON()
             }
         };

@@ -26,7 +26,7 @@ public class InstanceCategoryService {
         var store = UserStore.fromSession(session);
         var defaultInstance = store.getDefaultInstace();
 
-        return defaultInstance != null ? defaultInstance.object(key) : null;
+        return defaultInstance != null ? defaultInstance.getObject(key) : null;
     }
 
 }

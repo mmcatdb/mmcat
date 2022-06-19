@@ -21,13 +21,11 @@ public class SchemaObjectController
     private SchemaObjectService service;
 
     @GetMapping("/schemaObjects/{id}")
-    public SchemaObjectWrapper getObjectById(@PathVariable int id) // TODO
-    //public String getObjectById(@PathVariable int id)
+    public SchemaObjectWrapper getObject(@PathVariable int id)
     {
         SchemaObjectWrapper object = service.find(id);
 
         if (object != null)
-            //return object.toJSON().toString();
             return object;
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);

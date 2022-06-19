@@ -13,7 +13,7 @@ import org.json.JSONObject;
 /**
  * An instance of this class represents a tuple from the {@link InstanceObject}.
  * The tuple is made of pairs (signature, value) for each signature in the superid. This structure is implemented by a map.
- * Each value is unique among all the values associated with the same signature. (TODO maybe not)
+ * Each value is unique among all the values associated with the same signature.
  * @author jachym.bartik
  */
 public class ActiveDomainRow implements Comparable<ActiveDomainRow>, JSONConvertible

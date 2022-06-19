@@ -22,7 +22,7 @@ public class MTCAlgorithmTests
         UniqueIdProvider.reset();
         data = new TestData();
         schema = data.createDefaultSchemaCategory();
-        order = schema.keyToObject(data.getOrderKey());
+        order = schema.getObject(data.getOrderKey());
     }
 
 	@Test

@@ -1,7 +1,6 @@
 import { Signature, type SignatureJSON } from "../identifiers";
 
 export type SchemaMorphismJSON = {
-    _class: 'SchemaMorphism',
     signature: SignatureJSON,
     min: Min,
     max: Max
@@ -105,7 +104,6 @@ export class SchemaMorphism {
 
     toJSON(): SchemaMorphismJSON {
         return {
-            _class: 'SchemaMorphism',
             signature: this.signature.toJSON(),
             min: this.min,
             max: this.max

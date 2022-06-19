@@ -59,49 +59,9 @@ public class IdWithValues implements Comparable<IdWithValues>
         }
     }
     
-    /*
-    public Match compareToActiveDomainRow(ActiveDomainRow row)
-    {
-        int numberOfNulls = 0;
-        for (Signature signature : signatures())
-        {
-            String value = map.get(signature);
-            String rowValue = row.tuples().get(signature);
-            
-            if (rowValue == null)
-                numberOfNulls++;
-            else if (value != rowValue)
-                return Match.NONE;
-        }
-        
-        int sizeDifference = map.size() - row.tuples().size();
-        
-        if (sizeDifference == 0)
-            return numberOfNulls == 0 ? Match.EXACT : Match.UNION;
-        else if (sizeDifference > 0)
-            return numberOfNulls == sizeDifference ? Match.SUPERSET : Match.UNION;
-        else
-            return numberOfNulls == 0 ? Match.SUBSET : Match.UNION;
-    }
-    */
-
-    // TODO - this is only auto-generated code.
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final IdWithValues other = (IdWithValues) obj;
-        if (!Objects.equals(this.map, other.map)) {
-            return false;
-        }
-        return true;
+    public boolean equals(Object object) {
+        return object instanceof IdWithValues idWithValues && Objects.equals(this.map, idWithValues.map);
     }
     
     @Override
@@ -149,14 +109,3 @@ public class IdWithValues implements Comparable<IdWithValues>
         return builder.toString();
 	}
 }
-
-/*
-public enum Match
-{
-    EXACT,
-    SUBSET,
-    SUPERSET,
-    UNION, // All values for the same signatures are equal, but both sets have some different signatures.
-    NONE // At least one signature leads to different (non-null) values in both sets.
-}
-*/

@@ -1,13 +1,12 @@
 import axios from 'axios';
 import type { AxiosResponse } from 'axios/index';
-//import { API_URL } from '@/config';
 import qs from 'qs';
 import type { Result } from '@/types/result';
 
-const API_URL = 'http://localhost:27500';
+const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
 const instance = axios.create({
-    baseURL: API_URL,
+    baseURL: BACKEND_API_URL,
     withCredentials: true,
     // timeout: false,
     params: {} // do not remove this, its added to add params later in the config
@@ -71,7 +70,7 @@ function promiseToResponse<T>(promise: Promise<AxiosResponse<T>>): Promise<Resul
 }
 
 export function GET<T>(action: string, params = {}): Promise<Result<T>> {
-    let url = `${API_URL}`;
+    let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.get(url, {
         params,
@@ -82,25 +81,25 @@ export function GET<T>(action: string, params = {}): Promise<Result<T>> {
 }
 
 export function POST<T>(action: string, data = {}, params = {}): Promise<Result<T>> {
-    let url = `${API_URL}`;
+    let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.post(url, data, { params }));
 }
 
 export function PUT<T>(action: string, data = {}, params = {}): Promise<Result<T>> {
-    let url = `${API_URL}`;
+    let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.put(url, data, { params }));
 }
 
 export function PATCH<T>(action: string, data = {}, params = {}): Promise<Result<T>> {
-    let url = `${API_URL}`;
+    let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.patch(url, data, { params }));
 }
 
 export function DELETE<T>(action: string, params = {}): Promise<Result<T>> {
-    let url = `${API_URL}`;
+    let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.delete(url, { params }));
 }

@@ -42,8 +42,7 @@ public class SchemaCategoryController
     }
 
     @GetMapping("/schemaCategories/{id}")
-    //public IdentifiedSchemaCategory getCategoryById(@PathVariable String id) // TODO
-    public SchemaCategoryWrapper getCategoryWrapperById(@PathVariable int id)
+    public SchemaCategoryWrapper getCategoryWrapper(@PathVariable int id)
     {
         SchemaCategoryWrapper schema = service.find(id);
 

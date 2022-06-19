@@ -91,7 +91,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     
     private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, Document document, ComplexProperty path) throws Exception
     {
-        // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name
+        // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name.
         AccessPath subpathWithDynamicName = null;
         Set<String> otherSubpathNames = new TreeSet<>();
         

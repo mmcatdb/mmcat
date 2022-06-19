@@ -16,7 +16,7 @@ import java.util.*;
 public class DDLAlgorithm
 {
     private SchemaCategory schema; // TODO
-    private InstanceFunctor instanceFunctor;
+    private InstanceCategory instance;
     private String rootName; // TODO
     private ComplexProperty rootAccessPath;
     private AbstractDDLWrapper wrapper;
@@ -24,7 +24,7 @@ public class DDLAlgorithm
     public void input(SchemaCategory schema, InstanceCategory instance, String rootName, ComplexProperty rootAccessPath, AbstractDDLWrapper wrapper)
     {
         this.schema = schema;
-        instanceFunctor = new InstanceFunctor(instance, schema);
+        this.instance = instance;
         this.rootName = rootName;
         this.rootAccessPath = rootAccessPath;
         this.wrapper = wrapper;
@@ -80,8 +80,8 @@ public class DDLAlgorithm
         
         var dynamicName = (DynamicName) path.name();
             
-        SchemaObject schemaObject = schema.signatureToMorphism(dynamicName.signature()).cod();
-        InstanceObject instanceObject = instanceFunctor.object(schemaObject);
+        SchemaObject schemaObject = schema.getMorphism(dynamicName.signature()).cod();
+        InstanceObject instanceObject = instance.getObject(schemaObject);
         
         var output = new TreeSet<String>();
         for (ActiveDomainRow row : instanceObject.activeDomain().get(new Id(Signature.Empty())).values())
@@ -102,7 +102,7 @@ public class DDLAlgorithm
     
     private void processPath(SimpleProperty property, Set<String> names)
     {
-        var morphism = schema.signatureToMorphism(property.value().signature());
+        var morphism = schema.getMorphism(property.value().signature());
         
         if (morphism.isArray())
             wrapper.addSimpleArrayProperty(names, isRequired(morphism));
@@ -112,7 +112,7 @@ public class DDLAlgorithm
     
     private void processPath(ComplexProperty property, Set<String> names)
     {
-        var morphism = schema.signatureToMorphism(property.signature());
+        var morphism = schema.getMorphism(property.signature());
         
         if (morphism.isArray())
             wrapper.addComplexArrayProperty(names, isRequired(morphism));

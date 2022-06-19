@@ -2,7 +2,7 @@ package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.record.StaticRecordName;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.serialization.ToJSONSwitchConverterBase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,7 +92,7 @@ public class StaticName extends Name
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends ToJSONConverterBase<StaticName> {
+    public static class Converter extends ToJSONSwitchConverterBase<StaticName> {
 
         @Override
         protected JSONObject _toJSON(StaticName object) throws JSONException {
