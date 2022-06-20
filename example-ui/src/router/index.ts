@@ -20,9 +20,14 @@ const router = createRouter({
             component: () => import('@/views/JobView.vue')
         },
         {
-            path: '/accessPathEditor',
+            path: '/mappings/new',
             name: 'accessPathEditor',
             component: () => import('@/views/AccessPathEditorView.vue')
+        },
+        {
+            path: '/mappings',
+            name: 'mappings',
+            component: () => import('@/views/MappingsView.vue')
         },
         {
             path: '/schema',

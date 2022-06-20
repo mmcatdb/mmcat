@@ -6,20 +6,28 @@ import { subpathFromJSON, type ChildProperty } from "./compositeTypes";
 export type RootPropertyJSON = ComplexPropertyJSON & { name: StaticNameJSON };
 
 export class RootProperty {
-    public name: StaticName;
-    private _subpaths: ChildProperty[];
-    private _signature = Signature.null;
+    name: StaticName;
+    _subpaths: ChildProperty[];
+    _signature = Signature.null;
 
-    public constructor(name: StaticName, subpaths: ChildProperty[] = []) {
+    constructor(name: StaticName, subpaths: ChildProperty[] = []) {
         this.name = name;
         this._subpaths = [ ...subpaths ];
     }
 
-    public get subpaths(): ChildProperty[] {
+    get isAuxiliary(): boolean {
+        return true;
+    }
+
+    get signature(): Signature {
+        return this._signature;
+    }
+
+    get subpaths(): ChildProperty[] {
         return this._subpaths;
     }
 
-    public static fromJSON(jsonObject: RootPropertyJSON): RootProperty {
+    static fromJSON(jsonObject: RootPropertyJSON): RootProperty {
         const property = new RootProperty(StaticName.fromJSON(jsonObject.name));
 
         property._subpaths = jsonObject.subpaths.map(subpath => subpathFromJSON(subpath, property));
@@ -27,7 +35,7 @@ export class RootProperty {
         return property;
     }
 
-    public toString(level = 0): string {
+    toString(level = 0): string {
         const builder = new IntendedStringBuilder(level);
 
         builder.appendIntendedLine(this.name + ': ');
@@ -41,7 +49,7 @@ export class RootProperty {
         return builder.toString();
     }
 
-    public toJSON(): ComplexPropertyJSON {
+    toJSON(): ComplexPropertyJSON {
         return {
             _class: 'ComplexProperty',
             name: this.name.toJSON(),

@@ -1,23 +1,30 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty, type ParentProperty } from '@/types/accessPath/graph';
+import { SimpleProperty, ComplexProperty, type ParentProperty, RootProperty } from '@/types/accessPath/graph';
+import { SimpleProperty as BasicSimpleProperty, ComplexProperty as BasicComplexProperty, type ParentProperty as BasicParentProperty } from '@/types/accessPath/basic';
 import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 
 export default defineComponent({
-    name: 'ComplexPropertyDisplay',
+    name: 'ParentPropertyDisplay',
     components: {
         SimplePropertyDisplay,
         IconPlusSquare,
     },
     props: {
         property: {
-            type: Object as () => ParentProperty,
+            type: Object as () => ParentProperty | BasicParentProperty,
             required: true
         },
         isLast: {
             type: Boolean,
-            required: true
+            default: true,
+            required: false
+        },
+        disableAdditions: {
+            type: Boolean,
+            default: false,
+            required: false
         }
     },
     emits: [ 'complex:click', 'simple:click', 'add:click' ],
@@ -27,11 +34,15 @@ export default defineComponent({
         };
     },
     computed: {
-        simpleSubpaths(): SimpleProperty[] {
-            return this.property.subpaths.filter((subpath): subpath is SimpleProperty => subpath instanceof SimpleProperty);
+        simpleSubpaths(): (SimpleProperty | BasicSimpleProperty)[] {
+            return this.property instanceof RootProperty || this.property instanceof ComplexProperty ?
+                this.property.subpaths.filter((subpath): subpath is SimpleProperty => subpath instanceof SimpleProperty) :
+                this.property.subpaths.filter((subpath): subpath is BasicSimpleProperty => subpath instanceof BasicSimpleProperty);
         },
-        complexSubpaths(): ComplexProperty[] {
-            return this.property.subpaths.filter((subpath): subpath is ComplexProperty => subpath instanceof ComplexProperty);
+        complexSubpaths(): (ComplexProperty | BasicComplexProperty)[] {
+            return this.property instanceof RootProperty || this.property instanceof ComplexProperty ?
+                this.property.subpaths.filter((subpath): subpath is ComplexProperty => subpath instanceof ComplexProperty) :
+                this.property.subpaths.filter((subpath): subpath is BasicComplexProperty => subpath instanceof BasicComplexProperty);
         }
     },
     methods: {
@@ -77,16 +88,18 @@ export default defineComponent({
                     :is-last="index === property.subpaths.length - 1"
                     @simple:click="reEmitSimpleClick"
                 />
-                <ComplexPropertyDisplay
+                <ParentPropertyDisplay
                     v-for="(subpath, index) in complexSubpaths"
                     :key="index"
                     :property="subpath"
                     :is-last="index === complexSubpaths.length - 1"
+                    :disable-additions="disableAdditions"
                     @complex:click="reEmitComplexClick"
                     @simple:click="reEmitSimpleClick"
                     @add:click="reEmitAddClick"
                 />
                 <span
+                    v-if="!disableAdditions"
                     class="button-icon"
                     @click="$emit('add:click', property)"
                     @mouseenter="highlighted = true;"

@@ -7,21 +7,21 @@ export type SimpleValueJSON = { signature: SignatureJSON };
 export type SimplePropertyJSON = { _class: 'SimpleProperty', name: NameJSON, value: SimpleValueJSON };
 
 export class SimpleProperty {
-    public name: Name;
-    public parent?: ParentProperty;
-    private _signature: Signature;
+    name: Name;
+    parent?: ParentProperty;
+    _signature: Signature;
 
-    public constructor(name: Name, signature: Signature, parent?: ParentProperty) {
+    constructor(name: Name, signature: Signature, parent?: ParentProperty) {
         this.name = name;
         this._signature = signature;
         this.parent = parent;
     }
 
-    public get signature(): Signature {
+    get signature(): Signature {
         return this._signature;
     }
 
-    public update(newName: Name, newSignature: Signature) {
+    update(newName: Name, newSignature: Signature) {
         if (!this.name.equals(newName))
             this.name = newName;
 
@@ -29,12 +29,12 @@ export class SimpleProperty {
             this._signature = newSignature;
     }
 
-    public toString(level = 0): string {
+    toString(level = 0): string {
         return (level === 0 ? '' : IntendedStringBuilder.getTabIntendationString(level))
             + `${this.name}: ${this._signature}`;
     }
 
-    public static fromJSON(jsonObject: SimplePropertyJSON, parent: ParentProperty): SimpleProperty {
+    static fromJSON(jsonObject: SimplePropertyJSON, parent: ParentProperty): SimpleProperty {
         return new SimpleProperty(
             nameFromJSON(jsonObject.name),
             Signature.fromJSON(jsonObject.value.signature),
@@ -42,7 +42,7 @@ export class SimpleProperty {
         );
     }
 
-    public toJSON(): SimplePropertyJSON {
+    toJSON(): SimplePropertyJSON {
         return {
             _class: 'SimpleProperty',
             name: this.name.toJSON(),

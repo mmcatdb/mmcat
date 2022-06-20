@@ -8,7 +8,7 @@ import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { GET, POST } from '@/utils/backendAPI';
 import { DatabaseView, type DatabaseViewFromServer } from '@/types/database';
-import type { Mapping } from '@/types/mapping';
+import type { MappingFromServer } from '@/types/mapping';
 
 export default defineComponent({
     components: {
@@ -54,7 +54,7 @@ export default defineComponent({
             this.rootObjectName = name;
         },
         async createMapping(name: string) {
-            const result = await POST<Mapping>('/mappings', {
+            const result = await POST<MappingFromServer>('/mappings', {
                 id: null,
                 databaseId: this.selectedDatabase?.id,
                 categoryId: this.graph?.schemaCategory.id,
@@ -70,7 +70,7 @@ export default defineComponent({
             });
             console.log(result);
             if (result.status)
-                this.$router.push({ name: 'jobs' });
+                this.$router.push({ name: 'mappings' });
         }
     }
 });

@@ -15,9 +15,6 @@ export default defineComponent({
         JobDisplay,
         NewJob
     },
-    props: {
-
-    },
     data() {
         return {
             jobs: null as Job[] | null,
@@ -45,7 +42,7 @@ export default defineComponent({
         async fetchNew() {
             const result = await GET<Job[]>('/jobs');
             if (result.status)
-                this.jobs = [ ...result.data ];
+                this.jobs = result.data;
 
             if (this.continueFetching)
                 setTimeout(this.fetchNew, 1000);
@@ -57,9 +54,18 @@ export default defineComponent({
 <template>
     <div>
         <h1>Jobs</h1>
-        <div class="jobs" v-if="jobs">
-            <div v-for="(job, index) in jobs" :key="index">
-                <JobDisplay @delete-job="() => deleteJob(job.id)" :job="job" />
+        <div
+            v-if="jobs"
+            class="jobs"
+        >
+            <div
+                v-for="(job, index) in jobs"
+                :key="index"
+            >
+                <JobDisplay
+                    :job="job"
+                    @delete-job="() => deleteJob(job.id)"
+                />
             </div>
             <NewJob @new-job="addNewJob" />
         </div>

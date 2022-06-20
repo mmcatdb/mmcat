@@ -2,7 +2,7 @@
 import { type ComplexProperty, RootProperty, type ChildProperty, type ParentProperty } from '@/types/accessPath/graph';
 import type { Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
-import ComplexPropertyDisplay from '../display/ParentPropertyDisplay.vue';
+import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { DatabaseView } from '@/types/database';
 import AddProperty from './AddProperty.vue';
 import EditProperty from './EditProperty.vue';
@@ -31,7 +31,7 @@ export default defineComponent({
         AddProperty,
         EditProperty,
         EditRootProperty,
-        ComplexPropertyDisplay
+        ParentPropertyDisplay
     },
     props: {
         graph: {
@@ -149,9 +149,8 @@ export default defineComponent({
                 </template>
             </div>
         </div>
-        <ComplexPropertyDisplay
+        <ParentPropertyDisplay
             :property="rootProperty"
-            :is-last="true"
             @complex:click="editPropertyClicked"
             @simple:click="editPropertyClicked"
             @add:click="addPropertyClicked"

@@ -130,22 +130,11 @@ export default defineComponent({
             v-if="state.type === State.Default"
             class="options"
         >
-            <!--
             <button @click="addObjectClicked">
                 Add object
             </button>
             <button @click="addMorphismClicked">
                 Add morphism
-            </button>
-            -->
-            <button>
-                Add
-            </button>
-            <button>
-                Delete
-            </button>
-            <button>
-                Rename
             </button>
             <Divider />
             <button>
@@ -156,22 +145,6 @@ export default defineComponent({
             </button>
             <button>
                 Split
-            </button>
-            <Divider />
-            <button>
-                Add Id
-            </button>
-            <button>
-                Drop Id
-            </button>
-            <button>
-                Add Reference
-            </button>
-            <button>
-                Drop Reference
-            </button>
-            <button>
-                Change Cardinality
             </button>
             <Divider />
             <button @click="save">

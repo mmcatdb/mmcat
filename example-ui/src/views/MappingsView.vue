@@ -1,37 +1,37 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { Mapping, type MappingFromServer } from '@/types/mapping';
 import { GET } from '@/utils/backendAPI';
-import type { Database } from '@/types/database/Database';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import DatabaseDisplay from '@/components/database/DatabaseDisplay.vue';
+import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 
 export default defineComponent({
     components: {
         ResourceNotFound,
         ResourceLoading,
-        DatabaseDisplay
+        MappingDisplay
     },
     data() {
         return {
-            databases: null as Database[] | null,
-            fetched: false,
+            mappings: null as Mapping[] | null,
+            fetched: false
         };
     },
-    mounted() {
-        this.fetchData();
+    async mounted() {
+        await this.fetchData();
     },
     methods: {
         async fetchData() {
-            const result = await GET<Database[]>('/databases');
+            const result = await GET<MappingFromServer[]>('/mappings');
             if (result.status)
-                this.databases = result.data;
+                this.mappings = result.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
 
             this.fetched = true;
         },
         createNew() {
-            this.$router.push({ name: 'database', params: { id: 'new' } });
+            this.$router.push({ name: 'accessPathEditor' });
         }
     }
 });
@@ -39,19 +39,14 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>Databases</h1>
-        <template v-if="databases">
-            <div
-                class="databases"
-            >
+        <h1>Mappings</h1>
+        <template v-if="mappings">
+            <div class="mappings">
                 <div
-                    v-for="(database, index) in databases"
+                    v-for="(mapping, index) in mappings"
                     :key="index"
                 >
-                    <DatabaseDisplay
-                        :database="database"
-                        @edit="$router.push({ name: 'database', params: { id: database.id, state: 'editing' } });"
-                    />
+                    <MappingDisplay :mapping="mapping" />
                 </div>
             </div>
             <div class="button-row">
@@ -68,7 +63,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.databases {
+.mappings {
     display: flex;
 }
 </style>

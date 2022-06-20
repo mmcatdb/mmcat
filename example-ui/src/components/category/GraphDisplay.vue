@@ -99,7 +99,6 @@ export default defineComponent({
             id="cytoscape"
         />
         <template v-if="schemaCategory">
-            <!--
             <div class="category-command-panel">
                 <button
                     :disabled="saveButtonDisabled"
@@ -108,7 +107,6 @@ export default defineComponent({
                     Save positions
                 </button>
             </div>
-            -->
         </template>
         <ResourceNotFound v-else-if="schemaFetched" />
         <ResourceLoading v-else />

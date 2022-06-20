@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import { type Job, JOB_TYPES } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
-import type { Mapping } from '@/types/mapping';
+import type { MappingFromServer } from '@/types/mapping';
 import { RootProperty } from '@/types/accessPath/basic';
 
 export default defineComponent({
@@ -12,7 +12,7 @@ export default defineComponent({
     emits: [ 'newJob' ],
     data() {
         return {
-            mappings: null as Mapping[] | null,
+            mappings: null as MappingFromServer[] | null,
             fetched: false,
             mappingId: null as number | null,
             jobName: '',
@@ -22,7 +22,7 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<Mapping[]>('/mappings');
+        const result = await GET<MappingFromServer[]>('/mappings');
         if (result.status) {
             this.mappings = [ ...result.data ];
             this.mappingId = this.mappings[0]?.id;
