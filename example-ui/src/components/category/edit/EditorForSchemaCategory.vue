@@ -7,6 +7,7 @@ import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import EditObject from './EditObject.vue';
 import EditMorphism from './EditMorphism.vue';
+import Divider from '@/components/layout/Divider.vue';
 
 enum State {
     Default,
@@ -29,7 +30,8 @@ export default defineComponent({
         AddObject,
         AddMorphism,
         EditObject,
-        EditMorphism
+        EditMorphism,
+        Divider
     },
     props: {
         graph: {
@@ -145,7 +147,7 @@ export default defineComponent({
             <button>
                 Rename
             </button>
-            <div class="divider" />
+            <Divider />
             <button>
                 Copy / Move
             </button>
@@ -155,7 +157,7 @@ export default defineComponent({
             <button>
                 Split
             </button>
-            <div class="divider" />
+            <Divider />
             <button>
                 Add Id
             </button>
@@ -171,7 +173,7 @@ export default defineComponent({
             <button>
                 Change Cardinality
             </button>
-            <div class="divider" />
+            <Divider />
             <button @click="save">
                 Save
             </button>

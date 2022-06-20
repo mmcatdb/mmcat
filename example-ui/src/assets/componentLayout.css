@@ -12,7 +12,7 @@ td.value {
 .editor {
     border: 2px solid var(--color-border);
     padding: 12px;
-    font-size: 20px;
+    /*SCREENSHOT font-size: 20px;*/
 }
 
 .divide {
@@ -25,6 +25,7 @@ td.value {
 }
 
 /* This rule hide the input but leave its width intact. */
+/* However, it doesn't work on safari ... */
 tr.hidden {
     /*color: var(--color-text-disabled);*/
     visibility: collapse;
@@ -35,8 +36,6 @@ tr.hidden {
     margin-bottom: 8px;
 }
 
-div.divider {
-    height: 2px;
-    background-color: var(--color-primary);
-    margin: 3px 0px;
+span.disabled {
+    background-color: var(--color-background-disabled);
 }

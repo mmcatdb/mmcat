@@ -45,6 +45,7 @@ export default defineComponent({
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
+        this.innerValue.sequence.selectAll();
         this.innerValue.markAvailablePaths(this.filters);
     },
     unmounted() {
@@ -58,11 +59,17 @@ export default defineComponent({
                 return;
 
             if (this.innerValue.sequence.tryRemoveNode(node)) {
+                if (this.innerValue.isNull)
+                    this.innerValue = this.innerValue.copyNotNull();
+
                 this.graph.resetAvailabilityStatus();
                 this.innerValue.markAvailablePaths(this.filters);
                 this.sendUpdate();
             }
             else if (this.innerValue.sequence.tryAddNode(node)) {
+                if (this.innerValue.isNull)
+                    this.innerValue = this.innerValue.copyNotNull();
+
                 this.graph.resetAvailabilityStatus();
                 this.innerValue.markAvailablePaths(this.filters);
                 this.sendUpdate();
@@ -72,6 +79,7 @@ export default defineComponent({
             this.innerValue.sequence.unselectAll();
             this.graph.resetAvailabilityStatus();
             this.innerValue = signature;
+            this.innerValue.sequence.selectAll();
             this.innerValue.markAvailablePaths(this.filters);
 
             if (sendUpdate)
@@ -92,23 +100,16 @@ export default defineComponent({
 </script>
 
 <template>
-    <div
+    <button
         v-if="allowNull"
-        class="outer"
+        :disabled="disabled"
+        @click="setSignatureNull"
     >
-        <button
-            :disabled="disabled"
-            @click="setSignatureNull"
-        >
-            <slot name="nullButton" />
-        </button>
-    </div>
+        <slot name="nullButton" />
+    </button>
 </template>
 
 <style scoped>
-.outer {
-    background-color: darkblue;
-    padding: 12px;
-}
+
 </style>
 

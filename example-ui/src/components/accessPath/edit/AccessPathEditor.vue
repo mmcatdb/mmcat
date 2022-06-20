@@ -91,7 +91,23 @@ export default defineComponent({
                     <table>
                         <tr>
                             <td class="label">
-                                Mapping name:
+                                Database:
+                            </td>
+                            <td class="value">
+                                {{ database.label }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                Root object:
+                            </td>
+                            <td class="value">
+                                {{ rootProperty.name }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                Name:
                             </td>
                             <td class="value">
                                 <input v-model="mappingName" />

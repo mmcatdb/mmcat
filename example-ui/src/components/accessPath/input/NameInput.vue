@@ -86,56 +86,75 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="outer">
-        <input
-            id="static"
-            v-model="type"
-            type="radio"
-            :value="NameType.Static"
+    <input
+        id="static"
+        v-model="type"
+        type="radio"
+        :value="NameType.Static"
+        :disabled="disabled"
+        @change="updateInnerValue"
+    />
+    <label
+        for="static"
+        :class="{ value: type === NameType.Static }"
+    >
+        Static
+    </label>
+    <br />
+    <input
+        v-model="staticValue"
+        :disabled="type !== NameType.Static"
+        @input="updateInnerValue"
+    />
+    <br />
+    <input
+        id="dynamic"
+        v-model="type"
+        type="radio"
+        :value="NameType.Dynamic"
+        :disabled="disabled || !database.configuration.isDynamicNamingAllowed"
+        @change="updateInnerValue"
+    />
+    <label
+        for="dynamic"
+        :class="{ value: type === NameType.Dynamic }"
+    >
+        Dynamic
+    </label>
+    <br />
+    <span :class="{ disabled: type !== NameType.Dynamic }">
+        {{ dynamicValue }}
+    </span>
+    <br />
+    <input
+        id="anonymous"
+        v-model="type"
+        type="radio"
+        :value="NameType.Anonymous"
+        :disabled="disabled || !database.configuration.isAnonymousNamingAllowed"
+        @change="updateInnerValue"
+    />
+    <label
+        for="anonymous"
+        :class="{ value: type === NameType.Anonymous }"
+    >
+        Anonymous
+    </label>
+    <br />
+    <div v-if="type === NameType.Dynamic">
+        <SignatureInput
+            v-model="dynamicValue"
+            :graph="graph"
+            :filters="filter"
             :disabled="disabled"
-            @change="updateInnerValue"
+            @input="updateInnerValue"
         />
-        <label for="static">Static</label><br />
-        <input
-            id="dynamic"
-            v-model="type"
-            type="radio"
-            :value="NameType.Dynamic"
-            :disabled="disabled || !database.configuration.isDynamicNamingAllowed"
-            @change="updateInnerValue"
-        />
-        <label for="dynamic">Dynamic</label><br />
-        <input
-            id="anonymous"
-            v-model="type"
-            type="radio"
-            :value="NameType.Anonymous"
-            :disabled="disabled || !database.configuration.isAnonymousNamingAllowed"
-            @change="updateInnerValue"
-        />
-        <label for="anonymous">Anonymous</label><br />
-        <div v-if="type === NameType.Static">
-            <input
-                v-model="staticValue"
-                @input="updateInnerValue"
-            />
-        </div>
-        <div v-if="type === NameType.Dynamic">
-            <SignatureInput
-                v-model="dynamicValue"
-                :graph="graph"
-                :filters="filter"
-                :disabled="disabled"
-                @input="updateInnerValue"
-            />
-        </div>
     </div>
 </template>
 
 <style scoped>
-.outer {
-    background-color: darkgreen;
-    padding: 12px;
+.value {
+    font-weight: bold;
 }
 </style>
 

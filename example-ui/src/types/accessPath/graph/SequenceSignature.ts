@@ -14,6 +14,10 @@ export class SequenceSignature {
         return new SequenceSignature(this.sequence, this.isNull);
     }
 
+    copyNotNull(): SequenceSignature {
+        return new SequenceSignature(this.sequence, false);
+    }
+
     static empty(rootNode: Node): SequenceSignature {
         return new SequenceSignature(rootNode);
     }

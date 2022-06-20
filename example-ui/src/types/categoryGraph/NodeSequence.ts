@@ -55,6 +55,11 @@ export class NodeSequence {
         this._nodes.forEach(node => node.unselect());
     }
 
+    selectAll(): void {
+        this.rootNode.unselect();
+        this._nodes.forEach(node => node.selectNext());
+    }
+
     tryAddNode(node: Node): boolean {
         /*
         const morphism = this.lastNode.neighbours.get(node);

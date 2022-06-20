@@ -4,6 +4,7 @@ import { PropertyType, type Graph, createDefaultFilter } from '@/types/categoryG
 import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
+import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
 import type { DatabaseView } from '@/types/database';
 
@@ -16,6 +17,7 @@ enum State {
 export default defineComponent({
     components: {
         SignatureInput,
+        TypeInput,
         NameInput
     },
     props: {
@@ -41,7 +43,8 @@ export default defineComponent({
             name: StaticName.fromString('') as Name,
             state: State.SelectSignature,
             State,
-            filter: createDefaultFilter(this.database.configuration)
+            filter: createDefaultFilter(this.database.configuration),
+            typeIsDetermined: false
         };
     },
     methods: {
@@ -67,17 +70,37 @@ export default defineComponent({
 
             if (type !== null) {
                 this.type = type;
+                this.typeIsDetermined = true;
                 this.state = State.SelectName;
-                return;
             }
-
-            this.state = State.SelectType;
+            else {
+                this.state = State.SelectType;
+                this.typeIsDetermined = false;
+            }
         },
         confirmType() {
             this.state = State.SelectName;
         },
         confirmName() {
             this.save();
+        },
+        nextButton() {
+            switch (this.state) {
+            case State.SelectSignature:
+                this.confirmSignature();
+                break;
+            case State.SelectType:
+                this.confirmType();
+                break;
+            case State.SelectName:
+                this.confirmName();
+                break;
+            }
+        },
+        backButton() {
+            this.state--;
+            if (this.state === State.SelectType && this.typeIsDetermined)
+                this.state--;
         }
     }
 });
@@ -87,111 +110,69 @@ export default defineComponent({
     <div class="outer">
         <h2>Add property</h2>
         <table>
-            <template v-if="state >= State.SelectType">
-                <tr>
-                    <td class="label">
-                        Signature:
-                    </td>
-                    <td class="value">
-                        {{ signature }}
-                    </td>
-                </tr>
-            </template>
-            <template v-if="state >= State.SelectName">
-                <tr>
-                    <td class="label">
-                        Type:
-                    </td>
-                    <td class="value">
-                        {{ type }}
-                    </td>
-                </tr>
-            </template>
-            <template v-if="state === State.SelectType">
-                <tr>
-                    <td class="label">
-                        Type:
-                    </td>
-                    <td class="value">
-                        <input
-                            id="simple"
-                            v-model="type"
-                            type="radio"
-                            :value="PropertyType.Simple"
-                        />
-                        <label
-                            :class="{ value: type === PropertyType.Simple }"
-                            for="simple"
-                        >
-                            Simple
-                        </label><br />
-                        <input
-                            id="complex"
-                            v-model="type"
-                            type="radio"
-                            :value="PropertyType.Complex"
-                        />
-                        <label
-                            :class="{ value: type === PropertyType.Complex }"
-                            for="complex"
-                        >
-                            Complex
-                        </label><br />
-                    </td>
-                </tr>
-                <button
-                    @click="confirmType"
-                >
-                    Confirm
-                </button>
-            </template>
-            <template v-else-if="state === State.SelectName">
-                <tr>
-                    <td class="label">
-                        Name:
-                    </td>
-                    <td class="value">
-                        {{ name }}
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <NameInput
-                            v-model="name"
-                            :graph="graph"
-                            :database="database"
-                            :root-node="parentProperty.node"
-                        />
-                    </td>
-                </tr>
-                <br />
-                <button
-                    @click="confirmName"
-                >
-                    Confirm
-                </button>
-            </template>
-            <template v-else-if="state === State.SelectSignature">
-                Signature: <span class="value">{{ signature }}</span>
-                <SignatureInput
-                    v-model="signature"
-                    :graph="graph"
-                    :filters="filter"
-                    :allow-null="database.configuration.isGrouppingAllowed"
-                >
-                    <template #nullButton>
-                        Auxiliary property
-                    </template>
-                </SignatureInput>
-                <br />
-                <button
-                    @click="confirmSignature"
-                >
-                    Confirm
-                </button>
-            </template>
+            <tr v-if="state >= State.SelectSignature">
+                <td class="label">
+                    Signature:
+                </td>
+                <td class="value">
+                    {{ signature }}
+                </td>
+            </tr>
+            <tr v-if="state >= State.SelectName">
+                <td class="label">
+                    Type:
+                </td>
+                <td class="value">
+                    {{ type }}
+                </td>
+            </tr>
+            <tr v-if="state === State.SelectType">
+                <td class="label">
+                    Type:
+                </td>
+                <td class="value">
+                    <TypeInput v-model="type" />
+                </td>
+            </tr>
+            <tr v-if="state === State.SelectName">
+                <td class="label">
+                    Name:
+                </td>
+                <td class="value">
+                    <NameInput
+                        v-model="name"
+                        :graph="graph"
+                        :database="database"
+                        :root-node="parentProperty.node"
+                    />
+                </td>
+            </tr>
         </table>
+        <div
+            v-if="state === State.SelectSignature"
+            class="button-row"
+        >
+            <SignatureInput
+                v-model="signature"
+                :graph="graph"
+                :filters="filter"
+                :allow-null="database.configuration.isGrouppingAllowed"
+            >
+                <template #nullButton>
+                    Auxiliary property
+                </template>
+            </SignatureInput>
+        </div>
         <div class="button-row">
+            <button @click="nextButton">
+                {{ state < State.SelectName ? 'Next' : 'Finish' }}
+            </button>
+            <button
+                v-if="state > State.SelectSignature"
+                @click="backButton"
+            >
+                Back
+            </button>
             <button @click="cancel">
                 Cancel
             </button>
@@ -200,8 +181,5 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.value {
-    font-weight: bold;
-}
-</style>
 
+</style>

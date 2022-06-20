@@ -62,7 +62,7 @@ export default defineComponent({
                 {{ property.name }}: {{ property.isAuxiliary ? '' : (property.signature + ' ') }}{
             </span>
         </div>
-        <div class="divider">
+        <div class="property-divide">
             <div class="filler">
                 <div
                     class="filler-line"
@@ -94,14 +94,6 @@ export default defineComponent({
                 >
                     <IconPlusSquare />
                 </span>
-                <!--
-                <span
-                    v-if="property.subpaths.length === 0"
-                    class="fillerRow"
-                >
-                    &nbsp;
-                </span>
-                -->
             </div>
         </div>
         <div class="row">
@@ -124,7 +116,7 @@ export default defineComponent({
     flex-direction: column;
 }
 
-.divider {
+.property-divide {
     display: flex;
     flex-direction: row;
 }
@@ -156,9 +148,5 @@ export default defineComponent({
     width: fit-content;
     padding: 2px 4px;
     border-radius: 4px;
-}
-
-.fillerRow {
-
 }
 </style>

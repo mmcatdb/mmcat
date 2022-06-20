@@ -4,7 +4,7 @@ import { StaticName } from '@/types/identifiers';
 import type { Node, Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
-import SelectRoot from './SelectRoot.vue';
+import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { GET, POST } from '@/utils/backendAPI';
 import { DatabaseView, type DatabaseViewFromServer } from '@/types/database';
@@ -13,7 +13,7 @@ import type { Mapping } from '@/types/mapping';
 export default defineComponent({
     components: {
         GraphDisplay,
-        SelectRoot,
+        NodeInput,
         AccessPathEditor
     },
     data() {
@@ -21,10 +21,16 @@ export default defineComponent({
             graph: null as Graph | null,
             accessPath: null as RootProperty | null,
             rootObjectName: 'pathName',
+            selectingRootNode: null as Node | null,
             databases: [] as DatabaseView[],
             selectingDatabase: null as DatabaseView | null,
             selectedDatabase: null as DatabaseView | null
         };
+    },
+    computed: {
+        databaseAndRootNodeValid(): boolean {
+            return !!this.selectingDatabase && !!this.selectingRootNode;
+        }
     },
     async mounted() {
         const result = await GET<DatabaseViewFromServer[]>('/database-views');
@@ -35,9 +41,16 @@ export default defineComponent({
         cytoscapeCreated(graph: Graph) {
             this.graph = graph;
         },
-        selectRootNode(node: Node) {
-            const name = node.schemaObject.label;
-            this.accessPath = new RootProperty(StaticName.fromString(name), node);
+        confirmDatabaseAndRootNode() {
+            if (!this.selectingDatabase || !this.selectingRootNode)
+                return;
+
+            this.selectedDatabase = this.selectingDatabase;
+
+            this.selectingRootNode.unselect();
+            this.selectingRootNode.becomeRoot();
+            const name = this.selectingRootNode.schemaObject.label;
+            this.accessPath = new RootProperty(StaticName.fromString(name), this.selectingRootNode);
             this.rootObjectName = name;
         },
         async createMapping(name: string) {
@@ -68,40 +81,55 @@ export default defineComponent({
         <GraphDisplay @graph:created="cytoscapeCreated" />
         <div v-if="graph">
             <div>
-                <template v-if="!!selectedDatabase">
-                    <SelectRoot
-                        v-if="accessPath === null"
-                        :graph="graph"
-                        @root-node:confirm="selectRootNode"
-                    />
-                    <AccessPathEditor
-                        v-else
-                        :graph="graph"
-                        :database="selectedDatabase"
-                        :root-property="accessPath"
-                        @finish="createMapping"
-                    />
-                </template>
                 <div
-                    v-else
+                    v-if="!selectedDatabase || !accessPath"
                     class="editor"
                 >
-                    <label>Select database:</label>
-                    <select v-model="selectingDatabase">
-                        <option
-                            v-for="database in databases"
-                            :key="database.id"
-                            :value="database"
-                        >
-                            {{ database.label }}
-                        </option>
-                    </select>
+                    <table>
+                        <tr>
+                            <td class="label">
+                                Database:
+                            </td>
+                            <td class="value">
+                                <select v-model="selectingDatabase">
+                                    <option
+                                        v-for="database in databases"
+                                        :key="database.id"
+                                        :value="database"
+                                    >
+                                        {{ database.label }}
+                                    </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                Root object:
+                            </td>
+                            <td class="value">
+                                <NodeInput
+                                    v-model="selectingRootNode"
+                                    :graph="graph"
+                                />
+                            </td>
+                        </tr>
+                    </table>
                     <div class="button-row">
-                        <button @click="selectedDatabase = selectingDatabase">
+                        <button
+                            :disabled="!selectingDatabase || !selectingRootNode"
+                            @click="confirmDatabaseAndRootNode"
+                        >
                             Confirm
                         </button>
                     </div>
                 </div>
+                <AccessPathEditor
+                    v-else
+                    :graph="graph"
+                    :database="selectedDatabase"
+                    :root-property="accessPath"
+                    @finish="createMapping"
+                />
             </div>
         </div>
     </div>

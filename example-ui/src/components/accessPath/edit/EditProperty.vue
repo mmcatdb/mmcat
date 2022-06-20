@@ -7,6 +7,7 @@ import type { DatabaseView } from '@/types/database';
 import type { SchemaObject } from '@/types/schema';
 
 import SignatureInput from '../input/SignatureInput.vue';
+import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
 import SchemaIds from '@/components/category/SchemaIds.vue';
 
@@ -19,6 +20,7 @@ enum State {
 export default defineComponent({
     components: {
         SignatureInput,
+        TypeInput,
         NameInput,
         SchemaIds
     },
@@ -45,7 +47,8 @@ export default defineComponent({
             name: this.property.name.copy() as Name,
             state: State.SelectSignature,
             State,
-            filter: createDefaultFilter(this.database.configuration)
+            filter: createDefaultFilter(this.database.configuration),
+            typeIsDetermined: false
         };
     },
     computed: {
@@ -88,11 +91,13 @@ export default defineComponent({
 
             if (type !== null) {
                 this.type = type;
+                this.typeIsDetermined = true;
                 this.state = State.SelectName;
-                return;
             }
-
-            this.state = State.SelectType;
+            else {
+                this.state = State.SelectType;
+                this.typeIsDetermined = false;
+            }
         },
         resetSignature() {
             this.signature = this.property.signature.copy();
@@ -112,6 +117,11 @@ export default defineComponent({
         deleteProperty() {
             this.property.parent.removeSubpath(this.property);
             this.$emit('save');
+        },
+        backButton() {
+            this.state--;
+            if (this.state === State.SelectType && this.typeIsDetermined)
+                this.state--;
         }
     }
 });
@@ -137,43 +147,74 @@ export default defineComponent({
                     <SchemaIds :schema-object="schemaObject" />
                 </td>
             </tr>
+            <tr v-if="state >= State.SelectSignature">
+                <td class="label">
+                    Signature:
+                </td>
+                <td class="value">
+                    {{ signature }}
+                </td>
+            </tr>
+            <tr v-if="state >= State.SelectName">
+                <td class="label">
+                    Type:
+                </td>
+                <td class="value">
+                    {{ type }}
+                </td>
+            </tr>
+            <tr v-if="state === State.SelectType">
+                <td class="label">
+                    Type:
+                </td>
+                <td class="value">
+                    <TypeInput v-model="type" />
+                </td>
+            </tr>
+            <tr v-if="state === State.SelectName">
+                <td class="label">
+                    Name:
+                </td>
+                <td class="value">
+                    <NameInput
+                        v-model="name"
+                        :graph="graph"
+                        :database="database"
+                        :root-node="property.parentNode"
+                    />
+                </td>
+            </tr>
         </table>
-        <br />
-        <template v-if="state >= State.SelectType">
-            Signature: {{ signature }}
-            <br />
-        </template>
-        <template v-if="state >= State.SelectName">
-            Type: {{ type }}
-            <br />
-        </template>
-        <template v-if="state === State.SelectType">
-            Type:<br />
-            <input
-                id="simple"
-                v-model="type"
-                type="radio"
-                :value="PropertyType.Simple"
-            />
-            <label
-                :class="{ selected: type === PropertyType.Simple }"
-                for="simple"
+        <div
+            v-if="state === State.SelectSignature"
+            class="button-row"
+        >
+            <SignatureInput
+                v-model="signature"
+                :graph="graph"
+                :filters="filter"
+                :allow-null="database.configuration.isGrouppingAllowed"
             >
-                Simple
-            </label><br />
-            <input
-                id="complex"
-                v-model="type"
-                type="radio"
-                :value="PropertyType.Complex"
-            />
-            <label
-                :class="{ selected: type === PropertyType.Complex }"
-                for="complex"
-            >
-                Complex
-            </label><br />
-            <div class="button-row">
+                <template #nullButton>
+                    Auxiliary property
+                </template>
+            </SignatureInput>
+        </div>
+        <div class="button-row">
+            <template v-if="state === State.SelectSignature">
+                <button
+                    @click="confirmSignature"
+                >
+                    {{ signatureChanged ? 'Confirm change' : 'Keep current' }}
+                </button>
+                <button
+                    v-if="signatureChanged"
+                    @click="resetSignature"
+                >
+                    Reset
+                </button>
+            </template>
+            <template v-if="state === State.SelectType">
                 <button
                     @click="confirmType"
                 >
@@ -185,18 +226,8 @@ export default defineComponent({
                 >
                     Reset
                 </button>
-            </div>
-        </template>
-        <template v-else-if="state === State.SelectName">
-            Name: <span class="selected">{{ name }}</span>
-            <NameInput
-                v-model="name"
-                :graph="graph"
-                :database="database"
-                :root-node="property.parentNode"
-            />
-            <br />
-            <div class="button-row">
+            </template>
+            <template v-if="state === State.SelectName">
                 <button
                     @click="confirmName"
                 >
@@ -208,43 +239,22 @@ export default defineComponent({
                 >
                     Reset
                 </button>
-            </div>
-        </template>
-        <template v-else-if="state === State.SelectSignature">
-            Signature: <span class="selected">{{ signature }}</span>
-            <SignatureInput
-                v-model="signature"
-                :graph="graph"
-                :filters="filter"
-                :allow-null="database.configuration.isGrouppingAllowed"
-            >
-                <template #nullButton>
-                    Auxiliary property
-                </template>
-            </SignatureInput>
-            <div class="button-row">
-                <button
-                    :disabled="signature.isEmpty"
-                    @click="confirmSignature"
-                >
-                    {{ signatureChanged ? 'Confirm change' : 'Keep current' }}
-                </button>
-                <button
-                    v-if="signatureChanged"
-                    @click="resetSignature"
-                >
-                    Reset
-                </button>
-            </div>
-        </template>
+            </template>
+        </div>
         <div class="button-row">
+            <button
+                v-if="state > State.SelectSignature"
+                @click="backButton"
+            >
+                Back
+            </button>
             <button @click="cancel">
                 Cancel
             </button>
             <button
                 @click="deleteProperty"
             >
-                Delete property
+                Delete
             </button>
         </div>
     </div>

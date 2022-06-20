@@ -1,0 +1,9 @@
+button {
+    padding: 2px 12px 6px 12px;
+    font-size: 20px;
+}
+
+:root {
+    /*--top-bar-height: 64px;*/
+    --top-bar-height: 0px;
+}

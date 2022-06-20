@@ -38,6 +38,7 @@ module.exports = {
         'brace-style': [ 'warn', 'stroustrup' ],
         'vue/html-indent': [ 'warn', 4 ],
         'no-empty-function': 'off',
-        '@typescript-eslint/no-empty-function': [ "error", { "allow": [ "private-constructors" ] } ]
+        '@typescript-eslint/no-empty-function': [ "error", { "allow": [ "private-constructors" ] } ],
+        'vue/multi-word-component-names': 'off'
     }
 };
