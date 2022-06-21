@@ -8,6 +8,7 @@ import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
+import { type MappingFromServer, Mapping } from '@/types/mapping';
 
 export default defineComponent({
     components: {
@@ -25,9 +26,14 @@ export default defineComponent({
     },
     async mounted() {
         const result = await GET<SchemaCategoryFromServer>(`/schemaCategories/1`);
-        if (result.status && 'data' in result) {
+        const mappingsResult = await GET<MappingFromServer[]>('/mappings');
+
+        if (result.status && mappingsResult.status) {
             console.log(result.data);
             this.schemaCategory = SchemaCategory.fromServer(result.data);
+            mappingsResult.data
+                .map(mappingFromServer => Mapping.fromServer(mappingFromServer))
+                .forEach(mapping => this.schemaCategory?.setDatabaseToObjectsFromMapping(mapping));
 
             this.graph = this.createGraph(this.schemaCategory);
 

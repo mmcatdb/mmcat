@@ -10,12 +10,14 @@ export class Mapping {
     id: number | null;
     name: string;
     databaseId: number;
+    rootObjectId: number;
     accessPath: RootProperty;
 
-    private constructor(id: number | null, name: string, databaseId: number, accessPath: RootProperty) {
+    private constructor(id: number | null, name: string, databaseId: number, rootObjectId: number, accessPath: RootProperty) {
         this.id = id;
         this.name = name;
         this.databaseId = databaseId;
+        this.rootObjectId = rootObjectId;
         this.accessPath = accessPath;
     }
 
@@ -24,7 +26,7 @@ export class Mapping {
         const mappingJson = JSON.parse(input.mappingJsonValue) as MappingJSON;
         const accessPath = RootProperty.fromJSON(mappingJson.accessPath);
 
-        return new Mapping(input.id, json.name, input.databaseId, accessPath);
+        return new Mapping(input.id, json.name, input.databaseId, input.rootObjectId, accessPath);
     }
 }
 

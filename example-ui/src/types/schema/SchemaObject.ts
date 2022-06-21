@@ -15,38 +15,31 @@ export class SchemaObject {
     //label: number | undefined;
 
     id!: number;
-
+    label!: string;
+    key!: Key;
     schemaIds!: SchemaId[];
     superId!: SchemaId;
-    label!: string;
-    _jsonValue!: string;
-    position?: ComparablePosition;
-    _originalPosition?: ComparablePosition;
+    position!: ComparablePosition;
     _isNew!: boolean;
-    databases!: string[];
 
-    key!: Key;
+    _originalPosition?: ComparablePosition;
+
+    _databases = new Set as Set<number>;
 
     private constructor() {}
 
     static fromServer(input: SchemaObjectFromServer): SchemaObject {
         const object = new SchemaObject();
 
-        //object.key = input.key.value;
-        //object.label = input.label;
         const jsonObject = JSON.parse(input.jsonValue) as SchemaObjectJSON;
-        object.key = Key.fromServer(jsonObject.key);
-        object.label = jsonObject.label;
         object.id = input.id;
+        object.label = jsonObject.label;
+        object.key = Key.fromServer(jsonObject.key);
         object.schemaIds = jsonObject.ids.map((schemaId: SchemaIdJSON) => SchemaId.fromJSON(schemaId));
         object.superId = SchemaId.fromJSON(jsonObject.superId);
-        object._jsonValue = input.jsonValue;
         object._isNew = false;
-        object.databases = jsonObject.databases || [];
-        if (input.position) { // This should be mandatory since all objects should have defined position.
-            object.position = new ComparablePosition(input.position);
-            object._originalPosition = new ComparablePosition(input.position);
-        }
+        object.position = new ComparablePosition(input.position);
+        object._originalPosition = new ComparablePosition(input.position);
 
         return object;
     }
@@ -62,7 +55,6 @@ export class SchemaObject {
 
         object.position = new ComparablePosition({ x: 0, y: 0});
         object._isNew = true;
-        object.databases = [];
 
         return object;
     }
@@ -88,12 +80,20 @@ export class SchemaObject {
         return this._isNew;
     }
 
+    get databases(): number[] {
+        return [ ...this._databases.values() ];
+    }
+
+    setDatabase(database: number) {
+        this._databases.add(database);
+    }
+
     setLabel(label: string) {
         this.label = label;
     }
 
     toPositionUpdateToServer(): PositionUpdateToServer | null {
-        return this.position?.equals(this._originalPosition) ? null : new PositionUpdateToServer({ schemaObjectId: this.id, position: this.position });
+        return this.position.equals(this._originalPosition) ? null : new PositionUpdateToServer({ schemaObjectId: this.id, position: this.position });
     }
 
     toJSON(): SchemaObjectJSON {
@@ -102,7 +102,6 @@ export class SchemaObject {
             key: this.key.toJSON(),
             ids: this.schemaIds.map(id => id.toJSON()),
             superId: this.superId.toJSON(),
-            databases: this.databases
         };
     }
 }
@@ -110,5 +109,5 @@ export class SchemaObject {
 export type SchemaObjectFromServer = {
     id: number;
     jsonValue: string;
-    position?: Position;
+    position: Position;
 }

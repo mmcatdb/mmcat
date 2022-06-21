@@ -132,23 +132,39 @@ export const style: cytoscape.Stylesheet[] = [
         }
     },
     {
-        selector: '.mongodb',
+        selector: '.group-1',
         style: {
             'background-color': 'green',
             'background-opacity': 0.01,
             'border-color': 'green',
-            'padding-right': '10px'
+            'padding-right': '8px'
         }
     },
     {
-        selector: '.postgresql',
+        selector: '.group-2',
         style: {
             'background-color': 'red',
             'background-opacity': 0.01,
-            'border-style': 'dashed',
-            'shape': 'round-rectangle',
             'border-color': 'red',
-            'padding-right': '15px'
+            'padding-right': '12px'
+        }
+    },
+    {
+        selector: '.group-3',
+        style: {
+            'background-color': 'blue',
+            'background-opacity': 0.01,
+            'border-color': 'blue',
+            'padding-right': '16px'
+        }
+    },
+    {
+        selector: '.group-4',
+        style: {
+            'background-color': 'orange',
+            'background-opacity': 0.01,
+            'border-color': 'orange',
+            'padding-right': '20px'
         }
     }
 ];

@@ -1,5 +1,7 @@
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
-import { Key, SchemaId, Signature } from "../identifiers";
+import { ComplexProperty, type ParentProperty } from "../accessPath/basic";
+import { DynamicName, Key, SchemaId, Signature } from "../identifiers";
+import type { Mapping } from "../mapping";
 import { SchemaMorphism, SchemaMorphismFromServer, type Max, type Min } from "./SchemaMorphism";
 import { SchemaObject, type SchemaObjectFromServer } from "./SchemaObject";
 
@@ -142,6 +144,16 @@ export class SchemaCategory {
     isBaseSignatureAvailable(signature: Signature): boolean {
         return this._signatureProvider.isAvailable(signature);
     }
+
+    setDatabaseToObjectsFromMapping(mapping: Mapping): void {
+        const objects = getObjectsFromPath(mapping.accessPath, this.objects, this.morphisms);
+
+        const rootObject = this.objects.find(object => object.id === mapping.rootObjectId);
+        if (rootObject)
+            objects.push(rootObject);
+
+        objects.forEach(object => object.setDatabase(mapping.databaseId));
+    }
 }
 
 export class SchemaCategoryFromServer {
@@ -149,4 +161,37 @@ export class SchemaCategoryFromServer {
     jsonValue!: string;
     objects!: SchemaObjectFromServer[];
     morphisms!: SchemaMorphismFromServer[];
+}
+
+function getObjectsFromPath(path: ParentProperty, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject[] {
+    const output = [] as SchemaObject[];
+
+    path.subpaths.forEach(subpath => {
+        const subpathObject = findObjectFromSignature(subpath.signature, objects, morphisms);
+        if (subpathObject)
+            output.push(subpathObject);
+
+        if (subpath.name instanceof DynamicName) {
+            const nameObject = findObjectFromSignature(subpath.name.signature, objects, morphisms);
+            if (nameObject)
+                output.push(nameObject);
+        }
+
+        if (subpath instanceof ComplexProperty)
+            output.push(...getObjectsFromPath(subpath, objects, morphisms));
+    });
+
+    return output;
+}
+
+function findObjectFromSignature(signature: Signature, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject | undefined {
+    const base = signature.getLastBase();
+    if (!base)
+        return undefined;
+
+    const morphism = morphisms.find(morphism => morphism.signature.equals(base.last));
+    if (!morphism)
+        return undefined;
+
+    return objects.find(object => object.id === morphism.codId);
 }

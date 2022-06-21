@@ -1,5 +1,4 @@
 import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, NodeSingular } from "cytoscape";
-import { Type } from "../database";
 import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Edge } from "./Edge";
 import { Node } from "./Node";
@@ -11,10 +10,11 @@ export type TemporaryEdge = {
     delete: () => void;
 }
 
-type Group = { label: string, node: NodeSingular };
+type Group = { id: number, databaseId: number, node: NodeSingular };
 
 export class Graph {
     _cytoscape: Core;
+    _nodes = [] as Node[];
     readonly schemaCategory: SchemaCategory;
 
     constructor(cytoscape: Core, schemaCategory: SchemaCategory) {
@@ -59,23 +59,25 @@ export class Graph {
     }
 
     resetAvailabilityStatus(): void {
-        this._cytoscape.nodes().forEach(node => (node.data('schemaData') as Node).resetAvailabilityStatus());
+        this._nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
     groups = [] as Group[];
 
-    getGroupOrAddIt(label: string): Group {
-        const results = this.groups.filter(group => group.label === label);
+    getGroupOrAddIt(databaseId: number): Group {
+        const results = this.groups.filter(group => group.databaseId === databaseId);
         if (results[0])
             return results[0];
 
+        const id = this.groups.length + 1;
         const newGroup = {
-            label,
+            id,
+            databaseId,
             node: this._cytoscape.add({
                 data: {
-                    id: 'group_' + label
+                    id: 'group_' + id
                 },
-                classes: 'group ' + label
+                classes: 'group ' + 'group-' + id
             })
         };
 
@@ -85,11 +87,12 @@ export class Graph {
 
     createNode(object: SchemaObject, classes?: string): Node {
         const node = new Node(object);
+        this._nodes.push(node);
 
-        const groupObjects = object.databases.map(database => this.getGroupOrAddIt(database));
+        const groupObjects = object.databases.map(databaseId => this.getGroupOrAddIt(databaseId));
 
         const groupPlaceholders = [] as NodeSingular[];
-        groupObjects.forEach(group => groupPlaceholders.push(this._cytoscape.add(createGroupPlaceholderDefinition(object, group.label))));
+        groupObjects.forEach(group => groupPlaceholders.push(this._cytoscape.add(createGroupPlaceholderDefinition(object, group.id))));
 
         //const coloringNode = this._cytoscape.add(createColoringNodeDefinition(object, Math.random() < 0.5 ? Type.mongodb : Type.postgresql));
         const cytoscapeNode = this._cytoscape.add(createNodeDefinition(object, node, classes));
@@ -109,11 +112,12 @@ export class Graph {
 
     deleteNode(node: Node) {
         this._cytoscape.remove(node.node);
+        this._nodes = this._nodes.filter(n => !n.equals(node));
     }
 
     createEdgeWithDual(morphism: SchemaMorphism, classes?: string): void {
-        const domNode = this._cytoscape.nodes('#' + morphism.domId).first().data('schemaData') as Node;
-        const codNode = this._cytoscape.nodes('#' + morphism.codId).first().data('schemaData') as Node;
+        const domNode = this._nodes.find(node => node.schemaObject.id === morphism.domId) as Node;
+        const codNode = this._nodes.find(node => node.schemaObject.id === morphism.codId) as Node;
 
         const edges = [ new Edge(morphism, domNode, codNode), new Edge(morphism.dual, codNode, domNode) ];
         edges[0].dual = edges[1];
@@ -197,11 +201,11 @@ function createColoringNodeDefinition(object: SchemaObject, databaseType: Type):
 }
 */
 
-function createGroupPlaceholderDefinition(object: SchemaObject, groupLabel: string): ElementDefinition {
+function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number): ElementDefinition {
     return {
         data: {
-            id: groupLabel + '_' + object.id.toString(),
-            parent: 'group_' + groupLabel,
+            id: groupId + '_' + object.id.toString(),
+            parent: 'group_' + groupId,
             label: object.label
         },
         position: object.position,
