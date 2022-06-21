@@ -10,8 +10,8 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
 import cz.cuni.matfyz.server.entity.Job;
-import cz.cuni.matfyz.server.entity.MappingWrapper;
 import cz.cuni.matfyz.server.entity.database.Database;
+import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.JobRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.server.entity.MappingWrapper;
+import cz.cuni.matfyz.server.entity.mapping.MappingInit;
+import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import cz.cuni.matfyz.server.repository.utils.Utils;
 
@@ -55,7 +56,7 @@ public class MappingRepository {
         });
     }
 
-    public Integer add(MappingWrapper mapping) {
+    public Integer add(MappingInit mapping) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 INSERT INTO mapping (schema_category_id, database_id, root_object_id, root_morphism_id, mapping_json_value, json_value)

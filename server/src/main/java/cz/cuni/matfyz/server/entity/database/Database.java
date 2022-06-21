@@ -18,11 +18,12 @@ import cz.cuni.matfyz.server.entity.Entity;
  * @author jachym.bartik
  */
 public class Database extends Entity {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(Database.class);
-    private static ObjectReader dataJSONReader = new ObjectMapper().readerFor(CreationData.class);
-    private static ObjectWriter dataJSONWriter = new ObjectMapper().writer();
+    
     public static final String PASSWORD_FIELD_NAME = "password";
+    
+    private static Logger LOGGER = LoggerFactory.getLogger(Database.class);
+    private static ObjectReader dataJSONReader = new ObjectMapper().readerFor(DatabaseInit.class);
+    private static ObjectWriter dataJSONWriter = new ObjectMapper().writer();
 
     public Type type;
     public String label;
@@ -38,7 +39,7 @@ public class Database extends Entity {
         super(id);
     }
 
-    public Database(Integer id, CreationData data) {
+    public Database(Integer id, DatabaseInit data) {
         super(id);
         this.type = data.type;
         this.label = data.label;
@@ -46,14 +47,14 @@ public class Database extends Entity {
     }
 
     public Database(Integer id, Database database) {
-        this(id, database.toCreationData());
+        this(id, database.toDatabaseInit());
     }
 
     public void hidePassword() {
         this.settings.remove(PASSWORD_FIELD_NAME);
     }
 
-    public void updateFrom(UpdateData data) {
+    public void updateFrom(DatabaseUpdate data) {
         if (data.label != null)
             this.label = data.label;
         
@@ -62,16 +63,16 @@ public class Database extends Entity {
     }
 
     public static Database fromJSONValue(Integer id, String JSONValue) throws JsonProcessingException {
-        CreationData data = dataJSONReader.readValue(JSONValue);
+        DatabaseInit data = dataJSONReader.readValue(JSONValue);
         return new Database(id, data);
     }
 
-    private CreationData toCreationData() {
-        return new CreationData(label, settings, type);
+    private DatabaseInit toDatabaseInit() {
+        return new DatabaseInit(label, settings, type);
     }
 
     public String toJSONValue() throws JsonProcessingException {
-        return dataJSONWriter.writeValueAsString(this.toCreationData());
+        return dataJSONWriter.writeValueAsString(this.toDatabaseInit());
     }
 
     /*

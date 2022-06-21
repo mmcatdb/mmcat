@@ -1,8 +1,10 @@
-type Injection<Key, KeyId> = (key: Key) => KeyId;
+import { type Injection, injectionIterator } from './ComparableSet';
 
-export class ComparableMap<Key, KeyId, Value> {
+export type KeyValue<Key, Value> = { key: Key, value: Value };
+
+export class ComparableMap<Key, KeyId, Value> implements Map<Key, Value> {
     _keyToIdFunction: Injection<Key, KeyId>;
-    _map = new Map() as Map<KeyId, Value>;
+    _map = new Map() as Map<KeyId, KeyValue<Key, Value>>;
 
     public constructor(keyToIdFunction: Injection<Key, KeyId>) {
         this._keyToIdFunction = keyToIdFunction;
@@ -21,11 +23,11 @@ export class ComparableMap<Key, KeyId, Value> {
     }
 
     get(key: Key): Value | undefined {
-        return this._map.get(this._keyToIdFunction(key));
+        return this._map.get(this._keyToIdFunction(key))?.value;
     }
 
     set(key: Key, value: Value): this {
-        this._map.set(this._keyToIdFunction(key), value);
+        this._map.set(this._keyToIdFunction(key), { key, value });
         return this;
     }
 
@@ -33,15 +35,29 @@ export class ComparableMap<Key, KeyId, Value> {
         return this._map.size;
     }
 
-    entries(): IterableIterator<[KeyId, Value]> {
-        return this._map.entries();
+    entries(): IterableIterator<[Key, Value]> {
+        return injectionIterator(this._map.entries(), ([ , keyValue ]) => [ keyValue.key, keyValue.value ]);
     }
 
     keyIds(): IterableIterator<KeyId> {
         return this._map.keys();
     }
 
-    values(): IterableIterator<Value> {
-        return this._map.values();
+    forEach(callbackfn: (value: Value, key: Key, map: Map<Key, Value>) => void): void {
+        this._map.forEach(keyValue => callbackfn(keyValue.value, keyValue.key, this));
     }
+
+    keys(): IterableIterator<Key> {
+        return injectionIterator(this._map.values(), (keyValue) => keyValue.key);
+    }
+
+    values(): IterableIterator<Value> {
+        return injectionIterator(this._map.values(), (keyValue) => keyValue.value);
+    }
+
+    [Symbol.iterator](): IterableIterator<[Key, Value]> {
+        return this.entries();
+    }
+
+    [Symbol.toStringTag] = 'ComparableMap';
 }

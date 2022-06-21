@@ -1,4 +1,6 @@
+import { ComparableSet } from "@/utils/ComparableSet";
 import type { Position } from "cytoscape";
+import type { DatabaseView } from "../database";
 import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
 import { ComparablePosition, PositionUpdateToServer } from "./Position";
 
@@ -24,7 +26,7 @@ export class SchemaObject {
 
     _originalPosition?: ComparablePosition;
 
-    _databases = new Set as Set<number>;
+    _databases = new ComparableSet<DatabaseView, number>(database => database.id);
 
     private constructor() {}
 
@@ -80,11 +82,11 @@ export class SchemaObject {
         return this._isNew;
     }
 
-    get databases(): number[] {
+    get databases(): DatabaseView[] {
         return [ ...this._databases.values() ];
     }
 
-    setDatabase(database: number) {
+    setDatabase(database: DatabaseView) {
         this._databases.add(database);
     }
 

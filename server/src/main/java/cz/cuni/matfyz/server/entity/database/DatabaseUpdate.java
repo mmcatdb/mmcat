@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * 
  * @author jachym.bartik
  */
-public class UpdateData {
+public class DatabaseUpdate {
 
     public String label;
     public ObjectNode settings;

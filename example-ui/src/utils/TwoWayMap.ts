@@ -1,4 +1,4 @@
-export class TwoWayMap<Key, Value> {
+export class TwoWayMap<Key, Value> implements Map<Key, Value> {
     _map = new Map() as Map<Key, Value>;
     _reverseMap = new Map() as Map<Value, Key>;
 
@@ -56,6 +56,10 @@ export class TwoWayMap<Key, Value> {
         return this._map.entries();
     }
 
+    forEach(callbackfn: (value: Value, key: Key, map: Map<Key, Value>) => void): void {
+        this._map.forEach(callbackfn);
+    }
+
     keys(): IterableIterator<Key> {
         return this._map.keys();
     }
@@ -63,4 +67,10 @@ export class TwoWayMap<Key, Value> {
     values(): IterableIterator<Value> {
         return this._map.values();
     }
+
+    [Symbol.iterator](): IterableIterator<[Key, Value]> {
+        return this.entries();
+    }
+
+    [Symbol.toStringTag] = 'TwoWayMap';
 }

@@ -1,6 +1,11 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.MappingWrapper;
+import cz.cuni.matfyz.server.entity.database.Database;
+import cz.cuni.matfyz.server.entity.database.DatabaseView;
+import cz.cuni.matfyz.server.entity.mapping.MappingInit;
+import cz.cuni.matfyz.server.entity.mapping.MappingView;
+import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
+import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.MappingService;
 
 import java.util.List;
@@ -24,25 +29,34 @@ public class MappingController {
     @Autowired
     private MappingService service;
 
+    @Autowired
+    private DatabaseService databaseService;
+
     @GetMapping("/mappings/{id}")
-    public MappingWrapper getMapping(@PathVariable int id) {
-        MappingWrapper object = service.find(id);
+    public MappingView getMapping(@PathVariable int id) {
+        MappingWrapper wrapper = service.find(id);
 
-        if (object != null)
-            return object;
+        if (wrapper == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return wrapperToView(wrapper);
     }
 
     @GetMapping("/mappings")
-    public List<MappingWrapper> getAllMappings() {
+    public List<MappingView> getAllMappings() {
         // TODO multiple schema categories
-        return service.findAllInCategory(1);
+        return service.findAllInCategory(1).stream().map(wrapper -> wrapperToView(wrapper)).toList();
     }
 
     @PostMapping("/mappings")
-    public MappingWrapper createNewMapping(@RequestBody MappingWrapper newMapping) {
-        return service.createNew(newMapping);
+    public MappingView createNewMapping(@RequestBody MappingInit newMapping) {
+        return wrapperToView(service.createNew(newMapping));
+    }
+
+    private MappingView wrapperToView(MappingWrapper wrapper) {
+        Database database = databaseService.find(wrapper.databaseId);
+        DatabaseView databaseView = new DatabaseView(database, databaseService.getDatabaseConfiguration(database));
+        return new MappingView(wrapper, databaseView);
     }
 
 }

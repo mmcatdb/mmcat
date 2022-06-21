@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.server.entity;
+package cz.cuni.matfyz.server.entity.mapping;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * 
  * @author jachym.bartik
  */
-public class MappingWrapper extends Entity {
+public class MappingInit {
 
     public final int databaseId;
     public final int categoryId;
@@ -17,8 +17,7 @@ public class MappingWrapper extends Entity {
     public final String jsonValue;
 
     @JsonCreator
-    public MappingWrapper(
-        @JsonProperty("id") Integer id,
+    public MappingInit(
         @JsonProperty("databaseId") int databaseId,
         @JsonProperty("categoryId") int categoryId,
         @JsonProperty("rootObjectId") Integer rootObjectId,
@@ -26,7 +25,6 @@ public class MappingWrapper extends Entity {
         @JsonProperty("mappingJsonValue") String mappingJsonValue,
         @JsonProperty("jsonValue") String jsonValue
     ) {
-        super(id);
         this.databaseId = databaseId;
         this.categoryId = categoryId;
         this.rootObjectId = rootObjectId;

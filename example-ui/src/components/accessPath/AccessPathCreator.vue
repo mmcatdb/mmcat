@@ -55,7 +55,6 @@ export default defineComponent({
         },
         async createMapping(name: string) {
             const result = await POST<MappingFromServer>('/mappings', {
-                id: null,
                 databaseId: this.selectedDatabase?.id,
                 categoryId: this.graph?.schemaCategory.id,
                 rootObjectId: this.accessPath?.node.schemaObject.id,

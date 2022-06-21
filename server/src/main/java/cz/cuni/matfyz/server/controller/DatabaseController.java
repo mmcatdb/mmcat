@@ -1,10 +1,10 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.database.CreationData;
+import cz.cuni.matfyz.server.entity.database.DatabaseInit;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.database.DatabaseConfiguration;
-import cz.cuni.matfyz.server.entity.database.UpdateData;
-import cz.cuni.matfyz.server.entity.database.View;
+import cz.cuni.matfyz.server.entity.database.DatabaseUpdate;
+import cz.cuni.matfyz.server.entity.database.DatabaseView;
 import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.WrapperService;
 
@@ -30,17 +30,9 @@ public class DatabaseController {
     @Autowired
     private DatabaseService service;
 
-    @Autowired
-    private WrapperService wrapperService;
-
     @GetMapping("/database-views")
-    public List<View> getAllDatabaseViews() {
-        return service.findAll().stream().map(database -> createDatabaseView(database)).toList();
-    }
-
-    private View createDatabaseView(Database database) {
-        var configuration = new DatabaseConfiguration(wrapperService.getPathWrapper(database));
-        return new View(database, configuration);
+    public List<DatabaseView> getAllDatabaseViews() {
+        return service.findAll().stream().map(database -> new DatabaseView(database, service.getDatabaseConfiguration(database))).toList();
     }
 
     @GetMapping("/databases")
@@ -61,7 +53,7 @@ public class DatabaseController {
     }
 
     @PostMapping("/databases")
-    public Database createDatabase(@RequestBody CreationData data) {
+    public Database createDatabase(@RequestBody DatabaseInit data) {
         Database database = service.createNew(data);
         if (database == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -71,7 +63,7 @@ public class DatabaseController {
     }
 
     @PutMapping("/databases/{id}")
-    public Database updateDatabase(@PathVariable int id, @RequestBody UpdateData update) {
+    public Database updateDatabase(@PathVariable int id, @RequestBody DatabaseUpdate update) {
         if (!update.hasPassword()) {
             var originalDatabase = service.find(id);
             update.setPasswordFrom(originalDatabase);

@@ -152,7 +152,7 @@ export class SchemaCategory {
         if (rootObject)
             objects.push(rootObject);
 
-        objects.forEach(object => object.setDatabase(mapping.databaseId));
+        objects.forEach(object => object.setDatabase(mapping.databaseView));
     }
 }
 

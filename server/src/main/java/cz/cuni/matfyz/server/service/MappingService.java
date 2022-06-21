@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.entity.mapping.MappingInit;
+import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.MappingRepository;
-import cz.cuni.matfyz.server.entity.MappingWrapper;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class MappingService
         return repository.find(id);
     }
 
-    public MappingWrapper createNew(MappingWrapper wrapper) {
+    public MappingWrapper createNew(MappingInit wrapper) {
         Integer generatedId = repository.add(wrapper);
 
         return generatedId == null ? null : new MappingWrapper(

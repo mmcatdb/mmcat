@@ -31,18 +31,16 @@ export default defineComponent({
         if (result.status && mappingsResult.status) {
             console.log(result.data);
             this.schemaCategory = SchemaCategory.fromServer(result.data);
-            mappingsResult.data
-                .map(mappingFromServer => Mapping.fromServer(mappingFromServer))
-                .forEach(mapping => this.schemaCategory?.setDatabaseToObjectsFromMapping(mapping));
+            const mappings = mappingsResult.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
 
-            this.graph = this.createGraph(this.schemaCategory);
+            this.graph = this.createGraph(this.schemaCategory, mappings);
 
             this.schemaFetched = true;
             this.$emit('graph:created', this.graph);
         }
     },
     methods: {
-        createGraph(schema: SchemaCategory): Graph {
+        createGraph(schema: SchemaCategory, mappings: Mapping[]): Graph {
             const container = document.getElementById('cytoscape');
 
             // This is needed because of some weird bug.
@@ -63,6 +61,9 @@ export default defineComponent({
                 //elements,
                 style
             });
+
+            mappings.forEach(mapping => schema.setDatabaseToObjectsFromMapping(mapping));
+
 
             const graph = new Graph(cytoscapeInstance, schema);
 

@@ -125,7 +125,7 @@ export const style: cytoscape.Stylesheet[] = [
     {
         selector: '.group',
         style: {
-            label: '',
+            label: 'data(label)',
             events: 'no',
             'shape': 'round-rectangle',
             'border-style': 'dashed',
@@ -136,6 +136,7 @@ export const style: cytoscape.Stylesheet[] = [
         selector: '.group-1',
         style: {
             'background-color': 'green',
+            'color': 'green',
             'border-color': 'green',
             'padding-right': '8px'
         }
@@ -144,6 +145,7 @@ export const style: cytoscape.Stylesheet[] = [
         selector: '.group-2',
         style: {
             'background-color': 'red',
+            'color': 'red',
             'border-color': 'red',
             'padding-right': '12px'
         }
@@ -152,6 +154,7 @@ export const style: cytoscape.Stylesheet[] = [
         selector: '.group-3',
         style: {
             'background-color': 'blue',
+            'color': 'blue',
             'border-color': 'blue',
             'padding-right': '16px'
         }
@@ -160,6 +163,7 @@ export const style: cytoscape.Stylesheet[] = [
         selector: '.group-4',
         style: {
             'background-color': 'orange',
+            'color': 'orange',
             'border-color': 'orange',
             'padding-right': '20px'
         }

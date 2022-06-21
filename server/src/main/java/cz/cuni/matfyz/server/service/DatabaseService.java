@@ -1,8 +1,9 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.server.entity.database.CreationData;
+import cz.cuni.matfyz.server.entity.database.DatabaseInit;
 import cz.cuni.matfyz.server.entity.database.Database;
-import cz.cuni.matfyz.server.entity.database.UpdateData;
+import cz.cuni.matfyz.server.entity.database.DatabaseConfiguration;
+import cz.cuni.matfyz.server.entity.database.DatabaseUpdate;
 import cz.cuni.matfyz.server.repository.DatabaseRepository;
 
 import java.util.List;
@@ -21,6 +22,9 @@ public class DatabaseService {
     @Autowired
     private DatabaseRepository repository;
 
+    @Autowired
+    private WrapperService wrapperService;
+
     public Database find(int id) {
         return repository.find(id);
     }
@@ -29,12 +33,12 @@ public class DatabaseService {
         return repository.findAll();
     }
 
-    public Database createNew(CreationData data) {
+    public Database createNew(DatabaseInit data) {
         var database = new Database(null, data);
         return repository.save(database);
     }
 
-    public Database update(int id, UpdateData data) {
+    public Database update(int id, DatabaseUpdate data) {
         Database database = repository.find(id);
         if (database == null)
             return null;
@@ -45,6 +49,10 @@ public class DatabaseService {
 
     public boolean delete(int id) {
         return repository.delete(id);
+    }
+
+    public DatabaseConfiguration getDatabaseConfiguration(Database database) {
+        return new DatabaseConfiguration(wrapperService.getPathWrapper(database));
     }
 
 }
