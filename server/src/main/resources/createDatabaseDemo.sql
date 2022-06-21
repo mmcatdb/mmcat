@@ -44,15 +44,15 @@ CREATE TABLE schema_morphism_in_category (
 
 INSERT INTO schema_object (json_value)
 VALUES
-    ('{"ids": [{"signatures": [{"ids": [1], "isNull": false}]}], "key": {"value": 1}, "label": "Customer", "superId": {"signatures": [{"ids": [1], "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 2}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 3}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 4}, "label": "Surname", "superId": {"signatures": [{"ids": [], "isNull": false}]}, "databases": ["postgresql", "mongodb"]}'),
-    ('{"ids": [{"signatures": [{"ids": [4], "isNull": false}, {"ids": [5], "isNull": false}]}], "key": {"value": 5}, "label": "Friend", "superId": {"signatures": [{"ids": [5], "isNull": false}]}, "databases": ["mongodb"]}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 6}, "label": "Address", "superId": {"signatures": [{"ids": [], "isNull": false}]}, "databases": ["postgresql"]}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 7}, "label": "Street", "superId": {"signatures": [{"ids": [], "isNull": false}]}, "databases": ["postgresql"]}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 8}, "label": "City", "superId": {"signatures": [{"ids": [], "isNull": false}]}, "databases": ["postgresql"]}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 9}, "label": "Post code", "superId": {"signatures": [{"ids": [], "isNull": false}]}, "databases": ["postgresql"]}');
+    ('{"ids": [{"signatures": [{"ids": [1], "isNull": false}]}], "key": {"value": 1}, "label": "Customer", "superId": {"signatures": [{"ids": [1], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 2}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 3}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 4}, "label": "Surname", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [4], "isNull": false}, {"ids": [5], "isNull": false}]}], "key": {"value": 5}, "label": "Friend", "superId": {"signatures": [{"ids": [5], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 6}, "label": "Address", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 7}, "label": "Street", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 8}, "label": "City", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 9}, "label": "Post code", "superId": {"signatures": [{"ids": [], "isNull": false}]}}');
 
 INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position)
 VALUES
