@@ -45,10 +45,10 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
-                    Database id:
+                    Database:
                 </td>
                 <td class="value">
-                    {{ mapping.databaseId }}
+                    {{ mapping.databaseView.label }}
                 </td>
             </tr>
         </table>
