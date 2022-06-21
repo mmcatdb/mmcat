@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaMorphismUpdate;
+import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
-import cz.cuni.matfyz.server.view.SchemaCategoryUpdate;
 
 import java.sql.Statement;
 import java.util.*;
@@ -55,7 +55,7 @@ public class SchemaMorphismRepository {
         });
     }
 
-    public Integer add(SchemaCategoryUpdate.MorphismUpdate morphism, int categoryId) {
+    public Integer add(SchemaMorphismUpdate morphism, int categoryId) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value) VALUES (?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             

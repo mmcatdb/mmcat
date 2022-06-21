@@ -18,14 +18,12 @@ public class DMLAlgorithm
 {
     private Mapping mapping;
     private InstanceCategory instance;
-    private String rootName; // TODO
     private AbstractPushWrapper wrapper;
 
-    public void input(Mapping mapping, InstanceCategory instance, String rootName, AbstractPushWrapper wrapper)
+    public void input(Mapping mapping, InstanceCategory instance, AbstractPushWrapper wrapper)
     {
         this.mapping = mapping;
         this.instance = instance;
-        this.rootName = rootName; // Maybe it could be found as mapping.accessPath.Name.getStringName()
         this.wrapper = wrapper;
     }
     
@@ -93,7 +91,7 @@ public class DMLAlgorithm
     private DMLStatement buildStatement(Stack<DMLStackTriple> M)
     {
         wrapper.clear();
-        wrapper.setKindName(rootName);
+        wrapper.setKindName(mapping.kindName());
 
         while (!M.empty())
         {

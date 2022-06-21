@@ -7,10 +7,10 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
-import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
-import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 
 /**
  * 

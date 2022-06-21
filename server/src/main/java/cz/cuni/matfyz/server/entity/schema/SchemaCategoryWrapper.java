@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.server.entity;
+package cz.cuni.matfyz.server.entity.schema;
 
 import java.util.Collection;
 

@@ -95,7 +95,7 @@ public class AsyncJobService {
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
 
         var process = new DatabaseToInstance();
-        process.input(pullWrapper, mapping, instance);
+        process.input(mapping, instance, pullWrapper);
 
         var result = process.run();
         Thread.sleep(2 * 1000);
@@ -126,7 +126,7 @@ public class AsyncJobService {
         AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
 
         var process = new InstanceToDatabase();
-        process.input(pushWrapper, mapping, instance);
+        process.input(mapping, instance, pushWrapper);
 
         var result = process.run();
         Thread.sleep(2 * 1000);

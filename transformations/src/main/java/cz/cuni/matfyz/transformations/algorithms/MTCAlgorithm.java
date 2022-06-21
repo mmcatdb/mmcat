@@ -5,7 +5,6 @@ import cz.cuni.matfyz.core.category.*;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
-import cz.cuni.matfyz.core.utils.Debug;
 
 import java.util.*;
 import org.javatuples.Pair;
@@ -21,34 +20,29 @@ public class MTCAlgorithm
 {
     private static Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
 
-    private SchemaCategory schema; // TODO
-    private ForestOfRecords forest; // TODO
-    private Mapping mapping; // TODO
-    private ComplexProperty rootAccessPath;
+    private ForestOfRecords forest;
+    private Mapping mapping;
     private InstanceCategory instance;
     
     public void input(Mapping mapping, InstanceCategory instance, ForestOfRecords forest)
     {
-        this.schema = mapping.category();
         this.forest = forest;
         this.mapping = mapping;
-        this.rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
         this.instance = instance;
     }
     
 	public void algorithm()
     {
-        if (Debug.shouldLog(4))
-            System.out.println("# ALGORITHM");
+        LOGGER.debug("Model To Category algorithm");
+        final ComplexProperty rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
         
         for (RootRecord rootRecord : forest)
         {
-            if (Debug.shouldLog(4))
-                System.out.println("################ Process of Root Record ################");
+            LOGGER.debug("Process a root record:\n{}", rootRecord);
 			// preparation phase
 			Stack<StackTriple> M = mapping.hasRootMorphism() ?
-                createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord) : // K with root morphism
-                createStackWithObject(mapping.rootObject(), rootRecord); // K with root object
+                createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord, rootAccessPath) : // K with root morphism
+                createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath); // K with root object
 
 			// processing of the tree
 			while (!M.empty())
@@ -56,11 +50,8 @@ public class MTCAlgorithm
 		}
 	}
     
-    private Stack<StackTriple> createStackWithObject(SchemaObject object, RootRecord record)
+    private Stack<StackTriple> createStackWithObject(SchemaObject object, RootRecord record, ComplexProperty rootAccessPath)
     {
-        if (Debug.shouldLog(3))
-            System.out.println("#### Create Stack With Object ####");
-        
         InstanceObject qI = instance.getObject(object);
         IdWithValues sid = fetchSid(object.superId(), record);
         Stack<StackTriple> M = new Stack<>();
@@ -68,17 +59,11 @@ public class MTCAlgorithm
         ActiveDomainRow row = modify(qI, sid);
         addPathChildrenToStack(M, rootAccessPath, row, record);
         
-        if (Debug.shouldLog(3))
-            System.out.println("# Stack size: " + M.size());
-        
         return M;
     }
     
-    private Stack<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord record)
+    private Stack<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord record, ComplexProperty rootAccessPath)
     {
-        if (Debug.shouldLog(3))
-            System.out.println("#### Create Stack With Morphism ####");
-        
         Stack<StackTriple> M = new Stack<>();
         
         InstanceObject qI_dom = instance.getObject(object);
@@ -104,18 +89,12 @@ public class MTCAlgorithm
         addPathChildrenToStack(M, ap, sid_dom, record);
         addPathChildrenToStack(M, t_cod, sid_cod, record);
         
-        if (Debug.shouldLog(3))
-            System.out.println("# Stack size: " + M.size());
-        
         return M;
     }
     
     private void processTopOfStack(Stack<StackTriple> M)
     {
-        if (Debug.shouldLog(3))
-            System.out.println("#### Process Top of Stack ####");
-        if (Debug.shouldLog(2))
-            printStack(M);
+        LOGGER.debug("Process Top of Stack:\n{}", M);
         
         StackTriple triple = M.pop();
         InstanceMorphism mI = instance.getMorphism(triple.mS);
@@ -132,19 +111,6 @@ public class MTCAlgorithm
             
             addPathChildrenToStack(M, triple.t, row, sid.getValue1());
         }
-    }
-    
-    private void printStack(Stack<StackTriple> M)
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\nSize: ").append(M.size());
-        
-        var array = M.toArray();
-        for (int i = array.length - 1; i >= 0; i--)
-            builder.append("\n").append(array[i]);
-        builder.append("\n");
-        
-        System.out.println(builder.toString());
     }
 
     // Fetch id with values for given record.
@@ -393,7 +359,7 @@ public class MTCAlgorithm
         if (path instanceof ComplexProperty complexPath)
             for (Pair<Signature, ComplexProperty> child: children(complexPath))
             {
-                SchemaMorphism morphism = schema.getMorphism(child.getValue0());
+                SchemaMorphism morphism = instance.getMorphism(child.getValue0()).schemaMorphism();
                 stack.push(new StackTriple(sid, morphism, child.getValue1(), record));
             }
     }
@@ -406,12 +372,6 @@ public class MTCAlgorithm
      */
 	private static Collection<Pair<Signature, ComplexProperty>> children(ComplexProperty complexProperty)
     {
-        if (Debug.shouldLog(0))
-        {
-            System.out.println("$ Children:");
-            System.out.println(complexProperty);
-        }
-        
         final List<Pair<Signature, ComplexProperty>> output = new ArrayList<>();
         
         for (AccessPath subpath: complexProperty.subpaths())
@@ -431,12 +391,6 @@ public class MTCAlgorithm
      */
     private static Collection<Pair<Signature, ComplexProperty>> process(Name name)
     {
-        if (Debug.shouldLog(0))
-        {
-            System.out.println("$ Process name:");
-            System.out.println(name);
-        }
-        
         if (name instanceof DynamicName dynamicName)
             return List.of(new Pair<>(dynamicName.signature(), ComplexProperty.Empty()));
         else // Static or anonymous (empty) name
@@ -445,13 +399,6 @@ public class MTCAlgorithm
     
     private static Collection<Pair<Signature, ComplexProperty>> process(IContext context, IValue value)
     {
-        if (Debug.shouldLog(0))
-        {
-            System.out.println("$ Process context, value:");
-            System.out.println(context);
-            System.out.println(value);
-        }
-        
         if (value instanceof SimpleValue simpleValue)
         {
             final Signature contextSignature = context instanceof Signature signature ? signature : Signature.Empty();

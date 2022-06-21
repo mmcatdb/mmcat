@@ -19,14 +19,14 @@ public class DatabaseToInstance {
 
     private static Logger LOGGER = LoggerFactory.getLogger(DatabaseToInstance.class);
 
-    private AbstractPullWrapper pullWrapper;
     private Mapping mapping;
     private InstanceCategory defaultInstance;
+    private AbstractPullWrapper pullWrapper;
 
-    public void input(AbstractPullWrapper pullWrapper, Mapping mapping, InstanceCategory defaultInstance) {
-        this.pullWrapper = pullWrapper;
+    public void input(Mapping mapping, InstanceCategory defaultInstance, AbstractPullWrapper pullWrapper) {
         this.mapping = mapping;
         this.defaultInstance = defaultInstance;
+        this.pullWrapper = pullWrapper;
     }
     
     public DataResult<InstanceCategory> run() {

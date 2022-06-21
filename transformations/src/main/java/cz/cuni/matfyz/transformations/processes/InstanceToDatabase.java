@@ -20,19 +20,20 @@ public class InstanceToDatabase {
 
     private static Logger LOGGER = LoggerFactory.getLogger(InstanceToDatabase.class);
 
-    private AbstractPushWrapper pushWrapper;
     private Mapping mapping;
     private InstanceCategory instance;
+    private AbstractPushWrapper pushWrapper;
 
-    public void input(AbstractPushWrapper pushWrapper, Mapping mapping, InstanceCategory instance) {
-        this.pushWrapper = pushWrapper;
+    public void input(Mapping mapping, InstanceCategory instance, AbstractPushWrapper pushWrapper) {
         this.mapping = mapping;
         this.instance = instance;
+        this.pushWrapper = pushWrapper;
     }
     
     public DataResult<String> run() {
         var transformation = new DMLAlgorithm();
-		transformation.input(mapping, instance, "rootName", pushWrapper);
+        // TODO DDL also ?
+		transformation.input(mapping, instance, pushWrapper);
 		List<DMLStatement> dmlStatements = transformation.algorithm();
 
         var output = new StringBuilder();

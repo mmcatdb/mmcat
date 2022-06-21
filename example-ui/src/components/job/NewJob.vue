@@ -26,13 +26,6 @@ export default defineComponent({
         if (result.status) {
             this.mappings = [ ...result.data ];
             this.mappingId = this.mappings[0]?.id;
-
-            const jsonString = this.mappings[0].mappingJsonValue;
-            console.log(jsonString);
-            const jsonObject = JSON.parse(jsonString);
-            const path = RootProperty.fromJSON(jsonObject.accessPath);
-            console.log({ path });
-            console.log(path.toString());
         }
 
         this.fetched = true;
@@ -40,10 +33,8 @@ export default defineComponent({
     methods: {
         async createJob() {
             this.createJobDisabled = true;
-            console.log('New job is being created.');
 
             const result = await POST<Job>('/jobs', { mappingId: this.mappingId, name: this.jobName, type: this.jobType });
-            console.log(result);
             if (result.status)
                 this.$emit('newJob', result.data);
 

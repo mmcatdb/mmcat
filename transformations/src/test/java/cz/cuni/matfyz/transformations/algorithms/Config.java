@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 abstract class Config
 {
     private static Properties properties;
-    private static Logger logger = LoggerFactory.getLogger(Config.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
     private Config() {}
 
@@ -26,7 +26,7 @@ abstract class Config
 
         String property = properties.getProperty(key);
         if (property == null)
-            logger.error("Property '" + key + "' not found in configuration.");
+            LOGGER.error("Property '" + key + "' not found in configuration.");
 
         return property;
     }
@@ -46,15 +46,15 @@ abstract class Config
         }
         catch (URISyntaxException exception)
         {
-            logger.error(exception.toString());
+            LOGGER.error(exception.toString());
         }
         catch (FileNotFoundException exception)
         {
-            logger.error(exception.toString());
+            LOGGER.error(exception.toString());
         }
         catch (IOException exception)
         {
-            logger.error(exception.toString());
+            LOGGER.error(exception.toString());
         }
     }
 }

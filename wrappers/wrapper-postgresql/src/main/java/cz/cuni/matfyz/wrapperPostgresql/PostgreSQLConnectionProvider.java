@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PostgreSQLConnectionProvider implements ConnectionProvider {
 
-    private static Logger logger = LoggerFactory.getLogger(PostgreSQLConnectionProvider.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(PostgreSQLConnectionProvider.class);
 
     private PostgreSQLSettings settings;
 
@@ -30,7 +30,7 @@ public class PostgreSQLConnectionProvider implements ConnectionProvider {
             return DriverManager.getConnection(settings.getConnectionString());
         }
         catch (SQLException exception) {
-            logger.error("Cannot create connection to PostgreSQL.", exception);
+            LOGGER.error("Cannot create connection to PostgreSQL.", exception);
         }
 
         return null;

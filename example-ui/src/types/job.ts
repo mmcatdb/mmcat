@@ -10,13 +10,29 @@ export const JOB_TYPES = [
 ];
 
 export class Job {
-    id!: number;
-    mappingId!: number;
-    name!: string;
-    type!: string;
-    status!: string;
+    private constructor(
+        public id: number,
+        public mappingId: number,
+        public name: string,
+        public type: string,
+        public status: string
+    ) {
+
+    }
+
+    static fromServer(input: JobFromServer): Job {
+        return new Job(input.id, input.mappingId, input.name, input.type, input.status);
+    }
 
     setStatus(status: string) {
         this.status = status;
     }
+}
+
+export type JobFromServer = {
+    id: number;
+    mappingId: number;
+    name: string;
+    type: string;
+    status: string;
 }

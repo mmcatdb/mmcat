@@ -67,7 +67,6 @@ export default defineComponent({
                     accessPath: this.accessPath?.toJSON()
                 })
             });
-            console.log(result);
             if (result.status)
                 this.$router.push({ name: 'mappings' });
         }

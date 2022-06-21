@@ -1,5 +1,6 @@
-package cz.cuni.matfyz.server.entity;
+package cz.cuni.matfyz.server.entity.schema;
 
+import cz.cuni.matfyz.server.entity.Entity;
 import cz.cuni.matfyz.server.utils.Position;
 
 /**

@@ -12,18 +12,6 @@ public class PullWrapperOptions
 	{
 		return kindName;
 	}
-
-	private String command = null;
-
-	public String getCommand()
-	{
-		return command;
-	}
-
-	public boolean hasCommand()
-	{
-		return command != null;
-	}
 	
 	private Integer offset = null;
 
@@ -63,12 +51,6 @@ public class PullWrapperOptions
         {
             instance.offset = offset;
             return this;
-        }
-
-        public PullWrapperOptions buildWithCommand(String command)
-        {
-            instance.command = command;
-            return instance;
         }
 
 		public PullWrapperOptions buildWithKindName(String kindName)

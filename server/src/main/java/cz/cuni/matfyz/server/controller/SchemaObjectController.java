@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.service.SchemaObjectService;
 
 import org.springframework.beans.factory.annotation.Autowired;

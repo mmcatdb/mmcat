@@ -3,6 +3,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.Debug;
 import cz.cuni.matfyz.wrapperDummy.DummyDDLWrapper;
 
@@ -26,9 +27,9 @@ public class DDLAlgorithmTestBase
         this.dataFileName = dataFileName;
     }
 
-    public DDLAlgorithmTestBase setAll(SchemaCategory schema, String rootName, ComplexProperty path, InstanceCategory inputInstance)
+    public DDLAlgorithmTestBase setAll(SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path, InstanceCategory inputInstance)
     {
-        return setSchema(schema).setRootName(rootName).setPath(path).setInputInstance(inputInstance);
+        return setSchema(schema).setRootObject(rootObject).setKindName(kindName).setPath(path).setInputInstance(inputInstance);
     }
 
     private SchemaCategory schema;
@@ -52,11 +53,20 @@ public class DDLAlgorithmTestBase
         return this;
     }
 
-    private String rootName;
+    private SchemaObject rootObject;
 
-    public DDLAlgorithmTestBase setRootName(String rootName)
+    public DDLAlgorithmTestBase setRootObject(SchemaObject rootObject)
     {
-        this.rootName = rootName;
+        this.rootObject = rootObject;
+
+        return this;
+    }
+
+    private String kindName;
+
+    public DDLAlgorithmTestBase setKindName(String kindName)
+    {
+        this.kindName = kindName;
 
         return this;
     }
@@ -102,8 +112,10 @@ public class DDLAlgorithmTestBase
 
         var wrapper = new DummyDDLWrapper();
 
+        Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, null);
+
 		var transformation = new DDLAlgorithm();
-		transformation.input(schema, inputInstance, rootName, path, wrapper);
+		transformation.input(mapping, inputInstance, wrapper);
 		transformation.algorithm();
 
         List<String> result = wrapper.methods();

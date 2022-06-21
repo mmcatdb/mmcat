@@ -1,13 +1,13 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
-import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 import cz.cuni.matfyz.server.service.SchemaObjectService;
 import cz.cuni.matfyz.server.utils.Position;
 import cz.cuni.matfyz.server.view.MappingOptionsView;
-import cz.cuni.matfyz.server.view.SchemaCategoryUpdate;
 
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;

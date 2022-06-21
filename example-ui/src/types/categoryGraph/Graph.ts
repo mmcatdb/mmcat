@@ -19,7 +19,6 @@ export class Graph {
     readonly schemaCategory: SchemaCategory;
 
     constructor(cytoscape: Core, schemaCategory: SchemaCategory) {
-        console.log('NEW GRAPH CREATED', cytoscape);
         this._cytoscape = cytoscape;
         this.schemaCategory = schemaCategory;
     }
@@ -193,18 +192,6 @@ function createNodeDefinition(object: SchemaObject, node: Node, classes?: string
         ...classes ? { classes } : {}
     };
 }
-/*
-function createColoringNodeDefinition(object: SchemaObject, databaseType: Type): ElementDefinition {
-    console.log('coloring ' + databaseType);
-    return {
-        data: {
-            id: 'co' + object.id.toString()
-        },
-        position: object.position,
-        classes: 'coloring ' + databaseType
-    };
-}
-*/
 
 function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number): ElementDefinition {
     return {

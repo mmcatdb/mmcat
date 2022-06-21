@@ -18,7 +18,7 @@ public class DummyPullWrapper implements AbstractPullWrapper
     @Override
 	public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception
     {
-        String resourceFileName = options.hasCommand() ? options.getCommand() : options.getKindName();
+        String resourceFileName = options.getKindName();
         String jsonString = Files.readString(Path.of(resourceFileName));
         var json = new JSONArray(jsonString);
         

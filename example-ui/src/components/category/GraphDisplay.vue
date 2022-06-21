@@ -92,7 +92,7 @@ export default defineComponent({
                 .map(object => object.toPositionUpdateToServer())
                 .filter(update => update != null);
             const result = await PUT<PositionUpdateToServer[]>(`/schemaCategories/positions/${this.schemaCategory?.id}`, updatedPositions);
-            console.log('UPDATE RESULT:', result);
+            console.log(result);
 
             this.saveButtonDisabled = false;
         }

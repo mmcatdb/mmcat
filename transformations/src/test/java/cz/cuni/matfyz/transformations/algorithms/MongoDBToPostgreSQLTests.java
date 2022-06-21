@@ -86,8 +86,8 @@ public class MongoDBToPostgreSQLTests
         testBase.setAll(
             "TODO",
             schema,
-            "basic",
             order,
+            "basic",
             data.path_order()
         );
 

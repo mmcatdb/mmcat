@@ -20,9 +20,9 @@ class Settings
             @Override
             public void addCorsMappings(CorsRegistry registry)
             {
-                // TODO konfigurace portu pro clienta
                 registry.addMapping("/**")
-                    .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                    // 3000 is the default port of the vite development server.
                     .allowedOrigins("http://localhost:3000", "http://localhost")
                     .allowCredentials(true);
             }

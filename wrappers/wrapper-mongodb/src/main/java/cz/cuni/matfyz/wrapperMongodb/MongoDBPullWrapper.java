@@ -29,45 +29,33 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
         this.databaseProvider = databaseProvider;
     }
 
-    private static String getKindNameFromSelectAllCommand(String selectAllCommand)
+    private Iterator<Document> getDocumentIterator(PullWrapperOptions options)
     {
-        // selectAll should be in the form of "database.getCollection("<kindName>");"
-        return selectAllCommand.substring("database.getCollection(\"".length(), selectAllCommand.length() - "\");".length());
+        String kindName = options.getKindName();
+        var database = databaseProvider.getDatabase();
+        var find = database.getCollection(kindName).find();
+
+        if (options.hasOffset())
+            find = find.skip(options.getOffset());
+        
+        if (options.hasLimit())
+            find = find.limit(options.getLimit());
+
+        return find.iterator();
     }
 
     @Override
     public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception
     {
-        String kindName = options.hasCommand() ? getKindNameFromSelectAllCommand(options.getCommand()) : options.getKindName();
-
-        var database = databaseProvider.getDatabase();
-        MongoCollection<Document> collection = database.getCollection(kindName);
-        Iterator<Document> iterator = collection.find().iterator();
-
-        //TODO
-        //var a = collection.find().skip(options.getOffset()).limit(options.getLimit());
-        
         var forest = new ForestOfRecords();
-        int offsetIndex = 0;
-        int limitIndex = 0;
+        var iterator = getDocumentIterator(options);
         
         while (iterator.hasNext())
         {
             Document document = iterator.next();
-            
-            if (options.hasOffset() && offsetIndex < options.getOffset())
-                continue;
-            offsetIndex++;
-            
-            if (options.hasLimit() && limitIndex >= options.getLimit())
-                break;
-            limitIndex++;
-                
             var record = new RootRecord();
-
             getDataFromDocument(record, document, path);
             forest.addRecord(record);
-
         }
         
         return forest;

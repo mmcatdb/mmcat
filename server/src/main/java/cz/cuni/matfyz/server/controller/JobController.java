@@ -60,7 +60,7 @@ public class JobController
     {
         Job job = service.find(id);
         if (job == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not foud ... TODO"); // TODO
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job " + id + " not foud.");
 
         var store = UserStore.fromSession(session);
         return service.start(job, store);

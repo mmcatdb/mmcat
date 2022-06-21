@@ -38,9 +38,9 @@ public class PullToDDLAndDMLTestBase
         this.pushWrapper = pushWrapper;
     }
 
-    public PullToDDLAndDMLTestBase setAll(String dataFileName, SchemaCategory schema, String rootName, SchemaObject rootObject, ComplexProperty path)
+    public PullToDDLAndDMLTestBase setAll(String dataFileName, SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path)
     {
-        return setDataFileName(dataFileName).setSchema(schema).setRootName(rootName).setRootObject(rootObject).setPath(path);
+        return setDataFileName(dataFileName).setSchema(schema).setKindName(kindName).setRootObject(rootObject).setPath(path);
     }
 
     private String dataFileName;
@@ -62,11 +62,11 @@ public class PullToDDLAndDMLTestBase
         return this;
     }
 
-    private String rootName;
+    private String kindName;
 
-    public PullToDDLAndDMLTestBase setRootName(String rootName)
+    public PullToDDLAndDMLTestBase setKindName(String kindName)
     {
-        this.rootName = rootName;
+        this.kindName = kindName;
 
         return this;
     }
@@ -98,7 +98,7 @@ public class PullToDDLAndDMLTestBase
         ForestOfRecords forest;
         try
         {
-		    forest = pullWrapper.pullForest(path, new PullWrapperOptions.Builder().buildWithKindName(rootName));
+		    forest = pullWrapper.pullForest(path, new PullWrapperOptions.Builder().buildWithKindName(kindName));
         }
         catch (Exception e)
         {
@@ -108,7 +108,7 @@ public class PullToDDLAndDMLTestBase
 
         LOGGER.trace("Pulled Forest Of Records:\n" + forest);
         
-		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
+		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, null);
 
 		var transformation = new MTCAlgorithm();
 		transformation.input(mapping, instance, forest);
@@ -117,13 +117,13 @@ public class PullToDDLAndDMLTestBase
         LOGGER.trace("Created Instance Category:\n" + instance);
         
         var ddlAlgorithm = new DDLAlgorithm();
-        ddlAlgorithm.input(schema, instance, rootName, path, ddlWrapper);
+        ddlAlgorithm.input(mapping, instance, ddlWrapper);
         DDLStatement ddlStatement = ddlAlgorithm.algorithm();
 
         LOGGER.info("Created DDL Statement:\n" + ddlStatement);
 
         var dmlAlgorithm = new DMLAlgorithm();
-        dmlAlgorithm.input(mapping, instance, rootName, pushWrapper);
+        dmlAlgorithm.input(mapping, instance, pushWrapper);
         List<DMLStatement> dmlStatements = dmlAlgorithm.algorithm();
 
         LOGGER.info("Created DML Statement-s:\n" + dmlStatements);

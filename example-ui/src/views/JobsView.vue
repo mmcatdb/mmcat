@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { Job } from '@/types/job';
+import { Job, type JobFromServer } from '@/types/job';
 import { GET } from '@/utils/backendAPI';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
@@ -40,9 +40,9 @@ export default defineComponent({
             this.jobs = this.jobs?.filter(job => job.id !== id) ?? [];
         },
         async fetchNew() {
-            const result = await GET<Job[]>('/jobs');
+            const result = await GET<JobFromServer[]>('/jobs');
             if (result.status)
-                this.jobs = result.data;
+                this.jobs = result.data.map(jobFromServer => Job.fromServer(jobFromServer));
 
             if (this.continueFetching)
                 setTimeout(this.fetchNew, 1000);

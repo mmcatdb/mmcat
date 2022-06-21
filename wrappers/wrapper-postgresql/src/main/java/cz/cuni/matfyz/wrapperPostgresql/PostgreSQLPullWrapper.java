@@ -24,20 +24,13 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         this.connectionProvider = connectionProvider;
     }
 
-    private String createBasicCommand(PullWrapperOptions options)
-    {
-        if (options.hasCommand())
-        {
-            String command = options.getCommand();
-            return command.endsWith(";") ? command.substring(0, command.length() - 1) : command;
-        }
-        
-        return "SELECT * FROM \"" + options.getKindName() + "\""; // TODO prevent SQL injection
-    }
-
     private PreparedStatement prepareStatement(Connection connection, PullWrapperOptions options) throws SQLException
     {
-        String command = createBasicCommand(options);
+        // Prevent SQL injection.
+        if (!options.getKindName().matches("[_a-zA-Z0-9\\.]+"))
+            throw new SQLException("Invalid table name.");
+
+        String command = "SELECT * FROM " + options.getKindName();
 
         if (options.hasLimit())
             command += "\nLIMIT " + options.getLimit();
@@ -45,10 +38,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper
         if (options.hasOffset())
             command += "\nOFFSET " + options.getOffset();
 
-        PreparedStatement statement = connection.prepareStatement(command);
-        LOGGER.debug("SQL statement: " + statement);
-        
-        return statement;
+        command += ";";
+
+        return connection.prepareStatement(command);
     }
 
     @Override

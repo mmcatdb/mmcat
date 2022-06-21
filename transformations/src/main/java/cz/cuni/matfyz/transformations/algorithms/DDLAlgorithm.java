@@ -15,29 +15,25 @@ import java.util.*;
  */
 public class DDLAlgorithm
 {
-    private SchemaCategory schema; // TODO
+    private Mapping mapping;
     private InstanceCategory instance;
-    private String rootName; // TODO
-    private ComplexProperty rootAccessPath;
     private AbstractDDLWrapper wrapper;
     
-    public void input(SchemaCategory schema, InstanceCategory instance, String rootName, ComplexProperty rootAccessPath, AbstractDDLWrapper wrapper)
+    public void input(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper)
     {
-        this.schema = schema;
+        this.mapping = mapping;
         this.instance = instance;
-        this.rootName = rootName;
-        this.rootAccessPath = rootAccessPath;
         this.wrapper = wrapper;
     }
     
     public DDLStatement algorithm()
     {
-        wrapper.setKindName(rootName);
+        wrapper.setKindName(mapping.kindName());
         
         if (!wrapper.isSchemaLess())
         {
             Stack<StackPair> M = new Stack<>();
-            addSubpathsToStack(M, rootAccessPath, Set.of(StaticName.Anonymous().getStringName()));
+            addSubpathsToStack(M, mapping.accessPath(), Set.of(StaticName.Anonymous().getStringName()));
 
             while (!M.isEmpty())
                 processTopOfStack(M);
@@ -80,7 +76,7 @@ public class DDLAlgorithm
         
         var dynamicName = (DynamicName) path.name();
             
-        SchemaObject schemaObject = schema.getMorphism(dynamicName.signature()).cod();
+        SchemaObject schemaObject = instance.getMorphism(dynamicName.signature()).schemaMorphism().cod();
         InstanceObject instanceObject = instance.getObject(schemaObject);
         
         var output = new TreeSet<String>();
@@ -102,7 +98,7 @@ public class DDLAlgorithm
     
     private void processPath(SimpleProperty property, Set<String> names)
     {
-        var morphism = schema.getMorphism(property.value().signature());
+        var morphism = instance.getMorphism(property.value().signature()).schemaMorphism();
         
         if (morphism.isArray())
             wrapper.addSimpleArrayProperty(names, isRequired(morphism));
@@ -112,7 +108,7 @@ public class DDLAlgorithm
     
     private void processPath(ComplexProperty property, Set<String> names)
     {
-        var morphism = schema.getMorphism(property.signature());
+        var morphism = instance.getMorphism(property.signature()).schemaMorphism();
         
         if (morphism.isArray())
             wrapper.addComplexArrayProperty(names, isRequired(morphism));

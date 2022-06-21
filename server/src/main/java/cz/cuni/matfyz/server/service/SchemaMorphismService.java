@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.repository.SchemaMorphismRepository;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

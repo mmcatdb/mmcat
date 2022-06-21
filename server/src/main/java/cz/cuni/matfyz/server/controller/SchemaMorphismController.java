@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.service.SchemaMorphismService;
 
 import org.springframework.beans.factory.annotation.Autowired;

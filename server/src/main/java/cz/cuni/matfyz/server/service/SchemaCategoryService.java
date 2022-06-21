@@ -1,13 +1,13 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
 import cz.cuni.matfyz.server.repository.SchemaMorphismRepository;
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
-import cz.cuni.matfyz.server.view.SchemaCategoryUpdate;
-import cz.cuni.matfyz.server.entity.SchemaCategoryInfo;
-import cz.cuni.matfyz.server.entity.SchemaCategoryWrapper;
-import cz.cuni.matfyz.server.entity.SchemaMorphismWrapper;
-import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,12 +16,14 @@ public class DDLAlgorithmTests
 {
     private TestData data;
     private SchemaCategory schema;
+    private SchemaObject order;
 
     @BeforeEach
     public void setupTestData()
     {
         data = new TestData();
         schema = data.createDefaultSchemaCategory();
+        order = schema.getObject(data.getOrderKey());
     }
 
 	@Test
@@ -28,6 +31,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("1BasicTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_order(),
             data.expectedInstance_order(schema)
@@ -40,6 +44,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("2StructureTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDoc(schema)
@@ -54,6 +59,7 @@ public class DDLAlgorithmTests
 
         new DDLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_array(),
             data.expectedInstance_array(schema)
@@ -66,6 +72,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("4ComplexArrayTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_items(),
             data.expectedInstance_items(schema)
@@ -78,6 +85,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("5MapTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_contact(),
             data.expectedInstance_contact(schema)
@@ -92,6 +100,7 @@ public class DDLAlgorithmTests
         
         new DDLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_ordered(),
             data.expectedInstance_ordered(schema)
@@ -104,6 +113,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("7MissingSimpleTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingSimple(schema)
@@ -116,6 +126,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("8MissingComplexTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingComplex(schema)
@@ -128,6 +139,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("9EmptyArrayTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_items(),
             data.expectedInstance_itemsEmpty(schema)
@@ -140,6 +152,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("10ComplexMapTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_address(),
             data.expectedInstance_address(schema)
@@ -152,6 +165,7 @@ public class DDLAlgorithmTests
     {
         new DDLAlgorithmTestBase("11MissingArrayTest.json").setAll(
             schema,
+            order,
             "order",
             data.path_items(),
             data.expectedInstance_itemsMissing(schema)

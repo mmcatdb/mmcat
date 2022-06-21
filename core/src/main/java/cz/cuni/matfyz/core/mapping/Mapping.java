@@ -28,19 +28,11 @@ public class Mapping implements JSONConvertible
     private String kindName;
     private Collection<Signature> pkey;
     
-    /*
-    public Mapping(SchemaObject rootObject, ComplexProperty accessPath)
-    {
-        this(rootObject, null, accessPath);
-    }
-    */
-    
-    private Mapping(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism)//, ComplexProperty accessPath)
+    private Mapping(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism)
     {
         this.category = category;
         this.rootObject = rootObject;
         this.rootMorphism = rootMorphism;
-        //this.accessPath = accessPath;
     }
 
     public SchemaCategory category()

@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectUpdate;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import cz.cuni.matfyz.server.utils.Position;
-import cz.cuni.matfyz.server.view.SchemaCategoryUpdate;
 
 import java.sql.Statement;
 import java.util.*;
@@ -75,7 +75,7 @@ public class SchemaObjectRepository {
     }
 
     // TODO This should be handeld by one transaction.
-    public Integer add(SchemaCategoryUpdate.ObjectUpdate object, int categoryId) {
+    public Integer add(SchemaObjectUpdate object, int categoryId) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_object (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, object.jsonValue);

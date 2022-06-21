@@ -28,9 +28,9 @@ public class DMLAlgorithmTestBase
         this.dataFileName = dataFileName;
     }
 
-    public DMLAlgorithmTestBase setAll(SchemaCategory schema, SchemaObject rootObject, String rootName, ComplexProperty path, InstanceCategory inputInstance)
+    public DMLAlgorithmTestBase setAll(SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path, InstanceCategory inputInstance)
     {
-        return setSchema(schema).setRootObject(rootObject).setRootName(rootName).setPath(path).setInputInstance(inputInstance);
+        return setSchema(schema).setRootObject(rootObject).setKindName(kindName).setPath(path).setInputInstance(inputInstance);
     }
 
     private SchemaCategory schema;
@@ -63,11 +63,11 @@ public class DMLAlgorithmTestBase
         return this;
     }
 
-    private String rootName;
+    private String kindName;
 
-    public DMLAlgorithmTestBase setRootName(String rootName)
+    public DMLAlgorithmTestBase setKindName(String kindName)
     {
-        this.rootName = rootName;
+        this.kindName = kindName;
 
         return this;
     }
@@ -113,10 +113,10 @@ public class DMLAlgorithmTestBase
 
         var wrapper = new DummyPushWrapper();
 
-		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
+		Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, null);
 
 		var transformation = new DMLAlgorithm();
-		transformation.input(mapping, inputInstance, rootName, wrapper);
+		transformation.input(mapping, inputInstance, wrapper);
 		transformation.algorithm();
 
         List<DMLTestStructure> result = wrapper.structures();

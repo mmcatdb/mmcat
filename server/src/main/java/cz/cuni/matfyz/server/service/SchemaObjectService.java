@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
 import cz.cuni.matfyz.server.utils.Position;
-import cz.cuni.matfyz.server.entity.SchemaObjectWrapper;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
