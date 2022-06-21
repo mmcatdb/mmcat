@@ -94,6 +94,9 @@ export class Graph {
         const groupPlaceholders = [] as NodeSingular[];
         groupObjects.forEach(group => groupPlaceholders.push(this._cytoscape.add(createGroupPlaceholderDefinition(object, group.id))));
 
+        if (groupObjects.length === 0)
+            this._cytoscape.add(createNoGroupDefinition(object));
+
         //const coloringNode = this._cytoscape.add(createColoringNodeDefinition(object, Math.random() < 0.5 ? Type.mongodb : Type.postgresql));
         const cytoscapeNode = this._cytoscape.add(createNodeDefinition(object, node, classes));
         node.setCytoscapeNode(cytoscapeNode);
@@ -210,6 +213,16 @@ function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number)
         },
         position: object.position,
         classes: 'group-placeholder'
+    };
+}
+
+function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
+    return {
+        data: {
+            id: 'no-group_' + object.id.toString()
+        },
+        position: object.position,
+        classes: 'no-group'
     };
 }
 
