@@ -199,5 +199,8 @@ CREATE TABLE job (
 
 INSERT INTO job (mapping_id, json_value)
 VALUES
-    (1, '{"name": "Import Order", "type": "ModelToCategory", "status": "Canceled"}');
+    (1, '{"name": "Import Order", "type": "ModelToCategory", "status": "Ready"}'),
+    (1, '{"name": "Export Order", "type": "CategoryToModel", "status": "Ready"}'),
+    (2, '{"name": "Import Customer", "type": "ModelToCategory", "status": "Ready"}'),
+    (2, '{"name": "Export Customer", "type": "CategoryToModel", "status": "Ready"}');
 

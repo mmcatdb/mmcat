@@ -31,7 +31,7 @@ public class PostgreSQLPushWrapper implements AbstractPushWrapper
         List<String> names = propertyValues.stream().map(propertyValue -> propertyValue.name).toList();
         List<String> values = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
         
-        String content = String.format("INSERT INTO %s(%s)\nVALUES (%s);", kindName, String.join(", ", names), String.join(", ", values));
+        String content = String.format("INSERT INTO %s(%s) VALUES (%s);", kindName, String.join(", ", names), String.join(", ", values));
         return new PostgreSQLDMLStatement(content);
     }
     
