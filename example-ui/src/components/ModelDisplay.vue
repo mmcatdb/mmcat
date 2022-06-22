@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Model } from '@/types/model';
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
     props: {
@@ -11,7 +11,7 @@ export default defineComponent({
     },
     data() {
         return {
-            textArea: null as HTMLTextAreaElement | null
+
         };
     },
     mounted() {

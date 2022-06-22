@@ -11,7 +11,7 @@ export default defineComponent({
     },
     data() {
         return {
-            textArea: null as HTMLTextAreaElement | null
+
         };
     },
     methods: {

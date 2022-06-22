@@ -149,3 +149,8 @@ input[type=number] {
 .text-warning {
     color: var(--color-warning);
 }
+
+/* To remove the small space under the text area. */
+.textarea {
+    vertical-align: top;
+}

@@ -20,7 +20,7 @@ export default defineComponent({
 <template>
     <div>
         <h2>Access path json editor</h2>
-        <br>
+        <br />
         <textarea
             :value="modelValue"
             class="accessPathInput"
