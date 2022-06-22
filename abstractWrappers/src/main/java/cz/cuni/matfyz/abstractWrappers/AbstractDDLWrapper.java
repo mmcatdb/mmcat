@@ -9,6 +9,8 @@ import java.util.Set;
  */
 public interface AbstractDDLWrapper {
 
+	public final static String INTENDATION = "    ";
+
 	public abstract void setKindName(String name);
 
 	public abstract boolean isSchemaLess();

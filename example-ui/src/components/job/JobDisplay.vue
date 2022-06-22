@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Job } from '@/types/job';
+import { type Job, Status } from '@/types/job';
 import { DELETE, POST } from '@/utils/backendAPI';
 import { defineComponent } from 'vue';
 
@@ -15,8 +15,21 @@ export default defineComponent({
         return {
             startJobDisabled: false,
             deleteJobDisabled: false,
-            restartJobDisabled: false
+            restartJobDisabled: false,
+            Status
         };
+    },
+    computed: {
+        jobStatusClass(): string {
+            switch (this.job.status) {
+            case Status.Canceled:
+                return 'text-error';
+            case Status.Finished:
+                return 'text-success';
+            default:
+                return '';
+            }
+        }
     },
     methods: {
         async startJob() {
@@ -84,14 +97,17 @@ export default defineComponent({
                 <td class="label">
                     Status:
                 </td>
-                <td class="value">
+                <td
+                    :class="jobStatusClass"
+                    class="value"
+                >
                     {{ job.status }}
                 </td>
             </tr>
         </table>
         <div class="button-row">
             <button
-                v-if="job.status === 'Ready'"
+                v-if="job.status === Status.Ready"
                 :disabled="startJobDisabled"
                 class="success"
                 @click="startJob"
@@ -99,7 +115,7 @@ export default defineComponent({
                 Start job
             </button>
             <button
-                v-if="job.status === 'Finished' || job.status === 'Canceled'"
+                v-if="job.status === Status.Finished || job.status === Status.Canceled"
                 :disabled="deleteJobDisabled"
                 class="error"
                 @click="deleteJob"
@@ -107,7 +123,7 @@ export default defineComponent({
                 Delete job
             </button>
             <button
-                v-if="job.status === 'Finished' || job.status === 'Canceled'"
+                v-if="job.status === Status.Finished || job.status === Status.Canceled"
                 :disabled="restartJobDisabled"
                 class="warning"
                 @click="restartJob"
@@ -123,5 +139,7 @@ export default defineComponent({
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;
+    margin-bottom: 16px;
+    min-width: 284px;
 }
 </style>

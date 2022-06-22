@@ -41,6 +41,13 @@ export default defineComponent({
     <div>
         <h1>Mappings</h1>
         <template v-if="mappings">
+            <div class="button-row">
+                <button
+                    @click="createNew"
+                >
+                    Create new
+                </button>
+            </div>
             <div class="mappings">
                 <div
                     v-for="(mapping, index) in mappings"
@@ -48,13 +55,6 @@ export default defineComponent({
                 >
                     <MappingDisplay :mapping="mapping" />
                 </div>
-            </div>
-            <div class="button-row">
-                <button
-                    @click="createNew"
-                >
-                    Create new
-                </button>
             </div>
         </template>
         <ResourceNotFound v-else-if="fetched" />
@@ -65,5 +65,6 @@ export default defineComponent({
 <style scoped>
 .mappings {
     display: flex;
+    flex-wrap: wrap;
 }
 </style>

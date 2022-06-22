@@ -59,8 +59,8 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper
     @Override
     public PostgreSQLDDLStatement createDDLStatement()
     {
-        String commands = String.join(",", properties.stream().map(property -> "\n" + property.command).toList());
-        String content = String.format("CREATE TABLE %s (%s\n);", kindName, commands);
+        String commands = String.join(",\n", properties.stream().map(property -> AbstractDDLWrapper.INTENDATION + property.command).toList());
+        String content = String.format("CREATE TABLE %s (\n%s\n);", kindName, commands);
         
         return new PostgreSQLDDLStatement(content);
     }

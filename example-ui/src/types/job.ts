@@ -15,7 +15,7 @@ export class Job {
         public mappingId: number,
         public name: string,
         public type: string,
-        public status: string
+        public status: Status
     ) {
 
     }
@@ -24,7 +24,7 @@ export class Job {
         return new Job(input.id, input.mappingId, input.name, input.type, input.status);
     }
 
-    setStatus(status: string) {
+    setStatus(status: Status) {
         this.status = status;
     }
 }
@@ -34,5 +34,13 @@ export type JobFromServer = {
     mappingId: number;
     name: string;
     type: string;
-    status: string;
+    status: Status;
+}
+
+export enum Status {
+    Default = 'Default',
+    Ready = 'Ready',
+    Running = 'Running',
+    Finished = 'Finished',
+    Canceled = 'Canceled'
 }

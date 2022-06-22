@@ -102,6 +102,7 @@
 
 body {
     min-height: 100vh;
+    min-width: 1000px;
     margin: 0;
     color: var(--color-text);
     background: var(--color-background);
@@ -131,4 +132,20 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type=number] {
     -moz-appearance: textfield;
+}
+
+.text-error {
+    color: var(--color-error);
+}
+
+.text-info {
+    color: var(--color-info);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-warning {
+    color: var(--color-warning);
 }

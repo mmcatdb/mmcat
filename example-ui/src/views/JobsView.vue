@@ -58,6 +58,7 @@ export default defineComponent({
             v-if="jobs"
             class="jobs"
         >
+            <NewJob @new-job="addNewJob" />
             <div
                 v-for="(job, index) in jobs"
                 :key="index"
@@ -67,7 +68,6 @@ export default defineComponent({
                     @delete-job="() => deleteJob(job.id)"
                 />
             </div>
-            <NewJob @new-job="addNewJob" />
         </div>
         <ResourceNotFound v-else-if="fetched" />
         <ResourceLoading v-else />
@@ -77,5 +77,6 @@ export default defineComponent({
 <style scoped>
 .jobs {
     display: flex;
+    flex-wrap: wrap;
 }
 </style>

@@ -27,6 +27,6 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper
     @Override
     public MongoDBDDLStatement createDDLStatement()
     {
-        return new MongoDBDDLStatement("db.createCollection(" + kindName + ")");
+        return new MongoDBDDLStatement("db.createCollection(" + kindName + ");");
     }
 }

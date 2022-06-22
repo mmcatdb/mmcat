@@ -3,6 +3,7 @@ package cz.cuni.matfyz.server.service;
 import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
+import cz.cuni.matfyz.abstractWrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -44,6 +45,9 @@ public class AsyncJobService {
 
     @Autowired
     private WrapperService wrapperService;
+
+    @Autowired
+    private ModelService modelService;
 
     @Async("jobExecutor")
     public void runJob(Job job, UserStore store) {
@@ -106,10 +110,16 @@ public class AsyncJobService {
     @Async("jobExecutor")
     private void categoryToModelProcess(Job job, UserStore store) throws Exception {
         var defaultInstance = store.getDefaultInstace();
+
+        if (defaultInstance == null) {
+            setJobStatus(job, Job.Status.Canceled);
+            return;
+        }
+
         var result = categoryToModelAlgorithm(job, defaultInstance).join();
 
         if (result.status) {
-            // TODO Do something with the result.
+            modelService.createNew(store, job, job.name, result.data);
             setJobStatus(job, Job.Status.Finished);
         }
         else {
@@ -123,15 +133,14 @@ public class AsyncJobService {
         var mapping = createMapping(mappingWrapper);
 
         Database database = databaseService.find(mappingWrapper.databaseId);
+        AbstractDDLWrapper ddlWrapper = wrapperService.getDDLWrapper(database);
         AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
 
         var process = new InstanceToDatabase();
-        process.input(mapping, instance, pushWrapper);
+        process.input(mapping, instance, ddlWrapper, pushWrapper);
 
         var result = process.run();
         Thread.sleep(2 * 1000);
-
-        // TODO The DDL and IC algorithms should be here.
 
         return CompletableFuture.completedFuture(result);
     }

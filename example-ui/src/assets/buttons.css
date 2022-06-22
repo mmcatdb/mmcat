@@ -73,6 +73,11 @@ button.warning:hover, button.warning.selected {
     display: flex;
     flex-direction: row;
     margin-top: 12px;
+    margin-bottom: 12px;
+}
+
+.button-row:last-child {
+    margin-bottom: 0px;
 }
 
 .button-row button + button {

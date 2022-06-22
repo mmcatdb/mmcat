@@ -1,67 +1,57 @@
 <script lang="ts">
-import type { Database } from '@/types/database';
 import { defineComponent } from 'vue';
+import type { ModelView } from '@/types/model';
 
 export default defineComponent({
     props: {
-        database: {
-            type: Object as () => Database,
+        model: {
+            type: Object as () => ModelView,
             required: true
         }
     },
-    emits: [ 'edit' ],
     data() {
         return {
-
+            textArea: null as HTMLTextAreaElement | null
         };
     },
     methods: {
-        edit() {
-            this.$emit('edit');
-        }
+
     }
 });
 </script>
 
 <template>
-    <div class="database-display">
-        <RouterLink :to="{ name: 'database', params: { id: database.id } }">
-            <h2>{{ database.label }}</h2>
+    <div class="model-display">
+        <RouterLink :to="{ name: 'model', params: { jobId: model.jobId } }">
+            <h2>{{ model.jobName }}</h2>
         </RouterLink>
         <table>
             <tr>
                 <td class="label">
-                    Id:
+                    Job id:
                 </td>
                 <td class="value">
-                    {{ database.id }}
+                    {{ model.jobId }}
                 </td>
             </tr>
             <tr>
                 <td class="label">
-                    Type:
+                    Job name:
                 </td>
                 <td class="value">
-                    {{ database.type }}
+                    {{ model.jobName }}
                 </td>
             </tr>
         </table>
-        <div class="button-row">
-            <button
-                @click="edit"
-            >
-                Edit
-            </button>
-        </div>
     </div>
 </template>
 
 <style scoped>
-.database-display {
+.model-display {
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;
     margin-bottom: 16px;
-    min-width: 204px;
+    min-width: 244px;
 }
 </style>

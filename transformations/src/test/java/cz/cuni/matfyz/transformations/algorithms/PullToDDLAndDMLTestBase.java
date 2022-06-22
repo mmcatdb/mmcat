@@ -127,7 +127,5 @@ public class PullToDDLAndDMLTestBase
         List<DMLStatement> dmlStatements = dmlAlgorithm.algorithm();
 
         LOGGER.info("Created DML Statement-s:\n" + dmlStatements);
-
-        // TODO
 	}
 }

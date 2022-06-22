@@ -1,8 +1,9 @@
 package cz.cuni.matfyz.wrapperMongodb;
 
-import java.util.*;
-
+import cz.cuni.matfyz.abstractWrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
+
+import java.util.*;
 
 /**
  *
@@ -28,15 +29,19 @@ public class MongoDBPushWrapper implements AbstractPushWrapper
     @Override
 	public MongoDBDMLStatement createDMLStatement()
     {
-        List<String> dataValues = propertyValues.stream().map(propertyValue -> String.format("%s: %s", propertyValue.name, escapeString(propertyValue.value))).toList();
+        List<String> dataValues = propertyValues.stream().map(propertyValue -> String.format("%s%s: %s",
+            AbstractDDLWrapper.INTENDATION,
+            propertyValue.name,
+            escapeString(propertyValue.value)
+        )).toList();
         
-        String content = String.format("db.%s.insert({ %s })", kindName, String.join(", ", dataValues));
+        String content = String.format("db.%s.insert({\n%s\n});", kindName, String.join(",\n", dataValues));
         return new MongoDBDMLStatement(content);
     }
     
     private String escapeString(String input)
     {
-        return "\"" + input.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"") + "\"";
+        return "\"" + input.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
 
     @Override

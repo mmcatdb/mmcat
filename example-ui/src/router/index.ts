@@ -45,6 +45,16 @@ const router = createRouter({
             component: () => import('@/views/InstanceCategoryView.vue')
         },
         {
+            path: '/models',
+            name: 'models',
+            component: () => import('@/views/ModelsView.vue')
+        },
+        {
+            path: '/models/:jobId',
+            name: 'model',
+            component: () => import('@/views/ModelView.vue')
+        },
+        {
             path: '/databases',
             name: 'databases',
             component: () => import('@/views/DatabasesView.vue')

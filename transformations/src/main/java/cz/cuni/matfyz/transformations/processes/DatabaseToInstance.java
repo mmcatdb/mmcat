@@ -20,12 +20,12 @@ public class DatabaseToInstance {
     private static Logger LOGGER = LoggerFactory.getLogger(DatabaseToInstance.class);
 
     private Mapping mapping;
-    private InstanceCategory defaultInstance;
+    private InstanceCategory currentInstance;
     private AbstractPullWrapper pullWrapper;
 
-    public void input(Mapping mapping, InstanceCategory defaultInstance, AbstractPullWrapper pullWrapper) {
+    public void input(Mapping mapping, InstanceCategory currentInstance, AbstractPullWrapper pullWrapper) {
         this.mapping = mapping;
-        this.defaultInstance = defaultInstance;
+        this.currentInstance = currentInstance;
         this.pullWrapper = pullWrapper;
     }
     
@@ -39,8 +39,8 @@ public class DatabaseToInstance {
             return new DataResult<InstanceCategory>(null, "Pull forest failed.");
         }
 
-        InstanceCategory instance = defaultInstance != null ?
-            defaultInstance :
+        InstanceCategory instance = currentInstance != null ?
+            currentInstance :
             new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
 
         var transformation = new MTCAlgorithm();

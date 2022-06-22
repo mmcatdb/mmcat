@@ -43,7 +43,7 @@ public class DMLAlgorithm
 
         for (ActiveDomainRow sid : S)
         {
-            M.push(new DMLStackTriple(sid, StaticName.Anonymous().getStringName(), mapping.accessPath()));
+            M.push(new DMLStackTriple(sid, DDLAlgorithm.EMPTY_NAME, mapping.accessPath()));
             output.add(buildStatement(M));
         }
 
@@ -62,8 +62,8 @@ public class DMLAlgorithm
         {
             for (ActiveMappingRow row : S)
             {
-                M.push(new DMLStackTriple(row.domainRow(), StaticName.Anonymous().getStringName(), mapping.accessPath().minusSubpath(codomainPath)));
-                M.push(new DMLStackTriple(row.codomainRow(), StaticName.Anonymous().getStringName(), complexPath));
+                M.push(new DMLStackTriple(row.domainRow(), DDLAlgorithm.EMPTY_NAME, mapping.accessPath().minusSubpath(codomainPath)));
+                M.push(new DMLStackTriple(row.codomainRow(), DDLAlgorithm.EMPTY_NAME, complexPath));
                 output.add(buildStatement(M));
             }
 
@@ -100,7 +100,7 @@ public class DMLAlgorithm
 
             for (var pair : pairs)
             {
-                String newName = triple.name + "/" + pair.name;
+                String newName = DDLAlgorithm.concatenatePaths(triple.name, pair.name);
 
                 if (pair.isSimple)
                     wrapper.append(newName, pair.simpleValue);
@@ -114,7 +114,7 @@ public class DMLAlgorithm
 
     private List<NameValuePair> collectNameValuePairs(ComplexProperty path, ActiveDomainRow row)
     {
-        return collectNameValuePairs(path, row, "");
+        return collectNameValuePairs(path, row, DDLAlgorithm.EMPTY_NAME);
     }
 
     private List<NameValuePair> collectNameValuePairs(ComplexProperty path, ActiveDomainRow row, String prefix)
@@ -125,8 +125,10 @@ public class DMLAlgorithm
         {
             if (subpath instanceof ComplexProperty complexSubpath && complexSubpath.isAuxiliary())
             {
-                if (complexSubpath.name() instanceof StaticName staticName)
-                    output.addAll(collectNameValuePairs(complexSubpath, row, prefix + staticName.getStringName() + "/"));
+                if (complexSubpath.name() instanceof StaticName staticName) {
+                    String newPrefix = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                    output.addAll(collectNameValuePairs(complexSubpath, row, newPrefix));
+                }
             }
             else
             {
@@ -142,8 +144,10 @@ public class DMLAlgorithm
                 }
 
                 // If it's aray but there aren't any items in it, we return a simple pair with 'null' value.
-                if (index == 0 && showIndex && subpath.name() instanceof StaticName staticName)
-                    output.add(new NameValuePair(prefix + staticName.getStringName(), null));
+                if (index == 0 && showIndex && subpath.name() instanceof StaticName staticName) {
+                    String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                    output.add(new NameValuePair(name, null));
+                }
 
                 // Pro cassandru se nyní nerozlišuje mezi množinou (array bez duplicit) a polem (array).
                     // Potom se to ale vyřeší.
@@ -156,17 +160,18 @@ public class DMLAlgorithm
     private NameValuePair getNameValuePair(AccessPath objectPath, ActiveMappingRow parentToObjectMapping, String prefix, int index, boolean showIndex)
     {
         ActiveDomainRow objectRow = parentToObjectMapping.codomainRow();
-        String name = prefix + getStringName(objectPath, parentToObjectMapping) + (showIndex ? "[" + index + "]" : "");
+        String name = getStringName(objectPath, parentToObjectMapping) + (showIndex ? "[" + index + "]" : "");
+        String fullName = DDLAlgorithm.concatenatePaths(prefix, name);
 
         if (objectPath instanceof SimpleProperty simplePath)
         {
             String value = objectRow.getValue(Signature.Empty());
 
-            return new NameValuePair(name, value);
+            return new NameValuePair(fullName, value);
         }
         else if (objectPath instanceof ComplexProperty complexPath)
         {
-            return new NameValuePair(name, objectRow, complexPath);
+            return new NameValuePair(fullName, objectRow, complexPath);
         }
 
         throw new UnsupportedOperationException();

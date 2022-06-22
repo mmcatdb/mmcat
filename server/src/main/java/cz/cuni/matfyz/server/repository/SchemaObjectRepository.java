@@ -74,7 +74,7 @@ public class SchemaObjectRepository {
         });
     }
 
-    // TODO This should be handeld by one transaction.
+    // TODO This should be handled by one transaction.
     public Integer add(SchemaObjectUpdate object, int categoryId) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_object (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);

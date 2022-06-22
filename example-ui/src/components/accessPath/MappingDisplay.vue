@@ -65,5 +65,7 @@ export default defineComponent({
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;
+    margin-bottom: 16px;
+    min-width: 244px;
 }
 </style>

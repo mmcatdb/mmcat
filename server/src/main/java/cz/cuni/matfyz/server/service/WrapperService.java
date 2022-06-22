@@ -1,19 +1,9 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
-import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.abstractWrappers.*;
+import cz.cuni.matfyz.wrapperMongodb.*;
+import cz.cuni.matfyz.wrapperPostgresql.*;
 import cz.cuni.matfyz.server.entity.database.Database;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBPathWrapper;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBPushWrapper;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBSettings;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPathWrapper;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPullWrapper;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLPushWrapper;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLSettings;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -50,6 +40,17 @@ public class WrapperService {
                 return new MongoDBPathWrapper();
             case postgresql:
                 return new PostgreSQLPathWrapper();
+            default:
+                return null;
+        }
+    }
+
+    public AbstractDDLWrapper getDDLWrapper(Database database) {
+        switch (database.type) {
+            case mongodb:
+                return new MongoDBDDLWrapper();
+            case postgresql:
+                return new PostgreSQLDDLWrapper();
             default:
                 return null;
         }

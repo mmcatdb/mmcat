@@ -21,6 +21,7 @@ const links = [
     defineLink('schema', 'Schema Category'),
     defineLink('instances', 'Instances'),
     defineLink('instanceCategory', 'Instance Category'),
+    defineLink('models', 'Models'),
     defineLink('databases', 'Databases'),
 ];
 </script>

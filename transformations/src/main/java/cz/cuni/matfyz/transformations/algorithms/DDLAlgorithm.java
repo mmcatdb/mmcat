@@ -15,6 +15,9 @@ import java.util.*;
  */
 public class DDLAlgorithm
 {
+    public final static String PATH_SEPARATOR = "/";
+    public final static String EMPTY_NAME = StaticName.Anonymous().getStringName();
+
     private Mapping mapping;
     private InstanceCategory instance;
     private AbstractDDLWrapper wrapper;
@@ -33,7 +36,7 @@ public class DDLAlgorithm
         if (!wrapper.isSchemaLess())
         {
             Stack<StackPair> M = new Stack<>();
-            addSubpathsToStack(M, mapping.accessPath(), Set.of(StaticName.Anonymous().getStringName()));
+            addSubpathsToStack(M, mapping.accessPath(), Set.of(EMPTY_NAME));
 
             while (!M.isEmpty())
                 processTopOfStack(M);
@@ -91,9 +94,16 @@ public class DDLAlgorithm
         var output = new TreeSet<String>();
         for (String name1 : names1)
             for (String name2 : names2)
-                output.add(name1 + "/" + name2);
+                output.add(concatenatePaths(name1, name2));
         
         return output;
+    }
+
+    public static String concatenatePaths(String path1, String path2)
+    {
+        return DDLAlgorithm.EMPTY_NAME.equals(path1) ?
+            path2 :
+            path1 + DDLAlgorithm.PATH_SEPARATOR + path2;
     }
     
     private void processPath(SimpleProperty property, Set<String> names)

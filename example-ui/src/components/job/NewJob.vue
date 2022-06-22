@@ -3,7 +3,6 @@ import { defineComponent } from 'vue';
 import { type Job, JOB_TYPES } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
 import type { MappingFromServer } from '@/types/mapping';
-import { RootProperty } from '@/types/accessPath/basic';
 
 export default defineComponent({
     components: {
@@ -108,9 +107,7 @@ export default defineComponent({
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;
-    /*
-    display: flex;
-    flex-direction: column;
-    */
+    margin-bottom: 16px;
+    min-width: 284px;
 }
 </style>

@@ -41,6 +41,13 @@ export default defineComponent({
     <div>
         <h1>Databases</h1>
         <template v-if="databases">
+            <div class="button-row">
+                <button
+                    @click="createNew"
+                >
+                    Create new
+                </button>
+            </div>
             <div
                 class="databases"
             >
@@ -54,13 +61,6 @@ export default defineComponent({
                     />
                 </div>
             </div>
-            <div class="button-row">
-                <button
-                    @click="createNew"
-                >
-                    Create new
-                </button>
-            </div>
         </template>
         <ResourceNotFound v-else-if="fetched" />
         <ResourceLoading v-else />
@@ -70,5 +70,6 @@ export default defineComponent({
 <style scoped>
 .databases {
     display: flex;
+    flex-wrap: wrap;
 }
 </style>
