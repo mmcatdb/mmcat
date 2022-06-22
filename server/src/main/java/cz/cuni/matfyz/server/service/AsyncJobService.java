@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.utils.RunJobData;
 import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
@@ -18,7 +19,11 @@ import cz.cuni.matfyz.server.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +34,16 @@ import org.slf4j.LoggerFactory;
 @Service
 public class AsyncJobService {
 
+    private static final int JOB_DELAY_IN_SECONDS = 2;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncJobService.class);
+
+    /*
+     * The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
+     * There is a prostor for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
+     */
+    private Queue<RunJobData> jobQueue = new ConcurrentLinkedQueue<>();
+    private boolean jobIsRunning = false;
 
     @Autowired
     private JobRepository repository;
@@ -49,9 +63,33 @@ public class AsyncJobService {
     @Autowired
     private ModelService modelService;
 
-    @Async("jobExecutor")
     public void runJob(Job job, UserStore store) {
-        LOGGER.info("RUN JOB");
+
+        jobQueue.add(new RunJobData(job, store));
+        
+        LOGGER.info("Job { id: {}, name: '{}' } placed to the queue.", job.id, job.name);
+        
+        tryStartNextJob(false);
+    }
+
+    private synchronized void tryStartNextJob(boolean currentIsEnding) {
+        if (jobIsRunning && !currentIsEnding)
+            return;
+
+        var nextJobData = jobQueue.poll();
+        if (nextJobData == null) {
+            jobIsRunning = false;
+            return;
+        }
+        
+        jobIsRunning = true;
+        processJob(nextJobData.job, nextJobData.store);
+    }
+
+    @Async("jobExecutor")
+    public void processJob(Job job, UserStore store) {
+        LOGGER.info("Job { id: {}, name: '{}' } started.", job.id, job.name);
+        
         try {
             switch (job.type) {
                 case CategoryToModel:
@@ -63,10 +101,12 @@ public class AsyncJobService {
             }
         }
         catch (Exception exception) {
-            LOGGER.error("Job " + job.id + " was interrupted.", exception);
+            LOGGER.error(String.format("Job { id: %d, name: '%s' } interrupted.", job.id, job.name), exception);
             setJobStatus(job, Job.Status.Canceled);
         }
-        LOGGER.info("RUN JOB END");
+
+        LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.name);
+        tryStartNextJob(true);
     }
 
     private void setJobStatus(Job job, Job.Status status) {
@@ -102,7 +142,7 @@ public class AsyncJobService {
         process.input(mapping, instance, pullWrapper);
 
         var result = process.run();
-        Thread.sleep(2 * 1000);
+        Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
 
         return CompletableFuture.completedFuture(result);
     }
@@ -140,7 +180,7 @@ public class AsyncJobService {
         process.input(mapping, instance, ddlWrapper, pushWrapper);
 
         var result = process.run();
-        Thread.sleep(2 * 1000);
+        Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
 
         return CompletableFuture.completedFuture(result);
     }

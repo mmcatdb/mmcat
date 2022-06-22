@@ -5,7 +5,7 @@ import { defineComponent } from 'vue';
 import AddSimpleId from './AddSimpleId.vue';
 import AddComplexId from './AddComplexId.vue';
 
-/**
+/*
  * When the id is simple (it has exactly one signature) the corresponding morphism must have cardinality 1:1.
  * Wheren the id is complex, all its morphisms have to have cardinality n:1 (because otherwise they would be simple identifiers so the complex one wouldn't be needed).
  * The last option is a simple empty identifier.

@@ -7,8 +7,6 @@ import cz.cuni.matfyz.server.entity.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -16,8 +14,6 @@ import org.slf4j.LoggerFactory;
  */
 @Service
 public class JobService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
     @Autowired
     private JobRepository repository;
@@ -40,10 +36,9 @@ public class JobService {
     }
 
     public Job start(Job job, UserStore store) {
-        LOGGER.info("START JOB");
         setJobStatus(job, Job.Status.Running);
         asyncService.runJob(job, store);
-        LOGGER.info("START JOB END");
+
         return job;
     }
 

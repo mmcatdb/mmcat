@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 /**
  * Each object from instance category is modeled as a set of tuples ({@link ActiveDomainRow}).
- * @author pavel.koupil
+ * @author pavel.koupil, jachym.bartik
  */
 public class InstanceObject implements CategoricalObject, JSONConvertible
 {
