@@ -1,5 +1,8 @@
+# The port on which the application will listen:
 server.port=27500
+# Make sure the same number is used in the apache configuration.
 
+# Credentials fot the main database (PostgreSQL):
 postgresql.host=localhost
 postgresql.port=5432
 postgresql.database=mmcat_server
