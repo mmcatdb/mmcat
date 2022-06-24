@@ -1,4 +1,4 @@
-baseURL = "http://localhost"
+baseURL = "http://nosql.ms.mff.cuni.cz/mmcat-docs/"
 title = "MM-cat"
 theme = "hugo-geekdoc"
 defaultContentLanguage = "en"
