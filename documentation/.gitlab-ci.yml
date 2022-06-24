@@ -13,16 +13,9 @@ build:
 
 deploy:
   stage: deploy
-  # image: byteflair/ssh-rsync
-  image: ubuntu:latest
+  image: byteflair/ssh-rsync
   script:
-    - echo $FTP_PASSWORD
-    - echo $FTP_USERNAME
-    - echo $FTP_HOST
-    - apt install -y sshpass
-    - apt install -y rsync
-    - apt install -y ssh
-    - sshpass -p "$FTP_PASSWORD" rsync -e 'ssh -p 42222' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
+    - sshpass -p "$FTP_PASSWORD" rsync -e 'ssh -p 42222 -o StrictHostKeyChecking=no' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
 
 
 
