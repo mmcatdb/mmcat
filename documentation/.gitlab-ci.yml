@@ -13,7 +13,7 @@ build:
 
 deploy:
   stage: deploy
-  image: eeacms/rsync
+  image: byteflair/ssh-rsync
   script:
     - sshpass -p "$FTP_PASSWORD" rsync -e 'ssh -p 42222' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
 
