@@ -13,11 +13,11 @@ build:
 
 deploy:
   stage: deploy
-  image: ubuntu:latest
+  image: eeacms/rsync
   script:
     - apt-get update -qy
     - apt-get install -y lftp
-    - lftp -e "set ssl:verify-certificate no; open $FTP_HOST; user $FTP_USERNAME $FTP_PASSWORD; mirror -X .* -I .htaccess -X .*/ --reverse --verbose ./public/ .; bye"
+    - sshpass -p "$FTP_PASSWORD" rsync -e 'ssh -p 42222' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
 
 
 
