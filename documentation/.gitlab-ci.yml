@@ -15,8 +15,6 @@ deploy:
   stage: deploy
   image: eeacms/rsync
   script:
-    - apt-get update -qy
-    - apt-get install -y lftp
     - sshpass -p "$FTP_PASSWORD" rsync -e 'ssh -p 42222' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
 
 
