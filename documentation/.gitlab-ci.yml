@@ -1,0 +1,20 @@
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  variables:
+    SITE: '$CI_PROJECT_DIR/site'
+    DEST: '$CI_PROJECT_DIR/public'
+  artifacts:
+    paths:
+    - public
+  script:
+    - hugo --cleanDestinationDir --source $SITE --destination $DEST
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying application..."
+    - echo "Application successfully deployed."
