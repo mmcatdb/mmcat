@@ -1,0 +1,81 @@
+---
+- id: edit_page
+  translation: Edit page
+
+- id: nav_navigation
+  translation: Navigation
+- id: nav_tags
+  translation: Tags
+- id: nav_more
+  translation: More
+- id: nav_top
+  translation: Back to top
+
+- id: form_placeholder_search
+  translation: Search
+
+- id: error_page_title
+  translation: Lost? Don't worry
+- id: error_message_title
+  translation: Lost?
+- id: error_message_code
+  translation: Error 404
+- id: error_message_text
+  translation: >
+    Seems like what you are looking for can't be found. Don't worry, we can
+    bring you back to the <a class="gdoc-error__link" href="{{ . }}">homepage</a>.
+
+- id: button_toggle_dark
+  translation: Toggle Dark/Light/Auto mode
+- id: button_nav_open
+  translation: Open Navigation
+- id: button_nav_close
+  translation: Close Navigation
+- id: button_menu_open
+  translation: Open Menu Bar
+- id: button_menu_close
+  translation: Close Menu Bar
+- id: button_homepage
+  translation: Back to homepage
+
+- id: title_anchor_prefix
+  translation: Anchor to
+
+- id: posts_read_more
+  translation: Read full post
+
+- id: posts_read_time
+  translation:
+    one: One minute to read
+    other: "{{ . }} minutes to read"
+
+- id: posts_update_prefix
+  translation : Updated on
+- id: posts_count
+  translation:
+    one: One post
+    other: "{{ . }} posts"
+- id: posts_tagged_with
+  translation : All posts tagged with '{{ . }}'
+
+- id: footer_build_with
+  translation : >
+    Built with <a href="https://gohugo.io/" class="gdoc-footer__link">Hugo</a> and
+    <svg class="gdoc-icon gdoc_heart"><use xlink:href="#gdoc_heart"></use></svg>
+- id: footer_legal_notice
+  translation : Legal Notice
+- id: footer_privacy_policy
+  translation : Privacy Policy
+- id: footer_content_license_prefix
+  translation : >
+    Content licensed under
+
+- id: language_switch_no_tranlation_prefix
+  translation : "Page not translated:"
+
+- id: propertylist_required
+  translation : required
+- id: propertylist_optional
+  translation : optional
+- id: propertylist_default
+  translation : default
