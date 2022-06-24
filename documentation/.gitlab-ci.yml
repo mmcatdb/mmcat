@@ -14,5 +14,9 @@ build:
 deploy:
   stage: deploy
   script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - apt-get update -qy
+    - apt-get install -y lftp
+    - lftp -e "set ssl:verify-certificate no; open $FTP_HOST; user $FTP_USERNAME $FTP_PASSWORD; mirror -X .* -I .htaccess -X .*/ --reverse --verbose ./public/ .; bye"
+
+
+
