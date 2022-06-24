@@ -29,3 +29,6 @@ enableRobotsTXT = true
 
 [taxonomies]
    tag = "tags"
+
+[params]
+    custom_css = ["css/custom.css"]
