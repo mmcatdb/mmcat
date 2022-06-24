@@ -5,14 +5,11 @@ stages:
 build:
   stage: build
   image: registry.gitlab.com/gitlab-ci-utils/docker-hugo:latest
-  variables:
-    SITE: '$CI_PROJECT_DIR/site'
-    DEST: '$CI_PROJECT_DIR/public'
   artifacts:
     paths:
     - public
   script:
-    - hugo --cleanDestinationDir --source $SITE --destination $DEST
+    - hugo --cleanDestinationDir
 
 deploy:
   stage: deploy
