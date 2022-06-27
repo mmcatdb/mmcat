@@ -1,13 +1,12 @@
 # MM-cat
 
-A multi-model data modelling tool. It consists of
-- a java backend application,
-- a typescript frontend application
-- and some java modules:
-    - core objects needed by other modules,
-    - transformation algorithms,
-    - wrappers for supported databases.
-- There is also the evolution module for the evolution management which will be developed later.
+A multi-model data modelling framework based on the category theory. It consists of the following modules:
+- [Core](./core/README.md) defines classes needed by other modules.
+- [Transformations](./transformations/README.md) contains algorithms for transforming data from logical to conceptual model (and back).
+- [Wrappers](./wrappers/README.md) provides funcionalities specific for different databases.
+- [Evolution](./evolution/README.md) will be implemented later and it will include algorithms for the evolution of both the conceptual and the logical models.
+- [Backend application](./server/README.md) provides an API which exposes the functionality of the other modules. It also contains a job scheduler for the transformation algorithms.
+- [Frontend application](./example-ui//README.md) is used as a UI for the backend API. It is also a tool for modelling all the necessary data structures which are then used by the other modules.
 
 ## Installation
 

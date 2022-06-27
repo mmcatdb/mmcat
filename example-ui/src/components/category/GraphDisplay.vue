@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, nextTick } from 'vue';
 import { GET, PUT } from '@/utils/backendAPI';
 import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
 import cytoscape from 'cytoscape';
@@ -15,10 +15,10 @@ export default defineComponent({
         ResourceNotFound,
         ResourceLoading
     },
-    emits: [ 'graph:created' ],
+    emits: [ 'create:graph' ],
     data() {
         return {
-            schemaCategory: null as SchemaCategory | null,
+            mappings: [] as Mapping[],
             schemaFetched: false,
             saveButtonDisabled: false,
             graph: null as Graph | null
@@ -30,13 +30,13 @@ export default defineComponent({
 
         if (result.status && mappingsResult.status) {
             console.log(result.data);
-            this.schemaCategory = SchemaCategory.fromServer(result.data);
-            const mappings = mappingsResult.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
+            const schemaCategory = SchemaCategory.fromServer(result.data);
+            this.mappings = mappingsResult.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
 
-            this.graph = this.createGraph(this.schemaCategory, mappings);
+            this.graph = this.createGraph(schemaCategory, this.mappings);
 
             this.schemaFetched = true;
-            this.$emit('graph:created', this.graph);
+            this.$emit('create:graph', this.graph);
         }
     },
     methods: {
@@ -85,16 +85,29 @@ export default defineComponent({
             return graph;
         },
         async savePositionChanges() {
+            if (!this.graph)
+                return;
+
             this.saveButtonDisabled = true;
             console.log('Saving position changes');
 
-            const updatedPositions = this.schemaCategory?.objects
+            const updatedPositions = this.graph.schemaCategory.objects
                 .map(object => object.toPositionUpdateToServer())
                 .filter(update => update != null);
-            const result = await PUT<PositionUpdateToServer[]>(`/schemaCategories/positions/${this.schemaCategory?.id}`, updatedPositions);
+            const result = await PUT<PositionUpdateToServer[]>(`/schemaCategories/positions/${this.graph.schemaCategory.id}`, updatedPositions);
             console.log(result);
 
             this.saveButtonDisabled = false;
+        },
+        updateSchema(schemaCategory: SchemaCategory) {
+            this.schemaFetched = false;
+            this.graph = null;
+
+            nextTick(() => {
+                this.graph = this.createGraph(schemaCategory, this.mappings);
+                this.schemaFetched = true;
+                this.$emit('create:graph', this.graph);
+            });
         }
     }
 });
@@ -105,13 +118,18 @@ export default defineComponent({
         <div
             id="cytoscape"
         />
-        <template v-if="schemaCategory">
-            <div class="category-command-panel">
+        <template v-if="graph">
+            <div class="category-command-panel button-panel">
                 <button
                     :disabled="saveButtonDisabled"
                     @click="savePositionChanges"
                 >
                     Save positions
+                </button>
+                <button
+                    @click="graph.center()"
+                >
+                    Center graph
                 </button>
             </div>
         </template>

@@ -23,6 +23,11 @@ button:disabled, button:disabled:hover {
     cursor: auto;
 }
 
+button.selected:disabled {
+    background-color: var(--color-text);
+    color: var(--color-background);
+}
+
 /*
 button + button {
     margin-left: 16px;
@@ -80,7 +85,7 @@ button.warning:hover, button.warning.selected {
     margin-bottom: 0px;
 }
 
-.button-row button + button {
+.button-row button + button, .button-panel button + button {
     margin-left: 12px;
 }
 

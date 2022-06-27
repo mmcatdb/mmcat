@@ -18,6 +18,11 @@ export default defineComponent({
         modelValue: {
             type: Object as () => CardinalitySettings,
             required: true
+        },
+        disabled: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     emits: [ 'update:modelValue' ],
@@ -83,6 +88,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="morphismCardinality"
                 :value="CardinalityType.ZeroOne"
+                :disabled="disabled"
                 @update:model-value="updateMorphismCardinality"
             >
                 0..1
@@ -90,6 +96,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="morphismCardinality"
                 :value="CardinalityType.ZeroStar"
+                :disabled="disabled"
                 @update:model-value="updateMorphismCardinality"
             >
                 0..*
@@ -101,6 +108,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="morphismCardinality"
                 :value="CardinalityType.OneOne"
+                :disabled="disabled"
                 @update:model-value="updateMorphismCardinality"
             >
                 1..1
@@ -108,6 +116,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="morphismCardinality"
                 :value="CardinalityType.OneStar"
+                :disabled="disabled"
                 @update:model-value="updateMorphismCardinality"
             >
                 1..*
@@ -125,6 +134,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="dualCardinality"
                 :value="CardinalityType.ZeroOne"
+                :disabled="disabled"
                 @update:model-value="updateDualCardinality"
             >
                 0..1
@@ -132,6 +142,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="dualCardinality"
                 :value="CardinalityType.ZeroStar"
+                :disabled="disabled"
                 @update:model-value="updateDualCardinality"
             >
                 0..*
@@ -143,6 +154,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="dualCardinality"
                 :value="CardinalityType.OneOne"
+                :disabled="disabled"
                 @update:model-value="updateDualCardinality"
             >
                 1..1
@@ -150,6 +162,7 @@ export default defineComponent({
             <RadioInput
                 :model-value="dualCardinality"
                 :value="CardinalityType.OneStar"
+                :disabled="disabled"
                 @update:model-value="updateDualCardinality"
             >
                 1..*

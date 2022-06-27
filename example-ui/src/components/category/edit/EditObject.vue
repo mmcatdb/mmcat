@@ -3,6 +3,7 @@ import type { Graph, Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import SchemaIds from '@/components/category/SchemaIds.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 import AddId from './AddId.vue';
 
 export default defineComponent({
@@ -10,6 +11,7 @@ export default defineComponent({
     components: {
         SchemaIds,
         AddId,
+        ButtonIcon,
         IconPlusSquare
     },
     props: {
@@ -34,6 +36,9 @@ export default defineComponent({
     computed: {
         changed(): boolean {
             return this.label !== this.node.schemaObject.label || this.addingId || this.addedId;
+        },
+        isNew(): boolean {
+            return this.node.schemaObject.isNew;
         }
     },
     methods: {
@@ -81,6 +86,7 @@ export default defineComponent({
                 <td class="value">
                     <input
                         v-model="label"
+                        :disabled="!isNew"
                     />
                 </td>
             </tr>
@@ -98,13 +104,12 @@ export default defineComponent({
                 </td>
                 <td class="value">
                     <SchemaIds :schema-object="node.schemaObject" />
-                    <span
-                        v-if="!addingId"
-                        class="button-icon"
+                    <ButtonIcon
+                        v-if="!addingId && isNew"
                         @click="startAddingId"
                     >
                         <IconPlusSquare />
-                    </span>
+                    </ButtonIcon>
                 </td>
             </tr>
         </table>
@@ -121,7 +126,8 @@ export default defineComponent({
         </div>
         <div class="button-row">
             <button
-                :disabled="!label || !changed || addingId || !node.schemaObject.isNew"
+                v-if="isNew"
+                :disabled="!label || !changed || addingId"
                 @click="save"
             >
                 Confirm
@@ -132,7 +138,7 @@ export default defineComponent({
                 Cancel
             </button>
             <button
-                :disabled="!node.schemaObject.isNew"
+                v-if="isNew"
                 @click="deleteFunction"
             >
                 Delete

@@ -3,6 +3,7 @@ import type { Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import GraphDisplay from './GraphDisplay.vue';
 import EditorForSchemaCategory from './edit/EditorForSchemaCategory.vue';
+import type { SchemaCategory } from '@/types/schema';
 
 export default defineComponent({
     components: {
@@ -17,6 +18,11 @@ export default defineComponent({
     methods: {
         cytoscapeCreated(graph: Graph) {
             this.graph = graph;
+        },
+        schemaCategorySaved(schemaCategory: SchemaCategory) {
+            this.graph = null;
+            const graphDisplay = this.$refs.graphDisplay as InstanceType<typeof GraphDisplay>;
+            graphDisplay.updateSchema(schemaCategory);
         }
     }
 });
@@ -24,12 +30,16 @@ export default defineComponent({
 
 <template>
     <div class="divide">
-        <GraphDisplay @graph:created="cytoscapeCreated" />
+        <GraphDisplay
+            ref="graphDisplay"
+            @create:graph="cytoscapeCreated"
+        />
         <div
             v-if="graph"
         >
             <EditorForSchemaCategory
                 :graph="graph"
+                @save="schemaCategorySaved"
             />
         </div>
     </div>

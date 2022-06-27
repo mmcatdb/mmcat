@@ -50,10 +50,14 @@ export default defineComponent({
         },
         nodesChanged(): boolean {
             return !this.edge.domainNode.equals(this.node1) || !this.edge.codomainNode.equals(this.node2);
+        },
+        isNew(): boolean {
+            return this.edge.schemaMorphism.isNew;
         }
     },
     mounted() {
-        this.graph.addNodeListener('tap', this.onNodeTapHandler);
+        if (this.isNew)
+            this.graph.addNodeListener('tap', this.onNodeTapHandler);
 
         this.onNodeTapHandler(this.edge.domainNode);
         if (!this.edge.domainNode.equals(this.edge.codomainNode))
@@ -182,7 +186,7 @@ export default defineComponent({
                     {{ node2?.schemaObject.label }}
                 </td>
             </tr>
-            <tr>
+            <tr v-if="isNew">
                 <td colspan="2">
                     <div class="button-row mb-2">
                         <button
@@ -209,16 +213,19 @@ export default defineComponent({
             </tr>
             <CardinalityInput
                 v-model="cardinality"
+                :disabled="!isNew"
             />
         </table>
         <div class="button-row">
             <button
-                :disabled="!nodesSelected || !changed || !edge.schemaMorphism.isNew"
+                v-if="isNew"
+                :disabled="!nodesSelected || !changed"
                 @click="save"
             >
                 Confirm
             </button>
             <button
+                v-if="isNew"
                 :disabled="!nodesSelected"
                 @click="switchNodes"
             >
@@ -228,7 +235,7 @@ export default defineComponent({
                 Cancel
             </button>
             <button
-                :disabled="!edge.schemaMorphism.isNew"
+                v-if="isNew"
                 @click="deleteFunction"
             >
                 Delete

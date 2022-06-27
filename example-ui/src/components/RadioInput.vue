@@ -10,6 +10,11 @@ export default defineComponent({
         value: {
             type: undefined,
             required: true
+        },
+        disabled: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     emits: [ 'update:modelValue' ],
@@ -37,6 +42,7 @@ export default defineComponent({
     <!--<slot />-->
     <button
         :class="{ selected: active }"
+        :disabled="disabled"
         @click="onClick"
     >
         <slot />

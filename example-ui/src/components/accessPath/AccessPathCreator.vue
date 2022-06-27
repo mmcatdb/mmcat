@@ -76,7 +76,7 @@ export default defineComponent({
 
 <template>
     <div class="divide">
-        <GraphDisplay @graph:created="cytoscapeCreated" />
+        <GraphDisplay @create:graph="cytoscapeCreated" />
         <div v-if="graph">
             <div>
                 <div

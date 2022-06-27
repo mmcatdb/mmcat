@@ -1,7 +1,7 @@
 <script lang="ts">
 import { Edge, SelectionType, type Graph, type Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
-import type { SchemaCategoryFromServer } from '@/types/schema';
+import { SchemaCategory, type SchemaCategoryFromServer } from '@/types/schema';
 import { PUT } from '@/utils/backendAPI';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
@@ -39,6 +39,7 @@ export default defineComponent({
             required: true
         }
     },
+    emits: [ 'save' ],
     data() {
         return {
             state: { type: State.Default } as StateValue,
@@ -110,15 +111,12 @@ export default defineComponent({
         },
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
-            console.log(updateObject);
 
             const result = await PUT<SchemaCategoryFromServer>(`/schemaCategories/${this.graph.schemaCategory.id}`, updateObject);
-
-            console.log(result);
-            /*
-            if (result.status)
-                this.$router.push({ name: 'jobs' });
-            */
+            if (result.status) {
+                const schemaCategory = SchemaCategory.fromServer(result.data);
+                this.$emit('save', schemaCategory);
+            }
         }
     }
 });
