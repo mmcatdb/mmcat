@@ -1,5 +1,5 @@
 <script lang="ts">
-import { type Graph, type NodeNeighbour, type Node, FilterType } from '@/types/categoryGraph';
+import { type Graph, type PathSegment, type Node, FilterType } from '@/types/categoryGraph';
 import { SchemaIdFactory } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
@@ -26,10 +26,10 @@ export default defineComponent({
             signature: SequenceSignature.empty(this.node),
             filter: {
                 type: FilterType.Base,
-                function: (neighbour: NodeNeighbour) => {
-                    return neighbour.morphism.min === Cardinality.One
-                        && neighbour.morphism.max === Cardinality.One
-                        && neighbour.dualMorphism.max === Cardinality.One;
+                function: (segment: PathSegment) => {
+                    return segment.morphism.min === Cardinality.One
+                        && segment.morphism.max === Cardinality.One
+                        && segment.dual.max === Cardinality.One;
                 }
             }
         };
