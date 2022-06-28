@@ -59,10 +59,7 @@ export default defineComponent({
             this.graph.addNodeListener('tap', this.onNodeTapHandler);
 
         this.onNodeTapHandler(this.edge.domainNode);
-        if (!this.edge.domainNode.equals(this.edge.codomainNode))
-            this.onNodeTapHandler(this.edge.codomainNode);
-        else
-            this.selectSameNode();
+        this.onNodeTapHandler(this.edge.codomainNode);
     },
     unmounted() {
         this.graph.removeNodeListener('tap', this.onNodeTapHandler);
@@ -154,19 +151,6 @@ export default defineComponent({
 
             this.node1.select({ type: SelectionType.Selected, level: 0 });
             this.node2.select({ type: SelectionType.Selected, level: 1 });
-        },
-        selectSameNode() {
-            if (!this.node1)
-                return;
-
-            this.node2?.unselect();
-
-            this.node2 = this.node1;
-            this.lastSelectedNode = NodeIndices.Second;
-
-            this.temporayEdge?.delete();
-            if (this.nodesChanged)
-                this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
         }
     }
 });
@@ -192,24 +176,6 @@ export default defineComponent({
                     {{ node2?.schemaObject.label }}
                 </td>
             </tr>
-            <tr v-if="isNew">
-                <td colspan="2">
-                    <div class="button-row mb-2">
-                        <button
-                            :disabled="!node1"
-                            @click="selectSameNode"
-                        >
-                            Select same object
-                        </button>
-                        <button
-                            :disabled="!nodesSelected || node1?.equals(node2)"
-                            @click="switchNodes"
-                        >
-                            Switch
-                        </button>
-                    </div>
-                </td>
-            </tr>
             <tr>
                 <td class="label">
                     Signature:
@@ -230,6 +196,13 @@ export default defineComponent({
                 @click="save"
             >
                 Confirm
+            </button>
+            <button
+                v-if="isNew"
+                :disabled="!nodesSelected"
+                @click="switchNodes"
+            >
+                Switch
             </button>
             <button @click="cancel">
                 Cancel

@@ -34,10 +34,6 @@ export class SchemaMorphism {
         return this._isNew;
     }
 
-    get isIdentity(): boolean {
-        return this.domId === this.codId;
-    }
-
     get dual(): SchemaMorphism {
         return this._dual;
     }

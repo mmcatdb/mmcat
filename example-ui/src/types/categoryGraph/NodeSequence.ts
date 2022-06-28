@@ -101,12 +101,6 @@ export class NodeSequence {
         if (!edge.domainNode.equals(this.lastNode))
             return false;
 
-        // Identity morphism is a special case.
-        if (edge.codomainNode.equals(edge.domainNode)) {
-            this.addEdge(edge);
-            return true;
-        }
-
         // The node is available in some way we can add it.
         if ([ AvailabilityStatus.CertainlyAvailable, AvailabilityStatus.Available, AvailabilityStatus.Ambiguous ].includes(edge.codomainNode.availabilityStatus)) {
             this.addEdge(edge);

@@ -64,10 +64,6 @@ export class Node {
         if (!edge.domainNode.equals(this))
             return;
 
-        // Identity morphisms are special. They are dealt with separately.
-        if (edge.isIdentity)
-            return;
-
         this._adjacentEdges.set(edge.schemaMorphism.signature, edge);
     }
 

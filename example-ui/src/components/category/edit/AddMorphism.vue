@@ -119,18 +119,6 @@ export default defineComponent({
 
             this.node1.select({ type: SelectionType.Selected, level: 0 });
             this.node2.select({ type: SelectionType.Selected, level: 1 });
-        },
-        selectSameNode() {
-            if (!this.node1)
-                return;
-
-            this.node2?.unselect();
-
-            this.node2 = this.node1;
-            this.lastSelectedNode = NodeIndices.Second;
-
-            this.temporayEdge?.delete();
-            this.temporayEdge = this.graph.createTemporaryEdge(this.node1, this.node2);
         }
     }
 });
@@ -156,24 +144,6 @@ export default defineComponent({
                     {{ node2?.schemaObject.label }}
                 </td>
             </tr>
-            <tr>
-                <td colspan="2">
-                    <div class="button-row mb-2">
-                        <button
-                            :disabled="!node1"
-                            @click="selectSameNode"
-                        >
-                            Select same object
-                        </button>
-                        <button
-                            :disabled="!nodesSelected || node1?.equals(node2)"
-                            @click="switchNodes"
-                        >
-                            Switch
-                        </button>
-                    </div>
-                </td>
-            </tr>
             <CardinalityInput
                 v-model="cardinality"
             />
@@ -184,6 +154,12 @@ export default defineComponent({
                 @click="save"
             >
                 Confirm
+            </button>
+            <button
+                :disabled="!nodesSelected"
+                @click="switchNodes"
+            >
+                Switch
             </button>
             <button @click="cancel">
                 Cancel
