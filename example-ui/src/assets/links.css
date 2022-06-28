@@ -1,0 +1,19 @@
+a {
+    text-decoration: none;
+    color: var(--color-primary);
+    transition: 0.4s;
+}
+  
+@media (hover: hover) {
+    a:hover {
+        background-color: var(--color-primary-dark);
+    }
+}
+
+a.router-link-exact-active {
+    color: var(--color-text);
+}
+
+a.router-link-exact-active:hover {
+    background-color: transparent;
+}

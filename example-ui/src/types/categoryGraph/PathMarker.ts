@@ -35,7 +35,7 @@ export type NodeNeighbour = {
 }
 
 export type FilterFunction = (neighbour: NodeNeighbour) => boolean;
-//export type CompositeFilterFunction = (morp)
+
 export enum FilterType {
     Base, // A rule must be satisfied for each base morphism along the path.
     Composite // A rule must be satisfied only for the composite morphism of the full path.
@@ -43,9 +43,8 @@ export enum FilterType {
 export type Filter = { function: FilterFunction, type: FilterType };
 
 export class PathMarker {
-    // It's actually important this is a stack and not a queue, because the paths has to be traversed from in one go.
+    // It's actually important this is a stack and not a queue, because the paths has to be traversed in one go.
     rootNode: Node;
-    //filterFunction: FilterFunction;
 
     baseFilters: FilterFunction[];
     compositeFilters: FilterFunction[];
@@ -54,11 +53,6 @@ export class PathMarker {
 
     constructor(rootNode: Node, filters: Filter | Filter[]) {
         this.rootNode = rootNode;
-        /*
-        this.filterFunction = filterOptions instanceof DatabaseConfiguration ?
-            createDefaultFilterFunction(filterOptions) :
-            filterOptions;
-        */
         const filtersArray = Array.isArray(filters) ? filters : [ filters ];
 
         this.baseFilters = filtersArray.filter(filter => filter.type === FilterType.Base).map(filter => filter.function);
@@ -74,9 +68,9 @@ export class PathMarker {
             (dualMorphism: SchemaMorphism) => combineData(dualMorphism, parentNeighbour.dualMorphism) :
             (dualMorphism: SchemaMorphism) => morphismToData(dualMorphism);
 
-        let neighbours = [ ...parentNode.neighbours.entries() ]
-            .map(([ childNode, edge ]) => ({
-                node: childNode,
+        let neighbours = parentNode.adjacentEdges
+            .map(edge => ({
+                node: edge.codomainNode,
                 previousNode: parentNode,
                 morphism: combineFunction(edge.schemaMorphism),
                 dualMorphism: dualCombineFunction(edge.schemaMorphism.dual),
@@ -175,8 +169,10 @@ function filterBackwardPaths(neighbours: NodeNeighbour[], entryMorphism: Morphis
 
 function markNeighbour(neighbour: NodeNeighbour, isDirect: boolean): boolean {
     // If the previous node was the root node, this node is definitely available so we mark it this way.
+    // Unless there are multiple morphisms between the root node and this one. If that's the case, we have to process it normally.
     if (isDirect) {
-        neighbour.node.setAvailabilityStatus(AvailabilityStatus.CertainlyAvailable);
+        const status = neighbour.node.availabilityStatus === AvailabilityStatus.Default ? AvailabilityStatus.CertainlyAvailable : AvailabilityStatus.Ambiguous;
+        neighbour.node.setAvailabilityStatus(status);
         neighbour.node.availablePathData = neighbour.morphism;
 
         return true;
@@ -185,8 +181,8 @@ function markNeighbour(neighbour: NodeNeighbour, isDirect: boolean): boolean {
     // If the node hasn't been traversed yet, it becomes available.
     // Unless it's previous node has been found ambigous - then this node is also ambiguous.
     if (neighbour.node.availabilityStatus === AvailabilityStatus.Default) {
-        if (neighbour.previousNode?.availabilityStatus === AvailabilityStatus.Maybe) {
-            neighbour.node.setAvailabilityStatus(AvailabilityStatus.Maybe);
+        if (neighbour.previousNode?.availabilityStatus === AvailabilityStatus.Ambiguous) {
+            neighbour.node.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
         }
         else {
             neighbour.node.setAvailabilityStatus(AvailabilityStatus.Available);
@@ -201,8 +197,8 @@ function markNeighbour(neighbour: NodeNeighbour, isDirect: boolean): boolean {
     }
 
     // Already traversed path detected. This means we have marked all potentially ambiguous nodes.
-    // If the node is in the maybe state, it means we have already processed all its ambiguous paths
-    if (neighbour.node.availabilityStatus !== AvailabilityStatus.Maybe)
+    // If the node is in the Ambiguous state, it means we have already processed all its ambiguous paths
+    if (neighbour.node.availabilityStatus !== AvailabilityStatus.Ambiguous)
         processAmbiguousPath(neighbour);
 
     return false;
@@ -216,7 +212,7 @@ function processAmbiguousPath(lastNeighbour: NodeNeighbour): void {
         !currentNeighbour.node.equals(lastNeighbour.node) &&
         currentNeighbour.node.availabilityStatus !== AvailabilityStatus.CertainlyAvailable
     ) {
-        currentNeighbour.node.setAvailabilityStatus(AvailabilityStatus.Maybe);
+        currentNeighbour.node.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
         processAmbiguousDependentNeighbours(currentNeighbour);
         currentNeighbour = currentNeighbour.previousNeighbour;
     }
@@ -224,8 +220,8 @@ function processAmbiguousPath(lastNeighbour: NodeNeighbour): void {
 
 function processAmbiguousDependentNeighbours(neigbour: NodeNeighbour): void {
     neigbour.dependentNeighbours.forEach(dependentNeighbour => {
-        if (dependentNeighbour.node.availabilityStatus !== AvailabilityStatus.Maybe) {
-            dependentNeighbour.node.setAvailabilityStatus(AvailabilityStatus.Maybe);
+        if (dependentNeighbour.node.availabilityStatus !== AvailabilityStatus.Ambiguous) {
+            dependentNeighbour.node.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
             processAmbiguousDependentNeighbours(dependentNeighbour);
         }
     });

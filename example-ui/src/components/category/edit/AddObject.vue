@@ -1,6 +1,5 @@
 <script lang="ts">
 import type { Graph } from '@/types/categoryGraph';
-import { Key } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
@@ -15,27 +14,22 @@ export default defineComponent({
     },
     emits: [ 'save', 'cancel' ],
     data() {
-        const key = this.graph.schemaCategory.suggestKey();
+
         return {
             label: '',
-            key,
-            keyValue: key.value,
             keyIsValid: true
         };
     },
     methods: {
         save() {
-            const object = this.graph.schemaCategory.createObject(this.label, this.key, []);
+
+            const object = this.graph.schemaCategory.createObject(this.label, []);
             this.graph.createNode(object, 'new');
 
             this.$emit('save');
         },
         cancel() {
             this.$emit('cancel');
-        },
-        keyValueChanged() {
-            this.key = Key.createNew(this.keyValue);
-            this.keyIsValid = this.graph.schemaCategory.isKeyAvailable(this.key);
         }
     }
 });
@@ -52,21 +46,6 @@ export default defineComponent({
                 <td class="value">
                     <input
                         v-model="label"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Key:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="keyValue"
-                        class="number-input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        @input="keyValueChanged"
                     />
                 </td>
             </tr>

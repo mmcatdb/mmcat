@@ -28,7 +28,6 @@ export default defineComponent({
     data() {
         return {
             label: this.node.schemaObject.label,
-            key: this.node.schemaObject.key,
             addingId: false,
             addedId: false
         };
@@ -51,10 +50,10 @@ export default defineComponent({
             this.$emit('cancel');
         },
         deleteFunction() {
-            for (const edge of this.node.neighbours.values()) {
+            this.node.adjacentEdges.forEach(edge => {
                 this.graph.schemaCategory.deleteMorphismWithDual(edge.schemaMorphism);
                 this.graph.deleteEdgeWithDual(edge);
-            }
+            });
 
             this.graph.schemaCategory.deleteObject(this.node.schemaObject);
             this.graph.deleteNode(this.node);
@@ -95,7 +94,7 @@ export default defineComponent({
                     Key:
                 </td>
                 <td class="value">
-                    {{ key.value }}
+                    {{ node.schemaObject.key.value }}
                 </td>
             </tr>
             <tr>

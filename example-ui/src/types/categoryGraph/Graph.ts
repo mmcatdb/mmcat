@@ -143,8 +143,8 @@ export class Graph {
         const cytoscapeEdge = this._cytoscape.add(definition);
         edges[0].setCytoscapeEdge(cytoscapeEdge);
 
-        domNode.addNeighbour(codNode, edges[0]);
-        codNode.addNeighbour(domNode, edges[1]);
+        domNode.addNeighbour(edges[0]);
+        codNode.addNeighbour(edges[1]);
     }
 
     deleteEdgeWithDual(edge: Edge) {

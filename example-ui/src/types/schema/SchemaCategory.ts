@@ -70,9 +70,8 @@ export class SchemaCategory {
         );
     }
 
-    createObject(label: string, key: Key, ids: SchemaId[]): SchemaObject {
-        this._keysProvider.add(key);
-
+    createObject(label: string, ids: SchemaId[]): SchemaObject {
+        const key = this._keysProvider.createAndAdd();
         const id = this._objectIdProvider.createAndAdd();
         const object = SchemaObject.createNew(id, label, key, ids);
         this._createdObjects.push(object);
@@ -80,9 +79,9 @@ export class SchemaCategory {
         return object;
     }
 
-    createMorphismWithDual(dom: SchemaObject, cod: SchemaObject, signature: Signature, cardinality: CardinalitySettings): SchemaMorphism {
+    createMorphismWithDual(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings): SchemaMorphism {
+        const signature = this._signatureProvider.createAndAdd();
         const dualSignature = signature.dual();
-        this._signatureProvider.add(signature);
         this._signatureProvider.add(dualSignature);
 
         const id = this._morphismIdProvider.createAndAdd();

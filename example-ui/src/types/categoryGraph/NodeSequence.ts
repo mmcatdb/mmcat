@@ -41,14 +41,18 @@ export class NodeSequence {
     }
 
     addBaseSignature(baseSignature: Signature): void {
-        for (const [ node, edge ] of this.lastNode.neighbours.entries()) {
+        for (const edge of this.lastNode.adjacentEdges) {
             if (edge.schemaMorphism.signature.equals(baseSignature)) {
-                this._edges.push(edge);
-                this._nodes.push(node);
-                node.selectNext();
+                this.addEdge(edge);
                 return;
             }
         }
+    }
+
+    addEdge(edge: Edge): void {
+        this._edges.push(edge);
+        this._nodes.push(edge.codomainNode);
+        edge.codomainNode.selectNext();
     }
 
     unselectAll(): void {
@@ -89,6 +93,25 @@ export class NodeSequence {
         this.lastNode.unselectPrevious();
         this._nodes.pop();
         this._edges.pop();
+
+        return true;
+    }
+
+    tryAddEdge(edge: Edge): boolean {
+        if (!edge.domainNode.equals(this.lastNode))
+            return false;
+
+        // Identity morphism is a special case.
+        if (edge.codomainNode.equals(edge.domainNode)) {
+            this.addEdge(edge);
+            return true;
+        }
+
+        // The node is available in some way we can add it.
+        if ([ AvailabilityStatus.CertainlyAvailable, AvailabilityStatus.Available, AvailabilityStatus.Ambiguous ].includes(edge.codomainNode.availabilityStatus)) {
+            this.addEdge(edge);
+            return true;
+        }
 
         return true;
     }

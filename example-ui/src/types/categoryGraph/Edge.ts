@@ -19,6 +19,10 @@ export class Edge {
         this.edge = edge;
     }
 
+    get isIdentity(): boolean {
+        return this.schemaMorphism.isIdentity;
+    }
+
     get dual(): Edge {
         return this._dual;
     }

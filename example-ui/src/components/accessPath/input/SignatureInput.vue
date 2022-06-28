@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Graph, Node } from '@/types/categoryGraph';
+import type { Edge, Graph, Node } from '@/types/categoryGraph';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
 import type { Filter } from '@/types/categoryGraph';
@@ -45,11 +45,13 @@ export default defineComponent({
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
+        this.graph.addEdgeListener('tap', this.onEdgeTapHandler);
         this.innerValue.sequence.selectAll();
         this.innerValue.markAvailablePaths(this.filters);
     },
     unmounted() {
         this.graph.removeNodeListener('tap', this.onNodeTapHandler);
+        this.graph.removeEdgeListener('tap', this.onEdgeTapHandler);
         this.innerValue.sequence.unselectAll();
         this.graph.resetAvailabilityStatus();
     },
@@ -58,22 +60,23 @@ export default defineComponent({
             if (this.disabled)
                 return;
 
-            if (this.innerValue.sequence.tryRemoveNode(node)) {
-                if (this.innerValue.isNull)
-                    this.innerValue = this.innerValue.copyNotNull();
+            if (this.innerValue.sequence.tryRemoveNode(node) || this.innerValue.sequence.tryAddNode(node))
+                this.updateInnerValue();
+        },
+        onEdgeTapHandler(edge: Edge): void {
+            if (this.disabled)
+                return;
 
-                this.graph.resetAvailabilityStatus();
-                this.innerValue.markAvailablePaths(this.filters);
-                this.sendUpdate();
-            }
-            else if (this.innerValue.sequence.tryAddNode(node)) {
-                if (this.innerValue.isNull)
-                    this.innerValue = this.innerValue.copyNotNull();
+            if (this.innerValue.sequence.tryAddEdge(edge) || this.innerValue.sequence.tryAddEdge(edge.dual))
+                this.updateInnerValue();
+        },
+        updateInnerValue() {
+            if (this.innerValue.isNull)
+                this.innerValue = this.innerValue.copyNotNull();
 
-                this.graph.resetAvailabilityStatus();
-                this.innerValue.markAvailablePaths(this.filters);
-                this.sendUpdate();
-            }
+            this.graph.resetAvailabilityStatus();
+            this.innerValue.markAvailablePaths(this.filters);
+            this.sendUpdate();
         },
         setSignature(signature: SequenceSignature, sendUpdate = true) {
             this.innerValue.sequence.unselectAll();

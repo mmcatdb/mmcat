@@ -17,33 +17,13 @@
     font-size: 20px;
 }
 
-a {
-  text-decoration: none;
-  color: var(--color-primary);
-  transition: 0.4s;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: var(--color-primary-dark);
-  }
-}
-
-a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-a {
+.leftBar a {
   display: inline-block;
   padding: 0 1rem;
   border-top: 1px solid var(--color-border);
 }
 
-a:first-of-type {
+.leftBar a:first-of-type {
   border: 0;
 }
 </style>

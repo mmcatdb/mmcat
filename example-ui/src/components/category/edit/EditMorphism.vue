@@ -27,7 +27,6 @@ export default defineComponent({
             node2: null as Node | null,
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
-            signatureValue: this.edge.schemaMorphism.signature.baseValue ?? 0,
             cardinality: {
                 domCodMin: this.edge.schemaMorphism.min,
                 domCodMax: this.edge.schemaMorphism.max,
@@ -88,6 +87,8 @@ export default defineComponent({
             this.$emit('cancel');
         },
         deleteFunction() {
+            // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
+
             this.graph.schemaCategory.deleteMorphismWithDual(this.edge.schemaMorphism);
             this.graph.deleteEdgeWithDual(this.edge);
 
@@ -98,22 +99,30 @@ export default defineComponent({
             this.node2?.unselect();
             this.temporayEdge?.delete();
         },
-        onNodeTapHandler(node: Node): void {
-            if (node.equals(this.node1)) {
-                node.unselect();
-                this.node1 = null;
-            }
-            else if (node.equals(this.node2)) {
-                node.unselect();
-                this.node2 = null;
-            }
-            else {
-                this.handleTapOnNotSelectedNode(node);
-            }
-
-            this.temporayEdge?.delete();
+        selectAll() {
+            this.node1?.select({ type: SelectionType.Selected, level: 0 });
+            this.node2?.select({ type: SelectionType.Selected, level: 1 });
             if (this.nodesChanged)
                 this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
+        },
+        onNodeTapHandler(node: Node): void {
+            this.unselectAll();
+
+            let changed = false;
+            if (node.equals(this.node1)) {
+                this.node1 = null;
+                changed = true;
+            }
+
+            if (node.equals(this.node2)) {
+                this.node2 = null;
+                changed = true;
+            }
+
+            if (!changed)
+                this.handleTapOnNotSelectedNode(node);
+
+            this.selectAll();
         },
         handleTapOnNotSelectedNode(node: Node) {
             // Which node should be changed.
@@ -123,12 +132,7 @@ export default defineComponent({
                     NodeIndices.Second :
                     this.lastSelectedNode;
 
-            const changingNode = this.indexToNode(changingNodeIndex);
-
-            changingNode?.unselect();
-            node.select({ type: SelectionType.Selected, level: changingNodeIndex });
             this.setNodeOnIndex(node, changingNodeIndex);
-
             this.lastSelectedNode = changingNodeIndex;
         },
         indexToNode(index: NodeIndices): Node | null {
@@ -152,10 +156,12 @@ export default defineComponent({
             this.node2.select({ type: SelectionType.Selected, level: 1 });
         },
         selectSameNode() {
+            if (!this.node1)
+                return;
+
             this.node2?.unselect();
 
             this.node2 = this.node1;
-            this.node2?.select({ type: SelectionType.Selected, level: 3 });
             this.lastSelectedNode = NodeIndices.Second;
 
             this.temporayEdge?.delete();
@@ -172,7 +178,7 @@ export default defineComponent({
         <table>
             <tr>
                 <td class="label">
-                    First node:
+                    Domain object:
                 </td>
                 <td class="value">
                     {{ node1?.schemaObject.label }}
@@ -180,7 +186,7 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
-                    Second node:
+                    Codomain object:
                 </td>
                 <td class="value">
                     {{ node2?.schemaObject.label }}
@@ -193,22 +199,23 @@ export default defineComponent({
                             :disabled="!node1"
                             @click="selectSameNode"
                         >
-                            Select same node
+                            Select same object
+                        </button>
+                        <button
+                            :disabled="!nodesSelected || node1?.equals(node2)"
+                            @click="switchNodes"
+                        >
+                            Switch
                         </button>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td class="label">
-                    Signature value:
+                    Signature:
                 </td>
                 <td class="value">
-                    <input
-                        v-model="signatureValue"
-                        type="number"
-                        class="number-input"
-                        disabled
-                    />
+                    {{ edge.schemaMorphism.signature }}
                 </td>
             </tr>
             <CardinalityInput
@@ -223,13 +230,6 @@ export default defineComponent({
                 @click="save"
             >
                 Confirm
-            </button>
-            <button
-                v-if="isNew"
-                :disabled="!nodesSelected"
-                @click="switchNodes"
-            >
-                Switch
             </button>
             <button @click="cancel">
                 Cancel

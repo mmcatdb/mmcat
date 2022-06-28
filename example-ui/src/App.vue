@@ -14,7 +14,7 @@ function defineLink(pathName: string, label: string): Link {
 }
 
 const links = [
-    defineLink('home', 'Home'),
+    defineLink('home', 'MM-cat'),
     defineLink('jobs', 'Jobs'),
     defineLink('mappings', 'Mappings'),
     //defineLink('accessPathEditor', 'Create Mapping'),
@@ -44,6 +44,7 @@ const links = [
 @import "@/assets/base.css";
 @import "@/assets/componentLayout.css";
 @import "@/assets/buttons.css";
+@import "@/assets/links.css";
 /*/ @import "@/assets/screenshot.css"; /**/
 
 #app {

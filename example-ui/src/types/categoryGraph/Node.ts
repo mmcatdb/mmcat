@@ -1,5 +1,4 @@
 import { ComparableMap } from "@/utils/ComparableMap";
-import { TwoWayComparableMap } from "@/utils/TwoWayComparableMap";
 import type { NodeSingular } from "cytoscape";
 import type { SchemaId, Signature } from "../identifiers";
 import type { SchemaObject } from "../schema";
@@ -14,7 +13,7 @@ export enum AvailabilityStatus {
     Default = 'availability-default',
     Available = 'availability-available',
     CertainlyAvailable = 'availability-certainly-available',
-    Maybe = 'availability-maybe',
+    Ambiguous = 'availability-ambiguous',
     Removable = 'availability-removable',
     NotAvailable = 'availability-not-available'
 }
@@ -50,11 +49,7 @@ export class Node {
     _tags = new Set() as Set<NodeTag>;
     availablePathData = null as MorphismData | null;
 
-    neighbours = new TwoWayComparableMap<Node, number, Edge, string>(
-        node => node.schemaObject.key.value,
-        edge => edge.schemaMorphism.signature.toString()
-    );
-    _signatureToEdge = new ComparableMap<Signature, string, Edge>(signature => signature.toString());
+    _adjacentEdges = new ComparableMap<Signature, string, Edge>(signature => signature.toString());
 
     constructor(schemaObject: SchemaObject) {
         this.schemaObject = schemaObject;
@@ -65,16 +60,20 @@ export class Node {
         node.toggleClass('no-ids', this.schemaObject.schemaIds.length === 0);
     }
 
-    addNeighbour(node: Node, edge: Edge): void {
-        this.neighbours.set(node, edge);
-        this._signatureToEdge.set(edge.schemaMorphism.signature, edge);
+    addNeighbour(edge: Edge): void {
+        if (!edge.domainNode.equals(this))
+            return;
+
+        // Identity morphisms are special. They are dealt with separately.
+        if (edge.isIdentity)
+            return;
+
+        this._adjacentEdges.set(edge.schemaMorphism.signature, edge);
     }
 
     removeNeighbour(node: Node): void {
-        const edge = this.neighbours.get(node);
-        this.neighbours.delete(node);
-        if (edge)
-            this._signatureToEdge.delete(edge.schemaMorphism.signature);
+        [ ...this._adjacentEdges.values() ].filter(edge => edge.codomainNode.equals(node))
+            .forEach(edgeToRemove => this._adjacentEdges.delete(edgeToRemove.schemaMorphism.signature));
     }
 
     getNeighbour(signature: Signature): Node | undefined {
@@ -85,12 +84,15 @@ export class Node {
         if (!split)
             return undefined;
 
-        const edge = this._signatureToEdge.get(split.first);
+        const edge = this._adjacentEdges.get(split.first);
         if (!edge)
             return undefined;
 
-        const nextNeighbour = this.neighbours.getKey(edge);
-        return !nextNeighbour ? undefined : split.rest.isEmpty ? nextNeighbour : nextNeighbour.getNeighbour(split.rest);
+        return split.rest.isEmpty ? edge.codomainNode : edge.codomainNode.getNeighbour(split.rest);
+    }
+
+    get adjacentEdges(): Edge[] {
+        return [ ...this._adjacentEdges.values() ];
     }
 
     get determinedPropertyType(): PropertyType | null {
