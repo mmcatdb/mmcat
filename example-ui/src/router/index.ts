@@ -35,11 +35,6 @@ const router = createRouter({
             component: () => import('@/views/SchemaCategoryView.vue')
         },
         {
-            path: '/instances',
-            name: 'instances',
-            component: () => import('@/views/InstancesView.vue')
-        },
-        {
             path: '/instanceCategory',
             name: 'instanceCategory',
             component: () => import('@/views/InstanceCategoryView.vue')
