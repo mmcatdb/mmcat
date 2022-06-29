@@ -12,6 +12,15 @@
     {{/* NOTE: for links starting with ./ */}}
     {{- $urltrimmed := strings.TrimPrefix "./" $url -}}
     {{- $destination = printf "%s://%s/%s%s" $baseurl.Scheme $baseurl.Host $urltrimmed $fragment -}}
+  {{- else if (strings.HasPrefix $url.Path "../") -}}
+  <!--
+    {{ $directoryLink := (path.Split (strings.TrimSuffix "/" .Page.Permalink)).Dir }}
+    {{ $directoryLinkUp := (path.Split (strings.TrimSuffix "/" $directoryLink)).Dir }}
+    {{ $trimmedDestination := strings.TrimPrefix "../" $url.Path }}
+    {{ $destinationFile := printf "%s%s" $directoryLinkUp $trimmedDestination }}
+  -->
+    {{ $relativeLink := (site.GetPage $trimmedDestination).RelPermalink }}
+    {{ $destination = printf "%s%s" $relativeLink $fragment }}
   {{- else -}}
     {{/* NOTE: for internal links */}}
     {{- $destination = printf "%s%s" $getpage.RelPermalink $fragment -}}
