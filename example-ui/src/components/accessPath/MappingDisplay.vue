@@ -45,6 +45,14 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
+                    Root object id:
+                </td>
+                <td class="value">
+                    {{ mapping.rootObjectId }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
                     Database:
                 </td>
                 <td class="value">

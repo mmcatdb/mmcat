@@ -1,26 +1,24 @@
 <script lang="ts">
-import { type ComplexProperty, RootProperty, type ChildProperty, type ParentProperty } from '@/types/accessPath/graph';
+import type { ComplexProperty, RootProperty, ChildProperty, ParentProperty } from '@/types/accessPath/graph';
 import type { Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { DatabaseView } from '@/types/database';
 import AddProperty from './AddProperty.vue';
 import EditProperty from './EditProperty.vue';
-import EditRootProperty from './EditRootProperty.vue';
+import StaticNameInput from '../input/StaticNameInput.vue';
 
 enum State {
     Default,
     AddProperty,
-    EditProperty,
-    EditRootProperty
+    EditProperty
 }
 
 type GenericStateValue<State, Value> = { type: State } & Value;
 
 type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddProperty, { parent: ParentProperty }> |
-    GenericStateValue<State.EditProperty, { property: ChildProperty }> |
-    GenericStateValue<State.EditRootProperty, { property: RootProperty }>;
+    GenericStateValue<State.EditProperty, { property: ChildProperty }>;
 /*
 type State = { default: string }
     | { editProperty: { property: ComplexProperty } };
@@ -30,8 +28,8 @@ export default defineComponent({
     components: {
         AddProperty,
         EditProperty,
-        EditRootProperty,
-        ParentPropertyDisplay
+        ParentPropertyDisplay,
+        StaticNameInput
     },
     props: {
         graph: {
@@ -50,22 +48,17 @@ export default defineComponent({
     emits: [ 'finish' ],
     data() {
         return {
-            mappingName: 'New mapping',
+            name: 'New mapping',
             state: { type: State.Default } as StateValue,
             State,
         };
     },
     methods: {
-        editPropertyClicked(property: RootProperty | ChildProperty) {
-            this.state = property instanceof RootProperty ?
-                {
-                    type: State.EditRootProperty,
-                    property
-                } :
-                {
-                    type: State.EditProperty,
-                    property
-                };
+        editPropertyClicked(property: ChildProperty) {
+            this.state = {
+                type: State.EditProperty,
+                property
+            };
         },
         addPropertyClicked(parentProperty: ComplexProperty) {
             this.state = {
@@ -77,7 +70,7 @@ export default defineComponent({
             this.state = { type: State.Default };
         },
         finishMapping() {
-            this.$emit('finish', this.mappingName);
+            this.$emit('finish', this.name);
         }
     }
 });
@@ -102,7 +95,7 @@ export default defineComponent({
                                 Root object:
                             </td>
                             <td class="value">
-                                {{ rootProperty.name }}
+                                {{ rootProperty.node.label }}
                             </td>
                         </tr>
                         <tr>
@@ -110,7 +103,15 @@ export default defineComponent({
                                 Name:
                             </td>
                             <td class="value">
-                                <input v-model="mappingName" />
+                                <input v-model="name" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">
+                                Kind name:
+                            </td>
+                            <td class="value">
+                                <StaticNameInput v-model="rootProperty.name" />
                             </td>
                         </tr>
                     </table>
@@ -131,15 +132,6 @@ export default defineComponent({
                 </template>
                 <template v-else-if="state.type === State.EditProperty">
                     <EditProperty
-                        :graph="graph"
-                        :database="database"
-                        :property="state.property"
-                        @save="setStateToDefault"
-                        @cancel="setStateToDefault"
-                    />
-                </template>
-                <template v-else-if="state.type === State.EditRootProperty">
-                    <EditRootProperty
                         :graph="graph"
                         :database="database"
                         :property="state.property"

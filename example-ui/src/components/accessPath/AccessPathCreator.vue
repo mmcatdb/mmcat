@@ -20,7 +20,6 @@ export default defineComponent({
         return {
             graph: null as Graph | null,
             accessPath: null as RootProperty | null,
-            rootObjectName: 'pathName',
             selectingRootNode: null as Node | null,
             databases: [] as DatabaseView[],
             selectingDatabase: null as DatabaseView | null,
@@ -49,9 +48,8 @@ export default defineComponent({
 
             this.selectingRootNode.unselect();
             this.selectingRootNode.becomeRoot();
-            const name = this.selectingRootNode.schemaObject.label;
+            const name = this.selectingRootNode.schemaObject.label.toLowerCase();
             this.accessPath = new RootProperty(StaticName.fromString(name), this.selectingRootNode);
-            this.rootObjectName = name;
         },
         async createMapping(name: string) {
             const result = await POST<MappingFromServer>('/mappings', {
@@ -59,10 +57,10 @@ export default defineComponent({
                 categoryId: this.graph?.schemaCategory.id,
                 rootObjectId: this.accessPath?.node.schemaObject.id,
                 jsonValue: JSON.stringify({
-                    name
+                    name: name
                 }),
                 mappingJsonValue: JSON.stringify({
-                    kindName: this.accessPath?.name.toString().toLowerCase(),
+                    kindName: this.accessPath?.name.toString(),
                     pkey: [], // TODO this is important for the IC algorithm
                     accessPath: this.accessPath?.toJSON()
                 })

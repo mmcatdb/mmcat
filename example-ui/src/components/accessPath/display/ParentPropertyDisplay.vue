@@ -21,6 +21,11 @@ export default defineComponent({
             default: true,
             required: false
         },
+        isRoot: {
+            type: Boolean,
+            default: true,
+            required: false
+        },
         disableAdditions: {
             type: Boolean,
             default: false,
@@ -54,6 +59,10 @@ export default defineComponent({
         },
         reEmitAddClick(property: ComplexProperty): void {
             this.$emit('add:click', property);
+        },
+        emitComplexClick(): void {
+            if (!this.isRoot)
+                this.$emit('complex:click', this.property);
         }
     }
 });
@@ -65,8 +74,8 @@ export default defineComponent({
         <div class="row">
             <span
                 class="name-text"
-                :class="{ highlighted }"
-                @click="$emit('complex:click', property)"
+                :class="{ highlighted, clickable: !isRoot }"
+                @click="emitComplexClick"
                 @mouseenter="highlighted = true;"
                 @mouseleave="highlighted = false"
             >
@@ -93,6 +102,7 @@ export default defineComponent({
                     :key="index"
                     :property="subpath"
                     :is-last="index === complexSubpaths.length - 1"
+                    :is-root="false"
                     :disable-additions="disableAdditions"
                     @complex:click="reEmitComplexClick"
                     @simple:click="reEmitSimpleClick"
@@ -113,7 +123,8 @@ export default defineComponent({
             <span
                 ref="bracketText"
                 class="bracket-text"
-                :class="{ highlighted }"
+                :class="{ highlighted, clickable: !isRoot }"
+                @click="emitComplexClick"
                 @mouseenter="highlighted = true"
                 @mouseleave="highlighted = false"
             >
@@ -157,9 +168,12 @@ export default defineComponent({
 }
 
 .name-text, .bracket-text {
-    cursor: pointer;
     width: fit-content;
     padding: 2px 4px;
     border-radius: 4px;
+}
+
+.clickable {
+    cursor: pointer;
 }
 </style>
