@@ -68,7 +68,7 @@ export class SchemaObject {
 
     get canBeSimpleProperty(): boolean {
         if (this.schemaIds.length < 1)
-            return false;
+            return true; // This shouldn't happen since all properties should have at least one identifier
 
         for (const id of this.schemaIds) {
             if (id.signatures.length < 2)

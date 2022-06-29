@@ -1,6 +1,6 @@
 <script lang="ts">
 import { SimpleProperty, ComplexProperty, SequenceSignature, type ParentProperty } from '@/types/accessPath/graph';
-import { PropertyType, type Graph, createDefaultFilter } from '@/types/categoryGraph';
+import { PropertyType, type Graph, createDefaultFilter, Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
@@ -63,10 +63,7 @@ export default defineComponent({
         confirmSignature() {
             const node = this.signature.sequence.lastNode;
             this.name = StaticName.fromString(node.schemaObject.label.toLowerCase());
-
-            const type = this.database.configuration.isComplexPropertyAllowed ?
-                node.determinedPropertyType :
-                PropertyType.Simple;
+            const type = this.determinePropertyType(node);
 
             if (type !== null) {
                 this.type = type;
@@ -77,6 +74,16 @@ export default defineComponent({
                 this.state = State.SelectType;
                 this.typeIsDetermined = false;
             }
+        },
+        determinePropertyType(node: Node): PropertyType | null {
+            if (!this.database.configuration.isComplexPropertyAllowed)
+                return PropertyType.Simple;
+
+            // Auxiliary property.
+            if (this.signature.isNull)
+                return PropertyType.Complex;
+
+            return node.determinedPropertyType;
         },
         confirmType() {
             this.state = State.SelectName;
