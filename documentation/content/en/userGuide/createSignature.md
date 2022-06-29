@@ -20,13 +20,13 @@ The color of the border of the node indicates if the node can be added to the se
 - Light green - there is an unambiguous path to the node so it can be added right now.
 - Dark green - same as above except the node is a direct neighbour of the last node in the sequence. There might exist other paths to the node but the direct one will be used instead.
 
-You can also click on the morphism arrows to add them directly to the sequence. However, this works only for the direct neighbours or for the identity morphisms.
+You can also click on the morphism arrows to add them directly to the sequence. However, this works only for the direct neighbours.
 
 ## Special cases
 
 ### Filters
 
-Depending on the situation the available nodes might be filtered. For example, when selecting an id for an object a special cardinality conditions are required. If you can't create a path from one node to another, even though there are morphisms between them, check if they all satisfy these conditions.
+Depending on the situation the available nodes might be filtered. For example, when selecting an id for an object, a special cardinality conditions are required. If you can't create a path from one node to another, even though there are morphisms between them, check if they all satisfy these conditions.
 
 ### Amgiguous paths
 

@@ -14,7 +14,7 @@ Also mind that all changes must be explicitly saved by the `Save` button.
 
 Each object is represented by node with it's label. The nodes can be moved by dragging them with the cursor, however the new positions must be explicitly saved by the `Save positions` button.
 
-Each base morphism is an arow labeled by its signature. For each of those morphism there is a dual which isn't displayed for better clarity. Identity morphisms aren't displayed unless they are specifically created (again, for the clarity reasons). Composite morphisms can't be created by the tool directly and therefore aren't displayed in any case.
+Each base morphism is an arow labeled by its signature. For each of those morphism there is a dual which isn't displayed for better clarity. Identity morphisms aren't displayed as well (again, for the clarity reasons). Composite morphisms can't be created by the tool directly and therefore aren't displayed in any case.
 
 The colored dashed lines around the nodes shows in which databases the corresponding objects are represented. If an object isn't in any, there is a red circle around its node.
 
@@ -58,9 +58,7 @@ An empty set. This means that the object is identified by itself. In order to do
 
 First click the `Add morphism` button. Then you can specify the morphism domain and codomain objects by clicking on the nodes in the graph. A click on a selected node will unselect it.
 
-The `Switch` button allows you to switch 
-
-To create an identity morphism, select the domain object and then click on the `Select same object` button. Although there can be multiple morphisms between any any two objects, multiple identity morphisms on one object aren't supported due to a bug in the graphic library.
+The `Switch` button allows you to switch both nodes while everything else will stay the same.
 
 Finally select the cardinality of the morphism and its dual.
 
