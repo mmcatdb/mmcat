@@ -1,6 +1,7 @@
 import type { DatabaseConfiguration } from "../database";
 import type { Signature } from "../identifiers";
 import { Cardinality, type Max, type Min } from "../schema";
+import type { Edge } from "./Edge";
 import { type Node, AvailabilityStatus } from "./Node";
 
 export type MorphismData = {
@@ -28,9 +29,8 @@ function joinDuals(parent: MorphismData | undefined, next: MorphismData) {
 export type PathSegment = {
     targetNode: Node,
     sourceNode: Node,
-    morphism: MorphismData,
+    edge: Edge,
     fullMorphism: MorphismData,
-    dual: MorphismData,
     fullDual: MorphismData,
     previousSegment: PathSegment | undefined,
     dependentSegments: PathSegment[]
@@ -38,75 +38,56 @@ export type PathSegment = {
 
 export type FilterFunction = (segment: PathSegment) => boolean;
 
-export enum FilterType {
-    Base, // A rule must be satisfied for each base morphism along the path.
-    Composite // A rule must be satisfied only for the composite morphism of the full path.
-}
-export type Filter = { function: FilterFunction, type: FilterType };
-
 export class PathMarker {
     // It's actually important this is a stack and not a queue, because the paths has to be traversed in one go.
     rootNode: Node;
 
-    baseFilters: FilterFunction[];
-    compositeFilters: FilterFunction[];
+    filters: FilterFunction[];
 
     readonly stack = [] as PathSegment[];
 
-    constructor(rootNode: Node, filters: Filter | Filter[]) {
+    constructor(rootNode: Node, filters: FilterFunction | FilterFunction[]) {
         this.rootNode = rootNode;
-        const filtersArray = Array.isArray(filters) ? filters : [ filters ];
-
-        this.baseFilters = filtersArray.filter(filter => filter.type === FilterType.Base).map(filter => filter.function);
-        this.compositeFilters = filtersArray.filter(filter => filter.type === FilterType.Composite).map(filter => filter.function);
+        this.filters = Array.isArray(filters) ? filters : [ filters ];
     }
 
-    getTraversableNeighbours(sourceNode: Node, parentSegment?: PathSegment): PathSegment[] {
+    getTraversableNeighbours(sourceNode: Node, previousSegment?: PathSegment): PathSegment[] {
         let neighbours = sourceNode.adjacentEdges
-            .map(edge => ({
-                targetNode: edge.codomainNode,
-                sourceNode,
-                morphism: joinMorphisms(parentSegment?.morphism, edge.schemaMorphism),
-                fullMorphism: joinMorphisms(parentSegment?.fullMorphism, edge.schemaMorphism),
-                dual: joinDuals(parentSegment?.dual, edge.schemaMorphism.dual),
-                fullDual: joinDuals(parentSegment?.fullDual, edge.schemaMorphism.dual),
-                previousSegment: parentSegment,
-                dependentSegments: [] as PathSegment[]
-            }))
+            .map(edge => createPathSegment(edge, previousSegment))
             .filter(neighbour => !neighbour.targetNode.equals(this.rootNode));
 
-        if (parentSegment)
-            neighbours = filterBackwardPaths(neighbours, parentSegment.morphism);
+        // The edges around the root node are clickable so we have to check if they are valid.
+        // First we mark all as invalid.
+        if (!previousSegment)
+            neighbours.forEach(neighbour => neighbour.edge.isTraversible = false);
 
-        for (const filterFunction of this.baseFilters)
+        if (previousSegment)
+            neighbours = filterBackwardPaths(neighbours, previousSegment.fullMorphism);
+
+        for (const filterFunction of this.filters)
             neighbours = neighbours.filter(filterFunction);
+
+        // Then we validate those that survive the filters.
+        if (!previousSegment)
+            neighbours.forEach(neighbour => neighbour.edge.isTraversible = true);
 
         // We have to check that we are not going back to the same node.
         // It's permitted, but the user has to specifically require it.
         // To do so, the user has to choose the node as CertainlyAvailable, i.e. as a direct neighbour.
         // However, this is not required for the leaves because for them there is no other option than to go back.
-        if (parentSegment && neighbours.length > 1)
+        if (previousSegment && neighbours.length > 1)
             neighbours = neighbours.filter(entry => !entry.targetNode.equals(sourceNode));
 
         return neighbours;
     }
 
-    processNeighbour(neighbour: PathSegment, isDirect = false): void {
-        const continueAdding = markNeighbour(neighbour, isDirect);
+    processNeighbour(neighbour: PathSegment): void {
+        const continueAdding = markNeighbour(neighbour);
         if (!continueAdding)
             return;
 
         const addition = this.getTraversableNeighbours(neighbour.targetNode, neighbour);
         this.stack.push(...addition);
-    }
-
-    checkCompositeFilters(neighbour: PathSegment): boolean {
-        for (const filterFunction of this.compositeFilters) {
-            if (!filterFunction(neighbour))
-                return false;
-        }
-
-        return true;
     }
 
     /**
@@ -141,7 +122,7 @@ export class PathMarker {
         let directNeighbour = queue.shift();
         while (directNeighbour) {
             allProcessedNeighbours.push(directNeighbour);
-            this.processNeighbour(directNeighbour, true);
+            this.processNeighbour(directNeighbour);
             directNeighbour = queue.shift();
         }
 
@@ -151,23 +132,27 @@ export class PathMarker {
             this.processNeighbour(indirectNeighbour);
             indirectNeighbour = this.stack.pop();
         }
-
-        // Filter out paths that are not available.
-        allProcessedNeighbours.forEach(neighbour => {
-            if (!this.checkCompositeFilters(neighbour))
-                neighbour.targetNode.setAvailabilityStatus(AvailabilityStatus.NotAvailable);
-        });
     }
 }
 
-export function createDefaultFilter(configuration: DatabaseConfiguration): Filter {
-    return { type: FilterType.Base, function: createDefaultFilterFunction(configuration) };
+function createPathSegment(edge: Edge, previousSegment?: PathSegment): PathSegment {
+    return {
+        targetNode: edge.codomainNode,
+        sourceNode: edge.domainNode,
+        edge,
+        fullMorphism: joinMorphisms(previousSegment?.fullMorphism, edge.schemaMorphism),
+        fullDual: joinDuals(previousSegment?.fullDual, edge.schemaMorphism.dual),
+        previousSegment,
+        dependentSegments: [] as PathSegment[]
+    };
 }
 
-function createDefaultFilterFunction(configuration: DatabaseConfiguration): FilterFunction {
-    return (neighbour: PathSegment) => neighbour.previousSegment ?
-        (neighbour.morphism.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed) :
-        (neighbour.morphism.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed);
+export function createDefaultFilter(configuration: DatabaseConfiguration): { function: FilterFunction } {
+    return {
+        function: (segment: PathSegment) => segment.previousSegment ?
+            (segment.fullMorphism.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed) :
+            (segment.fullMorphism.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed)
+    };
 }
 
 // The path backwards is not allowed unless this node is the current root (i.e. entry morphism is empty)
@@ -175,18 +160,18 @@ function filterBackwardPaths(neighbours: PathSegment[], entryMorphism: MorphismD
     const entryBase = entryMorphism.signature.getLastBase();
 
     return neighbours.filter(neighbour => {
-        const base = neighbour.morphism.signature.getLastBase();
+        const base = neighbour.fullMorphism.signature.getLastBase();
         return !(base && entryBase && base.last.isBaseAndDualOf(entryBase.last));
     });
 }
 
-function markNeighbour(neighbour: PathSegment, isDirect: boolean): boolean {
+function markNeighbour(neighbour: PathSegment): boolean {
     // If the previous node was the root node, this node is definitely available so we mark it this way.
     // Unless there are multiple morphisms between the root node and this one. If that's the case, we have to process it normally.
-    if (isDirect) {
+    if (!neighbour.previousSegment) {
         const status = neighbour.targetNode.availabilityStatus === AvailabilityStatus.Default ? AvailabilityStatus.CertainlyAvailable : AvailabilityStatus.Ambiguous;
         neighbour.targetNode.setAvailabilityStatus(status);
-        neighbour.targetNode.availablePathData = neighbour.morphism;
+        neighbour.targetNode.availablePathData = neighbour.fullMorphism;
 
         return true;
     }
@@ -199,7 +184,7 @@ function markNeighbour(neighbour: PathSegment, isDirect: boolean): boolean {
         }
         else {
             neighbour.targetNode.setAvailabilityStatus(AvailabilityStatus.Available);
-            neighbour.targetNode.availablePathData = neighbour.morphism;
+            neighbour.targetNode.availablePathData = neighbour.fullMorphism;
 
             // If the previous neighbour is found to be ambiguous, this one is also ambiguous.
             if (neighbour.previousSegment)

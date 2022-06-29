@@ -43,7 +43,7 @@ public class AsyncJobService {
      * There is a prostor for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
      */
     private Queue<RunJobData> jobQueue = new ConcurrentLinkedQueue<>();
-    private boolean jobIsRunning = false;
+    private volatile boolean jobIsRunning = false;
 
     @Autowired
     private JobRepository repository;

@@ -1,8 +1,7 @@
 <script lang="ts">
-import type { Edge, Graph, Node } from '@/types/categoryGraph';
+import type { Edge, Graph, Node, FilterFunction } from '@/types/categoryGraph';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { defineComponent } from 'vue';
-import type { Filter } from '@/types/categoryGraph';
 
 export default defineComponent({
     props: {
@@ -10,8 +9,8 @@ export default defineComponent({
             type: Object as () => Graph,
             required: true
         },
-        filters: {
-            type: Object as () => Filter | Filter[],
+        filter: {
+            type: Object as () => { function: FilterFunction | FilterFunction[] },
             required: true
         },
         modelValue: {
@@ -47,7 +46,7 @@ export default defineComponent({
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
         this.graph.addEdgeListener('tap', this.onEdgeTapHandler);
         this.innerValue.sequence.selectAll();
-        this.innerValue.markAvailablePaths(this.filters);
+        this.innerValue.markAvailablePaths(this.filter.function);
     },
     unmounted() {
         this.graph.removeNodeListener('tap', this.onNodeTapHandler);
@@ -75,7 +74,7 @@ export default defineComponent({
                 this.innerValue = this.innerValue.copyNotNull();
 
             this.graph.resetAvailabilityStatus();
-            this.innerValue.markAvailablePaths(this.filters);
+            this.innerValue.markAvailablePaths(this.filter.function);
             this.sendUpdate();
         },
         setSignature(signature: SequenceSignature, sendUpdate = true) {
@@ -83,7 +82,7 @@ export default defineComponent({
             this.graph.resetAvailabilityStatus();
             this.innerValue = signature;
             this.innerValue.sequence.selectAll();
-            this.innerValue.markAvailablePaths(this.filters);
+            this.innerValue.markAvailablePaths(this.filter.function);
 
             if (sendUpdate)
                 this.sendUpdate();

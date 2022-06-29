@@ -1,5 +1,5 @@
 <script lang="ts">
-import { type Graph, type PathSegment, type Node, FilterType } from '@/types/categoryGraph';
+import type { Graph, PathSegment, Node } from '@/types/categoryGraph';
 import { SchemaIdFactory } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
@@ -25,12 +25,10 @@ export default defineComponent({
         return {
             signature: SequenceSignature.empty(this.node),
             filter: {
-                type: FilterType.Base,
-                function: (segment: PathSegment) => {
-                    return segment.morphism.min === Cardinality.One
-                        && segment.morphism.max === Cardinality.One
-                        && segment.dual.max === Cardinality.One;
-                }
+                function: (segment: PathSegment) =>
+                    segment.edge.schemaMorphism.min === Cardinality.One
+                        && segment.edge.schemaMorphism.max === Cardinality.One
+                        && segment.edge.schemaMorphism.dual.max === Cardinality.One
             }
         };
     },
@@ -63,7 +61,7 @@ export default defineComponent({
     <SignatureInput
         v-model="signature"
         :graph="graph"
-        :filters="filter"
+        :filter="filter"
     />
     <div class="button-row">
         <button

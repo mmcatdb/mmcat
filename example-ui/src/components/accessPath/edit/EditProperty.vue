@@ -192,7 +192,7 @@ export default defineComponent({
             <SignatureInput
                 v-model="signature"
                 :graph="graph"
-                :filters="filter"
+                :filter="filter"
                 :allow-null="database.configuration.isGrouppingAllowed"
             >
                 <template #nullButton>

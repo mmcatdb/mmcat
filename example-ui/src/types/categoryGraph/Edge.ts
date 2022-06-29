@@ -9,6 +9,9 @@ export class Edge {
     codomainNode: Node;
     _dual!: Edge;
 
+    // This is important for the pathMarker algorithm.
+    isTraversible = false;
+
     constructor(schemaMorphism: SchemaMorphism, domainNode: Node, codomainNode: Node) {
         this.schemaMorphism = schemaMorphism;
         this.domainNode = domainNode;

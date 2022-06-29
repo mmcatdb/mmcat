@@ -102,7 +102,7 @@ public class PullToDDLAndDMLTestBase
         }
         catch (Exception e)
         {
-            Assertions.fail("Exception thrown when building forest.");
+            Assertions.fail("Exception thrown when building forest.", e);
             return;
         }
 
@@ -120,12 +120,12 @@ public class PullToDDLAndDMLTestBase
         ddlAlgorithm.input(mapping, instance, ddlWrapper);
         DDLStatement ddlStatement = ddlAlgorithm.algorithm();
 
-        LOGGER.info("Created DDL Statement:\n" + ddlStatement);
+        LOGGER.info("Created DDL Statement:\n" + ddlStatement.getContent());
 
         var dmlAlgorithm = new DMLAlgorithm();
         dmlAlgorithm.input(mapping, instance, pushWrapper);
         List<DMLStatement> dmlStatements = dmlAlgorithm.algorithm();
 
-        LOGGER.info("Created DML Statement-s:\n" + dmlStatements);
+        LOGGER.info("Created DML Statement-s:\n" + String.join("\n", dmlStatements.stream().map(statement -> statement.getContent()).toList()));
 	}
 }

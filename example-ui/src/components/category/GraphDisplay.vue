@@ -127,7 +127,7 @@ export default defineComponent({
                     Save positions
                 </button>
                 <button
-                    @click="graph.center()"
+                    @click="graph?.center()"
                 >
                     Center graph
                 </button>

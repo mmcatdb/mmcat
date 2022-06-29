@@ -3,7 +3,7 @@ import type { NodeSingular } from "cytoscape";
 import type { SchemaId, Signature } from "../identifiers";
 import type { SchemaObject } from "../schema";
 import type { Edge } from "./Edge";
-import { PathMarker, type Filter, type MorphismData } from "./PathMarker";
+import { PathMarker, type FilterFunction, type MorphismData } from "./PathMarker";
 
 export enum NodeTag {
     Root = 'tag-root'
@@ -155,7 +155,7 @@ export class Node {
         return !!other && this.schemaObject.id === other.schemaObject.id;
     }
 
-    markAvailablePaths(filters: Filter | Filter[]): void {
+    markAvailablePaths(filters: FilterFunction | FilterFunction[]): void {
         const pathMarker = new PathMarker(this, filters);
         pathMarker.markPathsFromRootNode();
     }

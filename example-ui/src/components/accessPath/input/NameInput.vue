@@ -145,7 +145,7 @@ export default defineComponent({
         <SignatureInput
             v-model="dynamicValue"
             :graph="graph"
-            :filters="filter"
+            :filter="filter"
             :disabled="disabled"
             @input="updateInnerValue"
         />

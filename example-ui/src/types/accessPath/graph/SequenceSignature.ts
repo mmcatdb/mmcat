@@ -1,4 +1,4 @@
-import { Node, NodeSequence, type Filter } from "@/types/categoryGraph";
+import { Node, NodeSequence, type FilterFunction } from "@/types/categoryGraph";
 import { Signature } from "@/types/identifiers";
 
 export class SequenceSignature {
@@ -51,7 +51,7 @@ export class SequenceSignature {
         return this.isNull === signature.isNull && this.sequence.equals(signature.sequence);
     }
 
-    markAvailablePaths(filters: Filter | Filter[]): void {
+    markAvailablePaths(filters: FilterFunction | FilterFunction[]): void {
         if (this.sequence.lengthOfMorphisms === 0) {
             this.sequence.rootNode.unselect();
             this.sequence.rootNode.selectNext();
