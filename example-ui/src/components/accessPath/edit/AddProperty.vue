@@ -39,7 +39,7 @@ export default defineComponent({
         return {
             type: PropertyType.Simple,
             PropertyType,
-            signature: SequenceSignature.empty(this.parentProperty.node),
+            signature: SequenceSignature.null(this.parentProperty.node),
             name: StaticName.fromString('') as Name,
             state: State.SelectSignature,
             State,
@@ -163,7 +163,7 @@ export default defineComponent({
                 v-model="signature"
                 :graph="graph"
                 :filter="filter"
-                :allow-null="database.configuration.isGrouppingAllowed"
+                :default-is-null="true"
             >
                 <template #nullButton>
                     Auxiliary property
@@ -171,7 +171,10 @@ export default defineComponent({
             </SignatureInput>
         </div>
         <div class="button-row">
-            <button @click="nextButton">
+            <button
+                :disabled="state === State.SelectSignature && !database.configuration.isGrouppingAllowed && signature.isNull"
+                @click="nextButton"
+            >
                 {{ state < State.SelectName ? 'Next' : 'Finish' }}
             </button>
             <button

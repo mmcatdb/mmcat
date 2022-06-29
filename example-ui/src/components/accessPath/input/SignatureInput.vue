@@ -17,7 +17,7 @@ export default defineComponent({
             type: Object as () => SequenceSignature,
             required: true
         },
-        allowNull: {
+        defaultIsNull: {
             type: Boolean,
             default: false,
             required: false
@@ -38,7 +38,7 @@ export default defineComponent({
         modelValue: {
             handler(newValue: SequenceSignature): void {
                 if (!this.innerValue.equals(newValue))
-                    this.setSignature(newValue, false);
+                    this.setSignature(newValue);
             }
         }
     },
@@ -70,48 +70,32 @@ export default defineComponent({
                 this.updateInnerValue();
         },
         updateInnerValue() {
-            if (this.innerValue.isNull)
+            if (!this.innerValue.isEmpty && this.innerValue.isNull)
                 this.innerValue = this.innerValue.copyNotNull();
+
+            if (this.innerValue.isEmpty && this.defaultIsNull)
+                this.innerValue = SequenceSignature.null(this.innerValue.sequence.rootNode);
 
             this.graph.resetAvailabilityStatus();
             this.innerValue.markAvailablePaths(this.filter.function);
             this.sendUpdate();
         },
-        setSignature(signature: SequenceSignature, sendUpdate = true) {
+        setSignature(signature: SequenceSignature) {
             this.innerValue.sequence.unselectAll();
             this.graph.resetAvailabilityStatus();
             this.innerValue = signature;
             this.innerValue.sequence.selectAll();
             this.innerValue.markAvailablePaths(this.filter.function);
-
-            if (sendUpdate)
-                this.sendUpdate();
         },
         sendUpdate() {
             this.$emit('update:modelValue', this.innerValue);
             this.$emit('input');
-        },
-        setSignatureNull() {
-            this.setSignature(SequenceSignature.null(this.innerValue.sequence.rootNode));
-        },
-        setSignatureEmpty() {
-            this.setSignature(SequenceSignature.empty(this.innerValue.sequence.rootNode));
         }
     }
 });
 </script>
 
 <template>
-    <button
-        v-if="allowNull"
-        :disabled="disabled"
-        @click="setSignatureNull"
-    >
-        <slot name="nullButton" />
-    </button>
+    <div v-if="false" />
 </template>
-
-<style scoped>
-
-</style>
 

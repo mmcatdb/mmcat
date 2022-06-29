@@ -200,7 +200,7 @@ export default defineComponent({
                 v-model="signature"
                 :graph="graph"
                 :filter="filter"
-                :allow-null="database.configuration.isGrouppingAllowed"
+                :default-is-null="true"
             >
                 <template #nullButton>
                     Auxiliary property
@@ -210,6 +210,7 @@ export default defineComponent({
         <div class="button-row">
             <template v-if="state === State.SelectSignature">
                 <button
+                    :disabled="!database.configuration.isGrouppingAllowed && signature.isNull"
                     @click="confirmSignature"
                 >
                     {{ signatureChanged ? 'Confirm change' : 'Keep current' }}
