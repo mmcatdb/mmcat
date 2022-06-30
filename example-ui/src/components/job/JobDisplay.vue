@@ -112,15 +112,15 @@ export default defineComponent({
                 class="success"
                 @click="startJob"
             >
-                Start job
+                Start
             </button>
             <button
-                v-if="job.status === Status.Finished || job.status === Status.Canceled"
+                v-if="job.status !== Status.Running"
                 :disabled="deleteJobDisabled"
                 class="error"
                 @click="deleteJob"
             >
-                Delete job
+                Delete
             </button>
             <button
                 v-if="job.status === Status.Finished || job.status === Status.Canceled"
@@ -128,7 +128,7 @@ export default defineComponent({
                 class="warning"
                 @click="restartJob"
             >
-                Restart job
+                Restart
             </button>
         </div>
     </div>
