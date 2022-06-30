@@ -176,8 +176,12 @@ export class Graph {
         return { delete: () => this._cytoscape.remove('#' + id) };
     }
 
-    public center() {
+    center() {
         this._cytoscape.center();
+    }
+
+    getNode(object: SchemaObject): Node | undefined {
+        return this._nodes.find(node => node.schemaObject.key.equals(object.key));
     }
 }
 

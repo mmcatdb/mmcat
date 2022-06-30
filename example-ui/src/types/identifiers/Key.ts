@@ -18,6 +18,10 @@ export class Key {
             value: this.value
         };
     }
+
+    public equals(key: Key): boolean {
+        return this.value === key.value;
+    }
 }
 
 export type KeyFromServer = {

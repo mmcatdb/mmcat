@@ -30,12 +30,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.signature-span {
-    background-color: var(--color-background-dark);
-    border-radius: 4px;
-    padding: 0px 6px 0px 4px;
-}
-
 .comma-span {
     margin-right: 8px;
     margin-left: 2px;

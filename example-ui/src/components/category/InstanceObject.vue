@@ -7,14 +7,17 @@ import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { InstanceObject, type InstanceObjectFromServer } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
-import type { Signature } from '@/types/identifiers/Signature';
+import { Signature } from '@/types/identifiers/Signature';
+
+type Column = {
+    signature: Signature;
+    schemaObject: SchemaObject | undefined;
+    isClickable: boolean;
+}
 
 type FetchedInstanceObject = {
     object: InstanceObject;
-    columns: {
-        signature: Signature,
-        schemaObject: SchemaObject | undefined
-    }[]
+    columns: Column[]
 }
 
 export default defineComponent({
@@ -28,6 +31,7 @@ export default defineComponent({
             required: true
         },
     },
+    emits: [ 'object:click' ],
     data() {
         return {
             fetchedInstanceObject: null as FetchedInstanceObject | null,
@@ -55,7 +59,8 @@ export default defineComponent({
                     object,
                     columns: object.columns.map(signature => ({
                         signature,
-                        schemaObject: this.node.getNeighbour(signature)?.schemaObject
+                        schemaObject: this.node.getNeighbour(signature)?.schemaObject,
+                        isClickable: !signature.equals(Signature.empty)
                     }))
                 };
 
@@ -64,6 +69,10 @@ export default defineComponent({
             }
 
             this.loading = false;
+        },
+        columnClicked(column: Column) {
+            if (column.isClickable)
+                this.$emit('object:click', column.schemaObject);
         }
     }
 });
@@ -78,10 +87,16 @@ export default defineComponent({
                     <th
                         v-for="(column, index) in fetchedInstanceObject.columns"
                         :key="index"
+                        :class="{ clickable: column.isClickable }"
+                        @click="() => columnClicked(column)"
                     >
-                        {{ column.schemaObject?.label }}
+                        <span class="value">
+                            {{ column.schemaObject?.label }}
+                        </span>
                         <br />
-                        {{ column.signature }}
+                        <span class="signature-span">
+                            {{ column.signature }}
+                        </span>
                     </th>
                 </tr>
                 <tr
@@ -122,5 +137,13 @@ td, th {
 
 tr:nth-of-type(2n) td {
     background-color: var(--vt-c-black-soft);
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.value {
+    font-weight: bold;
 }
 </style>
