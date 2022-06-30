@@ -101,7 +101,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper
     
     private void getFieldWithKeyForSubpathFromObject(ComplexRecord parentRecord, Document document, String key, AccessPath subpath) throws Exception
     {
-        // TODO
+        // TODO Check for the null values if necessary.
         /*
         if (document.isNull(key)) // Returns if the value is null or if the value doesn't exist.
             return;

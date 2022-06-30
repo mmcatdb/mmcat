@@ -15,12 +15,12 @@ function defineLink(pathName: string, label: string): Link {
 
 const links = [
     defineLink('home', 'MM-cat'),
-    defineLink('jobs', 'Jobs'),
-    defineLink('mappings', 'Mappings'),
     defineLink('schema', 'Schema Category'),
+    defineLink('mappings', 'Mappings'),
+    defineLink('databases', 'Databases'),
+    defineLink('jobs', 'Jobs'),
     defineLink('instanceCategory', 'Instance Category'),
     defineLink('models', 'Models'),
-    defineLink('databases', 'Databases'),
 ];
 </script>
 

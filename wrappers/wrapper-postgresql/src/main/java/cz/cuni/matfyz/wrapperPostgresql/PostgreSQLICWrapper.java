@@ -16,7 +16,7 @@ public class PostgreSQLICWrapper implements AbstractICWrapper
     @Override
 	public void appendIdentifier(String kindName, IdentifierStructure identifier)
     {
-        // TODO IndentifierStructure is empty
+        // TODO IndentifierStructure is empty.
     }
 
     @Override
@@ -24,7 +24,7 @@ public class PostgreSQLICWrapper implements AbstractICWrapper
     {
         for (ComparablePair<String, String> attributePair : attributePairs)
         {
-            // TODO There should be a way how to get attribute names from the pairs
+            // TODO There should be a way how to get attribute names from the pairs.
             ReferenceConstraint newConstraint = new ReferenceConstraint(kindName, kindName2, "TODO1", "TODO2");
             
             if (constraints.stream().anyMatch(constraint -> constraint.getName().equals(newConstraint.getName())))

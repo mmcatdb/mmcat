@@ -6,7 +6,7 @@ export class DatabaseConfiguration {
     readonly isGrouppingAllowed: boolean;
     readonly isDynamicNamingAllowed: boolean;
     readonly isAnonymousNamingAllowed: boolean;
-    readonly isReferenceAllowed: boolean; // TODO The reference algorithm.
+    readonly isReferenceAllowed: boolean; // TODO The IC reference algorithm.
     readonly isComplexPropertyAllowed: boolean;
 
     public constructor(fromServer: DatabaseConfigurationFromServer) {

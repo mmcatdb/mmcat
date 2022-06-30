@@ -5,7 +5,7 @@ const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 <template>
     <h1>MM-cat</h1>
     <p>
-        A multi-model data modelling framework based on the category theory.
+        A multi-model data modelling framework based on category theory.
     </p>
     <br />
     <p>

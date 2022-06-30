@@ -317,10 +317,7 @@ public class MTCAlgorithm
             map.put(idWithValues, newRow);
         }
         
-        // TODO: předělat existující morfizmy
-        // WARNING: může se stát, že tu sloučím více řádků do jednoho - potom bude nutné sloučit jejich morfizmy do jednoho, což se nejlépe vyřeší lazy algoritmem
-        // právě až to bude potřeba
-        // TODO: optimalizovat
+        // TODO: The update of the already existing morphisms should be optimized.
         
         return newRow;
 	}
