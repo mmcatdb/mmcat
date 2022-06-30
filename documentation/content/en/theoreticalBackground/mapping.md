@@ -33,7 +33,7 @@ and similar. If the data structure is dynamic, we have no way of knowing what na
 ## Representation
 
 The access path can be represented by a JSON-like structure. For example, let's consider a kind `user`:
-```
+```js
 {
     name: 1,        // Simple property
     address: 3.2 {  // Complex property
