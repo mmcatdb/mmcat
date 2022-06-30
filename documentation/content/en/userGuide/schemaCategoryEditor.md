@@ -3,17 +3,18 @@ title: "Schema Category"
 weight: 10
 ---
 
-TODO image
-
 The schema category is displayed as a graph in the center of the page. You can add new objects an morphisms or the current ones. Be aware there are some limitations due to the nature of the conceptual schema (basically you can't make changes that could break existing mappings). However, we plan to implement procedures which would allow even these breaking changes.
 
 Also mind that all changes must be explicitly saved by the `Save` button.
+
+![Schema Category editor](/mmcat-docs/img/schema-category.png)
+<!-- ![Schema Category editor](/static/img/schema-category.png) -->
 
 ## Display
 
 Each object is represented by node with it's label. The nodes can be moved by dragging them with the cursor, however the new positions must be explicitly saved by the `Save positions` button.
 
-Each base morphism is an arow labeled by its signature. For each of those morphism there is a dual which isn't displayed for better clarity. Identity morphisms aren't displayed as well (again, for the clarity reasons). Composite morphisms can't be created by the tool directly and therefore aren't displayed in any case.
+Each base morphism is an arrow labeled by its signature. For each of those morphism there is a dual which isn't displayed for better clarity. Identity morphisms aren't displayed as well (again, for the clarity reasons). Composite morphisms can't be created by the tool directly and therefore aren't displayed in any case.
 
 The colored dashed lines around the nodes shows in which databases the corresponding objects are represented. If an object isn't in any, there is a red circle around its node.
 

@@ -3,11 +3,12 @@ title: "Create Signature"
 weight: 20
 ---
 
-TODO image
-
 Signatures are essential for almost all functionalities of the MM-cat framework because they are needed to specify morphisms. A signature is determined by a sequence of integers, i.e. identifiers of base morphisms. But signature can be also defined as a sequence of objects.
 
-Because of the high importance of signatures there is a specialized tool based on the graph display tool for creating them. 
+Because of the high importance of signatures there is a specialized tool based on the graph display tool for creating them.
+
+![Create Signature](/mmcat-docs/img/create-signature.png)
+<!-- ![Create Signature](/static/img/create-signature.png) -->
 
 ## Display
 
