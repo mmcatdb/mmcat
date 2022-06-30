@@ -1,7 +1,6 @@
 ---
 title: "Schema Category"
-description: "TODO"
-weight: 30
+weight: 10
 ---
 
 TODO image

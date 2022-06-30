@@ -1,7 +1,6 @@
 ---
 title: "Jobs"
-description: "TODO"
-weight: 10
+weight: 50
 ---
 
 A job is a transformaiton algorithm applied on a [mapping](mappings.md) that can be executed by the backend application.

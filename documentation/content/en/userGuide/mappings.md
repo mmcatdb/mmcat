@@ -1,7 +1,6 @@
 ---
 title: "Mappings"
-description: "TODO"
-weight: 20
+weight: 30
 ---
 
 Here you can find all mappings that can be used in import or export jobs. They are displayed with their access path in the JSON-like structure described [here](../theoreticalBackground/mapping.md#representation).

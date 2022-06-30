@@ -1,7 +1,7 @@
 ---
 title: "Mapping"
-description: "TODO"
 math: true
+weight: 30
 ---
 
 Each kind from the conceptual schema needs to be mapped to a logical model which represents data in some database system. A mapping uses JSON-like structure called [access path](#access-path) to both define the logical model of the kind and specify how it's mappend to the conceptual model.

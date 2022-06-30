@@ -1,5 +1,5 @@
 baseURL = "http://nosql.ms.mff.cuni.cz/mmcat-docs/"
-title = "MM-cat"
+title = "MM-cat docs"
 theme = "hugo-geekdoc"
 defaultContentLanguage = "en"
 

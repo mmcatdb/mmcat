@@ -1,5 +1,4 @@
 ---
 title: "Instance Category"
-description: "TODO"
-weight: 40
+weight: 60
 ---

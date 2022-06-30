@@ -1,6 +1,6 @@
 ---
 title: "User Guide"
-description: "TODO"
+weight: 10
 ---
 
 This is a user documentation for the frontend application of the [MM-cat framework](https://gitlab.mff.cuni.cz/contosp/evolution-management). Please be aware that the application is still in the development so it may not be as polished as you might be used to from other applications. Especially the UX was given less attention so please read this documentation carefully.

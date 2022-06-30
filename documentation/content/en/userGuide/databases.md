@@ -1,7 +1,6 @@
 ---
 title: "Databases"
-description: "TODO"
-weight: 60
+weight: 40
 ---
 
 Here you can find all databases that you can import data from or export data to.

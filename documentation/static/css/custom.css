@@ -1,3 +1,12 @@
 html {
     overflow-y: scroll;
 }
+
+:root {
+    --color-primary: hsla(160, 100%, 37%, 1);
+
+    --header-background: var(--color-primary) !important;
+    --button-background: var(--color-primary) !important;
+    --button-border-color: var(--color-primary) !important;
+    --link-color: var(--color-primary) !important;
+}
