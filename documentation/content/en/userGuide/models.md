@@ -12,3 +12,7 @@ Schema-less databases (eg. MongoDB) usually have trivial DDL statements while al
 This behaviour have some implications. If you run the export jobs while the instance database is empty, the DDL statements will be created as usual because they don't (in most cases) don't depend on the actual data. The exception is properties with dynamic names. However, the DML statements will be missing.
 
 If you run a job multiple times, each iteration will delete the previous model and create a new one.
+
+## Integrity constrains
+
+The application currently doesn't support integrity constrains. However, the algorithms that would allow this functionality are already derived so it's only a matter of time before they will be implemented.
