@@ -3,18 +3,18 @@ title: "Schema Category"
 weight: 10
 ---
 
-The schema category is displayed as a graph in the center of the page. You can add new objects an morphisms or the current ones. Be aware there are some limitations due to the nature of the conceptual schema (basically you can't make changes that could break existing mappings). However, we plan to implement procedures which would allow even these breaking changes.
+The schema category is displayed as a graph in the center of the page. You can add new objects and morphisms or the current ones. Be aware there are some limitations due to the nature of the conceptual schema (basically you can't make changes that could break existing mappings). However, we plan to implement procedures that would allow even these breaking changes.
 
-Also mind that all changes must be explicitly saved by the `Save` button.
+Also, mind that all changes must be explicitly saved by the `Save` button.
 
 ![Schema Category editor](/mmcat-docs/img/schema-category.png)
 <!-- ![Schema Category editor](/static/img/schema-category.png) -->
 
 ## Display
 
-Each object is represented by node with it's label. The nodes can be moved by dragging them with the cursor, however the new positions must be explicitly saved by the `Save positions` button.
+Each object is represented by a node with its label. The nodes can be moved by dragging them with the cursor, however the new positions must be explicitly saved by the `Save positions` button.
 
-Each base morphism is an arrow labeled by its signature. For each of those morphism there is a dual which isn't displayed for better clarity. Identity morphisms aren't displayed as well (again, for the clarity reasons). Composite morphisms can't be created by the tool directly and therefore aren't displayed in any case.
+Each base morphism is an arrow labeled by its signature. For each of those morphisms there is a dual which isn't displayed for better clarity. Identity morphisms aren't displayed as well (again, for the clarity reasons). Composite morphisms can't be created by the tool directly and therefore aren't displayed in any case.
 
 The colored dashed lines around the nodes shows in which databases the corresponding objects are represented. If an object isn't in any, there is a red circle around its node.
 
@@ -32,21 +32,21 @@ When you click on any new object you can delete it (the `Delete` button) or edit
 
 ## ID
 
-Id is a set of properties (usually other objects) whose values unambiguously identify given object. These properties are represented as a signatures of morhpisms that connect the object with them. There are three types of ids.
+Id is a set of properties (usually other objects) whose values unambiguously identify given object. These properties are represented as signatures of morphisms that connect the object with them. There are three types of ids.
 
 An object can have multiple ids. The ids don't have to share types.
 
 ### Simple
 
 A set with exactly one element. You can create it simply by [specifying a signature](createSignature.md). The corresponding morphism must have cardinalities:
-- Object to Property - 1..1, so there is exactly one identifier for any object.
-- Property to Object - 0..1 or 1..1, so there is at most one object for any identifier.
+- Object to Property - `1..1`, so there is exactly one identifier for any object.
+- Property to Object - `0..1` or `1..1`, so there is at most one object for any identifier.
 
 ### Complex
 
-A set with more than one elements. The process of specifying signatures is the same as for the simple id, you just have to do it multiple times. There is also difference in cardinality - each morphism must fulfill these conditions:
-- Object to Property - 1..1, so there is exactly one identifier for any object.
-- Property to Object - 0..* or 1..*, because the property would be a unique identifier otherwise. There would be no need for the complex id since a simple one would be sufficient.
+A set with more than one element. The process of specifying signatures is the same as for the simple id, you just have to do it multiple times. There is also difference in cardinality - each morphism must fulfill these conditions:
+- Object to Property - `1..1`, so there is exactly one identifier for any object.
+- Property to Object - `0..*` or `1..*`, because the property would be a unique identifier otherwise. There would be no need for the complex id since a simple one would be sufficient.
 
 ### Empty
 
@@ -60,11 +60,11 @@ First click the `Add morphism` button. Then you can specify the morphism domain 
 
 The `Switch` button allows you to switch both nodes while everything else will stay the same.
 
-Finally select the cardinality of the morphism and its dual.
+Finally, select the cardinality of the morphism and its dual.
 
 ### Edit
 
-New morphism can be edited in a similar way how they are created. You can delete them too. It's imortant to note that any change that could break newly created ids will result in deleting those ids.
+New morphism can be edited in a similar way how they are created. You can delete them too. It's important to note that any change that could break newly created ids will result in deleting those ids.
 
 ## Other functions
 

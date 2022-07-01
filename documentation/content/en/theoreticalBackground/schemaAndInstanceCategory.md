@@ -23,7 +23,7 @@ Each schema object corresponds to a kind or a property from the conceptual schem
 - *ids* - a set of all identifiers of the object.
 Each attribute of the superid is represented by a signature of morphism that goes from the object with the superid to the object which correspond to the attribute. So the superid is just a set of signatures. The concept of signature will be explained later.
 
-An identifier is also a set of signatures, this time their morphisms leads to the objects that unambiguously identify given object. Hence the ids is a set of sets of signatures. It must hold that all the signatures from all of the sets in the ids must be also contained in the superid.
+An identifier is also a set of signatures, this time their morphisms leads to the objects that unambiguously identify given object. Hence, the ids is a set of sets of signatures. It must hold that all the signatures from all the sets in the ids must be also contained in the superid.
 
 The most simple schema object is an object with only one identifier (an empty signature) and a single element superid (also the empty signature). So its ids and superid are $\{\{ \epsilon \}\}$ and $\{ \epsilon \}$. This means the object represents a simple property which is identified by its value. More complex objects are identified by and contain values of other objects.
 
@@ -44,7 +44,7 @@ The domain and codomain objects are represented by their identifiers, i.e. keys.
 
 ## Instance category
 
-An instance category is a structure capable of holding actual data. It is organized in a same way as the schema category, however its entities have a different contents.
+An instance category is a structure capable of holding actual data. It is organized in a same way as the schema category, however its entities have different contents.
 
 ### Objects
 
@@ -62,7 +62,7 @@ For example, $B$ can represent a first name with possible values `Frodo`, `Bilbo
 
 One $t_i$ is called an *active domain row*. A set of all $t_i$ together creates an *active domain* (or *instance object*) of the schema object $A$, which can be denoted as $I(A)$.
 
-It's important to note that the objects $B$ and $C$ must be the simple schema objects with the empty signature as an identifier so we can reference them by their values. A complex object (eg. $A$) can be also referenced but we have to use one of its identifiers to do so.
+It's important to note that the objects $B$ and $C$ must be the simple schema objects with the empty signature as an identifier, so we can reference them by their values. A complex object (e.g. $A$) can be also referenced, but we have to use one of its identifiers to do so.
 
 ### Morphisms
 
