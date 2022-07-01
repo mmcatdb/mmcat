@@ -16,4 +16,4 @@ A multi-model data modelling framework based on category theory. It consists of 
 mvn install -Dmaven.test.skip
 ```
 - Then follow the steps in the [Backend](./server/README.md) and [Frontend](./example-ui/README.md) guides.
-- Lastly, you need a web server to make both applications available. See the [Apache configuration](./documentation/apacheConfiguration.md) for detailed instructions.
+- Lastly, you need a web server to make both applications available. See the [Apache configuration](./examples/apacheConfiguration.md) for detailed instructions.
