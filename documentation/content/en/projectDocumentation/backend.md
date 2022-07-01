@@ -3,7 +3,7 @@ title: "Backend Application"
 weight: 20
 ---
 
-The application is located in the `server` package. It's based on the Spring Boot framework.
+The application is located in the `server` package. It's based on the [Spring Boot](https://spring.io/projects/spring-boot) framework.
 
 ## Architecture
 
