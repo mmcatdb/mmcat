@@ -9,4 +9,7 @@ html {
     --button-background: var(--color-primary) !important;
     --button-border-color: var(--color-primary) !important;
     --link-color: var(--color-primary) !important;
+    --link-color-visited: var(--color-primary) !important;
+    --footer-link-color: var(--color-primary) !important;
+    --footer-link-color-visited: var(--color-primary) !important;
 }
