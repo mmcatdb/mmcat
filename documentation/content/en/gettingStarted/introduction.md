@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "Motivation"
 ---
 
 There are lot of different database systems and each have different advantages and disadvantages. Although they might appear to be similar, there are no standards between them that would allow us to use them interchangeably. There also isn't any universal way how to transform data from one system to another or how to query among data from more than one database model. Moreover, this lack of standardization makes any effort for a general evolution tool almost impossible.
