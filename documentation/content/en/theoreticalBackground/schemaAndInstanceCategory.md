@@ -6,7 +6,7 @@ weight: 20
 
 Any application needs a way to represent some sort of data. A conceptual schema is a high-level model of the data from the application's point of view. It hides the technical details of physically storing the data from the application and allows us to concentrate on the concepts that are important for the domain we are working on. In the MM-cat framework this model is represented by a *schema category*. A similar structure capable of holding concrete data is called *instance category*.
 
-On the other hand, a logical model describes how the data should be organized to tables (for a relational model), documents (for a document model) and so on. It generally doesn't depend on any specific database engine. However, it might be affected by the possibilities of the target type of database systems.
+On the other hand, a logical model describes how the data should be organized to tables (for a relational model), documents (for a document model) and so on. It generally does not depend on any specific database engine. However, it might be affected by the possibilities of the target type of database systems.
 
 The framework is based on the condition that an application should have one conceptual schema which can be [mapped](mapping.md) to multiple logical models. The models can partially or completely overlap and each of them can be suited for a different database system.
 
@@ -48,7 +48,7 @@ An instance category is a structure capable of holding actual data. It is organi
 
 ### Objects
 
-Consider a schema object $A$ with superid $\{ \sigma_f = \texttt{3}, \sigma_g = \texttt{6} \}$ where $f: A \rightarrow B$ and $g: A \rightarrow C$ reference some objects $B$ and $C$. Let's denote $t_i$ as one specific instance of values of these objects. Then the corresponding instance object can be considered as a set of all $t_i$ in our domain. One $t_i$ can be represented as a set of tuples $(\sigma, v)$, where $\sigma$ is one of the signatures and $v$ is a value from the domain of the object linked to $A$ with morphism with signature $\sigma$. So in this case a $t_i$ can be written as
+Consider a schema object $A$ with superid $\{ \sigma_f = \texttt{3}, \sigma_g = \texttt{6} \}$ where $f: A \rightarrow B$ and $g: A \rightarrow C$ reference the objects $B$ and $C$. Let is denote $t_i$ as one specific instance of values of these objects. Then the corresponding instance object can be considered as a set of all $t_i$ in our domain. One $t_i$ can be represented as a set of tuples $(\sigma, v)$, where $\sigma$ is one of the signatures and $v$ is a value from the domain of the object linked to $A$ with morphism with signature $\sigma$. So in this case a $t_i$ can be written as
 $$
     t_i = \{(\sigma_f, b_j), (\sigma_g, c_k)\} \ .
 $$
@@ -62,11 +62,11 @@ For example, $B$ can represent a first name with possible values `Frodo`, `Bilbo
 
 One $t_i$ is called an *active domain row*. A set of all $t_i$ together creates an *active domain* (or *instance object*) of the schema object $A$, which can be denoted as $I(A)$.
 
-It's important to note that the objects $B$ and $C$ must be the simple schema objects with the empty signature as an identifier, so we can reference them by their values. A complex object (e.g. $A$) can be also referenced, but we have to use one of its identifiers to do so.
+It is important to note that the objects $B$ and $C$ must be the simple schema objects with the empty signature as an identifier, so we can reference them by their values. A complex object (e.g. $A$) can be also referenced, but we have to use one of its identifiers to do so.
 
 ### Morphisms
 
-An instance morphism is a set of all relations between the rows from two instance objects. If $f: A \rightarrow B$ is a schema morphism with the domain object $A$ and the codomain object $B$, we can denote $m_i$ to be a specific relation between some two rows $a_j \in I(A)$ and $b_k \in I(B)$. In other words, $m_i$ is an ordered pair $m_i = (a_j, b_k)$. The instance morphism of $f$, denoted as $I(f)$, is then the set of all possible $m_i$.
+An instance morphism is a set of all relations between the rows from two instance objects. If $f: A \rightarrow B$ is a schema morphism with the domain object $A$ and the codomain object $B$, we can denote $m_i$ to be a specific relation between selected two rows $a_j \in I(A)$ and $b_k \in I(B)$. In other words, $m_i$ is an ordered pair $m_i = (a_j, b_k)$. The instance morphism of $f$, denoted as $I(f)$, is then the set of all possible $m_i$.
 
 If we go back to the previous example, all the $m_i \in I(f)$ would look like:
 

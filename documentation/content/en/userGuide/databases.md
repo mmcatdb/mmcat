@@ -19,12 +19,12 @@ A user-readable identifier of the database. It will appear in the system under t
 
 ## Edit
 
-Editing a database is very similar to creating it. However, you can't change its type because there might already be mappings that depend on this specific database.
+Editing a database is very similar to creating it. However, you can not change its type because there might already be mappings that depend on this specific database.
 
 ### Password
 
-The second difference is that for security reasons the password can't leave the server. If you leave the field empty, the password will stay the same. On the other hand, if you input anything, even whitespace, the password will be changed.
+The second difference is that for security reasons the password can not leave the server. If you leave the field empty, the password will stay the same. On the other hand, if you input anything, even whitespace, the password will be changed.
 
 ## Delete
 
-If the database isn't involved in any mapping, it can be deleted by clicking on the `Delete` button on the edit page.
+If the database is not involved in any mapping, it can be deleted by clicking on the `Delete` button on the edit page.

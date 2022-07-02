@@ -17,15 +17,15 @@ There are several buttons in the navigation menu on the left side.
 
 ### Mappings
 
-A mapping defines both some logical model and how it is mapped to the conceptual schema. On [this page](mappings.md) are displayed all available mappings. There is also a link to the page where you can [create new mappings]().
+A mapping defines both a logical model and how it is mapped to the conceptual schema. On [this page](mappings.md) are displayed all available mappings. There is also a link to the page where you can [create new mappings]().
 
 ### Databases
 
-A database in the sense of this application is a representation of some existing database to which the application can connect. This means it has to specify all the necessary connection information. On [this page](databases.md), you can see all the available databases, edit them or create new ones.
+A database in the sense of this application is a representation of an actual database to which the application can connect. This means it has to specify all the necessary connection information. On [this page](databases.md), you can see all the available databases, edit them or create new ones.
 
 ### Jobs
 
-A job is some data transformation process that is executed on the server. On [this page](jobs.md), you can see all the existing jobs. You can check their state, start them or [create new ones]().
+A job is a selected data transformation process that is executed on the server. On [this page](jobs.md), you can see all the existing jobs. You can check their state, start them or [create new ones]().
 
 ### Instance Category
 

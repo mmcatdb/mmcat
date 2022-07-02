@@ -7,7 +7,7 @@ Here you can find all mappings that can be used in import or export jobs. They a
 
 ## Create
 
-First click on the `Create new` button. Then select the database from the select box and the root object from the nodes in the graph. Both values can't be changed after you click on the `Confirm` button.
+First click on the `Create new` button. Then select the database from the select box and the root object from the nodes in the graph. Both values can not be changed after you click on the `Confirm` button.
 
 The displayed graph is described [here](schemaCategoryEditor.md#display).
 
@@ -19,10 +19,10 @@ The access path of the mapping is displayed on the right. To add a subproperty t
 
 First, you have to [select the signature](createSignature.md) of the property. The default value of the signature is the null signature which corresponds to the auxiliary property.
 
-If the type of the property can't be determined from the current information, you will be asked to specify it. There are multiple rules:
-- Some databases (e.g. PostgreSQL) don't allow creating complex properties.
+If the type of the property can not be determined from the current information, you will be asked to specify it. There are multiple rules:
+- Some databases (e.g. PostgreSQL) do not allow creating complex properties.
 - Auxiliary property has to be complex.
-- If the corresponding category object doesn't have any simple identifier (all objects have to have at least one identifier) it has to be complex.
+- If the corresponding category object does not have any simple identifier (all objects have to have at least one identifier) it has to be complex.
 
 Then you have to choose the name of the property (or name of the column etc.) in the chosen database system. It can be static, dynamic or anonymous. If the dynamic name is chosen, you have to specify its signature.
 

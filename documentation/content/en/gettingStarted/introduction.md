@@ -2,7 +2,7 @@
 title: "Motivation"
 ---
 
-There are a lot of different database systems and each has different advantages and disadvantages. Although they might appear to be similar, there are no standards between them that would allow us to use them interchangeably. There also isn't any universal way how to transform data from one system to another or how to query among data from more than one database model. Moreover, this lack of standardization makes any effort for a general evolution tool almost impossible.
+There are a lot of different database systems and each has different advantages and disadvantages. Although they might appear to be similar, there are no standards between them that would allow us to use them interchangeably. There also is not any universal way how to transform data from one system to another or how to query among data from more than one database model. Moreover, this lack of standardization makes any effort for a general evolution tool almost impossible.
 
 The MM-cat framework attempts to solve this issue by creating a platform-independent conceptual model as an abstract layer above all the platform-dependent logical models. This solution, which is based on the [category theory](theoreticalBackground/categoryTheory.md), was theoretically developed by the article[^article].
 
