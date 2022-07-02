@@ -19,6 +19,8 @@ This is basically an opposite process to the previous one. The algorithm creates
 
 If the instance category is empty or if it even does not exist, yet there will not be any data to export. So it is recommended to run the import jobs first.
 
+![Job](/mmcat-docs/img/jobs.png)
+
 ## Create
 
 To create a job, specify its name, type and select a mapping. Then click on the `Create job` button.

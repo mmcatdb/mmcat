@@ -47,3 +47,9 @@ The access path can be represented by a JSON-like structure. For example, let us
 The first line defines a simple property with static name `name` and signature `1`. The second line describes a complex property `address` with signature `2.3`. This property can contain any number of other properties, for example `street`, `city` and `ZIP`. The `contact` is a complex property which contains subproperties with dynamic names. Note that those subproperties have to be contained in the `contact` property because they would not be recognizable from other properties (e.g. `name`) otherwise. Morphism with signature `6.5` defines the name of the property while `7` determines its value.
 
 Also be aware that the cardinalities of the properties are not defined explicitly because they can be derived from the cardinalities of the morphisms instead. So if the morphism `3.2` have cardinality `0..*` or `1..*` the property is an array.
+
+### Example
+
+Here is an example of the [schema category](schemaCategory.md#example) from one of the previous chapters. The kind `Order` was chosen as a root of the access path, which is shown in its JSON-like representation on in the middle of the figure. There are also some example data on the left.
+
+![Example of ER schema](/mmcat-docs/img/example-path.png)

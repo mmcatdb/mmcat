@@ -17,6 +17,8 @@ The framework currently supports two database engines - MongoDB and PostgreSQL. 
 
 A user-readable identifier of the database. It will appear in the system under this name.
 
+![Edit database](/mmcat-docs/img/database.png)
+
 ## Edit
 
 Editing a database is very similar to creating it. However, you can not change its type because there might already be mappings that depend on this specific database.

@@ -29,7 +29,7 @@ A job is a selected data transformation process that is executed on the server. 
 
 ### Instance Category
 
-[There](instanceCategory.md) you can browse the instance category, which is created automatically when you run any job that imports data from a database.
+[There](./instanceCategory.md) you can browse the instance category, which is created automatically when you run any job that imports data from a database.
 
 ### Models
 
