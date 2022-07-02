@@ -8,7 +8,7 @@ MM-cat is a framework for modelling multi-model data. It is based on category th
 
 The generality of the theory allows us to create a category which describe multiple logical models from different databases at once. Thus, we are able to model any combination of different logical schemas with one category. This object is called [schema category](schemaAndInstanceCategory.md#schema-category).
 
-A next step is to use the algorithms the framework provides to import data from all the databases to one place called [instance category](schemaAndInstanceCategory.md#instance-category). There are also algorithms which can export the data from the *instance category* to specific databases.
+The next step is to use the algorithms the framework provides to import data from all the databases to a unified representation called [instance category](schemaAndInstanceCategory.md#instance-category). There are also algorithms which can export the data from the *instance category* to specific databases.
 
 The advantage of this approach is this - we can convert data from any database **A** to any other database **B** simply by transforming them from **A** to the *instance category* and from there to **B**. The only thing we need is to create a wrapper for each involved database system that would handle the platform specific requirements of given database.
 

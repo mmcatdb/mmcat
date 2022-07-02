@@ -4,7 +4,7 @@ math: true
 weight: 10
 ---
 
-A category consists of a set of objects, a set of morphisms and a binary composition operation over the morphisms. We can imagine it as an oriented multigraph - the objects are the nodes and the morphisms are the oriented edges.
+A category consists of a set of objects, a set of morphisms and a binary composition operation over the morphisms. We can view it as a directed multigraph - the objects are the nodes and the morphisms are the oriented edges.
 
 {{< image src="/mmcat-docs/img/category-example.png" alt="Example of a category" width="320px" caption="An example of a category." >}}
 

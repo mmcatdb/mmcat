@@ -48,7 +48,7 @@ An instance category is a structure capable of holding actual data. It is organi
 
 ### Objects
 
-Consider a schema object $A$ with superid $\{ \sigma_f = \texttt{3}, \sigma_g = \texttt{6} \}$ where $f: A \rightarrow B$ and $g: A \rightarrow C$ reference the objects $B$ and $C$. Let is denote $t_i$ as one specific instance of values of these objects. Then the corresponding instance object can be considered as a set of all $t_i$ in our domain. One $t_i$ can be represented as a set of tuples $(\sigma, v)$, where $\sigma$ is one of the signatures and $v$ is a value from the domain of the object linked to $A$ with morphism with signature $\sigma$. So in this case a $t_i$ can be written as
+Consider a schema object $A$ with superid $\{ \sigma_f = \texttt{3}, \sigma_g = \texttt{6} \}$ where $f: A \rightarrow B$ and $g: A \rightarrow C$ reference the objects $B$ and $C$. Let us denote $t_i$ as one specific instance of values of these objects. Then the corresponding instance object can be considered as a set of all $t_i$ in our domain. One $t_i$ can be represented as a set of tuples $(\sigma, v)$, where $\sigma$ is one of the signatures and $v$ is a value from the domain of the object linked to $A$ with morphism with signature $\sigma$. So in this case a $t_i$ can be written as
 $$
     t_i = \{(\sigma_f, b_j), (\sigma_g, c_k)\} \ .
 $$

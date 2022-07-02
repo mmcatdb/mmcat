@@ -17,7 +17,7 @@ There are several buttons in the navigation menu on the left side.
 
 ### Mappings
 
-A mapping defines both a logical model and how it is mapped to the conceptual schema. On [this page](mappings.md) are displayed all available mappings. There is also a link to the page where you can [create new mappings]().
+A mapping defines both a logical model and how it is mapped to the conceptual schema. On [this page](mappings.md) are displayed all available mappings. There is also a link to the page where you can create new mappings.
 
 ### Databases
 
@@ -25,11 +25,11 @@ A database in the sense of this application is a representation of an actual dat
 
 ### Jobs
 
-A job is a selected data transformation process that is executed on the server. On [this page](jobs.md), you can see all the existing jobs. You can check their state, start them or [create new ones]().
+A job is a selected data transformation process that is executed on the server. On [this page](jobs.md), you can see all the existing jobs. You can check their state, start them or create new ones.
 
 ### Instance Category
 
-[There]() you can browse the instance category, which is created automatically when you run any job that imports data from a database.
+[There](instanceCategory.md) you can browse the instance category, which is created automatically when you run any job that imports data from a database.
 
 ### Models
 

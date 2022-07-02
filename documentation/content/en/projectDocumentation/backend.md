@@ -45,11 +45,11 @@ However, at this point it is becoming clear that these views are not any differe
 
 ## Highlights
 
-The whole application is pretty straightforward - it basically just reads the data from the database, provides them to the client, updates them and sometimes calls a transformation algorithm on them. Nevertheless, there are a few interesting spots.
+The whole application is straightforward - it reads the data from the database, provides them to the client, updates them and eventually calls a transformation algorithm on them. Nevertheless, there are a few important points.
 
 ### Repository functions
 
-To get data from / to the database is a dangerous business which can lead to many unexpected exceptions. And error handling in java means we have to write many lines of boilerplate `try ... catch` blocks, or we end up with `throws Exception` everywhere.
+To get data from / to the database is a critical process which can lead to many unexpected exceptions. And error handling in java means we have to write many lines of boilerplate `try ... catch` blocks, or we end up with `throws Exception` everywhere.
 
 The solution was inspired by the JavaScript server frameworks, where is quite common to handle requests by the `(request, response) => void` functions. The usage in this application looks like this:
 ```java
