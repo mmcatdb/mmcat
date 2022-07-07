@@ -164,5 +164,7 @@ export class Node {
         this.schemaObject.addSchemaId(schemaId);
         this.node.removeClass('no-ids');
     }
+
+    noGroupPlaceholder = undefined as NodeSingular | undefined;
 }
 

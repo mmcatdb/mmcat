@@ -96,7 +96,7 @@ export class Graph {
         groupObjects.forEach(group => groupPlaceholders.push(this._cytoscape.add(createGroupPlaceholderDefinition(object, group.id))));
 
         if (groupObjects.length === 0)
-            this._cytoscape.add(createNoGroupDefinition(object));
+            node.noGroupPlaceholder = this._cytoscape.add(createNoGroupDefinition(object));
 
         //const coloringNode = this._cytoscape.add(createColoringNodeDefinition(object, Math.random() < 0.5 ? Type.mongodb : Type.postgresql));
         const cytoscapeNode = this._cytoscape.add(createNodeDefinition(object, node, classes));
@@ -117,6 +117,11 @@ export class Graph {
     deleteNode(node: Node) {
         this._cytoscape.remove(node.node);
         this._nodes = this._nodes.filter(n => !n.equals(node));
+
+        // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
+        // However, the no group placeholder has to be removed.
+        if (node.noGroupPlaceholder)
+            this._cytoscape.remove(node.noGroupPlaceholder);
     }
 
     createEdgeWithDual(morphism: SchemaMorphism, classes?: string): void {
