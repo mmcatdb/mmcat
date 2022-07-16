@@ -8,6 +8,7 @@ import ResourceLoading from '@/components/ResourceLoading.vue';
 import { InstanceObject, type InstanceObjectFromServer } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
+import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 type Column = {
     signature: Signature;
@@ -52,7 +53,7 @@ export default defineComponent({
         async reloadInstanceObject() {
             this.loading = true;
 
-            const result = await GET<InstanceObjectFromServer>(`/instances/default/object/${this.node.schemaObject.key.value}`);
+            const result = await GET<InstanceObjectFromServer>(`/instances/${getSchemaCategoryId()}/object/${this.node.schemaObject.key.value}`);
             if (result.status && 'data' in result) {
                 const object = InstanceObject.fromServer(result.data);
                 this.fetchedInstanceObject = {

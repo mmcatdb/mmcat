@@ -6,6 +6,7 @@ import { GET } from '@/utils/backendAPI';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
+import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
@@ -24,7 +25,7 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<MappingFromServer[]>('/mappings');
+            const result = await GET<MappingFromServer[]>(`/schema/${getSchemaCategoryId()}/mappings`);
             if (result.status)
                 this.mappings = result.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
 

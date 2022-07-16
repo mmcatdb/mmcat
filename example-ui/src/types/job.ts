@@ -13,6 +13,7 @@ export class Job {
     private constructor(
         public id: number,
         public mappingId: number,
+        public schemaId: number,
         public name: string,
         public type: string,
         public status: Status
@@ -21,7 +22,7 @@ export class Job {
     }
 
     static fromServer(input: JobFromServer): Job {
-        return new Job(input.id, input.mappingId, input.name, input.type, input.status);
+        return new Job(input.id, input.mappingId, input.schemaId, input.name, input.type, input.status);
     }
 
     setStatus(status: Status) {
@@ -32,6 +33,7 @@ export class Job {
 export type JobFromServer = {
     id: number;
     mappingId: number;
+    schemaId: number;
     name: string;
     type: string;
     status: Status;

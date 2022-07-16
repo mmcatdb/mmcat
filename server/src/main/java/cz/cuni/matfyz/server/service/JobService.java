@@ -21,8 +21,8 @@ public class JobService {
     @Autowired
     private AsyncJobService asyncService;
 
-    public List<Job> findAll() {
-        return repository.findAll();
+    public List<Job> findAllInCategory(int categoryId) {
+        return repository.findAllInCategory(categoryId);
     }
 
     public Job find(int id) {    
@@ -32,7 +32,7 @@ public class JobService {
     public Job createNew(Job job) {
         Integer generatedId = repository.add(job);
 
-        return generatedId == null ? null : new Job.Builder().fromArguments(generatedId, job.mappingId, job.name, job.type, job.status);
+        return repository.find(generatedId);
     }
 
     public Job start(Job job, UserStore store) {

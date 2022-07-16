@@ -27,14 +27,14 @@ public class InstanceCategoryController {
     public List<String> getAllInstances(HttpSession session) {
         var instances = service.findAll(session);
 
-        return instances.stream().map(instance -> instance.toString()).toList();
+        return instances.stream().map(entry -> entry.getKey() + ":\n" + entry.getValue().toString()).toList();
     }
 
-    @GetMapping("/instances/default/object/{objectKey}")
-    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Integer objectKey) {
+    @GetMapping("/instances/{schemaId}/object/{objectKey}")
+    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Integer schemaId, @PathVariable Integer objectKey) {
         var key = new Key(objectKey);
 
-        var object = service.findObject(session, key);
+        var object = service.findObject(session, schemaId, key);
 
         if (object == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

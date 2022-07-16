@@ -9,6 +9,7 @@ import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
 import { type MappingFromServer, Mapping } from '@/types/mapping';
+import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
@@ -25,19 +26,19 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<SchemaCategoryFromServer>(`/schemaCategories/1`);
-        const mappingsResult = await GET<MappingFromServer[]>('/mappings');
+        const result = await GET<SchemaCategoryFromServer>(`/schemaCategories/${getSchemaCategoryId()}`);
+        const mappingsResult = await GET<MappingFromServer[]>(`/schema/${getSchemaCategoryId()}/mappings`);
+        if (!result.status || !mappingsResult.status)
+            return;
 
-        if (result.status && mappingsResult.status) {
-            console.log(result.data);
-            const schemaCategory = SchemaCategory.fromServer(result.data);
-            this.mappings = mappingsResult.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
+        console.log(result.data);
+        const schemaCategory = SchemaCategory.fromServer(result.data);
+        this.mappings = mappingsResult.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
 
-            this.graph = this.createGraph(schemaCategory, this.mappings);
+        this.graph = this.createGraph(schemaCategory, this.mappings);
 
-            this.schemaFetched = true;
-            this.$emit('create:graph', this.graph);
-        }
+        this.schemaFetched = true;
+        this.$emit('create:graph', this.graph);
     },
     methods: {
         createGraph(schema: SchemaCategory, mappings: Mapping[]): Graph {

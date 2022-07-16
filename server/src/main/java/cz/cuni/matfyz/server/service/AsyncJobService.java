@@ -116,13 +116,12 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void modelToCategoryProcess(Job job, UserStore store) throws Exception {
-        var defaultInstance = store.getDefaultInstace();
-        var result = modelToCategoryAlgorithm(job, defaultInstance).join();
+        var instance = store.getInstance(job.schemaId);
+        var result = modelToCategoryAlgorithm(job, instance).join();
 
         if (result.status) {
-            //store.addInstance(job.id, result.data);
-            if (defaultInstance == null)
-                store.setDefaultInstance(result.data);
+            if (instance == null)
+                store.setInstance(job.schemaId, result.data);
             setJobStatus(job, Job.Status.Finished);
         }
         else {
@@ -149,14 +148,14 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void categoryToModelProcess(Job job, UserStore store) throws Exception {
-        var defaultInstance = store.getDefaultInstace();
+        var instance = store.getInstance(job.schemaId);
 
-        if (defaultInstance == null) {
+        if (instance == null) {
             setJobStatus(job, Job.Status.Canceled);
             return;
         }
 
-        var result = categoryToModelAlgorithm(job, defaultInstance).join();
+        var result = categoryToModelAlgorithm(job, instance).join();
 
         if (result.status) {
             modelService.createNew(store, job, job.name, result.data);

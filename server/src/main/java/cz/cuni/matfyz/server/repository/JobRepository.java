@@ -14,30 +14,51 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JobRepository {
 
-    public List<Job> findAll() {
+    public List<Job> findAllInCategory(int categoryId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
-            var statement = connection.createStatement();
-            var resultSet = statement.executeQuery("SELECT * FROM job ORDER BY id;");
+            var statement = connection.prepareStatement("""
+                SELECT
+                    job.id as _id,
+                    mapping.id as _mapping_id,
+                    job.json_value as _json_value
+                FROM job
+                JOIN mapping ON mapping.id = job.mapping_id
+                WHERE mapping.schema_category_id = ?
+                ORDER BY job.id;
+            """);
+            statement.setInt(1, categoryId);
+            var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                int mappingId = resultSet.getInt("mapping_id");
-                String jsonValue = resultSet.getString("json_value");
-                output.add(new Job.Builder().fromJSON(id, mappingId, jsonValue));
+                int id = resultSet.getInt("_id");
+                int mappingId = resultSet.getInt("_mapping_id");
+                String jsonValue = resultSet.getString("_json_value");
+                output.add(new Job.Builder().fromJSON(id, mappingId, categoryId, jsonValue));
             }
         });
     }
 
     public Job find(int id) {
         return DatabaseWrapper.get((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM job WHERE id = ?;");
+            var statement = connection.prepareStatement("""
+                SELECT
+                    job.id as _id,
+                    mapping.id as _mapping_id,
+                    job.json_value as _json_value,
+                    mapping.schema_category_id as _schema_category_id
+                FROM job
+                JOIN mapping ON mapping.id = job.mapping_id
+                WHERE job.id = ?
+                ORDER BY job.id;
+            """);
             statement.setInt(1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                int mappingId = resultSet.getInt("mapping_id");
-                String jsonValue = resultSet.getString("json_value");
-                output.set(new Job.Builder().fromJSON(id, mappingId, jsonValue));
+                int mappingId = resultSet.getInt("_mapping_id");
+                int schemaId = resultSet.getInt("_schema_category_id");
+                String jsonValue = resultSet.getString("_json_value");
+                output.set(new Job.Builder().fromJSON(id, mappingId, schemaId, jsonValue));
             }
         });
     }

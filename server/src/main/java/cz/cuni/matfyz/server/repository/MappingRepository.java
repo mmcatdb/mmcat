@@ -19,7 +19,7 @@ public class MappingRepository {
 
     public List<MappingWrapper> findAllInCategory(int categoryId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM mapping WHERE schema_category_id = ?;");
+            var statement = connection.prepareStatement("SELECT * FROM mapping WHERE schema_category_id = ? ORDER BY id;");
             statement.setInt(1, categoryId);
             var resultSet = statement.executeQuery();
 

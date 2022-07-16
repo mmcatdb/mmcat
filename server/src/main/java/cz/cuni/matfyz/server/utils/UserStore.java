@@ -5,7 +5,9 @@ import cz.cuni.matfyz.server.entity.Model;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpSession;
 
@@ -31,26 +33,20 @@ public class UserStore {
         return store;
     }
 
-    public void addInstance(int jobId, InstanceCategory instance) {
-        instaces.put(jobId, instance);
+    public void addInstance(int schemaId, InstanceCategory instance) {
+        instaces.put(schemaId, instance);
     }
 
-    public InstanceCategory getInstance(int jobId) {
-        return instaces.get(jobId);
+    public InstanceCategory getInstance(int schemaId) {
+        return instaces.get(schemaId);
     }
 
-    public Collection<InstanceCategory> getAllInstances() {
-        return instaces.values();
+    public Set<Entry<Integer, InstanceCategory>> getAllInstances() {
+        return instaces.entrySet();
     }
 
-    private InstanceCategory defaultInstance = null;
-
-    public InstanceCategory getDefaultInstace() {
-        return defaultInstance;
-    }
-    
-    public void setDefaultInstance(InstanceCategory instance) {
-        this.defaultInstance = instance;
+    public void setInstance(int schemaId, InstanceCategory instance) {
+        this.instaces.put(schemaId, instance);
     }
 
     public void addModel(Model model) {

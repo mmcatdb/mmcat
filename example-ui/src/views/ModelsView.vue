@@ -6,6 +6,7 @@ import { GET } from '@/utils/backendAPI';
 import ModelViewDisplay from '@/components/ModelViewDisplay.vue';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
+import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
@@ -24,7 +25,7 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<ModelViewFromServer[]>('/models');
+            const result = await GET<ModelViewFromServer[]>(`/schema/${getSchemaCategoryId()}/models`);
             if (result.status)
                 this.models = result.data.map(modelFromServer => ModelView.fromServer(modelFromServer));
 

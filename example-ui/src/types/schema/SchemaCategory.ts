@@ -194,3 +194,17 @@ function findObjectFromSignature(signature: Signature, objects: SchemaObject[], 
 
     return objects.find(object => object.id === morphism.codId);
 }
+
+export class SchemaCategoryInfo {
+    private constructor(public id: number, public name: string) {}
+
+    static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
+        const parsed = JSON.parse(input.jsonValue) as { name: string };
+        return new SchemaCategoryInfo(input.id, parsed.name);
+    }
+}
+
+export type SchemaCategoryInfoFromServer = {
+    id: number;
+    jsonValue: string;
+}

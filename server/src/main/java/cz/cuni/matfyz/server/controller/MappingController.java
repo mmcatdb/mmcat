@@ -42,10 +42,9 @@ public class MappingController {
         return wrapperToView(wrapper);
     }
 
-    @GetMapping("/mappings")
-    public List<MappingView> getAllMappings() {
-        // TODO multiple schema categories
-        return service.findAllInCategory(1).stream().map(wrapper -> wrapperToView(wrapper)).toList();
+    @GetMapping("/schema/{schemaId}/mappings")
+    public List<MappingView> getAllMappingsInCategory(@PathVariable int schemaId) {
+        return service.findAllInCategory(schemaId).stream().map(wrapper -> wrapperToView(wrapper)).toList();
     }
 
     @PostMapping("/mappings")

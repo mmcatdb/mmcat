@@ -3,6 +3,7 @@ import { defineComponent } from 'vue';
 import { type Job, JOB_TYPES } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
 import { Mapping, type MappingFromServer } from '@/types/mapping';
+import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
@@ -21,11 +22,9 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<MappingFromServer[]>('/mappings');
-        if (result.status) {
+        const result = await GET<MappingFromServer[]>(`/schema/${getSchemaCategoryId()}/mappings`);
+        if (result.status)
             this.mappings = result.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
-            this.mappingId = this.mappings[0]?.id;
-        }
 
         this.fetched = true;
     },
@@ -93,7 +92,7 @@ export default defineComponent({
         </table>
         <div class="button-row">
             <button
-                :disabled="createJobDisabled"
+                :disabled="createJobDisabled || !jobName || !jobType || !mappingId"
                 @click="createJob"
             >
                 Create job

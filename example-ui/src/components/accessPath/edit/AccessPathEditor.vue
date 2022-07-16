@@ -48,7 +48,7 @@ export default defineComponent({
     emits: [ 'finish' ],
     data() {
         return {
-            name: 'New mapping',
+            name: '',
             state: { type: State.Default } as StateValue,
             State,
         };
@@ -116,7 +116,10 @@ export default defineComponent({
                         </tr>
                     </table>
                     <div class="button-row">
-                        <button @click="finishMapping">
+                        <button
+                            :disabled="!name"
+                            @click="finishMapping"
+                        >
                             Finish mapping
                         </button>
                     </div>

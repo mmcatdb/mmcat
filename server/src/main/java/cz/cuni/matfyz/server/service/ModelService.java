@@ -16,9 +16,9 @@ import javax.servlet.http.HttpSession;
 @Service
 public class ModelService {
 
-    public List<Model> findAll(HttpSession session) {
+    public List<Model> findAllInCategory(HttpSession session, int schemaId) {
         var store = UserStore.fromSession(session);
-        return store.getAllModels().stream().toList();
+        return store.getAllModels().stream().filter(model -> model.schemaId == schemaId).toList();
     }
 
     public Model findModel(HttpSession session, int jobId) {
@@ -27,7 +27,7 @@ public class ModelService {
     }
 
     public Model createNew(UserStore store, Job job, String jobName, String commands) {
-        var model = new Model(job.id, jobName, commands);
+        var model = new Model(job.id, job.schemaId, jobName, commands);
         store.addModel(model);
 
         return model;

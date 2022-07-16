@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.service.DatabaseService;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,6 +41,16 @@ public class SchemaCategoryController
     public List<SchemaCategoryInfo> getAllCategoryInfos()
     {
         return service.findAllInfos();
+    }
+
+    @PostMapping("/schemaCategories")
+    public SchemaCategoryInfo createNewSchema(@RequestBody SchemaCategoryInit init)
+    {
+        var newInfo = service.createNewInfo(init);
+        if (newInfo != null)
+            return newInfo;
+        
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/schemaCategories/{id}")

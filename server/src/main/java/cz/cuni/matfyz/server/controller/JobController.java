@@ -29,10 +29,10 @@ public class JobController
     @Autowired
     private JobService service;
 
-    @GetMapping("/jobs")
-    public List<Job> getAllJobs()
+    @GetMapping("/schema/{schemaId}/jobs")
+    public List<Job> getAllJobsInCategory(@PathVariable int schemaId)
     {
-        return service.findAll();
+        return service.findAllInCategory(schemaId);
     }
 
     @GetMapping("/jobs/{id}")
@@ -48,7 +48,7 @@ public class JobController
     @PostMapping("/jobs")
     public Job createNewJob(@RequestBody NewJobView jobView)
     {
-        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobView.mappingId, jobView.name, Job.Type.valueOf(jobView.type), Job.Status.Ready));
+        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobView.mappingId, null, jobView.name, Job.Type.valueOf(jobView.type), Job.Status.Ready));
         if (newJob != null)
             return newJob;
         

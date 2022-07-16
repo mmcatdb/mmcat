@@ -6,7 +6,10 @@ import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.schema.Key;
 
 import org.springframework.stereotype.Service;
+
 import java.util.*;
+import java.util.Map.Entry;
+
 import javax.servlet.http.HttpSession;
 
 
@@ -17,16 +20,16 @@ import javax.servlet.http.HttpSession;
 @Service
 public class InstanceCategoryService {
 
-    public List<InstanceCategory> findAll(HttpSession session) {
+    public List<Entry<Integer, InstanceCategory>> findAll(HttpSession session) {
         var store = UserStore.fromSession(session);
         return store.getAllInstances().stream().toList();
     }
 
-    public InstanceObject findObject(HttpSession session, Key key) {
+    public InstanceObject findObject(HttpSession session, int schemaId, Key key) {
         var store = UserStore.fromSession(session);
-        var defaultInstance = store.getDefaultInstace();
+        var instance = store.getInstance(schemaId);
 
-        return defaultInstance != null ? defaultInstance.getObject(key) : null;
+        return instance != null ? instance.getObject(key) : null;
     }
 
 }

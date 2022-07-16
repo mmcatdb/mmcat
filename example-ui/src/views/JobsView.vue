@@ -7,6 +7,7 @@ import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import JobDisplay from '../components/job/JobDisplay.vue';
 import NewJob from '../components/job/NewJob.vue';
+import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
@@ -40,7 +41,7 @@ export default defineComponent({
             this.jobs = this.jobs?.filter(job => job.id !== id) ?? [];
         },
         async fetchNew() {
-            const result = await GET<JobFromServer[]>('/jobs');
+            const result = await GET<JobFromServer[]>(`/schema/${getSchemaCategoryId()}/jobs`);
             if (result.status)
                 this.jobs = result.data.map(jobFromServer => Job.fromServer(jobFromServer));
 

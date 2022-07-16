@@ -14,6 +14,7 @@ import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 public class Job extends Entity implements JSONConvertible {
 
     public final int mappingId;
+    public final Integer schemaId;
     public String name;
     public Type type;
     public Status status;
@@ -30,9 +31,10 @@ public class Job extends Entity implements JSONConvertible {
     }
     */
 
-    private Job(Integer id, int mappingId) {
+    private Job(Integer id, int mappingId, Integer schemaId) {
         super(id);
         this.mappingId = mappingId;
+        this.schemaId = schemaId;
     }
 
     public enum Status {
@@ -70,8 +72,8 @@ public class Job extends Entity implements JSONConvertible {
 
 	public static class Builder extends FromJSONLoaderBase<Job> {
 
-		public Job fromJSON(int id, int mappingId, String jsonValue) {
-			var job = new Job(id, mappingId);
+		public Job fromJSON(int id, int mappingId, int schemaId, String jsonValue) {
+			var job = new Job(id, mappingId, schemaId);
 			loadFromJSON(job, jsonValue);
 			return job;
 		}
@@ -83,8 +85,8 @@ public class Job extends Entity implements JSONConvertible {
             job.status = Status.valueOf(jsonObject.getString("status"));
         }
 
-        public Job fromArguments(Integer id, int mappingId, String name, Type type, Status status) {
-            var job = new Job(id, mappingId);
+        public Job fromArguments(Integer id, int mappingId, Integer schemaId, String name, Type type, Status status) {
+            var job = new Job(id, mappingId, schemaId);
             job.name = name;
             job.type = type;
             job.status = status;
