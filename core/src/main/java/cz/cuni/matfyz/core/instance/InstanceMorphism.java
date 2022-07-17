@@ -19,6 +19,11 @@ public class InstanceMorphism implements Morphism
 	private final InstanceCategory category;
 
     private final Map<ActiveDomainRow, Set<ActiveMappingRow>> mappings = new TreeMap<>();
+	private boolean isActive = false;
+
+	public boolean isActive() {
+		return this.isActive;
+	}
     
     /*
 	private final List<ActiveMappingRow> activeDomain = new ArrayList<>();
@@ -29,7 +34,7 @@ public class InstanceMorphism implements Morphism
 	}
     */
     
-	InstanceMorphism(SchemaMorphism schemaMorphism, InstanceObject dom, InstanceObject cod, InstanceCategory category)
+	public InstanceMorphism(SchemaMorphism schemaMorphism, InstanceObject dom, InstanceObject cod, InstanceCategory category)
     {
 		this.schemaMorphism = schemaMorphism;
 		this.dom = dom;
@@ -47,6 +52,7 @@ public class InstanceMorphism implements Morphism
 		}
 
         set.add(mapping);
+		this.isActive = true;
     }
 
     public Set<ActiveMappingRow> mappingsFromRow(ActiveDomainRow row)

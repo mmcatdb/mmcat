@@ -12,7 +12,8 @@ import java.util.*;
  */
 public class InstanceCategory implements Category {
 
-	private final SchemaCategory schema;
+	// Evolution extension
+	public final SchemaCategory schema;
 	private final Map<Key, InstanceObject> objects;
 	private final Map<Signature, InstanceMorphism> morphisms;
 

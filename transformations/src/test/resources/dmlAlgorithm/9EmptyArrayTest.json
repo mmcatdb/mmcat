@@ -2,8 +2,8 @@
     {
         "name": "order",
         "values": [
-            "append(/number, 2043)",
-            "append(/items, null)"
+            "append(number, 2043)",
+            "append(items, null)"
         ]
     }
 ]

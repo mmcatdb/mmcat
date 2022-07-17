@@ -2,5 +2,5 @@
     "setKindName(order)",
     "isSchemaLess()",
     "createDDLStatement()",
-    "addSimpleProperty([ /number ], true)"
+    "addSimpleProperty([ number ], true)"
 ]

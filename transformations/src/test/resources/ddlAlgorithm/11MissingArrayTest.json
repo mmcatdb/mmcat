@@ -2,10 +2,10 @@
     "setKindName(order)",
     "isSchemaLess()",
     "createDDLStatement()",
-    "addSimpleProperty([ /number ], true)",
-    "addComplexArrayProperty([ /items ], false)",
-    "addSimpleProperty([ /items/productId ], true)",
-    "addSimpleProperty([ /items/name ], true)",
-    "addSimpleProperty([ /items/price ], true)",
-    "addSimpleProperty([ /items/quantity ], true)"
+    "addSimpleProperty([ number ], true)",
+    "addComplexArrayProperty([ items ], false)",
+    "addSimpleProperty([ items/productId ], true)",
+    "addSimpleProperty([ items/name ], true)",
+    "addSimpleProperty([ items/price ], true)",
+    "addSimpleProperty([ items/quantity ], true)"
 ]

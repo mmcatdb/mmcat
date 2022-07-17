@@ -2,6 +2,6 @@
     "setKindName(order)",
     "isSchemaLess()",
     "createDDLStatement()",
-    "addSimpleProperty([ /number ], true)",
-    "addSimpleArrayProperty([ /array ], false)"
+    "addSimpleProperty([ number ], true)",
+    "addSimpleArrayProperty([ array ], false)"
 ]

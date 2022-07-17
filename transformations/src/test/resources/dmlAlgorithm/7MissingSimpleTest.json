@@ -2,17 +2,17 @@
     {
         "name": "order",
         "values": [
-            "append(/number, 2043)",
-            "append(/nested/propertyA, hodnotaA)",
-            "append(/nested/propertyC, hodnotaC)"
+            "append(number, 2043)",
+            "append(nested/propertyA, hodnotaA)",
+            "append(nested/propertyC, hodnotaC)"
         ]
     },
     {
         "name": "order",
         "values": [
-            "append(/number, 1653)",
-            "append(/nested/propertyA, hodnotaA2)",
-            "append(/nested/propertyC, hodnotaC2)"
+            "append(number, 1653)",
+            "append(nested/propertyA, hodnotaA2)",
+            "append(nested/propertyC, hodnotaC2)"
         ]
     }
 ]

@@ -2,21 +2,21 @@
     {
         "name": "order",
         "values": [
-            "append(/number, 2043)",
-            "append(/address[0]/city/text, Praha)",
-            "append(/address[0]/city/locale, cs)",
-            "append(/address[1]/country/text, Czech republic)",
-            "append(/address[1]/country/locale, en)"
+            "append(number, 2043)",
+            "append(address[0]/city/text, Praha)",
+            "append(address[0]/city/locale, cs)",
+            "append(address[1]/country/text, Czech republic)",
+            "append(address[1]/country/locale, en)"
         ]
     },
     {
         "name": "order",
         "values": [
-            "append(/number, 1653)",
-            "append(/address[1]/location/text, Praha)",
-            "append(/address[1]/location/locale, cs)",
-            "append(/address[0]/country/text, Česká republika)",
-            "append(/address[0]/country/locale, cs)"
+            "append(number, 1653)",
+            "append(address[1]/location/text, Praha)",
+            "append(address[1]/location/locale, cs)",
+            "append(address[0]/country/text, Česká republika)",
+            "append(address[0]/country/locale, cs)"
         ]
     }
 ]

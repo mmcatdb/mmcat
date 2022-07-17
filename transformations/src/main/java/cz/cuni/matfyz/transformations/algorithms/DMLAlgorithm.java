@@ -5,9 +5,11 @@ import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
 import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.category.Signature.Type;
 import cz.cuni.matfyz.statements.DMLStatement;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * 
@@ -19,12 +21,14 @@ public class DMLAlgorithm
     private Mapping mapping;
     private InstanceCategory instance;
     private AbstractPushWrapper wrapper;
+    private ActivePathProvider activePathProvider;
 
     public void input(Mapping mapping, InstanceCategory instance, AbstractPushWrapper wrapper)
     {
         this.mapping = mapping;
         this.instance = instance;
         this.wrapper = wrapper;
+        this.activePathProvider = new ActivePathProvider(instance);
     }
     
     public List<DMLStatement> algorithm()
@@ -137,9 +141,9 @@ public class DMLAlgorithm
                 boolean showIndex = morphism.schemaMorphism().isArray();
                 int index = 0;
 
-                for (ActiveMappingRow mappingRow : morphism.mappingsFromRow(row))
+                for (ActiveDomainRow objectRow : getRowsForMorphism(row, morphism))
                 {
-                    output.add(getNameValuePair(subpath, mappingRow, prefix, index, showIndex));
+                    output.add(getNameValuePair(subpath, row, objectRow, prefix, index, showIndex));
                     index++;
                 }
 
@@ -157,10 +161,30 @@ public class DMLAlgorithm
         return output;
     }
 
-    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveMappingRow parentToObjectMapping, String prefix, int index, boolean showIndex)
+    // Evolution extension
+    private Set<ActiveDomainRow> getRowsForMorphism(ActiveDomainRow row, InstanceMorphism morphism) {
+        var path = activePathProvider.getActivePath(morphism.signature());
+        if (path == null)
+            return Set.of();
+
+        Set<ActiveDomainRow> primary = Set.of(row);
+        Set<ActiveDomainRow> secondary;
+
+        for (var submorphism : path) {
+            secondary = new TreeSet<>();
+
+            for (var primaryRow : primary)
+                secondary.addAll(submorphism.mappingsFromRow(primaryRow).stream().map(mapping -> mapping.codomainRow()).toList());
+
+            primary = secondary;
+        }
+
+        return primary;
+    }
+
+    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveDomainRow parentRow, ActiveDomainRow objectRow, String prefix, int index, boolean showIndex)
     {
-        ActiveDomainRow objectRow = parentToObjectMapping.codomainRow();
-        String name = getStringName(objectPath, parentToObjectMapping) + (showIndex ? "[" + index + "]" : "");
+        String name = getStringName(objectPath, parentRow) + (showIndex ? "[" + index + "]" : "");
         String fullName = DDLAlgorithm.concatenatePaths(prefix, name);
 
         if (objectPath instanceof SimpleProperty simplePath)
@@ -177,14 +201,13 @@ public class DMLAlgorithm
         throw new UnsupportedOperationException();
     }
 
-    private String getStringName(AccessPath objectPath, ActiveMappingRow parentToObjectMapping)
+    private String getStringName(AccessPath objectPath, ActiveDomainRow parentRow)
     {
         if (objectPath.name() instanceof StaticName staticName)
             return staticName.getStringName();
 
         var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
-        ActiveDomainRow parentRow = parentToObjectMapping.domainRow();
         InstanceMorphism nameMorphism = instance.getMorphism(dynamicName.signature());
         var nameRowSet = nameMorphism.mappingsFromRow(parentRow);
 
@@ -221,5 +244,55 @@ public class DMLAlgorithm
             this.subpath = subpath;
             this.isSimple = false;
         }
+    }
+
+    // Evolution extension
+    private class ActivePathProvider {
+
+        private InstanceCategory instance;
+        private Map<Signature, List<InstanceMorphism>> paths = new TreeMap<>();
+
+        public ActivePathProvider(InstanceCategory instance) {
+            this.instance = instance;
+        }
+
+        public List<InstanceMorphism> getActivePath(Signature signature) {
+
+            if (paths.containsKey(signature))
+                return paths.get(signature);
+
+            var result = findActivePath(signature);
+            paths.put(signature, result);
+            
+            return result;
+        }
+
+        // We try to find the longest possible morphism that is active.
+        // The algorithm is definitely not optimized.
+        private List<InstanceMorphism> findActivePath(Signature signature) {
+            var morphism = instance.getMorphism(signature);
+            if (morphism.isActive())
+                return List.of(morphism);
+
+            var restSignature = signature.getLast();
+            var possibleSignature = signature.cutLast();
+
+            while (possibleSignature.getType() == Type.COMPOSITE || possibleSignature.getType() == Type.BASE) {
+                var possibleMorphism = instance.getMorphism(possibleSignature);
+
+                if (possibleMorphism.isActive()) {
+                    var restResult = findActivePath(restSignature);
+
+                    if (restResult != null)
+                        return Stream.concat(Stream.of(possibleMorphism), restResult.stream()).toList();
+                }
+                
+                restSignature = possibleSignature.getLast().concatenate(restSignature);
+                possibleSignature = possibleSignature.cutLast();
+            }
+
+            return null;
+        }
+
     }
 }

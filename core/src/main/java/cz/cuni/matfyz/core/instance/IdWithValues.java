@@ -24,6 +24,8 @@ public class IdWithValues implements Comparable<IdWithValues>
         if (id == null)
             id = new Id(map.keySet());
         return id;
+        // Evolution extension
+        //return new Id(map.keySet());
     }
     
     public Collection<String> values()
@@ -34,6 +36,13 @@ public class IdWithValues implements Comparable<IdWithValues>
     public Map<Signature, String> map()
     {
         return map;
+    }
+
+    // Evolution extension
+    public IdWithValues copy() {
+        var mapCopy = new TreeMap<Signature, String>();
+        this.map.forEach((signature, string) -> mapCopy.put(signature, string));
+        return new IdWithValues(mapCopy);
     }
 
     private IdWithValues(Map<Signature, String> map)

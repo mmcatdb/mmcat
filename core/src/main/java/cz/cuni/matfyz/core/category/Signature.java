@@ -50,6 +50,28 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         return output;
     }
 
+    // Evolution extension
+    public Signature cutLast() {
+        if (isNull)
+            return Signature.Null();
+
+        if (ids.length == 0)
+            return Signature.Empty();
+
+        var newIds = Arrays.copyOfRange(ids, 1, ids.length);
+        return new Signature(newIds, false);
+    }
+
+    public Signature getLast() {
+        if (isNull)
+            return Signature.Null();
+
+        if (ids.length == 0)
+            return Signature.Empty();
+
+        return new Signature(this.ids[0]);
+    }
+
     public Signature concatenate(Signature other)
     {
         return new Signature(ArrayUtils.concatenate(other.ids, ids), false);

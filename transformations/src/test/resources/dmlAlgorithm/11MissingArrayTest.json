@@ -2,22 +2,22 @@
     {
         "name": "order",
         "values": [
-            "append(/number, 2043)",
-            "append(/items[0]/productId, 123)",
-            "append(/items[1]/productId, 456)",
-            "append(/items[4]/productId, 765)",
-            "append(/items[2]/productId, 457)",
-            "append(/items[3]/productId, 734)",
-            "append(/items[0]/name, Toy)",
-            "append(/items[4]/name, Book)",
-            "append(/items[0]/price, 125)",
-            "append(/items[1]/price, 500)",
-            "append(/items[2]/price, 299)",
-            "append(/items[3]/price, 350)",
-            "append(/items[1]/quantity, 4)",
-            "append(/items[4]/quantity, 2)",
-            "append(/items[2]/quantity, 7)",
-            "append(/items[3]/quantity, 3)"
+            "append(number, 2043)",
+            "append(items[0]/productId, 123)",
+            "append(items[1]/productId, 456)",
+            "append(items[4]/productId, 765)",
+            "append(items[2]/productId, 457)",
+            "append(items[3]/productId, 734)",
+            "append(items[0]/name, Toy)",
+            "append(items[4]/name, Book)",
+            "append(items[0]/price, 125)",
+            "append(items[1]/price, 500)",
+            "append(items[2]/price, 299)",
+            "append(items[3]/price, 350)",
+            "append(items[1]/quantity, 4)",
+            "append(items[4]/quantity, 2)",
+            "append(items[2]/quantity, 7)",
+            "append(items[3]/quantity, 3)"
         ]
     }
 ]

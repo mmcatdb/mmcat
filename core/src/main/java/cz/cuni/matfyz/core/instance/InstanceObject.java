@@ -36,7 +36,7 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
 	}
     */
 
-	InstanceObject(SchemaObject schemaObject)
+	public InstanceObject(SchemaObject schemaObject)
     {
 		this.schemaObject = schemaObject;
 	}

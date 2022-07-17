@@ -42,6 +42,14 @@ public class ActiveDomainRow implements Comparable<ActiveDomainRow>, JSONConvert
     }
     */
 
+    // Evolution extension
+    /*
+    public void addValue(Signature signature, String value) {
+        idWithValues.map().put(signature, value);
+        tuples.put(signature, value);
+    }
+    */
+
     public boolean hasSignature(Signature signature)
     {
         return tuples.containsKey(signature);
