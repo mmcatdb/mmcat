@@ -26,32 +26,49 @@ public class Id implements Comparable<Id>, JSONConvertible
 
 	public Id(Set<Signature> signatures)
     {
-        assert signatures.size() > 0 : "Empty signature array passed to Id constructor.";
-		this.signatures = new TreeSet<>(signatures);
+        this(new TreeSet<>(signatures), false);
+        //assert signatures.size() > 0 : "Empty signature array passed to Id constructor.";
+		//this.signatures = new TreeSet<>(signatures);
 	}
     
     public Id(Collection<Signature> signatures)
     {
-        assert signatures.size() > 0 : "Empty signature array passed to Id constructor.";
-		this.signatures = new TreeSet<>(signatures);
+        this(new TreeSet<>(signatures), false);
+        //assert signatures.size() > 0 : "Empty signature array passed to Id constructor.";
+		//this.signatures = new TreeSet<>(signatures);
 	}
 
     // There must be at least one signature
 	public Id(Signature... signatures)
     {
-        assert signatures.length > 0 : "Empty signature array passed to Id constructor.";
-		this.signatures = new TreeSet<>(List.of(signatures));
+        this(new TreeSet<>(List.of(signatures)), false);
+        //assert signatures.length > 0 : "Empty signature array passed to Id constructor.";
+		//this.signatures = new TreeSet<>(List.of(signatures));
 	}
     
     public static Id Empty()
     {
         return new Id(Signature.Empty());
     }
-            
+    
+    // The point of a technical id is to differentiate two idWithValues from each other, but only if they do not share any other id.
+    public final boolean isTechnical;
+
+    private Id(SortedSet<Signature> signatures, boolean isTechnical) {
+        this.signatures = signatures;
+        this.isTechnical = isTechnical;
+    }
+
+    public static Id Technical() {
+        return new Id(new TreeSet<Signature>(), true);
+    }
 
 	@Override
 	public int compareTo(Id id)
     {
+        if (isTechnical)
+            return id.isTechnical ? 0 : 1;
+
         int sizeResult = signatures.size() - id.signatures.size();
         if (sizeResult != 0)
             return sizeResult;
@@ -74,9 +91,15 @@ public class Id implements Comparable<Id>, JSONConvertible
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("(");
-        for (Signature signature : signatures.headSet(signatures.last()))
-            builder.append(signature).append(", ");
-        builder.append(signatures.last()).append(")");
+        if (isTechnical) {
+            builder.append("TECHNICAL");
+        }
+        else {
+            for (Signature signature : signatures.headSet(signatures.last()))
+               builder.append(signature).append(", ");
+            builder.append(signatures.last());
+        }
+        builder.append(")");
 
         return builder.toString();
 	}
@@ -86,6 +109,7 @@ public class Id implements Comparable<Id>, JSONConvertible
         return new Converter().toJSON(this);
     }
 
+    // TODO technical here? shouldn't be necessary
     public static class Converter extends ToJSONConverterBase<Id> {
 
         @Override

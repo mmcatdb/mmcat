@@ -10,6 +10,8 @@ import cz.cuni.matfyz.statements.DMLStatement;
 
 import java.util.*;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -18,6 +20,8 @@ import java.util.stream.Stream;
  */
 public class DMLAlgorithm
 {
+    private static Logger LOGGER = LoggerFactory.getLogger(DMLAlgorithm.class);
+
     private Mapping mapping;
     private InstanceCategory instance;
     private AbstractPushWrapper wrapper;
@@ -291,7 +295,43 @@ public class DMLAlgorithm
                 possibleSignature = possibleSignature.cutLast();
             }
 
+            return tryBFS(morphism);
+        }
+
+        private List<InstanceMorphism> tryBFS(InstanceMorphism morphism) {
+            Set<InstanceObject> visited = new TreeSet<>();
+            Queue<ObjectToVisit> objectsToVisit = new LinkedList<>();
+            objectsToVisit.offer(new ObjectToVisit(new ArrayList<>(), morphism.dom()));
+            var target = morphism.cod();
+
+            while (!objectsToVisit.isEmpty()) {
+                var object = objectsToVisit.poll();
+                if (object.value.equals(target))
+                    return object.path;
+                
+                visited.add(object.value);
+                instance.morphisms().values().stream()
+                    .filter(m -> m.isActive() && m.dom().equals(object.value) && !visited.contains(m.cod()))
+                    .forEach(m -> {
+                        var nextPath = new ArrayList<>(object.path);
+                        nextPath.add(m);
+                        objectsToVisit.offer(new ObjectToVisit(nextPath, m.cod()));
+                    });
+            }
+
             return null;
+        }
+
+        private class ObjectToVisit {
+
+            public final List<InstanceMorphism> path;
+            public final InstanceObject value;
+
+            public ObjectToVisit(List<InstanceMorphism> path, InstanceObject value) {
+                this.path = path;
+                this.value = value;
+            }
+
         }
 
     }

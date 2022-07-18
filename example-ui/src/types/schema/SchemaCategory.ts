@@ -104,11 +104,11 @@ export class SchemaCategory {
     }
 
     deleteObject(object: SchemaObject) {
-        this._createdObjects = this._createdObjects.filter(o => o.id === object.id);
+        this._createdObjects = this._createdObjects.filter(o => o.id !== object.id);
     }
 
     deleteMorphismWithDual(morphism: SchemaMorphism) {
-        this._createdMorphisms = this._createdMorphisms.filter(m => m.id === morphism.id || m.id === morphism.dual.id);
+        this._createdMorphisms = this._createdMorphisms.filter(m => m.id !== morphism.id && m.id !== morphism.dual.id);
     }
 
     getUpdateObject() {

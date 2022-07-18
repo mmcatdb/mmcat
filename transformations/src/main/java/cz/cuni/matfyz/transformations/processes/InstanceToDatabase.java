@@ -24,18 +24,22 @@ public class InstanceToDatabase {
     private static Logger LOGGER = LoggerFactory.getLogger(InstanceToDatabase.class);
 
     private Mapping mapping;
-    private InstanceCategory instance;
+    private InstanceCategory currentInstance;
     private AbstractDDLWrapper ddlWrapper;
     private AbstractPushWrapper pushWrapper;
 
-    public void input(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper ddlWrapper, AbstractPushWrapper pushWrapper) {
+    public void input(Mapping mapping, InstanceCategory currentInstance, AbstractDDLWrapper ddlWrapper, AbstractPushWrapper pushWrapper) {
         this.mapping = mapping;
-        this.instance = instance;
+        this.currentInstance = currentInstance;
         this.ddlWrapper = ddlWrapper;
         this.pushWrapper = pushWrapper;
     }
     
     public DataResult<String> run() {
+        InstanceCategory instance = currentInstance != null ?
+            currentInstance :
+            new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
+
         var ddlTransformation = new DDLAlgorithm();
         ddlTransformation.input(mapping, instance, ddlWrapper);
         DDLStatement ddlStatement = ddlTransformation.algorithm();

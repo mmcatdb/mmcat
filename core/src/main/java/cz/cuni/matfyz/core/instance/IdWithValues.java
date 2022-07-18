@@ -22,7 +22,7 @@ public class IdWithValues implements Comparable<IdWithValues>
     public Id id()
     {
         if (id == null)
-            id = new Id(map.keySet());
+            id = isTechnical ? Id.Technical() : new Id(map.keySet());
         return id;
         // Evolution extension
         //return new Id(map.keySet());
@@ -38,6 +38,14 @@ public class IdWithValues implements Comparable<IdWithValues>
         return map;
     }
 
+    // The point of a technical id is to differentiate two idWithValues from each other, but only if they do not share any other id.
+    private final int technicalValue;
+    public final boolean isTechnical;
+
+    public static IdWithValues Technical(int value) {
+        return new IdWithValues(value);
+    }
+
     // Evolution extension
     public IdWithValues copy() {
         var mapCopy = new TreeMap<Signature, String>();
@@ -45,9 +53,16 @@ public class IdWithValues implements Comparable<IdWithValues>
         return new IdWithValues(mapCopy);
     }
 
-    private IdWithValues(Map<Signature, String> map)
-    {
+    private IdWithValues(Map<Signature, String> map) {
 		this.map = map;
+        this.technicalValue = 0;
+        this.isTechnical = false;
+	}
+
+    private IdWithValues(int technicalValue) {
+		this.map = new TreeMap<>();
+        this.technicalValue = technicalValue;
+        this.isTechnical = true;
 	}
     
     public static class Builder
@@ -70,7 +85,18 @@ public class IdWithValues implements Comparable<IdWithValues>
     
     @Override
     public boolean equals(Object object) {
-        return object instanceof IdWithValues idWithValues && Objects.equals(this.map, idWithValues.map);
+        if (!(object instanceof IdWithValues))
+            return false;
+
+        var idWithValues = (IdWithValues) object;
+
+        if (isTechnical)
+            return idWithValues.isTechnical && technicalValue == idWithValues.technicalValue;
+
+        if (idWithValues.isTechnical)
+            return false;
+
+        return Objects.equals(this.map, idWithValues.map);
     }
     
     @Override
@@ -81,15 +107,19 @@ public class IdWithValues implements Comparable<IdWithValues>
     }
     
     @Override
-    public int compareTo(IdWithValues sid)
+    public int compareTo(IdWithValues idWithValues)
     {
-        int idCompareResult = id().compareTo(sid.id());
+        int technicalCompare = technicalValue - idWithValues.technicalValue;
+        if (isTechnical || idWithValues.isTechnical)
+            return technicalCompare;
+
+        int idCompareResult = id().compareTo(idWithValues.id());
         if (idCompareResult != 0)
             return idCompareResult;
         
         for (Signature signature : signatures())
         {
-            int signatureCompareResult = map.get(signature).compareTo(sid.map.get(signature));
+            int signatureCompareResult = map.get(signature).compareTo(idWithValues.map.get(signature));
             if (signatureCompareResult != 0)
                 return signatureCompareResult;
         }
@@ -103,17 +133,22 @@ public class IdWithValues implements Comparable<IdWithValues>
         StringBuilder builder = new StringBuilder();
         
         builder.append("{");
-        boolean notFirst = false;
-        for (Signature signature : map.keySet())
-        {
-            if (notFirst)
-                builder.append(", ");
-            else
-                notFirst = true;
-            
-            builder.append("(").append(signature).append(": \"").append(map.get(signature)).append("\")");
+        if (isTechnical) {
+            builder.append("(TECHNICAL: ").append(technicalValue).append(")");
         }
-        builder.append("}");
+        else {
+            boolean notFirst = false;
+            for (Signature signature : map.keySet())
+            {
+                if (notFirst)
+                    builder.append(", ");
+                else
+                    notFirst = true;
+                
+                builder.append("(").append(signature).append(": \"").append(map.get(signature)).append("\")");
+            }
+            builder.append("}");
+        }
             
         return builder.toString();
 	}

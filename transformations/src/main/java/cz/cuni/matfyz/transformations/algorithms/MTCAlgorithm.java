@@ -2,6 +2,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.record.*;
 import cz.cuni.matfyz.core.category.*;
+import cz.cuni.matfyz.core.category.Signature.Type;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.schema.*;
@@ -31,7 +32,7 @@ public class MTCAlgorithm
         this.instance = instance;
     }
     
-	public void algorithm()
+    public void algorithm()
     {
         LOGGER.debug("Model To Category algorithm");
         final ComplexProperty rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
@@ -39,16 +40,16 @@ public class MTCAlgorithm
         for (RootRecord rootRecord : forest)
         {
             LOGGER.debug("Process a root record:\n{}", rootRecord);
-			// preparation phase
-			Stack<StackTriple> M = mapping.hasRootMorphism() ?
+            // preparation phase
+            Stack<StackTriple> M = mapping.hasRootMorphism() ?
                 createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord, rootAccessPath) : // K with root morphism
                 createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath); // K with root object
 
-			// processing of the tree
-			while (!M.empty())
-				processTopOfStack(M);
-		}
-	}
+            // processing of the tree
+            while (!M.empty())
+                processTopOfStack(M);
+        }
+    }
     
     private Stack<StackTriple> createStackWithObject(SchemaObject object, RootRecord record, ComplexProperty rootAccessPath)
     {
@@ -78,8 +79,8 @@ public class MTCAlgorithm
 
         InstanceMorphism mI = instance.getMorphism(morphism);
 
-        addRelation(mI, sid_dom, sid_cod);
-        addRelation(mI.dual(), sid_cod, sid_dom);
+        addRelation(mI, sid_dom, sid_cod, record);
+        addRelation(mI.dual(), sid_cod, sid_dom, record);
 
         AccessPath t_dom = rootAccessPath.getSubpathBySignature(Signature.Empty());
         AccessPath t_cod = rootAccessPath.getSubpathBySignature(morphism.signature());
@@ -105,11 +106,12 @@ public class MTCAlgorithm
         for (Pair<IdWithValues, IComplexRecord> sid : sids)
         {
             ActiveDomainRow row = modify(qI, sid.getValue0());
+            var record = sid.getValue1();
 
-            addRelation(mI, triple.pid, row);
-            addRelation(mI.dual(), row, triple.pid);
+            addRelation(mI, triple.pid, row, record);
+            addRelation(mI.dual(), row, triple.pid, record);
             
-            addPathChildrenToStack(M, triple.t, row, sid.getValue1());
+            addPathChildrenToStack(M, triple.t, row, record);
         }
     }
 
@@ -138,7 +140,7 @@ public class MTCAlgorithm
         }
         
         return builder.build();
-	}
+    }
     
     // Fetch id with values for given record.
     // The return value is a set of (Signature, String) for each Signature in superId and its corresponding value from record.
@@ -280,12 +282,13 @@ public class MTCAlgorithm
         }
     }
 
-    // Create ActiveDomainRow from given IdWithValues and add it to the instance object
-	private static ActiveDomainRow modify(InstanceObject qI, IdWithValues sid)
+    // Creates ActiveDomainRow from given IdWithValues and add it to the instance object.
+    private static ActiveDomainRow modify(InstanceObject qI, IdWithValues sid)
     {
         Set<ActiveDomainRow> rows = new TreeSet<>();
         Set<IdWithValues> idsWithValues = getIdsWithValues(qI.schemaObject().ids(), sid);
         
+        // We find all rows that are identified by the sid.
         for (IdWithValues idWithValues : idsWithValues)
         {
             Map<IdWithValues, ActiveDomainRow> map = qI.activeDomain().get(idWithValues.id());
@@ -297,6 +300,7 @@ public class MTCAlgorithm
                 rows.add(row);
         }
         
+        // We merge them together.
         var builder = new IdWithValues.Builder();
         for (ActiveDomainRow row : rows)
             for (Signature signature : row.signatures())
@@ -320,14 +324,17 @@ public class MTCAlgorithm
         // TODO: The update of the already existing morphisms should be optimized.
         
         return newRow;
-	}
+    }
     
+    // Returns all ids that are contained in given sid as a subset (with their values from the sid).
     private static Set<IdWithValues> getIdsWithValues(Set<Id> ids, IdWithValues sid)
     {
         Set<IdWithValues> output = new TreeSet<>();
+        // For each possible Id from ids, we find if sid contains all its signatures (i.e., if sid.signatures() is a superset of id.signatures()).
         for (Id id : ids)
         {
             var builder = new IdWithValues.Builder();
+
             boolean idIsInSuperId = true;
             for (Signature signature : id.signatures())
             {
@@ -339,16 +346,37 @@ public class MTCAlgorithm
                 }
                 builder.add(signature, value);
             }
+            // If so, we add the Id (with its corresponding values) to the output.
             if (idIsInSuperId)
                 output.add(builder.build());
         }
         return output;
     }
     
-    private static void addRelation(InstanceMorphism morphism, ActiveDomainRow sid_dom, ActiveDomainRow sid_cod)
+    private void addRelation(InstanceMorphism morphism, ActiveDomainRow sid_dom, ActiveDomainRow sid_cod, IComplexRecord record)
     {
-		morphism.addMapping(new ActiveMappingRow(sid_dom, sid_cod));
-	}
+        morphism.addMapping(new ActiveMappingRow(sid_dom, sid_cod));
+        if (morphism.signature().getType() != Type.COMPOSITE)
+            return;
+
+        var a = morphism.signature().toString();
+        var b = sid_dom.toString();
+        var c = sid_cod.toString();
+        if (record != null) {
+            var d = record.toString();
+        }
+
+        // Split to base morphisms and fill them.
+        // We have to either find the corresponding objects on the path from the record,
+        // or create them with a technical identifier (autoincrement).
+        /* TODO
+        var baseMorphisms = morphism.signature().toBases().stream().map(signature -> instance.getMorphism(signature)).toList();
+        var currentRow = sid_dom;
+        for (var baseMorphism : baseMorphisms) {
+            record.
+        }
+        */
+    }
     
     private void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, IComplexRecord record)
     //private static void addPathChildrenToStack(Stack<StackTriple> stack, AccessPath path, ActiveDomainRow sid, IComplexRecord record)
@@ -367,7 +395,7 @@ public class MTCAlgorithm
      * Similarly, context must be a signature of a morphism.
      * @return set of pairs (morphism signature, complex property) of all possible sub-paths.
      */
-	private static Collection<Pair<Signature, ComplexProperty>> children(ComplexProperty complexProperty)
+    private static Collection<Pair<Signature, ComplexProperty>> children(ComplexProperty complexProperty)
     {
         final List<Pair<Signature, ComplexProperty>> output = new ArrayList<>();
         
@@ -378,7 +406,7 @@ public class MTCAlgorithm
         }
         
         return output;
-	}
+    }
     
     /**
      * Process (name, context and value) according to the "process" function from the paper.

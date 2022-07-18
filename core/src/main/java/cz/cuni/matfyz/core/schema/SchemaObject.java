@@ -88,7 +88,7 @@ public class SchemaObject implements CategoricalObject, JSONConvertible, Identif
 	@Override
 	public boolean equals(Object obj)
     {
-        return obj instanceof CategoricalObject categoricalObject && compareTo(categoricalObject) == 0;
+        return obj instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
 	}
 
     /**

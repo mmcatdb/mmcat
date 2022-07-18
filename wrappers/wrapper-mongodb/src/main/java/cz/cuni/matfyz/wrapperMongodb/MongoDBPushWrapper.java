@@ -32,7 +32,8 @@ public class MongoDBPushWrapper implements AbstractPushWrapper
     @Override
 	public void append(String name, Object value)
     {
-        propertyValues.add(new PropertyValue(name, value.toString()));
+        String stringValue = value == null ? null : value.toString();
+        propertyValues.add(new PropertyValue(name, stringValue));
     }
 
     @Override

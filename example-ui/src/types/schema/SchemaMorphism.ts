@@ -76,7 +76,7 @@ export class SchemaMorphism {
     }
 
     static createNewFromDual(id: number, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
-        return new SchemaMorphism(id, dual.domId, dual.codId, signature, min, max, true);
+        return new SchemaMorphism(id, dual.codId, dual.domId, signature, min, max, true);
     }
 
     update(domId: number, codId: number, min: Min, max: Max) {

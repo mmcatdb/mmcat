@@ -150,10 +150,12 @@ public class AsyncJobService {
     private void categoryToModelProcess(Job job, UserStore store) throws Exception {
         var instance = store.getInstance(job.schemaId);
 
+        /*
         if (instance == null) {
             setJobStatus(job, Job.Status.Canceled);
             return;
         }
+        */
 
         var result = categoryToModelAlgorithm(job, instance).join();
 

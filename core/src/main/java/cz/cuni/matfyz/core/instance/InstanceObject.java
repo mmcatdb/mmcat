@@ -61,6 +61,13 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
 
         return output;
     }
+
+    private int lastTechnicalId = 0;
+
+    public int generateTechnicalId() {
+        lastTechnicalId++;
+        return lastTechnicalId;
+    }
     
 	@Override
 	public int objectId()
@@ -94,7 +101,7 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
     @Override
     public boolean equals(Object object)
     {
-        return object instanceof InstanceObject instanceObject && activeDomain.equals(instanceObject.activeDomain);
+        return object instanceof InstanceObject instanceObject && schemaObject.equals(instanceObject.schemaObject);
     }
 
     @Override
