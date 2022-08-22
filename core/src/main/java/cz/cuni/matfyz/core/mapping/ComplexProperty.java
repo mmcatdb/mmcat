@@ -36,6 +36,10 @@ public class ComplexProperty extends AccessPath implements IValue
     {
         return context().equals(Signature.Null());
     }
+
+    public boolean hasDynamicKeys() {
+        return this.subpaths.size() == 1 && this.subpaths.get(0).name instanceof DynamicName;
+    }
     
     @Override
     public ComplexProperty value()

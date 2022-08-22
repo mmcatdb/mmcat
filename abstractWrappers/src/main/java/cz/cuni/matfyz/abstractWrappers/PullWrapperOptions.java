@@ -41,15 +41,15 @@ public class PullWrapperOptions
     {
         private PullWrapperOptions instance = new PullWrapperOptions();
 
-        public Builder offset(int value)
+        public Builder offset(Integer offset)
         {
-            instance.offset = value;
+            instance.offset = offset;
             return this;
         }
 
-		public Builder limit(int offset)
+		public Builder limit(Integer limit)
         {
-            instance.offset = offset;
+            instance.limit = limit;
             return this;
         }
 

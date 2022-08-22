@@ -5,7 +5,7 @@ import cz.cuni.matfyz.core.category.Signature;
 import java.util.*;
 
 /**
- * This class represents an inner node of the record tree.
+ * This class represents an inner node (so it can be root) of the record tree.
  * The value of this record are its children.
  * @author jachymb.bartik
  */
@@ -17,19 +17,19 @@ public interface IComplexRecord
 
     public List<? extends IComplexRecord> getComplexRecords(Signature signature);
     
-    public boolean hasDynamicChildren();
+    public boolean hasDynamicNameChildren();
     
-    public List<? extends IComplexRecord> getDynamicChildren();
+    public List<? extends IComplexRecord> getDynamicNameChildren();
 
-    public Signature dynamicSignature();
+    public Signature dynamicNameSignature();
 
     public boolean hasSimpleRecord(Signature signature);
 
     public SimpleRecord<?> getSimpleRecord(Signature signature);
 
-    public boolean hasDynamicValues();
+    public boolean hasDynamicNameValues();
     
-    public List<SimpleValueRecord<?>> getDynamicValues();
+    public List<SimpleValueRecord<?>> getDynamicNameValues();
     
-    public boolean containsDynamicValue(Signature signature);
+    public boolean containsDynamicNameValue(Signature signature);
 }

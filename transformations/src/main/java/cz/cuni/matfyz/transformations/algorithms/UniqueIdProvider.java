@@ -6,6 +6,8 @@ package cz.cuni.matfyz.transformations.algorithms;
  */
 public class UniqueIdProvider
 {
+    // TODO Examine when this is called and when it should be reseted (probably only for tests, because they require specific id values)
+
     private static final int lastIdDefault = -1;
     private static int lastId = lastIdDefault;
     

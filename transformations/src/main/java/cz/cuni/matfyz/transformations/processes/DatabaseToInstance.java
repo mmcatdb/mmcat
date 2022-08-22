@@ -6,6 +6,9 @@ import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.*;
 import cz.cuni.matfyz.core.mapping.*;
 import cz.cuni.matfyz.core.utils.DataResult;
+import cz.cuni.matfyz.core.utils.Statistics;
+import cz.cuni.matfyz.core.utils.Statistics.Counter;
+import cz.cuni.matfyz.core.utils.Statistics.Interval;
 import cz.cuni.matfyz.transformations.algorithms.MTCAlgorithm;
 
 import org.slf4j.Logger;
@@ -28,16 +31,27 @@ public class DatabaseToInstance {
         this.currentInstance = currentInstance;
         this.pullWrapper = pullWrapper;
     }
+
+    private Integer limit = null;
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
     
     public DataResult<InstanceCategory> run() {
+
+        Statistics.start(Interval.DATABASE_TO_INSTANCE);
+
         ForestOfRecords forest;
         try {
-            forest = pullWrapper.pullForest(mapping.accessPath(), new PullWrapperOptions.Builder().buildWithKindName(mapping.kindName()));
+            forest = pullWrapper.pullForest(mapping.accessPath(), new PullWrapperOptions.Builder().limit(limit).buildWithKindName(mapping.kindName()));
         }
         catch (Exception exception) {
             LOGGER.error("Pull forest failed.", exception);
             return new DataResult<InstanceCategory>(null, "Pull forest failed.");
         }
+
+        Statistics.set(Counter.PULLED_RECORDS, forest.size());
 
         InstanceCategory instance = currentInstance != null ?
             currentInstance :
@@ -45,7 +59,11 @@ public class DatabaseToInstance {
 
         var transformation = new MTCAlgorithm();
 		transformation.input(mapping, instance, forest);
+
+        Statistics.start(Interval.MTC_ALGORIGHM);
 		transformation.algorithm();
+        Statistics.end(Interval.MTC_ALGORIGHM);
+        Statistics.end(Interval.DATABASE_TO_INSTANCE);
 
         return new DataResult<InstanceCategory>(instance);
     }

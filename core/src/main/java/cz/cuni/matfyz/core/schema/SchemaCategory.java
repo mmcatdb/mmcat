@@ -30,6 +30,10 @@ public class SchemaCategory implements Category
 		return newMorphism;
 	}
 
+    public void deleteMorphism(SchemaMorphism morphism) {
+        morphismContext.deleteUniqueObject(morphism);
+    }
+
 	public SchemaMorphism dual(Signature signatureOfOriginal)
     {
         return getMorphism(signatureOfOriginal.dual());

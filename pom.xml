@@ -11,6 +11,7 @@
 		<module>transformations</module>
 		<module>wrappers</module>
 		<module>server</module>
+		<module>evolution</module>
 	</modules>
 	
 	<properties>

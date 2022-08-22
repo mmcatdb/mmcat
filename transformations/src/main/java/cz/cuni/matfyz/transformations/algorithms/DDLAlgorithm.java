@@ -120,7 +120,7 @@ public class DDLAlgorithm
     {
         var morphism = instance.getMorphism(property.signature()).schemaMorphism();
         
-        if (morphism.isArray())
+        if (morphism.isArray() && !property.hasDynamicKeys())
             wrapper.addComplexArrayProperty(names, isRequired(morphism));
         else
             wrapper.addComplexProperty(names, isRequired(morphism));

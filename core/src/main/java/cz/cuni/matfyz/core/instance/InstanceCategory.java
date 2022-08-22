@@ -33,6 +33,11 @@ public class InstanceCategory implements Category {
     {
         return morphisms;
     }
+
+	// Evolution extension
+	public void deleteMorphism(InstanceMorphism morphism) {
+        morphisms.remove(morphism.signature());
+    }
     
 	public InstanceObject getObject(Key key)
     {

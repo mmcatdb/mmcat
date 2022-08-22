@@ -84,6 +84,12 @@ public class Id implements Comparable<Id>, JSONConvertible
         
         return 0;
 	}
+
+    @Override
+    public boolean equals(Object object)
+    {
+        return object instanceof Id id && compareTo(id) == 0;
+    }
     
     @Override
 	public String toString()

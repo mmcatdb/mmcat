@@ -51,4 +51,8 @@ public class ForestOfRecords implements Iterable<RootRecord> {
         
         return builder.toString();
     }
+
+    public int size() {
+        return records.size();
+    }
 }

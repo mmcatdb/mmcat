@@ -61,9 +61,9 @@ public class InstanceMorphism implements Morphism
 		return mappingsFromRow == null ? new TreeSet<>() : mappingsFromRow;
     }
 
-	public Set<ActiveMappingRow> allMappings()
+	public SortedSet<ActiveMappingRow> allMappings()
 	{
-		return mappings.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+		return new TreeSet<>(mappings.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
 	}
 
 	public SchemaMorphism schemaMorphism()

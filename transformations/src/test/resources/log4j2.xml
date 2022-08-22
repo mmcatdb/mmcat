@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
-        <Property name="LOG_PATTERN">[%highlight{%p}{INFO=bright blue, DEBUG=bright magenta}] %style{%d{yyyy-MM-dd HH:mm:ss}}{bright,green} %c{1} - %m%n</Property>
+        <Property name="LOG_PATTERN">%highlight{[%-5p]}{INFO=bright blue, DEBUG=bright magenta} %style{%d{yyyy-MM-dd HH:mm:ss}}{bright,green} %style{%-24c{1}}{magenta} %style{- %m%n}{white}</Property>
     </Properties>
  
     <Appenders>

@@ -142,7 +142,8 @@ public class DMLAlgorithm
             {
                 // Get all mapping rows that have signature of this subpath and originate in given row.
                 InstanceMorphism morphism = instance.getMorphism(subpath.signature());
-                boolean showIndex = morphism.schemaMorphism().isArray();
+                boolean isObjectWithDynamicKeys = subpath instanceof ComplexProperty complexSubpath && complexSubpath.hasDynamicKeys();
+                boolean showIndex = morphism.schemaMorphism().isArray() && !isObjectWithDynamicKeys;
                 int index = 0;
 
                 for (ActiveDomainRow objectRow : getRowsForMorphism(row, morphism))

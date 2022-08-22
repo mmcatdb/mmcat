@@ -64,6 +64,7 @@ db.createUser({
     pwd: "mmcat_password",
     roles: [
         { role: "readWrite", db: "mmcat_server_data" },
+        //{ role: "readWrite", db: "mmcat_server_experiments" },
     ]
 });
 ```
@@ -71,3 +72,13 @@ db.createUser({
 ```sh
 mongo --username mmcat_user --password mmcat_password --authenticationDatabase admin localhost:27017/mmcat_server_data src/main/resources/setupMongodb.js
 ```
+
+## Other data
+```sql
+CREATE DATABASE mmcat_server_ttd OWNER mmcat_user;
+```
+
+```sh
+psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_ttd?sslmode=require -f src/main/resources/setupPostgresqlTTD.sql
+```
+

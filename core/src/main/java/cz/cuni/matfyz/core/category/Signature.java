@@ -135,9 +135,9 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
 	}
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(Object object)
     {
-        return obj instanceof Signature signature && compareTo(signature) == 0;
+        return object instanceof Signature signature && compareTo(signature) == 0;
     }
 
     /**

@@ -5,7 +5,7 @@ import cz.cuni.matfyz.core.category.Signature;
 import java.util.*;
 
 /**
- * This is a complex record which only purpose is to store one complex record child.
+ * This is a complex record whose only purpose is to store one complex record child.
  * Imagine property A with dynamic (complex) children B. There will be one record A with multiple children B. But, there should be multiple objects that corresponds to "type" A, each with exactly one corresponding object B.
  * Thus when record A is processed (in the fetchSids function), a different instance of this class is returned for each record B.
  * @author jachymb.bartik
@@ -28,27 +28,27 @@ public class DynamicRecordWrapper implements IComplexRecord
 
     public boolean hasComplexRecords(Signature signature)
     {
-        return signature.equals(source.dynamicSignature()) || source.hasComplexRecords(signature);
+        return signature.equals(source.dynamicNameSignature()) || source.hasComplexRecords(signature);
     }
 
     public List<? extends IComplexRecord> getComplexRecords(Signature signature)
     {
-        return signature.equals(source.dynamicSignature()) ? List.of(content) : source.getComplexRecords(signature);
+        return signature.equals(source.dynamicNameSignature()) ? List.of(content) : source.getComplexRecords(signature);
     }
 
-    public boolean hasDynamicChildren()
+    public boolean hasDynamicNameChildren()
     {
         return false;
     }
 
-    public List<? extends IComplexRecord> getDynamicChildren()
+    public List<? extends IComplexRecord> getDynamicNameChildren()
     {
         return new ArrayList<>();
     }
 
-    public Signature dynamicSignature()
+    public Signature dynamicNameSignature()
     {
-        return source.dynamicSignature();
+        return source.dynamicNameSignature();
     }
 
     public boolean hasSimpleRecord(Signature signature)
@@ -61,18 +61,18 @@ public class DynamicRecordWrapper implements IComplexRecord
         return source.getSimpleRecord(signature);
     }
 
-    public boolean hasDynamicValues()
+    public boolean hasDynamicNameValues()
     {
-        return source.hasDynamicValues();
+        return source.hasDynamicNameValues();
     }
 
-    public List<SimpleValueRecord<?>> getDynamicValues()
+    public List<SimpleValueRecord<?>> getDynamicNameValues()
     {
-        return source.getDynamicValues();
+        return source.getDynamicNameValues();
     }
 
-    public boolean containsDynamicValue(Signature signature)
+    public boolean containsDynamicNameValue(Signature signature)
     {
-        return source.containsDynamicValue(signature);
+        return source.containsDynamicNameValue(signature);
     }
 }

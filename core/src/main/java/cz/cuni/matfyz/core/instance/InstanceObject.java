@@ -88,10 +88,12 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
 
 		builder.append("\tKey: ").append(key()).append("\n");
         builder.append("\tValues:\n");
-		for (Id id : activeDomain.keySet())
+        // Consistent ordering of the keys for testing purposes.
+		for (Id id : new TreeSet<>(activeDomain.keySet()))
         {
             var subdomain = activeDomain.get(id);
-            for (IdWithValues idWithValues : subdomain.keySet())
+            // Again, ordering.
+            for (IdWithValues idWithValues : new TreeSet<>(subdomain.keySet()))
                 builder.append("\t\t").append(subdomain.get(idWithValues)).append("\n");
         }
         

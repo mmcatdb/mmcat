@@ -10,6 +10,8 @@ public interface UniqueContext<ObjectType extends Identified<IdType>, IdType ext
     
     public ObjectType createUniqueObject(ObjectType object);
 
+    public void deleteUniqueObject(ObjectType object);
+
     public ObjectType getUniqueObject(IdType id);
 
     public Collection<ObjectType> getAllUniqueObjects();

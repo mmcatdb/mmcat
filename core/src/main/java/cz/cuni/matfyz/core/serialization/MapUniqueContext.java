@@ -31,6 +31,11 @@ public class MapUniqueContext<ObjectType extends Identified<IdType>, IdType exte
     }
 
     @Override
+    public void deleteUniqueObject(ObjectType object) {
+        uniqueObjects.remove(object.identifier());
+    }
+
+    @Override
     public ObjectType getUniqueObject(IdType id) {
         return uniqueObjects.get(id);
     }

@@ -16,10 +16,10 @@ public class ComplexRecord extends DataRecord implements IComplexRecord
     //private final Map<Signature, Set<DataRecord>> children = new TreeMap<>();
     
     private final Map<Signature, List<ComplexRecord>> children = new TreeMap<>();
-    private final List<ComplexRecord> dynamicChildren = new ArrayList<>();
-    private Signature dynamicSignature;
+    private final List<ComplexRecord> dynamicNameChildren = new ArrayList<>();
+    private Signature dynamicNameSignature;
     private final Map<Signature, SimpleRecord<?>> values = new TreeMap<>();
-    private final List<SimpleValueRecord<?>> dynamicValues = new ArrayList<>();
+    private final List<SimpleValueRecord<?>> dynamicNameValues = new ArrayList<>();
     //private SimpleValueRecord<?> firstDynamicValue = null;
     
 	protected ComplexRecord(RecordName name)
@@ -46,19 +46,19 @@ public class ComplexRecord extends DataRecord implements IComplexRecord
         return children.get(signature);
     }
     
-    public boolean hasDynamicChildren()
+    public boolean hasDynamicNameChildren()
     {
-        return dynamicChildren.size() > 0;
+        return dynamicNameChildren.size() > 0;
     }
     
-    public List<? extends IComplexRecord> getDynamicChildren()
+    public List<? extends IComplexRecord> getDynamicNameChildren()
     {
-        return dynamicChildren;
+        return dynamicNameChildren;
     }
 
-    public Signature dynamicSignature()
+    public Signature dynamicNameSignature()
     {
-        return dynamicSignature;
+        return dynamicNameSignature;
     }
 
     public boolean hasSimpleRecord(Signature signature)
@@ -71,24 +71,24 @@ public class ComplexRecord extends DataRecord implements IComplexRecord
         return values.get(signature);
     }
 
-    public boolean hasDynamicValues()
+    public boolean hasDynamicNameValues()
     {
-        return dynamicValues.size() > 0;
+        return dynamicNameValues.size() > 0;
     }
     
-    public List<SimpleValueRecord<?>> getDynamicValues()
+    public List<SimpleValueRecord<?>> getDynamicNameValues()
     {
-        return dynamicValues;
+        return dynamicNameValues;
     }
     
-    public boolean containsDynamicValue(Signature signature)
+    public boolean containsDynamicNameValue(Signature signature)
     {
-        if (dynamicValues.size() == 0)
+        if (!hasDynamicNameValues())
             return false;
 
-        SimpleValueRecord<?> firstDynamicValue = dynamicValues.get(0);
-        return signature.equals(firstDynamicValue.signature) ||
-            firstDynamicValue.name() instanceof DynamicRecordName dynamicName && signature.equals(dynamicName.signature());
+        SimpleValueRecord<?> firstDynamicNameValue = dynamicNameValues.get(0);
+        return signature.equals(firstDynamicNameValue.signature) ||
+            firstDynamicNameValue.name() instanceof DynamicRecordName dynamicName && signature.equals(dynamicName.signature());
     }
     
     public ComplexRecord addComplexRecord(RecordName name, Signature signature)
@@ -108,8 +108,8 @@ public class ComplexRecord extends DataRecord implements IComplexRecord
         }
         else
         {
-            dynamicChildren.add(record);
-            dynamicSignature = signature;
+            dynamicNameChildren.add(record);
+            dynamicNameSignature = signature;
         }
         
         return record;
@@ -141,7 +141,7 @@ public class ComplexRecord extends DataRecord implements IComplexRecord
             }
             */
             
-            dynamicValues.add(record);
+            dynamicNameValues.add(record);
         }
 
         
@@ -170,8 +170,8 @@ public class ComplexRecord extends DataRecord implements IComplexRecord
         for (Signature signature : values.keySet())
             childrenBuilder.append(values.get(signature)).append(",\n");
         
-        for (SimpleValueRecord<?> dynamicValue : dynamicValues)
-            childrenBuilder.append(dynamicValue).append(",\n");
+        for (SimpleValueRecord<?> dynamicNameValue : dynamicNameValues)
+            childrenBuilder.append(dynamicNameValue).append(",\n");
 
         for (Signature signature : children.keySet())
         {
@@ -201,9 +201,9 @@ public class ComplexRecord extends DataRecord implements IComplexRecord
             childrenBuilder.append(",\n");
         }
 
-        for (ComplexRecord dynamicChild : dynamicChildren)
+        for (ComplexRecord dynamicNameChild : dynamicNameChildren)
         {
-            childrenBuilder.append(dynamicChild.name).append(": ").append(dynamicChild).append(",\n");
+            childrenBuilder.append(dynamicNameChild.name).append(": ").append(dynamicNameChild).append(",\n");
         }
 
         String childrenResult = childrenBuilder.toString();

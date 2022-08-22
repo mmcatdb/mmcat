@@ -12,10 +12,10 @@ import cz.cuni.matfyz.core.utils.*;
  */
 public class StackTriple {
 	
-	public final SchemaMorphism mS;
-	public final ActiveDomainRow pid;
+	public final SchemaMorphism parentToChildMorphism;
+	public final ActiveDomainRow parentRow;
 	public final AccessPath t;
-    public final IComplexRecord record;
+    public final IComplexRecord parentRecord;
 	
 /*
 	public StackTriple(IdWithValues sid_dom, Object context, Object value)
@@ -26,20 +26,20 @@ public class StackTriple {
     
     public StackTriple(ActiveDomainRow pid, SchemaMorphism mS, AccessPath t, IComplexRecord record)
     {
-        this.pid = pid;
-        this.mS = mS;
+        this.parentRow = pid;
+        this.parentToChildMorphism = mS;
         this.t = t;
-        this.record = record;
+        this.parentRecord = record;
     }
     
     @Override
     public String toString()
     {
         var innerBuilder = new IntendedStringBuilder(1);
-        innerBuilder.append("mS: ").append(mS.signature()).append(",\n");
-        innerBuilder.append("pid: ").append(pid).append(",\n");
+        innerBuilder.append("mS: ").append(parentToChildMorphism.signature()).append(",\n");
+        innerBuilder.append("pid: ").append(parentRow).append(",\n");
         innerBuilder.append("t: ").append(t).append(",\n");
-        innerBuilder.append("record: ").append(record);
+        innerBuilder.append("record: ").append(parentRecord);
         
         StringBuilder builder = new StringBuilder();
         builder.append("<\n").append(innerBuilder).append(">");
