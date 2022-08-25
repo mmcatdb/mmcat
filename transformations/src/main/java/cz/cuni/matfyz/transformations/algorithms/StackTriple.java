@@ -13,7 +13,7 @@ import cz.cuni.matfyz.core.utils.*;
 public class StackTriple {
 	
 	public final SchemaMorphism parentToChildMorphism;
-	public final ActiveDomainRow parentRow;
+	public final DomainRow parentRow;
 	public final AccessPath t;
     public final IComplexRecord parentRecord;
 	
@@ -24,7 +24,7 @@ public class StackTriple {
 	}
 */
     
-    public StackTriple(ActiveDomainRow pid, SchemaMorphism mS, AccessPath t, IComplexRecord record)
+    public StackTriple(DomainRow pid, SchemaMorphism mS, AccessPath t, IComplexRecord record)
     {
         this.parentRow = pid;
         this.parentToChildMorphism = mS;

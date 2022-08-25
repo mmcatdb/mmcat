@@ -149,7 +149,7 @@ public class TestData
         );
         schema.addObject(items);
         addMorphismWithDual(schema, orderToItems, order, items, Cardinality.ONE_TO_MANY);
-        addMorphismWithDual(schema, itemsToNumber, items, number, Cardinality.MANY_TO_ONE);
+        //addMorphismWithDual(schema, itemsToNumber, items, number, Cardinality.MANY_TO_ONE);
         
         var quantity = createSchemaObject(
             quantityKey,
@@ -157,7 +157,7 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(quantity);
-        addMorphismWithDual(schema, itemsToQuantity, items, quantity, Cardinality.ONE_TO_ONE);
+        addMorphismWithDual(schema, itemsToQuantity, items, quantity, Cardinality.MANY_TO_ONE);
         
         var product = createSchemaObject(
             productKey,
@@ -174,7 +174,7 @@ public class TestData
         );
         schema.addObject(pid);
         addMorphismWithDual(schema, productToPid, product, pid, Cardinality.ONE_TO_ONE);
-        addMorphismWithDual(schema, itemsToPid, items, pid, Cardinality.MANY_TO_ONE);
+        //addMorphismWithDual(schema, itemsToPid, items, pid, Cardinality.MANY_TO_ONE);
 
         var price = createSchemaObject(
             priceKey,
@@ -182,8 +182,8 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(price);
-        addMorphismWithDual(schema, productToPrice, product, price, Cardinality.ONE_TO_ONE);
-        addMorphismWithDual(schema, itemsToPrice, items, price, Cardinality.MANY_TO_ONE);
+        addMorphismWithDual(schema, productToPrice, product, price, Cardinality.MANY_TO_ONE);
+        //addMorphismWithDual(schema, itemsToPrice, items, price, Cardinality.MANY_TO_ONE);
 
         var pname = createSchemaObject(
             pnameKey,
@@ -191,8 +191,8 @@ public class TestData
             Id.Empty()
         );
         schema.addObject(pname);
-        addMorphismWithDual(schema, productToPname, product, pname, Cardinality.ONE_TO_ONE);
-        addMorphismWithDual(schema, itemsToPname, items, pname, Cardinality.MANY_TO_ONE);
+        addMorphismWithDual(schema, productToPname, product, pname, Cardinality.MANY_TO_ONE);
+        //addMorphismWithDual(schema, itemsToPname, items, pname, Cardinality.MANY_TO_ONE);
     }
     
     private void addContact(SchemaCategory schema, SchemaObject order)
@@ -388,7 +388,7 @@ public class TestData
         return instance;
     }
 
-    private ActiveDomainRow expectedOrder(TestInstanceCategoryBuilder builder, String orderNumber)
+    private DomainRow expectedOrder(TestInstanceCategoryBuilder builder, String orderNumber)
     {
         var order = builder.value(orderToNumber, orderNumber).object(orderKey);
         var number = builder.value(Signature.Empty(), orderNumber).object(numberKey);
@@ -456,19 +456,26 @@ public class TestData
         return instance;
     }
 
-    private void expectedItem(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    private void expectedItem(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
     {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
-        var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
-        var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
-        var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
-        var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
-        
-        builder.morphism(itemsToQuantity, items, quantity);
-        builder.morphism(itemsToPid, items, pid);
-        builder.morphism(itemsToPname, items, pname);
-        builder.morphism(itemsToPrice, items, price);
         builder.morphism(orderToItems, order, items);
+        var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
+        builder.morphism(itemsToQuantity, items, quantity);
+
+        var product = builder.value(productToPid, pidValue).object(productKey);
+        builder.morphism(itemsToProduct, items, product);
+
+        var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
+        builder.morphism(productToPid, product, pid);
+        // Empty morphisms are needed because of string comparison of actual and expected instance categories.
+        builder.morphism(itemsToPid);
+        var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
+        builder.morphism(productToPname, product, pname);
+        builder.morphism(itemsToPname);
+        var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
+        builder.morphism(productToPrice, product, price);
+        builder.morphism(itemsToPrice);
     }
 
     public InstanceCategory expectedInstance_contact(SchemaCategory schema)
@@ -487,14 +494,16 @@ public class TestData
         return instance;
     }
 
-    private void addExpectedContact(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String numberValue, String valueValue, String nameValue)
+    private void addExpectedContact(TestInstanceCategoryBuilder builder, DomainRow order, String numberValue, String valueValue, String nameValue)
     {
         var contact = builder.value(contactToNumber, numberValue).value(contactToValue, valueValue).value(contactToName, nameValue).object(contactKey);
         var value = builder.value(Signature.Empty(), valueValue).object(valueKey);
         var name = builder.value(Signature.Empty(), nameValue).object(nameKey);
+        var type = builder.value(typeToName, nameValue).object(typeKey);
         
         builder.morphism(contactToValue, contact, value);
-        builder.morphism(contactToName, contact, name);
+        builder.morphism(contactToType, contact, type);
+        builder.morphism(typeToName, type, name);
         builder.morphism(orderToContact, order, contact);
     }
 
@@ -509,11 +518,18 @@ public class TestData
         return instance;
     }
 
-    public ActiveDomainRow expectedOrder_ordered(TestInstanceCategoryBuilder builder, String orderNumber, String customerId)
+    public DomainRow expectedOrder_ordered(TestInstanceCategoryBuilder builder, String orderNumber, String customerId)
     {
         var order = expectedOrder(builder, orderNumber);
         var id = builder.value(Signature.Empty(), customerId).object(idKey);
-        builder.morphism(orderToId, order, id);
+        var customer = builder.value(customerToId, customerId).object(customerKey);
+        var ordered = builder.value(orderedToId, customerId).value(orderedToNumber, orderNumber).object(orderedKey);
+
+        //builder.morphism(orderToId, order, id);
+        builder.morphism(orderedToOrder, ordered, order);
+        builder.morphism(customerToOrdered, customer, ordered);
+        builder.morphism(customerToId, customer, id);
+
         return order;
     }
 
@@ -580,7 +596,7 @@ public class TestData
         return instance;
     }
 
-    private void addExpectedAddress(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String uniqueId, String number, String label, String text, String locale)
+    private void addExpectedAddress(TestInstanceCategoryBuilder builder, DomainRow order, String uniqueId, String number, String label, String text, String locale)
     {
         var address = builder.value(addressToNumber, number).value(addressToLabel, label).object(addressKey);
         var labelRow = builder.value(Signature.Empty(), label).object(labelKey);
@@ -610,33 +626,35 @@ public class TestData
         return instance;
     }
 
-    private void expectedItemMissing(TestInstanceCategoryBuilder builder, ActiveDomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
+    private void expectedItemMissing(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
     {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
         builder.morphism(orderToItems, order, items);
 
-        if (pidValue != null)
-        {
-            var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
-            builder.morphism(itemsToPid, items, pid);
-        }
-
-        if (pnameValue != null)
-        {
-            var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
-            builder.morphism(itemsToPname, items, pname);
-        }
-
-        if (priceValue != null)
-        {
-            var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
-            builder.morphism(itemsToPrice, items, price);
-        }
-
-        if (quantityValue != null)
-        {
+        if (quantityValue != null) {
             var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
             builder.morphism(itemsToQuantity, items, quantity);
+        }
+
+        var product = builder.value(productToPid, pidValue).object(productKey);
+        builder.morphism(itemsToProduct, items, product);
+
+        if (pidValue != null) {
+            var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
+            builder.morphism(productToPid, product, pid);
+            builder.morphism(itemsToPid);
+        }
+
+        if (pnameValue != null) {
+            var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
+            builder.morphism(productToPname, product, pname);
+            builder.morphism(itemsToPname);
+        }
+
+        if (priceValue != null) {
+            var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
+            builder.morphism(productToPrice, product, price);
+            builder.morphism(itemsToPrice);
         }
     }
 

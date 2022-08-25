@@ -18,8 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.instance.ActiveDomainRow;
-import cz.cuni.matfyz.core.instance.ActiveMappingRow;
+import cz.cuni.matfyz.core.instance.DomainRow;
+import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.instance.IdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
@@ -140,16 +140,16 @@ public class EvolutionManagementTests {
         //LOGGER.info(finalResult.data);
 	}
 
-    private Set<ActiveDomainRow> getRows(InstanceCategory instance, ActiveDomainRow source, Signature... signatures) {
+    private Set<DomainRow> getRows(InstanceCategory instance, DomainRow source, Signature... signatures) {
         var signature = signatures[0];
         var restOfSignatures = Arrays.copyOfRange(signatures, 1, signatures.length);
         var instanceMorphism = instance.getMorphism(signature);
-        var mappings = instanceMorphism.mappingsFromRow(source);
+        var mappings = source.getMappingsFromForMorphism(instanceMorphism);
 
         if (restOfSignatures.length == 0)
             return new TreeSet<>(mappings.stream().map(mapping -> mapping.codomainRow()).toList());
             
-        var output = new TreeSet<ActiveDomainRow>();
+        var output = new TreeSet<DomainRow>();
         mappings.forEach(mapping -> {
             var target = mapping.codomainRow();
             output.addAll(getRows(instance, target, restOfSignatures));
@@ -158,9 +158,9 @@ public class EvolutionManagementTests {
         return output;
     }
 
-    private ActiveDomainRow getRowEffective(ActiveDomainRow source, List<InstanceMorphism> morphismPath) {
+    private DomainRow getRowEffective(DomainRow source, List<InstanceMorphism> morphismPath) {
         for (var morphism : morphismPath) {
-            source = morphism.mappingsFromRow(source).stream().findFirst().get().codomainRow();
+            source = source.getMappingsFromForMorphism(morphism).stream().findFirst().get().codomainRow();
         }
 
         return source;
@@ -177,7 +177,7 @@ public class EvolutionManagementTests {
         var addressInstance = instance.getObject(data.addressKey);
         var addressToFullAddressMorphismInstance = createInstanceMorphismWithDual(instance, addressToFullAddressMorphism);
 
-        var fullAddressInnerMap = new TreeMap<IdWithValues, ActiveDomainRow>();
+        var fullAddressInnerMap = new TreeMap<IdWithValues, DomainRow>();
         var fullAddressId = new Id(Signature.Empty());
 
         Statistics.set(Counter.JOIN_ROWS, addressInstance.rows().size());
@@ -192,17 +192,18 @@ public class EvolutionManagementTests {
             // Create idWithValues and row
             var builder = new IdWithValues.Builder();
             builder.add(Signature.Empty(), fullAddressValue);
-            var fullAddressRow = new ActiveDomainRow(builder.build());
+            var fullAddressRow = new DomainRow(builder.build(), addressInstance);
 
             // Add it to the inner map which will be put to the instance object
-            fullAddressInnerMap.put(fullAddressRow.idWithValues(), fullAddressRow);
+            // TODO commented because of refactoring
+            //fullAddressInnerMap.put(fullAddressRow.superId(), fullAddressRow);
 
             // Add morphisms
-            addressToFullAddressMorphismInstance.addMapping(new ActiveMappingRow(addressRow, fullAddressRow));
-            addressToFullAddressMorphismInstance.dual().addMapping(new ActiveMappingRow(fullAddressRow, addressRow));
+            addressToFullAddressMorphismInstance.addMapping(new MappingRow(addressRow, fullAddressRow));
+            addressToFullAddressMorphismInstance.dual().addMapping(new MappingRow(fullAddressRow, addressRow));
         }
         // Add the inner map to the instance object
-        fullAddressInstance.activeDomain().put(fullAddressId, fullAddressInnerMap);
+        fullAddressInstance.domain().put(fullAddressId, fullAddressInnerMap);
     }
 
     private void move(SchemaCategory schema, InstanceCategory instance) {
@@ -221,8 +222,8 @@ public class EvolutionManagementTests {
         
         for (var orderRow : instance.getObject(data.orderKey).rows()) {
             var fullAddressRow = getRowEffective(orderRow, morphismPath);
-            orderToFullAddressMorphismInstance.addMapping(new ActiveMappingRow(orderRow, fullAddressRow));
-            orderToFullAddressMorphismInstance.dual().addMapping(new ActiveMappingRow(fullAddressRow, orderRow));
+            orderToFullAddressMorphismInstance.addMapping(new MappingRow(orderRow, fullAddressRow));
+            orderToFullAddressMorphismInstance.dual().addMapping(new MappingRow(fullAddressRow, orderRow));
         }
 
         // Delete address to full address
@@ -262,19 +263,19 @@ public class EvolutionManagementTests {
         instance.morphisms().put(masterToCopyDualInstance.signature(), masterToCopyDualInstance);
         
         // Populate instance object
-        var sourceToCopyMappings = new TreeMap<ActiveDomainRow, ActiveDomainRow>();
+        var sourceToCopyMappings = new TreeMap<DomainRow, DomainRow>();
         var sourceInstance = instance.getObject(sourceKey);
-        sourceInstance.activeDomain().forEach((id, innerMap) -> {
-            var copiedInnerMap = new TreeMap<IdWithValues, ActiveDomainRow>();
+        sourceInstance.domain().forEach((id, innerMap) -> {
+            var copiedInnerMap = new TreeMap<IdWithValues, DomainRow>();
 
             innerMap.forEach((idWithValues, row) -> {
                 var copiedIdWithValues = idWithValues.copy();
-                var copiedRow = new ActiveDomainRow(copiedIdWithValues);
+                var copiedRow = new DomainRow(copiedIdWithValues, copyInstance);
                 copiedInnerMap.put(copiedIdWithValues, copiedRow);
                 sourceToCopyMappings.put(row, copiedRow);
             });
 
-            copyInstance.activeDomain().put(id, copiedInnerMap);
+            copyInstance.domain().put(id, copiedInnerMap);
         });
 
         // Populate instance morphism
@@ -284,8 +285,8 @@ public class EvolutionManagementTests {
             var masterRow = mappingRow.domainRow();
             var copyRow = sourceToCopyMappings.get(mappingRow.codomainRow());
 
-            masterToSourceMorphismInstance.addMapping(new ActiveMappingRow(masterRow, copyRow));
-            masterToSourceDualInstance.addMapping(new ActiveMappingRow(copyRow, masterRow));
+            masterToSourceMorphismInstance.addMapping(new MappingRow(masterRow, copyRow));
+            masterToSourceDualInstance.addMapping(new MappingRow(copyRow, masterRow));
         });
     }
 

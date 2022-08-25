@@ -75,8 +75,9 @@ public class SchemaObject implements CategoricalObject, JSONConvertible, Identif
 		return superId;
 	}
 
+	// TODO
 	public Set<Id> ids() {
-		return ids;
+		return new TreeSet<>(ids);
 	}
 
 	@Override

@@ -50,6 +50,18 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         return output;
     }
 
+    public List<Signature> toBasesReverse()
+    {
+        if (this.isNull)
+            return List.of(this);
+
+        var output = new ArrayList<Signature>();
+        for (int i = ids.length - 1; i >= 0; i--)
+            output.add(new Signature(ids[i]));
+
+        return output;
+    }
+
     // Evolution extension
     public Signature cutLast() {
         if (isNull)
@@ -72,11 +84,38 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         return new Signature(this.ids[0]);
     }
 
+    public Signature cutFirst() {
+        if (isNull)
+            return Signature.Null();
+
+        if (ids.length == 0)
+            return Signature.Empty();
+
+        var newIds = Arrays.copyOfRange(ids, 0, ids.length - 1);
+        return new Signature(newIds, false);
+    }
+
+    public Signature getFirst() {
+        if (isNull)
+            return Signature.Null();
+
+        if (ids.length == 0)
+            return Signature.Empty();
+
+        return new Signature(this.ids[this.ids.length - 1]);
+    }
+
     public Signature concatenate(Signature other)
     {
         return new Signature(ArrayUtils.concatenate(other.ids, ids), false);
 	}
-    
+
+    public static Signature concatenate(Collection<Signature> signatures) {
+        var signaturesIds = signatures.stream().map(signature -> signature.ids).toList();
+        Collections.reverse(signaturesIds);
+        return new Signature(ArrayUtils.concatenate(signaturesIds), false);
+    }
+
     public static Signature Empty()
     {
         return new Signature(new int[] {}, false);
@@ -195,6 +234,25 @@ public class Signature implements Comparable<Signature>, IContext, JSONConvertib
         
         int length = ids.length - signature.ids.length;
         return length == 0 ? Signature.Empty() : new Signature(Arrays.copyOfRange(ids, 0, length), false);
+    }
+
+    public Signature traverseAlong(Signature path) {
+        var output = new LinkedList<Integer>();
+        for (var id : ids)
+            output.add(id);
+
+        for (int i = path.ids.length - 1; i >= 0; i--) {
+            var pathId = path.ids[i];
+            var lastId = output.getLast();
+            if (lastId == null)
+                output.addFirst(-pathId);
+            else if (lastId == pathId)
+                output.removeLast();
+            else
+                output.addLast(-pathId);
+        }
+
+        return new Signature(output.stream().mapToInt(Integer::intValue).toArray(), false);
     }
 
     @Override

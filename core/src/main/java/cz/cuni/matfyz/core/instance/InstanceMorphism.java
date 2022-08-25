@@ -11,28 +11,20 @@ import java.util.stream.Collectors;
  *
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceMorphism implements Morphism
+public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism
 {
     private final SchemaMorphism schemaMorphism;
 	private final InstanceObject dom;
 	private final InstanceObject cod;
 	private final InstanceCategory category;
 
-    private final Map<ActiveDomainRow, Set<ActiveMappingRow>> mappings = new TreeMap<>();
+    //private final Map<DomainRow, Set<MappingRow>> mappings = new TreeMap<>();
+	SortedSet<MappingRow> mappings = new TreeSet<>();
 	private boolean isActive = false;
 
 	public boolean isActive() {
 		return this.isActive;
 	}
-    
-    /*
-	private final List<ActiveMappingRow> activeDomain = new ArrayList<>();
-
-	public void addMapping(ActiveMappingRow mapping)
-    {
-		activeDomain.add(mapping);
-	}
-    */
     
 	public InstanceMorphism(SchemaMorphism schemaMorphism, InstanceObject dom, InstanceObject cod, InstanceCategory category)
     {
@@ -41,29 +33,43 @@ public class InstanceMorphism implements Morphism
 		this.cod = cod;
         this.category = category;
 	}
+
+	/**
+	 * Returns base morphisms in the order they need to be traversed (i.e., the first one has the same domainObject as this).
+	 * @return
+	 */
+	public List<InstanceMorphism> toBases() {
+		return signature().toBasesReverse().stream().map(signature -> category.getMorphism(signature)).toList();
+	}
     
-    public void addMapping(ActiveMappingRow mapping)
+    public void addMapping(MappingRow mapping)
     {
-		Set<ActiveMappingRow> set = mappings.get(mapping.domainRow());
+		/*
+		Set<MappingRow> set = mappings.get(mapping.domainRow());
 		if (set == null)
 		{
 			set = new TreeSet<>();
 			mappings.put(mapping.domainRow(), set);
 		}
+		*/
 
-        set.add(mapping);
+        mappings.add(mapping);
+
+		mapping.domainRow().addMappingFrom(this, mapping);
+		//mapping.codomainRow().addMappingTo(this, mapping);
+
 		this.isActive = true;
     }
 
-    public Set<ActiveMappingRow> mappingsFromRow(ActiveDomainRow row)
-    {
-        var mappingsFromRow = mappings.get(row);
-		return mappingsFromRow == null ? new TreeSet<>() : mappingsFromRow;
-    }
+	public void removeMapping(MappingRow mapping) {
+		mappings.remove(mapping);
+		mapping.domainRow().removeMappingFrom(this, mapping);
+	}
 
-	public SortedSet<ActiveMappingRow> allMappings()
+	public SortedSet<MappingRow> allMappings()
 	{
-		return new TreeSet<>(mappings.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
+		//return new TreeSet<>(mappings.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
+		return mappings;
 	}
 
 	public SchemaMorphism schemaMorphism()
@@ -94,6 +100,13 @@ public class InstanceMorphism implements Morphism
     {
 		return schemaMorphism.signature();
 	}
+
+	@Override
+	public int compareTo(InstanceMorphism instanceMorphism)
+    {
+		var domainComparison = dom.compareTo(instanceMorphism.dom);
+		return domainComparison != 0 ? domainComparison : cod.compareTo(instanceMorphism.cod);
+	}
 	
     @Override
 	public String toString()
@@ -107,7 +120,7 @@ public class InstanceMorphism implements Morphism
         builder.append("\tValues:\n");
 		//for (Set<ActiveMappingRow> set : mappings.values())
 		//	for (ActiveMappingRow row : set)
-		for (ActiveMappingRow row : allMappings())
+		for (MappingRow row : allMappings())
             	builder.append("\t\t").append(row).append("\n");
         
         return builder.toString();

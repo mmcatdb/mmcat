@@ -45,11 +45,11 @@ public class DMLAlgorithm
     private List<DMLStatement> processWithObject(SchemaObject object)
     {
         InstanceObject qI = instance.getObject(object);
-        Set<ActiveDomainRow> S = fetchSids(qI);
+        Set<DomainRow> S = fetchSids(qI);
         Stack<DMLStackTriple> M = new Stack<>();
         List<DMLStatement> output = new ArrayList<>();
 
-        for (ActiveDomainRow sid : S)
+        for (DomainRow sid : S)
         {
             M.push(new DMLStackTriple(sid, DDLAlgorithm.EMPTY_NAME, mapping.accessPath()));
             output.add(buildStatement(M));
@@ -61,14 +61,14 @@ public class DMLAlgorithm
     private List<DMLStatement> processWithMorphism(SchemaMorphism morphism)
     {
         InstanceMorphism mI = instance.getMorphism(morphism);
-        Set<ActiveMappingRow> S = fetchRelations(mI);
+        Set<MappingRow> S = fetchRelations(mI);
         AccessPath codomainPath = mapping.accessPath().getSubpathBySignature(morphism.signature());
         Stack<DMLStackTriple> M = new Stack<>();
         List<DMLStatement> output = new ArrayList<>();
 
         if (codomainPath instanceof ComplexProperty complexPath)
         {
-            for (ActiveMappingRow row : S)
+            for (MappingRow row : S)
             {
                 M.push(new DMLStackTriple(row.domainRow(), DDLAlgorithm.EMPTY_NAME, mapping.accessPath().minusSubpath(codomainPath)));
                 M.push(new DMLStackTriple(row.codomainRow(), DDLAlgorithm.EMPTY_NAME, complexPath));
@@ -81,17 +81,17 @@ public class DMLAlgorithm
         throw new UnsupportedOperationException();
     }
 
-    private Set<ActiveDomainRow> fetchSids(InstanceObject object)
+    private Set<DomainRow> fetchSids(InstanceObject object)
     {
-        Set<ActiveDomainRow> output = new TreeSet<>();
+        Set<DomainRow> output = new TreeSet<>();
 
-        for (var innerMap : object.activeDomain().values())
+        for (var innerMap : object.domain().values())
             output.addAll(innerMap.values());
 
         return output;
     }
 
-    private Set<ActiveMappingRow> fetchRelations(InstanceMorphism morphism)
+    private Set<MappingRow> fetchRelations(InstanceMorphism morphism)
     {
         return morphism.allMappings();
     }
@@ -120,12 +120,12 @@ public class DMLAlgorithm
         return wrapper.createDMLStatement();
     }
 
-    private List<NameValuePair> collectNameValuePairs(ComplexProperty path, ActiveDomainRow row)
+    private List<NameValuePair> collectNameValuePairs(ComplexProperty path, DomainRow row)
     {
         return collectNameValuePairs(path, row, DDLAlgorithm.EMPTY_NAME);
     }
 
-    private List<NameValuePair> collectNameValuePairs(ComplexProperty path, ActiveDomainRow row, String prefix)
+    private List<NameValuePair> collectNameValuePairs(ComplexProperty path, DomainRow row, String prefix)
     {
         List<NameValuePair> output = new ArrayList<>();
 
@@ -146,7 +146,7 @@ public class DMLAlgorithm
                 boolean showIndex = morphism.schemaMorphism().isArray() && !isObjectWithDynamicKeys;
                 int index = 0;
 
-                for (ActiveDomainRow objectRow : getRowsForMorphism(row, morphism))
+                for (DomainRow objectRow : getRowsForMorphism(row, morphism))
                 {
                     output.add(getNameValuePair(subpath, row, objectRow, prefix, index, showIndex));
                     index++;
@@ -167,19 +167,19 @@ public class DMLAlgorithm
     }
 
     // Evolution extension
-    private Set<ActiveDomainRow> getRowsForMorphism(ActiveDomainRow row, InstanceMorphism morphism) {
+    private Set<DomainRow> getRowsForMorphism(DomainRow row, InstanceMorphism morphism) {
         var path = activePathProvider.getActivePath(morphism.signature());
         if (path == null)
             return Set.of();
 
-        Set<ActiveDomainRow> primary = Set.of(row);
-        Set<ActiveDomainRow> secondary;
+        Set<DomainRow> primary = Set.of(row);
+        Set<DomainRow> secondary;
 
         for (var submorphism : path) {
             secondary = new TreeSet<>();
 
             for (var primaryRow : primary)
-                secondary.addAll(submorphism.mappingsFromRow(primaryRow).stream().map(mapping -> mapping.codomainRow()).toList());
+                secondary.addAll(primaryRow.getMappingsFromForMorphism(submorphism).stream().map(mapping -> mapping.codomainRow()).toList());
 
             primary = secondary;
         }
@@ -187,7 +187,7 @@ public class DMLAlgorithm
         return primary;
     }
 
-    private NameValuePair getNameValuePair(AccessPath objectPath, ActiveDomainRow parentRow, ActiveDomainRow objectRow, String prefix, int index, boolean showIndex)
+    private NameValuePair getNameValuePair(AccessPath objectPath, DomainRow parentRow, DomainRow objectRow, String prefix, int index, boolean showIndex)
     {
         String name = getStringName(objectPath, parentRow) + (showIndex ? "[" + index + "]" : "");
         String fullName = DDLAlgorithm.concatenatePaths(prefix, name);
@@ -206,7 +206,7 @@ public class DMLAlgorithm
         throw new UnsupportedOperationException();
     }
 
-    private String getStringName(AccessPath objectPath, ActiveDomainRow parentRow)
+    private String getStringName(AccessPath objectPath, DomainRow parentRow)
     {
         if (objectPath.name() instanceof StaticName staticName)
             return staticName.getStringName();
@@ -214,7 +214,7 @@ public class DMLAlgorithm
         var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
         InstanceMorphism nameMorphism = instance.getMorphism(dynamicName.signature());
-        var nameRowSet = nameMorphism.mappingsFromRow(parentRow);
+        var nameRowSet = parentRow.getMappingsFromForMorphism(nameMorphism);
 
         if (nameRowSet != null && nameRowSet.size() > 0)
         {
@@ -228,7 +228,7 @@ public class DMLAlgorithm
     {
         public final String name;
         public final String simpleValue;
-        public final ActiveDomainRow complexValue;
+        public final DomainRow complexValue;
         public final ComplexProperty subpath;
         public final boolean isSimple;
 
@@ -241,7 +241,7 @@ public class DMLAlgorithm
             this.isSimple = true;
         }
 
-        public NameValuePair(String name, ActiveDomainRow complexValue, ComplexProperty subpath)
+        public NameValuePair(String name, DomainRow complexValue, ComplexProperty subpath)
         {
             this.name = name;
             this.simpleValue = null;

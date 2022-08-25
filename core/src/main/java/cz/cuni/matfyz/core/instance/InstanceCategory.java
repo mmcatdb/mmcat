@@ -2,6 +2,7 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Category;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.category.Signature.Type;
 import cz.cuni.matfyz.core.schema.*;
 
 import java.util.*;
@@ -74,6 +75,34 @@ public class InstanceCategory implements Category {
     public InstanceMorphism dual(Signature signatureOfOriginal)
     {
 		return getMorphism(signatureOfOriginal.dual());
+	}
+
+	public void createNotes() {
+		for (var object : objects.values())
+			for (var signature : object.schemaObject().superId().signatures())
+				createNotesForSignature(signature, object);
+	}
+
+	private void createNotesForSignature(Signature signature, InstanceObject sourceObject) {
+		if (signature.getType() != Type.COMPOSITE)
+			return;
+
+		var baseSignatures = signature.toBasesReverse();
+		var path = new LinkedList<InstanceMorphism>();
+
+		for (int i = 0; i < baseSignatures.size() - 1; i++) {
+			var signatureInTarget = Signature.concatenate(baseSignatures.subList(i + 1, baseSignatures.size()));
+			var currentSignature = baseSignatures.get(i);
+			var currentMorphism = getMorphism(currentSignature).dual();
+			path = new LinkedList<>(path);
+			path.addFirst(currentMorphism);
+			var currentTarget = currentMorphism.dom();
+
+			if (!currentTarget.schemaObject().superId().signatures().contains(signatureInTarget))
+				continue;
+
+			currentTarget.addPathToSuperId(signatureInTarget, path, signature);
+		}
 	}
 	
 	@Override

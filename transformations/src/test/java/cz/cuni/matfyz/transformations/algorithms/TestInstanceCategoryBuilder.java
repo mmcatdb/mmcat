@@ -27,33 +27,32 @@ public class TestInstanceCategoryBuilder
         
         return this;
     }
-    
-    public ActiveDomainRow object(Key key)
+
+    public DomainRow object(Key key)
     {
+        var instanceObject = instance.getObject(key);
         IdWithValues idWithValues = builder.build();
-        var activeDomainRow = new ActiveDomainRow(idWithValues);
+
+        var domainRow = idWithValues.size() > 0 ? new DomainRow(idWithValues, instanceObject) : new DomainRow(instanceObject.generateTechnicalId(), instanceObject);
         
-        Map<IdWithValues, ActiveDomainRow> innerMap = instance.getObject(key).activeDomain().get(idWithValues.id());
-        if (innerMap == null)
-        {
-            innerMap = new TreeMap<>();
-            instance.getObject(key).activeDomain().put(idWithValues.id(), innerMap);
-        }
+        instanceObject.addRow(domainRow);
         
-        innerMap.put(idWithValues, activeDomainRow);
-        
-        return activeDomainRow;
+        return domainRow;
     }
     
-    public ActiveMappingRow morphism(Signature signature, ActiveDomainRow domainRow, ActiveDomainRow codomainRow)
+    public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow)
     {
-        var row = new ActiveMappingRow(domainRow, codomainRow);
+        var row = new MappingRow(domainRow, codomainRow);
         instance.getMorphism(signature).addMapping(row);
         
-        var dualRow = new ActiveMappingRow(codomainRow, domainRow);
+        var dualRow = new MappingRow(codomainRow, domainRow);
         instance.getMorphism(signature.dual()).addMapping(dualRow);
         
         return row;
+    }
+
+    public void morphism(Signature signature) {
+        instance.getMorphism(signature);
     }
     
 }

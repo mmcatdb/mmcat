@@ -11,76 +11,101 @@ import java.util.*;
  */
 public class IdWithValues implements Comparable<IdWithValues>
 {
-    private final Map<Signature, String> map;
+    private final Map<Signature, String> tuples;
+
+    public boolean hasSignature(Signature signature) {
+        return tuples.containsKey(signature);
+    }
     
-    public Set<Signature> signatures()
-    {
-        return map.keySet();
+    public Set<Signature> signatures() {
+        return tuples.keySet();
+    }
+
+    public String getValue(Signature signature) {
+        return tuples.get(signature);
     }
     
     private Id id;
-    public Id id()
-    {
+    
+    public Id id() {
         if (id == null)
-            id = isTechnical ? Id.Technical() : new Id(map.keySet());
+            //id = isTechnical ? Id.Technical() : new Id(tuples.keySet());
+            id = new Id(tuples.keySet());
         return id;
         // Evolution extension
         //return new Id(map.keySet());
     }
     
-    public Collection<String> values()
-    {
-        return map.values();
+    public Collection<String> values() {
+        return tuples.values();
     }
     
-    public Map<Signature, String> map()
-    {
-        return map;
+    public Map<Signature, String> map() {
+        return tuples;
     }
 
-    // The point of a technical id is to differentiate two idWithValues from each other, but only if they do not share any other id.
-    private final int technicalValue;
-    public final boolean isTechnical;
-
-    public static IdWithValues Technical(int value) {
-        return new IdWithValues(value);
+    public int size() {
+        return tuples.size();
     }
 
     // Evolution extension
     public IdWithValues copy() {
         var mapCopy = new TreeMap<Signature, String>();
-        this.map.forEach((signature, string) -> mapCopy.put(signature, string));
+        this.tuples.forEach((signature, string) -> mapCopy.put(signature, string));
         return new IdWithValues(mapCopy);
     }
 
+    public static IdWithValues merge(IdWithValues... ids) {
+        var builder = new Builder();
+        for (var id : ids)
+            builder.add(id);
+        
+        return builder.build();
+    }
+
+    public static IdWithValues Empty() {
+        return merge();
+    }
+
     private IdWithValues(Map<Signature, String> map) {
-		this.map = map;
-        this.technicalValue = 0;
-        this.isTechnical = false;
+		this.tuples = map;
+        //this.technicalValue = 0;
+        //this.isTechnical = false;
 	}
 
+    /*
     private IdWithValues(int technicalValue) {
-		this.map = new TreeMap<>();
+		this.tuples = new TreeMap<>();
         this.technicalValue = technicalValue;
         this.isTechnical = true;
 	}
-    
-    public static class Builder
-    {
+    */
+
+    public static class Builder {
+
         private Map<Signature, String> map = new TreeMap<>();
 
-        public Builder add(Signature signature, String value)
-        {
+        public Builder add(Signature signature, String value) {
             map.put(signature, value);
             return this;
         }
 
-        public IdWithValues build()
-        {
+        public Builder add(IdWithValues idWithValues) {
+            for (var tuple : idWithValues.tuples.entrySet())
+                map.put(tuple.getKey(), tuple.getValue());
+                
+            return this;
+        }
+
+        public IdWithValues build() {
+            // if (map.size() == 0)
+            //    return IdWithValues.TechnicalId();
+
             var output = new IdWithValues(map);
             map = new TreeMap<>();
             return output;
         }
+
     }
     
     @Override
@@ -90,36 +115,34 @@ public class IdWithValues implements Comparable<IdWithValues>
 
         var idWithValues = (IdWithValues) object;
 
-        if (isTechnical)
-            return idWithValues.isTechnical && technicalValue == idWithValues.technicalValue;
+        // if (isTechnical)
+        //    return idWithValues.isTechnical && technicalValue == idWithValues.technicalValue;
 
-        if (idWithValues.isTechnical)
-            return false;
+        // if (idWithValues.isTechnical)
+        //    return false;
 
-        return Objects.equals(this.map, idWithValues.map);
+        return Objects.equals(this.tuples, idWithValues.tuples);
     }
     
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 83 * hash + Objects.hashCode(this.map);
+        hash = 83 * hash + Objects.hashCode(this.tuples);
         return hash;
     }
     
     @Override
-    public int compareTo(IdWithValues idWithValues)
-    {
-        int technicalCompare = technicalValue - idWithValues.technicalValue;
-        if (isTechnical || idWithValues.isTechnical)
-            return technicalCompare;
+    public int compareTo(IdWithValues idWithValues) {
+        // int technicalCompare = technicalValue - idWithValues.technicalValue;
+        // if (isTechnical || idWithValues.isTechnical)
+        //    return technicalCompare;
 
         int idCompareResult = id().compareTo(idWithValues.id());
         if (idCompareResult != 0)
             return idCompareResult;
         
-        for (Signature signature : signatures())
-        {
-            int signatureCompareResult = map.get(signature).compareTo(idWithValues.map.get(signature));
+        for (Signature signature : signatures()) {
+            int signatureCompareResult = tuples.get(signature).compareTo(idWithValues.tuples.get(signature));
             if (signatureCompareResult != 0)
                 return signatureCompareResult;
         }
@@ -128,27 +151,20 @@ public class IdWithValues implements Comparable<IdWithValues>
     }
     
     @Override
-	public String toString()
-    {
+	public String toString() {
         StringBuilder builder = new StringBuilder();
         
         builder.append("{");
-        if (isTechnical) {
-            builder.append("(TECHNICAL: ").append(technicalValue).append(")");
+        boolean notFirst = false;
+        for (Signature signature : tuples.keySet()) {
+            if (notFirst)
+                builder.append(", ");
+            else
+                notFirst = true;
+            
+            builder.append("(").append(signature).append(": \"").append(tuples.get(signature)).append("\")");
         }
-        else {
-            boolean notFirst = false;
-            for (Signature signature : map.keySet())
-            {
-                if (notFirst)
-                    builder.append(", ");
-                else
-                    notFirst = true;
-                
-                builder.append("(").append(signature).append(": \"").append(map.get(signature)).append("\")");
-            }
-            builder.append("}");
-        }
+        builder.append("}");
             
         return builder.toString();
 	}
