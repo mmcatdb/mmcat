@@ -3,7 +3,6 @@ package cz.cuni.matfyz.server.entity.mapping;
 import cz.cuni.matfyz.server.entity.Entity;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class MappingWrapper extends Entity {

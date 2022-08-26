@@ -1,17 +1,18 @@
 package cz.cuni.matfyz.core.mapping;
 
-import java.util.Set;
-
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.FromJSONSwitchBuilderBase;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
+
+import java.util.Set;
 
 /**
- *
  * @author pavel.koupil, jachym.bartik
  */
-public abstract class Name implements JSONConvertible
-{
+public abstract class Name implements JSONConvertible {
+
+    protected Name() {}
+
     public static class Builder extends FromJSONSwitchBuilderBase<Name> {
 
         @Override

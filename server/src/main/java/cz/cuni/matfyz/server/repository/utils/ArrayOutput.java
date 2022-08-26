@@ -4,18 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
  * @author jachym.bartik
  */
-public class ArrayOutput<OutputType> {
+public class ArrayOutput<T> {
 
-    private List<OutputType> output = new ArrayList<>();
+    private List<T> output = new ArrayList<>();
 
-    public void add(OutputType outputItem) {
+    public void add(T outputItem) {
         this.output.add(outputItem);
     }
 
-    List<OutputType> get() {
+    List<T> get() {
         return this.output;
     }
 

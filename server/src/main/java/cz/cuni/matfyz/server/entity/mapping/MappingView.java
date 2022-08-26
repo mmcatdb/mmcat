@@ -4,7 +4,6 @@ import cz.cuni.matfyz.server.entity.Entity;
 import cz.cuni.matfyz.server.entity.database.DatabaseView;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class MappingView extends Entity {

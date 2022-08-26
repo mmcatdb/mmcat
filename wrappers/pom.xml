@@ -9,12 +9,12 @@
     <artifactId>wrappers</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>wrapper-mongodb</module>
-        <module>wrapper-neo4j</module>
-        <module>wrapper-postgresql</module>
-        <module>wrapper-cassandra</module>
-        <module>wrapper-riak</module>
-        <module>wrapper-dummy</module>
+        <module>wrappermongodb</module>
+        <module>wrapperneo4j</module>
+        <module>wrapperpostgresql</module>
+        <module>wrappercassandra</module>
+        <module>wrapperriak</module>
+        <module>wrapperdummy</module>
     </modules>
     <dependencies>
         <dependency>

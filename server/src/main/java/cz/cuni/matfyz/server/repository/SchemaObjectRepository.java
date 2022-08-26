@@ -6,12 +6,11 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import cz.cuni.matfyz.server.utils.Position;
 
 import java.sql.Statement;
-import java.util.*;
+import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
 /**
- * 
  * @author jachym.bartik
  */
 @Repository
@@ -24,7 +23,7 @@ public class SchemaObjectRepository {
                 FROM schema_object
                 JOIN schema_object_in_category ON (schema_object_id = schema_object.id)
                 WHERE schema_category_id = ?;
-            """);
+                """);
             statement.setInt(1, categoryId);
             var resultSet = statement.executeQuery();
 
@@ -63,7 +62,7 @@ public class SchemaObjectRepository {
                 SET position = ?::jsonb
                 WHERE schema_category_id = ?
                     AND schema_object_id = ?;
-            """);
+                """);
             statement.setString(1, newPosition.toJSON().toString());
             statement.setInt(2, categoryId);
             statement.setInt(3, objectId);
@@ -78,7 +77,7 @@ public class SchemaObjectRepository {
     public Integer add(SchemaObjectUpdate object, int categoryId) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_object (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, object.jsonValue);
+            statement.setString(1, object.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -93,7 +92,7 @@ public class SchemaObjectRepository {
             var categoryStatement = connection.prepareStatement("INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position) VALUES (?, ?, ?::jsonb)", Statement.RETURN_GENERATED_KEYS);
             categoryStatement.setInt(1, categoryId);
             categoryStatement.setInt(2, generatedId);
-            categoryStatement.setString(3, object.position.toJSON().toString());
+            categoryStatement.setString(3, object.position().toJSON().toString());
 
             int categoryAffectedRows = categoryStatement.executeUpdate();
             if (categoryAffectedRows == 0)

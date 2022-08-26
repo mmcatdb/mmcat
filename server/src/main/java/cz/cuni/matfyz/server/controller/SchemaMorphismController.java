@@ -11,18 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 
  * @author jachym.bartik
  */
 @RestController
-public class SchemaMorphismController
-{
+public class SchemaMorphismController {
+
     @Autowired
     private SchemaMorphismService service;
 
     @GetMapping("/schemaMorphisms/{id}")
-    public SchemaMorphismWrapper getMorphism(@PathVariable int id)
-    {
+    public SchemaMorphismWrapper getMorphism(@PathVariable int id) {
         SchemaMorphismWrapper morphism = service.find(id);
 
         if (morphism != null)

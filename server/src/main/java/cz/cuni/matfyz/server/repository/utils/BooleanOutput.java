@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.server.repository.utils;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class BooleanOutput {

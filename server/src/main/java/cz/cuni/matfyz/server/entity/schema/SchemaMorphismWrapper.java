@@ -3,7 +3,6 @@ package cz.cuni.matfyz.server.entity.schema;
 import cz.cuni.matfyz.server.entity.Entity;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class SchemaMorphismWrapper extends Entity { // implements JSONConvertible
@@ -32,13 +31,13 @@ public class SchemaMorphismWrapper extends Entity { // implements JSONConvertibl
         protected JSONObject _toJSON(SchemaMorphismWrapper object) throws JSONException {
             var output = new JSONObject();
 
-			output.put("id", object.id);
+            output.put("id", object.id);
             output.put("value", object.jsonValue);
 
             return output;
         }
 
-	}
+    }
     */
 
 }

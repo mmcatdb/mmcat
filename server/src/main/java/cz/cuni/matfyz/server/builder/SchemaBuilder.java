@@ -1,8 +1,5 @@
 package cz.cuni.matfyz.server.builder;
 
-import java.util.Map;
-import java.util.TreeMap;
-
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
@@ -12,8 +9,10 @@ import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
- * 
  * @author jachym.bartik
  */
 public class SchemaBuilder {

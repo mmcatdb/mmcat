@@ -1,20 +1,17 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.server.utils.UserStore;
+
+import java.util.List;
+import java.util.Map.Entry;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import javax.servlet.http.HttpSession;
-
-
 /**
- * 
  * @author jachym.bartik
  */
 @Service

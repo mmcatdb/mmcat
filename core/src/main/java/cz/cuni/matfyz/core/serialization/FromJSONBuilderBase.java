@@ -6,21 +6,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jachymb.bartik
  */
-public abstract class FromJSONBuilderBase<Type extends JSONConvertible> implements FromJSONBuilder<Type> {
+public abstract class FromJSONBuilderBase<T extends JSONConvertible> implements FromJSONBuilder<T> {
 
     /**
-     * A default name-of-the-Type-class implementation which expects the JSONConverter<Type> class to be an inner class of the Type.
+     * A default name-of-the-T-class implementation which expects the JSONConverter-T class to be an inner class of the T.
      */
     protected String name() {
         return this.getClass().getDeclaringClass().getSimpleName();
     }
 
-    public Type fromJSON(JSONObject jsonObject) {
+    protected abstract T innerFromJSON(JSONObject jsonObject) throws JSONException;
+
+    public T fromJSON(JSONObject jsonObject) {
         try {
-            return _fromJSON(jsonObject);
+            return innerFromJSON(jsonObject);
         }
         catch (JSONException exception) {
             Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -30,9 +31,7 @@ public abstract class FromJSONBuilderBase<Type extends JSONConvertible> implemen
         return null;
     }
 
-    protected abstract Type _fromJSON(JSONObject jsonObject) throws JSONException;
-
-    public Type fromJSON(String jsonValue) {
+    public T fromJSON(String jsonValue) {
         try {
             JSONObject jsonObject = new JSONObject(jsonValue);
             return fromJSON(jsonObject);

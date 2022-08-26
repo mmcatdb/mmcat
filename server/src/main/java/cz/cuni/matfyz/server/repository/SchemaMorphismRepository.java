@@ -1,15 +1,15 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.server.entity.schema.SchemaMorphismUpdate;
+import cz.cuni.matfyz.server.entity.schema.SchemaMorphismUpdateFixed;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
-import java.util.*;
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 /**
- * 
  * @author jachym.bartik
  */
 @Repository
@@ -22,7 +22,7 @@ public class SchemaMorphismRepository {
                 FROM schema_morphism
                 JOIN schema_morphism_in_category ON (schema_morphism_id = schema_morphism.id)
                 WHERE schema_category_id = ?;
-            """);
+                """);
             statement.setInt(1, categoryId);
             var resultSet = statement.executeQuery();
 
@@ -55,13 +55,13 @@ public class SchemaMorphismRepository {
         });
     }
 
-    public Integer add(SchemaMorphismUpdate morphism, int categoryId) {
+    public Integer add(SchemaMorphismUpdateFixed morphism, int categoryId) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value) VALUES (?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             
-            statement.setInt(1, morphism.domId);
-            statement.setInt(2, morphism.codId);
-            statement.setString(3, morphism.jsonValue);
+            statement.setInt(1, morphism.domId());
+            statement.setInt(2, morphism.codId());
+            statement.setString(3, morphism.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

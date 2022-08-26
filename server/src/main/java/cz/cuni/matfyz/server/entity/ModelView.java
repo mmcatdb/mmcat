@@ -1,13 +1,12 @@
 package cz.cuni.matfyz.server.entity;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class ModelView {
 
-    public int jobId;
-    public String jobName;
+    public final int jobId;
+    public final String jobName;
 
     public ModelView(int jobId, String jobName) {
         this.jobId = jobId;
@@ -15,7 +14,7 @@ public class ModelView {
     }
 
     public ModelView(Model model) {
-        this(model.jobId, model.jobName);
+        this(model.jobId(), model.jobName());
     }
 
 }

@@ -1,22 +1,21 @@
 package cz.cuni.matfyz.server.entity.database;
 
-import cz.cuni.matfyz.abstractWrappers.AbstractPathWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class DatabaseConfiguration {
 
-	public boolean isPropertyToOneAllowed;
-	public boolean isPropertyToManyAllowed;
-	public boolean isInliningToOneAllowed;
-	public boolean isInliningToManyAllowed;
-	public boolean isGrouppingAllowed;
-	public boolean isDynamicNamingAllowed;
-	public boolean isAnonymousNamingAllowed;
-	public boolean isReferenceAllowed;
-    public boolean isComplexPropertyAllowed;
+    public final boolean isPropertyToOneAllowed;
+    public final boolean isPropertyToManyAllowed;
+    public final boolean isInliningToOneAllowed;
+    public final boolean isInliningToManyAllowed;
+    public final boolean isGrouppingAllowed;
+    public final boolean isDynamicNamingAllowed;
+    public final boolean isAnonymousNamingAllowed;
+    public final boolean isReferenceAllowed;
+    public final boolean isComplexPropertyAllowed;
 
     public DatabaseConfiguration(AbstractPathWrapper wrapper) {
         this.isPropertyToOneAllowed = wrapper.isPropertyToOneAllowed();

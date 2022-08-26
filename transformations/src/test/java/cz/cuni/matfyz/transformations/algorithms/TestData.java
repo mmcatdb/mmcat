@@ -1,19 +1,27 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.core.category.*;
-import cz.cuni.matfyz.core.schema.*;
-import cz.cuni.matfyz.core.schema.SchemaMorphism.*;
-import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.mapping.*;
+import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.DomainRow;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
+import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
+import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.core.mapping.SimpleProperty;
+import cz.cuni.matfyz.core.mapping.StaticName;
+import cz.cuni.matfyz.core.schema.Id;
+import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.core.schema.SchemaMorphism;
+import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
+import cz.cuni.matfyz.core.schema.SchemaMorphism.Min;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 
-import java.util.*;
+import java.util.Set;
 
 /**
- *
  * @author jachymb.bartik
  */
-public class TestData
-{
+public class TestData {
+
     private final Key customerKey = new Key(100);
     private final Key idKey = new Key(101);
     private final Key orderedKey = new Key(102);
@@ -80,16 +88,14 @@ public class TestData
     
     private final Signature addressToNumber = orderToAddress.dual().concatenate(orderToNumber);
 
-    private enum Cardinality
-    {
+    private enum Cardinality {
         ONE_TO_ONE,
         ONE_TO_MANY,
         MANY_TO_ONE,
         MANY_TO_MANY
     }
 
-    public SchemaCategory createDefaultSchemaCategory()
-    {
+    public SchemaCategory createDefaultSchemaCategory() {
         var schema = new SchemaCategory();
         var order = buildOrder(schema);
         addArray(schema, order);
@@ -102,13 +108,11 @@ public class TestData
         return schema;
     }
 
-    public Key getOrderKey()
-    {
+    public Key getOrderKey() {
         return orderKey;
     }
 
-    private SchemaObject buildOrder(SchemaCategory schema)
-    {
+    private SchemaObject buildOrder(SchemaCategory schema) {
         var order = createSchemaObject(
             orderKey,
             "Order",
@@ -119,7 +123,7 @@ public class TestData
         var number = createSchemaObject(
             numberKey,
             "Number",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(number);
         addMorphismWithDual(schema, orderToNumber, order, number, Cardinality.ONE_TO_ONE);
@@ -127,20 +131,18 @@ public class TestData
         return order;
     }
 
-    private void addArray(SchemaCategory schema, SchemaObject order)
-    {
+    private void addArray(SchemaCategory schema, SchemaObject order) {
         var array = createSchemaObject(
             arrayKey,
             "Array",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(array);
         addMorphismWithDual(schema, orderToArray, order, array, Cardinality.ONE_TO_MANY);
     }
     
-    private void addItems(SchemaCategory schema, SchemaObject order)
-    {
-        var number = schema.getObject(numberKey);
+    private void addItems(SchemaCategory schema, SchemaObject order) {
+        //var number = schema.getObject(numberKey);
 
         var items = createSchemaObject(
             itemsKey,
@@ -154,7 +156,7 @@ public class TestData
         var quantity = createSchemaObject(
             quantityKey,
             "Quantity",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(quantity);
         addMorphismWithDual(schema, itemsToQuantity, items, quantity, Cardinality.MANY_TO_ONE);
@@ -170,7 +172,7 @@ public class TestData
         var pid = createSchemaObject(
             pidKey,
             "Id",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(pid);
         addMorphismWithDual(schema, productToPid, product, pid, Cardinality.ONE_TO_ONE);
@@ -179,7 +181,7 @@ public class TestData
         var price = createSchemaObject(
             priceKey,
             "Price",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(price);
         addMorphismWithDual(schema, productToPrice, product, price, Cardinality.MANY_TO_ONE);
@@ -188,15 +190,14 @@ public class TestData
         var pname = createSchemaObject(
             pnameKey,
             "Name",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(pname);
         addMorphismWithDual(schema, productToPname, product, pname, Cardinality.MANY_TO_ONE);
         //addMorphismWithDual(schema, itemsToPname, items, pname, Cardinality.MANY_TO_ONE);
     }
     
-    private void addContact(SchemaCategory schema, SchemaObject order)
-    {
+    private void addContact(SchemaCategory schema, SchemaObject order) {
         var contact = createSchemaObject(
             contactKey,
             "Contact",
@@ -208,7 +209,7 @@ public class TestData
         var value = createSchemaObject(
             valueKey,
             "Value",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(value);
         addMorphismWithDual(schema, contactToValue, contact, value, Cardinality.ONE_TO_ONE);
@@ -224,19 +225,18 @@ public class TestData
         var name = createSchemaObject(
             nameKey,
             "Name",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(name);
         addMorphismWithDual(schema, typeToName, type, name, Cardinality.ONE_TO_ONE);
         addMorphismWithDual(schema, contactToName, contact, name, Cardinality.MANY_TO_ONE);
     }
     
-    private void addNestedDoc(SchemaCategory schema, SchemaObject order)
-    {   
+    private void addNestedDoc(SchemaCategory schema, SchemaObject order) {   
         var nestedDoc = createSchemaObject(
             nestedDocKey,
             "NestedDoc",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(nestedDoc);
         addMorphismWithDual(schema, orderToNestedDoc, order, nestedDoc, Cardinality.ONE_TO_ONE);
@@ -244,7 +244,7 @@ public class TestData
         var propertyA = createSchemaObject(
             propertyAKey,
             "PropertyA",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(propertyA);
         addMorphismWithDual(schema, nestedDocToPropertyA, nestedDoc, propertyA, Cardinality.ONE_TO_ONE);
@@ -252,7 +252,7 @@ public class TestData
         var propertyB = createSchemaObject(
             propertyBKey,
             "PropertyB",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(propertyB);
         addMorphismWithDual(schema, nestedDocToPropertyB, nestedDoc, propertyB, Cardinality.ONE_TO_ONE);
@@ -260,14 +260,13 @@ public class TestData
         var propertyC = createSchemaObject(
             propertyCKey,
             "PropertyC",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(propertyC);
         addMorphismWithDual(schema, nestedDocToPropertyC, nestedDoc, propertyC, Cardinality.ONE_TO_ONE);
     }
     
-    private void addOrdered(SchemaCategory schema, SchemaObject order)
-    {
+    private void addOrdered(SchemaCategory schema, SchemaObject order) {
         var ordered = createSchemaObject(
             orderedKey,
             "Ordered",
@@ -287,15 +286,14 @@ public class TestData
         var id = createSchemaObject(
             idKey,
             "Id",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(id);
         addMorphismWithDual(schema, customerToId, customer, id, Cardinality.ONE_TO_ONE);
         addMorphismWithDual(schema, orderToId, order, id, Cardinality.MANY_TO_ONE);
     }
 
-    private void addAddress(SchemaCategory schema, SchemaObject order)
-    {
+    private void addAddress(SchemaCategory schema, SchemaObject order) {
         var address = createSchemaObject(
             addressKey,
             "address",
@@ -307,7 +305,7 @@ public class TestData
         var label = createSchemaObject(
             labelKey,
             "label",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(label);
         addMorphismWithDual(schema, addressToLabel, address, label, Cardinality.ONE_TO_ONE);
@@ -315,7 +313,7 @@ public class TestData
         var content = createSchemaObject(
             contentKey,
             "content",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(content);
         addMorphismWithDual(schema, addressToContent, address, content, Cardinality.ONE_TO_ONE);
@@ -323,7 +321,7 @@ public class TestData
         var text = createSchemaObject(
             textKey,
             "text",
-            Id.Empty()
+            Id.createEmpty()
         );
         schema.addObject(text);
         addMorphismWithDual(schema, contentToText, content, text, Cardinality.ONE_TO_ONE);
@@ -331,22 +329,19 @@ public class TestData
         var locale = new SchemaObject(
             localeKey,
             "locale",
-            Id.Empty(),
-            Set.of(Id.Empty())
+            Id.createEmpty(),
+            Set.of(Id.createEmpty())
         );
         schema.addObject(locale);
         addMorphismWithDual(schema, contentToLocale, content, locale, Cardinality.ONE_TO_ONE);
     }
     
-    private SchemaObject createSchemaObject(Key key, String name, Id id)
-    {
+    private SchemaObject createSchemaObject(Key key, String name, Id id) {
         return new SchemaObject(key, name, id, Set.of(id));
     }
 
-    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Cardinality cardinality)
-    {
-        switch (cardinality)
-        {
+    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Cardinality cardinality) {
+        switch (cardinality) {
             case ONE_TO_ONE:
                 addMorphismWithDual(schema, signature, dom, cod, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
                 break;
@@ -362,8 +357,7 @@ public class TestData
         }
     }
     
-    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax)
-    {
+    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax) {
         var builder = new SchemaMorphism.Builder();
         var morphism = builder.fromArguments(signature, dom, cod, min, max);
         var dual = builder.fromDual(morphism, dualMin, dualMax);
@@ -372,13 +366,11 @@ public class TestData
         schema.addMorphism(dual);
     }
     
-    private InstanceCategory buildInstanceScenario(SchemaCategory schema)
-    {
+    private InstanceCategory buildInstanceScenario(SchemaCategory schema) {
         return new InstanceCategoryBuilder().setSchemaCategory(schema).build();
     }
 
-    public InstanceCategory expectedInstance_order(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_order(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -388,16 +380,15 @@ public class TestData
         return instance;
     }
 
-    private DomainRow expectedOrder(TestInstanceCategoryBuilder builder, String orderNumber)
-    {
+    private DomainRow expectedOrder(TestInstanceCategoryBuilder builder, String orderNumber) {
         var order = builder.value(orderToNumber, orderNumber).object(orderKey);
-        var number = builder.value(Signature.Empty(), orderNumber).object(numberKey);
+        var number = builder.value(Signature.createEmpty(), orderNumber).object(numberKey);
         builder.morphism(orderToNumber, order, number);
+        
         return order;
     }
 
-    public InstanceCategory expectedInstance_nestedDoc(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_nestedDoc(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -407,13 +398,12 @@ public class TestData
         return instance;
     }
 
-    private void expectedOrder_nestedDoc(TestInstanceCategoryBuilder builder, String orderNumber, String uniqueId, String valueA, String valueB, String valueC)
-    {
+    private void expectedOrder_nestedDoc(TestInstanceCategoryBuilder builder, String orderNumber, String uniqueId, String valueA, String valueB, String valueC) {
         var order = expectedOrder(builder, orderNumber);
-        var nestedDoc = builder.value(Signature.Empty(), uniqueId).object(nestedDocKey);
-        var propertyA = builder.value(Signature.Empty(), valueA).object(propertyAKey);
-        var propertyB = builder.value(Signature.Empty(), valueB).object(propertyBKey);
-        var propertyC = builder.value(Signature.Empty(), valueC).object(propertyCKey);
+        var nestedDoc = builder.value(Signature.createEmpty(), uniqueId).object(nestedDocKey);
+        var propertyA = builder.value(Signature.createEmpty(), valueA).object(propertyAKey);
+        var propertyB = builder.value(Signature.createEmpty(), valueB).object(propertyBKey);
+        var propertyC = builder.value(Signature.createEmpty(), valueC).object(propertyCKey);
         
         builder.morphism(orderToNestedDoc, order, nestedDoc);
         builder.morphism(nestedDocToPropertyA, nestedDoc, propertyA);
@@ -421,8 +411,7 @@ public class TestData
         builder.morphism(nestedDocToPropertyC, nestedDoc, propertyC);
     }
 
-    public InstanceCategory expectedInstance_array(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_array(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -432,18 +421,15 @@ public class TestData
         return instance;
     }
 
-    private void expectedOrder_array(TestInstanceCategoryBuilder builder, String orderNumber, String[] array)
-    {
+    private void expectedOrder_array(TestInstanceCategoryBuilder builder, String orderNumber, String[] array) {
         var order = expectedOrder(builder, orderNumber);
-        for (String value : array)
-        {
-            var arrayItem = builder.value(Signature.Empty(), value).object(arrayKey);
+        for (String value : array) {
+            var arrayItem = builder.value(Signature.createEmpty(), value).object(arrayKey);
             builder.morphism(orderToArray, order, arrayItem);
         }
     }
 
-    public InstanceCategory expectedInstance_items(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_items(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
 
@@ -456,30 +442,28 @@ public class TestData
         return instance;
     }
 
-    private void expectedItem(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
-    {
+    private void expectedItem(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue) {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
         builder.morphism(orderToItems, order, items);
-        var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
+        var quantity = builder.value(Signature.createEmpty(), quantityValue).object(quantityKey);
         builder.morphism(itemsToQuantity, items, quantity);
 
         var product = builder.value(productToPid, pidValue).object(productKey);
         builder.morphism(itemsToProduct, items, product);
 
-        var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
+        var pid = builder.value(Signature.createEmpty(), pidValue).object(pidKey);
         builder.morphism(productToPid, product, pid);
         // Empty morphisms are needed because of string comparison of actual and expected instance categories.
         builder.morphism(itemsToPid);
-        var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
+        var pname = builder.value(Signature.createEmpty(), pnameValue).object(pnameKey);
         builder.morphism(productToPname, product, pname);
         builder.morphism(itemsToPname);
-        var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
+        var price = builder.value(Signature.createEmpty(), priceValue).object(priceKey);
         builder.morphism(productToPrice, product, price);
         builder.morphism(itemsToPrice);
     }
 
-    public InstanceCategory expectedInstance_contact(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_contact(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -494,11 +478,10 @@ public class TestData
         return instance;
     }
 
-    private void addExpectedContact(TestInstanceCategoryBuilder builder, DomainRow order, String numberValue, String valueValue, String nameValue)
-    {
+    private void addExpectedContact(TestInstanceCategoryBuilder builder, DomainRow order, String numberValue, String valueValue, String nameValue) {
         var contact = builder.value(contactToNumber, numberValue).value(contactToValue, valueValue).value(contactToName, nameValue).object(contactKey);
-        var value = builder.value(Signature.Empty(), valueValue).object(valueKey);
-        var name = builder.value(Signature.Empty(), nameValue).object(nameKey);
+        var value = builder.value(Signature.createEmpty(), valueValue).object(valueKey);
+        var name = builder.value(Signature.createEmpty(), nameValue).object(nameKey);
         var type = builder.value(typeToName, nameValue).object(typeKey);
         
         builder.morphism(contactToValue, contact, value);
@@ -507,8 +490,7 @@ public class TestData
         builder.morphism(orderToContact, order, contact);
     }
 
-    public InstanceCategory expectedInstance_ordered(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_ordered(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -518,10 +500,9 @@ public class TestData
         return instance;
     }
 
-    public DomainRow expectedOrder_ordered(TestInstanceCategoryBuilder builder, String orderNumber, String customerId)
-    {
+    public DomainRow expectedOrder_ordered(TestInstanceCategoryBuilder builder, String orderNumber, String customerId) {
         var order = expectedOrder(builder, orderNumber);
-        var id = builder.value(Signature.Empty(), customerId).object(idKey);
+        var id = builder.value(Signature.createEmpty(), customerId).object(idKey);
         var customer = builder.value(customerToId, customerId).object(customerKey);
         var ordered = builder.value(orderedToId, customerId).value(orderedToNumber, orderNumber).object(orderedKey);
 
@@ -533,24 +514,23 @@ public class TestData
         return order;
     }
 
-    public InstanceCategory expectedInstance_nestedDocMissingSimple(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_nestedDocMissingSimple(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
         var order1 = expectedOrder(builder, "2043");
-        var nestedDoc1 = builder.value(Signature.Empty(), "0").object(nestedDocKey);
-        var propertyA1 = builder.value(Signature.Empty(), "hodnotaA").object(propertyAKey);
-        var propertyC1 = builder.value(Signature.Empty(), "hodnotaC").object(propertyCKey);
+        var nestedDoc1 = builder.value(Signature.createEmpty(), "0").object(nestedDocKey);
+        var propertyA1 = builder.value(Signature.createEmpty(), "hodnotaA").object(propertyAKey);
+        var propertyC1 = builder.value(Signature.createEmpty(), "hodnotaC").object(propertyCKey);
         
         builder.morphism(orderToNestedDoc, order1, nestedDoc1);
         builder.morphism(nestedDocToPropertyA, nestedDoc1, propertyA1);
         builder.morphism(nestedDocToPropertyC, nestedDoc1, propertyC1);
         
         var order2 = expectedOrder(builder, "1653");
-        var nestedDoc2 = builder.value(Signature.Empty(), "1").object(nestedDocKey);
-        var propertyA2 = builder.value(Signature.Empty(), "hodnotaA2").object(propertyAKey);
-        var propertyC2 = builder.value(Signature.Empty(), "hodnotaC2").object(propertyCKey);
+        var nestedDoc2 = builder.value(Signature.createEmpty(), "1").object(nestedDocKey);
+        var propertyA2 = builder.value(Signature.createEmpty(), "hodnotaA2").object(propertyAKey);
+        var propertyC2 = builder.value(Signature.createEmpty(), "hodnotaC2").object(propertyCKey);
         
         builder.morphism(orderToNestedDoc, order2, nestedDoc2);
         builder.morphism(nestedDocToPropertyA, nestedDoc2, propertyA2);
@@ -559,8 +539,7 @@ public class TestData
         return instance;
     }
 
-    public InstanceCategory expectedInstance_nestedDocMissingComplex(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_nestedDocMissingComplex(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -570,8 +549,7 @@ public class TestData
         return instance;
     }
 
-    public InstanceCategory expectedInstance_itemsEmpty(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_itemsEmpty(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -580,8 +558,7 @@ public class TestData
         return instance;
     }
 
-    public InstanceCategory expectedInstance_address(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_address(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -596,13 +573,12 @@ public class TestData
         return instance;
     }
 
-    private void addExpectedAddress(TestInstanceCategoryBuilder builder, DomainRow order, String uniqueId, String number, String label, String text, String locale)
-    {
+    private void addExpectedAddress(TestInstanceCategoryBuilder builder, DomainRow order, String uniqueId, String number, String label, String text, String locale) {
         var address = builder.value(addressToNumber, number).value(addressToLabel, label).object(addressKey);
-        var labelRow = builder.value(Signature.Empty(), label).object(labelKey);
-        var contentRow = builder.value(Signature.Empty(), uniqueId).object(contentKey);
-        var textRow = builder.value(Signature.Empty(), text).object(textKey);
-        var localeRow = builder.value(Signature.Empty(), locale).object(localeKey);
+        var labelRow = builder.value(Signature.createEmpty(), label).object(labelKey);
+        var contentRow = builder.value(Signature.createEmpty(), uniqueId).object(contentKey);
+        var textRow = builder.value(Signature.createEmpty(), text).object(textKey);
+        var localeRow = builder.value(Signature.createEmpty(), locale).object(localeKey);
         
         builder.morphism(addressToLabel, address, labelRow);
         builder.morphism(addressToContent, address, contentRow);
@@ -611,8 +587,7 @@ public class TestData
         builder.morphism(orderToAddress, order, address);
     }
 
-    public InstanceCategory expectedInstance_itemsMissing(SchemaCategory schema)
-    {
+    public InstanceCategory expectedInstance_itemsMissing(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
         
@@ -626,13 +601,12 @@ public class TestData
         return instance;
     }
 
-    private void expectedItemMissing(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue)
-    {
+    private void expectedItemMissing(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue) {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
         builder.morphism(orderToItems, order, items);
 
         if (quantityValue != null) {
-            var quantity = builder.value(Signature.Empty(), quantityValue).object(quantityKey);
+            var quantity = builder.value(Signature.createEmpty(), quantityValue).object(quantityKey);
             builder.morphism(itemsToQuantity, items, quantity);
         }
 
@@ -640,34 +614,32 @@ public class TestData
         builder.morphism(itemsToProduct, items, product);
 
         if (pidValue != null) {
-            var pid = builder.value(Signature.Empty(), pidValue).object(pidKey);
+            var pid = builder.value(Signature.createEmpty(), pidValue).object(pidKey);
             builder.morphism(productToPid, product, pid);
             builder.morphism(itemsToPid);
         }
 
         if (pnameValue != null) {
-            var pname = builder.value(Signature.Empty(), pnameValue).object(pnameKey);
+            var pname = builder.value(Signature.createEmpty(), pnameValue).object(pnameKey);
             builder.morphism(productToPname, product, pname);
             builder.morphism(itemsToPname);
         }
 
         if (priceValue != null) {
-            var price = builder.value(Signature.Empty(), priceValue).object(priceKey);
+            var price = builder.value(Signature.createEmpty(), priceValue).object(priceKey);
             builder.morphism(productToPrice, product, price);
             builder.morphism(itemsToPrice);
         }
     }
 
-    public ComplexProperty path_order()
-    {
-        return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
+    public ComplexProperty path_order() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("number", orderToNumber)
         );
     }
 
-    public ComplexProperty path_nestedDoc()
-    {
-        return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
+    public ComplexProperty path_nestedDoc() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("nested", orderToNestedDoc,
                 new SimpleProperty("propertyA", nestedDocToPropertyA),
@@ -677,17 +649,15 @@ public class TestData
         );
     }
 
-    public ComplexProperty path_array()
-    {
-        return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
+    public ComplexProperty path_array() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("number", orderToNumber),
             new SimpleProperty("array", orderToArray)
         );
     }
 
-    public ComplexProperty path_items()
-    {
-        return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
+    public ComplexProperty path_items() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("items", orderToItems,
                 new SimpleProperty("productId", itemsToPid),
@@ -698,9 +668,8 @@ public class TestData
         );
     }
 
-    public ComplexProperty path_contact()
-    {
-        return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
+    public ComplexProperty path_contact() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("contact", orderToContact,
                 new SimpleProperty(contactToName, contactToValue)
@@ -708,19 +677,17 @@ public class TestData
         );
     }
 
-    public ComplexProperty path_ordered()
-    {
-        return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
-            new ComplexProperty("_id", Signature.Null(),
+    public ComplexProperty path_ordered() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+            new ComplexProperty("_id", Signature.createNull(),
                 new SimpleProperty("customer", orderToCustomer),
                 new SimpleProperty("number", orderToNumber)
             )
         );
     }
 
-    public ComplexProperty path_address()
-    {
-        return new ComplexProperty(StaticName.Anonymous(), Signature.Null(),
+    public ComplexProperty path_address() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("number", orderToNumber),
             new ComplexProperty("address", orderToAddress,
                 new ComplexProperty(addressToLabel, addressToContent,

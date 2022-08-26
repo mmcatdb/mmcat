@@ -3,7 +3,6 @@ package cz.cuni.matfyz.server.entity.schema;
 import java.util.Collection;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class SchemaCategoryWrapper extends SchemaCategoryInfo {

@@ -1,11 +1,9 @@
 package cz.cuni.matfyz.server.entity.schema;
 
-public class SchemaMorphismUpdate {
-
-    public Integer domId;
-    public Integer codId;
-    public Integer temporaryDomId;
-    public Integer temporaryCodId;
-    public String jsonValue;
-
-}
+public record SchemaMorphismUpdate(
+    Integer domId,
+    Integer codId,
+    Integer temporaryDomId,
+    Integer temporaryCodId,
+    String jsonValue
+) {}

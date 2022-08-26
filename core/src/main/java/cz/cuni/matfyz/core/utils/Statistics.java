@@ -8,14 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jachymb.bartik
  */
 public class Statistics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Statistics.class);
 
-	private static Map<Interval, Long> times = new TreeMap<>();
+    private static Map<Interval, Long> times = new TreeMap<>();
     private static Map<Interval, Long> starts = new TreeMap<>();
 
     public static void start(Interval interval) {
@@ -40,10 +39,25 @@ public class Statistics {
         return times.get(interval);
     }
 
+    public static long get(Counter counter) {
+        return Optional.ofNullable(counters.get(counter)).orElse(0L);
+    }
+
     public static void reset(Interval interval) {
         times.put(interval, null);
         starts.put(interval, null);
     }
+
+    public static void reset(Counter counter) {
+        counters.put(counter, 0L);
+    }
+
+    public static void reset() {
+        times.clear();
+        starts.clear();
+        counters = generateCounters();
+    }
+
 
     public static String getInfo(Interval interval) {
         var value = times.get(interval);
@@ -51,8 +65,27 @@ public class Statistics {
         return (value == null ? "Null" : (value / 1000000 + " ms"));
     }
 
+    public static String getInfo(Counter counter) {
+        var value = get(counter);
+        return printLargeInt(value);
+    }
+
+    private static String printLargeInt(long value) {
+        if (value > 1000000000)
+            return value / 1000000000 + "G";
+        if (value > 1000000)
+            return value / 1000000 + "M";
+        if (value > 1000)
+            return value / 1000 + "k";
+        return value + "";
+    }
+    
     public static void logInfo(Interval interval) {
-        LOGGER.info(getInfo(interval) + "\t(" + interval + ")");
+        LOGGER.info("{}\t({})", getInfo(interval), interval);
+    }
+    
+    public static void logInfo(Counter counter) {
+        LOGGER.info("{}\t({})", getInfo(counter), counter);
     }
 
     public enum Interval {
@@ -75,35 +108,10 @@ public class Statistics {
         return value;
     }
 
-    public static long get(Counter counter) {
-        return Optional.ofNullable(counters.get(counter)).orElse(0L);
-    }
+
 
     public static void set(Counter counter, long value) {
         counters.put(counter, value);
-    }
-
-    public static void reset(Counter counter) {
-        counters.put(counter, 0L);
-    }
-
-    public static String getInfo(Counter counter) {
-        var value = get(counter);
-
-        var valueString = 
-            value < 1000 ?
-                value :
-                value < 1000000 ?
-                    (value / 1000 + "k") :
-                    value < 1000000000 ?
-                        (value / 1000000 + "M") :
-                        (value / 1000000000 + "G");
-            
-        return valueString.toString();
-    }
-
-    public static void logInfo(Counter counter) {
-        LOGGER.info(getInfo(counter) + "\t(" + counter + ")");
     }
 
     public enum Counter {
@@ -120,12 +128,6 @@ public class Statistics {
             map.put(counter, 0L);
 
         return map;
-    }
-
-    public static void reset() {
-        times.clear();
-        starts.clear();
-        counters = generateCounters();
     }
 
 }

@@ -1,12 +1,12 @@
 package cz.cuni.matfyz.core.serialization;
 
-import org.json.*;
+import org.json.JSONObject;
 
 /**
- *
  * @author jachymb.bartik
  */
-public interface ToJSONConverter<Type extends JSONConvertible>
-{
-    public JSONObject toJSON(Type object);
+public interface ToJSONConverter<T extends JSONConvertible> {
+
+    public JSONObject toJSON(T object);
+    
 }

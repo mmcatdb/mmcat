@@ -1,20 +1,18 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.jupiter.api.Test;
 
 /**
- *
  * @author jachymb.bartik
  */
-public class SerializationTests
-{
+public class SerializationTests {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializationTests.class);
 
     @Test
-    public void createExampleSchemaCategory()
-    {
+    public void createExampleSchemaCategory() {
         var data = new TestData();
         data.createDefaultSchemaCategory();
         //var schema = data.createDefaultSchemaCategory();
@@ -23,8 +21,7 @@ public class SerializationTests
     }
 
     @Test
-    public void createBasicAccessPath()
-    {
+    public void createBasicAccessPath() {
         var data = new TestData();
         var path = data.path_order();
 

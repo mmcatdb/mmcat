@@ -7,78 +7,67 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
-
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *
  * @author pavel.koupil, jachym.bartik
  */
-public class Mapping implements JSONConvertible
-{
+public class Mapping implements JSONConvertible {
+
     private final SchemaCategory category;
-	private final SchemaObject rootObject;
-	private final SchemaMorphism rootMorphism;
+    private final SchemaObject rootObject;
+    private final SchemaMorphism rootMorphism;
     
-	private ComplexProperty accessPath;
+    private ComplexProperty accessPath;
     private String kindName;
     private Collection<Signature> pkey;
     
-    private Mapping(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism)
-    {
+    private Mapping(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism) {
         this.category = category;
         this.rootObject = rootObject;
         this.rootMorphism = rootMorphism;
     }
 
-    public SchemaCategory category()
-    {
+    public SchemaCategory category() {
         return category;
     }
     
-    public boolean hasRootMorphism()
-    {
+    public boolean hasRootMorphism() {
         return rootMorphism != null;
     }
 
-    public SchemaObject rootObject()
-    {
+    public SchemaObject rootObject() {
         return rootObject;
     }
     
-    public SchemaMorphism rootMorphism()
-    {
+    public SchemaMorphism rootMorphism() {
         return rootMorphism;
     }
     
-    public ComplexProperty accessPath()
-    {
+    public ComplexProperty accessPath() {
         return accessPath;
     }
 
-    public String kindName()
-    {
+    public String kindName() {
         return kindName;
     }
 
-    public Collection<Signature> pkey()
-    {
+    public Collection<Signature> pkey() {
         return pkey;
     }
 
     private final List<Reference> references = new ArrayList<Reference>();
 
-    public List<Reference> references()
-    {
+    public List<Reference> references() {
         return references;
     }
 
-    public void setReferences(Iterable<Reference> references)
-    {
+    public void setReferences(Iterable<Reference> references) {
         this.references.clear();
         references.forEach(reference -> this.references.add(reference));
     }
@@ -91,7 +80,7 @@ public class Mapping implements JSONConvertible
     public static class Converter extends ToJSONConverterBase<Mapping> {
 
         @Override
-        protected JSONObject _toJSON(Mapping object) throws JSONException {
+        protected JSONObject innerToJSON(Mapping object) throws JSONException {
             var output = new JSONObject();
     
             output.put("kindName", object.kindName);
@@ -108,19 +97,19 @@ public class Mapping implements JSONConvertible
     public static class Builder extends FromJSONLoaderBase<Mapping> {
     
         public Mapping fromJSON(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, JSONObject jsonObject) {
-			var mapping = new Mapping(category, rootObject, rootMorphism);
-			loadFromJSON(mapping, jsonObject);
-			return mapping;
-		}
+            var mapping = new Mapping(category, rootObject, rootMorphism);
+            loadFromJSON(mapping, jsonObject);
+            return mapping;
+        }
 
         public Mapping fromJSON(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, String jsonValue) {
-			var mapping = new Mapping(category, rootObject, rootMorphism);
-			loadFromJSON(mapping, jsonValue);
-			return mapping;
-		}
+            var mapping = new Mapping(category, rootObject, rootMorphism);
+            loadFromJSON(mapping, jsonValue);
+            return mapping;
+        }
 
         @Override
-        protected void _loadFromJSON(Mapping mapping, JSONObject jsonObject) throws JSONException {
+        protected void innerLoadFromJSON(Mapping mapping, JSONObject jsonObject) throws JSONException {
             mapping.accessPath = new ComplexProperty.Builder().fromJSON(jsonObject.getJSONObject("accessPath"));
             mapping.kindName = jsonObject.getString("kindName");
 
@@ -133,12 +122,12 @@ public class Mapping implements JSONConvertible
         }
 
         public Mapping fromArguments(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, ComplexProperty accessPath, String kindName, Collection<Signature> pkey) {
-			var mapping = new Mapping(category, rootObject, rootMorphism);
-			mapping.accessPath = accessPath;
+            var mapping = new Mapping(category, rootObject, rootMorphism);
+            mapping.accessPath = accessPath;
             mapping.kindName = kindName;
             mapping.pkey = pkey;
-			return mapping;
-		}
+            return mapping;
+        }
     
     }
 }

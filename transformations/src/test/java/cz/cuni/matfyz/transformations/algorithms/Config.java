@@ -1,26 +1,27 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import java.util.Properties;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jachymb.bartik
  */
-abstract class Config
-{
+abstract class Config {
+    
     private static Properties properties;
-    private static Logger LOGGER = LoggerFactory.getLogger(Config.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Config.class);
 
     private Config() {}
 
-    public static String get(String key)
-    {
+    public static String get(String key) {
         if (properties == null)
             loadProperties();
 
@@ -31,10 +32,8 @@ abstract class Config
         return property;
     }
 
-    private static void loadProperties()
-    {
-        try
-        {
+    private static void loadProperties() {
+        try {
             properties = new Properties();
             
             var url = ClassLoader.getSystemResource("application.properties");
@@ -44,16 +43,13 @@ abstract class Config
     
             properties.load(reader);
         }
-        catch (URISyntaxException exception)
-        {
+        catch (URISyntaxException exception) {
             LOGGER.error(exception.toString());
         }
-        catch (FileNotFoundException exception)
-        {
+        catch (FileNotFoundException exception) {
             LOGGER.error(exception.toString());
         }
-        catch (IOException exception)
-        {
+        catch (IOException exception) {
             LOGGER.error(exception.toString());
         }
     }

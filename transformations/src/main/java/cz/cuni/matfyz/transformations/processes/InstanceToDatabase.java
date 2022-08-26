@@ -1,9 +1,10 @@
 package cz.cuni.matfyz.transformations.processes;
 
-import cz.cuni.matfyz.abstractWrappers.AbstractDDLWrapper;
-import cz.cuni.matfyz.abstractWrappers.AbstractPushWrapper;
-import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.mapping.*;
+import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
+import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
+import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
@@ -15,16 +16,10 @@ import cz.cuni.matfyz.transformations.algorithms.DMLAlgorithm;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- *
  * @author jachym.bartik
  */
 public class InstanceToDatabase {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(InstanceToDatabase.class);
 
     private Mapping mapping;
     private InstanceCategory currentInstance;
@@ -42,19 +37,19 @@ public class InstanceToDatabase {
         
         Statistics.start(Interval.INSTANCE_TO_DATABASE);
 
-        InstanceCategory instance = currentInstance != null ?
-            currentInstance :
-            new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
+        InstanceCategory instance = currentInstance != null
+            ? currentInstance
+            : new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
 
         var ddlTransformation = new DDLAlgorithm();
         ddlTransformation.input(mapping, instance, ddlWrapper);
         
         var dmlTransformation = new DMLAlgorithm();
-		dmlTransformation.input(mapping, instance, pushWrapper);
+        dmlTransformation.input(mapping, instance, pushWrapper);
 
         Statistics.start(Interval.CTM_ALGORIGHM);
         DDLStatement ddlStatement = ddlTransformation.algorithm();
-		List<DMLStatement> dmlStatements = dmlTransformation.algorithm();
+        List<DMLStatement> dmlStatements = dmlTransformation.algorithm();
         Statistics.end(Interval.CTM_ALGORIGHM);
 
         var output = new StringBuilder();

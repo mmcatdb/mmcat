@@ -2,14 +2,14 @@ package cz.cuni.matfyz.server.repository.utils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
- * 
  * @author jachym.bartik
  */
-public interface DatabaseGetArrayFunction<OutputType> {
+public interface DatabaseGetArrayFunction<T> {
 
-    void execute(Connection connection, ArrayOutput<OutputType> output) throws SQLException, JsonProcessingException;
+    void execute(Connection connection, ArrayOutput<T> output) throws SQLException, JsonProcessingException;
 
 }

@@ -1,12 +1,11 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.service.JobService;
 import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.server.view.NewJobView;
-import cz.cuni.matfyz.server.entity.Job;
 
-import java.util.*;
-
+import java.util.List;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,24 +19,21 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 
  * @author jachym.bartik
  */
 @RestController
-public class JobController
-{
+public class JobController {
+
     @Autowired
     private JobService service;
 
     @GetMapping("/schema/{schemaId}/jobs")
-    public List<Job> getAllJobsInCategory(@PathVariable int schemaId)
-    {
+    public List<Job> getAllJobsInCategory(@PathVariable int schemaId) {
         return service.findAllInCategory(schemaId);
     }
 
     @GetMapping("/jobs/{id}")
-    public Job getJob(@PathVariable Integer id)
-    {
+    public Job getJob(@PathVariable Integer id) {
         Job job = service.find(id);
         if (job != null)
             return job;
@@ -46,9 +42,8 @@ public class JobController
     }
 
     @PostMapping("/jobs")
-    public Job createNewJob(@RequestBody NewJobView jobView)
-    {
-        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobView.mappingId, null, jobView.name, Job.Type.valueOf(jobView.type), Job.Status.Ready));
+    public Job createNewJob(@RequestBody NewJobView jobView) {
+        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobView.mappingId(), null, jobView.name(), Job.Type.valueOf(jobView.type()), Job.Status.Ready));
         if (newJob != null)
             return newJob;
         
@@ -56,8 +51,7 @@ public class JobController
     }
 
     @PostMapping("/jobs/{id}/start")
-    public Job startJob(@PathVariable int id, HttpSession session)
-    {
+    public Job startJob(@PathVariable int id, HttpSession session) {
         Job job = service.find(id);
         if (job == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job " + id + " not foud.");
@@ -67,8 +61,7 @@ public class JobController
     }
 
     @DeleteMapping("/jobs/{id}")
-    public void deleteJob(@PathVariable Integer id)
-    {
+    public void deleteJob(@PathVariable Integer id) {
         boolean result = service.delete(id);
         if (!result)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

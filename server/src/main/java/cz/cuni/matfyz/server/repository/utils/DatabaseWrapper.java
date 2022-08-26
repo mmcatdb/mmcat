@@ -8,17 +8,17 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
  * @author jachym.bartik
  */
 public abstract class DatabaseWrapper {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
+    private DatabaseWrapper() {}
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
 
     public static Connection getConnection() {
         return createConnection();
@@ -49,18 +49,18 @@ public abstract class DatabaseWrapper {
         return null;
     }
 
-    public static <OutputType> OutputType get(DatabaseGetSingleFunction<OutputType> function) {
+    public static <T> T get(DatabaseGetSingleFunction<T> function) {
         return resolveDatabaseFunction(connection -> {
-            SingleOutput<OutputType> output = new SingleOutput<>();
+            SingleOutput<T> output = new SingleOutput<>();
             function.execute(connection, output);
 
             return output.get();
         });
     }
 
-    public static <OutputType> List<OutputType> getMultiple(DatabaseGetArrayFunction<OutputType> function) {
+    public static <T> List<T> getMultiple(DatabaseGetArrayFunction<T> function) {
         return resolveDatabaseFunction(connection -> {
-            ArrayOutput<OutputType> output = new ArrayOutput<>();
+            ArrayOutput<T> output = new ArrayOutput<>();
             function.execute(connection, output);
 
             return output.get();
@@ -80,7 +80,7 @@ public abstract class DatabaseWrapper {
         return resolvedOutput == null ? false : resolvedOutput;
     }
 
-    private static <ReturnType> ReturnType resolveDatabaseFunction(DatabaseFunction<ReturnType> function) {
+    private static <T> T resolveDatabaseFunction(DatabaseFunction<T> function) {
         Connection connection = null;
 
         try {

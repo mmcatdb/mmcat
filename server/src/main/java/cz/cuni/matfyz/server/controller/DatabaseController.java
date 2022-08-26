@@ -1,31 +1,29 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.database.DatabaseInit;
 import cz.cuni.matfyz.server.entity.database.Database;
-import cz.cuni.matfyz.server.entity.database.DatabaseConfiguration;
+import cz.cuni.matfyz.server.entity.database.DatabaseInit;
 import cz.cuni.matfyz.server.entity.database.DatabaseUpdate;
 import cz.cuni.matfyz.server.entity.database.DatabaseView;
 import cz.cuni.matfyz.server.service.DatabaseService;
-import cz.cuni.matfyz.server.service.WrapperService;
 
-import java.util.*;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * 
  * @author jachym.bartik
  */
 @RestController
 public class DatabaseController {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(DatabaseController.class);
 
     @Autowired
     private DatabaseService service;

@@ -11,18 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 
  * @author jachym.bartik
  */
 @RestController
-public class SchemaObjectController
-{
+public class SchemaObjectController {
+
     @Autowired
     private SchemaObjectService service;
 
     @GetMapping("/schemaObjects/{id}")
-    public SchemaObjectWrapper getObject(@PathVariable int id)
-    {
+    public SchemaObjectWrapper getObject(@PathVariable int id) {
         SchemaObjectWrapper object = service.find(id);
 
         if (object != null)

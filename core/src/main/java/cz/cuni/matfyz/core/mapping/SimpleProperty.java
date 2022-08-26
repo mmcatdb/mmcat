@@ -11,42 +11,36 @@ import org.json.JSONObject;
  * A simple value node in the access path tree. Its context is undefined (null).
  * @author jachymb.bartik
  */
-public class SimpleProperty extends AccessPath
-{
+public class SimpleProperty extends AccessPath {
+
     @Override
-    public IContext context()
-    {
+    public IContext context() {
         return null;
     }
     
     private final SimpleValue value;
     
     @Override
-    public SimpleValue value()
-    {
+    public SimpleValue value() {
         return value;
     }
     
-    public SimpleProperty(Name name, SimpleValue value)
-    {
+    public SimpleProperty(Name name, SimpleValue value) {
         super(name);
         
         this.value = value;
     }
     
-    public SimpleProperty(String name, Signature value)
-    {
+    public SimpleProperty(String name, Signature value) {
         this(new StaticName(name), new SimpleValue(value));
     }
     
-    public SimpleProperty(Signature name, Signature value)
-    {
+    public SimpleProperty(Signature name, Signature value) {
         this(new DynamicName(name), new SimpleValue(value));
     }
     
     @Override
-    protected boolean hasSignature(Signature signature)
-    {
+    protected boolean hasSignature(Signature signature) {
         if (signature == null)
             return value.signature().getType() == Signature.Type.EMPTY;
         
@@ -54,8 +48,7 @@ public class SimpleProperty extends AccessPath
     }
     
     @Override
-    public String toString()
-    {
+    public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(name).append(": ").append(value);
         
@@ -63,8 +56,7 @@ public class SimpleProperty extends AccessPath
     }
     
     @Override
-    public Signature signature()
-    {
+    public Signature signature() {
         return value.signature();
     }
 
@@ -76,7 +68,7 @@ public class SimpleProperty extends AccessPath
     public static class Converter extends ToJSONSwitchConverterBase<SimpleProperty> {
 
         @Override
-        protected JSONObject _toJSON(SimpleProperty object) throws JSONException {
+        protected JSONObject innerToJSON(SimpleProperty object) throws JSONException {
             var output = new JSONObject();
             
             output.put("name", object.name.toJSON());
@@ -90,7 +82,7 @@ public class SimpleProperty extends AccessPath
     public static class Builder extends FromJSONBuilderBase<SimpleProperty> {
     
         @Override
-        protected SimpleProperty _fromJSON(JSONObject jsonObject) throws JSONException {
+        protected SimpleProperty innerFromJSON(JSONObject jsonObject) throws JSONException {
             var name = new Name.Builder().fromJSON(jsonObject.getJSONObject("name"));
             var value = new SimpleValue.Builder().fromJSON(jsonObject.getJSONObject("value"));
             

@@ -1,13 +1,10 @@
 package cz.cuni.matfyz.core.serialization;
 
 /**
- *
  * @author jachymb.bartik
  */
-public interface Identified<IdType extends Comparable<IdType>> {
+public interface Identified<T extends Comparable<T>> {
     
-    public IdType identifier();
-
-    //public UniqueContext<? extends Identified<IdType>, IdType> uniqueContext();
+    public T identifier();
 
 }

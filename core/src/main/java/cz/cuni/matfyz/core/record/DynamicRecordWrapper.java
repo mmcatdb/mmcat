@@ -2,7 +2,8 @@ package cz.cuni.matfyz.core.record;
 
 import cz.cuni.matfyz.core.category.Signature;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is a complex record whose only purpose is to store one complex record child.
@@ -10,69 +11,57 @@ import java.util.*;
  * Thus when record A is processed (in the fetchSids function), a different instance of this class is returned for each record B.
  * @author jachymb.bartik
  */
-public class DynamicRecordWrapper implements IComplexRecord
-{
+public class DynamicRecordWrapper implements IComplexRecord {
+
     private final IComplexRecord source;
     private final IComplexRecord content;
 
-	public DynamicRecordWrapper(IComplexRecord source, IComplexRecord content)
-    {
+    public DynamicRecordWrapper(IComplexRecord source, IComplexRecord content) {
         this.source = source;
         this.content = content;
-	}
+    }
 
-    public RecordName name()
-    {
+    public RecordName name() {
         return source.name();
     }
 
-    public boolean hasComplexRecords(Signature signature)
-    {
+    public boolean hasComplexRecords(Signature signature) {
         return signature.equals(source.dynamicNameSignature()) || source.hasComplexRecords(signature);
     }
 
-    public List<? extends IComplexRecord> getComplexRecords(Signature signature)
-    {
+    public List<? extends IComplexRecord> getComplexRecords(Signature signature) {
         return signature.equals(source.dynamicNameSignature()) ? List.of(content) : source.getComplexRecords(signature);
     }
 
-    public boolean hasDynamicNameChildren()
-    {
+    public boolean hasDynamicNameChildren() {
         return false;
     }
 
-    public List<? extends IComplexRecord> getDynamicNameChildren()
-    {
+    public List<? extends IComplexRecord> getDynamicNameChildren() {
         return new ArrayList<>();
     }
 
-    public Signature dynamicNameSignature()
-    {
+    public Signature dynamicNameSignature() {
         return source.dynamicNameSignature();
     }
 
-    public boolean hasSimpleRecord(Signature signature)
-    {
+    public boolean hasSimpleRecord(Signature signature) {
         return source.hasSimpleRecord(signature);
     }
 
-    public SimpleRecord<?> getSimpleRecord(Signature signature)
-    {
+    public SimpleRecord<?> getSimpleRecord(Signature signature) {
         return source.getSimpleRecord(signature);
     }
 
-    public boolean hasDynamicNameValues()
-    {
+    public boolean hasDynamicNameValues() {
         return source.hasDynamicNameValues();
     }
 
-    public List<SimpleValueRecord<?>> getDynamicNameValues()
-    {
+    public List<SimpleValueRecord<?>> getDynamicNameValues() {
         return source.getDynamicNameValues();
     }
 
-    public boolean containsDynamicNameValue(Signature signature)
-    {
+    public boolean containsDynamicNameValue(Signature signature) {
         return source.containsDynamicNameValue(signature);
     }
 }

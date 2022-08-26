@@ -1,16 +1,15 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.instance.IdWithValues;
-import cz.cuni.matfyz.core.record.*;
+import cz.cuni.matfyz.core.record.IComplexRecord;
 
 /**
- *
  * @author jachym.bartik
  */
 public class FetchedSuperId {
-	
-	public final IdWithValues idWithValues;
-	public final IComplexRecord childRecord;
+    
+    public final IdWithValues idWithValues;
+    public final IComplexRecord childRecord;
     
     public FetchedSuperId(IdWithValues idWithValues, IComplexRecord childRecord) {
         this.idWithValues = idWithValues;

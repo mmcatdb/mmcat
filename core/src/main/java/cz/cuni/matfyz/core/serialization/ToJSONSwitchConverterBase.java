@@ -6,22 +6,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jachymb.bartik
  */
-public abstract class ToJSONSwitchConverterBase<Type extends JSONConvertible> implements ToJSONConverter<Type> {
+public abstract class ToJSONSwitchConverterBase<T extends JSONConvertible> implements ToJSONConverter<T> {
 
     /**
-     * A default name-of-the-Type-class implementation which expects the JSONConverter<Type> class to be an inner class of the Type.
+     * A default name-of-the-Type-class implementation which expects the JSONConverter-T class to be an inner class of the Type.
      */
     protected String name() {
         return this.getClass().getDeclaringClass().getSimpleName();
     }
 
     @Override
-    public JSONObject toJSON(Type object) {
+    public JSONObject toJSON(T object) {
         try {
-            var output = _toJSON(object);
+            var output = innerToJSON(object);
             output.put("_class", name());
             return output;
         }
@@ -33,6 +32,6 @@ public abstract class ToJSONSwitchConverterBase<Type extends JSONConvertible> im
         return null;
     }
 
-    protected abstract JSONObject _toJSON(Type object) throws JSONException;
+    protected abstract JSONObject innerToJSON(T object) throws JSONException;
 
 }

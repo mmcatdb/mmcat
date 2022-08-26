@@ -9,7 +9,6 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 /**
- * 
  * @author jachym.bartik
  */
 @Repository

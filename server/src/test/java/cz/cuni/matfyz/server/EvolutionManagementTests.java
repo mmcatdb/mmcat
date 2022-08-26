@@ -1,29 +1,13 @@
 package cz.cuni.matfyz.server;
 
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
-import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
-import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.instance.IdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
+import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
@@ -39,9 +23,21 @@ import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.WrapperService;
 import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- *
  * @author jachymb.bartik
  */
 @SpringBootTest
@@ -68,10 +64,10 @@ public class EvolutionManagementTests {
     }
 
     @Test
-	public void joinMoveTest() throws Exception {
+    public void joinMoveTest() throws Exception {
         final int repetitions = 5;
         final int[] batches = new int[] { 1, 2 };
-		//final int[] batches = new int[] { 1, 2, 4, 8, 16, 32, 64, 128, 256 };
+        //final int[] batches = new int[] { 1, 2, 4, 8, 16, 32, 64, 128, 256 };
         //final int[] batches = new int[] { 1, 2, 4, 8, 16, 32, 64 };
         //final int[] batches = new int[] { 48, 80, 96 };
         //final int[] batches = new int[] { 128 };
@@ -81,9 +77,9 @@ public class EvolutionManagementTests {
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
 
         for (int i = 0; i < repetitions; i++) {
-			LOGGER.info("Repetition: " + (i + 1));
+            LOGGER.info("Repetition: " + (i + 1));
 
-			for (var batch : batches) {
+            for (var batch : batches) {
                 
                 // Create mapping and schema
                 Assertions.assertDoesNotThrow(() -> setMapping());
@@ -138,7 +134,7 @@ public class EvolutionManagementTests {
         var finalResult = instanceToDatabase.run();
         */
         //LOGGER.info(finalResult.data);
-	}
+    }
 
     private Set<DomainRow> getRows(InstanceCategory instance, DomainRow source, Signature... signatures) {
         var signature = signatures[0];
@@ -167,7 +163,7 @@ public class EvolutionManagementTests {
     }
 
     private void join(SchemaCategory schema, InstanceCategory instance) {
-        var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", Id.Empty());
+        var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", Id.createEmpty());
         var address = schema.getObject(data.addressKey);
         var addressToFullAddressMorphism = TestData.addMorphismWithDual(schema, data.addressToFullAddress, address, fullAddress, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
         
@@ -178,7 +174,7 @@ public class EvolutionManagementTests {
         var addressToFullAddressMorphismInstance = createInstanceMorphismWithDual(instance, addressToFullAddressMorphism);
 
         var fullAddressInnerMap = new TreeMap<IdWithValues, DomainRow>();
-        var fullAddressId = new Id(Signature.Empty());
+        var fullAddressId = new Id(Signature.createEmpty());
 
         Statistics.set(Counter.JOIN_ROWS, addressInstance.rows().size());
         for (var addressRow : addressInstance.rows()) {
@@ -191,7 +187,7 @@ public class EvolutionManagementTests {
 
             // Create idWithValues and row
             var builder = new IdWithValues.Builder();
-            builder.add(Signature.Empty(), fullAddressValue);
+            builder.add(Signature.createEmpty(), fullAddressValue);
             var fullAddressRow = new DomainRow(builder.build(), addressInstance);
 
             // Add it to the inner map which will be put to the instance object

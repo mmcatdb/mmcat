@@ -7,11 +7,11 @@ import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.*;
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 /**
- * 
  * @author jachym.bartik
  */
 @Repository
@@ -64,12 +64,12 @@ public class MappingRepository {
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            statement.setInt(1, mapping.categoryId);
-            statement.setInt(2, mapping.databaseId);
-            statement.setObject(3, mapping.rootObjectId, Types.INTEGER); // The inserted value can be null.
-            statement.setObject(4, mapping.rootMorphismId, Types.INTEGER); // Same here.
-            statement.setString(5, mapping.mappingJsonValue);
-            statement.setString(6, mapping.jsonValue);
+            statement.setInt(1, mapping.categoryId());
+            statement.setInt(2, mapping.databaseId());
+            statement.setObject(3, mapping.rootObjectId(), Types.INTEGER); // The inserted value can be null.
+            statement.setObject(4, mapping.rootMorphismId(), Types.INTEGER); // Same here.
+            statement.setString(5, mapping.mappingJsonValue());
+            statement.setString(6, mapping.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

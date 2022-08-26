@@ -5,30 +5,25 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jachymb.bartik
  */
-public class DMLAlgorithmTests
-{
+public class DMLAlgorithmTests {
+
     private TestData data;
     private SchemaCategory schema;
     private SchemaObject order;
 
     @BeforeEach
-    public void setupTestData()
-    {
+    public void setupTestData() {
         data = new TestData();
         schema = data.createDefaultSchemaCategory();
         order = schema.getObject(data.getOrderKey());
     }
     
-	@Test
-	public void basicTest()
-    {
+    @Test
+    public void basicTest() {
         new DMLAlgorithmTestBase("1BasicTest.json").setAll(
             schema,
             order,
@@ -36,12 +31,11 @@ public class DMLAlgorithmTests
             data.path_order(),
             data.expectedInstance_order(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void structureTest()
-    {
+    public void structureTest() {
         new DMLAlgorithmTestBase("2StructureTest.json").setAll(
             schema,
             order,
@@ -49,14 +43,11 @@ public class DMLAlgorithmTests
             data.path_nestedDoc(),
             data.expectedInstance_nestedDoc(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void simpleArrayTest()
-    {
-        //Debug.setLevel(0);
-
+    public void simpleArrayTest() {
         new DMLAlgorithmTestBase("3SimpleArrayTest.json").setAll(
             schema,
             order,
@@ -64,13 +55,12 @@ public class DMLAlgorithmTests
             data.path_array(),
             data.expectedInstance_array(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     // This isn't a comprehensive test because it doesn't check if the order is correct. However, to implement a complete test would be such an overkill.
     @Test
-	public void complexArrayTest()
-    {
+    public void complexArrayTest() {
         new DMLAlgorithmTestBase("4ComplexArrayTest.json").setAll(
             schema,
             order,
@@ -78,12 +68,11 @@ public class DMLAlgorithmTests
             data.path_items(),
             data.expectedInstance_items(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void mapTest()
-    {
+    public void mapTest() {
         new DMLAlgorithmTestBase("5MapTest.json").setAll(
             schema,
             order,
@@ -91,14 +80,11 @@ public class DMLAlgorithmTests
             data.path_contact(),
             data.expectedInstance_contact(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void syntheticPropertyTest()
-    {
-        //Debug.setLevel(0);
-
+    public void syntheticPropertyTest() {
         new DMLAlgorithmTestBase("6SyntheticPropertyTest.json").setAll(
             schema,
             order,
@@ -106,12 +92,11 @@ public class DMLAlgorithmTests
             data.path_ordered(),
             data.expectedInstance_ordered(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void missingSimpleTest()
-    {
+    public void missingSimpleTest() {
         new DMLAlgorithmTestBase("7MissingSimpleTest.json").setAll(
             schema,
             order,
@@ -119,12 +104,11 @@ public class DMLAlgorithmTests
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingSimple(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void missingComplexTest()
-    {
+    public void missingComplexTest() {
         new DMLAlgorithmTestBase("8MissingComplexTest.json").setAll(
             schema,
             order,
@@ -132,12 +116,11 @@ public class DMLAlgorithmTests
             data.path_nestedDoc(),
             data.expectedInstance_nestedDocMissingComplex(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void emptyArrayTest()
-    {
+    public void emptyArrayTest() {
         new DMLAlgorithmTestBase("9EmptyArrayTest.json").setAll(
             schema,
             order,
@@ -145,12 +128,11 @@ public class DMLAlgorithmTests
             data.path_items(),
             data.expectedInstance_itemsEmpty(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void complexMapTest()
-    {
+    public void complexMapTest() {
         new DMLAlgorithmTestBase("10ComplexMapTest.json").setAll(
             schema,
             order,
@@ -158,12 +140,11 @@ public class DMLAlgorithmTests
             data.path_address(),
             data.expectedInstance_address(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 
     @Test
-	public void missingArrayTest()
-    {
+    public void missingArrayTest() {
         new DMLAlgorithmTestBase("11MissingArrayTest.json").setAll(
             schema,
             order,
@@ -171,6 +152,6 @@ public class DMLAlgorithmTests
             data.path_items(),
             data.expectedInstance_itemsMissing(schema)
         )
-        .testAlgorithm();
-	}
+            .testAlgorithm();
+    }
 }

@@ -7,48 +7,41 @@ import cz.cuni.matfyz.core.schema.SchemaMorphism.Min;
 import cz.cuni.matfyz.core.serialization.MapUniqueContext;
 import cz.cuni.matfyz.core.serialization.UniqueContext;
 
+import java.io.Serializable;
+
 /**
- *
  * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaCategory implements Category
-{
+public class SchemaCategory implements Serializable, Category {
+    
     private final UniqueContext<SchemaObject, Key> objectContext = new MapUniqueContext<>();
     private final UniqueContext<SchemaMorphism, Signature> morphismContext = new MapUniqueContext<>();
 
-    public SchemaCategory() {}
-
-    public SchemaObject addObject(SchemaObject object)
-    {
+    public SchemaObject addObject(SchemaObject object) {
         return objectContext.createUniqueObject(object);
-	}
+    }
 
-	public SchemaMorphism addMorphism(SchemaMorphism morphism)
-    {
+    public SchemaMorphism addMorphism(SchemaMorphism morphism) {
         var newMorphism = morphismContext.createUniqueObject(morphism);
         newMorphism.setCategory(this);
-		return newMorphism;
-	}
+        return newMorphism;
+    }
 
     public void deleteMorphism(SchemaMorphism morphism) {
         morphismContext.deleteUniqueObject(morphism);
     }
 
-	public SchemaMorphism dual(Signature signatureOfOriginal)
-    {
+    public SchemaMorphism dual(Signature signatureOfOriginal) {
         return getMorphism(signatureOfOriginal.dual());
-	}
+    }
 
-    public SchemaObject getObject(Key key)
-    {
+    public SchemaObject getObject(Key key) {
         return objectContext.getUniqueObject(key);
     }
     
-    public SchemaMorphism getMorphism(Signature signature)
-    {
+    public SchemaMorphism getMorphism(Signature signature) {
         SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
-        if (morphism == null)
-        {
+        if (morphism == null) {
             SchemaMorphism  newMorphism = createCompositeMorphism(signature);
             morphism = this.morphismContext.createUniqueObject(newMorphism);
         }
@@ -56,18 +49,15 @@ public class SchemaCategory implements Category
         return morphism;
     }
 
-    public Iterable<SchemaObject> allObjects()
-    {
+    public Iterable<SchemaObject> allObjects() {
         return objectContext.getAllUniqueObjects();
     }
 
-    public Iterable<SchemaMorphism> allMorphisms()
-    {
+    public Iterable<SchemaMorphism> allMorphisms() {
         return morphismContext.getAllUniqueObjects();
     }
 
-    private SchemaMorphism createCompositeMorphism(Signature signature)
-    {
+    private SchemaMorphism createCompositeMorphism(Signature signature) {
         Signature[] bases = signature.toBases().toArray(new Signature[0]);
 
         Signature lastSignature = bases[bases.length - 1];
@@ -77,8 +67,7 @@ public class SchemaCategory implements Category
         Min min = lastMorphism.min();
         Max max = lastMorphism.max();
 
-        for (int i = 2; i <= bases.length; i++)
-        {
+        for (int i = 2; i <= bases.length; i++) {
             lastSignature = bases[bases.length - i];
             lastMorphism = this.getMorphism(lastSignature);
             cod = lastMorphism.cod();

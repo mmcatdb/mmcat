@@ -4,8 +4,14 @@ import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +23,7 @@ import org.json.JSONObject;
  * Each value is unique among all the values associated with the same signature.
  * @author jachym.bartik
  */
-public class DomainRow implements Comparable<DomainRow>, JSONConvertible {
+public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConvertible {
 
     public final InstanceObject instanceObject;
     // The tuples that holds the value of this row.
@@ -37,36 +43,31 @@ public class DomainRow implements Comparable<DomainRow>, JSONConvertible {
         tuples.put(signature, value);
     }
     */
- // TODO
+    // TODO
     public DomainRow(IdWithValues superId, InstanceObject instanceObject) {
         this.instanceObject = instanceObject;
         this.superId = superId;
         this.technicalIds = new TreeSet<>();
+        var aaa = superId.toString();
 
         // TODO this should happen only when there are no id, not when superId is empty
-        //if (superId.size() == 0)
-        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).getValue0().size() == 0)
+        //if (superId.isEmpty())
+        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).getValue0().isEmpty())
             this.technicalIds.add(instanceObject.generateTechnicalId());
 
         this.unnotifiedSignatures = new TreeSet<>(instanceObject.schemaObject().superId().signatures());
     }
- // TODO
+
+    // TODO
     public DomainRow(IdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
         this.instanceObject = instanceObject;
         this.superId = superId;
         this.technicalIds = technicalIds;
 
-        //if (superId.size() == 0 && technicalIds.size() == 0)
-        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).getValue0().size() == 0)
+        //if (superId.isEmpty() && technicalIds.isEmpty())
+        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).getValue0().isEmpty())
             this.technicalIds.add(instanceObject.generateTechnicalId());
 
-        this.unnotifiedSignatures = new TreeSet<>(instanceObject.schemaObject().superId().signatures());
-    }
- // TODO
-    public DomainRow(Integer technicalId, InstanceObject instanceObject) {
-        this.instanceObject = instanceObject;
-        this.superId = IdWithValues.Empty();
-        this.technicalIds = new TreeSet<>(List.of(technicalId));
         this.unnotifiedSignatures = new TreeSet<>(instanceObject.schemaObject().superId().signatures());
     }
 
@@ -96,11 +97,7 @@ public class DomainRow implements Comparable<DomainRow>, JSONConvertible {
 
     public void addMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
         //addMapping(mappingsFrom, morphism, mapping);
-        var mappingsOfSameType = mappingsFrom.get(morphism);
-        if (mappingsOfSameType == null) {
-            mappingsOfSameType = new TreeSet<>();
-            mappingsFrom.put(morphism, mappingsOfSameType);
-        }
+        var mappingsOfSameType = mappingsFrom.computeIfAbsent(morphism, x -> new TreeSet<>());
 
         mappingsOfSameType.add(mapping);
     }
@@ -153,7 +150,7 @@ public class DomainRow implements Comparable<DomainRow>, JSONConvertible {
     public String toString() {
         var builder = new StringBuilder();
         builder.append(superId.toString());
-        if (technicalIds.size() > 0) {
+        if (!technicalIds.isEmpty()) {
             builder.append("[");
             var notFirst = false;
             for (var technicalId : technicalIds) {
@@ -181,16 +178,16 @@ public class DomainRow implements Comparable<DomainRow>, JSONConvertible {
     public static class Converter extends ToJSONConverterBase<DomainRow> {
 
         @Override
-        protected JSONObject _toJSON(DomainRow object) throws JSONException {
+        protected JSONObject innerToJSON(DomainRow object) throws JSONException {
             var output = new JSONObject();
 
             var map = object.superId.map();
             var tuples = new ArrayList<JSONObject>();
             
-            for (Signature signature : map.keySet()) {
+            for (var entry : map.entrySet()) {
                 var jsonTuple = new JSONObject();
-                jsonTuple.put("signature", signature.toJSON());
-                jsonTuple.put("value", map.get(signature));
+                jsonTuple.put("signature", entry.getKey().toJSON());
+                jsonTuple.put("value", entry.getValue());
 
                 tuples.add(jsonTuple);
             }

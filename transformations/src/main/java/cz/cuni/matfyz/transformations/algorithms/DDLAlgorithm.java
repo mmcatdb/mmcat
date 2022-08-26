@@ -1,79 +1,82 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.mapping.*;
-import cz.cuni.matfyz.core.schema.*;
-import cz.cuni.matfyz.abstractWrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.DomainRow;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
+import cz.cuni.matfyz.core.instance.InstanceObject;
+import cz.cuni.matfyz.core.mapping.AccessPath;
+import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.core.mapping.DynamicName;
+import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.mapping.SimpleProperty;
+import cz.cuni.matfyz.core.mapping.StaticName;
+import cz.cuni.matfyz.core.schema.Id;
+import cz.cuni.matfyz.core.schema.SchemaMorphism;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.statements.DDLStatement;
 
-import java.util.*;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
- *
  * @author jachymb.bartik
  */
-public class DDLAlgorithm
-{
-    public final static String PATH_SEPARATOR = "/";
-    public final static String EMPTY_NAME = StaticName.Anonymous().getStringName();
+public class DDLAlgorithm {
+    
+    public static final String PATH_SEPARATOR = "/";
+    public static final String EMPTY_NAME = StaticName.createAnonymous().getStringName();
 
     private Mapping mapping;
     private InstanceCategory instance;
     private AbstractDDLWrapper wrapper;
     
-    public void input(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper)
-    {
+    public void input(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper) {
         this.mapping = mapping;
         this.instance = instance;
         this.wrapper = wrapper;
     }
     
-    public DDLStatement algorithm()
-    {
+    public DDLStatement algorithm() {
         wrapper.setKindName(mapping.kindName());
         
-        if (!wrapper.isSchemaLess())
-        {
-            Stack<StackPair> M = new Stack<>();
-            addSubpathsToStack(M, mapping.accessPath(), Set.of(EMPTY_NAME));
+        if (!wrapper.isSchemaLess()) {
+            Deque<StackPair> masterStack = new LinkedList<>();
+            addSubpathsToStack(masterStack, mapping.accessPath(), Set.of(EMPTY_NAME));
 
-            while (!M.isEmpty())
-                processTopOfStack(M);
+            while (!masterStack.isEmpty())
+                processTopOfStack(masterStack);
         }
         
         return wrapper.createDDLStatement();
     }
 
-    private void addSubpathsToStack(Stack<StackPair> M, ComplexProperty path, Set<String> names)
-    {
+    private void addSubpathsToStack(Deque<StackPair> masterStack, ComplexProperty path, Set<String> names) {
         for (AccessPath subpath : path.subpaths())
-            M.add(new StackPair(names, subpath));
+            masterStack.add(new StackPair(names, subpath));
     }
     
-    private void processTopOfStack(Stack<StackPair> M)
-    {
-        StackPair pair = M.pop();
+    private void processTopOfStack(Deque<StackPair> masterStack) {
+        StackPair pair = masterStack.pop();
         AccessPath path = pair.accessPath;
         
-        Set<String> Nt = determinePropertyName(path);
-        Set<String> N = concatenate(pair.names, Nt);
+        Set<String> propertyName = determinePropertyName(path);
+        Set<String> names = concatenate(pair.names, propertyName);
         
-        if (path instanceof SimpleProperty simpleProperty)
-        {
-            processPath(simpleProperty, N);
+        if (path instanceof SimpleProperty simpleProperty) {
+            processPath(simpleProperty, names);
         }
-        else if (path instanceof ComplexProperty complexProperty)
-        {
+        else if (path instanceof ComplexProperty complexProperty) {
             if (!complexProperty.isAuxiliary())
-                processPath(complexProperty, N);
+                processPath(complexProperty, names);
 
-            addSubpathsToStack(M, complexProperty, N);
+            addSubpathsToStack(masterStack, complexProperty, names);
         }
     }
     
-    private Set<String> determinePropertyName(AccessPath path)
-    {
+    private Set<String> determinePropertyName(AccessPath path) {
         if (path.name() instanceof StaticName staticName)
             return Set.of(staticName.getStringName());
         
@@ -83,14 +86,13 @@ public class DDLAlgorithm
         InstanceObject instanceObject = instance.getObject(schemaObject);
         
         var output = new TreeSet<String>();
-        for (DomainRow row : instanceObject.domain().get(new Id(Signature.Empty())).values())
-            output.add(row.getValue(Signature.Empty()));
+        for (DomainRow row : instanceObject.domain().get(new Id(Signature.createEmpty())).values())
+            output.add(row.getValue(Signature.createEmpty()));
         
         return output;
     }
     
-    private Set<String> concatenate(Set<String> names1, Set<String> names2)
-    {
+    private Set<String> concatenate(Set<String> names1, Set<String> names2) {
         var output = new TreeSet<String>();
         for (String name1 : names1)
             for (String name2 : names2)
@@ -99,15 +101,13 @@ public class DDLAlgorithm
         return output;
     }
 
-    public static String concatenatePaths(String path1, String path2)
-    {
-        return DDLAlgorithm.EMPTY_NAME.equals(path1) ?
-            path2 :
-            path1 + DDLAlgorithm.PATH_SEPARATOR + path2;
+    public static String concatenatePaths(String path1, String path2) {
+        return DDLAlgorithm.EMPTY_NAME.equals(path1)
+            ? path2
+            : path1 + DDLAlgorithm.PATH_SEPARATOR + path2;
     }
     
-    private void processPath(SimpleProperty property, Set<String> names)
-    {
+    private void processPath(SimpleProperty property, Set<String> names) {
         var morphism = instance.getMorphism(property.value().signature()).schemaMorphism();
         
         if (morphism.isArray())
@@ -116,8 +116,7 @@ public class DDLAlgorithm
             wrapper.addSimpleProperty(names, isRequired(morphism));
     }
     
-    private void processPath(ComplexProperty property, Set<String> names)
-    {
+    private void processPath(ComplexProperty property, Set<String> names) {
         var morphism = instance.getMorphism(property.signature()).schemaMorphism();
         
         if (morphism.isArray() && !property.hasDynamicKeys())
@@ -126,8 +125,7 @@ public class DDLAlgorithm
             wrapper.addComplexProperty(names, isRequired(morphism));
     }
     
-    private static boolean isRequired(SchemaMorphism morphism)
-    {
+    private static boolean isRequired(SchemaMorphism morphism) {
         return morphism.min() != SchemaMorphism.Min.ZERO;
     }
 }

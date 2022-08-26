@@ -1,9 +1,10 @@
 package cz.cuni.matfyz.core.instance;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class Merger {

@@ -1,6 +1,6 @@
 # transformations
 
-This package contains the algorithms for importing and exporting data between the instance category and an arbitrary database system. The category is defined by the [core](../core/README.md) package while the database systems are represented by the [abstractWrappers](../abstractWrappers/README.md) package and implemented by the [wrappers](../wrappers/README.md) package.
+This package contains the algorithms for importing and exporting data between the instance category and an arbitrary database system. The category is defined by the [core](../core/README.md) package while the database systems are represented by the [abstractwrappers](../abstractwrappers/README.md) package and implemented by the [wrappers](../wrappers/README.md) package.
 
 The currently implemented algorithms are:
 - MTC (Model to Category) - imports the data to the instance category from a database system,

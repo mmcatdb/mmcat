@@ -2,15 +2,15 @@ package cz.cuni.matfyz.core.record;
 
 import cz.cuni.matfyz.core.category.Signature;
 
-import java.util.*;
+import java.util.List;
 
 /**
  * This class represents an inner node (so it can be root) of the record tree.
  * The value of this record are its children.
  * @author jachymb.bartik
  */
-public interface IComplexRecord
-{
+public interface IComplexRecord {
+
     public RecordName name();
 
     public boolean hasComplexRecords(Signature signature);

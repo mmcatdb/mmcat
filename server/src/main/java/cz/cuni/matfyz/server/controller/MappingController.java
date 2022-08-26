@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * 
  * @author jachym.bartik
  */
 @RestController
@@ -44,7 +43,7 @@ public class MappingController {
 
     @GetMapping("/schema/{schemaId}/mappings")
     public List<MappingView> getAllMappingsInCategory(@PathVariable int schemaId) {
-        return service.findAllInCategory(schemaId).stream().map(wrapper -> wrapperToView(wrapper)).toList();
+        return service.findAllInCategory(schemaId).stream().map(this::wrapperToView).toList();
     }
 
     @PostMapping("/mappings")

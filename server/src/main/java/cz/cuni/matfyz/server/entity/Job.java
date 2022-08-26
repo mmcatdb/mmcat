@@ -1,14 +1,13 @@
 package cz.cuni.matfyz.server.entity;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
- * 
  * @author jachym.bartik
  */
 public class Job extends Entity implements JSONConvertible {
@@ -57,29 +56,29 @@ public class Job extends Entity implements JSONConvertible {
 
     public static class Converter extends ToJSONConverterBase<Job> {
 
-		@Override
-        protected JSONObject _toJSON(Job object) throws JSONException {
+        @Override
+        protected JSONObject innerToJSON(Job object) throws JSONException {
             var output = new JSONObject();
 
             output.put("name", object.name.toString());
             output.put("type", object.type.toString());
-			output.put("status", object.status.toString());
+            output.put("status", object.status.toString());
 
             return output;
         }
 
-	}
+    }
 
-	public static class Builder extends FromJSONLoaderBase<Job> {
+    public static class Builder extends FromJSONLoaderBase<Job> {
 
-		public Job fromJSON(int id, int mappingId, int schemaId, String jsonValue) {
-			var job = new Job(id, mappingId, schemaId);
-			loadFromJSON(job, jsonValue);
-			return job;
-		}
+        public Job fromJSON(int id, int mappingId, int schemaId, String jsonValue) {
+            var job = new Job(id, mappingId, schemaId);
+            loadFromJSON(job, jsonValue);
+            return job;
+        }
 
         @Override
-        protected void _loadFromJSON(Job job, JSONObject jsonObject) throws JSONException {
+        protected void innerLoadFromJSON(Job job, JSONObject jsonObject) throws JSONException {
             job.name = jsonObject.getString("name");
             job.type = Type.valueOf(jsonObject.getString("type"));
             job.status = Status.valueOf(jsonObject.getString("status"));

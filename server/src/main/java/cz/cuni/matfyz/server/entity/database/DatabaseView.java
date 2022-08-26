@@ -1,15 +1,14 @@
 package cz.cuni.matfyz.server.entity.database;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class DatabaseView {
 
-    public int id;
-    public Database.Type type;
-    public String label;
-    public DatabaseConfiguration configuration;
+    public final int id;
+    public final Database.Type type;
+    public final String label;
+    public final DatabaseConfiguration configuration;
 
     public DatabaseView(Database database, DatabaseConfiguration configuration) {
         this.id = database.id;

@@ -4,11 +4,11 @@ import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
-import java.util.*;
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 /**
- * 
  * @author jachym.bartik
  */
 @Repository
@@ -25,7 +25,7 @@ public class JobRepository {
                 JOIN mapping ON mapping.id = job.mapping_id
                 WHERE mapping.schema_category_id = ?
                 ORDER BY job.id;
-            """);
+                """);
             statement.setInt(1, categoryId);
             var resultSet = statement.executeQuery();
 
@@ -50,7 +50,7 @@ public class JobRepository {
                 JOIN mapping ON mapping.id = job.mapping_id
                 WHERE job.id = ?
                 ORDER BY job.id;
-            """);
+                """);
             statement.setInt(1, id);
             var resultSet = statement.executeQuery();
 
@@ -85,7 +85,7 @@ public class JobRepository {
                 UPDATE job
                 SET json_value = ?::jsonb
                 WHERE id = ?;
-            """);
+                """);
             statement.setString(1, job.toJSON().toString());
             statement.setInt(2, job.id);
 
@@ -99,7 +99,7 @@ public class JobRepository {
             var statement = connection.prepareStatement("""
                 DELETE FROM job
                 WHERE id = ?;
-            """);
+                """);
             statement.setInt(1, id);
 
             int affectedRows = statement.executeUpdate();

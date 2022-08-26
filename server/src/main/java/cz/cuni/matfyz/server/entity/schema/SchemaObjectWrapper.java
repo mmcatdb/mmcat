@@ -4,7 +4,6 @@ import cz.cuni.matfyz.server.entity.Entity;
 import cz.cuni.matfyz.server.utils.Position;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class SchemaObjectWrapper extends Entity { // implements JSONConvertible
@@ -19,7 +18,8 @@ public class SchemaObjectWrapper extends Entity { // implements JSONConvertible
         this.jsonValue = jsonValue;
         this.position = position;
     }
-/*
+    
+    /*
     @Override
     public JSONObject toJSON() {
         return new Converter().toJSON(this);
@@ -31,13 +31,13 @@ public class SchemaObjectWrapper extends Entity { // implements JSONConvertible
         protected JSONObject _toJSON(SchemaObjectWrapper object) throws JSONException {
             var output = new JSONObject();
 
-			output.put("id", object.id);
+            output.put("id", object.id);
             output.put("value", object.jsonValue);
 
             return output;
         }
 
-	}
+    }
     */
 
 }

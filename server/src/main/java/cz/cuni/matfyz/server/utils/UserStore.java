@@ -3,22 +3,22 @@ package cz.cuni.matfyz.server.utils;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.server.entity.Model;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
-
 import javax.servlet.http.HttpSession;
 
 /**
- * 
  * @author jachym.bartik
  */
-public class UserStore {
+public class UserStore implements Serializable {
 
-    private static String USER_STORE_KEY = "USER_STORE";
+    private static final String USER_STORE_KEY = "USER_STORE";
 
+    // TODO make instance serializable
     private Map<Integer, InstanceCategory> instaces = new TreeMap<>();
     private Map<Integer, Model> models = new TreeMap<>();
 
@@ -50,7 +50,7 @@ public class UserStore {
     }
 
     public void addModel(Model model) {
-        models.put(model.jobId, model);
+        models.put(model.jobId(), model);
     }
 
     public Model getModel(int jobId) {

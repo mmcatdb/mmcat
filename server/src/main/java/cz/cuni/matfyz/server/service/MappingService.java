@@ -5,27 +5,25 @@ import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.MappingRepository;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 /**
- * 
  * @author jachym.bartik
  */
 @Service
-public class MappingService
-{
+public class MappingService {
+
     @Autowired
     private MappingRepository repository;
 
-    public List<MappingWrapper> findAllInCategory(int categoryId)
-    {
+    public List<MappingWrapper> findAllInCategory(int categoryId) {
         return repository.findAllInCategory(categoryId);
     }
 
-    public MappingWrapper find(int id)
-    {
+    public MappingWrapper find(int id) {
         return repository.find(id);
     }
 
@@ -34,12 +32,12 @@ public class MappingService
 
         return generatedId == null ? null : new MappingWrapper(
             generatedId,
-            wrapper.databaseId,
-            wrapper.categoryId,
-            wrapper.rootObjectId,
-            wrapper.rootMorphismId,
-            wrapper.mappingJsonValue,
-            wrapper.jsonValue
+            wrapper.databaseId(),
+            wrapper.categoryId(),
+            wrapper.rootObjectId(),
+            wrapper.rootMorphismId(),
+            wrapper.mappingJsonValue(),
+            wrapper.jsonValue()
         );
     }
 }

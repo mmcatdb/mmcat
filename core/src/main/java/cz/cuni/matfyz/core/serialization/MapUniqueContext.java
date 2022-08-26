@@ -5,25 +5,24 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- *
  * @author jachymb.bartik
  */
-public class MapUniqueContext<ObjectType extends Identified<IdType>, IdType extends Comparable<IdType>> implements UniqueContext<ObjectType, IdType> {
+public class MapUniqueContext<O extends Identified<I>, I extends Comparable<I>> implements UniqueContext<O, I> {
     
-    private final Map<IdType, ObjectType> uniqueObjects;
+    private final Map<I, O> uniqueObjects;
 
     public MapUniqueContext() {
         uniqueObjects = new TreeMap<>();
     }
 
-    public MapUniqueContext(Collection<ObjectType> collection) {
+    public MapUniqueContext(Collection<O> collection) {
         uniqueObjects = new TreeMap<>();
-        for (ObjectType object : collection)
+        for (O object : collection)
             createUniqueObject(object);
     }
 
     @Override
-    public ObjectType createUniqueObject(ObjectType object) {
+    public O createUniqueObject(O object) {
         if (!uniqueObjects.containsKey(object.identifier()))
             uniqueObjects.put(object.identifier(), object);
         
@@ -31,17 +30,17 @@ public class MapUniqueContext<ObjectType extends Identified<IdType>, IdType exte
     }
 
     @Override
-    public void deleteUniqueObject(ObjectType object) {
+    public void deleteUniqueObject(O object) {
         uniqueObjects.remove(object.identifier());
     }
 
     @Override
-    public ObjectType getUniqueObject(IdType id) {
+    public O getUniqueObject(I id) {
         return uniqueObjects.get(id);
     }
 
     @Override
-    public Collection<ObjectType> getAllUniqueObjects() {
+    public Collection<O> getAllUniqueObjects() {
         return uniqueObjects.values();
     }
 

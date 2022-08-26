@@ -2,14 +2,20 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
-import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
+import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
-import cz.cuni.matfyz.core.schema.Id;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.javatuples.Pair;
 import org.json.JSONArray;
@@ -20,15 +26,15 @@ import org.json.JSONObject;
  * Each object from instance category is modeled as a set of tuples ({@link DomainRow}).
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceObject implements CategoricalObject, JSONConvertible
-{
-	private final SchemaObject schemaObject;
+public class InstanceObject implements Serializable, CategoricalObject, JSONConvertible {
+
+    private final SchemaObject schemaObject;
     private final Map<Id, Map<IdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<Integer, DomainRow> domainByTechnicalIds = new TreeMap<>();
     
     public Map<Id, Map<IdWithValues, DomainRow>> domain() {
-		return domain;
-	}
+        return domain;
+    }
 
     public DomainRow getRowById(IdWithValues id) {
         Map<IdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
@@ -72,37 +78,35 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
                 return foundRow;
         }
 
-        for (var technicalId : row.technicalIds)
-            return getRowByTechnicalId(technicalId);
+        var technicalId = row.technicalIds.stream().findFirst();
+        if (technicalId.isPresent())
+            return getRowByTechnicalId(technicalId.get());
 
         // This should not happen.
         throw new UnsupportedOperationException("Actual row not found for id: " + row.superId + ".");
     }
 
-	public InstanceObject(SchemaObject schemaObject)
-    {
-		this.schemaObject = schemaObject;
-	}
+    public InstanceObject(SchemaObject schemaObject) {
+        this.schemaObject = schemaObject;
+    }
 
     // The point of a technical id is to differentiate two idWithValues from each other, but only if they do not share any other id.
     private int lastTechnicalId = 0;
+
     public int generateTechnicalId() {
         lastTechnicalId++;
         return lastTechnicalId;
     }
     
-    public Key key()
-    {
+    public Key key() {
         return schemaObject.key();
     }
     
-    public SchemaObject schemaObject()
-    {
+    public SchemaObject schemaObject() {
         return schemaObject;
     }
 
-    public List<DomainRow> rows()
-    {
+    public List<DomainRow> rows() {
         var output = new ArrayList<DomainRow>();
 
         for (var innerMap : domain.values())
@@ -156,7 +160,7 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
 
         // Create new Row that contains the unified superId and put it to all possible ids.
         // This also deletes the old ones.
-        var newRow = new DomainRow(maximalSuperId, maximalTechnicalId, this);//, allIds);
+        var newRow = new DomainRow(maximalSuperId, maximalTechnicalId, this); //, allIds);
         setRow(newRow, allIds);
 
         // Get all morphisms from and to the original rows and put the new one instead of them.
@@ -167,13 +171,13 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
         //mergeMappingsTo(originalRows, newRow, merger);
     }
 
-    private IdWithValues findTechnicalSuperId(Set<Integer> technicalIds, Set<DomainRow> _originalRows) {
+    private IdWithValues findTechnicalSuperId(Set<Integer> technicalIds, Set<DomainRow> outOriginalRows) {
         var builder = new IdWithValues.Builder();
 
         for (var technicalId : technicalIds) {
             var row = getRowByTechnicalId(technicalId);
-            if (!_originalRows.contains(row)) {
-                _originalRows.add(row);
+            if (!outOriginalRows.contains(row)) {
+                outOriginalRows.add(row);
                 builder.add(row.superId);
             }
         }
@@ -186,7 +190,7 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
      * @param superId
      * @return
      */
-    public IdWithValues findMaximalSuperId(IdWithValues superId, Set<DomainRow> _originalRows, Set<IdWithValues> _allIds) {
+    public IdWithValues findMaximalSuperId(IdWithValues superId, Set<DomainRow> outOriginalRows, Set<IdWithValues> outAllIds) {
         // First, we take all ids that can be created for this object, and we find those, that can be filled from the given superId.
         // Then we find the rows that correspond to them and merge their superIds to the superId.
         // If it gets bigger, we try to generate other ids to find their objects and so on ...
@@ -200,9 +204,11 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
             var result = findIdsInSuperId(superId, notFoundIds);
             var foundIds = result.getValue0();
             notFoundIds = result.getValue1();
+
+            outAllIds.addAll(foundIds);
             
-            var foundRows = findNewRows(foundIds, _originalRows);
-            if (foundRows.size() == 0)
+            var foundRows = findNewRows(foundIds, outOriginalRows);
+            if (foundRows.isEmpty())
                 break; // We have not found anything new.
 
             superId = IdWithValues.merge(superId, mergeSuperIds(foundRows));
@@ -226,15 +232,15 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
         return output;
     }
 
-    private Set<DomainRow> findNewRows(Set<IdWithValues> foundIds, Set<DomainRow> _originalRows) {
+    private Set<DomainRow> findNewRows(Set<IdWithValues> foundIds, Set<DomainRow> outOriginalRows) {
         var output = new TreeSet<DomainRow>();
 
         for (var id : foundIds) {
             var row = getRowById(id);
-            if (row == null || _originalRows.contains(row))
+            if (row == null || outOriginalRows.contains(row))
                 continue;
             
-            _originalRows.add(row);
+            outOriginalRows.add(row);
             output.add(row);
         }
 
@@ -295,11 +301,7 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
     }
 
     private Set<DomainRow> getOrCreateRowSet(Map<InstanceMorphism, Set<DomainRow>> map, InstanceMorphism morphism) {
-        var set = map.get(morphism);
-        if (set == null) {
-            set = new TreeSet<>();
-            map.put(morphism, set);
-        }
+        var set = map.computeIfAbsent(morphism, x -> new TreeSet<>());
         return set;
     }
 
@@ -356,11 +358,8 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
     private final Map<Signature, List<NoteToOtherRow>> pathsToOtherSuperIds = new TreeMap<>();
 
     public void addPathToSuperId(Signature signature, List<InstanceMorphism> path, Signature signatureInOther) {
-        var listForSignature = pathsToOtherSuperIds.get(signature);
-        if (listForSignature == null) {
-            listForSignature = new ArrayList<>();
-            pathsToOtherSuperIds.put(signature, listForSignature);
-        }
+        //var listForSignature = pathsToOtherSuperIds.get(signature);
+        var listForSignature = pathsToOtherSuperIds.computeIfAbsent(signature, x -> new ArrayList<>());
         listForSignature.add(new NoteToOtherRow(signature, path, signatureInOther));
     }
 
@@ -397,28 +396,24 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
         }
     }
     
-	@Override
-	public int objectId()
-    {
-		return key().getValue();
-	}
+    @Override
+    public int objectId() {
+        return key().getValue();
+    }
 
-	@Override
-	public int compareTo(CategoricalObject categoricalObject)
-    {
+    @Override
+    public int compareTo(CategoricalObject categoricalObject) {
         return objectId() - categoricalObject.objectId();
-	}
-	
-	@Override
-	public String toString()
-    {
-		StringBuilder builder = new StringBuilder();
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
 
-		builder.append("\tKey: ").append(key()).append("\n");
+        builder.append("\tKey: ").append(key()).append("\n");
         builder.append("\tValues:\n");
         // Consistent ordering of the keys for testing purposes.
-		for (Id id : new TreeSet<>(domain.keySet()))
-        {
+        for (Id id : new TreeSet<>(domain.keySet())) {
             var subdomain = domain.get(id);
             // Again, ordering.
             for (IdWithValues idWithValues : new TreeSet<>(subdomain.keySet()))
@@ -426,11 +421,10 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
         }
         
         return builder.toString();
-	}
+    }
     
     @Override
-    public boolean equals(Object object)
-    {
+    public boolean equals(Object object) {
         return object instanceof InstanceObject instanceObject && schemaObject.equals(instanceObject.schemaObject);
     }
 
@@ -442,7 +436,7 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
     public static class Converter extends ToJSONConverterBase<InstanceObject> {
 
         @Override
-        protected JSONObject _toJSON(InstanceObject object) throws JSONException {
+        protected JSONObject innerToJSON(InstanceObject object) throws JSONException {
             var output = new JSONObject();
     
             output.put("key", object.key().toJSON());
@@ -454,4 +448,5 @@ public class InstanceObject implements CategoricalObject, JSONConvertible
         }
     
     }
+
 }

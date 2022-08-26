@@ -1,5 +1,10 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
+import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
+import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLConnectionProvider;
+import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLSettings;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
@@ -7,18 +12,12 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBSettings;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLConnectionProvider;
-import cz.cuni.matfyz.wrapperPostgresql.PostgreSQLSettings;
-
 /**
- *
  * @author jachymb.bartik
  */
-abstract class DatabaseSetup
-{
-    private static Logger LOGGER = LoggerFactory.getLogger(DatabaseSetup.class);
+abstract class DatabaseSetup {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSetup.class);
 
     private DatabaseSetup() {}
 
@@ -30,8 +29,7 @@ abstract class DatabaseSetup
         static final String PASSWORD = Config.get("postgresql.password");
     }
 
-    static PostgreSQLConnectionProvider createPostgreSQLConnectionProvider()
-    {
+    static PostgreSQLConnectionProvider createPostgreSQLConnectionProvider() {
         return new PostgreSQLConnectionProvider(new PostgreSQLSettings(
             PostgreSQL.HOST,
             PostgreSQL.PORT,
@@ -41,8 +39,7 @@ abstract class DatabaseSetup
         ));
     }
 
-    static void executePostgreSQLScript(String pathToFile) throws Exception
-    {
+    static void executePostgreSQLScript(String pathToFile) throws Exception {
         String beforePasswordString = new StringBuilder()
             .append("psql postgresql://")
             .append(PostgreSQL.USERNAME)
@@ -81,8 +78,7 @@ abstract class DatabaseSetup
         static final String PASSWORD = Config.get("mongodb.password");
     }
 
-    static MongoDBDatabaseProvider createMongoDBDatabaseProvider()
-    {
+    static MongoDBDatabaseProvider createMongoDBDatabaseProvider() {
         return new MongoDBDatabaseProvider(new MongoDBSettings(
             MongoDB.HOST,
             MongoDB.PORT,
@@ -93,8 +89,7 @@ abstract class DatabaseSetup
         ));
     }
 
-    static void executeMongoDBScript(String pathToFile) throws Exception
-    {
+    static void executeMongoDBScript(String pathToFile) throws Exception {
         String beforePasswordString = new StringBuilder()
             .append("mongo --username ")
             .append(MongoDB.USERNAME)

@@ -1,111 +1,93 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.mapping.*;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
+import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.utils.Debug;
-import cz.cuni.matfyz.wrapperDummy.DummyDDLWrapper;
+import cz.cuni.matfyz.wrapperdummy.DummyDDLWrapper;
 
-import java.nio.file.*;
-import java.util.*;
-import org.json.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeSet;
 
+import org.json.JSONArray;
 import org.junit.jupiter.api.Assertions;
 
+
 /**
- *
  * @author jachymb.bartik
  */
-public class DDLAlgorithmTestBase
-{
+public class DDLAlgorithmTestBase {
+
     private final String fileNamePrefix = "ddlAlgorithm/";
     private final String dataFileName;
 
-    public DDLAlgorithmTestBase(String dataFileName)
-    {
+    public DDLAlgorithmTestBase(String dataFileName) {
         this.dataFileName = dataFileName;
     }
 
-    public DDLAlgorithmTestBase setAll(SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path, InstanceCategory inputInstance)
-    {
+    public DDLAlgorithmTestBase setAll(SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path, InstanceCategory inputInstance) {
         return setSchema(schema).setRootObject(rootObject).setKindName(kindName).setPath(path).setInputInstance(inputInstance);
     }
 
     private SchemaCategory schema;
 
-    public DDLAlgorithmTestBase setSchema(SchemaCategory schema)
-    {
+    public DDLAlgorithmTestBase setSchema(SchemaCategory schema) {
         this.schema = schema;
-        
-        if (Debug.shouldLog(3))
-            System.out.println(String.format("# Schema Category\n%s", schema));
-
         return this;
     }
 
     private InstanceCategory inputInstance;
 
-    public DDLAlgorithmTestBase setInputInstance(InstanceCategory inputInstance)
-    {
+    public DDLAlgorithmTestBase setInputInstance(InstanceCategory inputInstance) {
         this.inputInstance = inputInstance;
-
         return this;
     }
 
     private SchemaObject rootObject;
 
-    public DDLAlgorithmTestBase setRootObject(SchemaObject rootObject)
-    {
+    public DDLAlgorithmTestBase setRootObject(SchemaObject rootObject) {
         this.rootObject = rootObject;
-
         return this;
     }
 
     private String kindName;
 
-    public DDLAlgorithmTestBase setKindName(String kindName)
-    {
+    public DDLAlgorithmTestBase setKindName(String kindName) {
         this.kindName = kindName;
-
         return this;
     }
 
     private ComplexProperty path;
 
-    public DDLAlgorithmTestBase setPath(ComplexProperty path)
-    {
+    public DDLAlgorithmTestBase setPath(ComplexProperty path) {
         this.path = path;
-
-        if (Debug.shouldLog(3))
-            System.out.println(String.format("# Access Path\n%s", path));
-
         return this;
     }
 
-	private List<String> buildExpectedResult() throws Exception
-    {
+    private List<String> buildExpectedResult() throws Exception {
         var url = ClassLoader.getSystemResource(fileNamePrefix + dataFileName);
         Path pathToDataFile = Paths.get(url.toURI()).toAbsolutePath();
-		String jsonString = Files.readString(pathToDataFile);
+        String jsonString = Files.readString(pathToDataFile);
         var json = new JSONArray(jsonString);
         var lines = new ArrayList<String>();
         
         for (int i = 0; i < json.length(); i++)
             lines.add(json.getString(i));
         
-		return lines;
-	}
+        return lines;
+    }
 
-	public void testAlgorithm()
-    {
+    public void testAlgorithm() {
         List<String> expectedResult;
-        try
-        {
+        try {
             expectedResult = buildExpectedResult();
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Assertions.fail("Exception thrown when loading test data.");
             return;
         }
@@ -114,20 +96,17 @@ public class DDLAlgorithmTestBase
 
         Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, null);
 
-		var transformation = new DDLAlgorithm();
-		transformation.input(mapping, inputInstance, wrapper);
-		transformation.algorithm();
+        var transformation = new DDLAlgorithm();
+        transformation.input(mapping, inputInstance, wrapper);
+        transformation.algorithm();
 
         List<String> result = wrapper.methods();
 
-        if (Debug.shouldLog(3))
-            printResult(result);
-
         Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
-	}
+    }
 
-    private static void printResult(List<String> result)
-    {
+    /*
+    private static void printResult(List<String> result) {
         var builder = new StringBuilder();
 
         builder.append("[\n");
@@ -136,9 +115,9 @@ public class DDLAlgorithmTestBase
 
         System.out.println(builder.toString());
     }
+    */
 
-    private static boolean resultsEquals(List<String> result1, List<String> result2)
-    {
+    private static boolean resultsEquals(List<String> result1, List<String> result2) {
         if (result1.size() != result2.size())
             return false;
 

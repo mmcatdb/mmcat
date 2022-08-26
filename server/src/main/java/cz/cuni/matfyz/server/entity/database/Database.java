@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.server.entity.database;
 
+import cz.cuni.matfyz.server.entity.Entity;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,20 +10,13 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import cz.cuni.matfyz.server.entity.Entity;
-
 /**
- * 
  * @author jachym.bartik
  */
 public class Database extends Entity {
     
     public static final String PASSWORD_FIELD_NAME = "password";
     
-    private static Logger LOGGER = LoggerFactory.getLogger(Database.class);
     private static ObjectReader dataJSONReader = new ObjectMapper().readerFor(DatabaseInit.class);
     private static ObjectWriter dataJSONWriter = new ObjectMapper().writer();
 
@@ -62,8 +57,8 @@ public class Database extends Entity {
             this.settings = data.settings;
     }
 
-    public static Database fromJSONValue(Integer id, String JSONValue) throws JsonProcessingException {
-        DatabaseInit data = dataJSONReader.readValue(JSONValue);
+    public static Database fromJSONValue(Integer id, String jsonValue) throws JsonProcessingException {
+        DatabaseInit data = dataJSONReader.readValue(jsonValue);
         return new Database(id, data);
     }
 
@@ -83,26 +78,26 @@ public class Database extends Entity {
 
     public static class Converter extends ToJSONConverterBase<Database> {
 
-		@Override
+        @Override
         protected JSONObject _toJSON(Database database) throws JSONException {
             var output = new JSONObject();
 
             output.put("type", database.type.toString());
             output.put("label", database.label);
-			output.put("jsonSettings", new JSONObject(database.jsonSettings));
+            output.put("jsonSettings", new JSONObject(database.jsonSettings));
 
             return output;
         }
 
-	}
+    }
 
-	public static class Builder extends FromJSONLoaderBase<Database> {
+    public static class Builder extends FromJSONLoaderBase<Database> {
 
-		public Database fromJSON(int id, String jsonValue) {
-			var database = new Database(id);
-			loadFromJSON(database, jsonValue);
-			return database;
-		}
+        public Database fromJSON(int id, String jsonValue) {
+            var database = new Database(id);
+            loadFromJSON(database, jsonValue);
+            return database;
+        }
 
         @Override
         protected void _loadFromJSON(Database database, JSONObject jsonObject) throws JSONException {

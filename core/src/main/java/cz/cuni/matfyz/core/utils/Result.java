@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.core.utils;
 
 /**
- * 
  * @author jachym.bartik
  */
 public class Result {

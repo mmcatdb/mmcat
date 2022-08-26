@@ -5,7 +5,6 @@ package cz.cuni.matfyz.core.mapping;
  * Its implemented by {@link SimpleValue} or {@link ComplexProperty}.
  * @author pavel.koupil, jachym.bartik
  */
-public interface IValue
-{
+public interface IValue {
     
 }

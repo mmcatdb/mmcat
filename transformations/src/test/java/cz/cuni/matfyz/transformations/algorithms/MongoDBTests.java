@@ -1,48 +1,44 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
-import cz.cuni.matfyz.core.mapping.ComplexProperty;
-import cz.cuni.matfyz.wrapperDummy.DummyPullWrapper;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBDatabaseProvider;
-import cz.cuni.matfyz.wrapperMongodb.MongoDBPullWrapper;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+
+import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
+import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
+import cz.cuni.matfyz.wrappermongodb.MongoDBPullWrapper;
+
 import java.nio.file.Paths;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- *
  * @author jachymb.bartik
  */
-public class MongoDBTests
-{
+public class MongoDBTests {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBTests.class);
 
     private static final MongoDBDatabaseProvider databaseProvider = DatabaseSetup.createMongoDBDatabaseProvider();
 
     @BeforeAll
-    public static void setupDB()
-    {
-        try
-        {
+    public static void setupDB() {
+        try {
             var url = ClassLoader.getSystemResource("setupMongodb.js");
             String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
             DatabaseSetup.executeMongoDBScript(pathToFile);
         }
-        catch (Exception exception)
-        {
+        catch (Exception exception) {
             LOGGER.error("MongoDB setup error: ", exception);
         }
     }
 
-    private static MongoDBPullWrapper createPullWrapper()
-    {
+    private static MongoDBPullWrapper createPullWrapper() {
         var wrapper = new MongoDBPullWrapper();
         wrapper.injectDatabaseProvider(databaseProvider);
 
@@ -50,8 +46,7 @@ public class MongoDBTests
     }
 
     @Test
-    public void readFromDB_DoesNotThrow()
-    {
+    public void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = createPullWrapper();
             var dbContent = inputWrapper.readCollectionAsStringForTests("database.getCollection(\"basic_order\");");
@@ -59,8 +54,7 @@ public class MongoDBTests
         });
     }
 
-    private void pullForestTestAlgorithm(String collectionName, String expectedDataFileName, ComplexProperty accessPath) throws Exception
-    {
+    private void pullForestTestAlgorithm(String collectionName, String expectedDataFileName, ComplexProperty accessPath) throws Exception {
         var inputWrapper = createPullWrapper();
 
         var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(collectionName));
@@ -76,38 +70,32 @@ public class MongoDBTests
     }
 
     @Test
-    public void getForestForBasicTest() throws Exception
-    {
+    public void getForestForBasicTest() throws Exception {
         pullForestTestAlgorithm("basic", "1BasicTest.json", new TestData().path_order());
     }
 
     @Test
-    public void getForestForStructureTest() throws Exception
-    {
+    public void getForestForStructureTest() throws Exception {
         pullForestTestAlgorithm("structure", "2StructureTest.json", new TestData().path_nestedDoc());
     }
 
     @Test
-    public void getForestForSimpleArrayTest() throws Exception
-    {
+    public void getForestForSimpleArrayTest() throws Exception {
         pullForestTestAlgorithm("simple_array", "3SimpleArrayTest.json", new TestData().path_array());
     }
 
     @Test
-    public void getForestForComplexArrayTest() throws Exception
-    {
+    public void getForestForComplexArrayTest() throws Exception {
         pullForestTestAlgorithm("complex_array", "4ComplexArrayTest.json", new TestData().path_items());
     }
 
     @Test
-    public void getForestForEmptyArrayTest() throws Exception
-    {
+    public void getForestForEmptyArrayTest() throws Exception {
         pullForestTestAlgorithm("empty_array", "9EmptyArrayTest.json", new TestData().path_items());
     }
 
     @Test
-    public void getForestForComplexMapTest() throws Exception
-    {
+    public void getForestForComplexMapTest() throws Exception {
         pullForestTestAlgorithm("complex_map", "10ComplexMapTest.json", new TestData().path_address());
     }
 }

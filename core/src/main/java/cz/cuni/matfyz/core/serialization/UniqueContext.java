@@ -1,19 +1,19 @@
 package cz.cuni.matfyz.core.serialization;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
- *
  * @author jachymb.bartik
  */
-public interface UniqueContext<ObjectType extends Identified<IdType>, IdType extends Comparable<IdType>> {
+public interface UniqueContext<O extends Identified<I>, I extends Comparable<I>> extends Serializable {
     
-    public ObjectType createUniqueObject(ObjectType object);
+    public O createUniqueObject(O object);
 
-    public void deleteUniqueObject(ObjectType object);
+    public void deleteUniqueObject(O object);
 
-    public ObjectType getUniqueObject(IdType id);
+    public O getUniqueObject(I id);
 
-    public Collection<ObjectType> getAllUniqueObjects();
+    public Collection<O> getAllUniqueObjects();
 
 }

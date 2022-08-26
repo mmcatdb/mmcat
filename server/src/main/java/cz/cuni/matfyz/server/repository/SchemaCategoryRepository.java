@@ -5,12 +5,11 @@ import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
-import java.util.*;
+import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
 /**
- * 
  * @author jachym.bartik
  */
 @Repository
@@ -52,7 +51,7 @@ public class SchemaCategoryRepository {
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            statement.setString(1, init.jsonValue);
+            statement.setString(1, init.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

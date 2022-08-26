@@ -3,22 +3,19 @@ package cz.cuni.matfyz.core.record;
 import cz.cuni.matfyz.core.mapping.StaticName.Type;
 
 /**
- *
  * @author jachym.bartik
  */
-public class StaticRecordName extends RecordName
-{
-	private final Type type;
+public class StaticRecordName extends RecordName {
     
-    public StaticRecordName(String value, Type type)
-    {
+    private final Type type;
+    
+    public StaticRecordName(String value, Type type) {
         super(value);
         this.type = type;
     }
 
     @Override
-    public boolean equals(Object object)
-    {
+    public boolean equals(Object object) {
         return object instanceof StaticRecordName staticName
             && value.equals(staticName.value)
             && type.equals(staticName.type);
@@ -30,8 +27,7 @@ public class StaticRecordName extends RecordName
      */
     /*
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         int hash = 5;
         hash = 29 * hash + Objects.hashCode(this.value);
         hash = 17 * hash + Objects.hashCode(this.type);
@@ -40,10 +36,8 @@ public class StaticRecordName extends RecordName
     */
     
     @Override
-	public String toString()
-    {
-        return switch (type)
-        {
+    public String toString() {
+        return switch (type) {
             case STATIC_NAME -> value;
             case ANONYMOUS -> "_";
         };

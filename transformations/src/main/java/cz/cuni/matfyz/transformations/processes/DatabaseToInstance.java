@@ -1,10 +1,11 @@
 package cz.cuni.matfyz.transformations.processes;
 
-import cz.cuni.matfyz.core.record.*;
-import cz.cuni.matfyz.abstractWrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractWrappers.PullWrapperOptions;
-import cz.cuni.matfyz.core.instance.*;
-import cz.cuni.matfyz.core.mapping.*;
+import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.core.instance.InstanceCategory;
+import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
+import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
@@ -15,12 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jachym.bartik
  */
 public class DatabaseToInstance {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(DatabaseToInstance.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseToInstance.class);
 
     private Mapping mapping;
     private InstanceCategory currentInstance;
@@ -48,24 +48,24 @@ public class DatabaseToInstance {
         }
         catch (Exception exception) {
             LOGGER.error("Pull forest failed.", exception);
-            return new DataResult<InstanceCategory>(null, "Pull forest failed.");
+            return new DataResult<>(null, "Pull forest failed.");
         }
 
         Statistics.set(Counter.PULLED_RECORDS, forest.size());
 
-        InstanceCategory instance = currentInstance != null ?
-            currentInstance :
-            new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
+        InstanceCategory instance = currentInstance != null
+            ? currentInstance
+            : new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
 
         var transformation = new MTCAlgorithm();
-		transformation.input(mapping, instance, forest);
+        transformation.input(mapping, instance, forest);
 
         Statistics.start(Interval.MTC_ALGORIGHM);
-		transformation.algorithm();
+        transformation.algorithm();
         Statistics.end(Interval.MTC_ALGORIGHM);
         Statistics.end(Interval.DATABASE_TO_INSTANCE);
 
-        return new DataResult<InstanceCategory>(instance);
+        return new DataResult<>(instance);
     }
 
 }

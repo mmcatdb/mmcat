@@ -3,14 +3,18 @@ package cz.cuni.matfyz.core.instance;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.Id;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
- *
  * @author jachymb.bartik
  */
-public class IdWithValues implements Comparable<IdWithValues>
-{
+public class IdWithValues implements Serializable, Comparable<IdWithValues> {
+
     private final Map<Signature, String> tuples;
 
     public boolean hasSignature(Signature signature) {
@@ -48,6 +52,10 @@ public class IdWithValues implements Comparable<IdWithValues>
         return tuples.size();
     }
 
+    public boolean isEmpty() {
+        return tuples.isEmpty();
+    }
+
     // Evolution extension
     public IdWithValues copy() {
         var mapCopy = new TreeMap<Signature, String>();
@@ -63,22 +71,22 @@ public class IdWithValues implements Comparable<IdWithValues>
         return builder.build();
     }
 
-    public static IdWithValues Empty() {
+    public static IdWithValues createEmpty() {
         return merge();
     }
 
     private IdWithValues(Map<Signature, String> map) {
-		this.tuples = map;
+        this.tuples = map;
         //this.technicalValue = 0;
         //this.isTechnical = false;
-	}
+    }
 
     /*
     private IdWithValues(int technicalValue) {
-		this.tuples = new TreeMap<>();
+        this.tuples = new TreeMap<>();
         this.technicalValue = technicalValue;
         this.isTechnical = true;
-	}
+    }
     */
 
     public static class Builder {
@@ -151,21 +159,22 @@ public class IdWithValues implements Comparable<IdWithValues>
     }
     
     @Override
-	public String toString() {
+    public String toString() {
         StringBuilder builder = new StringBuilder();
         
         builder.append("{");
         boolean notFirst = false;
-        for (Signature signature : tuples.keySet()) {
+        for (var entry : tuples.entrySet()) {
             if (notFirst)
                 builder.append(", ");
             else
                 notFirst = true;
             
-            builder.append("(").append(signature).append(": \"").append(tuples.get(signature)).append("\")");
+            builder.append("(").append(entry.getKey()).append(": \"").append(entry.getValue()).append("\")");
         }
         builder.append("}");
             
         return builder.toString();
-	}
+    }
+
 }

@@ -8,18 +8,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author jachymb.bartik
  */
-public abstract class FromJSONSwitchBuilderBase<Type extends JSONConvertible> implements FromJSONBuilder<Type> {
+public abstract class FromJSONSwitchBuilderBase<T extends JSONConvertible> implements FromJSONBuilder<T> {
 
     protected String name() {
         return this.getClass().getDeclaringClass().getSimpleName();
     }
 
-    protected abstract Set<FromJSONBuilderBase<? extends Type>> getChildConverters();
+    protected abstract Set<FromJSONBuilderBase<? extends T>> getChildConverters();
 
-    public Type fromJSON(JSONObject jsonObject) {
+    public T fromJSON(JSONObject jsonObject) {
         try {
             for (var converter : getChildConverters()) {
                 final String className = jsonObject.getString("_class");
@@ -35,7 +34,7 @@ public abstract class FromJSONSwitchBuilderBase<Type extends JSONConvertible> im
         return null;
     }
 
-    public Type fromJSON(String jsonValue) {
+    public T fromJSON(String jsonValue) {
         try {
             JSONObject jsonObject = new JSONObject(jsonValue);
             return fromJSON(jsonObject);

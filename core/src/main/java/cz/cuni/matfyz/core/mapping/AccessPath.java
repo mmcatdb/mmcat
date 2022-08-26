@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.FromJSONSwitchBuilderBase;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
 
 import java.util.Set;
 
@@ -12,12 +12,11 @@ import java.util.Set;
  * Each node is a tuple (name, context, value).
  * @author pavel.koupil, jachym.bartik
  */
-public abstract class AccessPath implements JSONConvertible
-{
+public abstract class AccessPath implements JSONConvertible {
+
     protected final Name name;
     
-    public Name name()
-    {
+    public Name name() {
         return name;
     }
     
@@ -25,16 +24,15 @@ public abstract class AccessPath implements JSONConvertible
     
     public abstract IValue value();
     
-    protected AccessPath(Name name)
-    {
+    protected AccessPath(Name name) {
         this.name = name;
     }
     
     protected abstract boolean hasSignature(Signature signature);
     
-    public boolean equals(AccessPath path)
-    {
-        return name.equals(path.name);
+    @Override
+    public boolean equals(Object object) {
+        return object instanceof AccessPath path && name.equals(path.name);
     }
     
     public abstract Signature signature();
@@ -50,4 +48,5 @@ public abstract class AccessPath implements JSONConvertible
         }
 
     }
+
 }

@@ -1,18 +1,17 @@
 package cz.cuni.matfyz.server.repository.utils;
 
 /**
- * 
  * @author jachym.bartik
  */
-public class SingleOutput<OutputType> {
+public class SingleOutput<T> {
 
-    private OutputType output = null;
+    private T output = null;
 
-    public void set(OutputType output) {
+    public void set(T output) {
         this.output = output;
     }
 
-    OutputType get() {
+    T get() {
         return this.output;
     }
 
