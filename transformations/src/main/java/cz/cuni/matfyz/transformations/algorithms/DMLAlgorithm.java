@@ -54,13 +54,13 @@ public class DMLAlgorithm {
     }
 
     private List<DMLStatement> processWithObject(SchemaObject object) {
-        InstanceObject qI = instance.getObject(object);
-        Set<DomainRow> S = fetchSids(qI);
+        InstanceObject instanceObject = instance.getObject(object);
+        Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
         Deque<DMLStackTriple> masterStack = new LinkedList<>();
         List<DMLStatement> output = new ArrayList<>();
 
-        for (DomainRow sid : S) {
-            masterStack.push(new DMLStackTriple(sid, DDLAlgorithm.EMPTY_NAME, mapping.accessPath()));
+        for (DomainRow domainRow : domainRows) {
+            masterStack.push(new DMLStackTriple(domainRow, DDLAlgorithm.EMPTY_NAME, mapping.accessPath()));
             output.add(buildStatement(masterStack));
         }
 
@@ -68,16 +68,16 @@ public class DMLAlgorithm {
     }
 
     private List<DMLStatement> processWithMorphism(SchemaMorphism morphism) {
-        InstanceMorphism mI = instance.getMorphism(morphism);
-        Set<MappingRow> S = fetchRelations(mI);
+        InstanceMorphism instanceMorphism = instance.getMorphism(morphism);
+        Set<MappingRow> mappingRows = fetchRelations(instanceMorphism);
         AccessPath codomainPath = mapping.accessPath().getSubpathBySignature(morphism.signature());
         Deque<DMLStackTriple> masterStack = new LinkedList<>();
         List<DMLStatement> output = new ArrayList<>();
 
         if (codomainPath instanceof ComplexProperty complexPath) {
-            for (MappingRow row : S) {
-                masterStack.push(new DMLStackTriple(row.domainRow(), DDLAlgorithm.EMPTY_NAME, mapping.accessPath().minusSubpath(codomainPath)));
-                masterStack.push(new DMLStackTriple(row.codomainRow(), DDLAlgorithm.EMPTY_NAME, complexPath));
+            for (MappingRow mappingRow : mappingRows) {
+                masterStack.push(new DMLStackTriple(mappingRow.domainRow(), DDLAlgorithm.EMPTY_NAME, mapping.accessPath().minusSubpath(codomainPath)));
+                masterStack.push(new DMLStackTriple(mappingRow.codomainRow(), DDLAlgorithm.EMPTY_NAME, complexPath));
                 output.add(buildStatement(masterStack));
             }
 
@@ -87,7 +87,7 @@ public class DMLAlgorithm {
         throw new UnsupportedOperationException("Process with morphism");
     }
 
-    private Set<DomainRow> fetchSids(InstanceObject object) {
+    private Set<DomainRow> fetchSuperIds(InstanceObject object) {
         Set<DomainRow> output = new TreeSet<>();
 
         for (var innerMap : object.domain().values())

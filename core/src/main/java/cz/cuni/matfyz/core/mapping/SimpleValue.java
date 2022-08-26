@@ -29,6 +29,10 @@ public class SimpleValue implements IValue, JSONConvertible {
     public static SimpleValue createEmpty() {
         return empty;
     }
+
+    public boolean isEmpty() {
+        return this.signature.isEmpty();
+    }
     
     @Override
     public String toString() {

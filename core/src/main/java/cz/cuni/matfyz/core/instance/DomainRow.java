@@ -48,11 +48,10 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
         this.instanceObject = instanceObject;
         this.superId = superId;
         this.technicalIds = new TreeSet<>();
-        var aaa = superId.toString();
 
         // TODO this should happen only when there are no id, not when superId is empty
         //if (superId.isEmpty())
-        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).getValue0().isEmpty())
+        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).foundIds().isEmpty())
             this.technicalIds.add(instanceObject.generateTechnicalId());
 
         this.unnotifiedSignatures = new TreeSet<>(instanceObject.schemaObject().superId().signatures());
@@ -65,7 +64,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
         this.technicalIds = technicalIds;
 
         //if (superId.isEmpty() && technicalIds.isEmpty())
-        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).getValue0().isEmpty())
+        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).foundIds().isEmpty())
             this.technicalIds.add(instanceObject.generateTechnicalId());
 
         this.unnotifiedSignatures = new TreeSet<>(instanceObject.schemaObject().superId().signatures());
@@ -101,23 +100,6 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
 
         mappingsOfSameType.add(mapping);
     }
-
-    /*
-    public void addMappingTo(InstanceMorphism morphism, MappingRow mapping) {
-        addMapping(mappingsTo, morphism, mapping);
-    }
-
-    private void addMapping(Map<InstanceMorphism, Set<MappingRow>> map, InstanceMorphism morphism, MappingRow mapping) {
-        var mappingsOfSameType = map.get(morphism);
-        if (mappingsOfSameType == null) {
-            mappingsOfSameType = new TreeSet<>();
-            map.put(morphism, mappingsOfSameType);
-        }
-
-        mappingsOfSameType.add(mapping);
-    }
-     */
-
 
     public void removeMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
         var mappingsOfSameType = mappingsFrom.get(morphism);

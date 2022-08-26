@@ -174,7 +174,7 @@ public class EvolutionManagementTests {
         var addressToFullAddressMorphismInstance = createInstanceMorphismWithDual(instance, addressToFullAddressMorphism);
 
         var fullAddressInnerMap = new TreeMap<IdWithValues, DomainRow>();
-        var fullAddressId = new Id(Signature.createEmpty());
+        var fullAddressId = Id.createEmpty();
 
         Statistics.set(Counter.JOIN_ROWS, addressInstance.rows().size());
         for (var addressRow : addressInstance.rows()) {

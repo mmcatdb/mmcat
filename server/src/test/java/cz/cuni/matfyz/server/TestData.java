@@ -12,6 +12,7 @@ import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
 import cz.cuni.matfyz.core.schema.SchemaMorphism.Min;
 import cz.cuni.matfyz.core.schema.SchemaObject;
+
 import java.net.URISyntaxException;
 import java.util.Set;
 

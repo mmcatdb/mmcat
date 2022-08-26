@@ -16,14 +16,8 @@ public class StackTriple {
     public final AccessPath parentAccessPath;
     public final IComplexRecord parentRecord;
     
-    /*
-    public StackTriple(IdWithValues sid_dom, Object context, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    */
-    
-    public StackTriple(DomainRow pid, SchemaMorphism parentToChildMorphism, AccessPath parentAccessPath, IComplexRecord parentRecord) {
-        this.parentRow = pid;
+    public StackTriple(DomainRow parentRow, SchemaMorphism parentToChildMorphism, AccessPath parentAccessPath, IComplexRecord parentRecord) {
+        this.parentRow = parentRow;
         this.parentToChildMorphism = parentToChildMorphism;
         this.parentAccessPath = parentAccessPath;
         this.parentRecord = parentRecord;
@@ -32,9 +26,9 @@ public class StackTriple {
     @Override
     public String toString() {
         var innerBuilder = new IndentedStringBuilder(1);
-        innerBuilder.append("mS: ").append(parentToChildMorphism.signature()).append(",\n");
-        innerBuilder.append("pid: ").append(parentRow).append(",\n");
-        innerBuilder.append("t: ").append(parentAccessPath).append(",\n");
+        innerBuilder.append("parentToChildMorphism: ").append(parentToChildMorphism.signature()).append(",\n");
+        innerBuilder.append("parentRow: ").append(parentRow).append(",\n");
+        innerBuilder.append("parentAccessPath: ").append(parentAccessPath).append(",\n");
         innerBuilder.append("record: ").append(parentRecord);
         
         StringBuilder builder = new StringBuilder();

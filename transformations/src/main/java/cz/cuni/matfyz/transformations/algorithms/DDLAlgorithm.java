@@ -86,7 +86,7 @@ public class DDLAlgorithm {
         InstanceObject instanceObject = instance.getObject(schemaObject);
         
         var output = new TreeSet<String>();
-        for (DomainRow row : instanceObject.domain().get(new Id(Signature.createEmpty())).values())
+        for (DomainRow row : instanceObject.domain().get(Id.createEmpty()).values())
             output.add(row.getValue(Signature.createEmpty()));
         
         return output;

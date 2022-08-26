@@ -50,6 +50,10 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
         this.signatures = signatures;
     }
 
+    public boolean hasOnlyEmptySignature() {
+        return this.signatures.size() == 1 && this.signatures.first().isEmpty();
+    }
+
     @Override
     public int compareTo(Id id) {
         int sizeResult = signatures.size() - id.signatures.size();

@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.category.Signature.Type;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.IdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,11 +82,11 @@ public class MTCAlgorithm {
     }
     
     private Deque<StackTriple> createStackWithObject(SchemaObject object, RootRecord rootRecord, ComplexProperty rootAccessPath) {
-        InstanceObject qI = instance.getObject(object);
-        IdWithValues sid = fetchSid(object.superId(), rootRecord);
+        InstanceObject instanceObject = instance.getObject(object);
+        IdWithValues superId = fetchSuperId(object.superId(), rootRecord);
         Deque<StackTriple> masterStack = new LinkedList<>();
         
-        DomainRow row = modifyActiveDomain(qI, sid);
+        DomainRow row = modifyActiveDomain(instanceObject, superId);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
         
         return masterStack;
@@ -97,28 +95,27 @@ public class MTCAlgorithm {
     private Deque<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         Deque<StackTriple> masterStack = new LinkedList<>();
         
-        InstanceObject qI_dom = instance.getObject(object);
-        IdWithValues sids_dom = fetchSid(object.superId(), rootRecord);
-        DomainRow sid_dom = modifyActiveDomain(qI_dom, sids_dom);
+        InstanceObject domainInstance = instance.getObject(object);
+        IdWithValues domainSuperId = fetchSuperId(object.superId(), rootRecord);
+        DomainRow domainRow = modifyActiveDomain(domainInstance, domainSuperId);
 
-        SchemaObject qS_cod = morphism.cod();
-        IdWithValues sids_cod = fetchSid(qS_cod.superId(), rootRecord);
-        
-        InstanceObject qI_cod = instance.getObject(qS_cod);
-        DomainRow sid_cod = modifyActiveDomain(qI_cod, sids_cod);
+        SchemaObject codomainObject = morphism.cod();
+        InstanceObject codomainInstance = instance.getObject(codomainObject);
+        IdWithValues codomainSuperId = fetchSuperId(codomainObject.superId(), rootRecord);
+        DomainRow codomainRow = modifyActiveDomain(codomainInstance, codomainSuperId);
 
-        InstanceMorphism mI = instance.getMorphism(morphism);
+        InstanceMorphism morphismInstance = instance.getMorphism(morphism);
 
-        addRelation(mI, sid_dom, sid_cod, rootRecord);
-        addRelation(mI.dual(), sid_cod, sid_dom, rootRecord);
+        addRelation(morphismInstance, domainRow, codomainRow, rootRecord);
+        addRelation(morphismInstance.dual(), codomainRow, domainRow, rootRecord);
 
-        AccessPath t_dom = rootAccessPath.getSubpathBySignature(Signature.createEmpty());
-        AccessPath t_cod = rootAccessPath.getSubpathBySignature(morphism.signature());
+        AccessPath domainSubpath = rootAccessPath.getSubpathBySignature(Signature.createEmpty());
+        AccessPath codomainSubpath = rootAccessPath.getSubpathBySignature(morphism.signature());
 
-        AccessPath ap = rootAccessPath.minusSubpath(t_dom).minusSubpath(t_cod);
+        AccessPath restAccessPath = rootAccessPath.minusSubpath(domainSubpath).minusSubpath(codomainSubpath);
 
-        addPathChildrenToStack(masterStack, ap, sid_dom, rootRecord);
-        addPathChildrenToStack(masterStack, t_cod, sid_cod, rootRecord);
+        addPathChildrenToStack(masterStack, restAccessPath, domainRow, rootRecord);
+        addPathChildrenToStack(masterStack, codomainSubpath, codomainRow, rootRecord);
         
         return masterStack;
     }
@@ -127,28 +124,28 @@ public class MTCAlgorithm {
         LOGGER.debug("Process Top of Stack:\n{}", masterStack);
         
         StackTriple triple = masterStack.pop();
-        Iterable<FetchedSuperId> sids = fetchSids(triple.parentRecord, triple.parentRow, triple.parentToChildMorphism);
+        Iterable<FetchedSuperId> superIds = fetchSuperIds(triple.parentRecord, triple.parentRow, triple.parentToChildMorphism);
 
         SchemaObject childObject = triple.parentToChildMorphism.cod();
         InstanceObject childInstance = instance.getObject(childObject);
         InstanceMorphism morphismInstance = instance.getMorphism(triple.parentToChildMorphism);
         
-        for (FetchedSuperId sid : sids) {
-            DomainRow childRow = modifyActiveDomain(childInstance, sid.idWithValues);
+        for (FetchedSuperId superId : superIds) {
+            DomainRow childRow = modifyActiveDomain(childInstance, superId.idWithValues);
             childRow = addRelation(morphismInstance, triple.parentRow, childRow, triple.parentRecord);
             /*
-            addRelation(morphismInstance, triple.parentRow, childRow, sid.childRecord);
-            addRelation(morphismInstance.dual(), childRow, triple.parentRow, sid.childRecord);
+            addRelation(morphismInstance, triple.parentRow, childRow, superId.childRecord);
+            addRelation(morphismInstance.dual(), childRow, triple.parentRow, superId.childRecord);
             */
 
             //childInstance.merge(childRow);
             
-            addPathChildrenToStack(masterStack, triple.parentAccessPath, childRow, sid.childRecord);
+            addPathChildrenToStack(masterStack, triple.parentAccessPath, childRow, superId.childRecord);
         }
     }
 
     // Fetch id-with-values for given root record.
-    private static IdWithValues fetchSid(Id superId, RootRecord rootRecord) {
+    private static IdWithValues fetchSuperId(Id superId, RootRecord rootRecord) {
         var builder = new IdWithValues.Builder();
         
         for (Signature signature : superId.signatures()) {
@@ -163,7 +160,7 @@ public class MTCAlgorithm {
             }
             else {
                 LOGGER.warn("A simple record with signature {} is an array record:\n{}\n", signature, simpleRecord);
-                throw new UnsupportedOperationException("FetchSid doesn't support array values.");
+                throw new UnsupportedOperationException("FetchSuperId doesn't support array values.");
             }
         }
         
@@ -179,14 +176,14 @@ public class MTCAlgorithm {
      * @param morphism Morphism from the parent schema object to the currently processed one.
      * @return
      */
-    private static Iterable<FetchedSuperId> fetchSids(IComplexRecord parentRecord, DomainRow parentRow, SchemaMorphism morphism) {
+    private static Iterable<FetchedSuperId> fetchSuperIds(IComplexRecord parentRecord, DomainRow parentRow, SchemaMorphism morphism) {
         List<FetchedSuperId> output = new ArrayList<>();
         Id superId = morphism.cod().superId();
         Signature signature = morphism.signature();
 
         // If the id is empty, the output ids with values will have only one tuple: (<signature>, <value>).
         // This means they represent either singular values (SimpleValueRecord) or a nested document without identifier (not auxilliary).
-        if (superId.equals(Id.createEmpty())) {
+        if (superId.hasOnlyEmptySignature()) {
             // Value is in the parent domain row.
             if (parentRow.hasSignature(signature)) {
                 String valueFromParentRow = parentRow.getValue(signature);
@@ -194,7 +191,7 @@ public class MTCAlgorithm {
             }
             // There is simple value/array record with given signature in the parent record.
             else if (parentRecord.hasSimpleRecord(signature)) {
-                addSidsFromSimpleRecordToOutput(output, parentRecord.getSimpleRecord(signature), signature);
+                addSuperIdsFromSimpleRecordToOutput(output, parentRecord.getSimpleRecord(signature), signature);
             }
             // There are complex records with given signature in the parent record.
             // They don't represent any (string) value so an unique identifier must be generated instead.
@@ -222,7 +219,7 @@ public class MTCAlgorithm {
         return output;
     }
 
-    private static void addSidsFromSimpleRecordToOutput(List<FetchedSuperId> output, SimpleRecord<?> simpleRecord, Signature signature) {
+    private static void addSuperIdsFromSimpleRecordToOutput(List<FetchedSuperId> output, SimpleRecord<?> simpleRecord, Signature signature) {
         if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
             addSimpleValueToOutput(output, simpleValueRecord.getValue().toString());
         else if (simpleRecord instanceof SimpleArrayRecord<?> simpleArrayRecord)
@@ -290,7 +287,7 @@ public class MTCAlgorithm {
                 else if (childRecord.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))
                     value = dynamicName.value();
                 else
-                    throw new UnsupportedOperationException("FetchSids doesn't support array values for complex records.");
+                    throw new UnsupportedOperationException("FetchSuperIds doesn't support array values for complex records.");
             }
             else
                 value = parentRow.getValue(signatureInParentRow);
@@ -310,51 +307,6 @@ public class MTCAlgorithm {
         instanceObject.addRow(row);
         var merger = new Merger();
         return merger.merge(row, instanceObject);
-        //return instanceObject.merge(row);
-
-        /*
-        Set<DomainRow> rows = new TreeSet<>();
-        Map<Id, IdWithValues> subsetIds = instanceObject.generateIdsFromSuperId(superId);
-        
-        // We find all rows that are identified by the superIdWithValues.
-        for (IdWithValues idWithValues : subsetIds.values()) {
-            Map<IdWithValues, DomainRow> map = instanceObject.domain().get(idWithValues.id());
-            if (map == null)
-                continue;
-            
-            DomainRow row = map.get(idWithValues);
-            if (row != null && !rows.contains(row))
-                rows.add(row);
-        }
-
-        // Teď přidat morfizmy
-        // Následně merge
-
-        // ----
-        
-        // We merge them together.
-        var builder = new IdWithValues.Builder();
-        for (DomainRow row : rows)
-            for (Signature signature : row.signatures())
-                builder.add(signature, row.getValue(signature));
-        
-        for (Signature signature : superId.signatures())
-            builder.add(signature, superId.map().get(signature));
-        
-        DomainRow newRow = new DomainRow(builder.build(), subsetIds);
-        for (IdWithValues subsetIdWithValues : subsetIds.values()) {
-            Map<IdWithValues, DomainRow> map = instanceObject.domain().get(subsetIdWithValues.id());
-            if (map == null) {
-                map = new TreeMap<>();
-                instanceObject.domain().put(subsetIdWithValues.id(), map);
-            }
-            map.put(subsetIdWithValues, newRow);
-        }
-        
-        // TODO: The update of the already existing morphisms should be optimized.
-        
-        return newRow;
-        */
     }
 
     private DomainRow addRelation(InstanceMorphism morphism, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {
@@ -421,14 +373,16 @@ public class MTCAlgorithm {
         morphism.dual().addMapping(new MappingRow(codomainRow, domainRow));
     }
     
-    private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow sid, IComplexRecord complexRecord) {
-        //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow sid, IComplexRecord record) {
+    private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow superId, IComplexRecord complexRecord) {
+        //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
         if (path instanceof ComplexProperty complexPath)
-            for (Pair<Signature, ComplexProperty> child : children(complexPath)) {
-                SchemaMorphism morphism = instance.getMorphism(child.getValue0()).schemaMorphism();
-                stack.push(new StackTriple(sid, morphism, child.getValue1(), complexRecord));
+            for (Child child : children(complexPath)) {
+                SchemaMorphism morphism = instance.getMorphism(child.signature()).schemaMorphism();
+                stack.push(new StackTriple(superId, morphism, child.property(), complexRecord));
             }
     }
+
+    private record Child(Signature signature, ComplexProperty property) {}
 
     /**
      * Determine possible sub-paths to be traversed from this complex property (inner node of an access path).
@@ -436,8 +390,8 @@ public class MTCAlgorithm {
      * Similarly, context must be a signature of a morphism.
      * @return set of pairs (morphism signature, complex property) of all possible sub-paths.
      */
-    private static Collection<Pair<Signature, ComplexProperty>> children(ComplexProperty complexProperty) {
-        final List<Pair<Signature, ComplexProperty>> output = new ArrayList<>();
+    private static Collection<Child> children(ComplexProperty complexProperty) {
+        final List<Child> output = new ArrayList<>();
         
         for (AccessPath subpath : complexProperty.subpaths()) {
             output.addAll(process(subpath.name()));
@@ -453,24 +407,24 @@ public class MTCAlgorithm {
      * @param name
      * @return see {@link #children()}
      */
-    private static Collection<Pair<Signature, ComplexProperty>> process(Name name) {
+    private static Collection<Child> process(Name name) {
         if (name instanceof DynamicName dynamicName)
-            return List.of(new Pair<>(dynamicName.signature(), ComplexProperty.createEmpty()));
+            return List.of(new Child(dynamicName.signature(), ComplexProperty.createEmpty()));
         else // Static or anonymous (empty) name
-            return Collections.<Pair<Signature, ComplexProperty>>emptyList();
+            return Collections.<Child>emptyList();
     }
     
-    private static Collection<Pair<Signature, ComplexProperty>> process(IContext context, IValue value) {
+    private static Collection<Child> process(IContext context, IValue value) {
         if (value instanceof SimpleValue simpleValue) {
             final Signature contextSignature = context instanceof Signature signature ? signature : Signature.createEmpty();
             final Signature newSignature = simpleValue.signature().concatenate(contextSignature);
             
-            return List.of(new Pair<>(newSignature, ComplexProperty.createEmpty()));
+            return List.of(new Child(newSignature, ComplexProperty.createEmpty()));
         }
         
         if (value instanceof ComplexProperty complexProperty) {
             if (context instanceof Signature signature)
-                return List.of(new Pair<>(signature, complexProperty));
+                return List.of(new Child(signature, complexProperty));
             else
                 return children(complexProperty);
         }

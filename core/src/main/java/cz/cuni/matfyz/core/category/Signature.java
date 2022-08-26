@@ -146,16 +146,20 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
     public Type getType() {
         if (isNull)
             return Type.NULL;
-        if (ids.length == 0)
+        if (isEmpty())
             return Type.EMPTY;
         if (ids.length == 1)
             return Type.BASE;
         return Type.COMPOSITE;
     }
 
+    public boolean isEmpty() {
+        return ids.length == 0;
+    }
+
     @Override
     public String toString() {
-        if (getType() == Type.EMPTY)
+        if (isEmpty())
             return "_EMPTY";
         
         StringBuilder builder = new StringBuilder();

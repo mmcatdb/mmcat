@@ -93,7 +93,7 @@ public class ComplexProperty extends AccessPath implements IValue {
         // If M = null, a leaf L with L.value = epsion is returned.
         if (signature == null) {
             for (AccessPath subpath : subpaths)
-                if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.value() == SimpleValue.createEmpty())
+                if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.value().isEmpty())
                     return simpleProperty;
             
             for (AccessPath subpath : subpaths)

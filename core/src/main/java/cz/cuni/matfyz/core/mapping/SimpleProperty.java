@@ -42,7 +42,7 @@ public class SimpleProperty extends AccessPath {
     @Override
     protected boolean hasSignature(Signature signature) {
         if (signature == null)
-            return value.signature().getType() == Signature.Type.EMPTY;
+            return value.signature().isEmpty();
         
         return value.signature().equals(signature);
     }

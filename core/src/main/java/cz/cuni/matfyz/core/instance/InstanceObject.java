@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.javatuples.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +59,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     }
 
     private void setRow(DomainRow row) {
-        var ids = findIdsInSuperId(row.superId, schemaObject.ids()).getValue0();
+        var ids = findIdsInSuperId(row.superId, schemaObject.ids()).foundIds();
         setRow(row, ids);
     }
 
@@ -71,7 +70,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
      */
     public DomainRow getActualRow(DomainRow row) {
         // Simple search by ids, any of them will do.
-        var ids = findIdsInSuperId(row.superId, schemaObject.ids()).getValue0();
+        var ids = findIdsInSuperId(row.superId, schemaObject.ids()).foundIds();
         for (var id : ids) {
             var foundRow = getRowById(id);
             if (foundRow != null)
@@ -150,18 +149,18 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     public void merge(IdWithValues superId, Set<Integer> technicalIds, Merger merger) {
         // Iteratively get all rows that are identified by the superId (while expanding the superId).
         Set<DomainRow> originalRows = new TreeSet<>();
-        Set<IdWithValues> allIds = new TreeSet<>();
 
         var superIdOfTechnicalRows = findTechnicalSuperId(technicalIds, originalRows);
         superId = IdWithValues.merge(superId, superIdOfTechnicalRows);
 
-        var maximalSuperId = findMaximalSuperId(superId, originalRows, allIds);
+        var result = findMaximalSuperId(superId, originalRows);
+        var maximalSuperId = result.superId();
         var maximalTechnicalId = mergeTechnicalIds(originalRows);
 
         // Create new Row that contains the unified superId and put it to all possible ids.
         // This also deletes the old ones.
         var newRow = new DomainRow(maximalSuperId, maximalTechnicalId, this); //, allIds);
-        setRow(newRow, allIds);
+        setRow(newRow, result.foundIds());
 
         // Get all morphisms from and to the original rows and put the new one instead of them.
         // Detect all morphisms that have maximal cardinality ONE and merge their rows. This can cause a chain reaction.
@@ -185,27 +184,28 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return builder.build();
     }
 
+    private record FindSuperIdResult(IdWithValues superId, Set<IdWithValues> foundIds) {}
+
     /**
      * Iteratively get all rows that are identified by the superId (while expanding the superId).
      * @param superId
      * @return
      */
-    public IdWithValues findMaximalSuperId(IdWithValues superId, Set<DomainRow> outOriginalRows, Set<IdWithValues> outAllIds) {
+    public FindSuperIdResult findMaximalSuperId(IdWithValues superId, Set<DomainRow> outOriginalRows) {
         // First, we take all ids that can be created for this object, and we find those, that can be filled from the given superId.
         // Then we find the rows that correspond to them and merge their superIds to the superId.
         // If it gets bigger, we try to generate other ids to find their objects and so on ...
 
         int previousSuperIdSize = 0;
+        Set<IdWithValues> foundIds = new TreeSet<>();
         Set<Id> notFoundIds = schemaObject.ids();
 
         while (previousSuperIdSize < superId.size()) {
             previousSuperIdSize = superId.size();
 
             var result = findIdsInSuperId(superId, notFoundIds);
-            var foundIds = result.getValue0();
-            notFoundIds = result.getValue1();
-
-            outAllIds.addAll(foundIds);
+            foundIds.addAll(result.foundIds());
+            notFoundIds = result.notFoundIds();
             
             var foundRows = findNewRows(foundIds, outOriginalRows);
             if (foundRows.isEmpty())
@@ -214,7 +214,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
             superId = IdWithValues.merge(superId, mergeSuperIds(foundRows));
         }
 
-        return superId;
+        return new FindSuperIdResult(superId, foundIds);
     }
 
     public static IdWithValues mergeSuperIds(Iterable<DomainRow> rows) {
@@ -305,14 +305,16 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return set;
     }
 
+    public record FindIdsResult(Set<IdWithValues> foundIds, Set<Id> notFoundIds) {}
+
     /**
      * Returns all ids that are contained in given superId as a subset.
      * @param superId
      * @return
      */
     // TODO private
-    //private Pair<Set<IdWithValues>, Set<Id>> findIdsInSuperId(IdWithValues superId, Set<Id> idsToFind) {
-    public Pair<Set<IdWithValues>, Set<Id>> findIdsInSuperId(IdWithValues superId, Set<Id> idsToFind) {
+    //private FindIdsResult findIdsInSuperId(IdWithValues superId, Set<Id> idsToFind) {
+    public FindIdsResult findIdsInSuperId(IdWithValues superId, Set<Id> idsToFind) {
         var foundIds = new TreeSet<IdWithValues>();
         var notFoundIds = new TreeSet<Id>();
 
@@ -337,7 +339,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
                 notFoundIds.add(id);
         }
 
-        return new Pair<>(foundIds, notFoundIds);
+        return new FindIdsResult(foundIds, notFoundIds);
     }
 
     // TODO change name
