@@ -48,7 +48,7 @@ for (let i = 1; i <= totalBatches; i++) {
         };
         customerId++;
 
-      //outputFile.write(JSON.stringify(customer) + ',\n');
+      outputFile.write(JSON.stringify(customer) + ',\n');
     }
     outputFile.write(']);\n')
 }

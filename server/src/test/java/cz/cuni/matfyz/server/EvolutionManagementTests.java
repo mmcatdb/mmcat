@@ -25,7 +25,6 @@ import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Assertions;
@@ -132,14 +131,6 @@ public class EvolutionManagementTests {
         //LOGGER.info(finalResult.data);
     }
 
-    private DomainRow getRowEffective(DomainRow source, List<InstanceMorphism> morphismPath) {
-        for (var morphism : morphismPath) {
-            source = source.getMappingsFromForMorphism(morphism).stream().findFirst().get().codomainRow();
-        }
-
-        return source;
-    }
-
     private void join(SchemaCategory schema, InstanceCategory category) {
         var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", Id.createEmpty());
         var address = schema.getObject(data.addressKey);
@@ -185,12 +176,12 @@ public class EvolutionManagementTests {
 
         Statistics.set(Counter.MOVE_ROWS, category.getObject(data.orderKey).allRows().size());
 
-        var originalSignatures = List.of(data.userToOrder.dual(), data.userToAddress, data.addressToFullAddress);
-        List<InstanceMorphism> morphismPath = originalSignatures.stream()
-            .map(signature -> category.getMorphism(signature)).toList();
+        var originalSignature = Signature.concatenate(data.userToOrder.dual(), data.userToAddress, data.addressToFullAddress);
+        var morphismPath = category.getMorphism(originalSignature);
         
         for (var orderRow : category.getObject(data.orderKey).allRows()) {
-            var fullAddressRow = getRowEffective(orderRow, morphismPath);
+            var optionalRow = orderRow.traverseThrough(morphismPath).stream().findFirst();
+            var fullAddressRow = optionalRow.get();
             orderToFullAddressMorphismInstance.addMapping(new MappingRow(orderRow, fullAddressRow));
             orderToFullAddressMorphismInstance.dual().addMapping(new MappingRow(fullAddressRow, orderRow));
         }

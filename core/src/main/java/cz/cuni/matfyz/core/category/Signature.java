@@ -110,6 +110,10 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         return new Signature(ArrayUtils.concatenate(other.ids, ids), false);
     }
 
+    public static Signature concatenate(Signature... signatures) {
+        return concatenate(List.of(signatures));
+    }
+
     public static Signature concatenate(Collection<Signature> signatures) {
         var signaturesIds = new ArrayList<>(signatures.stream().map(signature -> signature.ids).toList());
         Collections.reverse(signaturesIds);

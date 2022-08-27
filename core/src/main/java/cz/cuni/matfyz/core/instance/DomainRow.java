@@ -52,23 +52,26 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
     private final Map<InstanceMorphism, Set<MappingRow>> mappingsFrom = new TreeMap<>();
     //public final Map<InstanceMorphism, Set<MappingRow>> mappingsTo = new TreeMap<>();
 
+    /**
+     * Warning: this is a low-level method that works as intended only for the base morphisms. For the composite ones, an empty set might be returned even if connections exist.
+     */
     public Set<MappingRow> getMappingsFromForMorphism(InstanceMorphism morphism) {
         var mappings = mappingsFrom.get(morphism);
         return mappings != null ? mappings : new TreeSet<>();
     }
 
-    public Set<Entry<InstanceMorphism, Set<MappingRow>>> getAllMappingsFrom() {
+    Set<Entry<InstanceMorphism, Set<MappingRow>>> getAllMappingsFrom() {
         return mappingsFrom.entrySet();
     }
 
-    public void addMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
+    void addMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
         //addMapping(mappingsFrom, morphism, mapping);
         var mappingsOfSameType = mappingsFrom.computeIfAbsent(morphism, x -> new TreeSet<>());
 
         mappingsOfSameType.add(mapping);
     }
 
-    public void removeMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
+    void removeMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
         var mappingsOfSameType = mappingsFrom.get(morphism);
         mappingsOfSameType.remove(mapping);
     }
@@ -89,9 +92,9 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
         return currentSet;
     }
 
-    public record SignatureWithValue(Signature signature, String value) {}
+    record SignatureWithValue(Signature signature, String value) {}
 
-    public List<SignatureWithValue> getAndRemovePendingReferencePairs() {
+    List<SignatureWithValue> getAndRemovePendingReferencePairs() {
         var pendingSignatures = pendingReferences.stream().filter(this::hasSignature).toList();
         pendingReferences.removeAll(pendingSignatures);
         return pendingSignatures.stream().map(signature -> new SignatureWithValue(signature, getValue(signature))).toList();

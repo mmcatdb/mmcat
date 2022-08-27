@@ -172,11 +172,10 @@ public class DMLAlgorithm {
         var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
         InstanceMorphism nameMorphism = category.getMorphism(dynamicName.signature());
-        var nameRowSet = parentRow.getMappingsFromForMorphism(nameMorphism);
+        var nameRowSet = parentRow.traverseThrough(nameMorphism);
 
-        if (nameRowSet != null && !nameRowSet.isEmpty()) {
-            return nameRowSet.iterator().next().codomainRow().getValue(Signature.createEmpty());
-        }
+        if (nameRowSet != null && !nameRowSet.isEmpty())
+            return nameRowSet.iterator().next().getValue(Signature.createEmpty());
 
         throw new UnsupportedOperationException("Dynamic name value not found.");
     }

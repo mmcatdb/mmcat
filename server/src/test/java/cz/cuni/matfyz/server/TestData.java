@@ -104,7 +104,7 @@ public class TestData {
 
     private ComplexProperty createUserAccessPath() {
         return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
-            new SimpleProperty("id", userToId_user),
+            new SimpleProperty("_id", userToId_user),
             new ComplexProperty("contact_address", userToAddress,
                 new SimpleProperty("street", addressToStreet),
                 new SimpleProperty("city", addressToCity)
