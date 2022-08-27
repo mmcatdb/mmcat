@@ -24,9 +24,9 @@ public class InstanceCategoryService {
 
     public InstanceObject findObject(HttpSession session, int schemaId, Key key) {
         var store = UserStore.fromSession(session);
-        var instance = store.getInstance(schemaId);
+        var category = store.getCategory(schemaId);
 
-        return instance != null ? instance.getObject(key) : null;
+        return category != null ? category.getObject(key) : null;
     }
 
 }

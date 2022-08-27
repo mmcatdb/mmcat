@@ -12,10 +12,10 @@ import cz.cuni.matfyz.core.schema.Key;
  */
 public class TestInstanceCategoryBuilder {
 
-    private final InstanceCategory instance;
+    private final InstanceCategory category;
     
     public TestInstanceCategoryBuilder(InstanceCategory instance) {
-        this.instance = instance;
+        this.category = instance;
     }
     
     private final IdWithValues.Builder builder = new IdWithValues.Builder();
@@ -27,27 +27,24 @@ public class TestInstanceCategoryBuilder {
     }
 
     public DomainRow object(Key key) {
-        var instanceObject = instance.getObject(key);
-        IdWithValues idWithValues = builder.build();
+        var instanceObject = category.getObject(key);
+        IdWithValues superId = builder.build();
 
-        var domainRow = new DomainRow(idWithValues, instanceObject);
-        instanceObject.addRow(domainRow);
-        
-        return domainRow;
+        return instanceObject.createRow(superId);
     }
     
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {
         var row = new MappingRow(domainRow, codomainRow);
-        instance.getMorphism(signature).addMapping(row);
+        category.getMorphism(signature).addMapping(row);
         
         var dualRow = new MappingRow(codomainRow, domainRow);
-        instance.getMorphism(signature.dual()).addMapping(dualRow);
+        category.getMorphism(signature.dual()).addMapping(dualRow);
         
         return row;
     }
 
     public void morphism(Signature signature) {
-        instance.getMorphism(signature);
+        category.getMorphism(signature);
     }
     
 }

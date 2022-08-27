@@ -11,7 +11,6 @@ import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.statements.DDLStatement;
@@ -30,12 +29,12 @@ public class DDLAlgorithm {
     public static final String EMPTY_NAME = StaticName.createAnonymous().getStringName();
 
     private Mapping mapping;
-    private InstanceCategory instance;
+    private InstanceCategory category;
     private AbstractDDLWrapper wrapper;
     
     public void input(Mapping mapping, InstanceCategory instance, AbstractDDLWrapper wrapper) {
         this.mapping = mapping;
-        this.instance = instance;
+        this.category = instance;
         this.wrapper = wrapper;
     }
     
@@ -82,11 +81,12 @@ public class DDLAlgorithm {
         
         var dynamicName = (DynamicName) path.name();
             
-        SchemaObject schemaObject = instance.getMorphism(dynamicName.signature()).schemaMorphism().cod();
-        InstanceObject instanceObject = instance.getObject(schemaObject);
+        SchemaObject schemaObject = category.getMorphism(dynamicName.signature()).schemaMorphism().cod();
+        InstanceObject instanceObject = category.getObject(schemaObject);
         
         var output = new TreeSet<String>();
-        for (DomainRow row : instanceObject.domain().get(Id.createEmpty()).values())
+        // The rows have to have only empty signature so we can just pull all rows.
+        for (DomainRow row : instanceObject.allRows())
             output.add(row.getValue(Signature.createEmpty()));
         
         return output;
@@ -108,7 +108,7 @@ public class DDLAlgorithm {
     }
     
     private void processPath(SimpleProperty property, Set<String> names) {
-        var morphism = instance.getMorphism(property.value().signature()).schemaMorphism();
+        var morphism = category.getMorphism(property.value().signature()).schemaMorphism();
         
         if (morphism.isArray())
             wrapper.addSimpleArrayProperty(names, isRequired(morphism));
@@ -117,7 +117,7 @@ public class DDLAlgorithm {
     }
     
     private void processPath(ComplexProperty property, Set<String> names) {
-        var morphism = instance.getMorphism(property.signature()).schemaMorphism();
+        var morphism = category.getMorphism(property.signature()).schemaMorphism();
         
         if (morphism.isArray() && !property.hasDynamicKeys())
             wrapper.addComplexArrayProperty(names, isRequired(morphism));

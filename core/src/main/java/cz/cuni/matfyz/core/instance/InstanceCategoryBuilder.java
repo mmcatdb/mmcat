@@ -33,7 +33,15 @@ public class InstanceCategoryBuilder {
             objects.put(instanceObject.key(), instanceObject);
         }
 
-        for (SchemaMorphism schemaMorphism : schemaCategory.allMorphisms()) {
+        // The base moprhisms must be created first because the composite ones use them.
+        var baseMorphisms = schemaCategory.allMorphisms().stream().filter(SchemaMorphism::isBase).toList();
+        for (SchemaMorphism schemaMorphism : baseMorphisms) {
+            InstanceMorphism instanceMorphism = createMorphism(schemaMorphism);
+            morphisms.put(schemaMorphism.signature(), instanceMorphism);
+        }
+
+        var compositeMorphisms = schemaCategory.allMorphisms().stream().filter(morphism -> !morphism.isBase()).toList();
+        for (SchemaMorphism schemaMorphism : compositeMorphisms) {
             InstanceMorphism instanceMorphism = createMorphism(schemaMorphism);
             morphisms.put(schemaMorphism.signature(), instanceMorphism);
         }

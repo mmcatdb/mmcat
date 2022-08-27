@@ -18,7 +18,6 @@ public class UserStore implements Serializable {
 
     private static final String USER_STORE_KEY = "USER_STORE";
 
-    // TODO make instance serializable
     private Map<Integer, InstanceCategory> instaces = new TreeMap<>();
     private Map<Integer, Model> models = new TreeMap<>();
 
@@ -37,7 +36,7 @@ public class UserStore implements Serializable {
         instaces.put(schemaId, instance);
     }
 
-    public InstanceCategory getInstance(int schemaId) {
+    public InstanceCategory getCategory(int schemaId) {
         return instaces.get(schemaId);
     }
 

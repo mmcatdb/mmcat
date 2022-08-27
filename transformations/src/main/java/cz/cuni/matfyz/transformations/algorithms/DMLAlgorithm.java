@@ -2,7 +2,6 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.category.Signature.Type;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
@@ -22,12 +21,8 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Stream;
 
 /**
  * @author jachymb.bartik
@@ -36,15 +31,13 @@ import java.util.stream.Stream;
 public class DMLAlgorithm {
 
     private Mapping mapping;
-    private InstanceCategory instance;
+    private InstanceCategory category;
     private AbstractPushWrapper wrapper;
-    private ActivePathProvider activePathProvider;
 
     public void input(Mapping mapping, InstanceCategory instance, AbstractPushWrapper wrapper) {
         this.mapping = mapping;
-        this.instance = instance;
+        this.category = instance;
         this.wrapper = wrapper;
-        this.activePathProvider = new ActivePathProvider(instance);
     }
     
     public List<DMLStatement> algorithm() {
@@ -54,7 +47,7 @@ public class DMLAlgorithm {
     }
 
     private List<DMLStatement> processWithObject(SchemaObject object) {
-        InstanceObject instanceObject = instance.getObject(object);
+        InstanceObject instanceObject = category.getObject(object);
         Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
         Deque<DMLStackTriple> masterStack = new LinkedList<>();
         List<DMLStatement> output = new ArrayList<>();
@@ -68,7 +61,7 @@ public class DMLAlgorithm {
     }
 
     private List<DMLStatement> processWithMorphism(SchemaMorphism morphism) {
-        InstanceMorphism instanceMorphism = instance.getMorphism(morphism);
+        InstanceMorphism instanceMorphism = category.getMorphism(morphism);
         Set<MappingRow> mappingRows = fetchRelations(instanceMorphism);
         AccessPath codomainPath = mapping.accessPath().getSubpathBySignature(morphism.signature());
         Deque<DMLStackTriple> masterStack = new LinkedList<>();
@@ -88,12 +81,7 @@ public class DMLAlgorithm {
     }
 
     private Set<DomainRow> fetchSuperIds(InstanceObject object) {
-        Set<DomainRow> output = new TreeSet<>();
-
-        for (var innerMap : object.domain().values())
-            output.addAll(innerMap.values());
-
-        return output;
+        return object.allRows();
     }
 
     private Set<MappingRow> fetchRelations(InstanceMorphism morphism) {
@@ -137,12 +125,12 @@ public class DMLAlgorithm {
             }
             else {
                 // Get all mapping rows that have signature of this subpath and originate in given row.
-                InstanceMorphism morphism = instance.getMorphism(subpath.signature());
+                InstanceMorphism morphism = category.getMorphism(subpath.signature());
                 boolean isObjectWithDynamicKeys = subpath instanceof ComplexProperty complexSubpath && complexSubpath.hasDynamicKeys();
                 boolean showIndex = morphism.schemaMorphism().isArray() && !isObjectWithDynamicKeys;
                 int index = 0;
 
-                for (DomainRow objectRow : getRowsForMorphism(row, morphism)) {
+                for (DomainRow objectRow : row.traverseThrough(morphism)) {
                     output.add(getNameValuePair(subpath, row, objectRow, prefix, index, showIndex));
                     index++;
                 }
@@ -159,27 +147,6 @@ public class DMLAlgorithm {
         }
 
         return output;
-    }
-
-    // Evolution extension
-    private Set<DomainRow> getRowsForMorphism(DomainRow row, InstanceMorphism morphism) {
-        var path = activePathProvider.getActivePath(morphism.signature());
-        if (path == null)
-            return Set.of();
-
-        Set<DomainRow> primary = Set.of(row);
-        Set<DomainRow> secondary;
-
-        for (var submorphism : path) {
-            secondary = new TreeSet<>();
-
-            for (var primaryRow : primary)
-                secondary.addAll(primaryRow.getMappingsFromForMorphism(submorphism).stream().map(MappingRow::codomainRow).toList());
-
-            primary = secondary;
-        }
-
-        return primary;
     }
 
     private NameValuePair getNameValuePair(AccessPath objectPath, DomainRow parentRow, DomainRow objectRow, String prefix, int index, boolean showIndex) {
@@ -204,7 +171,7 @@ public class DMLAlgorithm {
 
         var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
-        InstanceMorphism nameMorphism = instance.getMorphism(dynamicName.signature());
+        InstanceMorphism nameMorphism = category.getMorphism(dynamicName.signature());
         var nameRowSet = parentRow.getMappingsFromForMorphism(nameMorphism);
 
         if (nameRowSet != null && !nameRowSet.isEmpty()) {
@@ -238,90 +205,4 @@ public class DMLAlgorithm {
         }
     }
 
-    // Evolution extension
-    private class ActivePathProvider {
-
-        private InstanceCategory instance;
-        private Map<Signature, List<InstanceMorphism>> paths = new TreeMap<>();
-
-        public ActivePathProvider(InstanceCategory instance) {
-            this.instance = instance;
-        }
-
-        public List<InstanceMorphism> getActivePath(Signature signature) {
-
-            if (paths.containsKey(signature))
-                return paths.get(signature);
-
-            var result = findActivePath(signature);
-            paths.put(signature, result);
-            
-            return result;
-        }
-
-        // We try to find the longest possible morphism that is active.
-        // The algorithm is definitely not optimized.
-        private List<InstanceMorphism> findActivePath(Signature signature) {
-            var morphism = instance.getMorphism(signature);
-            if (morphism.isActive())
-                return List.of(morphism);
-
-            var restSignature = signature.getLast();
-            var possibleSignature = signature.cutLast();
-
-            while (possibleSignature.getType() == Type.COMPOSITE || possibleSignature.getType() == Type.BASE) {
-                var possibleMorphism = instance.getMorphism(possibleSignature);
-
-                if (possibleMorphism.isActive()) {
-                    var restResult = findActivePath(restSignature);
-
-                    if (restResult != null)
-                        return Stream.concat(Stream.of(possibleMorphism), restResult.stream()).toList();
-                }
-                
-                restSignature = possibleSignature.getLast().concatenate(restSignature);
-                possibleSignature = possibleSignature.cutLast();
-            }
-
-            return tryBFS(morphism);
-        }
-
-        // TODO remove this, shouldn't be necessary
-        private List<InstanceMorphism> tryBFS(InstanceMorphism morphism) {
-            Set<InstanceObject> visited = new TreeSet<>();
-            Queue<ObjectToVisit> objectsToVisit = new LinkedList<>();
-            objectsToVisit.offer(new ObjectToVisit(new ArrayList<>(), morphism.dom()));
-            var target = morphism.cod();
-
-            while (!objectsToVisit.isEmpty()) {
-                var object = objectsToVisit.poll();
-                if (object.value.equals(target))
-                    return object.path;
-                
-                visited.add(object.value);
-                instance.morphisms().values().stream()
-                    .filter(m -> m.isActive() && m.dom().equals(object.value) && !visited.contains(m.cod()))
-                    .forEach(m -> {
-                        var nextPath = new ArrayList<>(object.path);
-                        nextPath.add(m);
-                        objectsToVisit.offer(new ObjectToVisit(nextPath, m.cod()));
-                    });
-            }
-
-            return null;
-        }
-
-        private class ObjectToVisit {
-
-            public final List<InstanceMorphism> path;
-            public final InstanceObject value;
-
-            public ObjectToVisit(List<InstanceMorphism> path, InstanceObject value) {
-                this.path = path;
-                this.value = value;
-            }
-
-        }
-
-    }
 }

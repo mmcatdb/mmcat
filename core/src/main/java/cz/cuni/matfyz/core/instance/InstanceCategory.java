@@ -9,7 +9,6 @@ import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
 import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -68,32 +67,30 @@ public class InstanceCategory implements Serializable, Category {
         return getMorphism(signatureOfOriginal.dual());
     }
 
-    public void createNotes() {
+    public void createReferences() {
         for (var object : objects.values())
-            for (var signature : object.schemaObject().superId().signatures())
-                createNotesForSignature(signature, object);
+            for (var signature : object.superId().signatures())
+                createReferencesForSignature(signature);
     }
 
-    // TODO unused sourceObject
-    private void createNotesForSignature(Signature signature, InstanceObject sourceObject) {
+    private void createReferencesForSignature(Signature signature) {
         if (signature.getType() != Type.COMPOSITE)
             return;
 
         var baseSignatures = signature.toBasesReverse();
-        var path = new LinkedList<InstanceMorphism>();
+        var signatureToTarget = Signature.createEmpty();
 
         for (int i = 0; i < baseSignatures.size() - 1; i++) {
+            var currentBase = baseSignatures.get(i);
             var signatureInTarget = Signature.concatenate(baseSignatures.subList(i + 1, baseSignatures.size()));
-            var currentSignature = baseSignatures.get(i);
-            var currentMorphism = getMorphism(currentSignature).dual();
-            path = new LinkedList<>(path);
-            path.addFirst(currentMorphism);
-            var currentTarget = currentMorphism.dom();
-
-            if (!currentTarget.schemaObject().superId().signatures().contains(signatureInTarget))
+            signatureToTarget = signatureToTarget.concatenate(currentBase);
+            
+            var pathFromTarget = getMorphism(signatureToTarget.dual());
+            var currentTarget = pathFromTarget.cod();
+            if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;
 
-            currentTarget.addPathToSuperId(signatureInTarget, path, signature);
+            currentTarget.addReferenceToRow(signatureInTarget, pathFromTarget, signature);
         }
     }
     
@@ -126,8 +123,8 @@ public class InstanceCategory implements Serializable, Category {
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof InstanceCategory instance
-            && objects.equals(instance.objects)
-            && morphisms.equals(instance.morphisms);
+        return object instanceof InstanceCategory category
+            && objects.equals(category.objects)
+            && morphisms.equals(category.morphisms);
     }
 }

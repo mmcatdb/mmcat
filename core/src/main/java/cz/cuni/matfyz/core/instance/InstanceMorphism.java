@@ -15,31 +15,34 @@ import java.util.TreeSet;
 public class InstanceMorphism implements Serializable, Comparable<InstanceMorphism>, Morphism {
 
     private final SchemaMorphism schemaMorphism;
+    private final List<InstanceMorphism> bases;
     private final InstanceObject dom;
     private final InstanceObject cod;
     private final InstanceCategory category;
 
     //private final Map<DomainRow, Set<MappingRow>> mappings = new TreeMap<>();
     private final SortedSet<MappingRow> mappings = new TreeSet<>();
-    private boolean isActive = false;
 
-    public boolean isActive() {
-        return this.isActive;
-    }
-    
     public InstanceMorphism(SchemaMorphism schemaMorphism, InstanceObject dom, InstanceObject cod, InstanceCategory category) {
         this.schemaMorphism = schemaMorphism;
         this.dom = dom;
         this.cod = cod;
         this.category = category;
+        this.bases = isBase()
+            ? List.of(this)
+            : List.of(signature().toBasesReverse().stream().map(category::getMorphism).toArray(InstanceMorphism[]::new));
+    }
+
+    public boolean isBase() {
+        return this.schemaMorphism.isBase();
     }
 
     /**
      * Returns base morphisms in the order they need to be traversed (i.e., the first one has the same domainObject as this).
      * @return
      */
-    public List<InstanceMorphism> toBases() {
-        return signature().toBasesReverse().stream().map(signature -> category.getMorphism(signature)).toList();
+    public List<InstanceMorphism> bases() {
+        return bases;
     }
     
     public void addMapping(MappingRow mapping) {
@@ -55,8 +58,6 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
 
         mapping.domainRow().addMappingFrom(this, mapping);
         //mapping.codomainRow().addMappingTo(this, mapping);
-
-        this.isActive = true;
     }
 
     public void removeMapping(MappingRow mapping) {

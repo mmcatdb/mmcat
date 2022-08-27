@@ -4,14 +4,12 @@ import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
-import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -30,11 +28,30 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     private final SchemaObject schemaObject;
     private final Map<Id, Map<IdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<Integer, DomainRow> domainByTechnicalIds = new TreeMap<>();
-    
-    public Map<Id, Map<IdWithValues, DomainRow>> domain() {
-        return domain;
+
+    public InstanceObject(SchemaObject schemaObject) {
+        this.schemaObject = schemaObject;
     }
 
+    public Key key() {
+        return schemaObject.key();
+    }
+
+    public String label() {
+        return schemaObject.label();
+    }
+
+    public Id superId() {
+        return schemaObject.superId();
+    }
+
+    /**
+     * Immutable.
+     */
+    public Set<Id> ids() {
+        return schemaObject.ids();
+    }
+    
     public DomainRow getRowById(IdWithValues id) {
         Map<IdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
         return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
@@ -44,7 +61,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return domainByTechnicalIds.get(technicalId);
     }
 
-    private void setRow(DomainRow row, Iterable<IdWithValues> ids) {
+    private void setRow(DomainRow row, Collection<IdWithValues> ids) {
         for (var id : ids) {
             Map<IdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
             if (rowsWithSameTypeId == null) {
@@ -58,38 +75,55 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
             domainByTechnicalIds.put(technicalId, row);
     }
 
-    private void setRow(DomainRow row) {
-        var ids = findIdsInSuperId(row.superId, schemaObject.ids()).foundIds();
-        setRow(row, ids);
+    public DomainRow createRow(IdWithValues superId) {
+        Set<Integer> technicalIds = superId.findFirstId(ids()) == null
+            ? Set.of(generateTechnicalId())
+            : Set.of();
+
+        return createRow(superId, technicalIds);
+    }
+
+    public DomainRow createRow(IdWithValues superId, Set<Integer> technicalIds) {
+        var ids = superId.findAllIds(ids()).foundIds();
+        
+        return createRow(superId, technicalIds, ids);
+    }
+
+    public DomainRow createRow(IdWithValues superId, Set<Integer> technicalIds, Set<IdWithValues> allIds) {
+        // TODO this can be optimized - we can discard the references that were referenced in all merged rows.
+        // However, it might be quite rare, so the overhead caused by finding such ids would be greater than the savings.
+        var row = new DomainRow(superId, technicalIds, referencesToRows.keySet());
+        setRow(row, allIds);
+
+        return row;
     }
 
     /**
-     * Returns the most recent value of the row (possibly the inpuct object).
-     * @param row
-     * @return
+     * Returns the most recent row for the superId or technicalIds.
      */
-    public DomainRow getActualRow(DomainRow row) {
-        // Simple search by ids, any of them will do.
-        var ids = findIdsInSuperId(row.superId, schemaObject.ids()).foundIds();
-        for (var id : ids) {
-            var foundRow = getRowById(id);
-            if (foundRow != null)
-                return foundRow;
-        }
+    public DomainRow getActualRow(IdWithValues superId, Set<Integer> technicalIds) {
+        // Simply find the first id of all possible ids (any of them should point to the same row).
+        var foundId = superId.findFirstId(schemaObject.ids());
+        if (foundId != null)
+            return getRowById(foundId);
 
-        var technicalId = row.technicalIds.stream().findFirst();
+        // Then the row has to be identified by its technical ids (again, any of them will do).
+        var technicalId = technicalIds.stream().findFirst();
         if (technicalId.isPresent())
             return getRowByTechnicalId(technicalId.get());
 
         // This should not happen.
-        throw new UnsupportedOperationException("Actual row not found for id: " + row.superId + ".");
+        throw new UnsupportedOperationException("Actual row not found for superId: " + superId + " and technicalIds: " + technicalIds + " .");
     }
 
-    public InstanceObject(SchemaObject schemaObject) {
-        this.schemaObject = schemaObject;
+    /**
+     * Returns the most recent value of the row (possibly the inpuct object).
+     */
+    public DomainRow getActualRow(DomainRow row) {
+        return getActualRow(row.superId, row.technicalIds);
     }
 
-    // The point of a technical id is to differentiate two idWithValues from each other, but only if they do not share any other id.
+    // The point of a technical id is to differentiate two rows from each other, but only if they do not have any common id that could differentiate them (or unify them, if both of them have the same value of the id).
     private int lastTechnicalId = 0;
 
     public int generateTechnicalId() {
@@ -97,80 +131,16 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return lastTechnicalId;
     }
     
-    public Key key() {
-        return schemaObject.key();
-    }
-    
-    public SchemaObject schemaObject() {
-        return schemaObject;
-    }
-
-    public List<DomainRow> rows() {
-        var output = new ArrayList<DomainRow>();
+    public Set<DomainRow> allRows() {
+        var output = new TreeSet<DomainRow>();
 
         for (var innerMap : domain.values())
-            for (DomainRow row : innerMap.values())
-                output.add(row);
+            output.addAll(innerMap.values());
 
         return output;
     }
 
-    public void addRow(DomainRow row) {
-        setRow(row);
-    }
-
-    public DomainRow mergeAlongMorphism(DomainRow domainRow, InstanceMorphism morphism) {
-        var merger = new Merger();
-
-        // Get all mappings from the domain row for this morphism.
-        var mappingsFromRow = domainRow.getMappingsFromForMorphism(morphism);
-        if (morphism.schemaMorphism().max() == Max.STAR || mappingsFromRow.size() <= 1)
-            return domainRow; // There is nothing to merge
-
-        // Create a new job that merges all these rows.
-        var codomainRows = new TreeSet<>(mappingsFromRow.stream().map(mapping -> mapping.codomainRow()).toList());
-
-
-        /* TODO change */
-        //merger.add(new Merger.MergeJob(codomainRows, morphism.cod()));
-        merger.addMergeJob(codomainRows, morphism.cod());
-        merger.mergePhase();
-        /*
-        while (!merger.isEmpty()) {
-            var job = merger.poll();
-            job.instanceObject.merge(job.superId, job.technicalIds, merger);
-        }
-         */
-        /* TODO change */
-
-        return getActualRow(domainRow);
-    }
-
-    public void merge(IdWithValues superId, Set<Integer> technicalIds, Merger merger) {
-        // Iteratively get all rows that are identified by the superId (while expanding the superId).
-        Set<DomainRow> originalRows = new TreeSet<>();
-
-        var superIdOfTechnicalRows = findTechnicalSuperId(technicalIds, originalRows);
-        superId = IdWithValues.merge(superId, superIdOfTechnicalRows);
-
-        var result = findMaximalSuperId(superId, originalRows);
-        var maximalSuperId = result.superId();
-        var maximalTechnicalId = mergeTechnicalIds(originalRows);
-
-        // Create new Row that contains the unified superId and put it to all possible ids.
-        // This also deletes the old ones.
-        var newRow = new DomainRow(maximalSuperId, maximalTechnicalId, this); //, allIds);
-        setRow(newRow, result.foundIds());
-
-        // Get all morphisms from and to the original rows and put the new one instead of them.
-        // Detect all morphisms that have maximal cardinality ONE and merge their rows. This can cause a chain reaction.
-        // This steps is done by combining the rows' superIds and then calling 
-        mergeMappings(originalRows, newRow, merger);
-        //mergeMappingsFrom(originalRows, newRow, merger);
-        //mergeMappingsTo(originalRows, newRow, merger);
-    }
-
-    private IdWithValues findTechnicalSuperId(Set<Integer> technicalIds, Set<DomainRow> outOriginalRows) {
+    public IdWithValues findTechnicalSuperId(Set<Integer> technicalIds, Set<DomainRow> outOriginalRows) {
         var builder = new IdWithValues.Builder();
 
         for (var technicalId : technicalIds) {
@@ -184,7 +154,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return builder.build();
     }
 
-    private record FindSuperIdResult(IdWithValues superId, Set<IdWithValues> foundIds) {}
+    public record FindSuperIdResult(IdWithValues superId, Set<IdWithValues> foundIds) {}
 
     /**
      * Iteratively get all rows that are identified by the superId (while expanding the superId).
@@ -203,7 +173,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         while (previousSuperIdSize < superId.size()) {
             previousSuperIdSize = superId.size();
 
-            var result = findIdsInSuperId(superId, notFoundIds);
+            var result = superId.findAllIds(notFoundIds);
             foundIds.addAll(result.foundIds());
             notFoundIds = result.notFoundIds();
             
@@ -217,7 +187,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return new FindSuperIdResult(superId, foundIds);
     }
 
-    public static IdWithValues mergeSuperIds(Iterable<DomainRow> rows) {
+    public static IdWithValues mergeSuperIds(Collection<DomainRow> rows) {
         var builder = new IdWithValues.Builder();
 
         for (var row : rows)
@@ -226,7 +196,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return builder.build();
     }
 
-    public static Set<Integer> mergeTechnicalIds(Iterable<DomainRow> rows) {
+    public static Set<Integer> mergeTechnicalIds(Collection<DomainRow> rows) {
         var output = new TreeSet<Integer>();
         rows.forEach(row -> output.addAll(row.technicalIds));
         return output;
@@ -247,165 +217,9 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return output;
     }
 
-    //private void mergeMappingsFrom(Set<DomainRow> originalRows, DomainRow newRow, Merger merger) {
-    private void mergeMappings(Set<DomainRow> originalRows, DomainRow newRow, Merger merger) {
-        // First, we find all mappings that go from the old rows to other rows, remove them, and get their codomain rows, sorted by their morphisms.
-        Map<InstanceMorphism, Set<DomainRow>> codomainRowsForAllMorphisms = findAndRemoveMorphismsFromOriginalRows(originalRows);
-
-        // We have to create only one mapping for each unique pair (newRow, rowTo), hence the rows to are stored in a set.
-        for (var entry : codomainRowsForAllMorphisms.entrySet()) {
-            var morphism = entry.getKey();
-            var codomainRows = entry.getValue();
-            createNewMappingsForMorphism(morphism, codomainRows, newRow, merger);
-        }
-    }
-
-    /**
-     * Find and remove all mappings that go from the original rows to other rows. The rows to which the mappings pointed are returned, sorted by the morphisms of the mappings.
-     * @param originalRows
-     * @return
-     */
-    private Map<InstanceMorphism, Set<DomainRow>> findAndRemoveMorphismsFromOriginalRows(Set<DomainRow> originalRows) {
-        Map<InstanceMorphism, Set<DomainRow>> output = new TreeMap<>();
-
-        for (var row : originalRows) {
-            for (var entry : row.getAllMappingsFrom()) {
-                var morphism = entry.getKey();
-                var rowSet = getOrCreateRowSet(output, morphism);
-                for (var mappingRow : entry.getValue()) {
-                    rowSet.add(mappingRow.codomainRow());
-                    
-                    // Remove old mappings from their rows.
-                    morphism.removeMapping(mappingRow);
-                    morphism.dual().removeMapping(mappingRow.toDual());
-                }
-            }
-        }
-
-        return output;
-    }
-
-    private void createNewMappingsForMorphism(InstanceMorphism morphism, Set<DomainRow> codomainRows, DomainRow newRow, Merger merger) {
-        for (var codomainRow : codomainRows) {
-            var newMapping = new MappingRow(newRow, codomainRow);
-            morphism.addMapping(newMapping);
-            morphism.dual().addMapping(newMapping.toDual());
-        }
-
-        // If there are multiple rows but the morphism allows at most one, they have to be merged as well.
-        // We do so by creating new merge job.
-        if (morphism.schemaMorphism().max() == Max.ONE && codomainRows.size() > 1) {
-            //merger.add(new Merger.MergeJob(codomainRows, morphism.cod()));
-            merger.addMergeJob(codomainRows, morphism.cod());
-        }
-    }
-
-    private Set<DomainRow> getOrCreateRowSet(Map<InstanceMorphism, Set<DomainRow>> map, InstanceMorphism morphism) {
-        var set = map.computeIfAbsent(morphism, x -> new TreeSet<>());
-        return set;
-    }
-
-    public record FindIdsResult(Set<IdWithValues> foundIds, Set<Id> notFoundIds) {}
-
-    /**
-     * Returns all ids that are contained in given superId as a subset.
-     * @param superId
-     * @return
-     */
-    // TODO private
-    //private FindIdsResult findIdsInSuperId(IdWithValues superId, Set<Id> idsToFind) {
-    public FindIdsResult findIdsInSuperId(IdWithValues superId, Set<Id> idsToFind) {
-        var foundIds = new TreeSet<IdWithValues>();
-        var notFoundIds = new TreeSet<Id>();
-
-        // For each possible id from ids, we find if superId contains all its signatures (i.e., if superId.signatures() is a superset of id.signatures()).
-        for (Id id : idsToFind) {
-            var builder = new IdWithValues.Builder();
-            boolean idIsInSuperId = true;
-
-            for (var signature : id.signatures()) {
-                String value = superId.map().get(signature);
-                if (value == null) {
-                    idIsInSuperId = false;
-                    break;
-                }
-
-                builder.add(signature, value);
-            }
-            // If so, we add the id (with its corresponding values) to the output.
-            if (idIsInSuperId)
-                foundIds.add(builder.build());
-            else
-                notFoundIds.add(id);
-        }
-
-        return new FindIdsResult(foundIds, notFoundIds);
-    }
-
-    // TODO change name
-    public static class NoteToOtherRow {
-
-        public final Signature signature;
-        public final List<InstanceMorphism> path;
-        public final Signature signatureInOther;
-
-        public NoteToOtherRow(Signature signature, List<InstanceMorphism> path, Signature signatureInOther) {
-            this.signature = signature;
-            this.path = path;
-            this.signatureInOther = signatureInOther;
-        }
-
-    }
-
-    private final Map<Signature, List<NoteToOtherRow>> pathsToOtherSuperIds = new TreeMap<>();
-
-    public void addPathToSuperId(Signature signature, List<InstanceMorphism> path, Signature signatureInOther) {
-        //var listForSignature = pathsToOtherSuperIds.get(signature);
-        var listForSignature = pathsToOtherSuperIds.computeIfAbsent(signature, x -> new ArrayList<>());
-        listForSignature.add(new NoteToOtherRow(signature, path, signatureInOther));
-    }
-
-    /**
-     * Notify all relevant rows about the new values from the superId of the row.
-     * @param domainRow
-     */
-    public void notifyOtherSuperIds(DomainRow domainRow, Merger merger) {
-        for (var signature : domainRow.unnotifiedSignatures) {
-            if (!domainRow.hasSignature(signature))
-                continue; // The value for this signature is not known to the row.
-
-            var notes = pathsToOtherSuperIds.get(signature);
-            if (notes == null)
-                continue; // The signature is not wanted by any other row.
-
-            domainRow.unnotifiedSignatures.remove(signature);
-
-            var value = domainRow.getValue(signature);
-
-            for (var note : notes) {
-                var targetRows = domainRow.traverseThrough(note.path);
-                for (var targetRow : targetRows) {
-                    if (!targetRow.hasSignature(signature))
-                        continue; // The row already has the value.
-
-                    // Add value to the targetRow.
-                    var builder = new IdWithValues.Builder();
-                    builder.add(targetRow.superId);
-                    builder.add(note.signatureInOther, value);
-                    merger.addMergeJob(builder.build(), targetRow.technicalIds, this);
-                }
-            }
-        }
-    }
-    
-    @Override
-    public int objectId() {
-        return key().getValue();
-    }
-
     @Override
     public int compareTo(CategoricalObject categoricalObject) {
-        return objectId() - categoricalObject.objectId();
+        return key().compareTo(categoricalObject.key());
     }
     
     @Override
@@ -418,8 +232,8 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         for (Id id : new TreeSet<>(domain.keySet())) {
             var subdomain = domain.get(id);
             // Again, ordering.
-            for (IdWithValues idWithValues : new TreeSet<>(subdomain.keySet()))
-                builder.append("\t\t").append(subdomain.get(idWithValues)).append("\n");
+            for (IdWithValues superId : new TreeSet<>(subdomain.keySet()))
+                builder.append("\t\t").append(subdomain.get(superId)).append("\n");
         }
         
         return builder.toString();
@@ -443,12 +257,64 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     
             output.put("key", object.key().toJSON());
 
-            var domain = object.rows().stream().map(row -> row.toJSON()).toList();
+            var domain = object.allRows().stream().map(row -> row.toJSON()).toList();
             output.put("domain", new JSONArray(domain));
             
             return output;
         }
     
+    }
+    
+    private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
+
+    public void addReferenceToRow(Signature signatureInThis, InstanceMorphism path, Signature signatureInOther) {
+        var referencesForSignature = referencesToRows.computeIfAbsent(signatureInThis, x -> new TreeSet<>());
+        referencesForSignature.add(new ReferenceToRow(signatureInThis, path, signatureInOther));
+    }
+
+    public Set<ReferenceToRow> getReferencesForSignature(Signature signatureInThis) {
+        return referencesToRows.get(signatureInThis);
+    }
+
+    public static class ReferenceToRow implements Comparable<ReferenceToRow> {
+
+        public final Signature signatureInThis;
+        public final InstanceMorphism path;
+        public final Signature signatureInOther;
+
+        public ReferenceToRow(Signature signatureInThis, InstanceMorphism path, Signature signatureInOther) {
+            this.signatureInThis = signatureInThis;
+            this.path = path;
+            this.signatureInOther = signatureInOther;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object)
+                return true;
+            
+            return object instanceof ReferenceToRow reference
+                && signatureInThis.equals(reference.signatureInThis)
+                && path.equals(reference.path)
+                && signatureInOther.equals(reference.signatureInOther);
+        }
+
+        @Override
+        public int compareTo(ReferenceToRow reference) {
+            if (this == reference)
+                return 0;
+            
+            var x1 = signatureInThis.compareTo(reference.signatureInThis);
+            if (x1 != 0)
+                return x1;
+            
+            var x2 = path.compareTo(reference.path);
+            if (x2 != 0)
+                return x2;
+            
+            return signatureInOther.compareTo(reference.signatureInOther);
+        }
+
     }
 
 }

@@ -26,26 +26,11 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
     private final Id superId; // Should be a union of all ids (super key).
     private final Set<Id> ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
 
-    /*
-    public SchemaObject(Key key) {
-        this(key, "", new Id(), new TreeSet<>());
-    }
-
-    public SchemaObject(Key key, String label) {
-        this(key, label, new Id(), new TreeSet<>());
-    }
-    */
-
     public SchemaObject(Key key, String label, Id superId, Set<Id> ids) {
-        //LOGGER.debug("Creating object...");
         this.key = key;
         this.label = label;
         this.superId = superId;
-        this.ids = ids;
-    }
-
-    public Key key() {
-        return key;
+        this.ids = Set.of(ids.toArray(Id[]::new));
     }
 
     @Override
@@ -54,26 +39,31 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
     }
 
     @Override
-    public int objectId() {
-        return key.getValue();
+    public Key key() {
+        return key;
     }
 
+    @Override
     public String label() {
         return label;
     }
 
+    @Override
     public Id superId() {
         return superId;
     }
 
-    // TODO
+    /**
+     * Immutable.
+     */
+    @Override
     public Set<Id> ids() {
         return new TreeSet<>(ids);
     }
 
     @Override
     public int compareTo(CategoricalObject categoricalObject) {
-        return objectId() - categoricalObject.objectId();
+        return key.compareTo(categoricalObject.key());
     }
 
     @Override

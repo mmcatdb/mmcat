@@ -25,6 +25,7 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
     
     private final SortedSet<Signature> signatures;
     
+    // TODO make immutable
     public SortedSet<Signature> signatures() {
         return signatures;
     }
@@ -48,6 +49,10 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
     
     private Id(SortedSet<Signature> signatures) {
         this.signatures = signatures;
+    }
+    
+    public boolean hasSignature(Signature signature) {
+        return this.signatures.contains(signature);
     }
 
     public boolean hasOnlyEmptySignature() {

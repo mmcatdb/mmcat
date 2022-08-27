@@ -5,7 +5,6 @@ import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,7 +12,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,49 +23,18 @@ import org.json.JSONObject;
  */
 public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConvertible {
 
-    public final InstanceObject instanceObject;
     // The tuples that holds the value of this row.
     public final IdWithValues superId;
     // All technical ids under which is this row known.
     public final Set<Integer> technicalIds;
-
-    public final Set<Signature> unnotifiedSignatures;
-
+    private final Set<Signature> pendingReferences;
     // Various ids that can be constructed from this row.
     //private final Map<Id, IdWithValues> ids;
-    
-    // Evolution extension
-    /*
-    public void addValue(Signature signature, String value) {
-        idWithValues.map().put(signature, value);
-        tuples.put(signature, value);
-    }
-    */
-    // TODO
-    public DomainRow(IdWithValues superId, InstanceObject instanceObject) {
-        this.instanceObject = instanceObject;
-        this.superId = superId;
-        this.technicalIds = new TreeSet<>();
 
-        // TODO this should happen only when there are no id, not when superId is empty
-        //if (superId.isEmpty())
-        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).foundIds().isEmpty())
-            this.technicalIds.add(instanceObject.generateTechnicalId());
-
-        this.unnotifiedSignatures = new TreeSet<>(instanceObject.schemaObject().superId().signatures());
-    }
-
-    // TODO
-    public DomainRow(IdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
-        this.instanceObject = instanceObject;
+    public DomainRow(IdWithValues superId, Set<Integer> technicalIds, Set<Signature> pendingReferences) {
         this.superId = superId;
         this.technicalIds = technicalIds;
-
-        //if (superId.isEmpty() && technicalIds.isEmpty())
-        if (instanceObject.findIdsInSuperId(superId, instanceObject.schemaObject().ids()).foundIds().isEmpty())
-            this.technicalIds.add(instanceObject.generateTechnicalId());
-
-        this.unnotifiedSignatures = new TreeSet<>(instanceObject.schemaObject().superId().signatures());
+        this.pendingReferences = pendingReferences;
     }
 
     public boolean hasSignature(Signature signature) {
@@ -106,20 +73,28 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
         mappingsOfSameType.remove(mapping);
     }
 
-    public Set<DomainRow> traverseThrough(List<InstanceMorphism> path) {
-        var rowSet = new TreeSet<DomainRow>();
-        rowSet.add(this);
+    public Set<DomainRow> traverseThrough(InstanceMorphism path) {
+        var currentSet = new TreeSet<DomainRow>();
+        currentSet.add(this);
 
-        for (var baseMorphism : path) {
+        for (var baseMorphism : path.bases()) {
             var nextSet = new TreeSet<DomainRow>();
-            for (var row : rowSet) {
-                var codomainRows = row.getMappingsFromForMorphism(baseMorphism).stream().map(mapping -> mapping.codomainRow()).toList();
+            for (var row : currentSet) {
+                var codomainRows = row.getMappingsFromForMorphism(baseMorphism).stream().map(MappingRow::codomainRow).toList();
                 nextSet.addAll(codomainRows);
             }
-            rowSet = nextSet;
+            currentSet = nextSet;
         }
 
-        return rowSet;
+        return currentSet;
+    }
+
+    public record SignatureWithValue(Signature signature, String value) {}
+
+    public List<SignatureWithValue> getAndRemovePendingReferencePairs() {
+        var pendingSignatures = pendingReferences.stream().filter(this::hasSignature).toList();
+        pendingReferences.removeAll(pendingSignatures);
+        return pendingSignatures.stream().map(signature -> new SignatureWithValue(signature, getValue(signature))).toList();
     }
 
     @Override
@@ -147,6 +122,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
         return builder.toString();
     }
     
+    // TODO change equals and compareTo to do == first
     @Override
     public boolean equals(Object object) {
         return object instanceof DomainRow row && superId.equals(row.superId);
@@ -161,22 +137,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
 
         @Override
         protected JSONObject innerToJSON(DomainRow object) throws JSONException {
-            var output = new JSONObject();
-
-            var map = object.superId.map();
-            var tuples = new ArrayList<JSONObject>();
-            
-            for (var entry : map.entrySet()) {
-                var jsonTuple = new JSONObject();
-                jsonTuple.put("signature", entry.getKey().toJSON());
-                jsonTuple.put("value", entry.getValue());
-
-                tuples.add(jsonTuple);
-            }
-
-            output.put("tuples", new JSONArray(tuples));
-            
-            return output;
+            return object.superId.toJSON();
         }
     
     }

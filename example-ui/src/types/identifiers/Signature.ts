@@ -10,19 +10,21 @@ export type SignatureJSON = {
     isNull: boolean
 };
 
+function determineType(isNull: boolean, idsLength: number) {
+    if (isNull)
+        return SignatureType.Null;
+    if (idsLength === 0)
+        return SignatureType.Empty;
+    return idsLength === 1 ? SignatureType.Base : SignatureType.Composite;
+}
+
 export class Signature {
     readonly _ids: number[];
     readonly _type: SignatureType;
 
     private constructor(input: number | number[], isNull = false) {
         this._ids = typeof input === 'number' ? [ input ] : [ ...input ];
-        this._type = isNull ?
-            SignatureType.Null :
-            this._ids.length === 0 ?
-                SignatureType.Empty :
-                this._ids.length === 1 ?
-                    SignatureType.Base :
-                    SignatureType.Composite;
+        this._type = determineType(isNull, this._ids.length);
     }
 
     static fromServer(input: SignatureFromServer): Signature {

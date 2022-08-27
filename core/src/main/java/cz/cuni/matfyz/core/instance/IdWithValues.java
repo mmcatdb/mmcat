@@ -2,18 +2,26 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.Id;
+import cz.cuni.matfyz.core.serialization.JSONConvertible;
+import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author jachymb.bartik
  */
-public class IdWithValues implements Serializable, Comparable<IdWithValues> {
+public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSONConvertible {
 
     private final Map<Signature, String> tuples;
 
@@ -29,23 +37,18 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues> {
         return tuples.get(signature);
     }
     
-    private Id id;
+    private Id cachedId;
     
     public Id id() {
-        if (id == null)
-            //id = isTechnical ? Id.Technical() : new Id(tuples.keySet());
-            id = new Id(tuples.keySet());
-        return id;
+        if (cachedId == null)
+            cachedId = new Id(tuples.keySet());
+        return cachedId;
         // Evolution extension
         //return new Id(map.keySet());
     }
-    
+
     public Collection<String> values() {
         return tuples.values();
-    }
-    
-    public Map<Signature, String> map() {
-        return tuples;
     }
 
     public int size() {
@@ -54,6 +57,57 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues> {
 
     public boolean isEmpty() {
         return tuples.isEmpty();
+    }
+
+    public boolean containsId(Id id) {
+        for (var signature : id.signatures())
+            if (!hasSignature(signature))
+                return false;
+        return true;
+    }
+
+    public IdWithValues findId(Id id) {
+        var builder = new Builder();
+
+        for (var signature : id.signatures()) {
+            var value = this.tuples.get(signature);
+            if (value == null)
+                return null;
+            builder.add(signature, value);
+        }
+
+        return builder.build();
+    }
+
+    public IdWithValues findFirstId(Set<Id> ids) {
+        for (var id : ids)
+            if (containsId(id))
+                return findId(id);
+
+        return null;
+    }
+
+    public record FindIdsResult(Set<IdWithValues> foundIds, Set<Id> notFoundIds) {}
+
+    /**
+     * Returns all ids that are contained there as a subset.
+     * @param ids The ids we want to find.
+     * @return A set of found ids and also not found ids.
+     */
+    public FindIdsResult findAllIds(Set<Id> ids) {
+        final var foundIds = new TreeSet<IdWithValues>();
+        final var notFoundIds = new TreeSet<Id>();
+
+        for (Id id : ids) {
+            var foundId = findId(id);
+
+            if (foundId == null)
+                notFoundIds.add(id);
+            else
+                foundIds.add(foundId);
+        }
+
+        return new FindIdsResult(foundIds, notFoundIds);
     }
 
     // Evolution extension
@@ -77,17 +131,7 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues> {
 
     private IdWithValues(Map<Signature, String> map) {
         this.tuples = map;
-        //this.technicalValue = 0;
-        //this.isTechnical = false;
     }
-
-    /*
-    private IdWithValues(int technicalValue) {
-        this.tuples = new TreeMap<>();
-        this.technicalValue = technicalValue;
-        this.isTechnical = true;
-    }
-    */
 
     public static class Builder {
 
@@ -175,6 +219,34 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues> {
         builder.append("}");
             
         return builder.toString();
+    }
+
+    @Override
+    public JSONObject toJSON() {
+        return new Converter().toJSON(this);
+    }
+
+    public static class Converter extends ToJSONConverterBase<IdWithValues> {
+
+        @Override
+        protected JSONObject innerToJSON(IdWithValues object) throws JSONException {
+            var output = new JSONObject();
+
+            var tuples = new ArrayList<JSONObject>();
+            
+            for (var entry : object.tuples.entrySet()) {
+                var jsonTuple = new JSONObject();
+                jsonTuple.put("signature", entry.getKey().toJSON());
+                jsonTuple.put("value", entry.getValue());
+
+                tuples.add(jsonTuple);
+            }
+
+            output.put("tuples", new JSONArray(tuples));
+            
+            return output;
+        }
+    
     }
 
 }

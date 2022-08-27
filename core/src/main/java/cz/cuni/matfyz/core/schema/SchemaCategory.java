@@ -8,6 +8,7 @@ import cz.cuni.matfyz.core.serialization.MapUniqueContext;
 import cz.cuni.matfyz.core.serialization.UniqueContext;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * @author pavel.koupil, jachymb.bartik
@@ -43,22 +44,22 @@ public class SchemaCategory implements Serializable, Category {
         SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
         if (morphism == null) {
             SchemaMorphism  newMorphism = createCompositeMorphism(signature);
-            morphism = this.morphismContext.createUniqueObject(newMorphism);
+            morphism = morphismContext.createUniqueObject(newMorphism);
         }
 
         return morphism;
     }
 
-    public Iterable<SchemaObject> allObjects() {
+    public Collection<SchemaObject> allObjects() {
         return objectContext.getAllUniqueObjects();
     }
 
-    public Iterable<SchemaMorphism> allMorphisms() {
+    public Collection<SchemaMorphism> allMorphisms() {
         return morphismContext.getAllUniqueObjects();
     }
 
     private SchemaMorphism createCompositeMorphism(Signature signature) {
-        Signature[] bases = signature.toBases().toArray(new Signature[0]);
+        Signature[] bases = signature.toBases().toArray(Signature[]::new);
 
         Signature lastSignature = bases[bases.length - 1];
         SchemaMorphism lastMorphism = this.getMorphism(lastSignature);

@@ -38,10 +38,10 @@ public class MTCAlgorithmTestBase {
         return this;
     }
 
-    private InstanceCategory expectedInstance;
+    private InstanceCategory expectedCategory;
 
     public MTCAlgorithmTestBase setExpectedInstance(InstanceCategory expectedInstance) {
-        this.expectedInstance = expectedInstance;
+        this.expectedCategory = expectedInstance;
 
         return this;
     }
@@ -72,7 +72,7 @@ public class MTCAlgorithmTestBase {
     }
 
     public void testAlgorithm() {
-        InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
+        InstanceCategory category = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
         ForestOfRecords forest;
         try {
@@ -86,10 +86,10 @@ public class MTCAlgorithmTestBase {
         Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
 
         var transformation = new MTCAlgorithm();
-        transformation.input(mapping, instance, forest);
+        transformation.input(mapping, category, forest);
         transformation.algorithm();
 
-        Assertions.assertEquals(expectedInstance.objects(), instance.objects(), "Test objects differ from the expected objects.");
-        Assertions.assertEquals(expectedInstance.morphisms(), instance.morphisms(), "Test morphisms differ from the expected morphisms.");
+        Assertions.assertEquals(expectedCategory.objects(), category.objects(), "Test objects differ from the expected objects.");
+        Assertions.assertEquals(expectedCategory.morphisms(), category.morphisms(), "Test morphisms differ from the expected morphisms.");
     }
 }

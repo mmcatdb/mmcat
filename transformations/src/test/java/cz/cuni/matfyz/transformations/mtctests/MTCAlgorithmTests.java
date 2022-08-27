@@ -37,9 +37,9 @@ public class MTCAlgorithmTests {
         var mapping = data.createOrderTableMapping(schema);
         databaseToInstance.input(mapping, null, pullWrapper);
         var result = databaseToInstance.run();
-        var instance = result.data;
+        var category = result.data;
 
-        LOGGER.info(instance.toString());
+        LOGGER.info(category.toString());
     }
 
 }

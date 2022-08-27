@@ -94,6 +94,10 @@ public class SchemaMorphism implements Serializable, Morphism, JSONConvertible, 
         return max == Max.STAR;
     }
 
+    public boolean isBase() {
+        return signature.isBase();
+    }
+
     @Override
     public SchemaMorphism dual() {
         return category.dual(signature);

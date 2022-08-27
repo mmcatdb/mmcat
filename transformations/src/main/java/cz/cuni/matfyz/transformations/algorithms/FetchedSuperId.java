@@ -8,16 +8,16 @@ import cz.cuni.matfyz.core.record.IComplexRecord;
  */
 public class FetchedSuperId {
     
-    public final IdWithValues idWithValues;
+    public final IdWithValues superId;
     public final IComplexRecord childRecord;
     
-    public FetchedSuperId(IdWithValues idWithValues, IComplexRecord childRecord) {
-        this.idWithValues = idWithValues;
+    public FetchedSuperId(IdWithValues superId, IComplexRecord childRecord) {
+        this.superId = superId;
         this.childRecord = childRecord;
     }
 
-    public FetchedSuperId(IdWithValues idWithValues) {
-        this(idWithValues, null);
+    public FetchedSuperId(IdWithValues superId) {
+        this(superId, null);
     }
     
 }

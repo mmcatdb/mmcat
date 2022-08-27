@@ -116,7 +116,7 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void modelToCategoryProcess(Job job, UserStore store) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var instance = store.getInstance(job.schemaId);
+        var instance = store.getCategory(job.schemaId);
         var result = modelToCategoryAlgorithm(job, instance).join();
 
         if (result.status) {
@@ -148,7 +148,7 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void categoryToModelProcess(Job job, UserStore store) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var instance = store.getInstance(job.schemaId);
+        var instance = store.getCategory(job.schemaId);
 
         /*
         if (instance == null) {

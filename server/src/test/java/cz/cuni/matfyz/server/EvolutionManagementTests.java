@@ -23,12 +23,11 @@ import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.WrapperService;
 import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
+
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,18 +91,15 @@ public class EvolutionManagementTests {
                 process.setLimit(batch * 1000);
                 process.input(mapping, null, pullWrapper);
 
-                var instance = process.run().data;
-                //LOGGER.info(instance.toString());
+                var category = process.run().data;
 
                 // JOIN
                 Statistics.start(Interval.JOIN);
-                join(schema, instance);
+                join(schema, category);
                 Statistics.end(Interval.JOIN);
                 
-                //LOGGER.info(instance.toString());
-
                 Statistics.start(Interval.MOVE);
-                move(schema, instance);
+                move(schema, category);
                 Statistics.end(Interval.MOVE);
                 Statistics.end(Interval.IMPORT_JOIN_MOVE);
 
@@ -136,24 +132,6 @@ public class EvolutionManagementTests {
         //LOGGER.info(finalResult.data);
     }
 
-    private Set<DomainRow> getRows(InstanceCategory instance, DomainRow source, Signature... signatures) {
-        var signature = signatures[0];
-        var restOfSignatures = Arrays.copyOfRange(signatures, 1, signatures.length);
-        var instanceMorphism = instance.getMorphism(signature);
-        var mappings = source.getMappingsFromForMorphism(instanceMorphism);
-
-        if (restOfSignatures.length == 0)
-            return new TreeSet<>(mappings.stream().map(mapping -> mapping.codomainRow()).toList());
-            
-        var output = new TreeSet<DomainRow>();
-        mappings.forEach(mapping -> {
-            var target = mapping.codomainRow();
-            output.addAll(getRows(instance, target, restOfSignatures));
-        });
-
-        return output;
-    }
-
     private DomainRow getRowEffective(DomainRow source, List<InstanceMorphism> morphismPath) {
         for (var morphism : morphismPath) {
             source = source.getMappingsFromForMorphism(morphism).stream().findFirst().get().codomainRow();
@@ -162,22 +140,19 @@ public class EvolutionManagementTests {
         return source;
     }
 
-    private void join(SchemaCategory schema, InstanceCategory instance) {
+    private void join(SchemaCategory schema, InstanceCategory category) {
         var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", Id.createEmpty());
         var address = schema.getObject(data.addressKey);
         var addressToFullAddressMorphism = TestData.addMorphismWithDual(schema, data.addressToFullAddress, address, fullAddress, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
         
         var fullAddressInstance = new InstanceObject(fullAddress);
-        instance.objects().put(fullAddressInstance.key(), fullAddressInstance);
+        category.objects().put(fullAddressInstance.key(), fullAddressInstance);
 
-        var addressInstance = instance.getObject(data.addressKey);
-        var addressToFullAddressMorphismInstance = createInstanceMorphismWithDual(instance, addressToFullAddressMorphism);
+        var addressInstance = category.getObject(data.addressKey);
+        var addressToFullAddressMorphismInstance = createInstanceMorphismWithDual(category, addressToFullAddressMorphism);
 
-        var fullAddressInnerMap = new TreeMap<IdWithValues, DomainRow>();
-        var fullAddressId = Id.createEmpty();
-
-        Statistics.set(Counter.JOIN_ROWS, addressInstance.rows().size());
-        for (var addressRow : addressInstance.rows()) {
+        Statistics.set(Counter.JOIN_ROWS, addressInstance.allRows().size());
+        for (var addressRow : addressInstance.allRows()) {
             // Get new value
             // TODO - tímto se vyhledává pouze v id daných řádků ... chtělo by to udělat funkci, která se automaticky podívá i do morfizmů
             // ideálně bychom měli tyto morfizmy uchovávat na řádcích
@@ -185,10 +160,10 @@ public class EvolutionManagementTests {
             var city = addressRow.getValue(data.addressToCity);
             var fullAddressValue = joinFunction(street, city);
 
-            // Create idWithValues and row
+            // Create superId and row
             var builder = new IdWithValues.Builder();
             builder.add(Signature.createEmpty(), fullAddressValue);
-            var fullAddressRow = new DomainRow(builder.build(), addressInstance);
+            var fullAddressRow = addressInstance.createRow(builder.build());
 
             // Add it to the inner map which will be put to the instance object
             // TODO commented because of refactoring
@@ -198,25 +173,23 @@ public class EvolutionManagementTests {
             addressToFullAddressMorphismInstance.addMapping(new MappingRow(addressRow, fullAddressRow));
             addressToFullAddressMorphismInstance.dual().addMapping(new MappingRow(fullAddressRow, addressRow));
         }
-        // Add the inner map to the instance object
-        fullAddressInstance.domain().put(fullAddressId, fullAddressInnerMap);
     }
 
-    private void move(SchemaCategory schema, InstanceCategory instance) {
+    private void move(SchemaCategory schema, InstanceCategory category) {
         // Link order with full address
         var order = schema.getObject(data.orderKey);
         var fullAddress = schema.getObject(data.fullAddressKey);
         var orderToFullAddressMorphism = TestData.addMorphismWithDual(schema, data.orderToFullAddress, order, fullAddress, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
 
-        var orderToFullAddressMorphismInstance = createInstanceMorphismWithDual(instance, orderToFullAddressMorphism);
+        var orderToFullAddressMorphismInstance = createInstanceMorphismWithDual(category, orderToFullAddressMorphism);
 
-        Statistics.set(Counter.MOVE_ROWS, instance.getObject(data.orderKey).rows().size());
+        Statistics.set(Counter.MOVE_ROWS, category.getObject(data.orderKey).allRows().size());
 
         var originalSignatures = List.of(data.userToOrder.dual(), data.userToAddress, data.addressToFullAddress);
         List<InstanceMorphism> morphismPath = originalSignatures.stream()
-            .map(signature -> instance.getMorphism(signature)).toList();
+            .map(signature -> category.getMorphism(signature)).toList();
         
-        for (var orderRow : instance.getObject(data.orderKey).rows()) {
+        for (var orderRow : category.getObject(data.orderKey).allRows()) {
             var fullAddressRow = getRowEffective(orderRow, morphismPath);
             orderToFullAddressMorphismInstance.addMapping(new MappingRow(orderRow, fullAddressRow));
             orderToFullAddressMorphismInstance.dual().addMapping(new MappingRow(fullAddressRow, orderRow));
@@ -227,55 +200,47 @@ public class EvolutionManagementTests {
         schema.deleteMorphism(addressToFullAddress);
         schema.deleteMorphism(addressToFullAddress.dual());
 
-        var addressToFullAddressInstance = instance.getMorphism(addressToFullAddress);
-        instance.deleteMorphism(addressToFullAddressInstance);
-        instance.deleteMorphism(addressToFullAddressInstance.dual());
+        var addressToFullAddressInstance = category.getMorphism(addressToFullAddress);
+        category.deleteMorphism(addressToFullAddressInstance);
+        category.deleteMorphism(addressToFullAddressInstance.dual());
     }
 
-    private static InstanceMorphism createInstanceMorphismWithDual(InstanceCategory instance, SchemaMorphism morphism) {
-        var dom = instance.getObject(morphism.dom());
-        var cod = instance.getObject(morphism.cod());
+    private static InstanceMorphism createInstanceMorphismWithDual(InstanceCategory category, SchemaMorphism morphism) {
+        var dom = category.getObject(morphism.dom());
+        var cod = category.getObject(morphism.cod());
 
-        var morphismInstance = new InstanceMorphism(morphism, dom, cod, instance);
-        var dualInstance = new InstanceMorphism(morphism.dual(), cod, dom, instance);
-        instance.morphisms().put(morphismInstance.signature(), morphismInstance);
-        instance.morphisms().put(dualInstance.signature(), dualInstance);
+        var morphismInstance = new InstanceMorphism(morphism, dom, cod, category);
+        var dualInstance = new InstanceMorphism(morphism.dual(), cod, dom, category);
+        category.morphisms().put(morphismInstance.signature(), morphismInstance);
+        category.morphisms().put(dualInstance.signature(), dualInstance);
 
         return morphismInstance;
     }
 
-    private void createInstanceAsACopy(InstanceCategory instance, Key masterKey, Key sourceKey, Signature masterToSource, Key copyKey, Signature masterToCopy) {
+    private void createInstanceAsACopy(InstanceCategory category, Key masterKey, Key sourceKey, Signature masterToSource, Key copyKey, Signature masterToCopy) {
         // Create instance object
-        var copy = instance.schema.getObject(copyKey);
+        var copy = category.schema.getObject(copyKey);
         var copyInstance = new InstanceObject(copy);
-        instance.objects().put(copyKey, copyInstance);
+        category.objects().put(copyKey, copyInstance);
 
         // Create instance morphisms
-        var masterInstance = instance.getObject(masterKey);
-        var masterToCopyMorphism = instance.schema.getMorphism(masterToCopy);
-        var masterToCopyMorphismInstance = new InstanceMorphism(masterToCopyMorphism, masterInstance, copyInstance, instance);
-        instance.morphisms().put(masterToCopyMorphismInstance.signature(), masterToCopyMorphismInstance);
-        var masterToCopyDualInstance = new InstanceMorphism(masterToCopyMorphism.dual(), copyInstance, masterInstance, instance);
-        instance.morphisms().put(masterToCopyDualInstance.signature(), masterToCopyDualInstance);
+        var masterInstance = category.getObject(masterKey);
+        var masterToCopyMorphism = category.schema.getMorphism(masterToCopy);
+        var masterToCopyMorphismInstance = new InstanceMorphism(masterToCopyMorphism, masterInstance, copyInstance, category);
+        category.morphisms().put(masterToCopyMorphismInstance.signature(), masterToCopyMorphismInstance);
+        var masterToCopyDualInstance = new InstanceMorphism(masterToCopyMorphism.dual(), copyInstance, masterInstance, category);
+        category.morphisms().put(masterToCopyDualInstance.signature(), masterToCopyDualInstance);
         
         // Populate instance object
         var sourceToCopyMappings = new TreeMap<DomainRow, DomainRow>();
-        var sourceInstance = instance.getObject(sourceKey);
-        sourceInstance.domain().forEach((id, innerMap) -> {
-            var copiedInnerMap = new TreeMap<IdWithValues, DomainRow>();
-
-            innerMap.forEach((idWithValues, row) -> {
-                var copiedIdWithValues = idWithValues.copy();
-                var copiedRow = new DomainRow(copiedIdWithValues, copyInstance);
-                copiedInnerMap.put(copiedIdWithValues, copiedRow);
-                sourceToCopyMappings.put(row, copiedRow);
-            });
-
-            copyInstance.domain().put(id, copiedInnerMap);
+        var sourceInstance = category.getObject(sourceKey);
+        sourceInstance.allRows().stream().forEach(row -> {
+            var copiedRow = copyInstance.createRow(row.superId);
+            sourceToCopyMappings.put(row, copiedRow);
         });
 
         // Populate instance morphism
-        var masterToSourceMorphismInstance = instance.getMorphism(masterToSource);
+        var masterToSourceMorphismInstance = category.getMorphism(masterToSource);
         var masterToSourceDualInstance = masterToSourceMorphismInstance.dual();
         masterToSourceMorphismInstance.allMappings().forEach(mappingRow -> {
             var masterRow = mappingRow.domainRow();
