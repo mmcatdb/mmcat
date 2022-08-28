@@ -6,7 +6,6 @@ import cz.cuni.matfyz.core.instance.IdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.instance.Merger;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -321,7 +320,8 @@ public class MTCAlgorithm {
                 currentDomainRow = instanceObject.getOrCreateRowWithMorphism(superId, currentDomainRow, baseMorphism);
             }
             else {
-                addBaseRelation(baseMorphism, currentDomainRow, childRow);
+                baseMorphism.createMappingWithDual(currentDomainRow, childRow);
+                // TODO both rows might need to reference the rows to which they are connected by the baseMorphism. Although it is rare, it should be adressed. See a similar comment in the Merger::createNewMappingsForMorphism() function.
             }
         }
 
@@ -355,12 +355,6 @@ public class MTCAlgorithm {
         return builder.build();
     }
 
-    private void addBaseRelation(InstanceMorphism morphism, DomainRow domainRow, DomainRow codomainRow) {
-        var newMapping = new MappingRow(domainRow, codomainRow);
-        morphism.addMapping(newMapping);
-        morphism.dual().addMapping(newMapping.toDual());
-    }
-    
     private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow superId, IComplexRecord complexRecord) {
         //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
         if (path instanceof ComplexProperty complexPath)

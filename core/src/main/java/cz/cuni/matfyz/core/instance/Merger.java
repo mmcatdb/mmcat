@@ -19,7 +19,6 @@ public class Merger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Merger.class);
 
-
     private final Queue<MergeRowsJob> jobs;
     private final Queue<ReferenceJob> referenceJobs;
 
@@ -28,16 +27,34 @@ public class Merger {
         this.referenceJobs = new LinkedList<>();
     }
 
+    private void processQueues() {
+        while (!jobs.isEmpty())
+            mergePhase();
+    }
+
+    private void mergePhase() {
+        while (!jobs.isEmpty()) {
+            var job = jobs.poll();
+            job.process();
+
+            // TODO make more effective:
+            // - only those that are needed
+            // - set, not a queue, so the same rows won't be repeated
+            addReferenceJob(job.superId, job.technicalIds, job.instanceObject);
+        }
+
+        while (!referenceJobs.isEmpty()) {
+            var job = referenceJobs.poll();
+            job.process();
+        }
+    }
+
     /**
      * Merges the row and then iterativelly merges rows from other instance objects that might be affected.
      */
-    //public DomainRow merge(DomainRow row, InstanceObject instanceObject) {
     public DomainRow merge(IdWithValues superId, InstanceObject instanceObject) {
-        //addMergeJob(row.superId, row.technicalIds, instanceObject);
         addMergeJob(superId, Set.of(), instanceObject);
-
-        while (!jobs.isEmpty())
-            mergePhase();
+        processQueues();
 
         return instanceObject.getActualRow(superId, Set.of());
     }
@@ -49,8 +66,10 @@ public class Merger {
      * @return
      */
     public DomainRow merge(IdWithValues superId, DomainRow parent, InstanceMorphism path) {
+        var object = path.cod();
+
         // First, we try to find the row by the superId.
-        var currentRow = path.cod().getRow(superId);
+        var currentRow = object.getRow(superId);
         if (currentRow != null)
             return addToRowAndConnect(currentRow, superId, parent, path);
 
@@ -62,8 +81,12 @@ public class Merger {
         }
 
         // No such row exists yet, so we have to create it. It also cannot be merged so we are not doing that.
-        var newRow = path.cod().createRow(superId);
+        var newRow = object.createRow(superId);
         path.createMappingWithDual(parent, newRow);
+
+        addReferenceJob(newRow.superId, newRow.technicalIds, object);
+        processQueues();
+
         return newRow;
     }
 
@@ -101,28 +124,9 @@ public class Merger {
         var codomainRows = new TreeSet<>(mappingsFromRow.stream().map(MappingRow::codomainRow).toList());
 
         addMergeJob(codomainRows, morphism.cod());
-
-        while (!jobs.isEmpty())
-            mergePhase();
+        processQueues();
 
         return morphism.dom().getActualRow(domainRow);
-    }
-
-    private void mergePhase() {
-        while (!jobs.isEmpty()) {
-            var job = jobs.poll();
-            job.process();
-
-            // TODO make more effective:
-            // - only those that are needed
-            // - set, not a queue, so the same rows won't be repeated
-            addReferenceJob(job.superId, job.technicalIds, job.instanceObject);
-        }
-
-        while (!referenceJobs.isEmpty()) {
-            var job = referenceJobs.poll();
-            job.process();
-        }
     }
 
     private void addMergeJob(IdWithValues superId, Set<Integer> technicalId, InstanceObject instanceObject) {
@@ -216,15 +220,19 @@ public class Merger {
         }
 
         private static void createNewMappingsForMorphism(InstanceMorphism morphism, Set<DomainRow> codomainRows, DomainRow newRow, Merger merger) {
-            for (var codomainRow : codomainRows) {
-                var newMapping = new MappingRow(newRow, codomainRow);
-                morphism.addMapping(newMapping);
-                morphism.dual().addMapping(newMapping.toDual());
-            }
+            for (var codomainRow : codomainRows)
+                morphism.createMappingWithDual(newRow, codomainRow);
     
             // If there are multiple rows but the morphism allows at most one, they have to be merged as well. We do so by creating new merge job.
             if (!morphism.isArray() && codomainRows.size() > 1)
                 merger.addMergeJob(codomainRows, morphism.cod());
+
+            // TODO Here probably should be reference jobs for the codomainRows. The newRow will reference automatically (because it is a product of merging, so a new information could have be created). The coodmainRows might need to reference as well if the following condition is met:
+            // Let C \in codomainRows had a morphism to one of the original rows, O_1.
+            // Another original row, O_2, had a connection to another row R.
+            // Row C should reference R, but there was no connection between them prior to the merging.
+            //
+            // Although this situation is extremely rare, it might happen. However, in that case, a somewhat limited work is needed - we only have to look to the references that satisfy the above-mentioned condition.
         }
 
     }

@@ -56,6 +56,7 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
         dual().addMapping(mapping.toDual());
     }
     
+    // TODO potentially dangerous function, left for testing purposes.
     public void addMapping(MappingRow mapping) {
         mappings.add(mapping);
         mapping.domainRow().addMappingFrom(this, mapping);
