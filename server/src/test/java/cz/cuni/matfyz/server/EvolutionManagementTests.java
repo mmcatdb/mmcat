@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.server;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.core.category.Morphism.Max;
+import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.IdWithValues;
@@ -10,11 +12,8 @@ import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.Id;
-import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
-import cz.cuni.matfyz.core.schema.SchemaMorphism.Min;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
@@ -25,7 +24,6 @@ import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 
 import java.net.URISyntaxException;
-import java.util.TreeMap;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -154,15 +152,8 @@ public class EvolutionManagementTests {
             // Create superId and row
             var builder = new IdWithValues.Builder();
             builder.add(Signature.createEmpty(), fullAddressValue);
-            var fullAddressRow = addressInstance.createRow(builder.build());
 
-            // Add it to the inner map which will be put to the instance object
-            // TODO commented because of refactoring
-            //fullAddressInnerMap.put(fullAddressRow.superId(), fullAddressRow);
-
-            // Add morphisms
-            addressToFullAddressMorphismInstance.addMapping(new MappingRow(addressRow, fullAddressRow));
-            addressToFullAddressMorphismInstance.dual().addMapping(new MappingRow(fullAddressRow, addressRow));
+            addressInstance.getOrCreateRowWithMorphism(builder.build(), addressRow, addressToFullAddressMorphismInstance);
         }
     }
 
@@ -206,40 +197,6 @@ public class EvolutionManagementTests {
         category.morphisms().put(dualInstance.signature(), dualInstance);
 
         return morphismInstance;
-    }
-
-    private void createInstanceAsACopy(InstanceCategory category, Key masterKey, Key sourceKey, Signature masterToSource, Key copyKey, Signature masterToCopy) {
-        // Create instance object
-        var copy = category.schema.getObject(copyKey);
-        var copyInstance = new InstanceObject(copy);
-        category.objects().put(copyKey, copyInstance);
-
-        // Create instance morphisms
-        var masterInstance = category.getObject(masterKey);
-        var masterToCopyMorphism = category.schema.getMorphism(masterToCopy);
-        var masterToCopyMorphismInstance = new InstanceMorphism(masterToCopyMorphism, masterInstance, copyInstance, category);
-        category.morphisms().put(masterToCopyMorphismInstance.signature(), masterToCopyMorphismInstance);
-        var masterToCopyDualInstance = new InstanceMorphism(masterToCopyMorphism.dual(), copyInstance, masterInstance, category);
-        category.morphisms().put(masterToCopyDualInstance.signature(), masterToCopyDualInstance);
-        
-        // Populate instance object
-        var sourceToCopyMappings = new TreeMap<DomainRow, DomainRow>();
-        var sourceInstance = category.getObject(sourceKey);
-        sourceInstance.allRows().stream().forEach(row -> {
-            var copiedRow = copyInstance.createRow(row.superId);
-            sourceToCopyMappings.put(row, copiedRow);
-        });
-
-        // Populate instance morphism
-        var masterToSourceMorphismInstance = category.getMorphism(masterToSource);
-        var masterToSourceDualInstance = masterToSourceMorphismInstance.dual();
-        masterToSourceMorphismInstance.allMappings().forEach(mappingRow -> {
-            var masterRow = mappingRow.domainRow();
-            var copyRow = sourceToCopyMappings.get(mappingRow.codomainRow());
-
-            masterToSourceMorphismInstance.addMapping(new MappingRow(masterRow, copyRow));
-            masterToSourceDualInstance.addMapping(new MappingRow(copyRow, masterRow));
-        });
     }
 
     private static String joinFunction(String street, String city) {

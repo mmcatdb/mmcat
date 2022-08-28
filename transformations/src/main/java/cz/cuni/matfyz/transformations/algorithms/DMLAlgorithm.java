@@ -22,13 +22,17 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jachymb.bartik
  * @implNote A custom ordering of the elements of the arrays isn't supported in the current iteration of the framework.
  */
 public class DMLAlgorithm {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DMLAlgorithm.class);
 
     private Mapping mapping;
     private InstanceCategory category;
@@ -127,7 +131,7 @@ public class DMLAlgorithm {
                 // Get all mapping rows that have signature of this subpath and originate in given row.
                 InstanceMorphism morphism = category.getMorphism(subpath.signature());
                 boolean isObjectWithDynamicKeys = subpath instanceof ComplexProperty complexSubpath && complexSubpath.hasDynamicKeys();
-                boolean showIndex = morphism.schemaMorphism().isArray() && !isObjectWithDynamicKeys;
+                boolean showIndex = morphism.isArray() && !isObjectWithDynamicKeys;
                 int index = 0;
 
                 for (DomainRow objectRow : row.traverseThrough(morphism)) {
@@ -135,7 +139,7 @@ public class DMLAlgorithm {
                     index++;
                 }
 
-                // If it's aray but there aren't any items in it, we return a simple pair with 'null' value.
+                // If it's an array but there aren't any items in it, we return a simple pair with 'null' value.
                 if (index == 0 && showIndex && subpath.name() instanceof StaticName staticName) {
                     String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
                     output.add(new NameValuePair(name, null));
@@ -201,6 +205,13 @@ public class DMLAlgorithm {
             this.complexValue = complexValue;
             this.subpath = subpath;
             this.isSimple = false;
+        }
+
+        @Override
+        public String toString() {
+            return isSimple
+                ? "[simple] " + name + " \"" + simpleValue + "\" "
+                : "[complex] " + complexValue;
         }
     }
 

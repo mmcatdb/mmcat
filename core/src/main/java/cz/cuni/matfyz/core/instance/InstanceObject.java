@@ -52,6 +52,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return schemaObject.ids();
     }
     
+    // TODO rozlišit id od superId
     public DomainRow getRowById(IdWithValues id) {
         Map<IdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
         return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
@@ -75,21 +76,26 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
             domainByTechnicalIds.put(technicalId, row);
     }
 
-    public DomainRow createRow(IdWithValues superId) {
+    public DomainRow getOrCreateRow(IdWithValues superId) {
+        var merger = new Merger();
+        return merger.merge(superId, this);
+    }
+
+    public DomainRow getOrCreateRowWithMorphism(IdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
+        var merger = new Merger();
+        return merger.merge(superId, parent, baseMorphismFromParent);
+    }
+
+    DomainRow createRow(IdWithValues superId) {
         Set<Integer> technicalIds = superId.findFirstId(ids()) == null
             ? Set.of(generateTechnicalId())
             : Set.of();
-
-        return createRow(superId, technicalIds);
-    }
-
-    public DomainRow createRow(IdWithValues superId, Set<Integer> technicalIds) {
         var ids = superId.findAllIds(ids()).foundIds();
         
         return createRow(superId, technicalIds, ids);
     }
 
-    public DomainRow createRow(IdWithValues superId, Set<Integer> technicalIds, Set<IdWithValues> allIds) {
+    DomainRow createRow(IdWithValues superId, Set<Integer> technicalIds, Set<IdWithValues> allIds) {
         // TODO this can be optimized - we can discard the references that were referenced in all merged rows.
         // However, it might be quite rare, so the overhead caused by finding such ids would be greater than the savings.
         var row = new DomainRow(superId, technicalIds, referencesToRows.keySet());
@@ -98,6 +104,17 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return row;
     }
 
+    public DomainRow getRow(IdWithValues superId) {
+        for (var id : superId.findAllIds(ids()).foundIds()) {
+            var row = getRowById(id);
+            if (row != null)
+                return row;
+        }
+
+        return null;
+    }
+
+    // TODO fix - problém je, že getRowById může stále vracet null - tedy toto je použitelné jenom když víme, že alespoň nějaká část superId už musí být zmergovaná, a proto by se nejspíš měla používat jen ta funkce podtím
     /**
      * Returns the most recent row for the superId or technicalIds.
      */

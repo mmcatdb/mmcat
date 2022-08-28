@@ -1,8 +1,10 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
+import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
@@ -11,6 +13,8 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
 
 import java.nio.file.Paths;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Assertions;
 
@@ -91,5 +95,27 @@ public class MTCAlgorithmTestBase {
 
         Assertions.assertEquals(expectedCategory.objects(), category.objects(), "Test objects differ from the expected objects.");
         Assertions.assertEquals(expectedCategory.morphisms(), category.morphisms(), "Test morphisms differ from the expected morphisms.");
+
+        for (var entry : expectedCategory.objects().entrySet()) {
+            var expectedObject = entry.getValue();
+            var object = category.getObject(entry.getKey());
+
+            var expectedString = expectedObject.allRows().stream().map(row -> rowToMappingsString(row, expectedObject)).toList();
+            var string = object.allRows().stream().map(row -> rowToMappingsString(row, object)).toList();
+
+            assertEquals(expectedString, string);
+        }
+    }
+
+    private static String rowToMappingsString(DomainRow row, InstanceObject object) {
+        String output = "\n[row] (" + object.key() + ") "  + row;
+
+        for (var mappingsOfType : row.getAllMappingsFrom()) {
+            output += "\n\tmappings [" + mappingsOfType.getKey().signature() + "] --> (" + mappingsOfType.getKey().cod().key() + "):";
+            for (var m : mappingsOfType.getValue())
+                output += "\n\t\t" + m.codomainRow();
+        }
+
+        return output + "\n";
     }
 }

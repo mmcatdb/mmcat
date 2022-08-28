@@ -14,6 +14,8 @@ import java.util.TreeSet;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An instance of this class represents a tuple from the {@link InstanceObject}.
@@ -22,6 +24,8 @@ import org.json.JSONObject;
  * @author jachym.bartik
  */
 public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConvertible {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
     // The tuples that holds the value of this row.
     public final IdWithValues superId;
@@ -60,14 +64,12 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
         return mappings != null ? mappings : new TreeSet<>();
     }
 
-    Set<Entry<InstanceMorphism, Set<MappingRow>>> getAllMappingsFrom() {
+    public Set<Entry<InstanceMorphism, Set<MappingRow>>> getAllMappingsFrom() {
         return mappingsFrom.entrySet();
     }
 
     void addMappingFrom(InstanceMorphism morphism, MappingRow mapping) {
-        //addMapping(mappingsFrom, morphism, mapping);
         var mappingsOfSameType = mappingsFrom.computeIfAbsent(morphism, x -> new TreeSet<>());
-
         mappingsOfSameType.add(mapping);
     }
 

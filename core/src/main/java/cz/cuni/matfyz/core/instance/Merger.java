@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.instance.InstanceObject.ReferenceToRow;
-import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
 
 import java.util.LinkedList;
 import java.util.Map;
@@ -10,10 +9,16 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author jachym.bartik
  */
 public class Merger {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Merger.class);
+
 
     private final Queue<MergeRowsJob> jobs;
     private final Queue<ReferenceJob> referenceJobs;
@@ -25,22 +30,71 @@ public class Merger {
 
     /**
      * Merges the row and then iterativelly merges rows from other instance objects that might be affected.
-     * @param row
-     * @return
      */
-    public DomainRow merge(DomainRow row, InstanceObject instanceObject) {
-        addMergeJob(row.superId, row.technicalIds, instanceObject);
+    //public DomainRow merge(DomainRow row, InstanceObject instanceObject) {
+    public DomainRow merge(IdWithValues superId, InstanceObject instanceObject) {
+        //addMergeJob(row.superId, row.technicalIds, instanceObject);
+        addMergeJob(superId, Set.of(), instanceObject);
 
         while (!jobs.isEmpty())
             mergePhase();
 
-        return instanceObject.getActualRow(row);
+        return instanceObject.getActualRow(superId, Set.of());
+    }
+
+    /**
+     * @param superId SuperId of the new row we want to create.
+     * @param parent Parent row to which we should connect the new row.
+     * @param path Base morphism from parent to the new row.
+     * @return
+     */
+    public DomainRow merge(IdWithValues superId, DomainRow parent, InstanceMorphism path) {
+        // First, we try to find the row by the superId.
+        var currentRow = path.cod().getRow(superId);
+        if (currentRow != null)
+            return addToRowAndConnect(currentRow, superId, parent, path);
+
+        // Then we try to find it by the connection.
+        if (!path.isArray()) {
+            var mapping = parent.getMappingsFromForMorphism(path).stream().findFirst();
+            if (mapping.isPresent())
+                return addToRow(mapping.get().codomainRow(), superId, path.cod());
+        }
+
+        // No such row exists yet, so we have to create it. It also cannot be merged so we are not doing that.
+        var newRow = path.cod().createRow(superId);
+        path.createMappingWithDual(parent, newRow);
+        return newRow;
+    }
+
+    private DomainRow addToRowAndConnect(DomainRow currentRow, IdWithValues superId, DomainRow parent, InstanceMorphism path) {
+        var mappings = parent.getMappingsFromForMorphism(path);
+        // TODO more effective search, e.g., map.
+        for (var mapping : mappings)
+            if (mapping.codomainRow().equals(currentRow))
+                return addToRow(currentRow, superId, path.cod()); // The connection already exists so we just have to add to the superId.
+
+        // The connection does not exist yet, so we create it and then merge it.
+        // TODO optimization - merging with the knowledge of the connection, so we would not have create it, then delete it and then create it for the new row.
+        path.createMappingWithDual(parent, currentRow);
+        return addToRow(currentRow, superId, path.cod());
+    }
+
+    /**
+     * Add information from the superId to the existing row.
+     */
+    private DomainRow addToRow(DomainRow currentRow, IdWithValues superId, InstanceObject object) {
+        var newSuperId = IdWithValues.merge(currentRow.superId, superId);
+        if (newSuperId.size() == currentRow.superId.size())
+            return currentRow; // The row already contains everything from the merging superId.
+
+        return merge(superId, object);
     }
 
     public DomainRow mergeAlongMorphism(DomainRow domainRow, InstanceMorphism morphism) {
         // Get all mappings from the domain row for this morphism.
         var mappingsFromRow = domainRow.getMappingsFromForMorphism(morphism);
-        if (morphism.schemaMorphism().max() == Max.STAR || mappingsFromRow.size() <= 1)
+        if (morphism.isArray() || mappingsFromRow.size() <= 1)
             return domainRow; // There is nothing to merge
 
         // Create a new job that merges all these rows.
@@ -48,7 +102,8 @@ public class Merger {
 
         addMergeJob(codomainRows, morphism.cod());
 
-        mergePhase();
+        while (!jobs.isEmpty())
+            mergePhase();
 
         return morphism.dom().getActualRow(domainRow);
     }
@@ -108,7 +163,10 @@ public class Merger {
             var result = instanceObject.findMaximalSuperId(superId, originalRows);
             var maximalSuperId = result.superId();
             var maximalTechnicalId = InstanceObject.mergeTechnicalIds(originalRows);
-    
+
+            if (originalRows.size() == 1)
+                return; // No merging is required
+
             // Create new Row that contains the unified superId and put it to all possible ids.
             // This also deletes the old ones.
             var newRow = instanceObject.createRow(maximalSuperId, maximalTechnicalId, result.foundIds());
@@ -165,7 +223,7 @@ public class Merger {
             }
     
             // If there are multiple rows but the morphism allows at most one, they have to be merged as well. We do so by creating new merge job.
-            if (morphism.schemaMorphism().max() == Max.ONE && codomainRows.size() > 1)
+            if (!morphism.isArray() && codomainRows.size() > 1)
                 merger.addMergeJob(codomainRows, morphism.cod());
         }
 

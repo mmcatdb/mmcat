@@ -7,6 +7,8 @@ import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.schema.Key;
 
+import java.util.Set;
+
 /**
  * @author jachymb.bartik
  */
@@ -30,7 +32,11 @@ public class TestInstanceCategoryBuilder {
         var instanceObject = category.getObject(key);
         IdWithValues superId = builder.build();
 
-        return instanceObject.createRow(superId);
+        var row = instanceObject.getRow(superId);
+        if (row != null)
+            return row;
+
+        return instanceObject.getOrCreateRow(superId);
     }
     
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {

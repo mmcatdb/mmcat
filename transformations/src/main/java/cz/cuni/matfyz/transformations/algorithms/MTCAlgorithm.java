@@ -121,22 +121,16 @@ public class MTCAlgorithm {
     }
     
     private void processTopOfStack(Deque<StackTriple> masterStack) {
-        LOGGER.debug("Process Top of Stack:\n{}", masterStack);
+        //LOGGER.debug("Process Top of Stack:\n{}", masterStack);
         
         StackTriple triple = masterStack.pop();
         Iterable<FetchedSuperId> superIds = fetchSuperIds(triple.parentRecord, triple.parentRow, triple.parentToChildMorphism);
 
-        SchemaObject childObject = triple.parentToChildMorphism.cod();
-        InstanceObject childInstance = category.getObject(childObject);
-        InstanceMorphism morphismInstance = category.getMorphism(triple.parentToChildMorphism);
+        InstanceObject childInstance = triple.parentToChildMorphism.cod();
         
         for (FetchedSuperId superId : superIds) {
             DomainRow childRow = modifyActiveDomain(childInstance, superId.superId);
-            childRow = addRelation(morphismInstance, triple.parentRow, childRow, triple.parentRecord);
-            /*
-            addRelation(morphismInstance, triple.parentRow, childRow, superId.childRecord);
-            addRelation(morphismInstance.dual(), childRow, triple.parentRow, superId.childRecord);
-            */
+            childRow = addRelation(triple.parentToChildMorphism, triple.parentRow, childRow, triple.parentRecord);
 
             //childInstance.merge(childRow);
             
@@ -176,7 +170,7 @@ public class MTCAlgorithm {
      * @param morphism Morphism from the parent schema object to the currently processed one.
      * @return
      */
-    private static Iterable<FetchedSuperId> fetchSuperIds(IComplexRecord parentRecord, DomainRow parentRow, SchemaMorphism morphism) {
+    private static Iterable<FetchedSuperId> fetchSuperIds(IComplexRecord parentRecord, DomainRow parentRow, InstanceMorphism morphism) {
         List<FetchedSuperId> output = new ArrayList<>();
         Id superId = morphism.cod().superId();
         Signature signature = morphism.signature();
@@ -303,9 +297,8 @@ public class MTCAlgorithm {
      * @return
      */
     private static DomainRow modifyActiveDomain(InstanceObject instanceObject, IdWithValues superId) {
-        var row = instanceObject.createRow(superId);
         var merger = new Merger();
-        return merger.merge(row, instanceObject);
+        return merger.merge(superId, instanceObject);
     }
 
     private DomainRow addRelation(InstanceMorphism morphism, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {
@@ -317,27 +310,23 @@ public class MTCAlgorithm {
         var currentToChild = morphism.signature();
 
         for (var baseMorphism : baseMorphisms) {
-            // If we are not at the end of the morphisms, we have to create a new row identified by a technical id.
             var instanceObject = baseMorphism.cod();
-
+            
             parentToCurrent = parentToCurrent.concatenate(currentToChild.getFirst());
             currentToChild = currentToChild.cutFirst();
-
-            var nextRow = childRow;
+            
+            // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
             if (!instanceObject.equals(morphism.cod())) {
                 var superId = fetchSuperIdForTechnicalRow(instanceObject, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
-
-                //nextRow = new DomainRow(instanceObject.generateTechnicalId(), instanceObject);
-                nextRow = instanceObject.createRow(superId);
+                currentDomainRow = instanceObject.getOrCreateRowWithMorphism(superId, currentDomainRow, baseMorphism);
             }
-
-            addBaseRelation(baseMorphism, currentDomainRow, nextRow);
-            currentDomainRow = nextRow;
+            else {
+                addBaseRelation(baseMorphism, currentDomainRow, childRow);
+            }
         }
 
-        // Now try merging them from the domain object and then from the codomain object.
+        // Now try merging them from the codomain object to the domain object (the other way should be already merged).
         var merger = new Merger();
-        merger.mergeAlongMorphism(parentRow, baseMorphisms.get(0));
         childRow = merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
 
         return childRow;
@@ -367,15 +356,16 @@ public class MTCAlgorithm {
     }
 
     private void addBaseRelation(InstanceMorphism morphism, DomainRow domainRow, DomainRow codomainRow) {
-        morphism.addMapping(new MappingRow(domainRow, codomainRow));
-        morphism.dual().addMapping(new MappingRow(codomainRow, domainRow));
+        var newMapping = new MappingRow(domainRow, codomainRow);
+        morphism.addMapping(newMapping);
+        morphism.dual().addMapping(newMapping.toDual());
     }
     
     private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow superId, IComplexRecord complexRecord) {
         //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
         if (path instanceof ComplexProperty complexPath)
             for (Child child : children(complexPath)) {
-                SchemaMorphism morphism = category.getMorphism(child.signature()).schemaMorphism();
+                InstanceMorphism morphism = category.getMorphism(child.signature());
                 stack.push(new StackTriple(superId, morphism, child.property(), complexRecord));
             }
     }

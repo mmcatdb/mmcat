@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import cz.cuni.matfyz.core.category.Morphism.Max;
+import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -11,8 +13,6 @@ import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.core.schema.SchemaMorphism.Max;
-import cz.cuni.matfyz.core.schema.SchemaMorphism.Min;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
 import java.util.Set;

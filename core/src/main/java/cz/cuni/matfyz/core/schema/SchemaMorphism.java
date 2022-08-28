@@ -22,19 +22,6 @@ public class SchemaMorphism implements Serializable, Morphism, JSONConvertible, 
     private SchemaObject cod;
     private Min min;
     private Max max;
-    
-    // Beware that the cardinality of morphism doesn't mean the cardinality from the relational point of view.
-    // For example, 1..1 means there is exactly one morphism (which is a monomorphism i.e. an injection).
-    // However, it doesn't mean there is one object from the codomain for each object from the domain.
-    public enum Min {
-        ZERO,
-        ONE
-    }
-    
-    public enum Max {
-        ONE,
-        STAR
-    }
 
     public static Min combineMin(Min min1, Min min2) {
         return (min1 == Min.ONE && min2 == Min.ONE) ? Min.ONE : Min.ZERO;
@@ -82,10 +69,12 @@ public class SchemaMorphism implements Serializable, Morphism, JSONConvertible, 
         return cod;
     }
 
+    @Override
     public Min min() {
         return min;
     }
 
+    @Override
     public Max max() {
         return max;
     }

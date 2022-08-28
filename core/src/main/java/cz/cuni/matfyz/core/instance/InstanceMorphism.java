@@ -9,10 +9,15 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author pavel.koupil, jachym.bartik
  */
 public class InstanceMorphism implements Serializable, Comparable<InstanceMorphism>, Morphism {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MappingRow.class);
 
     private final SchemaMorphism schemaMorphism;
     private final List<InstanceMorphism> bases;
@@ -20,7 +25,6 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
     private final InstanceObject cod;
     private final InstanceCategory category;
 
-    //private final Map<DomainRow, Set<MappingRow>> mappings = new TreeMap<>();
     private final SortedSet<MappingRow> mappings = new TreeSet<>();
 
     public InstanceMorphism(SchemaMorphism schemaMorphism, InstanceObject dom, InstanceObject cod, InstanceCategory category) {
@@ -44,20 +48,17 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
     public List<InstanceMorphism> bases() {
         return bases;
     }
+
+    public void createMappingWithDual(DomainRow domainRow, DomainRow codomainRow) {
+        var mapping = new MappingRow(domainRow, codomainRow);
+
+        addMapping(mapping);
+        dual().addMapping(mapping.toDual());
+    }
     
     public void addMapping(MappingRow mapping) {
-        /*
-        Set<MappingRow> set = mappings.get(mapping.domainRow());
-        if (set == null) {
-            set = new TreeSet<>();
-            mappings.put(mapping.domainRow(), set);
-        }
-        */
-
         mappings.add(mapping);
-
         mapping.domainRow().addMappingFrom(this, mapping);
-        //mapping.codomainRow().addMappingTo(this, mapping);
     }
 
     public void removeMapping(MappingRow mapping) {
@@ -66,14 +67,9 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
     }
 
     public SortedSet<MappingRow> allMappings() {
-        //return new TreeSet<>(mappings.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
         return mappings;
     }
 
-    public SchemaMorphism schemaMorphism() {
-        return schemaMorphism;
-    }
-    
     @Override
     public InstanceObject dom() {
         return dom;
@@ -92,6 +88,20 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
     @Override
     public Signature signature() {
         return schemaMorphism.signature();
+    }
+
+    @Override
+    public Min min() {
+        return schemaMorphism.min();
+    }
+
+    @Override
+    public Max max() {
+        return schemaMorphism.max();
+    }
+
+    public boolean isArray() {
+        return schemaMorphism.isArray();
     }
 
     @Override
@@ -117,9 +127,13 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
         return builder.toString();
     }
     
+    // TODO maybe there is no reason to override this method
     @Override
     public boolean equals(Object object) {
-        return object instanceof InstanceMorphism instanceMorphism && mappings.equals(instanceMorphism.mappings);
+        if (this == object)
+            return true;
+
+        return object instanceof InstanceMorphism instanceMorphism && dom.equals(instanceMorphism.dom) && cod.equals(instanceMorphism.cod);
     }
 
 }

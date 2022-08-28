@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.instance.DomainRow;
+import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.record.IComplexRecord;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.utils.IndentedStringBuilder;
 
 /**
@@ -11,12 +11,12 @@ import cz.cuni.matfyz.core.utils.IndentedStringBuilder;
  */
 public class StackTriple {
     
-    public final SchemaMorphism parentToChildMorphism;
+    public final InstanceMorphism parentToChildMorphism;
     public final DomainRow parentRow;
     public final AccessPath parentAccessPath;
     public final IComplexRecord parentRecord;
     
-    public StackTriple(DomainRow parentRow, SchemaMorphism parentToChildMorphism, AccessPath parentAccessPath, IComplexRecord parentRecord) {
+    public StackTriple(DomainRow parentRow, InstanceMorphism parentToChildMorphism, AccessPath parentAccessPath, IComplexRecord parentRecord) {
         this.parentRow = parentRow;
         this.parentToChildMorphism = parentToChildMorphism;
         this.parentAccessPath = parentAccessPath;
