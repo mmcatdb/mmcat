@@ -109,7 +109,7 @@ public class DDLAlgorithm {
     private void processPath(SimpleProperty property, Set<String> names) {
         var morphism = category.getMorphism(property.value().signature());
         
-        if (morphism.isArray())
+        if (morphism.isArray() && property.name() instanceof StaticName)
             wrapper.addSimpleArrayProperty(names, isRequired(morphism));
         else
             wrapper.addSimpleProperty(names, isRequired(morphism));

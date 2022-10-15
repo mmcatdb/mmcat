@@ -1,6 +1,6 @@
-# MM-cat
+# MM-evocat
 
-A multi-model data modelling framework based on category theory. It consists of the following modules:
+A multi-model data modelling and evolution framework based on category theory. It consists of the following modules:
 - [Core](./core/README.md) defines classes needed by other modules.
 - [Transformations](./transformations/README.md) contains algorithms for transforming data from logical to conceptual model (and back).
 - [Wrappers](./wrappers/README.md) provides funcionalities specific for different databases.

@@ -1,6 +1,6 @@
 # example-ui
 
-A frontend application for the MM-cat tool. It is based on [Vue 3](https://vuejs.org/) ([Vite](https://vitejs.dev/)) + TypeScript + Options API.
+A frontend application for the MM-evocat tool. It is based on [Vue 3](https://vuejs.org/) ([Vite](https://vitejs.dev/)) + TypeScript + Options API.
 
 ## Requirements
 

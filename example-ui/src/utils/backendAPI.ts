@@ -74,7 +74,7 @@ export function GET<T>(action: string, params = {}): Promise<Result<T>> {
     url += action;
     return promiseToResponse<T>(instance.get(url, {
         params,
-        paramsSerializer: function(params) {
+        paramsSerializer: function (params) {
             return qs.stringify(params, { arrayFormat: 'repeat' });
         }
     }));

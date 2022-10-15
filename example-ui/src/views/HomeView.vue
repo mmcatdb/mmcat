@@ -51,7 +51,7 @@ export default defineComponent({
 </script>
 
 <template>
-    <h1>MM-cat</h1>
+    <h1>MM-evocat</h1>
     <p>
         A multi-model data modelling framework based on category theory.
     </p>

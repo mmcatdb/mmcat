@@ -1,6 +1,6 @@
 # server
 
-A backend application for the MM-cat tool. It is based on the Spring Boot framework.
+A backend application for the MM-evocat tool. It is based on the Spring Boot framework.
 
 ## Requirements
 

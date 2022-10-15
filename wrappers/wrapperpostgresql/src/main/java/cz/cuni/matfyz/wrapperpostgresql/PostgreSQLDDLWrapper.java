@@ -47,6 +47,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     @Override
     public boolean addComplexProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
         throw new UnsupportedOperationException(); // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
+        // TODO dynamic named properties?
     }
 
     @Override
@@ -59,7 +60,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         String commands = String.join(",\n", properties.stream().map(property -> AbstractDDLWrapper.INDENTATION + property.command).toList());
         String content = String.format("""
             CREATE TABLE %s (
-                %s
+            %s
             );
             """, kindName, commands);
         
