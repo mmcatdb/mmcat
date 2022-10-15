@@ -19,6 +19,6 @@ i_B \circ f &= f \ , \\\ f \circ i_A &= f \ .
 \end{aligned}
 $$
 
-In the MM-cat framework, the direct morphisms (i.e. from one object to a different one) are called base morphisms. Those created by composition are called composite morphisms.
+In the MM-evocat framework, the direct morphisms (i.e. from one object to a different one) are called base morphisms. Those created by composition are called composite morphisms.
 
 The current version of the framework requires that for each morphism that is not an identity morphism there is an opposite morphism (called dual). For example, if there is a morphism $f: A \rightarrow B$, there must exist a morphism $f': B \rightarrow A$.

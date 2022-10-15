@@ -66,6 +66,6 @@ Finally, select the cardinality of the morphism and its dual.
 
 New morphism can be edited in a similar way how they are created. You can delete them too. It is important to note that any change that could break newly created ids will result in deleting those ids.
 
-## Other functions
+## Other features
 
 The other buttons currently do not do anything. Their functionalities will be implemented in the evolution management update.

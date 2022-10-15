@@ -9,7 +9,7 @@ The multi-model databases partially solve this issue by allowing multiple differ
 - the entities from one model can reference the entities from another,
 - the same data can be stored in multiple models, i.e. redundant.
 
-But there is still no universally applicable way how to model the multi-model data or how to transform data from one model to another. The MM-cat framework attempts to create a platform-independent conceptual model as an abstract layer above all the platform-dependent logical models. This solution, which is based on the [category theory](theoreticalBackground/categoryTheory.md), was theoretically developed by the article[^article].
+But there is still no universally applicable way how to model the multi-model data or how to transform data from one model to another. The MM-evocat framework attempts to create a platform-independent conceptual model as an abstract layer above all the platform-dependent logical models. This solution, which is based on the [category theory](theoreticalBackground/categoryTheory.md), was theoretically developed by the article[^article].
 
 This approach allows us to:
 - model the data from both multiple models and multiple database systems at once,

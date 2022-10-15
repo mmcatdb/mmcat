@@ -3,7 +3,7 @@ title: "Overview"
 weight: 0
 ---
 
-This is the user documentation for the frontend application of the [MM-cat framework](https://gitlab.mff.cuni.cz/contosp/evolution-management). Please be aware that the application is still in development, so it may not be as polished as you might be used to from other applications. Especially the UX was given less attention, so please read this documentation carefully.
+This is the user documentation for the frontend application of the [MM-evocat framework](https://gitlab.mff.cuni.cz/contosp/evolution-management). Please be aware that the application is still in development, so it may not be as polished as you might be used to from other applications. Especially the UX was given less attention, so please read this documentation carefully.
 
 ## Navigation
 

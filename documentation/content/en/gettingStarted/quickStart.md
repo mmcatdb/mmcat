@@ -4,7 +4,7 @@ title: "Quick Start"
 
 ### Theory
 
-The framework is based on selected theoretical concepts. It is impossible to utilize all its functionalities without understanding the concepts first. A brief introduction to the theoretical background can be found [here](../theoreticalBackground/overview.md).
+The framework is based on selected theoretical concepts. It is impossible to utilize all its features without understanding the concepts first. A brief introduction to the theoretical background can be found [here](../theoreticalBackground/overview.md).
 
 ### Usage
 
