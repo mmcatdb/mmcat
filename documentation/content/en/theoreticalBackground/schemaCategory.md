@@ -51,8 +51,8 @@ For a more complex example, here is an ER schema. The color borders define which
 - purple - relational,
 - blue - graph.
 
-![Example of ER schema](/mmcat-docs/img/example-ER.png)
+![Example of ER schema](/example-ER.png)
 
 Part of the ER schema was transformed to the schema categorical representation. The resulting schema category is depicted on the next figure. The color borders there have a different meaning which will be explained in the next chapters.
 
-![Example of schema category](/mmcat-docs/img/example-category.png)
+![Example of schema category](/example-category.png)

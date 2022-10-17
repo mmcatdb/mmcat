@@ -6,7 +6,7 @@ weight: 10
 
 A category consists of a set of objects, a set of morphisms and a binary composition operation over the morphisms. We can view it as a directed multigraph - the objects are the nodes and the morphisms are the oriented edges.
 
-{{< image src="/mmcat-docs/img/category-example.png" alt="Example of a category" width="320px" caption="An example of a category." >}}
+{{< image src="/category-example.png" alt="Example of a category" width="320px" caption="An example of a category." >}}
 
 The operation allows us to combine morphisms. If we have morphism $f$, i.e. an edge from object $A$ to object $B$ (which can be written as $f: A \rightarrow B$), and another morphism $g: B \rightarrow C$, we can combine them to the morphism $g \circ f: A \rightarrow C$. The whole category is closed under this operation. Also, it must hold true that chaining these operations is associative, for example
 $$

@@ -17,7 +17,7 @@ The framework currently supports two database engines - MongoDB and PostgreSQL. 
 
 A user-readable identifier of the database. It will appear in the system under this name.
 
-![Edit database](/mmcat-docs/img/database.png)
+![Edit database](/database.png)
 
 ## Edit
 

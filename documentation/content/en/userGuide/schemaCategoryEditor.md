@@ -7,7 +7,7 @@ The schema category is displayed as a graph in the center of the page. You can a
 
 Also, mind that all changes must be explicitly saved by the `Save` button.
 
-![Schema Category editor](/mmcat-docs/img/schema-category.png)
+![Schema Category editor](/schema-category.png)
 <!-- ![Schema Category editor](/static/img/schema-category.png) -->
 
 ## Display

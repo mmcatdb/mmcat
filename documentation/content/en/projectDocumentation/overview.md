@@ -9,7 +9,7 @@ This documentation describes only the high-level concepts of the framework. It d
 
 The framework is divided into several modules.
 
-![Framework architecture](/mmcat-docs/img/overall-architecture.png)
+![Framework architecture](/overall-architecture.png)
 
 ### `core`
 
