@@ -19,7 +19,7 @@ This is basically an opposite process to the previous one. The algorithm creates
 
 If the instance category is empty or if it even does not exist, yet there will not be any data to export. So it is recommended to run the import jobs first.
 
-![Job](/jobs.png)
+![Job](/img/jobs.png)
 
 ## Create
 

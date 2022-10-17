@@ -7,7 +7,7 @@ Signatures are essential for almost all features of the MM-evocat framework beca
 
 Because of the high importance of signatures, there is a specialized tool based on the graph display tool for creating them.
 
-![Create Signature](/create-signature.png)
+![Create Signature](/img/create-signature.png)
 <!-- ![Create Signature](/static/img/create-signature.png) -->
 
 ## Display

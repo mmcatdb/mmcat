@@ -52,4 +52,4 @@ Also be aware that the cardinalities of the properties are not defined explicitl
 
 Here is an example of the [schema category](schemaCategory.md#example) from one of the previous chapters. The kind `Order` was chosen as a root of the access path, which is shown in its JSON-like representation on in the middle of the figure. There are also some example data on the left.
 
-![Example of ER schema](/example-path.png)
+![Example of ER schema](/img/example-path.png)

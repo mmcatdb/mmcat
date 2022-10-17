@@ -9,7 +9,7 @@ This is the user documentation for the frontend application of the [MM-evocat fr
 
 There are several buttons in the navigation menu on the left side.
 
-![Navigation](/navigation.png)
+![Navigation](/img/navigation.png)
 
 ### Schema Category
 
