@@ -1,4 +1,4 @@
-baseURL = "http://nosql.ms.mff.cuni.cz/mmcat-docs/"
+baseURL = "http://mm-evocat.com/"
 title = "MM-evocat docs"
 theme = "hugo-geekdoc"
 defaultContentLanguage = "en"
