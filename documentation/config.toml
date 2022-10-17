@@ -1,4 +1,4 @@
-baseURL = "http://mm-evocat.com/"
+baseURL = "https://mm-evocat.com/"
 title = "MM-evocat docs"
 theme = "hugo-geekdoc"
 defaultContentLanguage = "en"
