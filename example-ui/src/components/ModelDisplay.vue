@@ -28,7 +28,7 @@ export default defineComponent({
 
 <template>
     <div class="model-display">
-        <h2>{{ model.jobName }}</h2>
+        <h2>{{ model.jobLabel }}</h2>
         <table>
             <tr>
                 <td class="label">
@@ -40,10 +40,10 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
-                    Job name:
+                    Job label:
                 </td>
                 <td class="value">
-                    {{ model.jobName }}
+                    {{ model.jobLabel }}
                 </td>
             </tr>
         </table>

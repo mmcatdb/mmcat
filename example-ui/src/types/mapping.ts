@@ -9,14 +9,14 @@ export type MappingJSON = {
 
 export class Mapping {
     id: number;
-    name: string;
+    label: string;
     logicalModel: LogicalModel;
     rootObjectId: number;
     accessPath: RootProperty;
 
-    private constructor(id: number, name: string, logicalModel: LogicalModel, rootObjectId: number, accessPath: RootProperty) {
+    private constructor(id: number, label: string, logicalModel: LogicalModel, rootObjectId: number, accessPath: RootProperty) {
         this.id = id;
-        this.name = name;
+        this.label = label;
         this.logicalModel = logicalModel;
         this.rootObjectId = rootObjectId;
         this.accessPath = accessPath;
@@ -24,11 +24,11 @@ export class Mapping {
 
     static fromServer(input: MappingFromServer): Mapping {
         const logicalModel = LogicalModel.fromServer(input.logicalModelView);
-        const json = JSON.parse(input.jsonValue) as { name: string };
+        const json = JSON.parse(input.jsonValue) as { label: string };
         const mappingJson = JSON.parse(input.mappingJsonValue) as MappingJSON;
         const accessPath = RootProperty.fromJSON(mappingJson.accessPath);
 
-        return new Mapping(input.id, json.name, logicalModel, input.rootObjectId, accessPath);
+        return new Mapping(input.id, json.label, logicalModel, input.rootObjectId, accessPath);
     }
 }
 

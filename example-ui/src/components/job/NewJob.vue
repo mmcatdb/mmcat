@@ -48,7 +48,7 @@ export default defineComponent({
         <table>
             <tr>
                 <td class="label">
-                    Name:
+                    Label:
                 </td>
                 <td class="value">
                     <input v-model="jobName" />
@@ -81,7 +81,7 @@ export default defineComponent({
                             :key="index"
                             :value="mapping.id"
                         >
-                            {{ mapping.name }}
+                            {{ mapping.label }}
                         </option>
                     </select>
                 </td>

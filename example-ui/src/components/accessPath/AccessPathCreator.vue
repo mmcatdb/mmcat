@@ -48,16 +48,16 @@ export default defineComponent({
 
             this.selectingRootNode.unselect();
             this.selectingRootNode.becomeRoot();
-            const name = this.selectingRootNode.schemaObject.label.toLowerCase();
-            this.accessPath = new RootProperty(StaticName.fromString(name), this.selectingRootNode);
+            const label = this.selectingRootNode.schemaObject.label.toLowerCase();
+            this.accessPath = new RootProperty(StaticName.fromString(label), this.selectingRootNode);
         },
-        async createMapping(name: string) {
+        async createMapping(label: string) {
             const result = await POST<MappingFromServer>('/mappings', {
                 databaseId: this.selectedDatabase?.id,
                 categoryId: this.graph?.schemaCategory.id,
                 rootObjectId: this.accessPath?.node.schemaObject.id,
                 jsonValue: JSON.stringify({
-                    name: name
+                    label: label
                 }),
                 mappingJsonValue: JSON.stringify({
                     kindName: this.accessPath?.name.toString(),

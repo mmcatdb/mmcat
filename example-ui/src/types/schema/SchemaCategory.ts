@@ -196,11 +196,11 @@ function findObjectFromSignature(signature: Signature, objects: SchemaObject[], 
 }
 
 export class SchemaCategoryInfo {
-    private constructor(public id: number, public name: string) {}
+    private constructor(public id: number, public label: string) {}
 
     static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
-        const parsed = JSON.parse(input.jsonValue) as { name: string };
-        return new SchemaCategoryInfo(input.id, parsed.name);
+        const parsed = JSON.parse(input.jsonValue) as { label: string };
+        return new SchemaCategoryInfo(input.id, parsed.label);
     }
 }
 

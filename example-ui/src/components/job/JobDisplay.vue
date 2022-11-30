@@ -70,7 +70,7 @@ export default defineComponent({
 <template>
     <div class="job-display">
         <CleverRouterLink :to="{ name: 'job', params: { id: job.id } }">
-            <h2>{{ job.name }}</h2>
+            <h2>{{ job.label }}</h2>
         </CleverRouterLink>
         <table>
             <tr>

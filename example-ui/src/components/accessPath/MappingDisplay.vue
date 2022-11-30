@@ -33,7 +33,7 @@ export default defineComponent({
             <h2>{{ mapping.name }}</h2>
         </CleverRouterLink>
         -->
-        <h2>{{ mapping.name }}</h2>
+        <h2>{{ mapping.label }}</h2>
         <table>
             <tr>
                 <td class="label">
@@ -56,7 +56,7 @@ export default defineComponent({
                     Logical model:
                 </td>
                 <td class="value">
-                    {{ mapping.logicalModel.name }}
+                    {{ mapping.logicalModel.label }}
                 </td>
             </tr>
             <tr>

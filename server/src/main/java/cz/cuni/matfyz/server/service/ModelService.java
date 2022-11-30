@@ -26,8 +26,8 @@ public class ModelService {
         return store.getModel(jobId);
     }
 
-    public Model createNew(UserStore store, Job job, String jobName, String commands) {
-        var model = new Model(job.id, job.categoryId, jobName, commands);
+    public Model createNew(UserStore store, Job job, String jobLabel, String commands) {
+        var model = new Model(job.id, job.categoryId, jobLabel, commands);
         store.addModel(model);
 
         return model;

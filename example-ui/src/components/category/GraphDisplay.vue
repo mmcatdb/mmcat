@@ -49,7 +49,7 @@ export default defineComponent({
             // It causes the cytoscape div to contain two cytoscape canvases (the first one is empty, probably it's here from the previous instance).
             // Weird is this only occurs after 'build', not 'dev' (meaning 'serve').
             if (container) {
-                var child = container.lastElementChild;
+                let child = container.lastElementChild;
                 while (child) {
                     container.removeChild(child);
                     child = container.lastElementChild;

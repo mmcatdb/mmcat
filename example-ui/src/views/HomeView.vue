@@ -14,7 +14,7 @@ export default defineComponent({
             selectedSchema: undefined as SchemaCategoryInfo | undefined,
             currentSchema: undefined as SchemaCategoryInfo | undefined,
             avaliableSchemas: [] as SchemaCategoryInfo[],
-            newSchemaName: '',
+            newSchemaLabel: '',
             DOCUMENTATION_URL
         };
     },
@@ -36,7 +36,7 @@ export default defineComponent({
             setSchemaCategoryId(this.selectedSchema.id);
         },
         async confirmNewSchema() {
-            const jsonValue = JSON.stringify({ name: this.newSchemaName });
+            const jsonValue = JSON.stringify({ label: this.newSchemaLabel });
             const result = await POST<SchemaCategoryInfoFromServer>('/schema-categories', { jsonValue });
             if (!result.status)
                 return;
@@ -44,7 +44,7 @@ export default defineComponent({
             const newSchema = SchemaCategoryInfo.fromServer(result.data);
             this.avaliableSchemas.push(newSchema);
 
-            this.newSchemaName = '';
+            this.newSchemaLabel = '';
         }
     }
 });
@@ -68,7 +68,7 @@ export default defineComponent({
                         Current schema:
                     </td>
                     <td class="value">
-                        {{ currentSchema?.name }}
+                        {{ currentSchema?.label }}
                     </td>
                 </tr>
                 <tr>
@@ -82,7 +82,7 @@ export default defineComponent({
                                 :key="schema.id"
                                 :value="schema"
                             >
-                                {{ schema.name }}
+                                {{ schema.label }}
                             </option>
                         </select>
                     </td>
@@ -102,17 +102,17 @@ export default defineComponent({
             <table>
                 <tr>
                     <td class="label">
-                        Name:
+                        Label:
                     </td>
                     <td class="value">
-                        <input v-model="newSchemaName" />
+                        <input v-model="newSchemaLabel" />
                     </td>
                 </tr>
                 <tr>&nbsp;</tr>
             </table>
             <div class="button-row">
                 <button
-                    :disabled="!newSchemaName"
+                    :disabled="!newSchemaLabel"
                     @click="confirmNewSchema"
                 >
                     Confirm

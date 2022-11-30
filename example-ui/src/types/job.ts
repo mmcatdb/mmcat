@@ -14,7 +14,7 @@ export class Job {
         public id: number,
         public mappingId: number,
         public categoryId: number,
-        public name: string,
+        public label: string,
         public type: string,
         public status: Status
     ) {
@@ -22,7 +22,7 @@ export class Job {
     }
 
     static fromServer(input: JobFromServer): Job {
-        return new Job(input.id, input.mappingId, input.categoryId, input.name, input.type, input.status);
+        return new Job(input.id, input.mappingId, input.categoryId, input.label, input.type, input.status);
     }
 
     setStatus(status: Status) {
@@ -34,7 +34,7 @@ export type JobFromServer = {
     id: number;
     mappingId: number;
     categoryId: number;
-    name: string;
+    label: string;
     type: string;
     status: Status;
 }

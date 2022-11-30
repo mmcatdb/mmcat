@@ -28,7 +28,6 @@ public class LogicalModelController {
     // TODO - jobs should depend on the logical model instead of mapping
     // TODO - LogicalModel vs LogicalModelView - now we have to load the whole view for each mapping ...
         // TODO - also some unification for the naming - i.e., View vs Full
-    // TODO - rename name to label (almost) everywhere
 
     @Autowired
     private LogicalModelService service;

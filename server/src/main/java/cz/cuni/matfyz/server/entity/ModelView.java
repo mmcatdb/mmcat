@@ -6,15 +6,15 @@ package cz.cuni.matfyz.server.entity;
 public class ModelView {
 
     public final int jobId;
-    public final String jobName;
+    public final String jobLabel;
 
-    public ModelView(int jobId, String jobName) {
+    public ModelView(int jobId, String jobLabel) {
         this.jobId = jobId;
-        this.jobName = jobName;
+        this.jobLabel = jobLabel;
     }
 
     public ModelView(Model model) {
-        this(model.jobId(), model.jobName());
+        this(model.jobId(), model.jobLabel());
     }
 
 }

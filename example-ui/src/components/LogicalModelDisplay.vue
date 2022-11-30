@@ -27,7 +27,7 @@ export default defineComponent({
 <template>
     <div class="logical-model-display">
         <CleverRouterLink :to="{ name: 'logicalModel', params: { id: logicalModel.id } }">
-            <h2>{{ logicalModel.name }}</h2>
+            <h2>{{ logicalModel.label }}</h2>
         </CleverRouterLink>
         <table>
             <tr>

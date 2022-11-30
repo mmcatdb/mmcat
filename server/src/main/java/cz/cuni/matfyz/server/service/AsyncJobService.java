@@ -70,7 +70,7 @@ public class AsyncJobService {
 
         jobQueue.add(new RunJobData(job, store));
         
-        LOGGER.info("Job { id: {}, name: '{}' } placed to the queue.", job.id, job.name);
+        LOGGER.info("Job { id: {}, name: '{}' } placed to the queue.", job.id, job.label);
         
         tryStartNextJob(false);
     }
@@ -91,7 +91,7 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     public void processJob(Job job, UserStore store) {
-        LOGGER.info("Job { id: {}, name: '{}' } started.", job.id, job.name);
+        LOGGER.info("Job { id: {}, name: '{}' } started.", job.id, job.label);
         
         try {
             switch (job.type) {
@@ -104,11 +104,11 @@ public class AsyncJobService {
             }
         }
         catch (Exception exception) {
-            LOGGER.error(String.format("Job { id: %d, name: '%s' } interrupted.", job.id, job.name), exception);
+            LOGGER.error(String.format("Job { id: %d, name: '%s' } interrupted.", job.id, job.label), exception);
             setJobStatus(job, Job.Status.Canceled);
         }
 
-        LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.name);
+        LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
         tryStartNextJob(true);
     }
 
@@ -165,7 +165,7 @@ public class AsyncJobService {
         var result = categoryToModelAlgorithm(job, instance).join();
 
         if (result.status) {
-            modelService.createNew(store, job, job.name, result.data);
+            modelService.createNew(store, job, job.label, result.data);
             setJobStatus(job, Job.Status.Finished);
         }
         else {

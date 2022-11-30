@@ -14,7 +14,7 @@ public class Job extends Entity implements JSONConvertible {
 
     public final int mappingId;
     public final Integer categoryId;
-    public String name;
+    public String label;
     public Type type;
     public Status status;
 
@@ -60,7 +60,7 @@ public class Job extends Entity implements JSONConvertible {
         protected JSONObject innerToJSON(Job object) throws JSONException {
             var output = new JSONObject();
 
-            output.put("name", object.name.toString());
+            output.put("label", object.label.toString());
             output.put("type", object.type.toString());
             output.put("status", object.status.toString());
 
@@ -79,14 +79,14 @@ public class Job extends Entity implements JSONConvertible {
 
         @Override
         protected void innerLoadFromJSON(Job job, JSONObject jsonObject) throws JSONException {
-            job.name = jsonObject.getString("name");
+            job.label = jsonObject.getString("label");
             job.type = Type.valueOf(jsonObject.getString("type"));
             job.status = Status.valueOf(jsonObject.getString("status"));
         }
 
-        public Job fromArguments(Integer id, int mappingId, Integer categoryId, String name, Type type, Status status) {
+        public Job fromArguments(Integer id, int mappingId, Integer categoryId, String label, Type type, Status status) {
             var job = new Job(id, mappingId, categoryId);
-            job.name = name;
+            job.label = label;
             job.type = type;
             job.status = status;
 

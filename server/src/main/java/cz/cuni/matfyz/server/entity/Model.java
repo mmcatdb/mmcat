@@ -8,6 +8,6 @@ import java.io.Serializable;
 public record Model(
     int jobId,
     int categoryId,
-    String jobName,
+    String jobLabel,
     String commands
 ) implements Serializable {}
