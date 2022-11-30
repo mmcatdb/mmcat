@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { ModelView } from '@/types/model';
+import type { LogicalModel } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 export default defineComponent({
@@ -8,8 +8,8 @@ export default defineComponent({
         CleverRouterLink
     },
     props: {
-        model: {
-            type: Object as () => ModelView,
+        logicalModel: {
+            type: Object as () => LogicalModel,
             required: true
         }
     },
@@ -25,25 +25,25 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="model-display">
-        <CleverRouterLink :to="{ name: 'model', params: { jobId: model.jobId } }">
-            <h2>{{ model.jobName }}</h2>
+    <div class="logical-model-display">
+        <CleverRouterLink :to="{ name: 'logicalModel', params: { id: logicalModel.id } }">
+            <h2>{{ logicalModel.name }}</h2>
         </CleverRouterLink>
         <table>
             <tr>
                 <td class="label">
-                    Job id:
+                    Id:
                 </td>
                 <td class="value">
-                    {{ model.jobId }}
+                    {{ logicalModel.id }}
                 </td>
             </tr>
             <tr>
                 <td class="label">
-                    Job name:
+                    Database:
                 </td>
                 <td class="value">
-                    {{ model.jobName }}
+                    {{ logicalModel.databaseView.label }}
                 </td>
             </tr>
         </table>
@@ -51,7 +51,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.model-display {
+.logical-model-display {
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;

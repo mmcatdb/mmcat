@@ -1,11 +1,11 @@
 <template>
-    <header class="topBar">
+    <header class="top-bar">
         <slot />
     </header>
 </template>
 
 <style scoped>
-.topBar {
+.top-bar {
     position: fixed;
     top: 0;
     width: 100%;

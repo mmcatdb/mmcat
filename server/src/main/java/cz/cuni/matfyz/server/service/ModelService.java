@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ModelService {
 
-    public List<Model> findAllInCategory(HttpSession session, int schemaId) {
+    public List<Model> findAllInCategory(HttpSession session, int categoryId) {
         var store = UserStore.fromSession(session);
-        return store.getAllModels().stream().filter(model -> model.schemaId() == schemaId).toList();
+        return store.getAllModels().stream().filter(model -> model.categoryId() == categoryId).toList();
     }
 
     public Model findModel(HttpSession session, int jobId) {
@@ -27,7 +27,7 @@ public class ModelService {
     }
 
     public Model createNew(UserStore store, Job job, String jobName, String commands) {
-        var model = new Model(job.id, job.schemaId, jobName, commands);
+        var model = new Model(job.id, job.categoryId, jobName, commands);
         store.addModel(model);
 
         return model;

@@ -15,7 +15,8 @@ function defineLink(pathName: string, label: string): Link {
 
 const links = [
     defineLink('home', 'MM-evocat'),
-    defineLink('schema', 'Schema Category'),
+    defineLink('schemaCategory', 'Schema Category'),
+    defineLink('logicalModels', 'Logical Models'),
     defineLink('mappings', 'Mappings'),
     defineLink('databases', 'Databases'),
     defineLink('jobs', 'Jobs'),

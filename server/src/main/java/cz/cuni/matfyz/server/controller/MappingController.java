@@ -2,10 +2,13 @@ package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.database.DatabaseView;
+import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModel;
+import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelView;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
 import cz.cuni.matfyz.server.entity.mapping.MappingView;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.service.DatabaseService;
+import cz.cuni.matfyz.server.service.LogicalModelService;
 import cz.cuni.matfyz.server.service.MappingService;
 
 import java.util.List;
@@ -29,7 +32,10 @@ public class MappingController {
     private MappingService service;
 
     @Autowired
-    private DatabaseService databaseService;
+    private DatabaseService databaseService; // TODO remove later
+
+    @Autowired
+    private LogicalModelService logicalModelService;
 
     @GetMapping("/mappings/{id}")
     public MappingView getMapping(@PathVariable int id) {
@@ -41,9 +47,21 @@ public class MappingController {
         return wrapperToView(wrapper);
     }
 
-    @GetMapping("/schema/{schemaId}/mappings")
-    public List<MappingView> getAllMappingsInCategory(@PathVariable int schemaId) {
-        return service.findAllInCategory(schemaId).stream().map(this::wrapperToView).toList();
+    /**
+     * @deprecated
+     */
+    @Deprecated
+    @GetMapping("/schema-categories/{categoryId}/mappings")
+    public List<MappingView> getAllMappingsInCategory(@PathVariable int categoryId) {
+        return logicalModelService.findAllInCategory(categoryId).stream().flatMap(logicalModel -> {
+            return service.findAllInLogicalModel(logicalModel.id).stream();
+        })
+        .map(this::wrapperToView).toList();
+    }
+
+    @GetMapping("/logical-models/{logicalModelId}/mappings")
+    public List<MappingView> getAllMappingsInLogicalModel(@PathVariable int logicalModelId) {
+        return service.findAllInLogicalModel(logicalModelId).stream().map(this::wrapperToView).toList();
     }
 
     @PostMapping("/mappings")
@@ -51,10 +69,13 @@ public class MappingController {
         return wrapperToView(service.createNew(newMapping));
     }
 
+    // TODO this is just sad ...
     private MappingView wrapperToView(MappingWrapper wrapper) {
-        Database database = databaseService.find(wrapper.databaseId);
+        LogicalModel logicalModel = logicalModelService.find(wrapper.logicalModelId);
+        Database database = databaseService.find(logicalModel.databaseId);
         DatabaseView databaseView = new DatabaseView(database, databaseService.getDatabaseConfiguration(database));
-        return new MappingView(wrapper, databaseView);
+        LogicalModelView logicalModelView = new LogicalModelView(logicalModel, databaseView);
+        return new MappingView(wrapper, logicalModelView);
     }
 
 }

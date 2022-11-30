@@ -54,7 +54,7 @@ export class SchemaCategory {
     }
 
     static fromServer(input: SchemaCategoryFromServer): SchemaCategory {
-        const morphisms = input.morphisms.map(morphism => SchemaMorphism.fromServer(morphism));
+        const morphisms = input.morphisms.map(SchemaMorphism.fromServer);
         morphisms.forEach(morphism => {
             const dualSignature = morphism.signature.dual();
             const dualMorphism = morphisms.find(otherMorphism => otherMorphism.signature.equals(dualSignature));
@@ -65,7 +65,7 @@ export class SchemaCategory {
         return new SchemaCategory(
             input.id,
             input.jsonValue,
-            input.objects.map(object => SchemaObject.fromServer(object)),
+            input.objects.map(SchemaObject.fromServer),
             morphisms
         );
     }
@@ -151,7 +151,7 @@ export class SchemaCategory {
         if (rootObject)
             objects.push(rootObject);
 
-        objects.forEach(object => object.setDatabase(mapping.databaseView));
+        objects.forEach(object => object.setDatabase(mapping.logicalModel.databaseView));
     }
 }
 

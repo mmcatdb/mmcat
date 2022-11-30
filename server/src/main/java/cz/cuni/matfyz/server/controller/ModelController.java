@@ -23,9 +23,9 @@ public class ModelController {
     @Autowired
     private ModelService service;
 
-    @GetMapping("/schema/{schemaId}/models")
-    public List<ModelView> getAllModelsInCategory(HttpSession session, @PathVariable int schemaId) {
-        return service.findAllInCategory(session, schemaId).stream().map(ModelView::new).toList();
+    @GetMapping("/schema-categories/{categoryId}/models")
+    public List<ModelView> getAllModelsInCategory(HttpSession session, @PathVariable int categoryId) {
+        return service.findAllInCategory(session, categoryId).stream().map(ModelView::new).toList();
     }
 
     @GetMapping("/models/{jobId}")

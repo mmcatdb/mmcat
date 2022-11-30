@@ -27,9 +27,9 @@ public class JobController {
     @Autowired
     private JobService service;
 
-    @GetMapping("/schema/{schemaId}/jobs")
-    public List<Job> getAllJobsInCategory(@PathVariable int schemaId) {
-        return service.findAllInCategory(schemaId);
+    @GetMapping("/schema-categories/{categoryId}/jobs")
+    public List<Job> getAllJobsInCategory(@PathVariable int categoryId) {
+        return service.findAllInCategory(categoryId);
     }
 
     @GetMapping("/jobs/{id}")

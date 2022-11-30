@@ -29,9 +29,9 @@ export default defineComponent({
 <template>
     <div class="mapping-display">
         <!--
-        <RouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
+        <CleverRouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
             <h2>{{ mapping.name }}</h2>
-        </RouterLink>
+        </CleverRouterLink>
         -->
         <h2>{{ mapping.name }}</h2>
         <table>
@@ -53,10 +53,18 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
+                    Logical model:
+                </td>
+                <td class="value">
+                    {{ mapping.logicalModel.name }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
                     Database:
                 </td>
                 <td class="value">
-                    {{ mapping.databaseView.label }}
+                    {{ mapping.logicalModel.databaseView.label }}
                 </td>
             </tr>
         </table>

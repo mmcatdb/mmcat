@@ -22,9 +22,9 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<MappingFromServer[]>(`/schema/${getSchemaCategoryId()}/mappings`);
+        const result = await GET<MappingFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/mappings`);
         if (result.status)
-            this.mappings = result.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
+            this.mappings = result.data.map(Mapping.fromServer);
 
         this.fetched = true;
     },

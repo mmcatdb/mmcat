@@ -22,9 +22,9 @@ public class InstanceCategoryService {
         return store.getAllInstances().stream().toList();
     }
 
-    public InstanceObject findObject(HttpSession session, int schemaId, Key key) {
+    public InstanceObject findObject(HttpSession session, int categoryId, Key key) {
         var store = UserStore.fromSession(session);
-        var category = store.getCategory(schemaId);
+        var category = store.getCategory(categoryId);
 
         return category != null ? category.getObject(key) : null;
     }

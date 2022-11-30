@@ -34,7 +34,7 @@ export default defineComponent({
     async mounted() {
         const result = await GET<DatabaseViewFromServer[]>('/database-views');
         if (result.status)
-            this.databases = result.data.map(databaseFromServer => new DatabaseView(databaseFromServer));
+            this.databases = result.data.map(DatabaseView.fromServer);
     },
     methods: {
         cytoscapeCreated(graph: Graph) {

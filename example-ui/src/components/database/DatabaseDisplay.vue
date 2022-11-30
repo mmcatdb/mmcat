@@ -1,8 +1,12 @@
 <script lang="ts">
 import type { Database } from '@/types/database';
 import { defineComponent } from 'vue';
+import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 export default defineComponent({
+    components: {
+        CleverRouterLink
+    },
     props: {
         database: {
             type: Object as () => Database,
@@ -25,9 +29,9 @@ export default defineComponent({
 
 <template>
     <div class="database-display">
-        <RouterLink :to="{ name: 'database', params: { id: database.id } }">
+        <CleverRouterLink :to="{ name: 'database', params: { id: database.id } }">
             <h2>{{ database.label }}</h2>
-        </RouterLink>
+        </CleverRouterLink>
         <table>
             <tr>
                 <td class="label">

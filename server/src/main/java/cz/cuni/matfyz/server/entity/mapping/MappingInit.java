@@ -4,8 +4,7 @@ package cz.cuni.matfyz.server.entity.mapping;
  * @author jachym.bartik
  */
 public record MappingInit(
-    int databaseId,
-    int categoryId,
+    int logicalModelId,
     Integer rootObjectId,
     Integer rootMorphismId,
     String mappingJsonValue,

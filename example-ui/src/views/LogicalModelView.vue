@@ -1,22 +1,21 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { ModelView, type ModelViewFromServer } from '@/types/model';
+import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
 import { GET } from '@/utils/backendAPI';
 
-import ModelViewDisplay from '@/components/ModelViewDisplay.vue';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 
 export default defineComponent({
     components: {
-        ModelViewDisplay,
         ResourceNotFound,
-        ResourceLoading
+        ResourceLoading,
+        LogicalModelDisplay
     },
     data() {
         return {
-            models: null as ModelView[] | null,
+            logicalModel: null as LogicalModel | null,
             fetched: false
         };
     },
@@ -25,9 +24,9 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<ModelViewFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/models`);
+            const result = await GET<LogicalModelFromServer>(`/logical-models/${this.$route.params.id}`);
             if (result.status)
-                this.models = result.data.map(ModelView.fromServer);
+                this.logicalModel = LogicalModel.fromServer(result.data);
 
             this.fetched = true;
         }
@@ -37,16 +36,12 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>Models</h1>
+        <h1>Logical model</h1>
         <div
-            v-if="models"
-            class="models"
+            v-if="logicalModel"
+            class="logical-model"
         >
-            <ModelViewDisplay
-                v-for="(model, index) in models"
-                :key="index"
-                :model="model"
-            />
+            <LogicalModelDisplay :logical-model="logicalModel" />
         </div>
         <ResourceNotFound v-else-if="fetched" />
         <ResourceLoading v-else />
@@ -54,7 +49,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.models {
+.logical-model {
     display: flex;
 }
 </style>

@@ -32,20 +32,20 @@ public class UserStore implements Serializable {
         return store;
     }
 
-    public void addInstance(int schemaId, InstanceCategory instance) {
-        instaces.put(schemaId, instance);
+    public void addInstance(int categoryId, InstanceCategory instance) {
+        instaces.put(categoryId, instance);
     }
 
-    public InstanceCategory getCategory(int schemaId) {
-        return instaces.get(schemaId);
+    public InstanceCategory getCategory(int categoryId) {
+        return instaces.get(categoryId);
     }
 
     public Set<Entry<Integer, InstanceCategory>> getAllInstances() {
         return instaces.entrySet();
     }
 
-    public void setInstance(int schemaId, InstanceCategory instance) {
-        this.instaces.put(schemaId, instance);
+    public void setInstance(int categoryId, InstanceCategory instance) {
+        this.instaces.put(categoryId, instance);
     }
 
     public void addModel(Model model) {

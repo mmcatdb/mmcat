@@ -1,5 +1,5 @@
 import { RootProperty, type RootPropertyJSON } from "./accessPath/basic";
-import { DatabaseView, type DatabaseViewFromServer } from "./database";
+import { LogicalModel, type LogicalModelFromServer } from "./logicalModel";
 
 export type MappingJSON = {
     kindName: string,
@@ -10,32 +10,31 @@ export type MappingJSON = {
 export class Mapping {
     id: number;
     name: string;
-    databaseView: DatabaseView;
+    logicalModel: LogicalModel;
     rootObjectId: number;
     accessPath: RootProperty;
 
-    private constructor(id: number, name: string, databaseView: DatabaseView, rootObjectId: number, accessPath: RootProperty) {
+    private constructor(id: number, name: string, logicalModel: LogicalModel, rootObjectId: number, accessPath: RootProperty) {
         this.id = id;
         this.name = name;
-        this.databaseView = databaseView;
+        this.logicalModel = logicalModel;
         this.rootObjectId = rootObjectId;
         this.accessPath = accessPath;
     }
 
     static fromServer(input: MappingFromServer): Mapping {
-        const databaseView = new DatabaseView(input.databaseView);
+        const logicalModel = LogicalModel.fromServer(input.logicalModelView);
         const json = JSON.parse(input.jsonValue) as { name: string };
         const mappingJson = JSON.parse(input.mappingJsonValue) as MappingJSON;
         const accessPath = RootProperty.fromJSON(mappingJson.accessPath);
 
-        return new Mapping(input.id, json.name, databaseView, input.rootObjectId, accessPath);
+        return new Mapping(input.id, json.name, logicalModel, input.rootObjectId, accessPath);
     }
 }
 
 export type MappingFromServer = {
     id: number;
-    databaseView: DatabaseViewFromServer;
-    categoryId: number;
+    logicalModelView: LogicalModelFromServer;
     rootObjectId: number;
     jsonValue: string;
     mappingJsonValue: string;

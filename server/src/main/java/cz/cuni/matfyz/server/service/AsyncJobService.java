@@ -52,6 +52,9 @@ public class AsyncJobService {
     private MappingService mappingService;
 
     @Autowired
+    private LogicalModelService logicalModelService;
+
+    @Autowired
     private DatabaseService databaseService;
 
     @Autowired
@@ -116,12 +119,12 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void modelToCategoryProcess(Job job, UserStore store) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var instance = store.getCategory(job.schemaId);
+        var instance = store.getCategory(job.categoryId);
         var result = modelToCategoryAlgorithm(job, instance).join();
 
         if (result.status) {
             if (instance == null)
-                store.setInstance(job.schemaId, result.data);
+                store.setInstance(job.categoryId, result.data);
             setJobStatus(job, Job.Status.Finished);
         }
         else {
@@ -133,8 +136,10 @@ public class AsyncJobService {
     private CompletableFuture<DataResult<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws WrapperNotFoundException, WrapperCreationErrorException {
         var mappingWrapper = mappingService.find(job.mappingId);
         var mapping = createMapping(mappingWrapper);
+        
+        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+        Database database = databaseService.find(logicalModel.databaseId);
 
-        Database database = databaseService.find(mappingWrapper.databaseId);
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
 
         var process = new DatabaseToInstance();
@@ -148,7 +153,7 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void categoryToModelProcess(Job job, UserStore store) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var instance = store.getCategory(job.schemaId);
+        var instance = store.getCategory(job.categoryId);
 
         /*
         if (instance == null) {
@@ -173,7 +178,9 @@ public class AsyncJobService {
         var mappingWrapper = mappingService.find(job.mappingId);
         var mapping = createMapping(mappingWrapper);
 
-        Database database = databaseService.find(mappingWrapper.databaseId);
+        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+        Database database = databaseService.find(logicalModel.databaseId);
+
         AbstractDDLWrapper ddlWrapper = wrapperService.getDDLWrapper(database);
         AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
 
@@ -186,7 +193,8 @@ public class AsyncJobService {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper) {
-        var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
+        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+        var categoryWrapper = categoryService.find(logicalModel.categoryId);
 
         return new SchemaBuilder()
             .setMappingWrapper(mappingWrapper)

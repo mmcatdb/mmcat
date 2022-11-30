@@ -1,11 +1,11 @@
 <template>
-    <nav class="leftBar">
+    <nav class="left-bar">
         <slot />
     </nav>
 </template>
 
 <style>
-.leftBar {
+.left-bar {
     position: fixed;
     top: var(--top-bar-height);
     bottom: 0px;
@@ -17,13 +17,13 @@
     font-size: 20px;
 }
 
-.leftBar a {
+.left-bar a {
   display: inline-block;
   padding: 0 1rem;
   border-top: 1px solid var(--color-border);
 }
 
-.leftBar a:first-of-type {
+.left-bar a:first-of-type {
   border: 0;
 }
 </style>

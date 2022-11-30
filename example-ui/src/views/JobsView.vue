@@ -41,9 +41,9 @@ export default defineComponent({
             this.jobs = this.jobs?.filter(job => job.id !== id) ?? [];
         },
         async fetchNew() {
-            const result = await GET<JobFromServer[]>(`/schema/${getSchemaCategoryId()}/jobs`);
+            const result = await GET<JobFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/jobs`);
             if (result.status)
-                this.jobs = result.data.map(jobFromServer => Job.fromServer(jobFromServer));
+                this.jobs = result.data.map(Job.fromServer);
 
             if (this.continueFetching)
                 setTimeout(this.fetchNew, 1000);

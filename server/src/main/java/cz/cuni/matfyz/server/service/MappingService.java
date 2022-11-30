@@ -19,8 +19,8 @@ public class MappingService {
     @Autowired
     private MappingRepository repository;
 
-    public List<MappingWrapper> findAllInCategory(int categoryId) {
-        return repository.findAllInCategory(categoryId);
+    public List<MappingWrapper> findAllInLogicalModel(int logicalModelId) {
+        return repository.findAllInLogicalModel(logicalModelId);
     }
 
     public MappingWrapper find(int id) {
@@ -32,8 +32,7 @@ public class MappingService {
 
         return generatedId == null ? null : new MappingWrapper(
             generatedId,
-            wrapper.databaseId(),
-            wrapper.categoryId(),
+            wrapper.logicalModelId(),
             wrapper.rootObjectId(),
             wrapper.rootMorphismId(),
             wrapper.mappingJsonValue(),

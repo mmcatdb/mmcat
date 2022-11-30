@@ -30,11 +30,11 @@ public class InstanceCategoryController {
         return instances.stream().map(entry -> entry.getKey() + ":\n" + entry.getValue().toString()).toList();
     }
 
-    @GetMapping("/instances/{schemaId}/object/{objectKey}")
-    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Integer schemaId, @PathVariable Integer objectKey) {
+    @GetMapping("/instances/{categoryId}/object/{objectKey}")
+    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Integer categoryId, @PathVariable Integer objectKey) {
         var key = new Key(objectKey);
 
-        var object = service.findObject(session, schemaId, key);
+        var object = service.findObject(session, categoryId, key);
 
         if (object == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

@@ -37,12 +37,12 @@ public class SchemaCategoryController {
     @Autowired
     private DatabaseService databaseService;
 
-    @GetMapping("/schemaCategories")
+    @GetMapping("/schema-categories")
     public List<SchemaCategoryInfo> getAllCategoryInfos() {
         return service.findAllInfos();
     }
 
-    @PostMapping("/schemaCategories")
+    @PostMapping("/schema-categories")
     public SchemaCategoryInfo createNewSchema(@RequestBody SchemaCategoryInit init) {
         var newInfo = service.createNewInfo(init);
         if (newInfo != null)
@@ -51,7 +51,7 @@ public class SchemaCategoryController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/schemaCategories/{id}")
+    @GetMapping("/schema-categories/{id}")
     public SchemaCategoryWrapper getCategoryWrapper(@PathVariable int id) {
         SchemaCategoryWrapper schema = service.find(id);
 
@@ -61,7 +61,7 @@ public class SchemaCategoryController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping("/schemaCategories/{id}")
+    @PutMapping("/schema-categories/{id}")
     public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable int id, @RequestBody SchemaCategoryUpdate update) {
         SchemaCategoryWrapper result = service.update(id, update);
         if (result != null)
@@ -70,7 +70,7 @@ public class SchemaCategoryController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping("/schemaCategories/positions/{id}")
+    @PutMapping("/schema-categories/positions/{id}")
     public boolean updateCategoryPositions(@PathVariable int id, @RequestBody PositionUpdate[] positionUpdates) {
         boolean result = true;
         for (PositionUpdate update : positionUpdates)
@@ -87,7 +87,7 @@ public class SchemaCategoryController {
         Position position
     ) {}
 
-    @GetMapping("/schemaCategories/{id}/mappingOptions")
+    @GetMapping("/schema-categories/{id}/mappingOptions")
     public MappingOptionsView getMappingOptions(@PathVariable int id) {
         return new MappingOptionsView(id, databaseService.findAll());
     }

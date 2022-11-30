@@ -2,8 +2,12 @@
 import { type Job, Status } from '@/types/job';
 import { DELETE, POST } from '@/utils/backendAPI';
 import { defineComponent } from 'vue';
+import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 export default defineComponent({
+    components: {
+        CleverRouterLink
+    },
     props: {
         job: {
             type: Object as () => Job,
@@ -65,9 +69,9 @@ export default defineComponent({
 
 <template>
     <div class="job-display">
-        <RouterLink :to="{ name: 'job', params: { id: job.id } }">
+        <CleverRouterLink :to="{ name: 'job', params: { id: job.id } }">
             <h2>{{ job.name }}</h2>
-        </RouterLink>
+        </CleverRouterLink>
         <table>
             <tr>
                 <td class="label">

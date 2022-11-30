@@ -1,22 +1,22 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Mapping, type MappingFromServer } from '@/types/mapping';
+import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
 import { GET } from '@/utils/backendAPI';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
+import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
         ResourceNotFound,
         ResourceLoading,
-        MappingDisplay
+        LogicalModelDisplay
     },
     data() {
         return {
-            mappings: null as Mapping[] | null,
+            logicalModels: null as LogicalModel[] | null,
             fetched: false
         };
     },
@@ -25,15 +25,14 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            //const result = await GET<MappingFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/mappings`);
-            const result = await GET<MappingFromServer[]>(`/logical-models/${1}/mappings`);
+            const result = await GET<LogicalModelFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/logical-models`);
             if (result.status)
-                this.mappings = result.data.map(Mapping.fromServer);
+                this.logicalModels = result.data.map(LogicalModel.fromServer);
 
             this.fetched = true;
         },
         createNew() {
-            this.$router.push({ name: 'accessPathEditor' });
+            this.$router.push({ name: 'logicalModelNew' });
         }
     }
 });
@@ -41,8 +40,8 @@ export default defineComponent({
 
 <template>
     <div>
-        <h1>Mappings</h1>
-        <template v-if="mappings">
+        <h1>Logical models</h1>
+        <template v-if="logicalModels">
             <div class="button-row">
                 <button
                     @click="createNew"
@@ -50,12 +49,12 @@ export default defineComponent({
                     Create new
                 </button>
             </div>
-            <div class="mappings">
+            <div class="logical-models">
                 <div
-                    v-for="(mapping, index) in mappings"
+                    v-for="(logicalModel, index) in logicalModels"
                     :key="index"
                 >
-                    <MappingDisplay :mapping="mapping" />
+                    <LogicalModelDisplay :logical-model="logicalModel" />
                 </div>
             </div>
         </template>
@@ -65,7 +64,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.mappings {
+.logical-models {
     display: flex;
     flex-wrap: wrap;
 }

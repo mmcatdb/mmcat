@@ -17,21 +17,20 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MappingRepository {
 
-    public List<MappingWrapper> findAllInCategory(int categoryId) {
+    public List<MappingWrapper> findAllInLogicalModel(int logicalModelId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM mapping WHERE schema_category_id = ? ORDER BY id;");
-            statement.setInt(1, categoryId);
+            var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
+            statement.setInt(1, logicalModelId);
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
-                int databaseId = resultSet.getInt("database_id");
                 Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
                 Integer rootMorphismId = Utils.getIntOrNull(resultSet.getInt("root_morphism_id"));
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.add(new MappingWrapper(foundId, databaseId, categoryId, rootObjectId, rootMorphismId, mappingJsonValue, jsonValue));
+                output.add(new MappingWrapper(foundId, logicalModelId, rootObjectId, rootMorphismId, mappingJsonValue, jsonValue));
             }
         });
     }
@@ -44,14 +43,13 @@ public class MappingRepository {
 
             if (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
-                int categoryId = resultSet.getInt("schema_category_id");
-                int databaseId = resultSet.getInt("database_id");
+                int logicalModelId = resultSet.getInt("logical_model_id");
                 Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
                 Integer rootMorphismId = Utils.getIntOrNull(resultSet.getInt("root_morphism_id"));
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.set(new MappingWrapper(foundId, databaseId, categoryId, rootObjectId, rootMorphismId, mappingJsonValue, jsonValue));
+                output.set(new MappingWrapper(foundId, logicalModelId, rootObjectId, rootMorphismId, mappingJsonValue, jsonValue));
             }
         });
     }
@@ -59,17 +57,16 @@ public class MappingRepository {
     public Integer add(MappingInit mapping) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
-                INSERT INTO mapping (schema_category_id, database_id, root_object_id, root_morphism_id, mapping_json_value, json_value)
+                INSERT INTO mapping (logical_model_id, root_object_id, root_morphism_id, mapping_json_value, json_value)
                 VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            statement.setInt(1, mapping.categoryId());
-            statement.setInt(2, mapping.databaseId());
-            statement.setObject(3, mapping.rootObjectId(), Types.INTEGER); // The inserted value can be null.
-            statement.setObject(4, mapping.rootMorphismId(), Types.INTEGER); // Same here.
-            statement.setString(5, mapping.mappingJsonValue());
-            statement.setString(6, mapping.jsonValue());
+            statement.setInt(1, mapping.logicalModelId());
+            statement.setObject(2, mapping.rootObjectId(), Types.INTEGER); // The inserted value can be null.
+            statement.setObject(3, mapping.rootMorphismId(), Types.INTEGER); // Same here.
+            statement.setString(4, mapping.mappingJsonValue());
+            statement.setString(5, mapping.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

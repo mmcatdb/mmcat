@@ -11,7 +11,7 @@ export class InstanceObject {
         const output = new InstanceObject;
 
         output.key = Key.fromServer(input.key);
-        output.columns = input.columns.map(signature => Signature.fromServer(signature));
+        output.columns = input.columns.map(Signature.fromServer);
         output.rows = input.rows;
 
         return output;

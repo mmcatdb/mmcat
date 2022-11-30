@@ -38,8 +38,14 @@ export default defineComponent({
 
 <template>
     <h1>Job</h1>
-    <div class="job" v-if="job">
-        <JobDisplay @delete-job="deleteJob" :job="job" />
+    <div
+        v-if="job"
+        class="job"
+    >
+        <JobDisplay
+            :job="job"
+            @delete-job="deleteJob"
+        />
     </div>
     <ResourceNotFound v-else-if="jobFetched" />
     <ResourceLoading v-else />

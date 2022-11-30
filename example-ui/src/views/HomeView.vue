@@ -19,11 +19,11 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<SchemaCategoryInfoFromServer[]>('/schemaCategories');
+        const result = await GET<SchemaCategoryInfoFromServer[]>('/schema-categories');
         if (!result.status)
             return;
 
-        this.avaliableSchemas = result.data.map(infoFromServer => SchemaCategoryInfo.fromServer(infoFromServer));
+        this.avaliableSchemas = result.data.map(SchemaCategoryInfo.fromServer);
         const currentId = getSchemaCategoryId();
         this.currentSchema = this.avaliableSchemas.find(schema => schema.id === currentId);
     },
@@ -37,7 +37,7 @@ export default defineComponent({
         },
         async confirmNewSchema() {
             const jsonValue = JSON.stringify({ name: this.newSchemaName });
-            const result = await POST<SchemaCategoryInfoFromServer>('/schemaCategories', { jsonValue });
+            const result = await POST<SchemaCategoryInfoFromServer>('/schema-categories', { jsonValue });
             if (!result.status)
                 return;
 

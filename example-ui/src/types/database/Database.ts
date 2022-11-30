@@ -7,11 +7,20 @@ export class DatabaseView {
     public readonly label: string;
     public configuration: DatabaseConfiguration;
 
-    public constructor(fromServer: DatabaseViewFromServer) {
-        this.id = fromServer.id;
-        this.type = fromServer.type;
-        this.label = fromServer.label;
-        this.configuration = new DatabaseConfiguration(fromServer.configuration);
+    private constructor(id: number, type: Type, label: string, configuration: DatabaseConfiguration) {
+        this.id = id;
+        this.type = type;
+        this.label = label;
+        this.configuration = configuration;
+    }
+
+    static fromServer(input: DatabaseViewFromServer): DatabaseView {
+        return new DatabaseView(
+            input.id,
+            input.type,
+            input.label,
+            new DatabaseConfiguration(input.configuration)
+        );
     }
 }
 

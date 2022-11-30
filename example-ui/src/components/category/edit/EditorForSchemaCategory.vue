@@ -112,7 +112,7 @@ export default defineComponent({
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
 
-            const result = await PUT<SchemaCategoryFromServer>(`/schemaCategories/${this.graph.schemaCategory.id}`, updateObject);
+            const result = await PUT<SchemaCategoryFromServer>(`/schema-categories/${this.graph.schemaCategory.id}`, updateObject);
             if (result.status) {
                 const schemaCategory = SchemaCategory.fromServer(result.data);
                 this.$emit('save', schemaCategory);

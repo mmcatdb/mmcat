@@ -23,7 +23,7 @@ export default defineComponent({
         <br />
         <textarea
             :value="modelValue"
-            class="accessPathInput"
+            class="access-path-input"
             spellcheck="false"
             @input="(event) => $emit('update:modelValue', (event.target as HTMLInputElement).value)"
         />
@@ -31,7 +31,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.accessPathInput {
+.access-path-input {
     color: white;
     background-color: black;
     width: 600px;

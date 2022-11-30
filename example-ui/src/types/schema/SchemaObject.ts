@@ -37,7 +37,7 @@ export class SchemaObject {
         object.id = input.id;
         object.label = jsonObject.label;
         object.key = Key.fromServer(jsonObject.key);
-        object.schemaIds = jsonObject.ids.map((schemaId: SchemaIdJSON) => SchemaId.fromJSON(schemaId));
+        object.schemaIds = jsonObject.ids.map(SchemaId.fromJSON);
         object.superId = SchemaId.fromJSON(jsonObject.superId);
         object._isNew = false;
         object.position = new ComparablePosition(input.position);

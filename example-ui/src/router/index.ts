@@ -20,22 +20,44 @@ const router = createRouter({
             component: () => import('@/views/JobView.vue')
         },
         {
-            path: '/mappings/new',
+            path: '/logical-models',
+            name: 'logicalModels',
+            component: () => import('@/views/LogicalModelsView.vue')
+        },
+        {
+            path: '/logical-models/:id',
+            name: 'logicalModel',
+            component: () => import('@/views/LogicalModelView.vue')
+        },
+        {
+            path: '/logical-models/new',
+            name: 'logicalModelNew',
+            component: () => import('@/views/LogicalModelNew.vue')
+        },
+        /*
+        {
+            path: '/logical-models/new',
             name: 'accessPathEditor',
             component: () => import('@/views/AccessPathEditorView.vue')
         },
+        */
         {
             path: '/mappings',
             name: 'mappings',
             component: () => import('@/views/MappingsView.vue')
         },
         {
-            path: '/schema',
-            name: 'schema',
+            path: '/mappings/new',
+            name: 'accessPathEditor',
+            component: () => import('@/views/AccessPathEditorView.vue')
+        },
+        {
+            path: '/schema-category',
+            name: 'schemaCategory',
             component: () => import('@/views/SchemaCategoryView.vue')
         },
         {
-            path: '/instanceCategory',
+            path: '/instance-category',
             name: 'instanceCategory',
             component: () => import('@/views/InstanceCategoryView.vue')
         },

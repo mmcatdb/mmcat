@@ -7,7 +7,7 @@ import java.io.Serializable;
  */
 public record Model(
     int jobId,
-    int schemaId,
+    int categoryId,
     String jobName,
     String commands
 ) implements Serializable {}

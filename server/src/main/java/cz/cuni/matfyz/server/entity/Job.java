@@ -13,7 +13,7 @@ import org.json.JSONObject;
 public class Job extends Entity implements JSONConvertible {
 
     public final int mappingId;
-    public final Integer schemaId;
+    public final Integer categoryId;
     public String name;
     public Type type;
     public Status status;
@@ -30,10 +30,10 @@ public class Job extends Entity implements JSONConvertible {
     }
     */
 
-    private Job(Integer id, int mappingId, Integer schemaId) {
+    private Job(Integer id, int mappingId, Integer categoryId) {
         super(id);
         this.mappingId = mappingId;
-        this.schemaId = schemaId;
+        this.categoryId = categoryId;
     }
 
     public enum Status {
@@ -71,8 +71,8 @@ public class Job extends Entity implements JSONConvertible {
 
     public static class Builder extends FromJSONLoaderBase<Job> {
 
-        public Job fromJSON(int id, int mappingId, int schemaId, String jsonValue) {
-            var job = new Job(id, mappingId, schemaId);
+        public Job fromJSON(int id, int mappingId, int categoryId, String jsonValue) {
+            var job = new Job(id, mappingId, categoryId);
             loadFromJSON(job, jsonValue);
             return job;
         }
@@ -84,8 +84,8 @@ public class Job extends Entity implements JSONConvertible {
             job.status = Status.valueOf(jsonObject.getString("status"));
         }
 
-        public Job fromArguments(Integer id, int mappingId, Integer schemaId, String name, Type type, Status status) {
-            var job = new Job(id, mappingId, schemaId);
+        public Job fromArguments(Integer id, int mappingId, Integer categoryId, String name, Type type, Status status) {
+            var job = new Job(id, mappingId, categoryId);
             job.name = name;
             job.type = type;
             job.status = status;

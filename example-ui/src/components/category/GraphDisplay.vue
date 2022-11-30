@@ -26,14 +26,14 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<SchemaCategoryFromServer>(`/schemaCategories/${getSchemaCategoryId()}`);
-        const mappingsResult = await GET<MappingFromServer[]>(`/schema/${getSchemaCategoryId()}/mappings`);
+        const result = await GET<SchemaCategoryFromServer>(`/schema-categories/${getSchemaCategoryId()}`);
+        const mappingsResult = await GET<MappingFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/mappings`);
         if (!result.status || !mappingsResult.status)
             return;
 
         console.log(result.data);
         const schemaCategory = SchemaCategory.fromServer(result.data);
-        this.mappings = mappingsResult.data.map(mappingFromServer => Mapping.fromServer(mappingFromServer));
+        this.mappings = mappingsResult.data.map(Mapping.fromServer);
 
         this.graph = this.createGraph(schemaCategory, this.mappings);
 
@@ -95,7 +95,7 @@ export default defineComponent({
             const updatedPositions = this.graph.schemaCategory.objects
                 .map(object => object.toPositionUpdateToServer())
                 .filter(update => update != null);
-            const result = await PUT<PositionUpdateToServer[]>(`/schemaCategories/positions/${this.graph.schemaCategory.id}`, updatedPositions);
+            const result = await PUT<PositionUpdateToServer[]>(`/schema-categories/positions/${this.graph.schemaCategory.id}`, updatedPositions);
             console.log(result);
 
             this.saveButtonDisabled = false;

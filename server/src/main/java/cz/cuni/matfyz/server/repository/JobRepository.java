@@ -23,7 +23,8 @@ public class JobRepository {
                     job.json_value as _json_value
                 FROM job
                 JOIN mapping ON mapping.id = job.mapping_id
-                WHERE mapping.schema_category_id = ?
+                JOIN logical_model on logical_model.id = mapping.logical_model_id
+                WHERE logical_model.schema_category_id = ?
                 ORDER BY job.id;
                 """);
             statement.setInt(1, categoryId);
@@ -45,9 +46,10 @@ public class JobRepository {
                     job.id as _id,
                     mapping.id as _mapping_id,
                     job.json_value as _json_value,
-                    mapping.schema_category_id as _schema_category_id
+                    logical_model.schema_category_id as _schema_category_id
                 FROM job
                 JOIN mapping ON mapping.id = job.mapping_id
+                JOIN logical_model on logical_model.id = mapping.logical_model_id
                 WHERE job.id = ?
                 ORDER BY job.id;
                 """);
@@ -56,9 +58,9 @@ public class JobRepository {
 
             if (resultSet.next()) {
                 int mappingId = resultSet.getInt("_mapping_id");
-                int schemaId = resultSet.getInt("_schema_category_id");
+                int categoryId = resultSet.getInt("_schema_category_id");
                 String jsonValue = resultSet.getString("_json_value");
-                output.set(new Job.Builder().fromJSON(id, mappingId, schemaId, jsonValue));
+                output.set(new Job.Builder().fromJSON(id, mappingId, categoryId, jsonValue));
             }
         });
     }

@@ -3,20 +3,20 @@ import { RouterView } from 'vue-router';
 </script>
 
 <template>
-    <main class="outerContent">
-        <div class="innerContent">
+    <main class="outer-content">
+        <div class="inner-content">
             <RouterView />
         </div>
     </main>
 </template>
 
 <style scoped>
-.outerContent {
+.outer-content {
     padding-top: var(--top-bar-height);
     padding-left: var(--left-panel-width);
 }
 
-.innerContent {
+.inner-content {
     padding: 10px 20px;
 }
 </style>
