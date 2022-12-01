@@ -1,8 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate } from '@/types/database';
+import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, type DatabaseInit, type DatabaseUpdate, createInitFromUpdate } from '@/types/database';
 import { DELETE, POST, PUT } from '@/utils/backendAPI';
-
+import { ResultError } from '@/types/result';
 
 export default defineComponent({
     props: {
@@ -27,37 +27,33 @@ export default defineComponent({
             return this.database === null;
         },
         isValid(): boolean {
-            return !this.isNew || (
-                this.innerValue.type != null &&
-                !!this.innerValue.label &&
-                !!this.innerValue.settings.host &&
-                !!this.innerValue.settings.port &&
-                !!this.innerValue.settings.database &&
-                !!this.innerValue.settings.username &&
-                //!!this.innerValue.settings.password &&
-                (
-                    !!this.innerValue.settings.authenticationDatabase ||
-                    this.innerValue.type !== Type.mongodb
-                )
-            );
+            return this.isNew ? true : !!createInitFromUpdate(this.innerValue);
         }
     },
     methods: {
         async save() {
             this.fetching = true;
-            const result = await (this.isNew ? this.createNew() : this.updateOld());
-            if (result.status)
-                this.$emit('save', result.data);
+
+            await (this.isNew ? this.createNew() : this.updateOld());
 
             this.fetching = false;
         },
         async createNew() {
-            return await POST<Database>('/databases', this.innerValue);
+            const init = createInitFromUpdate(this.innerValue);
+            if (!init)
+                return;
+
+            const result = await POST<Database, DatabaseInit>('/databases', init);
+            if (result.status)
+                this.$emit('save', result.data);
         },
         async updateOld() {
             if (this.innerValue.settings.password === '')
                 this.innerValue.settings.password = undefined;
-            return await PUT<Database>(`/databases/${this.database?.id}`, this.innerValue);
+
+            const result = await PUT<Database>(`/databases/${this.database?.id}`, this.innerValue);
+            if (result.status)
+                this.$emit('save', result.data);
         },
         cancel() {
             this.$emit('cancel');

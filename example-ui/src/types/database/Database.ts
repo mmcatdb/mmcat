@@ -49,6 +49,8 @@ export type Database = {
 
 export type DatabaseUpdate = DeepPartial<Omit<Database, 'id'>> & { settings: Partial<Settings> };
 
+export type DatabaseInit = Omit<Database, 'id'>;
+
 export enum Type {
     mongodb = 'mongodb',
     postgresql = 'postgresql'
@@ -71,4 +73,33 @@ export function copyDatabaseUpdate(database: DatabaseUpdate | Database): Databas
 
 export function getNewDatabaseUpdate(): DatabaseUpdate {
     return { settings: {} };
+}
+
+export function createInitFromUpdate(update: DatabaseUpdate): DatabaseInit | null {
+    if (
+        !update.type ||
+        !update.label ||
+        !update.settings.host ||
+        !update.settings.port ||
+        !update.settings.database ||
+        (
+            update.type === Type.mongodb && !update.settings.authenticationDatabase
+        ) ||
+        !update.settings.username ||
+        !update.settings.password
+    )
+        return null;
+
+    return {
+        type: update.type,
+        label: update.label,
+        settings: {
+            host: update.settings.host,
+            port: update.settings.port,
+            database: update.settings.database,
+            authenticationDatabase: update.settings.authenticationDatabase ?? '',
+            username: update.settings.username,
+            password: update.settings.password
+        }
+    };
 }

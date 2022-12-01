@@ -25,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class LogicalModelController {
 
+    // TODO - display all mappings under logical model
     // TODO - jobs should depend on the logical model instead of mapping
     // TODO - LogicalModel vs LogicalModelView - now we have to load the whole view for each mapping ...
         // TODO - also some unification for the naming - i.e., View vs Full

@@ -48,7 +48,7 @@ export default defineComponent({
     emits: [ 'finish' ],
     data() {
         return {
-            name: '',
+            label: '',
             state: { type: State.Default } as StateValue,
             State,
         };
@@ -70,7 +70,7 @@ export default defineComponent({
             this.state = { type: State.Default };
         },
         finishMapping() {
-            this.$emit('finish', this.name);
+            this.$emit('finish', this.label);
         }
     }
 });
@@ -100,10 +100,10 @@ export default defineComponent({
                         </tr>
                         <tr>
                             <td class="label">
-                                Name:
+                                Label:
                             </td>
                             <td class="value">
-                                <input v-model="name" />
+                                <input v-model="label" />
                             </td>
                         </tr>
                         <tr>
@@ -117,7 +117,7 @@ export default defineComponent({
                     </table>
                     <div class="button-row">
                         <button
-                            :disabled="!name"
+                            :disabled="!label"
                             @click="finishMapping"
                         >
                             Finish mapping

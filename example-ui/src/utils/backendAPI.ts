@@ -80,9 +80,10 @@ export function GET<T>(action: string, params = {}): Promise<Result<T>> {
     }));
 }
 
-export function POST<T>(action: string, data = {}, params = {}): Promise<Result<T>> {
+export function POST<T, V extends Record<string, unknown> | void = void>(action: string, data?: V, params = {}): Promise<Result<T>> {
     let url = `${BACKEND_API_URL}`;
     url += action;
+
     return promiseToResponse<T>(instance.post(url, data, { params }));
 }
 

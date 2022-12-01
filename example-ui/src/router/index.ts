@@ -31,8 +31,8 @@ const router = createRouter({
         },
         {
             path: '/logical-models/new',
-            name: 'logicalModelNew',
-            component: () => import('@/views/LogicalModelNew.vue')
+            name: 'newLogicalModel',
+            component: () => import('@/views/NewLogicalModel.vue')
         },
         /*
         {

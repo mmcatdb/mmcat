@@ -1,11 +1,16 @@
+export enum JobType {
+    ModelToCategory = 'ModelToCategory',
+    CategoryToModel = 'CategoryToModel'
+}
+
 export const JOB_TYPES = [
     {
         label: 'Model to Category',
-        value: 'ModelToCategory'
+        value: JobType.ModelToCategory
     },
     {
         label: 'Category to Model',
-        value: 'CategoryToModel'
+        value: JobType.CategoryToModel
     }
 ];
 
@@ -35,7 +40,7 @@ export type JobFromServer = {
     mappingId: number;
     categoryId: number;
     label: string;
-    type: string;
+    type: JobType;
     status: Status;
 }
 
@@ -45,4 +50,10 @@ export enum Status {
     Running = 'Running',
     Finished = 'Finished',
     Canceled = 'Canceled'
+}
+
+export type JobInit = {
+    mappingId: number,
+    label: string,
+    type: JobType
 }

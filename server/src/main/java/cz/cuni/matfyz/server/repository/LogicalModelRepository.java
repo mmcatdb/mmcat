@@ -58,7 +58,7 @@ public class LogicalModelRepository {
             );
             statement.setInt(1, logicalModel.categoryId());
             statement.setInt(2, logicalModel.databaseId());
-            statement.setString(6, logicalModel.jsonValue());
+            statement.setString(3, logicalModel.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

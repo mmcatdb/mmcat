@@ -37,7 +37,7 @@ export default defineComponent({
         },
         async confirmNewSchema() {
             const jsonValue = JSON.stringify({ label: this.newSchemaLabel });
-            const result = await POST<SchemaCategoryInfoFromServer>('/schema-categories', { jsonValue });
+            const result = await POST<SchemaCategoryInfoFromServer, { jsonValue: string }>('/schema-categories', { jsonValue });
             if (!result.status)
                 return;
 

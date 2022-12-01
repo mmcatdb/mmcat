@@ -27,3 +27,9 @@ export type LogicalModelFromServer = {
     categoryId: number;
     jsonValue: string;
 }
+
+export type LogicalModelInit = {
+    databaseId: number,
+    categoryId: number,
+    jsonValue: string
+}

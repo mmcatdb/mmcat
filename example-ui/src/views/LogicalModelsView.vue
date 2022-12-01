@@ -32,7 +32,7 @@ export default defineComponent({
             this.fetched = true;
         },
         createNew() {
-            this.$router.push({ name: 'logicalModelNew' });
+            this.$router.push({ name: 'newLogicalModel' });
         }
     }
 });

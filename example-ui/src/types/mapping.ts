@@ -39,3 +39,10 @@ export type MappingFromServer = {
     jsonValue: string;
     mappingJsonValue: string;
 }
+
+export type MappingInit = {
+    logicalModelId: number,
+    rootObjectId: number,
+    mappingJsonValue: string,
+    jsonValue: string
+}

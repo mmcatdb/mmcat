@@ -58,7 +58,7 @@ public class MappingRepository {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 INSERT INTO mapping (logical_model_id, root_object_id, root_morphism_id, mapping_json_value, json_value)
-                VALUES (?, ?, ?, ?, ?::jsonb, ?::jsonb);
+                VALUES (?, ?, ?, ?::jsonb, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );

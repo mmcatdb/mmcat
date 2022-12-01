@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { type Job, JOB_TYPES } from '@/types/job';
+import { type Job, JOB_TYPES, type JobInit, JobType } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
 import { Mapping, type MappingFromServer } from '@/types/mapping';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
@@ -16,9 +16,9 @@ export default defineComponent({
             fetched: false,
             mappingId: null as number | null,
             jobName: '',
-            jobType: '',
+            jobType: undefined as JobType | undefined,
             availableJobTypes: JOB_TYPES,
-            createJobDisabled: false
+            fetching: false
         };
     },
     async mounted() {
@@ -30,13 +30,20 @@ export default defineComponent({
     },
     methods: {
         async createJob() {
-            this.createJobDisabled = true;
+            if (!this.mappingId || !this.jobType)
+                return;
 
-            const result = await POST<Job>('/jobs', { mappingId: this.mappingId, name: this.jobName, type: this.jobType });
+            this.fetching = true;
+
+            const result = await POST<Job, JobInit>('/jobs', {
+                mappingId: this.mappingId,
+                label: this.jobName,
+                type: this.jobType
+            });
             if (result.status)
                 this.$emit('newJob', result.data);
 
-            this.createJobDisabled = false;
+            this.fetching = false;
         }
     }
 });
@@ -92,7 +99,7 @@ export default defineComponent({
         </table>
         <div class="button-row">
             <button
-                :disabled="createJobDisabled || !jobName || !jobType || !mappingId"
+                :disabled="fetching || !jobName || !jobType || !mappingId"
                 @click="createJob"
             >
                 Create job

@@ -7,8 +7,9 @@ import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { GET, POST } from '@/utils/backendAPI';
-import { DatabaseView, type DatabaseViewFromServer } from '@/types/database';
-import type { MappingFromServer } from '@/types/mapping';
+import type { MappingFromServer, MappingInit } from '@/types/mapping';
+import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
+import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
@@ -21,30 +22,27 @@ export default defineComponent({
             graph: null as Graph | null,
             accessPath: null as RootProperty | null,
             selectingRootNode: null as Node | null,
-            databases: [] as DatabaseView[],
-            selectingDatabase: null as DatabaseView | null,
-            selectedDatabase: null as DatabaseView | null
+            logicalModels: [] as LogicalModel[],
+            selectedLogicalModel: null as LogicalModel | null
         };
     },
     computed: {
         databaseAndRootNodeValid(): boolean {
-            return !!this.selectingDatabase && !!this.selectingRootNode;
+            return !!this.selectedLogicalModel && !!this.selectingRootNode;
         }
     },
     async mounted() {
-        const result = await GET<DatabaseViewFromServer[]>('/database-views');
+        const result = await GET<LogicalModelFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/logical-models`);
         if (result.status)
-            this.databases = result.data.map(DatabaseView.fromServer);
+            this.logicalModels = result.data.map(LogicalModel.fromServer);
     },
     methods: {
         cytoscapeCreated(graph: Graph) {
             this.graph = graph;
         },
         confirmDatabaseAndRootNode() {
-            if (!this.selectingDatabase || !this.selectingRootNode)
+            if (!this.selectedLogicalModel || !this.selectingRootNode)
                 return;
-
-            this.selectedDatabase = this.selectingDatabase;
 
             this.selectingRootNode.unselect();
             this.selectingRootNode.becomeRoot();
@@ -52,10 +50,12 @@ export default defineComponent({
             this.accessPath = new RootProperty(StaticName.fromString(label), this.selectingRootNode);
         },
         async createMapping(label: string) {
-            const result = await POST<MappingFromServer>('/mappings', {
-                databaseId: this.selectedDatabase?.id,
-                categoryId: this.graph?.schemaCategory.id,
-                rootObjectId: this.accessPath?.node.schemaObject.id,
+            if (! this.selectedLogicalModel || !this.graph || !this.accessPath)
+                return;
+
+            const result = await POST<MappingFromServer, MappingInit>('/mappings', {
+                logicalModelId: this.selectedLogicalModel.id,
+                rootObjectId: this.accessPath.node.schemaObject.id,
                 jsonValue: JSON.stringify({
                     label: label
                 }),
@@ -78,22 +78,22 @@ export default defineComponent({
         <div v-if="graph">
             <div>
                 <div
-                    v-if="!selectedDatabase || !accessPath"
+                    v-if="!accessPath || !selectedLogicalModel"
                     class="editor"
                 >
                     <table>
                         <tr>
                             <td class="label">
-                                Database:
+                                Logical model:
                             </td>
                             <td class="value">
-                                <select v-model="selectingDatabase">
+                                <select v-model="selectedLogicalModel">
                                     <option
-                                        v-for="database in databases"
-                                        :key="database.id"
-                                        :value="database"
+                                        v-for="logicalModel in logicalModels"
+                                        :key="logicalModel.id"
+                                        :value="logicalModel"
                                     >
-                                        {{ database.label }}
+                                        {{ logicalModel.label }}
                                     </option>
                                 </select>
                             </td>
@@ -112,7 +112,7 @@ export default defineComponent({
                     </table>
                     <div class="button-row">
                         <button
-                            :disabled="!selectingDatabase || !selectingRootNode"
+                            :disabled="!selectedLogicalModel || !selectingRootNode"
                             @click="confirmDatabaseAndRootNode"
                         >
                             Confirm
@@ -122,7 +122,7 @@ export default defineComponent({
                 <AccessPathEditor
                     v-else
                     :graph="graph"
-                    :database="selectedDatabase"
+                    :database="selectedLogicalModel.databaseView"
                     :root-property="accessPath"
                     @finish="createMapping"
                 />
