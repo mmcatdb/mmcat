@@ -52,8 +52,8 @@ export default defineComponent({
             </div>
             <div class="mappings">
                 <div
-                    v-for="(mapping, index) in mappings"
-                    :key="index"
+                    v-for="mapping in mappings"
+                    :key="mapping.id"
                 >
                     <MappingDisplay :mapping="mapping" />
                 </div>

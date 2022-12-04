@@ -86,8 +86,8 @@ export default defineComponent({
             <table v-if="fetchedInstanceObject.columns.length > 0">
                 <tr>
                     <th
-                        v-for="(column, index) in fetchedInstanceObject.columns"
-                        :key="index"
+                        v-for="column in fetchedInstanceObject.columns"
+                        :key="column.signature.toString()"
                         :class="{ clickable: column.isClickable }"
                         @click="() => columnClicked(column)"
                     >

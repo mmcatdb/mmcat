@@ -52,8 +52,8 @@ export default defineComponent({
                 class="databases"
             >
                 <div
-                    v-for="(database, index) in databases"
-                    :key="index"
+                    v-for="database in databases"
+                    :key="database.id"
                 >
                     <DatabaseDisplay
                         :database="database"

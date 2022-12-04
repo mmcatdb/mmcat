@@ -83,10 +83,10 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
-                    Mapping id:
+                    Logical model id:
                 </td>
                 <td class="value">
-                    {{ job.mappingId }}
+                    {{ job.logicalModelId }}
                 </td>
             </tr>
             <tr>

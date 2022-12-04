@@ -32,8 +32,8 @@ public class LogicalModelService {
 
         return generatedId == null ? null : new LogicalModel(
             generatedId,
-            init.databaseId(),
             init.categoryId(),
+            init.databaseId(),
             init.jsonValue()
         );
     }

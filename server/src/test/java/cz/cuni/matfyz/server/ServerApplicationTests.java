@@ -12,6 +12,7 @@ import cz.cuni.matfyz.server.builder.SchemaBuilder;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.service.DatabaseService;
+import cz.cuni.matfyz.server.service.LogicalModelService;
 import cz.cuni.matfyz.server.service.MappingService;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 import cz.cuni.matfyz.server.service.WrapperService;
@@ -35,6 +36,9 @@ class ServerApplicationTests {
 
     @Autowired
     private MappingService mappingService;
+
+    @Autowired
+    private LogicalModelService logicalModelService;
 
     @Autowired
     private DatabaseService databaseService;
@@ -143,7 +147,8 @@ class ServerApplicationTests {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper) {
-        var categoryWrapper = categoryService.find(mappingWrapper.categoryId);
+        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+        var categoryWrapper = categoryService.find(logicalModel.categoryId);
 
         var mapping = new SchemaBuilder()
             .setMappingWrapper(mappingWrapper)

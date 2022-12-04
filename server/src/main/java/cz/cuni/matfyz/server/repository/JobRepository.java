@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.server.repository;
 
-import cz.cuni.matfyz.server.entity.Job;
+import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
@@ -19,11 +19,10 @@ public class JobRepository {
             var statement = connection.prepareStatement("""
                 SELECT
                     job.id as _id,
-                    mapping.id as _mapping_id,
+                    job.logical_model_id as _logical_model_id,
                     job.json_value as _json_value
                 FROM job
-                JOIN mapping ON mapping.id = job.mapping_id
-                JOIN logical_model on logical_model.id = mapping.logical_model_id
+                JOIN logical_model on logical_model.id = job.logical_model_id
                 WHERE logical_model.schema_category_id = ?
                 ORDER BY job.id;
                 """);
@@ -32,9 +31,9 @@ public class JobRepository {
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("_id");
-                int mappingId = resultSet.getInt("_mapping_id");
+                int logicalModelId = resultSet.getInt("_logical_model_id");
                 String jsonValue = resultSet.getString("_json_value");
-                output.add(new Job.Builder().fromJSON(id, mappingId, categoryId, jsonValue));
+                output.add(new Job.Builder().fromJSON(id, logicalModelId, categoryId, jsonValue));
             }
         });
     }
@@ -44,12 +43,11 @@ public class JobRepository {
             var statement = connection.prepareStatement("""
                 SELECT
                     job.id as _id,
-                    mapping.id as _mapping_id,
+                    job.logical_model_id as _logical_model_id,
                     job.json_value as _json_value,
                     logical_model.schema_category_id as _schema_category_id
                 FROM job
-                JOIN mapping ON mapping.id = job.mapping_id
-                JOIN logical_model on logical_model.id = mapping.logical_model_id
+                JOIN logical_model on logical_model.id = job.logical_model_id
                 WHERE job.id = ?
                 ORDER BY job.id;
                 """);
@@ -57,18 +55,18 @@ public class JobRepository {
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                int mappingId = resultSet.getInt("_mapping_id");
+                int logicalModelId = resultSet.getInt("_logical_model_id");
                 int categoryId = resultSet.getInt("_schema_category_id");
                 String jsonValue = resultSet.getString("_json_value");
-                output.set(new Job.Builder().fromJSON(id, mappingId, categoryId, jsonValue));
+                output.set(new Job.Builder().fromJSON(id, logicalModelId, categoryId, jsonValue));
             }
         });
     }
 
     public Integer add(Job job) {
         return DatabaseWrapper.get((connection, output) -> {
-            var statement = connection.prepareStatement("INSERT INTO job (mapping_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setInt(1, job.mappingId);
+            var statement = connection.prepareStatement("INSERT INTO job (logical_model_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            statement.setInt(1, job.logicalModelId);
             statement.setString(2, job.toJSON().toString());
 
             int affectedRows = statement.executeUpdate();

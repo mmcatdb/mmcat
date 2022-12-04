@@ -1,8 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, type DatabaseInit, type DatabaseUpdate, createInitFromUpdate } from '@/types/database';
+import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, type DatabaseInit, createInitFromUpdate } from '@/types/database';
 import { DELETE, POST, PUT } from '@/utils/backendAPI';
-import { ResultError } from '@/types/result';
 
 export default defineComponent({
     props: {

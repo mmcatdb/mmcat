@@ -41,7 +41,7 @@ export type Settings = {
 }
 
 export type Database = {
-    id: number | null;
+    id: number;
     type: Type;
     label: string;
     settings: Settings;

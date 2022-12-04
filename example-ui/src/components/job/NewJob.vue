@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import { type Job, JOB_TYPES, type JobInit, JobType } from '@/types/job';
 import { GET, POST } from '@/utils/backendAPI';
-import { Mapping, type MappingFromServer } from '@/types/mapping';
+import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
@@ -12,9 +12,9 @@ export default defineComponent({
     emits: [ 'newJob' ],
     data() {
         return {
-            mappings: null as Mapping[] | null,
+            logicalModels: null as LogicalModel[] | null,
             fetched: false,
-            mappingId: null as number | null,
+            logicalModelId: null as number | null,
             jobName: '',
             jobType: undefined as JobType | undefined,
             availableJobTypes: JOB_TYPES,
@@ -22,21 +22,21 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<MappingFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/mappings`);
+        const result = await GET<LogicalModelFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/logical-models`);
         if (result.status)
-            this.mappings = result.data.map(Mapping.fromServer);
+            this.logicalModels = result.data.map(LogicalModel.fromServer);
 
         this.fetched = true;
     },
     methods: {
         async createJob() {
-            if (!this.mappingId || !this.jobType)
+            if (!this.logicalModelId || !this.jobType)
                 return;
 
             this.fetching = true;
 
             const result = await POST<Job, JobInit>('/jobs', {
-                mappingId: this.mappingId,
+                logicalModelId: this.logicalModelId,
                 label: this.jobName,
                 type: this.jobType
             });
@@ -79,16 +79,16 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
-                    Mapping:
+                    Logical model:
                 </td>
                 <td class="value">
-                    <select v-model="mappingId">
+                    <select v-model="logicalModelId">
                         <option
-                            v-for="(mapping, index) in mappings"
-                            :key="index"
-                            :value="mapping.id"
+                            v-for="logicalModel in logicalModels"
+                            :key="logicalModel.id"
+                            :value="logicalModel.id"
                         >
-                            {{ mapping.label }}
+                            {{ logicalModel.label }}
                         </option>
                     </select>
                 </td>
@@ -99,7 +99,7 @@ export default defineComponent({
         </table>
         <div class="button-row">
             <button
-                :disabled="fetching || !jobName || !jobType || !mappingId"
+                :disabled="(fetching || !jobName || !jobType || !logicalModelId)"
                 @click="createJob"
             >
                 Create job

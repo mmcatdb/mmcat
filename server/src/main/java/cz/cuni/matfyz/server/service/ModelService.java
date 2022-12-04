@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.entity.Model;
+import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.utils.UserStore;
 
 import java.util.List;

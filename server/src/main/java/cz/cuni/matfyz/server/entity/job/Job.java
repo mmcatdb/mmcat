@@ -1,8 +1,9 @@
-package cz.cuni.matfyz.server.entity;
+package cz.cuni.matfyz.server.entity.job;
 
 import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.server.entity.Entity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +13,7 @@ import org.json.JSONObject;
  */
 public class Job extends Entity implements JSONConvertible {
 
-    public final int mappingId;
+    public final int logicalModelId;
     public final Integer categoryId;
     public String label;
     public Type type;
@@ -21,18 +22,18 @@ public class Job extends Entity implements JSONConvertible {
     /*
     public Job(
         @JsonProperty("id") Integer id,
-        @JsonProperty("mappingId") int mappingId,
+        @JsonProperty("logicalModelId") int logicalModelId,
         @JsonProperty("status") Status status
     ) {
         super(id);
-        this.mappingId = mappingId;
+        this.logicalModelId = logicalModelId;
         this.status = status;
     }
     */
 
-    private Job(Integer id, int mappingId, Integer categoryId) {
+    private Job(Integer id, int logicalModelId, Integer categoryId) {
         super(id);
-        this.mappingId = mappingId;
+        this.logicalModelId = logicalModelId;
         this.categoryId = categoryId;
     }
 
@@ -71,8 +72,8 @@ public class Job extends Entity implements JSONConvertible {
 
     public static class Builder extends FromJSONLoaderBase<Job> {
 
-        public Job fromJSON(int id, int mappingId, int categoryId, String jsonValue) {
-            var job = new Job(id, mappingId, categoryId);
+        public Job fromJSON(int id, int logicalModelId, int categoryId, String jsonValue) {
+            var job = new Job(id, logicalModelId, categoryId);
             loadFromJSON(job, jsonValue);
             return job;
         }
@@ -84,8 +85,8 @@ public class Job extends Entity implements JSONConvertible {
             job.status = Status.valueOf(jsonObject.getString("status"));
         }
 
-        public Job fromArguments(Integer id, int mappingId, Integer categoryId, String label, Type type, Status status) {
-            var job = new Job(id, mappingId, categoryId);
+        public Job fromArguments(Integer id, int logicalModelId, Integer categoryId, String label, Type type, Status status) {
+            var job = new Job(id, logicalModelId, categoryId);
             job.label = label;
             job.type = type;
             job.status = status;

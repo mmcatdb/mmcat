@@ -61,8 +61,8 @@ export default defineComponent({
         >
             <NewJob @new-job="addNewJob" />
             <div
-                v-for="(job, index) in jobs"
-                :key="index"
+                v-for="job in jobs"
+                :key="job.id"
             >
                 <JobDisplay
                     :job="job"

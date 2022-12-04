@@ -7,8 +7,9 @@ import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
-import cz.cuni.matfyz.server.entity.Job;
 import cz.cuni.matfyz.server.entity.database.Database;
+import cz.cuni.matfyz.server.entity.job.Job;
+import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.JobRepository;
 import cz.cuni.matfyz.server.service.WrapperService.WrapperCreationErrorException;
@@ -133,19 +134,23 @@ public class AsyncJobService {
     }
 
     @Async("jobExecutor")
-    private CompletableFuture<DataResult<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var mappingWrapper = mappingService.find(job.mappingId);
-        var mapping = createMapping(mappingWrapper);
-        
-        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+    private CompletableFuture<DataResult<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws WrapperNotFoundException, WrapperCreationErrorException {       
+        var logicalModel = logicalModelService.find(job.logicalModelId);
         Database database = databaseService.find(logicalModel.databaseId);
 
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
+        var mappingWrappers = mappingService.findAllInLogicalModel(job.logicalModelId);
 
-        var process = new DatabaseToInstance();
-        process.input(mapping, instance, pullWrapper);
+        var result = new DataResult<InstanceCategory>(instance);
+        for (var mappingWrapper : mappingWrappers) {
+            var mapping = createMapping(mappingWrapper, logicalModel);
+            var process = new DatabaseToInstance();
+            process.input(mapping, result.data, pullWrapper);
 
-        var result = process.run();
+            result = process.run();
+            if (!result.status)
+                break;
+        }
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
 
         return CompletableFuture.completedFuture(result);
@@ -175,25 +180,30 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private CompletableFuture<DataResult<String>> categoryToModelAlgorithm(Job job, InstanceCategory instance) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var mappingWrapper = mappingService.find(job.mappingId);
-        var mapping = createMapping(mappingWrapper);
-
-        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+        var logicalModel = logicalModelService.find(job.logicalModelId);
         Database database = databaseService.find(logicalModel.databaseId);
 
         AbstractDDLWrapper ddlWrapper = wrapperService.getDDLWrapper(database);
         AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
+        var mappingWrappers = mappingService.findAllInLogicalModel(job.logicalModelId);
 
-        var process = new InstanceToDatabase();
-        process.input(mapping, instance, ddlWrapper, pushWrapper);
+        var output = new StringBuilder();
+        for (var mappingWrapper : mappingWrappers) {
+            var mapping = createMapping(mappingWrapper, logicalModel);
+            var process = new InstanceToDatabase();
+            process.input(mapping, instance, ddlWrapper, pushWrapper);
 
-        var result = process.run();
+            var result = process.run();
+            if (result.status)
+                return CompletableFuture.completedFuture(result);
 
-        return CompletableFuture.completedFuture(result);
+            output.append(result.data + "\n");
+        }
+
+        return CompletableFuture.completedFuture(new DataResult<>(output.toString()));
     }
 
-    private Mapping createMapping(MappingWrapper mappingWrapper) {
-        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+    private Mapping createMapping(MappingWrapper mappingWrapper, LogicalModel logicalModel) {
         var categoryWrapper = categoryService.find(logicalModel.categoryId);
 
         return new SchemaBuilder()

@@ -65,7 +65,7 @@ public class InstanceToDatabase {
 
         Statistics.end(Interval.INSTANCE_TO_DATABASE);
 
-        return new DataResult<String>(output.toString());
+        return new DataResult<>(output.toString());
     }
 
 }

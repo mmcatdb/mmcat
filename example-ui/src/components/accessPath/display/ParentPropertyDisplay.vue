@@ -92,14 +92,14 @@ export default defineComponent({
             <div class="inner">
                 <SimplePropertyDisplay
                     v-for="(subpath, index) in simpleSubpaths"
-                    :key="index"
+                    :key="subpath.name.toString()"
                     :property="subpath"
                     :is-last="index === property.subpaths.length - 1"
                     @simple:click="reEmitSimpleClick"
                 />
                 <ParentPropertyDisplay
                     v-for="(subpath, index) in complexSubpaths"
-                    :key="index"
+                    :key="subpath.name"
                     :property="subpath"
                     :is-last="index === complexSubpaths.length - 1"
                     :is-root="false"

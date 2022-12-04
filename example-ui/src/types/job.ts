@@ -17,7 +17,7 @@ export const JOB_TYPES = [
 export class Job {
     private constructor(
         public id: number,
-        public mappingId: number,
+        public logicalModelId: number,
         public categoryId: number,
         public label: string,
         public type: string,
@@ -27,7 +27,7 @@ export class Job {
     }
 
     static fromServer(input: JobFromServer): Job {
-        return new Job(input.id, input.mappingId, input.categoryId, input.label, input.type, input.status);
+        return new Job(input.id, input.logicalModelId, input.categoryId, input.label, input.type, input.status);
     }
 
     setStatus(status: Status) {
@@ -37,7 +37,7 @@ export class Job {
 
 export type JobFromServer = {
     id: number;
-    mappingId: number;
+    logicalModelId: number;
     categoryId: number;
     label: string;
     type: JobType;
@@ -53,7 +53,7 @@ export enum Status {
 }
 
 export type JobInit = {
-    mappingId: number,
+    logicalModelId: number,
     label: string,
     type: JobType
 }

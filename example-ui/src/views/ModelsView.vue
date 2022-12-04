@@ -43,8 +43,8 @@ export default defineComponent({
             class="models"
         >
             <ModelViewDisplay
-                v-for="(model, index) in models"
-                :key="index"
+                v-for="model in models"
+                :key="model.jobId"
                 :model="model"
             />
         </div>

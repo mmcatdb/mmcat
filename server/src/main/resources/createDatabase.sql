@@ -342,7 +342,7 @@ INSERT INTO logical_model (schema_category_id, database_id, json_value)
 VALUES
     (1, 1, '{"label": "Mongo - Order"}'),
     (1, 2, '{"label": "Postgres - Customer"}'),
-    (2, 3, '{"label": "Mongo import"}'),
+    (2, 3, '{"label": "Postgres import"}'),
     (2, 1, '{"label": "Mongo export"}');
 
 CREATE TABLE mapping (
@@ -371,7 +371,7 @@ VALUES
 
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
-    mapping_id INTEGER NOT NULL REFERENCES mapping,
+    logical_model_id INTEGER NOT NULL REFERENCES mapping,
     json_value JSONB NOT NULL
     -- přidat typ jobu, vstup, výstup, vše serializované v jsonu
         -- podobně jako ukládání logování
@@ -380,16 +380,11 @@ CREATE TABLE job (
 
 );
 
-INSERT INTO job (mapping_id, json_value)
+INSERT INTO job (logical_model_id, json_value)
 VALUES
     (1, '{"label": "Import Order", "type": "ModelToCategory", "status": "Ready"}'),
     (1, '{"label": "Export Order", "type": "CategoryToModel", "status": "Ready"}'),
     (2, '{"label": "Import Customer", "type": "ModelToCategory", "status": "Ready"}'),
     (2, '{"label": "Export Customer", "type": "CategoryToModel", "status": "Ready"}'),
-    (3, '{"label": "ImportCustomer", "type": "ModelToCategory", "status": "Ready"}'),
-    (4, '{"label": "ImportContact", "type": "ModelToCategory", "status": "Ready"}'),
-    (5, '{"label": "ImportCustomerContact", "type": "ModelToCategory", "status": "Ready"}'),
-    (6, '{"label": "ImportOrder", "type": "ModelToCategory", "status": "Ready"}'),
-    (7, '{"label": "ImportProduct", "type": "ModelToCategory", "status": "Ready"}'),
-    (8, '{"label": "ImportOrderItem", "type": "ModelToCategory", "status": "Ready"}'),
-    (9, '{"label": "ExportOrder", "type": "CategoryToModel", "status": "Ready"}');
+    (3, '{"label": "Import from Postgres", "type": "ModelToCategory", "status": "Ready"}'),
+    (4, '{"label": "Export to Mongo", "type": "CategoryToModel", "status": "Ready"}');

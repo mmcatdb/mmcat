@@ -6,6 +6,7 @@ import { GET } from '@/utils/backendAPI';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
+import type { Mapping } from '@/types/mapping';
 
 export default defineComponent({
     components: {
@@ -15,8 +16,9 @@ export default defineComponent({
     },
     data() {
         return {
+            fetched: false,
             logicalModel: null as LogicalModel | null,
-            fetched: false
+            mappings: [] as Mapping[] // TODO TODO TODO FIXXXXXXXXXXX
         };
     },
     async mounted() {
@@ -29,6 +31,9 @@ export default defineComponent({
                 this.logicalModel = LogicalModel.fromServer(result.data);
 
             this.fetched = true;
+        },
+        createNewMapping() {
+            this.$router.push({ name: 'accessPathEditor' });
         }
     }
 });
@@ -37,12 +42,27 @@ export default defineComponent({
 <template>
     <div>
         <h1>Logical model</h1>
-        <div
-            v-if="logicalModel"
-            class="logical-model"
-        >
-            <LogicalModelDisplay :logical-model="logicalModel" />
-        </div>
+        <template v-if="logicalModel">
+            <div class="logical-model">
+                <LogicalModelDisplay :logical-model="logicalModel" />
+            </div>
+            <h2>Mappings</h2>
+            <div class="button-row">
+                <button
+                    @click="createNewMapping"
+                >
+                    Create new
+                </button>
+            </div>
+            <div class="mappings">
+                <div
+                    v-for="mapping in mappings"
+                    :key="mapping.id"
+                >
+                    <MappingDisplay :mapping="mapping" />
+                </div>
+            </div>
+        </template>
         <ResourceNotFound v-else-if="fetched" />
         <ResourceLoading v-else />
     </div>
@@ -51,5 +71,10 @@ export default defineComponent({
 <style scoped>
 .logical-model {
     display: flex;
+}
+
+.mappings {
+    display: flex;
+    flex-wrap: wrap;
 }
 </style>

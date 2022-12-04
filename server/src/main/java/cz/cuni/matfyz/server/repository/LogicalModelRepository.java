@@ -26,7 +26,7 @@ public class LogicalModelRepository {
                 int databaseId = resultSet.getInt("database_id");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.add(new LogicalModel(foundId, databaseId, categoryId, jsonValue));
+                output.add(new LogicalModel(foundId, categoryId, databaseId, jsonValue));
             }
         });
     }
@@ -43,7 +43,7 @@ public class LogicalModelRepository {
                 int databaseId = resultSet.getInt("database_id");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.set(new LogicalModel(foundId, databaseId, categoryId, jsonValue));
+                output.set(new LogicalModel(foundId, categoryId, databaseId, jsonValue));
             }
         });
     }

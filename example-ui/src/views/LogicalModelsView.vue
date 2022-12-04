@@ -51,8 +51,8 @@ export default defineComponent({
             </div>
             <div class="logical-models">
                 <div
-                    v-for="(logicalModel, index) in logicalModels"
-                    :key="index"
+                    v-for="logicalModel in logicalModels"
+                    :key="logicalModel.id"
                 >
                     <LogicalModelDisplay :logical-model="logicalModel" />
                 </div>

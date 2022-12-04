@@ -1,12 +1,10 @@
-package cz.cuni.matfyz.server.view;
-
-import cz.cuni.matfyz.server.entity.Job;
+package cz.cuni.matfyz.server.entity.job;
 
 /**
  * @author jachym.bartik
  */
 public record JobInit(
-    int mappingId,
+    int logicalModelId,
     String label,
     Job.Type type
 ) {}
