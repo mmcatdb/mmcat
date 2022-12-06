@@ -139,7 +139,7 @@ public class AsyncJobService {
         Database database = databaseService.find(logicalModel.databaseId);
 
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
-        var mappingWrappers = mappingService.findAllWrappers(job.logicalModelId);
+        var mappingWrappers = mappingService.findAll(job.logicalModelId);
 
         var result = new DataResult<InstanceCategory>(instance);
         for (var mappingWrapper : mappingWrappers) {
@@ -185,7 +185,7 @@ public class AsyncJobService {
 
         AbstractDDLWrapper ddlWrapper = wrapperService.getDDLWrapper(database);
         AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
-        var mappingWrappers = mappingService.findAllWrappers(job.logicalModelId);
+        var mappingWrappers = mappingService.findAll(job.logicalModelId);
 
         var output = new StringBuilder();
         for (var mappingWrapper : mappingWrappers) {

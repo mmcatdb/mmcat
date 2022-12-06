@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.mapping.MappingFull;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
+import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.service.MappingService;
 
 import java.util.List;
@@ -26,8 +26,8 @@ public class MappingController {
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
-    public MappingFull getMapping(@PathVariable int id) {
-        var mapping = service.findFull(id);
+    public MappingWrapper getMapping(@PathVariable int id) {
+        var mapping = service.find(id);
 
         if (mapping == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -35,35 +35,14 @@ public class MappingController {
         return mapping;
     }
 
-    @GetMapping("/schema-categories/{categoryId}/mappings")
-    public List<MappingFull> getAllMappingsInCategory(@PathVariable int categoryId) {
-        return service.findAllFullInCategory(categoryId);
-    }
-
     @GetMapping("/logical-models/{logicalModelId}/mappings")
-    public List<MappingFull> getAllMappingsInLogicalModel(@PathVariable int logicalModelId) {
-        return service.findAllFull(logicalModelId);
+    public List<MappingWrapper> getAllMappingsInLogicalModel(@PathVariable int logicalModelId) {
+        return service.findAll(logicalModelId);
     }
 
     @PostMapping("/mappings")
     public MappingInfo createNewMapping(@RequestBody MappingInit newMapping) {
         return service.createNew(newMapping);
     }
-
-    /*
-    private MappingView wrapperToView(MappingWrapper wrapper) {
-        LogicalModel logicalModel = logicalModelService.find(wrapper.logicalModelId);
-        Database database = databaseService.find(logicalModel.databaseId);
-        DatabaseWithConfiguration databaseWithConfiguration = databaseService.findDatabaseWithConfiguration(logicalModel.databaseId)
-        LogicalModelFull logicalModelView = new LogicalModelFull(
-            logicalModel.id,
-            logicalModel.categoryId,
-            databaseWithConfiguration,
-            logicalModel.jsonValue,
-
-        );
-        return new MappingView(wrapper, logicalModelView);
-    }
-    */
 
 }

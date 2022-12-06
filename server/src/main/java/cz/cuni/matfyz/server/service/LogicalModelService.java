@@ -37,7 +37,7 @@ public class LogicalModelService {
 
     public LogicalModelFull findFull(int logicalModelId) {
         var logicalModel = find(logicalModelId);
-        var mappings = mappingService.findAllWrappers(logicalModel.id);
+        var mappings = mappingService.findAll(logicalModel.id);
         var database = databaseService.findDatabaseWithConfiguration(logicalModel.databaseId);
 
         return new LogicalModelFull(
@@ -51,7 +51,7 @@ public class LogicalModelService {
 
     public List<LogicalModelFull> findAllFull(int categoryId) {
         return repository.findAllInCategory(categoryId).stream().map(logicalModel -> {
-            var mappings = mappingService.findAllWrappers(logicalModel.id);
+            var mappings = mappingService.findAll(logicalModel.id);
             var database = databaseService.findDatabaseWithConfiguration(logicalModel.databaseId);
 
             return new LogicalModelFull(

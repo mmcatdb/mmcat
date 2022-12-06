@@ -12,9 +12,11 @@ const mappings = {
     createNewMapping: POST<Empty, MappingInfoFromServer, MappingInit>(
         () => `/mappings`
     ),
+    /*
     getAllMappingsInCategory: GET<{ categoryId: StringLike }, MappingFromServer[]>(
         u => `/schema-categories/${u.categoryId}/mappings`
     )
+    */
 };
 
 export default mappings;
