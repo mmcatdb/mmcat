@@ -8,7 +8,6 @@ import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
-import { Mapping } from '@/types/mapping';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import { LogicalModel } from '@/types/logicalModel';
 

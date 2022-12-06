@@ -1,15 +1,15 @@
 import type { DeepPartial } from "../utils";
 import { DatabaseConfiguration, type DatabaseConfigurationFromServer } from "./Configuration";
 
-export class DatabaseView {
+export class DatabaseInfo {
     private constructor(
         public readonly id: number,
         public readonly type: Type,
         public readonly label: string,
     ) {}
 
-    static fromServer(input: DatabaseViewFromServer): DatabaseView {
-        return new DatabaseView(
+    static fromServer(input: DatabaseInfoFromServer): DatabaseInfo {
+        return new DatabaseInfo(
             input.id,
             input.type,
             input.label
@@ -17,7 +17,7 @@ export class DatabaseView {
     }
 }
 
-export type DatabaseViewFromServer = {
+export type DatabaseInfoFromServer = {
     id: number;
     type: Type; // Full type (i.e. mongodb)
     label: string; // User-defined name

@@ -1,10 +1,10 @@
 import type { Empty, StringLike } from "@/types/api/routes";
 import { GET, POST, PUT, DELETE } from "../routeFunctions";
-import type { Database, DatabaseInit, DatabaseUpdate, DatabaseViewFromServer, DatabaseWithConfigurationFromServer } from "@/types/database";
+import type { Database, DatabaseInit, DatabaseUpdate, DatabaseInfoFromServer, DatabaseWithConfigurationFromServer } from "@/types/database";
 
 const databases = {
-    getAllDatabaseViews: GET<Empty, DatabaseWithConfigurationFromServer[]>(
-        () => `/database-views`
+    getAllDatabaseInfos: GET<Empty, DatabaseWithConfigurationFromServer[]>(
+        () => `/database-infos`
     ),
     getAllDatabases: GET<Empty, Database[]>(
         () => `/databases`
@@ -12,10 +12,10 @@ const databases = {
     getDatabase: GET<{ id: StringLike }, Database>(
         u => `/databases/${u.id}`
     ),
-    createDatabase: POST<Empty, DatabaseViewFromServer, DatabaseInit>(
+    createDatabase: POST<Empty, DatabaseInfoFromServer, DatabaseInit>(
         () => `/databases`
     ),
-    updateDatabase: PUT<{ id: StringLike }, DatabaseViewFromServer, DatabaseUpdate>(
+    updateDatabase: PUT<{ id: StringLike }, DatabaseInfoFromServer, DatabaseUpdate>(
         u => `/databases/${u.id}`
     ),
     deleteDatabase: DELETE<{ id: StringLike }, void>(

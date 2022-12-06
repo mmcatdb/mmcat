@@ -65,7 +65,7 @@ export default defineComponent({
                     Database:
                 </td>
                 <td class="value">
-                    {{ mapping.logicalModel.databaseView.label }}
+                    {{ mapping.logicalModel.database.label }}
                 </td>
             </tr>
             -->

@@ -17,7 +17,7 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await API.databases.getAllDatabaseViews({});
+        const result = await API.databases.getAllDatabaseInfos({});
         if (result.status)
             this.databases = result.data.map(DatabaseWithConfiguration.fromServer);
     },

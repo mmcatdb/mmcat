@@ -1,4 +1,4 @@
-import { DatabaseView, DatabaseWithConfiguration, type DatabaseViewFromServer, type DatabaseWithConfigurationFromServer } from "./database";
+import { DatabaseWithConfiguration, type DatabaseWithConfigurationFromServer } from "./database";
 import { Mapping, type MappingFromServer } from "./mapping";
 
 export type LogicalModelInit = {

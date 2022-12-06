@@ -28,8 +28,8 @@ public class DatabaseController {
     @Autowired
     private DatabaseService service;
 
-    @GetMapping("/database-views")
-    public List<DatabaseWithConfiguration> getAllDatabaseViews() {
+    @GetMapping("/database-infos")
+    public List<DatabaseWithConfiguration> getAllDatabaseInfos() {
         return service.findAllDatabasesWithConfiguration();
     }
 

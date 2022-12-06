@@ -1,9 +1,8 @@
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "../accessPath/basic";
-import type { DatabaseView, DatabaseWithConfiguration } from "../database";
+import type { DatabaseWithConfiguration } from "../database";
 import { DynamicName, Key, SchemaId, Signature } from "../identifiers";
-import type { LogicalModel } from "../logicalModel";
-import type { Mapping, MappingInfo } from "../mapping";
+import type { Mapping } from "../mapping";
 import { SchemaMorphism, SchemaMorphismFromServer, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
 import { SchemaObject, type SchemaObjectFromServer, type SchemaObjectUpdate } from "./SchemaObject";
 

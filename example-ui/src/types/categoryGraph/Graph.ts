@@ -11,7 +11,7 @@ export type TemporaryEdge = {
     delete: () => void;
 }
 
-type Group = { id: number, databaseView: DatabaseWithConfiguration, node: NodeSingular };
+type Group = { id: number, database: DatabaseWithConfiguration, node: NodeSingular };
 
 export class Graph {
     _cytoscape: Core;
@@ -64,19 +64,19 @@ export class Graph {
 
     groups = [] as Group[];
 
-    getGroupOrAddIt(databaseView: DatabaseWithConfiguration): Group {
-        const results = this.groups.filter(group => group.databaseView.id === databaseView.id);
+    getGroupOrAddIt(database: DatabaseWithConfiguration): Group {
+        const results = this.groups.filter(group => group.database.id === database.id);
         if (results[0])
             return results[0];
 
         const id = this.groups.length + 1;
         const newGroup = {
             id,
-            databaseView,
+            database,
             node: this._cytoscape.add({
                 data: {
                     id: 'group_' + id,
-                    label: databaseView.label
+                    label: database.label
                 },
                 classes: 'group ' + 'group-' + id
             })
