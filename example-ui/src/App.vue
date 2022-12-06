@@ -17,7 +17,6 @@ const links = [
     defineLink('home', 'MM-evocat'),
     defineLink('schemaCategory', 'Schema Category'),
     defineLink('logicalModels', 'Logical Models'),
-    defineLink('mappings', 'Mappings'),
     defineLink('databases', 'Databases'),
     defineLink('jobs', 'Jobs'),
     defineLink('instanceCategory', 'Instance Category'),

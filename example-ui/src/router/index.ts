@@ -34,18 +34,6 @@ const router = createRouter({
             name: 'newLogicalModel',
             component: () => import('@/views/NewLogicalModel.vue')
         },
-        /*
-        {
-            path: '/logical-models/new',
-            name: 'accessPathEditor',
-            component: () => import('@/views/AccessPathEditorView.vue')
-        },
-        */
-        {
-            path: '/mappings',
-            name: 'mappings',
-            component: () => import('@/views/MappingsView.vue')
-        },
         {
             path: '/mappings/new',
             name: 'accessPathEditor',
