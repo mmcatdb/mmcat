@@ -7,7 +7,5 @@ import cz.cuni.matfyz.server.entity.IEntity;
  */
 public record LogicalModelInfo(
     int id,
-    int categoryId,
-    //DatabaseView databaseView, // TODO remove
     String jsonValue
 ) implements IEntity {}

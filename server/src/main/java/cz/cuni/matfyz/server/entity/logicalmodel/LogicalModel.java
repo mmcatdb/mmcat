@@ -19,7 +19,7 @@ public class LogicalModel extends Entity {
     }
 
     public LogicalModelInfo toInfo() {
-        return new LogicalModelInfo(id, categoryId, jsonValue);
+        return new LogicalModelInfo(id, jsonValue);
     }
 
 }

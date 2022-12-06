@@ -69,7 +69,6 @@ public class LogicalModelService {
 
         return generatedId == null ? null : new LogicalModelInfo(
             generatedId,
-            init.categoryId(),
             init.jsonValue()
         );
     }

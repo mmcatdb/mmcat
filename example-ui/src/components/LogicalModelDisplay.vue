@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { LogicalModelFull } from '@/types/logicalModel';
+import type { LogicalModel } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 export default defineComponent({
@@ -9,7 +9,7 @@ export default defineComponent({
     },
     props: {
         logicalModel: {
-            type: Object as () => LogicalModelFull,
+            type: Object as () => LogicalModel,
             required: true
         }
     },

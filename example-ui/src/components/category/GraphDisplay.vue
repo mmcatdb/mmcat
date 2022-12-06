@@ -10,7 +10,7 @@ import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
 import { Mapping } from '@/types/mapping';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
-import { LogicalModelFull } from '@/types/logicalModel';
+import { LogicalModel } from '@/types/logicalModel';
 
 export default defineComponent({
     components: {
@@ -20,7 +20,7 @@ export default defineComponent({
     emits: [ 'create:graph' ],
     data() {
         return {
-            logicalModels: [] as LogicalModelFull[],
+            logicalModels: [] as LogicalModel[],
             schemaFetched: false,
             saveButtonDisabled: false,
             graph: null as Graph | null
@@ -35,7 +35,7 @@ export default defineComponent({
 
         console.log(result.data);
         const schemaCategory = SchemaCategory.fromServer(result.data);
-        this.logicalModels = logicalModelsResult.data.map(LogicalModelFull.fromServer);
+        this.logicalModels = logicalModelsResult.data.map(LogicalModel.fromServer);
 
         this.graph = this.createGraph(schemaCategory, this.logicalModels);
 
@@ -43,7 +43,7 @@ export default defineComponent({
         this.$emit('create:graph', this.graph);
     },
     methods: {
-        createGraph(schema: SchemaCategory, logicalModels: LogicalModelFull[]): Graph {
+        createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Graph {
             const container = document.getElementById('cytoscape');
 
             // This is needed because of some weird bug.

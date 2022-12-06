@@ -2,7 +2,7 @@
 import { defineComponent } from 'vue';
 import { JOB_TYPES, JobType } from '@/types/job';
 import API from '@/utils/api';
-import { LogicalModelFull } from '@/types/logicalModel';
+import { LogicalModel } from '@/types/logicalModel';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
@@ -12,7 +12,7 @@ export default defineComponent({
     emits: [ 'newJob' ],
     data() {
         return {
-            logicalModels: null as LogicalModelFull[] | null,
+            logicalModels: null as LogicalModel[] | null,
             fetched: false,
             logicalModelId: null as number | null,
             jobName: '',
@@ -24,7 +24,7 @@ export default defineComponent({
     async mounted() {
         const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
         if (result.status)
-            this.logicalModels = result.data.map(LogicalModelFull.fromServer);
+            this.logicalModels = result.data.map(LogicalModel.fromServer);
 
         this.fetched = true;
     },

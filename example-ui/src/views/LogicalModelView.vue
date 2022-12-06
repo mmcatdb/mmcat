@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { LogicalModelFull } from '@/types/logicalModel';
+import { LogicalModel } from '@/types/logicalModel';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
@@ -19,7 +19,7 @@ export default defineComponent({
     data() {
         return {
             fetched: false,
-            logicalModel: null as LogicalModelFull | null,
+            logicalModel: null as LogicalModel | null,
             mappings: null as Mapping[] | null
         };
     },
@@ -34,7 +34,8 @@ export default defineComponent({
                 return;
             }
 
-            this.logicalModel = LogicalModelFull.fromServer(result.data);
+            this.logicalModel = LogicalModel.fromServer(result.data);
+
             const mappingsResult = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId: this.logicalModel.id });
             if (mappingsResult.status) {
                 this.mappings = mappingsResult.data.map(Mapping.fromServer);

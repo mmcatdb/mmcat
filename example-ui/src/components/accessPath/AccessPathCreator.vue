@@ -6,7 +6,7 @@ import { defineComponent } from 'vue';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
-import { LogicalModelFull } from '@/types/logicalModel';
+import { LogicalModel } from '@/types/logicalModel';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import API from '@/utils/api';
 
@@ -21,8 +21,8 @@ export default defineComponent({
             graph: null as Graph | null,
             accessPath: null as RootProperty | null,
             selectingRootNode: null as Node | null,
-            logicalModels: [] as LogicalModelFull[],
-            selectedLogicalModel: null as LogicalModelFull | null
+            logicalModels: [] as LogicalModel[],
+            selectedLogicalModel: null as LogicalModel | null
         };
     },
     computed: {
@@ -33,7 +33,7 @@ export default defineComponent({
     async mounted() {
         const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
         if (result.status)
-            this.logicalModels = result.data.map(LogicalModelFull.fromServer);
+            this.logicalModels = result.data.map(LogicalModel.fromServer);
     },
     methods: {
         cytoscapeCreated(graph: Graph) {
