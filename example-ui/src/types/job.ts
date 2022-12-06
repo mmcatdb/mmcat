@@ -16,11 +16,11 @@ export const JOB_TYPES = [
 
 export class Job {
     private constructor(
-        public id: number,
-        public logicalModelId: number,
-        public categoryId: number,
-        public label: string,
-        public type: string,
+        public readonly id: number,
+        public readonly logicalModelId: number,
+        public readonly categoryId: number,
+        public readonly label: string,
+        public readonly type: string,
         public status: Status
     ) {
 

@@ -1,8 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { type Job, JOB_TYPES, type JobInit, JobType } from '@/types/job';
-import { GET, POST } from '@/utils/backendAPI';
-import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
+import { JOB_TYPES, JobType } from '@/types/job';
+import API from '@/utils/api';
+import { LogicalModelFull } from '@/types/logicalModel';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
@@ -12,7 +12,7 @@ export default defineComponent({
     emits: [ 'newJob' ],
     data() {
         return {
-            logicalModels: null as LogicalModel[] | null,
+            logicalModels: null as LogicalModelFull[] | null,
             fetched: false,
             logicalModelId: null as number | null,
             jobName: '',
@@ -22,9 +22,9 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<LogicalModelFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/logical-models`);
+        const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
         if (result.status)
-            this.logicalModels = result.data.map(LogicalModel.fromServer);
+            this.logicalModels = result.data.map(LogicalModelFull.fromServer);
 
         this.fetched = true;
     },
@@ -35,7 +35,7 @@ export default defineComponent({
 
             this.fetching = true;
 
-            const result = await POST<Job, JobInit>('/jobs', {
+            const result = await API.jobs.createNewJob({}, {
                 logicalModelId: this.logicalModelId,
                 label: this.jobName,
                 type: this.jobType

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Job, type JobFromServer } from '@/types/job';
-import { GET } from '@/utils/backendAPI';
+import { Job } from '@/types/job';
+import API from '@/utils/api';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
@@ -41,7 +41,7 @@ export default defineComponent({
             this.jobs = this.jobs?.filter(job => job.id !== id) ?? [];
         },
         async fetchNew() {
-            const result = await GET<JobFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/jobs`);
+            const result = await API.jobs.getAllJobsInCategory({ categoryId: getSchemaCategoryId() });
             if (result.status)
                 this.jobs = result.data.map(Job.fromServer);
 

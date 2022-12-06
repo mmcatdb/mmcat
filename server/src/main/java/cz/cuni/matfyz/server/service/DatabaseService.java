@@ -4,6 +4,7 @@ import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.database.DatabaseConfiguration;
 import cz.cuni.matfyz.server.entity.database.DatabaseInit;
 import cz.cuni.matfyz.server.entity.database.DatabaseUpdate;
+import cz.cuni.matfyz.server.entity.database.DatabaseWithConfiguration;
 import cz.cuni.matfyz.server.repository.DatabaseRepository;
 
 import java.util.List;
@@ -24,8 +25,8 @@ public class DatabaseService {
     @Autowired
     private WrapperService wrapperService;
 
-    public Database find(int id) {
-        return repository.find(id);
+    public Database find(int databaseId) {
+        return repository.find(databaseId);
     }
     
     public List<Database> findAll() {
@@ -37,8 +38,8 @@ public class DatabaseService {
         return repository.save(database);
     }
 
-    public Database update(int id, DatabaseUpdate data) {
-        Database database = repository.find(id);
+    public Database update(int databaseId, DatabaseUpdate data) {
+        Database database = repository.find(databaseId);
         if (database == null)
             return null;
         
@@ -46,12 +47,21 @@ public class DatabaseService {
         return repository.save(database);
     }
 
-    public boolean delete(int id) {
-        return repository.delete(id);
+    public boolean delete(int databaseId) {
+        return repository.delete(databaseId);
     }
 
-    public DatabaseConfiguration getDatabaseConfiguration(Database database) {
-        return new DatabaseConfiguration(wrapperService.getPathWrapper(database));
+    public DatabaseWithConfiguration findDatabaseWithConfiguration(int databaseId) {
+        var database = find(databaseId);
+        var configuration = new DatabaseConfiguration(wrapperService.getPathWrapper(database));
+
+        return new DatabaseWithConfiguration(database, configuration);
     }
 
+    public List<DatabaseWithConfiguration> findAllDatabasesWithConfiguration() {
+        return findAll().stream().map(database -> {
+            var configuration = new DatabaseConfiguration(wrapperService.getPathWrapper(database));
+            return new DatabaseWithConfiguration(database, configuration);
+        }).toList();
+    }
 }

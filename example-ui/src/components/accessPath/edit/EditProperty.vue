@@ -3,7 +3,7 @@ import { SimpleProperty, ComplexProperty, type ChildProperty } from '@/types/acc
 import { PropertyType, type Graph, createDefaultFilter, type Node } from '@/types/categoryGraph';
 import type { Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
-import type { DatabaseView } from '@/types/database';
+import type { DatabaseWithConfiguration } from '@/types/database';
 import type { SchemaObject } from '@/types/schema';
 
 import SignatureInput from '../input/SignatureInput.vue';
@@ -30,7 +30,7 @@ export default defineComponent({
             required: true
         },
         database: {
-            type: Object as () => DatabaseView,
+            type: Object as () => DatabaseWithConfiguration,
             required: true
         },
         property: {

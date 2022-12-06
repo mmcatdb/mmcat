@@ -1,9 +1,7 @@
 export class Key {
-    public readonly value!: number;
-
-    private constructor(value: number) {
-        this.value = value;
-    }
+    private constructor(
+        public readonly value: number
+    ) {}
 
     static fromServer(input: KeyFromServer): Key {
         return new Key(input.value);

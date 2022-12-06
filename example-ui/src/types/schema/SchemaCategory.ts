@@ -1,9 +1,11 @@
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "../accessPath/basic";
+import type { DatabaseView, DatabaseWithConfiguration } from "../database";
 import { DynamicName, Key, SchemaId, Signature } from "../identifiers";
-import type { Mapping } from "../mapping";
-import { SchemaMorphism, SchemaMorphismFromServer, type Max, type Min } from "./SchemaMorphism";
-import { SchemaObject, type SchemaObjectFromServer } from "./SchemaObject";
+import type { LogicalModelFull } from "../logicalModel";
+import type { Mapping, MappingInfo } from "../mapping";
+import { SchemaMorphism, SchemaMorphismFromServer, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
+import { SchemaObject, type SchemaObjectFromServer, type SchemaObjectUpdate } from "./SchemaObject";
 
 export type CardinalitySettings = {
     domCodMin: Min,
@@ -111,7 +113,7 @@ export class SchemaCategory {
         this._createdMorphisms = this._createdMorphisms.filter(m => m.id !== morphism.id && m.id !== morphism.dual.id);
     }
 
-    getUpdateObject() {
+    getUpdateObject(): SchemaCategoryUpdate {
         return {
             objects: this._createdObjects.map(object => ({
                 temporaryId: object.id,
@@ -119,10 +121,10 @@ export class SchemaCategory {
                 jsonValue: JSON.stringify(object.toJSON())
             })),
             morphisms: this._createdMorphisms.map(morphism => ({
-                domId: morphism.domId <= this._maxExistingObjectId ? morphism.domId : null,
-                codId: morphism.codId <= this._maxExistingObjectId ? morphism.codId : null,
-                temporaryDomId: morphism.domId > this._maxExistingObjectId ? morphism.domId : null,
-                temporaryCodId: morphism.codId > this._maxExistingObjectId ? morphism.codId : null,
+                domId: morphism.domId <= this._maxExistingObjectId ? morphism.domId : undefined,
+                codId: morphism.codId <= this._maxExistingObjectId ? morphism.codId : undefined,
+                temporaryDomId: morphism.domId > this._maxExistingObjectId ? morphism.domId : undefined,
+                temporaryCodId: morphism.codId > this._maxExistingObjectId ? morphism.codId : undefined,
                 jsonValue: JSON.stringify(morphism.toJSON())
             }))
         };
@@ -144,16 +146,21 @@ export class SchemaCategory {
         return this._signatureProvider.isAvailable(signature);
     }
 
-    setDatabaseToObjectsFromMapping(mapping: Mapping): void {
+    setDatabaseToObjectsFromMapping(mapping: Mapping, database: DatabaseWithConfiguration): void {
         const objects = getObjectsFromPath(mapping.accessPath, this.objects, this.morphisms);
 
         const rootObject = this.objects.find(object => object.id === mapping.rootObjectId);
         if (rootObject)
             objects.push(rootObject);
 
-        objects.forEach(object => object.setDatabase(mapping.logicalModel.databaseView));
+        objects.forEach(object => object.setDatabase(database));
     }
 }
+
+export type SchemaCategoryUpdate = {
+    objects: SchemaObjectUpdate[],
+    morphisms: SchemaMorphismUpdate[]
+};
 
 export class SchemaCategoryFromServer {
     id!: number;
@@ -196,7 +203,10 @@ function findObjectFromSignature(signature: Signature, objects: SchemaObject[], 
 }
 
 export class SchemaCategoryInfo {
-    private constructor(public id: number, public label: string) {}
+    private constructor(
+        public readonly id: number,
+        public readonly label: string
+    ) {}
 
     static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
         const parsed = JSON.parse(input.jsonValue) as { label: string };
@@ -206,5 +216,9 @@ export class SchemaCategoryInfo {
 
 export type SchemaCategoryInfoFromServer = {
     id: number;
+    jsonValue: string;
+}
+
+export type SchemaCategoryInit = {
     jsonValue: string;
 }

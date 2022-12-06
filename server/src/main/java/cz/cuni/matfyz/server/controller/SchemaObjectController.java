@@ -19,7 +19,7 @@ public class SchemaObjectController {
     @Autowired
     private SchemaObjectService service;
 
-    @GetMapping("/schemaObjects/{id}")
+    @GetMapping("/schema-objects/{id}")
     public SchemaObjectWrapper getObject(@PathVariable int id) {
         SchemaObjectWrapper object = service.find(id);
 

@@ -70,7 +70,7 @@ public class SchemaCategoryController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    @PutMapping("/schema-categories/positions/{id}")
+    @PutMapping("/schema-categories/{id}/positions")
     public boolean updateCategoryPositions(@PathVariable int id, @RequestBody PositionUpdate[] positionUpdates) {
         boolean result = true;
         for (PositionUpdate update : positionUpdates)
@@ -87,8 +87,10 @@ public class SchemaCategoryController {
         Position position
     ) {}
 
-    @GetMapping("/schema-categories/{id}/mappingOptions")
+    /*
+    @GetMapping("/schema-categories/{id}/mapping-options")
     public MappingOptionsView getMappingOptions(@PathVariable int id) {
         return new MappingOptionsView(id, databaseService.findAll());
     }
+    */
 }

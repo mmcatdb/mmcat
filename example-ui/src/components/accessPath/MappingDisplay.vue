@@ -27,7 +27,7 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="mapping-display">
+    <div class="mapping-preview">
         <!--
         <CleverRouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
             <h2>{{ mapping.name }}</h2>
@@ -51,6 +51,7 @@ export default defineComponent({
                     {{ mapping.rootObjectId }}
                 </td>
             </tr>
+            <!--
             <tr>
                 <td class="label">
                     Logical model:
@@ -67,6 +68,7 @@ export default defineComponent({
                     {{ mapping.logicalModel.databaseView.label }}
                 </td>
             </tr>
+            -->
         </table>
         <Divider />
         <ParentPropertyDisplay
@@ -77,7 +79,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.mapping-display {
+.mapping-preview {
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { type Graph, type Node, createDefaultFilter } from '@/types/categoryGraph';
-import type { DatabaseView } from '@/types/database';
+import type { DatabaseWithConfiguration } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import SignatureInput from './SignatureInput.vue';
@@ -20,7 +20,7 @@ export default defineComponent({
             required: true
         },
         database: {
-            type: Object as () => DatabaseView,
+            type: Object as () => DatabaseWithConfiguration,
             required: true
         },
         rootNode: {

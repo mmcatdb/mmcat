@@ -81,4 +81,3 @@ CREATE DATABASE mmcat_server_ttd OWNER mmcat_user;
 ```sh
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_ttd?sslmode=require -f src/main/resources/setupPostgresqlTTD.sql
 ```
-

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, type DatabaseInit, createInitFromUpdate } from '@/types/database';
-import { DELETE, POST, PUT } from '@/utils/backendAPI';
+import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, createInitFromUpdate } from '@/types/database';
+import API from '@/utils/api';
 
 export default defineComponent({
     props: {
@@ -42,15 +42,18 @@ export default defineComponent({
             if (!init)
                 return;
 
-            const result = await POST<Database, DatabaseInit>('/databases', init);
+            const result = await API.databases.createDatabase({}, init);
             if (result.status)
                 this.$emit('save', result.data);
         },
         async updateOld() {
+            if (!this.database)
+                return;
+
             if (this.innerValue.settings.password === '')
                 this.innerValue.settings.password = undefined;
 
-            const result = await PUT<Database>(`/databases/${this.database?.id}`, this.innerValue);
+            const result = await API.databases.updateDatabase({ id: this.database.id }, this.innerValue);
             if (result.status)
                 this.$emit('save', result.data);
         },
@@ -58,8 +61,11 @@ export default defineComponent({
             this.$emit('cancel');
         },
         async deleteMethod() {
+            if (!this.database)
+                return;
+
             this.fetching = true;
-            const result = await DELETE<void>(`/databases/${this.database?.id}`);
+            const result = await API.databases.deleteDatabase({ id: this.database.id });
             if (result.status)
                 this.$emit('delete');
 

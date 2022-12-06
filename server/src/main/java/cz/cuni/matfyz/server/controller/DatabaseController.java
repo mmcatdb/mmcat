@@ -3,7 +3,7 @@ package cz.cuni.matfyz.server.controller;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.database.DatabaseInit;
 import cz.cuni.matfyz.server.entity.database.DatabaseUpdate;
-import cz.cuni.matfyz.server.entity.database.DatabaseView;
+import cz.cuni.matfyz.server.entity.database.DatabaseWithConfiguration;
 import cz.cuni.matfyz.server.service.DatabaseService;
 
 import java.util.List;
@@ -29,8 +29,8 @@ public class DatabaseController {
     private DatabaseService service;
 
     @GetMapping("/database-views")
-    public List<DatabaseView> getAllDatabaseViews() {
-        return service.findAll().stream().map(database -> new DatabaseView(database, service.getDatabaseConfiguration(database))).toList();
+    public List<DatabaseWithConfiguration> getAllDatabaseViews() {
+        return service.findAllDatabasesWithConfiguration();
     }
 
     @GetMapping("/databases")

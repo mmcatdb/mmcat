@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Model, type ModelFromServer } from '@/types/model';
-import { GET } from '@/utils/backendAPI';
+import { Model } from '@/types/model';
+import API from '@/utils/api';
 
 import ModelDisplay from '@/components/ModelDisplay.vue';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
@@ -24,7 +24,7 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<ModelFromServer>(`/models/${this.$route.params.jobId}`);
+            const result = await API.models.getInstanceObject({ jobId: this.$route.params.jobId });
             if (result.status)
                 this.model = Model.fromServer(result.data);
 

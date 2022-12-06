@@ -1,8 +1,8 @@
 export class Model {
     private constructor(
-        public jobId: number,
-        public jobLabel: string,
-        public commands: string
+        public readonly jobId: number,
+        public readonly jobLabel: string,
+        public readonly commands: string
     ) {
 
     }
@@ -20,8 +20,8 @@ export type ModelFromServer = {
 
 export class ModelView {
     private constructor(
-        public jobId: number,
-        public jobLabel: string,
+        public readonly jobId: number,
+        public readonly jobLabel: string,
     ) {
 
     }

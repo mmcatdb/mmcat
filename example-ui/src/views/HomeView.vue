@@ -1,8 +1,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { getSchemaCategoryId, setSchemaCategoryId } from '@/utils/globalSchemaSettings';
-import { SchemaCategoryInfo, type SchemaCategoryInfoFromServer } from '@/types/schema';
-import { GET, POST } from '@/utils/backendAPI';
+import { SchemaCategoryInfo } from '@/types/schema';
+import API from '@/utils/api';
+
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
 export default defineComponent({
@@ -19,7 +20,7 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<SchemaCategoryInfoFromServer[]>('/schema-categories');
+        const result = await API.schemas.getAllCategoryInfos({});
         if (!result.status)
             return;
 
@@ -37,7 +38,7 @@ export default defineComponent({
         },
         async confirmNewSchema() {
             const jsonValue = JSON.stringify({ label: this.newSchemaLabel });
-            const result = await POST<SchemaCategoryInfoFromServer, { jsonValue: string }>('/schema-categories', { jsonValue });
+            const result = await API.schemas.createNewSchema({}, { jsonValue });
             if (!result.status)
                 return;
 

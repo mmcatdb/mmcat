@@ -95,6 +95,14 @@ export class SchemaMorphism {
     }
 }
 
+export type SchemaMorphismUpdate = {
+    domId?: number;
+    codId?: number;
+    temporaryDomId?: number;
+    temporaryCodId?: number;
+    jsonValue: string;
+}
+
 export class SchemaMorphismFromServer {
     id!: number;
     domId!: number;

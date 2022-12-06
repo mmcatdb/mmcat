@@ -2,20 +2,37 @@ import type { DeepPartial } from "../utils";
 import { DatabaseConfiguration, type DatabaseConfigurationFromServer } from "./Configuration";
 
 export class DatabaseView {
-    public readonly id: number;
-    public readonly type: Type;
-    public readonly label: string;
-    public configuration: DatabaseConfiguration;
-
-    private constructor(id: number, type: Type, label: string, configuration: DatabaseConfiguration) {
-        this.id = id;
-        this.type = type;
-        this.label = label;
-        this.configuration = configuration;
-    }
+    private constructor(
+        public readonly id: number,
+        public readonly type: Type,
+        public readonly label: string,
+    ) {}
 
     static fromServer(input: DatabaseViewFromServer): DatabaseView {
         return new DatabaseView(
+            input.id,
+            input.type,
+            input.label
+        );
+    }
+}
+
+export type DatabaseViewFromServer = {
+    id: number;
+    type: Type; // Full type (i.e. mongodb)
+    label: string; // User-defined name
+}
+
+export class DatabaseWithConfiguration {
+    private constructor(
+        public readonly id: number,
+        public readonly type: Type,
+        public readonly label: string,
+        public readonly configuration: DatabaseConfiguration
+    ) {}
+
+    static fromServer(input: DatabaseWithConfigurationFromServer): DatabaseWithConfiguration {
+        return new DatabaseWithConfiguration(
             input.id,
             input.type,
             input.label,
@@ -24,7 +41,7 @@ export class DatabaseView {
     }
 }
 
-export type DatabaseViewFromServer = {
+export type DatabaseWithConfigurationFromServer = {
     id: number;
     type: Type; // Full type (i.e. mongodb)
     label: string; // User-defined name

@@ -30,7 +30,7 @@ public class InstanceCategoryController {
         return instances.stream().map(entry -> entry.getKey() + ":\n" + entry.getValue().toString()).toList();
     }
 
-    @GetMapping("/instances/{categoryId}/object/{objectKey}")
+    @GetMapping("/instances/{categoryId}/objects/{objectKey}")
     public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Integer categoryId, @PathVariable Integer objectKey) {
         var key = new Key(objectKey);
 

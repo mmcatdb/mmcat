@@ -1,6 +1,6 @@
 <script lang="ts">
 import { type Job, Status } from '@/types/job';
-import { DELETE, POST } from '@/utils/backendAPI';
+import API from '@/utils/api';
 import { defineComponent } from 'vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
@@ -39,7 +39,7 @@ export default defineComponent({
         async startJob() {
             this.startJobDisabled = true;
 
-            const result = await POST<Job>(`/jobs/${this.job.id}/start`);
+            const result = await API.jobs.startJob({ id: this.job.id });
             if (result.status)
                 this.job.setStatus(result.data.status);
 
@@ -48,7 +48,7 @@ export default defineComponent({
         async deleteJob() {
             this.deleteJobDisabled = true;
 
-            const result = await DELETE<Job>(`/jobs/${this.job.id}`);
+            const result = await API.jobs.deleteJob({ id: this.job.id });
             if (result.status)
                 this.$emit('deleteJob');
 
@@ -57,7 +57,7 @@ export default defineComponent({
         async restartJob() {
             this.restartJobDisabled = true;
 
-            const result = await POST<Job>(`/jobs/${this.job.id}/start`);
+            const result = await API.jobs.startJob({ id: this.job.id });
             if (result.status)
                 this.job.setStatus(result.data.status);
 

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import type { AxiosResponse } from 'axios/index';
 import qs from 'qs';
-import type { Result } from '@/types/result';
+import type { Result } from '@/types/api/result';
+import type { PullResult, PushData } from '@/types/api/routes';
 
 const BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL;
 
@@ -54,7 +55,7 @@ instance.interceptors.response.use(
     }
 );
 
-function promiseToResponse<T>(promise: Promise<AxiosResponse<T>>): Promise<Result<T>> {
+function promiseToResponse<T>(promise: Promise<AxiosResponse<T>>): PullResult<T> {
     return promise
         .then(response => {
             return ({
@@ -69,7 +70,7 @@ function promiseToResponse<T>(promise: Promise<AxiosResponse<T>>): Promise<Resul
         });
 }
 
-export function GET<T>(action: string, params = {}): Promise<Result<T>> {
+function GET<T>(action: string, params = {}): PullResult<T> {
     let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.get(url, {
@@ -80,27 +81,30 @@ export function GET<T>(action: string, params = {}): Promise<Result<T>> {
     }));
 }
 
-export function POST<T, V extends Record<string, unknown> | void = void>(action: string, data?: V, params = {}): Promise<Result<T>> {
+function POST<T, D extends PushData = void>(action: string, data?: D, params = {}): PullResult<T> {
     let url = `${BACKEND_API_URL}`;
     url += action;
 
     return promiseToResponse<T>(instance.post(url, data, { params }));
 }
 
-export function PUT<T>(action: string, data = {}, params = {}): Promise<Result<T>> {
+function PUT<T, D extends PushData = void>(action: string, data?: D, params = {}): PullResult<T> {
     let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.put(url, data, { params }));
 }
 
-export function PATCH<T>(action: string, data = {}, params = {}): Promise<Result<T>> {
-    let url = `${BACKEND_API_URL}`;
-    url += action;
-    return promiseToResponse<T>(instance.patch(url, data, { params }));
-}
-
-export function DELETE<T>(action: string, params = {}): Promise<Result<T>> {
+function DELETE<T>(action: string, params = {}): PullResult<T> {
     let url = `${BACKEND_API_URL}`;
     url += action;
     return promiseToResponse<T>(instance.delete(url, { params }));
 }
+
+const rawAPI = {
+    GET,
+    POST,
+    PUT,
+    DELETE
+};
+
+export default rawAPI;

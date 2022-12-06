@@ -17,3 +17,23 @@ mvn install -Dmaven.test.skip
 ```
 - Then follow the steps in the [Backend](./server/README.md) and [Frontend](./example-ui/README.md) guides.
 - Lastly, you need a web server to make both applications available. See the [Apache configuration](./examples/apacheConfiguration.md) for detailed instructions.
+
+# Design
+
+## Data class hierarchy
+
+### Info
+
+- Contains basic information about the resource:
+    - id
+    - label
+    - description (optional)
+- Cannot contain information about other resources.
+- Corresponds to an **Info** class on client, which is displayed by a **Preview** component.
+
+### Full
+
+- Extends the **Info** class with information about neighbour resources (in the form of their **Infos**).
+- Cannot contain **Fulls** of other resources.
+
+### Full

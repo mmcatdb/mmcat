@@ -13,11 +13,7 @@ export class ComparablePosition implements Position {
     }
 }
 
-export class PositionUpdateToServer {
-    schemaObjectId!: number;
-    position!: Position;
-
-    constructor(input?: Partial<PositionUpdateToServer>) {
-        Object.assign(this, input);
-    }
+export type PositionUpdate = {
+    schemaObjectId: number;
+    position: Position;
 }

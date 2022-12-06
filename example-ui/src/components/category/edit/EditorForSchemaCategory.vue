@@ -1,13 +1,13 @@
 <script lang="ts">
 import { Edge, SelectionType, type Graph, type Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
-import { SchemaCategory, type SchemaCategoryFromServer } from '@/types/schema';
-import { PUT } from '@/utils/backendAPI';
+import { SchemaCategory } from '@/types/schema';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import EditObject from './EditObject.vue';
 import EditMorphism from './EditMorphism.vue';
 import Divider from '@/components/layout/Divider.vue';
+import API from '@/utils/api';
 
 enum State {
     Default,
@@ -112,7 +112,7 @@ export default defineComponent({
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
 
-            const result = await PUT<SchemaCategoryFromServer>(`/schema-categories/${this.graph.schemaCategory.id}`, updateObject);
+            const result = await API.schemas.updateCategoryWrapper({ id: this.graph.schemaCategory.id }, updateObject);
             if (result.status) {
                 const schemaCategory = SchemaCategory.fromServer(result.data);
                 this.$emit('save', schemaCategory);

@@ -1,14 +1,8 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.database.Database;
-import cz.cuni.matfyz.server.entity.database.DatabaseView;
-import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModel;
-import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelView;
+import cz.cuni.matfyz.server.entity.mapping.MappingFull;
+import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
-import cz.cuni.matfyz.server.entity.mapping.MappingView;
-import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
-import cz.cuni.matfyz.server.service.DatabaseService;
-import cz.cuni.matfyz.server.service.LogicalModelService;
 import cz.cuni.matfyz.server.service.MappingService;
 
 import java.util.List;
@@ -31,51 +25,45 @@ public class MappingController {
     @Autowired
     private MappingService service;
 
-    @Autowired
-    private DatabaseService databaseService; // TODO remove later
-
-    @Autowired
-    private LogicalModelService logicalModelService;
-
     @GetMapping("/mappings/{id}")
-    public MappingView getMapping(@PathVariable int id) {
-        MappingWrapper wrapper = service.find(id);
+    public MappingFull getMapping(@PathVariable int id) {
+        var mapping = service.findFull(id);
 
-        if (wrapper == null)
+        if (mapping == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        return wrapperToView(wrapper);
+        return mapping;
     }
 
-    /**
-     * @deprecated
-     */
-    @Deprecated
     @GetMapping("/schema-categories/{categoryId}/mappings")
-    public List<MappingView> getAllMappingsInCategory(@PathVariable int categoryId) {
-        return logicalModelService.findAllInCategory(categoryId).stream().flatMap(logicalModel -> {
-            return service.findAllInLogicalModel(logicalModel.id).stream();
-        })
-        .map(this::wrapperToView).toList();
+    public List<MappingFull> getAllMappingsInCategory(@PathVariable int categoryId) {
+        return service.findAllFullInCategory(categoryId);
     }
 
     @GetMapping("/logical-models/{logicalModelId}/mappings")
-    public List<MappingView> getAllMappingsInLogicalModel(@PathVariable int logicalModelId) {
-        return service.findAllInLogicalModel(logicalModelId).stream().map(this::wrapperToView).toList();
+    public List<MappingFull> getAllMappingsInLogicalModel(@PathVariable int logicalModelId) {
+        return service.findAllFull(logicalModelId);
     }
 
     @PostMapping("/mappings")
-    public MappingView createNewMapping(@RequestBody MappingInit newMapping) {
-        return wrapperToView(service.createNew(newMapping));
+    public MappingInfo createNewMapping(@RequestBody MappingInit newMapping) {
+        return service.createNew(newMapping);
     }
 
-    // TODO this is just sad ...
+    /*
     private MappingView wrapperToView(MappingWrapper wrapper) {
         LogicalModel logicalModel = logicalModelService.find(wrapper.logicalModelId);
         Database database = databaseService.find(logicalModel.databaseId);
-        DatabaseView databaseView = new DatabaseView(database, databaseService.getDatabaseConfiguration(database));
-        LogicalModelView logicalModelView = new LogicalModelView(logicalModel, databaseView);
+        DatabaseWithConfiguration databaseWithConfiguration = databaseService.findDatabaseWithConfiguration(logicalModel.databaseId)
+        LogicalModelFull logicalModelView = new LogicalModelFull(
+            logicalModel.id,
+            logicalModel.categoryId,
+            databaseWithConfiguration,
+            logicalModel.jsonValue,
+
+        );
         return new MappingView(wrapper, logicalModelView);
     }
+    */
 
 }

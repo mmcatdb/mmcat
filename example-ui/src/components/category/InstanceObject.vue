@@ -1,14 +1,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { GET } from '@/utils/backendAPI';
 import type { SchemaObject } from '@/types/schema';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import { InstanceObject, type InstanceObjectFromServer } from '@/types/instance/InstanceObject';
+import { InstanceObject } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import API from '@/utils/api';
 
 type Column = {
     signature: Signature;
@@ -53,7 +53,7 @@ export default defineComponent({
         async reloadInstanceObject() {
             this.loading = true;
 
-            const result = await GET<InstanceObjectFromServer>(`/instances/${getSchemaCategoryId()}/object/${this.node.schemaObject.key.value}`);
+            const result = await API.instances.getInstanceObject({ categoryId: getSchemaCategoryId(), objectKey: this.node.schemaObject.key.value });
             if (result.status && 'data' in result) {
                 const object = InstanceObject.fromServer(result.data);
                 this.fetchedInstanceObject = {

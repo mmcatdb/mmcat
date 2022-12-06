@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { LogicalModel } from '@/types/logicalModel';
+import type { LogicalModelFull } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 export default defineComponent({
@@ -9,7 +9,7 @@ export default defineComponent({
     },
     props: {
         logicalModel: {
-            type: Object as () => LogicalModel,
+            type: Object as () => LogicalModelFull,
             required: true
         }
     },
@@ -43,7 +43,7 @@ export default defineComponent({
                     Database:
                 </td>
                 <td class="value">
-                    {{ logicalModel.databaseView.label }}
+                    {{ logicalModel.database.label }}
                 </td>
             </tr>
         </table>

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { GET } from '@/utils/backendAPI';
+import API from '@/utils/api';
 import type { Database } from '@/types/database/Database';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
@@ -24,7 +24,7 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<Database[]>('/databases');
+            const result = await API.databases.getAllDatabases({});
             if (result.status)
                 this.databases = result.data;
 

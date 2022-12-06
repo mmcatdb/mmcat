@@ -1,15 +1,16 @@
 <script lang="ts">
 import { defineComponent, nextTick } from 'vue';
-import { GET, PUT } from '@/utils/backendAPI';
-import { SchemaCategoryFromServer, SchemaCategory, PositionUpdateToServer } from '@/types/schema';
+import API from '@/utils/api';
+import { SchemaCategory, type PositionUpdate } from '@/types/schema';
 import cytoscape from 'cytoscape';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
-import { type MappingFromServer, Mapping } from '@/types/mapping';
+import { Mapping } from '@/types/mapping';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { LogicalModelFull } from '@/types/logicalModel';
 
 export default defineComponent({
     components: {
@@ -19,29 +20,30 @@ export default defineComponent({
     emits: [ 'create:graph' ],
     data() {
         return {
-            mappings: [] as Mapping[],
+            logicalModels: [] as LogicalModelFull[],
             schemaFetched: false,
             saveButtonDisabled: false,
             graph: null as Graph | null
         };
     },
     async mounted() {
-        const result = await GET<SchemaCategoryFromServer>(`/schema-categories/${getSchemaCategoryId()}`);
-        const mappingsResult = await GET<MappingFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/mappings`);
-        if (!result.status || !mappingsResult.status)
+        const result = await API.schemas.getCategoryWrapper({ id: getSchemaCategoryId() });
+        // TODO
+        const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
+        if (!result.status || !logicalModelsResult.status)
             return;
 
         console.log(result.data);
         const schemaCategory = SchemaCategory.fromServer(result.data);
-        this.mappings = mappingsResult.data.map(Mapping.fromServer);
+        this.logicalModels = logicalModelsResult.data.map(LogicalModelFull.fromServer);
 
-        this.graph = this.createGraph(schemaCategory, this.mappings);
+        this.graph = this.createGraph(schemaCategory, this.logicalModels);
 
         this.schemaFetched = true;
         this.$emit('create:graph', this.graph);
     },
     methods: {
-        createGraph(schema: SchemaCategory, mappings: Mapping[]): Graph {
+        createGraph(schema: SchemaCategory, logicalModels: LogicalModelFull[]): Graph {
             const container = document.getElementById('cytoscape');
 
             // This is needed because of some weird bug.
@@ -63,8 +65,11 @@ export default defineComponent({
                 style
             });
 
-            mappings.forEach(mapping => schema.setDatabaseToObjectsFromMapping(mapping));
-
+            logicalModels.forEach(logicalModel => {
+                logicalModel.mappings.forEach(mapping => {
+                    schema.setDatabaseToObjectsFromMapping(mapping, logicalModel.database);
+                });
+            });
 
             const graph = new Graph(cytoscapeInstance, schema);
 
@@ -93,9 +98,10 @@ export default defineComponent({
             console.log('Saving position changes');
 
             const updatedPositions = this.graph.schemaCategory.objects
-                .map(object => object.toPositionUpdateToServer())
-                .filter(update => update != null);
-            const result = await PUT<PositionUpdateToServer[]>(`/schema-categories/positions/${this.graph.schemaCategory.id}`, updatedPositions);
+                .map(object => object.toPositionUpdate())
+                .filter((update): update is PositionUpdate => update !== null);
+
+            const result = await API.schemas.updateCategoryPositions({ id: this.graph.schemaCategory.id }, updatedPositions);
             console.log(result);
 
             this.saveButtonDisabled = false;
@@ -105,7 +111,7 @@ export default defineComponent({
             this.graph = null;
 
             nextTick(() => {
-                this.graph = this.createGraph(schemaCategory, this.mappings);
+                this.graph = this.createGraph(schemaCategory, this.logicalModels);
                 this.schemaFetched = true;
                 this.$emit('create:graph', this.graph);
             });

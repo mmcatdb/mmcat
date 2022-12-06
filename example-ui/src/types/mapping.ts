@@ -1,5 +1,5 @@
 import { RootProperty, type RootPropertyJSON } from "./accessPath/basic";
-import { LogicalModel, type LogicalModelFromServer } from "./logicalModel";
+import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
 
 export type MappingJSON = {
     kindName: string,
@@ -8,33 +8,32 @@ export type MappingJSON = {
 }
 
 export class Mapping {
-    id: number;
-    label: string;
-    logicalModel: LogicalModel;
-    rootObjectId: number;
-    accessPath: RootProperty;
-
-    private constructor(id: number, label: string, logicalModel: LogicalModel, rootObjectId: number, accessPath: RootProperty) {
-        this.id = id;
-        this.label = label;
-        this.logicalModel = logicalModel;
-        this.rootObjectId = rootObjectId;
-        this.accessPath = accessPath;
-    }
+    private constructor(
+        public readonly id: number,
+        public readonly label: string,
+        public readonly logicalModelId: number,
+        public readonly rootObjectId: number,
+        public readonly accessPath: RootProperty
+    ) {}
 
     static fromServer(input: MappingFromServer): Mapping {
-        const logicalModel = LogicalModel.fromServer(input.logicalModelView);
         const json = JSON.parse(input.jsonValue) as { label: string };
         const mappingJson = JSON.parse(input.mappingJsonValue) as MappingJSON;
         const accessPath = RootProperty.fromJSON(mappingJson.accessPath);
 
-        return new Mapping(input.id, json.label, logicalModel, input.rootObjectId, accessPath);
+        return new Mapping(
+            input.id,
+            json.label,
+            input.logicalModelId,
+            input.rootObjectId,
+            accessPath
+        );
     }
 }
 
 export type MappingFromServer = {
     id: number;
-    logicalModelView: LogicalModelFromServer;
+    logicalModelId: number;
     rootObjectId: number;
     jsonValue: string;
     mappingJsonValue: string;
@@ -46,3 +45,24 @@ export type MappingInit = {
     mappingJsonValue: string,
     jsonValue: string
 }
+
+export class MappingInfo {
+    private constructor(
+        public readonly id: number,
+        public readonly label: string
+    ) {}
+
+    static fromServer(input: MappingInfoFromServer): MappingInfo {
+        const json = JSON.parse(input.jsonValue) as { label: string };
+
+        return new MappingInfo(
+            input.id,
+            json.label
+        );
+    }
+}
+
+export type MappingInfoFromServer = {
+    id: number,
+    jsonValue: string
+};

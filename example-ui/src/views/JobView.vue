@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Job, type JobFromServer } from '@/types/job';
-import { GET } from '@/utils/backendAPI';
+import { Job } from '@/types/job';
+import API from '@/utils/api';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
@@ -22,7 +22,7 @@ export default defineComponent({
         };
     },
     async mounted() {
-        const result = await GET<JobFromServer>(`/jobs/${this.$route.params.id}`);
+        const result = await API.jobs.getJob({ id: this.$route.params.id });
         if (result.status)
             this.job = Job.fromServer(result.data);
 

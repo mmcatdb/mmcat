@@ -19,7 +19,7 @@ public class SchemaMorphismController {
     @Autowired
     private SchemaMorphismService service;
 
-    @GetMapping("/schemaMorphisms/{id}")
+    @GetMapping("/schema-morphisms/{id}")
     public SchemaMorphismWrapper getMorphism(@PathVariable int id) {
         SchemaMorphismWrapper morphism = service.find(id);
 

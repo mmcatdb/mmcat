@@ -6,10 +6,9 @@ import { defineComponent } from 'vue';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
-import { GET, POST } from '@/utils/backendAPI';
-import type { MappingFromServer, MappingInit } from '@/types/mapping';
-import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
+import { LogicalModelFull } from '@/types/logicalModel';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import API from '@/utils/api';
 
 export default defineComponent({
     components: {
@@ -22,8 +21,8 @@ export default defineComponent({
             graph: null as Graph | null,
             accessPath: null as RootProperty | null,
             selectingRootNode: null as Node | null,
-            logicalModels: [] as LogicalModel[],
-            selectedLogicalModel: null as LogicalModel | null
+            logicalModels: [] as LogicalModelFull[],
+            selectedLogicalModel: null as LogicalModelFull | null
         };
     },
     computed: {
@@ -32,9 +31,9 @@ export default defineComponent({
         }
     },
     async mounted() {
-        const result = await GET<LogicalModelFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/logical-models`);
+        const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
         if (result.status)
-            this.logicalModels = result.data.map(LogicalModel.fromServer);
+            this.logicalModels = result.data.map(LogicalModelFull.fromServer);
     },
     methods: {
         cytoscapeCreated(graph: Graph) {
@@ -53,7 +52,7 @@ export default defineComponent({
             if (! this.selectedLogicalModel || !this.graph || !this.accessPath)
                 return;
 
-            const result = await POST<MappingFromServer, MappingInit>('/mappings', {
+            const result = await API.mappings.createNewMapping({}, {
                 logicalModelId: this.selectedLogicalModel.id,
                 rootObjectId: this.accessPath.node.schemaObject.id,
                 jsonValue: JSON.stringify({
@@ -122,7 +121,7 @@ export default defineComponent({
                 <AccessPathEditor
                     v-else
                     :graph="graph"
-                    :database="selectedLogicalModel.databaseView"
+                    :database="selectedLogicalModel.database"
                     :root-property="accessPath"
                     @finish="createMapping"
                 />

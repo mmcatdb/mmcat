@@ -1,12 +1,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { Mapping, type MappingFromServer } from '@/types/mapping';
-import { GET } from '@/utils/backendAPI';
+import { Mapping } from '@/types/mapping';
+import API from '@/utils/api';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
@@ -25,8 +24,8 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            //const result = await GET<MappingFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/mappings`);
-            const result = await GET<MappingFromServer[]>(`/logical-models/${1}/mappings`);
+            // TODO get all mappings?
+            const result = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId: 1 });
             if (result.status)
                 this.mappings = result.data.map(Mapping.fromServer);
 

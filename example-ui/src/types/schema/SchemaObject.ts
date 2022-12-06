@@ -1,8 +1,8 @@
 import { ComparableSet } from "@/utils/ComparableSet";
 import type { Position } from "cytoscape";
-import type { DatabaseView } from "../database";
+import type { DatabaseWithConfiguration } from "../database";
 import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
-import { ComparablePosition, PositionUpdateToServer } from "./Position";
+import { ComparablePosition, type PositionUpdate } from "./Position";
 
 export type SchemaObjectJSON = {
     label: string,
@@ -26,7 +26,7 @@ export class SchemaObject {
 
     _originalPosition?: ComparablePosition;
 
-    _databases = new ComparableSet<DatabaseView, number>(database => database.id);
+    _databases = new ComparableSet<DatabaseWithConfiguration, number>(database => database.id);
 
     private constructor() {}
 
@@ -82,11 +82,11 @@ export class SchemaObject {
         return this._isNew;
     }
 
-    get databases(): DatabaseView[] {
+    get databases(): DatabaseWithConfiguration[] {
         return [ ...this._databases.values() ];
     }
 
-    setDatabase(database: DatabaseView) {
+    setDatabase(database: DatabaseWithConfiguration) {
         this._databases.add(database);
     }
 
@@ -94,8 +94,8 @@ export class SchemaObject {
         this.label = label;
     }
 
-    toPositionUpdateToServer(): PositionUpdateToServer | null {
-        return this.position.equals(this._originalPosition) ? null : new PositionUpdateToServer({ schemaObjectId: this.id, position: this.position });
+    toPositionUpdate(): PositionUpdate | null {
+        return this.position.equals(this._originalPosition) ? null : { schemaObjectId: this.id, position: this.position };
     }
 
     toJSON(): SchemaObjectJSON {
@@ -106,6 +106,12 @@ export class SchemaObject {
             superId: this.superId.toJSON(),
         };
     }
+}
+
+export type SchemaObjectUpdate = {
+    temporaryId: number;
+    position: Position;
+    jsonValue: string;
 }
 
 export type SchemaObjectFromServer = {

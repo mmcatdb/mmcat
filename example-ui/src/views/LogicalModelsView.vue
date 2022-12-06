@@ -1,22 +1,22 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
-import { GET } from '@/utils/backendAPI';
+import { LogicalModelInfo } from '@/types/logicalModel';
+import API from '@/utils/api';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
+import LogicalModelPreview from '@/components/LogicalModelPreview.vue';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 export default defineComponent({
     components: {
         ResourceNotFound,
         ResourceLoading,
-        LogicalModelDisplay
+        LogicalModelPreview
     },
     data() {
         return {
-            logicalModels: null as LogicalModel[] | null,
+            logicalModels: null as LogicalModelInfo[] | null,
             fetched: false
         };
     },
@@ -25,9 +25,9 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<LogicalModelFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/logical-models`);
+            const result = await API.logicalModels.getAllLogicalModelInfosInCategory({ categoryId: getSchemaCategoryId() });
             if (result.status)
-                this.logicalModels = result.data.map(LogicalModel.fromServer);
+                this.logicalModels = result.data.map(LogicalModelInfo.fromServer);
 
             this.fetched = true;
         },
@@ -54,7 +54,7 @@ export default defineComponent({
                     v-for="logicalModel in logicalModels"
                     :key="logicalModel.id"
                 >
-                    <LogicalModelDisplay :logical-model="logicalModel" />
+                    <LogicalModelPreview :logical-model="logicalModel" />
                 </div>
             </div>
         </template>

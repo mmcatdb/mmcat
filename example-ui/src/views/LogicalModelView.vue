@@ -1,24 +1,26 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { LogicalModel, type LogicalModelFromServer } from '@/types/logicalModel';
-import { GET } from '@/utils/backendAPI';
+import { LogicalModelFull } from '@/types/logicalModel';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
-import type { Mapping } from '@/types/mapping';
+import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
+import { Mapping } from '@/types/mapping';
+import API from '@/utils/api';
 
 export default defineComponent({
     components: {
         ResourceNotFound,
         ResourceLoading,
-        LogicalModelDisplay
+        LogicalModelDisplay,
+        MappingDisplay
     },
     data() {
         return {
             fetched: false,
-            logicalModel: null as LogicalModel | null,
-            mappings: [] as Mapping[] // TODO TODO TODO FIXXXXXXXXXXX
+            logicalModel: null as LogicalModelFull | null,
+            mappings: null as Mapping[] | null
         };
     },
     async mounted() {
@@ -26,9 +28,18 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<LogicalModelFromServer>(`/logical-models/${this.$route.params.id}`);
-            if (result.status)
-                this.logicalModel = LogicalModel.fromServer(result.data);
+            const result = await API.logicalModels.getLogicalModel({ id: this.$route.params.id });
+            if (!result.status) {
+                this.fetched = true;
+                return;
+            }
+
+            this.logicalModel = LogicalModelFull.fromServer(result.data);
+            const mappingsResult = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId: this.logicalModel.id });
+            if (mappingsResult.status) {
+                this.mappings = mappingsResult.data.map(Mapping.fromServer);
+                return;
+            }
 
             this.fetched = true;
         },
@@ -42,7 +53,7 @@ export default defineComponent({
 <template>
     <div>
         <h1>Logical model</h1>
-        <template v-if="logicalModel">
+        <template v-if="logicalModel && mappings">
             <div class="logical-model">
                 <LogicalModelDisplay :logical-model="logicalModel" />
             </div>

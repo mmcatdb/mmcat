@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.repository;
 
+import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MappingRepository {
 
-    public List<MappingWrapper> findAllInLogicalModel(int logicalModelId) {
+    public List<MappingWrapper> findAllWrappers(int logicalModelId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
             statement.setInt(1, logicalModelId);
@@ -50,6 +51,21 @@ public class MappingRepository {
                 String jsonValue = resultSet.getString("json_value");
 
                 output.set(new MappingWrapper(foundId, logicalModelId, rootObjectId, rootMorphismId, mappingJsonValue, jsonValue));
+            }
+        });
+    }
+
+    public List<MappingInfo> findAllInfos(int logicalModelId) {
+        return DatabaseWrapper.getMultiple((connection, output) -> {
+            var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
+            statement.setInt(1, logicalModelId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                int foundId = resultSet.getInt("id");
+                String jsonValue = resultSet.getString("json_value");
+
+                output.add(new MappingInfo(foundId, jsonValue));
             }
         });
     }

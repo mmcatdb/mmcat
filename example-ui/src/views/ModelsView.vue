@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { ModelView, type ModelViewFromServer } from '@/types/model';
-import { GET } from '@/utils/backendAPI';
+import { ModelView } from '@/types/model';
+import API from '@/utils/api';
 
 import ModelViewDisplay from '@/components/ModelViewDisplay.vue';
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
@@ -25,7 +25,7 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await GET<ModelViewFromServer[]>(`/schema-categories/${getSchemaCategoryId()}/models`);
+            const result = await API.models.getAllModelsInCategory({ categoryId: getSchemaCategoryId() });
             if (result.status)
                 this.models = result.data.map(ModelView.fromServer);
 

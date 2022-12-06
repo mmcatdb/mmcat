@@ -1,11 +1,8 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.server.entity.database.Database;
-import cz.cuni.matfyz.server.entity.database.DatabaseView;
-import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModel;
+import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelFull;
+import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelInfo;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelInit;
-import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelView;
-import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.LogicalModelService;
 
 import java.util.List;
@@ -25,41 +22,43 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 public class LogicalModelController {
 
-    // TODO - display all mappings under logical model
-    // TODO - jobs should depend on the logical model instead of mapping
     // TODO - LogicalModel vs LogicalModelView - now we have to load the whole view for each mapping ...
-        // TODO - also some unification for the naming - i.e., View vs Full
+    // TODO - also some unification for the naming - i.e., View vs Full
 
     @Autowired
     private LogicalModelService service;
 
-    @Autowired
-    private DatabaseService databaseService;
-
     @GetMapping("/logical-models/{id}")
-    public LogicalModelView getLogicalModel(@PathVariable int id) {
-        LogicalModel model = service.find(id);
+    public LogicalModelFull getLogicalModel(@PathVariable int id) {
+        var logicalModel = service.findFull(id);
 
-        if (model == null)
+        if (logicalModel == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        return logicalModelToView(model);
+        return logicalModel;
     }
 
+    /**
+     * @deprecated
+     */
+    @Deprecated
     @GetMapping("/schema-categories/{categoryId}/logical-models")
-    public List<LogicalModelView> getAllLogicalModelsInCategory(@PathVariable int categoryId) {
-        return service.findAllInCategory(categoryId).stream().map(this::logicalModelToView).toList();
+    public List<LogicalModelFull> getAllLogicalModelsInCategory(@PathVariable int categoryId) {
+        return service.findAllFull(categoryId);
     }
 
     @PostMapping("/logical-models")
-    public LogicalModelView createNewLogicalModel(@RequestBody LogicalModelInit newLogicalModel) {
-        return logicalModelToView(service.createNew(newLogicalModel));
+    public LogicalModelInfo createNewLogicalModel(@RequestBody LogicalModelInit init) {
+        return service.createNew(init);
     }
 
-    private LogicalModelView logicalModelToView(LogicalModel model) {
-        Database database = databaseService.find(model.databaseId);
-        DatabaseView databaseView = new DatabaseView(database, databaseService.getDatabaseConfiguration(database));
-        return new LogicalModelView(model, databaseView);
+    @GetMapping("/schema-categories/{categoryId}/logical-model-infos")
+    public List<LogicalModelInfo> getAllLogicalModelInfosInCategory(@PathVariable int categoryId) {
+        return service.findAll(categoryId).stream().map(logicalModel -> {
+            //Database database = databaseService.find(logicalModel.databaseId);
+            //return logicalModel.toInfo(database.toView());
+            return logicalModel.toInfo();
+        }).toList();
     }
 
 }

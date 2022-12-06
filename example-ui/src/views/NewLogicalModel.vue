@@ -1,7 +1,6 @@
 <script lang="ts">
-import { DatabaseView, type DatabaseViewFromServer } from '@/types/database';
-import type { LogicalModelFromServer, LogicalModelInit } from '@/types/logicalModel';
-import { GET, POST } from '@/utils/backendAPI';
+import { DatabaseWithConfiguration } from '@/types/database';
+import API from '@/utils/api';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import { defineComponent } from 'vue';
 
@@ -11,16 +10,16 @@ export default defineComponent({
     },
     data() {
         return {
-            databases: [] as DatabaseView[],
-            selectedDatabase: null as DatabaseView | null,
+            databases: [] as DatabaseWithConfiguration[],
+            selectedDatabase: null as DatabaseWithConfiguration | null,
             label: '',
             fetching: false
         };
     },
     async mounted() {
-        const result = await GET<DatabaseViewFromServer[]>('/database-views');
+        const result = await API.databases.getAllDatabaseViews({});
         if (result.status)
-            this.databases = result.data.map(DatabaseView.fromServer);
+            this.databases = result.data.map(DatabaseWithConfiguration.fromServer);
     },
     methods: {
         async createLogicalModel() {
@@ -29,7 +28,7 @@ export default defineComponent({
 
             this.fetching = true;
 
-            const result = await POST<LogicalModelFromServer, LogicalModelInit>('/logical-models', {
+            const result = await API.logicalModels.createNewLogicalModel({}, {
                 databaseId: this.selectedDatabase.id,
                 categoryId: getSchemaCategoryId(),
                 jsonValue: JSON.stringify({

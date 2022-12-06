@@ -1,5 +1,5 @@
 import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, NodeSingular } from "cytoscape";
-import type { DatabaseView } from "../database";
+import type { DatabaseWithConfiguration } from "../database";
 import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Edge } from "./Edge";
 import { Node } from "./Node";
@@ -11,7 +11,7 @@ export type TemporaryEdge = {
     delete: () => void;
 }
 
-type Group = { id: number, databaseView: DatabaseView, node: NodeSingular };
+type Group = { id: number, databaseView: DatabaseWithConfiguration, node: NodeSingular };
 
 export class Graph {
     _cytoscape: Core;
@@ -64,7 +64,7 @@ export class Graph {
 
     groups = [] as Group[];
 
-    getGroupOrAddIt(databaseView: DatabaseView): Group {
+    getGroupOrAddIt(databaseView: DatabaseWithConfiguration): Group {
         const results = this.groups.filter(group => group.databaseView.id === databaseView.id);
         if (results[0])
             return results[0];

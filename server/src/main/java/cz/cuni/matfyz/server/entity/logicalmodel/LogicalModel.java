@@ -18,4 +18,8 @@ public class LogicalModel extends Entity {
         this.jsonValue = jsonValue;
     }
 
+    public LogicalModelInfo toInfo() {
+        return new LogicalModelInfo(id, categoryId, jsonValue);
+    }
+
 }
