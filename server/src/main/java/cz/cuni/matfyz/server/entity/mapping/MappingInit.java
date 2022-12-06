@@ -5,8 +5,7 @@ package cz.cuni.matfyz.server.entity.mapping;
  */
 public record MappingInit(
     int logicalModelId,
-    Integer rootObjectId,
-    Integer rootMorphismId,
+    int rootObjectId,
     String mappingJsonValue,
     String jsonValue
 ) {}

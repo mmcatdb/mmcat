@@ -7,7 +7,6 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -28,11 +27,10 @@ public class MappingRepository {
                 int foundId = resultSet.getInt("id");
                 int logicalModelId = resultSet.getInt("logical_model_id");
                 Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
-                Integer rootMorphismId = Utils.getIntOrNull(resultSet.getInt("root_morphism_id"));
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.set(new MappingWrapper(foundId, logicalModelId, rootObjectId, rootMorphismId, mappingJsonValue, jsonValue));
+                output.set(new MappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
             }
         });
     }
@@ -46,11 +44,10 @@ public class MappingRepository {
             while (resultSet.next()) {
                 int foundId = resultSet.getInt("id");
                 Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
-                Integer rootMorphismId = Utils.getIntOrNull(resultSet.getInt("root_morphism_id"));
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.add(new MappingWrapper(foundId, logicalModelId, rootObjectId, rootMorphismId, mappingJsonValue, jsonValue));
+                output.add(new MappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
             }
         });
     }
@@ -73,16 +70,15 @@ public class MappingRepository {
     public Integer add(MappingInit mapping) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
-                INSERT INTO mapping (logical_model_id, root_object_id, root_morphism_id, mapping_json_value, json_value)
+                INSERT INTO mapping (logical_model_id, root_object_id, mapping_json_value, json_value)
                 VALUES (?, ?, ?, ?::jsonb, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
             statement.setInt(1, mapping.logicalModelId());
-            statement.setObject(2, mapping.rootObjectId(), Types.INTEGER); // The inserted value can be null.
-            statement.setObject(3, mapping.rootMorphismId(), Types.INTEGER); // Same here.
-            statement.setString(4, mapping.mappingJsonValue());
-            statement.setString(5, mapping.jsonValue());
+            statement.setInt(2, mapping.rootObjectId());
+            statement.setString(3, mapping.mappingJsonValue());
+            statement.setString(4, mapping.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

@@ -36,7 +36,7 @@ public class SchemaBuilder {
     public Mapping build() {
         var category = buildCategory();
         var rootObject = createdObjects.get(mappingWrapper.rootObjectId);
-        var rootMorphism = mappingWrapper.rootMorphismId == null ? null : createdMorphisms.get(mappingWrapper.rootMorphismId);
+        SchemaMorphism rootMorphism = null;
         
         return new Mapping.Builder().fromJSON(category, rootObject, rootMorphism, mappingWrapper.mappingJsonValue);
     }
