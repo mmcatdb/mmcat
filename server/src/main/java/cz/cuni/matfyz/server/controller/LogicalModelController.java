@@ -1,8 +1,10 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.database.DatabaseInfo;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelFull;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelInfo;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelInit;
+import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.LogicalModelService;
 
 import java.util.List;
@@ -28,6 +30,9 @@ public class LogicalModelController {
     @Autowired
     private LogicalModelService service;
 
+    @Autowired
+    private DatabaseService databaseService;
+
     @GetMapping("/logical-models/{id}")
     public LogicalModelFull getLogicalModel(@PathVariable int id) {
         var logicalModel = service.findFull(id);
@@ -49,15 +54,26 @@ public class LogicalModelController {
 
     @PostMapping("/logical-models")
     public LogicalModelInfo createNewLogicalModel(@RequestBody LogicalModelInit init) {
-        return service.createNew(init);
+        return service.createNew(init).toInfo();
     }
 
+    private record LogicalModelDatabaseInfo(
+        LogicalModelInfo logicalModel,
+        DatabaseInfo database
+    ) {}
+
     @GetMapping("/schema-categories/{categoryId}/logical-model-infos")
-    public List<LogicalModelInfo> getAllLogicalModelInfosInCategory(@PathVariable int categoryId) {
+    public List<LogicalModelDatabaseInfo> getAllLogicalModelDatabaseInfosInCategory(@PathVariable int categoryId) {
+        var databases = databaseService.findAll();
+
+
         return service.findAll(categoryId).stream().map(logicalModel -> {
-            //Database database = databaseService.find(logicalModel.databaseId);
-            //return logicalModel.toInfo(database.toView());
-            return logicalModel.toInfo();
+            var database = databases.stream().filter(d -> d.id == logicalModel.databaseId).findFirst();
+
+            return new LogicalModelDatabaseInfo(
+                logicalModel.toInfo(),
+                database.isPresent() ? database.get().toInfo() : null
+            );
         }).toList();
     }
 

@@ -70,8 +70,8 @@ public class Database extends Entity {
         return dataJSONWriter.writeValueAsString(this.toDatabaseInit());
     }
 
-    public DatabaseView toView() {
-        return new DatabaseView(id, type, label);
+    public DatabaseInfo toInfo() {
+        return new DatabaseInfo(id, type, label);
     }
 
     /*

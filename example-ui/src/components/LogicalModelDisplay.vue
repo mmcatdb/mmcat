@@ -1,7 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import type { LogicalModel } from '@/types/logicalModel';
+import type { LogicalModelInfo } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import type { DatabaseInfo } from '@/types/database';
 
 export default defineComponent({
     components: {
@@ -9,8 +10,13 @@ export default defineComponent({
     },
     props: {
         logicalModel: {
-            type: Object as () => LogicalModel,
+            type: Object as () => LogicalModelInfo,
             required: true
+        },
+        database: {
+            type: Object as () => DatabaseInfo,
+            required: false,
+            default: undefined
         }
     },
     data() {
@@ -38,12 +44,14 @@ export default defineComponent({
                     {{ logicalModel.id }}
                 </td>
             </tr>
-            <tr>
+            <tr v-if="database">
                 <td class="label">
                     Database:
                 </td>
                 <td class="value">
-                    {{ logicalModel.database.label }}
+                    <RouterLink :to="{ name: 'databases', params: { id: database.id } }">
+                        {{ database.label }}
+                    </RouterLink>
                 </td>
             </tr>
         </table>

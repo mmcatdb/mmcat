@@ -1,6 +1,12 @@
 import type { Empty, StringLike } from "@/types/api/routes";
 import { GET, POST } from "../routeFunctions";
 import type { LogicalModelFromServer, LogicalModelInfoFromServer, LogicalModelInit } from "@/types/logicalModel";
+import type { DatabaseInfoFromServer } from "@/types/database";
+
+type LogicalModelDatabaseInfoFromServer = {
+    logicalModel: LogicalModelInfoFromServer,
+    database: DatabaseInfoFromServer
+};
 
 const logicalModels = {
     getLogicalModel: GET<{ id: StringLike }, LogicalModelFromServer>(
@@ -12,7 +18,7 @@ const logicalModels = {
     createNewLogicalModel: POST<Empty, LogicalModelInfoFromServer, LogicalModelInit>(
         () => `/logical-models`
     ),
-    getAllLogicalModelInfosInCategory: GET<{ categoryId: StringLike }, LogicalModelInfoFromServer[]>(
+    getAllLogicalModelDatabaseInfosInCategory: GET<{ categoryId: StringLike }, LogicalModelDatabaseInfoFromServer[]>(
         u => `/schema-categories/${u.categoryId}/logical-model-infos`
     )
 };

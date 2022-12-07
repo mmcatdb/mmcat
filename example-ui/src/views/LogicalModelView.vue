@@ -6,7 +6,6 @@ import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
-import { Mapping } from '@/types/mapping';
 import API from '@/utils/api';
 
 export default defineComponent({
@@ -19,8 +18,7 @@ export default defineComponent({
     data() {
         return {
             fetched: false,
-            logicalModel: null as LogicalModel | null,
-            mappings: null as Mapping[] | null
+            logicalModel: null as LogicalModel | null
         };
     },
     async mounted() {
@@ -29,18 +27,8 @@ export default defineComponent({
     methods: {
         async fetchData() {
             const result = await API.logicalModels.getLogicalModel({ id: this.$route.params.id });
-            if (!result.status) {
-                this.fetched = true;
-                return;
-            }
-
-            this.logicalModel = LogicalModel.fromServer(result.data);
-
-            const mappingsResult = await API.mappings.getAllMappingsInLogicalModel({ logicalModelId: this.logicalModel.id });
-            if (mappingsResult.status) {
-                this.mappings = mappingsResult.data.map(Mapping.fromServer);
-                return;
-            }
+            if (result.status)
+                this.logicalModel = LogicalModel.fromServer(result.data);
 
             this.fetched = true;
         },
@@ -54,9 +42,12 @@ export default defineComponent({
 <template>
     <div>
         <h1>Logical model</h1>
-        <template v-if="logicalModel && mappings">
+        <template v-if="logicalModel">
             <div class="logical-model">
-                <LogicalModelDisplay :logical-model="logicalModel" />
+                <LogicalModelDisplay
+                    :logical-model="logicalModel"
+                    :database="logicalModel.database"
+                />
             </div>
             <h2>Mappings</h2>
             <div class="button-row">
@@ -68,7 +59,7 @@ export default defineComponent({
             </div>
             <div class="mappings">
                 <div
-                    v-for="mapping in mappings"
+                    v-for="mapping in logicalModel.mappings"
                     :key="mapping.id"
                 >
                     <MappingDisplay :mapping="mapping" />

@@ -35,6 +35,11 @@ const router = createRouter({
             component: () => import('@/views/NewLogicalModel.vue')
         },
         {
+            path: '/mappings/:id',
+            name: 'mapping',
+            component: () => import('@/views/MappingView.vue')
+        },
+        {
             path: '/mappings/new',
             name: 'accessPathEditor',
             component: () => import('@/views/AccessPathEditorView.vue')

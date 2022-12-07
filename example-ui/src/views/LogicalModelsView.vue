@@ -5,18 +5,24 @@ import API from '@/utils/api';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
-import LogicalModelPreview from '@/components/LogicalModelPreview.vue';
+import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { DatabaseInfo } from '@/types/database';
+
+type LogicalModelDatabase = {
+    logicalModel: LogicalModelInfo;
+    database: DatabaseInfo;
+};
 
 export default defineComponent({
     components: {
         ResourceNotFound,
         ResourceLoading,
-        LogicalModelPreview
+        LogicalModelDisplay
     },
     data() {
         return {
-            logicalModels: null as LogicalModelInfo[] | null,
+            infos: null as LogicalModelDatabase[] | null,
             fetched: false
         };
     },
@@ -25,9 +31,13 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await API.logicalModels.getAllLogicalModelInfosInCategory({ categoryId: getSchemaCategoryId() });
-            if (result.status)
-                this.logicalModels = result.data.map(LogicalModelInfo.fromServer);
+            const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId: getSchemaCategoryId() });
+            if (result.status) {
+                this.infos = result.data.map(info => ({
+                    logicalModel: LogicalModelInfo.fromServer(info.logicalModel),
+                    database: DatabaseInfo.fromServer(info.database)
+                }));
+            }
 
             this.fetched = true;
         },
@@ -41,7 +51,7 @@ export default defineComponent({
 <template>
     <div>
         <h1>Logical models</h1>
-        <template v-if="logicalModels">
+        <template v-if="infos">
             <div class="button-row">
                 <button
                     @click="createNew"
@@ -51,10 +61,13 @@ export default defineComponent({
             </div>
             <div class="logical-models">
                 <div
-                    v-for="logicalModel in logicalModels"
-                    :key="logicalModel.id"
+                    v-for="info in infos"
+                    :key="info.logicalModel.id"
                 >
-                    <LogicalModelPreview :logical-model="logicalModel" />
+                    <LogicalModelDisplay
+                        :logical-model="info.logicalModel"
+                        :database="info.database"
+                    />
                 </div>
             </div>
         </template>

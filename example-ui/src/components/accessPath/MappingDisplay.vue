@@ -3,11 +3,13 @@ import { defineComponent } from 'vue';
 import type { Mapping } from '@/types/mapping';
 import ParentPropertyDisplay from './display/ParentPropertyDisplay.vue';
 import Divider from '@/components/layout/Divider.vue';
+import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 export default defineComponent({
     components: {
         ParentPropertyDisplay,
-        Divider
+        Divider,
+        CleverRouterLink
     },
     props: {
         mapping: {
@@ -27,13 +29,10 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="mapping-preview">
-        <!--
+    <div class="mapping-display">
         <CleverRouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
-            <h2>{{ mapping.name }}</h2>
+            <h2>{{ mapping.label }}</h2>
         </CleverRouterLink>
-        -->
-        <h2>{{ mapping.label }}</h2>
         <table>
             <tr>
                 <td class="label">
@@ -79,7 +78,7 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.mapping-preview {
+.mapping-display {
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;
