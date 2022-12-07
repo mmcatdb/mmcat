@@ -1,4 +1,5 @@
 import { ComparableSet } from "@/utils/ComparableSet";
+import type { Iri } from "@/utils/integration/parser";
 import type { Position } from "cytoscape";
 import type { DatabaseWithConfiguration } from "../database";
 import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
@@ -15,6 +16,7 @@ export type SchemaObjectJSON = {
 export class SchemaObject {
     //key: number | undefined;
     //label: number | undefined;
+    iri?: Iri;
 
     id!: number;
     label!: string;

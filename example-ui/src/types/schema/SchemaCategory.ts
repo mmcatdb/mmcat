@@ -1,3 +1,4 @@
+import type { Iri } from "@/utils/integration/parser";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "../accessPath/basic";
 import type { DatabaseWithConfiguration } from "../database";
@@ -80,6 +81,21 @@ export class SchemaCategory {
         return object;
     }
 
+    createObjectWithIri(label: string, ids: SchemaId[], iri: Iri): SchemaObject | null {
+        if (this._createdObjects.find(object => object.iri === iri)) {
+            console.log('Object with iri ' + iri + " already exists.");
+            return null;
+        }
+
+        const newObject = this.createObject(label, ids);
+        newObject.iri = iri;
+        return newObject;
+    }
+
+    findObjectByIri(iri: Iri): SchemaObject | undefined {
+        return this._createdObjects.find(object => object.iri === iri);
+    }
+
     createMorphismWithDual(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings): SchemaMorphism {
         const signature = this._signatureProvider.createAndAdd();
         const dualSignature = signature.dual();
@@ -97,6 +113,17 @@ export class SchemaCategory {
         dualMorphism.dual = morphism;
 
         return morphism;
+    }
+
+    createMorphismWithDualWithIri(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, iri: Iri): SchemaMorphism | null {
+        if (this._createdMorphisms.find(morphism => morphism.iri === iri)) {
+            console.log('Morphism with iri ' + iri + " already exists.");
+            return null;
+        }
+
+        const newMorphism = this.createMorphismWithDual(dom, cod, cardinality);
+        newMorphism.iri = iri;
+        return newMorphism;
     }
 
     editMorphismWithDual(morphism: SchemaMorphism, dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings) {

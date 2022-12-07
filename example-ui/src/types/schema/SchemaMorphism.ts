@@ -1,3 +1,4 @@
+import type { Iri } from "@/utils/integration/parser";
 import { Signature, type SignatureJSON } from "../identifiers";
 
 export type SchemaMorphismJSON = {
@@ -16,6 +17,8 @@ export type Min = Cardinality.Zero | Cardinality.One;
 export type Max = Cardinality.One | Cardinality.Star;
 
 export class SchemaMorphism {
+    iri?: Iri;
+
     id!: number;
     domId!: number;
     codId!: number;

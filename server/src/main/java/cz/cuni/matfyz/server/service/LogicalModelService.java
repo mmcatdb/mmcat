@@ -64,11 +64,13 @@ public class LogicalModelService {
         }).toList();
     }
 
-    public LogicalModelInfo createNew(LogicalModelInit init) {
+    public LogicalModel createNew(LogicalModelInit init) {
         Integer generatedId = repository.add(init);
 
-        return generatedId == null ? null : new LogicalModelInfo(
+        return generatedId == null ? null : new LogicalModel(
             generatedId,
+            init.categoryId(),
+            init.databaseId(),
             init.jsonValue()
         );
     }

@@ -26,6 +26,11 @@ export default defineConfig(({ command, mode }) => {
                 '@': fileURLToPath(new URL('./src', import.meta.url))
             }
         },
-        base
+        base,
+        server: {
+            cors: {
+                origin: env.VITE_DATASPECER_API_URL
+            }
+        }
     };
 });

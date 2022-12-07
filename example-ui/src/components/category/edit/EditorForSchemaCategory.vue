@@ -6,6 +6,7 @@ import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import EditObject from './EditObject.vue';
 import EditMorphism from './EditMorphism.vue';
+import Integration from './Integration.vue';
 import Divider from '@/components/layout/Divider.vue';
 import API from '@/utils/api';
 
@@ -14,16 +15,19 @@ enum State {
     AddObject,
     AddMorphism,
     EditObject,
-    EditMorphism
+    EditMorphism,
+    Integration
 }
 
 type GenericStateValue<State, Value> = { type: State } & Value;
 
-type StateValue = GenericStateValue<State.Default, unknown> |
+type StateValue =
+    GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddObject, unknown> |
     GenericStateValue<State.AddMorphism, unknown> |
     GenericStateValue<State.EditObject, { node: Node }> |
-    GenericStateValue<State.EditMorphism, { edge: Edge }>;
+    GenericStateValue<State.EditMorphism, { edge: Edge }> |
+    GenericStateValue<State.Integration, unknown>;
 
 export default defineComponent({
     components: {
@@ -31,7 +35,8 @@ export default defineComponent({
         AddMorphism,
         EditObject,
         EditMorphism,
-        Divider
+        Divider,
+        Integration
     },
     props: {
         graph: {
@@ -60,6 +65,9 @@ export default defineComponent({
         },
         addMorphismClicked() {
             this.state = { type: State.AddMorphism };
+        },
+        integrationClicked() {
+            this.state = { type: State.Integration };
         },
         setStateToDefault() {
             if (this.state.type === State.EditObject)
@@ -145,6 +153,10 @@ export default defineComponent({
                 Split
             </button>
             <Divider />
+            <button @click="integrationClicked">
+                Integration
+            </button>
+            <Divider />
             <button @click="save">
                 Save
             </button>
@@ -179,6 +191,13 @@ export default defineComponent({
                 :key="state.edge.schemaMorphism.id"
                 :graph="graph"
                 :edge="state.edge"
+                @save="setStateToDefault"
+                @cancel="setStateToDefault"
+            />
+        </template>
+        <template v-else-if="state.type === State.Integration">
+            <Integration
+                :graph="graph"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />

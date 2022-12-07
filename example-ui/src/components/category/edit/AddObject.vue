@@ -14,7 +14,6 @@ export default defineComponent({
     },
     emits: [ 'save', 'cancel' ],
     data() {
-
         return {
             label: '',
             keyIsValid: true
@@ -22,7 +21,6 @@ export default defineComponent({
     },
     methods: {
         save() {
-
             const object = this.graph.schemaCategory.createObject(this.label, []);
             this.graph.createNode(object, 'new');
 
