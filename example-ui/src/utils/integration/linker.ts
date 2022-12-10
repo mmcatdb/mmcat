@@ -47,8 +47,8 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
         const newMorphism = new ImportedMorphism(attribute.iri, parentObject, newObject, {
             domCodMin: attribute.cardinality.min,
             domCodMax: attribute.cardinality.max,
-            codDomMin: Cardinality.One,
-            codDomMax: Cardinality.One
+            codDomMin: Cardinality.Zero,
+            codDomMax: Cardinality.Star
         });
 
         output.morphisms.push(newMorphism);
