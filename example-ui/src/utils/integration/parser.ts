@@ -49,6 +49,7 @@ function parseAttribute(resource: any): Attribute {
 }
 
 type Association = DataspecerEntity & {
+    label: string;
     domEndIri: Iri;
     codEndIri: Iri;
 };
@@ -56,6 +57,7 @@ type Association = DataspecerEntity & {
 function parseAssociation(resource: any): Association {
     return {
         iri: resource.iri,
+        label: getLanguageString(resource.pimHumanLabel),
         domEndIri: resource.pimEnd[0],
         codEndIri: resource.pimEnd[1]
     };

@@ -96,13 +96,13 @@ export class SchemaCategory {
         return this._createdObjects.find(object => object.iri === iri);
     }
 
-    createMorphismWithDual(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings): SchemaMorphism {
+    createMorphismWithDual(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, label: string): SchemaMorphism {
         const signature = this._signatureProvider.createAndAdd();
         const dualSignature = signature.dual();
         this._signatureProvider.add(dualSignature);
 
         const id = this._morphismIdProvider.createAndAdd();
-        const morphism = SchemaMorphism.createNew(id, dom.id, cod.id, signature, cardinality.domCodMin, cardinality.domCodMax);
+        const morphism = SchemaMorphism.createNew(id, dom.id, cod.id, signature, cardinality.domCodMin, cardinality.domCodMax, label);
         this._createdMorphisms.push(morphism);
 
         const dualId = this._morphismIdProvider.createAndAdd();
@@ -115,20 +115,20 @@ export class SchemaCategory {
         return morphism;
     }
 
-    createMorphismWithDualWithIri(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, iri: Iri): SchemaMorphism | null {
+    createMorphismWithDualWithIri(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, iri: Iri, label: string): SchemaMorphism | null {
         if (this._createdMorphisms.find(morphism => morphism.iri === iri)) {
             console.log('Morphism with iri ' + iri + " already exists.");
             return null;
         }
 
-        const newMorphism = this.createMorphismWithDual(dom, cod, cardinality);
+        const newMorphism = this.createMorphismWithDual(dom, cod, cardinality, label);
         newMorphism.iri = iri;
         return newMorphism;
     }
 
-    editMorphismWithDual(morphism: SchemaMorphism, dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings) {
-        morphism.update(dom.id, cod.id, cardinality.domCodMin, cardinality.domCodMax);
-        morphism.dual.update(cod.id, dom.id, cardinality.codDomMin, cardinality.codDomMax);
+    editMorphismWithDual(morphism: SchemaMorphism, dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, label: string) {
+        morphism.update(dom.id, cod.id, cardinality.domCodMin, cardinality.domCodMax, label);
+        morphism.dual.update(cod.id, dom.id, cardinality.codDomMin, cardinality.codDomMax, label);
     }
 
     deleteObject(object: SchemaObject) {

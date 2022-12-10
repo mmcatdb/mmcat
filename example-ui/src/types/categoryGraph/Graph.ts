@@ -224,7 +224,7 @@ function createNodeDefinition(object: SchemaObject, node: Node, classes?: string
     return {
         data: {
             id: object.id.toString(),
-            label: object.label,
+            label: node.label,
             schemaData: node
         },
         position: object.position,
@@ -236,8 +236,7 @@ function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number)
     return {
         data: {
             id: groupId + '_' + object.id.toString(),
-            parent: 'group_' + groupId,
-            label: object.label
+            parent: 'group_' + groupId
         },
         position: object.position,
         classes: 'group-placeholder'
@@ -260,7 +259,7 @@ function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes?: st
             id: 'm' + morphism.id.toString(),
             source: morphism.domId,
             target: morphism.codId,
-            label: morphism.signature.toString(),
+            label: edge.label,
             schemaData: edge
         },
         ...classes ? { classes } : {}

@@ -11,6 +11,7 @@ class ImportedObject {
 class ImportedMorphism {
     constructor(
         readonly iri: Iri,
+        readonly label: string,
         readonly dom: ImportedObject,
         readonly cod: ImportedObject,
         readonly cardinalitySettings: CardinalitySettings
@@ -44,7 +45,7 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
         if (!parentObject)
             return;
 
-        const newMorphism = new ImportedMorphism(attribute.iri, parentObject, newObject, {
+        const newMorphism = new ImportedMorphism(attribute.iri, '', parentObject, newObject, {
             domCodMin: attribute.cardinality.min,
             domCodMax: attribute.cardinality.max,
             codDomMin: Cardinality.Zero,
@@ -67,7 +68,7 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
         if (!dom || !cod)
             return;
 
-        const newMorphism = new ImportedMorphism(association.iri, dom, cod, {
+        const newMorphism = new ImportedMorphism(association.iri, association.label, dom, cod, {
             domCodMin: codEnd.cardinality.min,
             domCodMax: codEnd.cardinality.max,
             codDomMin: domEnd.cardinality.min,

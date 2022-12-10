@@ -25,6 +25,7 @@ export default defineComponent({
         return {
             node1: null as Node | null,
             node2: null as Node | null,
+            label: this.edge.schemaMorphism.label,
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
             cardinality: {
@@ -40,12 +41,15 @@ export default defineComponent({
             return !!this.node1 && !!this.node2;
         },
         changed(): boolean {
-            return !this.edge.domainNode.equals(this.node1) || !this.edge.codomainNode.equals(this.node2) || !compareCardinalitySettings(this.cardinality, {
-                domCodMin: this.edge.schemaMorphism.min,
-                domCodMax: this.edge.schemaMorphism.max,
-                codDomMin: this.edge.schemaMorphism.dual.min,
-                codDomMax: this.edge.schemaMorphism.dual.max
-            });
+            return !this.edge.domainNode.equals(this.node1) ||
+                !this.edge.codomainNode.equals(this.node2) ||
+                this.edge.schemaMorphism.label !== this.label.trim() ||
+                !compareCardinalitySettings(this.cardinality, {
+                    domCodMin: this.edge.schemaMorphism.min,
+                    domCodMax: this.edge.schemaMorphism.max,
+                    codDomMin: this.edge.schemaMorphism.dual.min,
+                    codDomMax: this.edge.schemaMorphism.dual.max
+                });
         },
         nodesChanged(): boolean {
             return !this.edge.domainNode.equals(this.node1) || !this.edge.codomainNode.equals(this.node2);
@@ -72,7 +76,7 @@ export default defineComponent({
 
             // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
 
-            this.graph.schemaCategory.editMorphismWithDual(this.edge.schemaMorphism, this.node1.schemaObject, this.node2.schemaObject, this.cardinality);
+            this.graph.schemaCategory.editMorphismWithDual(this.edge.schemaMorphism, this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.label.trim());
 
             this.temporayEdge?.delete();
             this.graph.deleteEdgeWithDual(this.edge);
@@ -175,6 +179,16 @@ export default defineComponent({
                 </td>
                 <td class="value">
                     {{ node2?.schemaObject.label }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Label?:
+                </td>
+                <td class="value">
+                    <input
+                        v-model="label"
+                    />
                 </td>
             </tr>
             <tr>

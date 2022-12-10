@@ -24,6 +24,7 @@ export default defineComponent({
         return {
             node1: null as Node | null,
             node2: null as Node | null,
+            label: '',
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
             cardinality: {
@@ -52,7 +53,7 @@ export default defineComponent({
                 return;
 
             this.temporayEdge?.delete();
-            const morphism = this.graph.schemaCategory.createMorphismWithDual(this.node1.schemaObject, this.node2.schemaObject, this.cardinality);
+            const morphism = this.graph.schemaCategory.createMorphismWithDual(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.label);
             this.graph.createEdgeWithDual(morphism, 'new');
             this.graph.layout();
 
@@ -143,6 +144,16 @@ export default defineComponent({
                 </td>
                 <td class="value">
                     {{ node2?.schemaObject.label }}
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Label?:
+                </td>
+                <td class="value">
+                    <input
+                        v-model="label"
+                    />
                 </td>
             </tr>
             <CardinalityInput

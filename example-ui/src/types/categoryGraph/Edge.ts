@@ -30,6 +30,10 @@ export class Edge {
         this._dual = edge;
     }
 
+    get label(): string {
+        return this.schemaMorphism.signature + (this.schemaMorphism.label !== '' ? ' - ' + this.schemaMorphism.label : '');
+    }
+
     equals(other: Edge | null): boolean {
         return !!other && this.schemaMorphism.id === other.schemaMorphism.id;
     }

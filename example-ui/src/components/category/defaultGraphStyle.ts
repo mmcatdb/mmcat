@@ -117,9 +117,9 @@ export const style: cytoscape.Stylesheet[] = [
     {
         selector: '.group-placeholder',
         style: {
-            label: 'data(label)',
             events: 'no',
             opacity: 0,
+            label: ''
         }
     },
     {
