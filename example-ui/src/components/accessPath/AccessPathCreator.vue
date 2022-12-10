@@ -22,7 +22,7 @@ export default defineComponent({
             accessPath: null as RootProperty | null,
             selectingRootNode: null as Node | null,
             logicalModels: [] as LogicalModel[],
-            selectedLogicalModel: null as LogicalModel | null
+            selectedLogicalModel: undefined as LogicalModel | undefined
         };
     },
     computed: {
@@ -32,8 +32,10 @@ export default defineComponent({
     },
     async mounted() {
         const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
-        if (result.status)
+        if (result.status) {
             this.logicalModels = result.data.map(LogicalModel.fromServer);
+            this.selectedLogicalModel = this.logicalModels.find(model => model.id == this.$route.params.logicalModelId);
+        }
     },
     methods: {
         cytoscapeCreated(graph: Graph) {
@@ -65,7 +67,7 @@ export default defineComponent({
                 })
             });
             if (result.status)
-                this.$router.push({ name: 'mappings' });
+                this.$router.push({ name: 'logicalModel', params: { id: this.selectedLogicalModel.id } });
         }
     }
 });

@@ -33,7 +33,7 @@ export default defineComponent({
             this.fetched = true;
         },
         createNewMapping() {
-            this.$router.push({ name: 'accessPathEditor' });
+            this.$router.push({ name: 'accessPathEditor', params: { logicalModelId: this.$route.params.id } });
         }
     }
 });
