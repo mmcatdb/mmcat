@@ -77,6 +77,7 @@ export default defineComponent({
             this.temporayEdge?.delete();
             this.graph.deleteEdgeWithDual(this.edge);
             this.graph.createEdgeWithDual(this.edge.schemaMorphism, 'new');
+            this.graph.layout();
 
             this.$emit('save');
         },

@@ -3,6 +3,11 @@ import { defineComponent, nextTick } from 'vue';
 import API from '@/utils/api';
 import { SchemaCategory, type PositionUpdate } from '@/types/schema';
 import cytoscape from 'cytoscape';
+import fcose from 'cytoscape-fcose';
+import layoutUtilities from 'cytoscape-layout-utilities';
+
+cytoscape.use(fcose);
+cytoscape.use(layoutUtilities);
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
@@ -59,7 +64,7 @@ export default defineComponent({
 
             const cytoscapeInstance = cytoscape({
                 container,
-                layout: { name: 'preset' },
+                //layout: { name: 'preset' },
                 //elements,
                 style
             });
@@ -84,7 +89,10 @@ export default defineComponent({
 
             morphismDublets.forEach(dublet => graph.createEdgeWithDual(dublet.morphism));
 
+
             // Position the object to the center of the canvas.
+            graph.fixLayout();
+            graph.layout();
             graph.center();
 
             return graph;
@@ -136,6 +144,11 @@ export default defineComponent({
                     @click="graph?.center()"
                 >
                     Center graph
+                </button>
+                <button
+                    @click="graph?.resetLayout()"
+                >
+                    Reset layout
                 </button>
             </div>
         </template>

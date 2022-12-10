@@ -23,6 +23,7 @@ export default defineComponent({
         save() {
             const object = this.graph.schemaCategory.createObject(this.label, []);
             this.graph.createNode(object, 'new');
+            this.graph.layout();
 
             this.$emit('save');
         },

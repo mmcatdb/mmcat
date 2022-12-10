@@ -33,4 +33,6 @@ export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
 
         graph.createEdgeWithDual(morphism, 'new');
     });
+
+    graph.layout();
 }

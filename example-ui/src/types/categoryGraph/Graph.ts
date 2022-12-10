@@ -16,6 +16,8 @@ type Group = { id: number, database: DatabaseWithConfiguration, node: NodeSingul
 export class Graph {
     _cytoscape: Core;
     _nodes = [] as Node[];
+    // How many nodes have fixed positions.
+    _fixedNodes = 0;
     readonly schemaCategory: SchemaCategory;
 
     constructor(cytoscape: Core, schemaCategory: SchemaCategory) {
@@ -183,6 +185,34 @@ export class Graph {
 
     center() {
         this._cytoscape.center();
+    }
+
+    layout() {
+        this._cytoscape.layout({
+            //name: 'dagre',
+            //name: 'cola',
+            name: 'fcose',
+            animate: false,
+            fixedNodeConstraint: this._nodes.slice(0, this._fixedNodes).map(node => ({
+                nodeId: node.node.id(),
+                position: node.node.position()
+            })),
+            //randomize: false,
+            //quality: 'proof',
+            nodeDimensionsIncludeLabels: true
+            //boundingBox: { x1: 0, x2: 1000, y1: 0, y2: 500 }
+        }).run();
+
+        this.fixLayout();
+    }
+
+    fixLayout() {
+        this._fixedNodes = this._nodes.length;
+    }
+
+    resetLayout() {
+        this._fixedNodes = 0;
+        this.layout();
     }
 
     getNode(object: SchemaObject): Node | undefined {
