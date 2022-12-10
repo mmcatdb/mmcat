@@ -3,7 +3,7 @@ import type { AxiosResponse } from 'axios/index';
 import type { Result } from '@/types/api/result';
 import type { PullResult } from '@/types/api/routes';
 
-export function createAxiosInstance(baseURL: string) {
+export function createAxiosInstance(baseURL?: string) {
     const instance = axios.create({
         baseURL,
         //withCredentials: true,

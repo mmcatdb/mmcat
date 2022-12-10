@@ -4,7 +4,8 @@ import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { defineComponent } from 'vue';
 import { addImportedToGraph, importDataspecer, type ImportedDataspecer } from '@/utils/integration';
 
-const EXAMPLE_UUID = '537f6a7e-0883-4d57-a19c-f275bd28af9f';
+//const EXAMPLE_UUID = '537f6a7e-0883-4d57-a19c-f275bd28af9f';
+const EXAMPLE_UUID = 'f2480523-c3ee-4c3c-a36a-9483749bc0d6';
 
 export default defineComponent({
     components: {

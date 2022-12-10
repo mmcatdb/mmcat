@@ -32,9 +32,9 @@ type Attribute = DataspecerEntity & {
     };
 };
 
-function parseCardinality(resource: { pimCardinalityMin: 0 | null, pimCardinalityMax: 1 | null }): { min: Min, max: Max } {
+function parseCardinality(resource: { pimCardinalityMin: 1 | unknown, pimCardinalityMax: 1 | unknown }): { min: Min, max: Max } {
     return {
-        min: resource.pimCardinalityMin === 0 ? Cardinality.Zero : Cardinality.One,
+        min: resource.pimCardinalityMin === 1 ? Cardinality.One : Cardinality.Zero,
         max: resource.pimCardinalityMax === 1 ? Cardinality.One : Cardinality.Star
     };
 }
