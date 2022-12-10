@@ -4,8 +4,9 @@ import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { defineComponent } from 'vue';
 import { addImportedToGraph, importDataspecer, type ImportedDataspecer } from '@/utils/integration';
 
-//const EXAMPLE_UUID = '537f6a7e-0883-4d57-a19c-f275bd28af9f';
-const EXAMPLE_UUID = 'f2480523-c3ee-4c3c-a36a-9483749bc0d6';
+//const EXAMPLE_IRI = '537f6a7e-0883-4d57-a19c-f275bd28af9f';
+//const EXAMPLE_IRI = 'f2480523-c3ee-4c3c-a36a-9483749bc0d6';
+const EXAMPLE_IRI = 'https://ofn.gov.cz/data-specification/c697d1a1-4df1-4292-a136-df593fb6a32b';
 
 export default defineComponent({
     components: {
@@ -20,14 +21,14 @@ export default defineComponent({
     emits: [ 'save', 'cancel' ],
     data() {
         return {
-            uuid: EXAMPLE_UUID,
-            EXAMPLE_UUID,
+            iri: EXAMPLE_IRI,
+            EXAMPLE_IRI,
             imported: undefined as ImportedDataspecer | undefined
         };
     },
     methods: {
         async importPIM() {
-            const result = await dataspecerAPI.GET<unknown>(`/store/${this.uuid}`);
+            const result = await dataspecerAPI.getStoreForIri(this.iri);
             if (result.status) {
                 console.log(result.data);
                 const imported = importDataspecer(result.data);
@@ -60,12 +61,12 @@ export default defineComponent({
             <table>
                 <tr>
                     <td class="label">
-                        UUID:
+                        IRI:
                     </td>
                     <td class="value">
                         <input
-                            v-model="uuid"
-                            class="uuid-input"
+                            v-model="iri"
+                            class="iri-input"
                         />
                     </td>
                 </tr>
@@ -74,7 +75,7 @@ export default defineComponent({
                         Example:
                     </td>
                     <td class="value">
-                        {{ EXAMPLE_UUID }}
+                        {{ EXAMPLE_IRI }}
                     </td>
                 </tr>
             </table>
@@ -105,7 +106,7 @@ export default defineComponent({
         <div class="button-row">
             <button
                 v-if="!imported"
-                :disabled="!uuid"
+                :disabled="!iri"
                 @click="importPIM"
             >
                 Import
@@ -130,9 +131,9 @@ export default defineComponent({
     font-weight: bold;
 }
 
-.uuid-input {
-    min-width: 260px;
-    width: 260px;
+.iri-input {
+    min-width: 560px;
+    width: 560px;
 }
 </style>
 
