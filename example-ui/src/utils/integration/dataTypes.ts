@@ -1,6 +1,4 @@
-import type { Attribute, DataTypeDefinition, ImportedDataspecer, Iri } from '@/types/integration';
-import { ImportedMorphism } from '@/types/integration';
-import { DataType, ImportedObject } from '@/types/integration';
+import { type Attribute, type DataTypeDefinition, type ImportedDataspecer, type Iri, ImportedObject, DataType, ImportedMorphism } from '@/types/integration';
 import { Cardinality } from '@/types/schema';
 
 const OFN_TYPE_PREFIX = "https://ofn.gov.cz/zdroj/základní-datové-typy/2020-07-01/";

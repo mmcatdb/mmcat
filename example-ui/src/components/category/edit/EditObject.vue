@@ -34,7 +34,8 @@ export default defineComponent({
     },
     computed: {
         changed(): boolean {
-            return this.label !== this.node.schemaObject.label || this.addingId || this.addedId;
+            //return this.label !== this.node.schemaObject.label || this.addingId || this.addedId;
+            return this.label !== this.node.schemaObject.label || this.addingId;
         },
         isNew(): boolean {
             return this.node.schemaObject.isNew;

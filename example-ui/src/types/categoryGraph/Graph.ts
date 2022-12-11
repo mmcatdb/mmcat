@@ -6,6 +6,7 @@ import { Node } from "./Node";
 
 export type NodeEventFunction = (node: Node) => void;
 export type EdgeEventFunction = (edge: Edge) => void;
+export type CanvasEventFunction = () => void;
 
 export type TemporaryEdge = {
     delete: () => void;
@@ -14,19 +15,21 @@ export type TemporaryEdge = {
 type Group = { id: number, database: DatabaseWithConfiguration, node: NodeSingular };
 
 export class Graph {
-    _cytoscape: Core;
+    // Workaround for the vue reactivity (all properties are replaced by proxies, but this way, we can have access to the original Core)
+    _getCytoscape: () => Core;
     _nodes = [] as Node[];
     // How many nodes have fixed positions.
     _fixedNodes = 0;
     readonly schemaCategory: SchemaCategory;
 
     constructor(cytoscape: Core, schemaCategory: SchemaCategory) {
-        this._cytoscape = cytoscape;
+        this._getCytoscape = () => cytoscape;
         this.schemaCategory = schemaCategory;
     }
 
     _nodeHandlers = new Map() as Map<NodeEventFunction, EventHandler>;
     _edgeHandlers = new Map() as Map<EdgeEventFunction, EventHandler>;
+    _canvasHandlers = new Map() as Map<CanvasEventFunction, EventHandler>;
 
     addNodeListener(event: string, handler: NodeEventFunction) {
         const innerHandler = (event: EventObject) => {
@@ -34,14 +37,14 @@ export class Graph {
             handler(node);
         };
 
-        this._cytoscape.addListener(event, 'node', innerHandler);
+        this._getCytoscape().addListener(event, 'node', innerHandler);
         this._nodeHandlers.set(handler, innerHandler);
     }
 
     removeNodeListener(event: string, handler: NodeEventFunction) {
         const innerHandler = this._nodeHandlers.get(handler);
         if (innerHandler)
-            this._cytoscape.removeListener(event, innerHandler);
+            this._getCytoscape().removeListener(event, innerHandler);
     }
 
     addEdgeListener(event: string, handler: EdgeEventFunction) {
@@ -50,14 +53,29 @@ export class Graph {
             handler(edge);
         };
 
-        this._cytoscape.addListener(event, 'edge', innerHandler);
+        this._getCytoscape().addListener(event, 'edge', innerHandler);
         this._edgeHandlers.set(handler, innerHandler);
     }
 
     removeEdgeListener(event: string, handler: EdgeEventFunction) {
         const innerHandler = this._edgeHandlers.get(handler);
         if (innerHandler)
-            this._cytoscape.removeListener(event, innerHandler);
+            this._getCytoscape().removeListener(event, innerHandler);
+    }
+
+    addCanvasListener(event: string, handler: CanvasEventFunction) {
+        const innerHandler = (event: EventObject) => {
+            if (event.target === this._getCytoscape())
+                handler();
+        };
+
+        this._getCytoscape().addListener(event, innerHandler);
+    }
+
+    removeCanvasListener(event: string, handler: CanvasEventFunction) {
+        const innerHandler = this._canvasHandlers.get(handler);
+        if (innerHandler)
+            this._getCytoscape().removeListener(event, innerHandler);
     }
 
     resetAvailabilityStatus(): void {
@@ -75,7 +93,7 @@ export class Graph {
         const newGroup = {
             id,
             database,
-            node: this._cytoscape.add({
+            node: this._getCytoscape().add({
                 data: {
                     id: 'group_' + id,
                     label: database.label
@@ -95,13 +113,13 @@ export class Graph {
         const groupObjects = object.databases.map(databaseId => this.getGroupOrAddIt(databaseId));
 
         const groupPlaceholders = [] as NodeSingular[];
-        groupObjects.forEach(group => groupPlaceholders.push(this._cytoscape.add(createGroupPlaceholderDefinition(object, group.id))));
+        groupObjects.forEach(group => groupPlaceholders.push(this._getCytoscape().add(createGroupPlaceholderDefinition(object, group.id))));
 
         if (groupObjects.length === 0)
-            node.noGroupPlaceholder = this._cytoscape.add(createNoGroupDefinition(object));
+            node.noGroupPlaceholder = this._getCytoscape().add(createNoGroupDefinition(object));
 
-        //const coloringNode = this._cytoscape.add(createColoringNodeDefinition(object, Math.random() < 0.5 ? Type.mongodb : Type.postgresql));
-        const cytoscapeNode = this._cytoscape.add(createNodeDefinition(object, node, classes));
+        //const coloringNode = this._getCytoscape().add(createColoringNodeDefinition(object, Math.random() < 0.5 ? Type.mongodb : Type.postgresql));
+        const cytoscapeNode = this._getCytoscape().add(createNodeDefinition(object, node, classes));
         node.setCytoscapeNode(cytoscapeNode);
 
         //cytoscapeNode.json();
@@ -117,13 +135,13 @@ export class Graph {
     }
 
     deleteNode(node: Node) {
-        this._cytoscape.remove(node.node);
+        this._getCytoscape().remove(node.node);
         this._nodes = this._nodes.filter(n => !n.equals(node));
 
         // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
         // However, the no group placeholder has to be removed.
         if (node.noGroupPlaceholder)
-            this._cytoscape.remove(node.noGroupPlaceholder);
+            this._getCytoscape().remove(node.noGroupPlaceholder);
     }
 
     createEdgeWithDual(morphism: SchemaMorphism, classes?: string): void {
@@ -140,14 +158,14 @@ export class Graph {
         //const noSwitchNeeded = morphism.domId > morphism.codId;
 
         /*
-        const cytoscapeEdges = this._cytoscape.add(noSwitchNeeded ? definitions : definitions.reverse());
+        const cytoscapeEdges = this._getCytoscape().add(noSwitchNeeded ? definitions : definitions.reverse());
         const orderedCytoscapeEdges = noSwitchNeeded ? cytoscapeEdges : cytoscapeEdges;
         edges[0].setCytoscapeEdge(orderedCytoscapeEdges[0]);
         edges[1].setCytoscapeEdge(orderedCytoscapeEdges[1]);
         */
 
         const definition = createEdgeDefinition(morphism, edges[0], classes);
-        const cytoscapeEdge = this._cytoscape.add(definition);
+        const cytoscapeEdge = this._getCytoscape().add(definition);
         edges[0].setCytoscapeEdge(cytoscapeEdge);
 
         domNode.addNeighbour(edges[0]);
@@ -155,10 +173,10 @@ export class Graph {
     }
 
     deleteEdgeWithDual(edge: Edge) {
-        //this._cytoscape.remove(edge.edge);
-        //this._cytoscape.remove(edge.dual.edge);
+        //this._getCytoscape().remove(edge.edge);
+        //this._getCytoscape().remove(edge.dual.edge);
         const cytoscapeEdge = edge.edge ? edge.edge : edge.dual.edge;
-        this._cytoscape.remove(cytoscapeEdge);
+        this._getCytoscape().remove(cytoscapeEdge);
 
         edge.domainNode.removeNeighbour(edge.codomainNode);
         edge.codomainNode.removeNeighbour(edge.domainNode);
@@ -170,7 +188,7 @@ export class Graph {
         const id = 'te' + this._lastTemporaryEdgeId;
         this._lastTemporaryEdgeId++;
 
-        this._cytoscape.add({
+        this._getCytoscape().add({
             data: {
                 id,
                 source: node1.schemaObject.id,
@@ -180,15 +198,15 @@ export class Graph {
             classes: 'temporary'
         });
 
-        return { delete: () => this._cytoscape.remove('#' + id) };
+        return { delete: () => this._getCytoscape().remove('#' + id) };
     }
 
     center() {
-        this._cytoscape.center();
+        this._getCytoscape().center();
     }
 
     layout() {
-        this._cytoscape.layout({
+        this._getCytoscape().layout({
             //name: 'dagre',
             //name: 'cola',
             name: 'fcose',

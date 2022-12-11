@@ -54,10 +54,12 @@ export default defineComponent({
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
         this.graph.addEdgeListener('tap', this.onEdgeTapHandler);
+        this.graph.addCanvasListener('tap', this.onCanvasTapHandler);
     },
     unmounted() {
         this.graph.removeNodeListener('tap', this.onNodeTapHandler);
         this.graph.removeEdgeListener('tap', this.onEdgeTapHandler);
+        this.graph.removeCanvasListener('tap', this.onCanvasTapHandler);
     },
     methods: {
         addObjectClicked() {
@@ -99,6 +101,14 @@ export default defineComponent({
             this.state = { type: State.EditObject, node };
         },
         onEdgeTapHandler(edge: Edge) {
+            if (this.state.type === State.EditObject) {
+                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed)
+                    return;
+
+                this.state = { type: State.EditMorphism, edge };
+                return;
+            }
+
             if (this.state.type !== State.Default && this.state.type !== State.EditMorphism)
                 return;
 
@@ -116,6 +126,19 @@ export default defineComponent({
             }
 
             this.state = { type: State.EditMorphism, edge };
+        },
+        onCanvasTapHandler() {
+            if (this.state.type === State.EditObject) {
+                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed)
+                    return;
+                this.setStateToDefault();
+            }
+
+            if (this.state.type === State.EditMorphism) {
+                if ((this.$refs.editedMorphism as InstanceType<typeof EditMorphism>).changed)
+                    return;
+                this.setStateToDefault();
+            }
         },
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();

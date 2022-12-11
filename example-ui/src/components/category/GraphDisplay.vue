@@ -76,7 +76,6 @@ export default defineComponent({
             });
 
             const graph = new Graph(cytoscapeInstance, schema);
-
             schema.objects.forEach(object => graph.createNode(object));
 
             // First we create a dublets of morphisms. Then we create edges from them.
