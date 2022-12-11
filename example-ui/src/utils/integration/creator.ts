@@ -1,6 +1,6 @@
 import type { Graph } from "@/types/categoryGraph";
 import type { SchemaObject } from "@/types/schema";
-import type { ImportedDataspecer } from "./linker";
+import type { ImportedDataspecer } from "@/types/integration";
 
 export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
     const iriToObjectMapping = new Map<string, SchemaObject>();

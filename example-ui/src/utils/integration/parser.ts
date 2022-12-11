@@ -1,19 +1,10 @@
+import type { Class, Attribute, Association, AssociationEnd, ParsedDataspecer } from "@/types/integration";
 import { Cardinality, type Max, type Min } from "@/types/schema";
-
-export type Iri = string;
-
-type DataspecerEntity = {
-    iri: Iri;
-}
+import { parseDataType } from "./dataTypes";
 
 function getLanguageString(object: { cs?: string, en?: string } | null): string {
     return object?.cs || object?.en || '';
 }
-
-type Class = DataspecerEntity & {
-    label: string;
-    extendsClassIris: Iri[];
-};
 
 function parseClass(resource: any): Class {
     return {
@@ -22,15 +13,6 @@ function parseClass(resource: any): Class {
         extendsClassIris: resource.pimExtends
     };
 }
-
-type Attribute = DataspecerEntity & {
-    label: string;
-    parentClassIri: Iri;
-    cardinality: {
-        min: Min;
-        max: Max;
-    };
-};
 
 function parseCardinality(resource: { pimCardinalityMin: 1 | unknown, pimCardinalityMax: 1 | unknown }): { min: Min, max: Max } {
     return {
@@ -43,16 +25,11 @@ function parseAttribute(resource: any): Attribute {
     return {
         iri: resource.iri,
         label: getLanguageString(resource.pimHumanLabel),
+        dataType: parseDataType(resource.pimDataType),
         parentClassIri: resource.pimOwnerClass,
         cardinality: parseCardinality(resource)
     };
 }
-
-type Association = DataspecerEntity & {
-    label: string;
-    domEndIri: Iri;
-    codEndIri: Iri;
-};
 
 function parseAssociation(resource: any): Association {
     return {
@@ -63,27 +40,12 @@ function parseAssociation(resource: any): Association {
     };
 }
 
-type AssociationEnd = DataspecerEntity & {
-    classIri: Iri,
-    cardinality: {
-        min: Min;
-        max: Max;
-    };
-};
-
 function parseAssociationEnd(resource: any): AssociationEnd {
     return {
         iri: resource.iri,
         classIri: resource.pimPart,
         cardinality: parseCardinality(resource)
     };
-}
-
-export type ParsedDataspecer = {
-    classes: Class[];
-    attributes: Attribute[];
-    associations: Association[];
-    associationEnds: AssociationEnd[];
 }
 
 export function parseDataspecer({ resources }: any): ParsedDataspecer {

@@ -30,10 +30,10 @@ async function getStoreForIri(iri: string): PullResult<unknown> {
 
     const dataSpecification = dataSpecificationsResult.data.find(s => s.iri === iri);
     if (!dataSpecification)
-        return { status: false, error: 'Data specification not found.' };
+        return { status: false, error: 'Data specification was not found.' };
 
     if (!dataSpecification.pimStores || dataSpecification.pimStores.length === 0)
-        return { status: false, error: 'No store url found.' };
+        return { status: false, error: 'No store url was found.' };
 
     const store = dataSpecification.pimStores[0];
 

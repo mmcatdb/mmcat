@@ -1,34 +1,20 @@
-import { Cardinality, type CardinalitySettings } from "@/types/schema";
-import type { Iri, ParsedDataspecer } from "./parser";
-
-class ImportedObject {
-    constructor(
-        readonly iri: Iri,
-        readonly label: string
-    ) {}
-}
-
-class ImportedMorphism {
-    constructor(
-        readonly iri: Iri,
-        readonly label: string,
-        readonly dom: ImportedObject,
-        readonly cod: ImportedObject,
-        readonly cardinalitySettings: CardinalitySettings
-    ) {}
-}
-
-export type ImportedDataspecer = {
-    objects: ImportedObject[];
-    morphisms: ImportedMorphism[];
-}
+import { ImportedMorphism, ImportedObject, type ImportedDataspecer } from "@/types/integration";
+import type { ParsedDataspecer } from "@/types/integration";
+import { Cardinality } from "@/types/schema";
+import { createAttribute } from "./dataTypes";
 
 export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
     const { classes, attributes, associations, associationEnds } = input;
 
     const output: ImportedDataspecer = {
         objects: [],
-        morphisms: []
+        morphisms: [],
+        counts: {
+            classes: classes.length,
+            attributes: attributes.length,
+            associations: associations.length,
+            associationEnds: associationEnds.length
+        }
     };
 
     classes.forEach(myClass => {
@@ -37,10 +23,8 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
     });
 
     attributes.forEach(attribute => {
-        const newObject = new ImportedObject(attribute.iri, attribute.label);
+        const newObject = createAttribute(attribute, output);
         const parentObject = output.objects.find(object => object.iri === attribute.parentClassIri);
-
-        output.objects.push(newObject);
 
         if (!parentObject)
             return;

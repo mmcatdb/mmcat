@@ -1,5 +1,5 @@
 import { ComparableSet } from "@/utils/ComparableSet";
-import type { Iri } from "@/utils/integration/parser";
+import type { Iri } from "@/types/integration";
 import type { Position } from "cytoscape";
 import type { DatabaseWithConfiguration } from "../database";
 import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";

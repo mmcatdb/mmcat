@@ -1,4 +1,4 @@
-import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, NodeSingular } from "cytoscape";
+import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, LayoutOptions, NodeSingular } from "cytoscape";
 import type { DatabaseWithConfiguration } from "../database";
 import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Edge } from "./Edge";
@@ -201,7 +201,7 @@ export class Graph {
             //quality: 'proof',
             nodeDimensionsIncludeLabels: true
             //boundingBox: { x1: 0, x2: 1000, y1: 0, y2: 500 }
-        }).run();
+        } as LayoutOptions).run();
 
         this.fixLayout();
     }
