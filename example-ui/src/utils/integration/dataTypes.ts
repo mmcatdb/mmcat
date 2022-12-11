@@ -53,7 +53,7 @@ function createAttributeForText(attribute: Attribute, output: ImportedDataspecer
 
     // TODO function createMap
 
-    const elementObject = new ImportedObject(attribute.iri + '/_element', '_element');
+    const elementObject = new ImportedObject(attribute.iri + '/_language-element', '_element');
     output.objects.push(elementObject);
     const attributeToElementMorphism = new ImportedMorphism(attribute.iri + '/_attribute-to-element', '', attributeObject, elementObject, {
         domCodMin: Cardinality.Zero,
