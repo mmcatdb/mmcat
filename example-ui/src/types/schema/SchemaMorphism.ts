@@ -1,11 +1,12 @@
-import type { Iri } from "@/utils/integration/parser";
+import type { Iri } from "@/types/integration/";
 import { Signature, type SignatureJSON } from "../identifiers";
 
 export type SchemaMorphismJSON = {
     signature: SignatureJSON,
     min: Min,
     max: Max,
-    label?: string
+    label?: string,
+    iri?: Iri
 }
 
 export enum Cardinality {
@@ -52,7 +53,7 @@ export class SchemaMorphism {
         return Math.abs(baseValue ? baseValue : 0);
     }
 
-    private constructor(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, isNew: boolean, label: string) {
+    private constructor(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri?: Iri) {
         this.id = id;
         this.domId = domId;
         this.codId = codId;
@@ -61,6 +62,7 @@ export class SchemaMorphism {
         this.max = max;
         this._isNew = isNew;
         this.label = label;
+        this.iri = iri;
     }
 
     static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
@@ -74,7 +76,8 @@ export class SchemaMorphism {
             parsedJson.min,
             parsedJson.max,
             false,
-            parsedJson.label || ''
+            parsedJson.label || '',
+            parsedJson.iri
         );
     }
 
@@ -99,7 +102,8 @@ export class SchemaMorphism {
             signature: this.signature.toJSON(),
             min: this.min,
             max: this.max,
-            label: this.label
+            label: this.label,
+            iri: this.iri
         };
     }
 }

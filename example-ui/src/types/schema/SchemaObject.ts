@@ -10,7 +10,8 @@ export type SchemaObjectJSON = {
     key: KeyJSON,
     ids: SchemaIdJSON[],
     superId: SchemaIdJSON,
-    databases?: string[]
+    databases?: string[],
+    iri?: Iri
 }
 
 export class SchemaObject {
@@ -44,6 +45,7 @@ export class SchemaObject {
         object._isNew = false;
         object.position = new ComparablePosition(input.position);
         object._originalPosition = new ComparablePosition(input.position);
+        object.iri = jsonObject.iri;
 
         return object;
     }
@@ -106,6 +108,7 @@ export class SchemaObject {
             key: this.key.toJSON(),
             ids: this.schemaIds.map(id => id.toJSON()),
             superId: this.superId.toJSON(),
+            iri: this.iri
         };
     }
 }
