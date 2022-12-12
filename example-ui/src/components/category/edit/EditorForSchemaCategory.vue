@@ -90,20 +90,29 @@ export default defineComponent({
         },
         onNodeTapHandler(node: Node) {
             if (this.state.type === State.EditGroup) {
-                const currentLength = this.state.nodes.length;
-                this.state.nodes = this.state.nodes.filter(n => !n.equals(node));
+                if (isKeyPressed(Key.Shift)) {
+                    const currentLength = this.state.nodes.length;
+                    this.state.nodes = this.state.nodes.filter(n => !n.equals(node));
 
-                if (this.state.nodes.length < currentLength) {
-                    node.unselect();
+                    if (this.state.nodes.length < currentLength) {
+                        node.unselect();
 
-                    if (this.state.nodes.length === 1) {
-                        this.state = { type: State.EditObject, node: this.state.nodes[0] };
+                        if (this.state.nodes.length === 1) {
+                            this.state = { type: State.EditObject, node: this.state.nodes[0] };
+                            return;
+                        }
+                    }
+                    else {
+                        this.state.nodes.push(node);
+                        node.select({ type: SelectionType.Root, level: 0 });
                         return;
                     }
                 }
                 else {
-                    this.state.nodes.push(node);
+                    // Disband the group and then proceed in the same way as if the node was clicked.
+                    this.state.nodes.forEach(n => n.unselect());
                     node.select({ type: SelectionType.Root, level: 0 });
+                    this.state = { type: State.EditObject, node };
                     return;
                 }
             }
