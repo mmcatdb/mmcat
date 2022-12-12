@@ -9,6 +9,8 @@ import EditMorphism from './EditMorphism.vue';
 import Integration from './Integration.vue';
 import Divider from '@/components/layout/Divider.vue';
 import API from '@/utils/api';
+import { isKeyPressed, Key } from '@/utils/keyboardInput';
+import EditGroup from './EditGroup.vue';
 
 enum State {
     Default,
@@ -16,6 +18,7 @@ enum State {
     AddMorphism,
     EditObject,
     EditMorphism,
+    EditGroup,
     Integration
 }
 
@@ -27,6 +30,7 @@ type StateValue =
     GenericStateValue<State.AddMorphism, unknown> |
     GenericStateValue<State.EditObject, { node: Node }> |
     GenericStateValue<State.EditMorphism, { edge: Edge }> |
+    GenericStateValue<State.EditGroup, { nodes: Node[] }> |
     GenericStateValue<State.Integration, unknown>;
 
 export default defineComponent({
@@ -36,7 +40,8 @@ export default defineComponent({
         EditObject,
         EditMorphism,
         Divider,
-        Integration
+        Integration,
+        EditGroup
     },
     props: {
         graph: {
@@ -78,9 +83,31 @@ export default defineComponent({
             if (this.state.type === State.EditMorphism)
                 this.state.edge.unselect();
 
+            if (this.state.type === State.EditGroup)
+                this.state.nodes.forEach(node => node.unselect());
+
             this.state = { type: State.Default };
         },
         onNodeTapHandler(node: Node) {
+            if (this.state.type === State.EditGroup) {
+                const currentLength = this.state.nodes.length;
+                this.state.nodes = this.state.nodes.filter(n => !n.equals(node));
+
+                if (this.state.nodes.length < currentLength) {
+                    node.unselect();
+
+                    if (this.state.nodes.length === 1) {
+                        this.state = { type: State.EditObject, node: this.state.nodes[0] };
+                        return;
+                    }
+                }
+                else {
+                    this.state.nodes.push(node);
+                    node.select({ type: SelectionType.Root, level: 0 });
+                    return;
+                }
+            }
+
             if (this.state.type !== State.Default && this.state.type !== State.EditObject)
                 return;
 
@@ -93,7 +120,14 @@ export default defineComponent({
                     return;
                 }
                 else {
-                    this.state.node.unselect();
+                    if (isKeyPressed(Key.Shift)) {
+                        this.state = { type: State.EditGroup, nodes: [ this.state.node, node ]};
+                        node.select({ type: SelectionType.Root, level: 0 });
+                        return;
+                    }
+                    else {
+                        this.state.node.unselect();
+                    }
                 }
             }
 
@@ -139,6 +173,9 @@ export default defineComponent({
                     return;
                 this.setStateToDefault();
             }
+
+            if (this.state.type === State.EditGroup)
+                this.setStateToDefault();
         },
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
@@ -223,6 +260,11 @@ export default defineComponent({
                 :graph="graph"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
+            />
+        </template>
+        <template v-else-if="state.type === State.EditGroup">
+            <EditGroup
+                :nodes="state.nodes"
             />
         </template>
     </div>

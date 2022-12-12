@@ -66,7 +66,8 @@ export default defineComponent({
                 container,
                 //layout: { name: 'preset' },
                 //elements,
-                style
+                style,
+                boxSelectionEnabled: true
             });
 
             logicalModels.forEach(logicalModel => {
