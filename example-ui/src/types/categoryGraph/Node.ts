@@ -51,8 +51,17 @@ export class Node {
 
     _adjacentEdges = new ComparableMap<Signature, string, Edge>(signature => signature.toString());
 
+    _groupPlaceholders = [] as NodeSingular[];
+
     constructor(schemaObject: SchemaObject) {
         this.schemaObject = schemaObject;
+    }
+
+    refreshGroupPlaceholders() {
+        this._groupPlaceholders.forEach(placeholder => {
+            placeholder.remove();
+            placeholder.restore();
+        });
     }
 
     setCytoscapeNode(node: NodeSingular) {

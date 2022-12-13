@@ -1,5 +1,6 @@
 import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, LayoutOptions, NodeSingular } from "cytoscape";
 import type { DatabaseWithConfiguration } from "../database";
+import type { LogicalModel } from "../logicalModel";
 import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Edge } from "./Edge";
 import { Node } from "./Node";
@@ -12,7 +13,7 @@ export type TemporaryEdge = {
     delete: () => void;
 }
 
-type Group = { id: number, database: DatabaseWithConfiguration, node: NodeSingular };
+type Group = { id: number, logicalModel: LogicalModel, node: NodeSingular };
 
 export class Graph {
     // Workaround for the vue reactivity (all properties are replaced by proxies, but this way, we can have access to the original Core)
@@ -84,19 +85,19 @@ export class Graph {
 
     groups = [] as Group[];
 
-    getGroupOrAddIt(database: DatabaseWithConfiguration): Group {
-        const results = this.groups.filter(group => group.database.id === database.id);
+    getGroupOrAddIt(logicalModel: LogicalModel): Group {
+        const results = this.groups.filter(group => group.logicalModel.id === logicalModel.id);
         if (results[0])
             return results[0];
 
         const id = this.groups.length + 1;
         const newGroup = {
             id,
-            database,
+            logicalModel,
             node: this._getCytoscape().add({
                 data: {
                     id: 'group_' + id,
-                    label: database.label
+                    label: logicalModel.label
                 },
                 classes: 'group ' + 'group-' + id
             })
@@ -110,10 +111,10 @@ export class Graph {
         const node = new Node(object);
         this._nodes.push(node);
 
-        const groupObjects = object.databases.map(databaseId => this.getGroupOrAddIt(databaseId));
+        const groupObjects = object.logicalModels.map(logicalModel => this.getGroupOrAddIt(logicalModel));
 
-        const groupPlaceholders = [] as NodeSingular[];
-        groupObjects.forEach(group => groupPlaceholders.push(this._getCytoscape().add(createGroupPlaceholderDefinition(object, group.id))));
+        //const groupPlaceholders = [] as NodeSingular[];
+        groupObjects.forEach(group => node._groupPlaceholders.push(this._getCytoscape().add(createGroupPlaceholderDefinition(object, group.id))));
 
         if (groupObjects.length === 0)
             node.noGroupPlaceholder = this._getCytoscape().add(createNoGroupDefinition(object));
@@ -124,12 +125,16 @@ export class Graph {
 
         //cytoscapeNode.json();
 
+        /*
         cytoscapeNode.on('drag', () => {
             groupPlaceholders.forEach(placeholder => {
                 placeholder.remove();
                 placeholder.restore();
             });
         });
+        */
+
+        cytoscapeNode.on('drag', () => node.refreshGroupPlaceholders());
 
         return node;
     }
@@ -208,6 +213,9 @@ export class Graph {
     }
 
     layout() {
+        // A necessary workaround for the bug with nodes without placeholders. More below.
+        this.groups.forEach(group => group.node.remove());
+
         this._getCytoscape().layout({
             //name: 'dagre',
             //name: 'cola',
@@ -222,6 +230,10 @@ export class Graph {
             nodeDimensionsIncludeLabels: true
             //boundingBox: { x1: 0, x2: 1000, y1: 0, y2: 500 }
         } as LayoutOptions).run();
+
+        // A continuation of the workaround.
+        this.groups.forEach(group => group.node.restore());
+        this._nodes.forEach(node => node.refreshGroupPlaceholders());
 
         this.fixLayout();
     }

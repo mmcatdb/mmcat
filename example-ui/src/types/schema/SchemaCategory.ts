@@ -3,6 +3,7 @@ import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "../accessPath/basic";
 import type { DatabaseWithConfiguration } from "../database";
 import { DynamicName, Key, SchemaId, Signature } from "../identifiers";
+import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
 import { SchemaMorphism, SchemaMorphismFromServer, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
 import { SchemaObject, type SchemaObjectFromServer, type SchemaObjectUpdate } from "./SchemaObject";
@@ -177,14 +178,14 @@ export class SchemaCategory {
         return this._signatureProvider.isAvailable(signature);
     }
 
-    setDatabaseToObjectsFromMapping(mapping: Mapping, database: DatabaseWithConfiguration): void {
+    setDatabaseToObjectsFromMapping(mapping: Mapping, logicalModel: LogicalModel): void {
         const objects = getObjectsFromPath(mapping.accessPath, this.objects, this.morphisms);
 
         const rootObject = this.objects.find(object => object.id === mapping.rootObjectId);
         if (rootObject)
             objects.push(rootObject);
 
-        objects.forEach(object => object.setDatabase(database));
+        objects.forEach(object => object.setLogicalModel(logicalModel));
     }
 }
 

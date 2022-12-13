@@ -4,6 +4,7 @@ import type { Position } from "cytoscape";
 import type { DatabaseWithConfiguration } from "../database";
 import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
 import { ComparablePosition, type PositionUpdate } from "./Position";
+import type { LogicalModel } from "../logicalModel";
 
 export type SchemaObjectJSON = {
     label: string,
@@ -29,7 +30,7 @@ export class SchemaObject {
 
     _originalPosition?: ComparablePosition;
 
-    _databases = new ComparableSet<DatabaseWithConfiguration, number>(database => database.id);
+    _logicalModels = new ComparableSet<LogicalModel, number>(logicalModel => logicalModel.id);
 
     private constructor() {}
 
@@ -87,12 +88,12 @@ export class SchemaObject {
         return this._isNew;
     }
 
-    get databases(): DatabaseWithConfiguration[] {
-        return [ ...this._databases.values() ];
+    get logicalModels(): LogicalModel[] {
+        return [ ...this._logicalModels.values() ];
     }
 
-    setDatabase(database: DatabaseWithConfiguration) {
-        this._databases.add(database);
+    setLogicalModel(logicalModel: LogicalModel) {
+        this._logicalModels.add(logicalModel);
     }
 
     setLabel(label: string) {

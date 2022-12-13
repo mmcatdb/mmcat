@@ -72,7 +72,7 @@ export default defineComponent({
 
             logicalModels.forEach(logicalModel => {
                 logicalModel.mappings.forEach(mapping => {
-                    schema.setDatabaseToObjectsFromMapping(mapping, logicalModel.database);
+                    schema.setDatabaseToObjectsFromMapping(mapping, logicalModel);
                 });
             });
 
