@@ -2,21 +2,31 @@ import { Signature } from "../identifiers";
 import type { Edge } from "./Edge";
 import { AvailabilityStatus, type Node } from "./Node";
 
+type Config = {
+    selectNodes: boolean;
+}
+
+const defaultConfig: Config = {
+    selectNodes: true
+};
+
 export class NodeSequence {
     _nodes: Node[];
     _edges: Edge[];
+    readonly config: Config;
 
-    private constructor(nodes: Node[], edges: Edge[]) {
+    private constructor(nodes: Node[], edges: Edge[], config: Partial<Config>) {
         this._nodes = [ ...nodes ];
         this._edges = [ ...edges ];
+        this.config = { ...defaultConfig, ...config };
     }
 
     copy(): NodeSequence {
-        return new NodeSequence(this._nodes, this._edges);
+        return new NodeSequence(this._nodes, this._edges, this.config);
     }
 
-    static fromRootNode(rootNode: Node): NodeSequence {
-        const sequence = new NodeSequence([ rootNode ], []);
+    static fromRootNode(rootNode: Node, config: Partial<Config> = {}): NodeSequence {
+        const sequence = new NodeSequence([ rootNode ], [], config);
         return sequence;
     }
 
@@ -40,19 +50,23 @@ export class NodeSequence {
         signature.toBases().reverse().forEach(baseSignature => this.addBaseSignature(baseSignature));
     }
 
-    addBaseSignature(baseSignature: Signature): void {
+    addBaseSignature(baseSignature: Signature): boolean {
         for (const edge of this.lastNode.adjacentEdges) {
             if (edge.schemaMorphism.signature.equals(baseSignature)) {
                 this.addEdge(edge);
-                return;
+                return true;
             }
         }
+
+        return false;
     }
 
     addEdge(edge: Edge): void {
         this._edges.push(edge);
         this._nodes.push(edge.codomainNode);
-        edge.codomainNode.selectNext();
+
+        if (this.config.selectNodes)
+            edge.codomainNode.selectNext();
     }
 
     unselectAll(): void {
@@ -90,7 +104,9 @@ export class NodeSequence {
         if (!this.lastNode.equals(node) || this._nodes.length === 1)
             return false;
 
-        this.lastNode.unselectPrevious();
+        if (this.config.selectNodes)
+            this.lastNode.unselectPrevious();
+
         this._nodes.pop();
         this._edges.pop();
 

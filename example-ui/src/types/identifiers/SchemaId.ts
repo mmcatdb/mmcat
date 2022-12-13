@@ -74,4 +74,9 @@ export class SchemaIdFactory {
     static createEmpty(): SchemaId {
         return new SchemaId([ Signature.empty ]);
     }
+
+    static createTechnical(): SchemaId {
+        // TODO this needs to change
+        return new SchemaId([ Signature.empty ]);
+    }
 }

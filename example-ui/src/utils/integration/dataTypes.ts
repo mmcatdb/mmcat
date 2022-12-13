@@ -1,5 +1,6 @@
 import { type Attribute, type DataTypeDefinition, type ImportedDataspecer, type Iri, ImportedObject, DataType, ImportedMorphism } from '@/types/integration';
 import { Cardinality } from '@/types/schema';
+import { createEmptyId, createMorphismId, createTechnicalId } from './common';
 
 const OFN_TYPE_PREFIX = "https://ofn.gov.cz/zdroj/základní-datové-typy/2020-07-01/";
 
@@ -41,47 +42,49 @@ const dataTypeDefinitions: DataTypeDefinition[] = [
 ];
 
 function createAttributeForString(attribute: Attribute, output: ImportedDataspecer): ImportedObject {
-    const newObject = new ImportedObject(attribute.iri, attribute.label);
+    const newObject = new ImportedObject(attribute.iri, attribute.label, createEmptyId());
     output.objects.push(newObject);
 
     return newObject;
 }
 
 function createAttributeForText(attribute: Attribute, output: ImportedDataspecer): ImportedObject {
-    const attributeObject = new ImportedObject(attribute.iri, attribute.label);
+    const attributeObject = new ImportedObject(attribute.iri, attribute.label, createTechnicalId());
     output.objects.push(attributeObject);
 
     // TODO function createMap
 
-    const elementObject = new ImportedObject(attribute.iri + '/_language-element', '_element');
-    output.objects.push(elementObject);
-    const attributeToElementMorphism = new ImportedMorphism(attribute.iri + '/_attribute-to-element', '', attributeObject, elementObject, {
-        domCodMin: Cardinality.Zero,
-        domCodMax: Cardinality.Star,
-        codDomMin: Cardinality.One,
-        codDomMax: Cardinality.One
-    });
-    output.morphisms.push(attributeToElementMorphism);
-
-    const languageObject = new ImportedObject(attribute.iri + '/_language', '_language');
-    output.objects.push(languageObject);
-    const elementToLanguageMorphism = new ImportedMorphism(attribute.iri + '/_element-to-language', '', elementObject, languageObject, {
+    const element = new ImportedObject(attribute.iri + '/_language-element', '_element');
+    output.objects.push(element);
+    const elementToAttribute = new ImportedMorphism(attribute.iri + '/_element-to-attribute', '', element, attributeObject, {
         domCodMin: Cardinality.One,
         domCodMax: Cardinality.One,
         codDomMin: Cardinality.Zero,
         codDomMax: Cardinality.Star
     });
-    output.morphisms.push(elementToLanguageMorphism);
+    output.morphisms.push(elementToAttribute);
 
-    const valueObject = new ImportedObject(attribute.iri + '/_value', '_value');
-    output.objects.push(valueObject);
-    const elementToValueMorphism = new ImportedMorphism(attribute.iri + '/_element-to-value', '', elementObject, valueObject, {
+    const language = new ImportedObject(attribute.iri + '/_language', '_language', createEmptyId());
+    output.objects.push(language);
+    const elementToLanguage = new ImportedMorphism(attribute.iri + '/_element-to-language', '', element, language, {
         domCodMin: Cardinality.One,
         domCodMax: Cardinality.One,
         codDomMin: Cardinality.Zero,
         codDomMax: Cardinality.Star
     });
-    output.morphisms.push(elementToValueMorphism);
+    output.morphisms.push(elementToLanguage);
+
+    const value = new ImportedObject(attribute.iri + '/_value', '_value', createEmptyId());
+    output.objects.push(value);
+    const elementToValue = new ImportedMorphism(attribute.iri + '/_element-to-value', '', element, value, {
+        domCodMin: Cardinality.One,
+        domCodMax: Cardinality.One,
+        codDomMin: Cardinality.Zero,
+        codDomMax: Cardinality.Star
+    });
+    output.morphisms.push(elementToValue);
+
+    element.addId(createMorphismId([ elementToLanguage, elementToValue, elementToAttribute ]));
 
     return attributeObject;
 }

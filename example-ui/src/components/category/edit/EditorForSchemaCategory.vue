@@ -274,6 +274,7 @@ export default defineComponent({
         <template v-else-if="state.type === State.EditGroup">
             <EditGroup
                 :nodes="state.nodes"
+                @cancel="setStateToDefault"
             />
         </template>
     </div>

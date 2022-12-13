@@ -144,11 +144,11 @@ export class Graph {
             this._getCytoscape().remove(node.noGroupPlaceholder);
     }
 
-    createEdgeWithDual(morphism: SchemaMorphism, classes?: string): void {
+    createEdgeWithDual(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
         const domNode = this._nodes.find(node => node.schemaObject.id === morphism.domId) as Node;
         const codNode = this._nodes.find(node => node.schemaObject.id === morphism.codId) as Node;
 
-        const edges = [ new Edge(morphism, domNode, codNode), new Edge(morphism.dual, codNode, domNode) ];
+        const edges = [ new Edge(morphism, domNode, codNode), new Edge(morphism.dual, codNode, domNode) ] as [ Edge, Edge ];
         edges[0].dual = edges[1];
         edges[1].dual = edges[0];
 
@@ -170,6 +170,8 @@ export class Graph {
 
         domNode.addNeighbour(edges[0]);
         codNode.addNeighbour(edges[1]);
+
+        return edges;
     }
 
     deleteEdgeWithDual(edge: Edge) {

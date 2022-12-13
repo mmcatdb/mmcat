@@ -50,7 +50,7 @@ export class SchemaObject {
         return object;
     }
 
-    static createNew(id: number, label: string, key: Key, schemaIds: SchemaId[]): SchemaObject {
+    static createNew(id: number, label: string, key: Key, schemaIds: SchemaId[], iri?: Iri): SchemaObject {
         const object = new SchemaObject();
 
         object.id = id;
@@ -61,6 +61,7 @@ export class SchemaObject {
 
         object.position = new ComparablePosition({ x: 0, y: 0});
         object._isNew = true;
+        object.iri = iri;
 
         return object;
     }

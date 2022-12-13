@@ -72,14 +72,18 @@ export class SchemaCategory {
         );
     }
 
-    createObject(label: string, ids: SchemaId[]): SchemaObject {
+    _createObjectWithoutCheck(label: string, ids: SchemaId[], iri?: Iri): SchemaObject {
         const key = this._keysProvider.createAndAdd();
         const id = this._objectIdProvider.createAndAdd();
-        const object = SchemaObject.createNew(id, label, key, ids);
+        const object = SchemaObject.createNew(id, label, key, ids, iri);
         this.objects.push(object);
         this._createdObjects.push(object);
 
         return object;
+    }
+
+    createObject(label: string, ids: SchemaId[]): SchemaObject {
+        return this._createObjectWithoutCheck(label, ids);
     }
 
     createObjectWithIri(label: string, ids: SchemaId[], iri: Iri): SchemaObject | null {
@@ -88,9 +92,7 @@ export class SchemaCategory {
             return null;
         }
 
-        const newObject = this.createObject(label, ids);
-        newObject.iri = iri;
-        return newObject;
+        return this._createObjectWithoutCheck(label, ids, iri);
     }
 
     findObjectByIri(iri: Iri): SchemaObject | undefined {

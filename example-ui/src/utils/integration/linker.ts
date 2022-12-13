@@ -2,6 +2,7 @@ import { ImportedMorphism, ImportedObject, type ImportedDataspecer } from "@/typ
 import type { ParsedDataspecer } from "@/types/integration";
 import { Cardinality, type CardinalitySettings } from "@/types/schema";
 import { createAttribute } from "./dataTypes";
+import { createEmptyId, createMorphismId, createTechnicalId } from "./common";
 
 // Checks if the morhpism can be simple or if array is required instead.
 function addMorphism(iri: string, label: string, dom: ImportedObject, cod: ImportedObject, cardinalitySettings: CardinalitySettings, output: ImportedDataspecer) {
@@ -13,7 +14,8 @@ function addMorphism(iri: string, label: string, dom: ImportedObject, cod: Impor
     }
     else if (cardinalitySettings.codDomMax === Cardinality.One) {
         const newLabel = label === '' ? '' : label + ' _reverse';
-        const newMorphism = new ImportedMorphism(iri, newLabel, cod, dom, {
+
+        const newMorphism = new ImportedMorphism(iri, newLabel, cod, dom, { // nosonar - This is OK, we are reversing the order of the morphism.
             domCodMin: cardinalitySettings.codDomMin,
             domCodMax: cardinalitySettings.codDomMax,
             codDomMin: cardinalitySettings.domCodMin,
@@ -24,8 +26,19 @@ function addMorphism(iri: string, label: string, dom: ImportedObject, cod: Impor
     }
     // Nope, array is required.
     else {
-        const element = new ImportedObject(iri + '/_array-element', '_array-element');
+        const element = new ImportedObject(iri + '/_array-element', '_array-element', createTechnicalId());
         output.objects.push(element);
+
+        const index = new ImportedObject(iri + '/_index', '_index', createEmptyId());
+        output.objects.push(index);
+
+        const elementToIndex = new ImportedMorphism(iri + '/_element-to-index', '', element, index, {
+            domCodMin: Cardinality.One,
+            domCodMax: Cardinality.One,
+            codDomMin: Cardinality.One,
+            codDomMax: Cardinality.One
+        });
+        output.morphisms.push(elementToIndex);
 
         const elementToDomLabel = label === '' ? '' : label + ' _element-to-dom';
         const elementToDom = new ImportedMorphism(iri + '/_element-to-dom', elementToDomLabel, element, dom, {
@@ -63,8 +76,20 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
     };
 
     classes.forEach(myClass => {
-        const newObject = new ImportedObject(myClass.iri, myClass.label);
-        output.objects.push(newObject);
+        const iri = new ImportedObject(myClass.iri + '/_iri', 'Iri', createEmptyId());
+        output.objects.push(iri);
+
+        const object = new ImportedObject(myClass.iri, myClass.label);
+        const objectToIri = new ImportedMorphism(myClass.iri + '/_class-to-iri', '', object, iri, {
+            domCodMin: Cardinality.One,
+            domCodMax: Cardinality.One,
+            codDomMin: Cardinality.One,
+            codDomMax: Cardinality.One
+        });
+        output.morphisms.push(objectToIri);
+
+        object.addId(createMorphismId(objectToIri));
+        output.objects.push(object);
     });
 
     attributes.forEach(attribute => {

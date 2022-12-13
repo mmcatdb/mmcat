@@ -60,7 +60,8 @@ export const style: cytoscape.Stylesheet[] = [
             'font-weight': 'bold',
             label: 'data(label)',
             'curve-style': 'bezier',
-            'target-arrow-shape': 'triangle'
+            'target-arrow-shape': 'triangle-backcurve',
+            'arrow-scale': 2
         }
     },
     {

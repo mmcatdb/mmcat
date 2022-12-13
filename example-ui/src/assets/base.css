@@ -58,8 +58,12 @@
     --color-warning: #FFC107;
 
     --left-panel-width: 220px;
+    /*
     --schema-category-canvas-width: 900px;
     --schema-category-canvas-height: 600px;
+    */
+    --schema-category-canvas-width: 1200px;
+    --schema-category-canvas-height: 700px;
 }
 
 @media (prefers-color-scheme: dark) {
