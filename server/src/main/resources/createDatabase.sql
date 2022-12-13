@@ -23,7 +23,8 @@ CREATE TABLE schema_category (
 INSERT INTO schema_category (version, json_value)
 VALUES
     ('0', '{"label": "Article example"}'),
-    ('0', '{"label": "Tables to document"}');
+    ('0', '{"label": "Tables to document"}'),
+    ('0', '{"label": "Querying example"}');
 
 CREATE TABLE schema_object (
     id SERIAL PRIMARY KEY,
@@ -88,7 +89,23 @@ VALUES
     ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 19}, "label": "id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
     ('{"ids": [{"signatures": [{"ids": [13, 21], "isNull": false}, {"ids": [15, 20], "isNull": false}]}], "key": {"value": 20}, "label": "order item", "superId": {"signatures": [{"ids": [13, 21], "isNull": false}, {"ids": [15, 20], "isNull": false}]}}'),
     ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 21}, "label": "amount", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 22}, "label": "total price", "superId": {"signatures": [{"ids": [], "isNull": false}]}}');
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 22}, "label": "total price", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [2], "isNull": false}]}], "key": {"value": 1}, "label": "Customer", "superId": {"signatures": [{"ids": [2], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 2}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 3}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 4}, "label": "Surname", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [2, 4], "isNull": false}, {"ids": [2, 5], "isNull": false}]}], "key": {"value": 5}, "label": "Friends", "superId": {"signatures": [{"ids": [2, 4], "isNull": false}, {"ids": [2, 5], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [7], "isNull": false}, {"ids": [8], "isNull": false}, {"ids": [2, 6], "isNull": false}]}], "key": {"value": 6}, "label": "Contact", "superId": {"signatures": [{"ids": [7], "isNull": false}, {"ids": [8], "isNull": false}, {"ids": [2, 6], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 7}, "label": "Key", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 8}, "label": "Value", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [2, 9], "isNull": false}, {"ids": [11, 10], "isNull": false}]}], "key": {"value": 9}, "label": "Orders", "superId": {"signatures": [{"ids": [2, 9], "isNull": false}, {"ids": [11, 10], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [11], "isNull": false}]}], "key": {"value": 10}, "label": "Order", "superId": {"signatures": [{"ids": [11], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 11}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [11, 12], "isNull": false}, {"ids": [14, 13], "isNull": false}]}], "key": {"value": 12}, "label": "Items", "superId": {"signatures": [{"ids": [11, 12], "isNull": false}, {"ids": [14, 13], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [14], "isNull": false}]}], "key": {"value": 13}, "label": "Product", "superId": {"signatures": [{"ids": [14], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 14}, "label": "Number", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 15}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
+    ('{"ids": [{"signatures": [{"ids": [], "isNull": false}]}], "key": {"value": 16}, "label": "Price", "superId": {"signatures": [{"ids": [], "isNull": false}]}}');
 
 INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position)
 VALUES
@@ -128,7 +145,23 @@ VALUES
     (2, 34, '{"x": -148, "y": -177}'),
     (2, 35, '{"x": 94, "y": -22}'),
     (2, 36, '{"x": 49, "y": -150}'),
-    (2, 37, '{"x": 166, "y": -145}');
+    (2, 37, '{"x": 166, "y": -145}'),
+    (3,	49,	'{"x": 561, "y": 415}'),
+    (3,	50,	'{"x": 556, "y": 532}'),
+    (3,	51,	'{"x": 552, "y": 178}'),
+    (3,	52,	'{"x": 717, "y": 405}'),
+    (3,	53,	'{"x": 722, "y": 525}'),
+    (3,	38,	'{"x": 293, "y": 307}'),
+    (3,	39,	'{"x": 147, "y": 308}'),
+    (3,	40,	'{"x": 294, "y": 190}'),
+    (3,	41,	'{"x": 141, "y": 404}'),
+    (3,	42,	'{"x": 155, "y": 206}'),
+    (3,	43,	'{"x": 189, "y": 520}'),
+    (3,	44,	'{"x": 189, "y": 656}'),
+    (3,	45,	'{"x": 300, "y": 657}'),
+    (3,	46,	'{"x": 433, "y": 304}'),
+    (3,	47,	'{"x": 559, "y": 299}'),
+    (3,	48,	'{"x": 439, "y": 533}');
 
 INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value)
 VALUES
@@ -201,7 +234,39 @@ VALUES
     (35, 31, '{"max": "ONE", "min": "ONE", "signature": {"ids": [20], "isNull": false}}'),
     (31, 35, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-20], "isNull": false}}'),
     (35, 24, '{"max": "ONE", "min": "ONE", "signature": {"ids": [21], "isNull": false}}'),
-    (24, 35, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-21], "isNull": false}}');
+    (24, 35, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-21], "isNull": false}}'),
+    (38,	39,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [1], "isNull": false}}'),
+    (39,	38,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-1], "isNull": false}}'),
+    (38,	40,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [2], "isNull": false}}'),
+    (40,	38,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [-2], "isNull": false}}'),
+    (38,	41,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [3], "isNull": false}}'),
+    (41,	38,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-3], "isNull": false}}'),
+    (42,	38,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [4], "isNull": false}}'),
+    (38,	42,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-4], "isNull": false}}'),
+    (42,	38,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [5], "isNull": false}}'),
+    (38,	42,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-5], "isNull": false}}'),
+    (43,	38,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [6], "isNull": false}}'),
+    (38,	43,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-6], "isNull": false}}'),
+    (43,	44,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [7], "isNull": false}}'),
+    (44,	43,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-7], "isNull": false}}'),
+    (43,	45,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [8], "isNull": false}}'),
+    (45,	43,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-8], "isNull": false}}'),
+    (46,	38,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [9], "isNull": false}}'),
+    (38,	46,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-9], "isNull": false}}'),
+    (46,	47,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [10], "isNull": false}}'),
+    (47,	46,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-10], "isNull": false}}'),
+    (47,	51,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [11], "isNull": false}}'),
+    (51,	47,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [-11], "isNull": false}}'),
+    (49,	47,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [12], "isNull": false}}'),
+    (47,	49,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-12], "isNull": false}}'),
+    (49,	50,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [13], "isNull": false}}'),
+    (50,	49,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-13], "isNull": false}}'),
+    (50,	48,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [14], "isNull": false}}'),
+    (48,	50,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [-14], "isNull": false}}'),
+    (50,	52,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [15], "isNull": false}}'),
+    (52,	50,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-15], "isNull": false}}'),
+    (50,	53,	'{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [16], "isNull": false}}'),
+    (53,	50,	'{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-16], "isNull": false}}');
 
 INSERT INTO schema_morphism_in_category (schema_category_id, schema_morphism_id)
 VALUES
@@ -274,7 +339,39 @@ VALUES
     (2, 67),
     (2, 68),
     (2, 69),
-    (2, 70);
+    (2, 70),
+    (3,	71),
+    (3,	72),
+    (3,	73),
+    (3,	74),
+    (3,	75),
+    (3,	76),
+    (3,	77),
+    (3,	78),
+    (3,	79),
+    (3,	80),
+    (3,	81),
+    (3,	82),
+    (3,	83),
+    (3,	84),
+    (3,	85),
+    (3,	86),
+    (3,	87),
+    (3,	88),
+    (3,	89),
+    (3,	90),
+    (3,	91),
+    (3,	92),
+    (3,	93),
+    (3,	94),
+    (3,	95),
+    (3,	96),
+    (3,	97),
+    (3,	98),
+    (3,	99),
+    (3,	100),
+    (3,	101),
+    (3,	102);
 
 CREATE TABLE database_for_mapping (
     id SERIAL PRIMARY KEY,
@@ -329,6 +426,36 @@ VALUES
             "username": "mmcat_user",
             "password": "mmcat_password"
         }
+    }'),
+    ('{ "type": "mongodb", "label": "MongoDB - Querying",
+        "settings": {
+            "host": "localhost",
+            "port": 27017,
+            "database": "mmcat_server_querying",
+            "password": "mmcat_password",
+            "username": "mmcat_user",
+            "authenticationDatabase": "admin"
+        }
+    }'),
+    ('{ "type": "postgresql", "label": "PostgreSQL - Querying",
+        "settings": {
+            "host": "localhost",
+            "port": 5432,
+            "database": "mmcat_server_querying",
+            "password": "mmcat_password",
+            "username": "mmcat_user",
+            "authenticationDatabase": ""
+        }
+    }'),
+    ('{ "type": "postgresql", "label": "Neo4j - Querying",
+        "settings": {
+            "host": "localhost",
+            "port": 5432,
+            "database": "mmcat_server_querying",
+            "password": "mmcat_password",
+            "username": "mmcat_user",
+            "authenticationDatabase": ""
+        }
     }');
 
 CREATE TABLE logical_model (
@@ -343,7 +470,10 @@ VALUES
     (1, 1, '{"label": "Mongo - Order"}'),
     (1, 2, '{"label": "Postgres - Customer"}'),
     (2, 3, '{"label": "Postgres import"}'),
-    (2, 1, '{"label": "Mongo export"}');
+    (2, 1, '{"label": "Mongo export"}'),
+    (3,	6,	'{"label": "MongoDB"}'),
+    (3,	7,	'{"label": "PostgreSQL"}'),
+    (3,	8,	'{"label": "Neo4j"}');
 
 CREATE TABLE mapping (
     id SERIAL PRIMARY KEY,
@@ -366,7 +496,11 @@ VALUES
     (3, 24, '{"pkey": [], "kindName": "app_order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [13], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "delivery_address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [4, 14], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "OrderTable"}'),
     (3, 31, '{"pkey": [], "kindName": "app_product", "accessPath": {"name": {"type": "STATIC_NAME", "value": "product", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [15], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [17], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "ProductTable"}'),
     (3, 35, '{"pkey": [], "kindName": "app_order_item", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order_item", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "order_id", "_class": "StaticName"}, "value": {"signature": {"ids": [13, 21], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "product_id", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 20], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "OrderItemTable"}'),
-    (4, 24, '{"pkey": [], "kindName": "order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"_class": "DynamicName", "signature": {"ids": [3], "isNull": false}}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [6, -7], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [14], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "events", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}, {"name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 20], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [-21], "isNull": false}}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "OrderDocument"}');
+    (4, 24, '{"pkey": [], "kindName": "order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"_class": "DynamicName", "signature": {"ids": [3], "isNull": false}}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [6, -7], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [14], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "events", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}, {"name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 20], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [-21], "isNull": false}}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "OrderDocument"}'),
+    (5,	47,	'{"pkey": [], "kindName": "order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "customers", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [9, -10], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [14, 13], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 13], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 13], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [-12], "isNull": false}}], "signature": {"ids": [0], "isNull": true}}}',	'{"label": "Order"}'),
+    (6,	38,	'{"pkey": [], "kindName": "customer", "accessPath": {"name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "surname", "_class": "StaticName"}, "value": {"signature": {"ids": [3], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}',	'{"label": "Customer"}'),
+    (7,	42,	'{"pkey": [], "kindName": "friends", "accessPath": {"name": {"type": "STATIC_NAME", "value": "friends", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "first_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 4], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "second_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 5], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}',	'{"label": "Friends"}'),
+    (7,	43,	'{"pkey": [], "kindName": "contact", "accessPath": {"name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "key", "_class": "StaticName"}, "value": {"signature": {"ids": [7], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 6], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}',	'{"label": "Contacts"}');
 
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,

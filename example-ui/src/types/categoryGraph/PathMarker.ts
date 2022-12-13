@@ -94,7 +94,7 @@ export class PathMarker {
      * # A comment to the previous system:
      *
      * In general, it isn't possible mark all nodes perfectly. The rules are:
-     * - a) A node is ambiguos if there are multiple valid paths to it.
+     * - a) A node is ambiguous if there are multiple valid paths to it.
      * - b) The validity of the path can be found only after we know the whole path.
      * - c) We don't want to consider paths with loops (or, in general, paths that contain a node more than once).
      * The problem is that:

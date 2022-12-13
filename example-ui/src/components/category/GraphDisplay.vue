@@ -67,7 +67,9 @@ export default defineComponent({
                 //layout: { name: 'preset' },
                 //elements,
                 style,
-                boxSelectionEnabled: true
+                boxSelectionEnabled: true,
+                wheelSensitivity: 0.3,
+                maxZoom: 2
             });
 
             logicalModels.forEach(logicalModel => {

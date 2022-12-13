@@ -46,12 +46,13 @@ public class SchemaCategoryRepository {
     public Integer add(SchemaCategoryInit init) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
-                INSERT INTO schema_category (json_value)
-                VALUES (?::jsonb);
+                INSERT INTO schema_category (version, json_value)
+                VALUES (?, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            statement.setString(1, init.jsonValue());
+            statement.setString(1, "0"); // TODO version
+            statement.setString(2, init.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
