@@ -131,12 +131,11 @@ export class Graph {
     }
 
     deleteNode(node: Node) {
-        node.node.remove();
+        node.remove();
         this._nodes = this._nodes.filter(n => !n.equals(node));
 
         // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
         // However, the no group placeholder has to be removed.
-        node.remove();
     }
 
     createEdgeWithDual(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
@@ -201,30 +200,6 @@ export class Graph {
 
     center() {
         this._getCytoscape().center();
-    }
-
-    runTest() {
-        console.log('RUN TEST');
-
-        const object = this.schemaCategory.createObject('test_object', []);
-        const node1 = this.createNode(object, 'new');
-        const node2 = this._nodes.find(node => node.schemaObject.label === 'order');
-
-        if (!node2) {
-            console.log('RETURN 1');
-            return;
-        }
-
-        const morphism = this.schemaCategory.createMorphismWithDual(node1.schemaObject, node2.schemaObject, {
-            domCodMin: Cardinality.One,
-            domCodMax: Cardinality.One,
-            codDomMin: Cardinality.One,
-            codDomMax: Cardinality.One
-        }, '');
-
-        this.createEdgeWithDual(morphism, 'new');
-
-        console.log('END TEST');
     }
 
     layout() {

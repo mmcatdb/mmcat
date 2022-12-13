@@ -63,6 +63,7 @@ export class Node {
     remove() {
         this._noGroupPlaceholder?.remove();
         this._groupPlaceholders.forEach(placeholder => placeholder.remove());
+        this.node.remove();
     }
 
     refreshGroupPlaceholders() {

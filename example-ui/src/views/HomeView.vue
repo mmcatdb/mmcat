@@ -35,6 +35,7 @@ export default defineComponent({
 
             this.currentSchema = this.selectedSchema;
             setSchemaCategoryId(this.selectedSchema.id);
+            this.selectedSchema = undefined;
         },
         async confirmNewSchema() {
             const jsonValue = JSON.stringify({ label: this.newSchemaLabel });
@@ -46,6 +47,10 @@ export default defineComponent({
             this.avaliableSchemas.push(newSchema);
 
             this.newSchemaLabel = '';
+
+            this.currentSchema = newSchema;
+            this.selectedSchema = undefined;
+            setSchemaCategoryId(newSchema.id);
         }
     }
 });
@@ -74,12 +79,12 @@ export default defineComponent({
                 </tr>
                 <tr>
                     <td class="label">
-                        New value:
+                        Select other:
                     </td>
                     <td class="value">
                         <select v-model="selectedSchema">
                             <option
-                                v-for="schema in avaliableSchemas"
+                                v-for="schema in avaliableSchemas.filter(schema => schema.id !== currentSchema?.id)"
                                 :key="schema.id"
                                 :value="schema"
                             >
@@ -91,7 +96,7 @@ export default defineComponent({
             </table>
             <div class="button-row">
                 <button
-                    :disabled="!selectedSchema || selectedSchema?.id === currentSchema?.id"
+                    :disabled="!selectedSchema"
                     @click="confirmNewId"
                 >
                     Confirm
@@ -99,7 +104,7 @@ export default defineComponent({
             </div>
         </div>
         <div class="editor">
-            <h2>Add schema category</h2>
+            <h2>Create new schema category</h2>
             <table>
                 <tr>
                     <td class="label">
