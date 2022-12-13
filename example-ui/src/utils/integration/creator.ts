@@ -13,8 +13,6 @@ function sequenceToSignature(morphismSequence: MorphismSequence, node: Node, cre
             return null;
         }
 
-        console.log(edge);
-
         const result = nodeSequence.addBaseSignature(edge.schemaMorphism.signature);
         if (!result) {
             console.log('Base signature couln\'t be added.');

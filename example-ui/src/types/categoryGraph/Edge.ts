@@ -4,7 +4,7 @@ import type { Node } from "./Node";
 
 export class Edge {
     schemaMorphism: SchemaMorphism;
-    edge!: EdgeSingular;
+    edge?: EdgeSingular;
     domainNode: Node;
     codomainNode: Node;
     _dual!: Edge;

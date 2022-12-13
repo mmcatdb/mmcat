@@ -150,6 +150,11 @@ export default defineComponent({
                 >
                     Reset layout
                 </button>
+                <button
+                    @click="graph?.runTest()"
+                >
+                    Run test
+                </button>
             </div>
         </template>
         <ResourceNotFound v-else-if="schemaFetched" />

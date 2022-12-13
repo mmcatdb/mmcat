@@ -55,7 +55,6 @@ export default defineComponent({
             this.temporayEdge?.delete();
             const morphism = this.graph.schemaCategory.createMorphismWithDual(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.label);
             this.graph.createEdgeWithDual(morphism, 'new');
-            this.graph.layout();
 
             this.$emit('save');
         },

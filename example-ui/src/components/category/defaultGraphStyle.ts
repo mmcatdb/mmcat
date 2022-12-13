@@ -177,7 +177,8 @@ export const style: cytoscape.Stylesheet[] = [
             opacity: 0.2,
             'background-color': 'red',
             width: '60px',
-            height: '60px'
+            height: '60px',
+            'z-compound-depth': 'bottom'
         }
     }
 ];

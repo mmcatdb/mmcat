@@ -51,10 +51,18 @@ export class Node {
 
     _adjacentEdges = new ComparableMap<Signature, string, Edge>(signature => signature.toString());
 
-    _groupPlaceholders = [] as NodeSingular[];
+    _groupPlaceholders: NodeSingular[];
+    _noGroupPlaceholder = undefined as NodeSingular | undefined;
 
-    constructor(schemaObject: SchemaObject) {
+    constructor(schemaObject: SchemaObject, groupPlaceholders: NodeSingular[], noGroupPlaceholder?: NodeSingular) {
         this.schemaObject = schemaObject;
+        this._groupPlaceholders = groupPlaceholders;
+        this._noGroupPlaceholder = noGroupPlaceholder;
+    }
+
+    remove() {
+        this._noGroupPlaceholder?.remove();
+        this._groupPlaceholders.forEach(placeholder => placeholder.remove());
     }
 
     refreshGroupPlaceholders() {
@@ -173,7 +181,5 @@ export class Node {
         this.schemaObject.addSchemaId(schemaId);
         this.node.removeClass('no-ids');
     }
-
-    noGroupPlaceholder = undefined as NodeSingular | undefined;
 }
 

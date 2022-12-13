@@ -1,7 +1,6 @@
 import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, LayoutOptions, NodeSingular } from "cytoscape";
-import type { DatabaseWithConfiguration } from "../database";
-import type { LogicalModel } from "../logicalModel";
-import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
+import type { LogicalModel, LogicalModelInfo } from "../logicalModel";
+import { type SchemaMorphism, type SchemaObject, type SchemaCategory, Cardinality } from "../schema";
 import { Edge } from "./Edge";
 import { Node } from "./Node";
 
@@ -13,7 +12,11 @@ export type TemporaryEdge = {
     delete: () => void;
 }
 
-type Group = { id: number, logicalModel: LogicalModel, node: NodeSingular };
+type Group = {
+    id: number,
+    logicalModel: LogicalModelInfo,
+    node: NodeSingular
+};
 
 export class Graph {
     // Workaround for the vue reactivity (all properties are replaced by proxies, but this way, we can have access to the original Core)
@@ -108,31 +111,19 @@ export class Graph {
     }
 
     createNode(object: SchemaObject, classes?: string): Node {
-        const node = new Node(object);
+        const groupPlaceholders = object.logicalModels
+            .map(logicalModel => this.getGroupOrAddIt(logicalModel))
+            .map(group => this._getCytoscape().add(createGroupPlaceholderDefinition(object, group.id)));
+
+        const noGroupPlaceholder = groupPlaceholders.length > 0 ?
+            undefined :
+            this._getCytoscape().add(createNoGroupDefinition(object));
+
+        const node = new Node(object, groupPlaceholders, noGroupPlaceholder);
         this._nodes.push(node);
 
-        const groupObjects = object.logicalModels.map(logicalModel => this.getGroupOrAddIt(logicalModel));
-
-        //const groupPlaceholders = [] as NodeSingular[];
-        groupObjects.forEach(group => node._groupPlaceholders.push(this._getCytoscape().add(createGroupPlaceholderDefinition(object, group.id))));
-
-        if (groupObjects.length === 0)
-            node.noGroupPlaceholder = this._getCytoscape().add(createNoGroupDefinition(object));
-
-        //const coloringNode = this._getCytoscape().add(createColoringNodeDefinition(object, Math.random() < 0.5 ? Type.mongodb : Type.postgresql));
         const cytoscapeNode = this._getCytoscape().add(createNodeDefinition(object, node, classes));
         node.setCytoscapeNode(cytoscapeNode);
-
-        //cytoscapeNode.json();
-
-        /*
-        cytoscapeNode.on('drag', () => {
-            groupPlaceholders.forEach(placeholder => {
-                placeholder.remove();
-                placeholder.restore();
-            });
-        });
-        */
 
         cytoscapeNode.on('drag', () => node.refreshGroupPlaceholders());
 
@@ -140,13 +131,12 @@ export class Graph {
     }
 
     deleteNode(node: Node) {
-        this._getCytoscape().remove(node.node);
+        node.node.remove();
         this._nodes = this._nodes.filter(n => !n.equals(node));
 
         // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
         // However, the no group placeholder has to be removed.
-        if (node.noGroupPlaceholder)
-            this._getCytoscape().remove(node.noGroupPlaceholder);
+        node.remove();
     }
 
     createEdgeWithDual(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
@@ -183,7 +173,8 @@ export class Graph {
         //this._getCytoscape().remove(edge.edge);
         //this._getCytoscape().remove(edge.dual.edge);
         const cytoscapeEdge = edge.edge ? edge.edge : edge.dual.edge;
-        this._getCytoscape().remove(cytoscapeEdge);
+        if (cytoscapeEdge)
+            this._getCytoscape().remove(cytoscapeEdge);
 
         edge.domainNode.removeNeighbour(edge.codomainNode);
         edge.codomainNode.removeNeighbour(edge.domainNode);
@@ -212,10 +203,31 @@ export class Graph {
         this._getCytoscape().center();
     }
 
-    layout() {
-        // A necessary workaround for the bug with nodes without placeholders. More below.
-        this.groups.forEach(group => group.node.remove());
+    runTest() {
+        console.log('RUN TEST');
 
+        const object = this.schemaCategory.createObject('test_object', []);
+        const node1 = this.createNode(object, 'new');
+        const node2 = this._nodes.find(node => node.schemaObject.label === 'order');
+
+        if (!node2) {
+            console.log('RETURN 1');
+            return;
+        }
+
+        const morphism = this.schemaCategory.createMorphismWithDual(node1.schemaObject, node2.schemaObject, {
+            domCodMin: Cardinality.One,
+            domCodMax: Cardinality.One,
+            codDomMin: Cardinality.One,
+            codDomMax: Cardinality.One
+        }, '');
+
+        this.createEdgeWithDual(morphism, 'new');
+
+        console.log('END TEST');
+    }
+
+    layout() {
         this._getCytoscape().layout({
             //name: 'dagre',
             //name: 'cola',
@@ -231,10 +243,6 @@ export class Graph {
             //boundingBox: { x1: 0, x2: 1000, y1: 0, y2: 500 }
         } as LayoutOptions).run();
 
-        // A continuation of the workaround.
-        this.groups.forEach(group => group.node.restore());
-        this._nodes.forEach(node => node.refreshGroupPlaceholders());
-
         this.fixLayout();
     }
 
@@ -244,7 +252,16 @@ export class Graph {
 
     resetLayout() {
         this._fixedNodes = 0;
+
+        // A necessary workaround for the bug with nodes without placeholders. More below.
+        // Also, both parts of the workaround DO HAVE to be outside the layout function. Otherwise it causes a particularly hard to find bug (when the layout function is called from AddObject, then a new morphism is added in AddMorphism and then this function is called).
+        this.groups.forEach(group => group.node.remove());
+
         this.layout();
+
+        // A continuation of the workaround.
+        this.groups.forEach(group => group.node.restore());
+        this._nodes.forEach(node => node.refreshGroupPlaceholders());
     }
 
     getNode(object: SchemaObject): Node | undefined {
