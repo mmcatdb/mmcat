@@ -99,7 +99,7 @@ export default defineComponent({
                 />
                 <ParentPropertyDisplay
                     v-for="(subpath, index) in complexSubpaths"
-                    :key="subpath.name"
+                    :key="subpath.name.toString()"
                     :property="subpath"
                     :is-last="index === complexSubpaths.length - 1"
                     :is-root="false"
