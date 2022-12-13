@@ -34,7 +34,7 @@ export default defineComponent({
         const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
         if (result.status) {
             this.logicalModels = result.data.map(LogicalModel.fromServer);
-            this.selectedLogicalModel = this.logicalModels.find(model => model.id == this.$route.params.logicalModelId);
+            this.selectedLogicalModel = this.logicalModels.find(model => model.id.toString() === this.$route.params.logicalModelId);
         }
     },
     methods: {

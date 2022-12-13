@@ -1,6 +1,6 @@
 import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, LayoutOptions, NodeSingular } from "cytoscape";
 import type { LogicalModel, LogicalModelInfo } from "../logicalModel";
-import { type SchemaMorphism, type SchemaObject, type SchemaCategory, Cardinality } from "../schema";
+import type { SchemaMorphism, SchemaObject, SchemaCategory } from "../schema";
 import { Edge } from "./Edge";
 import { Node } from "./Node";
 
