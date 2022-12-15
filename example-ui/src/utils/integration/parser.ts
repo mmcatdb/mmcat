@@ -25,7 +25,7 @@ function parseAttribute(resource: any): Attribute {
     return {
         iri: resource.iri,
         label: getLanguageString(resource.pimHumanLabel),
-        dataType: parseDataType(resource.pimDataType),
+        dataType: parseDataType(resource.pimDatatype),
         parentClassIri: resource.pimOwnerClass,
         cardinality: parseCardinality(resource)
     };

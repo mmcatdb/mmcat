@@ -84,7 +84,7 @@ function createAttributeForText(attribute: Attribute, output: ImportedDataspecer
     });
     output.morphisms.push(elementToValue);
 
-    element.addId(createMorphismId([ elementToLanguage, elementToValue, elementToAttribute ]));
+    element.addId(createMorphismId([ [ elementToLanguage ], [ elementToValue ], [ elementToAttribute ] ]));
 
     return attributeObject;
 }

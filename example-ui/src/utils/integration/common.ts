@@ -8,9 +8,9 @@ export function createTechnicalId(): ImportedId {
     return { type: IdType.Technical };
 }
 
-export function createMorphismId(morphisms: ImportedMorphism | ImportedMorphism[]): ImportedId {
+export function createMorphismId(morphisms: ImportedMorphism | ImportedMorphism[][]): ImportedId {
     return {
         type: IdType.Morphism,
-        keys: [ Array.isArray(morphisms) ? morphisms : [ morphisms ] ]
+        keys: Array.isArray(morphisms) ? morphisms : [ [ morphisms ] ]
     };
 }
