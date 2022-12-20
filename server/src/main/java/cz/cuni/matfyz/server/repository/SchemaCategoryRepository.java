@@ -1,8 +1,10 @@
 package cz.cuni.matfyz.server.repository;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import static cz.cuni.matfyz.server.repository.utils.Utils.*;
 
 import java.sql.Statement;
 import java.util.List;
@@ -29,16 +31,17 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public SchemaCategoryInfo find(int id) {
+    public SchemaCategoryInfo find(Id id) {
         return DatabaseWrapper.get((connection, output) -> {
 
             var statement = connection.prepareStatement("SELECT * FROM schema_category WHERE id = ?;");
-            statement.setInt(1, id);
+            //statement.setInt(1, id);
+            setId(statement, 1, id);
             var resultSet = statement.executeQuery();
             
             if (resultSet.next()) {
                 var jsonValue = resultSet.getString("json_value");
-                output.set(new SchemaCategoryInfo(id, jsonValue));
+                output.set(new SchemaCategoryInfo(Integer.parseInt(id.value), jsonValue));
             }
         });
     }

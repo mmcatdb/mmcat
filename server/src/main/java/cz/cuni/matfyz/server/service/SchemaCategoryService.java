@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
@@ -44,7 +45,7 @@ public class SchemaCategoryService {
     }
 
     public SchemaCategoryWrapper find(int id) {
-        SchemaCategoryInfo info = repository.find(id);
+        SchemaCategoryInfo info = repository.find(new Id("" + id));
         if (info == null)
             return null;
             
@@ -55,7 +56,7 @@ public class SchemaCategoryService {
     }
 
     public SchemaCategoryInfo findInfo(int id) {
-        return repository.find(id);
+        return repository.find(new Id("" + id));
     }
 
     public SchemaCategoryWrapper update(int id, SchemaCategoryUpdate update) {

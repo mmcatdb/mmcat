@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
+import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfoBetter;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
@@ -22,11 +24,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author jachym.bartik
  */
 @RestController
 public class SchemaCategoryController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SchemaCategoryController.class);
 
     @Autowired
     private SchemaCategoryService service;
@@ -34,12 +41,9 @@ public class SchemaCategoryController {
     @Autowired
     private SchemaObjectService objectService;
 
-    @Autowired
-    private DatabaseService databaseService;
-
     @GetMapping("/schema-categories")
-    public List<SchemaCategoryInfo> getAllCategoryInfos() {
-        return service.findAllInfos();
+    public List<SchemaCategoryInfoBetter> getAllCategoryInfos() {
+        return service.findAllInfos().stream().map(info -> new SchemaCategoryInfoBetter(info)).toList();
     }
 
     @PostMapping("/schema-categories")
@@ -83,8 +87,12 @@ public class SchemaCategoryController {
     @PutMapping("/schema-categories/{id}/positions")
     public boolean updateCategoryPositions(@PathVariable int id, @RequestBody PositionUpdate[] positionUpdates) {
         boolean result = true;
-        for (PositionUpdate update : positionUpdates)
-            result = result && objectService.updatePosition(id, update.schemaObjectId, update.position);
+        for (PositionUpdate update : positionUpdates) {
+            var parsed = Integer.parseInt(update.schemaObjectId.value);
+            result = result && objectService.updatePosition(id, parsed, update.position);
+            LOGGER.info(update.toString());
+            LOGGER.info("" + parsed);
+        }
         
         if (result)
             return true;
@@ -93,7 +101,8 @@ public class SchemaCategoryController {
     }
 
     static record PositionUpdate(
-        int schemaObjectId,
+        //int schemaObjectId,
+        Id schemaObjectId,
         Position position
     ) {}
 
