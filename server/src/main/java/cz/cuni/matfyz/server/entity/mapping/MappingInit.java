@@ -1,11 +1,13 @@
 package cz.cuni.matfyz.server.entity.mapping;
 
+import cz.cuni.matfyz.server.entity.Id;
+
 /**
  * @author jachym.bartik
  */
 public record MappingInit(
-    int logicalModelId,
-    int rootObjectId,
+    Id logicalModelId,
+    Id rootObjectId,
     String mappingJsonValue,
     String jsonValue
 ) {}

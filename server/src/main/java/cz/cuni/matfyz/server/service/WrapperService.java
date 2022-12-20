@@ -4,6 +4,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDDLWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
@@ -72,7 +73,7 @@ public class WrapperService {
         return name + "wrapper for database " + database.id + " with JSON settings: " + database.settings + " not found.";
     }
 
-    private Map<Integer, MongoDBDatabaseProvider> mongoDBCache = new TreeMap<>();
+    private Map<Id, MongoDBDatabaseProvider> mongoDBCache = new TreeMap<>();
 
     private MongoDBPullWrapper getMongoDBPullWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!mongoDBCache.containsKey(database.id))
@@ -92,7 +93,7 @@ public class WrapperService {
         return new MongoDBDatabaseProvider(settings);
     }
 
-    private Map<Integer, PostgreSQLConnectionProvider> postgreSQLCache = new TreeMap<>();
+    private Map<Id, PostgreSQLConnectionProvider> postgreSQLCache = new TreeMap<>();
 
     private PostgreSQLPullWrapper getPostgreSQLPullWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!postgreSQLCache.containsKey(database.id))

@@ -1,5 +1,9 @@
 package cz.cuni.matfyz.server.repository;
 
+import static cz.cuni.matfyz.server.repository.utils.Utils.getId;
+import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
+
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
@@ -16,7 +20,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SchemaObjectRepository {
 
-    public List<SchemaObjectWrapper> findAllInCategory(int categoryId) {
+    public List<SchemaObjectWrapper> findAllInCategory(Id categoryId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT *
@@ -24,7 +28,7 @@ public class SchemaObjectRepository {
                 JOIN schema_object_in_category ON (schema_object_id = schema_object.id)
                 WHERE schema_category_id = ?;
                 """);
-            statement.setInt(1, categoryId);
+            setId(statement, 1, categoryId);
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -35,27 +39,27 @@ public class SchemaObjectRepository {
                 //var schema = builder.fromJSON(jsonObject);
 
                 if (position != null)
-                    output.add(new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject, position));
+                    output.add(new SchemaObjectWrapper(getId(resultSet, "id"), jsonObject, position));
             }
         });
     }
 
-    public SchemaObjectWrapper find(int id) {
+    public SchemaObjectWrapper find(Id id) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM schema_object WHERE id = ?;");
-            statement.setInt(1, id);
+            setId(statement, 1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 //var jsonObject = new JSONObject(resultSet.getString("json_value"));
                 var jsonObject = resultSet.getString("json_value");
                 //var schema = new SchemaObject.Builder().fromJSON(jsonObject);
-                output.set(new SchemaObjectWrapper(resultSet.getInt("id"), jsonObject, null));
+                output.set(new SchemaObjectWrapper(getId(resultSet, "id"), jsonObject, null));
             }
         });
     }
 
-    public boolean updatePosition(int categoryId, int objectId, Position newPosition) {
+    public boolean updatePosition(Id categoryId, Id objectId, Position newPosition) {
         return DatabaseWrapper.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
                 UPDATE schema_object_in_category
@@ -64,8 +68,8 @@ public class SchemaObjectRepository {
                     AND schema_object_id = ?;
                 """);
             statement.setString(1, newPosition.toJSON().toString());
-            statement.setInt(2, categoryId);
-            statement.setInt(3, objectId);
+            setId(statement, 2, categoryId);
+            setId(statement, 3, objectId);
 
             int affectedRows = statement.executeUpdate();
 
@@ -74,7 +78,7 @@ public class SchemaObjectRepository {
     }
 
     // TODO This should be handled by one transaction.
-    public Integer add(SchemaObjectUpdate object, int categoryId) {
+    public Id add(SchemaObjectUpdate object, Id categoryId) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_object (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, object.jsonValue());
@@ -87,11 +91,11 @@ public class SchemaObjectRepository {
             if (!generatedKeys.next())
                 return;
 
-            var generatedId = generatedKeys.getInt("id");
+            var generatedId = getId(generatedKeys, "id");
 
             var categoryStatement = connection.prepareStatement("INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position) VALUES (?, ?, ?::jsonb)", Statement.RETURN_GENERATED_KEYS);
-            categoryStatement.setInt(1, categoryId);
-            categoryStatement.setInt(2, generatedId);
+            setId(categoryStatement, 1, categoryId);
+            setId(categoryStatement, 2, generatedId);
             categoryStatement.setString(3, object.position().toJSON().toString());
 
             int categoryAffectedRows = categoryStatement.executeUpdate();

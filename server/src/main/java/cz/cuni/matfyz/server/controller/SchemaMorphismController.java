@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.service.SchemaMorphismService;
 
@@ -20,7 +21,7 @@ public class SchemaMorphismController {
     private SchemaMorphismService service;
 
     @GetMapping("/schema-morphisms/{id}")
-    public SchemaMorphismWrapper getMorphism(@PathVariable int id) {
+    public SchemaMorphismWrapper getMorphism(@PathVariable Id id) {
         SchemaMorphismWrapper morphism = service.find(id);
 
         if (morphism != null)

@@ -4,6 +4,7 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
@@ -17,8 +18,8 @@ import java.util.TreeMap;
  */
 public class SchemaBuilder {
 
-    private final Map<Integer, SchemaObject> createdObjects = new TreeMap<>();
-    private final Map<Integer, SchemaMorphism> createdMorphisms = new TreeMap<>();
+    private final Map<Id, SchemaObject> createdObjects = new TreeMap<>();
+    private final Map<Id, SchemaMorphism> createdMorphisms = new TreeMap<>();
 
     private SchemaCategoryWrapper categoryWrapper;
     private MappingWrapper mappingWrapper;

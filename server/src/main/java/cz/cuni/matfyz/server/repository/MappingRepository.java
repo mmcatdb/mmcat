@@ -1,10 +1,13 @@
 package cz.cuni.matfyz.server.repository;
 
+import static cz.cuni.matfyz.server.repository.utils.Utils.getId;
+import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
+
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
-import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.util.List;
@@ -17,16 +20,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MappingRepository {
 
-    public MappingWrapper find(int id) {
+    public MappingWrapper find(Id id) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE id = ?;");
-            statement.setInt(1, id);
+            setId(statement, 1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                int foundId = resultSet.getInt("id");
-                int logicalModelId = resultSet.getInt("logical_model_id");
-                Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
+                Id foundId = getId(resultSet, "id");
+                Id logicalModelId = getId(resultSet, "logical_model_id");
+                Id rootObjectId = getId(resultSet, "root_object_id");
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
@@ -35,15 +38,15 @@ public class MappingRepository {
         });
     }
 
-    public List<MappingWrapper> findAll(int logicalModelId) {
+    public List<MappingWrapper> findAll(Id logicalModelId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
-            statement.setInt(1, logicalModelId);
+            setId(statement, 1, logicalModelId);
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int foundId = resultSet.getInt("id");
-                Integer rootObjectId = Utils.getIntOrNull(resultSet.getInt("root_object_id"));
+                Id foundId = getId(resultSet, "id");
+                Id rootObjectId = getId(resultSet, "root_object_id");
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
@@ -52,14 +55,14 @@ public class MappingRepository {
         });
     }
 
-    public List<MappingInfo> findAllInfos(int logicalModelId) {
+    public List<MappingInfo> findAllInfos(Id logicalModelId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
-            statement.setInt(1, logicalModelId);
+            setId(statement, 1, logicalModelId);
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int foundId = resultSet.getInt("id");
+                Id foundId = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
 
                 output.add(new MappingInfo(foundId, jsonValue));
@@ -67,7 +70,7 @@ public class MappingRepository {
         });
     }
 
-    public Integer add(MappingInit mapping) {
+    public Id add(MappingInit mapping) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 INSERT INTO mapping (logical_model_id, root_object_id, mapping_json_value, json_value)
@@ -75,8 +78,8 @@ public class MappingRepository {
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            statement.setInt(1, mapping.logicalModelId());
-            statement.setInt(2, mapping.rootObjectId());
+            setId(statement, 1, mapping.logicalModelId());
+            setId(statement, 2, mapping.rootObjectId());
             statement.setString(3, mapping.mappingJsonValue());
             statement.setString(4, mapping.jsonValue());
 
@@ -86,7 +89,7 @@ public class MappingRepository {
 
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
-                output.set(generatedKeys.getInt("id"));
+                output.set(getId(generatedKeys, "id"));
         });
     }
 

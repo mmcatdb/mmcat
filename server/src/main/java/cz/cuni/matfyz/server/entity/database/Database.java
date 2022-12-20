@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.entity.database;
 
 import cz.cuni.matfyz.server.entity.Entity;
+import cz.cuni.matfyz.server.entity.Id;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,18 +31,18 @@ public class Database extends Entity {
     }
 
     @JsonCreator
-    public Database(@JsonProperty("id") int id) {
+    public Database(@JsonProperty("id") Id id) {
         super(id);
     }
 
-    public Database(Integer id, DatabaseInit data) {
+    public Database(Id id, DatabaseInit data) {
         super(id);
         this.type = data.type;
         this.label = data.label;
         this.settings = data.settings;
     }
 
-    public Database(Integer id, Database database) {
+    public Database(Id id, Database database) {
         this(id, database.toDatabaseInit());
     }
 
@@ -57,7 +58,7 @@ public class Database extends Entity {
             this.settings = data.settings;
     }
 
-    public static Database fromJSONValue(Integer id, String jsonValue) throws JsonProcessingException {
+    public static Database fromJSONValue(Id id, String jsonValue) throws JsonProcessingException {
         DatabaseInit data = dataJSONReader.readValue(jsonValue);
         return new Database(id, data);
     }

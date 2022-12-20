@@ -1,11 +1,13 @@
 package cz.cuni.matfyz.server.entity.database;
 
+import cz.cuni.matfyz.server.entity.Id;
+
 /**
  * @author jachym.bartik
  */
 public class DatabaseWithConfiguration {
 
-    public final int id;
+    public final Id id;
     public final Database.Type type;
     public final String label;
     public final DatabaseConfiguration configuration;

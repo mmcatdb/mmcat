@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.service.SchemaObjectService;
 
@@ -20,7 +21,7 @@ public class SchemaObjectController {
     private SchemaObjectService service;
 
     @GetMapping("/schema-objects/{id}")
-    public SchemaObjectWrapper getObject(@PathVariable int id) {
+    public SchemaObjectWrapper getObject(@PathVariable Id id) {
         SchemaObjectWrapper object = service.find(id);
 
         if (object != null)

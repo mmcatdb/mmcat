@@ -1,5 +1,9 @@
 package cz.cuni.matfyz.server.repository;
 
+import static cz.cuni.matfyz.server.repository.utils.Utils.getId;
+import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
+
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
@@ -14,10 +18,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DatabaseRepository {
 
-    public Database find(int id) {
+    public Database find(Id id) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM database_for_mapping WHERE id = ?;");
-            statement.setInt(1, id);
+            setId(statement, 1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
@@ -33,7 +37,7 @@ public class DatabaseRepository {
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
+                Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
                 output.add(Database.fromJSONValue(id, jsonValue));
             }
@@ -55,7 +59,7 @@ public class DatabaseRepository {
 
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
-                int id = generatedKeys.getInt("id");
+                Id id = getId(generatedKeys, "id");
                 output.set(new Database(id, database));
             }
         });
@@ -65,7 +69,7 @@ public class DatabaseRepository {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("UPDATE database_for_mapping SET json_value = ?::jsonb WHERE id = ?;");
             statement.setString(1, database.toJSONValue());
-            statement.setInt(2, database.id);
+            setId(statement, 2, database.id);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -75,10 +79,10 @@ public class DatabaseRepository {
         });
     }
 
-    public boolean delete(int id) {
+    public boolean delete(Id id) {
         return DatabaseWrapper.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("DELETE FROM database_for_mapping WHERE id = ?;");
-            statement.setInt(1, id);
+            setId(statement, 1, id);
 
             int affectedRows = statement.executeUpdate();
             output.set(affectedRows == 1);

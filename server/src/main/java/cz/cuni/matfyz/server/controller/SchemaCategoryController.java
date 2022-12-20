@@ -2,15 +2,12 @@ package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
-import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfoBetter;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 import cz.cuni.matfyz.server.service.SchemaObjectService;
 import cz.cuni.matfyz.server.utils.Position;
-import cz.cuni.matfyz.server.view.MappingOptionsView;
 
 import java.util.List;
 
@@ -24,16 +21,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author jachym.bartik
  */
 @RestController
 public class SchemaCategoryController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchemaCategoryController.class);
 
     @Autowired
     private SchemaCategoryService service;
@@ -42,8 +34,8 @@ public class SchemaCategoryController {
     private SchemaObjectService objectService;
 
     @GetMapping("/schema-categories")
-    public List<SchemaCategoryInfoBetter> getAllCategoryInfos() {
-        return service.findAllInfos().stream().map(info -> new SchemaCategoryInfoBetter(info)).toList();
+    public List<SchemaCategoryInfo> getAllCategoryInfos() {
+        return service.findAllInfos();
     }
 
     @PostMapping("/schema-categories")
@@ -56,7 +48,7 @@ public class SchemaCategoryController {
     }
 
     @GetMapping("/schema-categories/{id}/info")
-    public SchemaCategoryInfo getCategoryInfo(@PathVariable int id) {
+    public SchemaCategoryInfo getCategoryInfo(@PathVariable Id id) {
         SchemaCategoryInfo schema = service.findInfo(id);
 
         if (schema != null)
@@ -66,7 +58,7 @@ public class SchemaCategoryController {
     }
 
     @GetMapping("/schema-categories/{id}")
-    public SchemaCategoryWrapper getCategoryWrapper(@PathVariable int id) {
+    public SchemaCategoryWrapper getCategoryWrapper(@PathVariable Id id) {
         SchemaCategoryWrapper schema = service.find(id);
 
         if (schema != null)
@@ -76,7 +68,7 @@ public class SchemaCategoryController {
     }
 
     @PutMapping("/schema-categories/{id}")
-    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable int id, @RequestBody SchemaCategoryUpdate update) {
+    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaCategoryUpdate update) {
         SchemaCategoryWrapper result = service.update(id, update);
         if (result != null)
             return result;
@@ -85,14 +77,10 @@ public class SchemaCategoryController {
     }
 
     @PutMapping("/schema-categories/{id}/positions")
-    public boolean updateCategoryPositions(@PathVariable int id, @RequestBody PositionUpdate[] positionUpdates) {
+    public boolean updateCategoryPositions(@PathVariable Id id, @RequestBody PositionUpdate[] positionUpdates) {
         boolean result = true;
-        for (PositionUpdate update : positionUpdates) {
-            var parsed = Integer.parseInt(update.schemaObjectId.value);
-            result = result && objectService.updatePosition(id, parsed, update.position);
-            LOGGER.info(update.toString());
-            LOGGER.info("" + parsed);
-        }
+        for (PositionUpdate update : positionUpdates)
+            result = result && objectService.updatePosition(id, update.schemaObjectId, update.position);
         
         if (result)
             return true;
@@ -108,7 +96,7 @@ public class SchemaCategoryController {
 
     /*
     @GetMapping("/schema-categories/{id}/mapping-options")
-    public MappingOptionsView getMappingOptions(@PathVariable int id) {
+    public MappingOptionsView getMappingOptions(@PathVariable Id id) {
         return new MappingOptionsView(id, databaseService.findAll());
     }
     */

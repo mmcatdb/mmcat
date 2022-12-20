@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
 import cz.cuni.matfyz.server.utils.Position;
@@ -19,21 +20,21 @@ public class SchemaObjectService {
     @Autowired
     private SchemaObjectRepository repository;
 
-    public List<SchemaObjectWrapper> findAllInCategory(int categoryId) {
+    public List<SchemaObjectWrapper> findAllInCategory(Id categoryId) {
         return repository.findAllInCategory(categoryId);
     }
 
-    public SchemaObjectWrapper find(int id) {
+    public SchemaObjectWrapper find(Id id) {
         return repository.find(id);
     }
 
-    public boolean updatePosition(int categoryId, int objectId, Position newPosition) {
+    public boolean updatePosition(Id categoryId, Id objectId, Position newPosition) {
         return repository.updatePosition(categoryId, objectId, newPosition);
     }
 
     /*
-    public SchemaObjectWrapper add(SchemaObjectWrapper object, int categoryId) {
-        Integer generatedId = repository.add(object, categoryId);
+    public SchemaObjectWrapper add(SchemaObjectWrapper object, Id categoryId) {
+        Id generatedId = repository.add(object, categoryId);
 
         return generatedId == null ? null : new SchemaObjectWrapper(generatedId, object.jsonValue, object.position);
     }

@@ -39,12 +39,12 @@ public class SchemaCategoryService {
     }
 
     public SchemaCategoryInfo createNewInfo(SchemaCategoryInit init) {
-        Integer generatedId = repository.add(init);
+        Id generatedId = repository.add(init);
 
         return generatedId == null ? null : new SchemaCategoryInfo(generatedId, init.jsonValue());
     }
 
-    public SchemaCategoryWrapper find(int id) {
+    public SchemaCategoryWrapper find(Id id) {
         SchemaCategoryInfo info = repository.find(new Id("" + id));
         if (info == null)
             return null;
@@ -55,12 +55,12 @@ public class SchemaCategoryService {
         return new SchemaCategoryWrapper(info, objects, morphisms);
     }
 
-    public SchemaCategoryInfo findInfo(int id) {
+    public SchemaCategoryInfo findInfo(Id id) {
         return repository.find(new Id("" + id));
     }
 
-    public SchemaCategoryWrapper update(int id, SchemaCategoryUpdate update) {
-        var temporaryIdMap = new TreeMap<Integer, Integer>();
+    public SchemaCategoryWrapper update(Id id, SchemaCategoryUpdate update) {
+        var temporaryIdMap = new TreeMap<Integer, Id>();
         for (var object : update.objects()) {
             var generatedObjectId = objectRepository.add(object, id);
             if (generatedObjectId == null)

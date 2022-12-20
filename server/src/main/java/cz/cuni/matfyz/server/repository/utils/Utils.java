@@ -23,7 +23,12 @@ public abstract class Utils {
 
     public static void setId(PreparedStatement statement, int position, Id id) throws SQLException {
         //statement.setString(position, id.value);
-        statement.setInt(position, Integer.parseInt(id.value));
+        try {
+            statement.setInt(position, Integer.parseInt(id.value));
+        }
+        catch (NumberFormatException exception) {
+            statement.setInt(position, 0);
+        }
     }
 
 }

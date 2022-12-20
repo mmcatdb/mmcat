@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.database.DatabaseInit;
 import cz.cuni.matfyz.server.entity.database.DatabaseUpdate;
@@ -41,7 +42,7 @@ public class DatabaseController {
     }
 
     @GetMapping("/databases/{id}")
-    public Database getDatabase(@PathVariable int id) {
+    public Database getDatabase(@PathVariable Id id) {
         Database database = service.find(id);
         if (database == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -61,7 +62,7 @@ public class DatabaseController {
     }
 
     @PutMapping("/databases/{id}")
-    public Database updateDatabase(@PathVariable int id, @RequestBody DatabaseUpdate update) {
+    public Database updateDatabase(@PathVariable Id id, @RequestBody DatabaseUpdate update) {
         if (!update.hasPassword()) {
             var originalDatabase = service.find(id);
             update.setPasswordFrom(originalDatabase);
@@ -75,7 +76,7 @@ public class DatabaseController {
     }
 
     @DeleteMapping("/databases/{id}")
-    public void deleteDatabase(@PathVariable int id) {
+    public void deleteDatabase(@PathVariable Id id) {
         boolean status = service.delete(id);
         if (!status)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The database can't be deleted. Check that there aren't any mappings that depend on it.");

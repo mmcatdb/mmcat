@@ -6,8 +6,8 @@ import java.io.Serializable;
  * @author jachym.bartik
  */
 public record Model(
-    int jobId,
-    int categoryId,
+    Id jobId,
+    Id categoryId,
     String jobLabel,
     String commands
 ) implements Serializable {}

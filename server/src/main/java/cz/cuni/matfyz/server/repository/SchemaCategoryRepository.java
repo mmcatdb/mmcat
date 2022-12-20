@@ -1,10 +1,12 @@
 package cz.cuni.matfyz.server.repository;
 
+import static cz.cuni.matfyz.server.repository.utils.Utils.getId;
+import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
+
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
-import static cz.cuni.matfyz.server.repository.utils.Utils.*;
 
 import java.sql.Statement;
 import java.util.List;
@@ -23,7 +25,7 @@ public class SchemaCategoryRepository {
             var resultSet = statement.executeQuery("SELECT * FROM schema_category;");
 
             while (resultSet.next()) {
-                var id = resultSet.getInt("id");
+                var id = getId(resultSet, "id");
                 //var jsonValue = new JSONObject(resultSet.getString("json_value"));
                 var jsonValue = resultSet.getString("json_value");
                 output.add(new SchemaCategoryInfo(id, jsonValue));
@@ -35,18 +37,17 @@ public class SchemaCategoryRepository {
         return DatabaseWrapper.get((connection, output) -> {
 
             var statement = connection.prepareStatement("SELECT * FROM schema_category WHERE id = ?;");
-            //statement.setInt(1, id);
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
             
             if (resultSet.next()) {
                 var jsonValue = resultSet.getString("json_value");
-                output.set(new SchemaCategoryInfo(Integer.parseInt(id.value), jsonValue));
+                output.set(new SchemaCategoryInfo(id, jsonValue));
             }
         });
     }
 
-    public Integer add(SchemaCategoryInit init) {
+    public Id add(SchemaCategoryInit init) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 INSERT INTO schema_category (version, json_value)
@@ -63,7 +64,7 @@ public class SchemaCategoryRepository {
 
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
-                output.set(generatedKeys.getInt("id"));
+                output.set(getId(generatedKeys, "id"));
         });
     }
 

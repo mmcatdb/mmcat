@@ -1,10 +1,12 @@
 package cz.cuni.matfyz.server.entity.logicalmodel;
 
+import cz.cuni.matfyz.server.entity.Id;
+
 /**
  * @author jachym.bartik
  */
 public record LogicalModelInit(
-    int databaseId,
-    int categoryId,
+    Id databaseId,
+    Id categoryId,
     String jsonValue
 ) {}

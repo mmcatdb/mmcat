@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.Model;
 import cz.cuni.matfyz.server.entity.ModelView;
 import cz.cuni.matfyz.server.service.ModelService;
@@ -24,12 +25,12 @@ public class ModelController {
     private ModelService service;
 
     @GetMapping("/schema-categories/{categoryId}/models")
-    public List<ModelView> getAllModelsInCategory(HttpSession session, @PathVariable int categoryId) {
+    public List<ModelView> getAllModelsInCategory(HttpSession session, @PathVariable Id categoryId) {
         return service.findAllInCategory(session, categoryId).stream().map(ModelView::new).toList();
     }
 
     @GetMapping("/models/{jobId}")
-    public Model getModel(HttpSession session, @PathVariable Integer jobId) {
+    public Model getModel(HttpSession session, @PathVariable Id jobId) {
         var model = service.findModel(session, jobId);
 
         if (model == null)

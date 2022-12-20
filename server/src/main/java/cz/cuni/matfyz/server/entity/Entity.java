@@ -5,16 +5,16 @@ import cz.cuni.matfyz.core.serialization.Identified;
 /**
  * @author jachym.bartik
  */
-public class Entity implements Identified<Integer> {
+public class Entity implements Identified<Id> {
     
-    public final Integer id;
+    public final Id id;
 
-    public Entity(Integer id) {
+    public Entity(Id id) {
         this.id = id;
     }
 
     @Override
-    public Integer identifier() {
+    public Id identifier() {
         return id;
     }
 

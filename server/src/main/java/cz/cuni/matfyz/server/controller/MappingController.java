@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
@@ -26,7 +27,7 @@ public class MappingController {
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
-    public MappingWrapper getMapping(@PathVariable int id) {
+    public MappingWrapper getMapping(@PathVariable Id id) {
         var mapping = service.find(id);
 
         if (mapping == null)
@@ -36,7 +37,7 @@ public class MappingController {
     }
 
     @GetMapping("/logical-models/{logicalModelId}/mappings")
-    public List<MappingWrapper> getAllMappingsInLogicalModel(@PathVariable int logicalModelId) {
+    public List<MappingWrapper> getAllMappingsInLogicalModel(@PathVariable Id logicalModelId) {
         return service.findAll(logicalModelId);
     }
 

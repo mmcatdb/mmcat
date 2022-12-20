@@ -1,12 +1,13 @@
 package cz.cuni.matfyz.server.entity.mapping;
 
 import cz.cuni.matfyz.server.entity.IEntity;
+import cz.cuni.matfyz.server.entity.Id;
 
 /**
  * @author jachym.bartik
  */
 public record MappingInfo(
-    int id,
+    Id id,
     String jsonValue
 
 ) implements IEntity {}

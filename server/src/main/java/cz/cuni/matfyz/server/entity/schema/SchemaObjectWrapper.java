@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.entity.schema;
 
 import cz.cuni.matfyz.server.entity.Entity;
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.utils.Position;
 
 /**
@@ -13,7 +14,7 @@ public class SchemaObjectWrapper extends Entity { // implements JSONConvertible
     public final Position position;
     
     //public SchemaObjectWrapper(int id, JSONObject jsonValue)
-    public SchemaObjectWrapper(Integer id, String jsonValue, Position position) {
+    public SchemaObjectWrapper(Id id, String jsonValue, Position position) {
         super(id);
         this.jsonValue = jsonValue;
         this.position = position;

@@ -4,6 +4,7 @@ import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.server.entity.Entity;
+import cz.cuni.matfyz.server.entity.Id;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,8 +14,8 @@ import org.json.JSONObject;
  */
 public class Job extends Entity implements JSONConvertible {
 
-    public final int logicalModelId;
-    public final Integer categoryId;
+    public final Id logicalModelId;
+    public final Id categoryId;
     public String label;
     public Type type;
     public Status status;
@@ -31,7 +32,7 @@ public class Job extends Entity implements JSONConvertible {
     }
     */
 
-    private Job(Integer id, int logicalModelId, Integer categoryId) {
+    private Job(Id id, Id logicalModelId, Id categoryId) {
         super(id);
         this.logicalModelId = logicalModelId;
         this.categoryId = categoryId;
@@ -72,7 +73,7 @@ public class Job extends Entity implements JSONConvertible {
 
     public static class Builder extends FromJSONLoaderBase<Job> {
 
-        public Job fromJSON(int id, int logicalModelId, int categoryId, String jsonValue) {
+        public Job fromJSON(Id id, Id logicalModelId, Id categoryId, String jsonValue) {
             var job = new Job(id, logicalModelId, categoryId);
             loadFromJSON(job, jsonValue);
             return job;
@@ -85,7 +86,7 @@ public class Job extends Entity implements JSONConvertible {
             job.status = Status.valueOf(jsonObject.getString("status"));
         }
 
-        public Job fromArguments(Integer id, int logicalModelId, Integer categoryId, String label, Type type, Status status) {
+        public Job fromArguments(Id id, Id logicalModelId, Id categoryId, String label, Type type, Status status) {
             var job = new Job(id, logicalModelId, categoryId);
             job.label = label;
             job.type = type;

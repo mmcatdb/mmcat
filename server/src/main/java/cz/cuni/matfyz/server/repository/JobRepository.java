@@ -1,5 +1,9 @@
 package cz.cuni.matfyz.server.repository;
 
+import static cz.cuni.matfyz.server.repository.utils.Utils.getId;
+import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
+
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
@@ -14,7 +18,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JobRepository {
 
-    public List<Job> findAllInCategory(int categoryId) {
+    public List<Job> findAllInCategory(Id categoryId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT
@@ -26,19 +30,19 @@ public class JobRepository {
                 WHERE logical_model.schema_category_id = ?
                 ORDER BY job.id;
                 """);
-            statement.setInt(1, categoryId);
+            setId(statement, 1, categoryId);
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("_id");
-                int logicalModelId = resultSet.getInt("_logical_model_id");
+                Id id = getId(resultSet, "_id");
+                Id logicalModelId = getId(resultSet, "_logical_model_id");
                 String jsonValue = resultSet.getString("_json_value");
                 output.add(new Job.Builder().fromJSON(id, logicalModelId, categoryId, jsonValue));
             }
         });
     }
 
-    public Job find(int id) {
+    public Job find(Id id) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT
@@ -51,22 +55,22 @@ public class JobRepository {
                 WHERE job.id = ?
                 ORDER BY job.id;
                 """);
-            statement.setInt(1, id);
+            setId(statement, 1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                int logicalModelId = resultSet.getInt("_logical_model_id");
-                int categoryId = resultSet.getInt("_schema_category_id");
+                Id logicalModelId = getId(resultSet, "_logical_model_id");
+                Id categoryId = getId(resultSet, "_schema_category_id");
                 String jsonValue = resultSet.getString("_json_value");
                 output.set(new Job.Builder().fromJSON(id, logicalModelId, categoryId, jsonValue));
             }
         });
     }
 
-    public Integer add(Job job) {
+    public Id add(Job job) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO job (logical_model_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setInt(1, job.logicalModelId);
+            setId(statement, 1, job.logicalModelId);
             statement.setString(2, job.toJSON().toString());
 
             int affectedRows = statement.executeUpdate();
@@ -75,7 +79,7 @@ public class JobRepository {
 
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
-                output.set(generatedKeys.getInt("id"));
+                output.set(getId(generatedKeys, "id"));
         });
     }
 
@@ -87,20 +91,20 @@ public class JobRepository {
                 WHERE id = ?;
                 """);
             statement.setString(1, job.toJSON().toString());
-            statement.setInt(2, job.id);
+            setId(statement, 2, job.id);
 
             int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);
         });
     }
 
-    public boolean delete(Integer id) {
+    public boolean delete(Id id) {
         return DatabaseWrapper.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
                 DELETE FROM job
                 WHERE id = ?;
                 """);
-            statement.setInt(1, id);
+            setId(statement, 1, id);
 
             int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);

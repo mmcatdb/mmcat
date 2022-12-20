@@ -105,7 +105,7 @@ public class AsyncJobService {
             }
         }
         catch (Exception exception) {
-            LOGGER.error(String.format("Job { id: %d, name: '%s' } interrupted.", job.id, job.label), exception);
+            LOGGER.error(String.format("Job { id: %s, name: '%s' } interrupted.", job.id, job.label), exception);
             setJobStatus(job, Job.Status.Canceled);
         }
 

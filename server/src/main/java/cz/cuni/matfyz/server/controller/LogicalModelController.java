@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.DatabaseInfo;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelFull;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelInfo;
@@ -34,7 +35,7 @@ public class LogicalModelController {
     private DatabaseService databaseService;
 
     @GetMapping("/logical-models/{id}")
-    public LogicalModelFull getLogicalModel(@PathVariable int id) {
+    public LogicalModelFull getLogicalModel(@PathVariable Id id) {
         var logicalModel = service.findFull(id);
 
         if (logicalModel == null)
@@ -48,7 +49,7 @@ public class LogicalModelController {
      */
     @Deprecated
     @GetMapping("/schema-categories/{categoryId}/logical-models")
-    public List<LogicalModelFull> getAllLogicalModelsInCategory(@PathVariable int categoryId) {
+    public List<LogicalModelFull> getAllLogicalModelsInCategory(@PathVariable Id categoryId) {
         return service.findAllFull(categoryId);
     }
 
@@ -63,7 +64,7 @@ public class LogicalModelController {
     ) {}
 
     @GetMapping("/schema-categories/{categoryId}/logical-model-infos")
-    public List<LogicalModelDatabaseInfo> getAllLogicalModelDatabaseInfosInCategory(@PathVariable int categoryId) {
+    public List<LogicalModelDatabaseInfo> getAllLogicalModelDatabaseInfosInCategory(@PathVariable Id categoryId) {
         var databases = databaseService.findAll();
 
 

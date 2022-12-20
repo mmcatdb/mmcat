@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.service.InstanceCategoryService;
 import cz.cuni.matfyz.server.view.InstanceObjectView;
 
@@ -31,7 +32,7 @@ public class InstanceCategoryController {
     }
 
     @GetMapping("/instances/{categoryId}/objects/{objectKey}")
-    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Integer categoryId, @PathVariable Integer objectKey) {
+    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {
         var key = new Key(objectKey);
 
         var object = service.findObject(session, categoryId, key);

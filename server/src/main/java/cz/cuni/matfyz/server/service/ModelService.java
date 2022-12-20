@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.Model;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.utils.UserStore;
@@ -16,12 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class ModelService {
 
-    public List<Model> findAllInCategory(HttpSession session, int categoryId) {
+    public List<Model> findAllInCategory(HttpSession session, Id categoryId) {
         var store = UserStore.fromSession(session);
         return store.getAllModels().stream().filter(model -> model.categoryId() == categoryId).toList();
     }
 
-    public Model findModel(HttpSession session, int jobId) {
+    public Model findModel(HttpSession session, Id jobId) {
         var store = UserStore.fromSession(session);
         return store.getModel(jobId);
     }

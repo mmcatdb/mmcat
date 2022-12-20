@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.entity.job.JobInit;
 import cz.cuni.matfyz.server.service.JobService;
@@ -28,12 +29,12 @@ public class JobController {
     private JobService service;
 
     @GetMapping("/schema-categories/{categoryId}/jobs")
-    public List<Job> getAllJobsInCategory(@PathVariable int categoryId) {
+    public List<Job> getAllJobsInCategory(@PathVariable Id categoryId) {
         return service.findAllInCategory(categoryId);
     }
 
     @GetMapping("/jobs/{id}")
-    public Job getJob(@PathVariable Integer id) {
+    public Job getJob(@PathVariable Id id) {
         Job job = service.find(id);
         if (job != null)
             return job;
@@ -52,7 +53,7 @@ public class JobController {
     }
 
     @PostMapping("/jobs/{id}/start")
-    public Job startJob(@PathVariable int id, HttpSession session) {
+    public Job startJob(@PathVariable Id id, HttpSession session) {
         Job job = service.find(id);
         if (job == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job " + id + " not foud.");
@@ -62,7 +63,7 @@ public class JobController {
     }
 
     @DeleteMapping("/jobs/{id}")
-    public void deleteJob(@PathVariable Integer id) {
+    public void deleteJob(@PathVariable Id id) {
         boolean result = service.delete(id);
         if (!result)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

@@ -8,6 +8,6 @@ import cz.cuni.matfyz.core.serialization.Identified;
 // TODO public class Entity implements Identified<Integer> {
 public interface IEntity {
     
-    public int id();
+    public Id id();
 
 }

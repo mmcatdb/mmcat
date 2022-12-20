@@ -1,7 +1,9 @@
 package cz.cuni.matfyz.server.entity.schema;
 
+import cz.cuni.matfyz.server.entity.Id;
+
 public record SchemaMorphismUpdateFixed(
-    Integer domId,
-    Integer codId,
+    Id domId,
+    Id codId,
     String jsonValue
 ) {}

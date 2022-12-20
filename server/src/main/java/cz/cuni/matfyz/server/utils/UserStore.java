@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.utils;
 
 import cz.cuni.matfyz.core.instance.InstanceCategory;
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.Model;
 
 import java.io.Serializable;
@@ -18,8 +19,8 @@ public class UserStore implements Serializable {
 
     private static final String USER_STORE_KEY = "USER_STORE";
 
-    private Map<Integer, InstanceCategory> instaces = new TreeMap<>();
-    private Map<Integer, Model> models = new TreeMap<>();
+    private Map<Id, InstanceCategory> instaces = new TreeMap<>();
+    private Map<Id, Model> models = new TreeMap<>();
 
     public static UserStore fromSession(HttpSession session) {
         UserStore store = (UserStore) session.getAttribute(USER_STORE_KEY);
@@ -32,19 +33,19 @@ public class UserStore implements Serializable {
         return store;
     }
 
-    public void addInstance(int categoryId, InstanceCategory instance) {
+    public void addInstance(Id categoryId, InstanceCategory instance) {
         instaces.put(categoryId, instance);
     }
 
-    public InstanceCategory getCategory(int categoryId) {
+    public InstanceCategory getCategory(Id categoryId) {
         return instaces.get(categoryId);
     }
 
-    public Set<Entry<Integer, InstanceCategory>> getAllInstances() {
+    public Set<Entry<Id, InstanceCategory>> getAllInstances() {
         return instaces.entrySet();
     }
 
-    public void setInstance(int categoryId, InstanceCategory instance) {
+    public void setInstance(Id categoryId, InstanceCategory instance) {
         this.instaces.put(categoryId, instance);
     }
 
@@ -52,7 +53,7 @@ public class UserStore implements Serializable {
         models.put(model.jobId(), model);
     }
 
-    public Model getModel(int jobId) {
+    public Model getModel(Id jobId) {
         return models.get(jobId);
     }
 
