@@ -69,7 +69,7 @@ public class LogicalModelController {
 
 
         return service.findAll(categoryId).stream().map(logicalModel -> {
-            var database = databases.stream().filter(d -> d.id == logicalModel.databaseId).findFirst();
+            var database = databases.stream().filter(d -> d.id.equals(logicalModel.databaseId)).findFirst();
 
             return new LogicalModelDatabaseInfo(
                 logicalModel.toInfo(),
