@@ -24,7 +24,7 @@ export default defineComponent({
     },
     methods: {
         async fetchData() {
-            const result = await API.models.getInstanceObject({ jobId: this.$route.params.jobId });
+            const result = await API.models.getModel({ jobId: this.$route.params.jobId });
             if (result.status)
                 this.model = Model.fromServer(result.data);
 

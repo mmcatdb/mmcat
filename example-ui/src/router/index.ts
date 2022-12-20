@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '@/views/HomeView.vue';
+import { createRouter, createWebHistory, RouterView } from 'vue-router';
+import { projectSpecificRoutes } from './projectSpecific';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,72 +7,17 @@ const router = createRouter({
         {
             path: '/',
             name: 'home',
-            component: HomeView
+            component: () => import('@/views/HomeView.vue')
         },
         {
-            path: '/jobs',
-            name: 'jobs',
-            component: () => import('@/views/JobsView.vue')
-        },
-        {
-            path: '/jobs/:id',
-            name: 'job',
-            component: () => import('@/views/JobView.vue')
-        },
-        {
-            path: '/logical-models',
-            name: 'logicalModels',
-            component: () => import('@/views/LogicalModelsView.vue')
-        },
-        {
-            path: '/logical-models/:id',
-            name: 'logicalModel',
-            component: () => import('@/views/LogicalModelView.vue')
-        },
-        {
-            path: '/logical-models/new',
-            name: 'newLogicalModel',
-            component: () => import('@/views/NewLogicalModel.vue')
-        },
-        {
-            path: '/mappings/:id',
-            name: 'mapping',
-            component: () => import('@/views/MappingView.vue')
-        },
-        {
-            path: '/mappings/new',
-            name: 'accessPathEditor',
-            component: () => import('@/views/AccessPathEditorView.vue')
-        },
-        {
-            path: '/schema-category',
-            name: 'schemaCategory',
-            component: () => import('@/views/SchemaCategoryView.vue')
-        },
-        {
-            path: '/instance-category',
-            name: 'instanceCategory',
-            component: () => import('@/views/InstanceCategoryView.vue')
-        },
-        {
-            path: '/models',
-            name: 'models',
-            component: () => import('@/views/ModelsView.vue')
-        },
-        {
-            path: '/models/:jobId',
-            name: 'model',
-            component: () => import('@/views/ModelView.vue')
-        },
-        {
-            path: '/databases',
-            name: 'databases',
-            component: () => import('@/views/DatabasesView.vue')
-        },
-        {
-            path: '/databases/:id',
-            name: 'database',
-            component: () => import('@/views/DatabaseView.vue')
+            path: '/:schemaCategoryId',
+            name: 'projectSpecific',
+            components: {
+                default: () => import('@/views/ProjectSpecificView.vue'),
+                //default: () => RouterView,
+                leftBar: () => import('@/components/layout/project-specific/NavigationContent.vue')
+            },
+            children: projectSpecificRoutes
         },
         {
             path: '/404',

@@ -12,6 +12,9 @@ function compareRoutes(to: RouteLocationRaw, route: RouteLocationNormalizedLoade
     else return false;
 }
 
+/**
+ * This component looks like a normal link except for the situation when we are on the exact page the link directs to. Then only a plain content without any link is rendered.
+ */
 export default defineComponent({
     props: {
         to: {

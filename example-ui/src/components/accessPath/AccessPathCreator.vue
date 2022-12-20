@@ -1,76 +1,73 @@
-<script lang="ts">
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
 import { RootProperty } from '@/types/accessPath/graph';
 import { StaticName } from '@/types/identifiers';
 import type { Node, Graph } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 import API from '@/utils/api';
+import { useRoute, useRouter } from 'vue-router';
 
-export default defineComponent({
-    components: {
-        GraphDisplay,
-        NodeInput,
-        AccessPathEditor
-    },
-    data() {
-        return {
-            graph: null as Graph | null,
-            accessPath: null as RootProperty | null,
-            selectingRootNode: null as Node | null,
-            logicalModels: [] as LogicalModel[],
-            selectedLogicalModel: undefined as LogicalModel | undefined
-        };
-    },
-    computed: {
-        databaseAndRootNodeValid(): boolean {
-            return !!this.selectedLogicalModel && !!this.selectingRootNode;
-        }
-    },
-    async mounted() {
-        const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
-        if (result.status) {
-            this.logicalModels = result.data.map(LogicalModel.fromServer);
-            this.selectedLogicalModel = this.logicalModels.find(model => model.id.toString() === this.$route.params.logicalModelId);
-        }
-    },
-    methods: {
-        cytoscapeCreated(graph: Graph) {
-            this.graph = graph;
-        },
-        confirmDatabaseAndRootNode() {
-            if (!this.selectedLogicalModel || !this.selectingRootNode)
-                return;
+const route = useRoute();
+const router = useRouter();
 
-            this.selectingRootNode.unselect();
-            this.selectingRootNode.becomeRoot();
-            const label = this.selectingRootNode.schemaObject.label.toLowerCase();
-            this.accessPath = new RootProperty(StaticName.fromString(label), this.selectingRootNode);
-        },
-        async createMapping(label: string) {
-            if (! this.selectedLogicalModel || !this.graph || !this.accessPath)
-                return;
+const graph = ref<Graph>();
+const accessPath = ref<RootProperty>();
+const selectingRootNode = ref<Node>();
+const logicalModels = ref<LogicalModel[]>([]);
+const selectedLogicalModel = ref<LogicalModel>();
 
-            const result = await API.mappings.createNewMapping({}, {
-                logicalModelId: this.selectedLogicalModel.id,
-                rootObjectId: this.accessPath.node.schemaObject.id,
-                jsonValue: JSON.stringify({
-                    label: label
-                }),
-                mappingJsonValue: JSON.stringify({
-                    kindName: this.accessPath?.name.toString(),
-                    pkey: [], // TODO this is important for the IC algorithm
-                    accessPath: this.accessPath?.toJSON()
-                })
-            });
-            if (result.status)
-                this.$router.push({ name: 'logicalModel', params: { id: this.selectedLogicalModel.id } });
-        }
+const databaseAndRootNodeValid = computed(() => {
+    return !!selectedLogicalModel.value && !!selectingRootNode.value;
+});
+
+const schemaCategoryId = useSchemaCategory();
+
+onMounted(async () => {
+    const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
+    if (result.status) {
+        logicalModels.value = result.data.map(LogicalModel.fromServer);
+        selectedLogicalModel.value = logicalModels.value.find(model => model.id.toString() === route.params.logicalModelId);
     }
 });
+
+
+function cytoscapeCreated(newGraph: Graph) {
+    graph.value = newGraph;
+}
+
+function confirmDatabaseAndRootNode() {
+    if (!selectedLogicalModel.value || !selectingRootNode.value)
+        return;
+
+    selectingRootNode.value.unselect();
+    selectingRootNode.value.becomeRoot();
+    const label = selectingRootNode.value.schemaObject.label.toLowerCase();
+    accessPath.value = new RootProperty(StaticName.fromString(label), selectingRootNode.value);
+}
+
+async function createMapping(label: string) {
+    if (! selectedLogicalModel.value || !graph.value || !accessPath.value)
+        return;
+
+    const result = await API.mappings.createNewMapping({}, {
+        logicalModelId: selectedLogicalModel.value.id,
+        rootObjectId: accessPath.value.node.schemaObject.id,
+        jsonValue: JSON.stringify({
+            label: label
+        }),
+        mappingJsonValue: JSON.stringify({
+            kindName: accessPath.value?.name.toString(),
+            pkey: [], // TODO this is important for the IC algorithm
+            accessPath: accessPath.value?.toJSON()
+        })
+    });
+    if (result.status)
+        router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });
+}
 </script>
 
 <template>

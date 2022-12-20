@@ -1,59 +1,50 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { getSchemaCategoryId, setSchemaCategoryId } from '@/utils/globalSchemaSettings';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
+import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
-export default defineComponent({
-    props: {
+const selectedSchema = ref<SchemaCategoryInfo>();
+const currentSchema = ref<SchemaCategoryInfo>();
+const avaliableCategories = ref<SchemaCategoryInfo[]>([]);
+const newSchemaLabel = ref('');
 
-    },
-    data() {
-        return {
-            selectedSchema: undefined as SchemaCategoryInfo | undefined,
-            currentSchema: undefined as SchemaCategoryInfo | undefined,
-            avaliableSchemas: [] as SchemaCategoryInfo[],
-            newSchemaLabel: '',
-            DOCUMENTATION_URL
-        };
-    },
-    async mounted() {
-        const result = await API.schemas.getAllCategoryInfos({});
-        if (!result.status)
-            return;
+onMounted(async () => {
+    const result = await API.schemas.getAllCategoryInfos({});
+    if (!result.status)
+        return;
 
-        this.avaliableSchemas = result.data.map(SchemaCategoryInfo.fromServer);
-        const currentId = getSchemaCategoryId();
-        this.currentSchema = this.avaliableSchemas.find(schema => schema.id === currentId);
-    },
-    methods: {
-        confirmNewId() {
-            if (!this.selectedSchema)
-                return;
-
-            this.currentSchema = this.selectedSchema;
-            setSchemaCategoryId(this.selectedSchema.id);
-            this.selectedSchema = undefined;
-        },
-        async confirmNewSchema() {
-            const jsonValue = JSON.stringify({ label: this.newSchemaLabel });
-            const result = await API.schemas.createNewSchema({}, { jsonValue });
-            if (!result.status)
-                return;
-
-            const newSchema = SchemaCategoryInfo.fromServer(result.data);
-            this.avaliableSchemas.push(newSchema);
-
-            this.newSchemaLabel = '';
-
-            this.currentSchema = newSchema;
-            this.selectedSchema = undefined;
-            setSchemaCategoryId(newSchema.id);
-        }
-    }
+    avaliableCategories.value = result.data.map(SchemaCategoryInfo.fromServer);
+    //const currentId = inject<number>('schemaCategoryId') || 2;
+    const currentId = 2;
+    console.log('currentId: ' + currentId);
+    currentSchema.value = avaliableCategories.value.find(schema => schema.id === currentId);
 });
+
+function confirmNewId() {
+    if (!selectedSchema.value)
+        return;
+
+    currentSchema.value = selectedSchema.value;
+    selectedSchema.value = undefined;
+}
+
+async function confirmNewSchema() {
+    const jsonValue = JSON.stringify({ label: newSchemaLabel.value });
+    const result = await API.schemas.createNewSchema({}, { jsonValue });
+    if (!result.status)
+        return;
+
+    const newSchema = SchemaCategoryInfo.fromServer(result.data);
+    avaliableCategories.value.push(newSchema);
+
+    newSchemaLabel.value = '';
+
+    currentSchema.value = newSchema;
+    selectedSchema.value = undefined;
+}
 </script>
 
 <template>
@@ -65,46 +56,27 @@ export default defineComponent({
     <p>
         Detailed instructions on how to use this tool can be found <a :href="DOCUMENTATION_URL">here</a>.
     </p>
-    <div class="divide">
-        <div class="editor">
-            <h2>Select schema category</h2>
-            <table>
-                <tr>
-                    <td class="label">
-                        Current schema:
-                    </td>
-                    <td class="value">
-                        {{ currentSchema?.label }}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        Select other:
-                    </td>
-                    <td class="value">
-                        <select v-model="selectedSchema">
-                            <option
-                                v-for="schema in avaliableSchemas.filter(schema => schema.id !== currentSchema?.id)"
-                                :key="schema.id"
-                                :value="schema"
-                            >
-                                {{ schema.label }}
-                            </option>
-                        </select>
-                    </td>
-                </tr>
-            </table>
-            <div class="button-row">
-                <button
-                    :disabled="!selectedSchema"
-                    @click="confirmNewId"
-                >
-                    Confirm
-                </button>
-            </div>
+    <h2 class="mt-3">
+        Current schema categories
+    </h2>
+    <div class="schema-category-list">
+        <div
+            v-for="category in avaliableCategories"
+            :key="category.id"
+            class="schema-category-display"
+        >
+            <CleverRouterLink
+                :to="{ name: 'schemaCategory', params: { schemaCategoryId: category.id } }"
+            >
+                <h3>{{ category.label }}</h3>
+            </CleverRouterLink>
         </div>
-        <div class="editor">
-            <h2>Create new schema category</h2>
+    </div>
+    <h2 class="mt-3">
+        Create new schema category
+    </h2>
+    <div class="new-schema-category">
+        <div class="editor mt-3">
             <table>
                 <tr>
                     <td class="label">
@@ -129,12 +101,27 @@ export default defineComponent({
 </template>
 
 <style>
-.divide {
-    margin-top: 24px;
+.schema-category-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.schema-category-display {
+    max-width: 400px;
+    background-color: var(--color-background-mute);
+    padding: 8px;
+    margin-top: 12px;
+    padding-left: 32px;
+}
+
+.new-schema-category {
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .editor {
     display: flex;
     flex-direction: column;
+    flex-wrap: wrap;
 }
 </style>

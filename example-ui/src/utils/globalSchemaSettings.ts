@@ -1,21 +1,10 @@
+import { inject } from "vue";
 
-// It is stored here so that it won't be overriden by other windows.
-let schemaCategoryId: number | undefined;
-const schemaCategoryIdKey = "SCHEMA_CATEGORY_ID";
-const schemaCategoryIdDefault = 1;
+export function useSchemaCategory(): number {
+    const id = inject<number>('schemaCategoryId');
 
-export function getSchemaCategoryId(): number {
-    if (!schemaCategoryId) {
-        const result = localStorage.getItem(schemaCategoryIdKey);
-        const intResult = result ? parseInt(result) : null;
+    if (id === undefined)
+        throw new Error('Schema category id not injected.');
 
-        schemaCategoryId = intResult || schemaCategoryIdDefault;
-    }
-
-    return schemaCategoryId;
-}
-
-export function setSchemaCategoryId(value: number): void {
-    schemaCategoryId = value;
-    localStorage.setItem(schemaCategoryIdKey, '' + value);
+    return id;
 }

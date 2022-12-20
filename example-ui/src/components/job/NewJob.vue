@@ -1,52 +1,45 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { defineEmits, onMounted, ref } from 'vue';
 import { JOB_TYPES, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 
-export default defineComponent({
-    components: {
+const emit = defineEmits([ 'newJob' ]);
 
-    },
-    emits: [ 'newJob' ],
-    data() {
-        return {
-            logicalModels: null as LogicalModel[] | null,
-            fetched: false,
-            logicalModelId: null as number | null,
-            jobName: '',
-            jobType: undefined as JobType | undefined,
-            availableJobTypes: JOB_TYPES,
-            fetching: false
-        };
-    },
-    async mounted() {
-        const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
-        if (result.status)
-            this.logicalModels = result.data.map(LogicalModel.fromServer);
+const logicalModels = ref<LogicalModel[]>();
+const fetched = ref(false);
+const logicalModelId = ref<number>();
+const jobName = ref<string>('');
+const jobType = ref<JobType>();
+const fetching = ref(false);
 
-        this.fetched = true;
-    },
-    methods: {
-        async createJob() {
-            if (!this.logicalModelId || !this.jobType)
-                return;
+const schemaCategoryId = useSchemaCategory();
 
-            this.fetching = true;
+onMounted(async () => {
+    const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
+    if (result.status)
+        logicalModels.value = result.data.map(LogicalModel.fromServer);
 
-            const result = await API.jobs.createNewJob({}, {
-                logicalModelId: this.logicalModelId,
-                label: this.jobName,
-                type: this.jobType
-            });
-            if (result.status)
-                this.$emit('newJob', result.data);
-
-            this.fetching = false;
-        }
-    }
+    fetched.value = true;
 });
+
+async function createJob() {
+    if (!logicalModelId.value || !jobType.value)
+        return;
+
+    fetching.value = true;
+
+    const result = await API.jobs.createNewJob({}, {
+        logicalModelId: logicalModelId.value,
+        label: jobName.value,
+        type: jobType.value
+    });
+    if (result.status)
+        emit('newJob', result.data);
+
+    fetching.value = false;
+}
 </script>
 
 <template>
@@ -68,7 +61,7 @@ export default defineComponent({
                 <td class="value">
                     <select v-model="jobType">
                         <option
-                            v-for="availableType in availableJobTypes"
+                            v-for="availableType in JOB_TYPES"
                             :key="availableType.value"
                             :value="availableType.value"
                         >

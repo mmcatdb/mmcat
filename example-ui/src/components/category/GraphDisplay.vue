@@ -1,131 +1,130 @@
-<script lang="ts">
-import { defineComponent, nextTick } from 'vue';
+<script setup lang="ts">
+import { defineEmits, defineExpose, nextTick, onMounted, ref } from 'vue';
 import API from '@/utils/api';
 import { SchemaCategory, type PositionUpdate } from '@/types/schema';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import layoutUtilities from 'cytoscape-layout-utilities';
 
-cytoscape.use(fcose);
-cytoscape.use(layoutUtilities);
-
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 import { LogicalModel } from '@/types/logicalModel';
 
-export default defineComponent({
-    components: {
-        ResourceNotFound,
-        ResourceLoading
-    },
-    emits: [ 'create:graph' ],
-    data() {
-        return {
-            logicalModels: [] as LogicalModel[],
-            schemaFetched: false,
-            saveButtonDisabled: false,
-            graph: null as Graph | null
-        };
-    },
-    async mounted() {
-        const result = await API.schemas.getCategoryWrapper({ id: getSchemaCategoryId() });
-        // TODO
-        const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: getSchemaCategoryId() });
-        if (!result.status || !logicalModelsResult.status)
-            return;
+cytoscape.use(fcose);
+cytoscape.use(layoutUtilities);
 
-        console.log(result.data);
-        const schemaCategory = SchemaCategory.fromServer(result.data);
-        this.logicalModels = logicalModelsResult.data.map(LogicalModel.fromServer);
+const emit = defineEmits([ 'create:graph' ]);
 
-        this.graph = this.createGraph(schemaCategory, this.logicalModels);
+const logicalModels = ref<LogicalModel[]>([]);
+const schemaFetched = ref(false);
+const saveButtonDisabled = ref(false);
+const graph = ref<Graph>();
 
-        this.schemaFetched = true;
-        this.$emit('create:graph', this.graph);
-    },
-    methods: {
-        createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Graph {
-            const container = document.getElementById('cytoscape');
+const schemaCategoryId = useSchemaCategory();
 
-            // This is needed because of some weird bug.
-            // It has to do something with the cache (because it doesn't appear after hard refresh).
-            // It causes the cytoscape div to contain two cytoscape canvases (the first one is empty, probably it's here from the previous instance).
-            // Weird is this only occurs after 'build', not 'dev' (meaning 'serve').
-            if (container) {
-                let child = container.lastElementChild;
-                while (child) {
-                    container.removeChild(child);
-                    child = container.lastElementChild;
-                }
-            }
+onMounted(async () => {
+    const result = await API.schemas.getCategoryWrapper({ id: schemaCategoryId });
+    // TODO
+    const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
+    if (!result.status || !logicalModelsResult.status)
+        return;
 
-            const cytoscapeInstance = cytoscape({
-                container,
-                //layout: { name: 'preset' },
-                //elements,
-                style,
-                boxSelectionEnabled: true,
-                wheelSensitivity: 0.3,
-                maxZoom: 2
-            });
+    console.log(result.data);
+    const schemaCategory = SchemaCategory.fromServer(result.data);
+    logicalModels.value = logicalModelsResult.data.map(LogicalModel.fromServer);
 
-            logicalModels.forEach(logicalModel => {
-                logicalModel.mappings.forEach(mapping => {
-                    schema.setDatabaseToObjectsFromMapping(mapping, logicalModel);
-                });
-            });
+    graph.value = createGraph(schemaCategory, logicalModels.value);
 
-            const graph = new Graph(cytoscapeInstance, schema);
-            schema.objects.forEach(object => graph.createNode(object));
+    schemaFetched.value = true;
+    emit('create:graph', graph.value);
+});
 
-            // First we create a dublets of morphisms. Then we create edges from them.
-            const sortedBaseMorphisms = schema.morphisms.filter(morphism => morphism.isBase)
-                .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
-            const morphismDublets = [];
-            //for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
-            for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
-                morphismDublets.push({ morphism: sortedBaseMorphisms[i], dualMorphism: sortedBaseMorphisms[i + 1] });
+function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Graph {
+    const container = document.getElementById('cytoscape');
 
-            morphismDublets.forEach(dublet => graph.createEdgeWithDual(dublet.morphism));
-
-
-            // Position the object to the center of the canvas.
-            graph.fixLayout();
-            graph.layout();
-            graph.center();
-
-            return graph;
-        },
-        async savePositionChanges() {
-            if (!this.graph)
-                return;
-
-            this.saveButtonDisabled = true;
-            console.log('Saving position changes');
-
-            const updatedPositions = this.graph.schemaCategory.objects
-                .map(object => object.toPositionUpdate())
-                .filter((update): update is PositionUpdate => update !== null);
-
-            const result = await API.schemas.updateCategoryPositions({ id: this.graph.schemaCategory.id }, updatedPositions);
-            console.log(result);
-
-            this.saveButtonDisabled = false;
-        },
-        updateSchema(schemaCategory: SchemaCategory) {
-            this.schemaFetched = false;
-            this.graph = null;
-
-            nextTick(() => {
-                this.graph = this.createGraph(schemaCategory, this.logicalModels);
-                this.schemaFetched = true;
-                this.$emit('create:graph', this.graph);
-            });
+    // This is needed because of some weird bug.
+    // It has to do something with the cache (because it doesn't appear after hard refresh).
+    // It causes the cytoscape div to contain two cytoscape canvases (the first one is empty, probably it's here from the previous instance).
+    // Weird is this only occurs after 'build', not 'dev' (meaning 'serve').
+    if (container) {
+        let child = container.lastElementChild;
+        while (child) {
+            container.removeChild(child);
+            child = container.lastElementChild;
         }
     }
+
+    const cytoscapeInstance = cytoscape({
+        container,
+        //layout: { name: 'preset' },
+        //elements,
+        style,
+        boxSelectionEnabled: true,
+        wheelSensitivity: 0.3,
+        maxZoom: 2
+    });
+
+    logicalModels.forEach(logicalModel => {
+        logicalModel.mappings.forEach(mapping => {
+            schema.setDatabaseToObjectsFromMapping(mapping, logicalModel);
+        });
+    });
+
+    const newGraph = new Graph(cytoscapeInstance, schema);
+    schema.objects.forEach(object => newGraph.createNode(object));
+
+    // First we create a dublets of morphisms. Then we create edges from them.
+    const sortedBaseMorphisms = schema.morphisms.filter(morphism => morphism.isBase)
+        .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
+    const morphismDublets = [];
+    //for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
+    for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
+        morphismDublets.push({ morphism: sortedBaseMorphisms[i], dualMorphism: sortedBaseMorphisms[i + 1] });
+
+    morphismDublets.forEach(dublet => newGraph.createEdgeWithDual(dublet.morphism));
+
+
+    // Position the object to the center of the canvas.
+    newGraph.fixLayout();
+    newGraph.layout();
+    newGraph.center();
+
+    return newGraph;
+}
+
+async function savePositionChanges() {
+    if (!graph.value)
+        return;
+
+    saveButtonDisabled.value = true;
+    console.log('Saving position changes');
+
+    const updatedPositions = graph.value.schemaCategory.objects
+        .map(object => object.toPositionUpdate())
+        .filter((update): update is PositionUpdate => update !== null);
+
+    const result = await API.schemas.updateCategoryPositions({ id: graph.value.schemaCategory.id }, updatedPositions);
+    console.log(result);
+
+    saveButtonDisabled.value = false;
+}
+
+function updateSchema(schemaCategory: SchemaCategory) {
+    schemaFetched.value = false;
+    graph.value = undefined;
+
+    nextTick(() => {
+        graph.value = createGraph(schemaCategory, logicalModels.value);
+        schemaFetched.value = true;
+        emit('create:graph', graph.value);
+    });
+}
+
+defineExpose({
+    updateSchema
 });
 </script>
 

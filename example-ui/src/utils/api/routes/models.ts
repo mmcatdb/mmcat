@@ -6,7 +6,7 @@ const models = {
     getAllModelsInCategory: GET<{ categoryId: StringLike }, ModelViewFromServer[]>(
         u => `/schema-categories/${u.categoryId}/models`
     ),
-    getInstanceObject: GET<{ jobId: StringLike }, ModelFromServer>(
+    getModel: GET<{ jobId: StringLike }, ModelFromServer>(
         u => `/models/${u.jobId}`
     )
 };

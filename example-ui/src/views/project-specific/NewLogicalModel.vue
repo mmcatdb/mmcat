@@ -1,47 +1,43 @@
-<script lang="ts">
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import { DatabaseWithConfiguration } from '@/types/database';
 import API from '@/utils/api';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
-import { defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 
-export default defineComponent({
-    components: {
+const databases = ref<DatabaseWithConfiguration[]>();
+const selectedDatabase = ref<DatabaseWithConfiguration>();
+const label = ref('');
+const fetching = ref(false);
 
-    },
-    data() {
-        return {
-            databases: [] as DatabaseWithConfiguration[],
-            selectedDatabase: null as DatabaseWithConfiguration | null,
-            label: '',
-            fetching: false
-        };
-    },
-    async mounted() {
-        const result = await API.databases.getAllDatabaseInfos({});
-        if (result.status)
-            this.databases = result.data.map(DatabaseWithConfiguration.fromServer);
-    },
-    methods: {
-        async createLogicalModel() {
-            if (!this.selectedDatabase || !this.label)
-                return;
-
-            this.fetching = true;
-
-            const result = await API.logicalModels.createNewLogicalModel({}, {
-                databaseId: this.selectedDatabase.id,
-                categoryId: getSchemaCategoryId(),
-                jsonValue: JSON.stringify({
-                    label: this.label
-                })
-            });
-            if (result.status)
-                this.$router.push({ name: 'logicalModels' });
-
-            this.fetching = false;
-        }
-    }
+onMounted(async () => {
+    const result = await API.databases.getAllDatabaseInfos({});
+    if (result.status)
+        databases.value = result.data.map(DatabaseWithConfiguration.fromServer);
 });
+
+const router = useRouter();
+
+const schemaCategoryId = useSchemaCategory();
+
+async function createLogicalModel() {
+    if (!selectedDatabase.value || !label.value)
+        return;
+
+    fetching.value = true;
+
+    const result = await API.logicalModels.createNewLogicalModel({}, {
+        databaseId: selectedDatabase.value.id,
+        categoryId: schemaCategoryId,
+        jsonValue: JSON.stringify({
+            label: label.value
+        })
+    });
+    if (result.status)
+        router.push({ name: 'logicalModels' });
+
+    fetching.value = false;
+}
 </script>
 
 <template>

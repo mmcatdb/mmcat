@@ -31,6 +31,10 @@ tr.hidden {
     height: 0px;
 }
 
+.mt-3 {
+    margin-top: 12px !important;
+}
+
 .mb-2 {
     margin-bottom: 8px !important;
 }

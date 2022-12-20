@@ -1,15 +1,8 @@
 import type { Empty, StringLike } from "@/types/api/routes";
 import { GET, POST, PUT } from "../routeFunctions";
-import type { ModelFromServer, ModelViewFromServer } from "@/types/model";
 import type { PositionUpdate, SchemaCategoryFromServer, SchemaCategoryInfoFromServer, SchemaCategoryInit, SchemaCategoryUpdate } from "@/types/schema";
 
 const schemas = {
-    getAllModelsInCategory: GET<{ categoryId: StringLike }, ModelViewFromServer[]>(
-        u => `/schema-categories/${u.categoryId}/models`
-    ),
-    getInstanceObject: GET<{ jobId: StringLike }, ModelFromServer>(
-        u => `/models/${u.jobId}`
-    ),
     getAllCategoryInfos: GET<Empty, SchemaCategoryInfoFromServer[]>(
         () => `/schema-categories`
     ),

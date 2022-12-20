@@ -29,7 +29,7 @@ public class ModelController {
     }
 
     @GetMapping("/models/{jobId}")
-    public Model getInstanceObject(HttpSession session, @PathVariable Integer jobId) {
+    public Model getModel(HttpSession session, @PathVariable Integer jobId) {
         var model = service.findModel(session, jobId);
 
         if (model == null)

@@ -1,5 +1,5 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { defineEmits, defineProps, onMounted, ref, watch } from 'vue';
 import type { SchemaObject } from '@/types/schema';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
@@ -7,7 +7,7 @@ import ResourceLoading from '@/components/ResourceLoading.vue';
 import { InstanceObject } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 import API from '@/utils/api';
 
 type Column = {
@@ -21,62 +21,48 @@ type FetchedInstanceObject = {
     columns: Column[]
 }
 
-export default defineComponent({
-    components: {
-        ResourceNotFound,
-        ResourceLoading
-    },
-    props: {
-        node: {
-            type: Object as () => Node,
-            required: true
-        },
-    },
-    emits: [ 'object:click' ],
-    data() {
-        return {
-            fetchedInstanceObject: null as FetchedInstanceObject | null,
-            loading: false
+interface InstanceObjectProps {
+    node: Node;
+}
+
+const props = defineProps<InstanceObjectProps>();
+
+const emit = defineEmits([ 'object:click' ]);
+
+const fetchedInstanceObject = ref<FetchedInstanceObject>();
+const loading = ref(false);
+
+watch(props.node, () => reloadInstanceObject());
+
+const schemaCategoryId = useSchemaCategory();
+
+onMounted(() => reloadInstanceObject());
+async function reloadInstanceObject() {
+    loading.value = true;
+
+    const result = await API.instances.getInstanceObject({ categoryId: schemaCategoryId, objectKey: props.node.schemaObject.key.value });
+    if (result.status && 'data' in result) {
+        const object = InstanceObject.fromServer(result.data);
+        fetchedInstanceObject.value = {
+            object,
+            columns: object.columns.map(signature => ({
+                signature,
+                schemaObject: props.node.getNeighbour(signature)?.schemaObject,
+                isClickable: !signature.equals(Signature.empty)
+            }))
         };
-    },
-    watch: {
-        node: {
-            handler(): void {
-                this.reloadInstanceObject();
-            }
-        }
-    },
-    mounted() {
-        this.reloadInstanceObject();
-    },
-    methods: {
-        async reloadInstanceObject() {
-            this.loading = true;
 
-            const result = await API.instances.getInstanceObject({ categoryId: getSchemaCategoryId(), objectKey: this.node.schemaObject.key.value });
-            if (result.status && 'data' in result) {
-                const object = InstanceObject.fromServer(result.data);
-                this.fetchedInstanceObject = {
-                    object,
-                    columns: object.columns.map(signature => ({
-                        signature,
-                        schemaObject: this.node.getNeighbour(signature)?.schemaObject,
-                        isClickable: !signature.equals(Signature.empty)
-                    }))
-                };
-
-                console.log(this.fetchedInstanceObject);
-                console.log(this.node);
-            }
-
-            this.loading = false;
-        },
-        columnClicked(column: Column) {
-            if (column.isClickable)
-                this.$emit('object:click', column.schemaObject);
-        }
+        console.log(fetchedInstanceObject.value);
+        console.log(props.node);
     }
-});
+
+    loading.value = false;
+}
+
+function columnClicked(column: Column) {
+    if (column.isClickable)
+        emit('object:click', column.schemaObject);
+}
 </script>
 
 <template>

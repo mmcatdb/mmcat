@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import AccessPathCreator from '../components/accessPath/AccessPathCreator.vue';
+import AccessPathCreator from '@/components/accessPath/AccessPathCreator.vue';
 
 export default defineComponent({
     components: {

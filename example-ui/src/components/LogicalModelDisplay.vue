@@ -3,6 +3,7 @@ import { defineComponent } from 'vue';
 import type { LogicalModelInfo } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import type { DatabaseInfo } from '@/types/database';
+import type { SchemaCategory } from '@/types/schema';
 
 export default defineComponent({
     components: {
@@ -49,7 +50,8 @@ export default defineComponent({
                     Database:
                 </td>
                 <td class="value">
-                    <RouterLink :to="{ name: 'databases', params: { id: database.id } }">
+                    <RouterLink :to="{ name: 'databases', params: { id: database.id, schemaCategoryId: 1 } }">
+                        <!--TODO-->
                         {{ database.label }}
                     </RouterLink>
                 </td>

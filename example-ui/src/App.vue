@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
-import TopBar from './components/layout/TopBar.vue';
-import LeftBar from './components/layout/LeftBar.vue';
-import Content from './components/layout/Content.vue';
+import { RouterLink, RouterView } from 'vue-router';
+import TopBar from '@/components/layout/TopBar.vue';
+import LeftBar from '@/components/layout/LeftBar.vue';
+import Content from '@/components/layout/Content.vue';
 
 type Link = {
     pathName: string,
@@ -13,14 +13,8 @@ function defineLink(pathName: string, label: string): Link {
     return { pathName, label };
 }
 
-const links = [
+const globalLinks = [
     defineLink('home', 'MM-evocat'),
-    defineLink('schemaCategory', 'Schema Category'),
-    defineLink('logicalModels', 'Logical Models'),
-    defineLink('databases', 'Databases'),
-    defineLink('jobs', 'Jobs'),
-    defineLink('instanceCategory', 'Instance Category'),
-    defineLink('models', 'Models'),
 ];
 </script>
 
@@ -28,12 +22,13 @@ const links = [
     <TopBar />
     <LeftBar>
         <RouterLink
-            v-for="link in links"
+            v-for="link in globalLinks"
             :key="link.pathName"
             :to="{ name: link.pathName }"
         >
             {{ link.label }}
         </RouterLink>
+        <RouterView name="leftBar" />
     </LeftBar>
     <Content />
 </template>

@@ -1,51 +1,43 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import { LogicalModelInfo } from '@/types/logicalModel';
 import API from '@/utils/api';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
-import { getSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import { DatabaseInfo } from '@/types/database';
+import { useRouter } from 'vue-router';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 
 type LogicalModelDatabase = {
     logicalModel: LogicalModelInfo;
     database: DatabaseInfo;
 };
 
-export default defineComponent({
-    components: {
-        ResourceNotFound,
-        ResourceLoading,
-        LogicalModelDisplay
-    },
-    data() {
-        return {
-            infos: null as LogicalModelDatabase[] | null,
-            fetched: false
-        };
-    },
-    async mounted() {
-        await this.fetchData();
-    },
-    methods: {
-        async fetchData() {
-            const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId: getSchemaCategoryId() });
-            if (result.status) {
-                this.infos = result.data.map(info => ({
-                    logicalModel: LogicalModelInfo.fromServer(info.logicalModel),
-                    database: DatabaseInfo.fromServer(info.database)
-                }));
-            }
+const infos = ref<LogicalModelDatabase[]>();
+const fetched = ref(false);
 
-            this.fetched = true;
-        },
-        createNew() {
-            this.$router.push({ name: 'newLogicalModel' });
-        }
+onMounted(fetchData);
+
+const schemaCategoryId = useSchemaCategory();
+
+async function fetchData() {
+    const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId: schemaCategoryId });
+    if (result.status) {
+        infos.value = result.data.map(info => ({
+            logicalModel: LogicalModelInfo.fromServer(info.logicalModel),
+            database: DatabaseInfo.fromServer(info.database)
+        }));
     }
-});
+
+    fetched.value = true;
+}
+
+const router = useRouter();
+function createNew() {
+    router.push({ name: 'newLogicalModel' });
+}
 </script>
 
 <template>

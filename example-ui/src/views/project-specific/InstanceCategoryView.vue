@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import InstanceCategoryDisplay from '../components/category/InstanceCategoryDisplay.vue';
+import InstanceCategoryDisplay from '@/components/category/InstanceCategoryDisplay.vue';
 
 export default defineComponent({
     components: {
