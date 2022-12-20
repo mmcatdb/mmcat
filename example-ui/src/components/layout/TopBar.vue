@@ -12,5 +12,8 @@
     height: var(--top-bar-height);
     overflow: hidden;
     background-color: var(--color-primary);
+    padding: 10px;
+    display: flex;
+    align-items: center;
 }
 </style>

@@ -3,6 +3,7 @@ import { provide } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 
 const route = useRoute();
+
 provide('schemaCategoryId', route.params.schemaCategoryId);
 </script>
 

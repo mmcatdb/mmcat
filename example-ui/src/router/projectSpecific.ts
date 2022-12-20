@@ -63,5 +63,14 @@ export const projectSpecificRoutes = [
         path: 'databases/:id',
         name: 'database',
         component: () => import('@/views/project-specific/DatabaseView.vue')
+    },
+    {
+        path: '404',
+        name: 'platformSpecificNotFound',
+        component: () => import('@/views/PageNotFoundView.vue')
+    },
+    {
+        path: ':catchAll(.*)',
+        redirect: { name: 'platformSpecificNotFound' }
     }
 ];

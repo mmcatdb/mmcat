@@ -116,12 +116,10 @@ async function confirmNewSchema() {
 
 .new-schema-category {
     display: flex;
-    flex-wrap: wrap;
 }
 
 .editor {
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
 }
 </style>

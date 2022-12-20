@@ -19,7 +19,7 @@
 
 .left-bar a {
   display: inline-block;
-  padding: 0 1rem;
+  padding: 0 16px;
   border-top: 1px solid var(--color-border);
 }
 

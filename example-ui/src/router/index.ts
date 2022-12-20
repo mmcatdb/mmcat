@@ -1,20 +1,24 @@
 import { createRouter, createWebHistory, RouterView } from 'vue-router';
 import { projectSpecificRoutes } from './projectSpecific';
 
+import GeneralNavigationContent from '@/components/layout/project-independent/NavigationContent.vue';
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
             path: '/',
             name: 'home',
-            component: () => import('@/views/HomeView.vue')
+            components: {
+                default: () => import('@/views/project-independent/HomeView.vue'),
+                leftBar: () => GeneralNavigationContent
+            }
         },
         {
             path: '/:schemaCategoryId',
             name: 'projectSpecific',
             components: {
                 default: () => import('@/views/ProjectSpecificView.vue'),
-                //default: () => RouterView,
                 leftBar: () => import('@/components/layout/project-specific/NavigationContent.vue')
             },
             children: projectSpecificRoutes
@@ -22,7 +26,10 @@ const router = createRouter({
         {
             path: '/404',
             name: 'notFound',
-            component: () => import('@/views/PageNotFoundView.vue')
+            components: {
+                default: () => import('@/views/PageNotFoundView.vue'),
+                leftBar: () => GeneralNavigationContent
+            }
         },
         {
             path: '/:catchAll(.*)',
