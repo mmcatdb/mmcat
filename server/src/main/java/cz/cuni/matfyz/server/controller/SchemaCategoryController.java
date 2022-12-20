@@ -51,6 +51,16 @@ public class SchemaCategoryController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
+    @GetMapping("/schema-categories/{id}/info")
+    public SchemaCategoryInfo getCategoryInfo(@PathVariable int id) {
+        SchemaCategoryInfo schema = service.findInfo(id);
+
+        if (schema != null)
+            return schema;
+        
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
     @GetMapping("/schema-categories/{id}")
     public SchemaCategoryWrapper getCategoryWrapper(@PathVariable int id) {
         SchemaCategoryWrapper schema = service.find(id);

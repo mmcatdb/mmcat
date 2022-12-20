@@ -10,6 +10,7 @@ module.exports = {
         'eslint:recommended',
         '@vue/typescript/recommended'
     ],
+    parser: 'vue-eslint-parser',
     parserOptions: {
         ecmaVersion: 2021
     },

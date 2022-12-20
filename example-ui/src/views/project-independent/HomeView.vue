@@ -6,8 +6,6 @@ import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
-const selectedSchema = ref<SchemaCategoryInfo>();
-const currentSchema = ref<SchemaCategoryInfo>();
 const avaliableCategories = ref<SchemaCategoryInfo[]>([]);
 const newSchemaLabel = ref('');
 
@@ -17,19 +15,7 @@ onMounted(async () => {
         return;
 
     avaliableCategories.value = result.data.map(SchemaCategoryInfo.fromServer);
-    //const currentId = inject<number>('schemaCategoryId') || 2;
-    const currentId = 2;
-    console.log('currentId: ' + currentId);
-    currentSchema.value = avaliableCategories.value.find(schema => schema.id === currentId);
 });
-
-function confirmNewId() {
-    if (!selectedSchema.value)
-        return;
-
-    currentSchema.value = selectedSchema.value;
-    selectedSchema.value = undefined;
-}
 
 async function confirmNewSchema() {
     const jsonValue = JSON.stringify({ label: newSchemaLabel.value });
@@ -41,9 +27,6 @@ async function confirmNewSchema() {
     avaliableCategories.value.push(newSchema);
 
     newSchemaLabel.value = '';
-
-    currentSchema.value = newSchema;
-    selectedSchema.value = undefined;
 }
 </script>
 

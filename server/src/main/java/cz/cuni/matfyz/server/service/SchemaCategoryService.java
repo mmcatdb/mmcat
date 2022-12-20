@@ -54,6 +54,10 @@ public class SchemaCategoryService {
         return new SchemaCategoryWrapper(info, objects, morphisms);
     }
 
+    public SchemaCategoryInfo findInfo(int id) {
+        return repository.find(id);
+    }
+
     public SchemaCategoryWrapper update(int id, SchemaCategoryUpdate update) {
         var temporaryIdMap = new TreeMap<Integer, Integer>();
         for (var object : update.objects()) {

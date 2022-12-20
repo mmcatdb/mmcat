@@ -13,7 +13,7 @@ import { RouterView } from 'vue-router';
 <style scoped>
 .outer-content {
     padding-top: var(--top-bar-height);
-    padding-left: var(--left-panel-width);
+    padding-left: var(--left-bar-width);
 }
 
 .inner-content {

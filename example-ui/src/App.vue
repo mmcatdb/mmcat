@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router';
+import { RouterLink } from 'vue-router';
 import TopBar from '@/components/layout/TopBar.vue';
 import LeftBar from '@/components/layout/LeftBar.vue';
 import Content from '@/components/layout/Content.vue';
 </script>
 
 <template>
-    <TopBar class="app-top-bar">
-        <div>
+    <TopBar>
+        <template #left>
             <RouterLink
                 :to="{ name: 'home' }"
                 class="home-link"
             >
                 MM-evocat
             </RouterLink>
-        </div>
+        </template>
     </TopBar>
-    <LeftBar>
-        <RouterView name="leftBar" />
-    </LeftBar>
+    <LeftBar />
     <Content />
 </template>
 

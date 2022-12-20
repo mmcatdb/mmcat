@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineEmits, defineProps, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import type { SchemaObject } from '@/types/schema';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';

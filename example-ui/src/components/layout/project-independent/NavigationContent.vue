@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink } from 'vue-router';
 
 type Link = {
     pathName: string,
@@ -11,7 +11,8 @@ function defineLink(pathName: string, label: string): Link {
 }
 
 const links = [
-    defineLink('home', 'MM-evocat')
+    defineLink('home', 'Home'),
+    defineLink('about', 'About')
 ];
 </script>
 

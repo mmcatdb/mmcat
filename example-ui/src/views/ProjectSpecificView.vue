@@ -1,12 +1,38 @@
 <script setup lang="ts">
-import { provide } from 'vue';
-import { RouterView, useRoute } from 'vue-router';
+import NavigationContent from '@/components/layout/project-specific/NavigationContent.vue';
+import { SchemaCategoryInfo } from '@/types/schema';
+import API from '@/utils/api';
+import { onMounted, provide, ref } from 'vue';
+import { RouterView, useRoute, useRouter } from 'vue-router';
 
-const route = useRoute();
+interface ProjectSpecificViewProps {
+    schemaCategoryId: number;
+}
 
-provide('schemaCategoryId', route.params.schemaCategoryId);
+const props = defineProps<ProjectSpecificViewProps>();
+
+provide('schemaCategoryId', props.schemaCategoryId);
+
+const schemaCategoryInfo = ref<SchemaCategoryInfo>();
+const router = useRouter();
+
+onMounted(async () => {
+    const result = await API.schemas.getCategoryInfo({ id: props.schemaCategoryId });
+    if (result.status)
+        schemaCategoryInfo.value = SchemaCategoryInfo.fromServer(result.data);
+    else
+        router.push({ name: 'notFound' });
+});
 </script>
 
 <template>
-    <RouterView />
+    <template v-if="schemaCategoryInfo">
+        <RouterView />
+        <Teleport to="#app-top-bar-center">
+            <h2>{{ schemaCategoryInfo.label }}</h2>
+        </Teleport>
+        <Teleport to="#app-left-bar-content">
+            <NavigationContent />
+        </Teleport>
+    </template>
 </template>

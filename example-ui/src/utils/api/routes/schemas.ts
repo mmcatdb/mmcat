@@ -9,6 +9,9 @@ const schemas = {
     createNewSchema: POST<Empty, SchemaCategoryInfoFromServer, SchemaCategoryInit>(
         () => `/schema-categories`
     ),
+    getCategoryInfo: GET<{ id: StringLike }, SchemaCategoryInfoFromServer>(
+        u => `/schema-categories/${u.id}/info`
+    ),
     getCategoryWrapper: GET<{ id: StringLike }, SchemaCategoryFromServer>(
         u => `/schema-categories/${u.id}`
     ),

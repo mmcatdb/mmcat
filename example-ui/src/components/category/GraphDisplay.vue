@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineEmits, defineExpose, nextTick, onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import API from '@/utils/api';
 import { SchemaCategory, type PositionUpdate } from '@/types/schema';
 import cytoscape from 'cytoscape';

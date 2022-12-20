@@ -1,5 +1,8 @@
 <template>
-    <nav class="left-bar">
+    <nav
+        id="app-left-bar-content"
+        class="left-bar"
+    >
         <slot />
     </nav>
 </template>
@@ -9,7 +12,7 @@
     position: fixed;
     top: var(--top-bar-height);
     bottom: 0px;
-    width: var(--left-panel-width);
+    width: var(--left-bar-width);
     overflow: hidden;
     display: flex;
     flex-direction: column;
