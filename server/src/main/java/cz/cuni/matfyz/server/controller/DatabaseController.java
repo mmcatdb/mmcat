@@ -8,6 +8,7 @@ import cz.cuni.matfyz.server.entity.database.DatabaseWithConfiguration;
 import cz.cuni.matfyz.server.service.DatabaseService;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,9 +37,9 @@ public class DatabaseController {
     }
 
     @GetMapping("/databases")
-    public List<Database> getAllDatabases() {
-        var databases = service.findAll();
-        databases.stream().forEach(database -> database.hidePassword());
+    public List<Database> getAllDatabases(@RequestParam Optional<Id> categoryId) {
+        var databases = categoryId.isPresent() ? service.findAllInCategory(categoryId.get()) : service.findAll();
+        databases.stream().forEach(Database::hidePassword);
         return databases;
     }
 

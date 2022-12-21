@@ -34,6 +34,10 @@ public class DatabaseService {
         return repository.findAll();
     }
 
+    public List<Database> findAllInCategory(Id categoryId) {
+        return repository.findAllInCategory(categoryId);
+    }
+
     public Database createNew(DatabaseInit data) {
         var database = new Database(null, data);
         return repository.save(database);

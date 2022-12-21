@@ -44,6 +44,28 @@ public class DatabaseRepository {
         });
     }
 
+    public List<Database> findAllInCategory(Id categoryId) {
+        return DatabaseWrapper.getMultiple((connection, output) -> {
+            var statement = connection.prepareStatement("""
+                    SELECT
+                        database_for_mapping.id as id,
+                        database_for_mapping.json_value as json_value
+                    FROM database_for_mapping
+                    JOIN logical_model on logical_model.id = database_for_mapping.id
+                    WHERE logical_model.schema_category_id = ?
+                    ORDER BY database_for_mapping.id;
+                """);
+            setId(statement, 1, categoryId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Id id = getId(resultSet, "id");
+                String jsonValue = resultSet.getString("json_value");
+                output.add(Database.fromJSONValue(id, jsonValue));
+            }
+        });
+    }
+
     public Database save(Database database) {
         return database.id == null ? create(database) : update(database);
     }

@@ -1,40 +1,36 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import API from '@/utils/api';
 import type { Database } from '@/types/database/Database';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import DatabaseDisplay from '@/components/database/DatabaseDisplay.vue';
+import { useRouter } from 'vue-router';
+import { tryUseSchemaCategory } from '@/utils/globalSchemaSettings';
 
-export default defineComponent({
-    components: {
-        ResourceNotFound,
-        ResourceLoading,
-        DatabaseDisplay
-    },
-    data() {
-        return {
-            databases: null as Database[] | null,
-            fetched: false,
-        };
-    },
-    mounted() {
-        this.fetchData();
-    },
-    methods: {
-        async fetchData() {
-            const result = await API.databases.getAllDatabases({});
-            if (result.status)
-                this.databases = result.data;
+const databases = ref<Database[]>();
+const fetched = ref(false);
 
-            this.fetched = true;
-        },
-        createNew() {
-            this.$router.push({ name: 'database', params: { id: 'new' } });
-        }
-    }
+onMounted(() => {
+    fetchData();
 });
+
+async function fetchData() {
+    const categoryId = tryUseSchemaCategory();
+    const queryParams = categoryId !== undefined ? { categoryId } : undefined;
+    const result = await API.databases.getAllDatabases({}, queryParams);
+    if (result.status)
+        databases.value = result.data;
+
+    fetched.value = true;
+}
+
+const router = useRouter();
+
+function createNew() {
+    router.push({ name: 'database', params: { id: 'new' } });
+}
 </script>
 
 <template>

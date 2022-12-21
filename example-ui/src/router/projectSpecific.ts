@@ -56,13 +56,8 @@ export const projectSpecificRoutes = [
     },
     {
         path: 'databases',
-        name: 'databases',
+        name: 'databasesInSchema',
         component: () => import('@/views/project-specific/DatabasesView.vue')
-    },
-    {
-        path: 'databases/:id',
-        name: 'database',
-        component: () => import('@/views/project-specific/DatabaseView.vue')
     },
     {
         path: '404',

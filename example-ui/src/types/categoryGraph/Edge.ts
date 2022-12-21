@@ -31,7 +31,9 @@ export class Edge {
     }
 
     get label(): string {
-        return this.schemaMorphism.signature + (this.schemaMorphism.label !== '' ? ' - ' + this.schemaMorphism.label : '');
+        return this.schemaMorphism.signature +
+            (this.schemaMorphism.label === '' ? '' : ' - ' + this.schemaMorphism.label) +
+            (this.schemaMorphism.tags.length === 0 ? '' : ' - ' + this.schemaMorphism.tags.map(tag => '#' + tag).join(' '));
     }
 
     equals(other: Edge | null): boolean {

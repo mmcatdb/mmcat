@@ -6,7 +6,8 @@ export type SchemaMorphismJSON = {
     min: Min,
     max: Max,
     label?: string,
-    iri?: Iri
+    iri?: Iri,
+    tags?: Tag[]
 }
 
 export enum Cardinality {
@@ -18,9 +19,15 @@ export enum Cardinality {
 export type Min = Cardinality.Zero | Cardinality.One;
 export type Max = Cardinality.One | Cardinality.Star;
 
+export enum Tag {
+    Isa = 'isa',
+    Role = 'role'
+}
+
 export class SchemaMorphism {
     iri?: Iri;
     label: string;
+    tags: Tag[];
 
     id!: number;
     domId!: number;
@@ -53,7 +60,7 @@ export class SchemaMorphism {
         return Math.abs(baseValue ? baseValue : 0);
     }
 
-    private constructor(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri?: Iri) {
+    private constructor(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, tags: Tag[]) {
         this.id = id;
         this.domId = domId;
         this.codId = codId;
@@ -63,6 +70,7 @@ export class SchemaMorphism {
         this._isNew = isNew;
         this.label = label;
         this.iri = iri;
+        this.tags = [ ...tags ];
     }
 
     static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
@@ -77,16 +85,17 @@ export class SchemaMorphism {
             parsedJson.max,
             false,
             parsedJson.label || '',
-            parsedJson.iri
+            parsedJson.iri,
+            parsedJson.tags ? parsedJson.tags : []
         );
     }
 
-    static createNew(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, label: string): SchemaMorphism {
-        return new SchemaMorphism(id, domId, codId, signature, min, max, true, label);
+    static createNew(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, label: string, tags: Tag[]): SchemaMorphism {
+        return new SchemaMorphism(id, domId, codId, signature, min, max, true, label, undefined, tags);
     }
 
     static createNewFromDual(id: number, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
-        return new SchemaMorphism(id, dual.codId, dual.domId, signature, min, max, true, '');
+        return new SchemaMorphism(id, dual.codId, dual.domId, signature, min, max, true, '', undefined, dual.tags);
     }
 
     update(domId: number, codId: number, min: Min, max: Max, label: string) {
@@ -103,7 +112,8 @@ export class SchemaMorphism {
             min: this.min,
             max: this.max,
             label: this.label,
-            iri: this.iri
+            iri: this.iri,
+            tags: this.tags
         };
     }
 }

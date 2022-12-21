@@ -277,7 +277,7 @@ function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
     };
 }
 
-function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes?: string): ElementDefinition {
+function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
     return {
         data: {
             id: 'm' + morphism.id.toString(),
@@ -286,6 +286,6 @@ function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes?: st
             label: edge.label,
             schemaData: edge
         },
-        ...classes ? { classes } : {}
+        classes: classes + ' ' + morphism.tags.join(' ')
     };
 }

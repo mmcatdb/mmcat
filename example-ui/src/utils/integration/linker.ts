@@ -1,8 +1,15 @@
 import { ImportedMorphism, ImportedObject, type ImportedDataspecer } from "@/types/integration";
 import type { ParsedDataspecer } from "@/types/integration";
-import { Cardinality, type CardinalitySettings } from "@/types/schema";
+import { Cardinality, Tag, type CardinalitySettings } from "@/types/schema";
 import { createAttribute } from "./dataTypes";
 import { createEmptyId, createMorphismId, createTechnicalId } from "./common";
+
+const CARDINALITY_ONE_TO_ONE: CardinalitySettings = {
+    domCodMin: Cardinality.One,
+    domCodMax: Cardinality.One,
+    codDomMin: Cardinality.One,
+    codDomMax: Cardinality.One
+};
 
 // Checks if the morhpism can be simple or if array is required instead.
 function addMorphism(iri: string, label: string, dom: ImportedObject, cod: ImportedObject, cardinalitySettings: CardinalitySettings, output: ImportedDataspecer) {
@@ -32,12 +39,7 @@ function addMorphism(iri: string, label: string, dom: ImportedObject, cod: Impor
         const index = new ImportedObject(iri + '/_index', '_index', createEmptyId());
         output.objects.push(index);
 
-        const elementToIndex = new ImportedMorphism(iri + '/_element-to-index', '', element, index, {
-            domCodMin: Cardinality.One,
-            domCodMax: Cardinality.One,
-            codDomMin: Cardinality.One,
-            codDomMax: Cardinality.One
-        });
+        const elementToIndex = new ImportedMorphism(iri + '/_element-to-index', '', element, index, CARDINALITY_ONE_TO_ONE);
         output.morphisms.push(elementToIndex);
 
         const elementToDomLabel = label === '' ? '' : label + ' _element-to-dom';
@@ -46,7 +48,7 @@ function addMorphism(iri: string, label: string, dom: ImportedObject, cod: Impor
             domCodMax: Cardinality.One,
             codDomMin: cardinalitySettings.domCodMin,
             codDomMax: cardinalitySettings.domCodMax
-        });
+        }, [ Tag.Role ]);
         output.morphisms.push(elementToDom);
 
         const elementToCodLabel = label === '' ? '' : label + ' _element-to-cod';
@@ -55,11 +57,10 @@ function addMorphism(iri: string, label: string, dom: ImportedObject, cod: Impor
             domCodMax: Cardinality.One,
             codDomMin: cardinalitySettings.codDomMin,
             codDomMax: cardinalitySettings.codDomMax
-        });
+        }, [ Tag.Role ]);
         output.morphisms.push(elementToCod);
     }
 }
-
 
 export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
     const { classes, attributes, associations, associationEnds } = input;
@@ -80,16 +81,29 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
         output.objects.push(iri);
 
         const object = new ImportedObject(myClass.iri, myClass.label);
-        const objectToIri = new ImportedMorphism(myClass.iri + '/_class-to-iri', '', object, iri, {
-            domCodMin: Cardinality.One,
-            domCodMax: Cardinality.One,
-            codDomMin: Cardinality.One,
-            codDomMax: Cardinality.One
-        });
+        const objectToIri = new ImportedMorphism(myClass.iri + '/_class-to-iri', '', object, iri, CARDINALITY_ONE_TO_ONE);
         output.morphisms.push(objectToIri);
 
         object.addId(createMorphismId(objectToIri));
         output.objects.push(object);
+    });
+
+    classes.forEach(myClass => {
+        if (myClass.extendsClassIris.length === 0)
+            return;
+
+        const object = output.objects.find(o => o.iri === myClass.iri);
+        if (!object)
+            return;
+
+        myClass.extendsClassIris.forEach(ancestorIri => {
+            const ancestorObject = output.objects.find(o => o.iri === ancestorIri);
+            if (!ancestorObject)
+                return;
+
+            const isa = new ImportedMorphism(myClass.iri + '/_isa/' + ancestorIri, '', object, ancestorObject, CARDINALITY_ONE_TO_ONE, [ Tag.Isa ]);
+            output.morphisms.push(isa);
+        });
     });
 
     attributes.forEach(attribute => {

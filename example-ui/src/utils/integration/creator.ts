@@ -75,7 +75,7 @@ export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
             return;
         }
 
-        const schemaMorphism = graph.schemaCategory.createMorphismWithDualWithIri(object1, object2, morphism.cardinalitySettings, morphism.iri, morphism.label);
+        const schemaMorphism = graph.schemaCategory.createMorphismWithDualWithIri(object1, object2, morphism.cardinalitySettings, morphism.iri, morphism.label, morphism.tags);
         if (!schemaMorphism)
             return;
 

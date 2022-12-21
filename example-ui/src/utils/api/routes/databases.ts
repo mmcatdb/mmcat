@@ -6,7 +6,7 @@ const databases = {
     getAllDatabaseInfos: GET<Empty, DatabaseWithConfigurationFromServer[]>(
         () => `/database-infos`
     ),
-    getAllDatabases: GET<Empty, Database[]>(
+    getAllDatabases: GET<Empty, Database[], { categoryId: number }>(
         () => `/databases`
     ),
     getDatabase: GET<{ id: StringLike }, Database>(

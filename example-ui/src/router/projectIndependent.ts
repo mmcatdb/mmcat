@@ -9,4 +9,14 @@ export const projectIndependentRoutes = [
         name: 'about',
         component: () => import('@/views/project-independent/AboutView.vue')
     },
+    {
+        path: 'databases',
+        name: 'databases',
+        component: () => import('@/views/project-specific/DatabasesView.vue')
+    },
+    {
+        path: 'databases/:id',
+        name: 'database',
+        component: () => import('@/views/project-independent/DatabaseView.vue')
+    },
 ];

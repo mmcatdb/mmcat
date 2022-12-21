@@ -72,6 +72,18 @@ export const style: cytoscape.Stylesheet[] = [
         }
     },
     {
+        selector: 'edge.isa',
+        style: {
+            'line-color': 'green'
+        }
+    },
+    {
+        selector: 'edge.role',
+        style: {
+            'line-color': 'orange'
+        }
+    },
+    {
         selector: 'node.new',
         style: {
             'border-style': 'dashed'

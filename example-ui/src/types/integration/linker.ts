@@ -1,4 +1,4 @@
-import type { CardinalitySettings } from "@/types/schema";
+import type { CardinalitySettings, Tag } from "@/types/schema";
 import type { Iri } from "./parser";
 
 export type MorphismSequence = ImportedMorphism[];
@@ -40,7 +40,8 @@ export class ImportedMorphism {
         readonly label: string,
         readonly dom: ImportedObject,
         readonly cod: ImportedObject,
-        readonly cardinalitySettings: CardinalitySettings
+        readonly cardinalitySettings: CardinalitySettings,
+        readonly tags: Tag[] = []
     ) {}
 }
 

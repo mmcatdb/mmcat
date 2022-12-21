@@ -50,7 +50,7 @@ export default defineComponent({
                     Database:
                 </td>
                 <td class="value">
-                    <RouterLink :to="{ name: 'databases', params: { id: database.id, schemaCategoryId: 1 } }">
+                    <RouterLink :to="{ name: 'database', params: { id: database.id } }">
                         <!--TODO-->
                         {{ database.label }}
                     </RouterLink>
