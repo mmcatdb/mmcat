@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import NavigationContent from '@/components/layout/project-specific/NavigationContent.vue';
+import type { Id } from '@/types/id';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
 import { onMounted, provide, ref } from 'vue';
 import { RouterView, useRoute, useRouter } from 'vue-router';
 
 interface ProjectSpecificViewProps {
-    schemaCategoryId: number;
+    schemaCategoryId: Id;
 }
 
 const props = defineProps<ProjectSpecificViewProps>();

@@ -1,6 +1,8 @@
+import type { Id } from "./id";
+
 export class Model {
     private constructor(
-        public readonly jobId: number,
+        public readonly jobId: Id,
         public readonly jobLabel: string,
         public readonly commands: string
     ) {
@@ -13,14 +15,14 @@ export class Model {
 }
 
 export type ModelFromServer = {
-    jobId: number;
+    jobId: Id;
     jobLabel: string;
     commands: string;
 }
 
 export class ModelView {
     private constructor(
-        public readonly jobId: number,
+        public readonly jobId: Id,
         public readonly jobLabel: string,
     ) {
 
@@ -32,6 +34,6 @@ export class ModelView {
 }
 
 export type ModelViewFromServer = {
-    jobId: number;
+    jobId: Id;
     jobLabel: string;
 }

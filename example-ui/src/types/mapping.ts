@@ -1,4 +1,5 @@
 import { RootProperty, type RootPropertyJSON } from "./accessPath/basic";
+import type { Entity, Id } from "./id";
 import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
 
 export type MappingJSON = {
@@ -7,12 +8,12 @@ export type MappingJSON = {
     accessPath: RootPropertyJSON
 }
 
-export class Mapping {
+export class Mapping implements Entity {
     private constructor(
-        public readonly id: number,
+        public readonly id: Id,
         public readonly label: string,
-        public readonly logicalModelId: number,
-        public readonly rootObjectId: number,
+        public readonly logicalModelId: Id,
+        public readonly rootObjectId: Id,
         public readonly accessPath: RootProperty
     ) {}
 
@@ -32,23 +33,23 @@ export class Mapping {
 }
 
 export type MappingFromServer = {
-    id: number;
-    logicalModelId: number;
-    rootObjectId: number;
+    id: Id;
+    logicalModelId: Id;
+    rootObjectId: Id;
     jsonValue: string;
     mappingJsonValue: string;
 }
 
 export type MappingInit = {
-    logicalModelId: number,
-    rootObjectId: number,
-    mappingJsonValue: string,
-    jsonValue: string
+    logicalModelId: Id;
+    rootObjectId: Id;
+    mappingJsonValue: string;
+    jsonValue: string;
 }
 
-export class MappingInfo {
+export class MappingInfo implements Entity {
     private constructor(
-        public readonly id: number,
+        public readonly id: Id,
         public readonly label: string
     ) {}
 
@@ -63,6 +64,6 @@ export class MappingInfo {
 }
 
 export type MappingInfoFromServer = {
-    id: number,
+    id: Id,
     jsonValue: string
 };

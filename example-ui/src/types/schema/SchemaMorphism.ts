@@ -1,4 +1,5 @@
 import type { Iri } from "@/types/integration/";
+import type { Id } from "../id";
 import { Signature, type SignatureJSON } from "../identifiers";
 
 export type SchemaMorphismJSON = {
@@ -29,14 +30,14 @@ export class SchemaMorphism {
     label: string;
     tags: Tag[];
 
-    id!: number;
-    domId!: number;
-    codId!: number;
-    signature!: Signature;
-    min!: Min;
-    max!: Max;
+    id: Id;
+    domId: Id;
+    codId: Id;
+    signature: Signature;
+    min: Min;
+    max: Max;
     _dual!: SchemaMorphism;
-    _isNew!: boolean;
+    _isNew: boolean;
 
 
     get isBase(): boolean {
@@ -60,7 +61,7 @@ export class SchemaMorphism {
         return Math.abs(baseValue ? baseValue : 0);
     }
 
-    private constructor(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, tags: Tag[]) {
+    private constructor(id: Id, domId: Id, codId: Id, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, tags: Tag[]) {
         this.id = id;
         this.domId = domId;
         this.codId = codId;
@@ -90,15 +91,15 @@ export class SchemaMorphism {
         );
     }
 
-    static createNew(id: number, domId: number, codId: number, signature: Signature, min: Min, max: Max, label: string, tags: Tag[]): SchemaMorphism {
+    static createNew(id: Id, domId: Id, codId: Id, signature: Signature, min: Min, max: Max, label: string, tags: Tag[]): SchemaMorphism {
         return new SchemaMorphism(id, domId, codId, signature, min, max, true, label, undefined, tags);
     }
 
-    static createNewFromDual(id: number, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
+    static createNewFromDual(id: Id, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
         return new SchemaMorphism(id, dual.codId, dual.domId, signature, min, max, true, '', undefined, dual.tags);
     }
 
-    update(domId: number, codId: number, min: Min, max: Max, label: string) {
+    update(domId: Id, codId: Id, min: Min, max: Max, label: string) {
         this.domId = domId;
         this.codId = codId;
         this.min = min;
@@ -119,16 +120,16 @@ export class SchemaMorphism {
 }
 
 export type SchemaMorphismUpdate = {
-    domId?: number;
-    codId?: number;
-    temporaryDomId?: number;
-    temporaryCodId?: number;
+    domId?: Id;
+    codId?: Id;
+    temporaryDomId?: Id;
+    temporaryCodId?: Id;
     jsonValue: string;
 }
 
-export class SchemaMorphismFromServer {
-    id!: number;
-    domId!: number;
-    codId!: number;
-    jsonValue!: string;
+export type SchemaMorphismFromServer = {
+    id: Id;
+    domId: Id;
+    codId: Id;
+    jsonValue: string;
 }

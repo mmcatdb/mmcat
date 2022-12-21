@@ -5,6 +5,7 @@ import type { DatabaseWithConfiguration } from "../database";
 import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
 import { ComparablePosition, type PositionUpdate } from "./Position";
 import type { LogicalModel } from "../logicalModel";
+import type { Entity, Id } from "../id";
 
 export type SchemaObjectJSON = {
     label: string,
@@ -15,12 +16,12 @@ export type SchemaObjectJSON = {
     iri?: Iri
 }
 
-export class SchemaObject {
+export class SchemaObject implements Entity {
     //key: number | undefined;
     //label: number | undefined;
     iri?: Iri;
 
-    id!: number;
+    id!: Id;
     label!: string;
     key!: Key;
     schemaIds!: SchemaId[];
@@ -30,7 +31,7 @@ export class SchemaObject {
 
     _originalPosition?: ComparablePosition;
 
-    _logicalModels = new ComparableSet<LogicalModel, number>(logicalModel => logicalModel.id);
+    _logicalModels = new ComparableSet<LogicalModel, Id>(logicalModel => logicalModel.id);
 
     private constructor() {}
 
@@ -51,7 +52,7 @@ export class SchemaObject {
         return object;
     }
 
-    static createNew(id: number, label: string, key: Key, schemaIds: SchemaId[], iri?: Iri): SchemaObject {
+    static createNew(id: Id, label: string, key: Key, schemaIds: SchemaId[], iri?: Iri): SchemaObject {
         const object = new SchemaObject();
 
         object.id = id;
@@ -116,13 +117,13 @@ export class SchemaObject {
 }
 
 export type SchemaObjectUpdate = {
-    temporaryId: number;
+    temporaryId: Id;
     position: Position;
     jsonValue: string;
 }
 
 export type SchemaObjectFromServer = {
-    id: number;
+    id: Id;
     jsonValue: string;
     position: Position;
 }

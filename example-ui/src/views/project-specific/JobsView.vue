@@ -8,6 +8,7 @@ import ResourceLoading from '@/components/ResourceLoading.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 import NewJob from '@/components/job/NewJob.vue';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import type { Id } from '@/types/id';
 
 const jobs = ref<Job[]>();
 const fetched = ref(false);
@@ -29,7 +30,7 @@ function addNewJob(job: Job) {
     jobs.value?.push(job);
 }
 
-function deleteJob(id: number) {
+function deleteJob(id: Id) {
     jobs.value = jobs.value?.filter(job => job.id !== id) ?? [];
 }
 

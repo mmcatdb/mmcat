@@ -1,10 +1,11 @@
 import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "../accessPath/basic";
+import type { Entity, Id } from "../id";
 import { DynamicName, Key, SchemaId, Signature } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
-import { SchemaMorphism, SchemaMorphismFromServer, Tag, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
+import { SchemaMorphism, type SchemaMorphismFromServer, Tag, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
 import { SchemaObject, type SchemaObjectFromServer, type SchemaObjectUpdate } from "./SchemaObject";
 
 export type CardinalitySettings = {
@@ -21,8 +22,8 @@ export function compareCardinalitySettings(settings1: CardinalitySettings, setti
         settings1.codDomMax === settings2.codDomMax;
 }
 
-export class SchemaCategory {
-    id: number;
+export class SchemaCategory implements Entity {
+    id: Id;
     jsonValue: string;
     objects: SchemaObject[];
     morphisms: SchemaMorphism[];
@@ -30,14 +31,14 @@ export class SchemaCategory {
     _createdObjects = [] as SchemaObject[];
     _createdMorphisms = [] as SchemaMorphism[];
 
-    _objectIdProvider = UniqueIdProvider.identity();
-    _maxExistingObjectId = 0;
-    _morphismIdProvider = UniqueIdProvider.identity();
+    _objectIdProvider = new UniqueIdProvider<Id>({ function: id => parseInt(id) || 0, inversion: value => '' + value });
+    _maxExistingObjectId: Id;
+    _morphismIdProvider = new UniqueIdProvider<Id>({ function: id => parseInt(id) || 0, inversion: value => '' + value });
 
     _keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     _signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
 
-    private constructor(id: number, jsonValue: string, objects: SchemaObject[], morphisms: SchemaMorphism[]) {
+    private constructor(id: Id, jsonValue: string, objects: SchemaObject[], morphisms: SchemaMorphism[]) {
         this.id = id;
         this.jsonValue = jsonValue;
         this.objects = objects;
@@ -47,7 +48,7 @@ export class SchemaCategory {
             this._objectIdProvider.add(object.id);
             this._keysProvider.add(object.key);
         });
-        this._maxExistingObjectId = this._objectIdProvider.maxValue;
+        this._maxExistingObjectId = this._objectIdProvider.maxIdentifier;
 
         this.morphisms.forEach(morphism => {
             this._morphismIdProvider.add(morphism.id);
@@ -193,11 +194,11 @@ export type SchemaCategoryUpdate = {
     morphisms: SchemaMorphismUpdate[]
 };
 
-export class SchemaCategoryFromServer {
-    id!: number;
-    jsonValue!: string;
-    objects!: SchemaObjectFromServer[];
-    morphisms!: SchemaMorphismFromServer[];
+export type SchemaCategoryFromServer = {
+    id: Id;
+    jsonValue: string;
+    objects: SchemaObjectFromServer[];
+    morphisms: SchemaMorphismFromServer[];
 }
 
 function getObjectsFromPath(path: ParentProperty, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject[] {
@@ -233,9 +234,9 @@ function findObjectFromSignature(signature: Signature, objects: SchemaObject[], 
     return objects.find(object => object.id === morphism.codId);
 }
 
-export class SchemaCategoryInfo {
+export class SchemaCategoryInfo implements Entity {
     private constructor(
-        public readonly id: number,
+        public readonly id: Id,
         public readonly label: string
     ) {}
 
@@ -246,7 +247,7 @@ export class SchemaCategoryInfo {
 }
 
 export type SchemaCategoryInfoFromServer = {
-    id: number;
+    id: Id;
     jsonValue: string;
 }
 

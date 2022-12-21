@@ -1,3 +1,5 @@
+import type { Entity, Id } from "./id";
+
 export enum JobType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel'
@@ -14,11 +16,11 @@ export const JOB_TYPES = [
     }
 ];
 
-export class Job {
+export class Job implements Entity {
     private constructor(
-        public readonly id: number,
-        public readonly logicalModelId: number,
-        public readonly categoryId: number,
+        public readonly id: Id,
+        public readonly logicalModelId: Id,
+        public readonly categoryId: Id,
         public readonly label: string,
         public readonly type: string,
         public status: Status
@@ -36,9 +38,9 @@ export class Job {
 }
 
 export type JobFromServer = {
-    id: number;
-    logicalModelId: number;
-    categoryId: number;
+    id: Id;
+    logicalModelId: Id;
+    categoryId: Id;
     label: string;
     type: JobType;
     status: Status;
@@ -53,7 +55,7 @@ export enum Status {
 }
 
 export type JobInit = {
-    logicalModelId: number,
-    label: string,
-    type: JobType
+    logicalModelId: Id;
+    label: string;
+    type: JobType;
 }

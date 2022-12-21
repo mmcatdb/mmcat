@@ -1,15 +1,16 @@
 import { DatabaseWithConfiguration, type DatabaseWithConfigurationFromServer } from "./database";
+import type { Id, Entity } from "./id";
 import { Mapping, type MappingFromServer } from "./mapping";
 
 export type LogicalModelInit = {
-    databaseId: number,
-    categoryId: number,
-    jsonValue: string
+    databaseId: Id;
+    categoryId: Id;
+    jsonValue: string;
 }
 
-export class LogicalModelInfo {
+export class LogicalModelInfo implements Entity {
     private constructor(
-        public readonly id: number,
+        public readonly id: Id,
         public readonly label: string
     ) {}
 
@@ -24,15 +25,15 @@ export class LogicalModelInfo {
 }
 
 export type LogicalModelInfoFromServer = {
-    id: number;
+    id: Id;
     jsonValue: string;
 }
 
-export class LogicalModel {
+export class LogicalModel implements Entity {
     private constructor(
-        public readonly id: number,
+        public readonly id: Id,
         public readonly label: string,
-        public readonly categoryId: number,
+        public readonly categoryId: Id,
         public readonly database: DatabaseWithConfiguration,
         public readonly mappings: Mapping[]
     ) {}
@@ -51,8 +52,8 @@ export class LogicalModel {
 }
 
 export type LogicalModelFromServer = {
-    id: number;
-    categoryId: number;
+    id: Id;
+    categoryId: Id;
     jsonValue: string;
     database: DatabaseWithConfigurationFromServer;
     mappings: MappingFromServer[];

@@ -1,9 +1,10 @@
+import type { Entity, Id } from "../id";
 import type { DeepPartial } from "../utils";
 import { DatabaseConfiguration, type DatabaseConfigurationFromServer } from "./Configuration";
 
-export class DatabaseInfo {
+export class DatabaseInfo implements Entity {
     private constructor(
-        public readonly id: number,
+        public readonly id: Id,
         public readonly type: Type,
         public readonly label: string,
     ) {}
@@ -18,14 +19,14 @@ export class DatabaseInfo {
 }
 
 export type DatabaseInfoFromServer = {
-    id: number;
+    id: Id;
     type: Type; // Full type (i.e. mongodb)
     label: string; // User-defined name
 }
 
-export class DatabaseWithConfiguration {
+export class DatabaseWithConfiguration implements Entity {
     private constructor(
-        public readonly id: number,
+        public readonly id: Id,
         public readonly type: Type,
         public readonly label: string,
         public readonly configuration: DatabaseConfiguration
@@ -42,7 +43,7 @@ export class DatabaseWithConfiguration {
 }
 
 export type DatabaseWithConfigurationFromServer = {
-    id: number;
+    id: Id;
     type: Type; // Full type (i.e. mongodb)
     label: string; // User-defined name
     configuration: DatabaseConfigurationFromServer;
@@ -58,7 +59,7 @@ export type Settings = {
 }
 
 export type Database = {
-    id: number;
+    id: Id;
     type: Type;
     label: string;
     settings: Settings;

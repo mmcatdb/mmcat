@@ -1,4 +1,5 @@
 import type { Position } from "cytoscape";
+import type { Id } from "../id";
 
 export class ComparablePosition implements Position {
     x!: number;
@@ -14,6 +15,6 @@ export class ComparablePosition implements Position {
 }
 
 export type PositionUpdate = {
-    schemaObjectId: number;
+    schemaObjectId: Id;
     position: Position;
 }
