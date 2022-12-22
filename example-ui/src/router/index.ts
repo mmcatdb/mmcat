@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { projectSpecificRoutes } from './projectSpecific';
-import { projectIndependentRoutes } from './projectIndependent';
+import { projectSpecificRoutes } from './projectSpecificRoutes';
+import { projectIndependentRoutes } from './projectIndependentRoutes';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),

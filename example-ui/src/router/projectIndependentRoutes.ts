@@ -1,4 +1,6 @@
-export const projectIndependentRoutes = [
+import type { RouteRecordRaw } from 'vue-router';
+
+export const projectIndependentRoutes: RouteRecordRaw[] = [
     {
         path: '/',
         name: 'home',

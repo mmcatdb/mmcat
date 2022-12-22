@@ -4,12 +4,13 @@ import { JOB_TYPES, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import type { Id } from '@/types/id';
 
 const emit = defineEmits([ 'newJob' ]);
 
 const logicalModels = ref<LogicalModel[]>();
 const fetched = ref(false);
-const logicalModelId = ref<number>();
+const logicalModelId = ref<Id>();
 const jobName = ref<string>('');
 const jobType = ref<JobType>();
 const fetching = ref(false);

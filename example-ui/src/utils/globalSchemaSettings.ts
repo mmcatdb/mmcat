@@ -1,10 +1,11 @@
+import type { Id } from "@/types/id";
 import { inject } from "vue";
 
-export function tryUseSchemaCategory(): number | undefined {
-    return inject<number>('schemaCategoryId');
+export function tryUseSchemaCategory(): Id | undefined {
+    return inject<Id>('schemaCategoryId');
 }
 
-export function useSchemaCategory(): number {
+export function useSchemaCategory(): Id {
     const id = tryUseSchemaCategory();
 
     if (id === undefined)

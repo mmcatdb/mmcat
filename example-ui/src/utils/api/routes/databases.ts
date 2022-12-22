@@ -1,6 +1,7 @@
 import type { Empty, StringLike } from "@/types/api/routes";
 import { GET, POST, PUT, DELETE } from "../routeFunctions";
 import type { Database, DatabaseInit, DatabaseUpdate, DatabaseInfoFromServer, DatabaseWithConfigurationFromServer } from "@/types/database";
+import type { Id } from "@/types/id";
 
 const databases = {
     getAllDatabaseInfos: GET<Empty, DatabaseWithConfigurationFromServer[]>(
