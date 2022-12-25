@@ -34,7 +34,7 @@ public class ComplexProperty extends AccessPath implements IValue {
     }
     
     public boolean isAuxiliary() {
-        return context().equals(Signature.createNull());
+        return context() instanceof Signature contextSignature && contextSignature.isNull();
     }
 
     public boolean hasDynamicKeys() {

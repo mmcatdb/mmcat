@@ -157,8 +157,12 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         return Type.COMPOSITE;
     }
 
+    public boolean isNull() {
+        return this.isNull;
+    }
+
     public boolean isEmpty() {
-        return ids.length == 0;
+        return ids.length == 0 && !isNull;
     }
 
     public boolean isBase() {
@@ -167,9 +171,12 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
 
     @Override
     public String toString() {
+        if (isNull())
+            return "_NULL";
+        
         if (isEmpty())
             return "_EMPTY";
-        
+
         StringBuilder builder = new StringBuilder();
         
         builder.append(ids[0]);
