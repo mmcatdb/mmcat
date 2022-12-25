@@ -1,6 +1,6 @@
 import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
-import { ComplexProperty, type ParentProperty } from "../accessPath/basic";
+import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id } from "../id";
 import { DynamicName, Key, SchemaId, Signature } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";

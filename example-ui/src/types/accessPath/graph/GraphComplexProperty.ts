@@ -1,24 +1,20 @@
-import type { Name, NameJSON, SignatureJSON } from "@/types/identifiers";
-import type { AccessPathJSON } from "./AccessPath";
-import type { ChildProperty, ParentProperty } from "./compositeTypes";
+import type { Name } from "@/types/identifiers";
+import type { GraphChildProperty, GraphParentProperty } from "./compositeTypes";
 import type { Node } from "@/types/categoryGraph";
 import type { SequenceSignature } from "./SequenceSignature";
+import type { ComplexPropertyJSON } from "../JSONTypes";
 
-export type ComplexPropertyJSON = { _class: 'ComplexProperty', name: NameJSON, signature: SignatureJSON, subpaths: AccessPathJSON[] };
-
-export class ComplexProperty {
+export class GraphComplexProperty {
     name: Name;
     _signature: SequenceSignature;
-    parent: ParentProperty;
-    _subpaths: ChildProperty[];
-    //_subpaths = new ComparableMap<Signature, string, AccessPath>(signature => signature.toString());
+    parent: GraphParentProperty;
+    _subpaths: GraphChildProperty[];
 
-    constructor(name: Name, signature: SequenceSignature, parent: ParentProperty, subpaths: ChildProperty[] = []) {
+    constructor(name: Name, signature: SequenceSignature, parent: GraphParentProperty, subpaths: GraphChildProperty[] = []) {
         this.name = name;
         this._signature = signature;
         this.parent = parent;
         this._subpaths = [ ...subpaths ];
-        //subpaths.forEach(subpath => this._subpaths.set(subpath.signature, subpath));
     }
 
     update(newName: Name, newSignature: SequenceSignature): void {
@@ -27,12 +23,11 @@ export class ComplexProperty {
 
         if (!this._signature.equals(newSignature)) {
             this._signature = newSignature;
-            //this._subpaths.clear();
             this._subpaths = [];
         }
     }
 
-    updateOrAddSubpath(newSubpath: ChildProperty, oldSubpath?: ChildProperty): void {
+    updateOrAddSubpath(newSubpath: GraphChildProperty, oldSubpath?: GraphChildProperty): void {
         newSubpath.parent = this;
         const index = oldSubpath ? this._subpaths.findIndex(subpath => subpath.signature.equals(oldSubpath.signature)) : -1;
         if (index === -1)
@@ -41,7 +36,7 @@ export class ComplexProperty {
             this._subpaths[index] = newSubpath;
     }
 
-    removeSubpath(oldSubpath: ChildProperty): void {
+    removeSubpath(oldSubpath: GraphChildProperty): void {
         this._subpaths = this._subpaths.filter(subpath => !subpath.signature.equals(oldSubpath.signature));
     }
 
@@ -61,7 +56,7 @@ export class ComplexProperty {
         return this._signature.sequence.lastNode;
     }
 
-    get subpaths(): ChildProperty[] {
+    get subpaths(): GraphChildProperty[] {
         return this._subpaths;
     }
 

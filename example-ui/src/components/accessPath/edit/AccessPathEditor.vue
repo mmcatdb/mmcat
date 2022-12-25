@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ComplexProperty, RootProperty, ChildProperty, ParentProperty } from '@/types/accessPath/graph';
+import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
 import type { Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
@@ -17,8 +17,8 @@ enum State {
 type GenericStateValue<State, Value> = { type: State } & Value;
 
 type StateValue = GenericStateValue<State.Default, unknown> |
-    GenericStateValue<State.AddProperty, { parent: ParentProperty }> |
-    GenericStateValue<State.EditProperty, { property: ChildProperty }>;
+    GenericStateValue<State.AddProperty, { parent: GraphParentProperty }> |
+    GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
 /*
 type State = { default: string }
     | { editProperty: { property: ComplexProperty } };
@@ -41,7 +41,7 @@ export default defineComponent({
             required: true
         },
         rootProperty: {
-            type: Object as () => RootProperty,
+            type: Object as () => GraphRootProperty,
             required: true
         }
     },
@@ -54,13 +54,13 @@ export default defineComponent({
         };
     },
     methods: {
-        editPropertyClicked(property: ChildProperty) {
+        editPropertyClicked(property: GraphChildProperty) {
             this.state = {
                 type: State.EditProperty,
                 property
             };
         },
-        addPropertyClicked(parentProperty: ComplexProperty) {
+        addPropertyClicked(parentProperty: GraphComplexProperty) {
             this.state = {
                 type: State.AddProperty,
                 parent: parentProperty

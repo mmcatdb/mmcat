@@ -1,4 +1,5 @@
-import { RootProperty, type RootPropertyJSON } from "./accessPath/basic";
+import { RootProperty } from "@/types/accessPath/basic";
+import type { RootPropertyJSON } from "./accessPath/JSONTypes";
 import type { Entity, Id } from "./id";
 import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
 

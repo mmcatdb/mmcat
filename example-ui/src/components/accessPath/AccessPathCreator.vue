@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { RootProperty } from '@/types/accessPath/graph';
+import { GraphRootProperty } from '@/types/accessPath/graph';
 import { StaticName } from '@/types/identifiers';
 import type { Node, Graph } from '@/types/categoryGraph';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
@@ -15,7 +15,7 @@ const route = useRoute();
 const router = useRouter();
 
 const graph = ref<Graph>();
-const accessPath = ref<RootProperty>();
+const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
 const logicalModels = ref<LogicalModel[]>([]);
 const selectedLogicalModel = ref<LogicalModel>();
@@ -46,7 +46,7 @@ function confirmDatabaseAndRootNode() {
     selectingRootNode.value.unselect();
     selectingRootNode.value.becomeRoot();
     const label = selectingRootNode.value.schemaObject.label.toLowerCase();
-    accessPath.value = new RootProperty(StaticName.fromString(label), selectingRootNode.value);
+    accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
 }
 
 async function createMapping(label: string) {

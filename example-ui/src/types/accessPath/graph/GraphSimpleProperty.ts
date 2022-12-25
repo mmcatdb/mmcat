@@ -1,18 +1,15 @@
 import type { Node } from "@/types/categoryGraph";
-import type { Name, NameJSON, SignatureJSON } from "@/types/identifiers";
-import type { ParentProperty } from "./compositeTypes";
+import type { Name } from "@/types/identifiers";
+import type { SimplePropertyJSON } from "../JSONTypes";
+import type { GraphParentProperty } from "./compositeTypes";
 import type { SequenceSignature } from "./SequenceSignature";
 
-export type SimpleValueJSON = { signature: SignatureJSON };
-
-export type SimplePropertyJSON = { _class: 'SimpleProperty', name: NameJSON, value: SimpleValueJSON };
-
-export class SimpleProperty {
+export class GraphSimpleProperty {
     name: Name;
     _signature: SequenceSignature;
-    parent: ParentProperty;
+    parent: GraphParentProperty;
 
-    constructor(name: Name, signature: SequenceSignature, parent: ParentProperty) {
+    constructor(name: Name, signature: SequenceSignature, parent: GraphParentProperty) {
         this.name = name;
         this._signature = signature;
         this.parent = parent;

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty, type ChildProperty } from '@/types/accessPath/graph';
+import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty } from '@/types/accessPath/graph';
 import { PropertyType, type Graph, createDefaultFilter, type Node } from '@/types/categoryGraph';
 import type { Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
@@ -34,7 +34,7 @@ export default defineComponent({
             required: true
         },
         property: {
-            type: Object as () => ChildProperty,
+            type: Object as () => GraphChildProperty,
             required: true
         }
     },
@@ -66,14 +66,14 @@ export default defineComponent({
         }
     },
     methods: {
-        propertyToType(property: ChildProperty): PropertyType {
-            return property instanceof SimpleProperty ? PropertyType.Simple : PropertyType.Complex;
+        propertyToType(property: GraphChildProperty): PropertyType {
+            return property instanceof GraphSimpleProperty ? PropertyType.Simple : PropertyType.Complex;
         },
         save() {
-            const subpaths = !this.signatureChanged && !this.typeChanged && this.property instanceof ComplexProperty ? this.property.subpaths : [];
+            const subpaths = !this.signatureChanged && !this.typeChanged && this.property instanceof GraphComplexProperty ? this.property.subpaths : [];
             const newProperty = this.type === PropertyType.Simple
-                ? new SimpleProperty(this.name, this.signature, this.property.parent)
-                : new ComplexProperty(this.name, this.signature, this.property.parent, subpaths);
+                ? new GraphSimpleProperty(this.name, this.signature, this.property.parent)
+                : new GraphComplexProperty(this.name, this.signature, this.property.parent, subpaths);
 
             this.property.parent.updateOrAddSubpath(newProperty, this.property);
 

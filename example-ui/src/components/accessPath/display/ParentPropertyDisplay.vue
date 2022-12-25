@@ -1,6 +1,6 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty, type ParentProperty, RootProperty } from '@/types/accessPath/graph';
-import { SimpleProperty as BasicSimpleProperty, ComplexProperty as BasicComplexProperty, type ParentProperty as BasicParentProperty } from '@/types/accessPath/basic';
+import { GraphSimpleProperty, GraphComplexProperty, type GraphParentProperty, GraphRootProperty } from '@/types/accessPath/graph';
+import { SimpleProperty, ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
@@ -13,7 +13,7 @@ export default defineComponent({
     },
     props: {
         property: {
-            type: Object as () => ParentProperty | BasicParentProperty,
+            type: Object as () => GraphParentProperty | ParentProperty,
             required: true
         },
         isLast: {
@@ -39,25 +39,25 @@ export default defineComponent({
         };
     },
     computed: {
-        simpleSubpaths(): (SimpleProperty | BasicSimpleProperty)[] {
-            return this.property instanceof RootProperty || this.property instanceof ComplexProperty ?
-                this.property.subpaths.filter((subpath): subpath is SimpleProperty => subpath instanceof SimpleProperty) :
-                this.property.subpaths.filter((subpath): subpath is BasicSimpleProperty => subpath instanceof BasicSimpleProperty);
+        simpleSubpaths(): (GraphSimpleProperty | SimpleProperty)[] {
+            return this.property instanceof GraphRootProperty || this.property instanceof GraphComplexProperty ?
+                this.property.subpaths.filter((subpath): subpath is GraphSimpleProperty => subpath instanceof GraphSimpleProperty) :
+                this.property.subpaths.filter((subpath): subpath is SimpleProperty => subpath instanceof SimpleProperty);
         },
-        complexSubpaths(): (ComplexProperty | BasicComplexProperty)[] {
-            return this.property instanceof RootProperty || this.property instanceof ComplexProperty ?
-                this.property.subpaths.filter((subpath): subpath is ComplexProperty => subpath instanceof ComplexProperty) :
-                this.property.subpaths.filter((subpath): subpath is BasicComplexProperty => subpath instanceof BasicComplexProperty);
+        complexSubpaths(): (GraphComplexProperty | ComplexProperty)[] {
+            return this.property instanceof GraphRootProperty || this.property instanceof GraphComplexProperty ?
+                this.property.subpaths.filter((subpath): subpath is GraphComplexProperty => subpath instanceof GraphComplexProperty) :
+                this.property.subpaths.filter((subpath): subpath is ComplexProperty => subpath instanceof ComplexProperty);
         }
     },
     methods: {
-        reEmitComplexClick(property: ComplexProperty): void {
+        reEmitComplexClick(property: GraphComplexProperty): void {
             this.$emit('complex:click', property);
         },
-        reEmitSimpleClick(property: SimpleProperty): void {
+        reEmitSimpleClick(property: GraphSimpleProperty): void {
             this.$emit('simple:click', property);
         },
-        reEmitAddClick(property: ComplexProperty): void {
+        reEmitAddClick(property: GraphComplexProperty): void {
             this.$emit('add:click', property);
         },
         emitComplexClick(): void {

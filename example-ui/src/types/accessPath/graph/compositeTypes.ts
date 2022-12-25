@@ -1,9 +1,7 @@
-import type { ComplexProperty, ComplexPropertyJSON } from "./ComplexProperty";
-import type { RootProperty } from "./RootProperty";
-import type { SimpleProperty, SimplePropertyJSON } from "./SimpleProperty";
+import type { GraphComplexProperty } from "./GraphComplexProperty";
+import type { GraphRootProperty } from "./GraphRootProperty";
+import type { GraphSimpleProperty } from "./GraphSimpleProperty";
 
-export type ParentProperty = RootProperty | ComplexProperty;
+export type GraphParentProperty = GraphRootProperty | GraphComplexProperty;
 
-export type ChildPropertyJSON = ComplexPropertyJSON | SimplePropertyJSON;
-
-export type ChildProperty = ComplexProperty | SimpleProperty;
+export type GraphChildProperty = GraphComplexProperty | GraphSimpleProperty;

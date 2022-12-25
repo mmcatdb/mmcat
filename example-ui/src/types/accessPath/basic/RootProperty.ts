@@ -1,9 +1,7 @@
 import { IntendedStringBuilder } from "@/utils/string";
-import { Signature, StaticName, type StaticNameJSON } from "@/types/identifiers";
-import type { ComplexPropertyJSON } from "./ComplexProperty";
+import { Signature, StaticName } from "@/types/identifiers";
 import { subpathFromJSON, type ChildProperty } from "./compositeTypes";
-
-export type RootPropertyJSON = ComplexPropertyJSON & { name: StaticNameJSON };
+import type { ComplexPropertyJSON, RootPropertyJSON } from "../JSONTypes";
 
 export class RootProperty {
     name: StaticName;

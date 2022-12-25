@@ -1,17 +1,14 @@
 import { IntendedStringBuilder } from "@/utils/string";
-import { nameFromJSON, Signature, type Name, type NameJSON, type SignatureJSON } from "@/types/identifiers";
+import { nameFromJSON, Signature, type Name } from "@/types/identifiers";
 import type { ParentProperty } from "./compositeTypes";
-
-export type SimpleValueJSON = { signature: SignatureJSON };
-
-export type SimplePropertyJSON = { _class: 'SimpleProperty', name: NameJSON, value: SimpleValueJSON };
+import type { SimplePropertyJSON } from "../JSONTypes";
 
 export class SimpleProperty {
     name: Name;
     parent?: ParentProperty;
     _signature: Signature;
 
-    constructor(name: Name, signature: Signature, parent?: ParentProperty) {
+    private constructor(name: Name, signature: Signature, parent?: ParentProperty) {
         this.name = name;
         this._signature = signature;
         this.parent = parent;

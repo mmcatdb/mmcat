@@ -1,9 +1,5 @@
-//export { ComplexProperty } from './ComplexProperty';
-//export { SimpleProperty } from './SimpleProperty';
-
-//export * from './AccessPath';
 export * from './compositeTypes';
-export * from './SimpleProperty';
-export * from './ComplexProperty';
-export * from './RootProperty';
+export * from './GraphSimpleProperty';
+export * from './GraphComplexProperty';
+export * from './GraphRootProperty';
 export * from './SequenceSignature';

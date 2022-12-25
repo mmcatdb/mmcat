@@ -1,23 +1,19 @@
-import { DynamicName, nameFromJSON, Signature, StaticName, type Name, type NameJSON, type SignatureJSON } from "@/types/identifiers";
+import { DynamicName, nameFromJSON, Signature, StaticName, type Name } from "@/types/identifiers";
 import { IntendedStringBuilder } from "@/utils/string";
-import { subpathFromJSON, type AccessPathJSON } from "./AccessPath";
-import type { ChildProperty, ParentProperty } from "./compositeTypes";
-
-export type ComplexPropertyJSON = { _class: 'ComplexProperty', name: NameJSON, signature: SignatureJSON, subpaths: AccessPathJSON[] };
+import type { ComplexPropertyJSON } from "../JSONTypes";
+import { subpathFromJSON, type ChildProperty, type ParentProperty } from "./compositeTypes";
 
 export class ComplexProperty {
     name: Name;
     _signature: Signature;
     parent?: ParentProperty;
     _subpaths: ChildProperty[];
-    //_subpaths = new ComparableMap<Signature, string, AccessPath>(signature => signature.toString());
 
-    constructor(name: Name, signature: Signature, parent?: ParentProperty, subpaths: ChildProperty[] = []) {
+    private constructor(name: Name, signature: Signature, parent?: ParentProperty, subpaths: ChildProperty[] = []) {
         this.name = name;
         this._signature = signature;
         this.parent = parent;
         this._subpaths = [ ...subpaths ];
-        //subpaths.forEach(subpath => this._subpaths.set(subpath.signature, subpath));
     }
 
     static copy(property: ComplexProperty): ComplexProperty {

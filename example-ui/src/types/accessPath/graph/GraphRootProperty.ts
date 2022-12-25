@@ -1,15 +1,15 @@
 import type { Node } from "@/types/categoryGraph";
 import type { StaticName } from "@/types/identifiers";
-import type { ComplexPropertyJSON } from "./ComplexProperty";
-import type { ChildProperty } from "./compositeTypes";
+import type { ComplexPropertyJSON } from "../JSONTypes";
+import type { GraphChildProperty } from "./compositeTypes";
 import { SequenceSignature } from "./SequenceSignature";
 
-export class RootProperty {
+export class GraphRootProperty {
     name: StaticName;
-    _subpaths: ChildProperty[];
+    _subpaths: GraphChildProperty[];
     _signature: SequenceSignature;
 
-    constructor(name: StaticName, rootNode: Node, subpaths: ChildProperty[] = []) {
+    constructor(name: StaticName, rootNode: Node, subpaths: GraphChildProperty[] = []) {
         this.name = name;
         this._subpaths = [ ...subpaths ];
         this._signature = SequenceSignature.null(rootNode);
@@ -20,7 +20,7 @@ export class RootProperty {
             this.name = newName;
     }
 
-    updateOrAddSubpath(newSubpath: ChildProperty, oldSubpath?: ChildProperty): void {
+    updateOrAddSubpath(newSubpath: GraphChildProperty, oldSubpath?: GraphChildProperty): void {
         newSubpath.parent = this;
         const index = oldSubpath ? this._subpaths.findIndex(subpath => subpath.signature.equals(oldSubpath.signature)) : -1;
         if (index === -1)
@@ -29,7 +29,7 @@ export class RootProperty {
             this._subpaths[index] = newSubpath;
     }
 
-    removeSubpath(oldSubpath: ChildProperty): void {
+    removeSubpath(oldSubpath: GraphChildProperty): void {
         this._subpaths = this._subpaths.filter(subpath => !subpath.signature.equals(oldSubpath.signature));
     }
 
@@ -45,7 +45,7 @@ export class RootProperty {
         return this._signature.sequence.lastNode;
     }
 
-    get subpaths(): ChildProperty[] {
+    get subpaths(): GraphChildProperty[] {
         return this._subpaths;
     }
 

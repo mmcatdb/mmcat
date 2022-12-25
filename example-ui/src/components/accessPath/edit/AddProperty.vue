@@ -1,5 +1,5 @@
 <script lang="ts">
-import { SimpleProperty, ComplexProperty, SequenceSignature, type ParentProperty } from '@/types/accessPath/graph';
+import { GraphSimpleProperty, GraphComplexProperty, SequenceSignature, type GraphParentProperty } from '@/types/accessPath/graph';
 import { PropertyType, type Graph, createDefaultFilter, Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
@@ -30,7 +30,7 @@ export default defineComponent({
             required: true
         },
         parentProperty: {
-            type: Object as () => ParentProperty,
+            type: Object as () => GraphParentProperty,
             required: true
         }
     },
@@ -50,8 +50,8 @@ export default defineComponent({
     methods: {
         save() {
             const newProperty = this.type === PropertyType.Simple
-                ? new SimpleProperty(this.name, this.signature, this.parentProperty)
-                : new ComplexProperty(this.name, this.signature, this.parentProperty);
+                ? new GraphSimpleProperty(this.name, this.signature, this.parentProperty)
+                : new GraphComplexProperty(this.name, this.signature, this.parentProperty);
 
             this.parentProperty.updateOrAddSubpath(newProperty);
 

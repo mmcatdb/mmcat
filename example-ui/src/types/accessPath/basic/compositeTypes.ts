@@ -1,10 +1,9 @@
-import { ComplexProperty, type ComplexPropertyJSON } from "./ComplexProperty";
+import type { ChildPropertyJSON } from "../JSONTypes";
+import { ComplexProperty } from "./ComplexProperty";
 import type { RootProperty } from "./RootProperty";
-import { SimpleProperty, type SimplePropertyJSON } from "./SimpleProperty";
+import { SimpleProperty } from "./SimpleProperty";
 
 export type ParentProperty = RootProperty | ComplexProperty;
-
-export type ChildPropertyJSON = ComplexPropertyJSON | SimplePropertyJSON;
 
 export type ChildProperty = ComplexProperty | SimpleProperty;
 
