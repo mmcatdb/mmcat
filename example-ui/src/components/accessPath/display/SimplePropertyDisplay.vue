@@ -1,12 +1,12 @@
 <script lang="ts">
 import type { GraphSimpleProperty } from '@/types/accessPath/graph';
-import type { SimpleProperty as BasicSimpleProperty } from '@/types/accessPath/basic';
+import type { SimpleProperty } from '@/types/accessPath/basic';
 import { defineComponent } from 'vue';
 
 export default defineComponent({
     props: {
         property: {
-            type: Object as () => GraphSimpleProperty | BasicSimpleProperty,
+            type: Object as () => GraphSimpleProperty | SimpleProperty,
             required: true
         },
         isLast: {
