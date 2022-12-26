@@ -2,11 +2,11 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
-import cz.cuni.matfyz.core.instance.IdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.Merger;
+import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
@@ -23,9 +23,9 @@ import cz.cuni.matfyz.core.record.RootRecord;
 import cz.cuni.matfyz.core.record.SimpleArrayRecord;
 import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
-import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.core.schema.SignatureId;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,7 +82,7 @@ public class MTCAlgorithm {
     
     private Deque<StackTriple> createStackWithObject(SchemaObject object, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         InstanceObject instanceObject = category.getObject(object);
-        IdWithValues superId = fetchSuperId(object.superId(), rootRecord);
+        SuperIdWithValues superId = fetchSuperId(object.superId(), rootRecord);
         Deque<StackTriple> masterStack = new LinkedList<>();
         
         DomainRow row = modifyActiveDomain(instanceObject, superId);
@@ -95,12 +95,12 @@ public class MTCAlgorithm {
         Deque<StackTriple> masterStack = new LinkedList<>();
         
         InstanceObject domainInstance = category.getObject(object);
-        IdWithValues domainSuperId = fetchSuperId(object.superId(), rootRecord);
+        SuperIdWithValues domainSuperId = fetchSuperId(object.superId(), rootRecord);
         DomainRow domainRow = modifyActiveDomain(domainInstance, domainSuperId);
 
         SchemaObject codomainObject = morphism.cod();
         InstanceObject codomainInstance = category.getObject(codomainObject);
-        IdWithValues codomainSuperId = fetchSuperId(codomainObject.superId(), rootRecord);
+        SuperIdWithValues codomainSuperId = fetchSuperId(codomainObject.superId(), rootRecord);
         DomainRow codomainRow = modifyActiveDomain(codomainInstance, codomainSuperId);
 
         InstanceMorphism morphismInstance = category.getMorphism(morphism);
@@ -138,8 +138,8 @@ public class MTCAlgorithm {
     }
 
     // Fetch id-with-values for given root record.
-    private static IdWithValues fetchSuperId(Id superId, RootRecord rootRecord) {
-        var builder = new IdWithValues.Builder();
+    private static SuperIdWithValues fetchSuperId(SignatureId superId, RootRecord rootRecord) {
+        var builder = new SuperIdWithValues.Builder();
         
         for (Signature signature : superId.signatures()) {
             /*
@@ -171,25 +171,25 @@ public class MTCAlgorithm {
      */
     private static Iterable<FetchedSuperId> fetchSuperIds(IComplexRecord parentRecord, DomainRow parentRow, InstanceMorphism morphism) {
         List<FetchedSuperId> output = new ArrayList<>();
-        Id superId = morphism.cod().superId();
+        SignatureId superId = morphism.cod().superId();
         Signature signature = morphism.signature();
 
-        // If the id is empty, the output ids with values will have only one tuple: (<signature>, <value>).
-        // This means they represent either singular values (SimpleValueRecord) or a nested document without identifier (not auxilliary).
         if (superId.hasOnlyEmptySignature()) {
-            // Value is in the parent domain row.
+            // If the id is empty, the output ids with values will have only one tuple: (<signature>, <value>).
+            // This means they represent either singular values (SimpleValueRecord) or a nested document without identifier (not auxilliary).
             if (parentRow.hasSignature(signature)) {
+                // Value is in the parent domain row.
                 String valueFromParentRow = parentRow.getValue(signature);
                 addSimpleValueToOutput(output, valueFromParentRow);
             }
-            // There is simple value/array record with given signature in the parent record.
             else if (parentRecord.hasSimpleRecord(signature)) {
+                // There is simple value/array record with given signature in the parent record.
                 addSuperIdsFromSimpleRecordToOutput(output, parentRecord.getSimpleRecord(signature));
             }
-            // There are complex records with given signature in the parent record.
-            // They don't represent any (string) value so an unique identifier must be generated instead.
-            // But their complex value will be processed later.
             else if (parentRecord.hasComplexRecords(signature)) {
+                // There are complex records with given signature in the parent record.
+                // They don't represent any (string) value so an unique identifier must be generated instead.
+                // But their complex value will be processed later.
                 for (IComplexRecord childRecord : parentRecord.getComplexRecords(signature))
                     addSimpleValueWithChildRecordToOutput(output, UniqueIdProvider.getNext(), childRecord);
             }
@@ -226,22 +226,22 @@ public class MTCAlgorithm {
     }
 
     private static void addSimpleValueWithChildRecordToOutput(List<FetchedSuperId> output, String value, IComplexRecord childRecord) {
-        var builder = new IdWithValues.Builder();
+        var builder = new SuperIdWithValues.Builder();
         builder.add(Signature.createEmpty(), value);
         output.add(new FetchedSuperId(builder.build(), childRecord));
     }
 
-    private static void processComplexRecordWithDynamicChildren(List<FetchedSuperId> output, Id superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
+    private static void processComplexRecordWithDynamicChildren(List<FetchedSuperId> output, SignatureId superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
         for (IComplexRecord dynamicNameChild : childRecord.getDynamicNameChildren()) {
-            var builder = new IdWithValues.Builder();
+            var builder = new SuperIdWithValues.Builder();
             addStaticNameSignaturesToBuilder(superId.signatures(), builder, parentRow, pathSignature, dynamicNameChild);
             output.add(new FetchedSuperId(builder.build(), new DynamicRecordWrapper(childRecord, dynamicNameChild)));
         }
     }
 
-    private static void processComplexRecordWithDynamicValues(List<FetchedSuperId> output, Id superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
+    private static void processComplexRecordWithDynamicValues(List<FetchedSuperId> output, SignatureId superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
         for (SimpleValueRecord<?> dynamicNameValue : childRecord.getDynamicNameValues()) {
-            var builder = new IdWithValues.Builder();
+            var builder = new SuperIdWithValues.Builder();
             Set<Signature> staticNameSignatures = new TreeSet<>();
 
             for (Signature signature : superId.signatures()) {
@@ -260,13 +260,13 @@ public class MTCAlgorithm {
         }
     }
     
-    private static void processStaticComplexRecord(List<FetchedSuperId> output, Id superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
-        var builder = new IdWithValues.Builder();
+    private static void processStaticComplexRecord(List<FetchedSuperId> output, SignatureId superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
+        var builder = new SuperIdWithValues.Builder();
         addStaticNameSignaturesToBuilder(superId.signatures(), builder, parentRow, pathSignature, childRecord);
         output.add(new FetchedSuperId(builder.build(), childRecord));
     }
 
-    private static void addStaticNameSignaturesToBuilder(Set<Signature> signatures, IdWithValues.Builder builder, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
+    private static void addStaticNameSignaturesToBuilder(Set<Signature> signatures, SuperIdWithValues.Builder builder, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
         for (Signature signature : signatures) {
             // How the signature looks like from the parent object.
             var signatureInParentRow = signature.traverseThrough(pathSignature);
@@ -290,12 +290,12 @@ public class MTCAlgorithm {
     }
 
     /**
-     * Creates DomainRow from given IdWithValues, adds it to the instance object and merges it with other potentially duplicite rows.
+     * Creates DomainRow from given SuperIdWithValues, adds it to the instance object and merges it with other potentially duplicite rows.
      * @param instanceObject
      * @param superId
      * @return
      */
-    private static DomainRow modifyActiveDomain(InstanceObject instanceObject, IdWithValues superId) {
+    private static DomainRow modifyActiveDomain(InstanceObject instanceObject, SuperIdWithValues superId) {
         var merger = new Merger();
         return merger.merge(superId, instanceObject);
     }
@@ -332,8 +332,8 @@ public class MTCAlgorithm {
         return childRow;
     }
 
-    private IdWithValues fetchSuperIdForTechnicalRow(InstanceObject instanceObject, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, IComplexRecord parentRecord) {
-        var builder = new IdWithValues.Builder();
+    private SuperIdWithValues fetchSuperIdForTechnicalRow(InstanceObject instanceObject, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, IComplexRecord parentRecord) {
+        var builder = new SuperIdWithValues.Builder();
 
         for (var signature : instanceObject.superId().signatures()) {
             // The value is in either the first row ...

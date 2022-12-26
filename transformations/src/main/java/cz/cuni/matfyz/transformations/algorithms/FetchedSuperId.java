@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.core.instance.IdWithValues;
+import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.record.IComplexRecord;
 
 /**
@@ -8,15 +8,15 @@ import cz.cuni.matfyz.core.record.IComplexRecord;
  */
 public class FetchedSuperId {
     
-    public final IdWithValues superId;
+    public final SuperIdWithValues superId;
     public final IComplexRecord childRecord;
     
-    public FetchedSuperId(IdWithValues superId, IComplexRecord childRecord) {
+    public FetchedSuperId(SuperIdWithValues superId, IComplexRecord childRecord) {
         this.superId = superId;
         this.childRecord = childRecord;
     }
 
-    public FetchedSuperId(IdWithValues superId) {
+    public FetchedSuperId(SuperIdWithValues superId) {
         this(superId, null);
     }
     

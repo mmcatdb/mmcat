@@ -1,9 +1,8 @@
 package cz.cuni.matfyz.core.category;
 
-import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
-
-import java.util.Set;
+import cz.cuni.matfyz.core.schema.ObjectIds;
+import cz.cuni.matfyz.core.schema.SignatureId;
 
 /**
  * @author pavel.koupil
@@ -14,11 +13,11 @@ public interface CategoricalObject extends Comparable<CategoricalObject> {
 
     public String label();
 
-    public Id superId();
+    public SignatureId superId();
 
     /**
      * Immutable.
      */
-    public Set<Id> ids();
+    public ObjectIds ids();
     
 }

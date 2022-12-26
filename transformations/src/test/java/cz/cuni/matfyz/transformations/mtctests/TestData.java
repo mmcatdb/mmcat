@@ -7,11 +7,12 @@ import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.core.schema.SignatureId;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -40,11 +41,11 @@ public class TestData {
     public SchemaCategory createInitialSchemaCategory() {
         var schema = new SchemaCategory();
 
-        var user = addSchemaObject(schema, userKey, "user", new Id(userToU_id));
-        var u_id = addSchemaObject(schema, u_idKey, "u_id", Id.createEmpty());
-        var name = addSchemaObject(schema, nameKey, "name", Id.createEmpty());
-        var order = addSchemaObject(schema, orderKey, "order", new Id(orderToO_id));
-        var o_id = addSchemaObject(schema, o_idKey, "o_id", Id.createEmpty());
+        var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToU_id));
+        var u_id = addSchemaObject(schema, u_idKey, "u_id", ObjectIds.createValue());
+        var name = addSchemaObject(schema, nameKey, "name", ObjectIds.createValue());
+        var order = addSchemaObject(schema, orderKey, "order", new ObjectIds(orderToO_id));
+        var o_id = addSchemaObject(schema, o_idKey, "o_id", ObjectIds.createValue());
 
         addMorphismWithDual(schema, userToU_id, user, u_id, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
         addMorphismWithDual(schema, userToName, user, name, Min.ONE, Max.ONE, Min.ONE, Max.STAR);
@@ -54,8 +55,8 @@ public class TestData {
         return schema;
     }
 
-    public static SchemaObject addSchemaObject(SchemaCategory schema, Key key, String name, Id id) {
-        var object = new SchemaObject(key, name, id, Set.of(id));
+    public static SchemaObject addSchemaObject(SchemaCategory schema, Key key, String name, ObjectIds ids) {
+        var object = new SchemaObject(key, name, ids.generateDefaultSuperId(), ids);
         schema.addObject(object);
         return object;
     }

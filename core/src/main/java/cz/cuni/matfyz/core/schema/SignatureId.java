@@ -6,7 +6,6 @@ import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +20,7 @@ import org.json.JSONObject;
  * Id is a set of signatures (each corresponding to a base or a composite morphism).
  * @author jachymb.bartik
  */
-public class Id implements Serializable, Comparable<Id>, JSONConvertible {
+public class SignatureId implements Serializable, Comparable<SignatureId>, JSONConvertible {
     
     private final SortedSet<Signature> signatures;
     
@@ -30,24 +29,20 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
         return signatures;
     }
 
-    public Id(Set<Signature> signatures) {
+    public SignatureId(Set<Signature> signatures) {
         this(new TreeSet<>(signatures));
     }
     
-    public Id(Collection<Signature> signatures) {
-        this(new TreeSet<>(signatures));
-    }
-
     // There must be at least one signature
-    public Id(Signature... signatures) {
+    public SignatureId(Signature... signatures) {
         this(new TreeSet<>(List.of(signatures)));
     }
     
-    public static Id createEmpty() {
-        return new Id(Signature.createEmpty());
+    public static SignatureId createEmpty() {
+        return new SignatureId(Signature.createEmpty());
     }
     
-    private Id(SortedSet<Signature> signatures) {
+    private SignatureId(SortedSet<Signature> signatures) {
         this.signatures = signatures;
     }
     
@@ -60,7 +55,7 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
     }
 
     @Override
-    public int compareTo(Id id) {
+    public int compareTo(SignatureId id) {
         int sizeResult = signatures.size() - id.signatures.size();
         if (sizeResult != 0)
             return sizeResult;
@@ -78,7 +73,7 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof Id id && compareTo(id) == 0;
+        return object instanceof SignatureId id && compareTo(id) == 0;
     }
     
     @Override
@@ -99,10 +94,10 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends ToJSONConverterBase<Id> {
+    public static class Converter extends ToJSONConverterBase<SignatureId> {
 
         @Override
-        protected JSONObject innerToJSON(Id object) throws JSONException {
+        protected JSONObject innerToJSON(SignatureId object) throws JSONException {
             var output = new JSONObject();
     
             var signatures = new JSONArray(object.signatures.stream().map(signature -> signature.toJSON()).toList());
@@ -113,17 +108,17 @@ public class Id implements Serializable, Comparable<Id>, JSONConvertible {
     
     }
     
-    public static class Builder extends FromJSONBuilderBase<Id> {
+    public static class Builder extends FromJSONBuilderBase<SignatureId> {
     
         @Override
-        protected Id innerFromJSON(JSONObject jsonObject) throws JSONException {
+        protected SignatureId innerFromJSON(JSONObject jsonObject) throws JSONException {
             var signaturesArray = jsonObject.getJSONArray("signatures");
             var signatures = new TreeSet<Signature>();
             var builder = new Signature.Builder();
             for (int i = 0; i < signaturesArray.length(); i++)
                 signatures.add(builder.fromJSON(signaturesArray.getJSONObject(i)));
 
-            return new Id(signatures);
+            return new SignatureId(signatures);
         }
     
     }

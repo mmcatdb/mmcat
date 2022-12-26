@@ -7,14 +7,13 @@ import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
 import java.net.URISyntaxException;
-import java.util.Set;
 
 /**
  * @author jachymb.bartik
@@ -47,19 +46,19 @@ public class TestData {
     private SchemaCategory createInitialSchemaCategory() {
         var schema = new SchemaCategory();
 
-        var user = addSchemaObject(schema, userKey, "user", new Id(userToId_user));
-        var id_user = addSchemaObject(schema, id_userKey, "id_user", Id.createEmpty());
-        var address = addSchemaObject(schema, addressKey, "address", new Id(addressToStreet, addressToCity));
-        var street = addSchemaObject(schema, streetKey, "street", Id.createEmpty());
-        var city = addSchemaObject(schema, cityKey, "city", Id.createEmpty());
+        var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToId_user));
+        var id_user = addSchemaObject(schema, id_userKey, "id_user", ObjectIds.createValue());
+        var address = addSchemaObject(schema, addressKey, "address", new ObjectIds(addressToStreet, addressToCity));
+        var street = addSchemaObject(schema, streetKey, "street", ObjectIds.createValue());
+        var city = addSchemaObject(schema, cityKey, "city", ObjectIds.createValue());
 
         addMorphismWithDual(schema, userToId_user, user, id_user, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
         addMorphismWithDual(schema, userToAddress, user, address, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
         addMorphismWithDual(schema, addressToStreet, address, street, Min.ONE, Max.ONE, Min.ONE, Max.STAR);
         addMorphismWithDual(schema, addressToCity, address, city, Min.ONE, Max.ONE, Min.ZERO, Max.STAR);
 
-        var order = addSchemaObject(schema, orderKey, "order", new Id(orderToId_order));
-        var id_order = addSchemaObject(schema, id_orderKey, "id_order", Id.createEmpty());
+        var order = addSchemaObject(schema, orderKey, "order", new ObjectIds(orderToId_order));
+        var id_order = addSchemaObject(schema, id_orderKey, "id_order", ObjectIds.createValue());
 
         addMorphismWithDual(schema, orderToId_order, order, id_order, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
 
@@ -68,8 +67,8 @@ public class TestData {
         return schema;
     }
 
-    public static SchemaObject addSchemaObject(SchemaCategory schema, Key key, String name, Id id) {
-        var object = new SchemaObject(key, name, id, Set.of(id));
+    public static SchemaObject addSchemaObject(SchemaCategory schema, Key key, String name, ObjectIds ids) {
+        var object = new SchemaObject(key, name, ids.generateDefaultSuperId(), ids);
         schema.addObject(object);
         return object;
     }

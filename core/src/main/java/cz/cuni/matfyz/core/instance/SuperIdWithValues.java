@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.schema.Id;
+import cz.cuni.matfyz.core.schema.ObjectIds;
+import cz.cuni.matfyz.core.schema.SignatureId;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
@@ -21,7 +22,7 @@ import org.json.JSONObject;
 /**
  * @author jachymb.bartik
  */
-public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSONConvertible {
+public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithValues>, JSONConvertible {
 
     private final Map<Signature, String> tuples;
 
@@ -37,11 +38,11 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
         return tuples.get(signature);
     }
     
-    private Id cachedId;
+    private SignatureId cachedId;
     
-    public Id id() {
+    public SignatureId id() {
         if (cachedId == null)
-            cachedId = new Id(tuples.keySet());
+            cachedId = new SignatureId(tuples.keySet());
         return cachedId;
         // Evolution extension
         //return new Id(map.keySet());
@@ -59,14 +60,14 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
         return tuples.isEmpty();
     }
 
-    public boolean containsId(Id id) {
+    public boolean containsId(SignatureId id) {
         for (var signature : id.signatures())
             if (!hasSignature(signature))
                 return false;
         return true;
     }
 
-    public IdWithValues findId(Id id) {
+    public SuperIdWithValues findId(SignatureId id) {
         var builder = new Builder();
 
         for (var signature : id.signatures()) {
@@ -79,26 +80,30 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
         return builder.build();
     }
 
-    public IdWithValues findFirstId(Set<Id> ids) {
-        for (var id : ids)
+    public SuperIdWithValues findFirstId(ObjectIds ids) {
+        for (var id : ids.toSignatureIds())
             if (containsId(id))
                 return findId(id);
 
         return null;
     }
 
-    public record FindIdsResult(Set<IdWithValues> foundIds, Set<Id> notFoundIds) {}
+    public record FindIdsResult(Set<SuperIdWithValues> foundIds, Set<SignatureId> notFoundIds) {}
 
     /**
      * Returns all ids that are contained there as a subset.
-     * @param ids The ids we want to find.
+     * @param signatureIds The ids we want to find.
      * @return A set of found ids and also not found ids.
      */
-    public FindIdsResult findAllIds(Set<Id> ids) {
-        final var foundIds = new TreeSet<IdWithValues>();
-        final var notFoundIds = new TreeSet<Id>();
+    public FindIdsResult findAllIds(ObjectIds ids) {
+        return findAllSignatureIds(ids.toSignatureIds());
+    }
 
-        for (Id id : ids) {
+    public FindIdsResult findAllSignatureIds(Set<SignatureId> ids) {
+        final var foundIds = new TreeSet<SuperIdWithValues>();
+        final var notFoundIds = new TreeSet<SignatureId>();
+
+        for (SignatureId id : ids) {
             var foundId = findId(id);
 
             if (foundId == null)
@@ -111,13 +116,13 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
     }
 
     // Evolution extension
-    public IdWithValues copy() {
+    public SuperIdWithValues copy() {
         var mapCopy = new TreeMap<Signature, String>();
         this.tuples.forEach((signature, string) -> mapCopy.put(signature, string));
-        return new IdWithValues(mapCopy);
+        return new SuperIdWithValues(mapCopy);
     }
 
-    public static IdWithValues merge(IdWithValues... ids) {
+    public static SuperIdWithValues merge(SuperIdWithValues... ids) {
         var builder = new Builder();
         for (var id : ids)
             builder.add(id);
@@ -125,11 +130,11 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
         return builder.build();
     }
 
-    public static IdWithValues createEmpty() {
+    public static SuperIdWithValues createEmpty() {
         return merge();
     }
 
-    private IdWithValues(Map<Signature, String> map) {
+    private SuperIdWithValues(Map<Signature, String> map) {
         this.tuples = map;
     }
 
@@ -142,18 +147,15 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
             return this;
         }
 
-        public Builder add(IdWithValues idWithValues) {
+        public Builder add(SuperIdWithValues idWithValues) {
             for (var tuple : idWithValues.tuples.entrySet())
                 map.put(tuple.getKey(), tuple.getValue());
                 
             return this;
         }
 
-        public IdWithValues build() {
-            // if (map.size() == 0)
-            //    return IdWithValues.TechnicalId();
-
-            var output = new IdWithValues(map);
+        public SuperIdWithValues build() {
+            var output = new SuperIdWithValues(map);
             map = new TreeMap<>();
             return output;
         }
@@ -162,16 +164,8 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
     
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof IdWithValues))
+        if (!(object instanceof SuperIdWithValues idWithValues))
             return false;
-
-        var idWithValues = (IdWithValues) object;
-
-        // if (isTechnical)
-        //    return idWithValues.isTechnical && technicalValue == idWithValues.technicalValue;
-
-        // if (idWithValues.isTechnical)
-        //    return false;
 
         return Objects.equals(this.tuples, idWithValues.tuples);
     }
@@ -184,11 +178,7 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
     }
     
     @Override
-    public int compareTo(IdWithValues idWithValues) {
-        // int technicalCompare = technicalValue - idWithValues.technicalValue;
-        // if (isTechnical || idWithValues.isTechnical)
-        //    return technicalCompare;
-
+    public int compareTo(SuperIdWithValues idWithValues) {
         int idCompareResult = id().compareTo(idWithValues.id());
         if (idCompareResult != 0)
             return idCompareResult;
@@ -226,10 +216,10 @@ public class IdWithValues implements Serializable, Comparable<IdWithValues>, JSO
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends ToJSONConverterBase<IdWithValues> {
+    public static class Converter extends ToJSONConverterBase<SuperIdWithValues> {
 
         @Override
-        protected JSONObject innerToJSON(IdWithValues object) throws JSONException {
+        protected JSONObject innerToJSON(SuperIdWithValues object) throws JSONException {
             var output = new JSONObject();
 
             var tuples = new ArrayList<JSONObject>();

@@ -2,12 +2,10 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
-import cz.cuni.matfyz.core.instance.IdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.MappingRow;
+import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.schema.Key;
-
-import java.util.Set;
 
 /**
  * @author jachymb.bartik
@@ -20,7 +18,7 @@ public class TestInstanceCategoryBuilder {
         this.category = instance;
     }
     
-    private final IdWithValues.Builder builder = new IdWithValues.Builder();
+    private final SuperIdWithValues.Builder builder = new SuperIdWithValues.Builder();
     
     public TestInstanceCategoryBuilder value(Signature signature, String value) {
         builder.add(signature, value);
@@ -30,7 +28,7 @@ public class TestInstanceCategoryBuilder {
 
     public DomainRow object(Key key) {
         var instanceObject = category.getObject(key);
-        IdWithValues superId = builder.build();
+        SuperIdWithValues superId = builder.build();
 
         var row = instanceObject.getRow(superId);
         if (row != null)

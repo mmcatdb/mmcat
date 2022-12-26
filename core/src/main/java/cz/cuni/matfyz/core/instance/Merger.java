@@ -52,7 +52,7 @@ public class Merger {
     /**
      * Merges the row and then iterativelly merges rows from other instance objects that might be affected.
      */
-    public DomainRow merge(IdWithValues superId, InstanceObject instanceObject) {
+    public DomainRow merge(SuperIdWithValues superId, InstanceObject instanceObject) {
         addMergeJob(superId, Set.of(), instanceObject);
         processQueues();
 
@@ -65,7 +65,7 @@ public class Merger {
      * @param path Base morphism from parent to the new row.
      * @return
      */
-    public DomainRow merge(IdWithValues superId, DomainRow parent, InstanceMorphism path) {
+    public DomainRow merge(SuperIdWithValues superId, DomainRow parent, InstanceMorphism path) {
         var object = path.cod();
 
         // First, we try to find the row by the superId.
@@ -90,7 +90,7 @@ public class Merger {
         return newRow;
     }
 
-    private DomainRow addToRowAndConnect(DomainRow currentRow, IdWithValues superId, DomainRow parent, InstanceMorphism path) {
+    private DomainRow addToRowAndConnect(DomainRow currentRow, SuperIdWithValues superId, DomainRow parent, InstanceMorphism path) {
         var mappings = parent.getMappingsFromForMorphism(path);
         // TODO more effective search, e.g., map.
         for (var mapping : mappings)
@@ -106,8 +106,8 @@ public class Merger {
     /**
      * Add information from the superId to the existing row.
      */
-    private DomainRow addToRow(DomainRow currentRow, IdWithValues superId, InstanceObject object) {
-        var newSuperId = IdWithValues.merge(currentRow.superId, superId);
+    private DomainRow addToRow(DomainRow currentRow, SuperIdWithValues superId, InstanceObject object) {
+        var newSuperId = SuperIdWithValues.merge(currentRow.superId, superId);
         if (newSuperId.size() == currentRow.superId.size())
             return currentRow; // The row already contains everything from the merging superId.
 
@@ -129,7 +129,7 @@ public class Merger {
         return morphism.dom().getActualRow(domainRow);
     }
 
-    private void addMergeJob(IdWithValues superId, Set<Integer> technicalId, InstanceObject instanceObject) {
+    private void addMergeJob(SuperIdWithValues superId, Set<Integer> technicalId, InstanceObject instanceObject) {
         jobs.add(new MergeRowsJob(this, superId, technicalId, instanceObject));
     }
 
@@ -137,7 +137,7 @@ public class Merger {
         jobs.add(new MergeRowsJob(this, InstanceObject.mergeSuperIds(rows), InstanceObject.mergeTechnicalIds(rows), instanceObject));
     }
 
-    private void addReferenceJob(IdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
+    private void addReferenceJob(SuperIdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
         referenceJobs.add(new ReferenceJob(this, superId, technicalIds, instanceObject));
     }
 
@@ -145,11 +145,11 @@ public class Merger {
 
         private final Merger merger;
 
-        IdWithValues superId;
+        SuperIdWithValues superId;
         Set<Integer> technicalIds;
         InstanceObject instanceObject;
 
-        public MergeRowsJob(Merger merger, IdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
+        public MergeRowsJob(Merger merger, SuperIdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
             this.merger = merger;
             this.superId = superId;
             this.technicalIds = technicalIds;
@@ -162,7 +162,7 @@ public class Merger {
             // Iteratively get all rows that are identified by the superId (while expanding the superId).
             // Also get all technical ids.
             var superIdOfTechnicalRows = instanceObject.findTechnicalSuperId(technicalIds, originalRows);
-            superId = IdWithValues.merge(superId, superIdOfTechnicalRows);
+            superId = SuperIdWithValues.merge(superId, superIdOfTechnicalRows);
     
             var result = instanceObject.findMaximalSuperId(superId, originalRows);
             var maximalSuperId = result.superId();
@@ -241,11 +241,11 @@ public class Merger {
 
         private final Merger merger;
 
-        IdWithValues superId;
+        SuperIdWithValues superId;
         Set<Integer> technicalIds; // The rows have to have at least some values in superId but it does not have to be a valid id ...
         InstanceObject instanceObject;
 
-        public ReferenceJob(Merger merger, IdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
+        public ReferenceJob(Merger merger, SuperIdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
             this.merger = merger;
             this.superId = superId;
             this.technicalIds = technicalIds;
@@ -268,7 +268,7 @@ public class Merger {
                     continue; // The row already has the value.
 
                 // Add value to the targetRow.
-                var builder = new IdWithValues.Builder();
+                var builder = new SuperIdWithValues.Builder();
                 builder.add(targetRow.superId);
                 builder.add(reference.signatureInOther, value);
 

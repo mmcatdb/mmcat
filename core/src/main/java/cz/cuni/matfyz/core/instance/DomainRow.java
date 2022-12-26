@@ -28,14 +28,13 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
     // The tuples that holds the value of this row.
-    public final IdWithValues superId;
+    public final SuperIdWithValues superId;
     // All technical ids under which is this row known.
     public final Set<Integer> technicalIds;
     private final Set<Signature> pendingReferences;
     // Various ids that can be constructed from this row.
-    //private final Map<Id, IdWithValues> ids;
 
-    public DomainRow(IdWithValues superId, Set<Integer> technicalIds, Set<Signature> pendingReferences) {
+    public DomainRow(SuperIdWithValues superId, Set<Integer> technicalIds, Set<Signature> pendingReferences) {
         this.superId = superId;
         this.technicalIds = technicalIds;
         this.pendingReferences = pendingReferences;

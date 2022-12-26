@@ -5,13 +5,13 @@ import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
-import cz.cuni.matfyz.core.instance.IdWithValues;
+import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.schema.Id;
+import cz.cuni.matfyz.core.schema.SignatureId;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.utils.Statistics;
@@ -130,7 +130,7 @@ public class EvolutionManagementTests {
     }
 
     private void join(SchemaCategory schema, InstanceCategory category) {
-        var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", Id.createEmpty());
+        var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", SignatureId.createEmpty());
         var address = schema.getObject(data.addressKey);
         var addressToFullAddressMorphism = TestData.addMorphismWithDual(schema, data.addressToFullAddress, address, fullAddress, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
         
@@ -150,7 +150,7 @@ public class EvolutionManagementTests {
             var fullAddressValue = joinFunction(street, city);
 
             // Create superId and row
-            var builder = new IdWithValues.Builder();
+            var builder = new SuperIdWithValues.Builder();
             builder.add(Signature.createEmpty(), fullAddressValue);
 
             addressInstance.getOrCreateRowWithMorphism(builder.build(), addressRow, addressToFullAddressMorphismInstance);

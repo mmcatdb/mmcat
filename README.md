@@ -36,4 +36,18 @@ mvn install -Dmaven.test.skip
 - Extends the **Info** class with information about neighbour resources (in the form of their **Infos**).
 - Cannot contain **Fulls** of other resources.
 
-### Full
+## Ids, Signatures ...
+
+- **Signature** describes a path in a graph. There are three distinct types:
+    - *Empty* - the object itself (i.e., the value is stored on the object),
+    - *Base* - a direct neighbour to the object via a morphism with the signature (i.e., the value is stored on the neighbour),
+    - *Composite* - a composition of base signatures.
+- A **SchemaObject** has two properties:
+    - *ids* - a description of how the object is identified,
+    - *superId* - a set of all attributes whose values we want to capture on the object.
+- The *ids* property is one of the following:
+    - *Value* - the object is identified by its (string) value, i.e., by the data itself,
+    - *Generated* - the object is, again, identified by its value, however it is automatically generated (if not present in the data)
+        - TODO - maybe it should be non-accessible so it would be always generated
+    - *Signature* - its a set of **SignatureId**s where each of them is a set of **Signature**s leading to the objects with the values.
+- The *superId* is just a set of signatures, because we do not have to know what they represent - the only important thinkg is how to get to them.

@@ -7,9 +7,11 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

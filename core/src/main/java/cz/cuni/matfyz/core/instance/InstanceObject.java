@@ -2,9 +2,10 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.schema.Id;
 import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.core.schema.SignatureId;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
@@ -26,7 +27,7 @@ import org.json.JSONObject;
 public class InstanceObject implements Serializable, CategoricalObject, JSONConvertible {
 
     private final SchemaObject schemaObject;
-    private final Map<Id, Map<IdWithValues, DomainRow>> domain = new TreeMap<>();
+    private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<Integer, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
     public InstanceObject(SchemaObject schemaObject) {
@@ -41,20 +42,20 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return schemaObject.label();
     }
 
-    public Id superId() {
+    public SignatureId superId() {
         return schemaObject.superId();
     }
 
     /**
      * Immutable.
      */
-    public Set<Id> ids() {
+    public ObjectIds ids() {
         return schemaObject.ids();
     }
     
     // TODO rozlišit id od superId
-    public DomainRow getRowById(IdWithValues id) {
-        Map<IdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
+    public DomainRow getRowById(SuperIdWithValues id) {
+        Map<SuperIdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
         return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
     }
 
@@ -62,9 +63,9 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return domainByTechnicalIds.get(technicalId);
     }
 
-    private void setRow(DomainRow row, Collection<IdWithValues> ids) {
+    private void setRow(DomainRow row, Collection<SuperIdWithValues> ids) {
         for (var id : ids) {
-            Map<IdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
+            Map<SuperIdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
             if (rowsWithSameTypeId == null) {
                 rowsWithSameTypeId = new TreeMap<>();
                 domain.put(id.id(), rowsWithSameTypeId);
@@ -76,17 +77,17 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
             domainByTechnicalIds.put(technicalId, row);
     }
 
-    public DomainRow getOrCreateRow(IdWithValues superId) {
+    public DomainRow getOrCreateRow(SuperIdWithValues superId) {
         var merger = new Merger();
         return merger.merge(superId, this);
     }
 
-    public DomainRow getOrCreateRowWithMorphism(IdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
+    public DomainRow getOrCreateRowWithMorphism(SuperIdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
         var merger = new Merger();
         return merger.merge(superId, parent, baseMorphismFromParent);
     }
 
-    DomainRow createRow(IdWithValues superId) {
+    DomainRow createRow(SuperIdWithValues superId) {
         Set<Integer> technicalIds = superId.findFirstId(ids()) == null
             ? Set.of(generateTechnicalId())
             : Set.of();
@@ -95,7 +96,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return createRow(superId, technicalIds, ids);
     }
 
-    DomainRow createRow(IdWithValues superId, Set<Integer> technicalIds, Set<IdWithValues> allIds) {
+    DomainRow createRow(SuperIdWithValues superId, Set<Integer> technicalIds, Set<SuperIdWithValues> allIds) {
         // TODO this can be optimized - we can discard the references that were referenced in all merged rows.
         // However, it might be quite rare, so the overhead caused by finding such ids would be greater than the savings.
         var row = new DomainRow(superId, technicalIds, referencesToRows.keySet());
@@ -104,7 +105,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return row;
     }
 
-    public DomainRow getRow(IdWithValues superId) {
+    public DomainRow getRow(SuperIdWithValues superId) {
         for (var id : superId.findAllIds(ids()).foundIds()) {
             var row = getRowById(id);
             if (row != null)
@@ -118,9 +119,9 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     /**
      * Returns the most recent row for the superId or technicalIds.
      */
-    public DomainRow getActualRow(IdWithValues superId, Set<Integer> technicalIds) {
+    public DomainRow getActualRow(SuperIdWithValues superId, Set<Integer> technicalIds) {
         // Simply find the first id of all possible ids (any of them should point to the same row).
-        var foundId = superId.findFirstId(schemaObject.ids());
+        var foundId = superId.findFirstId(ids());
         if (foundId != null)
             return getRowById(foundId);
 
@@ -157,8 +158,8 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return output;
     }
 
-    public IdWithValues findTechnicalSuperId(Set<Integer> technicalIds, Set<DomainRow> outOriginalRows) {
-        var builder = new IdWithValues.Builder();
+    public SuperIdWithValues findTechnicalSuperId(Set<Integer> technicalIds, Set<DomainRow> outOriginalRows) {
+        var builder = new SuperIdWithValues.Builder();
 
         for (var technicalId : technicalIds) {
             var row = getRowByTechnicalId(technicalId);
@@ -171,41 +172,41 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return builder.build();
     }
 
-    public record FindSuperIdResult(IdWithValues superId, Set<IdWithValues> foundIds) {}
+    public record FindSuperIdResult(SuperIdWithValues superId, Set<SuperIdWithValues> foundIds) {}
 
     /**
      * Iteratively get all rows that are identified by the superId (while expanding the superId).
      * @param superId
      * @return
      */
-    public FindSuperIdResult findMaximalSuperId(IdWithValues superId, Set<DomainRow> outOriginalRows) {
+    public FindSuperIdResult findMaximalSuperId(SuperIdWithValues superId, Set<DomainRow> outOriginalRows) {
         // First, we take all ids that can be created for this object, and we find those, that can be filled from the given superId.
         // Then we find the rows that correspond to them and merge their superIds to the superId.
         // If it gets bigger, we try to generate other ids to find their objects and so on ...
 
         int previousSuperIdSize = 0;
-        Set<IdWithValues> foundIds = new TreeSet<>();
-        Set<Id> notFoundIds = schemaObject.ids();
+        Set<SuperIdWithValues> foundIds = new TreeSet<>();
+        Set<SignatureId> notFoundIds = ids().toSignatureIds();
 
         while (previousSuperIdSize < superId.size()) {
             previousSuperIdSize = superId.size();
 
-            var result = superId.findAllIds(notFoundIds);
+            final var result = superId.findAllSignatureIds(notFoundIds);
             foundIds.addAll(result.foundIds());
             notFoundIds = result.notFoundIds();
             
-            var foundRows = findNewRows(foundIds, outOriginalRows);
+            final var foundRows = findNewRows(foundIds, outOriginalRows);
             if (foundRows.isEmpty())
                 break; // We have not found anything new.
 
-            superId = IdWithValues.merge(superId, mergeSuperIds(foundRows));
+            superId = SuperIdWithValues.merge(superId, mergeSuperIds(foundRows));
         }
 
         return new FindSuperIdResult(superId, foundIds);
     }
 
-    public static IdWithValues mergeSuperIds(Collection<DomainRow> rows) {
-        var builder = new IdWithValues.Builder();
+    public static SuperIdWithValues mergeSuperIds(Collection<DomainRow> rows) {
+        var builder = new SuperIdWithValues.Builder();
 
         for (var row : rows)
             builder.add(row.superId);
@@ -219,7 +220,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return output;
     }
 
-    private Set<DomainRow> findNewRows(Set<IdWithValues> foundIds, Set<DomainRow> outOriginalRows) {
+    private Set<DomainRow> findNewRows(Set<SuperIdWithValues> foundIds, Set<DomainRow> outOriginalRows) {
         var output = new TreeSet<DomainRow>();
 
         for (var id : foundIds) {
@@ -246,10 +247,10 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         builder.append("\tKey: ").append(key()).append("\n");
         builder.append("\tValues:\n");
         // Consistent ordering of the keys for testing purposes.
-        for (Id id : new TreeSet<>(domain.keySet())) {
+        for (SignatureId id : new TreeSet<>(domain.keySet())) {
             var subdomain = domain.get(id);
             // Again, ordering.
-            for (IdWithValues superId : new TreeSet<>(subdomain.keySet()))
+            for (SuperIdWithValues superId : new TreeSet<>(subdomain.keySet()))
                 builder.append("\t\t").append(subdomain.get(superId)).append("\n");
         }
         

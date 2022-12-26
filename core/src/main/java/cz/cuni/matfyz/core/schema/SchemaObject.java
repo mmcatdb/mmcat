@@ -8,10 +8,7 @@ import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,14 +20,14 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
     
     private final Key key; // Identifies the object, in the paper it's a number >= 100
     private final String label;
-    private final Id superId; // Should be a union of all ids (super key).
-    private final Set<Id> ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
+    private final SignatureId superId; // Should be a union of all ids (super key).
+    private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
 
-    public SchemaObject(Key key, String label, Id superId, Set<Id> ids) {
+    public SchemaObject(Key key, String label, SignatureId superId, ObjectIds ids) {
         this.key = key;
         this.label = label;
         this.superId = superId;
-        this.ids = Set.of(ids.toArray(Id[]::new));
+        this.ids = ids;
     }
 
     @Override
@@ -49,7 +46,7 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
     }
 
     @Override
-    public Id superId() {
+    public SignatureId superId() {
         return superId;
     }
 
@@ -57,8 +54,8 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
      * Immutable.
      */
     @Override
-    public Set<Id> ids() {
-        return new TreeSet<>(ids);
+    public ObjectIds ids() {
+        return ids;
     }
 
     @Override
@@ -101,9 +98,7 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
             output.put("key", object.key.toJSON());
             output.put("label", object.label);
             output.put("superId", object.superId.toJSON());
-
-            var ids = new JSONArray(object.ids.stream().map(id -> id.toJSON()).toList());
-            output.put("ids", ids);
+            output.put("ids", object.ids.toJSON());
             
             return output;
         }
@@ -116,13 +111,8 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
         protected SchemaObject innerFromJSON(JSONObject jsonObject) throws JSONException {
             var key = new Key.Builder().fromJSON(jsonObject.getJSONObject("key"));
             var label = jsonObject.getString("label");
-            var superId = new Id.Builder().fromJSON(jsonObject.getJSONObject("superId"));
-
-            var idsArray = jsonObject.getJSONArray("ids");
-            var ids = new TreeSet<Id>();
-            var builder = new Id.Builder();
-            for (int i = 0; i < idsArray.length(); i++)
-                ids.add(builder.fromJSON(idsArray.getJSONObject(i)));
+            var superId = new SignatureId.Builder().fromJSON(jsonObject.getJSONObject("superId"));
+            var ids = new ObjectIds.Builder().fromJSON(jsonObject.getJSONObject("ids"));
 
             return new SchemaObject(key, label, superId, ids);
         }

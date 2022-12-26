@@ -120,6 +120,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         return new Signature(ArrayUtils.concatenate(signaturesIds), false);
     }
 
+    // TODO flyweight
     public static Signature createEmpty() {
         return new Signature(new int[] {}, false);
     }
