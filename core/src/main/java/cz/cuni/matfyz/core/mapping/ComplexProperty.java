@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +21,7 @@ import org.json.JSONObject;
  * It has subpaths and it provides many methods needed in the algorithms described in the paper.
  * @author jachymb.bartik
  */
-public class ComplexProperty extends AccessPath implements IValue {
+public class ComplexProperty extends AccessPath {
     
     private final Signature signature;
     
@@ -40,23 +42,26 @@ public class ComplexProperty extends AccessPath implements IValue {
     public boolean hasDynamicKeys() {
         return this.subpaths.size() == 1 && this.subpaths.get(0).name instanceof DynamicName;
     }
+
+    private final ArrayList<AccessPath> subpaths;
+    private final Map<Signature, AccessPath> subpathsMap;
     
-    @Override
-    public ComplexProperty value() {
-        return this;
-    }
-    
-    private final List<AccessPath> subpaths;
-    
-    public Iterable<AccessPath> subpaths() {
+    public List<AccessPath> subpaths() {
         return subpaths;
+    }
+
+    public AccessPath getDirectSubpath(Signature signature) {
+        return subpathsMap.get(signature);
     }
     
     public ComplexProperty(Name name, Signature signature, List<AccessPath> subpaths) {
         super(name);
         
         this.signature = signature;
-        this.subpaths = new ArrayList<>(subpaths);
+        //this.subpaths = new ArrayList<>(subpaths);
+        this.subpathsMap = new TreeMap<>();
+        subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
+        this.subpaths = new ArrayList<>(this.subpathsMap.values());
     }
     
     public ComplexProperty(Name name, Signature signature, AccessPath... subpaths) {
@@ -82,7 +87,7 @@ public class ComplexProperty extends AccessPath implements IValue {
      *      - exists an ancestor A of L in S where A.context == M.
      * If there are more such subpaths (i.e. when some of them are auxiliary), the closest one is returned.
      * If M == null, a leaf L with L.value == epsion is returned.
-     * If none of above exists, a null is returned;
+     * If none of above exists, a null is returned.
      * @param signature
      * @return the closest subpath with given signature (or null if none such exists).
      */
@@ -92,23 +97,25 @@ public class ComplexProperty extends AccessPath implements IValue {
         
         // If M = null, a leaf L with L.value = epsion is returned.
         if (signature == null) {
-            for (AccessPath subpath : subpaths)
-                if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.value().isEmpty())
-                    return simpleProperty;
+            final var directSubpath = getDirectSubpath(Signature.createEmpty());
+            if (directSubpath instanceof SimpleProperty simpleProperty)
+                return simpleProperty;
             
-            for (AccessPath subpath : subpaths)
+            for (AccessPath subpath : subpaths())
                 if (subpath instanceof ComplexProperty complexProperty) {
                     AccessPath result = complexProperty.getSubpathBySignature(null);
                     if (result != null)
                         return result;
                 }
+    
+            return null;
         }
         
         // If this is an auxiliary property, we must find if all of the descendats of this property have M in their contexts or values.
         // If so, this is returned even if this context is null.
         if (isAuxiliary()) {
             boolean returnThis = true;
-            for (AccessPath subpath : subpaths) {
+            for (AccessPath subpath : subpaths()) {
                 if (!subpath.hasSignature(signature)
                     && subpath instanceof ComplexProperty complexProperty
                     && complexProperty.getSubpathBySignature(signature) != complexProperty
@@ -121,12 +128,12 @@ public class ComplexProperty extends AccessPath implements IValue {
             if (returnThis)
                 return this;
         }
+    
+        final var directSubpath = getDirectSubpath(signature);
+        if (directSubpath != null)
+            return directSubpath;
         
-        for (AccessPath subpath : subpaths)
-            if (subpath.hasSignature(signature))
-                return subpath;
-        
-        for (AccessPath subpath : subpaths)
+        for (AccessPath subpath : subpaths())
             if (subpath instanceof ComplexProperty complexProperty) {
                 AccessPath result = complexProperty.getSubpathBySignature(signature);
                 if (result != null)
@@ -159,7 +166,7 @@ public class ComplexProperty extends AccessPath implements IValue {
     
     @Override
     public String toString() {
-        var subpathBuilder = new IndentedStringBuilder(1);
+        final var subpathBuilder = new IndentedStringBuilder(1);
         
         if (!subpaths.isEmpty())
             subpathBuilder.append(subpaths.get(0));
@@ -188,7 +195,7 @@ public class ComplexProperty extends AccessPath implements IValue {
     
     private List<AccessPath> getContentWithoutAuxiliaryNodes() {
         List<AccessPath> newSubpaths = new ArrayList<>();
-        for (AccessPath path : subpaths) {
+        for (AccessPath path : subpaths()) {
             if (path instanceof SimpleProperty) {
                 newSubpaths.add(path); // Not making a copy because the path is expected to be immutable.
             }

@@ -22,8 +22,6 @@ public abstract class AccessPath implements JSONConvertible {
     
     public abstract IContext context();
     
-    public abstract IValue value();
-    
     protected AccessPath(Name name) {
         this.name = name;
     }

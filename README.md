@@ -49,5 +49,5 @@ mvn install -Dmaven.test.skip
     - *Value* - the object is identified by its (string) value, i.e., by the data itself,
     - *Generated* - the object is, again, identified by its value, however it is automatically generated (if not present in the data)
         - TODO - maybe it should be non-accessible so it would be always generated
-    - *Signature* - its a set of **SignatureId**s where each of them is a set of **Signature**s leading to the objects with the values.
+    - *Signatures* - its a set of **SignatureId**s where each of them is a set of **Signature**s leading to the objects with the values.
 - The *superId* is just a set of signatures, because we do not have to know what they represent - the only important thinkg is how to get to them.

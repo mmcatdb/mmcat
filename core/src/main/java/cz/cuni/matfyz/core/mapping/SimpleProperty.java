@@ -20,7 +20,6 @@ public class SimpleProperty extends AccessPath {
     
     private final SimpleValue value;
     
-    @Override
     public SimpleValue value() {
         return value;
     }

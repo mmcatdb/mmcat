@@ -23,7 +23,7 @@ import org.json.JSONObject;
 public class ObjectIds implements Serializable, JSONConvertible {
 
     public enum Type {
-        Signature, // Its a set of signatures.
+        Signatures, // Its a set of signatures.
         Value, // Its a simple string value.
         Generated // Its a simple string value that has to be automatically generated.
     }
@@ -64,22 +64,30 @@ public class ObjectIds implements Serializable, JSONConvertible {
     
     private ObjectIds(SortedSet<SignatureId> signatures) {
         this.signatureIds = signatures;
-        this.type = Type.Signature;
+        this.type = Type.Signatures;
     }
 
     private ObjectIds(Type type) {
-        assert(type != Type.Signature);
+        assert(type != Type.Signatures);
 
         this.signatureIds = null;
         this.type = type;
     }
 
     public boolean isSignatures() {
-        return type == Type.Signature;
+        return type == Type.Signatures;
+    }
+
+    public boolean isValue() {
+        return type == Type.Value;
+    }
+
+    public boolean isGenerated() {
+        return type == Type.Generated;
     }
 
     public SignatureId generateDefaultSuperId() {
-        if (type != Type.Signature)
+        if (type != Type.Signatures)
             return SignatureId.createEmpty();
         
         final var allSignatures = new TreeSet<Signature>();

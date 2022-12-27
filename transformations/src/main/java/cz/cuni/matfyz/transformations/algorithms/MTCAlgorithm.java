@@ -11,19 +11,14 @@ import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.IContext;
-import cz.cuni.matfyz.core.mapping.IValue;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.Name;
-import cz.cuni.matfyz.core.mapping.SimpleValue;
-import cz.cuni.matfyz.core.record.DynamicRecordName;
-import cz.cuni.matfyz.core.record.DynamicRecordWrapper;
+import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.IComplexRecord;
 import cz.cuni.matfyz.core.record.RootRecord;
-import cz.cuni.matfyz.core.record.SimpleArrayRecord;
 import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SignatureId;
 
@@ -33,8 +28,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,9 +64,12 @@ public class MTCAlgorithm {
         LOGGER.debug("Process a root record:\n{}", rootRecord);
 
         // preparation phase
+        /*
         Deque<StackTriple> masterStack = mapping.hasRootMorphism()
             ? createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord, rootAccessPath) // K with root morphism
             : createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath); // K with root object
+        */
+        Deque<StackTriple> masterStack = createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath);
 
         // processing of the tree
         while (!masterStack.isEmpty())
@@ -91,6 +87,7 @@ public class MTCAlgorithm {
         return masterStack;
     }
     
+    /*
     private Deque<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         Deque<StackTriple> masterStack = new LinkedList<>();
         
@@ -118,22 +115,23 @@ public class MTCAlgorithm {
         
         return masterStack;
     }
+    */
     
     private void processTopOfStack(Deque<StackTriple> masterStack) {
         //LOGGER.debug("Process Top of Stack:\n{}", masterStack);
         
         StackTriple triple = masterStack.pop();
-        Iterable<FetchedSuperId> superIds = fetchSuperIds(triple.parentRecord, triple.parentRow, triple.parentToChildMorphism);
+        final var superIds = SuperIdsFetcher.fetch(triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
-        InstanceObject childInstance = triple.parentToChildMorphism.cod();
+        InstanceObject childInstance = triple.parentToChild.cod();
         
-        for (FetchedSuperId superId : superIds) {
-            DomainRow childRow = modifyActiveDomain(childInstance, superId.superId);
-            childRow = addRelation(triple.parentToChildMorphism, triple.parentRow, childRow, triple.parentRecord);
+        for (final var superId : superIds) {
+            DomainRow childRow = modifyActiveDomain(childInstance, superId.superId());
+            childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
 
             //childInstance.merge(childRow);
             
-            addPathChildrenToStack(masterStack, triple.parentAccessPath, childRow, superId.childRecord);
+            addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, superId.childRecord());
         }
     }
 
@@ -158,135 +156,6 @@ public class MTCAlgorithm {
         }
         
         return builder.build();
-    }
-    
-    /**
-     * Fetch id-with-values for a schema object in given record / domain row.
-     * The output is a set of (Signature, String) for each Signature in superId and its corresponding value from record. Actually, there can be multiple values in the record, so a list of these sets is returned.
-     * For further processing, the child records associated with the values are needed (if they are complex), so they are added to the output as well.
-     * @param parentRecord Record of the parent (in the access path) schema object.
-     * @param parentRow Domain row of the parent schema object.
-     * @param morphism Morphism from the parent schema object to the currently processed one.
-     * @return
-     */
-    private static Iterable<FetchedSuperId> fetchSuperIds(IComplexRecord parentRecord, DomainRow parentRow, InstanceMorphism morphism) {
-        List<FetchedSuperId> output = new ArrayList<>();
-        SignatureId superId = morphism.cod().superId();
-        Signature signature = morphism.signature();
-
-        if (superId.hasOnlyEmptySignature()) {
-            // If the id is empty, the output ids with values will have only one tuple: (<signature>, <value>).
-            // This means they represent either singular values (SimpleValueRecord) or a nested document without identifier (not auxilliary).
-            if (parentRow.hasSignature(signature)) {
-                // Value is in the parent domain row.
-                String valueFromParentRow = parentRow.getValue(signature);
-                addSimpleValueToOutput(output, valueFromParentRow);
-            }
-            else if (parentRecord.hasSimpleRecord(signature)) {
-                // There is simple value/array record with given signature in the parent record.
-                addSuperIdsFromSimpleRecordToOutput(output, parentRecord.getSimpleRecord(signature));
-            }
-            else if (parentRecord.hasComplexRecords(signature)) {
-                // There are complex records with given signature in the parent record.
-                // They don't represent any (string) value so an unique identifier must be generated instead.
-                // But their complex value will be processed later.
-                for (IComplexRecord childRecord : parentRecord.getComplexRecords(signature))
-                    addSimpleValueWithChildRecordToOutput(output, UniqueIdProvider.getNext(), childRecord);
-            }
-        }
-        // The superId isn't empty so we need to find value for each signature in superId and return the tuples (<signature>, <value>).
-        // Because there are multiple signatures in the superId, we are dealing with a complex property (resp. properties, i.e., children of given parentRecord).
-        else if (parentRecord.hasComplexRecords(signature)) {
-            for (IComplexRecord childRecord : parentRecord.getComplexRecords(signature)) {
-                // If the record has children/values with dynamic names for a signature, it is not allowed to have any other children/values (even with static names) for any other signature.
-                // So there are two different complex records - one with static children/values (with possibly different signatures) and the other with only dynamic ones (with the same signature).
-                if (childRecord.hasDynamicNameChildren())
-                    processComplexRecordWithDynamicChildren(output, superId, parentRow, signature, childRecord);
-                else if (childRecord.hasDynamicNameValues())
-                    processComplexRecordWithDynamicValues(output, superId, parentRow, signature, childRecord);
-                else
-                    processStaticComplexRecord(output, superId, parentRow, signature, childRecord);
-            }
-        }
-        
-        return output;
-    }
-
-    private static void addSuperIdsFromSimpleRecordToOutput(List<FetchedSuperId> output, SimpleRecord<?> simpleRecord) {
-        if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
-            addSimpleValueToOutput(output, simpleValueRecord.getValue().toString());
-        else if (simpleRecord instanceof SimpleArrayRecord<?> simpleArrayRecord)
-            simpleArrayRecord.getValues().stream()
-                .forEach(valueObject -> addSimpleValueToOutput(output, valueObject.toString()));
-    }
-
-    private static void addSimpleValueToOutput(List<FetchedSuperId> output, String value) {
-        // It doesn't matter if there is null because the accessPath is also null so it isn't further traversed
-        addSimpleValueWithChildRecordToOutput(output, value, null);
-    }
-
-    private static void addSimpleValueWithChildRecordToOutput(List<FetchedSuperId> output, String value, IComplexRecord childRecord) {
-        var builder = new SuperIdWithValues.Builder();
-        builder.add(Signature.createEmpty(), value);
-        output.add(new FetchedSuperId(builder.build(), childRecord));
-    }
-
-    private static void processComplexRecordWithDynamicChildren(List<FetchedSuperId> output, SignatureId superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
-        for (IComplexRecord dynamicNameChild : childRecord.getDynamicNameChildren()) {
-            var builder = new SuperIdWithValues.Builder();
-            addStaticNameSignaturesToBuilder(superId.signatures(), builder, parentRow, pathSignature, dynamicNameChild);
-            output.add(new FetchedSuperId(builder.build(), new DynamicRecordWrapper(childRecord, dynamicNameChild)));
-        }
-    }
-
-    private static void processComplexRecordWithDynamicValues(List<FetchedSuperId> output, SignatureId superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
-        for (SimpleValueRecord<?> dynamicNameValue : childRecord.getDynamicNameValues()) {
-            var builder = new SuperIdWithValues.Builder();
-            Set<Signature> staticNameSignatures = new TreeSet<>();
-
-            for (Signature signature : superId.signatures()) {
-                if (dynamicNameValue.signature().equals(signature))
-                    builder.add(signature, dynamicNameValue.getValue().toString());
-                else if (dynamicNameValue.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))
-                    builder.add(signature, dynamicNameValue.name().value());
-                // If the signature is not the dynamic value nor its dynamic name, it is static and we have to find it elsewhere.
-                else
-                    staticNameSignatures.add(signature);
-            }
-
-            addStaticNameSignaturesToBuilder(staticNameSignatures, builder, parentRow, pathSignature, childRecord);
-
-            output.add(new FetchedSuperId(builder.build(), childRecord));
-        }
-    }
-    
-    private static void processStaticComplexRecord(List<FetchedSuperId> output, SignatureId superId, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
-        var builder = new SuperIdWithValues.Builder();
-        addStaticNameSignaturesToBuilder(superId.signatures(), builder, parentRow, pathSignature, childRecord);
-        output.add(new FetchedSuperId(builder.build(), childRecord));
-    }
-
-    private static void addStaticNameSignaturesToBuilder(Set<Signature> signatures, SuperIdWithValues.Builder builder, DomainRow parentRow, Signature pathSignature, IComplexRecord childRecord) {
-        for (Signature signature : signatures) {
-            // How the signature looks like from the parent object.
-            var signatureInParentRow = signature.traverseThrough(pathSignature);
-
-            // Why java still doesn't support output arguments?
-            String value;
-            if (signatureInParentRow == null) {
-                SimpleRecord<?> simpleRecord = childRecord.getSimpleRecord(signature);
-                if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
-                    value = simpleValueRecord.getValue().toString();
-                else if (childRecord.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))
-                    value = dynamicName.value();
-                else
-                    throw new UnsupportedOperationException("FetchSuperIds doesn't support array values for complex records.");
-            }
-            else
-                value = parentRow.getValue(signatureInParentRow);
-
-            builder.add(signature, value);
-        }
     }
 
     /**
@@ -355,16 +224,17 @@ public class MTCAlgorithm {
         return builder.build();
     }
 
-    private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow superId, IComplexRecord complexRecord) {
+    private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, IComplexRecord complexRecord) {
         //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
         if (path instanceof ComplexProperty complexPath)
             for (Child child : children(complexPath)) {
-                InstanceMorphism morphism = category.getMorphism(child.signature());
-                stack.push(new StackTriple(superId, morphism, child.property(), complexRecord));
+                InstanceMorphism parentToChild = category.getMorphism(child.signature());
+                stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
             }
     }
 
-    private record Child(Signature signature, ComplexProperty property) {}
+    //private record Child(Signature signature, ComplexProperty property) {}
+    private record Child(Signature signature, AccessPath property) {}
 
     /**
      * Determine possible sub-paths to be traversed from this complex property (inner node of an access path).
@@ -377,7 +247,7 @@ public class MTCAlgorithm {
         
         for (AccessPath subpath : complexProperty.subpaths()) {
             output.addAll(process(subpath.name()));
-            output.addAll(process(subpath.context(), subpath.value()));
+            output.addAll(process(subpath.context(), subpath));
         }
         
         return output;
@@ -396,15 +266,15 @@ public class MTCAlgorithm {
             return Collections.<Child>emptyList();
     }
     
-    private static Collection<Child> process(IContext context, IValue value) {
-        if (value instanceof SimpleValue simpleValue) {
+    private static Collection<Child> process(IContext context, AccessPath accessPath) {
+        if (accessPath instanceof SimpleProperty simpleProperty) {
             final Signature contextSignature = context instanceof Signature signature ? signature : Signature.createEmpty();
-            final Signature newSignature = simpleValue.signature().concatenate(contextSignature);
+            final Signature newSignature = simpleProperty.value().signature().concatenate(contextSignature);
             
-            return List.of(new Child(newSignature, ComplexProperty.createEmpty()));
+            return List.of(new Child(newSignature, accessPath));
         }
         
-        if (value instanceof ComplexProperty complexProperty) {
+        if (accessPath instanceof ComplexProperty complexProperty) {
             if (context instanceof Signature signature)
                 return List.of(new Child(signature, complexProperty));
             else

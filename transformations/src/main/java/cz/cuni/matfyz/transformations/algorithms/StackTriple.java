@@ -11,24 +11,24 @@ import cz.cuni.matfyz.core.utils.IndentedStringBuilder;
  */
 public class StackTriple {
     
-    public final InstanceMorphism parentToChildMorphism;
+    public final InstanceMorphism parentToChild;
     public final DomainRow parentRow;
-    public final AccessPath parentAccessPath;
+    public final AccessPath childAccessPath;
     public final IComplexRecord parentRecord;
     
-    public StackTriple(DomainRow parentRow, InstanceMorphism parentToChildMorphism, AccessPath parentAccessPath, IComplexRecord parentRecord) {
+    public StackTriple(DomainRow parentRow, InstanceMorphism parentToChild, AccessPath childAccessPath, IComplexRecord parentRecord) {
         this.parentRow = parentRow;
-        this.parentToChildMorphism = parentToChildMorphism;
-        this.parentAccessPath = parentAccessPath;
+        this.parentToChild = parentToChild;
+        this.childAccessPath = childAccessPath;
         this.parentRecord = parentRecord;
     }
     
     @Override
     public String toString() {
         var innerBuilder = new IndentedStringBuilder(1);
-        innerBuilder.append("parentToChildMorphism: ").append(parentToChildMorphism.signature()).append(",\n");
+        innerBuilder.append("parentToChildMorphism: ").append(parentToChild.signature()).append(",\n");
         innerBuilder.append("parentRow: ").append(parentRow).append(",\n");
-        innerBuilder.append("parentAccessPath: ").append(parentAccessPath).append(",\n");
+        innerBuilder.append("childAccessPath: ").append(childAccessPath).append(",\n");
         innerBuilder.append("record: ").append(parentRecord);
         
         StringBuilder builder = new StringBuilder();

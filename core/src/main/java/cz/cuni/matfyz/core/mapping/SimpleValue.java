@@ -12,7 +12,7 @@ import org.json.JSONObject;
  * A simple value is a signature of morphism ?(which maps the parent property to this value)?
  * @author jachymb.bartik
  */
-public class SimpleValue implements IValue, JSONConvertible {
+public class SimpleValue implements JSONConvertible {
     
     private final Signature signature;
     

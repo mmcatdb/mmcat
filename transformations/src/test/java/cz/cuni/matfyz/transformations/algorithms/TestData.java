@@ -14,7 +14,6 @@ import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.schema.SignatureId;
 
 /**
  * @author jachymb.bartik
@@ -235,7 +234,7 @@ public class TestData {
         var nestedDoc = createSchemaObject(
             nestedDocKey,
             "NestedDoc",
-            ObjectIds.createValue()
+            ObjectIds.createGenerated()
         );
         schema.addObject(nestedDoc);
         addMorphismWithDual(schema, orderToNestedDoc, order, nestedDoc, Cardinality.ONE_TO_ONE);
@@ -312,7 +311,7 @@ public class TestData {
         var content = createSchemaObject(
             contentKey,
             "content",
-            ObjectIds.createValue()
+            ObjectIds.createGenerated()
         );
         schema.addObject(content);
         addMorphismWithDual(schema, addressToContent, address, content, Cardinality.ONE_TO_ONE);
