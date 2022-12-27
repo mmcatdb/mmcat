@@ -37,6 +37,26 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         this.isNull = false;
     }
 
+    public static Signature createBase(int id) {
+        return new Signature(new int[] { id }, false);
+    }
+
+    private static Signature createComposite(int[] ids) {
+        return ids.length == 0 ? createEmpty() : new Signature(ids, false);
+    }
+
+    private static final Signature emptyObject = new Signature(new int[] {}, false);
+
+    public static Signature createEmpty() {
+        return emptyObject;
+    }
+
+    private static final Signature nullObject = new Signature(new int[] {}, true);
+    
+    public static Signature createNull() {
+        return nullObject;
+    }
+
     public int[] ids() {
         return this.ids.clone();
     }
@@ -47,7 +67,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
 
         var output = new ArrayList<Signature>();
         for (int id : ids)
-            output.add(new Signature(id));
+            output.add(createBase(id));
 
         return output;
     }
@@ -58,7 +78,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
 
         var output = new ArrayList<Signature>();
         for (int i = ids.length - 1; i >= 0; i--)
-            output.add(new Signature(ids[i]));
+            output.add(createBase(ids[i]));
 
         return output;
     }
@@ -72,7 +92,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
             return Signature.createEmpty();
 
         var newIds = Arrays.copyOfRange(ids, 1, ids.length);
-        return new Signature(newIds, false);
+        return createComposite(newIds);
     }
 
     public Signature getLast() {
@@ -82,7 +102,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         if (ids.length == 0)
             return Signature.createEmpty();
 
-        return new Signature(this.ids[0]);
+        return createBase(this.ids[0]);
     }
 
     public Signature cutFirst() {
@@ -93,7 +113,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
             return Signature.createEmpty();
 
         var newIds = Arrays.copyOfRange(ids, 0, ids.length - 1);
-        return new Signature(newIds, false);
+        return createComposite(newIds);
     }
 
     public Signature getFirst() {
@@ -103,11 +123,11 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         if (ids.length == 0)
             return Signature.createEmpty();
 
-        return new Signature(this.ids[this.ids.length - 1]);
+        return createBase(this.ids[this.ids.length - 1]);
     }
 
     public Signature concatenate(Signature other) {
-        return new Signature(ArrayUtils.concatenate(other.ids, ids), false);
+        return createComposite(ArrayUtils.concatenate(other.ids, ids));
     }
 
     public static Signature concatenate(Signature... signatures) {
@@ -117,16 +137,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
     public static Signature concatenate(Collection<Signature> signatures) {
         var signaturesIds = new ArrayList<>(signatures.stream().map(signature -> signature.ids).toList());
         Collections.reverse(signaturesIds);
-        return new Signature(ArrayUtils.concatenate(signaturesIds), false);
-    }
-
-    // TODO flyweight
-    public static Signature createEmpty() {
-        return new Signature(new int[] {}, false);
-    }
-    
-    public static Signature createNull() {
-        return new Signature(new int[] {}, true);
+        return createComposite(ArrayUtils.concatenate(signaturesIds));
     }
     
     public Signature dual() {
@@ -138,7 +149,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         for (int i = 0; i < n; i++)
             array[i] = - ids[n - i - 1];
         
-        return new Signature(array, false);
+        return createComposite(array);
     }
     
     public enum Type {
@@ -205,6 +216,9 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
     
     @Override
     public int compareTo(Signature signature) {
+        if (this == signature)
+            return 0;
+
         final int lengthDifference = ids.length - signature.ids.length;
         
         return lengthDifference != 0 ? lengthDifference : compareIdsWithSameLength(signature.ids);
@@ -241,7 +255,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
             return null;
         
         int length = ids.length - signature.ids.length;
-        return length == 0 ? Signature.createEmpty() : new Signature(Arrays.copyOfRange(ids, 0, length), false);
+        return createComposite(Arrays.copyOfRange(ids, 0, length));
     }
 
     public Signature traverseAlong(Signature path) {
@@ -260,7 +274,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
                 output.addLast(-pathId);
         }
 
-        return new Signature(output.stream().mapToInt(Integer::intValue).toArray(), false);
+        return createComposite(output.stream().mapToInt(Integer::intValue).toArray());
     }
 
     @Override
@@ -294,7 +308,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
             
             var isNull = jsonObject.getBoolean("isNull");
 
-            return new Signature(ids, isNull);
+            return isNull ? Signature.createNull() : Signature.createComposite(ids);
         }
     
     }

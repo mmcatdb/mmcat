@@ -31,10 +31,10 @@ public class TestData {
     public final Key orderKey = new Key(103);
     public final Key o_idKey = new Key(104);
     
-    public final Signature userToU_id = new Signature(1);
-    public final Signature userToName = new Signature(2);
-    public final Signature userToOrder = new Signature(3);
-    public final Signature orderToO_id = new Signature(4);
+    public final Signature userToU_id = Signature.createBase(1);
+    public final Signature userToName = Signature.createBase(2);
+    public final Signature userToOrder = Signature.createBase(3);
+    public final Signature orderToO_id = Signature.createBase(4);
     
     public final Signature orderToU_id = userToOrder.dual().concatenate(userToU_id);
 

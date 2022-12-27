@@ -31,17 +31,17 @@ public class TestData {
 
     public final Key fullAddressKey = new Key(131);
     
-    public final Signature userToId_user = new Signature(1);
-    public final Signature userToAddress = new Signature(2);
-    public final Signature addressToStreet = new Signature(3);
-    public final Signature addressToCity = new Signature(4);
+    public final Signature userToId_user = Signature.createBase(1);
+    public final Signature userToAddress = Signature.createBase(2);
+    public final Signature addressToStreet = Signature.createBase(3);
+    public final Signature addressToCity = Signature.createBase(4);
     
-    public final Signature orderToId_order = new Signature(11);
+    public final Signature orderToId_order = Signature.createBase(11);
     
-    public final Signature userToOrder = new Signature(21);
+    public final Signature userToOrder = Signature.createBase(21);
 
-    public final Signature addressToFullAddress = new Signature(31);
-    public final Signature orderToFullAddress = new Signature(32);
+    public final Signature addressToFullAddress = Signature.createBase(31);
+    public final Signature orderToFullAddress = Signature.createBase(32);
 
     private SchemaCategory createInitialSchemaCategory() {
         var schema = new SchemaCategory();
