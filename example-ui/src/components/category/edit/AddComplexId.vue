@@ -1,16 +1,16 @@
 <script lang="ts">
 import type { Graph, PathSegment, Node } from '@/types/categoryGraph';
-import { SchemaIdFactory } from '@/types/identifiers';
+import { SignatureIdFactory } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
-import SchemaId from '../SchemaId.vue';
+import SignatureIdDisplay from '../SignatureIdDisplay.vue';
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 
 export default defineComponent({
     components: {
-        SchemaId,
+        SignatureIdDisplay,
         SignatureInput,
         IconPlusSquare
     },
@@ -27,7 +27,7 @@ export default defineComponent({
     emits: [ 'save', 'cancel' ],
     data() {
         return {
-            schemaIdFactory: new SchemaIdFactory(),
+            signatureIdFactory: new SignatureIdFactory(),
             addingSignature: false,
             signature: SequenceSignature.empty(this.node),
             idIsNotEmpty: false,
@@ -43,7 +43,7 @@ export default defineComponent({
     },
     methods: {
         save() {
-            this.node.addSchemaId(this.schemaIdFactory.schemaId);
+            this.node.addSignatureId(this.signatureIdFactory.signatureId);
 
             this.$emit('save');
         },
@@ -59,7 +59,7 @@ export default defineComponent({
             this.addingSignature = false;
         },
         addSignature() {
-            this.schemaIdFactory.addSignature(this.signature.toSignature());
+            this.signatureIdFactory.addSignature(this.signature.toSignature());
             this.addingSignature = false;
             this.idIsNotEmpty = true;
         }
@@ -75,11 +75,11 @@ export default defineComponent({
                 Id:
             </td>
             <td class="value fix-icon-height">
-                <SchemaId :schema-id="schemaIdFactory.schemaId" />
+                <SignatureIdDisplay :signature-id="signatureIdFactory.signatureId" />
                 <span
                     v-if="!addingSignature"
                     class="button-icon"
-                    :class="{ 'ml-2': !schemaIdFactory.isEmpty }"
+                    :class="{ 'ml-2': !signatureIdFactory.isEmpty }"
                     @click="startAddingSignature"
                 >
                     <IconPlusSquare />
@@ -121,7 +121,7 @@ export default defineComponent({
     </div>
     <div class="button-row">
         <button
-            :disabled="schemaIdFactory.length <= 1"
+            :disabled="signatureIdFactory.length <= 1"
             @click="save"
         >
             Confirm

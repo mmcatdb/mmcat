@@ -2,7 +2,7 @@ import { ComparableSet } from "@/utils/ComparableSet";
 import type { Iri } from "@/types/integration";
 import type { Position } from "cytoscape";
 import type { DatabaseWithConfiguration } from "../database";
-import { Key, SchemaId, type KeyJSON, type SchemaIdJSON } from "../identifiers";
+import { Key, ObjectIds, SignatureId, Type, type KeyJSON, type NonSignaturesType, type ObjectIdsJSON, type SignatureIdJSON } from "../identifiers";
 import { ComparablePosition, type PositionUpdate } from "./Position";
 import type { LogicalModel } from "../logicalModel";
 import type { Entity, Id } from "../id";
@@ -10,8 +10,8 @@ import type { Entity, Id } from "../id";
 export type SchemaObjectJSON = {
     label: string,
     key: KeyJSON,
-    ids: SchemaIdJSON[],
-    superId: SchemaIdJSON,
+    ids?: ObjectIdsJSON,
+    superId: SignatureIdJSON,
     databases?: string[],
     iri?: Iri
 }
@@ -24,8 +24,8 @@ export class SchemaObject implements Entity {
     id!: Id;
     label!: string;
     key!: Key;
-    schemaIds!: SchemaId[];
-    superId!: SchemaId;
+    ids?: ObjectIds;
+    superId!: SignatureId;
     position!: ComparablePosition;
     _isNew!: boolean;
 
@@ -42,8 +42,8 @@ export class SchemaObject implements Entity {
         object.id = input.id;
         object.label = jsonObject.label;
         object.key = Key.fromServer(jsonObject.key);
-        object.schemaIds = jsonObject.ids.map(SchemaId.fromJSON);
-        object.superId = SchemaId.fromJSON(jsonObject.superId);
+        object.ids = jsonObject.ids ? ObjectIds.fromJSON(jsonObject.ids) : undefined;
+        object.superId = SignatureId.fromJSON(jsonObject.superId);
         object._isNew = false;
         object.position = new ComparablePosition(input.position);
         object._originalPosition = new ComparablePosition(input.position);
@@ -52,14 +52,14 @@ export class SchemaObject implements Entity {
         return object;
     }
 
-    static createNew(id: Id, label: string, key: Key, schemaIds: SchemaId[], iri?: Iri): SchemaObject {
+    static createNew(id: Id, label: string, key: Key, ids?: ObjectIds, iri?: Iri): SchemaObject {
         const object = new SchemaObject();
 
         object.id = id;
         object.label = label;
         object.key = key;
-        object.schemaIds = schemaIds;
-        object.superId = SchemaId.union(schemaIds);
+        object.ids = ids;
+        object._updateDefaultSuperId(); // TODO maybe a computed variable?
 
         object.position = new ComparablePosition({ x: 0, y: 0});
         object._isNew = true;
@@ -68,16 +68,46 @@ export class SchemaObject implements Entity {
         return object;
     }
 
-    addSchemaId(id: SchemaId): void {
-        this.schemaIds.push(id);
-        this.superId = SchemaId.union([ this.superId, id ]);
+    _updateDefaultSuperId() {
+        this.superId = this.ids?.generateDefaultSuperId() || SignatureId.union([]);
+    }
+
+    addSignatureId(signatureId: SignatureId): void {
+        if (this.ids && this.ids.type !== Type.Signatures)
+            return;
+
+        const currentIds = this.ids ? this.ids.signatureIds : [];
+        this.ids = ObjectIds.createSignatures([ ...currentIds, signatureId ]);
+        this._updateDefaultSuperId();
+    }
+
+    addNonSignatureId(type: NonSignaturesType) {
+        this.ids = ObjectIds.createNonSignatures(type);
+        this._updateDefaultSuperId();
+    }
+
+    deleteSignatureId(index: number): void {
+        if (!this.ids || this.ids.type !== Type.Signatures)
+            return;
+
+        const newIds = this.ids.signatureIds.filter((_, i) => i !== index);
+        this.ids = newIds.length > 0 ? ObjectIds.createSignatures(newIds) : undefined;
+        this._updateDefaultSuperId();
+    }
+
+    deleteNonSignatureId() {
+        this.ids = undefined;
+        this._updateDefaultSuperId();
     }
 
     get canBeSimpleProperty(): boolean {
-        if (this.schemaIds.length < 1)
-            return true; // This shouldn't happen since all properties should have at least one identifier
+        if (!this.ids) // This should not happen (i.e., ids should have a value when this property is relevant)
+            return false;
 
-        for (const id of this.schemaIds) {
+        if (this.ids.type !== Type.Signatures)
+            return true;
+
+        for (const id of this.ids.signatureIds) {
             if (id.signatures.length < 2)
                 return true;
         }
@@ -109,7 +139,7 @@ export class SchemaObject implements Entity {
         return {
             label: this.label,
             key: this.key.toJSON(),
-            ids: this.schemaIds.map(id => id.toJSON()),
+            ids: this.ids?.toJSON(),
             superId: this.superId.toJSON(),
             iri: this.iri
         };

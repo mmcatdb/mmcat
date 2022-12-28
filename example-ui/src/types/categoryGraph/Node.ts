@@ -1,6 +1,6 @@
 import { ComparableMap } from "@/utils/ComparableMap";
 import type { NodeSingular } from "cytoscape";
-import type { SchemaId, Signature } from "../identifiers";
+import type { SignatureId, Signature, NonSignaturesType } from "../identifiers";
 import type { SchemaObject } from "../schema";
 import type { Edge } from "./Edge";
 import { PathMarker, type FilterFunction, type MorphismData } from "./PathMarker";
@@ -75,7 +75,7 @@ export class Node {
 
     setCytoscapeNode(node: NodeSingular) {
         this.node = node;
-        node.toggleClass('no-ids', this.schemaObject.schemaIds.length === 0);
+        this._updateNoIdsClass();
     }
 
     addNeighbour(edge: Edge): void {
@@ -178,9 +178,28 @@ export class Node {
         pathMarker.markPathsFromRootNode();
     }
 
-    addSchemaId(schemaId: SchemaId): void {
-        this.schemaObject.addSchemaId(schemaId);
-        this.node.removeClass('no-ids');
+    _updateNoIdsClass(): void {
+        this.node.toggleClass('no-ids', !this.schemaObject.ids);
+    }
+
+    addSignatureId(signatureId: SignatureId): void {
+        this.schemaObject.addSignatureId(signatureId);
+        this._updateNoIdsClass();
+    }
+
+    addNonSignatureId(type: NonSignaturesType): void {
+        this.schemaObject.addNonSignatureId(type);
+        this._updateNoIdsClass();
+    }
+
+    deleteSignatureId(index: number): void {
+        this.schemaObject.deleteSignatureId(index);
+        this._updateNoIdsClass();
+    }
+
+    deleteNonSignatureId() {
+        this.schemaObject.deleteNonSignatureId();
+        this._updateNoIdsClass();
     }
 }
 

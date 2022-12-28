@@ -93,6 +93,10 @@ button.warning:hover, button.warning.selected {
     color: var(--color-primary);
 }
 
+.button-icon-error:hover {
+    color: var(--color-error);
+}
+
 .button-icon {
     cursor: pointer;
     width: fit-content;

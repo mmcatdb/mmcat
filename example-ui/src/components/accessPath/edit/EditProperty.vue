@@ -9,7 +9,7 @@ import type { SchemaObject } from '@/types/schema';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
-import SchemaIds from '@/components/category/SchemaIds.vue';
+import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
 
 enum State {
     SelectSignature,
@@ -22,7 +22,7 @@ export default defineComponent({
         SignatureInput,
         TypeInput,
         NameInput,
-        SchemaIds
+        ObjectIdsDisplay
     },
     props: {
         graph: {
@@ -151,7 +151,7 @@ export default defineComponent({
                     Ids:
                 </td>
                 <td class="value">
-                    <SchemaIds :schema-object="schemaObject" />
+                    <ObjectIdsDisplay :schema-object="schemaObject" />
                 </td>
             </tr>
             <tr v-if="state >= State.SelectSignature">

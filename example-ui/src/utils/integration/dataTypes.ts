@@ -1,6 +1,6 @@
 import { type Attribute, type DataTypeDefinition, type ImportedDataspecer, type Iri, ImportedObject, DataType, ImportedMorphism } from '@/types/integration';
 import { Cardinality } from '@/types/schema';
-import { createEmptyId, createMorphismId, createTechnicalId } from './common';
+import { createValueId, createMorphismId, createGeneratedId } from './common';
 
 const OFN_TYPE_PREFIX = "https://ofn.gov.cz/zdroj/základní-datové-typy/2020-07-01/";
 
@@ -42,14 +42,14 @@ const dataTypeDefinitions: DataTypeDefinition[] = [
 ];
 
 function createAttributeForString(attribute: Attribute, output: ImportedDataspecer): ImportedObject {
-    const newObject = new ImportedObject(attribute.iri, attribute.label, createEmptyId());
+    const newObject = new ImportedObject(attribute.iri, attribute.label, createValueId());
     output.objects.push(newObject);
 
     return newObject;
 }
 
 function createAttributeForText(attribute: Attribute, output: ImportedDataspecer): ImportedObject {
-    const attributeObject = new ImportedObject(attribute.iri, attribute.label, createTechnicalId());
+    const attributeObject = new ImportedObject(attribute.iri, attribute.label, createGeneratedId());
     output.objects.push(attributeObject);
 
     // TODO function createMap
@@ -64,7 +64,7 @@ function createAttributeForText(attribute: Attribute, output: ImportedDataspecer
     });
     output.morphisms.push(elementToAttribute);
 
-    const language = new ImportedObject(attribute.iri + '/_language', '_language', createEmptyId());
+    const language = new ImportedObject(attribute.iri + '/_language', '_language', createValueId());
     output.objects.push(language);
     const elementToLanguage = new ImportedMorphism(attribute.iri + '/_element-to-language', '', element, language, {
         domCodMin: Cardinality.One,
@@ -74,7 +74,7 @@ function createAttributeForText(attribute: Attribute, output: ImportedDataspecer
     });
     output.morphisms.push(elementToLanguage);
 
-    const value = new ImportedObject(attribute.iri + '/_value', '_value', createEmptyId());
+    const value = new ImportedObject(attribute.iri + '/_value', '_value', createValueId());
     output.objects.push(value);
     const elementToValue = new ImportedMorphism(attribute.iri + '/_element-to-value', '', element, value, {
         domCodMin: Cardinality.One,

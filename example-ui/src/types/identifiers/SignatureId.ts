@@ -1,10 +1,10 @@
 import { Signature, type SignatureJSON } from "./Signature";
 
-export type SchemaIdJSON = {
+export type SignatureIdJSON = {
     signatures: SignatureJSON[]
 }
 
-export class SchemaId {
+export class SignatureId {
     _signatures: Signature[];
 
     constructor(signatures: Signature[]) {
@@ -15,12 +15,12 @@ export class SchemaId {
         return this._signatures;
     }
 
-    static fromJSON(jsonObject: SchemaIdJSON): SchemaId {
+    static fromJSON(jsonObject: SignatureIdJSON): SignatureId {
         const signatures = jsonObject.signatures.map(signature => Signature.fromJSON(signature));
-        return new SchemaId(signatures);
+        return new SignatureId(signatures);
     }
 
-    static union(ids: SchemaId[]): SchemaId {
+    static union(ids: SignatureId[]): SignatureId {
         const union = [] as Signature[];
         ids.forEach(id => {
             id.signatures.forEach(signature => {
@@ -33,29 +33,29 @@ export class SchemaId {
             });
         });
 
-        return new SchemaId(union);
+        return new SignatureId(union);
     }
 
-    toJSON(): SchemaIdJSON {
+    toJSON(): SignatureIdJSON {
         return {
             signatures: this._signatures.map(signature => signature.toJSON())
         };
     }
 }
 
-export class SchemaIdFactory {
+export class SignatureIdFactory {
     _signatures = [] as Signature[];
-    _schemaId: SchemaId;
+    _signatureId: SignatureId;
 
     constructor(signatures?: Signature[]) {
         if (signatures)
             this._signatures = signatures;
 
-        this._schemaId = new SchemaId(this._signatures);
+        this._signatureId = new SignatureId(this._signatures);
     }
 
-    get schemaId(): SchemaId {
-        return this._schemaId;
+    get signatureId(): SignatureId {
+        return this._signatureId;
     }
 
     get isEmpty(): boolean {
@@ -68,15 +68,10 @@ export class SchemaIdFactory {
 
     addSignature(signature: Signature): void {
         this._signatures.push(signature);
-        this._schemaId = new SchemaId(this._signatures);
+        this._signatureId = new SignatureId(this._signatures);
     }
 
-    static createEmpty(): SchemaId {
-        return new SchemaId([ Signature.empty ]);
-    }
-
-    static createTechnical(): SchemaId {
-        // TODO this needs to change
-        return new SchemaId([ Signature.empty ]);
+    static createEmpty(): SignatureId {
+        return new SignatureId([ Signature.empty ]);
     }
 }

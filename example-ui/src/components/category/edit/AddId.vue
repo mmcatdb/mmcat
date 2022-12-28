@@ -1,14 +1,14 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Graph, Node } from '@/types/categoryGraph';
-import { SchemaIdFactory } from '@/types/identifiers';
-import { defineComponent } from 'vue';
+import { SignatureIdFactory, Type } from '@/types/identifiers';
+import { defineComponent, ref } from 'vue';
 import AddSimpleId from './AddSimpleId.vue';
 import AddComplexId from './AddComplexId.vue';
 
 /*
  * When the id is simple (it has exactly one signature) the corresponding morphism must have cardinality 1:1.
- * Wheren the id is complex, all its morphisms have to have cardinality n:1 (because otherwise they would be simple identifiers so the complex one wouldn't be needed).
- * The last option is a simple empty identifier.
+ * When the id is complex, all its morphisms have to have cardinality n:1 (because otherwise they would be simple identifiers so the complex one wouldn't be needed).
+ * The last option is a either a Value or a Generated one.
  */
 
 enum State {
@@ -17,53 +17,47 @@ enum State {
     Complex
 }
 
-export default defineComponent({
-    components: {
-        AddSimpleId,
-        AddComplexId
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        },
-        node: {
-            type: Object as () => Node,
-            required: true
-        }
-    },
-    emits: [ 'save', 'cancel' ],
-    data() {
-        return {
-            state: State.SelectType,
-            State
-        };
-    },
-    methods: {
-        save() {
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        },
-        selectSimple() {
-            this.state = State.Simple;
-        },
-        selectComplex() {
-            this.state = State.Complex;
-        },
-        selectEmpty() {
-            this.node.addSchemaId(SchemaIdFactory.createEmpty());
+interface AddIdProps {
+    graph: Graph;
+    node: Node;
+}
 
-            this.$emit('save');
-        }
-    }
-});
+const props = defineProps<AddIdProps>();
+
+const state = ref(State.SelectType);
+
+const emit = defineEmits([ 'save', 'cancel' ]);
+
+function save() {
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
+
+function selectSimple() {
+    state.value = State.Simple;
+}
+
+function selectComplex() {
+    state.value = State.Complex;
+}
+
+function selectValue() {
+    props.node.addNonSignatureId(Type.Value);
+    emit('save');
+}
+
+function selectGenerated() {
+    props.node.addNonSignatureId(Type.Generated);
+    emit('save');
+}
 </script>
 
 <template>
     <template v-if="state === State.SelectType">
-        <h2>Add Id</h2>
+        <h2>{{ node.schemaObject.ids ? 'Add Id' : 'Create Id' }}</h2>
         <div class="button-row">
             <button @click="selectSimple">
                 Simple
@@ -71,9 +65,14 @@ export default defineComponent({
             <button @click="selectComplex">
                 Complex
             </button>
-            <button @click="selectEmpty">
-                Empty
-            </button>
+            <template v-if="!node.schemaObject.ids">
+                <button @click="selectValue">
+                    Value
+                </button>
+                <button @click="selectGenerated">
+                    Generated
+                </button>
+            </template>
             <button @click="cancel">
                 Cancel
             </button>
@@ -96,7 +95,3 @@ export default defineComponent({
         />
     </template>
 </template>
-
-<style scoped>
-
-</style>

@@ -2,7 +2,7 @@ import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id } from "../id";
-import { DynamicName, Key, SchemaId, Signature } from "../identifiers";
+import { DynamicName, Key, SignatureId, Signature, ObjectIds } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, Tag, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
@@ -73,7 +73,7 @@ export class SchemaCategory implements Entity {
         );
     }
 
-    _createObjectWithoutCheck(label: string, ids: SchemaId[], iri?: Iri): SchemaObject {
+    _createObjectWithoutCheck(label: string, ids?: ObjectIds, iri?: Iri): SchemaObject {
         const key = this._keysProvider.createAndAdd();
         const id = this._objectIdProvider.createAndAdd();
         const object = SchemaObject.createNew(id, label, key, ids, iri);
@@ -83,11 +83,11 @@ export class SchemaCategory implements Entity {
         return object;
     }
 
-    createObject(label: string, ids: SchemaId[]): SchemaObject {
+    createObject(label: string, ids?: ObjectIds): SchemaObject {
         return this._createObjectWithoutCheck(label, ids);
     }
 
-    createObjectWithIri(label: string, ids: SchemaId[], iri: Iri): SchemaObject | null {
+    createObjectWithIri(label: string, ids: ObjectIds | undefined, iri: Iri): SchemaObject | null {
         if (this.objects.find(object => object.iri === iri)) {
             console.log('Object with iri ' + iri + " already exists.");
             return null;

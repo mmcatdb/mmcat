@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Graph, PathSegment, Node } from '@/types/categoryGraph';
-import { SchemaIdFactory } from '@/types/identifiers';
+import { SignatureIdFactory } from '@/types/identifiers';
 import { defineComponent } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
@@ -34,8 +34,8 @@ export default defineComponent({
     },
     methods: {
         save() {
-            const factory = new SchemaIdFactory([ this.signature.toSignature() ]);
-            this.node.addSchemaId(factory.schemaId);
+            const factory = new SignatureIdFactory([ this.signature.toSignature() ]);
+            this.node.addSignatureId(factory.signatureId);
 
             this.$emit('save');
         },

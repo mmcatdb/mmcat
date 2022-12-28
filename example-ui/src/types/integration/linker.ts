@@ -1,20 +1,15 @@
 import type { CardinalitySettings, Tag } from "@/types/schema";
+import type { Type } from "../identifiers";
 import type { Iri } from "./parser";
 
 export type MorphismSequence = ImportedMorphism[];
 
-export enum IdType {
-    Empty,
-    Technical,
-    Morphism
-}
-
 export type ImportedId = {
-    type: IdType.Empty;
+    type: Type.Value;
 } | {
-    type: IdType.Technical;
+    type: Type.Generated;
 } | {
-    type: IdType.Morphism;
+    type: Type.Signatures;
     keys: MorphismSequence[];
 }
 

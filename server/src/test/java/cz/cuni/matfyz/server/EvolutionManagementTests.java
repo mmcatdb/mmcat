@@ -4,19 +4,19 @@ import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.instance.DomainRow;
-import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.MappingRow;
+import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.schema.SignatureId;
+import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.WrapperService;
@@ -67,7 +67,7 @@ public class EvolutionManagementTests {
         //final int[] batches = new int[] { 1, 2, 4, 8, 16, 32, 64 };
         //final int[] batches = new int[] { 48, 80, 96 };
         //final int[] batches = new int[] { 128 };
-        final int mongodbDatabaseId = 4;
+        final Id mongodbDatabaseId = new Id("4");
 
         Database database = databaseService.find(mongodbDatabaseId);
         AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
@@ -130,7 +130,7 @@ public class EvolutionManagementTests {
     }
 
     private void join(SchemaCategory schema, InstanceCategory category) {
-        var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", SignatureId.createEmpty());
+        var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", ObjectIds.createValue());
         var address = schema.getObject(data.addressKey);
         var addressToFullAddressMorphism = TestData.addMorphismWithDual(schema, data.addressToFullAddress, address, fullAddress, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
         

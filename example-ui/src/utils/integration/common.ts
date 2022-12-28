@@ -1,16 +1,17 @@
-import { type ImportedMorphism, type ImportedId, IdType } from "@/types/integration";
+import { Type } from "@/types/identifiers";
+import type { ImportedMorphism, ImportedId } from "@/types/integration";
 
-export function createEmptyId(): ImportedId {
-    return { type: IdType.Empty };
+export function createValueId(): ImportedId {
+    return { type: Type.Value };
 }
 
-export function createTechnicalId(): ImportedId {
-    return { type: IdType.Technical };
+export function createGeneratedId(): ImportedId {
+    return { type: Type.Generated };
 }
 
 export function createMorphismId(morphisms: ImportedMorphism | ImportedMorphism[][]): ImportedId {
     return {
-        type: IdType.Morphism,
+        type: Type.Signatures,
         keys: Array.isArray(morphisms) ? morphisms : [ [ morphisms ] ]
     };
 }

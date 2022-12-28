@@ -2,7 +2,7 @@ import { ImportedMorphism, ImportedObject, type ImportedDataspecer } from "@/typ
 import type { ParsedDataspecer } from "@/types/integration";
 import { Cardinality, Tag, type CardinalitySettings } from "@/types/schema";
 import { createAttribute } from "./dataTypes";
-import { createEmptyId, createMorphismId, createTechnicalId } from "./common";
+import { createValueId, createMorphismId, createGeneratedId } from "./common";
 
 const CARDINALITY_ONE_TO_ONE: CardinalitySettings = {
     domCodMin: Cardinality.One,
@@ -33,10 +33,10 @@ function addMorphism(iri: string, label: string, dom: ImportedObject, cod: Impor
     }
     // Nope, array is required.
     else {
-        const element = new ImportedObject(iri + '/_array-element', '_array-element', createTechnicalId());
+        const element = new ImportedObject(iri + '/_array-element', '_array-element', createGeneratedId());
         output.objects.push(element);
 
-        const index = new ImportedObject(iri + '/_index', '_index', createEmptyId());
+        const index = new ImportedObject(iri + '/_index', '_index', createValueId());
         output.objects.push(index);
 
         const elementToIndex = new ImportedMorphism(iri + '/_element-to-index', '', element, index, CARDINALITY_ONE_TO_ONE);
@@ -77,7 +77,7 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
     };
 
     classes.forEach(myClass => {
-        const iri = new ImportedObject(myClass.iri + '/_iri', 'Iri', createEmptyId());
+        const iri = new ImportedObject(myClass.iri + '/_iri', 'Iri', createValueId());
         output.objects.push(iri);
 
         const object = new ImportedObject(myClass.iri, myClass.label);

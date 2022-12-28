@@ -21,7 +21,7 @@ export default defineComponent({
     },
     methods: {
         save() {
-            const object = this.graph.schemaCategory.createObject(this.label, []);
+            const object = this.graph.schemaCategory.createObject(this.label);
             this.graph.createNode(object, 'new');
             this.graph.layout();
 

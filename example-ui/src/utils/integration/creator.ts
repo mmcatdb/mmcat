@@ -1,7 +1,7 @@
 import { NodeSequence, type Edge, type Graph, type Node } from "@/types/categoryGraph";
 import type { SchemaObject } from "@/types/schema";
-import { IdType, ImportedMorphism, type ImportedDataspecer, type ImportedId, type ImportedObject, type MorphismSequence } from "@/types/integration";
-import { SchemaIdFactory, Signature } from "@/types/identifiers";
+import type { ImportedMorphism, ImportedDataspecer, ImportedId, ImportedObject, MorphismSequence } from "@/types/integration";
+import { SignatureIdFactory, Signature, Type } from "@/types/identifiers";
 
 function sequenceToSignature(morphismSequence: MorphismSequence, node: Node, createdMorphisms: Map<ImportedMorphism, Edge>): Signature | null {
     const nodeSequence = NodeSequence.fromRootNode(node, { selectNodes: false });
@@ -24,17 +24,12 @@ function sequenceToSignature(morphismSequence: MorphismSequence, node: Node, cre
 }
 
 function addId(id: ImportedId, node: Node, createdMorphisms: Map<ImportedMorphism, Edge>) {
-    if (id.type === IdType.Empty) {
-        node.addSchemaId(SchemaIdFactory.createEmpty());
+    if (id.type !== Type.Signatures) {
+        node.addNonSignatureId(id.type);
         return;
     }
 
-    if (id.type === IdType.Technical) {
-        node.addSchemaId(SchemaIdFactory.createTechnical());
-        return;
-    }
-
-    const factory = new SchemaIdFactory();
+    const factory = new SignatureIdFactory();
     for (const morphismSequence of id.keys) {
         const signature = sequenceToSignature(morphismSequence, node, createdMorphisms);
         if (signature === null) {
@@ -44,7 +39,7 @@ function addId(id: ImportedId, node: Node, createdMorphisms: Map<ImportedMorphis
         factory.addSignature(signature);
     }
 
-    node.addSchemaId(factory.schemaId);
+    node.addSignatureId(factory.signatureId);
 }
 
 export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
@@ -53,7 +48,7 @@ export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
     const createdMorphisms = new Map() as Map<ImportedMorphism, Edge>;
 
     imported.objects.forEach(object => {
-        const schemaObject = graph.schemaCategory.createObjectWithIri(object.label, [], object.iri);
+        const schemaObject = graph.schemaCategory.createObjectWithIri(object.label, undefined, object.iri);
         if (!schemaObject)
             return;
 

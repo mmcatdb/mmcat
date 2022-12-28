@@ -100,7 +100,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId>, JSONC
         protected JSONObject innerToJSON(SignatureId object) throws JSONException {
             var output = new JSONObject();
     
-            var signatures = new JSONArray(object.signatures.stream().map(signature -> signature.toJSON()).toList());
+            var signatures = new JSONArray(object.signatures.stream().map(Signature::toJSON).toList());
             output.put("signatures", signatures);
             
             return output;

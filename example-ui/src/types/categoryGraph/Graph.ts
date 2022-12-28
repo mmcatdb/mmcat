@@ -203,6 +203,7 @@ export class Graph {
     }
 
     layout() {
+        // TODO fix adding objects
         this._getCytoscape().layout({
             //name: 'dagre',
             //name: 'cola',

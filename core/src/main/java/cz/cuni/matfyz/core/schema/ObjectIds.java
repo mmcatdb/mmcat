@@ -28,8 +28,8 @@ public class ObjectIds implements Serializable, JSONConvertible {
         Generated // Its a simple string value that has to be automatically generated.
     }
     
-    private final SortedSet<SignatureId> signatureIds;
     private final Type type;
+    private final SortedSet<SignatureId> signatureIds;
     
     // TODO disable this method eventually and fix all other methods that rely on it.
     // The reason is that this whole object was introduced because we want to behave differently to the different types of ids - so there ain't be no function that unifies them back together.
@@ -125,9 +125,10 @@ public class ObjectIds implements Serializable, JSONConvertible {
         @Override
         protected JSONObject innerToJSON(ObjectIds object) throws JSONException {
             var output = new JSONObject();
-    
-            var signatures = new JSONArray(object.signatureIds.stream().map(signature -> signature.toJSON()).toList());
-            output.put("signatures", signatures);
+
+            output.put("type", object.type);
+            var signatureIds = new JSONArray(object.signatureIds.stream().map(SignatureId::toJSON).toList());
+            output.put("signatureIds", signatureIds);
             
             return output;
         }

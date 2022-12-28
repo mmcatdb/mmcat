@@ -1,15 +1,16 @@
 <script lang="ts">
 import type { Graph, Node } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
-import SchemaIds from '@/components/category/SchemaIds.vue';
+import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import AddId from './AddId.vue';
+import { Type } from '@/types/identifiers';
 
 export default defineComponent({
     expose: [ 'changed' ],
     components: {
-        SchemaIds,
+        ObjectIdsDisplay,
         AddId,
         ButtonIcon,
         IconPlusSquare
@@ -29,7 +30,7 @@ export default defineComponent({
         return {
             label: this.node.schemaObject.label,
             addingId: false,
-            addedId: false
+            Type
         };
     },
     computed: {
@@ -66,7 +67,6 @@ export default defineComponent({
         },
         finishAddingId() {
             this.addingId = false;
-            this.addedId = true;
         },
         cancelAddingId() {
             this.addingId = false;
@@ -103,9 +103,15 @@ export default defineComponent({
                     Ids:
                 </td>
                 <td class="value">
-                    <SchemaIds :schema-object="node.schemaObject" />
+                    <ObjectIdsDisplay
+                        v-if="node.schemaObject.ids"
+                        :ids="node.schemaObject.ids"
+                        :disabled="!isNew"
+                        @delete-signature="(index) => node.deleteSignatureId(index)"
+                        @delete-non-signature="() => node.deleteNonSignatureId()"
+                    />
                     <ButtonIcon
-                        v-if="!addingId && isNew"
+                        v-if="!addingId && isNew && (!node.schemaObject.ids || node.schemaObject.ids.type === Type.Signatures)"
                         @click="startAddingId"
                     >
                         <IconPlusSquare />

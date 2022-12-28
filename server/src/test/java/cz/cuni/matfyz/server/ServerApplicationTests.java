@@ -9,6 +9,7 @@ import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
 import cz.cuni.matfyz.server.builder.SchemaBuilder;
+import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.service.DatabaseService;
@@ -19,6 +20,9 @@ import cz.cuni.matfyz.server.service.WrapperService;
 import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -65,8 +69,8 @@ class ServerApplicationTests {
         //final int[] batches = new int[] { 128 };
         //final int[] batches = new int[] { 256 };
         //final int[] batches = new int[] { 48, 80, 96 };
-        final int postgresqlDatabaseId = 5;
-        final int[] postgresqlMappingIds = new int[] { 3, 4, 5, 6, 7, 8 };
+        final Id postgresqlDatabaseId = new Id("5");
+        final List<Id> postgresqlMappingIds = List.of(3, 4, 5, 6, 7, 8).stream().map(number -> new Id("" + number)).toList();
         /*
             app_customer
             app_contact
@@ -77,8 +81,8 @@ class ServerApplicationTests {
             order
          */
 
-        final int mongodbDatabaseId = 4;
-        final int mongodbMappingId = 9;
+        final Id mongodbDatabaseId = new Id("4");
+        final Id mongodbMappingId = new Id("9");
 
         for (int i = 0; i < repetitions; i++) {
             LOGGER.info("Repetition: " + (i + 1));
@@ -102,7 +106,7 @@ class ServerApplicationTests {
         LOGGER.info("Finished");
     }
 
-    private InstanceCategory importMapping(InstanceCategory instance, int mappingId, int databaseId, int records) throws Exception {
+    private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id databaseId, int records) throws Exception {
         var mappingWrapper = mappingService.find(mappingId);
         var mapping = createMapping(mappingWrapper);
 
@@ -125,7 +129,7 @@ class ServerApplicationTests {
         return result.data;
     }
 
-    private void exportMapping(InstanceCategory instance, int mappingId, int databaseId) throws Exception {
+    private void exportMapping(InstanceCategory instance, Id mappingId, Id databaseId) throws Exception {
         var mappingWrapper = mappingService.find(mappingId);
         var mapping = createMapping(mappingWrapper);
 
