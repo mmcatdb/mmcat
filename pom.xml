@@ -12,6 +12,7 @@
         <module>wrappers</module>
         <module>server</module>
         <module>evolution</module>
+        <module>integration</module>
     </modules>
     
     <properties>
@@ -23,6 +24,7 @@
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <junit.platform.version>1.8.1</junit.platform.version>
         <jackson.version>2.13.2</jackson.version>
+        <jena.version>4.6.1</jena.version>
     </properties>
     
     <dependencies>
