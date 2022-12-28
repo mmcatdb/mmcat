@@ -180,10 +180,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.value {
-    font-weight: bold;
-}
-
 .iri-input {
     min-width: 560px;
     width: 560px;

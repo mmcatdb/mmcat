@@ -27,6 +27,7 @@ export class SchemaCategory implements Entity {
     jsonValue: string;
     objects: SchemaObject[];
     morphisms: SchemaMorphism[];
+    notAvailableIris = new Set as Set<Iri>;
 
     _createdObjects = [] as SchemaObject[];
     _createdMorphisms = [] as SchemaMorphism[];
@@ -47,12 +48,16 @@ export class SchemaCategory implements Entity {
         this.objects.forEach(object => {
             this._objectIdProvider.add(object.id);
             this._keysProvider.add(object.key);
+            if (object.iri)
+                this.notAvailableIris.add(object.iri);
         });
         this._maxExistingObjectId = this._objectIdProvider.maxIdentifier;
 
         this.morphisms.forEach(morphism => {
             this._morphismIdProvider.add(morphism.id);
             this._signatureProvider.add(morphism.signature);
+            if (morphism.iri)
+                this.notAvailableIris.add(morphism.iri);
         });
     }
 
@@ -88,10 +93,12 @@ export class SchemaCategory implements Entity {
     }
 
     createObjectWithIri(label: string, ids: ObjectIds | undefined, iri: Iri): SchemaObject | null {
-        if (this.objects.find(object => object.iri === iri)) {
+        if (!this.iriIsAvailable(iri)) {
             console.log('Object with iri ' + iri + " already exists.");
             return null;
         }
+
+        this.notAvailableIris.add(iri);
 
         return this._createObjectWithoutCheck(label, ids, iri);
     }
@@ -121,14 +128,20 @@ export class SchemaCategory implements Entity {
         return morphism;
     }
 
+    iriIsAvailable(iri: Iri): boolean {
+        return !this.notAvailableIris.has(iri);
+    }
+
     createMorphismWithDualWithIri(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, iri: Iri, label: string, tags: Tag[] = []): SchemaMorphism | null {
-        if (this.morphisms.find(morphism => morphism.iri === iri)) {
+        if (!this.iriIsAvailable(iri)) {
             console.log('Morphism with iri ' + iri + " already exists.");
             return null;
         }
 
+        this.notAvailableIris.add(iri);
         const newMorphism = this.createMorphismWithDual(dom, cod, cardinality, label, tags);
         newMorphism.iri = iri;
+
         return newMorphism;
     }
 

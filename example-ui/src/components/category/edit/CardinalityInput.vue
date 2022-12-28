@@ -172,6 +172,8 @@ export default defineComponent({
 </template>
 
 <style scoped>
-
+.value button:first-of-type {
+    margin-right: 4px;
+}
 </style>
 

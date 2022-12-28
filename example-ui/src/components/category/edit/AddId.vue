@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Graph, Node } from '@/types/categoryGraph';
-import { SignatureIdFactory, Type } from '@/types/identifiers';
-import { defineComponent, ref } from 'vue';
+import { Type } from '@/types/identifiers';
+import { ref } from 'vue';
 import AddSimpleId from './AddSimpleId.vue';
 import AddComplexId from './AddComplexId.vue';
 

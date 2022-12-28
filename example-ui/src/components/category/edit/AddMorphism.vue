@@ -25,6 +25,7 @@ export default defineComponent({
             node1: null as Node | null,
             node2: null as Node | null,
             label: '',
+            iri: '',
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
             cardinality: {
@@ -38,6 +39,9 @@ export default defineComponent({
     computed: {
         nodesSelected() {
             return !!this.node1 && !!this.node2;
+        },
+        iriIsAvailable() {
+            return this.graph.schemaCategory.iriIsAvailable(this.iri);
         }
     },
     mounted() {
@@ -52,9 +56,19 @@ export default defineComponent({
             if (!this.node1 || !this.node2)
                 return;
 
-            this.temporayEdge?.delete();
-            const morphism = this.graph.schemaCategory.createMorphismWithDual(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.label);
-            this.graph.createEdgeWithDual(morphism, 'new');
+            if (this.iri) {
+                const morphism = this.graph.schemaCategory.createMorphismWithDualWithIri(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.iri, this.label);
+                if (!morphism)
+                    return;
+
+                this.temporayEdge?.delete();
+                this.graph.createEdgeWithDual(morphism, 'new');
+            }
+            else {
+                const morphism = this.graph.schemaCategory.createMorphismWithDual(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.label);
+                this.temporayEdge?.delete();
+                this.graph.createEdgeWithDual(morphism, 'new');
+            }
 
             this.$emit('save');
         },
@@ -155,13 +169,23 @@ export default defineComponent({
                     />
                 </td>
             </tr>
+            <tr>
+                <td class="label">
+                    Iri?:
+                </td>
+                <td class="value">
+                    <input
+                        v-model="iri"
+                    />
+                </td>
+            </tr>
             <CardinalityInput
                 v-model="cardinality"
             />
         </table>
         <div class="button-row">
             <button
-                :disabled="!nodesSelected"
+                :disabled="!nodesSelected || !iriIsAvailable"
                 @click="save"
             >
                 Confirm

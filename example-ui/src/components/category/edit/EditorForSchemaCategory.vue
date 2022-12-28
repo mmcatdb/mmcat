@@ -148,6 +148,7 @@ export default defineComponent({
                 if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed)
                     return;
 
+                this.state.node.unselect();
                 this.state = { type: State.EditMorphism, edge };
                 return;
             }

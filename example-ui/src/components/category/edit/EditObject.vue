@@ -6,6 +6,7 @@ import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import AddId from './AddId.vue';
 import { Type } from '@/types/identifiers';
+import IriDisplay from '@/components/IriDisplay.vue';
 
 export default defineComponent({
     expose: [ 'changed' ],
@@ -13,7 +14,8 @@ export default defineComponent({
         ObjectIdsDisplay,
         AddId,
         ButtonIcon,
-        IconPlusSquare
+        IconPlusSquare,
+        IriDisplay
     },
     props: {
         graph: {
@@ -92,6 +94,17 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
+                    Iri:
+                </td>
+                <td class="value">
+                    <IriDisplay
+                        :iri="node.schemaObject.iri"
+                        :max-chars="36"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
                     Key:
                 </td>
                 <td class="value">
@@ -107,6 +120,7 @@ export default defineComponent({
                         v-if="node.schemaObject.ids"
                         :ids="node.schemaObject.ids"
                         :disabled="!isNew"
+                        class="object-ids-display"
                         @delete-signature="(index) => node.deleteSignatureId(index)"
                         @delete-non-signature="() => node.deleteNonSignatureId()"
                     />
@@ -154,7 +168,11 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.value {
+.object-ids-display {
+    margin-left: -6px;
+}
+
+.value::v-deep .iri-row {
     font-weight: bold;
 }
 </style>

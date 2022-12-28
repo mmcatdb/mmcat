@@ -63,10 +63,3 @@ export default defineComponent({
         Complex
     </label>
 </template>
-
-<style scoped>
-.value {
-    font-weight: bold;
-}
-</style>
-

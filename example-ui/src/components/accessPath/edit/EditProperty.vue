@@ -151,7 +151,12 @@ export default defineComponent({
                     Ids:
                 </td>
                 <td class="value">
-                    <ObjectIdsDisplay :schema-object="schemaObject" />
+                    <ObjectIdsDisplay
+                        v-if="schemaObject.ids"
+                        :ids="schemaObject.ids"
+                        disabled
+                        class="object-ids-display"
+                    />
                 </td>
             </tr>
             <tr v-if="state >= State.SelectSignature">
@@ -271,6 +276,10 @@ export default defineComponent({
 <style scoped>
 .selected {
     font-weight: bold;
+}
+
+.object-ids-display {
+    margin-left: -6px;
 }
 </style>
 

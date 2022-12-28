@@ -16,15 +16,30 @@ export default defineComponent({
     data() {
         return {
             label: '',
+            iri: '',
             keyIsValid: true
         };
     },
+    computed: {
+        iriIsAvailable() {
+            return this.graph.schemaCategory.iriIsAvailable(this.iri);
+        }
+    },
     methods: {
         save() {
-            const object = this.graph.schemaCategory.createObject(this.label);
-            this.graph.createNode(object, 'new');
-            this.graph.layout();
+            if (this.iri) {
+                const object = this.graph.schemaCategory.createObjectWithIri(this.label, undefined, this.iri);
+                if (!object)
+                    return;
 
+                this.graph.createNode(object, 'new');
+            }
+            else {
+                const object = this.graph.schemaCategory.createObject(this.label);
+                this.graph.createNode(object, 'new');
+            }
+
+            this.graph.layout();
             this.$emit('save');
         },
         cancel() {
@@ -48,10 +63,20 @@ export default defineComponent({
                     />
                 </td>
             </tr>
+            <tr>
+                <td class="label">
+                    Iri?:
+                </td>
+                <td class="value">
+                    <input
+                        v-model="iri"
+                    />
+                </td>
+            </tr>
         </table>
         <div class="button-row">
             <button
-                :disabled="!keyIsValid || !label"
+                :disabled="!keyIsValid || !label || !iriIsAvailable"
                 @click="save"
             >
                 Confirm
@@ -64,10 +89,3 @@ export default defineComponent({
         </div>
     </div>
 </template>
-
-<style scoped>
-.value {
-    font-weight: bold;
-}
-</style>
-

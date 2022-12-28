@@ -129,8 +129,4 @@ tr:nth-of-type(2n) td {
 .clickable {
     cursor: pointer;
 }
-
-.value {
-    font-weight: bold;
-}
 </style>

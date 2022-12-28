@@ -5,8 +5,8 @@ td.label {
 
 td.value {
     padding-left: 8px;
-    font-weight: bold;
     vertical-align: top;
+    font-weight: bold;
 }
 
 .editor {
@@ -46,5 +46,5 @@ span.disabled {
 .signature-span {
     background-color: var(--color-background-dark);
     border-radius: 4px;
-    padding: 0px 6px 0px 4px;
+    padding: 0px 6px 0px 6px;
 }

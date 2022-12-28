@@ -151,10 +151,3 @@ export default defineComponent({
         />
     </div>
 </template>
-
-<style scoped>
-.value {
-    font-weight: bold;
-}
-</style>
-
