@@ -28,7 +28,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
 
     private final SchemaObject schemaObject;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
-    private final Map<Integer, DomainRow> domainByTechnicalIds = new TreeMap<>();
+    private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
     public InstanceObject(SchemaObject schemaObject) {
         this.schemaObject = schemaObject;
@@ -59,7 +59,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
     }
 
-    public DomainRow getRowByTechnicalId(Integer technicalId) {
+    public DomainRow getRowByTechnicalId(String technicalId) {
         return domainByTechnicalIds.get(technicalId);
     }
 
@@ -88,7 +88,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     }
 
     DomainRow createRow(SuperIdWithValues superId) {
-        Set<Integer> technicalIds = superId.findFirstId(ids()) == null
+        Set<String> technicalIds = superId.findFirstId(ids()) == null
             ? Set.of(generateTechnicalId())
             : Set.of();
         var ids = superId.findAllIds(ids()).foundIds();
@@ -96,7 +96,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return createRow(superId, technicalIds, ids);
     }
 
-    DomainRow createRow(SuperIdWithValues superId, Set<Integer> technicalIds, Set<SuperIdWithValues> allIds) {
+    DomainRow createRow(SuperIdWithValues superId, Set<String> technicalIds, Set<SuperIdWithValues> allIds) {
         // TODO this can be optimized - we can discard the references that were referenced in all merged rows.
         // However, it might be quite rare, so the overhead caused by finding such ids would be greater than the savings.
         var row = new DomainRow(superId, technicalIds, referencesToRows.keySet());
@@ -119,7 +119,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     /**
      * Returns the most recent row for the superId or technicalIds.
      */
-    public DomainRow getActualRow(SuperIdWithValues superId, Set<Integer> technicalIds) {
+    public DomainRow getActualRow(SuperIdWithValues superId, Set<String> technicalIds) {
         // Simply find the first id of all possible ids (any of them should point to the same row).
         var foundId = superId.findFirstId(ids());
         if (foundId != null)
@@ -144,9 +144,9 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     // The point of a technical id is to differentiate two rows from each other, but only if they do not have any common id that could differentiate them (or unify them, if both of them have the same value of the id).
     private int lastTechnicalId = 0;
 
-    public int generateTechnicalId() {
+    public String generateTechnicalId() {
         lastTechnicalId++;
-        return lastTechnicalId;
+        return "#" + lastTechnicalId;
     }
     
     public Set<DomainRow> allRows() {
@@ -158,7 +158,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return output;
     }
 
-    public SuperIdWithValues findTechnicalSuperId(Set<Integer> technicalIds, Set<DomainRow> outOriginalRows) {
+    public SuperIdWithValues findTechnicalSuperId(Set<String> technicalIds, Set<DomainRow> outOriginalRows) {
         var builder = new SuperIdWithValues.Builder();
 
         for (var technicalId : technicalIds) {
@@ -214,8 +214,8 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return builder.build();
     }
 
-    public static Set<Integer> mergeTechnicalIds(Collection<DomainRow> rows) {
-        var output = new TreeSet<Integer>();
+    public static Set<String> mergeTechnicalIds(Collection<DomainRow> rows) {
+        var output = new TreeSet<String>();
         rows.forEach(row -> output.addAll(row.technicalIds));
         return output;
     }

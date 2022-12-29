@@ -30,11 +30,11 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
     // The tuples that holds the value of this row.
     public final SuperIdWithValues superId;
     // All technical ids under which is this row known.
-    public final Set<Integer> technicalIds;
+    public final Set<String> technicalIds;
     private final Set<Signature> pendingReferences;
     // Various ids that can be constructed from this row.
 
-    public DomainRow(SuperIdWithValues superId, Set<Integer> technicalIds, Set<Signature> pendingReferences) {
+    public DomainRow(SuperIdWithValues superId, Set<String> technicalIds, Set<Signature> pendingReferences) {
         this.superId = superId;
         this.technicalIds = technicalIds;
         this.pendingReferences = pendingReferences;

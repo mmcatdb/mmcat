@@ -129,7 +129,7 @@ public class Merger {
         return morphism.dom().getActualRow(domainRow);
     }
 
-    private void addMergeJob(SuperIdWithValues superId, Set<Integer> technicalId, InstanceObject instanceObject) {
+    private void addMergeJob(SuperIdWithValues superId, Set<String> technicalId, InstanceObject instanceObject) {
         jobs.add(new MergeRowsJob(this, superId, technicalId, instanceObject));
     }
 
@@ -137,7 +137,7 @@ public class Merger {
         jobs.add(new MergeRowsJob(this, InstanceObject.mergeSuperIds(rows), InstanceObject.mergeTechnicalIds(rows), instanceObject));
     }
 
-    private void addReferenceJob(SuperIdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
+    private void addReferenceJob(SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
         referenceJobs.add(new ReferenceJob(this, superId, technicalIds, instanceObject));
     }
 
@@ -146,10 +146,10 @@ public class Merger {
         private final Merger merger;
 
         SuperIdWithValues superId;
-        Set<Integer> technicalIds;
+        Set<String> technicalIds;
         InstanceObject instanceObject;
 
-        public MergeRowsJob(Merger merger, SuperIdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
+        public MergeRowsJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
             this.merger = merger;
             this.superId = superId;
             this.technicalIds = technicalIds;
@@ -242,10 +242,10 @@ public class Merger {
         private final Merger merger;
 
         SuperIdWithValues superId;
-        Set<Integer> technicalIds; // The rows have to have at least some values in superId but it does not have to be a valid id ...
+        Set<String> technicalIds; // The rows have to have at least some values in superId but it does not have to be a valid id ...
         InstanceObject instanceObject;
 
-        public ReferenceJob(Merger merger, SuperIdWithValues superId, Set<Integer> technicalIds, InstanceObject instanceObject) {
+        public ReferenceJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
             this.merger = merger;
             this.superId = superId;
             this.technicalIds = technicalIds;
