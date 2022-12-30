@@ -9,6 +9,8 @@ import cz.cuni.matfyz.server.service.SchemaCategoryService;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import org.apache.jena.query.Dataset;
+import org.apache.jena.rdf.model.Model;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,7 @@ public class IntegrationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);
     
     static final String JSON_LD_FILE_NAME = "test2.jsonld";
-    static final Id CATEGORY_ID = new Id("6");
+    static final Id CATEGORY_ID = new Id("7");
 
     @Autowired
     private SchemaCategoryService categoryService;
@@ -35,7 +37,8 @@ public class IntegrationTests {
         jsonToRDF.input(JSON_LD_FILE_NAME);
 
         assertDoesNotThrow(() -> {
-            jsonToRDF.algorithm();
+            final var dataset = jsonToRDF.algorithm();
+            printDataset(dataset);
         });
     }
 
@@ -60,4 +63,18 @@ public class IntegrationTests {
 
         System.out.println(instanceCategory);
     }
+
+    private void printDataset(Dataset dataset) {
+        final var builder = new StringBuilder();
+
+        addModel(builder, dataset.getDefaultModel());
+        dataset.listModelNames().forEachRemaining(resource -> addModel(builder, dataset.getNamedModel(resource.getURI())));
+
+        System.out.println(builder.toString());
+    }
+
+    private void addModel(StringBuilder builder, Model model) {
+        model.listStatements().forEach(statement -> builder.append(statement).append("\n"));
+    }
+
 }

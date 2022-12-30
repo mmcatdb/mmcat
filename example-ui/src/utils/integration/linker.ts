@@ -92,14 +92,8 @@ export function linkDataspecer(input: ParsedDataspecer): ImportedDataspecer {
     };
 
     classes.forEach(myClass => {
-        const iri = new ImportedObject(myClass.iri + '/_iri', IDENTIFIER_IRI, 'Iri', createValueId());
-        output.objects.push(iri);
-
         const object = new ImportedObject(myClass.iri, myClass.pimIri, myClass.label);
-        const objectToIri = new ImportedMorphism(myClass.iri + '/_class-to-iri', CLASS_TO_IDENTIFIER_IRI, '', object, iri, CARDINALITY_ONE_TO_ONE);
-        output.morphisms.push(objectToIri);
-
-        object.addId(createMorphismId(objectToIri));
+        object.addId(createValueId());
         output.objects.push(object);
     });
 

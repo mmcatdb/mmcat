@@ -41,6 +41,7 @@ public class RDFToInstance {
     public void input(Dataset dataset, InstanceCategory category) {
         this.dataset = dataset;
         this.category = category;
+        this.propertyProcessors = definePropertyProcessors(category);
     }
 
     public void algorithm() {
@@ -64,7 +65,7 @@ public class RDFToInstance {
 
         final String typeIri = getTypeIri(resource);
         final InstanceObject object = findObject(typeIri);
-        final DomainRow row = createInitialDomainRow(resource, object);
+        final DomainRow row = getOrCreateInitialDomainRow(resource, object);
 
         // TODO add relation from row to the id object?
         // Ne, spíš vytvořit testovací framework a pak postupně sledovat jak se to objevuje v IC
@@ -96,7 +97,7 @@ public class RDFToInstance {
         return output;
     }
 
-    private List<? extends PropertyProcessor> propertyProcessors = definePropertyProcessors(category);
+    private List<? extends PropertyProcessor> propertyProcessors;
 
 
     private void processProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
@@ -109,15 +110,6 @@ public class RDFToInstance {
         throw new UnsupportedOperationException("No processor found for statement: " + statement + ".");
     }
 
-    private static DomainRow modifyActiveDomain(InstanceObject instanceObject, SuperIdWithValues superId) {
-        var merger = new Merger();
-        return merger.merge(superId, instanceObject);
-    }
-
-    private InstanceMorphism findMorphismFromObject(String pimIri, InstanceObject object) {
-        return MorphismFinder.findFromObject(category, pimIri, object);
-    }
-
     private InstanceObject findObject(String pimIri) {
         final var objects = this.category.objects().values().stream().filter(object -> object.schemaObject.pimIri.equals(pimIri)).toList();
         if (objects.size() != 1)
@@ -126,40 +118,14 @@ public class RDFToInstance {
         return objects.get(0);
     }
 
-    private InstanceMorphism findClassToIdentifierMorphism(InstanceObject resourceObject) {
-        for (final var signature : resourceObject.superId().signatures()) {
-            final var morphism = category.getMorphism(signature);
-
-            if (morphism.schemaMorphism.pimIri.equals(CLASS_TO_IDENTIFIER_IRI))
-                return morphism;
-        }
-
-        throw new UnsupportedOperationException("No class-to-identifier morphism found for resource object: " + resourceObject.key() + ".");
-    }
-
-    private DomainRow createInitialDomainRow(Resource resource, InstanceObject resourceObject) {
-        final var morphism = findClassToIdentifierMorphism(resourceObject);
-
-        final var identifierValue = resource.getURI();
-        final var resourceSuperId = new SuperIdWithValues.Builder()
-            .add(morphism.signature(), identifierValue)
-            .build();
-
-        if (resourceSuperId.size() != 1)
-            throw new UnsupportedOperationException("Identifier not found for resource:" + resource.getURI() + ".");
-
-        final var resourceRow = modifyActiveDomain(resourceObject, resourceSuperId);
-
-        final var identifierObject = morphism.cod();
-        if (!identifierObject.schemaObject.ids().isValue())
+    private DomainRow getOrCreateInitialDomainRow(Resource resource, InstanceObject resourceObject) {
+        if (!resourceObject.schemaObject.ids().isValue())
             throw new UnsupportedOperationException("Identifier has wrong id for resource:" + resource.getURI() + ".");
 
-        final var identifierSuperId = new SuperIdWithValues.Builder()
-            .add(Signature.createEmpty(), identifierValue)
+        final var resourceSuperId = new SuperIdWithValues.Builder()
+            .add(Signature.createEmpty(), resource.getURI())
             .build();
-        final var identifierRow = modifyActiveDomain(identifierObject, identifierSuperId);
 
-        morphism.createMappingWithDual(resourceRow, identifierRow);
-        return resourceRow;
+        return resourceObject.getOrCreateRow(resourceSuperId);
     }
 }
