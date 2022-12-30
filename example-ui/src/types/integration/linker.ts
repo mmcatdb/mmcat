@@ -18,6 +18,7 @@ export class ImportedObject {
 
     constructor(
         readonly iri: Iri,
+        readonly pimIri: Iri,
         readonly label: string,
         ids: ImportedId | ImportedId[] = []
     ) {
@@ -32,6 +33,7 @@ export class ImportedObject {
 export class ImportedMorphism {
     constructor(
         readonly iri: Iri,
+        readonly pimIri: Iri,
         readonly label: string,
         readonly dom: ImportedObject,
         readonly cod: ImportedObject,

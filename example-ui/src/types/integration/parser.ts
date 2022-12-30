@@ -8,11 +8,13 @@ export type DataspecerEntity = {
 }
 
 export type Class = DataspecerEntity & {
+    pimIri: Iri,
     label: string;
     extendsClassIris: Iri[];
 };
 
 export type Attribute = DataspecerEntity & {
+    pimIri: Iri,
     label: string;
     parentClassIri: Iri;
     dataType: DataType;
@@ -23,6 +25,7 @@ export type Attribute = DataspecerEntity & {
 };
 
 export type Association = DataspecerEntity & {
+    pimIri: Iri,
     label: string;
     domEndIri: Iri;
     codEndIri: Iri;

@@ -48,7 +48,7 @@ export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
     const createdMorphisms = new Map() as Map<ImportedMorphism, Edge>;
 
     imported.objects.forEach(object => {
-        const schemaObject = graph.schemaCategory.createObjectWithIri(object.label, undefined, object.iri);
+        const schemaObject = graph.schemaCategory.createObjectWithIri(object.label, undefined, object.iri, object.pimIri);
         if (!schemaObject)
             return;
 
@@ -70,7 +70,7 @@ export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
             return;
         }
 
-        const schemaMorphism = graph.schemaCategory.createMorphismWithDualWithIri(object1, object2, morphism.cardinalitySettings, morphism.iri, morphism.label, morphism.tags);
+        const schemaMorphism = graph.schemaCategory.createMorphismWithDualWithIri(object1, object2, morphism.cardinalitySettings, morphism.iri, morphism.pimIri, morphism.label, morphism.tags);
         if (!schemaMorphism)
             return;
 

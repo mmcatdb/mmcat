@@ -15,3 +15,5 @@ export function createMorphismId(morphisms: ImportedMorphism | ImportedMorphism[
         keys: Array.isArray(morphisms) ? morphisms : [ [ morphisms ] ]
     };
 }
+
+export const CUSTOM_IRI_PREFIX = 'https://mm-evocat.com/iri/';

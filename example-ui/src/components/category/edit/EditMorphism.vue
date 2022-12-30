@@ -5,12 +5,12 @@ import { defineComponent } from 'vue';
 import CardinalityInput from './CardinalityInput.vue';
 
 import { NodeIndices } from './AddMorphism.vue';
-import IriDisplayVue from '@/components/IriDisplay.vue';
+import IriDisplay from '@/components/IriDisplay.vue';
 
 export default defineComponent({
     components: {
         CardinalityInput,
-        IriDisplayVue
+        IriDisplay
     },
     props: {
         graph: {
@@ -198,8 +198,19 @@ export default defineComponent({
                     Iri:
                 </td>
                 <td class="value">
-                    <IriDisplayVue
+                    <IriDisplay
                         :iri="edge.schemaMorphism.iri"
+                        :max-chars="36"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Pim Iri:
+                </td>
+                <td class="value">
+                    <IriDisplay
+                        :iri="edge.schemaMorphism.pimIri"
                         :max-chars="36"
                     />
                 </td>

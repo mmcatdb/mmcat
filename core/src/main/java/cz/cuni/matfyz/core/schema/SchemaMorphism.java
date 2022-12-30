@@ -8,7 +8,10 @@ import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,6 +25,14 @@ public class SchemaMorphism implements Serializable, Morphism, JSONConvertible, 
     private SchemaObject cod;
     private Min min;
     private Max max;
+
+    public String iri;
+    public String pimIri;
+    private Set<Tag> tags;
+
+    public boolean hasTag(Tag tag) {
+        return tags.contains(tag);
+    }
 
     public static Min combineMin(Min min1, Min min2) {
         return (min1 == Min.ONE && min2 == Min.ONE) ? Min.ONE : Min.ZERO;
@@ -118,6 +129,9 @@ public class SchemaMorphism implements Serializable, Morphism, JSONConvertible, 
             output.put("codIdentifier", object.cod.identifier().toJSON());
             output.put("min", object.min());
             output.put("max", object.max());
+            output.put("iri", object.iri);
+            output.put("pimIri", object.pimIri);
+            output.put("tags", new JSONArray(object.tags));
 
             return output;
         }
@@ -158,6 +172,16 @@ public class SchemaMorphism implements Serializable, Morphism, JSONConvertible, 
 
             morphism.min = Min.valueOf(jsonObject.getString("min"));
             morphism.max = Max.valueOf(jsonObject.getString("max"));
+
+            morphism.iri = jsonObject.has("iri") ? jsonObject.getString("iri") : "";
+            morphism.pimIri = jsonObject.has("pimIri") ? jsonObject.getString("pimIri") : "";
+
+            morphism.tags = new TreeSet<>();
+            if (jsonObject.has("tags")) {
+                final var tagsArray = jsonObject.getJSONArray("tags");
+                for (int i = 0; i < tagsArray.length(); i++)
+                    morphism.tags.add(Tag.valueOf(tagsArray.getString(i)));
+            }
 
             //return new SchemaMorphism(signature, dom, cod, min, max);
 

@@ -13,13 +13,15 @@ export type SchemaObjectJSON = {
     ids?: ObjectIdsJSON,
     superId: SignatureIdJSON,
     databases?: string[],
-    iri?: Iri
+    iri?: Iri,
+    pimIri?: Iri
 }
 
 export class SchemaObject implements Entity {
     //key: number | undefined;
     //label: number | undefined;
     iri?: Iri;
+    pimIri?: Iri;
 
     id!: Id;
     label!: string;
@@ -48,11 +50,12 @@ export class SchemaObject implements Entity {
         object.position = new ComparablePosition(input.position);
         object._originalPosition = new ComparablePosition(input.position);
         object.iri = jsonObject.iri;
+        object.pimIri = jsonObject.pimIri;
 
         return object;
     }
 
-    static createNew(id: Id, label: string, key: Key, ids?: ObjectIds, iri?: Iri): SchemaObject {
+    static createNew(id: Id, label: string, key: Key, ids?: ObjectIds, iri?: Iri, pimIri?: Iri): SchemaObject {
         const object = new SchemaObject();
 
         object.id = id;
@@ -64,6 +67,7 @@ export class SchemaObject implements Entity {
         object.position = new ComparablePosition({ x: 0, y: 0});
         object._isNew = true;
         object.iri = iri;
+        object.pimIri = pimIri;
 
         return object;
     }
@@ -141,7 +145,8 @@ export class SchemaObject implements Entity {
             key: this.key.toJSON(),
             ids: this.ids?.toJSON(),
             superId: this.superId.toJSON(),
-            iri: this.iri
+            iri: this.iri,
+            pimIri: this.pimIri
         };
     }
 }

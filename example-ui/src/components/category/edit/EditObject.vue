@@ -105,6 +105,17 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
+                    Pim Iri:
+                </td>
+                <td class="value">
+                    <IriDisplay
+                        :iri="node.schemaObject.pimIri"
+                        :max-chars="36"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
                     Key:
                 </td>
                 <td class="value">

@@ -17,6 +17,7 @@ export default defineComponent({
         return {
             label: '',
             iri: '',
+            pimIri: '',
             keyIsValid: true
         };
     },
@@ -28,7 +29,7 @@ export default defineComponent({
     methods: {
         save() {
             if (this.iri) {
-                const object = this.graph.schemaCategory.createObjectWithIri(this.label, undefined, this.iri);
+                const object = this.graph.schemaCategory.createObjectWithIri(this.label, undefined, this.iri, this.pimIri);
                 if (!object)
                     return;
 
@@ -70,6 +71,16 @@ export default defineComponent({
                 <td class="value">
                     <input
                         v-model="iri"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Pim Iri?:
+                </td>
+                <td class="value">
+                    <input
+                        v-model="pimIri"
                     />
                 </td>
             </tr>

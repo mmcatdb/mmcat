@@ -6,7 +6,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.DataResult;
-import cz.cuni.matfyz.server.builder.SchemaBuilder;
+import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModel;
@@ -206,7 +206,7 @@ public class AsyncJobService {
     private Mapping createMapping(MappingWrapper mappingWrapper, LogicalModel logicalModel) {
         var categoryWrapper = categoryService.find(logicalModel.categoryId);
 
-        return new SchemaBuilder()
+        return new MappingBuilder()
             .setMappingWrapper(mappingWrapper)
             .setCategoryWrapper(categoryWrapper)
             .build();

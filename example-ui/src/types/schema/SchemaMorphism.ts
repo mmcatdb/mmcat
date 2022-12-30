@@ -8,6 +8,7 @@ export type SchemaMorphismJSON = {
     max: Max,
     label?: string,
     iri?: Iri,
+    pimIri?: Iri,
     tags?: Tag[]
 }
 
@@ -27,6 +28,7 @@ export enum Tag {
 
 export class SchemaMorphism {
     iri?: Iri;
+    pimIri?: Iri;
     label: string;
     tags: Tag[];
 
@@ -61,7 +63,7 @@ export class SchemaMorphism {
         return Math.abs(baseValue ? baseValue : 0);
     }
 
-    private constructor(id: Id, domId: Id, codId: Id, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, tags: Tag[]) {
+    private constructor(id: Id, domId: Id, codId: Id, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, pimIri: Iri | undefined, tags: Tag[]) {
         this.id = id;
         this.domId = domId;
         this.codId = codId;
@@ -71,6 +73,7 @@ export class SchemaMorphism {
         this._isNew = isNew;
         this.label = label;
         this.iri = iri;
+        this.pimIri = pimIri;
         this.tags = [ ...tags ];
     }
 
@@ -87,16 +90,17 @@ export class SchemaMorphism {
             false,
             parsedJson.label || '',
             parsedJson.iri,
+            parsedJson.pimIri,
             parsedJson.tags ? parsedJson.tags : []
         );
     }
 
     static createNew(id: Id, domId: Id, codId: Id, signature: Signature, min: Min, max: Max, label: string, tags: Tag[]): SchemaMorphism {
-        return new SchemaMorphism(id, domId, codId, signature, min, max, true, label, undefined, tags);
+        return new SchemaMorphism(id, domId, codId, signature, min, max, true, label, undefined, undefined, tags);
     }
 
-    static createNewFromDual(id: Id, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
-        return new SchemaMorphism(id, dual.codId, dual.domId, signature, min, max, true, '', undefined, dual.tags);
+    static createNewFromDualWithoutTags(id: Id, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
+        return new SchemaMorphism(id, dual.codId, dual.domId, signature, min, max, true, '', '', undefined, []);
     }
 
     update(domId: Id, codId: Id, min: Min, max: Max, label: string) {
@@ -114,6 +118,7 @@ export class SchemaMorphism {
             max: this.max,
             label: this.label,
             iri: this.iri,
+            pimIri: this.pimIri,
             tags: this.tags
         };
     }

@@ -2,20 +2,24 @@ package cz.cuni.matfyz.integration;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.jena.query.Dataset;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author jachym.bartik
+ */
 public class JsonLdToRDF {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LogRDFHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonLdToRDF.class);
 
     private String dataFileName;
 
@@ -23,7 +27,7 @@ public class JsonLdToRDF {
         this.dataFileName = dataFileName;
     }
 
-    public void algorithm() throws Exception {
+    public Dataset algorithm() throws URISyntaxException, FileNotFoundException {
         final var jsonLdStream = getDataFileContents();
 
         final RDFParser parser = RDFParser.source(jsonLdStream)
@@ -31,22 +35,14 @@ public class JsonLdToRDF {
             .build();
 
         final Dataset dataset = parser.toDataset();
+
         LOGGER.info("Dataset parsed successfuly.");
 
-        processModel(dataset.getDefaultModel());
-        dataset.listModelNames().forEachRemaining(resource -> {
-            final Model model = dataset.getNamedModel(resource.getURI());
-            processModel(model);
-        });
+        return dataset;
+
     }
 
-    private void processModel(Model model) {
-        model.listStatements().forEach(statement -> {
-            LOGGER.info("[Statement]: " + statement);
-        });
-    }
-
-    private InputStream getDataFileContents() throws Exception {
+    private InputStream getDataFileContents() throws URISyntaxException, FileNotFoundException {
         final var url = ClassLoader.getSystemResource(dataFileName);
         Path pathToDataFile = Paths.get(url.toURI()).toAbsolutePath();
         File dataFile = pathToDataFile.toFile();

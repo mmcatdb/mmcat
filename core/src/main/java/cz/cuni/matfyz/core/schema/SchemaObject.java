@@ -24,10 +24,19 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
     private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
 
     public SchemaObject(Key key, String label, SignatureId superId, ObjectIds ids) {
+        this(key, label, superId, ids, "", "");
+    }
+
+    public final String iri;
+    public final String pimIri;
+
+    public SchemaObject(Key key, String label, SignatureId superId, ObjectIds ids, String iri, String pimIri) {
         this.key = key;
         this.label = label;
         this.superId = superId;
         this.ids = ids;
+        this.iri = iri;
+        this.pimIri = pimIri;
     }
 
     @Override
@@ -99,6 +108,8 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
             output.put("label", object.label);
             output.put("superId", object.superId.toJSON());
             output.put("ids", object.ids.toJSON());
+            output.put("iri", object.iri);
+            output.put("pimIri", object.pimIri);
             
             return output;
         }
@@ -113,8 +124,10 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
             var label = jsonObject.getString("label");
             var superId = new SignatureId.Builder().fromJSON(jsonObject.getJSONObject("superId"));
             var ids = new ObjectIds.Builder().fromJSON(jsonObject.getJSONObject("ids"));
+            var iri = jsonObject.has("iri") ? jsonObject.getString("iri") : "";
+            var pimIri = jsonObject.has("pimIri") ? jsonObject.getString("pimIri") : "";
 
-            return new SchemaObject(key, label, superId, ids);
+            return new SchemaObject(key, label, superId, ids, iri, pimIri);
         }
 
     }

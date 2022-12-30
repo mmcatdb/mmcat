@@ -101,21 +101,24 @@ public class InstanceCategory implements Serializable, Category {
         builder.append("Keys: ");
         for (Key key : objects.keySet())
             builder.append(key).append(", ");
-        builder.append("\n");
+        builder.append("\n\n");
         
-        builder.append("Objects:\n");
+
+        builder.append("Objects (showing only non-empty):\n");
         for (InstanceObject object : objects.values())
-            builder.append(object).append("\n");
+            if (!object.allRows().isEmpty())
+                builder.append(object).append("\n");
         builder.append("\n");
 
         builder.append("Signatures: ");
         for (Signature signature : morphisms.keySet())
             builder.append(signature).append(", ");
-        builder.append("\n");
+        builder.append("\n\n");
         
-        builder.append("Morphisms:\n");
+        builder.append("Morphisms (showing only non-empty):\n");
         for (InstanceMorphism morphism : morphisms.values())
-            builder.append(morphism).append("\n");
+            if (!morphism.allMappings().isEmpty())
+                builder.append(morphism).append("\n");
         builder.append("\n");
 
         return builder.toString();

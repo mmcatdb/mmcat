@@ -8,7 +8,7 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
-import cz.cuni.matfyz.server.builder.SchemaBuilder;
+import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
@@ -154,7 +154,7 @@ class ServerApplicationTests {
         var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
         var categoryWrapper = categoryService.find(logicalModel.categoryId);
 
-        var mapping = new SchemaBuilder()
+        var mapping = new MappingBuilder()
             .setMappingWrapper(mappingWrapper)
             .setCategoryWrapper(categoryWrapper)
             .build();

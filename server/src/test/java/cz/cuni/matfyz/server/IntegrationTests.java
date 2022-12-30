@@ -1,0 +1,63 @@
+package cz.cuni.matfyz.server;
+
+import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
+import cz.cuni.matfyz.integration.JsonLdToRDF;
+import cz.cuni.matfyz.integration.RDFToInstance;
+import cz.cuni.matfyz.server.builder.CategoryBuilder;
+import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.server.service.SchemaCategoryService;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+/**
+ * @author jachymb.bartik
+ */
+@SpringBootTest
+public class IntegrationTests {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);
+    
+    static final String JSON_LD_FILE_NAME = "test2.jsonld";
+    static final Id CATEGORY_ID = new Id("6");
+
+    @Autowired
+    private SchemaCategoryService categoryService;
+
+    @Test
+    public void jsonLdToRDF_DoesNotThrow() {
+        final var jsonToRDF = new JsonLdToRDF();
+        jsonToRDF.input(JSON_LD_FILE_NAME);
+
+        assertDoesNotThrow(() -> {
+            jsonToRDF.algorithm();
+        });
+    }
+
+    @Test
+    public void RDFToInstance_DoesNotThrow() {
+        final var rdfToInstance = new RDFToInstance();
+
+        final var jsonToRDF = new JsonLdToRDF();
+        jsonToRDF.input(JSON_LD_FILE_NAME);
+
+        final var schemaCategoryWrapper = categoryService.find(CATEGORY_ID);
+        final var schemaCategory = new CategoryBuilder()
+            .setCategoryWrapper(schemaCategoryWrapper)
+            .build();
+        final var instanceCategory = new InstanceCategoryBuilder().setSchemaCategory(schemaCategory).build();
+
+        assertDoesNotThrow(() -> {
+            final var dataset = jsonToRDF.algorithm();
+            rdfToInstance.input(dataset, instanceCategory);
+            rdfToInstance.algorithm();
+        });
+
+        System.out.println(instanceCategory);
+    }
+}

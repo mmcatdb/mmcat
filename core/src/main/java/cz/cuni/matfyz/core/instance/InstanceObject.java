@@ -26,7 +26,7 @@ import org.json.JSONObject;
  */
 public class InstanceObject implements Serializable, CategoricalObject, JSONConvertible {
 
-    private final SchemaObject schemaObject;
+    public final SchemaObject schemaObject;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 

@@ -26,6 +26,7 @@ export default defineComponent({
             node2: null as Node | null,
             label: '',
             iri: '',
+            pimIri: '',
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
             cardinality: {
@@ -57,7 +58,7 @@ export default defineComponent({
                 return;
 
             if (this.iri) {
-                const morphism = this.graph.schemaCategory.createMorphismWithDualWithIri(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.iri, this.label);
+                const morphism = this.graph.schemaCategory.createMorphismWithDualWithIri(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.iri, this.pimIri, this.label);
                 if (!morphism)
                     return;
 
@@ -176,6 +177,16 @@ export default defineComponent({
                 <td class="value">
                     <input
                         v-model="iri"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    Pim Iri?:
+                </td>
+                <td class="value">
+                    <input
+                        v-model="pimIri"
                     />
                 </td>
             </tr>

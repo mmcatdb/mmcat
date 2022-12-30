@@ -18,6 +18,11 @@ public interface Morphism {
         STAR
     }
 
+    public enum Tag {
+        isa,
+        role
+    }
+
     public abstract CategoricalObject dom();
 
     public abstract CategoricalObject cod();

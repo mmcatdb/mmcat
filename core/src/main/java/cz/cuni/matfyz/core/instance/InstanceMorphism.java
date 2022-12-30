@@ -19,7 +19,7 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingRow.class);
 
-    private final SchemaMorphism schemaMorphism;
+    public final SchemaMorphism schemaMorphism;
     private final List<InstanceMorphism> bases;
     private final InstanceObject dom;
     private final InstanceObject cod;
@@ -47,6 +47,10 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
      */
     public List<InstanceMorphism> bases() {
         return bases;
+    }
+
+    public InstanceMorphism lastBase() {
+        return bases.get(bases.size() - 1);
     }
 
     public void createMappingWithDual(DomainRow domainRow, DomainRow codomainRow) {

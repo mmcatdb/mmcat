@@ -78,10 +78,10 @@ export class SchemaCategory implements Entity {
         );
     }
 
-    _createObjectWithoutCheck(label: string, ids?: ObjectIds, iri?: Iri): SchemaObject {
+    _createObjectWithoutCheck(label: string, ids?: ObjectIds, iri?: Iri, pimIri?: Iri): SchemaObject {
         const key = this._keysProvider.createAndAdd();
         const id = this._objectIdProvider.createAndAdd();
-        const object = SchemaObject.createNew(id, label, key, ids, iri);
+        const object = SchemaObject.createNew(id, label, key, ids, iri, pimIri);
         this.objects.push(object);
         this._createdObjects.push(object);
 
@@ -92,7 +92,7 @@ export class SchemaCategory implements Entity {
         return this._createObjectWithoutCheck(label, ids);
     }
 
-    createObjectWithIri(label: string, ids: ObjectIds | undefined, iri: Iri): SchemaObject | null {
+    createObjectWithIri(label: string, ids: ObjectIds | undefined, iri: Iri, pimIri: Iri): SchemaObject | null {
         if (!this.iriIsAvailable(iri)) {
             console.log('Object with iri ' + iri + " already exists.");
             return null;
@@ -100,7 +100,7 @@ export class SchemaCategory implements Entity {
 
         this.notAvailableIris.add(iri);
 
-        return this._createObjectWithoutCheck(label, ids, iri);
+        return this._createObjectWithoutCheck(label, ids, iri, pimIri);
     }
 
     findObjectByIri(iri: Iri): SchemaObject | undefined {
@@ -118,7 +118,7 @@ export class SchemaCategory implements Entity {
         this._createdMorphisms.push(morphism);
 
         const dualId = this._morphismIdProvider.createAndAdd();
-        const dualMorphism = SchemaMorphism.createNewFromDual(dualId, morphism, dualSignature, cardinality.codDomMin, cardinality.codDomMax);
+        const dualMorphism = SchemaMorphism.createNewFromDualWithoutTags(dualId, morphism, dualSignature, cardinality.codDomMin, cardinality.codDomMax);
         this.morphisms.push(dualMorphism);
         this._createdMorphisms.push(dualMorphism);
 
@@ -132,7 +132,7 @@ export class SchemaCategory implements Entity {
         return !this.notAvailableIris.has(iri);
     }
 
-    createMorphismWithDualWithIri(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, iri: Iri, label: string, tags: Tag[] = []): SchemaMorphism | null {
+    createMorphismWithDualWithIri(dom: SchemaObject, cod: SchemaObject, cardinality: CardinalitySettings, iri: Iri, pimIri: Iri, label: string, tags: Tag[] = []): SchemaMorphism | null {
         if (!this.iriIsAvailable(iri)) {
             console.log('Morphism with iri ' + iri + " already exists.");
             return null;
@@ -141,6 +141,7 @@ export class SchemaCategory implements Entity {
         this.notAvailableIris.add(iri);
         const newMorphism = this.createMorphismWithDual(dom, cod, cardinality, label, tags);
         newMorphism.iri = iri;
+        newMorphism.pimIri = pimIri;
 
         return newMorphism;
     }

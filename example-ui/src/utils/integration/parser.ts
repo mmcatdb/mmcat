@@ -9,6 +9,7 @@ function getLanguageString(object: { cs?: string, en?: string } | null): string 
 function parseClass(resource: any): Class {
     return {
         iri: resource.iri,
+        pimIri: resource.pimInterpretation,
         label: getLanguageString(resource.pimHumanLabel),
         extendsClassIris: resource.pimExtends
     };
@@ -24,6 +25,7 @@ function parseCardinality(resource: { pimCardinalityMin: 1 | unknown, pimCardina
 function parseAttribute(resource: any): Attribute {
     return {
         iri: resource.iri,
+        pimIri: resource.pimInterpretation,
         label: getLanguageString(resource.pimHumanLabel),
         dataType: parseDataType(resource.pimDatatype),
         parentClassIri: resource.pimOwnerClass,
@@ -34,6 +36,7 @@ function parseAttribute(resource: any): Attribute {
 function parseAssociation(resource: any): Association {
     return {
         iri: resource.iri,
+        pimIri: resource.pimInterpretation,
         label: getLanguageString(resource.pimHumanLabel),
         domEndIri: resource.pimEnd[0],
         codEndIri: resource.pimEnd[1]
