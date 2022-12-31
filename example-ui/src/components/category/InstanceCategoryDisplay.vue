@@ -1,47 +1,44 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import { SelectionType, type Node } from '@/types/categoryGraph';
 import type { Graph } from '@/types/categoryGraph';
-import InstanceObject from './InstanceObject.vue';
+import InstanceObjectDisplay from './InstanceObjectDisplay.vue';
 import GraphDisplay from './GraphDisplay.vue';
 import type { SchemaObject } from '@/types/schema';
 
-export default defineComponent({
-    components: {
-        GraphDisplay,
-        InstanceObject
-    },
-    data() {
-        return {
-            graph: null as Graph | null,
-            selectedNode: null as Node | null
-        };
-    },
-    methods: {
-        cytoscapeCreated(graph: Graph) {
-            this.graph = graph;
+const graph = ref<Graph>();
+const selectedNode = ref<Node>();
 
-            graph.addNodeListener('tap', node => this.selectNode(node));
-        },
-        objectClicked(object: SchemaObject) {
-            const newNode = this.graph?.getNode(object);
-            if (newNode)
-                this.selectNode(newNode);
-        },
-        selectNode(node: Node) {
-            this.selectedNode?.unselect();
-            this.selectedNode = node;
-            this.selectedNode.select({ type: SelectionType.Root, level: 0 });
-        }
+function cytoscapeCreated(newGraph: Graph) {
+    graph.value = newGraph;
+    graph.value.addNodeListener('tap', node => selectNode(node));
+}
+
+function objectClicked(object: SchemaObject) {
+    const newNode = graph.value?.getNode(object);
+    if (newNode)
+        selectNode(newNode);
+}
+
+function selectNode(node: Node) {
+    selectedNode.value?.unselect();
+
+    if (node.equals(selectedNode.value)) {
+        selectedNode.value = undefined;
+        return;
     }
-});
+
+    selectedNode.value = node;
+    selectedNode.value.select({ type: SelectionType.Root, level: 0 });
+}
 </script>
 
 <template>
     <div class="divide">
         <GraphDisplay @create:graph="cytoscapeCreated" />
-        <InstanceObject
+        <InstanceObjectDisplay
             v-if="selectedNode"
+            :key="selectedNode.schemaObject.key.value"
             :node="selectedNode"
             @object:click="objectClicked"
         />

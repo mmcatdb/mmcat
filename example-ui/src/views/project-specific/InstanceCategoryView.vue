@@ -1,12 +1,5 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import InstanceCategoryDisplay from '@/components/category/InstanceCategoryDisplay.vue';
-
-export default defineComponent({
-    components: {
-        InstanceCategoryDisplay
-    },
-});
 </script>
 
 <template>
@@ -15,6 +8,3 @@ export default defineComponent({
         <InstanceCategoryDisplay />
     </div>
 </template>
-
-<style scoped>
-</style>

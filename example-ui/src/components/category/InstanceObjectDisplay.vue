@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import type { SchemaObject } from '@/types/schema';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
@@ -32,12 +32,9 @@ const emit = defineEmits([ 'object:click' ]);
 const fetchedInstanceObject = ref<FetchedInstanceObject>();
 const loading = ref(false);
 
-watch(props.node, () => reloadInstanceObject());
-
 const schemaCategoryId = useSchemaCategory();
 
-onMounted(() => reloadInstanceObject());
-async function reloadInstanceObject() {
+onMounted(async () => {
     loading.value = true;
 
     const result = await API.instances.getInstanceObject({ categoryId: schemaCategoryId, objectKey: props.node.schemaObject.key.value });
@@ -57,7 +54,7 @@ async function reloadInstanceObject() {
     }
 
     loading.value = false;
-}
+});
 
 function columnClicked(column: Column) {
     if (column.isClickable)

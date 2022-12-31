@@ -169,7 +169,7 @@ export class Node {
         this.node.addClass(NodeTag.Root);
     }
 
-    equals(other: Node | null): boolean {
+    equals(other: Node | null | undefined): boolean {
         return !!other && this.schemaObject.id === other.schemaObject.id;
     }
 
