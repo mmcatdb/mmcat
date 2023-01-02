@@ -28,3 +28,4 @@ coverage
 *.sw?
 
 public/adminer.php
+public/data-sources/*
