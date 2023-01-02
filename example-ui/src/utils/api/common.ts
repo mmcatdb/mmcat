@@ -3,10 +3,10 @@ import type { AxiosResponse } from 'axios/index';
 import type { Result } from '@/types/api/result';
 import type { PullResult } from '@/types/api/routes';
 
-export function createAxiosInstance(baseURL?: string) {
+export function createAxiosInstance(baseURL?: string, withCredentials = true) {
     const instance = axios.create({
         baseURL,
-        withCredentials: true, // This is required for the backend cookies to work properly.
+        withCredentials, // This (true) is required for the backend cookies to work properly.
         // timeout: false,
         params: {} // do not remove this, its added to add params later in the config
     });

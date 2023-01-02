@@ -5,7 +5,7 @@ import { createAxiosInstance, promiseToResponse } from "./common";
 
 const DATASPECER_API_URL = import.meta.env.VITE_DATASPECER_API_URL;
 
-const instance = createAxiosInstance();
+const instance = createAxiosInstance(undefined, false);
 
 function GET<T>(url: string, params = {}): PullResult<T> {
     return promiseToResponse<T>(instance.get(url, {
