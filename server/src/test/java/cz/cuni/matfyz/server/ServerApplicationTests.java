@@ -8,6 +8,7 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
+import cz.cuni.matfyz.core.utils.UniqueIdProvider;
 import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
@@ -17,7 +18,6 @@ import cz.cuni.matfyz.server.service.LogicalModelService;
 import cz.cuni.matfyz.server.service.MappingService;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 import cz.cuni.matfyz.server.service.WrapperService;
-import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
 

@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.transformations.algorithms;
+package cz.cuni.matfyz.core.utils;
 
 /**
  * @author jachymb.bartik

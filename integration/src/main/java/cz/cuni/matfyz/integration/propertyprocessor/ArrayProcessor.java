@@ -31,7 +31,7 @@ public class ArrayProcessor extends Base implements PropertyProcessor {
 
     @Override
     public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
-        final var morphism = findMorphismFromObject(statement.getPredicate().getURI() + ELEMENT_TO_COD_SUFFIX, resourceObject);
+        final var morphism = finder.findFromObject(resourceObject, statement.getPredicate().getURI() + ELEMENT_TO_COD_SUFFIX);
         if (morphism == null)
             return false;
         if (!morphism.cod().schemaObject.ids().isValue())
@@ -47,12 +47,12 @@ public class ArrayProcessor extends Base implements PropertyProcessor {
 
         final var cod = elementToCod.cod();
 
-        final var elementToIndex = findDirectMorphismFromObject(ELEMENT_TO_INDEX, element);
+        final var elementToIndex = finder.findDirectFromObject(element, ELEMENT_TO_INDEX);
         final var index = elementToIndex.cod();
         if (!index.schemaObject.pimIri.equals(INDEX))
             return false;
 
-        final var elementToDom = findDirectMorphismFromObject(ELEMENT_TO_DOM, element);
+        final var elementToDom = finder.findDirectFromObject(element, ELEMENT_TO_DOM);
         if (!elementToDom.schemaMorphism.hasTag(Tag.role))
             return false;
 
@@ -60,7 +60,7 @@ public class ArrayProcessor extends Base implements PropertyProcessor {
     
         // TODO - how to make arrays in RDF?
 
-        return true;
+        return false;
     }
 
 }

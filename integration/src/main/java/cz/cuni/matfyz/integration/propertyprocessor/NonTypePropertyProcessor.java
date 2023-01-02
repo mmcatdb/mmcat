@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.integration.propertyprocessor;
 
-import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
@@ -26,7 +25,7 @@ public class NonTypePropertyProcessor extends Base implements PropertyProcessor 
 
     @Override
     public boolean tryProcessProperty(Statement statement, InstanceObject object, DomainRow row) {
-        final var morphism = findMorphismFromObject(statement.getPredicate().getURI(), object);
+        final var morphism = finder.findFromObject(object, statement.getPredicate().getURI());
         if (morphism == null)
             return false;
         if (!morphism.cod().schemaObject.ids().isValue())
@@ -37,25 +36,19 @@ public class NonTypePropertyProcessor extends Base implements PropertyProcessor 
             return tryAddLiteral(statementObject.asLiteral(), object, row, morphism);
         if (statementObject.isResource())
             return tryAddResource(statementObject.asResource(), object, row, morphism);
-        
-        LOGGER.error("Object in statement not recognized: {}.", statementObject);
 
-        return true;
+        return false;
     }
 
     private boolean tryAddLiteral(Literal literal, InstanceObject object, DomainRow row, InstanceMorphism morphism) {
-        LOGGER.info("[Value]: {}", literal.getLexicalForm());
-        
-        final var valueSuperId = new SuperIdWithValues.Builder().add(Signature.createEmpty(), literal.getLexicalForm()).build();
+        final var valueSuperId = SuperIdWithValues.fromEmptySignature(literal.getLexicalForm());
         object.getOrCreateRowWithMorphism(valueSuperId, row, morphism);
 
         return true;
     }
 
     private boolean tryAddResource(Resource resource, InstanceObject object, DomainRow row, InstanceMorphism morphism) {
-        LOGGER.info("[Value]: {}", resource.getURI());
-        
-        final var valueSuperId = new SuperIdWithValues.Builder().add(Signature.createEmpty(), resource.getURI()).build();
+        final var valueSuperId = SuperIdWithValues.fromEmptySignature(resource.getURI());
         object.getOrCreateRowWithMorphism(valueSuperId, row, morphism);
 
         return true;

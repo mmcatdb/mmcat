@@ -1,11 +1,8 @@
 package cz.cuni.matfyz.integration.algorithms;
 
-import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.core.instance.Merger;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.integration.propertyprocessor.ArrayProcessor;
 import cz.cuni.matfyz.integration.propertyprocessor.NonTypePropertyProcessor;
@@ -60,7 +57,7 @@ public class RDFToInstance {
     }
 
     private void processResource(Resource resource) {
-        LOGGER.info("[Resource]: {}", resource.getURI());
+        LOGGER.debug("[Resource]: {}", resource.getURI());
 
         final String typeIri = getTypeIri(resource);
         final InstanceObject object = findObject(typeIri);
@@ -81,7 +78,7 @@ public class RDFToInstance {
         final var rdfTypeProperty = resource.getModel().getProperty(RDF_TYPE_IRI);
         final var typeStatement = resource.getProperty(rdfTypeProperty);
         final var type = typeStatement.getObject().toString();
-        LOGGER.info("[Type]: {}", type);
+        LOGGER.debug("[Type]: {}", type);
 
         return type;
     }
@@ -98,15 +95,15 @@ public class RDFToInstance {
 
     private List<? extends PropertyProcessor> propertyProcessors;
 
-
     private void processProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
-        LOGGER.info("{}", statement);
+        LOGGER.debug("{}", statement);
 
         for (final var processor : propertyProcessors)
             if (processor.tryProcessProperty(statement, resourceObject, resourceRow))
                 return;
 
-        throw new UnsupportedOperationException("No processor found for statement: " + statement + ".");
+        //throw new UnsupportedOperationException("No processor found for statement: " + statement + ".");
+        LOGGER.error("No processor found for statement: {}.", statement);
     }
 
     private InstanceObject findObject(String pimIri) {
@@ -121,9 +118,7 @@ public class RDFToInstance {
         if (!resourceObject.schemaObject.ids().isValue())
             throw new UnsupportedOperationException("Identifier has wrong id for resource:" + resource.getURI() + ".");
 
-        final var resourceSuperId = new SuperIdWithValues.Builder()
-            .add(Signature.createEmpty(), resource.getURI())
-            .build();
+        final var resourceSuperId = SuperIdWithValues.fromEmptySignature(resource.getURI());
 
         return resourceObject.getOrCreateRow(resourceSuperId);
     }

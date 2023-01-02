@@ -82,7 +82,7 @@ async function restartJob() {
             </tr>
             <tr v-if="job.type === JobType.JsonLdToCategory">
                 <td class="label">
-                    Database id:
+                    Data source id:
                 </td>
                 <td class="value">
                     {{ job.dataSourceId }}

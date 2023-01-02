@@ -16,11 +16,11 @@ import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
+import cz.cuni.matfyz.core.utils.UniqueIdProvider;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.service.DatabaseService;
 import cz.cuni.matfyz.server.service.WrapperService;
-import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 
 import java.net.URISyntaxException;
@@ -150,10 +150,8 @@ public class EvolutionManagementTests {
             var fullAddressValue = joinFunction(street, city);
 
             // Create superId and row
-            var builder = new SuperIdWithValues.Builder();
-            builder.add(Signature.createEmpty(), fullAddressValue);
-
-            addressInstance.getOrCreateRowWithMorphism(builder.build(), addressRow, addressToFullAddressMorphismInstance);
+            var superId = SuperIdWithValues.fromEmptySignature(fullAddressValue);
+            addressInstance.getOrCreateRowWithMorphism(superId, addressRow, addressToFullAddressMorphismInstance);
         }
     }
 

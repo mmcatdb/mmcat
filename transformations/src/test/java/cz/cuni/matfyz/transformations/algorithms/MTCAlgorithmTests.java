@@ -2,6 +2,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
+import cz.cuni.matfyz.core.utils.UniqueIdProvider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

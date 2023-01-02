@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.transformations.mtctests;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.transformations.algorithms.UniqueIdProvider;
+import cz.cuni.matfyz.core.utils.UniqueIdProvider;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
 

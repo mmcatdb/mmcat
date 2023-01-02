@@ -13,6 +13,7 @@ import cz.cuni.matfyz.core.record.IComplexRecord;
 import cz.cuni.matfyz.core.record.SimpleArrayRecord;
 import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
+import cz.cuni.matfyz.core.utils.UniqueIdProvider;
 
 import java.util.ArrayList;
 import java.util.List;

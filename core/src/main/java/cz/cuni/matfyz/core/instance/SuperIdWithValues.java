@@ -130,8 +130,8 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return builder.build();
     }
 
-    public static SuperIdWithValues createEmpty() {
-        return merge();
+    public static SuperIdWithValues fromEmptySignature(String value) {
+        return new Builder().add(Signature.createEmpty(), value).build();
     }
 
     private SuperIdWithValues(Map<Signature, String> map) {
