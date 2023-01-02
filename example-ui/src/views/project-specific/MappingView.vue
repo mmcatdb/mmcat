@@ -2,33 +2,31 @@
 import { defineComponent } from 'vue';
 import API from '@/utils/api';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
-import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import { Mapping } from '@/types/mapping';
+import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
+
 
 export default defineComponent({
     components: {
-        ResourceNotFound,
-        ResourceLoading,
+        ResourceLoader,
         MappingDisplay
     },
     props: {},
     data() {
         return {
-            mapping: null as Mapping | null,
-            fetched: false
+            mapping: null as Mapping | null
         };
     },
-    async mounted() {
-        const result = await API.mappings.getMapping({ id: this.$route.params.id });
-        if (result.status)
-            this.mapping = Mapping.fromServer(result.data);
-
-        this.fetched = true;
-    },
     methods: {
+        async fetchMapping() {
+            const result = await API.mappings.getMapping({ id: this.$route.params.id });
+            if (!result.status)
+                return false;
 
+            this.mapping = Mapping.fromServer(result.data);
+            return true;
+        }
     }
 });
 </script>
@@ -43,8 +41,7 @@ export default defineComponent({
             :mapping="mapping"
         />
     </div>
-    <ResourceNotFound v-else-if="fetched" />
-    <ResourceLoading v-else />
+    <ResourceLoader :loading-function="fetchMapping" />
 </template>
 
 <style scoped>

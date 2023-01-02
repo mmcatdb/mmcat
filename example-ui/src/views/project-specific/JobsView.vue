@@ -3,28 +3,13 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import { Job } from '@/types/job';
 import API from '@/utils/api';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 import NewJob from '@/components/job/NewJob.vue';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 import type { Id } from '@/types/id';
 
 const jobs = ref<Job[]>();
-const fetched = ref(false);
-const continueFetching = ref(true);
-
-onMounted(async () => {
-    await fetchNew();
-
-    fetched.value = true;
-});
-
-onUnmounted(() => {
-    // The reason for this variable is that we want to stop additional fetches while the fetchNew is in the middle of the fetching.
-    // So just clearing the timeout isn't enough.
-    continueFetching.value = false;
-});
 
 function addNewJob(job: Job) {
     jobs.value?.push(job);
@@ -36,13 +21,13 @@ function deleteJob(id: Id) {
 
 const schemaCategoryId = useSchemaCategory();
 
-async function fetchNew() {
+async function fetchJobs() {
     const result = await API.jobs.getAllJobsInCategory({ categoryId: schemaCategoryId });
-    if (result.status)
-        jobs.value = result.data.map(Job.fromServer);
+    if (!result.status)
+        return false;
 
-    if (continueFetching.value)
-        setTimeout(fetchNew, 1000);
+    jobs.value = result.data.map(Job.fromServer);
+    return true;
 }
 </script>
 
@@ -64,8 +49,10 @@ async function fetchNew() {
                 />
             </div>
         </div>
-        <ResourceNotFound v-else-if="fetched" />
-        <ResourceLoading v-else />
+        <ResourceLoader
+            :loading-function="fetchJobs"
+            :refresh-period="1000"
+        />
     </div>
 </template>
 

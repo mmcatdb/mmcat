@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { LogicalModelInfo } from '@/types/logicalModel';
 import API from '@/utils/api';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import { DatabaseInfo } from '@/types/database';
 import { useRouter } from 'vue-router';
@@ -16,22 +15,20 @@ type LogicalModelDatabase = {
 };
 
 const infos = ref<LogicalModelDatabase[]>();
-const fetched = ref(false);
-
-onMounted(fetchData);
 
 const schemaCategoryId = useSchemaCategory();
 
-async function fetchData() {
+async function fetchModels() {
     const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId: schemaCategoryId });
-    if (result.status) {
-        infos.value = result.data.map(info => ({
-            logicalModel: LogicalModelInfo.fromServer(info.logicalModel),
-            database: DatabaseInfo.fromServer(info.database)
-        }));
-    }
+    if (!result.status)
+        return false;
 
-    fetched.value = true;
+    infos.value = result.data.map(info => ({
+        logicalModel: LogicalModelInfo.fromServer(info.logicalModel),
+        database: DatabaseInfo.fromServer(info.database)
+    }));
+
+    return true;
 }
 
 const router = useRouter();
@@ -63,8 +60,7 @@ function createNew() {
                 </div>
             </div>
         </template>
-        <ResourceNotFound v-else-if="fetched" />
-        <ResourceLoading v-else />
+        <ResourceLoader :loading-function="fetchModels" />
     </div>
 </template>
 

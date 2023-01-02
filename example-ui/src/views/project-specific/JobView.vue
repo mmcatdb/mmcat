@@ -3,34 +3,32 @@ import { defineComponent } from 'vue';
 import { Job } from '@/types/job';
 import API from '@/utils/api';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 
 export default defineComponent({
     components: {
-        ResourceNotFound,
-        ResourceLoading,
+        ResourceLoader,
         JobDisplay
     },
     props: {},
     data() {
         return {
             job: null as Job | null,
-            jobFetched: false,
             startJobDisabled: false
         };
-    },
-    async mounted() {
-        const result = await API.jobs.getJob({ id: this.$route.params.id });
-        if (result.status)
-            this.job = Job.fromServer(result.data);
-
-        this.jobFetched = true;
     },
     methods: {
         deleteJob(): void {
             this.$router.push({ name: 'jobs' });
+        },
+        async fetchJob() {
+            const result = await API.jobs.getJob({ id: this.$route.params.id });
+            if (!result.status)
+                return false;
+
+            this.job = Job.fromServer(result.data);
+            return true;
         }
     }
 });
@@ -47,8 +45,7 @@ export default defineComponent({
             @delete-job="deleteJob"
         />
     </div>
-    <ResourceNotFound v-else-if="jobFetched" />
-    <ResourceLoading v-else />
+    <ResourceLoader :loading-function="fetchJob" />
 </template>
 
 <style scoped>

@@ -1,32 +1,37 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
-const avaliableCategories = ref<SchemaCategoryInfo[]>([]);
-const newSchemaLabel = ref('');
+const avaliableCategories = ref<SchemaCategoryInfo[]>();
+const newCategoryLabel = ref('');
 
-onMounted(async () => {
+async function fetchCategories() {
     const result = await API.schemas.getAllCategoryInfos({});
     if (!result.status)
-        return;
+        return false;
 
     avaliableCategories.value = result.data.map(SchemaCategoryInfo.fromServer);
-});
+    return true;
+}
 
-async function confirmNewSchema() {
-    const jsonValue = JSON.stringify({ label: newSchemaLabel.value });
+async function confirmNewCategory() {
+    if (!avaliableCategories.value)
+        return;
+
+    const jsonValue = JSON.stringify({ label: newCategoryLabel.value });
     const result = await API.schemas.createNewSchema({}, { jsonValue });
     if (!result.status)
         return;
 
-    const newSchema = SchemaCategoryInfo.fromServer(result.data);
-    avaliableCategories.value.push(newSchema);
+    const newCategory = SchemaCategoryInfo.fromServer(result.data);
+    avaliableCategories.value.push(newCategory);
 
-    newSchemaLabel.value = '';
+    newCategoryLabel.value = '';
 }
 </script>
 
@@ -42,7 +47,10 @@ async function confirmNewSchema() {
     <h2 class="mt-3">
         Current schema categories
     </h2>
-    <div class="schema-category-list">
+    <div
+        v-if="avaliableCategories"
+        class="schema-category-list"
+    >
         <div
             v-for="category in avaliableCategories"
             :key="category.id"
@@ -55,6 +63,7 @@ async function confirmNewSchema() {
             </CleverRouterLink>
         </div>
     </div>
+    <ResourceLoader :loading-function="fetchCategories" />
     <h2 class="mt-3">
         Create new schema category
     </h2>
@@ -66,15 +75,15 @@ async function confirmNewSchema() {
                         Label:
                     </td>
                     <td class="value">
-                        <input v-model="newSchemaLabel" />
+                        <input v-model="newCategoryLabel" />
                     </td>
                 </tr>
                 <tr>&nbsp;</tr>
             </table>
             <div class="button-row">
                 <button
-                    :disabled="!newSchemaLabel"
-                    @click="confirmNewSchema"
+                    :disabled="!newCategoryLabel || !avaliableCategories"
+                    @click="confirmNewCategory"
                 >
                     Confirm
                 </button>

@@ -4,31 +4,26 @@ import { Model } from '@/types/model';
 import API from '@/utils/api';
 
 import ModelDisplay from '@/components/ModelDisplay.vue';
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 
 export default defineComponent({
     components: {
         ModelDisplay,
-        ResourceNotFound,
-        ResourceLoading
+        ResourceLoader
     },
     data() {
         return {
-            model: null as Model | null,
-            fetched: false
+            model: null as Model | null
         };
     },
-    async mounted() {
-        await this.fetchData();
-    },
     methods: {
-        async fetchData() {
+        async fetchModel() {
             const result = await API.models.getModel({ jobId: this.$route.params.jobId });
-            if (result.status)
-                this.model = Model.fromServer(result.data);
+            if (!result.status)
+                return false;
 
-            this.fetched = true;
+            this.model = Model.fromServer(result.data);
+            return true;
         }
     }
 });
@@ -45,8 +40,7 @@ export default defineComponent({
                 :model="model"
             />
         </div>
-        <ResourceNotFound v-else-if="fetched" />
-        <ResourceLoading v-else />
+        <ResourceLoader :loading-function="fetchModel" />
     </div>
 </template>
 

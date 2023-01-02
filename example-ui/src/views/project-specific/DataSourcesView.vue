@@ -1,29 +1,24 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import API from '@/utils/api';
 import type { DataSource } from '@/types/dataSource';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import { useRouter } from 'vue-router';
 import { tryUseSchemaCategory } from '@/utils/globalSchemaSettings';
 
 const dataSources = ref<DataSource[]>();
-const fetched = ref(false);
 
-onMounted(() => {
-    fetchData();
-});
-
-async function fetchData() {
+async function fetchDataSources() {
     const categoryId = tryUseSchemaCategory();
     const queryParams = categoryId !== undefined ? { categoryId } : undefined;
     const result = await API.dataSources.getAllDataSources({}, queryParams);
-    if (result.status)
-        dataSources.value = result.data;
+    if (!result.status)
+        return false;
 
-    fetched.value = true;
+    dataSources.value = result.data;
+    return true;
 }
 
 const router = useRouter();
@@ -58,8 +53,7 @@ function createNew() {
                 </div>
             </div>
         </template>
-        <ResourceNotFound v-else-if="fetched" />
-        <ResourceLoading v-else />
+        <ResourceLoader :loading-function="fetchDataSources" />
     </div>
 </template>
 

@@ -2,35 +2,30 @@
 import { defineComponent } from 'vue';
 import { LogicalModel } from '@/types/logicalModel';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import API from '@/utils/api';
 
 export default defineComponent({
     components: {
-        ResourceNotFound,
-        ResourceLoading,
+        ResourceLoader,
         LogicalModelDisplay,
         MappingDisplay
     },
     data() {
         return {
-            fetched: false,
             logicalModel: null as LogicalModel | null
         };
     },
-    async mounted() {
-        await this.fetchData();
-    },
     methods: {
-        async fetchData() {
+        async fetchModel() {
             const result = await API.logicalModels.getLogicalModel({ id: this.$route.params.id });
-            if (result.status)
-                this.logicalModel = LogicalModel.fromServer(result.data);
+            if (!result.status)
+                return false;
 
-            this.fetched = true;
+            this.logicalModel = LogicalModel.fromServer(result.data);
+            return true;
         },
         createNewMapping() {
             this.$router.push({ name: 'accessPathEditor', params: { logicalModelId: this.$route.params.id } });
@@ -66,8 +61,7 @@ export default defineComponent({
                 </div>
             </div>
         </template>
-        <ResourceNotFound v-else-if="fetched" />
-        <ResourceLoading v-else />
+        <ResourceLoader :loading-function="fetchModel" />
     </div>
 </template>
 

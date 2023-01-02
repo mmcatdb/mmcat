@@ -1,26 +1,23 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { ModelView } from '@/types/model';
 import API from '@/utils/api';
 
-import ModelViewDisplay from '@/components/ModelViewDisplay.vue';
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import ModelViewDisplay from '@/components/ModelViewDisplay.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 
 const models = ref<ModelView[]>();
-const fetched = ref(false);
-
-onMounted(fetchData);
 
 const schemaCategoryId = useSchemaCategory();
 
-async function fetchData() {
+async function fetchModels() {
     const result = await API.models.getAllModelsInCategory({ categoryId: schemaCategoryId });
-    if (result.status)
-        models.value = result.data.map(ModelView.fromServer);
+    if (!result.status)
+        return false;
 
-    fetched.value = true;
+    models.value = result.data.map(ModelView.fromServer);
+    return true;
 }
 </script>
 
@@ -37,8 +34,7 @@ async function fetchData() {
                 :model="model"
             />
         </div>
-        <ResourceNotFound v-else-if="fetched" />
-        <ResourceLoading v-else />
+        <ResourceLoader :loading-function="fetchModels" />
     </div>
 </template>
 

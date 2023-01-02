@@ -2,11 +2,10 @@
 import API from '@/utils/api';
 import type { DataSource } from '@/types/dataSource';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import DataSourceEditor from '@/components/dataSource/DataSourceEditor.vue';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -18,24 +17,19 @@ const id = isNew ? null : parseInt(rawId);
 
 const isEditing = ref(isNew || route.params.state === 'editing');
 const dataSource = ref<DataSource>();
-const fetched = ref(false);
 
 const shouldReturnToAllDataSourcesAfterEditing = isEditing.value;
 
-onMounted(async () => {
-    if (!isNew)
-        fetchData();
-});
-
-async function fetchData() {
-    if (!id)
-        return;
+async function fetchDataSource() {
+    if (isNew || !id)
+        return true;
 
     const result = await API.dataSources.getDataSource({ id: id });
-    if (result.status)
-        dataSource.value = result.data;
+    if (!result.status)
+        return false;
 
-    fetched.value = true;
+    dataSource.value = result.data;
+    return true;
 }
 
 function save(newValue: DataSource) {
@@ -92,8 +86,7 @@ function deleteFunction() {
                     @edit="isEditing = true"
                 />
             </div>
-            <ResourceNotFound v-else-if="fetched" />
-            <ResourceLoading v-else />
+            <ResourceLoader :loading-function="fetchDataSource" />
         </template>
     </div>
 </template>

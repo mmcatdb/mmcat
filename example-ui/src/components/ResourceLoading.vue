@@ -1,24 +1,18 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const LOADING_WAIT_TIME_IN_MILLISECONDS = 400;
 
-export default defineComponent({
-    data() {
-        return {
-            showLoadingMessage: false,
-            timeoutId: undefined as number | undefined
-        };
-    },
-    mounted() {
-        this.timeoutId = setTimeout(() => {
-            this.showLoadingMessage = true;
-        }, LOADING_WAIT_TIME_IN_MILLISECONDS);
-    },
-    unmounted() {
-        clearTimeout(this.timeoutId);
-    }
+const showLoadingMessage = ref(false);
+
+const timeoutId = ref<number>();
+onMounted(() => {
+    timeoutId.value = setTimeout(() => {
+        showLoadingMessage.value = true;
+    }, LOADING_WAIT_TIME_IN_MILLISECONDS);
 });
+
+onUnmounted(() => clearTimeout(timeoutId.value));
 </script>
 
 <template>

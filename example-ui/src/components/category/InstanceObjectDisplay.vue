@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import type { SchemaObject } from '@/types/schema';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import { InstanceObject } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
@@ -30,31 +29,26 @@ const props = defineProps<InstanceObjectProps>();
 const emit = defineEmits([ 'object:click' ]);
 
 const fetchedInstanceObject = ref<FetchedInstanceObject>();
-const loading = ref(false);
 
 const schemaCategoryId = useSchemaCategory();
 
-onMounted(async () => {
-    loading.value = true;
-
+async function fetchObject() {
     const result = await API.instances.getInstanceObject({ categoryId: schemaCategoryId, objectKey: props.node.schemaObject.key.value });
-    if (result.status && 'data' in result) {
-        const object = InstanceObject.fromServer(result.data);
-        fetchedInstanceObject.value = {
-            object,
-            columns: object.columns.map(signature => ({
-                signature,
-                schemaObject: props.node.getNeighbour(signature)?.schemaObject,
-                isClickable: !signature.equals(Signature.empty)
-            }))
-        };
+    if (!result.status || !('data' in result))
+        return false;
 
-        console.log(fetchedInstanceObject.value);
-        console.log(props.node);
-    }
+    const object = InstanceObject.fromServer(result.data);
+    fetchedInstanceObject.value = {
+        object,
+        columns: object.columns.map(signature => ({
+            signature,
+            schemaObject: props.node.getNeighbour(signature)?.schemaObject,
+            isClickable: !signature.equals(Signature.empty)
+        }))
+    };
 
-    loading.value = false;
-});
+    return true;
+}
 
 function columnClicked(column: Column) {
     if (column.isClickable)
@@ -64,8 +58,7 @@ function columnClicked(column: Column) {
 
 <template>
     <div class="outer">
-        <ResourceLoading v-if="loading" />
-        <template v-else-if="fetchedInstanceObject">
+        <template v-if="fetchedInstanceObject">
             <table v-if="fetchedInstanceObject.columns.length > 0">
                 <tr>
                     <th
@@ -99,7 +92,7 @@ function columnClicked(column: Column) {
                 Instance object is empty.
             </span>
         </template>
-        <ResourceNotFound v-else />
+        <ResourceLoader :loading-function="fetchObject" />
     </div>
 </template>
 

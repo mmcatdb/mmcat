@@ -2,11 +2,10 @@
 import API from '@/utils/api';
 import type { Database } from '@/types/database';
 
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
+import ResourceLoader from '@/components/ResourceLoader.vue';
 import DatabaseDisplay from '@/components/database/DatabaseDisplay.vue';
 import DatabaseEditor from '@/components/database/DatabaseEditor.vue';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -18,24 +17,19 @@ const id = isNew ? null : parseInt(rawId);
 
 const isEditing = ref(isNew || route.params.state === 'editing');
 const database = ref<Database>();
-const fetched = ref(false);
 
 const shouldReturnToAllDatabasesAfterEditing = isEditing.value;
 
-onMounted(async () => {
-    if (!isNew)
-        fetchData();
-});
-
-async function fetchData() {
-    if (!id)
-        return;
+async function fetchDatabase() {
+    if (isNew || !id)
+        return true;
 
     const result = await API.databases.getDatabase({ id: id });
-    if (result.status)
-        database.value = result.data;
+    if (!result.status)
+        return false;
 
-    fetched.value = true;
+    database.value = result.data;
+    return true;
 }
 
 function save(newValue: Database) {
@@ -92,8 +86,7 @@ function deleteFunction() {
                     @edit="isEditing = true"
                 />
             </div>
-            <ResourceNotFound v-else-if="fetched" />
-            <ResourceLoading v-else />
+            <ResourceLoader :loading-function="fetchDatabase" />
         </template>
     </div>
 </template>
