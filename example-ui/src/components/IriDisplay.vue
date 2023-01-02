@@ -5,6 +5,7 @@ import { computed } from 'vue';
 interface IriDisplayProps {
     iri?: Iri;
     maxChars?: number;
+    clickable?: boolean;
 }
 
 const props = defineProps<IriDisplayProps>();
@@ -40,6 +41,13 @@ const iriRows = computed(() => {
 
     return output;
 });
+
+function click() {
+    if (!props.clickable)
+        return;
+
+    window.open(props.iri, '_blank', 'noreferrer');
+}
 </script>
 
 <template>
@@ -48,6 +56,8 @@ const iriRows = computed(() => {
             v-for="row in iriRows"
             :key="row"
             class="iri-row"
+            :class="{ clickable: props.clickable }"
+            @click="click"
         >
             {{ row }}
         </div>

@@ -46,6 +46,7 @@ function edit() {
                     <IriDisplay
                         :iri="dataSource.url"
                         :max-chars="36"
+                        clickable
                     />
                 </td>
             </tr>
