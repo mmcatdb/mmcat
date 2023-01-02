@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.integration;
+package cz.cuni.matfyz.integration.algorithms;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
@@ -11,6 +11,7 @@ import cz.cuni.matfyz.integration.propertyprocessor.ArrayProcessor;
 import cz.cuni.matfyz.integration.propertyprocessor.NonTypePropertyProcessor;
 import cz.cuni.matfyz.integration.propertyprocessor.PropertyProcessor;
 import cz.cuni.matfyz.integration.propertyprocessor.TextProcessor;
+import cz.cuni.matfyz.integration.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +32,7 @@ public class RDFToInstance {
 
     static final String RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
-    static final String IDENTIFIER_IRI = Common.CUSTOM_IRI_PREFIX + "identifier";
-    static final String CLASS_TO_IDENTIFIER_IRI = Common.CUSTOM_IRI_PREFIX + "class-to-identifier";
-    static final String CLASS_TO_ISA_IRI = Common.CUSTOM_IRI_PREFIX + "class-to-isa";
+    static final String CLASS_TO_ISA_IRI = Constants.CUSTOM_IRI_PREFIX + "class-to-isa";
 
     private Dataset dataset;
     private InstanceCategory category;

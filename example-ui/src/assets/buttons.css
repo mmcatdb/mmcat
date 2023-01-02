@@ -100,11 +100,5 @@ button.warning:hover, button.warning.selected {
 .button-icon {
     cursor: pointer;
     width: fit-content;
-    padding: 2px 4px;
     border-radius: 4px;
-}
-
-td > .button-icon {
-    padding-top: 0px;
-    padding-bottom: 0px;
 }

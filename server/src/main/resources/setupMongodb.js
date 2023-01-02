@@ -23,7 +23,7 @@ db.order.insertMany([
                 quantity: '1'
             }
         ]
-    },    
+    },
     {
         _id: {
             customer: '1',
@@ -64,7 +64,7 @@ db.order.insertMany([
                 quantity: '1'
             }
         ]
-    },    
+    },
     {
         _id: {
             customer: '2',

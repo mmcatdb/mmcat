@@ -80,7 +80,6 @@ public class ICAlgorithm {
     }
 
     /**
-     * 
      * @param path
      * @param referenceProperties A set of signatures.
      * @return

@@ -77,7 +77,7 @@ public class WrapperService {
 
     private MongoDBPullWrapper getMongoDBPullWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!mongoDBCache.containsKey(database.id))
-            mongoDBCache.put(database.id, createMongoDBProvider(database));        
+            mongoDBCache.put(database.id, createMongoDBProvider(database));
 
         var wrapper = new MongoDBPullWrapper();
         var provider = mongoDBCache.get(database.id);

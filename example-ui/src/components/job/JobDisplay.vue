@@ -1,70 +1,61 @@
-<script lang="ts">
-import { type Job, Status } from '@/types/job';
+<script setup lang="ts">
+import { type Job, Status, JobType } from '@/types/job';
 import API from '@/utils/api';
-import { defineComponent } from 'vue';
+import { computed, ref } from 'vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
-export default defineComponent({
-    components: {
-        CleverRouterLink
-    },
-    props: {
-        job: {
-            type: Object as () => Job,
-            required: true
-        }
-    },
-    emits: [ 'deleteJob' ],
-    data() {
-        return {
-            startJobDisabled: false,
-            deleteJobDisabled: false,
-            restartJobDisabled: false,
-            Status
-        };
-    },
-    computed: {
-        jobStatusClass(): string {
-            switch (this.job.status) {
-            case Status.Canceled:
-                return 'text-error';
-            case Status.Finished:
-                return 'text-success';
-            default:
-                return '';
-            }
-        }
-    },
-    methods: {
-        async startJob() {
-            this.startJobDisabled = true;
+interface JobDisplayProps {
+    job: Job;
+}
 
-            const result = await API.jobs.startJob({ id: this.job.id });
-            if (result.status)
-                this.job.setStatus(result.data.status);
+const props = defineProps<JobDisplayProps>();
 
-            this.startJobDisabled = false;
-        },
-        async deleteJob() {
-            this.deleteJobDisabled = true;
+const emit = defineEmits([ 'deleteJob' ]);
 
-            const result = await API.jobs.deleteJob({ id: this.job.id });
-            if (result.status)
-                this.$emit('deleteJob');
+const startJobDisabled = ref(false);
+const deleteJobDisabled = ref(false);
+const restartJobDisabled = ref(false);
 
-            this.deleteJobDisabled = false;
-        },
-        async restartJob() {
-            this.restartJobDisabled = true;
-
-            const result = await API.jobs.startJob({ id: this.job.id });
-            if (result.status)
-                this.job.setStatus(result.data.status);
-
-            this.restartJobDisabled = false;
-        }
+const jobStatusClass = computed(() => {
+    switch (props.job.status) {
+    case Status.Canceled:
+        return 'text-error';
+    case Status.Finished:
+        return 'text-success';
+    default:
+        return '';
     }
 });
+
+async function startJob() {
+    startJobDisabled.value = true;
+
+    const result = await API.jobs.startJob({ id: props.job.id });
+    if (result.status)
+        props.job.setStatus(result.data.status);
+
+    startJobDisabled.value = false;
+}
+
+async function deleteJob() {
+    deleteJobDisabled.value = true;
+
+    const result = await API.jobs.deleteJob({ id: props.job.id });
+    if (result.status)
+        emit('deleteJob');
+
+    deleteJobDisabled.value = false;
+}
+
+async function restartJob() {
+    restartJobDisabled.value = true;
+
+    const result = await API.jobs.startJob({ id: props.job.id });
+    if (result.status)
+        props.job.setStatus(result.data.status);
+
+    restartJobDisabled.value = false;
+}
 </script>
 
 <template>
@@ -83,18 +74,26 @@ export default defineComponent({
             </tr>
             <tr>
                 <td class="label">
-                    Logical model id:
-                </td>
-                <td class="value">
-                    {{ job.logicalModelId }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
                     Type:
                 </td>
                 <td class="value">
                     {{ job.type }}
+                </td>
+            </tr>
+            <tr v-if="job.type === JobType.JsonLdToCategory">
+                <td class="label">
+                    Database id:
+                </td>
+                <td class="value">
+                    {{ job.dataSourceId }}
+                </td>
+            </tr>
+            <tr v-else>
+                <td class="label">
+                    Logical model id:
+                </td>
+                <td class="value">
+                    {{ job.logicalModelId }}
                 </td>
             </tr>
             <tr>

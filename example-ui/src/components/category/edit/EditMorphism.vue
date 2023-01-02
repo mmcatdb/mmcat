@@ -260,9 +260,5 @@ export default defineComponent({
 .number-input {
     max-width: 80px;
 }
-
-.value::v-deep .iri-row {
-    font-weight: bold;
-}
 </style>
 

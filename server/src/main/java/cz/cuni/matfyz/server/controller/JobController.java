@@ -44,8 +44,7 @@ public class JobController {
 
     @PostMapping("/jobs")
     public Job createNewJob(@RequestBody JobInit jobInit) {
-        //Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobInit.mappingId(), null, jobInit.name(), Job.Type.valueOf(jobInit.type()), Job.Status.Ready));
-        Job newJob = service.createNew(new Job.Builder().fromArguments(null, jobInit.logicalModelId(), null, jobInit.label(), jobInit.type(), Job.Status.Ready));
+        Job newJob = service.createNew(new Job.Builder().fromInit(jobInit));
         if (newJob != null)
             return newJob;
         

@@ -7,14 +7,14 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-public class IdDeserializer extends StdDeserializer<Id> { 
+public class IdDeserializer extends StdDeserializer<Id> {
 
-    public IdDeserializer() { 
-        this(null); 
-    } 
+    public IdDeserializer() {
+        this(null);
+    }
 
-    public IdDeserializer(Class<?> vc) { 
-        super(vc); 
+    public IdDeserializer(Class<?> vc) {
+        super(vc);
     }
 
     @Override

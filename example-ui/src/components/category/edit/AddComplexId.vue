@@ -6,12 +6,14 @@ import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
 import SignatureIdDisplay from '../SignatureIdDisplay.vue';
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 
 export default defineComponent({
     components: {
         SignatureIdDisplay,
         SignatureInput,
+        ButtonIcon,
         IconPlusSquare
     },
     props: {
@@ -76,14 +78,13 @@ export default defineComponent({
             </td>
             <td class="value fix-icon-height">
                 <SignatureIdDisplay :signature-id="signatureIdFactory.signatureId" />
-                <span
+                <ButtonIcon
                     v-if="!addingSignature"
-                    class="button-icon"
                     :class="{ 'ml-2': !signatureIdFactory.isEmpty }"
                     @click="startAddingSignature"
                 >
                     <IconPlusSquare />
-                </span>
+                </ButtonIcon>
             </td>
         </tr>
     </table>

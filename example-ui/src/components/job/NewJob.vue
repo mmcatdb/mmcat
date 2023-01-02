@@ -1,38 +1,53 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { JOB_TYPES, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 import type { Id } from '@/types/id';
+import { DataSource } from '@/types/dataSource';
 
 const emit = defineEmits([ 'newJob' ]);
 
 const logicalModels = ref<LogicalModel[]>();
+const dataSources = ref<DataSource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
+const dataSourceId = ref<Id>();
 const jobName = ref<string>('');
-const jobType = ref<JobType>();
+const jobType = ref(JOB_TYPES[0].value);
 const fetching = ref(false);
 
 const schemaCategoryId = useSchemaCategory();
 
 onMounted(async () => {
-    const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
-    if (result.status)
-        logicalModels.value = result.data.map(LogicalModel.fromServer);
+    const logicalModelResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
+    if (logicalModelResult.status)
+        logicalModels.value = logicalModelResult.data.map(LogicalModel.fromServer);
+
+    const dataSourceResult = await API.dataSources.getAllDataSources({});
+    if (dataSourceResult.status)
+        dataSources.value = dataSourceResult.data.map(DataSource.fromServer);
 
     fetched.value = true;
 });
 
-async function createJob() {
-    if (!logicalModelId.value || !jobType.value)
-        return;
+const dataValid = computed(() => {
+    if (!jobName.value)
+        return false;
 
+    return jobType.value === JobType.JsonLdToCategory
+        ? !!dataSourceId.value
+        : !!logicalModelId.value;
+});
+
+async function createJob() {
     fetching.value = true;
 
     const result = await API.jobs.createNewJob({}, {
-        logicalModelId: logicalModelId.value,
+        categoryId: schemaCategoryId,
+        logicalModelId: jobType.value === JobType.JsonLdToCategory ? undefined : logicalModelId.value,
+        dataSourceId: jobType.value === JobType.JsonLdToCategory ? dataSourceId.value : undefined,
         label: jobName.value,
         type: jobType.value
     });
@@ -71,7 +86,23 @@ async function createJob() {
                     </select>
                 </td>
             </tr>
-            <tr>
+            <tr v-if="jobType === JobType.JsonLdToCategory">
+                <td class="label">
+                    Data source:
+                </td>
+                <td class="value">
+                    <select v-model="dataSourceId">
+                        <option
+                            v-for="dataSource in dataSources"
+                            :key="dataSource.id"
+                            :value="dataSource.id"
+                        >
+                            {{ dataSource.label }}
+                        </option>
+                    </select>
+                </td>
+            </tr>
+            <tr v-else>
                 <td class="label">
                     Logical model:
                 </td>
@@ -93,7 +124,7 @@ async function createJob() {
         </table>
         <div class="button-row">
             <button
-                :disabled="(fetching || !jobName || !jobType || !logicalModelId)"
+                :disabled="(fetching || !dataValid)"
                 @click="createJob"
             >
                 Create job

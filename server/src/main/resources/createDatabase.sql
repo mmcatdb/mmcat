@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS job;
 DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS logical_model;
+DROP TABLE IF EXISTS data_source;
 DROP TABLE IF EXISTS database_for_mapping;
 
 DROP TABLE IF EXISTS schema_morphism_in_category;
@@ -458,6 +459,19 @@ VALUES
         }
     }');
 
+CREATE TABLE data_source (
+    id SERIAL PRIMARY KEY,
+    json_value JSONB NOT NULL
+);
+
+INSERT INTO data_source (json_value)
+VALUES
+    ('{
+        "url": "http://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld",
+        "label": "test2",
+        "type": "JsonLdStore"
+    }');
+
 CREATE TABLE logical_model (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
@@ -504,7 +518,9 @@ VALUES
 
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
-    logical_model_id INTEGER NOT NULL REFERENCES mapping,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    logical_model_id INTEGER REFERENCES logical_model,
+    data_source_id INTEGER REFERENCES database_for_mapping, -- TODO make job to contain either logical_model_id or data_source_id
     json_value JSONB NOT NULL
     -- přidat typ jobu, vstup, výstup, vše serializované v jsonu
         -- podobně jako ukládání logování
@@ -513,11 +529,11 @@ CREATE TABLE job (
 
 );
 
-INSERT INTO job (logical_model_id, json_value)
+INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value)
 VALUES
-    (1, '{"label": "Import Order", "type": "ModelToCategory", "status": "Ready"}'),
-    (1, '{"label": "Export Order", "type": "CategoryToModel", "status": "Ready"}'),
-    (2, '{"label": "Import Customer", "type": "ModelToCategory", "status": "Ready"}'),
-    (2, '{"label": "Export Customer", "type": "CategoryToModel", "status": "Ready"}'),
-    (3, '{"label": "Import from Postgres", "type": "ModelToCategory", "status": "Ready"}'),
-    (4, '{"label": "Export to Mongo", "type": "CategoryToModel", "status": "Ready"}');
+    (1, 1, null, '{"label": "Import Order", "type": "ModelToCategory", "status": "Ready"}'),
+    (1, 1, null, '{"label": "Export Order", "type": "CategoryToModel", "status": "Ready"}'),
+    (2, 2, null, '{"label": "Import Customer", "type": "ModelToCategory", "status": "Ready"}'),
+    (2, 2, null, '{"label": "Export Customer", "type": "CategoryToModel", "status": "Ready"}'),
+    (3, 3, null, '{"label": "Import from Postgres", "type": "ModelToCategory", "status": "Ready"}'),
+    (3, 4, null, '{"label": "Export to Mongo", "type": "CategoryToModel", "status": "Ready"}');

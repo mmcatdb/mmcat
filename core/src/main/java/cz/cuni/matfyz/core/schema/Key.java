@@ -42,7 +42,7 @@ public class Key implements Serializable, Comparable<Key>, JSONConvertible {
 
     /**
      * Auto-generated, constants doesn't have any special meaning.
-     * @return 
+     * @return
      */
     @Override
     public int hashCode() {

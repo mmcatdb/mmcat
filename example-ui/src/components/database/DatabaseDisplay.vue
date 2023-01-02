@@ -1,30 +1,18 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Database } from '@/types/database';
-import { defineComponent } from 'vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 
-export default defineComponent({
-    components: {
-        CleverRouterLink
-    },
-    props: {
-        database: {
-            type: Object as () => Database,
-            required: true
-        }
-    },
-    emits: [ 'edit' ],
-    data() {
-        return {
+interface DatabaseDisplayProps {
+    database: Database;
+}
 
-        };
-    },
-    methods: {
-        edit() {
-            this.$emit('edit');
-        }
-    }
-});
+defineProps<DatabaseDisplayProps>();
+
+const emit = defineEmits([ 'edit' ]);
+
+function edit() {
+    emit('edit');
+}
 </script>
 
 <template>

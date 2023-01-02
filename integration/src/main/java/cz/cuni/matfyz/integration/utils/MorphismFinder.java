@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.integration;
+package cz.cuni.matfyz.integration.utils;
 
 import cz.cuni.matfyz.core.category.Morphism.Tag;
 import cz.cuni.matfyz.core.category.Signature;

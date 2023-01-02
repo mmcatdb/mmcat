@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * @author jachymb.bartik
  */
-public class MongoDBDDLWrapper implements AbstractDDLWrapper {    
+public class MongoDBDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
     

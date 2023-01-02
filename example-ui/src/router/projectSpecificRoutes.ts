@@ -62,6 +62,11 @@ export const projectSpecificRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/project-specific/DatabasesView.vue')
     },
     {
+        path: 'data-sources',
+        name: 'dataSourcesInSchema',
+        component: () => import('@/views/project-specific/DataSourcesView.vue')
+    },
+    {
         path: '404',
         name: 'platformSpecificNotFound',
         component: () => import('@/views/PageNotFoundView.vue')

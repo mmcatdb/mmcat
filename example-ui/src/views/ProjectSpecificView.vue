@@ -4,7 +4,7 @@ import type { Id } from '@/types/id';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
 import { onMounted, provide, ref } from 'vue';
-import { RouterView, useRoute, useRouter } from 'vue-router';
+import { RouterView, useRouter } from 'vue-router';
 
 interface ProjectSpecificViewProps {
     schemaCategoryId: Id;

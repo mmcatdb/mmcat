@@ -23,7 +23,7 @@ public class StaticRecordName extends RecordName {
 
     /**
      * Auto-generated, constants doesn't have any special meaning.
-     * @return 
+     * @return
      */
     /*
     @Override

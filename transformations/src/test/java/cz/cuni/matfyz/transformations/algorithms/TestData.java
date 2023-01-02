@@ -230,7 +230,7 @@ public class TestData {
         addMorphismWithDual(schema, contactToName, contact, name, Cardinality.MANY_TO_ONE);
     }
     
-    private void addNestedDoc(SchemaCategory schema, SchemaObject order) {   
+    private void addNestedDoc(SchemaCategory schema, SchemaObject order) {
         var nestedDoc = createSchemaObject(
             nestedDocKey,
             "NestedDoc",

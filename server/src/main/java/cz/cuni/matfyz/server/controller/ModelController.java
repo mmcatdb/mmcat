@@ -26,6 +26,7 @@ public class ModelController {
 
     @GetMapping("/schema-categories/{categoryId}/models")
     public List<ModelView> getAllModelsInCategory(HttpSession session, @PathVariable Id categoryId) {
+        System.out.println("SID: " + session.getId());
         return service.findAllInCategory(session, categoryId).stream().map(ModelView::new).toList();
     }
 

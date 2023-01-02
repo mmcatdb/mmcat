@@ -3,7 +3,7 @@ package cz.cuni.matfyz.integration.propertyprocessor;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.integration.MorphismFinder;
+import cz.cuni.matfyz.integration.utils.MorphismFinder;
 
 
 /**

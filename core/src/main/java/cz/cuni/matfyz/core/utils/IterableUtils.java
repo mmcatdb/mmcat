@@ -18,7 +18,7 @@ public class IterableUtils {
      * @param a
      * @param b
      * @param action
-     * @return 
+     * @return
      */
     public static <T1, T2> boolean iterateTwo(Iterable<T1> a, Iterable<T2> b, BiConsumer<T1, T2> action) {
         Iterator<T1> iteratorA = a.iterator();
@@ -38,7 +38,7 @@ public class IterableUtils {
      * @param a
      * @param b
      * @param continueFunction
-     * @return 
+     * @return
      */
     public static <T1, T2> boolean iterateTwo(Iterable<T1> a, Iterable<T2> b, BiPredicate<T1, T2> continueFunction) {
         Iterator<T1> iteratorA = a.iterator();

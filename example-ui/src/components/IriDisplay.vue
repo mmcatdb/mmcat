@@ -60,3 +60,9 @@ const iriRows = computed(() => {
     flex-direction: column;
 }
 </style>
+
+<style>
+.value .iri-row {
+    font-weight: bold;
+}
+</style>

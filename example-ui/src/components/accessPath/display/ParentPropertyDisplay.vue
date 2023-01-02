@@ -3,13 +3,15 @@ import { GraphSimpleProperty, GraphComplexProperty, type GraphParentProperty, Gr
 import { SimpleProperty, ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import { defineComponent } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
+import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 
 export default defineComponent({
     name: 'ParentPropertyDisplay',
     components: {
         SimplePropertyDisplay,
-        IconPlusSquare,
+        ButtonIcon,
+        IconPlusSquare
     },
     props: {
         property: {
@@ -108,15 +110,15 @@ export default defineComponent({
                     @simple:click="reEmitSimpleClick"
                     @add:click="reEmitAddClick"
                 />
-                <span
+                <ButtonIcon
                     v-if="!disableAdditions"
-                    class="button-icon"
+                    class="name-text"
                     @click="$emit('add:click', property)"
                     @mouseenter="highlighted = true;"
                     @mouseleave="highlighted = false"
                 >
                     <IconPlusSquare />
-                </span>
+                </ButtonIcon>
             </div>
         </div>
         <div class="row">

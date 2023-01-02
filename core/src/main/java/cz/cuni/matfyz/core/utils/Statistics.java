@@ -95,7 +95,9 @@ public class Statistics {
         INSTANCE_TO_DATABASE,
         JOIN,
         MOVE,
-        IMPORT_JOIN_MOVE
+        IMPORT_JOIN_MOVE,
+        JSON_LD_TO_RDF,
+        RDF_TO_INSTANCE
     }
 
     private static Map<Counter, Long> counters = generateCounters();

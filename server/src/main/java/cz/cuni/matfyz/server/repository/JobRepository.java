@@ -21,23 +21,20 @@ public class JobRepository {
     public List<Job> findAllInCategory(Id categoryId) {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
-                SELECT
-                    job.id as _id,
-                    job.logical_model_id as _logical_model_id,
-                    job.json_value as _json_value
+                SELECT *
                 FROM job
-                JOIN logical_model on logical_model.id = job.logical_model_id
-                WHERE logical_model.schema_category_id = ?
+                WHERE schema_category_id = ?
                 ORDER BY job.id;
                 """);
             setId(statement, 1, categoryId);
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Id id = getId(resultSet, "_id");
-                Id logicalModelId = getId(resultSet, "_logical_model_id");
-                String jsonValue = resultSet.getString("_json_value");
-                output.add(new Job.Builder().fromJSON(id, logicalModelId, categoryId, jsonValue));
+                Id id = getId(resultSet, "id");
+                Id logicalModelId = getId(resultSet, "logical_model_id");
+                Id dataSourceId = getId(resultSet, "data_source_id");
+                String jsonValue = resultSet.getString("json_value");
+                output.add(new Job.Builder().fromJSON(id, categoryId, logicalModelId, dataSourceId, jsonValue));
             }
         });
     }
@@ -45,33 +42,30 @@ public class JobRepository {
     public Job find(Id id) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
-                SELECT
-                    job.id as _id,
-                    job.logical_model_id as _logical_model_id,
-                    job.json_value as _json_value,
-                    logical_model.schema_category_id as _schema_category_id
+                SELECT *
                 FROM job
-                JOIN logical_model on logical_model.id = job.logical_model_id
-                WHERE job.id = ?
-                ORDER BY job.id;
+                WHERE job.id = ?;
                 """);
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                Id logicalModelId = getId(resultSet, "_logical_model_id");
-                Id categoryId = getId(resultSet, "_schema_category_id");
-                String jsonValue = resultSet.getString("_json_value");
-                output.set(new Job.Builder().fromJSON(id, logicalModelId, categoryId, jsonValue));
+                Id categoryId = getId(resultSet, "schema_category_id");
+                Id logicalModelId = getId(resultSet, "logical_model_id");
+                Id dataSourceId = getId(resultSet, "data_source_id");
+                String jsonValue = resultSet.getString("json_value");
+                output.set(new Job.Builder().fromJSON(id, categoryId, logicalModelId, dataSourceId, jsonValue));
             }
         });
     }
 
     public Id add(Job job) {
         return DatabaseWrapper.get((connection, output) -> {
-            var statement = connection.prepareStatement("INSERT INTO job (logical_model_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            setId(statement, 1, job.logicalModelId);
-            statement.setString(2, job.toJSON().toString());
+            var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value) VALUES (?, ?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            setId(statement, 1, job.categoryId);
+            setId(statement, 2, job.logicalModelId);
+            setId(statement, 3, job.dataSourceId);
+            statement.setString(4, job.toJSON().toString());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

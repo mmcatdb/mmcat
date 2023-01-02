@@ -177,7 +177,7 @@ public class Merger {
     
             // Get all morphisms from and to the original rows and put the new one instead of them.
             // Detect all morphisms that have maximal cardinality ONE and merge their rows. This can cause a chain reaction.
-            // This steps is done by combining the rows' superIds and then calling 
+            // This steps is done by combining the rows' superIds and then calling merge.
             mergeMappings(originalRows, newRow);
         }
 

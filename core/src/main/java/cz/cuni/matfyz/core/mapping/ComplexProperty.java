@@ -186,7 +186,7 @@ public class ComplexProperty extends AccessPath {
     
     /**
      * Properties from given synthetic nodes are moved to their parent paths
-     * @return 
+     * @return
      */
     public ComplexProperty copyWithoutAuxiliaryNodes() {
         List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();

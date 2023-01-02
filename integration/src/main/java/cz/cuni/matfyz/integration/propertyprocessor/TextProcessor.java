@@ -3,7 +3,7 @@ package cz.cuni.matfyz.integration.propertyprocessor;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.integration.Common;
+import cz.cuni.matfyz.integration.utils.Constants;
 
 import org.apache.jena.rdf.model.Statement;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ public class TextProcessor extends Base implements PropertyProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TextProcessor.class);
 
-    private static final String TEXT_IRI_PREFIX = Common.CUSTOM_IRI_PREFIX + "text/";
+    private static final String TEXT_IRI_PREFIX = Constants.CUSTOM_IRI_PREFIX + "text/";
 
     private static final String ELEMENT = TEXT_IRI_PREFIX + "element";
     private static final String ELEMENT_TO_ATTRIBUTE = TEXT_IRI_PREFIX + "element-to-attribute";

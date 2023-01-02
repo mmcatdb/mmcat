@@ -2,7 +2,7 @@ import { ImportedMorphism, ImportedObject, type ImportedDataspecer, type Iri } f
 import type { ParsedDataspecer } from "@/types/integration";
 import { Cardinality, Tag, type CardinalitySettings } from "@/types/schema";
 import { createAttribute } from "./dataTypes";
-import { createValueId, createMorphismId, createGeneratedId, CUSTOM_IRI_PREFIX } from "./common";
+import { createValueId, createGeneratedId, CUSTOM_IRI_PREFIX } from "./common";
 
 const CARDINALITY_ONE_TO_ONE: CardinalitySettings = {
     domCodMin: Cardinality.One,
@@ -11,8 +11,6 @@ const CARDINALITY_ONE_TO_ONE: CardinalitySettings = {
     codDomMax: Cardinality.One
 };
 
-const IDENTIFIER_IRI: Iri = CUSTOM_IRI_PREFIX + 'identifier';
-const CLASS_TO_IDENTIFIER_IRI: Iri = CUSTOM_IRI_PREFIX + 'class-to-identifier';
 const CLASS_TO_ISA_IRI: Iri = CUSTOM_IRI_PREFIX + 'class-to-isa';
 
 const REVERSED_SUFFIX = '/_reversed';

@@ -1,76 +1,65 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import API from '@/utils/api';
-import { getNewDatabaseUpdate, type Database } from '@/types/database';
+import type { Database } from '@/types/database';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import DatabaseDisplay from '@/components/database/DatabaseDisplay.vue';
 import DatabaseEditor from '@/components/database/DatabaseEditor.vue';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
-export default defineComponent({
-    components: {
-        ResourceNotFound,
-        ResourceLoading,
-        DatabaseDisplay,
-        DatabaseEditor
-    },
-    props: {
+const route = useRoute();
+const router = useRouter();
 
-    },
-    data() {
-        const rawId = this.$route.params.id as string;
-        const isNew = rawId === 'new';
-        const id = isNew ? null : parseInt(rawId);
-        const isEditing = isNew || this.$route.params.state === 'editing';
+const rawId = route.params.id as string;
+const isNew = rawId === 'new';
+const id = isNew ? null : parseInt(rawId);
 
-        return {
-            id,
-            isNew,
-            isEditing,
-            shouldReturnToAllDatabasesAfterEditing: isEditing,
-            database: null as Database | null,
-            newDatabase: getNewDatabaseUpdate(),
-            fetched: false,
-        };
-    },
-    mounted() {
-        if (!this.isNew)
-            this.fetchData();
-    },
-    methods: {
-        async fetchData() {
-            if (!this.id)
-                return;
+const isEditing = ref(isNew || route.params.state === 'editing');
+const database = ref<Database>();
+const fetched = ref(false);
 
-            const result = await API.databases.getDatabase({ id: this.id });
-            if (result.status)
-                this.database = result.data;
+const shouldReturnToAllDatabasesAfterEditing = isEditing.value;
 
-            this.fetched = true;
-        },
-        save(newValue: Database) {
-            if (this.shouldReturnToAllDatabasesAfterEditing) {
-                this.$router.push({ name: 'databases' });
-                return;
-            }
-
-            this.database = newValue;
-            this.isEditing = false;
-        },
-        cancel() {
-            if (this.shouldReturnToAllDatabasesAfterEditing) {
-                this.$router.push({ name: 'databases' });
-                return;
-            }
-
-            this.isEditing = false;
-        },
-        deleteFunction() {
-            this.$router.push({ name: 'databases' });
-        }
-    }
+onMounted(async () => {
+    if (!isNew)
+        fetchData();
 });
+
+async function fetchData() {
+    if (!id)
+        return;
+
+    const result = await API.databases.getDatabase({ id: id });
+    if (result.status)
+        database.value = result.data;
+
+    fetched.value = true;
+}
+
+function save(newValue: Database) {
+    if (shouldReturnToAllDatabasesAfterEditing) {
+        router.push({ name: 'databases' });
+        return;
+    }
+
+    database.value = newValue;
+    isEditing.value = false;
+}
+
+function cancel() {
+    if (shouldReturnToAllDatabasesAfterEditing) {
+        router.push({ name: 'databases' });
+        return;
+    }
+
+    isEditing.value = false;
+}
+
+function deleteFunction() {
+    router.push({ name: 'databases' });
+}
 </script>
 
 <template>

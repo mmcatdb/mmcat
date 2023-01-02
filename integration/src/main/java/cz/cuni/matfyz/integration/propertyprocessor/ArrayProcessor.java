@@ -4,7 +4,7 @@ import cz.cuni.matfyz.core.category.Morphism.Tag;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.integration.Common;
+import cz.cuni.matfyz.integration.utils.Constants;
 
 import org.apache.jena.rdf.model.Statement;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ public class ArrayProcessor extends Base implements PropertyProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArrayProcessor.class);
 
-    private static final String ARRAY_IRI_PREFIX = Common.CUSTOM_IRI_PREFIX + "array/";
+    private static final String ARRAY_IRI_PREFIX = Constants.CUSTOM_IRI_PREFIX + "array/";
 
     private static final String ELEMENT_TO_COD_SUFFIX = "/_array";
     private static final String ELEMENT = ARRAY_IRI_PREFIX + "element";

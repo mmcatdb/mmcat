@@ -1,78 +1,67 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, createInitFromUpdate } from '@/types/database';
+<script setup lang="ts">
+import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, createInitFromUpdate, type DatabaseUpdate } from '@/types/database';
 import API from '@/utils/api';
+import { computed, ref } from 'vue';
 
-export default defineComponent({
-    props: {
-        database: {
-            type: Object as () => Database | null,
-            default: null,
-            required: false
-        }
-    },
-    emits: [ 'save', 'cancel', 'delete' ],
-    data() {
-        return {
-            fetching: false,
-            innerValue: this.database !== null ? copyDatabaseUpdate(this.database) : getNewDatabaseUpdate(),
-            //portString: '',
-            DB_TYPES,
-            Type
-        };
-    },
-    computed: {
-        isNew(): boolean {
-            return this.database === null;
-        },
-        isValid(): boolean {
-            return this.isNew ? true : !!createInitFromUpdate(this.innerValue);
-        }
-    },
-    methods: {
-        async save() {
-            this.fetching = true;
+interface DatabaseEditorProps {
+    database?: Database;
+}
 
-            await (this.isNew ? this.createNew() : this.updateOld());
+const props = defineProps<DatabaseEditorProps>();
 
-            this.fetching = false;
-        },
-        async createNew() {
-            const init = createInitFromUpdate(this.innerValue);
-            if (!init)
-                return;
+const emit = defineEmits([ 'save', 'cancel', 'delete' ]);
 
-            const result = await API.databases.createDatabase({}, init);
-            if (result.status)
-                this.$emit('save', result.data);
-        },
-        async updateOld() {
-            if (!this.database)
-                return;
+const fetching = ref(false);
+const innerValue = ref<DatabaseUpdate>(props.database ? copyDatabaseUpdate(props.database) : getNewDatabaseUpdate());
 
-            if (this.innerValue.settings.password === '')
-                this.innerValue.settings.password = undefined;
+const isNew = computed(() => props.database === null);
+const isValid = computed(() => isNew.value ? true : !!createInitFromUpdate(innerValue.value));
 
-            const result = await API.databases.updateDatabase({ id: this.database.id }, this.innerValue);
-            if (result.status)
-                this.$emit('save', result.data);
-        },
-        cancel() {
-            this.$emit('cancel');
-        },
-        async deleteMethod() {
-            if (!this.database)
-                return;
+async function save() {
+    fetching.value = true;
 
-            this.fetching = true;
-            const result = await API.databases.deleteDatabase({ id: this.database.id });
-            if (result.status)
-                this.$emit('delete');
+    await (isNew.value ? createNew() : updateOld());
 
-            this.fetching = false;
-        }
-    }
-});
+    fetching.value = false;
+}
+
+async function createNew() {
+    const init = createInitFromUpdate(innerValue.value);
+    if (!init)
+        return;
+
+    const result = await API.databases.createDatabase({}, init);
+    if (result.status)
+        emit('save', result.data);
+}
+
+async function updateOld() {
+    if (!props.database)
+        return;
+
+    if (innerValue.value.settings.password === '')
+        innerValue.value.settings.password = undefined;
+
+    const result = await API.databases.updateDatabase({ id: props.database.id }, innerValue.value);
+    if (result.status)
+        emit('save', result.data);
+}
+
+function cancel() {
+    emit('cancel');
+}
+
+async function deleteMethod() {
+    if (!props.database)
+        return;
+
+    fetching.value = true;
+    const result = await API.databases.deleteDatabase({ id: props.database.id });
+    if (result.status)
+        emit('delete');
+
+    fetching.value = false;
+}
 </script>
 
 <template>
@@ -181,13 +170,3 @@ export default defineComponent({
         </div>
     </div>
 </template>
-
-<style scoped>
-.accessPathInput {
-    color: white;
-    background-color: black;
-    width: 600px;
-    height: 600px;
-    font-size: 15px;
-}
-</style>

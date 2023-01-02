@@ -6,7 +6,7 @@ import type { PullResult } from '@/types/api/routes';
 export function createAxiosInstance(baseURL?: string) {
     const instance = axios.create({
         baseURL,
-        //withCredentials: true,
+        withCredentials: true, // This is required for the backend cookies to work properly.
         // timeout: false,
         params: {} // do not remove this, its added to add params later in the config
     });

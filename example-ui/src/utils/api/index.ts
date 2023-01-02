@@ -1,4 +1,5 @@
 import databases from "./routes/databases";
+import dataSources from "./routes/dataSource";
 import instances from "./routes/instances";
 import jobs from "./routes/jobs";
 import logicalModels from "./routes/logicalModels";
@@ -10,6 +11,7 @@ import schemas from "./routes/schemas";
 
 const API = {
     databases,
+    dataSources,
     mappings,
     jobs,
     logicalModels,

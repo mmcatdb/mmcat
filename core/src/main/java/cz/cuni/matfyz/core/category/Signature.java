@@ -205,7 +205,7 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
 
     /**
      * Auto-generated, constants doesn't have any special meaning.
-     * @return 
+     * @return
      */
     @Override
     public int hashCode() {

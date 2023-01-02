@@ -31,7 +31,7 @@ public class ArrayUtils {
     /**
      * Why java, why you have to be like this?
      * @param arrays
-     * @return 
+     * @return
      */
     public static int[] concatenate(int[]... arrays) {
         return concatenate(Arrays.asList(arrays));

@@ -8,14 +8,18 @@ import cz.cuni.matfyz.server.entity.Id;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.lang.Nullable;
 
 /**
  * @author jachym.bartik
  */
 public class Job extends Entity implements JSONConvertible {
 
-    public final Id logicalModelId;
     public final Id categoryId;
+    @Nullable
+    public final Id logicalModelId;
+    @Nullable
+    public final Id dataSourceId;
     public String label;
     public Type type;
     public Status status;
@@ -32,10 +36,11 @@ public class Job extends Entity implements JSONConvertible {
     }
     */
 
-    private Job(Id id, Id logicalModelId, Id categoryId) {
+    private Job(Id id, Id categoryId, Id logicalModelId, Id dataSourceId) {
         super(id);
-        this.logicalModelId = logicalModelId;
         this.categoryId = categoryId;
+        this.logicalModelId = logicalModelId;
+        this.dataSourceId = dataSourceId;
     }
 
     public enum Status {
@@ -48,7 +53,14 @@ public class Job extends Entity implements JSONConvertible {
 
     public enum Type {
         ModelToCategory,
-        CategoryToModel
+        CategoryToModel,
+        JsonLdToCategory
+    }
+
+    public boolean isValid() {
+        return type == Type.JsonLdToCategory
+            ? dataSourceId != null
+            : logicalModelId != null;
     }
 
     @Override
@@ -62,9 +74,9 @@ public class Job extends Entity implements JSONConvertible {
         protected JSONObject innerToJSON(Job object) throws JSONException {
             var output = new JSONObject();
 
-            output.put("label", object.label.toString());
-            output.put("type", object.type.toString());
-            output.put("status", object.status.toString());
+            output.put("label", object.label);
+            output.put("type", object.type);
+            output.put("status", object.status);
 
             return output;
         }
@@ -73,8 +85,8 @@ public class Job extends Entity implements JSONConvertible {
 
     public static class Builder extends FromJSONLoaderBase<Job> {
 
-        public Job fromJSON(Id id, Id logicalModelId, Id categoryId, String jsonValue) {
-            var job = new Job(id, logicalModelId, categoryId);
+        public Job fromJSON(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String jsonValue) {
+            var job = new Job(id, categoryId, logicalModelId, dataSourceId);
             loadFromJSON(job, jsonValue);
             return job;
         }
@@ -86,11 +98,20 @@ public class Job extends Entity implements JSONConvertible {
             job.status = Status.valueOf(jsonObject.getString("status"));
         }
 
-        public Job fromArguments(Id id, Id logicalModelId, Id categoryId, String label, Type type, Status status) {
-            var job = new Job(id, logicalModelId, categoryId);
+        public Job fromArguments(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String label, Type type, Status status) {
+            var job = new Job(id, categoryId, logicalModelId, dataSourceId);
             job.label = label;
             job.type = type;
             job.status = status;
+
+            return job;
+        }
+
+        public Job fromInit(JobInit init) {
+            final var job = new Job(null, init.categoryId(), init.logicalModelId(), init.dataSourceId());
+            job.label = init.label();
+            job.type = init.type();
+            job.status = Status.Ready;
 
             return job;
         }

@@ -182,9 +182,5 @@ export default defineComponent({
 .object-ids-display {
     margin-left: -6px;
 }
-
-.value::v-deep .iri-row {
-    font-weight: bold;
-}
 </style>
 

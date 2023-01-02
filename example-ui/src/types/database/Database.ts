@@ -65,9 +65,9 @@ export type Database = {
     settings: Settings;
 }
 
-export type DatabaseUpdate = DeepPartial<Omit<Database, 'id'>> & { settings: Partial<Settings> };
-
 export type DatabaseInit = Omit<Database, 'id'>;
+
+export type DatabaseUpdate = DeepPartial<DatabaseInit> & { settings: Partial<Settings> };
 
 export enum Type {
     mongodb = 'mongodb',

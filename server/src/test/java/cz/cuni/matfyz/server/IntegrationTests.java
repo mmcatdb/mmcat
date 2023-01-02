@@ -1,13 +1,15 @@
 package cz.cuni.matfyz.server;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
-import cz.cuni.matfyz.integration.JsonLdToRDF;
-import cz.cuni.matfyz.integration.RDFToInstance;
+import cz.cuni.matfyz.core.utils.io.FileInputStreamProvider;
+import cz.cuni.matfyz.core.utils.io.UrlInputStreamProvider;
+import cz.cuni.matfyz.integration.algorithms.JsonLdToRDF;
+import cz.cuni.matfyz.integration.algorithms.RDFToInstance;
 import cz.cuni.matfyz.server.builder.CategoryBuilder;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
@@ -26,15 +28,27 @@ public class IntegrationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);
     
     static final String JSON_LD_FILE_NAME = "test2.jsonld";
-    static final Id CATEGORY_ID = new Id("7");
+    static final String JSON_LD_URL = "http://localhost/test2.jsonld";
+    static final Id CATEGORY_ID = new Id("4");
 
     @Autowired
     private SchemaCategoryService categoryService;
 
     @Test
-    public void jsonLdToRDF_DoesNotThrow() {
+    public void jsonLdToRdfFromLocalFile_DoesNotThrow() {
         final var jsonToRDF = new JsonLdToRDF();
-        jsonToRDF.input(JSON_LD_FILE_NAME);
+        jsonToRDF.input(new FileInputStreamProvider(JSON_LD_FILE_NAME));
+
+        assertDoesNotThrow(() -> {
+            final var dataset = jsonToRDF.algorithm();
+            printDataset(dataset);
+        });
+    }
+
+    @Test
+    public void jsonLdToRdfFromRemoteUrl_DoesNotThrow() {
+        final var jsonToRDF = new JsonLdToRDF();
+        jsonToRDF.input(new UrlInputStreamProvider(JSON_LD_URL));
 
         assertDoesNotThrow(() -> {
             final var dataset = jsonToRDF.algorithm();
@@ -47,7 +61,7 @@ public class IntegrationTests {
         final var rdfToInstance = new RDFToInstance();
 
         final var jsonToRDF = new JsonLdToRDF();
-        jsonToRDF.input(JSON_LD_FILE_NAME);
+        jsonToRDF.input(new FileInputStreamProvider(JSON_LD_FILE_NAME));
 
         final var schemaCategoryWrapper = categoryService.find(CATEGORY_ID);
         final var schemaCategory = new CategoryBuilder()

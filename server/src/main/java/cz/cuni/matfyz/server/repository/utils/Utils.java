@@ -5,6 +5,7 @@ import cz.cuni.matfyz.server.entity.Id;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * @author jachym.bartik
@@ -24,6 +25,11 @@ public abstract class Utils {
     public static void setId(PreparedStatement statement, int position, Id id) throws SQLException {
         //statement.setString(position, id.value);
         try {
+            if (id == null) {
+                statement.setNull(position, Types.INTEGER);
+                return;
+            }
+
             statement.setInt(position, Integer.parseInt(id.value));
         }
         catch (NumberFormatException exception) {

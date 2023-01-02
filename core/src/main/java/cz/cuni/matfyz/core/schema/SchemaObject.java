@@ -79,7 +79,7 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
 
     /**
      * Auto-generated, constants doesn't have any special meaning.
-     * @return 
+     * @return
      */
     @Override
     public int hashCode() {

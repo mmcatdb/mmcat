@@ -26,7 +26,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
     @Override
     public boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
-        names.forEach(name -> {            
+        names.forEach(name -> {
             String command = name + " TEXT" + (required ? " NOT NULL" : "");
             properties.add(new Property(name, command));
         });
