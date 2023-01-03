@@ -31,6 +31,8 @@ public class ArrayProcessor extends Base implements PropertyProcessor {
 
     @Override
     public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
+        LOGGER.warn("[Array]: {}", statement);
+
         final var morphism = finder.findFromObject(resourceObject, statement.getPredicate().getURI() + ELEMENT_TO_COD_SUFFIX);
         if (morphism == null)
             return false;

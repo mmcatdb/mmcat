@@ -5,6 +5,7 @@ import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
+import cz.cuni.matfyz.integration.utils.IsaMorphismCreator;
 
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Resource;
@@ -33,23 +34,23 @@ public class NonTypePropertyProcessor extends Base implements PropertyProcessor 
 
         final var statementObject = statement.getObject();
         if (statementObject.isLiteral())
-            return tryAddLiteral(statementObject.asLiteral(), object, row, morphism);
+            return tryAddLiteral(statementObject.asLiteral(), row, morphism);
         if (statementObject.isResource())
-            return tryAddResource(statementObject.asResource(), object, row, morphism);
+            return tryAddResource(statementObject.asResource(), row, morphism);
 
         return false;
     }
 
-    private boolean tryAddLiteral(Literal literal, InstanceObject object, DomainRow row, InstanceMorphism morphism) {
+    private boolean tryAddLiteral(Literal literal, DomainRow row, InstanceMorphism morphism) {
         final var valueSuperId = SuperIdWithValues.fromEmptySignature(literal.getLexicalForm());
-        object.getOrCreateRowWithMorphism(valueSuperId, row, morphism);
+        IsaMorphismCreator.getOrCreateRowForIsaMorphism(valueSuperId, row, morphism);
 
         return true;
     }
 
-    private boolean tryAddResource(Resource resource, InstanceObject object, DomainRow row, InstanceMorphism morphism) {
+    private boolean tryAddResource(Resource resource, DomainRow row, InstanceMorphism morphism) {
         final var valueSuperId = SuperIdWithValues.fromEmptySignature(resource.getURI());
-        object.getOrCreateRowWithMorphism(valueSuperId, row, morphism);
+        IsaMorphismCreator.getOrCreateRowForIsaMorphism(valueSuperId, row, morphism);
 
         return true;
     }

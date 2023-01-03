@@ -106,7 +106,7 @@ public class InstanceCategory implements Serializable, Category {
 
         builder.append("Objects (showing only non-empty):\n");
         for (InstanceObject object : objects.values())
-            if (!object.allRows().isEmpty())
+            if (!object.isEmpty())
                 builder.append(object).append("\n");
         builder.append("\n");
 
@@ -117,7 +117,7 @@ public class InstanceCategory implements Serializable, Category {
         
         builder.append("Morphisms (showing only non-empty):\n");
         for (InstanceMorphism morphism : morphisms.values())
-            if (!morphism.allMappings().isEmpty())
+            if (!morphism.isEmpty())
                 builder.append(morphism).append("\n");
         builder.append("\n");
 

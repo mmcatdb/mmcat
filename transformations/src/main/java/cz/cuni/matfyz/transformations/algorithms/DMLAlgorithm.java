@@ -85,7 +85,7 @@ public class DMLAlgorithm {
     }
 
     private Set<DomainRow> fetchSuperIds(InstanceObject object) {
-        return object.allRows();
+        return object.allRowsToSet();
     }
 
     private Set<MappingRow> fetchRelations(InstanceMorphism morphism) {

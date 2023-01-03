@@ -37,6 +37,10 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
             : List.of(signature().toBasesReverse().stream().map(category::getMorphism).toArray(InstanceMorphism[]::new));
     }
 
+    public boolean isEmpty() {
+        return mappings.isEmpty();
+    }
+
     public boolean isBase() {
         return this.schemaMorphism.isBase();
     }
@@ -120,14 +124,15 @@ public class InstanceMorphism implements Serializable, Comparable<InstanceMorphi
         var builder = new StringBuilder();
 
         builder.append("\tSignature: ").append(signature())
-                .append("\tDom: ").append(dom.key())
-                .append("\tCod: ").append(cod.key()).append("\n");
+            .append("\tDom: ").append(dom.key())
+            .append("\tCod: ").append(cod.key())
+            .append("\n");
         
         builder.append("\tValues:\n");
         //for (Set<ActiveMappingRow> set : mappings.values())
         //    for (ActiveMappingRow row : set)
         for (MappingRow row : allMappings())
-                builder.append("\t\t").append(row).append("\n");
+            builder.append("\t\t").append(row).append("\n");
         
         return builder.toString();
     }

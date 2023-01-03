@@ -85,7 +85,7 @@ public class DDLAlgorithm {
         
         var output = new TreeSet<String>();
         // The rows have to have only empty signature so we can just pull all rows.
-        for (DomainRow row : instanceObject.allRows())
+        for (DomainRow row : instanceObject.allRowsToSet())
             output.add(row.getValue(Signature.createEmpty()));
         
         return output;

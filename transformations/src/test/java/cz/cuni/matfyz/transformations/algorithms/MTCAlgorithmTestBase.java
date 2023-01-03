@@ -100,8 +100,8 @@ public class MTCAlgorithmTestBase {
             var expectedObject = entry.getValue();
             var object = category.getObject(entry.getKey());
 
-            var expectedString = expectedObject.allRows().stream().map(row -> rowToMappingsString(row, expectedObject)).toList();
-            var string = object.allRows().stream().map(row -> rowToMappingsString(row, object)).toList();
+            var expectedString = expectedObject.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObject)).toList();
+            var string = object.allRowsToSet().stream().map(row -> rowToMappingsString(row, object)).toList();
 
             assertEquals(expectedString, string);
         }

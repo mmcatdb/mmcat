@@ -134,6 +134,10 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return new Builder().add(Signature.createEmpty(), value).build();
     }
 
+    public static SuperIdWithValues createEmpty() {
+        return new Builder().build();
+    }
+
     private SuperIdWithValues(Map<Signature, String> map) {
         this.tuples = map;
     }

@@ -3,6 +3,7 @@ package cz.cuni.matfyz.core.instance;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.utils.IterableUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -103,8 +104,15 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
 
     @Override
     public int compareTo(DomainRow row) {
-        // TODO technical ids?
-        return superId.compareTo(row.superId);
+        final var superIdComparison = superId.compareTo(row.superId);
+        if (superIdComparison != 0)
+            return superIdComparison;
+
+        for (final var technicalId : technicalIds)
+            if (row.technicalIds.contains(technicalId))
+                return 0;
+
+        return IterableUtils.compareTwoIterables(technicalIds, row.technicalIds);
     }
     
     @Override

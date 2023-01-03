@@ -19,7 +19,7 @@ public class InstanceObjectView {
     public InstanceObjectView(InstanceObject instanceObject) {
         this.key = new KeyView(instanceObject.key());
 
-        var originalRows = instanceObject.allRows();
+        var originalRows = instanceObject.allRowsToSet();
 
         var signatures = new TreeSet<Signature>();
         originalRows.forEach(row -> signatures.addAll(row.signatures()));

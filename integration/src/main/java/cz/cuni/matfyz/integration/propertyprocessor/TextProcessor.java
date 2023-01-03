@@ -8,6 +8,7 @@ import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.utils.UniqueIdProvider;
 import cz.cuni.matfyz.integration.utils.Constants;
+import cz.cuni.matfyz.integration.utils.IsaMorphismCreator;
 
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Statement;
@@ -44,16 +45,16 @@ public class TextProcessor extends Base implements PropertyProcessor {
 
         final var statementObject = statement.getObject();
         if (statementObject.isLiteral())
-            return tryAddLanguageText(statementObject.asLiteral(), resourceObject, resourceRow, resourceToAttribute);
+            return tryAddLanguageText(statementObject.asLiteral(), resourceRow, resourceToAttribute);
 
         return false;
     }
 
-    private boolean tryAddLanguageText(Literal literal, InstanceObject resourceObject, DomainRow resourceRow, InstanceMorphism resourceToAttribute) {
+    private boolean tryAddLanguageText(Literal literal, DomainRow resourceRow, InstanceMorphism resourceToAttribute) {
         if (literal.getLanguage().isEmpty())
             return false;
         
-        final var attributeRow = getOrCreateAttributeRow(resourceObject, resourceRow, resourceToAttribute);
+        final var attributeRow = getOrCreateAttributeRow(resourceRow, resourceToAttribute);
 
         final var elementToAttribute = finder.findDirectToObject(resourceToAttribute.cod(), ELEMENT_TO_ATTRIBUTE);
         if (elementToAttribute == null)
@@ -68,27 +69,26 @@ public class TextProcessor extends Base implements PropertyProcessor {
         if (elementToLanguage == null || elementToValue == null)
             return false;
 
-        final var languageRow = elementToLanguage.cod().getOrCreateRow(SuperIdWithValues.fromEmptySignature(literal.getLanguage()));
-        final var valueRow = elementToValue.cod().getOrCreateRow(SuperIdWithValues.fromEmptySignature(literal.getLexicalForm()));
-
         final var newElementSuperId = new SuperIdWithValues.Builder()
             .add(elementToAttribute.signature(), attributeRow.superId.getValue(Signature.createEmpty()))
-            .add(elementToLanguage.signature(), languageRow.superId.getValue(Signature.createEmpty()))
-            .add(elementToValue.signature(), valueRow.superId.getValue(Signature.createEmpty()))
+            .add(elementToLanguage.signature(), literal.getLanguage())
+            .add(elementToValue.signature(), literal.getLexicalForm())
             .build();
 
-        element.getOrCreateRow(newElementSuperId);
+        final var elementRow = InstanceObject.getOrCreateRowWithBaseMorphism(newElementSuperId, attributeRow, elementToAttribute.dual());
+        InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature(literal.getLanguage()), elementRow, elementToLanguage);
+        InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature(literal.getLexicalForm()), elementRow, elementToValue);
 
         return true;
     }
 
-    private DomainRow getOrCreateAttributeRow(InstanceObject resourceObject, DomainRow resourceRow, InstanceMorphism resourceToAttribute) {
+    private DomainRow getOrCreateAttributeRow(DomainRow resourceRow, InstanceMorphism resourceToAttribute) {
         final var mapping = resourceRow.getMappingsFromForMorphism(resourceToAttribute).stream().findFirst();
         if (mapping.isPresent())
             return mapping.get().codomainRow();
 
         final var generatedSuperId = SuperIdWithValues.fromEmptySignature(UniqueIdProvider.getNext());
-        return resourceObject.getOrCreateRowWithMorphism(generatedSuperId, resourceRow, resourceToAttribute);
+        return IsaMorphismCreator.getOrCreateRowForIsaMorphism(generatedSuperId, resourceRow, resourceToAttribute);
     }
 
 }

@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -52,6 +53,10 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     public ObjectIds ids() {
         return schemaObject.ids();
     }
+
+    public boolean isEmpty() {
+        return domain.isEmpty() && domainByTechnicalIds.isEmpty();
+    }
     
     // TODO rozlišit id od superId
     public DomainRow getRowById(SuperIdWithValues id) {
@@ -82,7 +87,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return merger.merge(superId, this);
     }
 
-    public DomainRow getOrCreateRowWithMorphism(SuperIdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
+    public static DomainRow getOrCreateRowWithBaseMorphism(SuperIdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
         var merger = new Merger();
         return merger.merge(superId, parent, baseMorphismFromParent);
     }
@@ -149,11 +154,13 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return "#" + lastTechnicalId;
     }
     
-    public Set<DomainRow> allRows() {
+    public SortedSet<DomainRow> allRowsToSet() {
         var output = new TreeSet<DomainRow>();
 
         for (var innerMap : domain.values())
             output.addAll(innerMap.values());
+
+        output.addAll(domainByTechnicalIds.values());
 
         return output;
     }
@@ -244,15 +251,14 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("\tKey: ").append(key()).append("\n");
+        builder.append("\tKey: ").append(key());
+        if (!label().isEmpty())
+            builder.append("\t(").append(label()).append(")");
+        builder.append("\n");
+
         builder.append("\tValues:\n");
-        // Consistent ordering of the keys for testing purposes.
-        for (SignatureId id : new TreeSet<>(domain.keySet())) {
-            var subdomain = domain.get(id);
-            // Again, ordering.
-            for (SuperIdWithValues superId : new TreeSet<>(subdomain.keySet()))
-                builder.append("\t\t").append(subdomain.get(superId)).append("\n");
-        }
+        for (final DomainRow row : allRowsToSet())
+            builder.append("\t\t").append(row).append("\n");
         
         return builder.toString();
     }
@@ -275,7 +281,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     
             output.put("key", object.key().toJSON());
 
-            var domain = object.allRows().stream().map(row -> row.toJSON()).toList();
+            var domain = object.allRowsToSet().stream().map(row -> row.toJSON()).toList();
             output.put("domain", new JSONArray(domain));
             
             return output;

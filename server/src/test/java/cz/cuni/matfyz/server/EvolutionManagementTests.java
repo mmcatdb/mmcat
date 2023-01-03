@@ -140,8 +140,8 @@ public class EvolutionManagementTests {
         var addressInstance = category.getObject(data.addressKey);
         var addressToFullAddressMorphismInstance = createInstanceMorphismWithDual(category, addressToFullAddressMorphism);
 
-        Statistics.set(Counter.JOIN_ROWS, addressInstance.allRows().size());
-        for (var addressRow : addressInstance.allRows()) {
+        Statistics.set(Counter.JOIN_ROWS, addressInstance.allRowsToSet().size());
+        for (var addressRow : addressInstance.allRowsToSet()) {
             // Get new value
             // TODO - tímto se vyhledává pouze v id daných řádků ... chtělo by to udělat funkci, která se automaticky podívá i do morfizmů
             // ideálně bychom měli tyto morfizmy uchovávat na řádcích
@@ -151,7 +151,7 @@ public class EvolutionManagementTests {
 
             // Create superId and row
             var superId = SuperIdWithValues.fromEmptySignature(fullAddressValue);
-            addressInstance.getOrCreateRowWithMorphism(superId, addressRow, addressToFullAddressMorphismInstance);
+            InstanceObject.getOrCreateRowWithBaseMorphism(superId, addressRow, addressToFullAddressMorphismInstance);
         }
     }
 
@@ -163,12 +163,12 @@ public class EvolutionManagementTests {
 
         var orderToFullAddressMorphismInstance = createInstanceMorphismWithDual(category, orderToFullAddressMorphism);
 
-        Statistics.set(Counter.MOVE_ROWS, category.getObject(data.orderKey).allRows().size());
+        Statistics.set(Counter.MOVE_ROWS, category.getObject(data.orderKey).allRowsToSet().size());
 
         var originalSignature = Signature.concatenate(data.userToOrder.dual(), data.userToAddress, data.addressToFullAddress);
         var morphismPath = category.getMorphism(originalSignature);
         
-        for (var orderRow : category.getObject(data.orderKey).allRows()) {
+        for (var orderRow : category.getObject(data.orderKey).allRowsToSet()) {
             var optionalRow = orderRow.traverseThrough(morphismPath).stream().findFirst();
             var fullAddressRow = optionalRow.get();
             orderToFullAddressMorphismInstance.addMapping(new MappingRow(orderRow, fullAddressRow));

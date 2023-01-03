@@ -171,7 +171,7 @@ public class MTCAlgorithm {
 
     private DomainRow addRelation(InstanceMorphism morphism, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {
         // First, create a domain row with technical id for each object between the domain and the codomain objects on the path of the morphism.
-        var baseMorphisms = morphism.bases();
+        final var baseMorphisms = morphism.bases();
         var currentDomainRow = parentRow;
 
         var parentToCurrent = Signature.createEmpty();
@@ -186,7 +186,7 @@ public class MTCAlgorithm {
             // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
             if (!instanceObject.equals(morphism.cod())) {
                 var superId = fetchSuperIdForTechnicalRow(instanceObject, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
-                currentDomainRow = instanceObject.getOrCreateRowWithMorphism(superId, currentDomainRow, baseMorphism);
+                currentDomainRow = InstanceObject.getOrCreateRowWithBaseMorphism(superId, currentDomainRow, baseMorphism);
             }
             else {
                 baseMorphism.createMappingWithDual(currentDomainRow, childRow);
@@ -195,10 +195,8 @@ public class MTCAlgorithm {
         }
 
         // Now try merging them from the codomain object to the domain object (the other way should be already merged).
-        var merger = new Merger();
-        childRow = merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
-
-        return childRow;
+        final var merger = new Merger();
+        return merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
     }
 
     private SuperIdWithValues fetchSuperIdForTechnicalRow(InstanceObject instanceObject, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, IComplexRecord parentRecord) {
