@@ -4,15 +4,22 @@ import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
+import java.io.IOException;
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 /**
  * This class represents a 'key' of an object as is described in the paper. It's basically just a number with extra steps.
  * @author pavel.koupil, jachym.bartik
  */
+@JsonSerialize(using = Key.Serializer.class)
 public class Key implements Serializable, Comparable<Key>, JSONConvertible {
 
     private final int value;
@@ -79,4 +86,24 @@ public class Key implements Serializable, Comparable<Key>, JSONConvertible {
         }
     
     }
+
+    public static class Serializer extends StdSerializer<Key> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<Key> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writeNumberField("value", key.value);
+            generator.writeEndObject();
+        }
+
+    }
+    
 }

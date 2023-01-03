@@ -281,7 +281,7 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     
             output.put("key", object.key().toJSON());
 
-            var domain = object.allRowsToSet().stream().map(row -> row.toJSON()).toList();
+            var domain = object.allRowsToSet().stream().map(DomainRow::toJSON).toList();
             output.put("domain", new JSONArray(domain));
             
             return output;

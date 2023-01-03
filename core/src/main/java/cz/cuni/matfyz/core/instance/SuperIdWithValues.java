@@ -6,6 +6,7 @@ import cz.cuni.matfyz.core.schema.SignatureId;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +16,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +27,7 @@ import org.json.JSONObject;
 /**
  * @author jachymb.bartik
  */
+@JsonSerialize(using = SuperIdWithValues.Serializer.class)
 public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithValues>, JSONConvertible {
 
     private final Map<Signature, String> tuples;
@@ -241,6 +247,30 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
             return output;
         }
     
+    }
+
+    public static class Serializer extends StdSerializer<SuperIdWithValues> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<SuperIdWithValues> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(SuperIdWithValues superId, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartArray();
+            for (final var entry : superId.tuples.entrySet()) {
+                generator.writeStartObject();
+                generator.writePOJOField("signature", entry.getKey());
+                generator.writeStringField("value", entry.getValue());
+                generator.writeEndObject();
+            }
+            generator.writeEndArray();
+        }
+
     }
 
 }

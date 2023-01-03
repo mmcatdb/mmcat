@@ -1,9 +1,11 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.service.InstanceCategoryService;
-import cz.cuni.matfyz.server.view.InstanceObjectView;
+import cz.cuni.matfyz.server.view.InstanceMorphismWrapper;
+import cz.cuni.matfyz.server.view.InstanceObjectWrapper;
 
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -32,16 +34,32 @@ public class InstanceCategoryController {
     }
 
     @GetMapping("/instances/{categoryId}/objects/{objectKey}")
-    public InstanceObjectView getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {
-        var key = new Key(objectKey);
+    public InstanceObjectWrapper getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {
+        final var key = new Key(objectKey);
 
-        var object = service.findObject(session, categoryId, key);
+        final var object = service.findObject(session, categoryId, key);
 
         if (object == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         
-        //return object.toJSON().toString();
-        return new InstanceObjectView(object);
+        return new InstanceObjectWrapper(object);
+    }
+
+    @GetMapping("/instances/{categoryId}/morphisms/{signatureString}")
+    public InstanceMorphismWrapper getInstanceMorphism(HttpSession session, @PathVariable Id categoryId, @PathVariable String signatureString) {
+        final var signature = Signature.fromString(signatureString);
+        if (signature == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+
+        if (signature.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+        final var morphism = service.findMorphism(session, categoryId, signature);
+
+        if (morphism == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        
+        return new InstanceMorphismWrapper(morphism);
     }
 
 }

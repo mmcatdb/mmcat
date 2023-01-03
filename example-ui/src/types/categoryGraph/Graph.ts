@@ -22,6 +22,7 @@ export class Graph {
     // Workaround for the vue reactivity (all properties are replaced by proxies, but this way, we can have access to the original Core)
     _getCytoscape: () => Core;
     _nodes = [] as Node[];
+    _edges = [] as Edge[];
     // How many nodes have fixed positions.
     _fixedNodes = 0;
     readonly schemaCategory: SchemaCategory;
@@ -143,6 +144,7 @@ export class Graph {
         const codNode = this._nodes.find(node => node.schemaObject.id === morphism.codId) as Node;
 
         const edges = [ new Edge(morphism, domNode, codNode), new Edge(morphism.dual, codNode, domNode) ] as [ Edge, Edge ];
+        this._edges.push(...edges);
         edges[0].dual = edges[1];
         edges[1].dual = edges[0];
 
@@ -177,6 +179,7 @@ export class Graph {
 
         edge.domainNode.removeNeighbour(edge.codomainNode);
         edge.codomainNode.removeNeighbour(edge.domainNode);
+        this._edges = this._edges.filter(e => !e.equals(edge) && !e.equals(edge.dual));
     }
 
     _lastTemporaryEdgeId = 0;
@@ -242,6 +245,10 @@ export class Graph {
 
     getNode(object: SchemaObject): Node | undefined {
         return this._nodes.find(node => node.schemaObject.key.equals(object.key));
+    }
+
+    getEdge(morphism: SchemaMorphism): Edge | undefined {
+        return this._edges.find(edge => edge.schemaMorphism.signature.equals(morphism.signature));
     }
 }
 

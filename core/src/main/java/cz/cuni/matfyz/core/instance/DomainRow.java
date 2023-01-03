@@ -5,6 +5,7 @@ import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.core.utils.IterableUtils;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,10 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -24,6 +29,7 @@ import org.slf4j.LoggerFactory;
  * Each value is unique among all the values associated with the same signature.
  * @author jachym.bartik
  */
+@JsonSerialize(using = DomainRow.Serializer.class)
 public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConvertible {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
@@ -149,8 +155,35 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
 
         @Override
         protected JSONObject innerToJSON(DomainRow object) throws JSONException {
-            return object.superId.toJSON();
+            var output = new JSONObject();
+            
+            output.put("superId", object.superId.toJSON());
+            output.put("technicalIds", object.technicalIds);
+            
+            return output;
         }
     
     }
+
+    public static class Serializer extends StdSerializer<DomainRow> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<DomainRow> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(DomainRow row, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writePOJOField("superId", row.superId);
+            generator.writeFieldName("technicalIds");
+            generator.writeArray(row.technicalIds.stream().toArray(String[]::new), 0, row.technicalIds.size());
+            generator.writeEndObject();
+        }
+
+    }
+    
 }

@@ -1,12 +1,19 @@
 package cz.cuni.matfyz.core.instance;
 
+import java.io.IOException;
 import java.io.Serializable;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * This class represents a relation between two members of two domains ({@link DomainRow}).
  * It corresponds to a single {@link InstanceMorphism}.
  * @author jachym.bartik
  */
+@JsonSerialize(using = MappingRow.Serializer.class)
 public class MappingRow implements Serializable, Comparable<MappingRow> {
 
     private final DomainRow domainRow;
@@ -49,6 +56,26 @@ public class MappingRow implements Serializable, Comparable<MappingRow> {
     @Override
     public boolean equals(Object object) {
         return object instanceof MappingRow row && domainRow.equals(row.domainRow) && codomainRow.equals(row.codomainRow);
+    }
+
+    public static class Serializer extends StdSerializer<MappingRow> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<MappingRow> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(MappingRow row, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writePOJOField("domRow", row.domainRow);
+            generator.writePOJOField("codRow", row.codomainRow);
+            generator.writeEndObject();
+        }
+
     }
     
 }

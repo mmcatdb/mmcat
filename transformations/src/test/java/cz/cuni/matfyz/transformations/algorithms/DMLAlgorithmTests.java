@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 

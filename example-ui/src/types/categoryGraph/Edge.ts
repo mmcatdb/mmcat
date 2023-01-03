@@ -36,7 +36,7 @@ export class Edge {
             (this.schemaMorphism.tags.length === 0 ? '' : ' - ' + this.schemaMorphism.tags.map(tag => '#' + tag).join(' '));
     }
 
-    equals(other: Edge | null): boolean {
+    equals(other: Edge | null | undefined): boolean {
         return !!other && this.schemaMorphism.id === other.schemaMorphism.id;
     }
 

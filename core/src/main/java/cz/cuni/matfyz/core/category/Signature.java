@@ -6,6 +6,7 @@ import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.core.utils.ArrayUtils;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +15,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +27,7 @@ import org.json.JSONObject;
  * This class represents a signature of a morphism. It can be empty, base, composite or null.
  * @author jachym.bartik
  */
+@JsonSerialize(using = Signature.Serializer.class)
 public class Signature implements Serializable, Comparable<Signature>, IContext, JSONConvertible {
 
     private final int[] ids;
@@ -198,6 +204,22 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
         return builder.toString();
     }
 
+    public static Signature fromString(String string) {
+        if (string.equals("_NULL"))
+            return createNull();
+
+        if (string.equals("_EMPTY"))
+            return createEmpty();
+
+        try {
+            final var ids = List.of(string.split("\\.")).stream().mapToInt(Integer::parseInt).toArray();
+            return new Signature(ids, false);
+        }
+        catch (NumberFormatException exception) {
+            return null;
+        }
+    }
+
     @Override
     public boolean equals(Object object) {
         return object instanceof Signature signature && compareTo(signature) == 0;
@@ -311,6 +333,27 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
             return isNull ? Signature.createNull() : Signature.createComposite(ids);
         }
     
+    }
+
+    public static class Serializer extends StdSerializer<Signature> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<Signature> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(Signature signature, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writeFieldName("ids");
+            generator.writeArray(signature.ids, 0, signature.ids.length);
+            generator.writeBooleanField("isNull", signature.isNull);
+            generator.writeEndObject();
+        }
+
     }
 
 }

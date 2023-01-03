@@ -1,10 +1,12 @@
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +14,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,6 +26,7 @@ import org.json.JSONObject;
  * Id is a set of signatures (each corresponding to a base or a composite morphism).
  * @author jachymb.bartik
  */
+@JsonSerialize(using = SignatureId.Serializer.class)
 public class SignatureId implements Serializable, Comparable<SignatureId>, JSONConvertible {
     
     private final SortedSet<Signature> signatures;
@@ -122,4 +129,26 @@ public class SignatureId implements Serializable, Comparable<SignatureId>, JSONC
         }
     
     }
+
+    public static class Serializer extends StdSerializer<SignatureId> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<SignatureId> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(SignatureId signatureId, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartArray();
+            for (final var signature : signatureId.signatures) {
+                generator.writeObject(signature);
+            }
+            generator.writeEndArray();
+        }
+
+    }
+
 }

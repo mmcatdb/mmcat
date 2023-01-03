@@ -174,8 +174,4 @@ export default defineComponent({
     padding: 2px 4px;
     border-radius: 4px;
 }
-
-.clickable {
-    cursor: pointer;
-}
 </style>
