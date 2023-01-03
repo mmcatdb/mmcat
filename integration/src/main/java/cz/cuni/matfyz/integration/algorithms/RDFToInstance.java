@@ -63,9 +63,6 @@ public class RDFToInstance {
         final InstanceObject object = findObject(typeIri);
         final DomainRow row = getOrCreateInitialDomainRow(resource, object);
 
-        // TODO add relation from row to the id object?
-        // Ne, spíš vytvořit testovací framework a pak postupně sledovat jak se to objevuje v IC
-        
         resource.listProperties().forEach(statement -> {
             if (statement.getPredicate().equals(resource.getModel().getProperty(RDF_TYPE_IRI)))
                 return;

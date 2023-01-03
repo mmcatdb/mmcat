@@ -41,14 +41,14 @@ public class NonTypePropertyProcessor extends Base implements PropertyProcessor 
         return false;
     }
 
-    private boolean tryAddLiteral(Literal literal, DomainRow row, InstanceMorphism morphism) {
+    private static boolean tryAddLiteral(Literal literal, DomainRow row, InstanceMorphism morphism) {
         final var valueSuperId = SuperIdWithValues.fromEmptySignature(literal.getLexicalForm());
         IsaMorphismCreator.getOrCreateRowForIsaMorphism(valueSuperId, row, morphism);
 
         return true;
     }
 
-    private boolean tryAddResource(Resource resource, DomainRow row, InstanceMorphism morphism) {
+    private static boolean tryAddResource(Resource resource, DomainRow row, InstanceMorphism morphism) {
         final var valueSuperId = SuperIdWithValues.fromEmptySignature(resource.getURI());
         IsaMorphismCreator.getOrCreateRowForIsaMorphism(valueSuperId, row, morphism);
 

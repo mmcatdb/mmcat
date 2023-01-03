@@ -6,6 +6,7 @@ import cz.cuni.matfyz.core.instance.InstanceObject;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 /**
  * @author jachym.bartik
@@ -65,11 +66,21 @@ public class MorphismFinder {
     private Map<ObjectIriTuple, InstanceMorphism> fromObjectCache = new TreeMap<>();
 
     public InstanceMorphism findFromObject(InstanceObject object, String pimIri) {
-        final var tuple = new ObjectIriTuple(object, pimIri);
+        final Function<InstanceMorphism, Boolean> findFunction = morphism -> morphism.schemaMorphism.pimIri.equals(pimIri);
+        return findFromObjectCached(object, pimIri, findFunction);
+    }
+
+    public InstanceMorphism findFromObjectWithLastDual(InstanceObject object, String dualPimIri) {
+        final Function<InstanceMorphism, Boolean> findFunction = morphism -> morphism.dual().schemaMorphism.pimIri.equals(dualPimIri);
+        return findFromObjectCached(object, "dual:" + dualPimIri, findFunction);
+    }
+
+    private InstanceMorphism findFromObjectCached(InstanceObject object, String key, Function<InstanceMorphism, Boolean> findFunction) {
+        final var tuple = new ObjectIriTuple(object, key);
         if (fromObjectCache.containsKey(tuple))
             return fromObjectCache.get(tuple);
 
-        final var algorithm = new FromObjectIsaSearch(category, object, pimIri);
+        final var algorithm = new FromObjectIsaSearch(category, object, findFunction);
         final var result = algorithm.process();
         fromObjectCache.put(tuple, result);
 

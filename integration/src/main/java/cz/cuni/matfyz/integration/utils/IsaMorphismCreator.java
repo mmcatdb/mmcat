@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.integration.utils;
 
+import cz.cuni.matfyz.core.category.Morphism.Tag;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
@@ -12,19 +13,25 @@ public class IsaMorphismCreator {
 
     private IsaMorphismCreator() {}
 
+    /**
+     * The morphism is expected to be a list of base isa morphisms, followed by exactly one non-isa morphism.
+     * @param superId
+     * @param initialRow
+     * @param pathToTarget
+     * @return
+     */
     public static DomainRow getOrCreateRowForIsaMorphism(SuperIdWithValues superId, DomainRow initialRow, InstanceMorphism pathToTarget) {
         final var lastIsaRow = getOrCreateLastIsaRow(initialRow, pathToTarget);
         return InstanceObject.getOrCreateRowWithBaseMorphism(superId, lastIsaRow, pathToTarget.lastBase());
     }
 
-    private static DomainRow getOrCreateLastIsaRow(DomainRow initialRow, InstanceMorphism pathToTarget) {
-        final var bases = pathToTarget.bases();
-        if (bases.isEmpty())
-            return initialRow;
-
+    public static DomainRow getOrCreateLastIsaRow(DomainRow initialRow, InstanceMorphism pathToTarget) {
         var currentRow = initialRow;
-        for (int i = 0; i < bases.size() - 1; i++) {
-            final var base = bases.get(i);
+
+        for (final var base : pathToTarget.bases()) {
+            if (!base.schemaMorphism.hasTag(Tag.isa))
+                break;
+
             currentRow = InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.createEmpty(), currentRow, base);
         }
 

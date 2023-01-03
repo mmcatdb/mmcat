@@ -17,9 +17,9 @@ const REVERSED_SUFFIX = '/_reversed';
 
 const ARRAY_IRI_PREFIX = CUSTOM_IRI_PREFIX + 'array/';
 const ARRAY = {
-    ELEMENT_TO_COD_SUFFIX: '/_array',
+    DOM_TO_ELEMENT_SUFFIX: '/_array',
     ELEMENT: ARRAY_IRI_PREFIX + 'element',
-    ELEMENT_TO_DOM: ARRAY_IRI_PREFIX + 'element-to-dom',
+    ELEMENT_TO_COD: ARRAY_IRI_PREFIX + 'element-to-cod',
     INDEX: ARRAY_IRI_PREFIX + 'index',
     ELEMENT_TO_INDEX: ARRAY_IRI_PREFIX + 'element-to-index'
 };
@@ -56,7 +56,7 @@ function addMorphism(iri: Iri, pimIri: Iri, label: string, dom: ImportedObject, 
         output.morphisms.push(elementToIndex);
 
         const elementToDomLabel = label === '' ? '' : label + ' _element-to-dom';
-        const elementToDom = new ImportedMorphism(iri + '/_element-to-dom', ARRAY.ELEMENT_TO_DOM, elementToDomLabel, element, dom, {
+        const elementToDom = new ImportedMorphism(iri + '/_element-to-dom', pimIri + ARRAY.DOM_TO_ELEMENT_SUFFIX, elementToDomLabel, element, dom, {
             domCodMin: Cardinality.One,
             domCodMax: Cardinality.One,
             codDomMin: cardinalitySettings.domCodMin,
@@ -65,7 +65,7 @@ function addMorphism(iri: Iri, pimIri: Iri, label: string, dom: ImportedObject, 
         output.morphisms.push(elementToDom);
 
         const elementToCodLabel = label === '' ? '' : label + ' _element-to-cod';
-        const elementToCod = new ImportedMorphism(iri + '/_element-to-cod', pimIri + ARRAY.ELEMENT_TO_COD_SUFFIX, elementToCodLabel, element, cod, {
+        const elementToCod = new ImportedMorphism(iri + '/_element-to-cod', ARRAY.ELEMENT_TO_COD, elementToCodLabel, element, cod, {
             domCodMin: Cardinality.One,
             domCodMax: Cardinality.One,
             codDomMin: cardinalitySettings.codDomMin,

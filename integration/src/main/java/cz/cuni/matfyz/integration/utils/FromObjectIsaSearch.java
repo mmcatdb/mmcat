@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author jachym.bartik
@@ -18,12 +19,12 @@ public class FromObjectIsaSearch {
 
     private final InstanceCategory category;
     private final InstanceObject object;
-    private final String pimIri;
+    private final Function<InstanceMorphism, Boolean> findFunction;
 
-    public FromObjectIsaSearch(InstanceCategory category, InstanceObject object, String pimIri) {
+    public FromObjectIsaSearch(InstanceCategory category, InstanceObject object, Function<InstanceMorphism, Boolean> findFunction) {
         this.category = category;
         this.object = object;
-        this.pimIri = pimIri;
+        this.findFunction = findFunction;
     }
 
     private final Deque<InstanceMorphism> queue = new LinkedList<>();
@@ -36,7 +37,7 @@ public class FromObjectIsaSearch {
             processPath(queue.poll());
 
         if (outputCandidates.size() > 1)
-            throw new UnsupportedOperationException("Multiple morphisms found from object: " + object.key() + " with pim iri: " + pimIri + ".");
+            throw new UnsupportedOperationException("Multiple morphisms found from object: " + object.key() + ".");
         
         return outputCandidates.size() == 1 ? outputCandidates.get(0) : null;
     }
@@ -44,7 +45,7 @@ public class FromObjectIsaSearch {
     private void processPath(InstanceMorphism path) {
         final var lastSection = path.lastBase();
 
-        if (lastSection.schemaMorphism.pimIri.equals(pimIri)) {
+        if (Boolean.TRUE.equals(findFunction.apply(lastSection))) {
             outputCandidates.add(path);
         }
         else if (lastSection.schemaMorphism.hasTag(Tag.isa)) {
