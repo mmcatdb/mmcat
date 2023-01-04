@@ -2,6 +2,7 @@
 import { defineComponent } from 'vue';
 import { Cardinality, compareCardinalitySettings, type CardinalitySettings, type Max, type Min } from '@/types/schema';
 import RadioInput from '@/components/RadioInput.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 enum CardinalityType {
     ZeroOne = 0,
@@ -12,7 +13,8 @@ enum CardinalityType {
 
 export default defineComponent({
     components: {
-        RadioInput
+        RadioInput,
+        ValueRow
     },
     props: {
         modelValue: {
@@ -77,98 +79,78 @@ export default defineComponent({
 </script>
 
 <template>
-    <tr>
-        <td
-            class="label"
-            rowspan="2"
+    <ValueRow label="Cardinality:">
+        <RadioInput
+            :model-value="morphismCardinality"
+            :value="CardinalityType.ZeroOne"
+            :disabled="disabled"
+            @update:model-value="updateMorphismCardinality"
         >
-            Cardinality:
-        </td>
-        <td class="value">
-            <RadioInput
-                :model-value="morphismCardinality"
-                :value="CardinalityType.ZeroOne"
-                :disabled="disabled"
-                @update:model-value="updateMorphismCardinality"
-            >
-                0..1
-            </RadioInput>
-            <RadioInput
-                :model-value="morphismCardinality"
-                :value="CardinalityType.ZeroStar"
-                :disabled="disabled"
-                @update:model-value="updateMorphismCardinality"
-            >
-                0..*
-            </RadioInput>
-        </td>
-    </tr>
-    <tr>
-        <td class="value">
-            <RadioInput
-                :model-value="morphismCardinality"
-                :value="CardinalityType.OneOne"
-                :disabled="disabled"
-                @update:model-value="updateMorphismCardinality"
-            >
-                1..1
-            </RadioInput>
-            <RadioInput
-                :model-value="morphismCardinality"
-                :value="CardinalityType.OneStar"
-                :disabled="disabled"
-                @update:model-value="updateMorphismCardinality"
-            >
-                1..*
-            </RadioInput>
-        </td>
-    </tr>
-    <tr>
-        <td
-            class="label"
-            rowspan="2"
+            0..1
+        </RadioInput>
+        <RadioInput
+            :model-value="morphismCardinality"
+            :value="CardinalityType.ZeroStar"
+            :disabled="disabled"
+            @update:model-value="updateMorphismCardinality"
         >
-            Dual cardinality:
-        </td>
-        <td class="value">
-            <RadioInput
-                :model-value="dualCardinality"
-                :value="CardinalityType.ZeroOne"
-                :disabled="disabled"
-                @update:model-value="updateDualCardinality"
-            >
-                0..1
-            </RadioInput>
-            <RadioInput
-                :model-value="dualCardinality"
-                :value="CardinalityType.ZeroStar"
-                :disabled="disabled"
-                @update:model-value="updateDualCardinality"
-            >
-                0..*
-            </RadioInput>
-        </td>
-    </tr>
-    <tr>
-        <td class="value">
-            <RadioInput
-                :model-value="dualCardinality"
-                :value="CardinalityType.OneOne"
-                :disabled="disabled"
-                @update:model-value="updateDualCardinality"
-            >
-                1..1
-            </RadioInput>
-            <RadioInput
-                :model-value="dualCardinality"
-                :value="CardinalityType.OneStar"
-                :disabled="disabled"
-                @update:model-value="updateDualCardinality"
-            >
-                1..*
-            </RadioInput>
-        </td>
-    </tr>
+            0..*
+        </RadioInput>
+    </ValueRow>
+    <ValueRow>
+        <RadioInput
+            :model-value="morphismCardinality"
+            :value="CardinalityType.OneOne"
+            :disabled="disabled"
+            @update:model-value="updateMorphismCardinality"
+        >
+            1..1
+        </RadioInput>
+        <RadioInput
+            :model-value="morphismCardinality"
+            :value="CardinalityType.OneStar"
+            :disabled="disabled"
+            @update:model-value="updateMorphismCardinality"
+        >
+            1..*
+        </RadioInput>
+    </ValueRow>
+    <ValueRow label="Dual cardinality:">
+        <RadioInput
+            :model-value="dualCardinality"
+            :value="CardinalityType.ZeroOne"
+            :disabled="disabled"
+            @update:model-value="updateDualCardinality"
+        >
+            0..1
+        </RadioInput>
+        <RadioInput
+            :model-value="dualCardinality"
+            :value="CardinalityType.ZeroStar"
+            :disabled="disabled"
+            @update:model-value="updateDualCardinality"
+        >
+            0..*
+        </RadioInput>
+    </ValueRow>
+    <ValueRow>
+        <RadioInput
+            :model-value="dualCardinality"
+            :value="CardinalityType.OneOne"
+            :disabled="disabled"
+            @update:model-value="updateDualCardinality"
+        >
+            1..1
+        </RadioInput>
+        <RadioInput
+            :model-value="dualCardinality"
+            :value="CardinalityType.OneStar"
+            :disabled="disabled"
+            @update:model-value="updateDualCardinality"
+        >
+            1..*
+        </RadioInput>
+    </ValueRow>
 </template>
 
 <style scoped>

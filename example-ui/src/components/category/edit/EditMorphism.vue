@@ -6,11 +6,15 @@ import CardinalityInput from './CardinalityInput.vue';
 
 import { NodeIndices } from './AddMorphism.vue';
 import IriDisplay from '@/components/IriDisplay.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
         CardinalityInput,
-        IriDisplay
+        IriDisplay,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -166,68 +170,36 @@ export default defineComponent({
 <template>
     <div class="add-morphism">
         <h2>Edit Schema Morphism</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Domain object:
-                </td>
-                <td class="value">
-                    {{ node1?.schemaObject.label }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Codomain object:
-                </td>
-                <td class="value">
-                    {{ node2?.schemaObject.label }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Label?:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="label"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Iri:
-                </td>
-                <td class="value">
-                    <IriDisplay
-                        :iri="edge.schemaMorphism.iri"
-                        :max-chars="36"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Pim Iri:
-                </td>
-                <td class="value">
-                    <IriDisplay
-                        :iri="edge.schemaMorphism.pimIri"
-                        :max-chars="36"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Signature:
-                </td>
-                <td class="value">
-                    {{ edge.schemaMorphism.signature }}
-                </td>
-            </tr>
+        <ValueContainer>
+            <ValueRow label="Domain obje">
+                {{ node1?.schemaObject.label }}
+            </ValueRow>
+            <ValueRow label="Codomain ob">
+                {{ node2?.schemaObject.label }}
+            </ValueRow>
+            <ValueRow label="Label?:">
+                <input v-model="label" />
+            </ValueRow>
+            <ValueRow label="Iri:">
+                <IriDisplay
+                    :iri="edge.schemaMorphism.iri"
+                    :max-chars="36"
+                />
+            </ValueRow>
+            <ValueRow label="Pim Iri:">
+                <IriDisplay
+                    :iri="edge.schemaMorphism.pimIri"
+                    :max-chars="36"
+                />
+            </ValueRow>
+            <ValueRow label="Signature:">
+                {{ edge.schemaMorphism.signature }}
+            </ValueRow>
             <CardinalityInput
                 v-model="cardinality"
                 :disabled="!isNew"
             />
-        </table>
+        </ValueContainer>
         <div class="button-row">
             <button
                 v-if="isNew"

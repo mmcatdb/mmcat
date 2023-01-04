@@ -4,12 +4,16 @@ import type { Mapping } from '@/types/mapping';
 import ParentPropertyDisplay from './display/ParentPropertyDisplay.vue';
 import Divider from '@/components/layout/Divider.vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
         ParentPropertyDisplay,
         Divider,
-        CleverRouterLink
+        CleverRouterLink,
+        ValueContainer,
+        ValueRow
     },
     props: {
         mapping: {
@@ -33,42 +37,22 @@ export default defineComponent({
         <CleverRouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
             <h2>{{ mapping.label }}</h2>
         </CleverRouterLink>
-        <table>
-            <tr>
-                <td class="label">
-                    Id:
-                </td>
-                <td class="value">
-                    {{ mapping.id }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Root object id:
-                </td>
-                <td class="value">
-                    {{ mapping.rootObjectId }}
-                </td>
-            </tr>
+        <ValueContainer>
+            <ValueRow label="Id:">
+                {{ mapping.id }}
+            </ValueRow>
+            <ValueRow label="Root object id:">
+                {{ mapping.rootObjectId }}
+            </ValueRow>
             <!--
-            <tr>
-                <td class="label">
-                    Logical model:
-                </td>
-                <td class="value">
-                    {{ mapping.logicalModel.label }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Database:
-                </td>
-                <td class="value">
-                    {{ mapping.logicalModel.database.label }}
-                </td>
-            </tr>
+            <ValueRow label="Logical model:">
+                {{ mapping.logicalModel.label }}
+            </ValueRow>
+            <ValueRow label="Database:">
+                {{ mapping.logicalModel.database.label }}
+            </ValueRow>
             -->
-        </table>
+        </ValueContainer>
         <Divider />
         <ParentPropertyDisplay
             :property="mapping.accessPath"

@@ -5,10 +5,14 @@ import { defineComponent } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
         SignatureInput,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -48,16 +52,11 @@ export default defineComponent({
 
 <template>
     <h2>Add simple Id</h2>
-    <table>
-        <tr>
-            <td class="label">
-                Signature:
-            </td>
-            <td class="value">
-                {{ signature }}
-            </td>
-        </tr>
-    </table>
+    <ValueContainer>
+        <ValueRow label="Signature:">
+            {{ signature }}
+        </ValueRow>
+    </ValueContainer>
     <SignatureInput
         v-model="signature"
         :graph="graph"
@@ -75,7 +74,3 @@ export default defineComponent({
         </button>
     </div>
 </template>
-
-<style scoped>
-
-</style>

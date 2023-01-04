@@ -2,7 +2,6 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
-import cz.cuni.matfyz.server.entity.job.Job.Type;
 import cz.cuni.matfyz.server.repository.JobRepository;
 import cz.cuni.matfyz.server.utils.UserStore;
 

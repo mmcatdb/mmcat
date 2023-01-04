@@ -2,6 +2,8 @@
 import { DataSource, DATA_SOURCE_TYPES, Type, type DataSourceInit, type DataSourceUpdate } from '@/types/dataSource';
 import API from '@/utils/api';
 import { computed, ref } from 'vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 interface DataSourceEditorProps {
     dataSource?: DataSource;
@@ -91,43 +93,28 @@ async function deleteMethod() {
 <template>
     <div class="editor">
         <h2>{{ isNew ? 'Add' : 'Edit' }} data source</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    <select
-                        v-model="innerValue.type"
-                        :disabled="!isNew"
+        <ValueContainer>
+            <ValueRow label="Type:">
+                <select
+                    v-model="innerValue.type"
+                    :disabled="!isNew"
+                >
+                    <option
+                        v-for="availableType in DATA_SOURCE_TYPES"
+                        :key="availableType.type"
+                        :value="availableType.type"
                     >
-                        <option
-                            v-for="availableType in DATA_SOURCE_TYPES"
-                            :key="availableType.type"
-                            :value="availableType.type"
-                        >
-                            {{ availableType.label }}
-                        </option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Label:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.label" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Url:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.url" />
-                </td>
-            </tr>
-        </table>
+                        {{ availableType.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow label="Label:">
+                <input v-model="innerValue.label" />
+            </ValueRow>
+            <ValueRow label="Url:">
+                <input v-model="innerValue.url" />
+            </ValueRow>
+        </ValueContainer>
         <div class="button-row">
             <button
                 :disabled="fetching || !isValid"

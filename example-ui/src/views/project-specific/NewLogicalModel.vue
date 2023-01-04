@@ -4,6 +4,8 @@ import { DatabaseWithConfiguration } from '@/types/database';
 import API from '@/utils/api';
 import { useRouter } from 'vue-router';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 const databases = ref<DatabaseWithConfiguration[]>();
 const selectedDatabase = ref<DatabaseWithConfiguration>();
@@ -43,32 +45,22 @@ async function createLogicalModel() {
 <template>
     <div>
         <h1>Create a new logical model</h1>
-        <table>
-            <tr>
-                <td class="label">
-                    Database:
-                </td>
-                <td class="value">
-                    <select v-model="selectedDatabase">
-                        <option
-                            v-for="database in databases"
-                            :key="database.id"
-                            :value="database"
-                        >
-                            {{ database.label }}
-                        </option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Label:
-                </td>
-                <td class="value">
-                    <input v-model="label" />
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Database:">
+                <select v-model="selectedDatabase">
+                    <option
+                        v-for="database in databases"
+                        :key="database.id"
+                        :value="database"
+                    >
+                        {{ database.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow label="Label:">
+                <input v-model="label" />
+            </ValueRow>
+        </ValueContainer>
         <div class="button-row">
             <button
                 :disabled="fetching || !selectedDatabase || !label"

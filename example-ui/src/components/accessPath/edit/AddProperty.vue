@@ -7,6 +7,8 @@ import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
 import type { DatabaseWithConfiguration } from '@/types/database';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 enum State {
     SelectSignature,
@@ -18,7 +20,9 @@ export default defineComponent({
     components: {
         SignatureInput,
         TypeInput,
-        NameInput
+        NameInput,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -116,45 +120,37 @@ export default defineComponent({
 <template>
     <div class="outer">
         <h2>Add property</h2>
-        <table>
-            <tr v-if="state >= State.SelectSignature">
-                <td class="label">
-                    Signature:
-                </td>
-                <td class="value">
-                    {{ signature }}
-                </td>
-            </tr>
-            <tr v-if="state >= State.SelectName">
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    {{ type }}
-                </td>
-            </tr>
-            <tr v-if="state === State.SelectType">
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    <TypeInput v-model="type" />
-                </td>
-            </tr>
-            <tr v-if="state === State.SelectName">
-                <td class="label">
-                    Name:
-                </td>
-                <td class="value">
-                    <NameInput
-                        v-model="name"
-                        :graph="graph"
-                        :database="database"
-                        :root-node="parentProperty.node"
-                    />
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow
+                v-if="state >= State.SelectSignature"
+                label="Signature:"
+            >
+                {{ signature }}
+            </ValueRow>
+            <ValueRow
+                v-if="state >= State.SelectName"
+                label="Type:"
+            >
+                {{ type }}
+            </ValueRow>
+            <ValueRow
+                v-if="state === State.SelectType"
+                label="Type:"
+            >
+                <TypeInput v-model="type" />
+            </ValueRow>
+            <ValueRow
+                v-if="state === State.SelectName"
+                label="Name:"
+            >
+                <NameInput
+                    v-model="name"
+                    :graph="graph"
+                    :database="database"
+                    :root-node="parentProperty.node"
+                />
+            </ValueRow>
+        </ValueContainer>
         <div
             v-if="state === State.SelectSignature"
             class="button-row"
@@ -189,7 +185,3 @@ export default defineComponent({
         </div>
     </div>
 </template>
-
-<style scoped>
-
-</style>

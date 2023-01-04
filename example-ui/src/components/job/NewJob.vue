@@ -6,6 +6,8 @@ import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 import type { Id } from '@/types/id';
 import { DataSource } from '@/types/dataSource';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 const emit = defineEmits([ 'newJob' ]);
 
@@ -61,67 +63,51 @@ async function createJob() {
 <template>
     <div class="newJob">
         <h2>Create a new job</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Label:
-                </td>
-                <td class="value">
-                    <input v-model="jobName" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    <select v-model="jobType">
-                        <option
-                            v-for="availableType in JOB_TYPES"
-                            :key="availableType.value"
-                            :value="availableType.value"
-                        >
-                            {{ availableType.label }}
-                        </option>
-                    </select>
-                </td>
-            </tr>
-            <tr v-if="jobType === JobType.JsonLdToCategory">
-                <td class="label">
-                    Data source:
-                </td>
-                <td class="value">
-                    <select v-model="dataSourceId">
-                        <option
-                            v-for="dataSource in dataSources"
-                            :key="dataSource.id"
-                            :value="dataSource.id"
-                        >
-                            {{ dataSource.label }}
-                        </option>
-                    </select>
-                </td>
-            </tr>
-            <tr v-else>
-                <td class="label">
-                    Logical model:
-                </td>
-                <td class="value">
-                    <select v-model="logicalModelId">
-                        <option
-                            v-for="logicalModel in logicalModels"
-                            :key="logicalModel.id"
-                            :value="logicalModel.id"
-                        >
-                            {{ logicalModel.label }}
-                        </option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                &nbsp;<!-- To make the NewJob tile look the same as the JobDisplay tile. -->
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Label:">
+                <input v-model="jobName" />
+            </ValueRow>
+            <ValueRow label="Type:">
+                <select v-model="jobType">
+                    <option
+                        v-for="availableType in JOB_TYPES"
+                        :key="availableType.value"
+                        :value="availableType.value"
+                    >
+                        {{ availableType.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow
+                v-if="jobType === JobType.JsonLdToCategory"
+                label="Data source:"
+            >
+                <select v-model="dataSourceId">
+                    <option
+                        v-for="dataSource in dataSources"
+                        :key="dataSource.id"
+                        :value="dataSource.id"
+                    >
+                        {{ dataSource.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow
+                v-else
+                label="Logical model:"
+            >
+                <select v-model="logicalModelId">
+                    <option
+                        v-for="logicalModel in logicalModels"
+                        :key="logicalModel.id"
+                        :value="logicalModel.id"
+                    >
+                        {{ logicalModel.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow>&nbsp;</ValueRow><!-- To make the NewJob tile look the same as the JobDisplay tile. -->
+        </ValueContainer>
         <div class="button-row">
             <button
                 :disabled="(fetching || !dataValid)"

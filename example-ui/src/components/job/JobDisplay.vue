@@ -3,6 +3,8 @@ import { type Job, Status, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { computed, ref } from 'vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 interface JobDisplayProps {
     job: Job;
@@ -63,51 +65,31 @@ async function restartJob() {
         <CleverRouterLink :to="{ name: 'job', params: { id: job.id } }">
             <h2>{{ job.label }}</h2>
         </CleverRouterLink>
-        <table>
-            <tr>
-                <td class="label">
-                    Id:
-                </td>
-                <td class="value">
-                    {{ job.id }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    {{ job.type }}
-                </td>
-            </tr>
-            <tr v-if="job.type === JobType.JsonLdToCategory">
-                <td class="label">
-                    Data source id:
-                </td>
-                <td class="value">
-                    {{ job.dataSourceId }}
-                </td>
-            </tr>
-            <tr v-else>
-                <td class="label">
-                    Logical model id:
-                </td>
-                <td class="value">
-                    {{ job.logicalModelId }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Status:
-                </td>
-                <td
-                    :class="jobStatusClass"
-                    class="value"
-                >
+        <ValueContainer>
+            <ValueRow label="Id:">
+                {{ job.id }}
+            </ValueRow>
+            <ValueRow label="Type:">
+                {{ job.type }}
+            </ValueRow>
+            <ValueRow
+                v-if="job.type === JobType.JsonLdToCategory"
+                label="Data source id:"
+            >
+                {{ job.dataSourceId }}
+            </ValueRow>
+            <ValueRow
+                v-else
+                label="Logical model id:"
+            >
+                {{ job.logicalModelId }}
+            </ValueRow>
+            <ValueRow label="Status:">
+                <span :class="jobStatusClass">
                     {{ job.status }}
-                </td>
-            </tr>
-        </table>
+                </span>
+            </ValueRow>
+        </ValueContainer>
         <div class="button-row">
             <button
                 v-if="job.status === Status.Ready"

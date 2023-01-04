@@ -5,6 +5,8 @@ import { defineComponent } from 'vue';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
 import type { ImportedDataspecer } from '@/types/integration';
 import Divider from '@/components/layout/Divider.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 //const EXAMPLE_IRI = '537f6a7e-0883-4d57-a19c-f275bd28af9f';
 //const EXAMPLE_IRI = 'f2480523-c3ee-4c3c-a36a-9483749bc0d6';
@@ -13,7 +15,9 @@ const EXAMPLE_IRI = 'https://ofn.gov.cz/data-specification/968c3ca7-bc39-4ecc-92
 
 export default defineComponent({
     components: {
-        Divider
+        Divider,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -71,81 +75,46 @@ export default defineComponent({
             <p>
                 Import project from Dataspecer!
             </p>
-            <table>
-                <tr>
-                    <td class="label">
-                        IRI:
-                    </td>
-                    <td class="value">
-                        <input
-                            v-model="iri"
-                            class="iri-input"
-                        />
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">
-                        Example:
-                    </td>
-                    <td class="value">
-                        {{ EXAMPLE_IRI }}
-                    </td>
-                </tr>
-            </table>
+            <ValueContainer>
+                <ValueRow label="IRI:">
+                    <input
+                        v-model="iri"
+                        class="iri-input"
+                    />
+                </ValueRow>
+                <ValueRow label="Example:">
+                    {{ EXAMPLE_IRI }}
+                </ValueRow>
+            </ValueContainer>
         </template>
         <template v-else>
             <template v-if="importedDataspecer">
                 <p>
                     Import successful! The following resources were found:
                 </p>
-                <table>
-                    <tr>
-                        <td class="label">
-                            Classes:
-                        </td>
-                        <td class="value">
-                            {{ importedDataspecer.counts.classes }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            Attributes:
-                        </td>
-                        <td class="value">
-                            {{ importedDataspecer.counts.attributes }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            Associations:
-                        </td>
-                        <td class="value">
-                            {{ importedDataspecer.counts.associations }}
-                        </td>
-                    </tr>
-                </table>
+                <ValueContainer>
+                    <ValueRow label="Classes:">
+                        {{ importedDataspecer.counts.classes }}
+                    </ValueRow>
+                    <ValueRow label="Attributes:">
+                        {{ importedDataspecer.counts.attributes }}
+                    </ValueRow>
+                    <ValueRow label="Associations:">
+                        {{ importedDataspecer.counts.associations }}
+                    </ValueRow>
+                </ValueContainer>
                 <Divider />
                 <p>
                     Do you want to create the objects and morphisms?
                 </p>
-                <table>
-                    <tr>
-                        <td class="label">
-                            Objects:
-                        </td>
-                        <td class="value">
-                            {{ importedDataspecer.objects.length }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="label">
-                            Morphisms:
-                        </td>
-                        <td class="value">
-                            {{ importedDataspecer.morphisms.length }}
-                        </td>
-                    </tr>
-                </table>
+                <ValueContainer>
+                    <ValueRow label="Objects:">
+                        {{ importedDataspecer.objects.length }}
+                    </ValueRow>
+                    <ValueRow label="Morphisms:">
+                        {{ importedDataspecer.morphisms.length }}
+                    </ValueRow>
+                </ValueContainer>
             </template>
             <template v-else>
                 {{ error }}

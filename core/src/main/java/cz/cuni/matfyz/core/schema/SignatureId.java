@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;

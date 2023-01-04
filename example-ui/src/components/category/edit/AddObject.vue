@@ -1,10 +1,13 @@
 <script lang="ts">
 import type { Graph } from '@/types/categoryGraph';
 import { defineComponent } from 'vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
-
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -53,38 +56,17 @@ export default defineComponent({
 <template>
     <div>
         <h2>Add Schema Object</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Label:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="label"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Iri?:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="iri"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Pim Iri?:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="pimIri"
-                    />
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Label:">
+                <input v-model="label" />
+            </ValueRow>
+            <ValueRow label="Iri?:">
+                <input v-model="iri" />
+            </ValueRow>
+            <ValueRow label="Pim Iri?:">
+                <input v-model="pimIri" />
+            </ValueRow>
+        </ValueContainer>
         <div class="button-row">
             <button
                 :disabled="!keyIsValid || !label || !iriIsAvailable"

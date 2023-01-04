@@ -10,6 +10,8 @@ import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
 import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 enum State {
     SelectSignature,
@@ -22,7 +24,9 @@ export default defineComponent({
         SignatureInput,
         TypeInput,
         NameInput,
-        ObjectIdsDisplay
+        ObjectIdsDisplay,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -137,66 +141,48 @@ export default defineComponent({
 <template>
     <div class="outer">
         <h2>Edit property</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Object:
-                </td>
-                <td class="value">
-                    {{ schemaObject.label }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Ids:
-                </td>
-                <td class="value">
-                    <ObjectIdsDisplay
-                        v-if="schemaObject.ids"
-                        :ids="schemaObject.ids"
-                        disabled
-                        class="object-ids-display"
-                    />
-                </td>
-            </tr>
-            <tr v-if="state >= State.SelectSignature">
-                <td class="label">
-                    Signature:
-                </td>
-                <td class="value">
-                    {{ signature }}
-                </td>
-            </tr>
-            <tr v-if="state >= State.SelectName">
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    {{ type }}
-                </td>
-            </tr>
-            <tr v-if="state === State.SelectType">
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    <TypeInput v-model="type" />
-                </td>
-            </tr>
-            <tr v-if="state === State.SelectName">
-                <td class="label">
-                    Name:
-                </td>
-                <td class="value">
-                    <NameInput
-                        v-model="name"
-                        :graph="graph"
-                        :database="database"
-                        :root-node="property.parentNode"
-                    />
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Object:">
+                {{ schemaObject.label }}
+            </ValueRow>
+            <ValueRow label="Ids:">
+                <ObjectIdsDisplay
+                    v-if="schemaObject.ids"
+                    :ids="schemaObject.ids"
+                    disabled
+                    class="object-ids-display"
+                />
+            </ValueRow>
+            <ValueRow
+                v-if="state >= State.SelectSignature"
+                label="Signature:"
+            >
+                {{ signature }}
+            </ValueRow>
+            <ValueRow
+                v-if="state >= State.SelectName"
+                label="Type:"
+            >
+                {{ type }}
+            </ValueRow>
+            <ValueRow
+                v-if="state === State.SelectType"
+                label="Type:"
+            >
+                <TypeInput v-model="type" />
+            </ValueRow>
+            <ValueRow
+                v-if="state === State.SelectName"
+                label="Name:"
+            >
+                <NameInput
+                    v-model="name"
+                    :graph="graph"
+                    :database="database"
+                    :root-node="property.parentNode"
+                />
+            </ValueRow>
+        </ValueContainer>
         <div
             v-if="state === State.SelectSignature"
             class="button-row"
@@ -274,10 +260,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.selected {
-    font-weight: bold;
-}
-
 .object-ids-display {
     margin-left: -6px;
 }

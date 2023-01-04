@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Database } from '@/types/database';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 interface DatabaseDisplayProps {
     database: Database;
@@ -20,24 +22,14 @@ function edit() {
         <CleverRouterLink :to="{ name: 'database', params: { id: database.id } }">
             <h2>{{ database.label }}</h2>
         </CleverRouterLink>
-        <table>
-            <tr>
-                <td class="label">
-                    Id:
-                </td>
-                <td class="value">
-                    {{ database.id }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    {{ database.type }}
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Id:">
+                {{ database.id }}
+            </ValueRow>
+            <ValueRow label="Type:">
+                {{ database.type }}
+            </ValueRow>
+        </ValueContainer>
         <div class="button-row">
             <button
                 @click="edit"

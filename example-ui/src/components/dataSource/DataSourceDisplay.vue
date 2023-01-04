@@ -2,6 +2,8 @@
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import type { DataSource } from '@/types/dataSource';
 import IriDisplay from '../IriDisplay.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 interface DataSourceDisplayProps {
     dataSource: DataSource;
@@ -21,36 +23,21 @@ function edit() {
         <CleverRouterLink :to="{ name: 'dataSource', params: { id: dataSource.id } }">
             <h2>{{ dataSource.label }}</h2>
         </CleverRouterLink>
-        <table>
-            <tr>
-                <td class="label">
-                    Id:
-                </td>
-                <td class="value">
-                    {{ dataSource.id }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    {{ dataSource.type }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Url:
-                </td>
-                <td class="value">
-                    <IriDisplay
-                        :iri="dataSource.url"
-                        :max-chars="36"
-                        clickable
-                    />
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Id:">
+                {{ dataSource.id }}
+            </ValueRow>
+            <ValueRow label="Type:">
+                {{ dataSource.type }}
+            </ValueRow>
+            <ValueRow label="Url:">
+                <IriDisplay
+                    :iri="dataSource.url"
+                    :max-chars="36"
+                    clickable
+                />
+            </ValueRow>
+        </ValueContainer>
         <div class="button-row">
             <button
                 @click="edit"

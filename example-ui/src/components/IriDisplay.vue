@@ -55,7 +55,7 @@ function click() {
         <div
             v-for="row in iriRows"
             :key="row"
-            class="iri-row"
+            class="text-bold"
             :class="{ clickable: props.clickable }"
             @click="click"
         >
@@ -68,11 +68,5 @@ function click() {
 .outer {
     display: flex;
     flex-direction: column;
-}
-</style>
-
-<style>
-.value .iri-row {
-    font-weight: bold;
 }
 </style>

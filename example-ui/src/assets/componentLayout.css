@@ -9,6 +9,10 @@ td.value {
     font-weight: bold;
 }
 
+td.value > span {
+    font-weight: bold;
+}
+
 .editor {
     border: 2px solid var(--color-border);
     padding: 12px;
@@ -47,4 +51,8 @@ span.disabled {
     background-color: var(--color-background-dark);
     border-radius: 4px;
     padding: 0px 6px 0px 6px;
+}
+
+.text-bold {
+    font-weight: bold;
 }

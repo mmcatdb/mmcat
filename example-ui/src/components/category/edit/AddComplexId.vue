@@ -8,13 +8,17 @@ import SignatureIdDisplay from '../SignatureIdDisplay.vue';
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
         SignatureIdDisplay,
         SignatureInput,
         ButtonIcon,
-        IconPlusSquare
+        IconPlusSquare,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -71,12 +75,9 @@ export default defineComponent({
 
 <template>
     <h2>Add complex Id</h2>
-    <table>
-        <tr>
-            <td class="label">
-                Id:
-            </td>
-            <td class="value fix-icon-height">
+    <ValueContainer>
+        <ValueRow label="Id:">
+            <span class="fix-icon-height">
                 <SignatureIdDisplay :signature-id="signatureIdFactory.signatureId" />
                 <ButtonIcon
                     v-if="!addingSignature"
@@ -85,24 +86,19 @@ export default defineComponent({
                 >
                     <IconPlusSquare />
                 </ButtonIcon>
-            </td>
-        </tr>
-    </table>
+            </span>
+        </ValueRow>
+    </ValueContainer>
     <div
         v-if="addingSignature"
         class="editor"
     >
         <h2>Add signature</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Signature:
-                </td>
-                <td class="value">
-                    {{ signature }}
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Signature:">
+                {{ signature }}
+            </ValueRow>
+        </ValueContainer>
         <SignatureInput
             v-model="signature"
             :graph="graph"
@@ -143,7 +139,7 @@ export default defineComponent({
     display: inline-flex;
 }
 
-.fix-icon-height > .button-icon {
+.fix-icon-height .button-icon {
     max-height: 20px;
 }
 

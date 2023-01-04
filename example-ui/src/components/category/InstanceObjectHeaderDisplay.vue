@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { SchemaObject } from '@/types/schema';
-
 import type { Signature } from '@/types/identifiers/Signature';
 
 export type Column = {
@@ -34,7 +33,7 @@ function columnClicked(column: Column) {
         :class="{ clickable: column.isClickable }"
         @click="() => columnClicked(column)"
     >
-        <span class="value">
+        <span class="text-bold">
             {{ column.schemaObject?.label }}
         </span>
         <br />

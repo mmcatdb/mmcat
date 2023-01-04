@@ -12,7 +12,7 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
     public final String value;
 
     public Id(String value) {
-        this.value = value;
+        this.value = value != null ? value : "";
     }
     
     @Override

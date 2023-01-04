@@ -7,6 +7,8 @@ import ButtonIcon from '@/components/ButtonIcon.vue';
 import AddId from './AddId.vue';
 import { Type } from '@/types/identifiers';
 import IriDisplay from '@/components/IriDisplay.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     expose: [ 'changed' ],
@@ -15,7 +17,9 @@ export default defineComponent({
         AddId,
         ButtonIcon,
         IconPlusSquare,
-        IriDisplay
+        IriDisplay,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -37,7 +41,6 @@ export default defineComponent({
     },
     computed: {
         changed(): boolean {
-            //return this.label !== this.node.schemaObject.label || this.addingId || this.addedId;
             return this.label !== this.node.schemaObject.label || this.addingId;
         },
         isNew(): boolean {
@@ -80,70 +83,45 @@ export default defineComponent({
 <template>
     <div>
         <h2>Edit Schema Object</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Label:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="label"
-                        :disabled="!isNew"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Iri:
-                </td>
-                <td class="value">
-                    <IriDisplay
-                        :iri="node.schemaObject.iri"
-                        :max-chars="36"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Pim Iri:
-                </td>
-                <td class="value">
-                    <IriDisplay
-                        :iri="node.schemaObject.pimIri"
-                        :max-chars="36"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Key:
-                </td>
-                <td class="value">
-                    {{ node.schemaObject.key.value }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Ids:
-                </td>
-                <td class="value">
-                    <ObjectIdsDisplay
-                        v-if="node.schemaObject.ids"
-                        :ids="node.schemaObject.ids"
-                        :disabled="!isNew"
-                        class="object-ids-display"
-                        @delete-signature="(index) => node.deleteSignatureId(index)"
-                        @delete-non-signature="() => node.deleteNonSignatureId()"
-                    />
-                    <ButtonIcon
-                        v-if="!addingId && isNew && (!node.schemaObject.ids || node.schemaObject.ids.type === Type.Signatures)"
-                        @click="startAddingId"
-                    >
-                        <IconPlusSquare />
-                    </ButtonIcon>
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Label:">
+                <input
+                    v-model="label"
+                    :disabled="!isNew"
+                />
+            </ValueRow>
+            <ValueRow label="Iri:">
+                <IriDisplay
+                    :iri="node.schemaObject.iri"
+                    :max-chars="36"
+                />
+            </ValueRow>
+            <ValueRow label="Pim Iri:">
+                <IriDisplay
+                    :iri="node.schemaObject.pimIri"
+                    :max-chars="36"
+                />
+            </ValueRow>
+            <ValueRow label="Key:">
+                {{ node.schemaObject.key.value }}
+            </ValueRow>
+            <ValueRow label="Ids:">
+                <ObjectIdsDisplay
+                    v-if="node.schemaObject.ids"
+                    :ids="node.schemaObject.ids"
+                    :disabled="!isNew"
+                    class="object-ids-display"
+                    @delete-signature="(index) => node.deleteSignatureId(index)"
+                    @delete-non-signature="() => node.deleteNonSignatureId()"
+                />
+                <ButtonIcon
+                    v-if="!addingId && isNew && (!node.schemaObject.ids || node.schemaObject.ids.type === Type.Signatures)"
+                    @click="startAddingId"
+                >
+                    <IconPlusSquare />
+                </ButtonIcon>
+            </ValueRow>
+        </ValueContainer>
         <div
             v-if="addingId"
             class="editor"

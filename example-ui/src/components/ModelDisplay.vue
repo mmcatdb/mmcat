@@ -1,8 +1,14 @@
 <script lang="ts">
 import type { Model } from '@/types/model';
 import { defineComponent } from 'vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
+    components: {
+        ValueContainer,
+        ValueRow
+    },
     props: {
         model: {
             type: Object as () => Model,
@@ -29,24 +35,14 @@ export default defineComponent({
 <template>
     <div class="model-display">
         <h2>{{ model.jobLabel }}</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Job id:
-                </td>
-                <td class="value">
-                    {{ model.jobId }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Job label:
-                </td>
-                <td class="value">
-                    {{ model.jobLabel }}
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Job id:">
+                {{ model.jobId }}
+            </ValueRow>
+            <ValueRow label="Job label:">
+                {{ model.jobLabel }}
+            </ValueRow>
+        </ValueContainer>
         <textarea
             ref="textArea"
             class="model-commands"

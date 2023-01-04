@@ -3,6 +3,8 @@ import { SelectionType, type Graph, type Node, type TemporaryEdge } from '@/type
 import { Cardinality, type CardinalitySettings } from '@/types/schema';
 import { defineComponent } from 'vue';
 import CardinalityInput from './CardinalityInput.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export enum NodeIndices {
     First = 0,
@@ -11,7 +13,9 @@ export enum NodeIndices {
 
 export default defineComponent({
     components: {
-        CardinalityInput
+        CardinalityInput,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -143,57 +147,26 @@ export default defineComponent({
 <template>
     <div class="add-morphism">
         <h2>Add Schema Morphism</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Domain object:
-                </td>
-                <td class="value">
-                    {{ node1?.schemaObject.label }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Codomain object:
-                </td>
-                <td class="value">
-                    {{ node2?.schemaObject.label }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Label?:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="label"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Iri?:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="iri"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Pim Iri?:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="pimIri"
-                    />
-                </td>
-            </tr>
+        <ValueContainer>
+            <ValueRow label="Domain object:">
+                {{ node1?.schemaObject.label }}
+            </ValueRow>
+            <ValueRow label="Codomain object:">
+                {{ node2?.schemaObject.label }}
+            </ValueRow>
+            <ValueRow label="Label?:">
+                <input v-model="label" />
+            </ValueRow>
+            <ValueRow label="Iri?:">
+                <input v-model="iri" />
+            </ValueRow>
+            <ValueRow label="Pim Iri?:">
+                <input v-model="pimIri" />
+            </ValueRow>
             <CardinalityInput
                 v-model="cardinality"
             />
-        </table>
+        </ValueContainer>
         <div class="button-row">
             <button
                 :disabled="!nodesSelected || !iriIsAvailable"

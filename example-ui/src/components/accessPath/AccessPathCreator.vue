@@ -10,6 +10,8 @@ import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -79,35 +81,25 @@ async function createMapping(label: string) {
                     v-if="!accessPath || !selectedLogicalModel"
                     class="editor"
                 >
-                    <table>
-                        <tr>
-                            <td class="label">
-                                Logical model:
-                            </td>
-                            <td class="value">
-                                <select v-model="selectedLogicalModel">
-                                    <option
-                                        v-for="logicalModel in logicalModels"
-                                        :key="logicalModel.id"
-                                        :value="logicalModel"
-                                    >
-                                        {{ logicalModel.label }}
-                                    </option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">
-                                Root object:
-                            </td>
-                            <td class="value">
-                                <NodeInput
-                                    v-model="selectingRootNode"
-                                    :graph="graph"
-                                />
-                            </td>
-                        </tr>
-                    </table>
+                    <ValueContainer>
+                        <ValueRow label="Logical model:">
+                            <select v-model="selectedLogicalModel">
+                                <option
+                                    v-for="logicalModel in logicalModels"
+                                    :key="logicalModel.id"
+                                    :value="logicalModel"
+                                >
+                                    {{ logicalModel.label }}
+                                </option>
+                            </select>
+                        </ValueRow>
+                        <ValueRow label="Root object:">
+                            <NodeInput
+                                v-model="selectingRootNode"
+                                :graph="graph"
+                            />
+                        </ValueRow>
+                    </ValueContainer>
                     <div class="button-row">
                         <button
                             :disabled="!selectedLogicalModel || !selectingRootNode"

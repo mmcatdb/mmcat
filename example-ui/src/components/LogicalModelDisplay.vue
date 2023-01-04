@@ -3,11 +3,14 @@ import { defineComponent } from 'vue';
 import type { LogicalModelInfo } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import type { DatabaseInfo } from '@/types/database';
-import type { SchemaCategory } from '@/types/schema';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
-        CleverRouterLink
+        CleverRouterLink,
+        ValueContainer,
+        ValueRow
     },
     props: {
         logicalModel: {
@@ -36,27 +39,20 @@ export default defineComponent({
         <CleverRouterLink :to="{ name: 'logicalModel', params: { id: logicalModel.id } }">
             <h2>{{ logicalModel.label }}</h2>
         </CleverRouterLink>
-        <table>
-            <tr>
-                <td class="label">
-                    Id:
-                </td>
-                <td class="value">
-                    {{ logicalModel.id }}
-                </td>
-            </tr>
-            <tr v-if="database">
-                <td class="label">
-                    Database:
-                </td>
-                <td class="value">
-                    <RouterLink :to="{ name: 'database', params: { id: database.id } }">
-                        <!--TODO-->
-                        {{ database.label }}
-                    </RouterLink>
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Id:">
+                {{ logicalModel.id }}
+            </ValueRow>
+            <ValueRow
+                v-if="database"
+                label="Database:"
+            >
+                <RouterLink :to="{ name: 'database', params: { id: database.id } }">
+                    <!--TODO-->
+                    {{ database.label }}
+                </RouterLink>
+            </ValueRow>
+        </ValueContainer>
     </div>
 </template>
 

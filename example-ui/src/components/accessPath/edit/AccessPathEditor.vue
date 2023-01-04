@@ -7,6 +7,8 @@ import type { DatabaseWithConfiguration } from '@/types/database';
 import AddProperty from './AddProperty.vue';
 import EditProperty from './EditProperty.vue';
 import StaticNameInput from '../input/StaticNameInput.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 enum State {
     Default,
@@ -19,17 +21,15 @@ type GenericStateValue<State, Value> = { type: State } & Value;
 type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddProperty, { parent: GraphParentProperty }> |
     GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
-/*
-type State = { default: string }
-    | { editProperty: { property: ComplexProperty } };
-*/
 
 export default defineComponent({
     components: {
         AddProperty,
         EditProperty,
         ParentPropertyDisplay,
-        StaticNameInput
+        StaticNameInput,
+        ValueContainer,
+        ValueRow
     },
     props: {
         graph: {
@@ -81,40 +81,20 @@ export default defineComponent({
         <div>
             <div class="editor">
                 <template v-if="state.type === State.Default">
-                    <table>
-                        <tr>
-                            <td class="label">
-                                Database:
-                            </td>
-                            <td class="value">
-                                {{ database.label }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">
-                                Root object:
-                            </td>
-                            <td class="value">
-                                {{ rootProperty.node.label }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">
-                                Label:
-                            </td>
-                            <td class="value">
-                                <input v-model="label" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">
-                                Kind name:
-                            </td>
-                            <td class="value">
-                                <StaticNameInput v-model="rootProperty.name" />
-                            </td>
-                        </tr>
-                    </table>
+                    <ValueContainer>
+                        <ValueRow label="Database:">
+                            {{ database.label }}
+                        </ValueRow>
+                        <ValueRow label="Root object:">
+                            {{ rootProperty.node.label }}
+                        </ValueRow>
+                        <ValueRow label="Label:">
+                            <input v-model="label" />
+                        </ValueRow>
+                        <ValueRow label="Kind name:">
+                            <StaticNameInput v-model="rootProperty.name" />
+                        </ValueRow>
+                    </ValueContainer>
                     <div class="button-row">
                         <button
                             :disabled="!label"

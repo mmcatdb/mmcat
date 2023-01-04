@@ -2,6 +2,8 @@
 import { type Database, DB_TYPES, Type, copyDatabaseUpdate, getNewDatabaseUpdate, createInitFromUpdate, type DatabaseUpdate } from '@/types/database';
 import API from '@/utils/api';
 import { computed, ref } from 'vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 interface DatabaseEditorProps {
     database?: Database;
@@ -67,86 +69,49 @@ async function deleteMethod() {
 <template>
     <div class="editor">
         <h2>{{ isNew ? 'Add' : 'Edit' }} database</h2>
-        <table>
-            <tr>
-                <td class="label">
-                    Type:
-                </td>
-                <td class="value">
-                    <select
-                        v-model="innerValue.type"
-                        :disabled="!isNew"
+        <ValueContainer>
+            <ValueRow label="Type:">
+                <select
+                    v-model="innerValue.type"
+                    :disabled="!isNew"
+                >
+                    <option
+                        v-for="availableType in DB_TYPES"
+                        :key="availableType.type"
+                        :value="availableType.type"
                     >
-                        <option
-                            v-for="availableType in DB_TYPES"
-                            :key="availableType.type"
-                            :value="availableType.type"
-                        >
-                            {{ availableType.label }}
-                        </option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Label:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.label" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Host:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.settings.host" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Port:
-                </td>
-                <td class="value">
-                    <input
-                        v-model="innerValue.settings.port"
-                        type="number"
-                    />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Database:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.settings.database" />
-                </td>
-            </tr>
-            <tr :class="{ hidden: innerValue.type !== Type.mongodb }">
-                <td class="label">
-                    Authentication Database:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.settings.authenticationDatabase" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Username:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.settings.username" />
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Password:
-                </td>
-                <td class="value">
-                    <input v-model="innerValue.settings.password" />
-                </td>
-            </tr>
-        </table>
+                        {{ availableType.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow label="Label:">
+                <input v-model="innerValue.label" />
+            </ValueRow>
+            <ValueRow label="Host:">
+                <input v-model="innerValue.settings.host" />
+            </ValueRow>
+            <ValueRow label="Port:">
+                <input
+                    v-model="innerValue.settings.port"
+                    type="number"
+                />
+            </ValueRow>
+            <ValueRow label="Database:">
+                <input v-model="innerValue.settings.database" />
+            </ValueRow>
+            <ValueRow
+                :class="{ hidden: innerValue.type !== Type.mongodb }"
+                label="Authentication Database:"
+            >
+                <input v-model="innerValue.settings.authenticationDatabase" />
+            </ValueRow>
+            <ValueRow label="Username:">
+                <input v-model="innerValue.settings.username" />
+            </ValueRow>
+            <ValueRow label="Password:">
+                <input v-model="innerValue.settings.password" />
+            </ValueRow>
+        </ValueContainer>
         <div class="button-row">
             <button
                 :disabled="fetching || !isValid"

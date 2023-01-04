@@ -2,10 +2,14 @@
 import { defineComponent } from 'vue';
 import type { ModelView } from '@/types/model';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
-        CleverRouterLink
+        CleverRouterLink,
+        ValueContainer,
+        ValueRow
     },
     props: {
         model: {
@@ -29,24 +33,14 @@ export default defineComponent({
         <CleverRouterLink :to="{ name: 'model', params: { jobId: model.jobId } }">
             <h2>{{ model.jobLabel }}</h2>
         </CleverRouterLink>
-        <table>
-            <tr>
-                <td class="label">
-                    Job id:
-                </td>
-                <td class="value">
-                    {{ model.jobId }}
-                </td>
-            </tr>
-            <tr>
-                <td class="label">
-                    Job label:
-                </td>
-                <td class="value">
-                    {{ model.jobLabel }}
-                </td>
-            </tr>
-        </table>
+        <ValueContainer>
+            <ValueRow label="Job id:">
+                {{ model.jobId }}
+            </ValueRow>
+            <ValueRow label="Job label:">
+                {{ model.jobLabel }}
+            </ValueRow>
+        </ValueContainer>
     </div>
 </template>
 

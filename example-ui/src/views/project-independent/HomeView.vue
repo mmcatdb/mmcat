@@ -4,6 +4,8 @@ import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ResourceLoader from '@/components/ResourceLoader.vue';
+import ValueContainer from '@/components/layout/page/ValueContainer.vue';
+import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
@@ -69,17 +71,11 @@ async function confirmNewCategory() {
     </h2>
     <div class="new-schema-category">
         <div class="editor mt-3">
-            <table>
-                <tr>
-                    <td class="label">
-                        Label:
-                    </td>
-                    <td class="value">
-                        <input v-model="newCategoryLabel" />
-                    </td>
-                </tr>
-                <tr>&nbsp;</tr>
-            </table>
+            <ValueContainer>
+                <ValueRow label="Label:">
+                    <input v-model="newCategoryLabel" />
+                </ValueRow>
+            </ValueContainer>
             <div class="button-row">
                 <button
                     :disabled="!newCategoryLabel || !avaliableCategories"
