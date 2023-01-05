@@ -206,7 +206,7 @@ public class AsyncJobService {
             process.input(mapping, instance, ddlWrapper, pushWrapper);
 
             var result = process.run();
-            if (result.status)
+            if (!result.status)
                 return CompletableFuture.completedFuture(result);
 
             output.append(result.data + "\n");
