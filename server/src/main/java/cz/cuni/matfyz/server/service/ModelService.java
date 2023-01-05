@@ -19,7 +19,7 @@ public class ModelService {
 
     public List<Model> findAllInCategory(HttpSession session, Id categoryId) {
         var store = UserStore.fromSession(session);
-        return store.getAllModels().stream().filter(model -> model.categoryId() == categoryId).toList();
+        return store.getAllModels().stream().filter(model -> model.categoryId().equals(categoryId)).toList();
     }
 
     public Model findModel(HttpSession session, Id jobId) {

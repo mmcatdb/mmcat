@@ -16,7 +16,7 @@ export const JOB_TYPES = [
         value: JobType.CategoryToModel
     },
     {
-        label: 'RDF to Category',
+        label: 'Import data', // TODO
         value: JobType.JsonLdToCategory
     }
 ];
