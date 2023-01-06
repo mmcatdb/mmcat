@@ -62,17 +62,12 @@ public class MongoDBPushWrapper implements AbstractPushWrapper {
         kindName = null;
         propertyValues = new ArrayList<>();
     }
-}
 
-class PropertyValue {
+    record PropertyValue(
+        String name,
+        String value
+    ) {}
 
-    public String name;
-    public String value;
-    
-    public PropertyValue(String name, String value) {
-        this.name = name;
-        this.value = value;
-    }
 }
 
 class StatementConstructor {
@@ -84,10 +79,10 @@ class StatementConstructor {
         return root.object.toString(4);
     }
 
-    void addProperty(PropertyValue property) throws Exception {
-        List<Key> keys = createKeys(property.name);
+    void addProperty(MongoDBPushWrapper.PropertyValue property) throws Exception {
+        List<Key> keys = createKeys(property.name());
 
-        add(root, keys, property.value);
+        add(root, keys, property.value());
     }
 
     private List<Key> createKeys(String path) {

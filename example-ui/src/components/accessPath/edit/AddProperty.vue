@@ -51,6 +51,11 @@ export default defineComponent({
             typeIsDetermined: false
         };
     },
+    computed: {
+        nameIsValid(): boolean {
+            return !(this.name instanceof StaticName) || !!this.name.value;
+        }
+    },
     methods: {
         save() {
             const newProperty = this.type === PropertyType.Simple
@@ -168,7 +173,8 @@ export default defineComponent({
         </div>
         <div class="button-row">
             <button
-                :disabled="state === State.SelectSignature && !database.configuration.isGrouppingAllowed && signature.isNull"
+                :disabled="(state === State.SelectSignature && !database.configuration.isGrouppingAllowed && signature.isNull) ||
+                    (state === State.SelectName && !nameIsValid)"
                 @click="nextButton"
             >
                 {{ state < State.SelectName ? 'Next' : 'Finish' }}

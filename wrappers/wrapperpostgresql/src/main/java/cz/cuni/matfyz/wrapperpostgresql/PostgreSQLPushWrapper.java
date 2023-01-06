@@ -26,11 +26,25 @@ public class PostgreSQLPushWrapper implements AbstractPushWrapper {
 
     @Override
     public PostgreSQLDMLStatement createDMLStatement() {
+        if (!nameIsValid(kindName))
+            // This should not happen.
+            throw new UnsupportedOperationException("Kind name \"" + kindName + "\" doesn't meet required pattern /^[\\w]+$/.");
+
         List<String> names = propertyValues.stream().map(propertyValue -> propertyValue.name).toList();
-        List<String> values = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
+        for (var name : names)
+            if (!nameIsValid(name))
+                // Neither this.
+                throw new UnsupportedOperationException("Property name \"" + name + "\" doesn't meet required pattern /^[\\w]+$/.");
+            
+        List<String> escapedNames = names.stream().map(name -> '"' + name + '"').toList();
+        List<String> escapedValues = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
         
-        String content = String.format("INSERT INTO %s (%s)\nVALUES (%s);", kindName, String.join(", ", names), String.join(", ", values));
+        String content = String.format("INSERT INTO \"%s\" (%s)\nVALUES (%s);", kindName, String.join(", ", escapedNames), String.join(", ", escapedValues));
         return new PostgreSQLDMLStatement(content);
+    }
+
+    private boolean nameIsValid(String name) {
+        return name.matches("^[\\w.]+$");
     }
     
     private String escapeString(String input) {
@@ -44,15 +58,10 @@ public class PostgreSQLPushWrapper implements AbstractPushWrapper {
         kindName = null;
         propertyValues = new ArrayList<>();
     }
-}
 
-class PropertyValue {
-    
-    public String name;
-    public String value;
-    
-    public PropertyValue(String name, String value) {
-        this.name = name;
-        this.value = value;
-    }
+    private record PropertyValue(
+        String name,
+        String value
+    ) {}
+
 }

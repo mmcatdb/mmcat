@@ -36,7 +36,6 @@ onMounted(async () => {
     }
 });
 
-
 function cytoscapeCreated(newGraph: Graph) {
     graph.value = newGraph;
 }

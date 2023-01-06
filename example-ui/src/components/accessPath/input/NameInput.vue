@@ -4,6 +4,7 @@ import { type Graph, type Node, createDefaultFilter } from '@/types/categoryGrap
 import type { DatabaseWithConfiguration } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
 import { defineComponent } from 'vue';
+import StaticNameInput from './StaticNameInput.vue';
 import SignatureInput from './SignatureInput.vue';
 
 enum NameType {
@@ -13,7 +14,10 @@ enum NameType {
 }
 
 export default defineComponent({
-    components: { SignatureInput },
+    components: {
+        StaticNameInput,
+        SignatureInput
+    },
     props: {
         graph: {
             type: Object as () => Graph,
@@ -42,7 +46,7 @@ export default defineComponent({
         return {
             innerValue: this.modelValue,
             type: this.getNameType(this.modelValue),
-            staticValue: this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue.value : '',
+            staticValue: this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue : StaticName.fromString(''),
             dynamicValue: SequenceSignature.fromSignature(this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty, this.rootNode),
             NameType,
             filter: createDefaultFilter(this.database.configuration)
@@ -54,7 +58,7 @@ export default defineComponent({
                 if (!newValue.equals(this.innerValue)) {
                     this.innerValue = this.modelValue;
                     this.type = this.getNameType(this.modelValue);
-                    this.staticValue = this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue.value : '';
+                    this.staticValue = this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue : StaticName.fromString('');
                     this.dynamicValue = SequenceSignature.fromSignature(this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty, this.rootNode);
                 }
             }
@@ -69,7 +73,7 @@ export default defineComponent({
         updateInnerValue() {
             switch (this.type) {
             case NameType.Static:
-                this.innerValue = StaticName.fromString(this.staticValue);
+                this.innerValue = this.staticValue;
                 break;
             case NameType.Dynamic:
                 this.innerValue = DynamicName.fromSignature(this.dynamicValue.toSignature());
@@ -101,7 +105,7 @@ export default defineComponent({
         Static
     </label>
     <br />
-    <input
+    <StaticNameInput
         v-model="staticValue"
         :disabled="type !== NameType.Static"
         @input="updateInnerValue"

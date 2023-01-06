@@ -33,7 +33,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     private PreparedStatement prepareStatement(Connection connection, PullWrapperOptions options) throws SQLException {
         // Prevent SQL injection.
-        if (!options.getKindName().matches("[_a-zA-Z0-9\\.]+"))
+        if (!options.getKindName().matches("^[_a-zA-Z0-9.]+$"))
             throw new SQLException("Invalid table name.");
 
         String command = "SELECT * FROM " + options.getKindName();
