@@ -45,7 +45,7 @@ public class WrapperService {
         }
     }
 
-    public AbstractPathWrapper getPathWrapper(Database database) {
+    public AbstractPathWrapper createPathWrapper(Database database) {
         return switch (database.type) {
             case mongodb -> new MongoDBPathWrapper();
             case postgresql -> new PostgreSQLPathWrapper();
@@ -53,7 +53,7 @@ public class WrapperService {
         };
     }
 
-    public AbstractDDLWrapper getDDLWrapper(Database database) {
+    public AbstractDDLWrapper createDDLWrapper(Database database) {
         return switch (database.type) {
             case mongodb ->  new MongoDBDDLWrapper();
             case postgresql ->  new PostgreSQLDDLWrapper();
@@ -61,7 +61,7 @@ public class WrapperService {
         };
     }
 
-    public AbstractPushWrapper getPushWrapper(Database database) {
+    public AbstractPushWrapper createPushWrapper(Database database) {
         return switch (database.type) {
             case mongodb ->  new MongoDBPushWrapper();
             case postgresql ->  new PostgreSQLPushWrapper();
@@ -79,16 +79,16 @@ public class WrapperService {
         if (!mongoDBCache.containsKey(database.id))
             mongoDBCache.put(database.id, createMongoDBProvider(database));
 
-        var wrapper = new MongoDBPullWrapper();
-        var provider = mongoDBCache.get(database.id);
+        final var wrapper = new MongoDBPullWrapper();
+        final var provider = mongoDBCache.get(database.id);
         wrapper.injectDatabaseProvider(provider);
 
         return wrapper;
     }
 
     private static MongoDBDatabaseProvider createMongoDBProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
-        var mapper = new ObjectMapper();
-        var settings = mapper.treeToValue(database.settings, MongoDBSettings.class);
+        final var mapper = new ObjectMapper();
+        final var settings = mapper.treeToValue(database.settings, MongoDBSettings.class);
 
         return new MongoDBDatabaseProvider(settings);
     }
@@ -99,16 +99,16 @@ public class WrapperService {
         if (!postgreSQLCache.containsKey(database.id))
             postgreSQLCache.put(database.id, createPostgreSQLProvider(database));
 
-        var wrapper = new PostgreSQLPullWrapper();
-        var provider = postgreSQLCache.get(database.id);
+        final var wrapper = new PostgreSQLPullWrapper();
+        final var provider = postgreSQLCache.get(database.id);
         wrapper.injectConnectionProvider(provider);
 
         return wrapper;
     }
 
     private static PostgreSQLConnectionProvider createPostgreSQLProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
-        var mapper = new ObjectMapper();
-        var settings = mapper.treeToValue(database.settings, PostgreSQLSettings.class);
+        final var mapper = new ObjectMapper();
+        final var settings = mapper.treeToValue(database.settings, PostgreSQLSettings.class);
 
         return new PostgreSQLConnectionProvider(settings);
     }

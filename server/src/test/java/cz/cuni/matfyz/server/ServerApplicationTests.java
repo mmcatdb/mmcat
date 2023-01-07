@@ -134,8 +134,8 @@ class ServerApplicationTests {
         var mapping = createMapping(mappingWrapper);
 
         Database database = databaseService.find(databaseId);
-        AbstractDDLWrapper ddlWrapper = wrapperService.getDDLWrapper(database);
-        AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
+        AbstractDDLWrapper ddlWrapper = wrapperService.createDDLWrapper(database);
+        AbstractPushWrapper pushWrapper = wrapperService.createPushWrapper(database);
 
         var process = new InstanceToDatabase();
         process.input(mapping, instance, ddlWrapper, pushWrapper);

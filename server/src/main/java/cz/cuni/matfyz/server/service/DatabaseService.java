@@ -58,14 +58,14 @@ public class DatabaseService {
 
     public DatabaseWithConfiguration findDatabaseWithConfiguration(Id databaseId) {
         var database = find(databaseId);
-        var configuration = new DatabaseConfiguration(wrapperService.getPathWrapper(database));
+        var configuration = new DatabaseConfiguration(wrapperService.createPathWrapper(database));
 
         return new DatabaseWithConfiguration(database, configuration);
     }
 
     public List<DatabaseWithConfiguration> findAllDatabasesWithConfiguration() {
         return findAll().stream().map(database -> {
-            var configuration = new DatabaseConfiguration(wrapperService.getPathWrapper(database));
+            var configuration = new DatabaseConfiguration(wrapperService.createPathWrapper(database));
             return new DatabaseWithConfiguration(database, configuration);
         }).toList();
     }

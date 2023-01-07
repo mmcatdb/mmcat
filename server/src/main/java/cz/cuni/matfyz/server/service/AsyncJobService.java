@@ -1,8 +1,5 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.DataResult;
@@ -11,7 +8,6 @@ import cz.cuni.matfyz.integration.processes.JsonLdToInstance;
 import cz.cuni.matfyz.server.builder.CategoryBuilder;
 import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.entity.Id;
-import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.JobRepository;
@@ -74,7 +70,6 @@ public class AsyncJobService {
     private ModelService modelService;
 
     public void runJob(Job job, UserStore store) {
-
         jobQueue.add(new RunJobData(job, store));
         
         LOGGER.info("Job { id: {}, name: '{}' } placed to the queue.", job.id, job.label);
@@ -86,7 +81,7 @@ public class AsyncJobService {
         if (jobIsRunning && !currentIsEnding)
             return;
 
-        var nextJobData = jobQueue.poll();
+        final var nextJobData = jobQueue.poll();
         if (nextJobData == null) {
             jobIsRunning = false;
             return;
@@ -129,8 +124,8 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void modelToCategoryProcess(Job job, UserStore store) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var instance = store.getCategory(job.categoryId);
-        var result = modelToCategoryAlgorithm(job, instance).join();
+        final var instance = store.getCategory(job.categoryId);
+        final var result = modelToCategoryAlgorithm(job, instance).join();
 
         LOGGER.info("MODEL TO CATEGORY");
         LOGGER.info("{}", result.status);
@@ -147,16 +142,16 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private CompletableFuture<DataResult<InstanceCategory>> modelToCategoryAlgorithm(Job job, InstanceCategory instance) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var logicalModel = logicalModelService.find(job.logicalModelId);
-        Database database = databaseService.find(logicalModel.databaseId);
+        final var logicalModel = logicalModelService.find(job.logicalModelId);
+        final var database = databaseService.find(logicalModel.databaseId);
 
-        AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
-        var mappingWrappers = mappingService.findAll(job.logicalModelId);
+        final var pullWrapper = wrapperService.getPullWraper(database);
+        final var mappingWrappers = mappingService.findAll(job.logicalModelId);
 
         var result = new DataResult<InstanceCategory>(instance);
-        for (var mappingWrapper : mappingWrappers) {
-            var mapping = createMapping(mappingWrapper, job.categoryId);
-            var process = new DatabaseToInstance();
+        for (final var mappingWrapper : mappingWrappers) {
+            final var mapping = createMapping(mappingWrapper, job.categoryId);
+            final var process = new DatabaseToInstance();
             process.input(mapping, result.data, pullWrapper);
 
             result = process.run();
@@ -170,7 +165,7 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void categoryToModelProcess(Job job, UserStore store) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var instance = store.getCategory(job.categoryId);
+        final var instance = store.getCategory(job.categoryId);
 
         /*
         if (instance == null) {
@@ -179,7 +174,7 @@ public class AsyncJobService {
         }
         */
 
-        var result = categoryToModelAlgorithm(job, instance).join();
+        final var result = categoryToModelAlgorithm(job, instance).join();
 
         if (result.status) {
             modelService.createNew(store, job, job.label, result.data);
@@ -192,20 +187,20 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private CompletableFuture<DataResult<String>> categoryToModelAlgorithm(Job job, InstanceCategory instance) throws WrapperNotFoundException, WrapperCreationErrorException {
-        var logicalModel = logicalModelService.find(job.logicalModelId);
-        Database database = databaseService.find(logicalModel.databaseId);
+        final var logicalModel = logicalModelService.find(job.logicalModelId);
+        final var database = databaseService.find(logicalModel.databaseId);
+        final var mappingWrappers = mappingService.findAll(job.logicalModelId);
+        
+        final var output = new StringBuilder();
+        for (final var mappingWrapper : mappingWrappers) {
+            final var ddlWrapper = wrapperService.createDDLWrapper(database);
+            final var pushWrapper = wrapperService.createPushWrapper(database);
 
-        AbstractDDLWrapper ddlWrapper = wrapperService.getDDLWrapper(database);
-        AbstractPushWrapper pushWrapper = wrapperService.getPushWrapper(database);
-        var mappingWrappers = mappingService.findAll(job.logicalModelId);
-
-        var output = new StringBuilder();
-        for (var mappingWrapper : mappingWrappers) {
-            var mapping = createMapping(mappingWrapper, job.categoryId);
-            var process = new InstanceToDatabase();
+            final var mapping = createMapping(mappingWrapper, job.categoryId);
+            final var process = new InstanceToDatabase();
             process.input(mapping, instance, ddlWrapper, pushWrapper);
 
-            var result = process.run();
+            final var result = process.run();
             if (!result.status)
                 return CompletableFuture.completedFuture(result);
 
@@ -240,7 +235,7 @@ public class AsyncJobService {
             .setCategoryWrapper(schemaCategoryWrapper)
             .build();
 
-        var process = new JsonLdToInstance();
+        final var process = new JsonLdToInstance();
         process.input(schemaCategory, instance, inputStreamProvider);
 
         final var result = process.run();
@@ -249,7 +244,7 @@ public class AsyncJobService {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper, Id categoryId) {
-        var categoryWrapper = categoryService.find(categoryId);
+        final var categoryWrapper = categoryService.find(categoryId);
 
         return new MappingBuilder()
             .setMappingWrapper(mappingWrapper)
