@@ -53,12 +53,16 @@ public class JobController {
 
     @PostMapping("/jobs/{id}/start")
     public Job startJob(@PathVariable Id id, HttpSession session) {
-        Job job = service.find(id);
+        final var job = service.find(id);
         if (job == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job " + id + " not foud.");
 
-        var store = UserStore.fromSession(session);
-        return service.start(job, store);
+        final var store = UserStore.fromSession(session);
+        final var startedJob = service.start(job, store);
+        if (startedJob == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job " + id + " could not be started.");
+
+        return startedJob;
     }
 
     @DeleteMapping("/jobs/{id}")
@@ -67,4 +71,18 @@ public class JobController {
         if (!result)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+
+    @PostMapping("/jobs/{id}/cancel")
+    public Job cancelJob(@PathVariable Id id, HttpSession session) {
+        final var job = service.find(id);
+        if (job == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job " + id + " not foud.");
+
+        final var canceledJob = service.cancel(job);
+        if (canceledJob == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job " + id + " could not be canceled.");
+
+        return canceledJob;
+    }
+
 }

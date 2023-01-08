@@ -48,7 +48,7 @@ public class DatabaseRepository {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                     SELECT
-                        database_for_mapping.id as id,
+                        DISTINCT database_for_mapping.id as id,
                         database_for_mapping.json_value as json_value
                     FROM database_for_mapping
                     JOIN logical_model on logical_model.id = database_for_mapping.id

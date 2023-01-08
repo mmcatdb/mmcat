@@ -14,9 +14,7 @@ const props = defineProps<JobDisplayProps>();
 
 const emit = defineEmits([ 'deleteJob' ]);
 
-const startJobDisabled = ref(false);
-const deleteJobDisabled = ref(false);
-const restartJobDisabled = ref(false);
+const fetching = ref(false);
 
 const jobStatusClass = computed(() => {
     switch (props.job.status) {
@@ -30,33 +28,43 @@ const jobStatusClass = computed(() => {
 });
 
 async function startJob() {
-    startJobDisabled.value = true;
+    fetching.value = true;
 
     const result = await API.jobs.startJob({ id: props.job.id });
     if (result.status)
         props.job.setStatus(result.data.status);
 
-    startJobDisabled.value = false;
+    fetching.value = false;
 }
 
 async function deleteJob() {
-    deleteJobDisabled.value = true;
+    fetching.value = true;
 
     const result = await API.jobs.deleteJob({ id: props.job.id });
     if (result.status)
         emit('deleteJob');
 
-    deleteJobDisabled.value = false;
+    fetching.value = false;
+}
+
+async function cancelJob() {
+    fetching.value = true;
+
+    const result = await API.jobs.cancelJob({ id: props.job.id });
+    if (result.status)
+        props.job.setStatus(result.data.status);
+
+    fetching.value = false;
 }
 
 async function restartJob() {
-    restartJobDisabled.value = true;
+    fetching.value = true;
 
     const result = await API.jobs.startJob({ id: props.job.id });
     if (result.status)
         props.job.setStatus(result.data.status);
 
-    restartJobDisabled.value = false;
+    fetching.value = false;
 }
 </script>
 
@@ -93,7 +101,7 @@ async function restartJob() {
         <div class="button-row">
             <button
                 v-if="job.status === Status.Ready"
-                :disabled="startJobDisabled"
+                :disabled="fetching"
                 class="success"
                 @click="startJob"
             >
@@ -101,7 +109,7 @@ async function restartJob() {
             </button>
             <button
                 v-if="job.status !== Status.Running"
-                :disabled="deleteJobDisabled"
+                :disabled="fetching"
                 class="error"
                 @click="deleteJob"
             >
@@ -109,11 +117,19 @@ async function restartJob() {
             </button>
             <button
                 v-if="job.status === Status.Finished || job.status === Status.Canceled"
-                :disabled="restartJobDisabled"
+                :disabled="fetching"
                 class="warning"
                 @click="restartJob"
             >
                 Restart
+            </button>
+            <button
+                v-if="job.status === Status.Running"
+                :disabled="fetching"
+                class="error"
+                @click="cancelJob"
+            >
+                Cancel
             </button>
         </div>
     </div>

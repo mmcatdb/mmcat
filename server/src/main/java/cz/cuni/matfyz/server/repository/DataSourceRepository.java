@@ -52,7 +52,7 @@ public class DataSourceRepository {
         return DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT
-                    data_source.id as id,
+                    DISTINCT data_source.id as id,
                     data_source.json_value as json_value
                 FROM data_source
                 JOIN job on job.data_source_id = data_source.id

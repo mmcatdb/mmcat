@@ -1,94 +1,65 @@
 package cz.cuni.matfyz.integration.propertyprocessor;
 
-import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
-import cz.cuni.matfyz.core.utils.UniqueIdProvider;
 import cz.cuni.matfyz.integration.utils.Constants;
-import cz.cuni.matfyz.integration.utils.IsaMorphismCreator;
 
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Statement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.jena.rdf.model.RDFNode;
 
 /**
  * @author jachym.bartik
  */
-public class TextProcessor extends Base implements PropertyProcessor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TextProcessor.class);
+public class TextProcessor extends TypeProcessorBase implements TypeProcessor {
 
     private static final String TEXT_IRI_PREFIX = Constants.CUSTOM_IRI_PREFIX + "text/";
 
-    //private static final String ELEMENT = TEXT_IRI_PREFIX + "element";
-    private static final String ELEMENT_TO_ATTRIBUTE = TEXT_IRI_PREFIX + "element-to-attribute";
     //private static final String LANGUAGE = TEXT_IRI_PREFIX + "language";
-    private static final String ELEMENT_TO_LANGUAGE = TEXT_IRI_PREFIX + "element-to-language";
+    private static final String ATTRIBUTE_TO_LANGUAGE = TEXT_IRI_PREFIX + "attribute-to-language";
     //private static final String VALUE = TEXT_IRI_PREFIX + "value";
-    private static final String ELEMENT_TO_VALUE = TEXT_IRI_PREFIX + "element-to-value";
+    private static final String ATTRIBUTE_TO_VALUE = TEXT_IRI_PREFIX + "attribute-to-value";
 
     public TextProcessor(InstanceCategory category) {
         super(category);
     }
 
     @Override
-    public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
-        final var resourceToAttribute = finder.findFromObject(resourceObject, statement.getPredicate().getURI());
-        if (resourceToAttribute == null)
-            return false;
-        if (!resourceToAttribute.cod().schemaObject.ids().isGenerated())
-            return false;
+    public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject) {
+        // TODO check if the object ids include only language and value
+        if (!attributeObject.ids().isSignatures())
+            return null;
 
-        final var statementObject = statement.getObject();
-        if (statementObject.isLiteral())
-            return tryAddLanguageText(statementObject.asLiteral(), resourceRow, resourceToAttribute);
+        if (!statementObject.isLiteral())
+            return null;
 
-        return false;
-    }
+        final var literal = statementObject.asLiteral();
+        final var languageString = literal.getLanguage();
+        if (languageString.isEmpty())
+            return null;
 
-    private boolean tryAddLanguageText(Literal literal, DomainRow resourceRow, InstanceMorphism resourceToAttribute) {
-        if (literal.getLanguage().isEmpty())
-            return false;
-        
-        final var attributeRow = getOrCreateAttributeRow(resourceRow, resourceToAttribute);
+        final var valueString = literal.getLexicalForm();
 
-        final var elementToAttribute = finder.findDirectToObject(resourceToAttribute.cod(), ELEMENT_TO_ATTRIBUTE);
-        if (elementToAttribute == null)
-            return false;
+        final var attributeToLanguage = finder.findDirectFromObject(attributeObject, ATTRIBUTE_TO_LANGUAGE);
+        final var attributeToValue = finder.findDirectFromObject(attributeObject, ATTRIBUTE_TO_VALUE);
+        if (attributeToLanguage == null || attributeToValue == null)
+            return null;
 
-        final var element = elementToAttribute.dom();
-        if (element == null)
-            return false;
-
-        final var elementToLanguage = finder.findDirectFromObject(element, ELEMENT_TO_LANGUAGE);
-        final var elementToValue = finder.findDirectFromObject(element, ELEMENT_TO_VALUE);
-        if (elementToLanguage == null || elementToValue == null)
-            return false;
-
-        final var newElementSuperId = new SuperIdWithValues.Builder()
-            .add(elementToAttribute.signature(), attributeRow.superId.getValue(Signature.createEmpty()))
-            .add(elementToLanguage.signature(), literal.getLanguage())
-            .add(elementToValue.signature(), literal.getLexicalForm())
+        final var attributeSuperId = new SuperIdWithValues.Builder()
+            .add(attributeToLanguage.signature(), languageString)
+            .add(attributeToValue.signature(), valueString)
             .build();
 
-        final var elementRow = InstanceObject.getOrCreateRowWithBaseMorphism(newElementSuperId, attributeRow, elementToAttribute.dual());
-        InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature(literal.getLanguage()), elementRow, elementToLanguage);
-        InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature(literal.getLexicalForm()), elementRow, elementToValue);
+        final var alreadyExistingAttributeRow = attributeObject.getRowById(attributeSuperId);
+        if (alreadyExistingAttributeRow != null)
+            return alreadyExistingAttributeRow;
 
-        return true;
-    }
+        // TODO this should be handled by the merger algorithm but isn't ...
+        final var attributeRow = attributeObject.getOrCreateRow(attributeSuperId);
+        InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature(languageString), attributeRow, attributeToLanguage);
+        InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature(valueString), attributeRow, attributeToValue);
 
-    private DomainRow getOrCreateAttributeRow(DomainRow resourceRow, InstanceMorphism resourceToAttribute) {
-        final var mapping = resourceRow.getMappingsFromForMorphism(resourceToAttribute).stream().findFirst();
-        if (mapping.isPresent())
-            return mapping.get().codomainRow();
-
-        final var generatedSuperId = SuperIdWithValues.fromEmptySignature(UniqueIdProvider.getNext());
-        return IsaMorphismCreator.getOrCreateRowForIsaMorphism(generatedSuperId, resourceRow, resourceToAttribute);
+        return attributeRow;
     }
 
 }

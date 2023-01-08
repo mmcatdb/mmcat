@@ -5,9 +5,8 @@ import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.integration.propertyprocessor.ArrayProcessor;
-import cz.cuni.matfyz.integration.propertyprocessor.NonTypePropertyProcessor;
 import cz.cuni.matfyz.integration.propertyprocessor.PropertyProcessor;
-import cz.cuni.matfyz.integration.propertyprocessor.TextProcessor;
+import cz.cuni.matfyz.integration.propertyprocessor.SimpleAttributeProcessor;
 import cz.cuni.matfyz.integration.utils.Constants;
 
 import java.util.ArrayList;
@@ -83,9 +82,9 @@ public class RDFToInstance {
     private static List<? extends PropertyProcessor> definePropertyProcessors(InstanceCategory category) {
         final List<PropertyProcessor> output = new ArrayList<>();
 
-        output.add(new NonTypePropertyProcessor(category));
-        output.add(new TextProcessor(category));
+        output.add(new SimpleAttributeProcessor(category));
         output.add(new ArrayProcessor(category));
+        // TODO map processor
 
         return output;
     }

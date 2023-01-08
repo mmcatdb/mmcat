@@ -25,6 +25,11 @@ public class IsaMorphismCreator {
         return InstanceObject.getOrCreateRowWithBaseMorphism(superId, lastIsaRow, pathToTarget.lastBase());
     }
 
+    public static DomainRow connectRowWithIsaMorphism(DomainRow domainRow, DomainRow initialRow, InstanceMorphism pathToTarget) {
+        final var lastIsaRow = getOrCreateLastIsaRow(initialRow, pathToTarget);
+        return InstanceObject.connectRowWithBaseMorphism(domainRow, lastIsaRow, pathToTarget.lastBase());
+    }
+
     public static DomainRow getOrCreateLastIsaRow(DomainRow initialRow, InstanceMorphism pathToTarget) {
         var currentRow = initialRow;
 

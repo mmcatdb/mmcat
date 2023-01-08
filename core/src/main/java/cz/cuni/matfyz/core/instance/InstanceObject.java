@@ -92,6 +92,11 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         return merger.merge(superId, parent, baseMorphismFromParent);
     }
 
+    public static DomainRow connectRowWithBaseMorphism(DomainRow domainRow, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
+        // TODO optimize
+        return getOrCreateRowWithBaseMorphism(domainRow.superId, parent, baseMorphismFromParent);
+    }
+
     DomainRow createRow(SuperIdWithValues superId) {
         Set<String> technicalIds = superId.findFirstId(ids()) == null
             ? Set.of(generateTechnicalId())

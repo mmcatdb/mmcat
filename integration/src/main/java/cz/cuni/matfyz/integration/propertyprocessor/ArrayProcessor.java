@@ -3,7 +3,6 @@ package cz.cuni.matfyz.integration.propertyprocessor;
 import cz.cuni.matfyz.core.category.Morphism.Tag;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.utils.UniqueIdProvider;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachym.bartik
  */
-public class ArrayProcessor extends Base implements PropertyProcessor {
+public class ArrayProcessor extends PropertyProcessorBase implements PropertyProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArrayProcessor.class);
 
@@ -69,28 +68,12 @@ public class ArrayProcessor extends Base implements PropertyProcessor {
 
         final var domToElement = elementToDom.dual();
         final var elementRow = InstanceObject.getOrCreateRowWithBaseMorphism(newElementSuperId, domRow, domToElement);
-        if (!getOrAddDomRow(statement, elementRow, elementToCod))
-            return false;
+
+        final var codRow = createTypeRow(statement.getObject(), elementToCod.cod());
+        InstanceObject.connectRowWithBaseMorphism(codRow, elementRow, elementToCod);
         
         final var indexValue = domRow.getMappingsFromForMorphism(domToElement).size() - 1; // We index from zero.
         InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature("" + indexValue), elementRow, elementToIndex);
-
-        return true;
-    }
-
-    private static boolean getOrAddDomRow(Statement statement, DomainRow elementRow, InstanceMorphism elementToCod) {
-        final var statementObject = statement.getObject();
-        if (statementObject.isLiteral())
-            return addStatementObject(statementObject.asLiteral().getLexicalForm(), elementRow, elementToCod);
-        if (statementObject.isResource())
-            return addStatementObject(statementObject.asResource().getURI(), elementRow, elementToCod);
-
-        return false;
-    }
-
-    private static boolean addStatementObject(String value, DomainRow row, InstanceMorphism morphism) {
-        final var valueSuperId = SuperIdWithValues.fromEmptySignature(value);
-        InstanceObject.getOrCreateRowWithBaseMorphism(valueSuperId, row, morphism);
 
         return true;
     }

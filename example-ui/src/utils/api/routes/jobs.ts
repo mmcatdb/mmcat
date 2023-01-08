@@ -17,6 +17,9 @@ const jobs = {
     ),
     deleteJob: DELETE<{ id: StringLike }, void>(
         u => `/jobs/${u.id}`
+    ),
+    cancelJob: POST<{ id: StringLike }, JobFromServer>(
+        u => `/jobs/${u.id}/cancel`
     )
 };
 

@@ -27,12 +27,12 @@ public class IntegrationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);
     
-    //static final String JSON_LD_FILE_NAME = "test2.jsonld";
-    static final String JSON_LD_FILE_NAME = "test1.jsonld";
+    static final String JSON_LD_FILE_NAME = "test2.jsonld";
+    //static final String JSON_LD_FILE_NAME = "test1.jsonld";
     static final String JSON_LD_URL = "http://localhost/data-sources/test2.jsonld";
     //static final String JSON_LD_URL = "http://localhost/data-sources/test1.jsonld";
     //static final Id CATEGORY_ID = new Id("4");
-    static final Id CATEGORY_ID = new Id("6");
+    static final Id CATEGORY_ID = new Id("7");
 
     @Autowired
     private SchemaCategoryService categoryService;
