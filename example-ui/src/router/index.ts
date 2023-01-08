@@ -11,9 +11,9 @@ const router = createRouter({
             children: projectIndependentRoutes
         },
         {
-            path: '/:schemaCategoryId',
+            path: '/:categoryId',
             component: () => import('@/views/ProjectSpecificView.vue'),
-            props: route => ({ schemaCategoryId: route.params.schemaCategoryId }),
+            props: route => ({ categoryId: route.params.categoryId }),
             children: projectSpecificRoutes
         },
         {

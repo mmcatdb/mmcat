@@ -23,12 +23,12 @@ const schemaFetched = ref(false);
 const saveButtonDisabled = ref(false);
 const graph = ref<Graph>();
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 onMounted(async () => {
-    const result = await API.schemas.getCategoryWrapper({ id: schemaCategoryId });
+    const result = await API.schemas.getCategoryWrapper({ id: categoryId });
     // TODO
-    const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
+    const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
     if (!result.status || !logicalModelsResult.status)
         return;
 

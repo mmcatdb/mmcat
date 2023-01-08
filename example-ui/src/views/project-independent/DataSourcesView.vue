@@ -6,14 +6,11 @@ import type { DataSource } from '@/types/dataSource';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import { useRouter } from 'vue-router';
-import { tryUseSchemaCategory } from '@/utils/globalSchemaSettings';
 
 const dataSources = ref<DataSource[]>();
 
 async function fetchDataSources() {
-    const categoryId = tryUseSchemaCategory();
-    const queryParams = categoryId !== undefined ? { categoryId } : undefined;
-    const result = await API.dataSources.getAllDataSources({}, queryParams);
+    const result = await API.dataSources.getAllDataSources({});
     if (!result.status)
         return false;
 
@@ -31,6 +28,17 @@ function createNew() {
 <template>
     <div>
         <h1>Data Sources</h1>
+        <div class="data-sources mt-3">
+            <div
+                v-for="dataSource in dataSources"
+                :key="dataSource.id"
+            >
+                <DataSourceDisplay
+                    :data-source="dataSource"
+                    @edit="$router.push({ name: 'dataSource', params: { id: dataSource.id }, query: { state: 'editing' } });"
+                />
+            </div>
+        </div>
         <template v-if="dataSources">
             <div class="button-row">
                 <button
@@ -38,19 +46,6 @@ function createNew() {
                 >
                     Create new
                 </button>
-            </div>
-            <div
-                class="data-sources"
-            >
-                <div
-                    v-for="dataSource in dataSources"
-                    :key="dataSource.id"
-                >
-                    <DataSourceDisplay
-                        :data-source="dataSource"
-                        @edit="$router.push({ name: 'dataSource', params: { id: dataSource.id, state: 'editing' } });"
-                    />
-                </div>
             </div>
         </template>
         <ResourceLoader :loading-function="fetchDataSources" />

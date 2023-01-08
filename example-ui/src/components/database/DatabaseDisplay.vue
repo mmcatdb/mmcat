@@ -3,23 +3,21 @@ import type { Database } from '@/types/database';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import type { Id } from '@/types/id';
 
 interface DatabaseDisplayProps {
     database: Database;
+    categoryId?: Id;
 }
 
 defineProps<DatabaseDisplayProps>();
 
 const emit = defineEmits([ 'edit' ]);
-
-function edit() {
-    emit('edit');
-}
 </script>
 
 <template>
     <div class="database-display">
-        <CleverRouterLink :to="{ name: 'database', params: { id: database.id } }">
+        <CleverRouterLink :to="{ name: 'database', params: { id: database.id }, query: { categoryId } }">
             <h2>{{ database.label }}</h2>
         </CleverRouterLink>
         <ValueContainer>
@@ -32,7 +30,7 @@ function edit() {
         </ValueContainer>
         <div class="button-row">
             <button
-                @click="edit"
+                @click="emit('edit')"
             >
                 Edit
             </button>

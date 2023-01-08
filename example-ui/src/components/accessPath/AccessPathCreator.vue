@@ -26,13 +26,13 @@ const databaseAndRootNodeValid = computed(() => {
     return !!selectedLogicalModel.value && !!selectingRootNode.value;
 });
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 onMounted(async () => {
-    const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
+    const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
     if (result.status) {
         logicalModels.value = result.data.map(LogicalModel.fromServer);
-        selectedLogicalModel.value = logicalModels.value.find(model => model.id.toString() === route.params.logicalModelId);
+        selectedLogicalModel.value = logicalModels.value.find(model => model.id.toString() === route.query.logicalModelId);
     }
 });
 

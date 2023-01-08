@@ -7,18 +7,18 @@ import { onMounted, provide, ref } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
 
 interface ProjectSpecificViewProps {
-    schemaCategoryId: Id;
+    categoryId: Id;
 }
 
 const props = defineProps<ProjectSpecificViewProps>();
 
-provide('schemaCategoryId', props.schemaCategoryId);
+provide('categoryId', props.categoryId);
 
 const schemaCategoryInfo = ref<SchemaCategoryInfo>();
 const router = useRouter();
 
 onMounted(async () => {
-    const result = await API.schemas.getCategoryInfo({ id: props.schemaCategoryId });
+    const result = await API.schemas.getCategoryInfo({ id: props.categoryId });
     if (result.status)
         schemaCategoryInfo.value = SchemaCategoryInfo.fromServer(result.data);
     else

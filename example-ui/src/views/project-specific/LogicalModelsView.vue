@@ -16,10 +16,10 @@ type LogicalModelDatabase = {
 
 const infos = ref<LogicalModelDatabase[]>();
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 async function fetchModels() {
-    const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId: schemaCategoryId });
+    const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId });
     if (!result.status)
         return false;
 

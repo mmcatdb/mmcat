@@ -28,7 +28,7 @@ export default defineComponent({
             return true;
         },
         createNewMapping() {
-            this.$router.push({ name: 'accessPathEditor', params: { logicalModelId: this.$route.params.id } });
+            this.$router.push({ name: 'accessPathEditor', query: { logicalModelId: this.$route.params.id } });
         }
     }
 });

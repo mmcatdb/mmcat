@@ -2,7 +2,7 @@ import type { Id } from "@/types/id";
 import { inject } from "vue";
 
 export function tryUseSchemaCategory(): Id | undefined {
-    return inject<Id>('schemaCategoryId');
+    return inject<Id>('categoryId');
 }
 
 export function useSchemaCategory(): Id {

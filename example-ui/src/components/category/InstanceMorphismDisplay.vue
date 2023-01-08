@@ -37,10 +37,10 @@ function defineColumn(signature: Signature, node: Node): Column {
     };
 }
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 async function fetchMorphism() {
-    const result = await API.instances.getInstanceMorphism({ categoryId: schemaCategoryId, signature: props.edge.schemaMorphism.signature.toString() });
+    const result = await API.instances.getInstanceMorphism({ categoryId, signature: props.edge.schemaMorphism.signature.toString() });
     if (!result.status)
         return false;
 

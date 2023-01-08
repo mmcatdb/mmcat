@@ -7,6 +7,7 @@ import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import DataSourceEditor from '@/components/dataSource/DataSourceEditor.vue';
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { toQueryScalar } from '@/utils/router';
 
 const route = useRoute();
 const router = useRouter();
@@ -15,7 +16,12 @@ const rawId = route.params.id as string;
 const isNew = rawId === 'new';
 const id = isNew ? null : parseInt(rawId);
 
-const isEditing = ref(isNew || route.params.state === 'editing');
+const isEditing = ref(isNew || route.query.state === 'editing');
+const categoryId = toQueryScalar(route.query.categoryId);
+const returnPath = categoryId
+    ? { name: 'dataSourcesInCategory', params: { categoryId } }
+    : { name: 'dataSources' };
+
 const dataSource = ref<DataSource>();
 
 const shouldReturnToAllDataSourcesAfterEditing = isEditing.value;
@@ -34,7 +40,7 @@ async function fetchDataSource() {
 
 function save(newValue: DataSource) {
     if (shouldReturnToAllDataSourcesAfterEditing) {
-        router.push({ name: 'dataSources' });
+        router.push(returnPath);
         return;
     }
 
@@ -44,15 +50,11 @@ function save(newValue: DataSource) {
 
 function cancel() {
     if (shouldReturnToAllDataSourcesAfterEditing) {
-        router.push({ name: 'dataSources' });
+        router.push(returnPath);
         return;
     }
 
     isEditing.value = false;
-}
-
-function deleteFunction() {
-    router.push({ name: 'dataSources' });
 }
 </script>
 
@@ -78,7 +80,7 @@ function deleteFunction() {
                     :data-source="dataSource"
                     @save="save"
                     @cancel="cancel"
-                    @delete="deleteFunction"
+                    @delete="router.push(returnPath)"
                 />
                 <DataSourceDisplay
                     v-else
@@ -87,6 +89,14 @@ function deleteFunction() {
                 />
             </div>
             <ResourceLoader :loading-function="fetchDataSource" />
+            <div class="button-row">
+                <button
+                    v-if="!isEditing"
+                    @click="router.push(returnPath)"
+                >
+                    Back
+                </button>
+            </div>
         </template>
     </div>
 </template>

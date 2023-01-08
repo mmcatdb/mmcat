@@ -19,10 +19,10 @@ function deleteJob(id: Id) {
     jobs.value = jobs.value?.filter(job => job.id !== id) ?? [];
 }
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 async function fetchJobs() {
-    const result = await API.jobs.getAllJobsInCategory({ categoryId: schemaCategoryId });
+    const result = await API.jobs.getAllJobsInCategory({ categoryId });
     if (!result.status)
         return false;
 

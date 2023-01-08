@@ -58,13 +58,13 @@ export const projectSpecificRoutes: RouteRecordRaw[] = [
     },
     {
         path: 'databases',
-        name: 'databasesInSchema',
-        component: () => import('@/views/project-specific/DatabasesView.vue')
+        name: 'databasesInCategory',
+        component: () => import('@/views/project-specific/DatabasesInCategoryView.vue')
     },
     {
         path: 'data-sources',
-        name: 'dataSourcesInSchema',
-        component: () => import('@/views/project-specific/DataSourcesView.vue')
+        name: 'dataSourcesInCategory',
+        component: () => import('@/views/project-specific/DataSourcesInCategoryView.vue')
     },
     {
         path: '404',

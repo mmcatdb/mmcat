@@ -6,14 +6,11 @@ import type { Database } from '@/types/database';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import DatabaseDisplay from '@/components/database/DatabaseDisplay.vue';
 import { useRouter } from 'vue-router';
-import { tryUseSchemaCategory } from '@/utils/globalSchemaSettings';
 
 const databases = ref<Database[]>();
 
 async function fetchDatabases() {
-    const categoryId = tryUseSchemaCategory();
-    const queryParams = categoryId !== undefined ? { categoryId } : undefined;
-    const result = await API.databases.getAllDatabases({}, queryParams);
+    const result = await API.databases.getAllDatabases({});
     if (!result.status)
         return false;
 
@@ -31,6 +28,17 @@ function createNew() {
 <template>
     <div>
         <h1>Databases</h1>
+        <div class="databases mt-3">
+            <div
+                v-for="database in databases"
+                :key="database.id"
+            >
+                <DatabaseDisplay
+                    :database="database"
+                    @edit="$router.push({ name: 'database', params: { id: database.id }, query: { state: 'editing' } });"
+                />
+            </div>
+        </div>
         <template v-if="databases">
             <div class="button-row">
                 <button
@@ -38,19 +46,6 @@ function createNew() {
                 >
                     Create new
                 </button>
-            </div>
-            <div
-                class="databases"
-            >
-                <div
-                    v-for="database in databases"
-                    :key="database.id"
-                >
-                    <DatabaseDisplay
-                        :database="database"
-                        @edit="$router.push({ name: 'database', params: { id: database.id, state: 'editing' } });"
-                    />
-                </div>
             </div>
         </template>
         <ResourceLoader :loading-function="fetchDatabases" />

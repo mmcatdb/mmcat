@@ -20,10 +20,10 @@ const jobName = ref<string>('');
 const jobType = ref(JOB_TYPES[0].value);
 const fetching = ref(false);
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 onMounted(async () => {
-    const logicalModelResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId: schemaCategoryId });
+    const logicalModelResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
     if (logicalModelResult.status)
         logicalModels.value = logicalModelResult.data.map(LogicalModel.fromServer);
 
@@ -47,7 +47,7 @@ async function createJob() {
     fetching.value = true;
 
     const result = await API.jobs.createNewJob({}, {
-        categoryId: schemaCategoryId,
+        categoryId,
         logicalModelId: jobType.value === JobType.JsonLdToCategory ? undefined : logicalModelId.value,
         dataSourceId: jobType.value === JobType.JsonLdToCategory ? dataSourceId.value : undefined,
         label: jobName.value,

@@ -9,10 +9,10 @@ import ResourceLoader from '@/components/ResourceLoader.vue';
 
 const models = ref<ModelView[]>();
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 async function fetchModels() {
-    const result = await API.models.getAllModelsInCategory({ categoryId: schemaCategoryId });
+    const result = await API.models.getAllModelsInCategory({ categoryId });
     if (!result.status)
         return false;
 

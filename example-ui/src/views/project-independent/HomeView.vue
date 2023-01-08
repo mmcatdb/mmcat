@@ -59,7 +59,7 @@ async function confirmNewCategory() {
             class="schema-category-display"
         >
             <CleverRouterLink
-                :to="{ name: 'schemaCategory', params: { schemaCategoryId: category.id } }"
+                :to="{ name: 'schemaCategory', params: { categoryId: category.id } }"
             >
                 <h3>{{ category.label }}</h3>
             </CleverRouterLink>

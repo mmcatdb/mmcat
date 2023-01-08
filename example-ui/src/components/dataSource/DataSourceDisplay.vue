@@ -1,26 +1,24 @@
 <script setup lang="ts">
-import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import type { DataSource } from '@/types/dataSource';
+import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import IriDisplay from '../IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import type { Id } from '@/types/id';
 
 interface DataSourceDisplayProps {
     dataSource: DataSource;
+    categoryId?: Id;
 }
 
 defineProps<DataSourceDisplayProps>();
 
 const emit = defineEmits([ 'edit' ]);
-
-function edit() {
-    emit('edit');
-}
 </script>
 
 <template>
     <div class="data-source-display">
-        <CleverRouterLink :to="{ name: 'dataSource', params: { id: dataSource.id } }">
+        <CleverRouterLink :to="{ name: 'dataSource', params: { id: dataSource.id }, query: { categoryId } }">
             <h2>{{ dataSource.label }}</h2>
         </CleverRouterLink>
         <ValueContainer>
@@ -40,7 +38,7 @@ function edit() {
         </ValueContainer>
         <div class="button-row">
             <button
-                @click="edit"
+                @click="emit('edit')"
             >
                 Edit
             </button>

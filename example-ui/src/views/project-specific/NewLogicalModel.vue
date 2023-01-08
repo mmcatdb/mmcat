@@ -20,7 +20,7 @@ onMounted(async () => {
 
 const router = useRouter();
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 async function createLogicalModel() {
     if (!selectedDatabase.value || !label.value)
@@ -30,7 +30,7 @@ async function createLogicalModel() {
 
     const result = await API.logicalModels.createNewLogicalModel({}, {
         databaseId: selectedDatabase.value.id,
-        categoryId: schemaCategoryId,
+        categoryId,
         jsonValue: JSON.stringify({
             label: label.value
         })

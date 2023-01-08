@@ -34,10 +34,10 @@ const emit = defineEmits([ 'object:click' ]);
 
 const fetchedInstanceObject = ref<FetchedInstanceObject>();
 
-const schemaCategoryId = useSchemaCategory();
+const categoryId = useSchemaCategory();
 
 async function fetchObject() {
-    const result = await API.instances.getInstanceObject({ categoryId: schemaCategoryId, objectKey: props.node.schemaObject.key.value });
+    const result = await API.instances.getInstanceObject({ categoryId, objectKey: props.node.schemaObject.key.value });
     if (!result.status || !('data' in result))
         return false;
 

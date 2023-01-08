@@ -5,7 +5,7 @@ type Link = {
     pathName: string,
     label: string,
     params: {
-        schemaCategoryId: string | string[]
+        categoryId: string | string[]
     }
 };
 
@@ -13,15 +13,15 @@ const route = useRoute();
 
 function defineLink(pathName: string, label: string): Link {
     return { pathName, label, params: {
-        schemaCategoryId: route.params.schemaCategoryId
+        categoryId: route.params.categoryId
     } };
 }
 
 const links = [
     defineLink('schemaCategory', 'Schema Category'),
     defineLink('logicalModels', 'Logical Models'),
-    defineLink('databasesInSchema', 'Databases'),
-    defineLink('dataSourcesInSchema', 'Data sources'),
+    defineLink('databasesInCategory', 'Databases'),
+    defineLink('dataSourcesInCategory', 'Data sources'),
     defineLink('jobs', 'Jobs'),
     defineLink('instanceCategory', 'Instance Category'),
     defineLink('models', 'Models')
