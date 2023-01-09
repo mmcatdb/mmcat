@@ -1,0 +1,10 @@
+[
+    "setKindName(order)",
+    "isSchemaLess()",
+    "createDDLStatement()",
+    "addSimpleProperty([ number ], true)",
+    "addComplexProperty([ address ], false)",
+    "addComplexProperty([ address/city, address/country, address/location ], true)",
+    "addSimpleProperty([ address/city/text, address/country/text, address/location/text ], true)",
+    "addSimpleProperty([ address/city/locale, address/country/locale, address/location/locale ], true)"
+]

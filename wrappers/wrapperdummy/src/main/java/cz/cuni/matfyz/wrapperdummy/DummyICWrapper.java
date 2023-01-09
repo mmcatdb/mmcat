@@ -16,18 +16,18 @@ public class DummyICWrapper implements AbstractICWrapper {
 
     private List<String> methods = new ArrayList<>();
 
-    public Iterable<String> methods() {
+    public List<String> methods() {
         return methods;
     }
     
     @Override
     public void appendIdentifier(String kindName, IdentifierStructure identifier) {
-        methods.add("appendIdentifier(" + kindName + ", " + identifier + ")");
+        methods.add("appendIdentifier(" + kindName + ", [ " + identifier + " ])");
     }
 
     @Override
     public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
-        methods.add("appendReference(" + kindName + ", " + kindName2 + ", " +  setToString(attributePairs) + ")");
+        methods.add("appendReference(" + kindName + ", " + kindName2 + ", " +  attributePairsToString(attributePairs) + ")");
     }
 
     @Override
@@ -43,7 +43,7 @@ public class DummyICWrapper implements AbstractICWrapper {
         return new DummyICStatement("");
     }
 
-    private String setToString(Set<ComparablePair<String, String>> pairs) {
+    private String attributePairsToString(Set<ComparablePair<String, String>> pairs) {
         var builder = new StringBuilder();
 
         builder.append("[");

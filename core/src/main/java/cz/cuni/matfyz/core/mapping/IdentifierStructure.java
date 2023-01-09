@@ -17,4 +17,10 @@ public class IdentifierStructure {
     public Collection<String> properties() {
         return properties;
     }
+
+    @Override
+    public String toString() {
+        return String.join(", ", properties);
+    }
+    
 }

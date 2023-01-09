@@ -13,10 +13,14 @@ const props = withDefaults(defineProps<StaticNameInputProps>(), ({
 
 const emit = defineEmits([ 'update:modelValue' ]);
 
-const innerValue = ref(props.modelValue);
-const staticValue = ref(props.modelValue.value);
+const innerValue = ref<StaticName>();
+const staticValue = ref<string>('');
 
-watch(() => props.modelValue, (newValue: StaticName) => {
+setValueFromParent(props.modelValue);
+
+watch(() => props.modelValue, setValueFromParent);
+
+function setValueFromParent(newValue: StaticName) {
     if (newValue.equals(innerValue.value))
         return;
 
@@ -27,7 +31,7 @@ watch(() => props.modelValue, (newValue: StaticName) => {
         return;
     }
     innerValue.value = props.modelValue;
-});
+}
 
 function validateDatabaseName(value: string): string {
     return value.replace(/\s/g, '_').replace(/[^\w.]/g, '.');

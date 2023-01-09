@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
-import { StaticName } from '@/types/identifiers';
+import { SignatureId, StaticName } from '@/types/identifiers';
 import type { Node, Graph } from '@/types/categoryGraph';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import NodeInput from './input/NodeInput.vue';
@@ -50,7 +50,7 @@ function confirmDatabaseAndRootNode() {
     accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
 }
 
-async function createMapping(label: string) {
+async function createMapping(label: string, primaryKey: SignatureId) {
     if (! selectedLogicalModel.value || !graph.value || !accessPath.value)
         return;
 
@@ -62,7 +62,7 @@ async function createMapping(label: string) {
         }),
         mappingJsonValue: JSON.stringify({
             kindName: accessPath.value?.name.toString(),
-            pkey: [], // TODO this is important for the IC algorithm
+            primaryKey: selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures,
             accessPath: accessPath.value?.toJSON()
         })
     });

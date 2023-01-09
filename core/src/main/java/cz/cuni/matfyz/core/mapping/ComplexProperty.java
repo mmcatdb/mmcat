@@ -113,6 +113,8 @@ public class ComplexProperty extends AccessPath {
         
         // If this is an auxiliary property, we must find if all of the descendats of this property have M in their contexts or values.
         // If so, this is returned even if this context is null.
+        // This doesn't make sense - each subpath has different signature
+        /*
         if (isAuxiliary()) {
             boolean returnThis = true;
             for (AccessPath subpath : subpaths()) {
@@ -128,6 +130,7 @@ public class ComplexProperty extends AccessPath {
             if (returnThis)
                 return this;
         }
+         */
     
         final var directSubpath = getDirectSubpath(signature);
         if (directSubpath != null)

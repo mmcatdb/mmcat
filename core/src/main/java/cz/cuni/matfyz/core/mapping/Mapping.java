@@ -27,7 +27,7 @@ public class Mapping implements JSONConvertible {
     
     private ComplexProperty accessPath;
     private String kindName;
-    private Collection<Signature> pkey;
+    private Collection<Signature> primaryKey;
     
     private Mapping(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism) {
         this.category = category;
@@ -59,8 +59,8 @@ public class Mapping implements JSONConvertible {
         return kindName;
     }
 
-    public Collection<Signature> pkey() {
-        return pkey;
+    public Collection<Signature> primaryKey() {
+        return primaryKey;
     }
 
     private final List<Reference> references = new ArrayList<Reference>();
@@ -71,7 +71,7 @@ public class Mapping implements JSONConvertible {
 
     public void setReferences(Iterable<Reference> references) {
         this.references.clear();
-        references.forEach(reference -> this.references.add(reference));
+        references.forEach(this.references::add);
     }
 
     @Override
@@ -86,10 +86,10 @@ public class Mapping implements JSONConvertible {
             var output = new JSONObject();
     
             output.put("kindName", object.kindName);
+            var primaryKey = new JSONArray(object.primaryKey.stream().map(Signature::toJSON).toList());
+            output.put("primaryKey", primaryKey);
             output.put("accessPath", object.accessPath.toJSON());
 
-            var pkey = new JSONArray(object.pkey.stream().map(signature -> signature.toJSON()).toList());
-            output.put("pkey", pkey);
             
             return output;
         }
@@ -112,22 +112,24 @@ public class Mapping implements JSONConvertible {
 
         @Override
         protected void innerLoadFromJSON(Mapping mapping, JSONObject jsonObject) throws JSONException {
-            mapping.accessPath = new ComplexProperty.Builder().fromJSON(jsonObject.getJSONObject("accessPath"));
             mapping.kindName = jsonObject.getString("kindName");
-
-            var pkeyArray = jsonObject.getJSONArray("pkey");
-            var pkey = new ArrayList<Signature>();
+            
+            var primaryKeyArray = jsonObject.getJSONArray("primaryKey");
+            var primaryKey = new ArrayList<Signature>();
             var builder = new Signature.Builder();
-            for (int i = 0; i < pkeyArray.length(); i++)
-                pkey.add(builder.fromJSON(pkeyArray.getJSONObject(i)));
-            mapping.pkey = pkey;
+            for (int i = 0; i < primaryKeyArray.length(); i++)
+                primaryKey.add(builder.fromJSON(primaryKeyArray.getJSONObject(i)));
+
+            mapping.primaryKey = primaryKey;
+
+            mapping.accessPath = new ComplexProperty.Builder().fromJSON(jsonObject.getJSONObject("accessPath"));
         }
 
-        public Mapping fromArguments(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, ComplexProperty accessPath, String kindName, Collection<Signature> pkey) {
+        public Mapping fromArguments(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, ComplexProperty accessPath, String kindName, Collection<Signature> primaryKey) {
             var mapping = new Mapping(category, rootObject, rootMorphism);
             mapping.accessPath = accessPath;
             mapping.kindName = kindName;
-            mapping.pkey = pkey;
+            mapping.primaryKey = primaryKey;
             return mapping;
         }
     

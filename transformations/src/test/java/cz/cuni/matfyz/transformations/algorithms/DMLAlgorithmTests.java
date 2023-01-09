@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
@@ -20,7 +19,7 @@ public class DMLAlgorithmTests {
     public void setupTestData() {
         data = new TestData();
         schema = data.createDefaultSchemaCategory();
-        order = schema.getObject(data.getOrderKey());
+        order = schema.getObject(data.orderKey);
     }
     
     @Test
@@ -29,7 +28,7 @@ public class DMLAlgorithmTests {
             schema,
             order,
             "order",
-            data.path_order(),
+            data.path_orderRoot(),
             data.expectedInstance_order(schema)
         )
             .testAlgorithm();

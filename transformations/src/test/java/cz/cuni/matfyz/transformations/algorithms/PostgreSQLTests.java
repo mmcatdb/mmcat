@@ -71,7 +71,7 @@ public class PostgreSQLTests {
 
     @Test
     public void getForestForBasicTest() throws Exception {
-        pullForestTestAlgorithm("order_basic", "1BasicTest.json", new TestData().path_order());
+        pullForestTestAlgorithm("order_basic", "1BasicTest.json", new TestData().path_orderRoot());
     }
 
     @Test

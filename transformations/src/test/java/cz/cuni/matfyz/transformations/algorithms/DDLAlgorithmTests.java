@@ -22,7 +22,7 @@ public class DDLAlgorithmTests {
     public void setupTestData() {
         data = new TestData();
         schema = data.createDefaultSchemaCategory();
-        order = schema.getObject(data.getOrderKey());
+        order = schema.getObject(data.orderKey);
     }
 
     @Test
@@ -31,7 +31,7 @@ public class DDLAlgorithmTests {
             schema,
             order,
             "order",
-            data.path_order(),
+            data.path_orderRoot(),
             data.expectedInstance_order(schema)
         )
             .testAlgorithm();

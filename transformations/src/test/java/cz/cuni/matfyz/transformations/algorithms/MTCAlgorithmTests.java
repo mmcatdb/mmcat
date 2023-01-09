@@ -22,7 +22,7 @@ public class MTCAlgorithmTests {
         UniqueIdProvider.reset();
         data = new TestData();
         schema = data.createDefaultSchemaCategory();
-        order = schema.getObject(data.getOrderKey());
+        order = schema.getObject(data.orderKey);
     }
 
     @Test
@@ -30,7 +30,7 @@ public class MTCAlgorithmTests {
         new MTCAlgorithmTestBase("1BasicTest.json").setAll(
             schema,
             order,
-            data.path_order(),
+            data.path_orderRoot(),
             data.expectedInstance_order(schema)
         )
             .testAlgorithm();

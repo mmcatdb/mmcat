@@ -23,7 +23,7 @@ public class SerializationTests {
     @Test
     public void createBasicAccessPath() {
         var data = new TestData();
-        var path = data.path_order();
+        var path = data.path_orderRoot();
 
         LOGGER.debug(path.toJSON().toString());
     }

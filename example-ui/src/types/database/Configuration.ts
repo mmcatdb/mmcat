@@ -8,17 +8,19 @@ export class DatabaseConfiguration {
     readonly isAnonymousNamingAllowed: boolean;
     readonly isReferenceAllowed: boolean; // TODO The IC reference algorithm.
     readonly isComplexPropertyAllowed: boolean;
+    readonly isSchemaLess: boolean;
 
-    public constructor(fromServer: DatabaseConfigurationFromServer) {
-        this.isPropertyToOneAllowed = fromServer.isPropertyToOneAllowed;
-        this.isPropertyToManyAllowed = fromServer.isPropertyToManyAllowed;
-        this.isInliningToOneAllowed = fromServer.isInliningToOneAllowed;
-        this.isInliningToManyAllowed = fromServer.isInliningToManyAllowed;
-        this.isGrouppingAllowed = fromServer.isGrouppingAllowed;
-        this.isDynamicNamingAllowed = fromServer.isDynamicNamingAllowed;
-        this.isAnonymousNamingAllowed = fromServer.isAnonymousNamingAllowed;
-        this.isReferenceAllowed = fromServer.isReferenceAllowed;
-        this.isComplexPropertyAllowed = fromServer.isComplexPropertyAllowed;
+    public constructor(input: DatabaseConfigurationFromServer) {
+        this.isPropertyToOneAllowed = input.isPropertyToOneAllowed;
+        this.isPropertyToManyAllowed = input.isPropertyToManyAllowed;
+        this.isInliningToOneAllowed = input.isInliningToOneAllowed;
+        this.isInliningToManyAllowed = input.isInliningToManyAllowed;
+        this.isGrouppingAllowed = input.isGrouppingAllowed;
+        this.isDynamicNamingAllowed = input.isDynamicNamingAllowed;
+        this.isAnonymousNamingAllowed = input.isAnonymousNamingAllowed;
+        this.isReferenceAllowed = input.isReferenceAllowed;
+        this.isComplexPropertyAllowed = input.isComplexPropertyAllowed;
+        this.isSchemaLess = input.isSchemaLess;
     }
 }
 
@@ -32,4 +34,5 @@ export type DatabaseConfigurationFromServer = {
     isAnonymousNamingAllowed: boolean,
     isReferenceAllowed: boolean,
     isComplexPropertyAllowed: boolean
+    isSchemaLess: boolean;
 }

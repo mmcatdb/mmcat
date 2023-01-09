@@ -24,6 +24,18 @@ export class SignatureId {
         return new SignatureId(input.map(Signature.fromServer));
     }
 
+    equals(other: SignatureId): boolean {
+        if (this._signatures.length !== other._signatures.length)
+            return false;
+
+        for (let i = 0; i < this._signatures.length; i++) {
+            if (!this._signatures[i].equals(other._signatures[i]))
+                return false;
+        }
+
+        return true;
+    }
+
     static union(ids: SignatureId[]): SignatureId {
         const union = [] as Signature[];
         ids.forEach(id => {

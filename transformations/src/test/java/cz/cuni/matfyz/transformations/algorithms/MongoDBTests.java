@@ -71,7 +71,7 @@ public class MongoDBTests {
 
     @Test
     public void getForestForBasicTest() throws Exception {
-        pullForestTestAlgorithm("basic", "1BasicTest.json", new TestData().path_order());
+        pullForestTestAlgorithm("basic", "1BasicTest.json", new TestData().path_orderRoot());
     }
 
     @Test

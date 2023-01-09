@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
@@ -8,12 +9,14 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDDLWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
+import cz.cuni.matfyz.wrappermongodb.MongoDBICWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBPathWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBPullWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBPushWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLDDLWrapper;
+import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLICWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPathWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPullWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPushWrapper;
@@ -66,6 +69,14 @@ public class WrapperService {
             case mongodb ->  new MongoDBPushWrapper();
             case postgresql ->  new PostgreSQLPushWrapper();
             default ->  throw new WrapperNotFoundException(wrapperNotFoundText("Push", database));
+        };
+    }
+
+    public AbstractICWrapper createICWrapper(Database database) {
+        return switch (database.type) {
+            case mongodb ->  new MongoDBICWrapper();
+            case postgresql ->  new PostgreSQLICWrapper();
+            default ->  throw new WrapperNotFoundException(wrapperNotFoundText("IC", database));
         };
     }
 

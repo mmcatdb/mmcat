@@ -16,6 +16,7 @@ public class DatabaseConfiguration {
     public final boolean isAnonymousNamingAllowed;
     public final boolean isReferenceAllowed;
     public final boolean isComplexPropertyAllowed;
+    public final boolean isSchemaLess;
 
     public DatabaseConfiguration(AbstractPathWrapper wrapper) {
         this.isPropertyToOneAllowed = wrapper.isPropertyToOneAllowed();
@@ -27,6 +28,7 @@ public class DatabaseConfiguration {
         this.isAnonymousNamingAllowed = wrapper.isAnonymousNamingAllowed();
         this.isReferenceAllowed = wrapper.isReferenceAllowed();
         this.isComplexPropertyAllowed = wrapper.isComplexPropertyAllowed();
+        this.isSchemaLess = wrapper.isSchemaLess();
     }
 
 }

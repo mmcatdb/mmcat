@@ -5,6 +5,7 @@ import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.core.utils.ComparablePair;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -17,12 +18,12 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
     
     @Override
     public void appendIdentifier(String kindName, IdentifierStructure identifier) {
-        // TODO IndentifierStructure is empty.
+        constraints.add(new IdentifierConstraint(kindName, identifier.properties()));
     }
 
     @Override
     public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
         /*
         for (ComparablePair<String, String> attributePair : attributePairs) {
 
@@ -39,24 +40,53 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
 
     @Override
     public PostgreSQLICStatement createICStatement() {
-        String content = String.join("\n\n", constraints.stream().map(constraint -> constraint.addCommand()).toList());
+        String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::addCommand).toList()) + "\n";
         return new PostgreSQLICStatement(content);
     }
 
     @Override
     public PostgreSQLICStatement createICRemoveStatement() {
-        String content = String.join("\n\n", constraints.stream().map(constraint -> constraint.dropCommand()).toList());
+        String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::dropCommand).toList()) + "\n";
         return new PostgreSQLICStatement(content);
     }
+
 }
 
 interface Constraint {
 
-    public abstract String getName();
-
     public abstract String addCommand();
 
     public abstract String dropCommand();
+
+}
+
+class IdentifierConstraint implements Constraint {
+    
+    private String sourceKindName;
+    private Collection<String> properties;
+
+    public IdentifierConstraint(String sourceKindName, Collection<String> properties) {
+        this.sourceKindName = sourceKindName;
+        this.properties = properties;
+    }
+
+    private String getName() {
+        return sourceKindName + "_PRIMARY_KEY_" + String.join("#", properties);
+    }
+
+    @Override
+    public String addCommand() {
+        return "ALTER TABLE " + sourceKindName
+            + "\nADD CONSTRAINT " + getName()
+            + "\nPRIMARY KEY (" + String.join(", ", properties) + ")" + ";";
+    }
+
+    @Override
+    public String dropCommand() {
+        return "\nALTER TABLE " + sourceKindName
+            + "\nDROP CONSTRAINT " + getName() + ";";
+    }
+
 }
 
 class ReferenceConstraint implements Constraint {
@@ -65,11 +95,7 @@ class ReferenceConstraint implements Constraint {
     private String referenceKindName;
     private String sourceAttributeName;
     private String referenceAttributeName;
-    
-    public String getName() {
-        return sourceKindName + "#" + sourceAttributeName + "_REFERENCES_" + referenceKindName + "#" + referenceAttributeName;
-    }
-    
+
     public ReferenceConstraint(String sourceKindName, String referenceKindName, String sourceAttributeName, String referenceAttributeName) {
         this.sourceKindName = sourceKindName;
         this.referenceKindName = referenceKindName;
@@ -77,6 +103,11 @@ class ReferenceConstraint implements Constraint {
         this.referenceAttributeName = referenceAttributeName;
     }
     
+    private String getName() {
+        return sourceKindName + "#" + sourceAttributeName + "_REFERENCES_" + referenceKindName + "#" + referenceAttributeName;
+    }
+    
+    @Override
     public String addCommand() {
         return "ALTER TABLE " + sourceKindName
             + "\nADD CONSTRAINT " + getName()
@@ -84,8 +115,10 @@ class ReferenceConstraint implements Constraint {
             + "\nREFERENCES " + referenceKindName + "(" + referenceAttributeName + ");";
     }
     
+    @Override
     public String dropCommand() {
         return "ALTER TABLE " + sourceKindName
-            + "\nDROP CONSTRAINT " + getName();
+            + "\nDROP CONSTRAINT " + getName() + ";";
     }
+
 }

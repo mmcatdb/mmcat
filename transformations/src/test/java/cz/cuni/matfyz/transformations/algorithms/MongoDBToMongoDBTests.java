@@ -57,14 +57,14 @@ public class MongoDBToMongoDBTests {
     public void basicTest() {
         var data = new TestData();
         var schema = data.createDefaultSchemaCategory();
-        var order = schema.getObject(data.getOrderKey());
+        var order = schema.getObject(data.orderKey);
         
         testBase.setAll(
             "TODO",
             schema,
             order,
             "basic",
-            data.path_order()
+            data.path_orderRoot()
         );
 
         testBase.testAlgorithm();
@@ -73,7 +73,7 @@ public class MongoDBToMongoDBTests {
     @Test
     public void test() throws Exception {
         var data = new TestData();
-        ComplexProperty path = data.path_order();
+        ComplexProperty path = data.path_orderRoot();
         LOGGER.trace(path.toString());
         var json = path.toJSON();
         LOGGER.trace(json.toString());
@@ -88,7 +88,7 @@ public class MongoDBToMongoDBTests {
     public void complex_arrayTest() {
         var data = new TestData();
         var schema = data.createDefaultSchemaCategory();
-        var order = schema.getObject(data.getOrderKey());
+        var order = schema.getObject(data.orderKey);
         
         testBase.setAll(
             "TODO",

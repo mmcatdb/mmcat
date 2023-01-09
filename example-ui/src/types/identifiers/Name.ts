@@ -41,7 +41,7 @@ export class StaticName {
         return this._isAnonymous;
     }
 
-    equals(other: Name): boolean {
+    equals(other: Name | undefined): boolean {
         return other instanceof StaticName
             && other._isAnonymous === this._isAnonymous
             && other.value === this.value;

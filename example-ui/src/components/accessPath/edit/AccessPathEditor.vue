@@ -9,6 +9,8 @@ import EditProperty from './EditProperty.vue';
 import StaticNameInput from '../input/StaticNameInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import PrimaryKeyInput from '../input/PrimaryKeyInput.vue';
+import { SignatureIdFactory, Type } from '@/types/identifiers';
 
 enum State {
     Default,
@@ -29,7 +31,8 @@ export default defineComponent({
         ParentPropertyDisplay,
         StaticNameInput,
         ValueContainer,
-        ValueRow
+        ValueRow,
+        PrimaryKeyInput
     },
     props: {
         graph: {
@@ -47,9 +50,12 @@ export default defineComponent({
     },
     emits: [ 'finish' ],
     data() {
+        const ids = this.rootProperty.node.schemaObject.ids;
+
         return {
             label: '',
             state: { type: State.Default } as StateValue,
+            primaryKey: (ids && ids.type === Type.Signatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty(),
             State,
         };
     },
@@ -70,7 +76,7 @@ export default defineComponent({
             this.state = { type: State.Default };
         },
         finishMapping() {
-            this.$emit('finish', this.label);
+            this.$emit('finish', this.label, this.primaryKey);
         }
     }
 });
@@ -93,6 +99,15 @@ export default defineComponent({
                         </ValueRow>
                         <ValueRow label="Kind name:">
                             <StaticNameInput v-model="rootProperty.name" />
+                        </ValueRow>
+                        <ValueRow
+                            v-if="!database.configuration.isSchemaLess && rootProperty.node.schemaObject.ids"
+                            label="Primary key:"
+                        >
+                            <PrimaryKeyInput
+                                v-model="primaryKey"
+                                :ids="rootProperty.node.schemaObject.ids"
+                            />
                         </ValueRow>
                     </ValueContainer>
                     <div class="button-row">

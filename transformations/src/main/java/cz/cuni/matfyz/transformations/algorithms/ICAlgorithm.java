@@ -35,7 +35,7 @@ public class ICAlgorithm {
     
     public ICStatement algorithm() {
         // N
-        IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.pkey());
+        IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
         wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
         
         for (Reference reference : mapping.references()) {
@@ -54,20 +54,20 @@ public class ICAlgorithm {
             wrapper.appendReference(mapping.kindName(), referencedMapping.kindName(), referencingReferencedNames);
         }
 
-        return wrapper.createICRemoveStatement();
+        return wrapper.createICStatement();
     }
 
     /**
-     * For each signature from pkey, we look to the access path to find a subpath with given signature.
+     * For each signature from primaryKey, we look to the access path to find a subpath with given signature.
      * The set of these names is then returned.
      * @param path Access path corresponding to the kind of the mapping.
-     * @param pkey An eventually ordered collection of signatures of morphisms whose codomains correspond to properties forming the primary identifier of given kind.
-     * @return The set of names corresponding to signatures from pkey.
+     * @param primaryKey An eventually ordered collection of signatures of morphisms whose codomains correspond to properties forming the primary identifier of given kind.
+     * @return The set of names corresponding to signatures from primaryKey.
      */
-    private IdentifierStructure collectNames(ComplexProperty path, Collection<Signature> pkey) {
+    private IdentifierStructure collectNames(ComplexProperty path, Collection<Signature> primaryKey) {
         Collection<String> output = new ArrayList<>();
 
-        for (Signature signature : pkey) {
+        for (Signature signature : primaryKey) {
             if (path.getSubpathBySignature(signature).name() instanceof StaticName staticName)
                 output.add(staticName.getStringName());
             else
@@ -108,4 +108,9 @@ public class ICAlgorithm {
 
         return output;
     }
+
+    public static Map<Name, Mapping> createAllMappings(Collection<Mapping> mappings) {
+        return new TreeMap<>(); // TODO
+    }
+
 }

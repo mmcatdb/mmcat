@@ -1,0 +1,4 @@
+[
+    "appendIdentifier(contact, [ value, name, number ])",
+    "createICStatement()"
+]

@@ -108,7 +108,7 @@ export default defineComponent({
     <StaticNameInput
         v-model="staticValue"
         :disabled="type !== NameType.Static"
-        @input="updateInnerValue"
+        @update:model-value="updateInnerValue"
     />
     <br />
     <input

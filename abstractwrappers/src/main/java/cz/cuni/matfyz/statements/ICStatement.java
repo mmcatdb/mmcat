@@ -5,4 +5,6 @@ package cz.cuni.matfyz.statements;
  */
 public interface ICStatement {
     
+    public String getContent();
+    
 }

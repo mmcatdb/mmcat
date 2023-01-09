@@ -26,4 +26,7 @@ public interface AbstractPathWrapper {
     public abstract boolean isReferenceAllowed();
 
     public abstract boolean isComplexPropertyAllowed();
+
+    public abstract boolean isSchemaLess();
+    
 }

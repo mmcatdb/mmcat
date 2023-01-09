@@ -16,6 +16,14 @@ function cytoscapeCreated(newGraph: Graph) {
     graph.value = newGraph;
     graph.value.addNodeListener('tap', node => selectNode(node));
     graph.value.addEdgeListener('tap', edge => selectEdge(edge));
+    graph.value.addCanvasListener('tap', onCanvasTapHandler);
+}
+
+function onCanvasTapHandler() {
+    selectedNode.value?.unselect();
+    selectedNode.value = undefined;
+    selectedEdge.value?.unselect();
+    selectedEdge.value = undefined;
 }
 
 function objectClicked(object: SchemaObject) {

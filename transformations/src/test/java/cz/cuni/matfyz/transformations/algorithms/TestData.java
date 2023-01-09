@@ -20,31 +20,31 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
  */
 public class TestData {
 
-    private final Key customerKey = new Key(100);
-    private final Key idKey = new Key(101);
-    private final Key orderedKey = new Key(102);
-    private final Key orderKey = new Key(103);
-    private final Key numberKey = new Key(104);
-    private final Key arrayKey = new Key(105);
-    private final Key contactKey = new Key(106);
-    private final Key valueKey = new Key(107);
-    private final Key typeKey = new Key(108);
-    private final Key nameKey = new Key(109);
-    private final Key nestedDocKey = new Key(110);
-    private final Key propertyAKey = new Key(111);
-    private final Key propertyBKey = new Key(112);
-    private final Key propertyCKey = new Key(113);
-    private final Key itemsKey = new Key(114);
-    private final Key quantityKey = new Key(115);
-    private final Key productKey = new Key(116);
-    private final Key pidKey = new Key(117);
-    private final Key pnameKey = new Key(118);
-    private final Key priceKey = new Key(119);
-    private final Key addressKey = new Key(120);
-    private final Key labelKey = new Key(121);
-    private final Key contentKey = new Key(122);
-    private final Key textKey = new Key(123);
-    private final Key localeKey = new Key(124);
+    public final Key customerKey = new Key(100);
+    public final Key idKey = new Key(101);
+    public final Key orderedKey = new Key(102);
+    public final Key orderKey = new Key(103);
+    public final Key numberKey = new Key(104);
+    public final Key arrayKey = new Key(105);
+    public final Key contactKey = new Key(106);
+    public final Key valueKey = new Key(107);
+    public final Key typeKey = new Key(108);
+    public final Key nameKey = new Key(109);
+    public final Key nestedDocKey = new Key(110);
+    public final Key propertyAKey = new Key(111);
+    public final Key propertyBKey = new Key(112);
+    public final Key propertyCKey = new Key(113);
+    public final Key itemsKey = new Key(114);
+    public final Key quantityKey = new Key(115);
+    public final Key productKey = new Key(116);
+    public final Key pidKey = new Key(117);
+    public final Key pnameKey = new Key(118);
+    public final Key priceKey = new Key(119);
+    public final Key addressKey = new Key(120);
+    public final Key labelKey = new Key(121);
+    public final Key contentKey = new Key(122);
+    public final Key textKey = new Key(123);
+    public final Key localeKey = new Key(124);
     
     private final Signature customerToId = Signature.createBase(1);
     private final Signature customerToOrdered = Signature.createBase(2);
@@ -104,10 +104,6 @@ public class TestData {
         addAddress(schema, order);
 
         return schema;
-    }
-
-    public Key getOrderKey() {
-        return orderKey;
     }
 
     private SchemaObject buildOrder(SchemaCategory schema) {
@@ -629,7 +625,7 @@ public class TestData {
         }
     }
 
-    public ComplexProperty path_order() {
+    public ComplexProperty path_orderRoot() {
         return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("number", orderToNumber)
         );
@@ -694,4 +690,13 @@ public class TestData {
             )
         );
     }
+
+    public ComplexProperty path_contactRoot() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+            new SimpleProperty("value", contactToValue),
+            new SimpleProperty("name", contactToName),
+            new SimpleProperty("number", contactToNumber)
+        );
+    }
+
 }

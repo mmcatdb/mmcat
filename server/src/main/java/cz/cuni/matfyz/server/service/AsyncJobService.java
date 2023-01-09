@@ -2,6 +2,7 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.mapping.Name;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.cuni.matfyz.integration.processes.JsonLdToInstance;
@@ -17,7 +18,9 @@ import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
 
+import java.util.List;
 import java.util.Queue;
+import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -189,16 +192,20 @@ public class AsyncJobService {
     private CompletableFuture<DataResult<String>> categoryToModelAlgorithm(Job job, InstanceCategory instance) throws WrapperNotFoundException, WrapperCreationErrorException {
         final var logicalModel = logicalModelService.find(job.logicalModelId);
         final var database = databaseService.find(logicalModel.databaseId);
-        final var mappingWrappers = mappingService.findAll(job.logicalModelId);
+        final List<Mapping> mappings = mappingService.findAll(job.logicalModelId).stream()
+            .map(wrapper -> createMapping(wrapper, job.categoryId))
+            .toList();
+
+        final var allMappings = new TreeMap<Name, Mapping>(); // TODO
         
         final var output = new StringBuilder();
-        for (final var mappingWrapper : mappingWrappers) {
+        for (final var mapping : mappings) {
             final var ddlWrapper = wrapperService.createDDLWrapper(database);
+            final var icWrapper = wrapperService.createICWrapper(database);
             final var pushWrapper = wrapperService.createPushWrapper(database);
 
-            final var mapping = createMapping(mappingWrapper, job.categoryId);
             final var process = new InstanceToDatabase();
-            process.input(mapping, instance, ddlWrapper, pushWrapper);
+            process.input(mapping, allMappings, instance, ddlWrapper, pushWrapper, icWrapper);
 
             final var result = process.run();
             if (!result.status)
