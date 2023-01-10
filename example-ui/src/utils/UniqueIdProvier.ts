@@ -1,7 +1,7 @@
 type Bijection<Domain, Codomain> = {
     function: (a: Domain) => Codomain;
     inversion: (to: Codomain) => Domain;
-}
+};
 
 const identityFunction = {
     function: (x: number) => x,
@@ -9,7 +9,7 @@ const identityFunction = {
 };
 
 export class UniqueIdProvider<T> {
-    _mapping: Bijection<T, number>
+    _mapping: Bijection<T, number>;
     _currentValues = new Set() as Set<number>;
     _maxValue = 0;
 

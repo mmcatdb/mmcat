@@ -24,10 +24,6 @@ public class SchemaObjectService {
         return repository.findAllInCategory(categoryId);
     }
 
-    public List<SchemaObjectWrapper> findAllInLogicalModel(Id categoryId) {
-        return repository.findAllInLogicalModel(categoryId);
-    }
-
     public SchemaObjectWrapper find(Id id) {
         return repository.find(id);
     }

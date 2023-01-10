@@ -11,7 +11,7 @@ export type NonSignaturesType = Type.Value | Type.Generated;
 export type ObjectIdsJSON = {
     type: Type;
     signatureIds?: SignatureIdJSON[];
-}
+};
 
 export class ObjectIds {
     readonly type: Type;

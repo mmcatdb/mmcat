@@ -7,14 +7,14 @@ import type { LogicalModel } from "../logicalModel";
 import type { Entity, Id } from "../id";
 
 export type SchemaObjectJSON = {
-    label: string,
-    key: KeyJSON,
-    ids?: ObjectIdsJSON,
-    superId: SignatureIdJSON,
-    databases?: string[],
-    iri?: Iri,
-    pimIri?: Iri
-}
+    label: string;
+    key: KeyJSON;
+    ids?: ObjectIdsJSON;
+    superId: SignatureIdJSON;
+    databases?: string[];
+    iri?: Iri;
+    pimIri?: Iri;
+};
 
 export class SchemaObject implements Entity {
     //key: number | undefined;
@@ -139,10 +139,10 @@ export type SchemaObjectUpdate = {
     temporaryId: Id;
     position: Position;
     jsonValue: string;
-}
+};
 
 export type SchemaObjectFromServer = {
     id: Id;
     jsonValue: string;
     position: Position;
-}
+};

@@ -13,7 +13,7 @@ type ParentPropertyDisplayProps = {
     isLast?: boolean;
     isRoot?: boolean;
     disableAdditions?: boolean;
-}
+};
 
 const props = withDefaults(defineProps<ParentPropertyDisplayProps>(), {
     isLast: true,

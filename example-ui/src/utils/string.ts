@@ -7,7 +7,7 @@ export class IntendedStringBuilder {
     }
 
     public static getTabIntendationString(depth: number): string {
-        return [ ...Array(depth) ].map(item => '    ').join();
+        return [ ...Array(depth) ].map(() => '    ').join();
     }
 
     public appendIntended(string: string): IntendedStringBuilder {

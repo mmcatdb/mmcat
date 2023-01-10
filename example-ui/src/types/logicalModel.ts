@@ -6,7 +6,7 @@ export type LogicalModelInit = {
     databaseId: Id;
     categoryId: Id;
     jsonValue: string;
-}
+};
 
 export class LogicalModelInfo implements Entity {
     private constructor(
@@ -27,7 +27,7 @@ export class LogicalModelInfo implements Entity {
 export type LogicalModelInfoFromServer = {
     id: Id;
     jsonValue: string;
-}
+};
 
 export class LogicalModel implements Entity {
     private constructor(
@@ -57,4 +57,4 @@ export type LogicalModelFromServer = {
     jsonValue: string;
     database: DatabaseWithConfigurationFromServer;
     mappings: MappingFromServer[];
-}
+};

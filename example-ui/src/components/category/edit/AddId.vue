@@ -17,10 +17,10 @@ enum State {
     Complex
 }
 
-interface AddIdProps {
+type AddIdProps = {
     graph: Graph;
     node: Node;
-}
+};
 
 const props = defineProps<AddIdProps>();
 

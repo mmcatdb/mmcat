@@ -7,11 +7,14 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
+import cz.cuni.matfyz.server.exception.RepositoryException;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -20,8 +23,23 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class MappingRepository {
 
-    public MappingWrapper find(Id id) {
-        return DatabaseWrapper.get((connection, output) -> {
+    @Autowired
+    SchemaObjectRepository objectRepository;
+
+    private record RawMappingWrapper(
+        Id id,
+        Id logicalModelId,
+        Id rootObjectId,
+        String mappingJsonValue,
+        String jsonValue
+    ) {
+        public MappingWrapper toMapping(SchemaObjectWrapper object) {
+            return new MappingWrapper(id, logicalModelId, object, mappingJsonValue, jsonValue);
+        }
+    }
+
+    public MappingWrapper find(Id id) throws RepositoryException {
+        final RawMappingWrapper rawMapping = DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
@@ -33,13 +51,18 @@ public class MappingRepository {
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.set(new MappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
+                output.set(new RawMappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
             }
-        });
+        }, "Mapping with id: {} not found.", id);
+
+        return DatabaseWrapper.join(
+            mapping -> mapping.toMapping(objectRepository.find(mapping.rootObjectId)),
+            rawMapping
+        );
     }
 
-    public List<MappingWrapper> findAll(Id logicalModelId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+    public List<MappingWrapper> findAll(Id logicalModelId) throws RepositoryException {
+        List<RawMappingWrapper> rawMappings = DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
             setId(statement, 1, logicalModelId);
             var resultSet = statement.executeQuery();
@@ -50,9 +73,17 @@ public class MappingRepository {
                 String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.add(new MappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
+                output.add(new RawMappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
             }
         });
+
+        final var objects = objectRepository.findAllInLogicalModel(logicalModelId);
+        return DatabaseWrapper.joinMultiple(
+            (mapping, rootObject) -> mapping.rootObjectId == rootObject.id,
+            (mapping, rootObject) -> mapping.toMapping(rootObject),
+            rawMappings,
+            objects
+        );
     }
 
     public List<MappingInfo> findAllInfos(Id logicalModelId) {

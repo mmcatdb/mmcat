@@ -20,7 +20,7 @@ type AddPropertyProps = {
     graph: Graph;
     database: DatabaseWithConfiguration;
     parentProperty: GraphParentProperty;
-}
+};
 
 const props = defineProps<AddPropertyProps>();
 

@@ -2,11 +2,11 @@
 
 const LOADING_WAIT_TIME_IN_MILLISECONDS = 400;
 
-interface ResourceLoaderProps {
+type ResourceLoaderProps = {
     loadingFunction: () => Promise<boolean>;
     noReloads?: boolean;
     refreshPeriod?: number;
-}
+};
 
 const props = defineProps<ResourceLoaderProps>();
 

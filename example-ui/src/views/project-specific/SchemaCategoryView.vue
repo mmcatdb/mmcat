@@ -1,16 +1,5 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import SchemaCategoryEditor from '@/components/category/SchemaCategoryEditor.vue';
-
-export default defineComponent({
-    components: {
-        SchemaCategoryEditor
-    },
-    props: {},
-    data() {
-        return {};
-    }
-});
 </script>
 
 <template>

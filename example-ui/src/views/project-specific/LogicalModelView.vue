@@ -1,37 +1,31 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import { LogicalModel } from '@/types/logicalModel';
 
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import API from '@/utils/api';
+import { useRoute, useRouter } from 'vue-router';
 
-export default defineComponent({
-    components: {
-        ResourceLoader,
-        LogicalModelDisplay,
-        MappingDisplay
-    },
-    data() {
-        return {
-            logicalModel: null as LogicalModel | null
-        };
-    },
-    methods: {
-        async fetchModel() {
-            const result = await API.logicalModels.getLogicalModel({ id: this.$route.params.id });
-            if (!result.status)
-                return false;
+const logicalModel = ref<LogicalModel>();
 
-            this.logicalModel = LogicalModel.fromServer(result.data);
-            return true;
-        },
-        createNewMapping() {
-            this.$router.push({ name: 'accessPathEditor', query: { logicalModelId: this.$route.params.id } });
-        }
-    }
-});
+const route = useRoute();
+
+async function fetchModel() {
+    const result = await API.logicalModels.getLogicalModel({ id: route.params.id });
+    if (!result.status)
+        return false;
+
+    logicalModel.value = LogicalModel.fromServer(result.data);
+    return true;
+}
+
+const router = useRouter();
+
+function createNewMapping() {
+    router.push({ name: 'accessPathEditor', query: { logicalModelId: route.params.id } });
+}
 </script>
 
 <template>

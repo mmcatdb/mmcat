@@ -28,7 +28,7 @@ type AccessPathEditor = {
     graph: Graph;
     database: DatabaseWithConfiguration;
     rootProperty: GraphRootProperty;
-}
+};
 
 const props = defineProps<AccessPathEditor>();
 

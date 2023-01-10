@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.Id;
-import cz.cuni.matfyz.server.entity.mapping.MappingDetail;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
+import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.service.MappingService;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class MappingController {
     private MappingService service;
 
     @GetMapping("/mappings/{id}")
-    public MappingDetail getMapping(@PathVariable Id id) {
+    public MappingWrapper getMapping(@PathVariable Id id) {
         final var mapping = service.find(id);
         if (mapping == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -36,7 +36,7 @@ public class MappingController {
     }
 
     @GetMapping("/logical-models/{logicalModelId}/mappings")
-    public List<MappingDetail> getAllMappingsInLogicalModel(@PathVariable Id logicalModelId) {
+    public List<MappingWrapper> getAllMappingsInLogicalModel(@PathVariable Id logicalModelId) {
         final var mappings = service.findAll(logicalModelId);
         if (mappings == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

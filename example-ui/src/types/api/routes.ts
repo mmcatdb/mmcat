@@ -8,7 +8,7 @@ export type UrlParams = {
     [ key: string ]: StringLike;
 } | Empty;
 
-export type UrlFunction<U extends UrlParams> = (urlParams: U) => string
+export type UrlFunction<U extends UrlParams> = (urlParams: U) => string;
 
 //export type Url<U extends UrlParams> = U extends UrlParams ? UrlFunction<U> : string;
 export type Url<U extends UrlParams> = UrlFunction<U>;

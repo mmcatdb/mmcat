@@ -2,18 +2,18 @@ import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id } from "../id";
-import { DynamicName, Key, SignatureId, Signature, ObjectIds } from "../identifiers";
+import { DynamicName, Key, Signature, ObjectIds } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, Tag, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
 import { SchemaObject, type SchemaObjectFromServer, type SchemaObjectUpdate } from "./SchemaObject";
 
 export type CardinalitySettings = {
-    domCodMin: Min,
-    domCodMax: Max,
-    codDomMin: Min,
-    codDomMax: Max
-}
+    domCodMin: Min;
+    domCodMax: Max;
+    codDomMin: Min;
+    codDomMax: Max;
+};
 
 export function compareCardinalitySettings(settings1: CardinalitySettings, settings2: CardinalitySettings): boolean {
     return settings1.domCodMin === settings2.domCodMin &&
@@ -204,8 +204,8 @@ export class SchemaCategory implements Entity {
 }
 
 export type SchemaCategoryUpdate = {
-    objects: SchemaObjectUpdate[],
-    morphisms: SchemaMorphismUpdate[]
+    objects: SchemaObjectUpdate[];
+    morphisms: SchemaMorphismUpdate[];
 };
 
 export type SchemaCategoryFromServer = {
@@ -213,7 +213,7 @@ export type SchemaCategoryFromServer = {
     jsonValue: string;
     objects: SchemaObjectFromServer[];
     morphisms: SchemaMorphismFromServer[];
-}
+};
 
 function getObjectsFromPath(path: ParentProperty, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject[] {
     const output = [] as SchemaObject[];
@@ -263,8 +263,8 @@ export class SchemaCategoryInfo implements Entity {
 export type SchemaCategoryInfoFromServer = {
     id: Id;
     jsonValue: string;
-}
+};
 
 export type SchemaCategoryInit = {
     jsonValue: string;
-}
+};

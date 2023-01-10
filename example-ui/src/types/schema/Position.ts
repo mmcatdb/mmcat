@@ -17,4 +17,4 @@ export class ComparablePosition implements Position {
 export type PositionUpdate = {
     schemaObjectId: Id;
     position: Position;
-}
+};

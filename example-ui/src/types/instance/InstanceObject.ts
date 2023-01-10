@@ -62,6 +62,6 @@ export class SuperIdWithValues {
 type SingatureValueTupleFromServer = {
     signature: SignatureFromServer;
     value: string;
-}
+};
 
 export type SuperIdWithValuesFromServer = SingatureValueTupleFromServer[];

@@ -4,7 +4,7 @@ import { AvailabilityStatus, type Node } from "./Node";
 
 type Config = {
     selectNodes: boolean;
-}
+};
 
 const defaultConfig: Config = {
     selectNodes: true

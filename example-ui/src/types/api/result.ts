@@ -9,14 +9,14 @@ export function onSuccess<Data, NewData>(result: DataResult<Data>, next: (data: 
     return result.status === true ? DataResultSuccess(next(result.data)) : result;
 }
 
-export type Result<DataType = undefined> = DataType extends undefined ? EmptyResult : DataResult<DataType>
+export type Result<DataType = undefined> = DataType extends undefined ? EmptyResult : DataResult<DataType>;
 
 export type EmptyResult = {
     status: true;
 } | {
     status: false;
     error: any;
-}
+};
 
 export type DataResult<Data = any> = {
     status: true;
@@ -24,7 +24,7 @@ export type DataResult<Data = any> = {
 } | {
     status: false;
     error: any;
-}
+};
 
 export enum Crud {
     None,
@@ -36,4 +36,4 @@ export enum Crud {
 export type Operation<Data> = {
     type: Crud;
     data: Data;
-}
+};

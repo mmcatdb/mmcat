@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { SignatureId } from '@/types/identifiers';
 
-interface SignatureIdDisplayProps {
+type SignatureIdDisplayProps = {
     signatureId: SignatureId;
-}
+};
 
 defineProps<SignatureIdDisplayProps>();
 </script>

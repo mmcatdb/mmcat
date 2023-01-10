@@ -1,37 +1,32 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import { Job } from '@/types/job';
 import API from '@/utils/api';
 
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
+import { useRoute, useRouter } from 'vue-router';
 
-export default defineComponent({
-    components: {
-        ResourceLoader,
-        JobDisplay
-    },
-    props: {},
-    data() {
-        return {
-            job: null as Job | null,
-            startJobDisabled: false
-        };
-    },
-    methods: {
-        deleteJob(): void {
-            this.$router.push({ name: 'jobs' });
-        },
-        async fetchJob() {
-            const result = await API.jobs.getJob({ id: this.$route.params.id });
-            if (!result.status)
-                return false;
+const job = ref<Job>();
 
-            this.job = Job.fromServer(result.data);
-            return true;
-        }
-    }
-});
+const route = useRoute();
+
+async function fetchJob() {
+    const result = await API.jobs.getJob({ id: route.params.id });
+    if (!result.status)
+        return false;
+
+    job.value = Job.fromServer(result.data);
+    return true;
+}
+
+const router = useRouter();
+
+function deleteJob(): void {
+    router.push({ name: 'jobs' });
+}
+
+
 </script>
 
 <template>

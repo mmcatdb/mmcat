@@ -64,7 +64,7 @@ export class StaticName {
     }
 }
 
-export type DynamicNameJSON = { _class: 'DynamicName', signature: SignatureJSON }
+export type DynamicNameJSON = { _class: 'DynamicName', signature: SignatureJSON };
 
 export class DynamicName {
     readonly signature: Signature;

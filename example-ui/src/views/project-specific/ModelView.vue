@@ -1,32 +1,24 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import { Model } from '@/types/model';
 import API from '@/utils/api';
 
 import ModelDisplay from '@/components/ModelDisplay.vue';
 import ResourceLoader from '@/components/ResourceLoader.vue';
+import { useRoute } from 'vue-router';
 
-export default defineComponent({
-    components: {
-        ModelDisplay,
-        ResourceLoader
-    },
-    data() {
-        return {
-            model: null as Model | null
-        };
-    },
-    methods: {
-        async fetchModel() {
-            const result = await API.models.getModel({ jobId: this.$route.params.jobId });
-            if (!result.status)
-                return false;
+const model = ref<Model>();
 
-            this.model = Model.fromServer(result.data);
-            return true;
-        }
-    }
-});
+const route = useRoute();
+
+async function fetchModel() {
+    const result = await API.models.getModel({ jobId: route.params.jobId });
+    if (!result.status)
+        return false;
+
+    model.value = Model.fromServer(result.data);
+    return true;
+}
 </script>
 
 <template>

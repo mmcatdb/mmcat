@@ -5,10 +5,10 @@ import type { Edge } from "./Edge";
 import { type Node, AvailabilityStatus } from "./Node";
 
 export type MorphismData = {
-    signature: Signature,
-    min: Min,
-    max: Max
-}
+    signature: Signature;
+    min: Min;
+    max: Max;
+};
 
 function combineMorphismData(first: MorphismData, second: MorphismData): MorphismData {
     return {
@@ -27,14 +27,14 @@ function joinDuals(parent: MorphismData | undefined, next: MorphismData) {
 }
 
 export type PathSegment = {
-    targetNode: Node,
-    sourceNode: Node,
-    edge: Edge,
-    fullMorphism: MorphismData,
-    fullDual: MorphismData,
-    previousSegment: PathSegment | undefined,
-    dependentSegments: PathSegment[]
-}
+    targetNode: Node;
+    sourceNode: Node;
+    edge: Edge;
+    fullMorphism: MorphismData;
+    fullDual: MorphismData;
+    previousSegment: PathSegment | undefined;
+    dependentSegments: PathSegment[];
+};
 
 export type FilterFunction = (segment: PathSegment) => boolean;
 

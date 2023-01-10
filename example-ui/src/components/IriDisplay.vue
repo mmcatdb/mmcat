@@ -2,11 +2,11 @@
 import type { Iri } from '@/types/integration';
 import { computed } from 'vue';
 
-interface IriDisplayProps {
+type IriDisplayProps = {
     iri?: Iri;
     maxChars?: number;
     clickable?: boolean;
-}
+};
 
 const props = defineProps<IriDisplayProps>();
 

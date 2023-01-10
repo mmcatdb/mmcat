@@ -6,9 +6,9 @@ import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
-interface JobDisplayProps {
+type JobDisplayProps = {
     job: Job;
-}
+};
 
 const props = defineProps<JobDisplayProps>();
 

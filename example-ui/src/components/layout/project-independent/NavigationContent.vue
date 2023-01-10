@@ -2,8 +2,8 @@
 import { RouterLink } from 'vue-router';
 
 type Link = {
-    pathName: string,
-    label: string
+    pathName: string;
+    label: string;
 };
 
 function defineLink(pathName: string, label: string): Link {

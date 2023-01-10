@@ -4,10 +4,10 @@ import IconMinusSquare from '@/components/icons/IconMinusSquare.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import SignatureIdDisplay from './SignatureIdDisplay.vue';
 
-interface ObjectIdsDisplayProps {
+type ObjectIdsDisplayProps = {
     ids: ObjectIds;
     disabled?: boolean;
-}
+};
 
 defineProps<ObjectIdsDisplayProps>();
 

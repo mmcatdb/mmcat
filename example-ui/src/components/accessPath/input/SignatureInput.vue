@@ -9,7 +9,7 @@ type SignatureInputProps = {
     modelValue: SequenceSignature;
     defaultIsNull?: boolean;
     disabled?: boolean;
-}
+};
 
 const props = withDefaults(defineProps<SignatureInputProps>(), {
     defaultIsNull: false,

@@ -5,7 +5,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import type { Id } from '@/types/id';
 
-interface DatabaseDisplayProps {
+type DatabaseDisplayProps = {
     database: Database;
     categoryId?: Id;
 }

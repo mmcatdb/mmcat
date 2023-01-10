@@ -49,7 +49,7 @@ export type JobFromServer = {
     label: string;
     type: JobType;
     status: Status;
-}
+};
 
 export enum Status {
     Default = 'Default',
@@ -65,4 +65,4 @@ export type JobInit = {
     dataSourceId?: Id;
     label: string;
     type: JobType;
-}
+};

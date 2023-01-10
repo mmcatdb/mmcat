@@ -10,9 +10,9 @@ import API from '@/utils/api';
 import { InstanceMorphism } from '@/types/instance';
 import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';
 
-interface InstanceObjectProps {
+type InstanceObjectProps = {
     edge: Edge;
-}
+};
 
 const props = defineProps<InstanceObjectProps>();
 
@@ -21,13 +21,13 @@ const emit = defineEmits([ 'object:click' ]);
 const morphism = ref<InstanceMorphism>();
 const columns = ref<Columns>();
 
-type Columns = { dom: Column[], cod: Column[] }
+type Columns = { dom: Column[], cod: Column[] };
 
 type Column = {
     signature: Signature;
     schemaObject: SchemaObject | undefined;
     isClickable: boolean;
-}
+};
 
 function defineColumn(signature: Signature, node: Node): Column {
     return {

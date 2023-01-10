@@ -6,10 +6,10 @@ export enum DataType {
     text = 'text'
 }
 
-type AttributeCreatorFunction = (attribute: Attribute, output: ImportedDataspecer) => ImportedObject
+type AttributeCreatorFunction = (attribute: Attribute, output: ImportedDataspecer) => ImportedObject;
 
 export type DataTypeDefinition = {
     iri: string;
     type: DataType;
     createAttribute: AttributeCreatorFunction;
-}
+};

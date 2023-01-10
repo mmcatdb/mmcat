@@ -11,7 +11,7 @@ export type ImportedId = {
 } | {
     type: Type.Signatures;
     keys: MorphismSequence[];
-}
+};
 
 export class ImportedObject {
     ids: ImportedId[];
@@ -51,4 +51,4 @@ export type ImportedDataspecer = {
         associations: number;
         associationEnds: number;
     };
-}
+};

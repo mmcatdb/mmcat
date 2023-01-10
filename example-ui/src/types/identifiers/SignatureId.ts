@@ -1,8 +1,8 @@
 import { Signature, type SignatureFromServer, type SignatureJSON } from "./Signature";
 
 export type SignatureIdJSON = {
-    signatures: SignatureJSON[]
-}
+    signatures: SignatureJSON[];
+};
 
 export class SignatureId {
     _signatures: Signature[]; // TODO make set?

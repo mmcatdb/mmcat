@@ -22,7 +22,7 @@ export type DatabaseInfoFromServer = {
     id: Id;
     type: Type; // Full type (i.e. mongodb)
     label: string; // User-defined name
-}
+};
 
 export class DatabaseWithConfiguration implements Entity {
     private constructor(
@@ -47,7 +47,7 @@ export type DatabaseWithConfigurationFromServer = {
     type: Type; // Full type (i.e. mongodb)
     label: string; // User-defined name
     configuration: DatabaseConfigurationFromServer;
-}
+};
 
 export type Settings = {
     host: string;
@@ -56,14 +56,14 @@ export type Settings = {
     authenticationDatabase: string;
     username: string;
     password?: string;
-}
+};
 
 export type Database = {
     id: Id;
     type: Type;
     label: string;
     settings: Settings;
-}
+};
 
 export type DatabaseInit = Omit<Database, 'id'>;
 

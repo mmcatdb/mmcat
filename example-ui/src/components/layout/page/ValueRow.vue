@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useSlots } from 'vue';
 
-interface ValueRowProps {
+type ValueRowProps = {
     label?: string;
-}
+};
 
 defineProps<ValueRowProps>();
 const slots = useSlots();

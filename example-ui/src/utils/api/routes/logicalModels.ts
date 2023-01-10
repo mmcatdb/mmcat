@@ -4,8 +4,8 @@ import type { LogicalModelFromServer, LogicalModelInfoFromServer, LogicalModelIn
 import type { DatabaseInfoFromServer } from "@/types/database";
 
 type LogicalModelDatabaseInfoFromServer = {
-    logicalModel: LogicalModelInfoFromServer,
-    database: DatabaseInfoFromServer
+    logicalModel: LogicalModelInfoFromServer;
+    database: DatabaseInfoFromServer;
 };
 
 const logicalModels = {

@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -136,9 +137,10 @@ class ServerApplicationTests {
         Database database = databaseService.find(databaseId);
         AbstractDDLWrapper ddlWrapper = wrapperService.createDDLWrapper(database);
         AbstractPushWrapper pushWrapper = wrapperService.createPushWrapper(database);
+        AbstractICWrapper icWrapper = wrapperService.createICWrapper(database);
 
         var process = new InstanceToDatabase();
-        process.input(mapping, instance, ddlWrapper, pushWrapper);
+        process.input(mapping, instance, ddlWrapper, pushWrapper, icWrapper);
 
         process.run();
 

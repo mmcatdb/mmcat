@@ -22,11 +22,11 @@ type FetchedInstanceObject = {
     object: InstanceObject;
     columns: Column[];
     showTechnicalIds: boolean;
-}
+};
 
-interface InstanceObjectProps {
+type InstanceObjectProps = {
     node: Node;
-}
+};
 
 const props = defineProps<InstanceObjectProps>();
 

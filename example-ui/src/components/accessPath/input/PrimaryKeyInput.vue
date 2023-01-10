@@ -6,7 +6,7 @@ import { ref, watch } from 'vue';
 type PrimaryKeyInputProps = {
     ids: ObjectIds;
     modelValue: SignatureId;
-}
+};
 
 const props = defineProps<PrimaryKeyInputProps>();
 

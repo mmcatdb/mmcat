@@ -22,7 +22,7 @@ type EditPropertyProps = {
     graph: Graph;
     database: DatabaseWithConfiguration;
     property: GraphChildProperty;
-}
+};
 
 const props = defineProps<EditPropertyProps>();
 

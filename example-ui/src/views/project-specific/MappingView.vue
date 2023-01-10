@@ -1,34 +1,24 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import API from '@/utils/api';
 
 import { Mapping } from '@/types/mapping';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import ResourceLoader from '@/components/ResourceLoader.vue';
+import { useRoute } from 'vue-router';
 
+const mapping = ref<Mapping>();
 
-export default defineComponent({
-    components: {
-        ResourceLoader,
-        MappingDisplay
-    },
-    props: {},
-    data() {
-        return {
-            mapping: null as Mapping | null
-        };
-    },
-    methods: {
-        async fetchMapping() {
-            const result = await API.mappings.getMapping({ id: this.$route.params.id });
-            if (!result.status)
-                return false;
+const route = useRoute();
 
-            this.mapping = Mapping.fromServer(result.data);
-            return true;
-        }
-    }
-});
+async function fetchMapping() {
+    const result = await API.mappings.getMapping({ id: route.params.id });
+    if (!result.status)
+        return false;
+
+    mapping.value = Mapping.fromServer(result.data);
+    return true;
+}
 </script>
 
 <template>

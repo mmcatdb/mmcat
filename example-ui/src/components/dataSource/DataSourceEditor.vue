@@ -5,9 +5,9 @@ import { computed, ref } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
-interface DataSourceEditorProps {
+type DataSourceEditorProps = {
     dataSource?: DataSource;
-}
+};
 
 const props = defineProps<DataSourceEditorProps>();
 
@@ -17,7 +17,7 @@ type DataSourceEdit = {
     url: string;
     label: string;
     type: Type;
-}
+};
 
 const fetching = ref(false);
 const innerValue = ref<DataSourceEdit>(props.dataSource ? { ...props.dataSource } : {

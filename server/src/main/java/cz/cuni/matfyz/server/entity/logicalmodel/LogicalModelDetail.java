@@ -3,7 +3,7 @@ package cz.cuni.matfyz.server.entity.logicalmodel;
 import cz.cuni.matfyz.server.entity.IEntity;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.DatabaseWithConfiguration;
-import cz.cuni.matfyz.server.entity.mapping.MappingDetail;
+import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 
 import java.util.List;
 
@@ -15,5 +15,5 @@ public record LogicalModelDetail(
     Id categoryId,
     DatabaseWithConfiguration database,
     String jsonValue,
-    List<MappingDetail> mappings
+    List<MappingWrapper> mappings
 ) implements IEntity {}

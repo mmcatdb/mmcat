@@ -25,14 +25,14 @@ export class DatabaseConfiguration {
 }
 
 export type DatabaseConfigurationFromServer = {
-    isPropertyToOneAllowed: boolean,
-    isPropertyToManyAllowed: boolean,
-    isInliningToOneAllowed: boolean,
-    isInliningToManyAllowed: boolean,
-    isGrouppingAllowed: boolean,
-    isDynamicNamingAllowed: boolean,
-    isAnonymousNamingAllowed: boolean,
-    isReferenceAllowed: boolean,
-    isComplexPropertyAllowed: boolean
+    isPropertyToOneAllowed: boolean;
+    isPropertyToManyAllowed: boolean;
+    isInliningToOneAllowed: boolean;
+    isInliningToManyAllowed: boolean;
+    isGrouppingAllowed: boolean;
+    isDynamicNamingAllowed: boolean;
+    isAnonymousNamingAllowed: boolean;
+    isReferenceAllowed: boolean;
+    isComplexPropertyAllowed: boolean;
     isSchemaLess: boolean;
-}
+};

@@ -6,12 +6,12 @@ export type Column = {
     signature: Signature;
     schemaObject: SchemaObject | undefined;
     isClickable: boolean;
-}
+};
 
-interface InstanceObjectHeaderProps {
+type InstanceObjectHeaderProps = {
     showTechnicalIds: boolean;
     columns: Column[];
-}
+};
 
 defineProps<InstanceObjectHeaderProps>();
 

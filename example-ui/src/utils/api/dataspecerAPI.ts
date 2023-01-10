@@ -21,7 +21,7 @@ type DataSpecification = {
     pimStores?: {
         url: string;
     }[];
-}
+};
 
 async function getStoreForIri(iri: string): PullResult<unknown> {
     const dataSpecificationsResult = await GET<DataSpecification[]>(DATASPECER_API_URL + '/data-specification');

@@ -6,8 +6,8 @@ enum SignatureType {
 }
 
 export type SignatureJSON = {
-    ids: number[],
-    isNull: boolean
+    ids: number[];
+    isNull: boolean;
 };
 
 function determineType(isNull: boolean, idsLength: number) {
@@ -154,4 +154,4 @@ export class Signature {
 export type SignatureFromServer = {
     ids: number[];
     isNull: boolean;
-}
+};

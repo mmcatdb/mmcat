@@ -3,14 +3,14 @@ import type { Id } from "../id";
 import { Signature, type SignatureJSON } from "../identifiers";
 
 export type SchemaMorphismJSON = {
-    signature: SignatureJSON,
-    min: Min,
-    max: Max,
-    label?: string,
-    iri?: Iri,
-    pimIri?: Iri,
-    tags?: Tag[]
-}
+    signature: SignatureJSON;
+    min: Min;
+    max: Max;
+    label?: string;
+    iri?: Iri;
+    pimIri?: Iri;
+    tags?: Tag[];
+};
 
 export enum Cardinality {
     Zero = 'ZERO',
@@ -130,11 +130,11 @@ export type SchemaMorphismUpdate = {
     temporaryDomId?: Id;
     temporaryCodId?: Id;
     jsonValue: string;
-}
+};
 
 export type SchemaMorphismFromServer = {
     id: Id;
     domId: Id;
     codId: Id;
     jsonValue: string;
-}
+};

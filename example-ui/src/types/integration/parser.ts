@@ -5,16 +5,16 @@ export type Iri = string;
 
 export type DataspecerEntity = {
     iri: Iri;
-}
+};
 
 export type Class = DataspecerEntity & {
-    pimIri: Iri,
+    pimIri: Iri;
     label: string;
     extendsClassIris: Iri[];
 };
 
 export type Attribute = DataspecerEntity & {
-    pimIri: Iri,
+    pimIri: Iri;
     label: string;
     parentClassIri: Iri;
     dataType: DataType;
@@ -25,14 +25,14 @@ export type Attribute = DataspecerEntity & {
 };
 
 export type Association = DataspecerEntity & {
-    pimIri: Iri,
+    pimIri: Iri;
     label: string;
     domEndIri: Iri;
     codEndIri: Iri;
 };
 
 export type AssociationEnd = DataspecerEntity & {
-    classIri: Iri,
+    classIri: Iri;
     cardinality: {
         min: Min;
         max: Max;
@@ -44,4 +44,4 @@ export type ParsedDataspecer = {
     attributes: Attribute[];
     associations: Association[];
     associationEnds: AssociationEnd[];
-}
+};

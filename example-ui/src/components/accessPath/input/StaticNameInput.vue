@@ -5,7 +5,7 @@ import { ref, watch } from 'vue';
 type StaticNameInputProps = {
     modelValue: StaticName;
     disabled?: boolean;
-}
+};
 
 const props = withDefaults(defineProps<StaticNameInputProps>(), {
     disabled: false

@@ -10,12 +10,12 @@ export type CanvasEventFunction = () => void;
 
 export type TemporaryEdge = {
     delete: () => void;
-}
+};
 
 type Group = {
-    id: number,
-    logicalModel: LogicalModelInfo,
-    node: NodeSingular
+    id: number;
+    logicalModel: LogicalModelInfo;
+    node: NodeSingular;
 };
 
 export class Graph {

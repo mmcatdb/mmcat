@@ -5,7 +5,7 @@ import type { SimpleProperty } from '@/types/accessPath/basic';
 type SimplePropertyDisplayProps = {
     property: GraphSimpleProperty | SimpleProperty;
     isLast: boolean;
-}
+};
 
 defineProps<SimplePropertyDisplayProps>();
 

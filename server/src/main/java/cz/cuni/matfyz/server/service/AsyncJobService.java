@@ -9,7 +9,6 @@ import cz.cuni.matfyz.server.builder.CategoryBuilder;
 import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
-import cz.cuni.matfyz.server.entity.mapping.MappingDetail;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.JobRepository;
 import cz.cuni.matfyz.server.service.WrapperService.WrapperCreationErrorException;
@@ -247,7 +246,7 @@ public class AsyncJobService {
         return CompletableFuture.completedFuture(result);
     }
 
-    private Mapping createMapping(MappingDetail mappingWrapper, Id categoryId) {
+    private Mapping createMapping(MappingWrapper mappingWrapper, Id categoryId) {
         final var categoryWrapper = categoryService.find(categoryId);
 
         return new MappingBuilder()

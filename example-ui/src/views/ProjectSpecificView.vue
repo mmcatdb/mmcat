@@ -6,9 +6,9 @@ import API from '@/utils/api';
 import { onMounted, provide, ref } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
 
-interface ProjectSpecificViewProps {
+type ProjectSpecificViewProps = {
     categoryId: Id;
-}
+};
 
 const props = defineProps<ProjectSpecificViewProps>();
 

@@ -34,7 +34,7 @@ export type DataSourceFromServer = {
     url: string;
     label: string;
     type: Type;
-}
+};
 
 export type DataSourceInit = Omit<DataSource, 'id'>;
 

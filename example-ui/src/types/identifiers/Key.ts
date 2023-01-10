@@ -24,8 +24,8 @@ export class Key {
 
 export type KeyFromServer = {
     value: number;
-}
+};
 
 export type KeyJSON = {
-    value: number
-}
+    value: number;
+};

@@ -5,9 +5,9 @@ import { computed, ref } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
-interface DatabaseEditorProps {
+type DatabaseEditorProps = {
     database?: Database;
-}
+};
 
 const props = defineProps<DatabaseEditorProps>();
 

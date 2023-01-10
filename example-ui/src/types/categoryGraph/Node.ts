@@ -25,8 +25,8 @@ export enum SelectionType {
 }
 
 export type SelectionStatus = {
-    type: SelectionType,
-    level: number
+    type: SelectionType;
+    level: number;
 };
 
 const defaultSelectionStatus = {

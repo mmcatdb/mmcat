@@ -5,7 +5,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 type NodeInputProps = {
     graph: Graph;
     modelValue?: Node;
-}
+};
 
 const props = defineProps<NodeInputProps>();
 

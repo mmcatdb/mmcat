@@ -2,11 +2,11 @@
 import { RouterLink, useRoute } from 'vue-router';
 
 type Link = {
-    pathName: string,
-    label: string,
+    pathName: string;
+    label: string;
     params: {
-        categoryId: string | string[]
-    }
+        categoryId: string | string[];
+    };
 };
 
 const route = useRoute();

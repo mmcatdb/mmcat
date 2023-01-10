@@ -6,10 +6,10 @@ import { SchemaObject, type SchemaObjectFromServer } from "./schema";
 import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
 
 export type MappingJSON = {
-    kindName: string,
-    primaryKey: SignatureIdFromServer,
-    accessPath: RootPropertyJSON
-}
+    kindName: string;
+    primaryKey: SignatureIdFromServer;
+    accessPath: RootPropertyJSON;
+};
 
 export class Mapping implements Entity {
     private constructor(
@@ -42,14 +42,14 @@ export type MappingFromServer = {
     rootObject: SchemaObjectFromServer;
     jsonValue: string;
     mappingJsonValue: string;
-}
+};
 
 export type MappingInit = {
     logicalModelId: Id;
     rootObjectId: Id;
     mappingJsonValue: string;
     jsonValue: string;
-}
+};
 
 export class MappingInfo implements Entity {
     private constructor(
@@ -68,6 +68,6 @@ export class MappingInfo implements Entity {
 }
 
 export type MappingInfoFromServer = {
-    id: Id,
-    jsonValue: string
+    id: Id;
+    jsonValue: string;
 };

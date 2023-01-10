@@ -6,10 +6,10 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import type { Id } from '@/types/id';
 
-interface DataSourceDisplayProps {
+type DataSourceDisplayProps = {
     dataSource: DataSource;
     categoryId?: Id;
-}
+};
 
 defineProps<DataSourceDisplayProps>();
 

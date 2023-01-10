@@ -1,7 +1,7 @@
 <script setup lang="ts">
-interface ResourceNotFoundProps {
-    reloadable?: boolean
-}
+type ResourceNotFoundProps = {
+    reloadable?: boolean;
+};
 
 const props = defineProps<ResourceNotFoundProps>();
 

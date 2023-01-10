@@ -15,11 +15,11 @@ enum NameType {
 
 type NameInputProps = {
     graph: Graph;
-database: DatabaseWithConfiguration;
-rootNode: Node;
-modelValue: Name;
-disabled?: boolean;
-}
+    database: DatabaseWithConfiguration;
+    rootNode: Node;
+    modelValue: Name;
+    disabled?: boolean;
+};
 
 const props = withDefaults(defineProps<NameInputProps>(), {
     disabled: false
