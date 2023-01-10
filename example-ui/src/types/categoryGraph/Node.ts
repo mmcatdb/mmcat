@@ -110,7 +110,10 @@ export class Node {
     }
 
     get determinedPropertyType(): PropertyType | null {
-        return this.schemaObject.canBeSimpleProperty ? null : PropertyType.Complex;
+        if (!this.schemaObject.ids)
+            return null;
+
+        return this.schemaObject.ids.isSignatures ? PropertyType.Complex : PropertyType.Simple;
     }
 
     _availabilityStatus = AvailabilityStatus.Default;

@@ -1,27 +1,21 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { GraphSimpleProperty } from '@/types/accessPath/graph';
 import type { SimpleProperty } from '@/types/accessPath/basic';
-import { defineComponent } from 'vue';
 
-export default defineComponent({
-    props: {
-        property: {
-            type: Object as () => GraphSimpleProperty | SimpleProperty,
-            required: true
-        },
-        isLast: {
-            type: Boolean,
-            required: true
-        }
-    },
-    emits: [ 'simple:click' ]
-});
+type SimplePropertyDisplayProps = {
+    property: GraphSimpleProperty | SimpleProperty;
+    isLast: boolean;
+}
+
+defineProps<SimplePropertyDisplayProps>();
+
+const emit = defineEmits([ 'simple:click' ]);
 </script>
 
 <template>
     <span
         class="name-text"
-        @click="$emit('simple:click', property)"
+        @click="emit('simple:click', property)"
     >
         {{ property.name }}: {{ property.signature }}{{ isLast ? '' : ',' }}
     </span>

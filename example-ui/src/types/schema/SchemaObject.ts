@@ -1,8 +1,7 @@
 import { ComparableSet } from "@/utils/ComparableSet";
 import type { Iri } from "@/types/integration";
 import type { Position } from "cytoscape";
-import type { DatabaseWithConfiguration } from "../database";
-import { Key, ObjectIds, SignatureId, Type, type KeyJSON, type NonSignaturesType, type ObjectIdsJSON, type SignatureIdJSON } from "../identifiers";
+import { Key, ObjectIds, SignatureId, type KeyJSON, type NonSignaturesType, type ObjectIdsJSON, type SignatureIdJSON } from "../identifiers";
 import { ComparablePosition, type PositionUpdate } from "./Position";
 import type { LogicalModel } from "../logicalModel";
 import type { Entity, Id } from "../id";
@@ -77,7 +76,7 @@ export class SchemaObject implements Entity {
     }
 
     addSignatureId(signatureId: SignatureId): void {
-        if (this.ids && this.ids.type !== Type.Signatures)
+        if (this.ids && !this.ids.isSignatures)
             return;
 
         const currentIds = this.ids ? this.ids.signatureIds : [];
@@ -91,7 +90,7 @@ export class SchemaObject implements Entity {
     }
 
     deleteSignatureId(index: number): void {
-        if (!this.ids || this.ids.type !== Type.Signatures)
+        if (!this.ids || !this.ids.isSignatures)
             return;
 
         const newIds = this.ids.signatureIds.filter((_, i) => i !== index);
@@ -102,21 +101,6 @@ export class SchemaObject implements Entity {
     deleteNonSignatureId() {
         this.ids = undefined;
         this._updateDefaultSuperId();
-    }
-
-    get canBeSimpleProperty(): boolean {
-        if (!this.ids) // This should not happen (i.e., ids should have a value when this property is relevant)
-            return false;
-
-        if (this.ids.type !== Type.Signatures)
-            return true;
-
-        for (const id of this.ids.signatureIds) {
-            if (id.signatures.length < 2)
-                return true;
-        }
-
-        return false;
     }
 
     get isNew(): boolean {

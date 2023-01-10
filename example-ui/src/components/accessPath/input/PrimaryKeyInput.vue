@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SignatureIdDisplay from '@/components/category/SignatureIdDisplay.vue';
-import { ObjectIds, SignatureId, StaticName, Type } from '@/types/identifiers';
+import type { ObjectIds, SignatureId } from '@/types/identifiers';
 import { ref, watch } from 'vue';
 
 type PrimaryKeyInputProps = {
@@ -42,7 +42,7 @@ function updateInnerValue() {
 
 <template>
     <SignatureIdDisplay
-        v-if="ids.type === Type.Signatures && ids.signatureIds.length === 1"
+        v-if="ids.isSignatures && ids.signatureIds.length === 1"
         :signature-id="ids.signatureIds[0]"
     />
     <div v-else>

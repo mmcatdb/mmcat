@@ -7,9 +7,9 @@ type StaticNameInputProps = {
     disabled?: boolean;
 }
 
-const props = withDefaults(defineProps<StaticNameInputProps>(), ({
+const props = withDefaults(defineProps<StaticNameInputProps>(), {
     disabled: false
-}));
+});
 
 const emit = defineEmits([ 'update:modelValue' ]);
 

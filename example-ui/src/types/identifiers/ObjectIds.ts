@@ -26,6 +26,10 @@ export class ObjectIds {
         return this._signatureIds;
     }
 
+    get isSignatures(): boolean {
+        return this.type === Type.Signatures;
+    }
+
     static createSignatures(signatureIds: SignatureId[]): ObjectIds {
         return new ObjectIds(Type.Signatures, signatureIds);
     }
@@ -48,9 +52,10 @@ export class ObjectIds {
     }
 
     public generateDefaultSuperId(): SignatureId {
-        if (this.type != Type.Signatures)
+        if (this.type !== Type.Signatures)
             return SignatureIdFactory.createEmpty();
 
         return SignatureId.union(this._signatureIds);
     }
+
 }

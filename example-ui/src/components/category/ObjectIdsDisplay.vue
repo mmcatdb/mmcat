@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ObjectIds, Type } from '@/types/identifiers';
+import type { ObjectIds } from '@/types/identifiers';
 import IconMinusSquare from '@/components/icons/IconMinusSquare.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import SignatureIdDisplay from './SignatureIdDisplay.vue';
@@ -16,7 +16,7 @@ const emit = defineEmits([ 'deleteNonSignature', 'deleteSignature' ]);
 
 <template>
     <div class="outer">
-        <template v-if="ids.type === Type.Signatures">
+        <template v-if="ids.isSignatures">
             <div
                 v-for="(signatureId, idIndex) in ids.signatureIds"
                 :key="idIndex"

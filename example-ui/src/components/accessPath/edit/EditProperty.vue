@@ -1,10 +1,9 @@
-<script lang="ts">
+<script setup lang="ts">
 import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty } from '@/types/accessPath/graph';
 import { PropertyType, type Graph, createDefaultFilter, type Node } from '@/types/categoryGraph';
 import type { Name } from '@/types/identifiers';
-import { defineComponent } from 'vue';
+import { ref, computed } from 'vue';
 import type { DatabaseWithConfiguration } from '@/types/database';
-import type { SchemaObject } from '@/types/schema';
 
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
@@ -19,123 +18,105 @@ enum State {
     SelectName
 }
 
-export default defineComponent({
-    components: {
-        SignatureInput,
-        TypeInput,
-        NameInput,
-        ObjectIdsDisplay,
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        },
-        database: {
-            type: Object as () => DatabaseWithConfiguration,
-            required: true
-        },
-        property: {
-            type: Object as () => GraphChildProperty,
-            required: true
-        }
-    },
-    emits: [ 'save', 'cancel' ],
-    data() {
-        return {
-            type: this.propertyToType(this.property),
-            PropertyType,
-            signature: this.property.signature.copy(),
-            name: this.property.name.copy() as Name,
-            state: State.SelectSignature,
-            State,
-            filter: createDefaultFilter(this.database.configuration),
-            typeIsDetermined: false
-        };
-    },
-    computed: {
-        typeChanged(): boolean {
-            return this.type !== this.propertyToType(this.property);
-        },
-        nameChanged(): boolean {
-            return !this.property.name.equals(this.name);
-        },
-        signatureChanged(): boolean {
-            return !this.property.signature.equals(this.signature);
-        },
-        schemaObject(): SchemaObject {
-            return this.signature.sequence.lastNode.schemaObject;
-        }
-    },
-    methods: {
-        propertyToType(property: GraphChildProperty): PropertyType {
-            return property instanceof GraphSimpleProperty ? PropertyType.Simple : PropertyType.Complex;
-        },
-        save() {
-            const subpaths = !this.signatureChanged && !this.typeChanged && this.property instanceof GraphComplexProperty ? this.property.subpaths : [];
-            const newProperty = this.type === PropertyType.Simple
-                ? new GraphSimpleProperty(this.name, this.signature, this.property.parent)
-                : new GraphComplexProperty(this.name, this.signature, this.property.parent, subpaths);
+type EditPropertyProps = {
+    graph: Graph;
+    database: DatabaseWithConfiguration;
+    property: GraphChildProperty;
+}
 
-            this.property.parent.updateOrAddSubpath(newProperty, this.property);
+const props = defineProps<EditPropertyProps>();
 
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        },
-        confirmSignature() {
-            const node = this.signature.sequence.lastNode;
-            const type = this.determinePropertyType(node);
+const emit = defineEmits([ 'save', 'cancel' ]);
 
-            if (type !== null) {
-                this.type = type;
-                this.typeIsDetermined = true;
-                this.state = State.SelectName;
-            }
-            else {
-                this.state = State.SelectType;
-                this.typeIsDetermined = false;
-            }
-        },
-        determinePropertyType(node: Node): PropertyType | null {
-            if (!this.database.configuration.isComplexPropertyAllowed)
-                return PropertyType.Simple;
+const type = ref(propertyToType(props.property));
+const signature = ref(props.property.signature.copy());
+const name = ref<Name>(props.property.name.copy());
+const state = ref(State.SelectSignature);
+const filter = ref(createDefaultFilter(props.database.configuration));
+const typeIsDetermined = ref(false);
 
-            // Auxiliary property.
-            if (this.signature.isNull)
-                return PropertyType.Complex;
 
-            return node.determinedPropertyType;
-        },
-        resetSignature() {
-            this.signature = this.property.signature.copy();
-        },
-        confirmType() {
-            this.state = State.SelectName;
-        },
-        resetType() {
-            this.type = this.propertyToType(this.property);
-        },
-        confirmName() {
-            this.save();
-        },
-        resetName() {
-            this.name = this.property.name.copy();
-        },
-        deleteProperty() {
-            this.property.parent.removeSubpath(this.property);
-            this.$emit('save');
-        },
-        backButton() {
-            this.state--;
-            if (this.state === State.SelectType && this.typeIsDetermined)
-                this.state--;
-        }
+
+const typeChanged = computed(() => type.value !== propertyToType(props.property));
+const nameChanged = computed(() => !props.property.name.equals(name.value));
+const signatureChanged = computed(() => !props.property.signature.equals(signature.value));
+const schemaObject = computed(() => signature.value.sequence.lastNode.schemaObject);
+
+function propertyToType(property: GraphChildProperty): PropertyType {
+    return property instanceof GraphSimpleProperty ? PropertyType.Simple : PropertyType.Complex;
+}
+
+function save() {
+    const subpaths = !signatureChanged.value && !typeChanged.value && props.property instanceof GraphComplexProperty ? props.property.subpaths : [];
+    const newProperty = type.value === PropertyType.Simple
+        ? new GraphSimpleProperty(name.value, signature.value, props.property.parent)
+        : new GraphComplexProperty(name.value, signature.value, props.property.parent, subpaths);
+
+    props.property.parent.updateOrAddSubpath(newProperty, props.property);
+
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
+
+function confirmSignature() {
+    const node = signature.value.sequence.lastNode;
+    const newType = determinePropertyType(node);
+
+    if (newType !== null) {
+        type.value = newType;
+        typeIsDetermined.value = true;
+        state.value = State.SelectName;
     }
-});
+    else {
+        state.value = State.SelectType;
+        typeIsDetermined.value = false;
+    }
+}
+
+function determinePropertyType(node: Node): PropertyType | null {
+    if (!props.database.configuration.isComplexPropertyAllowed)
+        return PropertyType.Simple;
+
+    // Auxiliary property.
+    if (signature.value.isNull)
+        return PropertyType.Complex;
+
+    return node.determinedPropertyType;
+}
+
+function resetSignature() {
+    signature.value = props.property.signature.copy();
+}
+
+function confirmType() {
+    state.value = State.SelectName;
+}
+
+function resetType() {
+    type.value = propertyToType(props.property);
+}
+
+function confirmName() {
+    save();
+}
+
+function resetName() {
+    name.value = props.property.name.copy();
+}
+
+function deleteProperty() {
+    props.property.parent.removeSubpath(props.property);
+    emit('save');
+}
+
+function backButton() {
+    state.value--;
+    if (state.value === State.SelectType && typeIsDetermined.value)
+        state.value--;
+}
 </script>
 
 <template>

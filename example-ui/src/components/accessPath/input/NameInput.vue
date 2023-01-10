@@ -1,9 +1,9 @@
-<script lang="ts">
+<script setup lang="ts">
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { type Graph, type Node, createDefaultFilter } from '@/types/categoryGraph';
 import type { DatabaseWithConfiguration } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
-import { defineComponent } from 'vue';
+import { ref, watch } from 'vue';
 import StaticNameInput from './StaticNameInput.vue';
 import SignatureInput from './SignatureInput.vue';
 
@@ -13,80 +13,56 @@ enum NameType {
     Anonymous
 }
 
-export default defineComponent({
-    components: {
-        StaticNameInput,
-        SignatureInput
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        },
-        database: {
-            type: Object as () => DatabaseWithConfiguration,
-            required: true
-        },
-        rootNode: {
-            type: Object as () => Node,
-            required: true
-        },
-        modelValue: {
-            type: Object as () => Name,
-            required: true
-        },
-        disabled: {
-            type: Boolean,
-            default: false,
-            required: false
-        }
-    },
-    emits: [ 'update:modelValue' ],
-    data() {
-        return {
-            innerValue: this.modelValue,
-            type: this.getNameType(this.modelValue),
-            staticValue: this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue : StaticName.fromString(''),
-            dynamicValue: SequenceSignature.fromSignature(this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty, this.rootNode),
-            NameType,
-            filter: createDefaultFilter(this.database.configuration)
-        };
-    },
-    watch: {
-        modelValue: {
-            handler(newValue: Name): void {
-                if (!newValue.equals(this.innerValue)) {
-                    this.innerValue = this.modelValue;
-                    this.type = this.getNameType(this.modelValue);
-                    this.staticValue = this.modelValue instanceof StaticName && !this.modelValue.isAnonymous ? this.modelValue : StaticName.fromString('');
-                    this.dynamicValue = SequenceSignature.fromSignature(this.modelValue instanceof DynamicName ? this.modelValue.signature : Signature.empty, this.rootNode);
-                }
-            }
-        }
-    },
-    methods: {
-        getNameType(name: Name): NameType {
-            return name instanceof StaticName
-                ? (name.isAnonymous ? NameType.Anonymous : NameType.Static)
-                : NameType.Dynamic;
-        },
-        updateInnerValue() {
-            switch (this.type) {
-            case NameType.Static:
-                this.innerValue = this.staticValue;
-                break;
-            case NameType.Dynamic:
-                this.innerValue = DynamicName.fromSignature(this.dynamicValue.toSignature());
-                break;
-            case NameType.Anonymous:
-                this.innerValue = StaticName.anonymous;
-                break;
-            }
+type NameInputProps = {
+    graph: Graph;
+database: DatabaseWithConfiguration;
+rootNode: Node;
+modelValue: Name;
+disabled?: boolean;
+}
 
-            this.$emit('update:modelValue', this.innerValue);
-        }
+const props = withDefaults(defineProps<NameInputProps>(), {
+    disabled: false
+});
+
+const emit = defineEmits([ 'update:modelValue' ]);
+
+const innerValue = ref(props.modelValue);
+const type = ref(getNameType(props.modelValue));
+const staticValue = ref(props.modelValue instanceof StaticName && !props.modelValue.isAnonymous ? props.modelValue : StaticName.fromString(''));
+const dynamicValue = ref(SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode));
+const filter = ref(createDefaultFilter(props.database.configuration));
+
+watch(() => props.modelValue, (newValue: Name) => {
+    if (!newValue.equals(innerValue.value)) {
+        innerValue.value = props.modelValue;
+        type.value = getNameType(props.modelValue);
+        staticValue.value = props.modelValue instanceof StaticName && !props.modelValue.isAnonymous ? props.modelValue : StaticName.fromString('');
+        dynamicValue.value = SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode);
     }
 });
+
+function getNameType(name: Name): NameType {
+    return name instanceof StaticName
+        ? (name.isAnonymous ? NameType.Anonymous : NameType.Static)
+        : NameType.Dynamic;
+}
+
+function updateInnerValue() {
+    switch (type.value) {
+    case NameType.Static:
+        innerValue.value = staticValue.value;
+        break;
+    case NameType.Dynamic:
+        innerValue.value = DynamicName.fromSignature(dynamicValue.value.toSignature());
+        break;
+    case NameType.Anonymous:
+        innerValue.value = StaticName.anonymous;
+        break;
+    }
+
+    emit('update:modelValue', innerValue.value);
+}
 </script>
 
 <template>

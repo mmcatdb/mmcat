@@ -115,7 +115,7 @@ export default defineComponent({
                     @delete-non-signature="() => node.deleteNonSignatureId()"
                 />
                 <ButtonIcon
-                    v-if="!addingId && isNew && (!node.schemaObject.ids || node.schemaObject.ids.type === Type.Signatures)"
+                    v-if="!addingId && isNew && (!node.schemaObject.ids || node.schemaObject.ids.isSignatures)"
                     @click="startAddingId"
                 >
                     <IconPlusSquare />

@@ -1,7 +1,7 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
 import type { Graph } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
+import { ref } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { DatabaseWithConfiguration } from '@/types/database';
 import AddProperty from './AddProperty.vue';
@@ -10,7 +10,7 @@ import StaticNameInput from '../input/StaticNameInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import PrimaryKeyInput from '../input/PrimaryKeyInput.vue';
-import { SignatureIdFactory, Type } from '@/types/identifiers';
+import { SignatureIdFactory } from '@/types/identifiers';
 
 enum State {
     Default,
@@ -24,62 +24,45 @@ type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddProperty, { parent: GraphParentProperty }> |
     GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
 
-export default defineComponent({
-    components: {
-        AddProperty,
-        EditProperty,
-        ParentPropertyDisplay,
-        StaticNameInput,
-        ValueContainer,
-        ValueRow,
-        PrimaryKeyInput
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        },
-        database: {
-            type: Object as () => DatabaseWithConfiguration,
-            required: true
-        },
-        rootProperty: {
-            type: Object as () => GraphRootProperty,
-            required: true
-        }
-    },
-    emits: [ 'finish' ],
-    data() {
-        const ids = this.rootProperty.node.schemaObject.ids;
+type AccessPathEditor = {
+    graph: Graph;
+    database: DatabaseWithConfiguration;
+    rootProperty: GraphRootProperty;
+}
 
-        return {
-            label: '',
-            state: { type: State.Default } as StateValue,
-            primaryKey: (ids && ids.type === Type.Signatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty(),
-            State,
-        };
-    },
-    methods: {
-        editPropertyClicked(property: GraphChildProperty) {
-            this.state = {
-                type: State.EditProperty,
-                property
-            };
-        },
-        addPropertyClicked(parentProperty: GraphComplexProperty) {
-            this.state = {
-                type: State.AddProperty,
-                parent: parentProperty
-            };
-        },
-        setStateToDefault() {
-            this.state = { type: State.Default };
-        },
-        finishMapping() {
-            this.$emit('finish', this.label, this.primaryKey);
-        }
-    }
-});
+const props = defineProps<AccessPathEditor>();
+
+const emit = defineEmits([ 'finish' ]);
+
+const ids = props.rootProperty.node.schemaObject.ids;
+
+const label = ref('');
+const state = ref<StateValue>({ type: State.Default });
+const primaryKey = ref((ids && ids.isSignatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty());
+
+
+
+function editPropertyClicked(property: GraphChildProperty) {
+    state.value = {
+        type: State.EditProperty,
+        property
+    };
+}
+
+function addPropertyClicked(parentProperty: GraphComplexProperty) {
+    state.value = {
+        type: State.AddProperty,
+        parent: parentProperty
+    };
+}
+
+function setStateToDefault() {
+    state.value = { type: State.Default };
+}
+
+function finishMapping() {
+    emit('finish', label.value, primaryKey.value);
+}
 </script>
 
 <template>

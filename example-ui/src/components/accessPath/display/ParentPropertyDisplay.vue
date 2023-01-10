@@ -1,73 +1,59 @@
-<script lang="ts">
+<script setup lang="ts">
 import { GraphSimpleProperty, GraphComplexProperty, type GraphParentProperty, GraphRootProperty } from '@/types/accessPath/graph';
 import { SimpleProperty, ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
-import { defineComponent } from 'vue';
+import { computed, ref } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 
-export default defineComponent({
-    name: 'ParentPropertyDisplay',
-    components: {
-        SimplePropertyDisplay,
-        ButtonIcon,
-        IconPlusSquare
-    },
-    props: {
-        property: {
-            type: Object as () => GraphParentProperty | ParentProperty,
-            required: true
-        },
-        isLast: {
-            type: Boolean,
-            default: true,
-            required: false
-        },
-        isRoot: {
-            type: Boolean,
-            default: true,
-            required: false
-        },
-        disableAdditions: {
-            type: Boolean,
-            default: false,
-            required: false
-        }
-    },
-    emits: [ 'complex:click', 'simple:click', 'add:click' ],
-    data() {
-        return {
-            highlighted: false
-        };
-    },
-    computed: {
-        simpleSubpaths(): (GraphSimpleProperty | SimpleProperty)[] {
-            return this.property instanceof GraphRootProperty || this.property instanceof GraphComplexProperty ?
-                this.property.subpaths.filter((subpath): subpath is GraphSimpleProperty => subpath instanceof GraphSimpleProperty) :
-                this.property.subpaths.filter((subpath): subpath is SimpleProperty => subpath instanceof SimpleProperty);
-        },
-        complexSubpaths(): (GraphComplexProperty | ComplexProperty)[] {
-            return this.property instanceof GraphRootProperty || this.property instanceof GraphComplexProperty ?
-                this.property.subpaths.filter((subpath): subpath is GraphComplexProperty => subpath instanceof GraphComplexProperty) :
-                this.property.subpaths.filter((subpath): subpath is ComplexProperty => subpath instanceof ComplexProperty);
-        }
-    },
-    methods: {
-        reEmitComplexClick(property: GraphComplexProperty): void {
-            this.$emit('complex:click', property);
-        },
-        reEmitSimpleClick(property: GraphSimpleProperty): void {
-            this.$emit('simple:click', property);
-        },
-        reEmitAddClick(property: GraphComplexProperty): void {
-            this.$emit('add:click', property);
-        },
-        emitComplexClick(): void {
-            if (!this.isRoot)
-                this.$emit('complex:click', this.property);
-        }
-    }
+//name: 'ParentPropertyDisplay',
+
+type ParentPropertyDisplayProps = {
+    property: GraphParentProperty | ParentProperty;
+    isLast?: boolean;
+    isRoot?: boolean;
+    disableAdditions?: boolean;
+}
+
+const props = withDefaults(defineProps<ParentPropertyDisplayProps>(), {
+    isLast: true,
+    isRoot: true,
+    disableAdditions: false
 });
+
+const emit = defineEmits([ 'complex:click', 'simple:click', 'add:click' ]);
+
+const highlighted = ref(false);
+
+const simpleSubpaths = computed(() => {
+    return props.property instanceof GraphRootProperty || props.property instanceof GraphComplexProperty ?
+        props.property.subpaths.filter((subpath): subpath is GraphSimpleProperty => subpath instanceof GraphSimpleProperty) :
+        props.property.subpaths.filter((subpath): subpath is SimpleProperty => subpath instanceof SimpleProperty);
+});
+
+const complexSubpaths = computed(() => {
+    return props.property instanceof GraphRootProperty || props.property instanceof GraphComplexProperty ?
+        props.property.subpaths.filter((subpath): subpath is GraphComplexProperty => subpath instanceof GraphComplexProperty) :
+        props.property.subpaths.filter((subpath): subpath is ComplexProperty => subpath instanceof ComplexProperty);
+});
+
+
+function reEmitComplexClick(property: GraphComplexProperty): void {
+    emit('complex:click', property);
+}
+
+function reEmitSimpleClick(property: GraphSimpleProperty): void {
+    emit('simple:click', property);
+}
+
+function reEmitAddClick(property: GraphComplexProperty): void {
+    emit('add:click', property);
+}
+
+function emitComplexClick(): void {
+    if (!props.isRoot)
+        emit('complex:click', props.property);
+}
 </script>
 
 
@@ -113,7 +99,7 @@ export default defineComponent({
                 <ButtonIcon
                     v-if="!disableAdditions"
                     class="name-text"
-                    @click="$emit('add:click', property)"
+                    @click="emit('add:click', property)"
                     @mouseenter="highlighted = true;"
                     @mouseleave="highlighted = false"
                 >

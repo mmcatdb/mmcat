@@ -1,8 +1,8 @@
-<script lang="ts">
+<script setup lang="ts">
 import { GraphSimpleProperty, GraphComplexProperty, SequenceSignature, type GraphParentProperty } from '@/types/accessPath/graph';
 import { PropertyType, type Graph, createDefaultFilter, Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
-import { defineComponent } from 'vue';
+import { ref, computed } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
@@ -16,110 +16,93 @@ enum State {
     SelectName
 }
 
-export default defineComponent({
-    components: {
-        SignatureInput,
-        TypeInput,
-        NameInput,
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        },
-        database: {
-            type: Object as () => DatabaseWithConfiguration,
-            required: true
-        },
-        parentProperty: {
-            type: Object as () => GraphParentProperty,
-            required: true
-        }
-    },
-    emits: [ 'save', 'cancel' ],
-    data() {
-        return {
-            type: PropertyType.Simple,
-            PropertyType,
-            signature: SequenceSignature.null(this.parentProperty.node),
-            name: StaticName.fromString('') as Name,
-            state: State.SelectSignature,
-            State,
-            filter: createDefaultFilter(this.database.configuration),
-            typeIsDetermined: false
-        };
-    },
-    computed: {
-        nameIsValid(): boolean {
-            return !(this.name instanceof StaticName) || !!this.name.value;
-        }
-    },
-    methods: {
-        save() {
-            const newProperty = this.type === PropertyType.Simple
-                ? new GraphSimpleProperty(this.name, this.signature, this.parentProperty)
-                : new GraphComplexProperty(this.name, this.signature, this.parentProperty);
+type AddPropertyProps = {
+    graph: Graph;
+    database: DatabaseWithConfiguration;
+    parentProperty: GraphParentProperty;
+}
 
-            this.parentProperty.updateOrAddSubpath(newProperty);
+const props = defineProps<AddPropertyProps>();
 
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        },
-        confirmSignature() {
-            const node = this.signature.sequence.lastNode;
-            this.name = StaticName.fromString(node.schemaObject.label.toLowerCase());
-            const type = this.determinePropertyType(node);
+const emit = defineEmits([ 'save', 'cancel' ]);
 
-            if (type !== null) {
-                this.type = type;
-                this.typeIsDetermined = true;
-                this.state = State.SelectName;
-            }
-            else {
-                this.state = State.SelectType;
-                this.typeIsDetermined = false;
-            }
-        },
-        determinePropertyType(node: Node): PropertyType | null {
-            if (!this.database.configuration.isComplexPropertyAllowed)
-                return PropertyType.Simple;
+const type = ref(PropertyType.Simple);
+const signature = ref(SequenceSignature.null(props.parentProperty.node));
+const name = ref<Name>(StaticName.fromString(''));
+const state = ref(State.SelectSignature);
+const filter = ref(createDefaultFilter(props.database.configuration));
+const typeIsDetermined = ref(false);
 
-            // Auxiliary property.
-            if (this.signature.isNull)
-                return PropertyType.Complex;
+const nameIsValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value);
 
-            return node.determinedPropertyType;
-        },
-        confirmType() {
-            this.state = State.SelectName;
-        },
-        confirmName() {
-            this.save();
-        },
-        nextButton() {
-            switch (this.state) {
-            case State.SelectSignature:
-                this.confirmSignature();
-                break;
-            case State.SelectType:
-                this.confirmType();
-                break;
-            case State.SelectName:
-                this.confirmName();
-                break;
-            }
-        },
-        backButton() {
-            this.state--;
-            if (this.state === State.SelectType && this.typeIsDetermined)
-                this.state--;
-        }
+function save() {
+    const newProperty = type.value === PropertyType.Simple
+        ? new GraphSimpleProperty(name.value, signature.value, props.parentProperty)
+        : new GraphComplexProperty(name.value, signature.value, props.parentProperty);
+
+    props.parentProperty.updateOrAddSubpath(newProperty);
+
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
+
+function confirmSignature() {
+    const node = signature.value.sequence.lastNode;
+    name.value = StaticName.fromString(node.schemaObject.label.toLowerCase());
+    const newType = determinePropertyType(node);
+
+    if (newType !== null) {
+        type.value = newType;
+        typeIsDetermined.value = true;
+        state.value = State.SelectName;
     }
-});
+    else {
+        state.value = State.SelectType;
+        typeIsDetermined.value = false;
+    }
+}
+
+function determinePropertyType(node: Node): PropertyType | null {
+    if (!props.database.configuration.isComplexPropertyAllowed)
+        return PropertyType.Simple;
+
+    // Auxiliary property.
+    if (signature.value.isNull)
+        return PropertyType.Complex;
+
+    return node.determinedPropertyType;
+}
+
+function confirmType() {
+    state.value = State.SelectName;
+}
+
+function confirmName() {
+    save();
+}
+
+function nextButton() {
+    switch (state.value) {
+    case State.SelectSignature:
+        confirmSignature();
+        break;
+    case State.SelectType:
+        confirmType();
+        break;
+    case State.SelectName:
+        confirmName();
+        break;
+    }
+}
+
+function backButton() {
+    state.value--;
+    if (state.value === State.SelectType && typeIsDetermined.value)
+        state.value--;
+}
 </script>
 
 <template>

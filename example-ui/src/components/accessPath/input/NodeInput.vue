@@ -1,66 +1,55 @@
-<script lang="ts">
+<script setup lang="ts">
 import { SelectionType, Graph, Node } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
-export default defineComponent({
-    props: {
-        graph: {
-            type: Graph,
-            required: true
-        },
-        modelValue: {
-            type: Object as () => Node | null,
-            default: null,
-            required: false
-        }
-    },
-    emits: [ 'update:modelValue' ],
-    data() {
-        return {
-            innerValue: null as Node | null,
-        };
-    },
-    watch: {
-        modelValue: {
-            handler(newValue: Node | null): void {
-                if (!newValue) {
-                    this.innerValue?.unselect();
-                    this.innerValue = null;
-                    return;
-                }
+type NodeInputProps = {
+    graph: Graph;
+    modelValue?: Node;
+}
 
-                if (newValue.equals(this.innerValue))
-                    return;
+const props = defineProps<NodeInputProps>();
 
-                this.innerValue?.unselect();
-                this.innerValue = newValue;
-                this.innerValue.select({ type: SelectionType.Root, level: 0 });
-            }
-        }
-    },
-    mounted() {
-        this.graph.addNodeListener('tap', this.onNodeTapHandler);
-    },
-    unmounted() {
-        this.graph.removeNodeListener('tap', this.onNodeTapHandler);
-    },
-    methods: {
-        onNodeTapHandler(node: Node) {
-            this.innerValue?.unselect();
+const emit = defineEmits([ 'update:modelValue' ]);
 
-            if (node.equals(this.innerValue)) {
-                // If we double tap current node, it become unselected.
-                this.innerValue = null;
-            }
-            else {
-                node.select({ type: SelectionType.Root, level: 0 });
-                this.innerValue = node;
-            }
+const innerValue = ref<Node>();
 
-            this.$emit('update:modelValue', this.innerValue);
-        }
+watch(() => props.modelValue, (newValue?: Node) => {
+    if (!newValue) {
+        innerValue.value?.unselect();
+        innerValue.value = undefined;
+        return;
     }
+
+    if (newValue.equals(innerValue.value))
+        return;
+
+    innerValue.value?.unselect();
+    innerValue.value = newValue;
+    innerValue.value.select({ type: SelectionType.Root, level: 0 });
 });
+
+onMounted(() => {
+    props.graph.addNodeListener('tap', onNodeTapHandler);
+});
+
+onUnmounted(() => {
+    props.graph.removeNodeListener('tap', onNodeTapHandler);
+});
+
+function onNodeTapHandler(node: Node) {
+    innerValue.value?.unselect();
+
+    if (node.equals(innerValue.value)) {
+        // If we double tap current node, it become unselected.
+        innerValue.value = undefined;
+    }
+    else {
+        node.select({ type: SelectionType.Root, level: 0 });
+        innerValue.value = node;
+    }
+
+    emit('update:modelValue', innerValue.value);
+}
 </script>
 
 <template>
