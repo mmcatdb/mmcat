@@ -69,7 +69,8 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
 
     public List<Signature> toBases() {
         if (this.isNull)
-            return List.of(this);
+            //return List.of(this);
+            return List.of();
 
         var output = new ArrayList<Signature>();
         for (int id : ids)
@@ -80,7 +81,8 @@ public class Signature implements Serializable, Comparable<Signature>, IContext,
 
     public List<Signature> toBasesReverse() {
         if (this.isNull)
-            return List.of(this);
+            //return List.of(this);
+            return List.of();
 
         var output = new ArrayList<Signature>();
         for (int i = ids.length - 1; i >= 0; i--)

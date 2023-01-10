@@ -27,7 +27,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     @Override
     public boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
         names.forEach(name -> {
-            String command = name + " TEXT" + (required ? " NOT NULL" : "");
+            String command = "\"" + name + "\" TEXT" + (required ? " NOT NULL" : "");
             properties.add(new Property(name, command));
         });
         
@@ -37,7 +37,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     @Override
     public boolean addSimpleArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
         names.forEach(name -> {
-            String command = name + " TEXT[]" + (required ? " NOT NULL" : "");
+            String command = "\"" + name + "\" TEXT[]" + (required ? " NOT NULL" : "");
             properties.add(new Property(name, command));
         });
         
@@ -59,7 +59,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     public PostgreSQLDDLStatement createDDLStatement() {
         String commands = String.join(",\n", properties.stream().map(property -> AbstractDDLWrapper.INDENTATION + property.command).toList());
         String content = String.format("""
-            CREATE TABLE %s (
+            CREATE TABLE \"%s\" (
             %s
             );
             """, kindName, commands);

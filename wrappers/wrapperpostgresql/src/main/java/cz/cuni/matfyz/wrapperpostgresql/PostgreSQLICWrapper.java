@@ -22,20 +22,8 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
     }
 
     @Override
-    public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
-        //throw new UnsupportedOperationException();
-        /*
-        for (ComparablePair<String, String> attributePair : attributePairs) {
-
-            // TODO There should be a way how to get attribute names from the pairs.
-            ReferenceConstraint newConstraint = new ReferenceConstraint(kindName, kindName2, "TODO1", "TODO2");
-            
-            if (constraints.stream().anyMatch(constraint -> constraint.getName().equals(newConstraint.getName())))
-                return;
-            
-            constraints.add(newConstraint);
-        }
-        */
+    public void appendReference(String referencingKindName, String referencedKindName, Set<ComparablePair<String, String>> attributePairs) {
+        constraints.add(new ReferenceConstraint(referencingKindName, referencedKindName, attributePairs));
     }
 
     @Override
@@ -62,63 +50,63 @@ interface Constraint {
 
 class IdentifierConstraint implements Constraint {
     
-    private String sourceKindName;
+    private String kindName;
     private Collection<String> properties;
 
-    public IdentifierConstraint(String sourceKindName, Collection<String> properties) {
-        this.sourceKindName = sourceKindName;
+    public IdentifierConstraint(String kindName, Collection<String> properties) {
+        this.kindName = kindName;
         this.properties = properties;
     }
 
     private String getName() {
-        return sourceKindName + "_PRIMARY_KEY_" + String.join("#", properties);
+        return "#" + kindName + "_PRIMARY_KEY";
     }
 
     @Override
     public String addCommand() {
-        return "ALTER TABLE " + sourceKindName
-            + "\nADD CONSTRAINT " + getName()
-            + "\nPRIMARY KEY (" + String.join(", ", properties) + ")" + ";";
+        return "ALTER TABLE \"" + kindName + "\""
+            + "\nADD CONSTRAINT \"" + getName() + "\""
+            + "\nPRIMARY KEY (\"" + String.join("\", \"", properties) + "\")" + ";";
     }
 
     @Override
     public String dropCommand() {
-        return "\nALTER TABLE " + sourceKindName
-            + "\nDROP CONSTRAINT " + getName() + ";";
+        return "\nALTER TABLE \"" + kindName + "\""
+            + "\nDROP CONSTRAINT \"" + getName() + "\";";
     }
 
 }
 
 class ReferenceConstraint implements Constraint {
     
-    private String sourceKindName;
-    private String referenceKindName;
-    private String sourceAttributeName;
-    private String referenceAttributeName;
+    private String referencingKindName;
+    private String referencedKindName;
+    private List<String> referencingAttributes;
+    private List<String> referencedAttributes;
 
-    public ReferenceConstraint(String sourceKindName, String referenceKindName, String sourceAttributeName, String referenceAttributeName) {
-        this.sourceKindName = sourceKindName;
-        this.referenceKindName = referenceKindName;
-        this.sourceAttributeName = sourceAttributeName;
-        this.referenceAttributeName = referenceAttributeName;
+    public ReferenceConstraint(String referencingKindName, String referencedKindName, Set<ComparablePair<String, String>> attributePairs) {
+        this.referencingKindName = referencingKindName;
+        this.referencedKindName = referencedKindName;
+        this.referencingAttributes = attributePairs.stream().map(ComparablePair::getValue1).toList();
+        this.referencedAttributes = attributePairs.stream().map(ComparablePair::getValue2).toList();
     }
     
     private String getName() {
-        return sourceKindName + "#" + sourceAttributeName + "_REFERENCES_" + referenceKindName + "#" + referenceAttributeName;
+        return "#" + referencingKindName + "_REFERENCES_" + referencedKindName;
     }
-    
+
     @Override
     public String addCommand() {
-        return "ALTER TABLE " + sourceKindName
-            + "\nADD CONSTRAINT " + getName()
-            + "\nFOREIGN KEY (" + sourceAttributeName + ")"
-            + "\nREFERENCES " + referenceKindName + "(" + referenceAttributeName + ");";
+        return "ALTER TABLE \"" + referencingKindName + "\""
+            + "\nADD CONSTRAINT \"" + getName() + "\""
+            + "\nFOREIGN KEY (\"" + String.join("\", \"", referencingAttributes) + "\")"
+            + "\nREFERENCES \"" + referencedKindName + "\" (\"" + String.join("\", \"", referencedAttributes) + "\");";
     }
     
     @Override
     public String dropCommand() {
-        return "ALTER TABLE " + sourceKindName
-            + "\nDROP CONSTRAINT " + getName() + ";";
+        return "ALTER TABLE \"" + referencingKindName + "\""
+            + "\nDROP CONSTRAINT \"" + getName() + "\";";
     }
 
 }

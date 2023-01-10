@@ -10,7 +10,6 @@ import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +18,7 @@ import org.json.JSONObject;
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class Mapping implements JSONConvertible {
+public class Mapping implements JSONConvertible, Comparable<Mapping> {
 
     private final SchemaCategory category;
     private final SchemaObject rootObject;
@@ -63,6 +62,21 @@ public class Mapping implements JSONConvertible {
         return primaryKey;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (this == other)
+            return true;
+        
+        return other instanceof Mapping otherMapping && compareTo(otherMapping) == 0;
+    }
+
+    @Override
+    public int compareTo(Mapping other) {
+        // This guarantees uniqueness in one logical model, however mappings between different logical models are never compared.
+        return kindName.compareTo(other.kindName);
+    }
+
+    /*
     private final List<Reference> references = new ArrayList<Reference>();
 
     public List<Reference> references() {
@@ -73,6 +87,7 @@ public class Mapping implements JSONConvertible {
         this.references.clear();
         references.forEach(this.references::add);
     }
+    */
 
     @Override
     public JSONObject toJSON() {
@@ -134,4 +149,5 @@ public class Mapping implements JSONConvertible {
         }
     
     }
+
 }

@@ -695,7 +695,20 @@ public class TestData {
         return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
             new SimpleProperty("value", contactToValue),
             new SimpleProperty("name", contactToName),
-            new SimpleProperty("number", contactToNumber)
+            new SimpleProperty("order_number", contactToNumber)
+        );
+    }
+
+    public ComplexProperty path_orderedRoot() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+            new SimpleProperty("customer_id", orderedToId),
+            new SimpleProperty("order_number", orderedToNumber)
+        );
+    }
+
+    public ComplexProperty path_customerRoot() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+            new SimpleProperty("id", customerToId)
         );
     }
 

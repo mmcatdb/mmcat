@@ -1,5 +1,14 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.core.schema.SchemaCategory;
+
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -9,53 +18,67 @@ import org.junit.jupiter.api.Test;
 public class ICAlgorithmTests {
 
     private TestData data;
-    private ICAlgorithmTestBase testBase;
+    private SchemaCategory schema;
+    private Map<String, Mapping> mappings;
 
     @BeforeEach
     public void setupTestData() {
         data = new TestData();
-        final var schema = data.createDefaultSchemaCategory();
+        schema = data.createDefaultSchemaCategory();
+        mappings = new TreeMap<>();
 
-        testBase = new ICAlgorithmTestBase(schema)
-            .addMappingForTest(schema.getObject(data.orderKey), "order", data.path_orderRoot())
-            .addMappingForTest(schema.getObject(data.contactKey), "contact", data.path_contactRoot());
+        addMapping(data.orderKey, "order", data.path_orderRoot());
+        addMapping(data.contactKey, "contact", data.path_contactRoot());
+        addMapping(data.orderedKey, "ordered", data.path_orderedRoot());
+        addMapping(data.customerKey, "customer", data.path_customerRoot());
+    }
 
-        System.out.print("");
+    private void addMapping(Key key, String name, ComplexProperty path) {
+        final var mapping = ICAlgorithmTestBase.createMapping(schema, schema.getObject(key), name, path);
+        mappings.put(name, mapping);
+    }
+
+    private void testFunction(String dataFileName, String primaryMappingName, String... otherMappingNames) {
+        new ICAlgorithmTestBase(dataFileName)
+            .setPrimaryMapping(mappings.get(primaryMappingName))
+            .addOtherMappings(List.of(otherMappingNames).stream().map(name -> mappings.get(name)).toArray(Mapping[]::new))
+            .testAlgorithm();
     }
 
     @Test
     public void basicPrimaryKeyTest() {
-        testBase.testAlgorithm("1BasicPrimaryKey.json", "order");
+        testFunction(
+            "1BasicPrimaryKey.json",
+            "order"
+        );
     }
 
     @Test
-    public void structureTest() {
-        testBase.testAlgorithm("2ComplexPrimaryKey.json", "contact");
+    public void complexPrimaryKeyTest() {
+        testFunction(
+            "2ComplexPrimaryKey.json",
+            "contact"
+        );
     }
 
     @Test
-    public void simpleArrayTest() {
-        testBase.testAlgorithm("3SimpleArrayTest.json", "order");
+    public void complexReferenceTest() {
+        testFunction(
+            "3BasicReference.json",
+            "contact",
+            "order"
+        );
     }
 
     @Test
-    public void complexArrayTest() {
-        testBase.testAlgorithm("4ComplexArrayTest.json", "order");
+    public void moreReferencesTest() {
+        testFunction(
+            "4MoreReferences.json",
+            "ordered",
+            "order", "customer"
+        );
     }
 
-    @Test
-    public void mapTest() {
-        testBase.testAlgorithm("5MapTest.json", "order");
-    }
-
-    @Test
-    public void syntheticPropertyTest() {
-        testBase.testAlgorithm("6SyntheticPropertyTest.json", "order");
-    }
-
-    @Test
-    public void complexMapTest() {
-        testBase.testAlgorithm("10ComplexMapTest.json", "order");
-    }
+    // TODO complex reference
 
 }

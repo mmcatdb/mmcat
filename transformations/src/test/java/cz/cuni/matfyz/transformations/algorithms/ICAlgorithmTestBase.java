@@ -12,8 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.json.JSONArray;
@@ -25,28 +24,28 @@ import org.junit.jupiter.api.Assertions;
 public class ICAlgorithmTestBase {
     
     private final String fileNamePrefix = "icAlgorithm/";
-    private SchemaCategory schema;
-    private final Map<String, Mapping> mappings = new TreeMap<>();
-
-    public ICAlgorithmTestBase(SchemaCategory schema) {
-        this.schema = schema;
+    private final String dataFileName;
+    
+    public ICAlgorithmTestBase(String dataFileName) {
+        this.dataFileName = dataFileName;
     }
 
-    public ICAlgorithmTestBase addMappingForTest(SchemaObject rootObject, String kindName, ComplexProperty path) {
-        final var mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, primaryKeyFromObject(rootObject));
-        mappings.put(kindName, mapping);
+    private Mapping mapping;
 
+    public ICAlgorithmTestBase setPrimaryMapping(Mapping mapping) {
+        this.mapping = mapping;
+        selectedMappings.add(mapping);
         return this;
     }
 
-    private static List<Signature> primaryKeyFromObject(SchemaObject object) {
-        if (object.ids().isSignatures())
-            return object.ids().toSignatureIds().first().signatures().stream().toList();
+    private final Set<Mapping> selectedMappings = new TreeSet<>();
 
-        throw new UnsupportedOperationException("Primary key cannot be empty!");
+    public ICAlgorithmTestBase addOtherMappings(Mapping... mappings) {
+        selectedMappings.addAll(List.of(mappings));
+        return this;
     }
 
-    private List<String> buildExpectedResult(String dataFileName) throws Exception {
+    private List<String> buildExpectedResult() throws Exception {
         var url = ClassLoader.getSystemResource(fileNamePrefix + dataFileName);
         Path pathToDataFile = Paths.get(url.toURI()).toAbsolutePath();
         String jsonString = Files.readString(pathToDataFile);
@@ -59,10 +58,10 @@ public class ICAlgorithmTestBase {
         return lines;
     }
 
-    public void testAlgorithm(String dataFileName, String kindName) {
+    public void testAlgorithm() {
         final List<String> expectedResult;
         try {
-            expectedResult = buildExpectedResult(dataFileName);
+            expectedResult = buildExpectedResult();
         }
         catch (Exception e) {
             Assertions.fail("Exception thrown when loading test data.");
@@ -70,11 +69,9 @@ public class ICAlgorithmTestBase {
         }
 
         final var wrapper = new DummyICWrapper();
-        final var mapping = mappings.get(kindName);
 
         final var transformation = new ICAlgorithm();
-        final var allMappings = ICAlgorithm.createAllMappings(mappings.values());
-        transformation.input(mapping, allMappings, wrapper);
+        transformation.input(mapping, selectedMappings, wrapper);
         transformation.algorithm();
 
         final List<String> result = wrapper.methods();
@@ -96,4 +93,16 @@ public class ICAlgorithmTestBase {
 
         return set1.equals(set2);
     }
+
+    public static Mapping createMapping(SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path) {
+        return new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, primaryKeyFromObject(rootObject));
+    }
+
+    private static List<Signature> primaryKeyFromObject(SchemaObject object) {
+        if (object.ids().isSignatures())
+            return object.ids().toSignatureIds().first().signatures().stream().toList();
+
+        throw new UnsupportedOperationException("Primary key cannot be empty!");
+    }
+
 }

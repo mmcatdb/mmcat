@@ -1,4 +1,5 @@
 [
     "appendIdentifier(contact, [ value, name, order_number ])",
+    "appendReference(contact, order, [ (order_number, number) ])",
     "createICStatement()"
 ]

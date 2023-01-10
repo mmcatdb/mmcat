@@ -15,6 +15,7 @@ import cz.cuni.matfyz.server.repository.JobRepository;
 import cz.cuni.matfyz.server.service.WrapperService.WrapperCreationErrorException;
 import cz.cuni.matfyz.server.service.WrapperService.WrapperNotFoundException;
 import cz.cuni.matfyz.server.utils.UserStore;
+import cz.cuni.matfyz.transformations.algorithms.ICAlgorithm;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
 
@@ -195,8 +196,6 @@ public class AsyncJobService {
         final List<Mapping> mappings = mappingService.findAll(job.logicalModelId).stream()
             .map(wrapper -> createMapping(wrapper, job.categoryId))
             .toList();
-
-        final var allMappings = new TreeMap<Name, Mapping>(); // TODO
         
         final var output = new StringBuilder();
         for (final var mapping : mappings) {
@@ -205,7 +204,7 @@ public class AsyncJobService {
             final var pushWrapper = wrapperService.createPushWrapper(database);
 
             final var process = new InstanceToDatabase();
-            process.input(mapping, allMappings, instance, ddlWrapper, pushWrapper, icWrapper);
+            process.input(mapping, mappings, instance, ddlWrapper, pushWrapper, icWrapper);
 
             final var result = process.run();
             if (!result.status)

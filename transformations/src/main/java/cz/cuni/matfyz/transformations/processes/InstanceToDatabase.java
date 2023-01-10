@@ -6,7 +6,6 @@ import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.mapping.Name;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
@@ -19,7 +18,6 @@ import cz.cuni.matfyz.transformations.algorithms.DMLAlgorithm;
 import cz.cuni.matfyz.transformations.algorithms.ICAlgorithm;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author jachym.bartik
@@ -27,13 +25,13 @@ import java.util.Map;
 public class InstanceToDatabase {
 
     private Mapping mapping;
-    private Map<Name, Mapping> allMappings;
+    private Iterable<Mapping> allMappings;
     private InstanceCategory currentInstance;
     private AbstractDDLWrapper ddlWrapper;
     private AbstractPushWrapper pushWrapper;
     private AbstractICWrapper icWrapper;
 
-    public void input(Mapping mapping, Map<Name, Mapping> allMappings, InstanceCategory currentInstance, AbstractDDLWrapper ddlWrapper, AbstractPushWrapper pushWrapper, AbstractICWrapper icWrapper) {
+    public void input(Mapping mapping, Iterable<Mapping> allMappings, InstanceCategory currentInstance, AbstractDDLWrapper ddlWrapper, AbstractPushWrapper pushWrapper, AbstractICWrapper icWrapper) {
         this.mapping = mapping;
         this.allMappings = allMappings;
         this.currentInstance = currentInstance;
