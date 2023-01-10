@@ -33,8 +33,6 @@ const state = ref(State.SelectSignature);
 const filter = ref(createDefaultFilter(props.database.configuration));
 const typeIsDetermined = ref(false);
 
-const nameIsValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value);
-
 function save() {
     const newProperty = type.value === PropertyType.Simple
         ? new GraphSimpleProperty(name.value, signature.value, props.parentProperty)
@@ -48,6 +46,28 @@ function save() {
 function cancel() {
     emit('cancel');
 }
+
+const isSignatureValid = computed(() => {
+    if (!props.database.configuration.isGrouppingAllowed && signature.value.isNull)
+        return false;
+    if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
+        return false;
+
+    return true;
+});
+
+const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value);
+
+const isNextButtonDisabled = computed(() => {
+    switch (state.value) {
+    case State.SelectSignature:
+        return !isSignatureValid.value;
+    case State.SelectName:
+        return !isNameValid.value;
+    default:
+        return false;
+    }
+});
 
 function confirmSignature() {
     const node = signature.value.sequence.lastNode;
@@ -156,8 +176,7 @@ function backButton() {
         </div>
         <div class="button-row">
             <button
-                :disabled="(state === State.SelectSignature && !database.configuration.isGrouppingAllowed && signature.isNull) ||
-                    (state === State.SelectName && !nameIsValid)"
+                :disabled="isNextButtonDisabled"
                 @click="nextButton"
             >
                 {{ state < State.SelectName ? 'Next' : 'Finish' }}

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty } from '@/types/accessPath/graph';
 import { PropertyType, type Graph, createDefaultFilter, type Node } from '@/types/categoryGraph';
-import type { Name } from '@/types/identifiers';
+import { StaticName, type Name } from '@/types/identifiers';
 import { ref, computed } from 'vue';
 import type { DatabaseWithConfiguration } from '@/types/database';
 
@@ -35,8 +35,6 @@ const state = ref(State.SelectSignature);
 const filter = ref(createDefaultFilter(props.database.configuration));
 const typeIsDetermined = ref(false);
 
-
-
 const typeChanged = computed(() => type.value !== propertyToType(props.property));
 const nameChanged = computed(() => !props.property.name.equals(name.value));
 const signatureChanged = computed(() => !props.property.signature.equals(signature.value));
@@ -60,6 +58,17 @@ function save() {
 function cancel() {
     emit('cancel');
 }
+
+const isSignatureValid = computed(() => {
+    if (!props.database.configuration.isGrouppingAllowed && signature.value.isNull)
+        return false;
+    if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
+        return false;
+
+    return true;
+});
+
+const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value);
 
 function confirmSignature() {
     const node = signature.value.sequence.lastNode;
@@ -182,7 +191,7 @@ function backButton() {
         <div class="button-row">
             <template v-if="state === State.SelectSignature">
                 <button
-                    :disabled="!database.configuration.isGrouppingAllowed && signature.isNull"
+                    :disabled="signatureChanged && !isSignatureValid"
                     @click="confirmSignature"
                 >
                     {{ signatureChanged ? 'Confirm change' : 'Keep current' }}
@@ -209,6 +218,7 @@ function backButton() {
             </template>
             <template v-if="state === State.SelectName">
                 <button
+                    :disabled="nameChanged && !isNameValid"
                     @click="confirmName"
                 >
                     {{ nameChanged ? 'Confirm change' : 'Keep current' }}
