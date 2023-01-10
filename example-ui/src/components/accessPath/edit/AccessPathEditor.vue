@@ -40,8 +40,6 @@ const label = ref('');
 const state = ref<StateValue>({ type: State.Default });
 const primaryKey = ref((ids && ids.isSignatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty());
 
-
-
 function editPropertyClicked(property: GraphChildProperty) {
     state.value = {
         type: State.EditProperty,
@@ -84,7 +82,7 @@ function finishMapping() {
                             <StaticNameInput v-model="rootProperty.name" />
                         </ValueRow>
                         <ValueRow
-                            v-if="!database.configuration.isSchemaLess && rootProperty.node.schemaObject.ids"
+                            v-if="rootProperty.node.schemaObject.ids"
                             label="Primary key:"
                         >
                             <PrimaryKeyInput

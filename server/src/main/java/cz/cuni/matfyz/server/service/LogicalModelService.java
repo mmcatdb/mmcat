@@ -2,7 +2,7 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModel;
-import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelFull;
+import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelDetail;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.cuni.matfyz.server.repository.LogicalModelRepository;
 
@@ -35,12 +35,12 @@ public class LogicalModelService {
         return repository.find(logicalModelId);
     }
 
-    public LogicalModelFull findFull(Id logicalModelId) {
+    public LogicalModelDetail findFull(Id logicalModelId) {
         var logicalModel = find(logicalModelId);
         var mappings = mappingService.findAll(logicalModel.id);
         var database = databaseService.findDatabaseWithConfiguration(logicalModel.databaseId);
 
-        return new LogicalModelFull(
+        return new LogicalModelDetail(
             logicalModel.id,
             logicalModel.categoryId,
             database,
@@ -49,12 +49,12 @@ public class LogicalModelService {
         );
     }
 
-    public List<LogicalModelFull> findAllFull(Id categoryId) {
+    public List<LogicalModelDetail> findAllFull(Id categoryId) {
         return repository.findAllInCategory(categoryId).stream().map(logicalModel -> {
             var mappings = mappingService.findAll(logicalModel.id);
             var database = databaseService.findDatabaseWithConfiguration(logicalModel.databaseId);
 
-            return new LogicalModelFull(
+            return new LogicalModelDetail(
                 logicalModel.id,
                 logicalModel.categoryId,
                 database,

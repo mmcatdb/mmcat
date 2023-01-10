@@ -195,7 +195,7 @@ export class SchemaCategory implements Entity {
     setDatabaseToObjectsFromMapping(mapping: Mapping, logicalModel: LogicalModel): void {
         const objects = getObjectsFromPath(mapping.accessPath, this.objects, this.morphisms);
 
-        const rootObject = this.objects.find(object => object.id === mapping.rootObjectId);
+        const rootObject = this.objects.find(object => object.id === mapping.rootObject.id);
         if (rootObject)
             objects.push(rootObject);
 

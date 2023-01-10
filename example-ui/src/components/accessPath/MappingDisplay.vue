@@ -1,35 +1,17 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import type { Mapping } from '@/types/mapping';
 import ParentPropertyDisplay from './display/ParentPropertyDisplay.vue';
 import Divider from '@/components/layout/Divider.vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import SignatureIdDisplay from '../category/SignatureIdDisplay.vue';
 
-export default defineComponent({
-    components: {
-        ParentPropertyDisplay,
-        Divider,
-        CleverRouterLink,
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        mapping: {
-            type: Object as () => Mapping,
-            required: true
-        }
-    },
-    data() {
-        return {
+type MappingDisplayProps = {
+    mapping: Mapping;
+};
 
-        };
-    },
-    methods: {
-
-    }
-});
+defineProps<MappingDisplayProps>();
 </script>
 
 <template>
@@ -41,8 +23,13 @@ export default defineComponent({
             <ValueRow label="Id:">
                 {{ mapping.id }}
             </ValueRow>
-            <ValueRow label="Root object id:">
-                {{ mapping.rootObjectId }}
+            <ValueRow label="Root object:">
+                {{ mapping.rootObject.label }}
+            </ValueRow>
+            <ValueRow label="Primary key:">
+                <SignatureIdDisplay
+                    :signature-id="mapping.primaryKey"
+                />
             </ValueRow>
             <!--
             <ValueRow label="Logical model:">

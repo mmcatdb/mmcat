@@ -1,12 +1,13 @@
 import { RootProperty } from "@/types/accessPath/basic";
 import type { RootPropertyJSON } from "./accessPath/JSONTypes";
 import type { Entity, Id } from "./id";
-import { Signature, type SignatureFromServer } from "./identifiers";
+import { SignatureId, type SignatureIdFromServer } from "./identifiers";
+import { SchemaObject, type SchemaObjectFromServer } from "./schema";
 import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
 
 export type MappingJSON = {
     kindName: string,
-    primaryKey: SignatureFromServer[],
+    primaryKey: SignatureIdFromServer,
     accessPath: RootPropertyJSON
 }
 
@@ -15,8 +16,8 @@ export class Mapping implements Entity {
         public readonly id: Id,
         public readonly label: string,
         public readonly logicalModelId: Id,
-        public readonly rootObjectId: Id,
-        public readonly primaryKey: Signature[], // TODO make a SignatureId?
+        public readonly rootObject: SchemaObject,
+        public readonly primaryKey: SignatureId,
         public readonly accessPath: RootProperty
     ) {}
 
@@ -28,8 +29,8 @@ export class Mapping implements Entity {
             input.id,
             json.label,
             input.logicalModelId,
-            input.rootObjectId,
-            mappingJson.primaryKey.map(Signature.fromServer),
+            SchemaObject.fromServer(input.rootObject),
+            SignatureId.fromServer(mappingJson.primaryKey),
             RootProperty.fromJSON(mappingJson.accessPath)
         );
     }
@@ -38,7 +39,7 @@ export class Mapping implements Entity {
 export type MappingFromServer = {
     id: Id;
     logicalModelId: Id;
-    rootObjectId: Id;
+    rootObject: SchemaObjectFromServer;
     jsonValue: string;
     mappingJsonValue: string;
 }

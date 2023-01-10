@@ -2,7 +2,7 @@ package cz.cuni.matfyz.server.builder;
 
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
+import cz.cuni.matfyz.server.entity.mapping.MappingDetail;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 
 /**
@@ -11,7 +11,7 @@ import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 public class MappingBuilder {
 
     private SchemaCategoryWrapper categoryWrapper;
-    private MappingWrapper mappingWrapper;
+    private MappingDetail mappingWrapper;
 
     public MappingBuilder setCategoryWrapper(SchemaCategoryWrapper categoryWrapper) {
         this.categoryWrapper = categoryWrapper;
@@ -19,7 +19,7 @@ public class MappingBuilder {
         return this;
     }
 
-    public MappingBuilder setMappingWrapper(MappingWrapper mappingWrapper) {
+    public MappingBuilder setMappingWrapper(MappingDetail mappingWrapper) {
         this.mappingWrapper = mappingWrapper;
 
         return this;
@@ -30,7 +30,7 @@ public class MappingBuilder {
         final var category = builder.setCategoryWrapper(categoryWrapper)
             .build();
 
-        final var rootObject = builder.getObject(mappingWrapper.rootObjectId);
+        final var rootObject = builder.getObject(mappingWrapper.rootObject.id);
         SchemaMorphism rootMorphism = null;
         
         return new Mapping.Builder().fromJSON(category, rootObject, rootMorphism, mappingWrapper.mappingJsonValue);

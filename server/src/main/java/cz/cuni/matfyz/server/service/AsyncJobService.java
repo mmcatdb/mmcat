@@ -2,7 +2,6 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.mapping.Name;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.cuni.matfyz.integration.processes.JsonLdToInstance;
@@ -10,18 +9,17 @@ import cz.cuni.matfyz.server.builder.CategoryBuilder;
 import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
+import cz.cuni.matfyz.server.entity.mapping.MappingDetail;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.repository.JobRepository;
 import cz.cuni.matfyz.server.service.WrapperService.WrapperCreationErrorException;
 import cz.cuni.matfyz.server.service.WrapperService.WrapperNotFoundException;
 import cz.cuni.matfyz.server.utils.UserStore;
-import cz.cuni.matfyz.transformations.algorithms.ICAlgorithm;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.List;
 import java.util.Queue;
-import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -249,7 +247,7 @@ public class AsyncJobService {
         return CompletableFuture.completedFuture(result);
     }
 
-    private Mapping createMapping(MappingWrapper mappingWrapper, Id categoryId) {
+    private Mapping createMapping(MappingDetail mappingWrapper, Id categoryId) {
         final var categoryWrapper = categoryService.find(categoryId);
 
         return new MappingBuilder()

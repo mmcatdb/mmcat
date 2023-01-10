@@ -24,7 +24,7 @@ public class SchemaMorphismRepository {
             var statement = connection.prepareStatement("""
                 SELECT *
                 FROM schema_morphism
-                JOIN schema_morphism_in_category ON (schema_morphism_id = schema_morphism.id)
+                JOIN schema_morphism_in_category ON schema_morphism_id = schema_morphism.id
                 WHERE schema_category_id = ?;
                 """);
             setId(statement, 1, categoryId);
