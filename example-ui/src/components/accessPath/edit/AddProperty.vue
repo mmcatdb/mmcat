@@ -56,7 +56,7 @@ const isSignatureValid = computed(() => {
     return true;
 });
 
-const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value);
+const isNameValid = computed(() => !(name.value instanceof StaticName) || !!name.value.value || name.value.isAnonymous);
 
 const isNextButtonDisabled = computed(() => {
     switch (state.value) {
