@@ -28,7 +28,8 @@ public class DataSourceRepository {
                 String jsonValue = resultSet.getString("json_value");
                 output.set(new DataSource.Builder().fromJSON(id, jsonValue));
             }
-        });
+        },
+        "Data source with id: {} not found.", id);
     }
 
     public List<DataSource> findAll() {

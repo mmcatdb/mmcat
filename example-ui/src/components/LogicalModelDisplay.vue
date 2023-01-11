@@ -1,37 +1,20 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import {  } from 'vue';
 import type { LogicalModelInfo } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import type { DatabaseInfo } from '@/types/database';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { useRoute } from 'vue-router';
 
-export default defineComponent({
-    components: {
-        CleverRouterLink,
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        logicalModel: {
-            type: Object as () => LogicalModelInfo,
-            required: true
-        },
-        database: {
-            type: Object as () => DatabaseInfo,
-            required: false,
-            default: undefined
-        }
-    },
-    data() {
-        return {
+type LogicalModelDisplayProps = {
+    logicalModel: LogicalModelInfo;
+    database?: DatabaseInfo;
+};
 
-        };
-    },
-    methods: {
+defineProps<LogicalModelDisplayProps>();
 
-    }
-});
+const route = useRoute();
 </script>
 
 <template>
@@ -47,8 +30,7 @@ export default defineComponent({
                 v-if="database"
                 label="Database:"
             >
-                <RouterLink :to="{ name: 'database', params: { id: database.id } }">
-                    <!--TODO-->
+                <RouterLink :to="{ name: 'database', params: { id: database.id }, query: { categoryId: route.params.categoryId } }">
                     {{ database.label }}
                 </RouterLink>
             </ValueRow>

@@ -128,11 +128,11 @@ public abstract class DatabaseWrapper {
         }
     }
 
-    public static <T, I, F> List<T> joinMultiple(RepositoryPredicateFunction<I, F> predicateFunction, RepositoryTransformFunction<T, I, F> transformFunction, List<I> inputs, List<F> objects) {
+    public static <T, I, F> List<T> joinMultiple(RepositoryPredicateFunction<I, F> predicateFunction, RepositoryTransformFunction<T, I, F> transformFunction, List<I> inputs, List<F> objects, Function<I, String> errorMessage) {
         return inputs.stream().map((I input) -> {
             final var result = objects.stream().filter((F object) -> predicateFunction.execute(input, object)).findFirst();
             if (!result.isPresent())
-                throw new SecondaryObjectNotFoundException("");
+                throw new SecondaryObjectNotFoundException(errorMessage.apply(input));
 
             return transformFunction.execute(input, result.get());
         }).toList();

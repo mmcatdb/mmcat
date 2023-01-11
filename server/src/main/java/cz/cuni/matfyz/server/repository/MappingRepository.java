@@ -8,7 +8,6 @@ import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
-import cz.cuni.matfyz.server.exception.RepositoryException;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
@@ -38,7 +37,7 @@ public class MappingRepository {
         }
     }
 
-    public MappingWrapper find(Id id) throws RepositoryException {
+    public MappingWrapper find(Id id) {
         final RawMappingWrapper rawMapping = DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE id = ?;");
             setId(statement, 1, id);
@@ -53,7 +52,7 @@ public class MappingRepository {
 
                 output.set(new RawMappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
             }
-        }, "Mapping with id: {} not found.", id);
+        }, "Mapping with id: %s not found.", id);
 
         return DatabaseWrapper.join(
             mapping -> mapping.toMapping(objectRepository.find(mapping.rootObjectId)),
@@ -61,7 +60,7 @@ public class MappingRepository {
         );
     }
 
-    public List<MappingWrapper> findAll(Id logicalModelId) throws RepositoryException {
+    public List<MappingWrapper> findAll(Id logicalModelId) {
         List<RawMappingWrapper> rawMappings = DatabaseWrapper.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
             setId(statement, 1, logicalModelId);
@@ -79,10 +78,11 @@ public class MappingRepository {
 
         final var objects = objectRepository.findAllInLogicalModel(logicalModelId);
         return DatabaseWrapper.joinMultiple(
-            (mapping, rootObject) -> mapping.rootObjectId == rootObject.id,
+            (mapping, rootObject) -> mapping.rootObjectId.equals(rootObject.id),
             (mapping, rootObject) -> mapping.toMapping(rootObject),
             rawMappings,
-            objects
+            objects,
+            mapping -> "Root object with id: " + mapping.rootObjectId + " not found."
         );
     }
 

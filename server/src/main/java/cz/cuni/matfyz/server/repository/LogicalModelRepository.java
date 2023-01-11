@@ -49,7 +49,8 @@ public class LogicalModelRepository {
 
                 output.set(new LogicalModel(foundId, categoryId, databaseId, jsonValue));
             }
-        });
+        },
+        "Logical model with id: %s not found.", id);
     }
 
     public Id add(LogicalModelInit logicalModel) {

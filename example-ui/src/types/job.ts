@@ -1,4 +1,6 @@
+import { DataSource, type DataSourceFromServer } from "./dataSource";
 import type { Entity, Id } from "./id";
+import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
 
 export enum JobType {
     ModelToCategory = 'ModelToCategory',
@@ -25,15 +27,23 @@ export class Job implements Entity {
     private constructor(
         public readonly id: Id,
         public readonly categoryId: Id,
-        public readonly logicalModelId: Id | undefined,
-        public readonly dataSourceId: Id | undefined,
+        public readonly logicalModel: LogicalModelInfo | undefined,
+        public readonly dataSource: DataSource | undefined,
         public readonly label: string,
         public readonly type: JobType,
         public status: Status
     ) {}
 
     static fromServer(input: JobFromServer): Job {
-        return new Job(input.id, input.categoryId, input.logicalModelId, input.dataSourceId, input.label, input.type, input.status);
+        return new Job(
+            input.id,
+            input.categoryId,
+            input.logicalModel ? LogicalModelInfo.fromServer(input.logicalModel) : undefined,
+            input.dataSource ? DataSource.fromServer(input.dataSource) : undefined,
+            input.label,
+            input.type,
+            input.status
+        );
     }
 
     setStatus(status: Status) {
@@ -44,8 +54,8 @@ export class Job implements Entity {
 export type JobFromServer = {
     id: Id;
     categoryId: Id;
-    logicalModelId?: Id;
-    dataSourceId?: Id;
+    logicalModel?: LogicalModelInfoFromServer;
+    dataSource?: DataSourceFromServer;
     label: string;
     type: JobType;
     status: Status;

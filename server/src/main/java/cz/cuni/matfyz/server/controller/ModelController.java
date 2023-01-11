@@ -2,7 +2,7 @@ package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.Model;
-import cz.cuni.matfyz.server.entity.ModelView;
+import cz.cuni.matfyz.server.entity.ModelInfo;
 import cz.cuni.matfyz.server.service.ModelService;
 
 import java.util.List;
@@ -25,8 +25,8 @@ public class ModelController {
     private ModelService service;
 
     @GetMapping("/schema-categories/{categoryId}/models")
-    public List<ModelView> getAllModelsInCategory(HttpSession session, @PathVariable Id categoryId) {
-        return service.findAllInCategory(session, categoryId).stream().map(ModelView::new).toList();
+    public List<ModelInfo> getAllModelsInCategory(HttpSession session, @PathVariable Id categoryId) {
+        return service.findAllInCategory(session, categoryId).stream().map(ModelInfo::new).toList();
     }
 
     @GetMapping("/models/{jobId}")

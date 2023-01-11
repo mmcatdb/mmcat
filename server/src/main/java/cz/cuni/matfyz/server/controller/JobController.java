@@ -2,8 +2,12 @@ package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
+import cz.cuni.matfyz.server.entity.job.JobDetail;
 import cz.cuni.matfyz.server.entity.job.JobInit;
+import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.cuni.matfyz.server.service.DataSourceService;
 import cz.cuni.matfyz.server.service.JobService;
+import cz.cuni.matfyz.server.service.LogicalModelService;
 import cz.cuni.matfyz.server.utils.UserStore;
 
 import java.util.List;
@@ -28,41 +32,39 @@ public class JobController {
     @Autowired
     private JobService service;
 
+    @Autowired
+    private LogicalModelService logicalModelService;
+
+    @Autowired
+    private DataSourceService dataSourceService;
+
     @GetMapping("/schema-categories/{categoryId}/jobs")
-    public List<Job> getAllJobsInCategory(@PathVariable Id categoryId) {
-        return service.findAllInCategory(categoryId);
+    public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId) {
+        final var jobs = service.findAllInCategory(categoryId);
+
+        return jobs.stream().map(this::jobToJobDetail).toList();
     }
 
     @GetMapping("/jobs/{id}")
-    public Job getJob(@PathVariable Id id) {
-        Job job = service.find(id);
-        if (job != null)
-            return job;
-        
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    public JobDetail getJob(@PathVariable Id id) {
+        return jobToJobDetail(service.find(id));
     }
 
     @PostMapping("/jobs")
-    public Job createNewJob(@RequestBody JobInit jobInit) {
-        Job newJob = service.createNew(new Job.Builder().fromInit(jobInit));
-        if (newJob != null)
-            return newJob;
-        
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    public JobDetail createNewJob(@RequestBody JobInit jobInit) {
+        return jobToJobDetail(service.createNew(new Job.Builder().fromInit(jobInit)));
     }
 
     @PostMapping("/jobs/{id}/start")
-    public Job startJob(@PathVariable Id id, HttpSession session) {
+    public JobDetail startJob(@PathVariable Id id, HttpSession session) {
         final var job = service.find(id);
-        if (job == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job " + id + " not foud.");
-
+    
         final var store = UserStore.fromSession(session);
         final var startedJob = service.start(job, store);
         if (startedJob == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job " + id + " could not be started.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Job " + id + " could not be started.");
 
-        return startedJob;
+        return jobToJobDetail(startedJob);
     }
 
     @DeleteMapping("/jobs/{id}")
@@ -73,16 +75,23 @@ public class JobController {
     }
 
     @PostMapping("/jobs/{id}/cancel")
-    public Job cancelJob(@PathVariable Id id, HttpSession session) {
+    public JobDetail cancelJob(@PathVariable Id id, HttpSession session) {
         final var job = service.find(id);
-        if (job == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job " + id + " not foud.");
 
         final var canceledJob = service.cancel(job);
         if (canceledJob == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job " + id + " could not be canceled.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Job " + id + " could not be canceled.");
 
-        return canceledJob;
+        return jobToJobDetail(canceledJob);
+    }
+
+    private JobDetail jobToJobDetail(Job job) {
+        return DatabaseWrapper.join(
+            rawJob -> rawJob.logicalModelId != null && !rawJob.logicalModelId.isEmpty()
+                ? new JobDetail(rawJob, logicalModelService.find(rawJob.logicalModelId).toInfo())
+                : new JobDetail(rawJob, dataSourceService.find(rawJob.dataSourceId)),
+            job
+        );
     }
 
 }
