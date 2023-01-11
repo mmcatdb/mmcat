@@ -140,7 +140,7 @@ class ServerApplicationTests {
         AbstractICWrapper icWrapper = wrapperService.createICWrapper(database);
 
         var process = new InstanceToDatabase();
-        process.input(mapping, instance, ddlWrapper, pushWrapper, icWrapper);
+        process.input(mapping, List.of(mapping), instance, ddlWrapper, pushWrapper, icWrapper);
 
         process.run();
 
