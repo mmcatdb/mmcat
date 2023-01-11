@@ -64,9 +64,6 @@ async function createJob() {
     <div class="newJob">
         <h2>Create a new job</h2>
         <ValueContainer>
-            <ValueRow label="Label:">
-                <input v-model="jobName" />
-            </ValueRow>
             <ValueRow label="Type:">
                 <select v-model="jobType">
                     <option
@@ -77,6 +74,9 @@ async function createJob() {
                         {{ availableType.label }}
                     </option>
                 </select>
+            </ValueRow>
+            <ValueRow label="Label:">
+                <input v-model="jobName" />
             </ValueRow>
             <ValueRow
                 v-if="jobType === JobType.JsonLdToCategory"

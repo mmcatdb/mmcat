@@ -1,31 +1,22 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Graph } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
+import { ref } from 'vue';
 import GraphDisplay from './GraphDisplay.vue';
 import EditorForSchemaCategory from './edit/EditorForSchemaCategory.vue';
 import type { SchemaCategory } from '@/types/schema';
 
-export default defineComponent({
-    components: {
-        GraphDisplay,
-        EditorForSchemaCategory
-    },
-    data() {
-        return {
-            graph: null as Graph | null
-        };
-    },
-    methods: {
-        cytoscapeCreated(graph: Graph) {
-            this.graph = graph;
-        },
-        schemaCategorySaved(schemaCategory: SchemaCategory) {
-            this.graph = null;
-            const graphDisplay = this.$refs.graphDisplay as InstanceType<typeof GraphDisplay>;
-            graphDisplay.updateSchema(schemaCategory);
-        }
-    }
-});
+const graph = ref<Graph>();
+
+function cytoscapeCreated(newGraph: Graph) {
+    graph.value = newGraph;
+}
+
+const graphDisplay = ref<InstanceType<typeof GraphDisplay>>();
+
+function schemaCategorySaved(schemaCategory: SchemaCategory) {
+    graph.value = undefined;
+    graphDisplay.value?.updateSchema(schemaCategory);
+}
 </script>
 
 <template>

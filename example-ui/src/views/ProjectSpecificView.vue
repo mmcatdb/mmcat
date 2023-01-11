@@ -3,6 +3,7 @@ import NavigationContent from '@/components/layout/project-specific/NavigationCo
 import type { Id } from '@/types/id';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
+import { categoryIdKey } from '@/utils/globalSchemaSettings';
 import { onMounted, provide, ref } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
 
@@ -12,7 +13,7 @@ type ProjectSpecificViewProps = {
 
 const props = defineProps<ProjectSpecificViewProps>();
 
-provide('categoryId', props.categoryId);
+provide(categoryIdKey, ref(props.categoryId));
 
 const schemaCategoryInfo = ref<SchemaCategoryInfo>();
 const router = useRouter();

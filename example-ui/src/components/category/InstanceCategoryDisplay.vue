@@ -7,7 +7,6 @@ import GraphDisplay from './GraphDisplay.vue';
 import type { SchemaMorphism, SchemaObject } from '@/types/schema';
 import InstanceMorphismDisplay from './InstanceMorphismDisplay.vue';
 
-
 const graph = ref<Graph>();
 const selectedNode = ref<Node>();
 const selectedEdge = ref<Edge>();
