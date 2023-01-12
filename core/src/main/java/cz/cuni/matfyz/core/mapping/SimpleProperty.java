@@ -13,11 +13,6 @@ import org.json.JSONObject;
  */
 public class SimpleProperty extends AccessPath {
 
-    @Override
-    public IContext context() {
-        return null;
-    }
-    
     private final SimpleValue value;
     
     public SimpleValue value() {

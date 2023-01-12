@@ -10,7 +10,6 @@ import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
-import cz.cuni.matfyz.core.mapping.IContext;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.Name;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
@@ -245,7 +244,7 @@ public class MTCAlgorithm {
         
         for (AccessPath subpath : complexProperty.subpaths()) {
             output.addAll(process(subpath.name()));
-            output.addAll(process(subpath.context(), subpath));
+            output.addAll(process(subpath));
         }
         
         return output;
@@ -264,19 +263,12 @@ public class MTCAlgorithm {
             return Collections.<Child>emptyList();
     }
     
-    private static Collection<Child> process(IContext context, AccessPath accessPath) {
+    private static Collection<Child> process(AccessPath accessPath) {
         if (accessPath instanceof SimpleProperty simpleProperty) {
-            final Signature contextSignature = context instanceof Signature signature ? signature : Signature.createEmpty();
-            final Signature newSignature = simpleProperty.value().signature().concatenate(contextSignature);
-            
-            return List.of(new Child(newSignature, accessPath));
+            return List.of(new Child(simpleProperty.signature(), accessPath));
         }
-        
-        if (accessPath instanceof ComplexProperty complexProperty) {
-            if (context instanceof Signature signature)
-                return List.of(new Child(signature, complexProperty));
-            else
-                return children(complexProperty);
+        else if (accessPath instanceof ComplexProperty complexProperty) {
+            return List.of(new Child(complexProperty.signature(), complexProperty));
         }
         
         throw new UnsupportedOperationException("Process");

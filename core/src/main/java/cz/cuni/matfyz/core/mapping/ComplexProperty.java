@@ -30,13 +30,8 @@ public class ComplexProperty extends AccessPath {
         return signature;
     }
     
-    @Override
-    public IContext context() {
-        return signature;
-    }
-    
     public boolean isAuxiliary() {
-        return context() instanceof Signature contextSignature && contextSignature.isNull();
+        return signature.isNull();
     }
 
     public boolean hasDynamicKeys() {
@@ -92,7 +87,7 @@ public class ComplexProperty extends AccessPath {
      * @return the closest subpath with given signature (or null if none such exists).
      */
     public AccessPath getSubpathBySignature(Signature signature) {
-        if (context().equals(signature))
+        if (this.signature.equals(signature))
             return this;
         
         // If M = null, a leaf L with L.value = epsion is returned.
@@ -180,7 +175,7 @@ public class ComplexProperty extends AccessPath {
         StringBuilder builder = new StringBuilder();
         builder.append(name).append(": ");
         if (!isAuxiliary())
-            builder.append(context()).append(" ");
+            builder.append(signature).append(" ");
         
         builder.append("{\n").append(subpathBuilder).append("}");
         

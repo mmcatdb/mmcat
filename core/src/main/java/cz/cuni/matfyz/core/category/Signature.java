@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.core.category;
 
-import cz.cuni.matfyz.core.mapping.IContext;
 import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.JSONConvertible;
 import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
@@ -28,7 +27,7 @@ import org.json.JSONObject;
  * @author jachym.bartik
  */
 @JsonSerialize(using = Signature.Serializer.class)
-public class Signature implements Serializable, Comparable<Signature>, IContext, JSONConvertible {
+public class Signature implements Serializable, Comparable<Signature>, JSONConvertible {
 
     private final int[] ids;
     private final boolean isNull;
