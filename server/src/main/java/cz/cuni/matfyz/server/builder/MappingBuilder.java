@@ -33,7 +33,7 @@ public class MappingBuilder {
         final var rootObject = builder.getObject(mappingWrapper.rootObject.id);
         SchemaMorphism rootMorphism = null;
         
-        return new Mapping.Builder().fromJSON(category, rootObject, rootMorphism, mappingWrapper.mappingJsonValue);
+        return new Mapping.Builder().fromJSON(category, rootObject, rootMorphism, mappingWrapper.jsonValue);
     }
 
 }

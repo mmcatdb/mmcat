@@ -8,6 +8,5 @@ import cz.cuni.matfyz.server.entity.Id;
 public record MappingInit(
     Id logicalModelId,
     Id rootObjectId,
-    String mappingJsonValue,
     String jsonValue
 ) {}

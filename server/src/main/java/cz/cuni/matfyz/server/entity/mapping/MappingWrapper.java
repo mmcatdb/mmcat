@@ -11,14 +11,12 @@ public class MappingWrapper extends Entity {
 
     public final Id logicalModelId;
     public final SchemaObjectWrapper rootObject;
-    public final String mappingJsonValue;
     public final String jsonValue;
 
-    public MappingWrapper(Id id, Id logicalModelId, SchemaObjectWrapper rootObject, String mappingJsonValue, String jsonValue) {
+    public MappingWrapper(Id id, Id logicalModelId, SchemaObjectWrapper rootObject, String jsonValue) {
         super(id);
         this.logicalModelId = logicalModelId;
         this.rootObject = rootObject;
-        this.mappingJsonValue = mappingJsonValue;
         this.jsonValue = jsonValue;
     }
 

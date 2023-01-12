@@ -22,12 +22,11 @@ export class Mapping implements Entity {
     ) {}
 
     static fromServer(input: MappingFromServer): Mapping {
-        const json = JSON.parse(input.jsonValue) as { label: string };
-        const mappingJson = JSON.parse(input.mappingJsonValue) as MappingJSON;
+        const mappingJson = JSON.parse(input.jsonValue) as MappingJSON;
 
         return new Mapping(
             input.id,
-            json.label,
+            mappingJson.kindName,
             input.logicalModelId,
             SchemaObject.fromServer(input.rootObject),
             SignatureId.fromServer(mappingJson.primaryKey),
@@ -41,13 +40,11 @@ export type MappingFromServer = {
     logicalModelId: Id;
     rootObject: SchemaObjectFromServer;
     jsonValue: string;
-    mappingJsonValue: string;
 };
 
 export type MappingInit = {
     logicalModelId: Id;
     rootObjectId: Id;
-    mappingJsonValue: string;
     jsonValue: string;
 };
 

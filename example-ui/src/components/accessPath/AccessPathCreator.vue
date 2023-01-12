@@ -58,9 +58,6 @@ async function createMapping(primaryKey: SignatureId) {
         logicalModelId: selectedLogicalModel.value.id,
         rootObjectId: accessPath.value.node.schemaObject.id,
         jsonValue: JSON.stringify({
-            label: accessPath.value.name.toString()
-        }),
-        mappingJsonValue: JSON.stringify({
             kindName: accessPath.value.name.toString(),
             primaryKey: selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures,
             accessPath: accessPath.value.toJSON()

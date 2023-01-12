@@ -468,7 +468,7 @@ INSERT INTO data_source (json_value)
 VALUES
     ('{
         "url": "http://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld",
-        "label": "test2",
+        "label": "Czech business registry",
         "type": "JsonLdStore"
     }');
 
@@ -493,18 +493,21 @@ CREATE TABLE mapping (
     id SERIAL PRIMARY KEY,
     logical_model_id INTEGER NOT NULL REFERENCES logical_model,
     root_object_id INTEGER NOT NULL REFERENCES schema_object,
-    mapping_json_value JSONB NOT NULL,
     json_value JSONB NOT NULL
 );
 
 -- databázový systém může obsahovat více databázových instancí
     -- - v jedné db instanci musí být jména kindů atd unikátní
 
-INSERT INTO mapping (logical_model_id, root_object_id, mapping_json_value, json_value)
+-- Property kindName is supposed to have the same value as the static name of the root property.
+-- The reasons are that:
+--      a) Sometimes we want to show only the label of the mapping, so we use the kindName for it without the necessity to access whole access path.
+--      b) Some display components on the frontent use only the access path, so the information should be there.
+INSERT INTO mapping (logical_model_id, root_object_id, json_value)
 VALUES
-(1, 4, '{"primaryKey": [[4], [1, 3, 2]], "kindName": "order",
+    (1, 4, '{"primaryKey": [[4], [1, 3, 2]], "kindName": "order",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "Order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "_id", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
@@ -533,34 +536,31 @@ VALUES
                     ], "signature": [9], "isAuxiliary": false
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "Order"}'
+        }}'
     ),
     (2, 1, '{"primaryKey": [[1]], "kindName": "customer",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "Customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "Customer"}'
+        }}'
     ),
     (3, 16, '{"primaryKey": [[4]], "kindName": "app_customer",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "app_customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [4]}, "_class": "SimpleProperty"
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "full_name", "_class": "StaticName"}, "value": {"signature": [5]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "CustomerTable"}'
+        }}'
     ),
     (3, 19, '{"primaryKey": [[1]], "kindName": "app_contact",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "app_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
                 }, {
@@ -569,24 +569,22 @@ VALUES
                     "name": {"type": "STATIC_NAME", "value": "type", "_class": "StaticName"}, "value": {"signature": [3]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "ContactTable"}'
+        }}'
     ),
     (3, 23, '{"primaryKey": [[4, 7], [1, 6]], "kindName": "app_customer_contact",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "customer_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "app_customer_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [4, 7]}, "_class": "SimpleProperty"
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "contact_id", "_class": "StaticName"}, "value": {"signature": [1, 6]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "CustomerContactTable"}'
+        }}'
     ),
     (3, 24, '{"primaryKey": [[13]], "kindName": "app_order",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "app_order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [13]}, "_class": "SimpleProperty"
                 }, {
@@ -603,12 +601,11 @@ VALUES
                     "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [4, 14]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "OrderTable"}'
+        }}'
     ),
     (3, 31, '{"primaryKey": [[15]], "kindName": "app_product",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "product", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "app_product", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [15]}, "_class": "SimpleProperty"
                 }, {
@@ -617,12 +614,11 @@ VALUES
                     "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": [17]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "ProductTable"}'
+        }}'
     ),
     (3, 35, '{"primaryKey": [[13, 21], [15, 20]], "kindName": "app_order_item",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "order_item", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC_NAME", "value": "app_order_item", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "order_id", "_class": "StaticName"}, "value": {"signature": [13, 21]}, "_class": "SimpleProperty"
                 }, {
@@ -633,8 +629,7 @@ VALUES
                     "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": [18]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "OrderItemTable"}'
+        }}'
     ),
     (4, 24, '{"primaryKey": [[13]], "kindName": "order",
         "accessPath": {
@@ -677,8 +672,7 @@ VALUES
                     ], "signature": [-21], "isAuxiliary": false
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "OrderDocument"}'
+        }}'
     ),
     (5, 47, '{"primaryKey": [[11]], "kindName": "order",
         "accessPath": {
@@ -703,8 +697,7 @@ VALUES
                     ], "signature": [-12], "isAuxiliary": false
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "Order"}'
+        }}'
     ),
     (6, 38, '{"primaryKey": [[2]], "kindName": "customer",
         "accessPath": {
@@ -717,8 +710,7 @@ VALUES
                     "name": {"type": "STATIC_NAME", "value": "surname", "_class": "StaticName"}, "value": {"signature": [3]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "Customer"}'
+        }}'
     ),
     (7, 42, '{"primaryKey": [[2, 4], [2, 5]], "kindName": "friends",
         "accessPath": {
@@ -729,8 +721,7 @@ VALUES
                     "name": {"type": "STATIC_NAME", "value": "second_customer_id", "_class": "StaticName"}, "value": {"signature": [2, 5]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "Friends"}'
+        }}'
     ),
     (7, 43, '{"primaryKey": [[7], [8], [2, 6]], "kindName": "contact",
         "accessPath": {
@@ -743,8 +734,7 @@ VALUES
                     "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [2, 6]}, "_class": "SimpleProperty"
                 }
             ], "signature": [], "isAuxiliary": true
-        }}',
-        '{"label": "Contacts"}'
+        }}'
     );
 
 CREATE TABLE job (

@@ -29,11 +29,10 @@ public class MappingRepository {
         Id id,
         Id logicalModelId,
         Id rootObjectId,
-        String mappingJsonValue,
         String jsonValue
     ) {
         public MappingWrapper toMapping(SchemaObjectWrapper object) {
-            return new MappingWrapper(id, logicalModelId, object, mappingJsonValue, jsonValue);
+            return new MappingWrapper(id, logicalModelId, object, jsonValue);
         }
     }
 
@@ -47,10 +46,9 @@ public class MappingRepository {
                 Id foundId = getId(resultSet, "id");
                 Id logicalModelId = getId(resultSet, "logical_model_id");
                 Id rootObjectId = getId(resultSet, "root_object_id");
-                String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.set(new RawMappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
+                output.set(new RawMappingWrapper(foundId, logicalModelId, rootObjectId, jsonValue));
             }
         }, "Mapping with id: %s not found.", id);
 
@@ -69,10 +67,9 @@ public class MappingRepository {
             while (resultSet.next()) {
                 Id foundId = getId(resultSet, "id");
                 Id rootObjectId = getId(resultSet, "root_object_id");
-                String mappingJsonValue = resultSet.getString("mapping_json_value");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.add(new RawMappingWrapper(foundId, logicalModelId, rootObjectId, mappingJsonValue, jsonValue));
+                output.add(new RawMappingWrapper(foundId, logicalModelId, rootObjectId, jsonValue));
             }
         });
 
@@ -104,15 +101,14 @@ public class MappingRepository {
     public Id add(MappingInit mapping) {
         return DatabaseWrapper.get((connection, output) -> {
             var statement = connection.prepareStatement("""
-                INSERT INTO mapping (logical_model_id, root_object_id, mapping_json_value, json_value)
-                VALUES (?, ?, ?::jsonb, ?::jsonb);
+                INSERT INTO mapping (logical_model_id, root_object_id, json_value)
+                VALUES (?, ?, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
             setId(statement, 1, mapping.logicalModelId());
             setId(statement, 2, mapping.rootObjectId());
-            statement.setString(3, mapping.mappingJsonValue());
-            statement.setString(4, mapping.jsonValue());
+            statement.setString(3, mapping.jsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
