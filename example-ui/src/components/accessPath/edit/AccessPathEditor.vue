@@ -34,11 +34,11 @@ const props = defineProps<AccessPathEditor>();
 
 const emit = defineEmits([ 'finish' ]);
 
-const ids = props.rootProperty.node.schemaObject.ids;
+const ids = props.rootProperty.node.schemaObject.ids!;
 
 const label = ref('');
 const state = ref<StateValue>({ type: State.Default });
-const primaryKey = ref((ids && ids.isSignatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty());
+const primaryKey = ref((ids.isSignatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty());
 
 function editPropertyClicked(property: GraphChildProperty) {
     state.value = {

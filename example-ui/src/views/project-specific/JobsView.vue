@@ -38,7 +38,10 @@ async function fetchJobs() {
             v-if="jobs"
             class="jobs"
         >
-            <NewJob @new-job="addNewJob" />
+            <NewJob
+                :key="jobs.length"
+                @new-job="addNewJob"
+            />
             <div
                 v-for="job in jobs"
                 :key="job.id"

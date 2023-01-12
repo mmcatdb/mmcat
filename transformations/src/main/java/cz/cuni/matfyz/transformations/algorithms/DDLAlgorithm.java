@@ -37,12 +37,17 @@ public class DDLAlgorithm {
         this.category = instance;
         this.wrapper = wrapper;
     }
+
+    record StackElement(
+        Set<String> names,
+        AccessPath accessPath
+    ) {}
     
     public DDLStatement algorithm() {
         wrapper.setKindName(mapping.kindName());
         
         if (!wrapper.isSchemaLess()) {
-            Deque<StackPair> masterStack = new LinkedList<>();
+            Deque<StackElement> masterStack = new LinkedList<>();
             addSubpathsToStack(masterStack, mapping.accessPath(), Set.of(EMPTY_NAME));
 
             while (!masterStack.isEmpty())
@@ -52,17 +57,17 @@ public class DDLAlgorithm {
         return wrapper.createDDLStatement();
     }
 
-    private void addSubpathsToStack(Deque<StackPair> masterStack, ComplexProperty path, Set<String> names) {
+    private void addSubpathsToStack(Deque<StackElement> masterStack, ComplexProperty path, Set<String> names) {
         for (AccessPath subpath : path.subpaths())
-            masterStack.add(new StackPair(names, subpath));
+            masterStack.add(new StackElement(names, subpath));
     }
     
-    private void processTopOfStack(Deque<StackPair> masterStack) {
-        StackPair pair = masterStack.pop();
-        AccessPath path = pair.accessPath;
+    private void processTopOfStack(Deque<StackElement> masterStack) {
+        StackElement element = masterStack.pop();
+        AccessPath path = element.accessPath();
         
         Set<String> propertyName = determinePropertyName(path);
-        Set<String> names = concatenate(pair.names, propertyName);
+        Set<String> names = concatenate(element.names(), propertyName);
         
         if (path instanceof SimpleProperty simpleProperty) {
             processPath(simpleProperty, names);
@@ -107,6 +112,12 @@ public class DDLAlgorithm {
     }
     
     private void processPath(SimpleProperty property, Set<String> names) {
+        // If the signature is empty, it is a self-identifier. Then it has to have a static name.
+        if (property.signature().isEmpty()) {
+            wrapper.addSimpleProperty(names, true);
+            return;
+        }
+
         var morphism = category.getMorphism(property.value().signature());
         
         if (morphism.isArray() && property.name() instanceof StaticName)

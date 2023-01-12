@@ -6,14 +6,12 @@ import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.core.instance.MappingRow;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.statements.DMLStatement;
 
@@ -45,9 +43,10 @@ public class DMLAlgorithm {
     }
     
     public List<DMLStatement> algorithm() {
-        return mapping.hasRootMorphism()
-            ? processWithMorphism(mapping.rootMorphism()) // K with root morphism
-            : processWithObject(mapping.rootObject()); // K with root object
+        //return mapping.hasRootMorphism()
+        //    ? processWithMorphism(mapping.rootMorphism()) // K with root morphism
+        //    : processWithObject(mapping.rootObject()); // K with root object
+        return processWithObject(mapping.rootObject());
     }
 
     private List<DMLStatement> processWithObject(SchemaObject object) {
@@ -64,6 +63,7 @@ public class DMLAlgorithm {
         return output;
     }
 
+    /*
     private List<DMLStatement> processWithMorphism(SchemaMorphism morphism) {
         InstanceMorphism instanceMorphism = category.getMorphism(morphism);
         Set<MappingRow> mappingRows = fetchRelations(instanceMorphism);
@@ -83,14 +83,17 @@ public class DMLAlgorithm {
 
         throw new UnsupportedOperationException("Process with morphism");
     }
+    */
 
     private Set<DomainRow> fetchSuperIds(InstanceObject object) {
         return object.allRowsToSet();
     }
 
+    /*
     private Set<MappingRow> fetchRelations(InstanceMorphism morphism) {
         return morphism.allMappings();
     }
+     */
 
     private DMLStatement buildStatement(Deque<DMLStackTriple> masterStack) {
         wrapper.clear();
@@ -129,6 +132,17 @@ public class DMLAlgorithm {
             }
             else {
                 // Get all mapping rows that have signature of this subpath and originate in given row.
+                if (subpath.signature().isEmpty()) {
+                    // Self-identifier.
+                    if (!(subpath.name() instanceof StaticName staticName))
+                        continue; // This should not happen.
+                    
+                    String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                    output.add(new NameValuePair(name, row.getValue(Signature.createEmpty())));
+
+                    continue;
+                }
+
                 InstanceMorphism morphism = category.getMorphism(subpath.signature());
                 boolean isObjectWithDynamicKeys = subpath instanceof ComplexProperty complexSubpath && complexSubpath.hasDynamicKeys();
                 boolean showIndex = morphism.isArray() && !isObjectWithDynamicKeys;

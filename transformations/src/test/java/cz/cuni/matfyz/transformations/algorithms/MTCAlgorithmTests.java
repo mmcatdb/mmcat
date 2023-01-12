@@ -145,4 +145,17 @@ public class MTCAlgorithmTests {
         )
             .testAlgorithm();
     }
+
+    @Test
+    public void selfIdentifierTest() {
+        final var schemaV3 = data.createDefaultV3SchemaCategory();
+
+        new MTCAlgorithmTestBase("12SelfIdentifierTest.json").setAll(
+            schemaV3,
+            schemaV3.getObject(data.orderKey),
+            data.path_orderV3Root(),
+            data.expectedInstance_selfIdentifier(schemaV3)
+        )
+            .testAlgorithm();
+    }
 }

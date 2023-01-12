@@ -45,6 +45,12 @@ function updateInnerValue() {
         v-if="ids.isSignatures && ids.signatureIds.length === 1"
         :signature-id="ids.signatureIds[0]"
     />
+    <span
+        v-else-if="!ids.isSignatures"
+        class="signature-span"
+    >
+        {{ ids.type }}
+    </span>
     <div v-else>
         <!--
         <RadioInput

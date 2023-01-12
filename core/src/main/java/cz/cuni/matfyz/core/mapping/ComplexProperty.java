@@ -106,9 +106,10 @@ public class ComplexProperty extends AccessPath {
      * @return the closest subpath with given signature (or null if none such exists).
      */
     public AccessPath getSubpathBySignature(Signature signature) {
+        /*
         if (this.signature.equals(signature))
             return this;
-        
+        */
         // If M = null, a leaf L with L.value = epsion is returned.
         if (signature == null) {
             final var directSubpath = getDirectSubpath(Signature.createEmpty());

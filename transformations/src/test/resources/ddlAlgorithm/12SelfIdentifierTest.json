@@ -1,0 +1,7 @@
+[
+    "setKindName(order_v3)",
+    "isSchemaLess()",
+    "createDDLStatement()",
+    "addSimpleProperty([ id ], true)",
+    "addSimpleProperty([ number ], true)"
+]

@@ -106,6 +106,26 @@ public class TestData {
         return schema;
     }
 
+    public SchemaCategory createDefaultV3SchemaCategory() {
+        var schema = new SchemaCategory();
+        var order = createSchemaObject(
+            orderKey,
+            "OrderV3",
+            ObjectIds.createValue()
+        );
+        schema.addObject(order);
+
+        var number = createSchemaObject(
+            numberKey,
+            "NumberV3",
+            ObjectIds.createValue()
+        );
+        schema.addObject(number);
+        addMorphismWithDual(schema, orderToNumber, order, number, Cardinality.ONE_TO_ONE);
+
+        return schema;
+    }
+
     private SchemaObject buildOrder(SchemaCategory schema) {
         var order = createSchemaObject(
             orderKey,
@@ -625,6 +645,21 @@ public class TestData {
         }
     }
 
+    public InstanceCategory expectedInstance_selfIdentifier(SchemaCategory schema) {
+        InstanceCategory instance = buildInstanceScenario(schema);
+        var builder = new TestInstanceCategoryBuilder(instance);
+        
+        var order1 = builder.value(Signature.createEmpty(), "#2043").object(orderKey);
+        var number1 = builder.value(Signature.createEmpty(), "2043").object(numberKey);
+        builder.morphism(orderToNumber, order1, number1);
+
+        var order2 = builder.value(Signature.createEmpty(), "#1653").object(orderKey);
+        var number2 = builder.value(Signature.createEmpty(), "1653").object(numberKey);
+        builder.morphism(orderToNumber, order2, number2);
+        
+        return instance;
+    }
+
     public ComplexProperty path_orderRoot() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber)
@@ -709,6 +744,13 @@ public class TestData {
     public ComplexProperty path_customerRoot() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("id", customerToId)
+        );
+    }
+
+    public ComplexProperty path_orderV3Root() {
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
+            new SimpleProperty("id", Signature.createEmpty()),
+            new SimpleProperty("number", orderToNumber)
         );
     }
 

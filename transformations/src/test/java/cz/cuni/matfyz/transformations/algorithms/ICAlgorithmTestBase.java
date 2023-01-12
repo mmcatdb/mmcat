@@ -99,10 +99,9 @@ public class ICAlgorithmTestBase {
     }
 
     private static List<Signature> primaryKeyFromObject(SchemaObject object) {
-        if (object.ids().isSignatures())
-            return object.ids().toSignatureIds().first().signatures().stream().toList();
-
-        throw new UnsupportedOperationException("Primary key cannot be empty!");
+        return object.ids().isSignatures()
+            ? object.ids().toSignatureIds().first().signatures().stream().toList()
+            : List.of(Signature.createEmpty());
     }
 
 }

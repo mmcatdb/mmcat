@@ -60,11 +60,13 @@ function cancel() {
     emit('cancel');
 }
 
+const isSelfIdentifier = computed(() => signature.value.isEmpty && !signature.value.sequence.lastNode.schemaObject.ids!.isSignatures);
+
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
         return signature.value.isEmpty;
     if (signature.value.isEmpty)
-        return !(signature.value.sequence.lastNode.schemaObject.ids && signature.value.sequence.lastNode.schemaObject.ids.isSignatures);
+        return !(signature.value.sequence.lastNode.schemaObject.ids!.isSignatures);
     if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
@@ -94,6 +96,9 @@ function determinePropertyType(node: Node): PropertyType | null {
 
     if (isAuxiliary.value)
         return PropertyType.Complex;
+
+    if (isSelfIdentifier.value)
+        return PropertyType.Simple;
 
     return node.determinedPropertyType;
 }
@@ -187,6 +192,7 @@ function isAuxiliaryClicked() {
                     :graph="graph"
                     :database="database"
                     :root-node="property.parentNode"
+                    :is-self-identifier="isSelfIdentifier"
                 />
             </ValueRow>
         </ValueContainer>

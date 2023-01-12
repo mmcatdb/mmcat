@@ -156,4 +156,19 @@ public class DDLAlgorithmTests {
         )
             .testAlgorithm();
     }
+
+    @Test
+    public void selfIdentifierTest() {
+        final var schemaV3 = data.createDefaultV3SchemaCategory();
+
+        new DDLAlgorithmTestBase("12SelfIdentifierTest.json").setAll(
+            schemaV3,
+            schemaV3.getObject(data.orderKey),
+            "order_v3",
+            data.path_orderV3Root(),
+            data.expectedInstance_selfIdentifier(schemaV3)
+        )
+            .testAlgorithm();
+    }
+
 }

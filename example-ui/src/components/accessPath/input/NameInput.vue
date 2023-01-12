@@ -18,6 +18,7 @@ type NameInputProps = {
     database: DatabaseWithConfiguration;
     rootNode: Node;
     modelValue: Name;
+    isSelfIdentifier: boolean;
     disabled?: boolean;
 };
 
@@ -92,7 +93,7 @@ function updateInnerValue() {
         v-model="type"
         type="radio"
         :value="NameType.Dynamic"
-        :disabled="disabled || !database.configuration.isDynamicNamingAllowed"
+        :disabled="disabled || !database.configuration.isDynamicNamingAllowed || isSelfIdentifier"
         @change="updateInnerValue"
     />
     <label
@@ -111,7 +112,7 @@ function updateInnerValue() {
         v-model="type"
         type="radio"
         :value="NameType.Anonymous"
-        :disabled="disabled || !database.configuration.isAnonymousNamingAllowed"
+        :disabled="disabled || !database.configuration.isAnonymousNamingAllowed || isSelfIdentifier"
         @change="updateInnerValue"
     />
     <label

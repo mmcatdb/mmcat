@@ -12,11 +12,9 @@ import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.schema.SignatureId;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.Set;
 
 /**
  * @author jachymb.bartik

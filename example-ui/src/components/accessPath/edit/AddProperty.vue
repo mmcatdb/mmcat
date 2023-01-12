@@ -48,11 +48,13 @@ function cancel() {
     emit('cancel');
 }
 
+const isSelfIdentifier = computed(() => signature.value.isEmpty && !signature.value.sequence.lastNode.schemaObject.ids!.isSignatures);
+
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
         return signature.value.isEmpty;
     if (signature.value.isEmpty)
-        return !(signature.value.sequence.lastNode.schemaObject.ids && signature.value.sequence.lastNode.schemaObject.ids.isSignatures);
+        return !signature.value.sequence.lastNode.schemaObject.ids!.isSignatures;
     if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
@@ -74,7 +76,8 @@ const isNextButtonDisabled = computed(() => {
 
 function confirmSignature() {
     const node = signature.value.sequence.lastNode;
-    name.value = StaticName.fromString(node.schemaObject.label.toLowerCase());
+    const staticNameString = (!signature.value.isEmpty || node.schemaObject.ids!.isSignatures) ? node.schemaObject.label.toLowerCase() : 'id';
+    name.value = StaticName.fromString(staticNameString);
     const newType = determinePropertyType(node);
 
     if (newType !== null) {
@@ -94,6 +97,9 @@ function determinePropertyType(node: Node): PropertyType | null {
 
     if (isAuxiliary.value)
         return PropertyType.Complex;
+
+    if (isSelfIdentifier.value)
+        return PropertyType.Simple;
 
     return node.determinedPropertyType;
 }
@@ -173,6 +179,7 @@ function isAuxiliaryClicked() {
                     :graph="graph"
                     :database="database"
                     :root-node="parentProperty.node"
+                    :is-self-identifier="isSelfIdentifier"
                 />
             </ValueRow>
         </ValueContainer>

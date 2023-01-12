@@ -81,4 +81,17 @@ public class ICAlgorithmTests {
 
     // TODO complex reference
 
+    @Test
+    public void selfIdentifierTest() {
+        schema = data.createDefaultV3SchemaCategory();
+        mappings = new TreeMap<>();
+
+        addMapping(data.orderKey, "order_v3", data.path_orderV3Root());
+
+        testFunction(
+            "12SelfIdentifier.json",
+            "order_v3"
+        );
+    }
+
 }

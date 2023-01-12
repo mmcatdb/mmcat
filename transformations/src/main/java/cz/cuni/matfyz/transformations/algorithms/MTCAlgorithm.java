@@ -223,11 +223,16 @@ public class MTCAlgorithm {
 
     private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, IComplexRecord complexRecord) {
         //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
-        if (path instanceof ComplexProperty complexPath)
-            for (Child child : children(complexPath)) {
-                InstanceMorphism parentToChild = category.getMorphism(child.signature());
-                stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
-            }
+        if (!(path instanceof ComplexProperty complexPath))
+            return;
+
+        for (Child child : children(complexPath)) {
+            if (child.signature.isEmpty())
+                continue;
+
+            InstanceMorphism parentToChild = category.getMorphism(child.signature());
+            stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
+        }
     }
 
     //private record Child(Signature signature, ComplexProperty property) {}
