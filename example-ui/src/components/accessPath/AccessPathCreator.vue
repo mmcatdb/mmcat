@@ -50,7 +50,7 @@ function confirmDatabaseAndRootNode() {
     accessPath.value = new GraphRootProperty(StaticName.fromString(label), selectingRootNode.value);
 }
 
-async function createMapping(label: string, primaryKey: SignatureId) {
+async function createMapping(primaryKey: SignatureId) {
     if (! selectedLogicalModel.value || !graph.value || !accessPath.value)
         return;
 
@@ -58,12 +58,12 @@ async function createMapping(label: string, primaryKey: SignatureId) {
         logicalModelId: selectedLogicalModel.value.id,
         rootObjectId: accessPath.value.node.schemaObject.id,
         jsonValue: JSON.stringify({
-            label: label
+            label: accessPath.value.name.toString()
         }),
         mappingJsonValue: JSON.stringify({
-            kindName: accessPath.value?.name.toString(),
+            kindName: accessPath.value.name.toString(),
             primaryKey: selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures,
-            accessPath: accessPath.value?.toJSON()
+            accessPath: accessPath.value.toJSON()
         })
     });
     if (result.status)

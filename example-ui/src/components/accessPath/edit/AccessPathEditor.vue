@@ -36,7 +36,6 @@ const emit = defineEmits([ 'finish' ]);
 
 const ids = props.rootProperty.node.schemaObject.ids!;
 
-const label = ref('');
 const state = ref<StateValue>({ type: State.Default });
 const primaryKey = ref((ids.isSignatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty());
 
@@ -59,7 +58,7 @@ function setStateToDefault() {
 }
 
 function finishMapping() {
-    emit('finish', label.value, primaryKey.value);
+    emit('finish', primaryKey.value);
 }
 </script>
 
@@ -74,9 +73,6 @@ function finishMapping() {
                         </ValueRow>
                         <ValueRow label="Root object:">
                             {{ rootProperty.node.label }}
-                        </ValueRow>
-                        <ValueRow label="Label:">
-                            <input v-model="label" />
                         </ValueRow>
                         <ValueRow label="Kind name:">
                             <StaticNameInput v-model="rootProperty.name" />
@@ -93,7 +89,6 @@ function finishMapping() {
                     </ValueContainer>
                     <div class="button-row">
                         <button
-                            :disabled="!label"
                             @click="finishMapping"
                         >
                             Finish mapping
