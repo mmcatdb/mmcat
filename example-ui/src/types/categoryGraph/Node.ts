@@ -113,7 +113,7 @@ export class Node {
         if (!this.schemaObject.ids)
             return null;
 
-        return this.schemaObject.ids.isSignatures ? PropertyType.Complex : PropertyType.Simple;
+        return this.schemaObject.ids.isSignatures ? PropertyType.Complex : null;
     }
 
     _availabilityStatus = AvailabilityStatus.Default;
