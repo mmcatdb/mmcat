@@ -133,7 +133,7 @@ public class Mapping implements JSONConvertible, Comparable<Mapping> {
             var primaryKey = new ArrayList<Signature>();
             var builder = new Signature.Builder();
             for (int i = 0; i < primaryKeyArray.length(); i++)
-                primaryKey.add(builder.fromJSON(primaryKeyArray.getJSONObject(i)));
+                primaryKey.add(builder.fromJSON(primaryKeyArray.getJSONArray(i)));
 
             mapping.primaryKey = primaryKey;
 

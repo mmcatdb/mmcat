@@ -128,9 +128,6 @@ public class AsyncJobService {
         final var instance = store.getCategory(job.categoryId);
         final var result = modelToCategoryAlgorithm(job, instance).join();
 
-        LOGGER.info("MODEL TO CATEGORY");
-        LOGGER.info("{}", result.status);
-        LOGGER.info("{}", instance);
         if (result.status) {
             if (instance == null)
                 store.setInstance(job.categoryId, result.data);

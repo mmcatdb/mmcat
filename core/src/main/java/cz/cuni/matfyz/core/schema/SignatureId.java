@@ -122,7 +122,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId>, JSONC
             var signatures = new TreeSet<Signature>();
             var builder = new Signature.Builder();
             for (int i = 0; i < signaturesArray.length(); i++)
-                signatures.add(builder.fromJSON(signaturesArray.getJSONObject(i)));
+                signatures.add(builder.fromJSON(signaturesArray.getJSONArray(i)));
 
             return new SignatureId(signatures);
         }

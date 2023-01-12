@@ -59,7 +59,7 @@ public class DynamicName extends Name {
     
         @Override
         protected DynamicName innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
+            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONArray("signature"));
             
             return new DynamicName(signature);
         }

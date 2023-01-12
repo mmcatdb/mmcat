@@ -162,7 +162,7 @@ public class SchemaMorphism implements Serializable, Morphism, JSONConvertible, 
 
         @Override
         protected void innerLoadFromJSON(SchemaMorphism morphism, JSONObject jsonObject) throws JSONException {
-            morphism.signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
+            morphism.signature = new Signature.Builder().fromJSON(jsonObject.getJSONArray("signature"));
 
             // var domKey = new Key.Builder().fromJSON(jsonObject.getJSONObject("domIdentifier"));
             // SchemaObject dom = context.getUniqueObject(domKey);

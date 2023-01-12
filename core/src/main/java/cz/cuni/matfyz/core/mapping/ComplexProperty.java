@@ -255,7 +255,7 @@ public class ComplexProperty extends AccessPath {
         @Override
         protected ComplexProperty innerFromJSON(JSONObject jsonObject) throws JSONException {
             var name = new Name.Builder().fromJSON(jsonObject.getJSONObject("name"));
-            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
+            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONArray("signature"));
             var isAuxiliary = jsonObject.getBoolean("isAuxiliary");
 
             var subpathsArray = jsonObject.getJSONArray("subpaths");

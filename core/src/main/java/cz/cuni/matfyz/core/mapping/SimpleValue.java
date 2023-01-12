@@ -61,7 +61,7 @@ public class SimpleValue implements JSONConvertible {
     
         @Override
         protected SimpleValue innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
+            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONArray("signature"));
             
             return new SimpleValue(signature);
         }

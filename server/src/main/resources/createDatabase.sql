@@ -54,59 +54,59 @@ CREATE TABLE schema_morphism_in_category (
 
 INSERT INTO schema_object (json_value)
 VALUES
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [1], "isNull": false}]}]}, "key": {"value": 1}, "label": "Customer", "superId": {"signatures": [{"ids": [1], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 2}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [1, 3], "isNull": false}]}]}, "key": {"value": 3}, "label": "Orders", "superId": {"signatures": [{"ids": [1, 3], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [4], "isNull": false}, {"ids": [1, 3, 2], "isNull": false}]}]}, "key": {"value": 4}, "label": "Order", "superId": {"signatures": [{"ids": [4], "isNull": false}, {"ids": [1, 3, 2], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 5}, "label": "Number", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [8, 7], "isNull": false}, {"ids": [6], "isNull": false}]}]}, "key": {"value": 6}, "label": "Contact", "superId": {"signatures": [{"ids": [8, 7], "isNull": false}, {"ids": [6], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 7}, "label": "Value", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [8], "isNull": false}]}]}, "key": {"value": 8}, "label": "Type", "superId": {"signatures": [{"ids": [8], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 9}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [1, 3, 2, -9], "isNull": false}, {"ids": [4, -9], "isNull": false}, {"ids": [12, 10], "isNull": false}]}]}, "key": {"value": 10}, "label": "Items", "superId": {"signatures": [{"ids": [1, 3, 2, -9], "isNull": false}, {"ids": [4, -9], "isNull": false}, {"ids": [12, 10], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 11}, "label": "Quantity", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [12], "isNull": false}]}]}, "key": {"value": 12}, "label": "Product", "superId": {"signatures": [{"ids": [12], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 13}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 14}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 15}, "label": "Price", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [4], "isNull": false}]}]}, "key": {"value": 1}, "label": "customer", "superId": {"signatures": [{"ids": [4], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 2}, "label": "full name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 3}, "label": "id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [1], "isNull": false}]}]}, "key": {"value": 4}, "label": "contact", "superId": {"signatures": [{"ids": [1], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 5}, "label": "type", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 6}, "label": "value", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 7}, "label": "id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [4, 7], "isNull": false}, {"ids": [1, 6], "isNull": false}]}]}, "key": {"value": 8}, "label": "customer contact", "superId": {"signatures": [{"ids": [4, 7], "isNull": false}, {"ids": [1, 6], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [13], "isNull": false}]}]}, "key": {"value": 9}, "label": "order", "superId": {"signatures": [{"ids": [13], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 10}, "label": "created", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 11}, "label": "paid", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 12}, "label": "sent", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 13}, "label": "note", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 14}, "label": "delivery address", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 15}, "label": "id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [15], "isNull": false}]}]}, "key": {"value": 16}, "label": "product", "superId": {"signatures": [{"ids": [15], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 17}, "label": "price", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 18}, "label": "name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 19}, "label": "id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [13, 21], "isNull": false}, {"ids": [15, 20], "isNull": false}]}]}, "key": {"value": 20}, "label": "order item", "superId": {"signatures": [{"ids": [13, 21], "isNull": false}, {"ids": [15, 20], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 21}, "label": "amount", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 22}, "label": "total price", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [2], "isNull": false}]}]}, "key": {"value": 1}, "label": "Customer", "superId": {"signatures": [{"ids": [2], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 2}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 3}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 4}, "label": "Surname", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [2, 4], "isNull": false}, {"ids": [2, 5], "isNull": false}]}]}, "key": {"value": 5}, "label": "Friends", "superId": {"signatures": [{"ids": [2, 4], "isNull": false}, {"ids": [2, 5], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [7], "isNull": false}, {"ids": [8], "isNull": false}, {"ids": [2, 6], "isNull": false}]}]}, "key": {"value": 6}, "label": "Contact", "superId": {"signatures": [{"ids": [7], "isNull": false}, {"ids": [8], "isNull": false}, {"ids": [2, 6], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 7}, "label": "Key", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 8}, "label": "Value", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [2, 9], "isNull": false}, {"ids": [11, 10], "isNull": false}]}]}, "key": {"value": 9}, "label": "Orders", "superId": {"signatures": [{"ids": [2, 9], "isNull": false}, {"ids": [11, 10], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [11], "isNull": false}]}]}, "key": {"value": 10}, "label": "Order", "superId": {"signatures": [{"ids": [11], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 11}, "label": "Id", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [11, 12], "isNull": false}, {"ids": [14, 13], "isNull": false}]}]}, "key": {"value": 12}, "label": "Items", "superId": {"signatures": [{"ids": [11, 12], "isNull": false}, {"ids": [14, 13], "isNull": false}]}}'),
-    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [{"ids": [14], "isNull": false}]}]}, "key": {"value": 13}, "label": "Product", "superId": {"signatures": [{"ids": [14], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 14}, "label": "Number", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 15}, "label": "Name", "superId": {"signatures": [{"ids": [], "isNull": false}]}}'),
-    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 16}, "label": "Price", "superId": {"signatures": [{"ids": [], "isNull": false}]}}');
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[1]]}]}, "key": {"value": 1}, "label": "Customer", "superId": {"signatures": [[1]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 2}, "label": "Id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[1, 3]]}]}, "key": {"value": 3}, "label": "Orders", "superId": {"signatures": [[1, 3]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[4], [1, 3, 2]]}]}, "key": {"value": 4}, "label": "Order", "superId": {"signatures": [[4], [1, 3, 2]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 5}, "label": "Number", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[8, 7], [6]]}]}, "key": {"value": 6}, "label": "Contact", "superId": {"signatures": [[8, 7], [6]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 7}, "label": "Value", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[8]]}]}, "key": {"value": 8}, "label": "Type", "superId": {"signatures": [[8]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 9}, "label": "Name", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[1, 3, 2, -9], [4, -9], [12, 10]]}]}, "key": {"value": 10}, "label": "Items", "superId": {"signatures": [[1, 3, 2, -9], [4, -9], [12, 10]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 11}, "label": "Quantity", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[12]]}]}, "key": {"value": 12}, "label": "Product", "superId": {"signatures": [[12]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 13}, "label": "Id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 14}, "label": "Name", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 15}, "label": "Price", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[4]]}]}, "key": {"value": 1}, "label": "customer", "superId": {"signatures": [[4]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 2}, "label": "full name", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 3}, "label": "id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[1]]}]}, "key": {"value": 4}, "label": "contact", "superId": {"signatures": [[1]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 5}, "label": "type", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 6}, "label": "value", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 7}, "label": "id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[4, 7], [1, 6]]}]}, "key": {"value": 8}, "label": "customer contact", "superId": {"signatures": [[4, 7], [1, 6]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[13]]}]}, "key": {"value": 9}, "label": "order", "superId": {"signatures": [[13]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 10}, "label": "created", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 11}, "label": "paid", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 12}, "label": "sent", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 13}, "label": "note", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 14}, "label": "delivery address", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 15}, "label": "id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[15]]}]}, "key": {"value": 16}, "label": "product", "superId": {"signatures": [[15]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 17}, "label": "price", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 18}, "label": "name", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 19}, "label": "id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[13, 21], [15, 20]]}]}, "key": {"value": 20}, "label": "order item", "superId": {"signatures": [[13, 21], [15, 20]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 21}, "label": "amount", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 22}, "label": "total price", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[2]]}]}, "key": {"value": 1}, "label": "Customer", "superId": {"signatures": [[2]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 2}, "label": "Name", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 3}, "label": "Id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 4}, "label": "Surname", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[2, 4], [2, 5]]}]}, "key": {"value": 5}, "label": "Friends", "superId": {"signatures": [[2, 4], [2, 5]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[7], [8], [2, 6]]}]}, "key": {"value": 6}, "label": "Contact", "superId": {"signatures": [[7], [8], [2, 6]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 7}, "label": "Key", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 8}, "label": "Value", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[2, 9], [11, 10]]}]}, "key": {"value": 9}, "label": "Orders", "superId": {"signatures": [[2, 9], [11, 10]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[11]]}]}, "key": {"value": 10}, "label": "Order", "superId": {"signatures": [[11]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 11}, "label": "Id", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[11, 12], [14, 13]]}]}, "key": {"value": 12}, "label": "Items", "superId": {"signatures": [[11, 12], [14, 13]]}}'),
+    ('{"ids": {"type": "Signatures", "signatureIds": [{"signatures": [[14]]}]}, "key": {"value": 13}, "label": "Product", "superId": {"signatures": [[14]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 14}, "label": "Number", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 15}, "label": "Name", "superId": {"signatures": [[]]}}'),
+    ('{"ids": {"type": "Value", "signatureIds": null}, "key": {"value": 16}, "label": "Price", "superId": {"signatures": [[]]}}');
 
 INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position)
 VALUES
@@ -166,108 +166,108 @@ VALUES
 
 INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value)
 VALUES
-    (1, 2, '{"max": "ONE", "min": "ONE", "signature": {"ids": [1], "isNull": false}}'),
-    (2, 1, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-1], "isNull": false}}'),
-    (4, 3, '{"max": "ONE", "min": "ONE", "signature": {"ids": [2], "isNull": false}}'),
-    (3, 4, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-2], "isNull": false}}'),
-    (3, 1, '{"max": "ONE", "min": "ONE", "signature": {"ids": [3], "isNull": false}}'),
-    (1, 3, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-3], "isNull": false}}'),
-    (4, 5, '{"max": "ONE", "min": "ONE", "signature": {"ids": [4], "isNull": false}}'),
-    (5, 4, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-4], "isNull": false}}'),
-    (4, 6, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [5], "isNull": false}}'),
-    (6, 4, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-5], "isNull": false}}'),
-    (6, 7, '{"max": "ONE", "min": "ONE", "signature": {"ids": [6], "isNull": false}}'),
-    (7, 6, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-6], "isNull": false}}'),
-    (6, 8, '{"max": "ONE", "min": "ONE", "signature": {"ids": [7], "isNull": false}}'),
-    (8, 6, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-7], "isNull": false}}'),
-    (8, 9, '{"max": "ONE", "min": "ONE", "signature": {"ids": [8], "isNull": false}}'),
-    (9, 8, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-8], "isNull": false}}'),
-    (4, 10, '{"max": "STAR", "min": "ONE", "signature": {"ids": [9], "isNull": false}}'),
-    (10, 4, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-9], "isNull": false}}'),
-    (10, 12, '{"max": "ONE", "min": "ONE", "signature": {"ids": [10], "isNull": false}}'),
-    (12, 10, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-10], "isNull": false}}'),
-    (10, 11, '{"max": "ONE", "min": "ZERO", "signature": {"ids": [11], "isNull": false}}'),
-    (11, 10, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-11], "isNull": false}}'),
-    (12, 13, '{"max": "ONE", "min": "ONE", "signature": {"ids": [12], "isNull": false}}'),
-    (13, 12, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-12], "isNull": false}}'),
-    (12, 14, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [13], "isNull": false}}'),
-    (14, 12, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-13], "isNull": false}}'),
-    (12, 15, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [14], "isNull": false}}'),
-    (15, 12, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-14], "isNull": false}}'),
-    (19, 22, '{"max": "ONE", "min": "ONE", "signature": {"ids": [1], "isNull": false}}'),
-    (22, 19, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-1], "isNull": false}}'),
-    (19, 21, '{"max": "ONE", "min": "ONE", "signature": {"ids": [2], "isNull": false}}'),
-    (21, 19, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-2], "isNull": false}}'),
-    (19, 20, '{"max": "ONE", "min": "ONE", "signature": {"ids": [3], "isNull": false}}'),
-    (20, 19, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-3], "isNull": false}}'),
-    (16, 18, '{"max": "ONE", "min": "ONE", "signature": {"ids": [4], "isNull": false}}'),
-    (18, 16, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-4], "isNull": false}}'),
-    (16, 17, '{"max": "ONE", "min": "ONE", "signature": {"ids": [5], "isNull": false}}'),
-    (17, 16, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-5], "isNull": false}}'),
-    (23, 19, '{"max": "ONE", "min": "ONE", "signature": {"ids": [6], "isNull": false}}'),
-    (19, 23, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-6], "isNull": false}}'),
-    (23, 16, '{"max": "ONE", "min": "ONE", "signature": {"ids": [7], "isNull": false}}'),
-    (16, 23, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-7], "isNull": false}}'),
-    (24, 25, '{"max": "ONE", "min": "ZERO", "signature": {"ids": [8], "isNull": false}}'),
-    (25, 24, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-8], "isNull": false}}'),
-    (24, 27, '{"max": "ONE", "min": "ZERO", "signature": {"ids": [9], "isNull": false}}'),
-    (27, 24, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-9], "isNull": false}}'),
-    (24, 26, '{"max": "ONE", "min": "ZERO", "signature": {"ids": [10], "isNull": false}}'),
-    (26, 24, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-10], "isNull": false}}'),
-    (24, 28, '{"max": "ONE", "min": "ONE", "signature": {"ids": [11], "isNull": false}}'),
-    (28, 24, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-11], "isNull": false}}'),
-    (24, 29, '{"max": "ONE", "min": "ONE", "signature": {"ids": [12], "isNull": false}}'),
-    (29, 24, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-12], "isNull": false}}'),
-    (24, 30, '{"max": "ONE", "min": "ONE", "signature": {"ids": [13], "isNull": false}}'),
-    (30, 24, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-13], "isNull": false}}'),
-    (24, 16, '{"max": "ONE", "min": "ONE", "signature": {"ids": [14], "isNull": false}}'),
-    (16, 24, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-14], "isNull": false}}'),
-    (31, 34, '{"max": "ONE", "min": "ONE", "signature": {"ids": [15], "isNull": false}}'),
-    (34, 31, '{"max": "ONE", "min": "ONE", "signature": {"ids": [-15], "isNull": false}}'),
-    (31, 33, '{"max": "ONE", "min": "ONE", "signature": {"ids": [16], "isNull": false}}'),
-    (33, 31, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-16], "isNull": false}}'),
-    (31, 32, '{"max": "ONE", "min": "ONE", "signature": {"ids": [17], "isNull": false}}'),
-    (32, 31, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-17], "isNull": false}}'),
-    (35, 37, '{"max": "ONE", "min": "ONE", "signature": {"ids": [18], "isNull": false}}'),
-    (37, 35, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-18], "isNull": false}}'),
-    (35, 36, '{"max": "ONE", "min": "ONE", "signature": {"ids": [19], "isNull": false}}'),
-    (36, 35, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-19], "isNull": false}}'),
-    (35, 31, '{"max": "ONE", "min": "ONE", "signature": {"ids": [20], "isNull": false}}'),
-    (31, 35, '{"max": "STAR", "min": "ZERO", "signature": {"ids": [-20], "isNull": false}}'),
-    (35, 24, '{"max": "ONE", "min": "ONE", "signature": {"ids": [21], "isNull": false}}'),
-    (24, 35, '{"max": "STAR", "min": "ONE", "signature": {"ids": [-21], "isNull": false}}'),
-    (38, 39, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [1], "isNull": false}}'),
-    (39, 38, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-1], "isNull": false}}'),
-    (38, 40, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [2], "isNull": false}}'),
-    (40, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [-2], "isNull": false}}'),
-    (38, 41, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [3], "isNull": false}}'),
-    (41, 38, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-3], "isNull": false}}'),
-    (42, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [4], "isNull": false}}'),
-    (38, 42, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-4], "isNull": false}}'),
-    (42, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [5], "isNull": false}}'),
-    (38, 42, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-5], "isNull": false}}'),
-    (43, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [6], "isNull": false}}'),
-    (38, 43, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-6], "isNull": false}}'),
-    (43, 44, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [7], "isNull": false}}'),
-    (44, 43, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-7], "isNull": false}}'),
-    (43, 45, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [8], "isNull": false}}'),
-    (45, 43, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-8], "isNull": false}}'),
-    (46, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [9], "isNull": false}}'),
-    (38, 46, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-9], "isNull": false}}'),
-    (46, 47, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [10], "isNull": false}}'),
-    (47, 46, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-10], "isNull": false}}'),
-    (47, 51, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [11], "isNull": false}}'),
-    (51, 47, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [-11], "isNull": false}}'),
-    (49, 47, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [12], "isNull": false}}'),
-    (47, 49, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-12], "isNull": false}}'),
-    (49, 50, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [13], "isNull": false}}'),
-    (50, 49, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-13], "isNull": false}}'),
-    (50, 48, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [14], "isNull": false}}'),
-    (48, 50, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [-14], "isNull": false}}'),
-    (50, 52, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [15], "isNull": false}}'),
-    (52, 50, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-15], "isNull": false}}'),
-    (50, 53, '{"max": "ONE", "min": "ONE", "label": "", "signature": {"ids": [16], "isNull": false}}'),
-    (53, 50, '{"max": "STAR", "min": "ZERO", "label": "", "signature": {"ids": [-16], "isNull": false}}');
+    (1, 2, '{"max": "ONE", "min": "ONE", "signature": [1]}'),
+    (2, 1, '{"max": "ONE", "min": "ONE", "signature": [-1]}'),
+    (4, 3, '{"max": "ONE", "min": "ONE", "signature": [2]}'),
+    (3, 4, '{"max": "ONE", "min": "ONE", "signature": [-2]}'),
+    (3, 1, '{"max": "ONE", "min": "ONE", "signature": [3]}'),
+    (1, 3, '{"max": "STAR", "min": "ZERO", "signature": [-3]}'),
+    (4, 5, '{"max": "ONE", "min": "ONE", "signature": [4]}'),
+    (5, 4, '{"max": "STAR", "min": "ZERO", "signature": [-4]}'),
+    (4, 6, '{"max": "STAR", "min": "ZERO", "signature": [5]}'),
+    (6, 4, '{"max": "STAR", "min": "ZERO", "signature": [-5]}'),
+    (6, 7, '{"max": "ONE", "min": "ONE", "signature": [6]}'),
+    (7, 6, '{"max": "STAR", "min": "ZERO", "signature": [-6]}'),
+    (6, 8, '{"max": "ONE", "min": "ONE", "signature": [7]}'),
+    (8, 6, '{"max": "STAR", "min": "ZERO", "signature": [-7]}'),
+    (8, 9, '{"max": "ONE", "min": "ONE", "signature": [8]}'),
+    (9, 8, '{"max": "ONE", "min": "ONE", "signature": [-8]}'),
+    (4, 10, '{"max": "STAR", "min": "ONE", "signature": [9]}'),
+    (10, 4, '{"max": "ONE", "min": "ONE", "signature": [-9]}'),
+    (10, 12, '{"max": "ONE", "min": "ONE", "signature": [10]}'),
+    (12, 10, '{"max": "STAR", "min": "ZERO", "signature": [-10]}'),
+    (10, 11, '{"max": "ONE", "min": "ZERO", "signature": [11]}'),
+    (11, 10, '{"max": "STAR", "min": "ZERO", "signature": [-11]}'),
+    (12, 13, '{"max": "ONE", "min": "ONE", "signature": [12]}'),
+    (13, 12, '{"max": "ONE", "min": "ONE", "signature": [-12]}'),
+    (12, 14, '{"max": "STAR", "min": "ZERO", "signature": [13]}'),
+    (14, 12, '{"max": "STAR", "min": "ZERO", "signature": [-13]}'),
+    (12, 15, '{"max": "STAR", "min": "ZERO", "signature": [14]}'),
+    (15, 12, '{"max": "STAR", "min": "ZERO", "signature": [-14]}'),
+    (19, 22, '{"max": "ONE", "min": "ONE", "signature": [1]}'),
+    (22, 19, '{"max": "ONE", "min": "ONE", "signature": [-1]}'),
+    (19, 21, '{"max": "ONE", "min": "ONE", "signature": [2]}'),
+    (21, 19, '{"max": "STAR", "min": "ONE", "signature": [-2]}'),
+    (19, 20, '{"max": "ONE", "min": "ONE", "signature": [3]}'),
+    (20, 19, '{"max": "STAR", "min": "ZERO", "signature": [-3]}'),
+    (16, 18, '{"max": "ONE", "min": "ONE", "signature": [4]}'),
+    (18, 16, '{"max": "ONE", "min": "ONE", "signature": [-4]}'),
+    (16, 17, '{"max": "ONE", "min": "ONE", "signature": [5]}'),
+    (17, 16, '{"max": "STAR", "min": "ONE", "signature": [-5]}'),
+    (23, 19, '{"max": "ONE", "min": "ONE", "signature": [6]}'),
+    (19, 23, '{"max": "STAR", "min": "ONE", "signature": [-6]}'),
+    (23, 16, '{"max": "ONE", "min": "ONE", "signature": [7]}'),
+    (16, 23, '{"max": "STAR", "min": "ZERO", "signature": [-7]}'),
+    (24, 25, '{"max": "ONE", "min": "ZERO", "signature": [8]}'),
+    (25, 24, '{"max": "STAR", "min": "ONE", "signature": [-8]}'),
+    (24, 27, '{"max": "ONE", "min": "ZERO", "signature": [9]}'),
+    (27, 24, '{"max": "STAR", "min": "ONE", "signature": [-9]}'),
+    (24, 26, '{"max": "ONE", "min": "ZERO", "signature": [10]}'),
+    (26, 24, '{"max": "STAR", "min": "ONE", "signature": [-10]}'),
+    (24, 28, '{"max": "ONE", "min": "ONE", "signature": [11]}'),
+    (28, 24, '{"max": "STAR", "min": "ONE", "signature": [-11]}'),
+    (24, 29, '{"max": "ONE", "min": "ONE", "signature": [12]}'),
+    (29, 24, '{"max": "STAR", "min": "ONE", "signature": [-12]}'),
+    (24, 30, '{"max": "ONE", "min": "ONE", "signature": [13]}'),
+    (30, 24, '{"max": "ONE", "min": "ONE", "signature": [-13]}'),
+    (24, 16, '{"max": "ONE", "min": "ONE", "signature": [14]}'),
+    (16, 24, '{"max": "STAR", "min": "ZERO", "signature": [-14]}'),
+    (31, 34, '{"max": "ONE", "min": "ONE", "signature": [15]}'),
+    (34, 31, '{"max": "ONE", "min": "ONE", "signature": [-15]}'),
+    (31, 33, '{"max": "ONE", "min": "ONE", "signature": [16]}'),
+    (33, 31, '{"max": "STAR", "min": "ONE", "signature": [-16]}'),
+    (31, 32, '{"max": "ONE", "min": "ONE", "signature": [17]}'),
+    (32, 31, '{"max": "STAR", "min": "ONE", "signature": [-17]}'),
+    (35, 37, '{"max": "ONE", "min": "ONE", "signature": [18]}'),
+    (37, 35, '{"max": "STAR", "min": "ONE", "signature": [-18]}'),
+    (35, 36, '{"max": "ONE", "min": "ONE", "signature": [19]}'),
+    (36, 35, '{"max": "STAR", "min": "ONE", "signature": [-19]}'),
+    (35, 31, '{"max": "ONE", "min": "ONE", "signature": [20]}'),
+    (31, 35, '{"max": "STAR", "min": "ZERO", "signature": [-20]}'),
+    (35, 24, '{"max": "ONE", "min": "ONE", "signature": [21]}'),
+    (24, 35, '{"max": "STAR", "min": "ONE", "signature": [-21]}'),
+    (38, 39, '{"max": "ONE", "min": "ONE", "label": "", "signature": [1]}'),
+    (39, 38, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-1]}'),
+    (38, 40, '{"max": "ONE", "min": "ONE", "label": "", "signature": [2]}'),
+    (40, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": [-2]}'),
+    (38, 41, '{"max": "ONE", "min": "ONE", "label": "", "signature": [3]}'),
+    (41, 38, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-3]}'),
+    (42, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": [4]}'),
+    (38, 42, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-4]}'),
+    (42, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": [5]}'),
+    (38, 42, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-5]}'),
+    (43, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": [6]}'),
+    (38, 43, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-6]}'),
+    (43, 44, '{"max": "ONE", "min": "ONE", "label": "", "signature": [7]}'),
+    (44, 43, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-7]}'),
+    (43, 45, '{"max": "ONE", "min": "ONE", "label": "", "signature": [8]}'),
+    (45, 43, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-8]}'),
+    (46, 38, '{"max": "ONE", "min": "ONE", "label": "", "signature": [9]}'),
+    (38, 46, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-9]}'),
+    (46, 47, '{"max": "ONE", "min": "ONE", "label": "", "signature": [10]}'),
+    (47, 46, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-10]}'),
+    (47, 51, '{"max": "ONE", "min": "ONE", "label": "", "signature": [11]}'),
+    (51, 47, '{"max": "ONE", "min": "ONE", "label": "", "signature": [-11]}'),
+    (49, 47, '{"max": "ONE", "min": "ONE", "label": "", "signature": [12]}'),
+    (47, 49, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-12]}'),
+    (49, 50, '{"max": "ONE", "min": "ONE", "label": "", "signature": [13]}'),
+    (50, 49, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-13]}'),
+    (50, 48, '{"max": "ONE", "min": "ONE", "label": "", "signature": [14]}'),
+    (48, 50, '{"max": "ONE", "min": "ONE", "label": "", "signature": [-14]}'),
+    (50, 52, '{"max": "ONE", "min": "ONE", "label": "", "signature": [15]}'),
+    (52, 50, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-15]}'),
+    (50, 53, '{"max": "ONE", "min": "ONE", "label": "", "signature": [16]}'),
+    (53, 50, '{"max": "STAR", "min": "ZERO", "label": "", "signature": [-16]}');
 
 INSERT INTO schema_morphism_in_category (schema_category_id, schema_morphism_id)
 VALUES
@@ -502,141 +502,141 @@ CREATE TABLE mapping (
 
 INSERT INTO mapping (logical_model_id, root_object_id, mapping_json_value, json_value)
 VALUES
-(1, 4, '{"primaryKey": [{"ids": [4], "isNull": false}, {"ids": [1, 3, 2], "isNull": false}], "kindName": "order",
+(1, 4, '{"primaryKey": [[4], [1, 3, 2]], "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "Order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
                     "name": {"type": "STATIC_NAME", "value": "_id", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
-                            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "value": {"signature": {"ids": [1, 3, 2], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "value": {"signature": [1, 3, 2]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": {"ids": [4], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": [4]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+                    ], "signature": [], "isAuxiliary": true
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
-                            "name": {"_class": "DynamicName", "signature": {"ids": [8, 7], "isNull": false}}, "value": {"signature": {"ids": [6], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"_class": "DynamicName", "signature": [8, 7]}, "value": {"signature": [6]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [5], "isNull": false}, "isAuxiliary": false
+                    ], "signature": [5], "isAuxiliary": false
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
-                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [12, 10], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [12, 10]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [13, 10], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [13, 10]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [14, 10], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": [14, 10]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "quantity", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "quantity", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [9], "isNull": false}, "isAuxiliary": false
+                    ], "signature": [9], "isAuxiliary": false
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "Order"}'
     ),
-    (2, 1, '{"primaryKey": [{"ids": [1], "isNull": false}], "kindName": "customer",
+    (2, 1, '{"primaryKey": [[1]], "kindName": "customer",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "Customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "Customer"}'
     ),
-    (3, 16, '{"primaryKey": [{"ids": [4], "isNull": false}], "kindName": "app_customer",
+    (3, 16, '{"primaryKey": [[4]], "kindName": "app_customer",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [4], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [4]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "full_name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "full_name", "_class": "StaticName"}, "value": {"signature": [5]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "CustomerTable"}'
     ),
-    (3, 19, '{"primaryKey": [{"ids": [1], "isNull": false}], "kindName": "app_contact",
+    (3, 19, '{"primaryKey": [[1]], "kindName": "app_contact",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": [2]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "type", "_class": "StaticName"}, "value": {"signature": {"ids": [3], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "type", "_class": "StaticName"}, "value": {"signature": [3]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "ContactTable"}'
     ),
-    (3, 23, '{"primaryKey": [{"ids": [4, 7], "isNull": false}, {"ids": [1, 6], "isNull": false}], "kindName": "app_customer_contact",
+    (3, 23, '{"primaryKey": [[4, 7], [1, 6]], "kindName": "app_customer_contact",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "customer_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [4, 7], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [4, 7]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "contact_id", "_class": "StaticName"}, "value": {"signature": {"ids": [1, 6], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "contact_id", "_class": "StaticName"}, "value": {"signature": [1, 6]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "CustomerContactTable"}'
     ),
-    (3, 24, '{"primaryKey": [{"ids": [13], "isNull": false}], "kindName": "app_order",
+    (3, 24, '{"primaryKey": [[13]], "kindName": "app_order",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [13], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [13]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "delivery_address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "delivery_address", "_class": "StaticName"}, "value": {"signature": [12]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": [8]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": [9]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": [10]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [4, 14], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [4, 14]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "OrderTable"}'
     ),
-    (3, 31, '{"primaryKey": [{"ids": [15], "isNull": false}], "kindName": "app_product",
+    (3, 31, '{"primaryKey": [[15]], "kindName": "app_product",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "product", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [15], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [15]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [16]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [17], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": [17]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "ProductTable"}'
     ),
-    (3, 35, '{"primaryKey": [{"ids": [13, 21], "isNull": false}, {"ids": [15, 20], "isNull": false}], "kindName": "app_order_item",
+    (3, 35, '{"primaryKey": [[13, 21], [15, 20]], "kindName": "app_order_item",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "order_item", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "order_id", "_class": "StaticName"}, "value": {"signature": {"ids": [13, 21], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "order_id", "_class": "StaticName"}, "value": {"signature": [13, 21]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "product_id", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 20], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "product_id", "_class": "StaticName"}, "value": {"signature": [15, 20]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": [19]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": [18]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "OrderItemTable"}'
     ),
-    (4, 24, '{"primaryKey": [{"ids": [13], "isNull": false}], "kindName": "order",
+    (4, 24, '{"primaryKey": [[13]], "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
@@ -644,109 +644,109 @@ VALUES
                         {
                             "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                                 {
-                                    "name": {"_class": "DynamicName", "signature": {"ids": [3], "isNull": false}}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                                    "name": {"_class": "DynamicName", "signature": [3]}, "value": {"signature": [2]}, "_class": "SimpleProperty"
                                 }
-                            ], "signature": {"ids": [6, -7], "isNull": false}, "isAuxiliary": false
+                            ], "signature": [6, -7], "isAuxiliary": false
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [5]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [14], "isNull": false}, "isAuxiliary": false
+                    ], "signature": [14], "isAuxiliary": false
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "address", "_class": "StaticName"}, "value": {"signature": [12]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "events", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
-                            "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": [8]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": [9]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": [10]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+                    ], "signature": [], "isAuxiliary": true
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
-                            "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": [19]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": [18]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 20], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [16, 20]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [-21], "isNull": false}, "isAuxiliary": false
+                    ], "signature": [-21], "isAuxiliary": false
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "OrderDocument"}'
     ),
-    (5, 47, '{"primaryKey": [{"ids": [11], "isNull": false}], "kindName": "order",
+    (5, 47, '{"primaryKey": [[11]], "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "customers", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
-                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [2]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [9, -10], "isNull": false}, "isAuxiliary": false
+                    ], "signature": [9, -10], "isAuxiliary": false
                 }, {
                     "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                         {
-                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [14, 13], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [14, 13]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 13], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [15, 13]}, "_class": "SimpleProperty"
                         }, {
-                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 13], "isNull": false}}, "_class": "SimpleProperty"
+                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": [16, 13]}, "_class": "SimpleProperty"
                         }
-                    ], "signature": {"ids": [-12], "isNull": false}, "isAuxiliary": false
+                    ], "signature": [-12], "isAuxiliary": false
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "Order"}'
     ),
-    (6, 38, '{"primaryKey": [{"ids": [2], "isNull": false}], "kindName": "customer",
+    (6, 38, '{"primaryKey": [[2]], "kindName": "customer",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [2]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "surname", "_class": "StaticName"}, "value": {"signature": {"ids": [3], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "surname", "_class": "StaticName"}, "value": {"signature": [3]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "Customer"}'
     ),
-    (7, 42, '{"primaryKey": [{"ids": [2, 4], "isNull": false}, {"ids": [2, 5], "isNull": false}], "kindName": "friends",
+    (7, 42, '{"primaryKey": [[2, 4], [2, 5]], "kindName": "friends",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "friends", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "first_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 4], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "first_customer_id", "_class": "StaticName"}, "value": {"signature": [2, 4]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "second_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 5], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "second_customer_id", "_class": "StaticName"}, "value": {"signature": [2, 5]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "Friends"}'
     ),
-    (7, 43, '{"primaryKey": [{"ids": [7], "isNull": false}, {"ids": [8], "isNull": false}, {"ids": [2, 6], "isNull": false}], "kindName": "contact",
+    (7, 43, '{"primaryKey": [[7], [8], [2, 6]], "kindName": "contact",
         "accessPath": {
             "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "key", "_class": "StaticName"}, "value": {"signature": {"ids": [7], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "key", "_class": "StaticName"}, "value": {"signature": [7]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": [8]}, "_class": "SimpleProperty"
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 6], "isNull": false}}, "_class": "SimpleProperty"
+                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [2, 6]}, "_class": "SimpleProperty"
                 }
-            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+            ], "signature": [], "isAuxiliary": true
         }}',
         '{"label": "Contacts"}'
     );
-    
+
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,

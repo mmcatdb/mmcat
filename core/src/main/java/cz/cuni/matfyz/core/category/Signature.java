@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.core.category;
 
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
+import cz.cuni.matfyz.core.serialization.FromJSONArrayBuilderBase;
+import cz.cuni.matfyz.core.serialization.JSONArrayConvertible;
+import cz.cuni.matfyz.core.serialization.ToJSONArrayConverterBase;
 import cz.cuni.matfyz.core.utils.ArrayUtils;
 
 import java.io.IOException;
@@ -20,14 +20,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * This class represents a signature of a morphism. It can be empty, base or composite.
  * @author jachym.bartik
  */
 @JsonSerialize(using = Signature.Serializer.class)
-public class Signature implements Serializable, Comparable<Signature>, JSONConvertible {
+public class Signature implements Serializable, Comparable<Signature>, JSONArrayConvertible {
 
     private final int[] ids;
     
@@ -256,32 +255,26 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     }
 
     @Override
-    public JSONObject toJSON() {
+    public JSONArray toJSON() {
         return new Converter().toJSON(this);
     }
 
-    public static class Converter extends ToJSONConverterBase<Signature> {
+    public static class Converter extends ToJSONArrayConverterBase<Signature> {
 
         @Override
-        protected JSONObject innerToJSON(Signature object) throws JSONException {
-            var output = new JSONObject();
-    
-            var ids = new JSONArray(object.ids);
-            output.put("ids", ids);
-            
-            return output;
+        protected JSONArray innerToJSON(Signature object) throws JSONException {
+            return new JSONArray(object.ids);
         }
     
     }
     
-    public static class Builder extends FromJSONBuilderBase<Signature> {
+    public static class Builder extends FromJSONArrayBuilderBase<Signature> {
     
         @Override
-        protected Signature innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var idsArray = jsonObject.getJSONArray("ids");
-            var ids = new int[idsArray.length()];
-            for (int i = 0; i < idsArray.length(); i++)
-                ids[i] = idsArray.getInt(i);
+        protected Signature innerFromJSON(JSONArray jsonArray) throws JSONException {
+            var ids = new int[jsonArray.length()];
+            for (int i = 0; i < jsonArray.length(); i++)
+                ids[i] = jsonArray.getInt(i);
             
             return Signature.createComposite(ids);
         }
@@ -300,10 +293,7 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
 
         @Override
         public void serialize(Signature signature, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-            generator.writeFieldName("ids");
             generator.writeArray(signature.ids, 0, signature.ids.length);
-            generator.writeEndObject();
         }
 
     }
