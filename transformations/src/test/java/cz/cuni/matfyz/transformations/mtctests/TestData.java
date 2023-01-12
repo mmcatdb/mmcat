@@ -93,14 +93,14 @@ public class TestData {
     }
 
     private ComplexProperty createUserTableAccessPath() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("u_id", userToU_id),
             new SimpleProperty("name", userToName)
         );
     }
 
     private ComplexProperty createOrderTableAccessPath() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("o_id", orderToO_id),
             new SimpleProperty("u_id", orderToU_id)
         );

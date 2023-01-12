@@ -23,43 +23,30 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * This class represents a signature of a morphism. It can be empty, base, composite or null.
+ * This class represents a signature of a morphism. It can be empty, base or composite.
  * @author jachym.bartik
  */
 @JsonSerialize(using = Signature.Serializer.class)
 public class Signature implements Serializable, Comparable<Signature>, JSONConvertible {
 
     private final int[] ids;
-    private final boolean isNull;
     
-    private Signature(int[] ids, boolean isNull) {
-        this.ids = isNull ? new int[] {} : ids;
-        this.isNull = isNull;
+    private Signature(int[] ids) {
+        this.ids = ids;
     }
     
-    public Signature(int id) {
-        this.ids = new int[] { id };
-        this.isNull = false;
-    }
-
     public static Signature createBase(int id) {
-        return new Signature(new int[] { id }, false);
+        return new Signature(new int[] { id });
     }
 
     private static Signature createComposite(int[] ids) {
-        return ids.length == 0 ? createEmpty() : new Signature(ids, false);
+        return ids.length == 0 ? createEmpty() : new Signature(ids);
     }
 
-    private static final Signature emptyObject = new Signature(new int[] {}, false);
+    private static final Signature emptyObject = new Signature(new int[] {});
 
     public static Signature createEmpty() {
         return emptyObject;
-    }
-
-    private static final Signature nullObject = new Signature(new int[] {}, true);
-    
-    public static Signature createNull() {
-        return nullObject;
     }
 
     public int[] ids() {
@@ -67,10 +54,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     }
 
     public List<Signature> toBases() {
-        if (this.isNull)
-            //return List.of(this);
-            return List.of();
-
         var output = new ArrayList<Signature>();
         for (int id : ids)
             output.add(createBase(id));
@@ -79,10 +62,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     }
 
     public List<Signature> toBasesReverse() {
-        if (this.isNull)
-            //return List.of(this);
-            return List.of();
-
         var output = new ArrayList<Signature>();
         for (int i = ids.length - 1; i >= 0; i--)
             output.add(createBase(ids[i]));
@@ -92,9 +71,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
 
     // Evolution extension
     public Signature cutLast() {
-        if (isNull)
-            return Signature.createNull();
-
         if (ids.length == 0)
             return Signature.createEmpty();
 
@@ -103,9 +79,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     }
 
     public Signature getLast() {
-        if (isNull)
-            return Signature.createNull();
-
         if (ids.length == 0)
             return Signature.createEmpty();
 
@@ -113,9 +86,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     }
 
     public Signature cutFirst() {
-        if (isNull)
-            return Signature.createNull();
-
         if (ids.length == 0)
             return Signature.createEmpty();
 
@@ -124,9 +94,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     }
 
     public Signature getFirst() {
-        if (isNull)
-            return Signature.createNull();
-
         if (ids.length == 0)
             return Signature.createEmpty();
 
@@ -163,12 +130,10 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
         EMPTY,      // The corresponding morphism is an identity.
         BASE,       // The length of the signature is exactly one (i.e. it's a signature of morphism between two neigbours in the schema category graph).
         COMPOSITE,  // The signature consists of multiple (i.e. >= 2) base signatures.
-        NULL        // There is no morphism corresponding to given signature. This means the access path's property accessible via this signature is an auxiliary property grouping one or more properties together.
+        //NULL        // There is no morphism corresponding to given signature. This means the access path's property accessible via this signature is an auxiliary property grouping one or more properties together.
     }
     
     public Type getType() {
-        if (isNull)
-            return Type.NULL;
         if (isEmpty())
             return Type.EMPTY;
         if (isBase())
@@ -176,12 +141,8 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
         return Type.COMPOSITE;
     }
 
-    public boolean isNull() {
-        return this.isNull;
-    }
-
     public boolean isEmpty() {
-        return ids.length == 0 && !isNull;
+        return ids.length == 0;
     }
 
     public boolean isBase() {
@@ -190,11 +151,8 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
 
     @Override
     public String toString() {
-        if (isNull())
-            return "_NULL";
-        
         if (isEmpty())
-            return "_EMPTY";
+            return "EMPTY";
 
         StringBuilder builder = new StringBuilder();
         
@@ -206,15 +164,12 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     }
 
     public static Signature fromString(String string) {
-        if (string.equals("_NULL"))
-            return createNull();
-
-        if (string.equals("_EMPTY"))
+        if (string.equals("EMPTY"))
             return createEmpty();
 
         try {
             final var ids = List.of(string.split("\\.")).stream().mapToInt(Integer::parseInt).toArray();
-            return new Signature(ids, false);
+            return new Signature(ids);
         }
         catch (NumberFormatException exception) {
             return null;
@@ -313,7 +268,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
     
             var ids = new JSONArray(object.ids);
             output.put("ids", ids);
-            output.put("isNull", object.isNull);
             
             return output;
         }
@@ -329,9 +283,7 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
             for (int i = 0; i < idsArray.length(); i++)
                 ids[i] = idsArray.getInt(i);
             
-            var isNull = jsonObject.getBoolean("isNull");
-
-            return isNull ? Signature.createNull() : Signature.createComposite(ids);
+            return Signature.createComposite(ids);
         }
     
     }
@@ -351,7 +303,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONConve
             generator.writeStartObject();
             generator.writeFieldName("ids");
             generator.writeArray(signature.ids, 0, signature.ids.length);
-            generator.writeBooleanField("isNull", signature.isNull);
             generator.writeEndObject();
         }
 

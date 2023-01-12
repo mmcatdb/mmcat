@@ -1,36 +1,24 @@
 import { Node, NodeSequence, type FilterFunction } from "@/types/categoryGraph";
-import { Signature } from "@/types/identifiers";
+import type { Signature } from "@/types/identifiers";
 
 export class SequenceSignature {
     readonly sequence: NodeSequence;
-    readonly isNull: boolean;
 
-    private constructor(input: Node | NodeSequence, isNull = false) {
+    private constructor(input: Node | NodeSequence) {
         this.sequence = input instanceof Node ? NodeSequence.fromRootNode(input) : input.copy();
-        this.isNull = isNull;
     }
 
     copy(): SequenceSignature {
-        return new SequenceSignature(this.sequence, this.isNull);
-    }
-
-    copyNotNull(): SequenceSignature {
-        return new SequenceSignature(this.sequence, false);
+        return new SequenceSignature(this.sequence);
     }
 
     static empty(rootNode: Node): SequenceSignature {
         return new SequenceSignature(rootNode);
     }
 
-    static null(rootNode: Node): SequenceSignature {
-        return new SequenceSignature(rootNode, true);
-    }
-
     static fromSignature(signature: Signature, rootNode: Node): SequenceSignature {
-        const output = new SequenceSignature(rootNode, signature.isNull);
-
-        if (!signature.isNull)
-            output.sequence.addSignature(signature);
+        const output = new SequenceSignature(rootNode);
+        output.sequence.addSignature(signature);
 
         return output;
     }
@@ -40,7 +28,7 @@ export class SequenceSignature {
     }
 
     toSignature(): Signature {
-        return this.isNull ? Signature.null : this.sequence.toSignature();
+        return this.sequence.toSignature();
     }
 
     toString(): string {
@@ -48,7 +36,7 @@ export class SequenceSignature {
     }
 
     equals(signature: SequenceSignature): boolean {
-        return this.isNull === signature.isNull && this.sequence.equals(signature.sequence);
+        return this.sequence.equals(signature.sequence);
     }
 
     markAvailablePaths(filters: FilterFunction | FilterFunction[]): void {

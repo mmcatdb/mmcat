@@ -12,6 +12,7 @@ export type ComplexPropertyJSON = {
     _class: 'ComplexProperty';
     name: NameJSON;
     signature: SignatureJSON;
+    isAuxiliary: boolean;
     subpaths: ChildPropertyJSON[];
 };
 

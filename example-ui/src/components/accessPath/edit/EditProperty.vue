@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty } from '@/types/accessPath/graph';
+import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty, SequenceSignature } from '@/types/accessPath/graph';
 import { PropertyType, type Graph, createDefaultFilter, type Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { ref, computed } from 'vue';
@@ -30,6 +30,7 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 
 const type = ref(propertyToType(props.property));
 const signature = ref(props.property.signature.copy());
+const isAuxiliary = ref('isAuxiliary' in props.property && props.property.isAuxiliary);
 const name = ref<Name>(props.property.name.copy());
 const state = ref(State.SelectSignature);
 const filter = ref(createDefaultFilter(props.database.configuration));
@@ -37,7 +38,7 @@ const typeIsDetermined = ref(false);
 
 const typeChanged = computed(() => type.value !== propertyToType(props.property));
 const nameChanged = computed(() => !props.property.name.equals(name.value));
-const signatureChanged = computed(() => !props.property.signature.equals(signature.value));
+const signatureChanged = computed(() => !props.property.signature.equals(signature.value) || ('isAuxiliary' in props.property && props.property.isAuxiliary !== isAuxiliary.value));
 const schemaObject = computed(() => signature.value.sequence.lastNode.schemaObject);
 
 function propertyToType(property: GraphChildProperty): PropertyType {
@@ -48,7 +49,7 @@ function save() {
     const subpaths = !signatureChanged.value && !typeChanged.value && props.property instanceof GraphComplexProperty ? props.property.subpaths : [];
     const newProperty = type.value === PropertyType.Simple
         ? new GraphSimpleProperty(name.value, signature.value, props.property.parent)
-        : new GraphComplexProperty(name.value, signature.value, props.property.parent, subpaths);
+        : new GraphComplexProperty(name.value, signature.value, isAuxiliary.value, props.property.parent, subpaths);
 
     props.property.parent.updateOrAddSubpath(newProperty, props.property);
 
@@ -60,8 +61,10 @@ function cancel() {
 }
 
 const isSignatureValid = computed(() => {
-    if (!props.database.configuration.isGrouppingAllowed && signature.value.isNull)
-        return false;
+    if (isAuxiliary.value)
+        return signature.value.isEmpty;
+    if (signature.value.isEmpty)
+        return !(signature.value.sequence.lastNode.schemaObject.ids && signature.value.sequence.lastNode.schemaObject.ids.isSignatures);
     if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
@@ -89,8 +92,7 @@ function determinePropertyType(node: Node): PropertyType | null {
     if (!props.database.configuration.isComplexPropertyAllowed)
         return PropertyType.Simple;
 
-    // Auxiliary property.
-    if (signature.value.isNull)
+    if (isAuxiliary.value)
         return PropertyType.Complex;
 
     return node.determinedPropertyType;
@@ -126,6 +128,10 @@ function backButton() {
     if (state.value === State.SelectType && typeIsDetermined.value)
         state.value--;
 }
+
+function isAuxiliaryClicked() {
+    signature.value = SequenceSignature.empty(props.property.node);
+}
 </script>
 
 <template>
@@ -144,7 +150,18 @@ function backButton() {
                 />
             </ValueRow>
             <ValueRow
-                v-if="state >= State.SelectSignature"
+                v-if="state >= State.SelectSignature && database.configuration.isGroupingAllowed"
+                label="Is auxiliary:"
+            >
+                <input
+                    v-model="isAuxiliary"
+                    :disabled="state > State.SelectSignature"
+                    type="checkbox"
+                    @input="isAuxiliaryClicked"
+                />
+            </ValueRow>
+            <ValueRow
+                v-if="state >= State.SelectSignature && !isAuxiliary"
                 label="Signature:"
             >
                 {{ signature }}
@@ -173,21 +190,12 @@ function backButton() {
                 />
             </ValueRow>
         </ValueContainer>
-        <div
-            v-if="state === State.SelectSignature"
-            class="button-row"
-        >
-            <SignatureInput
-                v-model="signature"
-                :graph="graph"
-                :filter="filter"
-                :default-is-null="true"
-            >
-                <template #nullButton>
-                    Auxiliary property
-                </template>
-            </SignatureInput>
-        </div>
+        <SignatureInput
+            v-if="state === State.SelectSignature && !isAuxiliary"
+            v-model="signature"
+            :graph="graph"
+            :filter="filter"
+        />
         <div class="button-row">
             <template v-if="state === State.SelectSignature">
                 <button

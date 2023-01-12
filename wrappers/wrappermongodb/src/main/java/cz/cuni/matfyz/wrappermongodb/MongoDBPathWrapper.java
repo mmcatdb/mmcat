@@ -27,7 +27,7 @@ public class MongoDBPathWrapper implements AbstractPathWrapper {
     @Override public boolean isPropertyToManyAllowed() { return true; }
     @Override public boolean isInliningToOneAllowed() { return true; }
     @Override public boolean isInliningToManyAllowed() { return true; }
-    @Override public boolean isGrouppingAllowed() { return true; }
+    @Override public boolean isGroupingAllowed() { return true; }
     @Override public boolean isDynamicNamingAllowed() { return true; }
     @Override public boolean isAnonymousNamingAllowed() { return true; }
     @Override public boolean isReferenceAllowed() { return true; }

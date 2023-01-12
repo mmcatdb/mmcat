@@ -7,12 +7,14 @@ import type { ComplexPropertyJSON } from "../JSONTypes";
 export class GraphComplexProperty {
     name: Name;
     _signature: SequenceSignature;
+    _isAuxiliary: boolean;
     parent: GraphParentProperty;
     _subpaths: GraphChildProperty[];
 
-    constructor(name: Name, signature: SequenceSignature, parent: GraphParentProperty, subpaths: GraphChildProperty[] = []) {
+    constructor(name: Name, signature: SequenceSignature, isAuxiliary: boolean, parent: GraphParentProperty, subpaths: GraphChildProperty[] = []) {
         this.name = name;
         this._signature = signature;
+        this._isAuxiliary = isAuxiliary;
         this.parent = parent;
         this._subpaths = [ ...subpaths ];
     }
@@ -41,7 +43,7 @@ export class GraphComplexProperty {
     }
 
     get isAuxiliary(): boolean {
-        return this.signature.isNull;
+        return this._isAuxiliary;
     }
 
     get signature(): SequenceSignature {
@@ -65,6 +67,7 @@ export class GraphComplexProperty {
             _class: 'ComplexProperty',
             name: this.name.toJSON(),
             signature: this._signature.toSignature().toJSON(),
+            isAuxiliary: this._isAuxiliary,
             subpaths: this._subpaths.map(subpath => subpath.toJSON())
         };
     }

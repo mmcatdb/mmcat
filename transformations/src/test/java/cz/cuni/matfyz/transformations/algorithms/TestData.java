@@ -626,15 +626,15 @@ public class TestData {
     }
 
     public ComplexProperty path_orderRoot() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber)
         );
     }
 
     public ComplexProperty path_nestedDoc() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            new ComplexProperty("nested", orderToNestedDoc,
+            ComplexProperty.create("nested", orderToNestedDoc,
                 new SimpleProperty("propertyA", nestedDocToPropertyA),
                 new SimpleProperty("propertyB", nestedDocToPropertyB),
                 new SimpleProperty("propertyC", nestedDocToPropertyC)
@@ -643,16 +643,16 @@ public class TestData {
     }
 
     public ComplexProperty path_array() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
             new SimpleProperty("array", orderToArray)
         );
     }
 
     public ComplexProperty path_items() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            new ComplexProperty("items", orderToItems,
+            ComplexProperty.create("items", orderToItems,
                 new SimpleProperty("productId", itemsToPid),
                 new SimpleProperty("name", itemsToPname),
                 new SimpleProperty("price", itemsToPrice),
@@ -662,17 +662,17 @@ public class TestData {
     }
 
     public ComplexProperty path_contact() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            new ComplexProperty("contact", orderToContact,
+            ComplexProperty.create("contact", orderToContact,
                 new SimpleProperty(contactToName, contactToValue)
             )
         );
     }
 
     public ComplexProperty path_ordered() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
-            new ComplexProperty("_id", Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
+            ComplexProperty.createAuxiliary(new StaticName("_id"),
                 new SimpleProperty("customer", orderToCustomer),
                 new SimpleProperty("number", orderToNumber)
             )
@@ -680,10 +680,10 @@ public class TestData {
     }
 
     public ComplexProperty path_address() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            new ComplexProperty("address", orderToAddress,
-                new ComplexProperty(addressToLabel, addressToContent,
+            ComplexProperty.create("address", orderToAddress,
+                ComplexProperty.create(addressToLabel, addressToContent,
                     new SimpleProperty("text", contentToText),
                     new SimpleProperty("locale", contentToLocale)
                 )
@@ -692,7 +692,7 @@ public class TestData {
     }
 
     public ComplexProperty path_contactRoot() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("value", contactToValue),
             new SimpleProperty("name", contactToName),
             new SimpleProperty("order_number", contactToNumber)
@@ -700,14 +700,14 @@ public class TestData {
     }
 
     public ComplexProperty path_orderedRoot() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("customer_id", orderedToId),
             new SimpleProperty("order_number", orderedToNumber)
         );
     }
 
     public ComplexProperty path_customerRoot() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("id", customerToId)
         );
     }

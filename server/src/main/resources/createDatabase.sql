@@ -502,20 +502,251 @@ CREATE TABLE mapping (
 
 INSERT INTO mapping (logical_model_id, root_object_id, mapping_json_value, json_value)
 VALUES
-    (1, 4, '{"primaryKey": [{"ids": [4], "isNull": false}, {"ids": [1, 3, 2], "isNull": false}], "kindName": "order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "Order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "_id", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "value": {"signature": {"ids": [1, 3, 2], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": {"ids": [4], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}, {"name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"_class": "DynamicName", "signature": {"ids": [8, 7], "isNull": false}}, "value": {"signature": {"ids": [6], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [5], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [12, 10], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [13, 10], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [14, 10], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "quantity", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [9], "isNull": false}}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "Order"}'),
-    (2, 1, '{"primaryKey": [{"ids": [1], "isNull": false}], "kindName": "customer", "accessPath": {"name": {"type": "STATIC_NAME", "value": "Customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "Customer"}'),
-    (3, 16, '{"primaryKey": [{"ids": [4], "isNull": false}], "kindName": "app_customer", "accessPath": {"name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [4], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "full_name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "CustomerTable"}'),
-    (3, 19, '{"primaryKey": [{"ids": [1], "isNull": false}], "kindName": "app_contact", "accessPath": {"name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "type", "_class": "StaticName"}, "value": {"signature": {"ids": [3], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "ContactTable"}'),
-    (3, 23, '{"primaryKey": [{"ids": [4, 7], "isNull": false}, {"ids": [1, 6], "isNull": false}], "kindName": "app_customer_contact", "accessPath": {"name": {"type": "STATIC_NAME", "value": "customer_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [4, 7], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "contact_id", "_class": "StaticName"}, "value": {"signature": {"ids": [1, 6], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "CustomerContactTable"}'),
-    (3, 24, '{"primaryKey": [{"ids": [13], "isNull": false}], "kindName": "app_order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [13], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "delivery_address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [4, 14], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "OrderTable"}'),
-    (3, 31, '{"primaryKey": [{"ids": [15], "isNull": false}], "kindName": "app_product", "accessPath": {"name": {"type": "STATIC_NAME", "value": "product", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [15], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [17], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "ProductTable"}'),
-    (3, 35, '{"primaryKey": [{"ids": [13, 21], "isNull": false}, {"ids": [15, 20], "isNull": false}], "kindName": "app_order_item", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order_item", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "order_id", "_class": "StaticName"}, "value": {"signature": {"ids": [13, 21], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "product_id", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 20], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "OrderItemTable"}'),
-    (4, 24, '{"primaryKey": [{"ids": [13], "isNull": false}], "kindName": "order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"_class": "DynamicName", "signature": {"ids": [3], "isNull": false}}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [6, -7], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [14], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "events", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}, {"name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 20], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [-21], "isNull": false}}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "OrderDocument"}'),
-    (5, 47, '{"primaryKey": [{"ids": [11], "isNull": false}], "kindName": "order", "accessPath": {"name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "customers", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [9, -10], "isNull": false}}, {"name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [14, 13], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 13], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 13], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [-12], "isNull": false}}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "Order"}'),
-    (6, 38, '{"primaryKey": [{"ids": [2], "isNull": false}], "kindName": "customer", "accessPath": {"name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "surname", "_class": "StaticName"}, "value": {"signature": {"ids": [3], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "Customer"}'),
-    (7, 42, '{"primaryKey": [{"ids": [2, 4], "isNull": false}, {"ids": [2, 5], "isNull": false}], "kindName": "friends", "accessPath": {"name": {"type": "STATIC_NAME", "value": "friends", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "first_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 4], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "second_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 5], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "Friends"}'),
-    (7, 43, '{"primaryKey": [{"ids": [7], "isNull": false}, {"ids": [8], "isNull": false}, {"ids": [2, 6], "isNull": false}], "kindName": "contact", "accessPath": {"name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [{"name": {"type": "STATIC_NAME", "value": "key", "_class": "StaticName"}, "value": {"signature": {"ids": [7], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"}, {"name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 6], "isNull": false}}, "_class": "SimpleProperty"}], "signature": {"ids": [0], "isNull": true}}}', '{"label": "Contacts"}');
-
+(1, 4, '{"primaryKey": [{"ids": [4], "isNull": false}, {"ids": [1, 3, 2], "isNull": false}], "kindName": "order",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "Order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "_id", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "value": {"signature": {"ids": [1, 3, 2], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": {"ids": [4], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"_class": "DynamicName", "signature": {"ids": [8, 7], "isNull": false}}, "value": {"signature": {"ids": [6], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [5], "isNull": false}, "isAuxiliary": false
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [12, 10], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [13, 10], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [14, 10], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "quantity", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [9], "isNull": false}, "isAuxiliary": false
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "Order"}'
+    ),
+    (2, 1, '{"primaryKey": [{"ids": [1], "isNull": false}], "kindName": "customer",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "Customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "Customer"}'
+    ),
+    (3, 16, '{"primaryKey": [{"ids": [4], "isNull": false}], "kindName": "app_customer",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [4], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "full_name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "CustomerTable"}'
+    ),
+    (3, 19, '{"primaryKey": [{"ids": [1], "isNull": false}], "kindName": "app_contact",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "type", "_class": "StaticName"}, "value": {"signature": {"ids": [3], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "ContactTable"}'
+    ),
+    (3, 23, '{"primaryKey": [{"ids": [4, 7], "isNull": false}, {"ids": [1, 6], "isNull": false}], "kindName": "app_customer_contact",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "customer_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [4, 7], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "contact_id", "_class": "StaticName"}, "value": {"signature": {"ids": [1, 6], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "CustomerContactTable"}'
+    ),
+    (3, 24, '{"primaryKey": [{"ids": [13], "isNull": false}], "kindName": "app_order",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [13], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "delivery_address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [4, 14], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "OrderTable"}'
+    ),
+    (3, 31, '{"primaryKey": [{"ids": [15], "isNull": false}], "kindName": "app_product",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "product", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [15], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [17], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "ProductTable"}'
+    ),
+    (3, 35, '{"primaryKey": [{"ids": [13, 21], "isNull": false}, {"ids": [15, 20], "isNull": false}], "kindName": "app_order_item",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "order_item", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "order_id", "_class": "StaticName"}, "value": {"signature": {"ids": [13, 21], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "product_id", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 20], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "OrderItemTable"}'
+    ),
+    (4, 24, '{"primaryKey": [{"ids": [13], "isNull": false}], "kindName": "order",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                                {
+                                    "name": {"_class": "DynamicName", "signature": {"ids": [3], "isNull": false}}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                                }
+                            ], "signature": {"ids": [6, -7], "isNull": false}, "isAuxiliary": false
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [5], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [14], "isNull": false}, "isAuxiliary": false
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "address", "_class": "StaticName"}, "value": {"signature": {"ids": [12], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "events", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": {"ids": [9], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": {"ids": [10], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": {"ids": [19], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": {"ids": [18], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 20], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [-21], "isNull": false}, "isAuxiliary": false
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "OrderDocument"}'
+    ),
+    (5, 47, '{"primaryKey": [{"ids": [11], "isNull": false}], "kindName": "order",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": {"ids": [11], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "customers", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [9, -10], "isNull": false}, "isAuxiliary": false
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                        {
+                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [14, 13], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [15, 13], "isNull": false}}, "_class": "SimpleProperty"
+                        }, {
+                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": {"ids": [16, 13], "isNull": false}}, "_class": "SimpleProperty"
+                        }
+                    ], "signature": {"ids": [-12], "isNull": false}, "isAuxiliary": false
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "Order"}'
+    ),
+    (6, 38, '{"primaryKey": [{"ids": [2], "isNull": false}], "kindName": "customer",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": {"ids": [2], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": {"ids": [1], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "surname", "_class": "StaticName"}, "value": {"signature": {"ids": [3], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "Customer"}'
+    ),
+    (7, 42, '{"primaryKey": [{"ids": [2, 4], "isNull": false}, {"ids": [2, 5], "isNull": false}], "kindName": "friends",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "friends", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "first_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 4], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "second_customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 5], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "Friends"}'
+    ),
+    (7, 43, '{"primaryKey": [{"ids": [7], "isNull": false}, {"ids": [8], "isNull": false}, {"ids": [2, 6], "isNull": false}], "kindName": "contact",
+        "accessPath": {
+            "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                {
+                    "name": {"type": "STATIC_NAME", "value": "key", "_class": "StaticName"}, "value": {"signature": {"ids": [7], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": {"ids": [8], "isNull": false}}, "_class": "SimpleProperty"
+                }, {
+                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": {"ids": [2, 6], "isNull": false}}, "_class": "SimpleProperty"
+                }
+            ], "signature": {"ids": [0], "isNull": true}, "isAuxiliary": true
+        }}',
+        '{"label": "Contacts"}'
+    );
+    
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,

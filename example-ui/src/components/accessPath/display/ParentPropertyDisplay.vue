@@ -6,8 +6,6 @@ import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 
-//name: 'ParentPropertyDisplay',
-
 type ParentPropertyDisplayProps = {
     property: GraphParentProperty | ParentProperty;
     isLast?: boolean;

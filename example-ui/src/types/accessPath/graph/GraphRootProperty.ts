@@ -12,7 +12,7 @@ export class GraphRootProperty {
     constructor(name: StaticName, rootNode: Node, subpaths: GraphChildProperty[] = []) {
         this.name = name;
         this._subpaths = [ ...subpaths ];
-        this._signature = SequenceSignature.null(rootNode);
+        this._signature = SequenceSignature.empty(rootNode);
     }
 
     update(newName: StaticName): void {
@@ -54,6 +54,7 @@ export class GraphRootProperty {
             _class: 'ComplexProperty',
             name: this.name.toJSON(),
             signature: this._signature.toSignature().toJSON(),
+            isAuxiliary: true,
             subpaths: this._subpaths.map(subpath => subpath.toJSON())
         };
     }

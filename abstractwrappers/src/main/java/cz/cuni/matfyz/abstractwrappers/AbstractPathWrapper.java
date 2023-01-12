@@ -17,7 +17,7 @@ public interface AbstractPathWrapper {
 
     public abstract boolean isInliningToManyAllowed();
 
-    public abstract boolean isGrouppingAllowed();
+    public abstract boolean isGroupingAllowed();
 
     public abstract boolean isDynamicNamingAllowed();
 

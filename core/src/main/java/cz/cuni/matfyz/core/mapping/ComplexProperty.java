@@ -29,9 +29,11 @@ public class ComplexProperty extends AccessPath {
     public Signature signature() {
         return signature;
     }
+
+    private final boolean isAuxiliary;
     
     public boolean isAuxiliary() {
-        return signature.isNull();
+        return isAuxiliary;
     }
 
     public boolean hasDynamicKeys() {
@@ -49,30 +51,47 @@ public class ComplexProperty extends AccessPath {
         return subpathsMap.get(signature);
     }
     
-    public ComplexProperty(Name name, Signature signature, List<AccessPath> subpaths) {
+    public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, List<AccessPath> subpaths) {
         super(name);
         
         this.signature = signature;
-        //this.subpaths = new ArrayList<>(subpaths);
+        this.isAuxiliary = isAuxiliary;
         this.subpathsMap = new TreeMap<>();
         subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
         this.subpaths = new ArrayList<>(this.subpathsMap.values());
     }
-    
-    public ComplexProperty(Name name, Signature signature, AccessPath... subpaths) {
-        this(name, signature, Arrays.asList(subpaths));
+    /*
+    public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
+        this(name, signature, isAuxiliary, Arrays.asList(subpaths));
     }
     
-    public ComplexProperty(String name, Signature signature, AccessPath... subpaths) {
-        this(new StaticName(name), signature, Arrays.asList(subpaths));
+    public ComplexProperty(String name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
+        this(new StaticName(name), signature, isAuxiliary, Arrays.asList(subpaths));
     }
     
-    public ComplexProperty(Signature name, Signature signature, AccessPath... subpaths) {
-        this(new DynamicName(name), signature, Arrays.asList(subpaths));
+    public ComplexProperty(Signature name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
+        this(new DynamicName(name), signature, isAuxiliary, Arrays.asList(subpaths));
+    }
+     */
+
+    private static ComplexProperty create(Name name, Signature signature, AccessPath... subpaths) {
+        return new ComplexProperty(name, signature, false, Arrays.asList(subpaths));
+    }
+
+    public static ComplexProperty create(String name, Signature signature, AccessPath... subpaths) {
+        return create(new StaticName(name), signature, subpaths);
+    }
+
+    public static ComplexProperty create(Signature name, Signature signature, AccessPath... subpaths) {
+        return create(new DynamicName(name), signature, subpaths);
     }
     
     public static ComplexProperty createEmpty() {
-        return new ComplexProperty(null, Signature.createNull(), Collections.<AccessPath>emptyList());
+        return new ComplexProperty(null, Signature.createEmpty(), true, Collections.<AccessPath>emptyList());
+    }
+
+    public static ComplexProperty createAuxiliary(Name name, AccessPath... subpaths) {
+        return new ComplexProperty(name, Signature.createEmpty(), true, Arrays.asList(subpaths));
     }
     
     /**
@@ -159,7 +178,7 @@ public class ComplexProperty extends AccessPath {
         
         final List<AccessPath> newSubpaths = subpaths.stream().filter(path -> path.equals(subpath)).toList();
         
-        return new ComplexProperty(name, signature, newSubpaths);
+        return new ComplexProperty(name, signature, isAuxiliary, newSubpaths);
     }
     
     @Override
@@ -188,7 +207,7 @@ public class ComplexProperty extends AccessPath {
      */
     public ComplexProperty copyWithoutAuxiliaryNodes() {
         List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();
-        return new ComplexProperty(name, signature, newSubpaths);
+        return new ComplexProperty(name, signature, isAuxiliary, newSubpaths);
     }
     
     private List<AccessPath> getContentWithoutAuxiliaryNodes() {
@@ -221,6 +240,7 @@ public class ComplexProperty extends AccessPath {
     
             output.put("name", object.name.toJSON());
             output.put("signature", object.signature.toJSON());
+            output.put("isAuxiliary", object.isAuxiliary);
 
             var subpaths = new JSONArray(object.subpaths.stream().map(subpath -> subpath.toJSON()).toList());
             output.put("subpaths", subpaths);
@@ -236,6 +256,7 @@ public class ComplexProperty extends AccessPath {
         protected ComplexProperty innerFromJSON(JSONObject jsonObject) throws JSONException {
             var name = new Name.Builder().fromJSON(jsonObject.getJSONObject("name"));
             var signature = new Signature.Builder().fromJSON(jsonObject.getJSONObject("signature"));
+            var isAuxiliary = jsonObject.getBoolean("isAuxiliary");
 
             var subpathsArray = jsonObject.getJSONArray("subpaths");
             var subpaths = new ArrayList<AccessPath>();
@@ -243,7 +264,7 @@ public class ComplexProperty extends AccessPath {
             for (int i = 0; i < subpathsArray.length(); i++)
                 subpaths.add(builder.fromJSON(subpathsArray.getJSONObject(i)));
 
-            return new ComplexProperty(name, signature, subpaths);
+            return new ComplexProperty(name, signature, isAuxiliary, subpaths);
         }
     
     }

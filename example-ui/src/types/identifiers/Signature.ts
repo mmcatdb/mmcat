@@ -1,20 +1,17 @@
 enum SignatureType {
     Base,
     Composite,
-    Empty,
-    Null
+    Empty
 }
 
 export type SignatureJSON = {
     ids: number[];
-    isNull: boolean;
 };
 
-function determineType(isNull: boolean, idsLength: number) {
-    if (isNull)
-        return SignatureType.Null;
+function determineType(idsLength: number) {
     if (idsLength === 0)
         return SignatureType.Empty;
+
     return idsLength === 1 ? SignatureType.Base : SignatureType.Composite;
 }
 
@@ -22,13 +19,13 @@ export class Signature {
     readonly _ids: number[];
     readonly _type: SignatureType;
 
-    private constructor(input: number | number[], isNull = false) {
+    private constructor(input: number | number[]) {
         this._ids = typeof input === 'number' ? [ input ] : [ ...input ];
-        this._type = determineType(isNull, this._ids.length);
+        this._type = determineType(this._ids.length);
     }
 
     static fromServer(input: SignatureFromServer): Signature {
-        return new Signature(input.ids, input.isNull);
+        return new Signature(input.ids);
     }
 
     static base(id: number): Signature {
@@ -56,7 +53,7 @@ export class Signature {
     }
 
     copy(): Signature {
-        return new Signature(this._ids, this._type === SignatureType.Null);
+        return new Signature(this._ids);
     }
 
     concatenate(other: Signature): Signature {
@@ -69,12 +66,6 @@ export class Signature {
         return this._emptyInstance;
     }
 
-    static _nullInstance = new Signature(0, true);
-
-    static get null(): Signature {
-        return this._nullInstance;
-    }
-
     get isBase(): boolean {
         return this._type === SignatureType.Base;
     }
@@ -83,20 +74,13 @@ export class Signature {
         return this._type === SignatureType.Empty;
     }
 
-    get isNull(): boolean {
-        return this._type === SignatureType.Null;
-    }
-
     get baseValue(): number | null {
         return this.isBase ? this._ids[0] : null;
     }
 
     toString(): string {
         if (this._type === SignatureType.Empty)
-            return '_EMPTY';
-
-        if (this._type === SignatureType.Null)
-            return '_NULL';
+            return 'EMPTY';
 
         return this._ids.join('.');
     }
@@ -140,18 +124,16 @@ export class Signature {
     }
 
     static fromJSON(jsonObject: SignatureJSON): Signature {
-        return new Signature(jsonObject.ids, jsonObject.isNull);
+        return new Signature(jsonObject.ids);
     }
 
     toJSON(): SignatureJSON {
         return {
-            ids: this._ids,
-            isNull: this.isNull
+            ids: this._ids
         };
     }
 }
 
 export type SignatureFromServer = {
     ids: number[];
-    isNull: boolean;
 };

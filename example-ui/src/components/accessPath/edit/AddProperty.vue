@@ -27,7 +27,8 @@ const props = defineProps<AddPropertyProps>();
 const emit = defineEmits([ 'save', 'cancel' ]);
 
 const type = ref(PropertyType.Simple);
-const signature = ref(SequenceSignature.null(props.parentProperty.node));
+const signature = ref(SequenceSignature.empty(props.parentProperty.node));
+const isAuxiliary = ref(false);
 const name = ref<Name>(StaticName.fromString(''));
 const state = ref(State.SelectSignature);
 const filter = ref(createDefaultFilter(props.database.configuration));
@@ -36,7 +37,7 @@ const typeIsDetermined = ref(false);
 function save() {
     const newProperty = type.value === PropertyType.Simple
         ? new GraphSimpleProperty(name.value, signature.value, props.parentProperty)
-        : new GraphComplexProperty(name.value, signature.value, props.parentProperty);
+        : new GraphComplexProperty(name.value, signature.value, isAuxiliary.value, props.parentProperty);
 
     props.parentProperty.updateOrAddSubpath(newProperty);
 
@@ -48,8 +49,10 @@ function cancel() {
 }
 
 const isSignatureValid = computed(() => {
-    if (!props.database.configuration.isGrouppingAllowed && signature.value.isNull)
-        return false;
+    if (isAuxiliary.value)
+        return signature.value.isEmpty;
+    if (signature.value.isEmpty)
+        return !(signature.value.sequence.lastNode.schemaObject.ids && signature.value.sequence.lastNode.schemaObject.ids.isSignatures);
     if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
@@ -89,8 +92,7 @@ function determinePropertyType(node: Node): PropertyType | null {
     if (!props.database.configuration.isComplexPropertyAllowed)
         return PropertyType.Simple;
 
-    // Auxiliary property.
-    if (signature.value.isNull)
+    if (isAuxiliary.value)
         return PropertyType.Complex;
 
     return node.determinedPropertyType;
@@ -123,6 +125,10 @@ function backButton() {
     if (state.value === State.SelectType && typeIsDetermined.value)
         state.value--;
 }
+
+function isAuxiliaryClicked() {
+    signature.value = SequenceSignature.empty(props.parentProperty.node);
+}
 </script>
 
 <template>
@@ -130,7 +136,18 @@ function backButton() {
         <h2>Add property</h2>
         <ValueContainer>
             <ValueRow
-                v-if="state >= State.SelectSignature"
+                v-if="state >= State.SelectSignature && database.configuration.isGroupingAllowed"
+                label="Is auxiliary:"
+            >
+                <input
+                    v-model="isAuxiliary"
+                    :disabled="state > State.SelectSignature"
+                    type="checkbox"
+                    @input="isAuxiliaryClicked"
+                />
+            </ValueRow>
+            <ValueRow
+                v-if="state >= State.SelectSignature && !isAuxiliary"
                 label="Signature:"
             >
                 {{ signature }}
@@ -159,21 +176,12 @@ function backButton() {
                 />
             </ValueRow>
         </ValueContainer>
-        <div
-            v-if="state === State.SelectSignature"
-            class="button-row"
-        >
-            <SignatureInput
-                v-model="signature"
-                :graph="graph"
-                :filter="filter"
-                :default-is-null="true"
-            >
-                <template #nullButton>
-                    Auxiliary property
-                </template>
-            </SignatureInput>
-        </div>
+        <SignatureInput
+            v-if="state === State.SelectSignature && !isAuxiliary"
+            v-model="signature"
+            :graph="graph"
+            :filter="filter"
+        />
         <div class="button-row">
             <button
                 :disabled="isNextButtonDisabled"

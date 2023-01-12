@@ -11,7 +11,7 @@ public class DatabaseConfiguration {
     public final boolean isPropertyToManyAllowed;
     public final boolean isInliningToOneAllowed;
     public final boolean isInliningToManyAllowed;
-    public final boolean isGrouppingAllowed;
+    public final boolean isGroupingAllowed;
     public final boolean isDynamicNamingAllowed;
     public final boolean isAnonymousNamingAllowed;
     public final boolean isReferenceAllowed;
@@ -23,7 +23,7 @@ public class DatabaseConfiguration {
         this.isPropertyToManyAllowed = wrapper.isPropertyToManyAllowed();
         this.isInliningToOneAllowed = wrapper.isInliningToOneAllowed();
         this.isInliningToManyAllowed = wrapper.isInliningToManyAllowed();
-        this.isGrouppingAllowed = wrapper.isGrouppingAllowed();
+        this.isGroupingAllowed = wrapper.isGroupingAllowed();
         this.isDynamicNamingAllowed = wrapper.isDynamicNamingAllowed();
         this.isAnonymousNamingAllowed = wrapper.isAnonymousNamingAllowed();
         this.isReferenceAllowed = wrapper.isReferenceAllowed();

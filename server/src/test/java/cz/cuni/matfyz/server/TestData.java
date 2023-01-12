@@ -102,20 +102,20 @@ public class TestData {
     }
 
     private ComplexProperty createUserAccessPath() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("_id", userToId_user),
-            new ComplexProperty("contact_address", userToAddress,
+            ComplexProperty.create("contact_address", userToAddress,
                 new SimpleProperty("street", addressToStreet),
                 new SimpleProperty("city", addressToCity)
             ),
-            new ComplexProperty("order", userToOrder,
+            ComplexProperty.create("order", userToOrder,
                 new SimpleProperty("id", orderToId_order)
             )
         );
     }
 
     private ComplexProperty createOrderAccessPath() {
-        return new ComplexProperty(StaticName.createAnonymous(), Signature.createNull(),
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("id", orderToId_order),
             new SimpleProperty("customer_id", userToOrder.dual().concatenate(userToId_user)),
             new SimpleProperty("fullAddress", orderToFullAddress)

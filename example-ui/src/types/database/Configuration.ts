@@ -3,7 +3,7 @@ export class DatabaseConfiguration {
     readonly isPropertyToManyAllowed: boolean;
     readonly isInliningToOneAllowed: boolean;
     readonly isInliningToManyAllowed: boolean;
-    readonly isGrouppingAllowed: boolean;
+    readonly isGroupingAllowed: boolean;
     readonly isDynamicNamingAllowed: boolean;
     readonly isAnonymousNamingAllowed: boolean;
     readonly isReferenceAllowed: boolean; // TODO The IC reference algorithm.
@@ -15,7 +15,7 @@ export class DatabaseConfiguration {
         this.isPropertyToManyAllowed = input.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = input.isInliningToOneAllowed;
         this.isInliningToManyAllowed = input.isInliningToManyAllowed;
-        this.isGrouppingAllowed = input.isGrouppingAllowed;
+        this.isGroupingAllowed = input.isGroupingAllowed;
         this.isDynamicNamingAllowed = input.isDynamicNamingAllowed;
         this.isAnonymousNamingAllowed = input.isAnonymousNamingAllowed;
         this.isReferenceAllowed = input.isReferenceAllowed;
@@ -29,7 +29,7 @@ export type DatabaseConfigurationFromServer = {
     isPropertyToManyAllowed: boolean;
     isInliningToOneAllowed: boolean;
     isInliningToManyAllowed: boolean;
-    isGrouppingAllowed: boolean;
+    isGroupingAllowed: boolean;
     isDynamicNamingAllowed: boolean;
     isAnonymousNamingAllowed: boolean;
     isReferenceAllowed: boolean;

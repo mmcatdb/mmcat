@@ -6,23 +6,25 @@ import { subpathFromJSON, type ChildProperty, type ParentProperty } from "./comp
 export class ComplexProperty {
     name: Name;
     _signature: Signature;
+    _isAuxiliary: boolean;
     parent?: ParentProperty;
     _subpaths: ChildProperty[];
 
-    private constructor(name: Name, signature: Signature, parent?: ParentProperty, subpaths: ChildProperty[] = []) {
+    private constructor(name: Name, signature: Signature, isAuxiliary: boolean, parent?: ParentProperty, subpaths: ChildProperty[] = []) {
         this.name = name;
         this._signature = signature;
+        this._isAuxiliary = isAuxiliary;
         this.parent = parent;
         this._subpaths = [ ...subpaths ];
     }
 
     static copy(property: ComplexProperty): ComplexProperty {
         const name = property.name instanceof DynamicName ? DynamicName.copy(property.name) : StaticName.copy(property.name);
-        return new ComplexProperty(name, property.signature.copy(), property.parent, property.subpaths);
+        return new ComplexProperty(name, property.signature.copy(), property._isAuxiliary, property.parent, property.subpaths);
     }
 
     get isAuxiliary(): boolean {
-        return this.signature.isNull;
+        return this._isAuxiliary;
     }
 
     get signature(): Signature {
@@ -53,6 +55,7 @@ export class ComplexProperty {
         const property = new ComplexProperty(
             nameFromJSON(jsonObject.name),
             Signature.fromJSON(jsonObject.signature),
+            jsonObject.isAuxiliary,
             parent
         );
 
@@ -66,6 +69,7 @@ export class ComplexProperty {
             _class: 'ComplexProperty',
             name: this.name.toJSON(),
             signature: this._signature.toJSON(),
+            isAuxiliary: this._isAuxiliary,
             subpaths: this._subpaths.map(subpath => subpath.toJSON())
         };
     }

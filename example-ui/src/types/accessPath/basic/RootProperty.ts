@@ -6,7 +6,7 @@ import type { ComplexPropertyJSON, RootPropertyJSON } from "../JSONTypes";
 export class RootProperty {
     name: StaticName;
     _subpaths: ChildProperty[];
-    _signature = Signature.null;
+    _signature = Signature.empty;
 
     constructor(name: StaticName, subpaths: ChildProperty[] = []) {
         this.name = name;
@@ -52,6 +52,7 @@ export class RootProperty {
             _class: 'ComplexProperty',
             name: this.name.toJSON(),
             signature: this._signature.toJSON(),
+            isAuxiliary: true,
             subpaths: this._subpaths.map(subpath => subpath.toJSON())
         };
     }
