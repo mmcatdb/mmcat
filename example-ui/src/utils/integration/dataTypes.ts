@@ -60,7 +60,7 @@ function createAttributeForText(attribute: Attribute, output: ImportedDataspecer
     const attributeObject = new ImportedObject(attribute.iri, attribute.pimIri, attribute.label);
     output.objects.push(attributeObject);
 
-    const language = new ImportedObject(attribute.iri + '/_language', TEXT.LANGUAGE, '_language', createValueId());
+    const language = new ImportedObject(attribute.iri + '/_language', TEXT.LANGUAGE, attribute.label + '_language', createValueId());
     output.objects.push(language);
     const attributeToLanguage = new ImportedMorphism(attribute.iri + '/_attribute-to-language', TEXT.ATTRIBUTE_TO_LANGUAGE, '', attributeObject, language, {
         domCodMin: Cardinality.One,
@@ -70,7 +70,7 @@ function createAttributeForText(attribute: Attribute, output: ImportedDataspecer
     });
     output.morphisms.push(attributeToLanguage);
 
-    const value = new ImportedObject(attribute.iri + '/_value', TEXT.VALUE, '_value', createValueId());
+    const value = new ImportedObject(attribute.iri + '/_value', TEXT.VALUE, attribute.label + '_value', createValueId());
     output.objects.push(value);
     const attributeToValue = new ImportedMorphism(attribute.iri + '/_attribute-to-value', TEXT.ATTRIBUTE_TO_VALUE, '', attributeObject, value, {
         domCodMin: Cardinality.One,
