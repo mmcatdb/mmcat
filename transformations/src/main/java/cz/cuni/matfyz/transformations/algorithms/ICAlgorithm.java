@@ -74,7 +74,11 @@ public class ICAlgorithm {
         Collection<String> output = new ArrayList<>();
 
         for (Signature signature : primaryKey) {
-            if (path.getSubpathBySignature(signature).name() instanceof StaticName staticName)
+            final var subpath = path.getSubpathBySignature(signature);
+            if (subpath == null)
+                continue;
+
+            if (subpath.name() instanceof StaticName staticName)
                 output.add(staticName.getStringName());
             else
                 // These names are identifiers of given kind so they must be unique among all names.
