@@ -1,6 +1,8 @@
-# The port on which the application will listen:
-server.port=27500
+# The port on which the application will listen.
 # Make sure the same number is used in the apache configuration.
+server.port=27500
+# Spring security (i.e., "server-side-cors") - 3000 is the default port of the vite development server.
+server.origin=http://localhost:3000
 
 # Credentials fot the main database (PostgreSQL):
 postgresql.host=localhost

@@ -16,10 +16,12 @@ class Settings implements WebMvcConfigurer {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                    // 3000 is the default port of the vite development server.
-                    .allowedOrigins("http://localhost:3000", "http://localhost")
+                final String origin = Config.get("server.origin");
+
+                registry
+                    .addMapping("/**")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE")
+                    .allowedOrigins(origin)
                     .allowCredentials(true);
             }
         };
