@@ -12,7 +12,7 @@ A backend application for the MM-evocat tool. It is based on the Spring Boot fra
 ## Configuration
 
 - Copy the sample configuration file and fill all the necessary information.
-```sh
+```bash
 cp src/main/resources/application.properties.sample src/main/resources/application.properties
 ```
 - Additional settings are in the `src/main/java/cz/cuni/matfyz/server/Settings.java` file.
@@ -24,7 +24,7 @@ cp src/main/resources/application.properties.sample src/main/resources/applicati
 
 The application needs one main database (to store its own data, must be PostgreSQL) as well as some other databases (from which it can import data to the instance category).
 - First create a user and the main database. To do so, open the PostgreSQL console:
-```sh
+```bash
 sudo -u postgres psql
 ```
 - and write:
@@ -34,16 +34,27 @@ CREATE DATABASE mmcat_server OWNER mmcat_user;
 ```
 - Feel free to use different credentials and database name (just make sure you replace them in the rest of this document).
 - Then create the database structure from the sample script:
-```sh
+```bash
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server?sslmode=require -f src/main/resources/createDatabase.sql
 ```
 
-### Run application in place
+### Run development server
 
-```sh
+```bash
 mvn spring-boot:run
 ```
-- To run the application independently execute the command in some detachable environment (Screen, Tmux etc.).
+
+### Build application
+
+```bash
+mvn clean package
+```
+
+- You can then run the application by:
+
+```bash
+java -jar target/server-1.0-SNAPSHOT.jar
+```
 
 ## Sample data
 
@@ -53,7 +64,7 @@ mvn spring-boot:run
 CREATE DATABASE mmcat_server_data OWNER mmcat_user;
 ```
 - and data can be loaded by:
-```sh
+```bash
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_data?sslmode=require -f src/main/resources/setupPostgresql.sql
 ```
 - You also need to create a user for the second one. Open the MongoDB console and write:
@@ -69,7 +80,7 @@ db.createUser({
 });
 ```
 - Then you can create the database:
-```sh
+```bash
 mongo --username mmcat_user --password mmcat_password --authenticationDatabase admin localhost:27017/mmcat_server_data src/main/resources/setupMongodb.js
 ```
 
@@ -78,6 +89,6 @@ mongo --username mmcat_user --password mmcat_password --authenticationDatabase a
 CREATE DATABASE mmcat_server_ttd OWNER mmcat_user;
 ```
 
-```sh
+```bash
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_ttd?sslmode=require -f src/main/resources/setupPostgresqlTTD.sql
 ```

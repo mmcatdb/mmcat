@@ -23,7 +23,10 @@ import org.springframework.stereotype.Repository;
 public class MappingRepository {
 
     @Autowired
-    SchemaObjectRepository objectRepository;
+    private DatabaseWrapper db;
+
+    @Autowired
+    private SchemaObjectRepository objectRepository;
 
     private record RawMappingWrapper(
         Id id,
@@ -37,7 +40,7 @@ public class MappingRepository {
     }
 
     public MappingWrapper find(Id id) {
-        final RawMappingWrapper rawMapping = DatabaseWrapper.get((connection, output) -> {
+        final RawMappingWrapper rawMapping = db.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
@@ -59,7 +62,7 @@ public class MappingRepository {
     }
 
     public List<MappingWrapper> findAll(Id logicalModelId) {
-        List<RawMappingWrapper> rawMappings = DatabaseWrapper.getMultiple((connection, output) -> {
+        List<RawMappingWrapper> rawMappings = db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
             setId(statement, 1, logicalModelId);
             var resultSet = statement.executeQuery();
@@ -84,7 +87,7 @@ public class MappingRepository {
     }
 
     public List<MappingInfo> findAllInfos(Id logicalModelId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM mapping WHERE logical_model_id = ? ORDER BY id;");
             setId(statement, 1, logicalModelId);
             var resultSet = statement.executeQuery();
@@ -99,7 +102,7 @@ public class MappingRepository {
     }
 
     public Id add(MappingInit mapping) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 INSERT INTO mapping (logical_model_id, root_object_id, json_value)
                 VALUES (?, ?, ?::jsonb);

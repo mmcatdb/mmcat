@@ -11,6 +11,7 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -19,8 +20,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class LogicalModelRepository {
 
+    @Autowired
+    private DatabaseWrapper db;
+
     public List<LogicalModel> findAllInCategory(Id categoryId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM logical_model WHERE schema_category_id = ? ORDER BY id;");
             setId(statement, 1, categoryId);
             var resultSet = statement.executeQuery();
@@ -36,7 +40,7 @@ public class LogicalModelRepository {
     }
 
     public LogicalModel find(Id id) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM logical_model WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
@@ -54,7 +58,7 @@ public class LogicalModelRepository {
     }
 
     public Id add(LogicalModelInit logicalModel) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 INSERT INTO logical_model (schema_category_id, database_id, json_value)
                 VALUES (?, ?, ?::jsonb);

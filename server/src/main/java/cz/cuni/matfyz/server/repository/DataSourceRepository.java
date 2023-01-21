@@ -10,6 +10,7 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -18,8 +19,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DataSourceRepository {
 
+    @Autowired
+    private DatabaseWrapper db;
+
     public DataSource find(Id id) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM data_source WHERE data_source.id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
@@ -33,7 +37,7 @@ public class DataSourceRepository {
     }
 
     public List<DataSource> findAll() {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT *
                 FROM data_source
@@ -50,7 +54,7 @@ public class DataSourceRepository {
     }
 
     public List<DataSource> findAllInCategory(Id categoryId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT
                     DISTINCT data_source.id as id,
@@ -76,7 +80,7 @@ public class DataSourceRepository {
     }
 
     private DataSource create(DataSource dataSource) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO data_source (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, dataSource.toJSON().toString());
 
@@ -93,7 +97,7 @@ public class DataSourceRepository {
     }
 
     private DataSource update(DataSource dataSource) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("UPDATE data_source SET json_value = ?::jsonb WHERE id = ?;");
             statement.setString(1, dataSource.toJSON().toString());
             setId(statement, 2, dataSource.id);
@@ -107,7 +111,7 @@ public class DataSourceRepository {
     }
 
     public boolean delete(Id id) {
-        return DatabaseWrapper.getBoolean((connection, output) -> {
+        return db.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
                 DELETE FROM data_source
                 WHERE id = ?;

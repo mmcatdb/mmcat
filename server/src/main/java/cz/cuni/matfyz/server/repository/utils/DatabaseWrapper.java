@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.server.repository.utils;
 
-import cz.cuni.matfyz.server.Config;
+import cz.cuni.matfyz.server.configuration.DatabaseProperties;
 import cz.cuni.matfyz.server.exception.DatabaseErrorException;
 import cz.cuni.matfyz.server.exception.PrimaryObjectNotFoundException;
 import cz.cuni.matfyz.server.exception.SecondaryObjectNotFoundException;
@@ -14,34 +14,42 @@ import java.util.function.Function;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * @author jachym.bartik
  */
-public abstract class DatabaseWrapper {
+@Component
+@Scope("singleton")
+public class DatabaseWrapper {
+
+    @Autowired
+    private DatabaseProperties databaseProperties;
 
     private DatabaseWrapper() {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
 
-    public static Connection getConnection() {
+    public Connection getConnection() {
         return createConnection();
     }
 
-    static Connection createConnection() {
+    private Connection createConnection() {
         try {
             var connectionBuilder = new StringBuilder();
             var connectionString = connectionBuilder
                 .append("jdbc:postgresql://")
-                .append(Config.get("postgresql.host"))
+                .append(databaseProperties.host())
                 .append(":")
-                .append(Config.get("postgresql.port"))
+                .append(databaseProperties.port())
                 .append("/")
-                .append(Config.get("postgresql.database"))
+                .append(databaseProperties.database())
                 .append("?user=")
-                .append(Config.get("postgresql.username"))
+                .append(databaseProperties.username())
                 .append("&password=")
-                .append(Config.get("postgresql.password"))
+                .append(databaseProperties.password())
                 .toString();
 
             return DriverManager.getConnection(connectionString);
@@ -52,7 +60,7 @@ public abstract class DatabaseWrapper {
         }
     }
 
-    public static <T> T get(DatabaseGetSingleFunction<T> function, String format, Object... arguments) {
+    public <T> T get(DatabaseGetSingleFunction<T> function, String format, Object... arguments) {
         return resolveDatabaseFunction(connection -> {
             SingleOutput<T> output = new SingleOutput<>();
             function.execute(connection, output);
@@ -64,11 +72,11 @@ public abstract class DatabaseWrapper {
         });
     }
 
-    public static <T> T get(DatabaseGetSingleFunction<T> function) {
+    public <T> T get(DatabaseGetSingleFunction<T> function) {
         return get(function, "");
     }
 
-    public static <T> List<T> getMultiple(DatabaseGetArrayFunction<T> function) {
+    public <T> List<T> getMultiple(DatabaseGetArrayFunction<T> function) {
         return resolveDatabaseFunction(connection -> {
             ArrayOutput<T> output = new ArrayOutput<>();
             function.execute(connection, output);
@@ -77,7 +85,7 @@ public abstract class DatabaseWrapper {
         });
     }
 
-    public static boolean getBoolean(DatabaseGetBooleanFunction function) {
+    public boolean getBoolean(DatabaseGetBooleanFunction function) {
         Boolean resolvedOutput = resolveDatabaseFunction(connection -> {
             BooleanOutput output = new BooleanOutput();
             function.execute(connection, output);
@@ -87,10 +95,10 @@ public abstract class DatabaseWrapper {
 
         // This is necessary because the resolveDatabaseFunction returns null in case of any error.
         // Null as a Boolean cannot be casted to boolean so we have to check it manually.
-        return resolvedOutput == null ? false : resolvedOutput;
+        return resolvedOutput != null && resolvedOutput;
     }
 
-    private static <T> T resolveDatabaseFunction(DatabaseFunction<T> function) {
+    private <T> T resolveDatabaseFunction(DatabaseFunction<T> function) {
         Connection connection = null;
 
         try {

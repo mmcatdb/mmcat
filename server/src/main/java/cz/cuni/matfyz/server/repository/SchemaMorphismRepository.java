@@ -11,6 +11,7 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -18,9 +19,12 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class SchemaMorphismRepository {
-    
+
+    @Autowired
+    private DatabaseWrapper db;
+
     public List<SchemaMorphismWrapper> findAllInCategory(Id categoryId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT *
                 FROM schema_morphism
@@ -43,7 +47,7 @@ public class SchemaMorphismRepository {
     }
 
     public SchemaMorphismWrapper find(Id id) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM schema_morphism WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
@@ -60,7 +64,7 @@ public class SchemaMorphismRepository {
     }
 
     public Id add(SchemaMorphismUpdateFixed morphism, Id categoryId) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_morphism (domain_object_id, codomain_object_id, json_value) VALUES (?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             
             setId(statement, 1, morphism.domId());

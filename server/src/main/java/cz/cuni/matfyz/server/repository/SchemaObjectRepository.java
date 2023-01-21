@@ -12,6 +12,7 @@ import cz.cuni.matfyz.server.utils.Position;
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -20,8 +21,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SchemaObjectRepository {
 
+    @Autowired
+    private DatabaseWrapper db;
+    
     public List<SchemaObjectWrapper> findAllInCategory(Id categoryId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT *
                 FROM schema_object
@@ -43,7 +47,7 @@ public class SchemaObjectRepository {
     }
 
     public List<SchemaObjectWrapper> findAllInLogicalModel(Id logicalModelId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT
                     schema_object.id as id,
@@ -69,7 +73,7 @@ public class SchemaObjectRepository {
     }
 
     public SchemaObjectWrapper find(Id id) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM schema_object WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
@@ -82,7 +86,7 @@ public class SchemaObjectRepository {
     }
 
     public boolean updatePosition(Id categoryId, Id objectId, Position newPosition) {
-        return DatabaseWrapper.getBoolean((connection, output) -> {
+        return db.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
                 UPDATE schema_object_in_category
                 SET position = ?::jsonb
@@ -101,7 +105,7 @@ public class SchemaObjectRepository {
 
     // TODO This should be handled by one transaction.
     public Id add(SchemaObjectUpdate object, Id categoryId) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO schema_object (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, object.jsonValue());
 

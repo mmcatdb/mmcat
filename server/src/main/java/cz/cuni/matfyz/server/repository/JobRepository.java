@@ -10,6 +10,7 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -18,8 +19,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JobRepository {
 
+    @Autowired
+    private DatabaseWrapper db;
+
     public List<Job> findAllInCategory(Id categoryId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT *
                 FROM job
@@ -40,7 +44,7 @@ public class JobRepository {
     }
 
     public Job find(Id id) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT *
                 FROM job
@@ -60,7 +64,7 @@ public class JobRepository {
     }
 
     public Id add(Job job) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value) VALUES (?, ?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             setId(statement, 1, job.categoryId);
             setId(statement, 2, job.logicalModelId);
@@ -78,7 +82,7 @@ public class JobRepository {
     }
 
     public boolean updateJSONValue(Job job) {
-        return DatabaseWrapper.getBoolean((connection, output) -> {
+        return db.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
                 UPDATE job
                 SET json_value = ?::jsonb
@@ -93,7 +97,7 @@ public class JobRepository {
     }
 
     public boolean delete(Id id) {
-        return DatabaseWrapper.getBoolean((connection, output) -> {
+        return db.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
                 DELETE FROM job
                 WHERE id = ?;

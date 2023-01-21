@@ -10,6 +10,7 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import java.sql.Statement;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -18,8 +19,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DatabaseRepository {
 
+    @Autowired
+    private DatabaseWrapper db;
+
     public Database find(Id id) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM database_for_mapping WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
@@ -32,7 +36,7 @@ public class DatabaseRepository {
     }
 
     public List<Database> findAll() {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM database_for_mapping ORDER BY id;");
             var resultSet = statement.executeQuery();
 
@@ -45,7 +49,7 @@ public class DatabaseRepository {
     }
 
     public List<Database> findAllInCategory(Id categoryId) {
-        return DatabaseWrapper.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                     SELECT
                         DISTINCT database_for_mapping.id as id,
@@ -71,7 +75,7 @@ public class DatabaseRepository {
     }
 
     private Database create(Database database) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO database_for_mapping (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, database.toJSONValue());
 
@@ -88,7 +92,7 @@ public class DatabaseRepository {
     }
 
     private Database update(Database database) {
-        return DatabaseWrapper.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("UPDATE database_for_mapping SET json_value = ?::jsonb WHERE id = ?;");
             statement.setString(1, database.toJSONValue());
             setId(statement, 2, database.id);
@@ -102,7 +106,7 @@ public class DatabaseRepository {
     }
 
     public boolean delete(Id id) {
-        return DatabaseWrapper.getBoolean((connection, output) -> {
+        return db.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("DELETE FROM database_for_mapping WHERE id = ?;");
             setId(statement, 1, id);
 

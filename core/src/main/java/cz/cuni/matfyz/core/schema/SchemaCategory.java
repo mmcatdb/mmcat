@@ -59,7 +59,6 @@ public class SchemaCategory implements Serializable, Category {
     }
 
     private SchemaMorphism createCompositeMorphism(Signature signature) {
-        System.out.println("create composite morphism: " + signature.toString());
         Signature[] bases = signature.toBases().toArray(Signature[]::new);
 
         Signature lastSignature = bases[bases.length - 1];
