@@ -1,10 +1,10 @@
 package cz.cuni.matfyz.statements;
 
 /**
- * @author pavel.koupil
+ * @author pavel.koupil, jachym.bartik
  */
-public interface ICStatement {
-    
+public interface AbstractStatement {
+
     public String getContent();
     
 }

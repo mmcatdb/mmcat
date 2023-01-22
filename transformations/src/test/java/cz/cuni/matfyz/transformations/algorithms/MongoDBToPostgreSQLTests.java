@@ -7,7 +7,7 @@ import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrappermongodb.MongoDBPullWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLDDLWrapper;
-import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPushWrapper;
+import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLDMLWrapper;
 
 import java.nio.file.Paths;
 
@@ -54,17 +54,14 @@ public class MongoDBToPostgreSQLTests {
     }
 
     private static MongoDBPullWrapper createPullWrapper() {
-        var wrapper = new MongoDBPullWrapper();
-        wrapper.injectDatabaseProvider(mongodbProvider);
-
-        return wrapper;
+        return new MongoDBPullWrapper(mongodbProvider);
     }
 
     private PullToDDLAndDMLTestBase testBase;
 
     @BeforeEach
     public void setupTestBase() {
-        testBase = new PullToDDLAndDMLTestBase(createPullWrapper(), new PostgreSQLDDLWrapper(), new PostgreSQLPushWrapper());
+        testBase = new PullToDDLAndDMLTestBase(createPullWrapper(), new PostgreSQLDDLWrapper(), new PostgreSQLDMLWrapper());
     }
 
     @Test

@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -13,7 +13,7 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.statements.DMLStatement;
+import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -34,26 +34,26 @@ public class DMLAlgorithm {
 
     private Mapping mapping;
     private InstanceCategory category;
-    private AbstractPushWrapper wrapper;
+    private AbstractDMLWrapper wrapper;
 
-    public void input(Mapping mapping, InstanceCategory instance, AbstractPushWrapper wrapper) {
+    public void input(Mapping mapping, InstanceCategory instance, AbstractDMLWrapper wrapper) {
         this.mapping = mapping;
         this.category = instance;
         this.wrapper = wrapper;
     }
     
-    public List<DMLStatement> algorithm() {
+    public List<AbstractStatement> algorithm() {
         //return mapping.hasRootMorphism()
         //    ? processWithMorphism(mapping.rootMorphism()) // K with root morphism
         //    : processWithObject(mapping.rootObject()); // K with root object
         return processWithObject(mapping.rootObject());
     }
 
-    private List<DMLStatement> processWithObject(SchemaObject object) {
+    private List<AbstractStatement> processWithObject(SchemaObject object) {
         InstanceObject instanceObject = category.getObject(object);
         Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
         Deque<DMLStackTriple> masterStack = new LinkedList<>();
-        List<DMLStatement> output = new ArrayList<>();
+        List<AbstractStatement> output = new ArrayList<>();
 
         for (DomainRow domainRow : domainRows) {
             masterStack.push(new DMLStackTriple(domainRow, DDLAlgorithm.EMPTY_NAME, mapping.accessPath()));
@@ -64,12 +64,12 @@ public class DMLAlgorithm {
     }
 
     /*
-    private List<DMLStatement> processWithMorphism(SchemaMorphism morphism) {
+    private List<Statement> processWithMorphism(SchemaMorphism morphism) {
         InstanceMorphism instanceMorphism = category.getMorphism(morphism);
         Set<MappingRow> mappingRows = fetchRelations(instanceMorphism);
         AccessPath codomainPath = mapping.accessPath().getSubpathBySignature(morphism.signature());
         Deque<DMLStackTriple> masterStack = new LinkedList<>();
-        List<DMLStatement> output = new ArrayList<>();
+        List<Statement> output = new ArrayList<>();
 
         if (codomainPath instanceof ComplexProperty complexPath) {
             for (MappingRow mappingRow : mappingRows) {
@@ -93,9 +93,9 @@ public class DMLAlgorithm {
     private Set<MappingRow> fetchRelations(InstanceMorphism morphism) {
         return morphism.allMappings();
     }
-     */
+    */
 
-    private DMLStatement buildStatement(Deque<DMLStackTriple> masterStack) {
+    private AbstractStatement buildStatement(Deque<DMLStackTriple> masterStack) {
         wrapper.clear();
         wrapper.setKindName(mapping.kindName());
 

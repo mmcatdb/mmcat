@@ -444,8 +444,7 @@ VALUES
             "port": 5432,
             "database": "mmcat_server_querying",
             "password": "mmcat_password",
-            "username": "mmcat_user",
-            "authenticationDatabase": ""
+            "username": "mmcat_user"
         }
     }'),
     ('{ "type": "postgresql", "label": "Neo4j - Querying",
@@ -454,8 +453,7 @@ VALUES
             "port": 5432,
             "database": "mmcat_server_querying",
             "password": "mmcat_password",
-            "username": "mmcat_user",
-            "authenticationDatabase": ""
+            "username": "mmcat_user"
         }
     }');
 

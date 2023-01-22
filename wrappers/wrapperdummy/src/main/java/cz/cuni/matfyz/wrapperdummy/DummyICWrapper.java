@@ -3,7 +3,6 @@ package cz.cuni.matfyz.wrapperdummy;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.core.utils.ComparablePair;
-import cz.cuni.matfyz.statements.ICStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,16 +30,16 @@ public class DummyICWrapper implements AbstractICWrapper {
     }
 
     @Override
-    public ICStatement createICRemoveStatement() {
+    public DummyStatement createICRemoveStatement() {
         methods.add("createICRemoveStatement()");
-        return new DummyICStatement("");
+        return new DummyStatement("");
     }
 
     @Override
-    public ICStatement createICStatement() {
+    public DummyStatement createICStatement() {
         methods.add("createICStatement()");
 
-        return new DummyICStatement("");
+        return new DummyStatement("");
     }
 
     private String attributePairsToString(Set<ComparablePair<String, String>> pairs) {

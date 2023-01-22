@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.wrapperdummy;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.cuni.matfyz.statements.DDLStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,9 +53,9 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public DDLStatement createDDLStatement() {
+    public DummyStatement createDDLStatement() {
         methods.add("createDDLStatement()");
-        return new DummyDDLStatement("");
+        return new DummyStatement("");
     }
 
     private String setToString(Set<String> strings) {

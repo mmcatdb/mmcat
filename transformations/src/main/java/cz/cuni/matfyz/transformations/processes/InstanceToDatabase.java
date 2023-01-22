@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.transformations.processes;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.cuni.matfyz.core.mapping.Mapping;
@@ -10,13 +10,13 @@ import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
-import cz.cuni.matfyz.statements.DDLStatement;
-import cz.cuni.matfyz.statements.DMLStatement;
-import cz.cuni.matfyz.statements.ICStatement;
+import cz.cuni.matfyz.statements.AbstractStatement;
 import cz.cuni.matfyz.transformations.algorithms.DDLAlgorithm;
 import cz.cuni.matfyz.transformations.algorithms.DMLAlgorithm;
 import cz.cuni.matfyz.transformations.algorithms.ICAlgorithm;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -28,20 +28,24 @@ public class InstanceToDatabase {
     private Iterable<Mapping> allMappings;
     private InstanceCategory currentInstance;
     private AbstractDDLWrapper ddlWrapper;
-    private AbstractPushWrapper pushWrapper;
+    private AbstractDMLWrapper dmlWrapper;
     private AbstractICWrapper icWrapper;
 
-    public void input(Mapping mapping, Iterable<Mapping> allMappings, InstanceCategory currentInstance, AbstractDDLWrapper ddlWrapper, AbstractPushWrapper pushWrapper, AbstractICWrapper icWrapper) {
+    public void input(Mapping mapping, Iterable<Mapping> allMappings, InstanceCategory currentInstance, AbstractDDLWrapper ddlWrapper, AbstractDMLWrapper dmlWrapper, AbstractICWrapper icWrapper) {
         this.mapping = mapping;
         this.allMappings = allMappings;
         this.currentInstance = currentInstance;
         this.ddlWrapper = ddlWrapper;
-        this.pushWrapper = pushWrapper;
+        this.dmlWrapper = dmlWrapper;
         this.icWrapper = icWrapper;
     }
+
+    public record InstanceToDatabaseResult(
+        String statementsAsString,
+        Collection<AbstractStatement> statements
+    ) {}
     
-    public DataResult<String> run() {
-        
+    public DataResult<InstanceToDatabaseResult> run() {
         Statistics.start(Interval.INSTANCE_TO_DATABASE);
 
         final InstanceCategory instance = currentInstance != null
@@ -55,14 +59,28 @@ public class InstanceToDatabase {
         icTransformation.input(mapping, allMappings, icWrapper);
         
         final var dmlTransformation = new DMLAlgorithm();
-        dmlTransformation.input(mapping, instance, pushWrapper);
+        dmlTransformation.input(mapping, instance, dmlWrapper);
 
         Statistics.start(Interval.CTM_ALGORIGHM);
-        final DDLStatement ddlStatement = ddlTransformation.algorithm();
-        final ICStatement icStatement = icTransformation.algorithm();
-        final List<DMLStatement> dmlStatements = dmlTransformation.algorithm();
+        final var ddlStatement = ddlTransformation.algorithm();
+        final var icStatement = icTransformation.algorithm();
+        final var dmlStatements = dmlTransformation.algorithm();
         Statistics.end(Interval.CTM_ALGORIGHM);
 
+        Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());
+
+        final var statementsAsString = statementsToString(ddlStatement, icStatement, dmlStatements);
+        final var statements = new ArrayList<AbstractStatement>();
+        statements.add(ddlStatement);
+        statements.add(icStatement);
+        statements.addAll(dmlStatements);
+
+        Statistics.end(Interval.INSTANCE_TO_DATABASE);
+
+        return new DataResult<>(new InstanceToDatabaseResult(statementsAsString, statements));
+    }
+
+    private String statementsToString(AbstractStatement ddlStatement, AbstractStatement icStatement, List<AbstractStatement> dmlStatements) {
         final var output = new StringBuilder();
         output.append(ddlStatement.getContent())
             .append("\n");
@@ -70,16 +88,13 @@ public class InstanceToDatabase {
         output.append(icStatement.getContent())
             .append("\n");
 
-        Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());
 
-        for (final DMLStatement dmlStatement : dmlStatements) {
+        for (final var dmlStatement : dmlStatements) {
             output.append(dmlStatement.getContent())
                 .append("\n");
         }
 
-        Statistics.end(Interval.INSTANCE_TO_DATABASE);
-
-        return new DataResult<>(output.toString());
+        return output.toString();
     }
 
 }

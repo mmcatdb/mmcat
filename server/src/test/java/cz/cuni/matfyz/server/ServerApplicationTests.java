@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.server;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.Statistics;
@@ -112,7 +112,7 @@ class ServerApplicationTests {
         var mapping = createMapping(mappingWrapper);
 
         Database database = databaseService.find(databaseId);
-        AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
+        AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
 
         var process = new DatabaseToInstance();
         process.setLimit(records);
@@ -135,12 +135,13 @@ class ServerApplicationTests {
         var mapping = createMapping(mappingWrapper);
 
         Database database = databaseService.find(databaseId);
-        AbstractDDLWrapper ddlWrapper = wrapperService.createDDLWrapper(database);
-        AbstractPushWrapper pushWrapper = wrapperService.createPushWrapper(database);
-        AbstractICWrapper icWrapper = wrapperService.createICWrapper(database);
+        final var control = wrapperService.getControlWrapper(database);
+        AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
+        AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
+        AbstractICWrapper icWrapper = control.getICWrapper();
 
         var process = new InstanceToDatabase();
-        process.input(mapping, List.of(mapping), instance, ddlWrapper, pushWrapper, icWrapper);
+        process.input(mapping, List.of(mapping), instance, ddlWrapper, dmlWrapper, icWrapper);
 
         process.run();
 

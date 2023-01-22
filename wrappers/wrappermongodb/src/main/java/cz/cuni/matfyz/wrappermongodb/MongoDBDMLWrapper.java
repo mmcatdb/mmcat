@@ -1,12 +1,15 @@
 package cz.cuni.matfyz.wrappermongodb;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bson.BsonArray;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -15,9 +18,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class MongoDBPushWrapper implements AbstractPushWrapper {
+public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBPushWrapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBDMLWrapper.class);
 
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
@@ -34,7 +37,7 @@ public class MongoDBPushWrapper implements AbstractPushWrapper {
     }
 
     @Override
-    public MongoDBDMLStatement createDMLStatement() {
+    public MongoDBCommandStatement createDMLStatement() {
         var constructor = new StatementConstructor();
 
         String content = "";
@@ -48,7 +51,11 @@ public class MongoDBPushWrapper implements AbstractPushWrapper {
             LOGGER.error("Invalid MongoDB Statements resulted in a JSON error.", exception);
         }
 
-        return new MongoDBDMLStatement(content);
+        final var command = new BsonDocument();
+        command.append("insert", new BsonString(kindName));
+        command.append("documents", new BsonArray(List.of(new BsonString(constructor.toString()))));
+
+        return new MongoDBCommandStatement(content, command);
     }
     
     /*
@@ -75,11 +82,15 @@ class StatementConstructor {
     private JSONObjectNode root = new JSONObjectNode();
     private Pattern arrayPattern = Pattern.compile("^([a-zA-Z0-9_-]+)\\[([0-9]+)\\]$");
 
+    public String toString() {
+        return root.object.toString();
+    }
+
     public String toPrettyString() throws Exception {
         return root.object.toString(4);
     }
 
-    void addProperty(MongoDBPushWrapper.PropertyValue property) throws Exception {
+    void addProperty(MongoDBDMLWrapper.PropertyValue property) throws Exception {
         List<Key> keys = createKeys(property.name());
 
         add(root, keys, property.value());

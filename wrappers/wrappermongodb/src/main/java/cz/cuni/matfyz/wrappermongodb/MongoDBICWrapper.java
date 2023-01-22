@@ -3,6 +3,7 @@ package cz.cuni.matfyz.wrappermongodb;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.core.utils.ComparablePair;
+import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.Set;
 
@@ -22,12 +23,12 @@ public class MongoDBICWrapper implements AbstractICWrapper {
     }
 
     @Override
-    public MongoDBICStatement createICStatement() {
-        return new MongoDBICStatement("");
+    public AbstractStatement createICStatement() {
+        return MongoDBEmptyStatement.getInstance();
     }
 
     @Override
-    public MongoDBICStatement createICRemoveStatement() {
-        return new MongoDBICStatement("");
+    public AbstractStatement createICRemoveStatement() {
+        return MongoDBEmptyStatement.getInstance();
     }
 }

@@ -1,25 +1,13 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
-import cz.cuni.matfyz.wrappermongodb.MongoDBDDLWrapper;
+import cz.cuni.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
-import cz.cuni.matfyz.wrappermongodb.MongoDBICWrapper;
-import cz.cuni.matfyz.wrappermongodb.MongoDBPathWrapper;
-import cz.cuni.matfyz.wrappermongodb.MongoDBPullWrapper;
-import cz.cuni.matfyz.wrappermongodb.MongoDBPushWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLConnectionProvider;
-import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLDDLWrapper;
-import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLICWrapper;
-import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPathWrapper;
-import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPullWrapper;
-import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPushWrapper;
+import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLSettings;
 
 import java.util.Map;
@@ -34,12 +22,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class WrapperService {
-    
-    public AbstractPullWrapper getPullWraper(Database database) {
+
+    public AbstractControlWrapper getControlWrapper(Database database) {
         try {
             return switch (database.type) {
-                case mongodb -> getMongoDBPullWrapper(database);
-                case postgresql -> getPostgreSQLPullWrapper(database);
+                case mongodb -> getMongoDBControlWrapper(database);
+                case postgresql -> getPostgreSQLControlWrapper(database);
                 default -> throw new WrapperNotFoundException(wrapperNotFoundText("Pull", database));
             };
         }
@@ -48,53 +36,18 @@ public class WrapperService {
         }
     }
 
-    public AbstractPathWrapper createPathWrapper(Database database) {
-        return switch (database.type) {
-            case mongodb -> new MongoDBPathWrapper();
-            case postgresql -> new PostgreSQLPathWrapper();
-            default -> throw new WrapperNotFoundException(wrapperNotFoundText("Path", database));
-        };
-    }
-
-    public AbstractDDLWrapper createDDLWrapper(Database database) {
-        return switch (database.type) {
-            case mongodb ->  new MongoDBDDLWrapper();
-            case postgresql ->  new PostgreSQLDDLWrapper();
-            default ->  throw new WrapperNotFoundException(wrapperNotFoundText("DDL", database));
-        };
-    }
-
-    public AbstractPushWrapper createPushWrapper(Database database) {
-        return switch (database.type) {
-            case mongodb ->  new MongoDBPushWrapper();
-            case postgresql ->  new PostgreSQLPushWrapper();
-            default ->  throw new WrapperNotFoundException(wrapperNotFoundText("Push", database));
-        };
-    }
-
-    public AbstractICWrapper createICWrapper(Database database) {
-        return switch (database.type) {
-            case mongodb ->  new MongoDBICWrapper();
-            case postgresql ->  new PostgreSQLICWrapper();
-            default ->  throw new WrapperNotFoundException(wrapperNotFoundText("IC", database));
-        };
-    }
-
     private String wrapperNotFoundText(String name, Database database) {
         return name + "wrapper for database " + database.id + " with JSON settings: " + database.settings + " not found.";
     }
 
     private Map<Id, MongoDBDatabaseProvider> mongoDBCache = new TreeMap<>();
 
-    private MongoDBPullWrapper getMongoDBPullWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private MongoDBControlWrapper getMongoDBControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!mongoDBCache.containsKey(database.id))
             mongoDBCache.put(database.id, createMongoDBProvider(database));
 
-        final var wrapper = new MongoDBPullWrapper();
         final var provider = mongoDBCache.get(database.id);
-        wrapper.injectDatabaseProvider(provider);
-
-        return wrapper;
+        return new MongoDBControlWrapper(provider);
     }
 
     private static MongoDBDatabaseProvider createMongoDBProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
@@ -106,15 +59,12 @@ public class WrapperService {
 
     private Map<Id, PostgreSQLConnectionProvider> postgreSQLCache = new TreeMap<>();
 
-    private PostgreSQLPullWrapper getPostgreSQLPullWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private PostgreSQLControlWrapper getPostgreSQLControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!postgreSQLCache.containsKey(database.id))
             postgreSQLCache.put(database.id, createPostgreSQLProvider(database));
 
-        final var wrapper = new PostgreSQLPullWrapper();
         final var provider = postgreSQLCache.get(database.id);
-        wrapper.injectConnectionProvider(provider);
-
-        return wrapper;
+        return new PostgreSQLControlWrapper(provider);
     }
 
     private static PostgreSQLConnectionProvider createPostgreSQLProvider(Database database) throws IllegalArgumentException, JsonProcessingException {

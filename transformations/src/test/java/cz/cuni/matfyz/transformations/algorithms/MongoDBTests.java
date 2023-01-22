@@ -39,10 +39,7 @@ public class MongoDBTests {
     }
 
     private static MongoDBPullWrapper createPullWrapper() {
-        var wrapper = new MongoDBPullWrapper();
-        wrapper.injectDatabaseProvider(databaseProvider);
-
-        return wrapper;
+        return new MongoDBPullWrapper(databaseProvider);
     }
 
     @Test

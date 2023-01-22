@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
@@ -11,10 +11,6 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.statements.DDLStatement;
-import cz.cuni.matfyz.statements.DMLStatement;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -31,12 +27,12 @@ public class PullToDDLAndDMLTestBase {
 
     private final AbstractPullWrapper pullWrapper;
     private final AbstractDDLWrapper ddlWrapper;
-    private final AbstractPushWrapper pushWrapper;
+    private final AbstractDMLWrapper dmlWrapper;
 
-    public PullToDDLAndDMLTestBase(AbstractPullWrapper pullWrapper, AbstractDDLWrapper ddlWrapper, AbstractPushWrapper pushWrapper) {
+    public PullToDDLAndDMLTestBase(AbstractPullWrapper pullWrapper, AbstractDDLWrapper ddlWrapper, AbstractDMLWrapper dmlWrapper) {
         this.pullWrapper = pullWrapper;
         this.ddlWrapper = ddlWrapper;
-        this.pushWrapper = pushWrapper;
+        this.dmlWrapper = dmlWrapper;
     }
 
     public PullToDDLAndDMLTestBase setAll(String dataFileName, SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path) {
@@ -113,13 +109,13 @@ public class PullToDDLAndDMLTestBase {
         
         var ddlAlgorithm = new DDLAlgorithm();
         ddlAlgorithm.input(mapping, instance, ddlWrapper);
-        DDLStatement ddlStatement = ddlAlgorithm.algorithm();
+        var ddlStatement = ddlAlgorithm.algorithm();
 
         LOGGER.info("Created DDL Statement:\n" + ddlStatement.getContent());
 
         var dmlAlgorithm = new DMLAlgorithm();
-        dmlAlgorithm.input(mapping, instance, pushWrapper);
-        List<DMLStatement> dmlStatements = dmlAlgorithm.algorithm();
+        dmlAlgorithm.input(mapping, instance, dmlWrapper);
+        var dmlStatements = dmlAlgorithm.algorithm();
 
         LOGGER.info("Created DML Statement-s:\n" + String.join("\n", dmlStatements.stream().map(statement -> statement.getContent()).toList()));
     }

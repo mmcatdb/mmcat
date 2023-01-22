@@ -26,8 +26,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLPullWrapper.class);
 
     private ConnectionProvider connectionProvider;
-
-    public void injectConnectionProvider(ConnectionProvider connectionProvider) {
+    
+    public PostgreSQLPullWrapper(ConnectionProvider connectionProvider) {
         this.connectionProvider = connectionProvider;
     }
 

@@ -27,15 +27,15 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
     }
 
     @Override
-    public PostgreSQLICStatement createICStatement() {
+    public PostgreSQLStatement createICStatement() {
         String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::addCommand).toList()) + "\n";
-        return new PostgreSQLICStatement(content);
+        return new PostgreSQLStatement(content);
     }
 
     @Override
-    public PostgreSQLICStatement createICRemoveStatement() {
+    public PostgreSQLStatement createICRemoveStatement() {
         String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::dropCommand).toList()) + "\n";
-        return new PostgreSQLICStatement(content);
+        return new PostgreSQLStatement(content);
     }
 
 }

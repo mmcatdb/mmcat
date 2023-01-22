@@ -10,7 +10,7 @@ import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.ComparablePair;
-import cz.cuni.matfyz.statements.ICStatement;
+import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,7 +37,7 @@ public class ICAlgorithm {
         allMappings.forEach(m -> mappingsByObjects.put(m.rootObject(), m));
     }
     
-    public ICStatement algorithm() {
+    public AbstractStatement algorithm() {
         // Primary key constraint
         IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
         wrapper.appendIdentifier(mapping.kindName(), identifierStructure);

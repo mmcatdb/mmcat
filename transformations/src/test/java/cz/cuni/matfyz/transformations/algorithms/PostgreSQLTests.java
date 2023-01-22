@@ -39,10 +39,7 @@ public class PostgreSQLTests {
     }
 
     private static PostgreSQLPullWrapper createPullWrapper() {
-        var wrapper = new PostgreSQLPullWrapper();
-        wrapper.injectConnectionProvider(connectionProvider);
-
-        return wrapper;
+        return new PostgreSQLPullWrapper(connectionProvider);
     }
 
     @Test

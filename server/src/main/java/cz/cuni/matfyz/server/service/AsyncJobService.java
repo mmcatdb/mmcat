@@ -143,7 +143,7 @@ public class AsyncJobService {
         final var logicalModel = logicalModelService.find(job.logicalModelId);
         final var database = databaseService.find(logicalModel.databaseId);
 
-        final var pullWrapper = wrapperService.getPullWraper(database);
+        final var pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
         final var mappingWrappers = mappingService.findAll(job.logicalModelId);
 
         var result = new DataResult<InstanceCategory>(instance);
@@ -190,21 +190,25 @@ public class AsyncJobService {
         final List<Mapping> mappings = mappingService.findAll(job.logicalModelId).stream()
             .map(wrapper -> createMapping(wrapper, job.categoryId))
             .toList();
+
+        final var control = wrapperService.getControlWrapper(database);
         
         final var output = new StringBuilder();
         for (final var mapping : mappings) {
-            final var ddlWrapper = wrapperService.createDDLWrapper(database);
-            final var icWrapper = wrapperService.createICWrapper(database);
-            final var pushWrapper = wrapperService.createPushWrapper(database);
+            final var ddlWrapper = control.getDDLWrapper();
+            final var icWrapper = control.getICWrapper();
+            final var dmlWrapper = control.getDMLWrapper();
 
             final var process = new InstanceToDatabase();
-            process.input(mapping, mappings, instance, ddlWrapper, pushWrapper, icWrapper);
+            process.input(mapping, mappings, instance, ddlWrapper, dmlWrapper, icWrapper);
 
             final var result = process.run();
             if (!result.status)
-                return CompletableFuture.completedFuture(result);
+                return CompletableFuture.completedFuture(new DataResult<String>(null, result.error));
 
-            output.append(result.data + "\n");
+            control.execute(result.data.statements());
+
+            output.append(result.data.statementsAsString() + "\n");
         }
 
         return CompletableFuture.completedFuture(new DataResult<>(output.toString()));

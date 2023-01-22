@@ -70,7 +70,7 @@ public class EvolutionManagementTests {
         final Id mongodbDatabaseId = new Id("4");
 
         Database database = databaseService.find(mongodbDatabaseId);
-        AbstractPullWrapper pullWrapper = wrapperService.getPullWraper(database);
+        AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
 
         for (int i = 0; i < repetitions; i++) {
             LOGGER.info("Repetition: " + (i + 1));
@@ -123,7 +123,7 @@ public class EvolutionManagementTests {
         /*
         var finalMapping = data.createFinalMapping(schema);
         var instanceToDatabase = new InstanceToDatabase();
-        instanceToDatabase.input(finalMapping, instance, ddlWrapper, pushWrapper);
+        instanceToDatabase.input(finalMapping, instance, ddlWrapper, dmlWrapper);
         var finalResult = instanceToDatabase.run();
         */
         //LOGGER.info(finalResult.data);

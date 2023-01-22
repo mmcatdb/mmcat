@@ -56,7 +56,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public PostgreSQLDDLStatement createDDLStatement() {
+    public PostgreSQLStatement createDDLStatement() {
         String commands = String.join(",\n", properties.stream().map(property -> AbstractDDLWrapper.INDENTATION + property.command).toList());
         String content = String.format("""
             CREATE TABLE \"%s\" (
@@ -64,7 +64,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
             );
             """, kindName, commands);
         
-        return new PostgreSQLDDLStatement(content);
+        return new PostgreSQLStatement(content);
     }
 }
 

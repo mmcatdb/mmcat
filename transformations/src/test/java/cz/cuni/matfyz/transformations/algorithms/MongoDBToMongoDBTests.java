@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDDLWrapper;
+import cz.cuni.matfyz.wrappermongodb.MongoDBDMLWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrappermongodb.MongoDBPullWrapper;
-import cz.cuni.matfyz.wrappermongodb.MongoDBPushWrapper;
 
 import java.nio.file.Paths;
 
@@ -40,17 +40,14 @@ public class MongoDBToMongoDBTests {
     }
 
     private static MongoDBPullWrapper createPullWrapper() {
-        var wrapper = new MongoDBPullWrapper();
-        wrapper.injectDatabaseProvider(mongodbProvider);
-
-        return wrapper;
+        return new MongoDBPullWrapper(mongodbProvider);
     }
 
     private PullToDDLAndDMLTestBase testBase;
 
     @BeforeEach
     public void setupTestBase() {
-        testBase = new PullToDDLAndDMLTestBase(createPullWrapper(), new MongoDBDDLWrapper(), new MongoDBPushWrapper());
+        testBase = new PullToDDLAndDMLTestBase(createPullWrapper(), new MongoDBDDLWrapper(), new MongoDBDMLWrapper());
     }
 
     @Test

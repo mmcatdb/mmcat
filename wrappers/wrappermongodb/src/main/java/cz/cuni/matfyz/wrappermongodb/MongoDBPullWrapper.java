@@ -28,7 +28,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private DatabaseProvider databaseProvider;
     
-    public void injectDatabaseProvider(DatabaseProvider databaseProvider) {
+    public MongoDBPullWrapper(DatabaseProvider databaseProvider) {
         this.databaseProvider = databaseProvider;
     }
 

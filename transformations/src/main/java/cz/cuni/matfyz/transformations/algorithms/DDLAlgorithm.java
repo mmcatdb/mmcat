@@ -13,7 +13,7 @@ import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.statements.DDLStatement;
+import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -43,7 +43,7 @@ public class DDLAlgorithm {
         AccessPath accessPath
     ) {}
     
-    public DDLStatement algorithm() {
+    public AbstractStatement algorithm() {
         wrapper.setKindName(mapping.kindName());
         
         if (!wrapper.isSchemaLess()) {

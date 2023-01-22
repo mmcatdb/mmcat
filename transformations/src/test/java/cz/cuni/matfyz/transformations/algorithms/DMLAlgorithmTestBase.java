@@ -6,7 +6,7 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.wrapperdummy.DMLTestStructure;
-import cz.cuni.matfyz.wrapperdummy.DummyPushWrapper;
+import cz.cuni.matfyz.wrapperdummy.DummyDMLWrapper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -91,7 +91,7 @@ public class DMLAlgorithmTestBase {
             return;
         }
 
-        var wrapper = new DummyPushWrapper();
+        var wrapper = new DummyDMLWrapper();
 
         Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, null);
 

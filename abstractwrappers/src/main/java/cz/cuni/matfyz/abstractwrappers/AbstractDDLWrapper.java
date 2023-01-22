@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.abstractwrappers;
 
-import cz.cuni.matfyz.statements.DDLStatement;
+import cz.cuni.matfyz.statements.AbstractStatement;
+
 import java.util.Set;
 
 /**
@@ -22,6 +23,6 @@ public interface AbstractDDLWrapper {
 
     public abstract boolean addComplexArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException;
 
-    public abstract DDLStatement createDDLStatement();
+    public abstract AbstractStatement createDDLStatement();
 
 }

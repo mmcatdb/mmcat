@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.wrapperpostgresql;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author jachymb.bartik
  */
-public class PostgreSQLPushWrapper implements AbstractPushWrapper {
+public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
@@ -25,7 +25,7 @@ public class PostgreSQLPushWrapper implements AbstractPushWrapper {
     }
 
     @Override
-    public PostgreSQLDMLStatement createDMLStatement() {
+    public PostgreSQLStatement createDMLStatement() {
         if (!nameIsValid(kindName))
             // This should not happen.
             throw new UnsupportedOperationException("Kind name \"" + kindName + "\" doesn't meet required pattern /^[\\w]+$/.");
@@ -40,7 +40,7 @@ public class PostgreSQLPushWrapper implements AbstractPushWrapper {
         List<String> escapedValues = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
         
         String content = String.format("INSERT INTO \"%s\" (%s)\nVALUES (%s);", kindName, String.join(", ", escapedNames), String.join(", ", escapedValues));
-        return new PostgreSQLDMLStatement(content);
+        return new PostgreSQLStatement(content);
     }
 
     private boolean nameIsValid(String name) {

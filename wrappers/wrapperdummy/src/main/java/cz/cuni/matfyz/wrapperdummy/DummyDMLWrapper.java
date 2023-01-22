@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.wrapperdummy;
 
-import cz.cuni.matfyz.abstractwrappers.AbstractPushWrapper;
-import cz.cuni.matfyz.statements.DMLStatement;
+import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +8,7 @@ import java.util.List;
 /**
  * @author jachym.bartik
  */
-public class DummyPushWrapper implements AbstractPushWrapper {
+public class DummyDMLWrapper implements AbstractDMLWrapper {
     //private List<String> methods = new ArrayList<>();
 
     private final List<DMLTestStructure> structures = new ArrayList<>();
@@ -38,9 +37,9 @@ public class DummyPushWrapper implements AbstractPushWrapper {
     }
 
     @Override
-    public DMLStatement createDMLStatement() {
+    public DummyStatement createDMLStatement() {
         //methods.add("createDMLStatement()");
         structures.add(structure);
-        return new DummyDMLStatement("");
+        return new DummyStatement("");
     }
 }

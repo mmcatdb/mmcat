@@ -4,6 +4,9 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 
 import java.util.Set;
 
+import org.bson.BsonDocument;
+import org.bson.BsonString;
+
 /**
  * @author jachymb.bartik
  */
@@ -37,7 +40,7 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public MongoDBDDLStatement createDDLStatement() {
-        return new MongoDBDDLStatement("db.createCollection(" + kindName + ");");
+    public MongoDBCommandStatement createDDLStatement() {
+        return new MongoDBCommandStatement("db.createCollection(" + kindName + ");", new BsonDocument("create", new BsonString(kindName)));
     }
 }
