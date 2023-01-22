@@ -16,7 +16,7 @@ const emit = defineEmits([ 'save', 'cancel', 'delete' ]);
 const fetching = ref(false);
 const innerValue = ref<DatabaseUpdate>(props.database ? copyDatabaseUpdate(props.database) : getNewDatabaseUpdate());
 
-const isNew = computed(() => props.database === null);
+const isNew = computed(() => !props.database);
 const isValid = computed(() => isNew.value ? true : !!createInitFromUpdate(innerValue.value));
 
 async function save() {

@@ -1,8 +1,11 @@
 package cz.cuni.matfyz.wrapperpostgresql;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author jachymb.bartik
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PostgreSQLSettings {
 
     private String host;

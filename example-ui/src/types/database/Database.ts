@@ -53,7 +53,7 @@ export type Settings = {
     host: string;
     port: number;
     database: string;
-    authenticationDatabase: string;
+    authenticationDatabase?: string;
     username: string;
     password?: string;
 };
@@ -115,7 +115,7 @@ export function createInitFromUpdate(update: DatabaseUpdate): DatabaseInit | nul
             host: update.settings.host,
             port: update.settings.port,
             database: update.settings.database,
-            authenticationDatabase: update.settings.authenticationDatabase ?? '',
+            authenticationDatabase: update.settings.authenticationDatabase ?? undefined,
             username: update.settings.username,
             password: update.settings.password
         }

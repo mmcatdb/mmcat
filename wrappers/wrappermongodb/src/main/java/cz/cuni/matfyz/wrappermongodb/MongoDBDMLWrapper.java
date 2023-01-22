@@ -53,7 +53,7 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
         final var command = new BsonDocument();
         command.append("insert", new BsonString(kindName));
-        command.append("documents", new BsonArray(List.of(new BsonString(constructor.toString()))));
+        command.append("documents", new BsonArray(List.of(BsonDocument.parse(constructor.toString()))));
 
         return new MongoDBCommandStatement(content, command);
     }
