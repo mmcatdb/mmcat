@@ -50,8 +50,9 @@
     
     --color-text-disabled: #484848;
 
-    --color-primary: hsla(160, 100%, 37%, 1);
+    --color-primary: hsl(160, 100%, 37%, 1);
     --color-primary-dark: hsla(160, 100%, 37%, 0.2);
+    --color-secondary: hsl(280, 100%, 37%);
     --color-error: #FF5252;
     --color-info: #2196F3;
     --color-success: #4CAF50;
@@ -94,6 +95,14 @@
     :root {
         --schema-category-canvas-width: 700px;
     }
+}
+
+.color-primary {
+    --color-text: var(--color-primary);
+}
+
+.color-secondary {
+    --color-text: var(--color-secondary);
 }
 
 *,

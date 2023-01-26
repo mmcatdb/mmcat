@@ -7,6 +7,7 @@ import type { SchemaCategory } from '@/types/schema';
 import { useRoute } from 'vue-router';
 import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
+import { toQueryScalar } from '@/utils/router';
 
 const graph = ref<Graph>();
 
@@ -15,8 +16,8 @@ const route = useRoute();
 async function cytoscapeCreated(newGraph: Graph) {
     graph.value = newGraph;
 
-    const pimIri = route.query.pimIri;
-    if (!pimIri || typeof pimIri !== 'string')
+    const pimIri = toQueryScalar(route.query.pimIri);
+    if (!pimIri)
         return;
 
     // Let's import the objects first so we don't have to create the schema category and then delete it immediately after if something goes wrong.

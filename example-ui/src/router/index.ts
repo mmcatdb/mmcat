@@ -11,11 +11,6 @@ const router = createRouter({
             children: projectIndependentRoutes
         },
         {
-            path: '/integration',
-            name: 'integration',
-            component: () => import('@/views/IntegrationView.vue')
-        },
-        {
             path: '/:categoryId',
             component: () => import('@/views/ProjectSpecificView.vue'),
             props: route => ({ categoryId: route.params.categoryId }),

@@ -6,7 +6,7 @@ import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import EditObject from './EditObject.vue';
 import EditMorphism from './EditMorphism.vue';
-import Integration from './Integration.vue';
+import Integration from '../../integration/Integration.vue';
 import Divider from '@/components/layout/Divider.vue';
 import API from '@/utils/api';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
