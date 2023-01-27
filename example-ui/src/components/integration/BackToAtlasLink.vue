@@ -5,15 +5,20 @@ import { toQueryScalar, createQueryParameterKeepingNavigationGuard } from '@/uti
 import { computed } from 'vue';
 
 const router = useRouter();
-router.beforeEach(createQueryParameterKeepingNavigationGuard('pimIri'));
+router.beforeEach(createQueryParameterKeepingNavigationGuard('returnUrl'));
+router.beforeEach(createQueryParameterKeepingNavigationGuard('returnUrlName'));
 
 const route = useRoute();
-const pimIri = computed(() => toQueryScalar(route.query.pimIri));
-const DATASPECER_SITE_PREFIX_URL = import.meta.env.VITE_DATASPECER_SITE_PREFIX_URL;
+const returnLink = computed(() => {
+    const url = toQueryScalar(route.query.returnUrl);
+    const name = toQueryScalar(route.query.returnUrlName);
+
+    return url && name ? { url, name } : null;
+});
 
 function goBackToAtlas() {
-    if (pimIri.value)
-        window.location.href = DATASPECER_SITE_PREFIX_URL + pimIri.value;
+    if (returnLink.value)
+        window.location.href = returnLink.value.url;
 }
 
 console.log(route);
@@ -21,11 +26,11 @@ console.log(route);
 
 <template>
     <div
-        v-if="pimIri"
+        v-if="returnLink"
         class="back-to-atlas"
     >
         <button @click="goBackToAtlas()">
-            <IconArrowLeftBold /> Back to Atlas
+            <IconArrowLeftBold /> Back to {{ returnLink.name }}
         </button>
     </div>
 </template>
