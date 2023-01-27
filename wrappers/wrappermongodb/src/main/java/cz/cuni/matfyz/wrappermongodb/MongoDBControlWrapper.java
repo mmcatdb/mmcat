@@ -11,8 +11,6 @@ import cz.cuni.matfyz.statements.AbstractStatement;
 import java.util.Collection;
 
 import com.mongodb.MongoException;
-import org.bson.BsonDocument;
-import org.bson.BsonInt64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
