@@ -3,9 +3,9 @@ package cz.cuni.matfyz.core.schema;
 import cz.cuni.matfyz.core.category.Category;
 import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
+import cz.cuni.matfyz.core.identification.MapUniqueContext;
+import cz.cuni.matfyz.core.identification.UniqueContext;
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.MapUniqueContext;
-import cz.cuni.matfyz.core.serialization.UniqueContext;
 
 import java.io.Serializable;
 import java.util.Collection;

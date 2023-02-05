@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.server.entity;
 
-import cz.cuni.matfyz.core.serialization.Identified;
+import cz.cuni.matfyz.core.identification.Identified;
 
 /**
  * @author jachym.bartik

@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.core.serialization;
+package cz.cuni.matfyz.core.identification;
 
 import java.util.Collection;
 import java.util.Map;

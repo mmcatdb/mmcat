@@ -2,7 +2,7 @@ package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.Identified;
+import cz.cuni.matfyz.core.identification.Identified;
 
 import java.io.IOException;
 import java.io.Serializable;

@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.core.serialization;
+package cz.cuni.matfyz.core.identification;
 
 /**
  * @author jachymb.bartik
