@@ -87,7 +87,7 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
     
         @Override
         public Id deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            JsonNode node = parser.getCodec().readTree(parser);
+            final JsonNode node = parser.getCodec().readTree(parser);
     
             return new Id(node.asText());
         }

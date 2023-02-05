@@ -1,23 +1,30 @@
 package cz.cuni.matfyz.server.entity.job;
 
-import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.server.entity.Entity;
 import cz.cuni.matfyz.server.entity.Id;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.lang.Nullable;
 
 /**
  * @author jachym.bartik
  */
-public class Job extends Entity implements JSONConvertible {
+@JsonSerialize(using = Job.Serializer.class)
+@JsonDeserialize(using = Job.Deserializer.class)
+public class Job extends Entity {
 
     public final Id categoryId;
     @Nullable
@@ -67,39 +74,17 @@ public class Job extends Entity implements JSONConvertible {
             : logicalModelId != null;
     }
 
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
+    public static class Builder {
 
-    public static class Converter extends ToJSONConverterBase<Job> {
+        private static ObjectReader jobJSONReader = new ObjectMapper().readerFor(Job.class);
 
-        @Override
-        protected JSONObject innerToJSON(Job object) throws JSONException {
-            var output = new JSONObject();
-
-            output.put("label", object.label);
-            output.put("type", object.type);
-            output.put("status", object.status);
-
-            return output;
-        }
-
-    }
-
-    public static class Builder extends FromJSONLoaderBase<Job> {
-
-        public Job fromJSON(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String jsonValue) {
-            var job = new Job(id, categoryId, logicalModelId, dataSourceId);
-            loadFromJSON(job, jsonValue);
-            return job;
-        }
-
-        @Override
-        protected void innerLoadFromJSON(Job job, JSONObject jsonObject) throws JSONException {
-            job.label = jsonObject.getString("label");
-            job.type = Type.valueOf(jsonObject.getString("type"));
-            job.status = Status.valueOf(jsonObject.getString("status"));
+        public Job fromJSON(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String jsonValue) throws JsonProcessingException {
+            return jobJSONReader
+                .withAttribute("id", id)
+                .withAttribute("categoryId", categoryId)
+                .withAttribute("logicalModelId", logicalModelId)
+                .withAttribute("dataSourceId", dataSourceId)
+                .readValue(jsonValue);
         }
 
         public Job fromArguments(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String label, Type type, Status status) {
@@ -116,6 +101,57 @@ public class Job extends Entity implements JSONConvertible {
             job.label = init.label();
             job.type = init.type();
             job.status = Status.Ready;
+
+            return job;
+        }
+
+    }
+
+    public static class Serializer extends StdSerializer<Job> {
+    
+        public Serializer() {
+            this(null);
+        }
+      
+        public Serializer(Class<Job> t) {
+            super(t);
+        }
+    
+        @Override
+        public void serialize(Job job, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writeStringField("label", job.label);
+            generator.writeStringField("type", job.type.name());
+            generator.writeStringField("status", job.status.name());
+            generator.writeEndObject();
+        }
+    
+    }
+
+    public static class Deserializer extends StdDeserializer<Job> {
+
+        public Deserializer() {
+            this(null);
+        }
+    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+    
+        @Override
+        public Job deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+    
+            final var id = (Id) context.getAttribute("id");
+            final var categoryId = (Id) context.getAttribute("categoryId");
+            final var logicalModelId = (Id) context.getAttribute("logicalModelId");
+            final var dataSourceId = (Id) context.getAttribute("dataSourceId");
+
+            final var job = new Job(id, categoryId, logicalModelId, dataSourceId);
+
+            job.label = node.get("label").asText();
+            job.type = Type.valueOf(node.get("type").asText());
+            job.status = Status.valueOf(node.get("status").asText());
 
             return job;
         }

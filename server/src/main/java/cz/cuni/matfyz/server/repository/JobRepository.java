@@ -10,6 +10,8 @@ import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import java.sql.Statement;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class JobRepository {
+
+    private static ObjectWriter jobJSONWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;
@@ -69,7 +73,7 @@ public class JobRepository {
             setId(statement, 1, job.categoryId);
             setId(statement, 2, job.logicalModelId);
             setId(statement, 3, job.dataSourceId);
-            statement.setString(4, job.toJSON().toString());
+            statement.setString(4, jobJSONWriter.writeValueAsString(job));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -88,7 +92,7 @@ public class JobRepository {
                 SET json_value = ?::jsonb
                 WHERE id = ?;
                 """);
-            statement.setString(1, job.toJSON().toString());
+            statement.setString(1, jobJSONWriter.writeValueAsString(job));
             setId(statement, 2, job.id);
 
             int affectedRows = statement.executeUpdate();

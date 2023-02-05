@@ -104,7 +104,7 @@ public class Mapping implements Comparable<Mapping> {
     
         @Override
         public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            JsonNode node = parser.getCodec().readTree(parser);
+            final JsonNode node = parser.getCodec().readTree(parser);
 
             final var category = (SchemaCategory) context.getAttribute("category");
             final var rootObject = (SchemaObject) context.getAttribute("rootObject");

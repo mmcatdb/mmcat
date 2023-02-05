@@ -1,22 +1,24 @@
 package cz.cuni.matfyz.server.entity.datasource;
 
-import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.server.entity.Entity;
 import cz.cuni.matfyz.server.entity.Id;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * @author jachym.bartik
  */
-public class DataSource extends Entity implements JSONConvertible {
+@JsonDeserialize(using = DataSource.Deserializer.class)
+public class DataSource extends Entity {
 
     public String url;
     public String label;
@@ -38,39 +40,14 @@ public class DataSource extends Entity implements JSONConvertible {
             this.label = update.label();
     }
 
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
+    public static class Builder {
 
-    public static class Converter extends ToJSONConverterBase<DataSource> {
+        private static ObjectReader dataSourceJSONReader = new ObjectMapper().readerFor(DataSource.class);
 
-        @Override
-        protected JSONObject innerToJSON(DataSource object) throws JSONException {
-            var output = new JSONObject();
-
-            output.put("url", object.url);
-            output.put("label", object.label);
-            output.put("type", object.type);
-
-            return output;
-        }
-
-    }
-
-    public static class Builder extends FromJSONLoaderBase<DataSource> {
-
-        public DataSource fromJSON(Id id, String jsonValue) {
-            var dataSource = new DataSource(id);
-            loadFromJSON(dataSource, jsonValue);
-            return dataSource;
-        }
-
-        @Override
-        protected void innerLoadFromJSON(DataSource dataSource, JSONObject jsonObject) throws JSONException {
-            dataSource.url = jsonObject.getString("url");
-            dataSource.label = jsonObject.getString("label");
-            dataSource.type = Type.valueOf(jsonObject.getString("type"));
+        public DataSource fromJSON(Id id, String jsonValue) throws JsonProcessingException {
+            return dataSourceJSONReader
+                .withAttribute("id", id)
+                .readValue(jsonValue);
         }
 
         public DataSource fromDataSource(Id id, DataSource input) {
@@ -87,6 +64,33 @@ public class DataSource extends Entity implements JSONConvertible {
             dataSource.url = init.url();
             dataSource.label = init.label();
             dataSource.type = init.type();
+
+            return dataSource;
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<DataSource> {
+
+        public Deserializer() {
+            this(null);
+        }
+    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        @Override
+        public DataSource deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            final var id = (Id) context.getAttribute("id");
+
+            final var dataSource = new DataSource(id);
+
+            dataSource.url = node.get("url").asText();
+            dataSource.label = node.get("label").asText();
+            dataSource.type = Type.valueOf(node.get("type").asText());
 
             return dataSource;
         }

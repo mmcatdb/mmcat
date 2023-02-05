@@ -183,7 +183,7 @@ public class SchemaMorphism implements Serializable, Morphism, Identified<Signat
     
         @Override
         public SchemaMorphism deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            JsonNode node = parser.getCodec().readTree(parser);
+            final JsonNode node = parser.getCodec().readTree(parser);
 
             final Key domKey = keyJSONReader.readValue(node.get("dom"));
             final Key codKey = keyJSONReader.readValue(node.get("cod"));
