@@ -1,21 +1,30 @@
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.CategoricalObject;
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
 import cz.cuni.matfyz.core.serialization.Identified;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaObject implements Serializable, CategoricalObject, JSONConvertible, Identified<Key> {
+@JsonSerialize(using = SchemaObject.Serializer.class)
+@JsonDeserialize(using = SchemaObject.Deserializer.class)
+public class SchemaObject implements Serializable, CategoricalObject, Identified<Key> {
     //private static final Logger LOGGER = LoggerFactory.getLogger(SchemaObject.class);
     
     private final Key key; // Identifies the object, in the paper it's a number >= 100
@@ -92,40 +101,55 @@ public class SchemaObject implements Serializable, CategoricalObject, JSONConver
     public String toString() {
         return "SchemaObject TODO";
     }
+    
+    public static class Serializer extends StdSerializer<SchemaObject> {
 
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
+        public Serializer() {
+            this(null);
+        }
 
-    public static class Converter extends ToJSONConverterBase<SchemaObject> {
+        public Serializer(Class<SchemaObject> t) {
+            super(t);
+        }
 
         @Override
-        protected JSONObject innerToJSON(SchemaObject object) throws JSONException {
-            var output = new JSONObject();
-
-            output.put("key", object.key.toJSON());
-            output.put("label", object.label);
-            output.put("superId", object.superId.toJSON());
-            output.put("ids", object.ids.toJSON());
-            output.put("iri", object.iri);
-            output.put("pimIri", object.pimIri);
-            
-            return output;
+        public void serialize(SchemaObject object, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writePOJOField("key", object.key);
+            generator.writeStringField("label", object.label);
+            generator.writePOJOField("superId", object.superId);
+            generator.writePOJOField("ids", object.ids);
+            generator.writeStringField("iri", object.iri);
+            generator.writeStringField("pimIri", object.pimIri);
+            generator.writeEndObject();
         }
 
     }
 
-    public static class Builder extends FromJSONBuilderBase<SchemaObject> {
+    public static class Deserializer extends StdDeserializer<SchemaObject> {
 
+        public Deserializer() {
+            this(null);
+        }
+    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
+        private static ObjectReader superIdJSONReader = new ObjectMapper().readerFor(SignatureId.class);
+        private static ObjectReader idsJSONReader = new ObjectMapper().readerFor(ObjectIds.class);
+    
         @Override
-        protected SchemaObject innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var key = new Key.Builder().fromJSON(jsonObject.getJSONObject("key"));
-            var label = jsonObject.getString("label");
-            var superId = new SignatureId.Builder().fromJSON(jsonObject.getJSONObject("superId"));
-            var ids = new ObjectIds.Builder().fromJSON(jsonObject.getJSONObject("ids"));
-            var iri = jsonObject.has("iri") ? jsonObject.getString("iri") : "";
-            var pimIri = jsonObject.has("pimIri") ? jsonObject.getString("pimIri") : "";
+        public SchemaObject deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            final Key key = keyJSONReader.readValue(node.get("key"));
+            final var label = node.get("label").asText();
+            final SignatureId superId = superIdJSONReader.readValue(node.get("superId"));
+            final ObjectIds ids = idsJSONReader.readValue(node.get("ids"));
+            final var iri = node.hasNonNull("iri") ? node.get("iri").asText() : "";
+            final var pimIri = node.hasNonNull("pimIri") ? node.get("pimIri").asText() : "";
 
             return new SchemaObject(key, label, superId, ids, iri, pimIri);
         }

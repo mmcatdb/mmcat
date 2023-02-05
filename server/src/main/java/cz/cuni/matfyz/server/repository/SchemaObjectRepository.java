@@ -12,6 +12,9 @@ import cz.cuni.matfyz.server.utils.Position;
 import java.sql.Statement;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -20,6 +23,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class SchemaObjectRepository {
+
+    private static ObjectReader positionJSONReader = new ObjectMapper().readerFor(Position.class);
+    private static ObjectWriter positionJSONWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;
@@ -38,7 +44,7 @@ public class SchemaObjectRepository {
             while (resultSet.next()) {
                 String jsonObject = resultSet.getString("json_value");
                 String jsonPosition = resultSet.getString("position");
-                Position position = new Position.Builder().fromJSON(jsonPosition);
+                Position position = positionJSONReader.readValue(jsonPosition);
 
                 if (position != null)
                     output.add(new SchemaObjectWrapper(getId(resultSet, "id"), jsonObject, position));
@@ -64,7 +70,7 @@ public class SchemaObjectRepository {
             while (resultSet.next()) {
                 String jsonObject = resultSet.getString("json_value");
                 String jsonPosition = resultSet.getString("position");
-                Position position = new Position.Builder().fromJSON(jsonPosition);
+                Position position = positionJSONReader.readValue(jsonPosition);
 
                 if (position != null)
                     output.add(new SchemaObjectWrapper(getId(resultSet, "id"), jsonObject, position));
@@ -93,7 +99,7 @@ public class SchemaObjectRepository {
                 WHERE schema_category_id = ?
                     AND schema_object_id = ?;
                 """);
-            statement.setString(1, newPosition.toJSON().toString());
+            statement.setString(1, positionJSONWriter.writeValueAsString(newPosition));
             setId(statement, 2, categoryId);
             setId(statement, 3, objectId);
 
@@ -122,7 +128,7 @@ public class SchemaObjectRepository {
             var categoryStatement = connection.prepareStatement("INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position) VALUES (?, ?, ?::jsonb)", Statement.RETURN_GENERATED_KEYS);
             setId(categoryStatement, 1, categoryId);
             setId(categoryStatement, 2, generatedId);
-            categoryStatement.setString(3, object.position().toJSON().toString());
+            categoryStatement.setString(3, positionJSONWriter.writeValueAsString(object.position()));
 
             int categoryAffectedRows = categoryStatement.executeUpdate();
             if (categoryAffectedRows == 0)

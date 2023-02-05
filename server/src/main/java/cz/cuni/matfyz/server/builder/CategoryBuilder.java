@@ -7,9 +7,13 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
+import cz.cuni.matfyz.server.service.WrapperService;
 
 import java.util.Map;
 import java.util.TreeMap;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 
 /**
  * @author jachym.bartik
@@ -18,6 +22,9 @@ public class CategoryBuilder {
 
     private final Map<Id, SchemaObject> createdObjects = new TreeMap<>();
     private final Map<Id, SchemaMorphism> createdMorphisms = new TreeMap<>();
+
+    private static ObjectReader objectJSONReader = new ObjectMapper().readerFor(SchemaObject.class);
+    private static ObjectReader morphismJSONReader = new ObjectMapper().readerFor(SchemaMorphism.class);
 
     public SchemaObject getObject(Id id) {
         return createdObjects.get(id);
@@ -44,7 +51,7 @@ public class CategoryBuilder {
         }
 
         for (final var morphismWrapper : categoryWrapper.morphisms) {
-            final var morphism = buildMorphism(morphismWrapper);
+            final var morphism = buildMorphism(morphismWrapper, category);
             category.addMorphism(morphism);
         }
 
@@ -52,21 +59,29 @@ public class CategoryBuilder {
     }
 
     private SchemaObject buildObject(SchemaObjectWrapper wrapper) {
-        final var object = new SchemaObject.Builder().fromJSON(wrapper.jsonValue);
-        createdObjects.put(wrapper.id, object);
+        try {
+            final SchemaObject object = objectJSONReader.readValue(wrapper.jsonValue);
+            createdObjects.put(wrapper.id, object);
 
-        return object;
+            return object;
+        }
+        catch (Exception exception) {
+            throw new WrapperService.WrapperCreationErrorException(exception.getMessage());
+        }
     }
 
-    private SchemaMorphism buildMorphism(SchemaMorphismWrapper wrapper) {
-        final var morphism = new SchemaMorphism.Builder().fromJSON(
-            createdObjects.get(wrapper.domId),
-            createdObjects.get(wrapper.codId),
-            wrapper.jsonValue
-        );
-        createdMorphisms.put(wrapper.id, morphism);
+    private SchemaMorphism buildMorphism(SchemaMorphismWrapper wrapper, SchemaCategory category) {
+        try {
+            final SchemaMorphism morphism = morphismJSONReader
+                .withAttribute("category", category)
+                .readValue(wrapper.jsonValue);
+            createdMorphisms.put(wrapper.id, morphism);
 
-        return morphism;
+            return morphism;
+        }
+        catch (Exception exception) {
+            throw new WrapperService.WrapperCreationErrorException(exception.getMessage());
+        }
     }
 
 }

@@ -1,8 +1,6 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 import cz.cuni.matfyz.core.utils.IterableUtils;
 
 import java.io.IOException;
@@ -18,8 +16,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @author jachym.bartik
  */
 @JsonSerialize(using = DomainRow.Serializer.class)
-public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConvertible {
+public class DomainRow implements Serializable, Comparable<DomainRow> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
@@ -144,25 +140,6 @@ public class DomainRow implements Serializable, Comparable<DomainRow>, JSONConve
     @Override
     public boolean equals(Object object) {
         return object instanceof DomainRow row && superId.equals(row.superId);
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONConverterBase<DomainRow> {
-
-        @Override
-        protected JSONObject innerToJSON(DomainRow object) throws JSONException {
-            var output = new JSONObject();
-            
-            output.put("superId", object.superId.toJSON());
-            output.put("technicalIds", object.technicalIds);
-            
-            return output;
-        }
-    
     }
 
     public static class Serializer extends StdSerializer<DomainRow> {

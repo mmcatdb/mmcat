@@ -1,9 +1,6 @@
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -14,19 +11,24 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Id is a set of signatures (each corresponding to a base or a composite morphism).
  * @author jachymb.bartik
  */
 @JsonSerialize(using = SignatureId.Serializer.class)
-public class SignatureId implements Serializable, Comparable<SignatureId>, JSONConvertible {
+@JsonDeserialize(using = SignatureId.Deserializer.class)
+public class SignatureId implements Serializable, Comparable<SignatureId> {
     
     private final SortedSet<Signature> signatures;
     
@@ -94,40 +96,6 @@ public class SignatureId implements Serializable, Comparable<SignatureId>, JSONC
 
         return builder.toString();
     }
-    
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONConverterBase<SignatureId> {
-
-        @Override
-        protected JSONObject innerToJSON(SignatureId object) throws JSONException {
-            var output = new JSONObject();
-    
-            var signatures = new JSONArray(object.signatures.stream().map(Signature::toJSON).toList());
-            output.put("signatures", signatures);
-            
-            return output;
-        }
-    
-    }
-    
-    public static class Builder extends FromJSONBuilderBase<SignatureId> {
-    
-        @Override
-        protected SignatureId innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var signaturesArray = jsonObject.getJSONArray("signatures");
-            var signatures = new TreeSet<Signature>();
-            var builder = new Signature.Builder();
-            for (int i = 0; i < signaturesArray.length(); i++)
-                signatures.add(builder.fromJSON(signaturesArray.getJSONArray(i)));
-
-            return new SignatureId(signatures);
-        }
-    
-    }
 
     public static class Serializer extends StdSerializer<SignatureId> {
 
@@ -146,6 +114,29 @@ public class SignatureId implements Serializable, Comparable<SignatureId>, JSONC
                 generator.writeObject(signature);
             }
             generator.writeEndArray();
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<SignatureId> {
+
+        public Deserializer() {
+            this(null);
+        }
+    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static ObjectReader signaturesJSONReader = new ObjectMapper().readerFor(Signature[].class);
+
+        @Override
+        public SignatureId deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            final Signature[] signatures = signaturesJSONReader.readValue(node);
+            
+            return new SignatureId(signatures);
         }
 
     }

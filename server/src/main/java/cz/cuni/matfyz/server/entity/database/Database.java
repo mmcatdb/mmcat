@@ -74,54 +74,5 @@ public class Database extends Entity {
     public DatabaseInfo toInfo() {
         return new DatabaseInfo(id, type, label);
     }
-
-    /*
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONConverterBase<Database> {
-
-        @Override
-        protected JSONObject _toJSON(Database database) throws JSONException {
-            var output = new JSONObject();
-
-            output.put("type", database.type.toString());
-            output.put("label", database.label);
-            output.put("jsonSettings", new JSONObject(database.jsonSettings));
-
-            return output;
-        }
-
-    }
-
-    public static class Builder extends FromJSONLoaderBase<Database> {
-
-        public Database fromJSON(int id, String jsonValue) {
-            var database = new Database(id);
-            loadFromJSON(database, jsonValue);
-            return database;
-        }
-
-        @Override
-        protected void _loadFromJSON(Database database, JSONObject jsonObject) throws JSONException {
-            database.type = Type.valueOf(jsonObject.getString("type"));
-            database.label = jsonObject.getString("label");
-            database.jsonSettings = jsonObject.getJSONObject("settings").toString();
-        }
-
-        public Database fromCreate(Integer id, Create create) {
-            var database = new Database(id);
-
-            database.type = create.type;
-            database.label = create.label;
-            database.jsonSettings = create.jsonSettings;
-
-            return database;
-        }
-
-    }
-    */
     
 }

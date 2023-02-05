@@ -3,6 +3,8 @@ package cz.cuni.matfyz.server;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
+import cz.cuni.matfyz.core.JSONTests;
+import cz.cuni.matfyz.core.TestData;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
@@ -39,7 +41,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class EvolutionManagementTests {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EvolutionManagementTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JSONTests.class);
 
     private TestData data;
 

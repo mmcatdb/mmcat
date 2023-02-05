@@ -3,12 +3,9 @@ package cz.cuni.matfyz.core.instance;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SignatureId;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -20,15 +17,12 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * @author jachymb.bartik
  */
 @JsonSerialize(using = SuperIdWithValues.Serializer.class)
-public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithValues>, JSONConvertible {
+public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithValues> {
 
     private final Map<Signature, String> tuples;
 
@@ -219,34 +213,6 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         builder.append("}");
             
         return builder.toString();
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONConverterBase<SuperIdWithValues> {
-
-        @Override
-        protected JSONObject innerToJSON(SuperIdWithValues object) throws JSONException {
-            var output = new JSONObject();
-
-            var tuples = new ArrayList<JSONObject>();
-            
-            for (var entry : object.tuples.entrySet()) {
-                var jsonTuple = new JSONObject();
-                jsonTuple.put("signature", entry.getKey().toJSON());
-                jsonTuple.put("value", entry.getValue());
-
-                tuples.add(jsonTuple);
-            }
-
-            output.put("tuples", new JSONArray(tuples));
-            
-            return output;
-        }
-    
     }
 
     public static class Serializer extends StdSerializer<SuperIdWithValues> {

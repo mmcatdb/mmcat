@@ -6,8 +6,6 @@ import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SignatureId;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -17,6 +15,15 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +32,8 @@ import org.json.JSONObject;
  * Each object from instance category is modeled as a set of tuples ({@link DomainRow}).
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceObject implements Serializable, CategoricalObject, JSONConvertible {
+//@JsonSerialize(using = InstanceObject.Serializer.class)
+public class InstanceObject implements Serializable, CategoricalObject {
 
     public final SchemaObject schemaObject;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
@@ -272,27 +280,6 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
     public boolean equals(Object object) {
         return object instanceof InstanceObject instanceObject && schemaObject.equals(instanceObject.schemaObject);
     }
-
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONConverterBase<InstanceObject> {
-
-        @Override
-        protected JSONObject innerToJSON(InstanceObject object) throws JSONException {
-            var output = new JSONObject();
-    
-            output.put("key", object.key().toJSON());
-
-            var domain = object.allRowsToSet().stream().map(DomainRow::toJSON).toList();
-            output.put("domain", new JSONArray(domain));
-            
-            return output;
-        }
-    
-    }
     
     private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
 
@@ -345,5 +332,43 @@ public class InstanceObject implements Serializable, CategoricalObject, JSONConv
         }
 
     }
+/*
+    public static class Serializer extends StdSerializer<Key> {
 
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<Key> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writeNumberField("value", key.value);
+            generator.writeEndObject();
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<Id> {
+
+        public Deserializer() {
+            this(null);
+        }
+    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+    
+        @Override
+        public Id deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            JsonNode node = parser.getCodec().readTree(parser);
+    
+            return new Id(node.asText());
+        }
+
+    }
+*/
 }

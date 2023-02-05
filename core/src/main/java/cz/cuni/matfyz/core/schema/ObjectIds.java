@@ -1,10 +1,8 @@
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
@@ -12,15 +10,25 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * TODO
  * @author jachymb.bartik
  */
-public class ObjectIds implements Serializable, JSONConvertible {
+@JsonSerialize(using = ObjectIds.Serializer.class)
+@JsonDeserialize(using = ObjectIds.Deserializer.class)
+public class ObjectIds implements Serializable {
 
     public enum Type {
         Signatures, // Its a set of signatures.
@@ -114,43 +122,52 @@ public class ObjectIds implements Serializable, JSONConvertible {
 
         return builder.toString();
     }
-    
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
 
-    public static class Converter extends ToJSONConverterBase<ObjectIds> {
+    public static class Serializer extends StdSerializer<ObjectIds> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<ObjectIds> t) {
+            super(t);
+        }
 
         @Override
-        protected JSONObject innerToJSON(ObjectIds object) throws JSONException {
-            var output = new JSONObject();
+        public void serialize(ObjectIds ids, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writeStringField("type", ids.type.name());
+            generator.writeArrayFieldStart("signatureIds");
+            for (final var id : ids.signatureIds)
+                generator.writePOJO(id);
+            generator.writeEndArray();
+            generator.writeEndObject();
+        }
 
-            output.put("type", object.type);
-            var signatureIds = new JSONArray(object.signatureIds.stream().map(SignatureId::toJSON).toList());
-            output.put("signatureIds", signatureIds);
-            
-            return output;
+    }
+
+    public static class Deserializer extends StdDeserializer<ObjectIds> {
+
+        public Deserializer() {
+            this(null);
         }
     
-    }
-    
-    public static class Builder extends FromJSONBuilderBase<ObjectIds> {
-    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static ObjectReader signatureIdsJSONReader = new ObjectMapper().readerFor(SignatureId[].class);
+
         @Override
-        protected ObjectIds innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var type = Type.valueOf(jsonObject.getString("type"));
-            if (type == Type.Value || type == Type.Generated)
-                return new ObjectIds(type);
+        public ObjectIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
 
-            var signatureIdsArray = jsonObject.getJSONArray("signatureIds");
-            var signatureIds = new TreeSet<SignatureId>();
-            var builder = new SignatureId.Builder();
-            for (int i = 0; i < signatureIdsArray.length(); i++)
-                signatureIds.add(builder.fromJSON(signatureIdsArray.getJSONObject(i)));
+            final Type type = Type.valueOf(node.get("type").asText());
+            final SignatureId[] signatureIds = signatureIdsJSONReader.readValue(node.get("signatureIds"));
 
-            return new ObjectIds(signatureIds);
+            return type == Type.Signatures ? new ObjectIds(signatureIds) : new ObjectIds(type);
         }
-    
+
     }
+
 }

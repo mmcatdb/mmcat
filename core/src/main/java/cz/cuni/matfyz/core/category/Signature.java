@@ -15,8 +15,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +33,7 @@ import org.json.JSONException;
  * @author jachym.bartik
  */
 @JsonSerialize(using = Signature.Serializer.class)
+@JsonDeserialize(using = Signature.Deserializer.class)
 public class Signature implements Serializable, Comparable<Signature>, JSONArrayConvertible {
 
     private final int[] ids;
@@ -294,6 +302,29 @@ public class Signature implements Serializable, Comparable<Signature>, JSONArray
         @Override
         public void serialize(Signature signature, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeArray(signature.ids, 0, signature.ids.length);
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<Signature> {
+
+        public Deserializer() {
+            this(null);
+        }
+    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static ObjectReader intsJSONReader = new ObjectMapper().readerFor(int[].class);
+
+        @Override
+        public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            final int[] values = intsJSONReader.readValue(node);
+
+            return values.length == 0 ? Signature.createEmpty() : new Signature(values);
         }
 
     }

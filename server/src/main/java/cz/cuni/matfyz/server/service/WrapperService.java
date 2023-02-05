@@ -74,7 +74,7 @@ public class WrapperService {
         return new PostgreSQLConnectionProvider(settings);
     }
 
-    public class WrapperCreationErrorException extends RuntimeException {
+    public static class WrapperCreationErrorException extends RuntimeException {
 
         public WrapperCreationErrorException(String errorMessage) {
             super(errorMessage);
@@ -82,7 +82,7 @@ public class WrapperService {
 
     }
 
-    public class WrapperNotFoundException extends RuntimeException {
+    public static class WrapperNotFoundException extends RuntimeException {
 
         public WrapperNotFoundException(String errorMessage) {
             super(errorMessage);
