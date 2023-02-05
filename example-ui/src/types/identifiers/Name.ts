@@ -3,12 +3,14 @@ import { Signature, type SignatureJSON } from "./Signature";
 export type NameJSON = StaticNameJSON | DynamicNameJSON;
 
 export function nameFromJSON(jsonObject: NameJSON): Name {
-    return jsonObject._class === 'StaticName' ? StaticName.fromJSON(jsonObject) : DynamicName.fromJSON(jsonObject);
+    return 'signature' in  jsonObject
+        ? DynamicName.fromJSON(jsonObject)
+        : StaticName.fromJSON(jsonObject);
 }
 
 export type Name = StaticName | DynamicName;
 
-export type StaticNameJSON = { _class: 'StaticName', value: string, type: 'STATIC_NAME' | 'ANONYMOUS' };
+export type StaticNameJSON = { value: string, type: 'STATIC' | 'ANONYMOUS' };
 
 export class StaticName {
     readonly value: string;
@@ -57,14 +59,13 @@ export class StaticName {
 
     toJSON(): StaticNameJSON {
         return {
-            _class: 'StaticName',
             value: this.value,
-            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC_NAME'
+            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC'
         };
     }
 }
 
-export type DynamicNameJSON = { _class: 'DynamicName', signature: SignatureJSON };
+export type DynamicNameJSON = { signature: SignatureJSON };
 
 export class DynamicName {
     readonly signature: Signature;
@@ -99,7 +100,6 @@ export class DynamicName {
 
     toJSON(): DynamicNameJSON {
         return {
-            _class: 'DynamicName',
             signature: this.signature.toJSON()
         };
     }

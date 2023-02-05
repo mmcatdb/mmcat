@@ -46,45 +46,45 @@ public class TestData {
     public final Key textKey = new Key(123);
     public final Key localeKey = new Key(124);
     
-    private final Signature customerToId = Signature.createBase(1);
-    private final Signature customerToOrdered = Signature.createBase(2);
-    private final Signature orderedToOrder = Signature.createBase(3);
-    private final Signature orderToNestedDoc = Signature.createBase(4);
-    private final Signature nestedDocToPropertyA = Signature.createBase(5);
-    private final Signature nestedDocToPropertyB = Signature.createBase(6);
-    private final Signature nestedDocToPropertyC = Signature.createBase(7);
-    private final Signature orderToItems = Signature.createBase(8);
-    private final Signature itemsToProduct = Signature.createBase(9);
-    private final Signature productToPid = Signature.createBase(10);
-    private final Signature productToPrice = Signature.createBase(11);
-    private final Signature productToPname = Signature.createBase(12);
-    private final Signature itemsToQuantity = Signature.createBase(13);
-    private final Signature orderToContact = Signature.createBase(14);
-    private final Signature contactToType = Signature.createBase(15);
-    private final Signature typeToName = Signature.createBase(16);
-    private final Signature contactToValue = Signature.createBase(17);
-    private final Signature orderToArray = Signature.createBase(18);
-    private final Signature orderToNumber = Signature.createBase(19);
-    private final Signature orderToAddress = Signature.createBase(20);
-    private final Signature addressToLabel = Signature.createBase(21);
-    private final Signature addressToContent = Signature.createBase(22);
-    private final Signature contentToText = Signature.createBase(23);
-    private final Signature contentToLocale = Signature.createBase(24);
+    public final Signature customerToId = Signature.createBase(1);
+    public final Signature customerToOrdered = Signature.createBase(2);
+    public final Signature orderedToOrder = Signature.createBase(3);
+    public final Signature orderToNestedDoc = Signature.createBase(4);
+    public final Signature nestedDocToPropertyA = Signature.createBase(5);
+    public final Signature nestedDocToPropertyB = Signature.createBase(6);
+    public final Signature nestedDocToPropertyC = Signature.createBase(7);
+    public final Signature orderToItems = Signature.createBase(8);
+    public final Signature itemsToProduct = Signature.createBase(9);
+    public final Signature productToPid = Signature.createBase(10);
+    public final Signature productToPrice = Signature.createBase(11);
+    public final Signature productToPname = Signature.createBase(12);
+    public final Signature itemsToQuantity = Signature.createBase(13);
+    public final Signature orderToContact = Signature.createBase(14);
+    public final Signature contactToType = Signature.createBase(15);
+    public final Signature typeToName = Signature.createBase(16);
+    public final Signature contactToValue = Signature.createBase(17);
+    public final Signature orderToArray = Signature.createBase(18);
+    public final Signature orderToNumber = Signature.createBase(19);
+    public final Signature orderToAddress = Signature.createBase(20);
+    public final Signature addressToLabel = Signature.createBase(21);
+    public final Signature addressToContent = Signature.createBase(22);
+    public final Signature contentToText = Signature.createBase(23);
+    public final Signature contentToLocale = Signature.createBase(24);
     
-    private final Signature itemsToNumber = orderToItems.dual().concatenate(orderToNumber);
-    private final Signature itemsToPid = itemsToProduct.concatenate(productToPid);
-    private final Signature itemsToPname = itemsToProduct.concatenate(productToPname);
-    private final Signature itemsToPrice = itemsToProduct.concatenate(productToPrice);
+    public final Signature itemsToNumber = orderToItems.dual().concatenate(orderToNumber);
+    public final Signature itemsToPid = itemsToProduct.concatenate(productToPid);
+    public final Signature itemsToPname = itemsToProduct.concatenate(productToPname);
+    public final Signature itemsToPrice = itemsToProduct.concatenate(productToPrice);
     
-    private final Signature contactToNumber = orderToContact.dual().concatenate(orderToNumber);
-    private final Signature contactToName = contactToType.concatenate(typeToName);
+    public final Signature contactToNumber = orderToContact.dual().concatenate(orderToNumber);
+    public final Signature contactToName = contactToType.concatenate(typeToName);
     
-    private final Signature orderedToNumber = orderedToOrder.concatenate(orderToNumber);
-    private final Signature orderedToId = customerToOrdered.dual().concatenate(customerToId);
-    private final Signature orderToId = orderedToOrder.dual().concatenate(orderedToId);
-    private final Signature orderToCustomer = orderedToOrder.dual().concatenate(customerToOrdered.dual()).concatenate(customerToId);
+    public final Signature orderedToNumber = orderedToOrder.concatenate(orderToNumber);
+    public final Signature orderedToId = customerToOrdered.dual().concatenate(customerToId);
+    public final Signature orderToId = orderedToOrder.dual().concatenate(orderedToId);
+    public final Signature orderToCustomer = orderedToOrder.dual().concatenate(customerToOrdered.dual()).concatenate(customerToId);
     
-    private final Signature addressToNumber = orderToAddress.dual().concatenate(orderToNumber);
+    public final Signature addressToNumber = orderToAddress.dual().concatenate(orderToNumber);
 
     private enum Cardinality {
         ONE_TO_ONE,

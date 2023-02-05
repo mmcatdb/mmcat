@@ -15,24 +15,10 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 /**
  * Each object from instance category is modeled as a set of tuples ({@link DomainRow}).
  * @author pavel.koupil, jachym.bartik
  */
-//@JsonSerialize(using = InstanceObject.Serializer.class)
 public class InstanceObject implements Serializable, CategoricalObject {
 
     public final SchemaObject schemaObject;
@@ -332,43 +318,5 @@ public class InstanceObject implements Serializable, CategoricalObject {
         }
 
     }
-/*
-    public static class Serializer extends StdSerializer<Key> {
 
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<Key> t) {
-            super(t);
-        }
-
-        @Override
-        public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-            generator.writeNumberField("value", key.value);
-            generator.writeEndObject();
-        }
-
-    }
-
-    public static class Deserializer extends StdDeserializer<Id> {
-
-        public Deserializer() {
-            this(null);
-        }
-    
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-    
-        @Override
-        public Id deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            JsonNode node = parser.getCodec().readTree(parser);
-    
-            return new Id(node.asText());
-        }
-
-    }
-*/
 }

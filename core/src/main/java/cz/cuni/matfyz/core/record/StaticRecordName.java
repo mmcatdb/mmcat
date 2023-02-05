@@ -38,7 +38,7 @@ public class StaticRecordName extends RecordName {
     @Override
     public String toString() {
         return switch (type) {
-            case STATIC_NAME -> value;
+            case STATIC -> value;
             case ANONYMOUS -> "_";
         };
     }

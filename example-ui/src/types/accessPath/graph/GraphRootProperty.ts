@@ -51,7 +51,6 @@ export class GraphRootProperty {
 
     toJSON(): ComplexPropertyJSON {
         return {
-            _class: 'ComplexProperty',
             name: this.name.toJSON(),
             signature: this._signature.toSignature().toJSON(),
             isAuxiliary: true,

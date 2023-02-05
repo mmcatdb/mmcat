@@ -65,14 +65,12 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                         if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.name() instanceof StaticName staticName) {
                             String name = staticName.getStringName();
                             String value = resultSet.getString(name);
-                            rootRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.value().signature(), value);
+                            rootRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.signature(), value);
                         }
                     }
                             
                     forest.addRecord(rootRecord);
                 }
-
-                resultSet.close();
                 
                 return forest;
             }

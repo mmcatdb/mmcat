@@ -1,11 +1,6 @@
 package cz.cuni.matfyz.core.mapping;
 
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.FromJSONSwitchBuilderBase;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-
 import java.io.IOException;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -19,21 +14,9 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
  * @author pavel.koupil, jachym.bartik
  */
 @JsonDeserialize(using = Name.Deserializer.class)
-public abstract class Name implements JSONConvertible {
+public abstract class Name {
 
     protected Name() {}
-
-    public static class Builder extends FromJSONSwitchBuilderBase<Name> {
-
-        @Override
-        protected Set<FromJSONBuilderBase<? extends Name>> getChildConverters() {
-            return Set.of(
-                new StaticName.Builder(),
-                new DynamicName.Builder()
-            );
-        }
-        
-    }
 
     public static class Deserializer extends StdDeserializer<Name> {
 

@@ -1,15 +1,11 @@
 import type { NameJSON, SignatureJSON, StaticNameJSON } from "../identifiers";
 
-export type SimpleValueJSON = { signature: SignatureJSON };
-
 export type SimplePropertyJSON = {
-    _class: 'SimpleProperty';
     name: NameJSON;
-    value: SimpleValueJSON;
+    signature: SignatureJSON;
 };
 
 export type ComplexPropertyJSON = {
-    _class: 'ComplexProperty';
     name: NameJSON;
     signature: SignatureJSON;
     isAuxiliary: boolean;

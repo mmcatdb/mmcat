@@ -12,7 +12,6 @@ import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.ArrayList;
@@ -43,14 +42,7 @@ public class DMLAlgorithm {
     }
     
     public List<AbstractStatement> algorithm() {
-        //return mapping.hasRootMorphism()
-        //    ? processWithMorphism(mapping.rootMorphism()) // K with root morphism
-        //    : processWithObject(mapping.rootObject()); // K with root object
-        return processWithObject(mapping.rootObject());
-    }
-
-    private List<AbstractStatement> processWithObject(SchemaObject object) {
-        InstanceObject instanceObject = category.getObject(object);
+        InstanceObject instanceObject = category.getObject(mapping.rootObject());
         Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
         Deque<DMLStackTriple> masterStack = new LinkedList<>();
         List<AbstractStatement> output = new ArrayList<>();
@@ -62,28 +54,6 @@ public class DMLAlgorithm {
 
         return output;
     }
-
-    /*
-    private List<Statement> processWithMorphism(SchemaMorphism morphism) {
-        InstanceMorphism instanceMorphism = category.getMorphism(morphism);
-        Set<MappingRow> mappingRows = fetchRelations(instanceMorphism);
-        AccessPath codomainPath = mapping.accessPath().getSubpathBySignature(morphism.signature());
-        Deque<DMLStackTriple> masterStack = new LinkedList<>();
-        List<Statement> output = new ArrayList<>();
-
-        if (codomainPath instanceof ComplexProperty complexPath) {
-            for (MappingRow mappingRow : mappingRows) {
-                masterStack.push(new DMLStackTriple(mappingRow.domainRow(), DDLAlgorithm.EMPTY_NAME, mapping.accessPath().minusSubpath(codomainPath)));
-                masterStack.push(new DMLStackTriple(mappingRow.codomainRow(), DDLAlgorithm.EMPTY_NAME, complexPath));
-                output.add(buildStatement(masterStack));
-            }
-
-            return output;
-        }
-
-        throw new UnsupportedOperationException("Process with morphism");
-    }
-    */
 
     private Set<DomainRow> fetchSuperIds(InstanceObject object) {
         return object.allRowsToSet();

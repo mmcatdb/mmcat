@@ -95,7 +95,7 @@ public class ICAlgorithmTestBase {
     }
 
     public static Mapping createMapping(SchemaCategory schema, SchemaObject rootObject, String kindName, ComplexProperty path) {
-        return new Mapping.Builder().fromArguments(schema, rootObject, null, path, kindName, primaryKeyFromObject(rootObject));
+        return Mapping.fromArguments(schema, rootObject, path, kindName, primaryKeyFromObject(rootObject));
     }
 
     private static List<Signature> primaryKeyFromObject(SchemaObject object) {

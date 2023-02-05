@@ -37,11 +37,8 @@ export class GraphSimpleProperty {
 
     toJSON(): SimplePropertyJSON {
         return {
-            _class: 'SimpleProperty',
             name: this.name.toJSON(),
-            value: {
-                signature: this._signature.toSignature().toJSON()
-            }
+            signature: this._signature.toSignature().toJSON()
         };
     }
 }

@@ -11,7 +11,7 @@ import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLDMLWrapper;
 
 import java.nio.file.Paths;
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,15 +83,16 @@ public class MongoDBToPostgreSQLTests {
 
     @Test
     public void test() throws Exception {
-        var data = new TestData();
-        ComplexProperty path = data.path_orderRoot();
+        final var data = new TestData();
+        final ComplexProperty path = data.path_orderRoot();
         LOGGER.trace(path.toString());
-        var json = path.toJSON();
-        LOGGER.trace(json.toString());
 
-        var parsedPath = new AccessPath.Builder().fromJSON(new JSONObject(json.toString()));
+        final var jsonString = new ObjectMapper().writer().writeValueAsString(path);
+        LOGGER.trace(jsonString);
+
+        final AccessPath parsedPath = new ObjectMapper().readerFor(AccessPath.class).readValue(jsonString);
         LOGGER.trace(parsedPath.toString());
-
+        
         assertEquals(path.toString(), parsedPath.toString());
     }
 }

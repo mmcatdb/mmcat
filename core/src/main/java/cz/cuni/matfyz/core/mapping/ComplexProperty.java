@@ -1,10 +1,9 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.ToJSONSwitchConverterBase;
 import cz.cuni.matfyz.core.utils.IndentedStringBuilder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,23 +11,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * A complex value in the access path tree. Its context is a signature of a morphism (or undefined in case of an auxiliary property)
  * It has subpaths and it provides many methods needed in the algorithms described in the paper.
  * @author jachymb.bartik
  */
+@JsonSerialize(using = ComplexProperty.Serializer.class)
+@JsonDeserialize(using = ComplexProperty.Deserializer.class)
 public class ComplexProperty extends AccessPath {
-    
-    private final Signature signature;
-    
-    @Override
-    public Signature signature() {
-        return signature;
-    }
 
     private final boolean isAuxiliary;
     
@@ -52,9 +54,8 @@ public class ComplexProperty extends AccessPath {
     }
     
     public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, List<AccessPath> subpaths) {
-        super(name);
+        super(name, signature);
         
-        this.signature = signature;
         this.isAuxiliary = isAuxiliary;
         this.subpathsMap = new TreeMap<>();
         subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
@@ -228,46 +229,59 @@ public class ComplexProperty extends AccessPath {
         return newSubpaths;
     }
 
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
+    public static class Serializer extends StdSerializer<ComplexProperty> {
 
-    public static class Converter extends ToJSONSwitchConverterBase<ComplexProperty> {
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<ComplexProperty> t) {
+            super(t);
+        }
 
         @Override
-        protected JSONObject innerToJSON(ComplexProperty object) throws JSONException {
-            var output = new JSONObject();
-    
-            output.put("name", object.name.toJSON());
-            output.put("signature", object.signature.toJSON());
-            output.put("isAuxiliary", object.isAuxiliary);
+        public void serialize(ComplexProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writePOJOField("name", property.name);
+            generator.writePOJOField("signature", property.signature);
+            generator.writeBooleanField("isAuxiliary", property.isAuxiliary);
 
-            var subpaths = new JSONArray(object.subpaths.stream().map(subpath -> subpath.toJSON()).toList());
-            output.put("subpaths", subpaths);
+            generator.writeArrayFieldStart("subpaths");
+            for (final var subpath : property.subpaths)
+                generator.writePOJO(subpath);
+            generator.writeEndArray();
             
-            return output;
+            generator.writeEndObject();
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<ComplexProperty> {
+
+        public Deserializer() {
+            this(null);
         }
     
-    }
-    
-    public static class Builder extends FromJSONBuilderBase<ComplexProperty> {
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static ObjectReader nameJSONReader = new ObjectMapper().readerFor(Name.class);
+        private static ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
+        private static ObjectReader subpathsJSONReader = new ObjectMapper().readerFor(AccessPath[].class);
     
         @Override
-        protected ComplexProperty innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var name = new Name.Builder().fromJSON(jsonObject.getJSONObject("name"));
-            var signature = new Signature.Builder().fromJSON(jsonObject.getJSONArray("signature"));
-            var isAuxiliary = jsonObject.getBoolean("isAuxiliary");
+        public ComplexProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
 
-            var subpathsArray = jsonObject.getJSONArray("subpaths");
-            var subpaths = new ArrayList<AccessPath>();
-            var builder = new AccessPath.Builder();
-            for (int i = 0; i < subpathsArray.length(); i++)
-                subpaths.add(builder.fromJSON(subpathsArray.getJSONObject(i)));
+            final Name name = nameJSONReader.readValue(node.get("name"));
+            final Signature signature = signatureJSONReader.readValue(node.get("signature"));
+            final var isAuxiliary = node.get("isAuxiliary").asBoolean();
+            final AccessPath[] subpaths = subpathsJSONReader.readValue(node.get("subpaths"));
 
-            return new ComplexProperty(name, signature, isAuxiliary, subpaths);
+            return new ComplexProperty(name, signature, isAuxiliary, List.of(subpaths));
         }
-    
+
     }
-    
+
 }

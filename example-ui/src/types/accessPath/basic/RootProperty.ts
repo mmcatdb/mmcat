@@ -49,7 +49,6 @@ export class RootProperty {
 
     toJSON(): ComplexPropertyJSON {
         return {
-            _class: 'ComplexProperty',
             name: this.name.toJSON(),
             signature: this._signature.toJSON(),
             isAuxiliary: true,

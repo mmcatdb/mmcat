@@ -1,9 +1,11 @@
 package cz.cuni.matfyz.server.builder;
 
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.service.WrapperService;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author jachym.bartik
@@ -27,13 +29,18 @@ public class MappingBuilder {
 
     public Mapping build() {
         final var builder = new CategoryBuilder();
-        final var category = builder.setCategoryWrapper(categoryWrapper)
-            .build();
-
+        final var category = builder.setCategoryWrapper(categoryWrapper).build();
         final var rootObject = builder.getObject(mappingWrapper.rootObject.id);
-        SchemaMorphism rootMorphism = null;
-        
-        return new Mapping.Builder().fromJSON(category, rootObject, rootMorphism, mappingWrapper.jsonValue);
+
+        try {
+            return new ObjectMapper().readerFor(Mapping.class)
+                .withAttribute("category", category)
+                .withAttribute("rootObject", rootObject)
+                .readValue(mappingWrapper.jsonValue);
+        }
+        catch (Exception exception) {
+            throw new WrapperService.WrapperCreationErrorException(exception.getMessage());
+        }
     }
 
 }

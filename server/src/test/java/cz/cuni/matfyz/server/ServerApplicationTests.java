@@ -64,6 +64,8 @@ class ServerApplicationTests {
 
     @Test
     void importExportTest() throws Exception {
+        //final int batchMultiplier = 1000;
+        final int batchMultiplier = 10;
         final int repetitions = 5;
         final int[] batches = new int[] { 1 };
         //final int[] batches = new int[] { 1, 2, 4, 8, 16, 32, 64 };
@@ -95,7 +97,7 @@ class ServerApplicationTests {
 
                 InstanceCategory instance = null;
                 for (var mappingId : postgresqlMappingIds) {
-                    instance = importMapping(instance, mappingId, postgresqlDatabaseId, batch * 1000);
+                    instance = importMapping(instance, mappingId, postgresqlDatabaseId, batch * batchMultiplier);
                 }
 
                 exportMapping(instance, mongodbMappingId, mongodbDatabaseId);

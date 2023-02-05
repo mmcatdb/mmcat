@@ -118,7 +118,7 @@ public class DDLAlgorithm {
             return;
         }
 
-        var morphism = category.getMorphism(property.value().signature());
+        var morphism = category.getMorphism(property.signature());
         
         if (morphism.isArray() && property.name() instanceof StaticName)
             wrapper.addSimpleArrayProperty(names, isRequired(morphism));

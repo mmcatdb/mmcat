@@ -8,5 +8,7 @@ export type ParentProperty = RootProperty | ComplexProperty;
 export type ChildProperty = ComplexProperty | SimpleProperty;
 
 export function subpathFromJSON(jsonObject: ChildPropertyJSON, parent: ParentProperty): ChildProperty {
-    return jsonObject._class === 'SimpleProperty' ? SimpleProperty.fromJSON(jsonObject, parent) : ComplexProperty.fromJSON(jsonObject, parent);
+    return 'subpaths' in jsonObject
+        ? ComplexProperty.fromJSON(jsonObject, parent)
+        : SimpleProperty.fromJSON(jsonObject, parent);
 }

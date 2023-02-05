@@ -64,7 +64,6 @@ export class GraphComplexProperty {
 
     toJSON(): ComplexPropertyJSON {
         return {
-            _class: 'ComplexProperty',
             name: this.name.toJSON(),
             signature: this._signature.toSignature().toJSON(),
             isAuxiliary: this._isAuxiliary,

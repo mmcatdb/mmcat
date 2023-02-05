@@ -87,7 +87,7 @@ public class MTCAlgorithmTestBase {
             return;
         }
 
-        Mapping mapping = new Mapping.Builder().fromArguments(schema, rootObject, null, path, null, null);
+        Mapping mapping = Mapping.fromArguments(schema, rootObject, path, null, null);
 
         var transformation = new MTCAlgorithm();
         transformation.input(mapping, category, forest);

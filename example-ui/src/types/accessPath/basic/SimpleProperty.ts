@@ -34,18 +34,15 @@ export class SimpleProperty {
     static fromJSON(jsonObject: SimplePropertyJSON, parent: ParentProperty): SimpleProperty {
         return new SimpleProperty(
             nameFromJSON(jsonObject.name),
-            Signature.fromJSON(jsonObject.value.signature),
+            Signature.fromJSON(jsonObject.signature),
             parent
         );
     }
 
     toJSON(): SimplePropertyJSON {
         return {
-            _class: 'SimpleProperty',
             name: this.name.toJSON(),
-            value: {
-                signature: this._signature.toJSON()
-            }
+            signature: this._signature.toJSON()
         };
     }
 }

@@ -3,8 +3,6 @@ package cz.cuni.matfyz.server;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
-import cz.cuni.matfyz.core.JSONTests;
-import cz.cuni.matfyz.core.TestData;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
@@ -41,10 +39,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class EvolutionManagementTests {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JSONTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EvolutionManagementTests.class);
 
     private TestData data;
-
 
     @Autowired
     private DatabaseService databaseService;
@@ -63,6 +60,8 @@ public class EvolutionManagementTests {
 
     @Test
     public void joinMoveTest() throws Exception {
+        //final int batchMultiplier = 1000;
+        final int batchMultiplier = 10;
         final int repetitions = 5;
         final int[] batches = new int[] { 1, 2 };
         //final int[] batches = new int[] { 1, 2, 4, 8, 16, 32, 64, 128, 256 };
@@ -87,7 +86,7 @@ public class EvolutionManagementTests {
                 Statistics.start(Interval.IMPORT_JOIN_MOVE);
 
                 var process = new DatabaseToInstance();
-                process.setLimit(batch * 1000);
+                process.setLimit(batch * batchMultiplier);
                 process.input(mapping, null, pullWrapper);
 
                 var category = process.run().data;

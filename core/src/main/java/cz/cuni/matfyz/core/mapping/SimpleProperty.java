@@ -1,87 +1,105 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.ToJSONSwitchConverterBase;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * A simple value node in the access path tree. Its context is undefined (null).
  * @author jachymb.bartik
  */
+@JsonSerialize(using = SimpleProperty.Serializer.class)
+@JsonDeserialize(using = SimpleProperty.Deserializer.class)
 public class SimpleProperty extends AccessPath {
 
-    private final SimpleValue value;
-    
-    public SimpleValue value() {
-        return value;
+    public SimpleProperty(Name name, Signature signature) {
+        super(name, signature);
     }
     
-    public SimpleProperty(Name name, SimpleValue value) {
-        super(name);
-        
-        this.value = value;
+    public SimpleProperty(String name, Signature signature) {
+        this(new StaticName(name), signature);
     }
     
-    public SimpleProperty(String name, Signature value) {
-        this(new StaticName(name), new SimpleValue(value));
-    }
-    
-    public SimpleProperty(Signature name, Signature value) {
-        this(new DynamicName(name), new SimpleValue(value));
+    public SimpleProperty(Signature name, Signature signature) {
+        this(new DynamicName(name), signature);
     }
     
     @Override
     protected boolean hasSignature(Signature signature) {
         if (signature == null)
-            return value.signature().isEmpty();
+            return this.signature.isEmpty();
         
-        return value.signature().equals(signature);
+        return this.signature.equals(signature);
     }
     
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(name).append(": ").append(value);
+        builder.append(name).append(": ").append(signature);
         
         return builder.toString();
     }
     
     @Override
     public Signature signature() {
-        return value.signature();
+        return signature;
     }
 
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
+    public static class Serializer extends StdSerializer<SimpleProperty> {
 
-    public static class Converter extends ToJSONSwitchConverterBase<SimpleProperty> {
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<SimpleProperty> t) {
+            super(t);
+        }
 
         @Override
-        protected JSONObject innerToJSON(SimpleProperty object) throws JSONException {
-            var output = new JSONObject();
-            
-            output.put("name", object.name.toJSON());
-            output.put("value", object.value.toJSON());
-            
-            return output;
+        public void serialize(SimpleProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartObject();
+            generator.writePOJOField("name", property.name);
+            generator.writePOJOField("signature", property.signature);
+            generator.writeEndObject();
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<SimpleProperty> {
+
+        public Deserializer() {
+            this(null);
         }
     
-    }
-    
-    public static class Builder extends FromJSONBuilderBase<SimpleProperty> {
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static ObjectReader nameJSONReader = new ObjectMapper().readerFor(Name.class);
+        private static ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
     
         @Override
-        protected SimpleProperty innerFromJSON(JSONObject jsonObject) throws JSONException {
-            var name = new Name.Builder().fromJSON(jsonObject.getJSONObject("name"));
-            var value = new SimpleValue.Builder().fromJSON(jsonObject.getJSONObject("value"));
-            
-            return new SimpleProperty(name, value);
+        public SimpleProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            final Name name = nameJSONReader.readValue(node.get("name"));
+            final Signature signature = signatureJSONReader.readValue(node.get("signature"));
+
+            return new SimpleProperty(name, signature);
         }
-    
+
     }
+
 }

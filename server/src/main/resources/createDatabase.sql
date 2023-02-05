@@ -505,32 +505,22 @@ INSERT INTO mapping (logical_model_id, root_object_id, json_value)
 VALUES
     (1, 4, '{"primaryKey": [[4], [1, 3, 2]], "kindName": "order",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC", "value": "order"}, "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "_id", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                        {
-                            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "value": {"signature": [1, 3, 2]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": [4]}, "_class": "SimpleProperty"
-                        }
+                    "name": {"type": "STATIC", "value": "_id"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "customer"}, "signature": [1, 3, 2]},
+                        {"name": {"type": "STATIC", "value": "number"}, "signature": [4]}
                     ], "signature": [], "isAuxiliary": true
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                        {
-                            "name": {"_class": "DynamicName", "signature": [8, 7]}, "value": {"signature": [6]}, "_class": "SimpleProperty"
-                        }
+                    "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
+                        {"name": {"signature": [8, 7]}, "signature": [6]}
                     ], "signature": [5], "isAuxiliary": false
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                        {
-                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [12, 10]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [13, 10]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": [14, 10]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "quantity", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
-                        }
+                    "name": {"type": "STATIC", "value": "items"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "id"}, "signature": [12, 10]},
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": [13, 10]},
+                        {"name": {"type": "STATIC", "value": "price"}, "signature": [14, 10]},
+                        {"name": {"type": "STATIC", "value": "quantity"}, "signature": [11]}
                     ], "signature": [9], "isAuxiliary": false
                 }
             ], "signature": [], "isAuxiliary": true
@@ -538,135 +528,93 @@ VALUES
     ),
     (2, 1, '{"primaryKey": [[1]], "kindName": "customer",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "customer"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "id"}, "signature": [1]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (3, 16, '{"primaryKey": [[4]], "kindName": "app_customer",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "app_customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [4]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "full_name", "_class": "StaticName"}, "value": {"signature": [5]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "app_customer"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "id"}, "signature": [4]},
+                {"name": {"type": "STATIC", "value": "full_name"}, "signature": [5]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (3, 19, '{"primaryKey": [[1]], "kindName": "app_contact",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "app_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": [2]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "type", "_class": "StaticName"}, "value": {"signature": [3]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "app_contact"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "id"}, "signature": [1]},
+                {"name": {"type": "STATIC", "value": "value"}, "signature": [2]},
+                {"name": {"type": "STATIC", "value": "type"}, "signature": [3]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (3, 23, '{"primaryKey": [[4, 7], [1, 6]], "kindName": "app_customer_contact",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "app_customer_contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [4, 7]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "contact_id", "_class": "StaticName"}, "value": {"signature": [1, 6]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "app_customer_contact"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": [4, 7]},
+                {"name": {"type": "STATIC", "value": "contact_id"}, "signature": [1, 6]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (3, 24, '{"primaryKey": [[13]], "kindName": "app_order",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "app_order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [13]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "delivery_address", "_class": "StaticName"}, "value": {"signature": [12]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": [8]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": [9]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": [10]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [4, 14]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "app_order"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "id"}, "signature": [13]},
+                {"name": {"type": "STATIC", "value": "delivery_address"}, "signature": [12]},
+                {"name": {"type": "STATIC", "value": "note"}, "signature": [11]},
+                {"name": {"type": "STATIC", "value": "created"}, "signature": [8]},
+                {"name": {"type": "STATIC", "value": "sent"}, "signature": [9]},
+                {"name": {"type": "STATIC", "value": "paid"}, "signature": [10]},
+                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": [4, 14]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (3, 31, '{"primaryKey": [[15]], "kindName": "app_product",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "app_product", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [15]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [16]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": [17]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "app_product"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "id"}, "signature": [15]},
+                {"name": {"type": "STATIC", "value": "name"}, "signature": [16]},
+                {"name": {"type": "STATIC", "value": "price"}, "signature": [17]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (3, 35, '{"primaryKey": [[13, 21], [15, 20]], "kindName": "app_order_item",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "app_order_item", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "order_id", "_class": "StaticName"}, "value": {"signature": [13, 21]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "product_id", "_class": "StaticName"}, "value": {"signature": [15, 20]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": [19]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": [18]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "app_order_item"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "order_id"}, "signature": [13, 21]},
+                {"name": {"type": "STATIC", "value": "product_id"}, "signature": [15, 20]},
+                {"name": {"type": "STATIC", "value": "amount"}, "signature": [19]},
+                {"name": {"type": "STATIC", "value": "total_price"}, "signature": [18]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (4, 24, '{"primaryKey": [[13]], "kindName": "order",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+            "name": {"type": "STATIC", "value": "order"}, "subpaths": [
                 {
-                    "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
+                    "name": {"type": "STATIC", "value": "customer"}, "subpaths": [
                         {
-                            "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                                {
-                                    "name": {"_class": "DynamicName", "signature": [3]}, "value": {"signature": [2]}, "_class": "SimpleProperty"
-                                }
+                            "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
+                                {"name": {"signature": [3]}, "signature": [2]}
                             ], "signature": [6, -7], "isAuxiliary": false
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [5]}, "_class": "SimpleProperty"
-                        }
+                        },
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": [5]}
                     ], "signature": [14], "isAuxiliary": false
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "address", "_class": "StaticName"}, "value": {"signature": [12]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "note", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "events", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                        {
-                            "name": {"type": "STATIC_NAME", "value": "created", "_class": "StaticName"}, "value": {"signature": [8]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "sent", "_class": "StaticName"}, "value": {"signature": [9]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "paid", "_class": "StaticName"}, "value": {"signature": [10]}, "_class": "SimpleProperty"
-                        }
+                },
+                {"name": {"type": "STATIC", "value": "address"}, "signature": [12]},
+                {"name": {"type": "STATIC", "value": "note"}, "signature": [11]}, {
+                    "name": {"type": "STATIC", "value": "events"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "created"}, "signature": [8]},
+                        {"name": {"type": "STATIC", "value": "sent"}, "signature": [9]},
+                        {"name": {"type": "STATIC", "value": "paid"}, "signature": [10]}
                     ], "signature": [], "isAuxiliary": true
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                        {
-                            "name": {"type": "STATIC_NAME", "value": "amount", "_class": "StaticName"}, "value": {"signature": [19]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "total_price", "_class": "StaticName"}, "value": {"signature": [18]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [16, 20]}, "_class": "SimpleProperty"
-                        }
+                    "name": {"type": "STATIC", "value": "items"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "amount"}, "signature": [19]},
+                        {"name": {"type": "STATIC", "value": "total_price"}, "signature": [18]},
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": [16, 20]}
                     ], "signature": [-21], "isAuxiliary": false
                 }
             ], "signature": [], "isAuxiliary": true
@@ -674,24 +622,16 @@ VALUES
     ),
     (5, 47, '{"primaryKey": [[11]], "kindName": "order",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "order", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "number", "_class": "StaticName"}, "value": {"signature": [11]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "customers", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                        {
-                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [2]}, "_class": "SimpleProperty"
-                        }
+            "name": {"type": "STATIC", "value": "order"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "number"}, "signature": [11]}, {
+                    "name": {"type": "STATIC", "value": "customers"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "id"}, "signature": [2]}
                     ], "signature": [9, -10], "isAuxiliary": false
                 }, {
-                    "name": {"type": "STATIC_NAME", "value": "items", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                        {
-                            "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [14, 13]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [15, 13]}, "_class": "SimpleProperty"
-                        }, {
-                            "name": {"type": "STATIC_NAME", "value": "price", "_class": "StaticName"}, "value": {"signature": [16, 13]}, "_class": "SimpleProperty"
-                        }
+                    "name": {"type": "STATIC", "value": "items"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "id"}, "signature": [14, 13]},
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": [15, 13]},
+                        {"name": {"type": "STATIC", "value": "price"}, "signature": [16, 13]}
                     ], "signature": [-12], "isAuxiliary": false
                 }
             ], "signature": [], "isAuxiliary": true
@@ -699,38 +639,27 @@ VALUES
     ),
     (6, 38, '{"primaryKey": [[2]], "kindName": "customer",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "customer", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "id", "_class": "StaticName"}, "value": {"signature": [2]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "name", "_class": "StaticName"}, "value": {"signature": [1]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "surname", "_class": "StaticName"}, "value": {"signature": [3]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "customer"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "id"}, "signature": [2]},
+                {"name": {"type": "STATIC", "value": "name"}, "signature": [1]},
+                {"name": {"type": "STATIC", "value": "surname"}, "signature": [3]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (7, 42, '{"primaryKey": [[2, 4], [2, 5]], "kindName": "friends",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "friends", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "first_customer_id", "_class": "StaticName"}, "value": {"signature": [2, 4]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "second_customer_id", "_class": "StaticName"}, "value": {"signature": [2, 5]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "friends"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "first_customer_id"}, "signature": [2, 4]},
+                {"name": {"type": "STATIC", "value": "second_customer_id"}, "signature": [2, 5]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
     (7, 43, '{"primaryKey": [[7], [8], [2, 6]], "kindName": "contact",
         "accessPath": {
-            "name": {"type": "STATIC_NAME", "value": "contact", "_class": "StaticName"}, "_class": "ComplexProperty", "subpaths": [
-                {
-                    "name": {"type": "STATIC_NAME", "value": "key", "_class": "StaticName"}, "value": {"signature": [7]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "value", "_class": "StaticName"}, "value": {"signature": [8]}, "_class": "SimpleProperty"
-                }, {
-                    "name": {"type": "STATIC_NAME", "value": "customer_id", "_class": "StaticName"}, "value": {"signature": [2, 6]}, "_class": "SimpleProperty"
-                }
+            "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "key"}, "signature": [7]},
+                {"name": {"type": "STATIC", "value": "value"}, "signature": [8]},
+                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": [2, 6]}
             ], "signature": [], "isAuxiliary": true
         }}'
     );

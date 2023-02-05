@@ -108,11 +108,11 @@ public class DummyPullWrapper implements AbstractPullWrapper {
                 for (int i = 0; i < simpleArray.length(); i++)
                     values.add(simpleArray.get(i).toString());
                 
-                parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), key), simpleSubpath.value().signature(), values);
+                parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), key), simpleSubpath.signature(), values);
             }
             else {
                 RecordName recordName = toRecordName(simpleSubpath.name(), key);
-                parentRecord.addSimpleValueRecord(recordName, simpleSubpath.value().signature(), value.toString());
+                parentRecord.addSimpleValueRecord(recordName, simpleSubpath.signature(), value.toString());
             }
         }
     }

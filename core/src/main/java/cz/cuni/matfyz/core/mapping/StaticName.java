@@ -1,8 +1,6 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.record.StaticRecordName;
-import cz.cuni.matfyz.core.serialization.FromJSONBuilderBase;
-import cz.cuni.matfyz.core.serialization.ToJSONSwitchConverterBase;
 
 import java.io.IOException;
 
@@ -15,8 +13,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * @author jachym.bartik
@@ -30,7 +26,7 @@ public class StaticName extends Name {
     public StaticName(String name) {
         super();
         this.value = name;
-        this.type = Type.STATIC_NAME;
+        this.type = Type.STATIC;
         this.staticRecordNameFlyweight = new StaticRecordName(value, type);
     }
 
@@ -49,7 +45,7 @@ public class StaticName extends Name {
     }
     
     public enum Type {
-        STATIC_NAME,
+        STATIC,
         ANONYMOUS, // Also known as Empty
     }
     
@@ -61,7 +57,7 @@ public class StaticName extends Name {
     
     public String getStringName() {
         return switch (type) {
-            case STATIC_NAME -> value;
+            case STATIC -> value;
             case ANONYMOUS -> "";
         };
     }
@@ -69,7 +65,7 @@ public class StaticName extends Name {
     @Override
     public String toString() {
         return switch (type) {
-            case STATIC_NAME -> value;
+            case STATIC -> value;
             case ANONYMOUS -> "_";
         };
     }
@@ -79,36 +75,6 @@ public class StaticName extends Name {
         return object instanceof StaticName staticName
             && type == staticName.type
             && value.equals(staticName.value);
-    }
-
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONSwitchConverterBase<StaticName> {
-
-        @Override
-        protected JSONObject innerToJSON(StaticName object) throws JSONException {
-            var output = new JSONObject();
-    
-            output.put("value", object.value);
-            output.put("type", object.type);
-            
-            return output;
-        }
-    
-    }
-    
-    public static class Builder extends FromJSONBuilderBase<StaticName> {
-    
-        @Override
-        protected StaticName innerFromJSON(JSONObject jsonObject) throws JSONException {
-            return Type.valueOf(jsonObject.getString("type")) == Type.ANONYMOUS
-                ? StaticName.createAnonymous()
-                : new StaticName(jsonObject.getString("value"));
-        }
-    
     }
 
     public static class Serializer extends StdSerializer<StaticName> {

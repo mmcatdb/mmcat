@@ -1,8 +1,5 @@
 package cz.cuni.matfyz.core.category;
 
-import cz.cuni.matfyz.core.serialization.FromJSONArrayBuilderBase;
-import cz.cuni.matfyz.core.serialization.JSONArrayConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONArrayConverterBase;
 import cz.cuni.matfyz.core.utils.ArrayUtils;
 
 import java.io.IOException;
@@ -25,8 +22,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 /**
  * This class represents a signature of a morphism. It can be empty, base or composite.
@@ -34,7 +29,7 @@ import org.json.JSONException;
  */
 @JsonSerialize(using = Signature.Serializer.class)
 @JsonDeserialize(using = Signature.Deserializer.class)
-public class Signature implements Serializable, Comparable<Signature>, JSONArrayConvertible {
+public class Signature implements Serializable, Comparable<Signature> {
 
     private final int[] ids;
     
@@ -260,33 +255,6 @@ public class Signature implements Serializable, Comparable<Signature>, JSONArray
         }
 
         return createComposite(output.stream().mapToInt(Integer::intValue).toArray());
-    }
-
-    @Override
-    public JSONArray toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONArrayConverterBase<Signature> {
-
-        @Override
-        protected JSONArray innerToJSON(Signature object) throws JSONException {
-            return new JSONArray(object.ids);
-        }
-    
-    }
-    
-    public static class Builder extends FromJSONArrayBuilderBase<Signature> {
-    
-        @Override
-        protected Signature innerFromJSON(JSONArray jsonArray) throws JSONException {
-            var ids = new int[jsonArray.length()];
-            for (int i = 0; i < jsonArray.length(); i++)
-                ids[i] = jsonArray.getInt(i);
-            
-            return Signature.createComposite(ids);
-        }
-    
     }
 
     public static class Serializer extends StdSerializer<Signature> {

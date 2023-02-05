@@ -62,12 +62,6 @@ public class MTCAlgorithm {
     private void processRootRecord(RootRecord rootRecord, ComplexProperty rootAccessPath) {
         LOGGER.debug("Process a root record:\n{}", rootRecord);
 
-        // preparation phase
-        /*
-        Deque<StackTriple> masterStack = mapping.hasRootMorphism()
-            ? createStackWithMorphism(mapping.rootObject(), mapping.rootMorphism(), rootRecord, rootAccessPath) // K with root morphism
-            : createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath); // K with root object
-        */
         Deque<StackTriple> masterStack = createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath);
 
         // processing of the tree
@@ -85,36 +79,6 @@ public class MTCAlgorithm {
         
         return masterStack;
     }
-    
-    /*
-    private Deque<StackTriple> createStackWithMorphism(SchemaObject object, SchemaMorphism morphism, RootRecord rootRecord, ComplexProperty rootAccessPath) {
-        Deque<StackTriple> masterStack = new LinkedList<>();
-        
-        InstanceObject domainInstance = category.getObject(object);
-        SuperIdWithValues domainSuperId = fetchSuperId(object.superId(), rootRecord);
-        DomainRow domainRow = modifyActiveDomain(domainInstance, domainSuperId);
-
-        SchemaObject codomainObject = morphism.cod();
-        InstanceObject codomainInstance = category.getObject(codomainObject);
-        SuperIdWithValues codomainSuperId = fetchSuperId(codomainObject.superId(), rootRecord);
-        DomainRow codomainRow = modifyActiveDomain(codomainInstance, codomainSuperId);
-
-        InstanceMorphism morphismInstance = category.getMorphism(morphism);
-
-        addRelation(morphismInstance, domainRow, codomainRow, rootRecord);
-        addRelation(morphismInstance.dual(), codomainRow, domainRow, rootRecord);
-
-        AccessPath domainSubpath = rootAccessPath.getSubpathBySignature(Signature.createEmpty());
-        AccessPath codomainSubpath = rootAccessPath.getSubpathBySignature(morphism.signature());
-
-        AccessPath restAccessPath = rootAccessPath.minusSubpath(domainSubpath).minusSubpath(codomainSubpath);
-
-        addPathChildrenToStack(masterStack, restAccessPath, domainRow, rootRecord);
-        addPathChildrenToStack(masterStack, codomainSubpath, codomainRow, rootRecord);
-        
-        return masterStack;
-    }
-    */
     
     private void processTopOfStack(Deque<StackTriple> masterStack) {
         //LOGGER.debug("Process Top of Stack:\n{}", masterStack);

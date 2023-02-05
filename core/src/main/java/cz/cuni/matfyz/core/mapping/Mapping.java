@@ -2,62 +2,52 @@ package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.serialization.FromJSONLoaderBase;
-import cz.cuni.matfyz.core.serialization.JSONConvertible;
-import cz.cuni.matfyz.core.serialization.ToJSONConverterBase;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * @author pavel.koupil, jachym.bartik
  */
-//@JsonSerialize(using = Mapping.Serializer.class)
-public class Mapping implements JSONConvertible, Comparable<Mapping> {
+@JsonDeserialize(using = Mapping.Deserializer.class)
+public class Mapping implements Comparable<Mapping> {
 
     private final SchemaCategory category;
     private final SchemaObject rootObject;
-    private final SchemaMorphism rootMorphism;
     
     private ComplexProperty accessPath;
     private String kindName;
     private Collection<Signature> primaryKey;
     
-    private Mapping(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism) {
+    private Mapping(SchemaCategory category, SchemaObject rootObject) {
         this.category = category;
         this.rootObject = rootObject;
-        this.rootMorphism = rootMorphism;
+    }
+
+    public static Mapping fromArguments(SchemaCategory category, SchemaObject rootObject, ComplexProperty accessPath, String kindName, Collection<Signature> primaryKey) {
+        var mapping = new Mapping(category, rootObject);
+        mapping.accessPath = accessPath;
+        mapping.kindName = kindName;
+        mapping.primaryKey = primaryKey;
+        return mapping;
     }
 
     public SchemaCategory category() {
         return category;
     }
     
-    public boolean hasRootMorphism() {
-        return rootMorphism != null;
-    }
-
     public SchemaObject rootObject() {
         return rootObject;
-    }
-    
-    public SchemaMorphism rootMorphism() {
-        return rootMorphism;
     }
     
     public ComplexProperty accessPath() {
@@ -99,87 +89,7 @@ public class Mapping implements JSONConvertible, Comparable<Mapping> {
     }
     */
 
-    @Override
-    public JSONObject toJSON() {
-        return new Converter().toJSON(this);
-    }
-
-    public static class Converter extends ToJSONConverterBase<Mapping> {
-
-        @Override
-        protected JSONObject innerToJSON(Mapping object) throws JSONException {
-            var output = new JSONObject();
-    
-            output.put("kindName", object.kindName);
-            var primaryKey = new JSONArray(object.primaryKey.stream().map(Signature::toJSON).toList());
-            output.put("primaryKey", primaryKey);
-            output.put("accessPath", object.accessPath.toJSON());
-
-            
-            return output;
-        }
-    
-    }
-    
-    public static class Builder extends FromJSONLoaderBase<Mapping> {
-    
-        public Mapping fromJSON(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, JSONObject jsonObject) {
-            var mapping = new Mapping(category, rootObject, rootMorphism);
-            loadFromJSON(mapping, jsonObject);
-            return mapping;
-        }
-
-        public Mapping fromJSON(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, String jsonValue) {
-            var mapping = new Mapping(category, rootObject, rootMorphism);
-            loadFromJSON(mapping, jsonValue);
-            return mapping;
-        }
-
-        @Override
-        protected void innerLoadFromJSON(Mapping mapping, JSONObject jsonObject) throws JSONException {
-            mapping.kindName = jsonObject.getString("kindName");
-            
-            var primaryKeyArray = jsonObject.getJSONArray("primaryKey");
-            var primaryKey = new ArrayList<Signature>();
-            var builder = new Signature.Builder();
-            for (int i = 0; i < primaryKeyArray.length(); i++)
-                primaryKey.add(builder.fromJSON(primaryKeyArray.getJSONArray(i)));
-
-            mapping.primaryKey = primaryKey;
-
-            mapping.accessPath = new ComplexProperty.Builder().fromJSON(jsonObject.getJSONObject("accessPath"));
-        }
-
-        public Mapping fromArguments(SchemaCategory category, SchemaObject rootObject, SchemaMorphism rootMorphism, ComplexProperty accessPath, String kindName, Collection<Signature> primaryKey) {
-            var mapping = new Mapping(category, rootObject, rootMorphism);
-            mapping.accessPath = accessPath;
-            mapping.kindName = kindName;
-            mapping.primaryKey = primaryKey;
-            return mapping;
-        }
-    
-    }
-/*
-    public static class Serializer extends StdSerializer<Key> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<Key> t) {
-            super(t);
-        }
-
-        @Override
-        public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-            generator.writeNumberField("value", key.value);
-            generator.writeEndObject();
-        }
-
-    }
-
-    public static class Deserializer extends StdDeserializer<Id> {
+    public static class Deserializer extends StdDeserializer<Mapping> {
 
         public Deserializer() {
             this(null);
@@ -188,14 +98,25 @@ public class Mapping implements JSONConvertible, Comparable<Mapping> {
         public Deserializer(Class<?> vc) {
             super(vc);
         }
+
+        private static ObjectReader rootPropertyJSONReader = new ObjectMapper().readerFor(ComplexProperty.class);
+        private static ObjectReader signaturesJSONReader = new ObjectMapper().readerFor(Signature[].class);
     
         @Override
-        public Id deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             JsonNode node = parser.getCodec().readTree(parser);
+
+            final var category = (SchemaCategory) context.getAttribute("category");
+            final var rootObject = (SchemaObject) context.getAttribute("rootObject");
+            final var mapping = new Mapping(category, rootObject);
+
+            mapping.kindName = node.get("kindName").asText();
+            mapping.primaryKey = List.of(signaturesJSONReader.readValue(node.get("primaryKey")));
+            mapping.accessPath = rootPropertyJSONReader.readValue(node.get("accessPath"));
     
-            return new Id(node.asText());
+            return mapping;
         }
 
     }
-*/
+
 }
