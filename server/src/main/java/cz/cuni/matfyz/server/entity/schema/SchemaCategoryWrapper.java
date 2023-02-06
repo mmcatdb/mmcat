@@ -1,19 +1,91 @@
 package cz.cuni.matfyz.server.entity.schema;
 
-import java.util.Collection;
+import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.server.repository.utils.Utils;
+
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * @author jachym.bartik
  */
+@JsonDeserialize(using = SchemaCategoryWrapper.Deserializer.class)
 public class SchemaCategoryWrapper extends SchemaCategoryInfo {
 
-    public final Collection<SchemaObjectWrapper> objects;
-    public final Collection<SchemaMorphismWrapper> morphisms;
+    public final String version;
+    public final SchemaObjectWrapper[] objects;
+    public final SchemaMorphismWrapper[] morphisms;
 
-    public SchemaCategoryWrapper(SchemaCategoryInfo info, Collection<SchemaObjectWrapper> objects, Collection<SchemaMorphismWrapper> morphisms) {
-        super(info.id, info.jsonValue);
+    private SchemaCategoryWrapper(Id id, String label, String version, SchemaObjectWrapper[] objects, SchemaMorphismWrapper[] morphisms) {
+        super(id, label);
+        this.version = version;
         this.objects = objects;
         this.morphisms = morphisms;
     }
 
+    private static final ObjectReader reader = new ObjectMapper().readerFor(SchemaCategoryWrapper.class);
+
+    public static SchemaCategoryWrapper createNew(String label) {
+        return new SchemaCategoryWrapper(
+            null,
+            label,
+            "0",
+            new SchemaObjectWrapper[] {},
+            new SchemaMorphismWrapper[] {}
+        );
+    }
+
+    /**
+     * Custom deserialization from the database.
+     */
+    public static SchemaCategoryWrapper fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
+        return reader.withAttribute("id", id).readValue(jsonValue);
+    }
+
+    /**
+     * Custom serialization for the database.
+     */
+    public String toJsonValue() throws JsonProcessingException {
+        return Utils.toJsonWithoutProperties(this, "id");
+    }
+
+    public static class Deserializer extends StdDeserializer<SchemaCategoryWrapper> {
+
+        public Deserializer() {
+            this(null);
+        }
+    
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static final ObjectReader idJSONReader = new ObjectMapper().readerFor(Id.class);
+        private static final ObjectReader objectsJSONReader = new ObjectMapper().readerFor(SchemaObjectWrapper[].class);
+        private static final ObjectReader morphismsJSONReader = new ObjectMapper().readerFor(SchemaMorphismWrapper[].class);
+    
+        @Override
+        public SchemaCategoryWrapper deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            final var idFromContext = (Id) context.getAttribute("id");
+            final Id id = idFromContext != null ? idFromContext : idJSONReader.readValue(node.get("id"));
+            
+            final var label = node.get("label").asText();
+            final var version = node.get("label").asText();
+
+            final SchemaObjectWrapper[] objects = objectsJSONReader.readValue(node.get("objects"));
+            final SchemaMorphismWrapper[] morphisms = morphismsJSONReader.readValue(node.get("morphisms"));
+                        
+            return new SchemaCategoryWrapper(id, label, version, objects, morphisms);
+        }
+
+    }
 }

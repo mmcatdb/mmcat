@@ -67,6 +67,7 @@ public class SchemaCategoryController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
+    /*
     @PutMapping("/schema-categories/{id}")
     public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaCategoryUpdate update) {
         SchemaCategoryWrapper result = service.update(id, update);
@@ -75,7 +76,9 @@ public class SchemaCategoryController {
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
+    */
 
+    /*
     @PutMapping("/schema-categories/{id}/positions")
     public boolean updateCategoryPositions(@PathVariable Id id, @RequestBody PositionUpdate[] positionUpdates) {
         boolean result = true;
@@ -87,6 +90,7 @@ public class SchemaCategoryController {
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
+    */
 
     static record PositionUpdate(
         //int schemaObjectId,

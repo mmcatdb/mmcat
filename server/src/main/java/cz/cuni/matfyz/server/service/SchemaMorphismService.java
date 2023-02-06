@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SchemaMorphismService {
 
+    /*
     @Autowired
     private SchemaMorphismRepository repository;
 
@@ -26,6 +27,7 @@ public class SchemaMorphismService {
     public SchemaMorphismWrapper find(Id id) {
         return repository.find(id);
     }
+    */
 
     /*
     public Id add(SchemaMorphism morphism) {

@@ -173,7 +173,7 @@ export class Node {
     }
 
     equals(other: Node | null | undefined): boolean {
-        return !!other && this.schemaObject.id === other.schemaObject.id;
+        return !!other && this.schemaObject.equals(other.schemaObject);
     }
 
     markAvailablePaths(filters: FilterFunction | FilterFunction[]): void {

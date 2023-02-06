@@ -77,7 +77,7 @@ public class DynamicName extends Name {
             super(vc);
         }
     
-        private static ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
+        private static final ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
     
         @Override
         public DynamicName deserialize(JsonParser parser, DeserializationContext context) throws IOException {

@@ -266,9 +266,9 @@ public class ComplexProperty extends AccessPath {
             super(vc);
         }
 
-        private static ObjectReader nameJSONReader = new ObjectMapper().readerFor(Name.class);
-        private static ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
-        private static ObjectReader subpathsJSONReader = new ObjectMapper().readerFor(AccessPath[].class);
+        private static final ObjectReader nameJSONReader = new ObjectMapper().readerFor(Name.class);
+        private static final ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
+        private static final ObjectReader subpathsJSONReader = new ObjectMapper().readerFor(AccessPath[].class);
     
         @Override
         public ComplexProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {

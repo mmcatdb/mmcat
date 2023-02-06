@@ -18,8 +18,8 @@ public class Database extends Entity {
     
     public static final String PASSWORD_FIELD_NAME = "password";
     
-    private static ObjectReader dataJSONReader = new ObjectMapper().readerFor(DatabaseInit.class);
-    private static ObjectWriter dataJSONWriter = new ObjectMapper().writer();
+    private static final ObjectReader dataJSONReader = new ObjectMapper().readerFor(DatabaseInit.class);
+    private static final ObjectWriter dataJSONWriter = new ObjectMapper().writer();
 
     public Type type;
     public String label;

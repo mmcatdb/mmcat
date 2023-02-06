@@ -38,7 +38,7 @@ public class MappingService {
 
         return generatedId == null ? null : new MappingInfo(
             generatedId,
-            wrapper.jsonValue()
+            wrapper.kindName()
         );
     }
 }

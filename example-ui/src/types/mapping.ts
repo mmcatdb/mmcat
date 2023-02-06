@@ -1,9 +1,8 @@
 import { RootProperty } from "@/types/accessPath/basic";
 import type { RootPropertyJSON } from "./accessPath/JSONTypes";
 import type { Entity, Id } from "./id";
-import { SignatureId, type SignatureIdFromServer } from "./identifiers";
+import { SignatureId, type SignatureFromServer, type SignatureIdFromServer } from "./identifiers";
 import { SchemaObject, type SchemaObjectFromServer } from "./schema";
-import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
 
 export type MappingJSON = {
     kindName: string;
@@ -11,10 +10,19 @@ export type MappingJSON = {
     accessPath: RootPropertyJSON;
 };
 
+export type MappingFromServer = {
+    id: Id;
+    logicalModelId: Id;
+    rootObject: SchemaObjectFromServer;
+    primaryKey: SignatureFromServer[];
+    kindName: string;
+    accessPath: RootPropertyJSON;
+};
+
 export class Mapping implements Entity {
     private constructor(
         public readonly id: Id,
-        public readonly label: string,
+        public readonly kindName: string,
         public readonly logicalModelId: Id,
         public readonly rootObject: SchemaObject,
         public readonly primaryKey: SignatureId,
@@ -22,49 +30,34 @@ export class Mapping implements Entity {
     ) {}
 
     static fromServer(input: MappingFromServer): Mapping {
-        const mappingJson = JSON.parse(input.jsonValue) as MappingJSON;
-
         return new Mapping(
             input.id,
-            mappingJson.kindName,
+            input.kindName,
             input.logicalModelId,
             SchemaObject.fromServer(input.rootObject),
-            SignatureId.fromServer(mappingJson.primaryKey),
-            RootProperty.fromJSON(mappingJson.accessPath)
+            SignatureId.fromServer(input.primaryKey),
+            RootProperty.fromJSON(input.accessPath)
         );
     }
 }
 
-export type MappingFromServer = {
-    id: Id;
-    logicalModelId: Id;
-    rootObject: SchemaObjectFromServer;
-    jsonValue: string;
-};
+export type MappingInit = Omit<MappingFromServer, 'id'>;
 
-export type MappingInit = {
-    logicalModelId: Id;
-    rootObjectId: Id;
-    jsonValue: string;
+export type MappingInfoFromServer = {
+    id: Id;
+    kindName: string;
 };
 
 export class MappingInfo implements Entity {
     private constructor(
         public readonly id: Id,
-        public readonly label: string
+        public readonly kindName: string
     ) {}
 
     static fromServer(input: MappingInfoFromServer): MappingInfo {
-        const json = JSON.parse(input.jsonValue) as { label: string };
-
         return new MappingInfo(
             input.id,
-            json.label
+            input.kindName
         );
     }
 }
-
-export type MappingInfoFromServer = {
-    id: Id;
-    jsonValue: string;
-};

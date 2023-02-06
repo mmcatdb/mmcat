@@ -3,10 +3,8 @@ package cz.cuni.matfyz.server.builder;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.cuni.matfyz.server.service.WrapperService;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
+import java.util.List;
 
 /**
  * @author jachym.bartik
@@ -28,22 +26,16 @@ public class MappingBuilder {
         return this;
     }
 
-    private static ObjectReader mappingJSONReader = new ObjectMapper().readerFor(Mapping.class);
-
     public Mapping build() {
-        final var builder = new CategoryBuilder();
-        final var category = builder.setCategoryWrapper(categoryWrapper).build();
-        final var rootObject = builder.getObject(mappingWrapper.rootObject.id);
+        final var category = new CategoryBuilder().setCategoryWrapper(categoryWrapper).build();
 
-        try {
-            return mappingJSONReader
-                .withAttribute("category", category)
-                .withAttribute("rootObject", rootObject)
-                .readValue(mappingWrapper.jsonValue);
-        }
-        catch (Exception exception) {
-            throw new WrapperService.WrapperCreationErrorException(exception.getMessage());
-        }
+        return new Mapping(
+            category,
+            category.getObject(mappingWrapper.rootObject().key()),
+            mappingWrapper.accessPath(),
+            mappingWrapper.kindName(),
+            List.of(mappingWrapper.primaryKey())
+        );
     }
 
 }

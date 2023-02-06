@@ -17,7 +17,7 @@ defineProps<MappingDisplayProps>();
 <template>
     <div class="mapping-display">
         <CleverRouterLink :to="{ name: 'mapping', params: { id: mapping.id } }">
-            <h2>{{ mapping.label }}</h2>
+            <h2>{{ mapping.kindName }}</h2>
         </CleverRouterLink>
         <ValueContainer>
             <ValueRow label="Id:">

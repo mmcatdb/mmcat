@@ -24,8 +24,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SchemaObjectRepository {
 
-    private static ObjectReader positionJSONReader = new ObjectMapper().readerFor(Position.class);
-    private static ObjectWriter positionJSONWriter = new ObjectMapper().writer();
+    /*
+    private static final ObjectReader positionJSONReader = new ObjectMapper().readerFor(Position.class);
+    private static final ObjectWriter positionJSONWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;
@@ -78,19 +79,6 @@ public class SchemaObjectRepository {
         });
     }
 
-    public SchemaObjectWrapper find(Id id) {
-        return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM schema_object WHERE id = ?;");
-            setId(statement, 1, id);
-            var resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                var jsonObject = resultSet.getString("json_value");
-                output.set(new SchemaObjectWrapper(getId(resultSet, "id"), jsonObject, null));
-            }
-        });
-    }
-
     public boolean updatePosition(Id categoryId, Id objectId, Position newPosition) {
         return db.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
@@ -137,5 +125,6 @@ public class SchemaObjectRepository {
             output.set(generatedId);
         });
     }
+    */
 
 }

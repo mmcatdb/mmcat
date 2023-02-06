@@ -20,6 +20,10 @@ export class Key {
     public equals(key: Key): boolean {
         return this.value === key.value;
     }
+
+    public toString(): string {
+        return '' + this.value;
+    }
 }
 
 export type KeyFromServer = {

@@ -34,7 +34,7 @@ export class SimpleProperty {
     static fromJSON(jsonObject: SimplePropertyJSON, parent: ParentProperty): SimpleProperty {
         return new SimpleProperty(
             nameFromJSON(jsonObject.name),
-            Signature.fromJSON(jsonObject.signature),
+            Signature.fromServer(jsonObject.signature),
             parent
         );
     }

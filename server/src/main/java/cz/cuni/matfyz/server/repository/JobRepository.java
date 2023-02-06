@@ -21,7 +21,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JobRepository {
 
-    private static ObjectWriter jobJSONWriter = new ObjectMapper().writer();
+    private static final ObjectWriter jobJSONWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;

@@ -54,7 +54,7 @@ export class ComplexProperty {
     static fromJSON(jsonObject: ComplexPropertyJSON, parent: ParentProperty): ComplexProperty {
         const property = new ComplexProperty(
             nameFromJSON(jsonObject.name),
-            Signature.fromJSON(jsonObject.signature),
+            Signature.fromServer(jsonObject.signature),
             jsonObject.isAuxiliary,
             parent
         );

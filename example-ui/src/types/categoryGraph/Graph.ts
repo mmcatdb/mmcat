@@ -140,8 +140,8 @@ export class Graph {
     }
 
     createEdgeWithDual(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
-        const domNode = this._nodes.find(node => node.schemaObject.id === morphism.domId) as Node;
-        const codNode = this._nodes.find(node => node.schemaObject.id === morphism.codId) as Node;
+        const domNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.domKey)) as Node;
+        const codNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.codKey)) as Node;
 
         const edges = [ new Edge(morphism, domNode, codNode), new Edge(morphism.dual, codNode, domNode) ] as [ Edge, Edge ];
         this._edges.push(...edges);
@@ -191,8 +191,8 @@ export class Graph {
         this._getCytoscape().add({
             data: {
                 id,
-                source: node1.schemaObject.id,
-                target: node2.schemaObject.id,
+                source: node1.schemaObject.key.toString(),
+                target: node2.schemaObject.key.toString(),
                 label: ''
             },
             classes: 'temporary'
@@ -244,7 +244,7 @@ export class Graph {
     }
 
     getNode(object: SchemaObject): Node | undefined {
-        return this._nodes.find(node => node.schemaObject.key.equals(object.key));
+        return this._nodes.find(node => node.schemaObject.equals(object));
     }
 
     getEdge(morphism: SchemaMorphism): Edge | undefined {
@@ -255,7 +255,7 @@ export class Graph {
 function createNodeDefinition(object: SchemaObject, node: Node, classes?: string): ElementDefinition {
     return {
         data: {
-            id: object.id.toString(),
+            id: object.key.toString(),
             label: node.label,
             schemaData: node
         },
@@ -267,7 +267,7 @@ function createNodeDefinition(object: SchemaObject, node: Node, classes?: string
 function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number): ElementDefinition {
     return {
         data: {
-            id: groupId + '_' + object.id.toString(),
+            id: groupId + '_' + object.key.toString(),
             parent: 'group_' + groupId
         },
         position: object.position,
@@ -278,7 +278,7 @@ function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number)
 function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
     return {
         data: {
-            id: 'no-group_' + object.id.toString()
+            id: 'no-group_' + object.key.toString()
         },
         position: object.position,
         classes: 'no-group'
@@ -288,9 +288,9 @@ function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
 function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
     return {
         data: {
-            id: 'm' + morphism.id.toString(),
-            source: morphism.domId,
-            target: morphism.codId,
+            id: 'm' + morphism.signature.toString(),
+            source: morphism.domKey.toString(),
+            target: morphism.codKey.toString(),
             label: edge.label,
             schemaData: edge
         },

@@ -86,7 +86,6 @@ function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Gra
 
     morphismDublets.forEach(dublet => newGraph.createEdgeWithDual(dublet.morphism));
 
-
     // Position the object to the center of the canvas.
     newGraph.fixLayout();
     newGraph.layout();
@@ -96,6 +95,7 @@ function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Gra
 }
 
 async function savePositionChanges() {
+    /*
     if (!graph.value)
         return;
 
@@ -110,6 +110,7 @@ async function savePositionChanges() {
     console.log(result);
 
     saveButtonDisabled.value = false;
+    */
 }
 
 function updateSchema(schemaCategory: SchemaCategory) {

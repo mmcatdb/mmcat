@@ -88,7 +88,7 @@ public class TestData {
         var schema = createInitialSchemaCategory();
         var rootObject = schema.getObject(userKey);
         var path = createUserAccessPath();
-        var mapping = Mapping.fromArguments(schema, rootObject, path, "customer", null);
+        var mapping = new Mapping(schema, rootObject, path, "customer", null);
 
         return mapping;
     }
@@ -96,7 +96,7 @@ public class TestData {
     public Mapping createFinalMapping(SchemaCategory schema) {
         var rootObject = schema.getObject(orderKey);
         var path = createOrderAccessPath();
-        var mapping = Mapping.fromArguments(schema, rootObject, path, "App_Order", null);
+        var mapping = new Mapping(schema, rootObject, path, "App_Order", null);
 
         return mapping;
     }

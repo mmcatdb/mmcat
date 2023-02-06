@@ -87,8 +87,8 @@ public class SimpleProperty extends AccessPath {
             super(vc);
         }
 
-        private static ObjectReader nameJSONReader = new ObjectMapper().readerFor(Name.class);
-        private static ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
+        private static final ObjectReader nameJSONReader = new ObjectMapper().readerFor(Name.class);
+        private static final ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
     
         @Override
         public SimpleProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {

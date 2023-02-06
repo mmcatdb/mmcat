@@ -178,8 +178,8 @@ public class SchemaMorphism implements Serializable, Morphism, Identified<Signat
             super(vc);
         }
 
-        private static ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
-        private static ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
+        private static final ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
+        private static final ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
     
         @Override
         public SchemaMorphism deserialize(JsonParser parser, DeserializationContext context) throws IOException {

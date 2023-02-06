@@ -18,7 +18,6 @@ import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 /**
  * @author jachym.bartik
  */
@@ -35,30 +34,28 @@ public class SchemaCategoryService {
     private SchemaMorphismRepository morphismRepository;
 
     public List<SchemaCategoryInfo> findAllInfos() {
-        return repository.findAll();
+        return repository.findAllInfos();
     }
 
     public SchemaCategoryInfo createNewInfo(SchemaCategoryInit init) {
-        Id generatedId = repository.add(init);
-
-        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, init.jsonValue());
-    }
-
-    public SchemaCategoryWrapper find(Id id) {
-        SchemaCategoryInfo info = repository.find(new Id("" + id));
-        if (info == null)
+        if (init.label() == null)
             return null;
-            
-        List<SchemaObjectWrapper> objects = objectRepository.findAllInCategory(id);
-        List<SchemaMorphismWrapper> morphisms = morphismRepository.findAllInCategory(id);
+        
+        final var newWrapper = SchemaCategoryWrapper.createNew(init.label());
+        final Id generatedId = repository.add(newWrapper);
 
-        return new SchemaCategoryWrapper(info, objects, morphisms);
+        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, init.label());
     }
 
     public SchemaCategoryInfo findInfo(Id id) {
-        return repository.find(new Id("" + id));
+        return repository.findInfo(new Id("" + id));
     }
 
+    public SchemaCategoryWrapper find(Id id) {
+        return repository.find(id);
+    }
+
+    /*
     public SchemaCategoryWrapper update(Id id, SchemaCategoryUpdate update) {
         var temporaryIdMap = new TreeMap<Integer, Id>();
         for (var object : update.objects()) {
@@ -81,11 +78,6 @@ public class SchemaCategoryService {
         }
 
         return find(id);
-    }
-
-    /*
-    public Integer add(SchemaCategory schema) {
-        return repository.add(schema);
     }
     */
 }

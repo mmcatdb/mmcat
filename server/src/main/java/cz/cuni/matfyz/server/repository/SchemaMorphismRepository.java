@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SchemaMorphismRepository {
 
+    /*
     @Autowired
     private DatabaseWrapper db;
 
@@ -92,5 +93,6 @@ public class SchemaMorphismRepository {
             output.set(generatedId);
         });
     }
+    */
 
 }

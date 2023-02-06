@@ -22,7 +22,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DataSourceRepository {
 
-    private static ObjectWriter dataSourceJSONWriter = new ObjectMapper().writer();
+    private static final ObjectWriter dataSourceJSONWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;

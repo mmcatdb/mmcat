@@ -8,6 +8,5 @@ import cz.cuni.matfyz.server.entity.Id;
  */
 public record MappingInfo(
     Id id,
-    String jsonValue
-
+    String kindName
 ) implements IEntity {}

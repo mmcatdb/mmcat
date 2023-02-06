@@ -1,12 +1,14 @@
 import type { Iri } from "@/types/integration/";
 import type { Id } from "../id";
-import { Signature, type SignatureJSON } from "../identifiers";
+import { Key, Signature, type KeyJSON, type SignatureFromServer } from "../identifiers";
 
-export type SchemaMorphismJSON = {
-    signature: SignatureJSON;
+export type SchemaMorphismFromServer = {
+    signature: SignatureFromServer;
+    label?: string;
+    domKey: KeyJSON;
+    codKey: KeyJSON;
     min: Min;
     max: Max;
-    label?: string;
     iri?: Iri;
     pimIri?: Iri;
     tags?: Tag[];
@@ -27,20 +29,18 @@ export enum Tag {
 }
 
 export class SchemaMorphism {
-    iri?: Iri;
-    pimIri?: Iri;
-    label: string;
-    tags: Tag[];
-
-    id: Id;
-    domId: Id;
-    codId: Id;
     signature: Signature;
+    domKey: Key;
+    codKey: Key;
     min: Min;
     max: Max;
+    label: string;
     _dual!: SchemaMorphism;
     _isNew: boolean;
 
+    iri?: Iri;
+    pimIri?: Iri;
+    tags: Tag[];
 
     get isBase(): boolean {
         return this.signature.isBase;
@@ -63,11 +63,10 @@ export class SchemaMorphism {
         return Math.abs(baseValue ? baseValue : 0);
     }
 
-    private constructor(id: Id, domId: Id, codId: Id, signature: Signature, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, pimIri: Iri | undefined, tags: Tag[]) {
-        this.id = id;
-        this.domId = domId;
-        this.codId = codId;
+    private constructor(signature: Signature, domKey: Key, codKey: Key, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, pimIri: Iri | undefined, tags: Tag[]) {
         this.signature = signature;
+        this.domKey = domKey;
+        this.codKey = codKey;
         this.min = min;
         this.max = max;
         this._isNew = isNew;
@@ -78,42 +77,41 @@ export class SchemaMorphism {
     }
 
     static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
-        const parsedJson = JSON.parse(input.jsonValue) as SchemaMorphismJSON;
-
         return new SchemaMorphism(
-            input.id,
-            input.domId,
-            input.codId,
-            Signature.fromJSON(parsedJson.signature),
-            parsedJson.min,
-            parsedJson.max,
+            Signature.fromServer(input.signature),
+            Key.fromServer(input.domKey),
+            Key.fromServer(input.codKey),
+            input.min,
+            input.max,
             false,
-            parsedJson.label || '',
-            parsedJson.iri,
-            parsedJson.pimIri,
-            parsedJson.tags ? parsedJson.tags : []
+            input.label || '',
+            input.iri,
+            input.pimIri,
+            input.tags ? input.tags : []
         );
     }
 
-    static createNew(id: Id, domId: Id, codId: Id, signature: Signature, min: Min, max: Max, label: string, tags: Tag[]): SchemaMorphism {
-        return new SchemaMorphism(id, domId, codId, signature, min, max, true, label, undefined, undefined, tags);
+    static createNew(signature: Signature, domKey: Key, codKey: Key, min: Min, max: Max, label: string, tags: Tag[]): SchemaMorphism {
+        return new SchemaMorphism(signature, domKey, codKey, min, max, true, label, undefined, undefined, tags);
     }
 
-    static createNewFromDualWithoutTags(id: Id, dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
-        return new SchemaMorphism(id, dual.codId, dual.domId, signature, min, max, true, '', '', undefined, []);
+    static createNewFromDualWithoutTags(dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
+        return new SchemaMorphism(signature, dual.codKey, dual.domKey, min, max, true, '', '', undefined, []);
     }
 
-    update(domId: Id, codId: Id, min: Min, max: Max, label: string) {
-        this.domId = domId;
-        this.codId = codId;
+    update(domKey: Key, codKey: Key, min: Min, max: Max, label: string) {
+        this.domKey = domKey;
+        this.codKey = codKey;
         this.min = min;
         this.max = max;
         this.label = label;
     }
 
-    toJSON(): SchemaMorphismJSON {
+    toJSON(): SchemaMorphismFromServer {
         return {
             signature: this.signature.toJSON(),
+            domKey: this.domKey.toJSON(),
+            codKey: this.codKey.toJSON(),
             min: this.min,
             max: this.max,
             label: this.label,
@@ -122,6 +120,10 @@ export class SchemaMorphism {
             tags: this.tags
         };
     }
+
+    equals(other: SchemaMorphism | null | undefined): boolean {
+        return !!other && this.signature.equals(other.signature);
+    }
 }
 
 export type SchemaMorphismUpdate = {
@@ -129,12 +131,5 @@ export type SchemaMorphismUpdate = {
     codId?: Id;
     temporaryDomId?: Id;
     temporaryCodId?: Id;
-    jsonValue: string;
-};
-
-export type SchemaMorphismFromServer = {
-    id: Id;
-    domId: Id;
-    codId: Id;
     jsonValue: string;
 };

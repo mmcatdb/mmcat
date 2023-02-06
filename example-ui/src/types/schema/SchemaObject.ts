@@ -6,29 +6,27 @@ import { ComparablePosition, type PositionUpdate } from "./Position";
 import type { LogicalModel } from "../logicalModel";
 import type { Entity, Id } from "../id";
 
-export type SchemaObjectJSON = {
-    label: string;
+export type SchemaObjectFromServer = {
     key: KeyJSON;
-    ids?: ObjectIdsJSON;
+    label: string;
+    position: Position;
     superId: SignatureIdJSON;
-    databases?: string[];
+    ids?: ObjectIdsJSON;
+    //databases?: string[];
     iri?: Iri;
     pimIri?: Iri;
 };
 
-export class SchemaObject implements Entity {
-    //key: number | undefined;
-    //label: number | undefined;
-    iri?: Iri;
-    pimIri?: Iri;
-
-    id!: Id;
-    label!: string;
+export class SchemaObject {
     key!: Key;
+    label!: string;
+    position!: ComparablePosition;
     ids?: ObjectIds;
     superId!: SignatureId;
-    position!: ComparablePosition;
     _isNew!: boolean;
+
+    iri?: Iri;
+    pimIri?: Iri;
 
     _originalPosition?: ComparablePosition;
 
@@ -39,31 +37,28 @@ export class SchemaObject implements Entity {
     static fromServer(input: SchemaObjectFromServer): SchemaObject {
         const object = new SchemaObject();
 
-        const jsonObject = JSON.parse(input.jsonValue) as SchemaObjectJSON;
-        object.id = input.id;
-        object.label = jsonObject.label;
-        object.key = Key.fromServer(jsonObject.key);
-        object.ids = jsonObject.ids ? ObjectIds.fromJSON(jsonObject.ids) : undefined;
-        object.superId = SignatureId.fromJSON(jsonObject.superId);
-        object._isNew = false;
+        object.key = Key.fromServer(input.key);
+        object.label = input.label;
         object.position = new ComparablePosition(input.position);
+        object.superId = SignatureId.fromJSON(input.superId);
+        object.ids = input.ids ? ObjectIds.fromJSON(input.ids) : undefined;
+        object._isNew = false;
         object._originalPosition = new ComparablePosition(input.position);
-        object.iri = jsonObject.iri;
-        object.pimIri = jsonObject.pimIri;
+        object.iri = input.iri;
+        object.pimIri = input.pimIri;
 
         return object;
     }
 
-    static createNew(id: Id, label: string, key: Key, ids?: ObjectIds, iri?: Iri, pimIri?: Iri): SchemaObject {
+    static createNew(key: Key, label: string, ids?: ObjectIds, iri?: Iri, pimIri?: Iri): SchemaObject {
         const object = new SchemaObject();
 
-        object.id = id;
-        object.label = label;
         object.key = key;
+        object.label = label;
+        object.position = new ComparablePosition({ x: 0, y: 0});
         object.ids = ids;
         object._updateDefaultSuperId(); // TODO maybe a computed variable?
 
-        object.position = new ComparablePosition({ x: 0, y: 0});
         object._isNew = true;
         object.iri = iri;
         object.pimIri = pimIri;
@@ -119,19 +114,26 @@ export class SchemaObject implements Entity {
         this.label = label;
     }
 
+    /*
     toPositionUpdate(): PositionUpdate | null {
         return this.position.equals(this._originalPosition) ? null : { schemaObjectId: this.id, position: this.position };
     }
+    */
 
-    toJSON(): SchemaObjectJSON {
+    toJSON(): SchemaObjectFromServer {
         return {
-            label: this.label,
             key: this.key.toJSON(),
+            position: this.position,
+            label: this.label,
             ids: this.ids?.toJSON(),
             superId: this.superId.toJSON(),
             iri: this.iri,
             pimIri: this.pimIri
         };
+    }
+
+    equals(other: SchemaObject | null | undefined): boolean {
+        return !!other && this.key.equals(other.key);
     }
 }
 
@@ -139,10 +141,4 @@ export type SchemaObjectUpdate = {
     temporaryId: Id;
     position: Position;
     jsonValue: string;
-};
-
-export type SchemaObjectFromServer = {
-    id: Id;
-    jsonValue: string;
-    position: Position;
 };

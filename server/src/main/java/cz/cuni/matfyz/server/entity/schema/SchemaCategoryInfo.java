@@ -8,11 +8,11 @@ import cz.cuni.matfyz.server.entity.Id;
  */
 public class SchemaCategoryInfo extends Entity {
 
-    public final String jsonValue;
+    public final String label;
 
-    public SchemaCategoryInfo(Id id, String jsonValue) {
+    public SchemaCategoryInfo(Id id, String label) {
         super(id);
-        this.jsonValue = jsonValue;
+        this.label = label;
     }
 
 }

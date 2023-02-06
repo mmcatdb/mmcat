@@ -1,4 +1,4 @@
-import { Signature, type SignatureJSON } from "./Signature";
+import { Signature, type SignatureFromServer } from "./Signature";
 
 export type NameJSON = StaticNameJSON | DynamicNameJSON;
 
@@ -65,7 +65,7 @@ export class StaticName {
     }
 }
 
-export type DynamicNameJSON = { signature: SignatureJSON };
+export type DynamicNameJSON = { signature: SignatureFromServer };
 
 export class DynamicName {
     readonly signature: Signature;
@@ -95,7 +95,7 @@ export class DynamicName {
     }
 
     static fromJSON(jsonObject: DynamicNameJSON): DynamicName {
-        return new DynamicName(Signature.fromJSON(jsonObject.signature));
+        return new DynamicName(Signature.fromServer(jsonObject.signature));
     }
 
     toJSON(): DynamicNameJSON {

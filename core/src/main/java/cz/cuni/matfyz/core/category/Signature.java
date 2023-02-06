@@ -284,7 +284,7 @@ public class Signature implements Serializable, Comparable<Signature> {
             super(vc);
         }
 
-        private static ObjectReader intsJSONReader = new ObjectMapper().readerFor(int[].class);
+        private static final ObjectReader intsJSONReader = new ObjectMapper().readerFor(int[].class);
 
         @Override
         public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {

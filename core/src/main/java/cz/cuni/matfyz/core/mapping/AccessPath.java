@@ -54,8 +54,8 @@ public abstract class AccessPath {
             super(vc);
         }
 
-        private static ObjectReader simplePropertyJSONReader = new ObjectMapper().readerFor(SimpleProperty.class);
-        private static ObjectReader complexPropertyJSONReader = new ObjectMapper().readerFor(ComplexProperty.class);
+        private static final ObjectReader simplePropertyJSONReader = new ObjectMapper().readerFor(SimpleProperty.class);
+        private static final ObjectReader complexPropertyJSONReader = new ObjectMapper().readerFor(ComplexProperty.class);
     
         @Override
         public AccessPath deserialize(JsonParser parser, DeserializationContext context) throws IOException {

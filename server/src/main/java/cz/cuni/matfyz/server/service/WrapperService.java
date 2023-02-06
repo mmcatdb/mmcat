@@ -50,8 +50,9 @@ public class WrapperService {
         return new MongoDBControlWrapper(provider);
     }
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     private static MongoDBDatabaseProvider createMongoDBProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
-        final var mapper = new ObjectMapper();
         final var settings = mapper.treeToValue(database.settings, MongoDBSettings.class);
 
         return new MongoDBDatabaseProvider(settings);
@@ -68,7 +69,6 @@ public class WrapperService {
     }
 
     private static PostgreSQLConnectionProvider createPostgreSQLProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
-        final var mapper = new ObjectMapper();
         final var settings = mapper.treeToValue(database.settings, PostgreSQLSettings.class);
 
         return new PostgreSQLConnectionProvider(settings);

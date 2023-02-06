@@ -28,8 +28,8 @@ public abstract class Name {
             super(vc);
         }
 
-        private static ObjectReader staticNameJSONReader = new ObjectMapper().readerFor(StaticName.class);
-        private static ObjectReader dynamicNameJSONReader = new ObjectMapper().readerFor(DynamicName.class);
+        private static final ObjectReader staticNameJSONReader = new ObjectMapper().readerFor(StaticName.class);
+        private static final ObjectReader dynamicNameJSONReader = new ObjectMapper().readerFor(DynamicName.class);
     
         @Override
         public Name deserialize(JsonParser parser, DeserializationContext context) throws IOException {

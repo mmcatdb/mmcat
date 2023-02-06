@@ -76,7 +76,7 @@ public class Job extends Entity {
 
     public static class Builder {
 
-        private static ObjectReader jobJSONReader = new ObjectMapper().readerFor(Job.class);
+        private static final ObjectReader jobJSONReader = new ObjectMapper().readerFor(Job.class);
 
         public Job fromJSON(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String jsonValue) throws JsonProcessingException {
             return jobJSONReader

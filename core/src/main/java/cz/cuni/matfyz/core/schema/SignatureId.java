@@ -110,9 +110,9 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         @Override
         public void serialize(SignatureId signatureId, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
-            for (final var signature : signatureId.signatures) {
+            for (final var signature : signatureId.signatures)
                 generator.writeObject(signature);
-            }
+                
             generator.writeEndArray();
         }
 
@@ -128,7 +128,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
             super(vc);
         }
 
-        private static ObjectReader signaturesJSONReader = new ObjectMapper().readerFor(Signature[].class);
+        private static final ObjectReader signaturesJSONReader = new ObjectMapper().readerFor(Signature[].class);
 
         @Override
         public SignatureId deserialize(JsonParser parser, DeserializationContext context) throws IOException {

@@ -67,16 +67,18 @@ public class MongoDBToMongoDBTests {
         testBase.testAlgorithm();
     }
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     @Test
     public void test() throws Exception {
         final var data = new TestData();
         final ComplexProperty path = data.path_orderRoot();
         LOGGER.trace(path.toString());
 
-        final var jsonString = new ObjectMapper().writer().writeValueAsString(path);
+        final var jsonString = mapper.writer().writeValueAsString(path);
         LOGGER.trace(jsonString);
 
-        final AccessPath parsedPath = new ObjectMapper().readerFor(AccessPath.class).readValue(jsonString);
+        final AccessPath parsedPath = mapper.readerFor(AccessPath.class).readValue(jsonString);
         LOGGER.trace(parsedPath.toString());
 
         assertEquals(path.toString(), parsedPath.toString());

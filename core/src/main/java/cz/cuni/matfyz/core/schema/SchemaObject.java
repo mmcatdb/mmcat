@@ -136,9 +136,9 @@ public class SchemaObject implements Serializable, CategoricalObject, Identified
             super(vc);
         }
 
-        private static ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
-        private static ObjectReader superIdJSONReader = new ObjectMapper().readerFor(SignatureId.class);
-        private static ObjectReader idsJSONReader = new ObjectMapper().readerFor(ObjectIds.class);
+        private static final ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
+        private static final ObjectReader superIdJSONReader = new ObjectMapper().readerFor(SignatureId.class);
+        private static final ObjectReader idsJSONReader = new ObjectMapper().readerFor(ObjectIds.class);
     
         @Override
         public SchemaObject deserialize(JsonParser parser, DeserializationContext context) throws IOException {

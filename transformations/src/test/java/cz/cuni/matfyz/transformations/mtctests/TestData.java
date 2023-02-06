@@ -75,7 +75,7 @@ public class TestData {
         var path = createUserTableAccessPath();
         var url = ClassLoader.getSystemResource(dataFilePrefix + "userData.json");
         var fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
-        var mapping = Mapping.fromArguments(schema, rootObject, path, fileName, null);
+        var mapping = new Mapping(schema, rootObject, path, fileName, null);
 
         return mapping;
     }
@@ -85,7 +85,7 @@ public class TestData {
         var path = createOrderTableAccessPath();
         var url = ClassLoader.getSystemResource(dataFilePrefix + "orderData.json");
         var fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
-        var mapping = Mapping.fromArguments(schema, rootObject, path, fileName, null);
+        var mapping = new Mapping(schema, rootObject, path, fileName, null);
 
         return mapping;
     }

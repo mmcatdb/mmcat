@@ -1,22 +1,24 @@
 package cz.cuni.matfyz.server.entity.schema;
 
-import cz.cuni.matfyz.server.entity.Entity;
-import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.core.category.Morphism.Max;
+import cz.cuni.matfyz.core.category.Morphism.Min;
+import cz.cuni.matfyz.core.category.Morphism.Tag;
+import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.schema.Key;
+
+import java.util.Set;
 
 /**
  * @author jachym.bartik
  */
-public class SchemaMorphismWrapper extends Entity {
-
-    public final Id domId;
-    public final Id codId;
-    public final String jsonValue;
-
-    public SchemaMorphismWrapper(Id id, Id domId, Id codId, String jsonValue) {
-        super(id);
-        this.domId = domId;
-        this.codId = codId;
-        this.jsonValue = jsonValue;
-    }
-
-}
+public record SchemaMorphismWrapper(
+    Signature signature,
+    String label,
+    Key domKey,
+    Key codKey,
+    Min min,
+    Max max,
+    String iri,
+    String pimIri,
+    Set<Tag> tags
+) {}

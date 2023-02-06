@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.core.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
@@ -29,17 +30,12 @@ public class Mapping implements Comparable<Mapping> {
     private String kindName;
     private Collection<Signature> primaryKey;
     
-    private Mapping(SchemaCategory category, SchemaObject rootObject) {
+    public Mapping(SchemaCategory category, SchemaObject rootObject, ComplexProperty accessPath, String kindName, Collection<Signature> primaryKey) {
         this.category = category;
         this.rootObject = rootObject;
-    }
-
-    public static Mapping fromArguments(SchemaCategory category, SchemaObject rootObject, ComplexProperty accessPath, String kindName, Collection<Signature> primaryKey) {
-        var mapping = new Mapping(category, rootObject);
-        mapping.accessPath = accessPath;
-        mapping.kindName = kindName;
-        mapping.primaryKey = primaryKey;
-        return mapping;
+        this.accessPath = accessPath;
+        this.kindName = kindName;
+        this.primaryKey = primaryKey;
     }
 
     public SchemaCategory category() {
@@ -99,22 +95,28 @@ public class Mapping implements Comparable<Mapping> {
             super(vc);
         }
 
-        private static ObjectReader rootPropertyJSONReader = new ObjectMapper().readerFor(ComplexProperty.class);
-        private static ObjectReader signaturesJSONReader = new ObjectMapper().readerFor(Signature[].class);
+        private static final ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
+        private static final ObjectReader rootPropertyJSONReader = new ObjectMapper().readerFor(ComplexProperty.class);
+        private static final ObjectReader signaturesJSONReader = new ObjectMapper().readerFor(Signature[].class);
     
         @Override
         public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final var category = (SchemaCategory) context.getAttribute("category");
-            final var rootObject = (SchemaObject) context.getAttribute("rootObject");
-            final var mapping = new Mapping(category, rootObject);
+            final Key rootObjectKey = keyJSONReader.readValue(node.get("rootObjectKey"));
 
-            mapping.kindName = node.get("kindName").asText();
-            mapping.primaryKey = List.of(signaturesJSONReader.readValue(node.get("primaryKey")));
-            mapping.accessPath = rootPropertyJSONReader.readValue(node.get("accessPath"));
+            final var kindName = node.get("kindName").asText();
+            final List<Signature> primaryKey = List.of(signaturesJSONReader.readValue(node.get("primaryKey")));
+            final ComplexProperty accessPath = rootPropertyJSONReader.readValue(node.get("accessPath"));
     
-            return mapping;
+            return new Mapping(
+                category,
+                category.getObject(rootObjectKey),
+                accessPath,
+                kindName,
+                primaryKey
+            );
         }
 
     }

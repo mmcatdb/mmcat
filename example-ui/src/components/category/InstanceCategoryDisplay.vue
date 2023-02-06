@@ -76,7 +76,7 @@ function selectEdge(edge: Edge) {
         <GraphDisplay @create:graph="cytoscapeCreated" />
         <InstanceObjectDisplay
             v-if="selectedNode"
-            :key="selectedNode.schemaObject.key.value"
+            :key="selectedNode.schemaObject.key.toString()"
             :node="selectedNode"
             @object:click="objectClicked"
         />

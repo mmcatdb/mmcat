@@ -37,7 +37,7 @@ export class Edge {
     }
 
     equals(other: Edge | null | undefined): boolean {
-        return !!other && this.schemaMorphism.id === other.schemaMorphism.id;
+        return !!other && this.schemaMorphism.equals(other.schemaMorphism);
     }
 
     unselect(): void {

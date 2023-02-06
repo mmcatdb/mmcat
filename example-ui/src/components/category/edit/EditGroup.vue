@@ -35,7 +35,7 @@ export default defineComponent({
             <ValueRow label="Objects:" />
             <ValueRow
                 v-for="node in nodes"
-                :key="node.schemaObject.id"
+                :key="node.schemaObject.key.toString()"
                 label="-"
             >
                 {{ node.schemaObject.label }}

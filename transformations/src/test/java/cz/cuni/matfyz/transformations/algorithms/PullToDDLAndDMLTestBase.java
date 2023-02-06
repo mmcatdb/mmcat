@@ -99,7 +99,7 @@ public class PullToDDLAndDMLTestBase {
 
         LOGGER.trace("Pulled Forest Of Records:\n" + forest);
         
-        Mapping mapping = Mapping.fromArguments(schema, rootObject, path, kindName, null);
+        Mapping mapping = new Mapping(schema, rootObject, path, kindName, null);
 
         var transformation = new MTCAlgorithm();
         transformation.input(mapping, instance, forest);

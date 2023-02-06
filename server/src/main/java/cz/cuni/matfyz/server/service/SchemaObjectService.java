@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SchemaObjectService {
 
+    /*
     @Autowired
     private SchemaObjectRepository repository;
 
@@ -31,6 +32,7 @@ public class SchemaObjectService {
     public boolean updatePosition(Id categoryId, Id objectId, Position newPosition) {
         return repository.updatePosition(categoryId, objectId, newPosition);
     }
+    */
 
     /*
     public SchemaObjectWrapper add(SchemaObjectWrapper object, Id categoryId) {

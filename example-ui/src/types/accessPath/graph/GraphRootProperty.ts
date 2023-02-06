@@ -1,6 +1,6 @@
 import type { Node } from "@/types/categoryGraph";
 import type { StaticName } from "@/types/identifiers";
-import type { ComplexPropertyJSON } from "../JSONTypes";
+import type { RootPropertyJSON } from "../JSONTypes";
 import type { GraphChildProperty } from "./compositeTypes";
 import { SequenceSignature } from "./SequenceSignature";
 
@@ -49,7 +49,7 @@ export class GraphRootProperty {
         return this._subpaths;
     }
 
-    toJSON(): ComplexPropertyJSON {
+    toJSON(): RootPropertyJSON {
         return {
             name: this.name.toJSON(),
             signature: this._signature.toSignature().toJSON(),

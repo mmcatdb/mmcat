@@ -4,7 +4,7 @@ enum SignatureType {
     Empty
 }
 
-export type SignatureJSON = number[];
+export type SignatureFromServer = number[];
 
 function determineType(idsLength: number) {
     if (idsLength === 0)
@@ -121,13 +121,7 @@ export class Signature {
         return 0;
     }
 
-    static fromJSON(jsonArray: SignatureJSON): Signature {
-        return new Signature(jsonArray);
-    }
-
-    toJSON(): SignatureJSON {
+    toJSON(): SignatureFromServer {
         return this._ids;
     }
 }
-
-export type SignatureFromServer = number[];

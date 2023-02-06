@@ -137,10 +137,15 @@ public class ObjectIds implements Serializable {
         public void serialize(ObjectIds ids, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writeStringField("type", ids.type.name());
-            generator.writeArrayFieldStart("signatureIds");
-            for (final var id : ids.signatureIds)
-                generator.writePOJO(id);
-            generator.writeEndArray();
+
+            if (ids.signatureIds != null) {
+                generator.writeArrayFieldStart("signatureIds");
+                for (final var id : ids.signatureIds)
+                    generator.writePOJO(id);
+                    
+                generator.writeEndArray();
+            }
+            
             generator.writeEndObject();
         }
 
@@ -156,14 +161,16 @@ public class ObjectIds implements Serializable {
             super(vc);
         }
 
-        private static ObjectReader signatureIdsJSONReader = new ObjectMapper().readerFor(SignatureId[].class);
+        private static final ObjectReader signatureIdsJSONReader = new ObjectMapper().readerFor(SignatureId[].class);
 
         @Override
         public ObjectIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Type type = Type.valueOf(node.get("type").asText());
-            final SignatureId[] signatureIds = signatureIdsJSONReader.readValue(node.get("signatureIds"));
+            final SignatureId[] signatureIds = node.hasNonNull("signatureIds")
+                ? signatureIdsJSONReader.readValue(node.get("signatureIds"))
+                : null;
 
             return type == Type.Signatures ? new ObjectIds(signatureIds) : new ObjectIds(type);
         }

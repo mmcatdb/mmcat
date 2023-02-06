@@ -5,8 +5,6 @@ import jobs from "./routes/jobs";
 import logicalModels from "./routes/logicalModels";
 import mappings from "./routes/mappings";
 import models from "./routes/models";
-import morphisms from "./routes/morphsims";
-import objects from "./routes/objects";
 import schemas from "./routes/schemas";
 
 const API = {
@@ -17,9 +15,7 @@ const API = {
     logicalModels,
     models,
     schemas,
-    instances,
-    objects,
-    morphisms
+    instances
 };
 
 export default API;

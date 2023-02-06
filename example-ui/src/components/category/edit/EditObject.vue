@@ -103,7 +103,7 @@ export default defineComponent({
                 />
             </ValueRow>
             <ValueRow label="Key:">
-                {{ node.schemaObject.key.value }}
+                {{ node.schemaObject.key.toString() }}
             </ValueRow>
             <ValueRow label="Ids:">
                 <ObjectIdsDisplay

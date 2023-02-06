@@ -1,13 +1,13 @@
-import type { NameJSON, SignatureJSON, StaticNameJSON } from "../identifiers";
+import type { NameJSON, SignatureFromServer, StaticNameJSON } from "../identifiers";
 
 export type SimplePropertyJSON = {
     name: NameJSON;
-    signature: SignatureJSON;
+    signature: SignatureFromServer;
 };
 
 export type ComplexPropertyJSON = {
     name: NameJSON;
-    signature: SignatureJSON;
+    signature: SignatureFromServer;
     isAuxiliary: boolean;
     subpaths: ChildPropertyJSON[];
 };
