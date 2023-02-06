@@ -18,8 +18,8 @@ public class Database extends Entity {
     
     public static final String PASSWORD_FIELD_NAME = "password";
     
-    private static final ObjectReader dataJSONReader = new ObjectMapper().readerFor(DatabaseInit.class);
-    private static final ObjectWriter dataJSONWriter = new ObjectMapper().writer();
+    private static final ObjectReader dataJsonReader = new ObjectMapper().readerFor(DatabaseInit.class);
+    private static final ObjectWriter dataJsonWriter = new ObjectMapper().writer();
 
     public Type type;
     public String label;
@@ -58,8 +58,8 @@ public class Database extends Entity {
             this.settings = data.settings;
     }
 
-    public static Database fromJSONValue(Id id, String jsonValue) throws JsonProcessingException {
-        DatabaseInit data = dataJSONReader.readValue(jsonValue);
+    public static Database fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
+        DatabaseInit data = dataJsonReader.readValue(jsonValue);
         return new Database(id, data);
     }
 
@@ -67,8 +67,8 @@ public class Database extends Entity {
         return new DatabaseInit(label, settings, type);
     }
 
-    public String toJSONValue() throws JsonProcessingException {
-        return dataJSONWriter.writeValueAsString(this.toDatabaseInit());
+    public String toJsonValue() throws JsonProcessingException {
+        return dataJsonWriter.writeValueAsString(this.toDatabaseInit());
     }
 
     public DatabaseInfo toInfo() {

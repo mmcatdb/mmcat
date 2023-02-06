@@ -42,10 +42,10 @@ public class DataSource extends Entity {
 
     public static class Builder {
 
-        private static final ObjectReader dataSourceJSONReader = new ObjectMapper().readerFor(DataSource.class);
+        private static final ObjectReader dataSourceJsonReader = new ObjectMapper().readerFor(DataSource.class);
 
-        public DataSource fromJSON(Id id, String jsonValue) throws JsonProcessingException {
-            return dataSourceJSONReader
+        public DataSource fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
+            return dataSourceJsonReader
                 .withAttribute("id", id)
                 .readValue(jsonValue);
         }

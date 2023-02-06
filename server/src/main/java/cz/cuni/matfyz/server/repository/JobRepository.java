@@ -21,7 +21,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class JobRepository {
 
-    private static final ObjectWriter jobJSONWriter = new ObjectMapper().writer();
+    private static final ObjectWriter jobJsonWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;
@@ -42,7 +42,7 @@ public class JobRepository {
                 Id logicalModelId = getId(resultSet, "logical_model_id");
                 Id dataSourceId = getId(resultSet, "data_source_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(new Job.Builder().fromJSON(id, categoryId, logicalModelId, dataSourceId, jsonValue));
+                output.add(new Job.Builder().fromJsonValue(id, categoryId, logicalModelId, dataSourceId, jsonValue));
             }
         });
     }
@@ -62,7 +62,7 @@ public class JobRepository {
                 Id logicalModelId = getId(resultSet, "logical_model_id");
                 Id dataSourceId = getId(resultSet, "data_source_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.set(new Job.Builder().fromJSON(id, categoryId, logicalModelId, dataSourceId, jsonValue));
+                output.set(new Job.Builder().fromJsonValue(id, categoryId, logicalModelId, dataSourceId, jsonValue));
             }
         });
     }
@@ -73,7 +73,7 @@ public class JobRepository {
             setId(statement, 1, job.categoryId);
             setId(statement, 2, job.logicalModelId);
             setId(statement, 3, job.dataSourceId);
-            statement.setString(4, jobJSONWriter.writeValueAsString(job));
+            statement.setString(4, jobJsonWriter.writeValueAsString(job));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -85,14 +85,14 @@ public class JobRepository {
         });
     }
 
-    public boolean updateJSONValue(Job job) {
+    public boolean updateJsonValue(Job job) {
         return db.getBoolean((connection, output) -> {
             var statement = connection.prepareStatement("""
                 UPDATE job
                 SET json_value = ?::jsonb
                 WHERE id = ?;
                 """);
-            statement.setString(1, jobJSONWriter.writeValueAsString(job));
+            statement.setString(1, jobJsonWriter.writeValueAsString(job));
             setId(statement, 2, job.id);
 
             int affectedRows = statement.executeUpdate();

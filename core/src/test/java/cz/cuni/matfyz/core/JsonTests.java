@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class JSONTests {
+public class JsonTests {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JSONTests.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonTests.class);
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final TestData data = new TestData();
 
@@ -59,7 +59,7 @@ public class JSONTests {
 
     @Test
     // TODO reorganize and rename later
-    public void toJSONConversion() throws Exception {
+    public void toJsonConversion() throws Exception {
         final var category = data.createDefaultSchemaCategory();
 
         final var order = category.getObject(data.orderKey);

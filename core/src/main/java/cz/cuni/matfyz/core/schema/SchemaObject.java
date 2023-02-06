@@ -136,18 +136,18 @@ public class SchemaObject implements Serializable, CategoricalObject, Identified
             super(vc);
         }
 
-        private static final ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
-        private static final ObjectReader superIdJSONReader = new ObjectMapper().readerFor(SignatureId.class);
-        private static final ObjectReader idsJSONReader = new ObjectMapper().readerFor(ObjectIds.class);
+        private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
+        private static final ObjectReader superIdJsonReader = new ObjectMapper().readerFor(SignatureId.class);
+        private static final ObjectReader idsJsonReader = new ObjectMapper().readerFor(ObjectIds.class);
     
         @Override
         public SchemaObject deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            final Key key = keyJSONReader.readValue(node.get("key"));
+            final Key key = keyJsonReader.readValue(node.get("key"));
             final var label = node.get("label").asText();
-            final SignatureId superId = superIdJSONReader.readValue(node.get("superId"));
-            final ObjectIds ids = idsJSONReader.readValue(node.get("ids"));
+            final SignatureId superId = superIdJsonReader.readValue(node.get("superId"));
+            final ObjectIds ids = idsJsonReader.readValue(node.get("ids"));
             final var iri = node.hasNonNull("iri") ? node.get("iri").asText() : "";
             final var pimIri = node.hasNonNull("pimIri") ? node.get("pimIri").asText() : "";
 

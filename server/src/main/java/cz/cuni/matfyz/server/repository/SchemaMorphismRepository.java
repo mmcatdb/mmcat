@@ -41,7 +41,7 @@ public class SchemaMorphismRepository {
                 Id domId = getId(resultSet, "domain_object_id");
                 Id codId = getId(resultSet, "codomain_object_id");
                 String jsonValue = resultSet.getString("json_value");
-                //var schema = builder.fromJSON(jsonObject);
+                //var schema = builder.fromJsonValue(jsonObject);
                 output.add(new SchemaMorphismWrapper(id, domId, codId, jsonValue));
             }
         });
@@ -58,7 +58,7 @@ public class SchemaMorphismRepository {
                 Id domId = getId(resultSet, "domain_object_id");
                 Id codId = getId(resultSet, "codomain_object_id");
                 String jsonValue = resultSet.getString("json_value");
-                //var schema = new SchemaCategory.Builder().fromJSON(jsonObject);
+                //var schema = new SchemaCategory.Builder().fromJsonValue(jsonObject);
                 output.set(new SchemaMorphismWrapper(id, domId, codId, jsonValue));
             }
         });

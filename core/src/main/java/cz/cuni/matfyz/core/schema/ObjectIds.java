@@ -142,7 +142,7 @@ public class ObjectIds implements Serializable {
                 generator.writeArrayFieldStart("signatureIds");
                 for (final var id : ids.signatureIds)
                     generator.writePOJO(id);
-                    
+
                 generator.writeEndArray();
             }
             
@@ -161,7 +161,7 @@ public class ObjectIds implements Serializable {
             super(vc);
         }
 
-        private static final ObjectReader signatureIdsJSONReader = new ObjectMapper().readerFor(SignatureId[].class);
+        private static final ObjectReader signatureIdsJsonReader = new ObjectMapper().readerFor(SignatureId[].class);
 
         @Override
         public ObjectIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
@@ -169,7 +169,7 @@ public class ObjectIds implements Serializable {
 
             final Type type = Type.valueOf(node.get("type").asText());
             final SignatureId[] signatureIds = node.hasNonNull("signatureIds")
-                ? signatureIdsJSONReader.readValue(node.get("signatureIds"))
+                ? signatureIdsJsonReader.readValue(node.get("signatureIds"))
                 : null;
 
             return type == Type.Signatures ? new ObjectIds(signatureIds) : new ObjectIds(type);

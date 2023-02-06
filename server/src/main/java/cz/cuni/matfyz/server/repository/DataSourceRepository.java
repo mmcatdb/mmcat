@@ -22,7 +22,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DataSourceRepository {
 
-    private static final ObjectWriter dataSourceJSONWriter = new ObjectMapper().writer();
+    private static final ObjectWriter dataSourceJsonWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;
@@ -35,7 +35,7 @@ public class DataSourceRepository {
 
             if (resultSet.next()) {
                 String jsonValue = resultSet.getString("json_value");
-                output.set(new DataSource.Builder().fromJSON(id, jsonValue));
+                output.set(new DataSource.Builder().fromJsonValue(id, jsonValue));
             }
         },
         "Data source with id: {} not found.", id);
@@ -53,7 +53,7 @@ public class DataSourceRepository {
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(new DataSource.Builder().fromJSON(id, jsonValue));
+                output.add(new DataSource.Builder().fromJsonValue(id, jsonValue));
             }
         });
     }
@@ -75,7 +75,7 @@ public class DataSourceRepository {
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(new DataSource.Builder().fromJSON(id, jsonValue));
+                output.add(new DataSource.Builder().fromJsonValue(id, jsonValue));
             }
         });
     }
@@ -87,7 +87,7 @@ public class DataSourceRepository {
     private DataSource create(DataSource dataSource) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO data_source (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, dataSourceJSONWriter.writeValueAsString(dataSource));
+            statement.setString(1, dataSourceJsonWriter.writeValueAsString(dataSource));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -104,7 +104,7 @@ public class DataSourceRepository {
     private DataSource update(DataSource dataSource) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("UPDATE data_source SET json_value = ?::jsonb WHERE id = ?;");
-            statement.setString(1, dataSourceJSONWriter.writeValueAsString(dataSource));
+            statement.setString(1, dataSourceJsonWriter.writeValueAsString(dataSource));
             setId(statement, 2, dataSource.id);
 
             int affectedRows = statement.executeUpdate();

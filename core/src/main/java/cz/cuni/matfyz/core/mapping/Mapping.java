@@ -95,20 +95,20 @@ public class Mapping implements Comparable<Mapping> {
             super(vc);
         }
 
-        private static final ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
-        private static final ObjectReader rootPropertyJSONReader = new ObjectMapper().readerFor(ComplexProperty.class);
-        private static final ObjectReader signaturesJSONReader = new ObjectMapper().readerFor(Signature[].class);
+        private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
+        private static final ObjectReader rootPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
+        private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
     
         @Override
         public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final var category = (SchemaCategory) context.getAttribute("category");
-            final Key rootObjectKey = keyJSONReader.readValue(node.get("rootObjectKey"));
+            final Key rootObjectKey = keyJsonReader.readValue(node.get("rootObjectKey"));
 
             final var kindName = node.get("kindName").asText();
-            final List<Signature> primaryKey = List.of(signaturesJSONReader.readValue(node.get("primaryKey")));
-            final ComplexProperty accessPath = rootPropertyJSONReader.readValue(node.get("accessPath"));
+            final List<Signature> primaryKey = List.of(signaturesJsonReader.readValue(node.get("primaryKey")));
+            final ComplexProperty accessPath = rootPropertyJsonReader.readValue(node.get("accessPath"));
     
             return new Mapping(
                 category,

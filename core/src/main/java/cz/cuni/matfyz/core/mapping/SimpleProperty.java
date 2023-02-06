@@ -87,15 +87,15 @@ public class SimpleProperty extends AccessPath {
             super(vc);
         }
 
-        private static final ObjectReader nameJSONReader = new ObjectMapper().readerFor(Name.class);
-        private static final ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
+        private static final ObjectReader nameJsonReader = new ObjectMapper().readerFor(Name.class);
+        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
     
         @Override
         public SimpleProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            final Name name = nameJSONReader.readValue(node.get("name"));
-            final Signature signature = signatureJSONReader.readValue(node.get("signature"));
+            final Name name = nameJsonReader.readValue(node.get("name"));
+            final Signature signature = signatureJsonReader.readValue(node.get("signature"));
 
             return new SimpleProperty(name, signature);
         }

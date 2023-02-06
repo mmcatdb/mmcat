@@ -50,7 +50,7 @@ public class JobService {
 
     private boolean setJobStatus(Job job, Job.Status status) {
         job.status = status;
-        return repository.updateJSONValue(job);
+        return repository.updateJsonValue(job);
     }
 
     public boolean delete(Id id) {

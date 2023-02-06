@@ -120,7 +120,7 @@ public class AsyncJobService {
 
     private void setJobStatus(Job job, Job.Status status) {
         job.status = status;
-        repository.updateJSONValue(job);
+        repository.updateJsonValue(job);
     }
 
     @Async("jobExecutor")

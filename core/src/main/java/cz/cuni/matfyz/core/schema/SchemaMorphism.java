@@ -178,21 +178,21 @@ public class SchemaMorphism implements Serializable, Morphism, Identified<Signat
             super(vc);
         }
 
-        private static final ObjectReader keyJSONReader = new ObjectMapper().readerFor(Key.class);
-        private static final ObjectReader signatureJSONReader = new ObjectMapper().readerFor(Signature.class);
+        private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
+        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
     
         @Override
         public SchemaMorphism deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            final Key domKey = keyJSONReader.readValue(node.get("dom"));
-            final Key codKey = keyJSONReader.readValue(node.get("cod"));
+            final Key domKey = keyJsonReader.readValue(node.get("dom"));
+            final Key codKey = keyJsonReader.readValue(node.get("cod"));
 
             final SchemaCategory category = (SchemaCategory) context.getAttribute("category");
 
             final var morphism = new SchemaMorphism(category.getObject(domKey), category.getObject(codKey));
 
-            morphism.signature = signatureJSONReader.readValue(node.get("signature"));
+            morphism.signature = signatureJsonReader.readValue(node.get("signature"));
             morphism.min = Min.valueOf(node.get("min").asText());
             morphism.max = Max.valueOf(node.get("max").asText());
             morphism.iri = node.hasNonNull("iri") ? node.get("iri").asText() : "";

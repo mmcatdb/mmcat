@@ -54,16 +54,16 @@ public abstract class AccessPath {
             super(vc);
         }
 
-        private static final ObjectReader simplePropertyJSONReader = new ObjectMapper().readerFor(SimpleProperty.class);
-        private static final ObjectReader complexPropertyJSONReader = new ObjectMapper().readerFor(ComplexProperty.class);
+        private static final ObjectReader simplePropertyJsonReader = new ObjectMapper().readerFor(SimpleProperty.class);
+        private static final ObjectReader complexPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
     
         @Override
         public AccessPath deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
     
             return node.has("subpaths")
-                ? complexPropertyJSONReader.readValue(node)
-                : simplePropertyJSONReader.readValue(node);
+                ? complexPropertyJsonReader.readValue(node)
+                : simplePropertyJsonReader.readValue(node);
         }
 
     }

@@ -30,7 +30,7 @@ public class DatabaseRepository {
 
             if (resultSet.next()) {
                 String jsonValue = resultSet.getString("json_value");
-                output.set(Database.fromJSONValue(id, jsonValue));
+                output.set(Database.fromJsonValue(id, jsonValue));
             }
         });
     }
@@ -43,7 +43,7 @@ public class DatabaseRepository {
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(Database.fromJSONValue(id, jsonValue));
+                output.add(Database.fromJsonValue(id, jsonValue));
             }
         });
     }
@@ -65,7 +65,7 @@ public class DatabaseRepository {
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(Database.fromJSONValue(id, jsonValue));
+                output.add(Database.fromJsonValue(id, jsonValue));
             }
         });
     }
@@ -77,7 +77,7 @@ public class DatabaseRepository {
     private Database create(Database database) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO database_for_mapping (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, database.toJSONValue());
+            statement.setString(1, database.toJsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -94,7 +94,7 @@ public class DatabaseRepository {
     private Database update(Database database) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("UPDATE database_for_mapping SET json_value = ?::jsonb WHERE id = ?;");
-            statement.setString(1, database.toJSONValue());
+            statement.setString(1, database.toJsonValue());
             setId(statement, 2, database.id);
 
             int affectedRows = statement.executeUpdate();

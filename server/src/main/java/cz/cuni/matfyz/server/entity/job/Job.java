@@ -76,10 +76,10 @@ public class Job extends Entity {
 
     public static class Builder {
 
-        private static final ObjectReader jobJSONReader = new ObjectMapper().readerFor(Job.class);
+        private static final ObjectReader jobJsonReader = new ObjectMapper().readerFor(Job.class);
 
-        public Job fromJSON(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String jsonValue) throws JsonProcessingException {
-            return jobJSONReader
+        public Job fromJsonValue(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String jsonValue) throws JsonProcessingException {
+            return jobJsonReader
                 .withAttribute("id", id)
                 .withAttribute("categoryId", categoryId)
                 .withAttribute("logicalModelId", logicalModelId)

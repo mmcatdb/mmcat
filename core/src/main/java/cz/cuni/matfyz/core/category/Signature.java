@@ -284,13 +284,13 @@ public class Signature implements Serializable, Comparable<Signature> {
             super(vc);
         }
 
-        private static final ObjectReader intsJSONReader = new ObjectMapper().readerFor(int[].class);
+        private static final ObjectReader intsJsonReader = new ObjectMapper().readerFor(int[].class);
 
         @Override
         public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            final int[] values = intsJSONReader.readValue(node);
+            final int[] values = intsJsonReader.readValue(node);
 
             return values.length == 0 ? Signature.createEmpty() : new Signature(values);
         }

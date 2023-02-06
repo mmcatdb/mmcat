@@ -28,16 +28,16 @@ public abstract class Name {
             super(vc);
         }
 
-        private static final ObjectReader staticNameJSONReader = new ObjectMapper().readerFor(StaticName.class);
-        private static final ObjectReader dynamicNameJSONReader = new ObjectMapper().readerFor(DynamicName.class);
+        private static final ObjectReader staticNameJsonReader = new ObjectMapper().readerFor(StaticName.class);
+        private static final ObjectReader dynamicNameJsonReader = new ObjectMapper().readerFor(DynamicName.class);
     
         @Override
         public Name deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             return node.has("signature")
-                ? dynamicNameJSONReader.readValue(node)
-                : staticNameJSONReader.readValue(node);
+                ? dynamicNameJsonReader.readValue(node)
+                : staticNameJsonReader.readValue(node);
         }
 
     }
