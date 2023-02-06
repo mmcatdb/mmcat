@@ -8,6 +8,7 @@ import cz.cuni.matfyz.server.entity.schema.SchemaObjectUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 import cz.cuni.matfyz.server.utils.Position;
+import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.util.List;
@@ -26,7 +27,6 @@ public class SchemaObjectRepository {
 
     /*
     private static final ObjectReader positionJsonReader = new ObjectMapper().readerFor(Position.class);
-    private static final ObjectWriter positionJsonWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;
@@ -87,7 +87,7 @@ public class SchemaObjectRepository {
                 WHERE schema_category_id = ?
                     AND schema_object_id = ?;
                 """);
-            statement.setString(1, positionJsonWriter.writeValueAsString(newPosition));
+            statement.setString(1, Utils.toJson(newPosition));
             setId(statement, 2, categoryId);
             setId(statement, 3, objectId);
 
@@ -116,7 +116,7 @@ public class SchemaObjectRepository {
             var categoryStatement = connection.prepareStatement("INSERT INTO schema_object_in_category (schema_category_id, schema_object_id, position) VALUES (?, ?, ?::jsonb)", Statement.RETURN_GENERATED_KEYS);
             setId(categoryStatement, 1, categoryId);
             setId(categoryStatement, 2, generatedId);
-            categoryStatement.setString(3, positionJsonWriter.writeValueAsString(object.position()));
+            categoryStatement.setString(3, Utils.toJson(object.position()));
 
             int categoryAffectedRows = categoryStatement.executeUpdate();
             if (categoryAffectedRows == 0)

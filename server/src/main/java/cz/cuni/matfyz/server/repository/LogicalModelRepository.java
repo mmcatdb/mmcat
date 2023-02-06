@@ -34,7 +34,7 @@ public class LogicalModelRepository {
                 Id databaseId = getId(resultSet, "database_id");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.add(new LogicalModel(foundId, categoryId, databaseId, jsonValue));
+                output.add(LogicalModel.fromJsonValue(foundId, categoryId, databaseId, jsonValue));
             }
         });
     }
@@ -51,13 +51,13 @@ public class LogicalModelRepository {
                 Id databaseId = getId(resultSet, "database_id");
                 String jsonValue = resultSet.getString("json_value");
 
-                output.set(new LogicalModel(foundId, categoryId, databaseId, jsonValue));
+                output.set(LogicalModel.fromJsonValue(foundId, categoryId, databaseId, jsonValue));
             }
         },
         "Logical model with id: %s not found.", id);
     }
 
-    public Id add(LogicalModelInit logicalModel) {
+    public Id add(LogicalModelInit init) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 INSERT INTO logical_model (schema_category_id, database_id, json_value)
@@ -65,9 +65,9 @@ public class LogicalModelRepository {
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            setId(statement, 1, logicalModel.categoryId());
-            setId(statement, 2, logicalModel.databaseId());
-            statement.setString(3, logicalModel.jsonValue());
+            setId(statement, 1, init.categoryId());
+            setId(statement, 2, init.databaseId());
+            statement.setString(3, init.toJsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

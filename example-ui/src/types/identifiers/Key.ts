@@ -1,3 +1,7 @@
+export type KeyFromServer = {
+    value: number;
+};
+
 export class Key {
     private constructor(
         public readonly value: number
@@ -11,7 +15,7 @@ export class Key {
         return new Key(value);
     }
 
-    public toJSON(): KeyJSON {
+    public toServer(): KeyFromServer {
         return {
             value: this.value
         };
@@ -25,11 +29,3 @@ export class Key {
         return '' + this.value;
     }
 }
-
-export type KeyFromServer = {
-    value: number;
-};
-
-export type KeyJSON = {
-    value: number;
-};

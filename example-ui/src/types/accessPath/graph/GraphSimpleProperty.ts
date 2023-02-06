@@ -1,6 +1,6 @@
 import type { Node } from "@/types/categoryGraph";
 import type { Name } from "@/types/identifiers";
-import type { SimplePropertyJSON } from "../JSONTypes";
+import type { SimplePropertyFromServer } from "../serverTypes";
 import type { GraphParentProperty } from "./compositeTypes";
 import type { SequenceSignature } from "./SequenceSignature";
 
@@ -35,10 +35,10 @@ export class GraphSimpleProperty {
             this._signature = newSignature;
     }
 
-    toJSON(): SimplePropertyJSON {
+    toServer(): SimplePropertyFromServer {
         return {
-            name: this.name.toJSON(),
-            signature: this._signature.toSignature().toJSON()
+            name: this.name.toServer(),
+            signature: this._signature.toSignature().toServer()
         };
     }
 }

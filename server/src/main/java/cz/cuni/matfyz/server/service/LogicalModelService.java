@@ -44,7 +44,7 @@ public class LogicalModelService {
             logicalModel.id,
             logicalModel.categoryId,
             database,
-            logicalModel.jsonValue,
+            logicalModel.label,
             mappings
         );
     }
@@ -58,7 +58,7 @@ public class LogicalModelService {
                 logicalModel.id,
                 logicalModel.categoryId,
                 database,
-                logicalModel.jsonValue,
+                logicalModel.label,
                 mappings
             );
         }).toList();
@@ -71,7 +71,7 @@ public class LogicalModelService {
             generatedId,
             init.categoryId(),
             init.databaseId(),
-            init.jsonValue()
+            init.label()
         );
     }
 }

@@ -8,5 +8,5 @@ import cz.cuni.matfyz.server.entity.Id;
  */
 public record LogicalModelInfo(
     Id id,
-    String jsonValue
+    String label
 ) implements IEntity {}

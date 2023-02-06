@@ -121,7 +121,7 @@ export class Signature {
         return 0;
     }
 
-    toJSON(): SignatureFromServer {
+    toServer(): SignatureFromServer {
         return this._ids;
     }
 }

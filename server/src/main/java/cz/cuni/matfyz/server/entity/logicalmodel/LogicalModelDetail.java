@@ -14,6 +14,6 @@ public record LogicalModelDetail(
     Id id,
     Id categoryId,
     DatabaseWithConfiguration database,
-    String jsonValue,
+    String label,
     List<MappingWrapper> mappings
 ) implements IEntity {}

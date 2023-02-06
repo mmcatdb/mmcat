@@ -1,7 +1,7 @@
 import { IntendedStringBuilder } from "@/utils/string";
-import { nameFromJSON, Signature, type Name } from "@/types/identifiers";
+import { nameFromServer, Signature, type Name } from "@/types/identifiers";
 import type { ParentProperty } from "./compositeTypes";
-import type { SimplePropertyJSON } from "../JSONTypes";
+import type { SimplePropertyFromServer } from "../serverTypes";
 
 export class SimpleProperty {
     name: Name;
@@ -31,18 +31,18 @@ export class SimpleProperty {
             + `${this.name}: ${this._signature}`;
     }
 
-    static fromJSON(jsonObject: SimplePropertyJSON, parent: ParentProperty): SimpleProperty {
+    static fromServer(input: SimplePropertyFromServer, parent: ParentProperty): SimpleProperty {
         return new SimpleProperty(
-            nameFromJSON(jsonObject.name),
-            Signature.fromServer(jsonObject.signature),
+            nameFromServer(input.name),
+            Signature.fromServer(input.signature),
             parent
         );
     }
 
-    toJSON(): SimplePropertyJSON {
+    toServer(): SimplePropertyFromServer {
         return {
-            name: this.name.toJSON(),
-            signature: this._signature.toJSON()
+            name: this.name.toServer(),
+            signature: this._signature.toServer()
         };
     }
 }

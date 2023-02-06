@@ -31,9 +31,7 @@ async function createLogicalModel() {
     const result = await API.logicalModels.createNewLogicalModel({}, {
         databaseId: selectedDatabase.value.id,
         categoryId,
-        jsonValue: JSON.stringify({
-            label: label.value
-        })
+        label: label.value
     });
     if (result.status)
         router.push({ name: 'logicalModels' });

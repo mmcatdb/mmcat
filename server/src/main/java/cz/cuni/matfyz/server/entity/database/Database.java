@@ -2,13 +2,13 @@ package cz.cuni.matfyz.server.entity.database;
 
 import cz.cuni.matfyz.server.entity.Entity;
 import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -17,9 +17,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class Database extends Entity {
     
     public static final String PASSWORD_FIELD_NAME = "password";
-    
-    private static final ObjectReader dataJsonReader = new ObjectMapper().readerFor(DatabaseInit.class);
-    private static final ObjectWriter dataJsonWriter = new ObjectMapper().writer();
 
     public Type type;
     public String label;
@@ -58,6 +55,8 @@ public class Database extends Entity {
             this.settings = data.settings;
     }
 
+    private static final ObjectReader dataJsonReader = new ObjectMapper().readerFor(DatabaseInit.class);
+
     public static Database fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
         DatabaseInit data = dataJsonReader.readValue(jsonValue);
         return new Database(id, data);
@@ -68,7 +67,7 @@ public class Database extends Entity {
     }
 
     public String toJsonValue() throws JsonProcessingException {
-        return dataJsonWriter.writeValueAsString(this.toDatabaseInit());
+        return Utils.toJson(this);
     }
 
     public DatabaseInfo toInfo() {

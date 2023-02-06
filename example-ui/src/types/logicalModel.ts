@@ -5,7 +5,7 @@ import { Mapping, type MappingFromServer } from "./mapping";
 export type LogicalModelInit = {
     databaseId: Id;
     categoryId: Id;
-    jsonValue: string;
+    label: string;
 };
 
 export class LogicalModelInfo implements Entity {
@@ -15,18 +15,16 @@ export class LogicalModelInfo implements Entity {
     ) {}
 
     static fromServer(input: LogicalModelInfoFromServer): LogicalModelInfo {
-        const json = JSON.parse(input.jsonValue) as { label: string };
-
         return new LogicalModelInfo(
             input.id,
-            json.label
+            input.label
         );
     }
 }
 
 export type LogicalModelInfoFromServer = {
     id: Id;
-    jsonValue: string;
+    label: string;
 };
 
 export class LogicalModel implements Entity {
@@ -39,11 +37,10 @@ export class LogicalModel implements Entity {
     ) {}
 
     static fromServer(input: LogicalModelFromServer): LogicalModel {
-        const json = JSON.parse(input.jsonValue) as { label: string };
 
         return new LogicalModel(
             input.id,
-            json.label,
+            input.label,
             input.categoryId,
             DatabaseWithConfiguration.fromServer(input.database),
             input.mappings.map(Mapping.fromServer)
@@ -54,7 +51,7 @@ export class LogicalModel implements Entity {
 export type LogicalModelFromServer = {
     id: Id;
     categoryId: Id;
-    jsonValue: string;
+    label: string;
     database: DatabaseWithConfigurationFromServer;
     mappings: MappingFromServer[];
 };

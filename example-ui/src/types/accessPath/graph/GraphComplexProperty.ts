@@ -2,7 +2,7 @@ import type { Name } from "@/types/identifiers";
 import type { GraphChildProperty, GraphParentProperty } from "./compositeTypes";
 import type { Node } from "@/types/categoryGraph";
 import type { SequenceSignature } from "./SequenceSignature";
-import type { ComplexPropertyJSON } from "../JSONTypes";
+import type { ComplexPropertyFromServer } from "../serverTypes";
 
 export class GraphComplexProperty {
     name: Name;
@@ -62,12 +62,12 @@ export class GraphComplexProperty {
         return this._subpaths;
     }
 
-    toJSON(): ComplexPropertyJSON {
+    toServer(): ComplexPropertyFromServer {
         return {
-            name: this.name.toJSON(),
-            signature: this._signature.toSignature().toJSON(),
+            name: this.name.toServer(),
+            signature: this._signature.toSignature().toServer(),
             isAuxiliary: this._isAuxiliary,
-            subpaths: this._subpaths.map(subpath => subpath.toJSON())
+            subpaths: this._subpaths.map(subpath => subpath.toServer())
         };
     }
 }

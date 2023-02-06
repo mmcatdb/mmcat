@@ -1,6 +1,6 @@
 import type { Node } from "@/types/categoryGraph";
 import type { StaticName } from "@/types/identifiers";
-import type { RootPropertyJSON } from "../JSONTypes";
+import type { RootPropertyFromServer } from "../serverTypes";
 import type { GraphChildProperty } from "./compositeTypes";
 import { SequenceSignature } from "./SequenceSignature";
 
@@ -49,12 +49,12 @@ export class GraphRootProperty {
         return this._subpaths;
     }
 
-    toJSON(): RootPropertyJSON {
+    toServer(): RootPropertyFromServer {
         return {
-            name: this.name.toJSON(),
-            signature: this._signature.toSignature().toJSON(),
+            name: this.name.toServer(),
+            signature: this._signature.toSignature().toServer(),
             isAuxiliary: true,
-            subpaths: this._subpaths.map(subpath => subpath.toJSON())
+            subpaths: this._subpaths.map(subpath => subpath.toServer())
         };
     }
 }

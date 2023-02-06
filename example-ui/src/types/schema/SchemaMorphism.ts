@@ -1,12 +1,12 @@
 import type { Iri } from "@/types/integration/";
 import type { Id } from "../id";
-import { Key, Signature, type KeyJSON, type SignatureFromServer } from "../identifiers";
+import { Key, Signature, type KeyFromServer, type SignatureFromServer } from "../identifiers";
 
 export type SchemaMorphismFromServer = {
     signature: SignatureFromServer;
     label?: string;
-    domKey: KeyJSON;
-    codKey: KeyJSON;
+    domKey: KeyFromServer;
+    codKey: KeyFromServer;
     min: Min;
     max: Max;
     iri?: Iri;
@@ -107,11 +107,11 @@ export class SchemaMorphism {
         this.label = label;
     }
 
-    toJSON(): SchemaMorphismFromServer {
+    toServer(): SchemaMorphismFromServer {
         return {
-            signature: this.signature.toJSON(),
-            domKey: this.domKey.toJSON(),
-            codKey: this.codKey.toJSON(),
+            signature: this.signature.toServer(),
+            domKey: this.domKey.toServer(),
+            codKey: this.codKey.toServer(),
             min: this.min,
             max: this.max,
             label: this.label,

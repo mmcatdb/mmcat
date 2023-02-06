@@ -9,6 +9,7 @@ import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.util.List;
@@ -110,7 +111,7 @@ public class SchemaCategoryRepository {
                 WHERE object->'key' @> ?;
                 """);
             setId(statement, 1, categoryId);
-            statement.setString(2, mapper.writeValueAsString(key));
+            statement.setString(2, Utils.toJson(key));
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {

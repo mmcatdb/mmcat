@@ -79,7 +79,7 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
 class StatementConstructor {
 
-    private JSONObjectNode root = new JSONObjectNode();
+    private JsonObjectNode root = new JsonObjectNode();
     private Pattern arrayPattern = Pattern.compile("^([a-zA-Z0-9_-]+)\\[([0-9]+)\\]$");
 
     public String toString() {
@@ -117,7 +117,7 @@ class StatementConstructor {
         return output;
     }
 
-    private void add(JSONNode parent, List<Key> path, String value) throws Exception {
+    private void add(JsonNode parent, List<Key> path, String value) throws Exception {
         Key key = path.get(0);
 
         if (path.size() == 1) {
@@ -128,18 +128,18 @@ class StatementConstructor {
         path.remove(0);
 
         if (parent.has(key)) {
-            JSONNode child = parent.get(key);
+            JsonNode child = parent.get(key);
             add(child, path, value);
             return;
         }
 
-        JSONNode child = create(path, value);
+        JsonNode child = create(path, value);
         parent.put(key, child);
     }
 
-    private JSONNode create(List<Key> path, String value) throws Exception {
+    private JsonNode create(List<Key> path, String value) throws Exception {
         Key key = path.get(0);
-        JSONNode output = JSONNodeBase.fromKey(key);
+        JsonNode output = JsonNodeBase.fromKey(key);
 
         if (path.size() == 1) {
             output.put(key, value);
@@ -147,7 +147,7 @@ class StatementConstructor {
         else {
             path.remove(0);
     
-            JSONNode child = create(path, value);
+            JsonNode child = create(path, value);
             output.put(key, child);
         }
 
@@ -173,46 +173,46 @@ class Key {
     }
 }
 
-interface JSONNode {
+interface JsonNode {
 
     Object toObject();
 
     void put(Key key, String value) throws Exception;
 
-    void put(Key key, JSONNode child) throws Exception;
+    void put(Key key, JsonNode child) throws Exception;
 
     boolean has(Key key);
 
-    JSONNode get(Key key) throws Exception;
+    JsonNode get(Key key) throws Exception;
 
 }
 
-class JSONNodeBase {
+class JsonNodeBase {
 
-    static JSONNode fromObject(Object object) {
+    static JsonNode fromObject(Object object) {
         if (object instanceof JSONObject jsonObject)
-            return new JSONObjectNode(jsonObject);
+            return new JsonObjectNode(jsonObject);
         else if (object instanceof JSONArray jsonArray)
-            return new JSONArrayNode(jsonArray);
+            return new JsonArrayNode(jsonArray);
         else
             return null;
     }
 
-    static JSONNode fromKey(Key key) {
-        return key.isName ? new JSONObjectNode() : new JSONArrayNode();
+    static JsonNode fromKey(Key key) {
+        return key.isName ? new JsonObjectNode() : new JsonArrayNode();
     }
 
 }
 
-class JSONObjectNode implements JSONNode {
+class JsonObjectNode implements JsonNode {
 
     public final JSONObject object;
 
-    JSONObjectNode() {
+    JsonObjectNode() {
         this.object = new JSONObject();
     }
 
-    JSONObjectNode(JSONObject object) {
+    JsonObjectNode(JSONObject object) {
         this.object = object;
     }
 
@@ -224,7 +224,7 @@ class JSONObjectNode implements JSONNode {
         object.put(key.name, value);
     }
 
-    public void put(Key key, JSONNode child) throws Exception {
+    public void put(Key key, JsonNode child) throws Exception {
         object.put(key.name, child.toObject());
     }
 
@@ -232,20 +232,20 @@ class JSONObjectNode implements JSONNode {
         return object.has(key.name);
     }
 
-    public JSONNode get(Key key) throws Exception {
-        return JSONNodeBase.fromObject(object.get(key.name));
+    public JsonNode get(Key key) throws Exception {
+        return JsonNodeBase.fromObject(object.get(key.name));
     }
 }
 
-class JSONArrayNode implements JSONNode {
+class JsonArrayNode implements JsonNode {
 
     public final JSONArray array;
 
-    JSONArrayNode() {
+    JsonArrayNode() {
         this.array = new JSONArray();
     }
 
-    JSONArrayNode(JSONArray array) {
+    JsonArrayNode(JSONArray array) {
         this.array = array;
     }
 
@@ -257,7 +257,7 @@ class JSONArrayNode implements JSONNode {
         array.put(key.index, value);
     }
 
-    public void put(Key key, JSONNode child) throws Exception {
+    public void put(Key key, JsonNode child) throws Exception {
         array.put(key.index, child.toObject());
     }
 
@@ -265,7 +265,7 @@ class JSONArrayNode implements JSONNode {
         return !array.isNull(key.index);
     }
 
-    public JSONNode get(Key key) throws Exception {
-        return JSONNodeBase.fromObject(array.get(key.index));
+    public JsonNode get(Key key) throws Exception {
+        return JsonNodeBase.fromObject(array.get(key.index));
     }
 }

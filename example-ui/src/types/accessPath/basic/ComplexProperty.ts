@@ -1,7 +1,7 @@
-import { DynamicName, nameFromJSON, Signature, StaticName, type Name } from "@/types/identifiers";
+import { DynamicName, nameFromServer, Signature, StaticName, type Name } from "@/types/identifiers";
 import { IntendedStringBuilder } from "@/utils/string";
-import type { ComplexPropertyJSON } from "../JSONTypes";
-import { subpathFromJSON, type ChildProperty, type ParentProperty } from "./compositeTypes";
+import type { ComplexPropertyFromServer } from "../serverTypes";
+import { subpathFromFromServer, type ChildProperty, type ParentProperty } from "./compositeTypes";
 
 export class ComplexProperty {
     name: Name;
@@ -51,25 +51,25 @@ export class ComplexProperty {
         return builder.toString();
     }
 
-    static fromJSON(jsonObject: ComplexPropertyJSON, parent: ParentProperty): ComplexProperty {
+    static fromServer(input: ComplexPropertyFromServer, parent: ParentProperty): ComplexProperty {
         const property = new ComplexProperty(
-            nameFromJSON(jsonObject.name),
-            Signature.fromServer(jsonObject.signature),
-            jsonObject.isAuxiliary,
+            nameFromServer(input.name),
+            Signature.fromServer(input.signature),
+            input.isAuxiliary,
             parent
         );
 
-        property._subpaths = jsonObject.subpaths.map(subpath => subpathFromJSON(subpath, property));
+        property._subpaths = input.subpaths.map(subpath => subpathFromFromServer(subpath, property));
 
         return property;
     }
 
-    toJSON(): ComplexPropertyJSON {
+    toServer(): ComplexPropertyFromServer {
         return {
-            name: this.name.toJSON(),
-            signature: this._signature.toJSON(),
+            name: this.name.toServer(),
+            signature: this._signature.toServer(),
             isAuxiliary: this._isAuxiliary,
-            subpaths: this._subpaths.map(subpath => subpath.toJSON())
+            subpaths: this._subpaths.map(subpath => subpath.toServer())
         };
     }
 }

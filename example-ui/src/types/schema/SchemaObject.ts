@@ -1,17 +1,17 @@
 import { ComparableSet } from "@/utils/ComparableSet";
 import type { Iri } from "@/types/integration";
 import type { Position } from "cytoscape";
-import { Key, ObjectIds, SignatureId, type KeyJSON, type NonSignaturesType, type ObjectIdsJSON, type SignatureIdJSON } from "../identifiers";
+import { Key, ObjectIds, SignatureId, type KeyFromServer, type NonSignaturesType, type ObjectIdsFromServer, type SignatureIdFromServer } from "../identifiers";
 import { ComparablePosition, type PositionUpdate } from "./Position";
 import type { LogicalModel } from "../logicalModel";
 import type { Entity, Id } from "../id";
 
 export type SchemaObjectFromServer = {
-    key: KeyJSON;
+    key: KeyFromServer;
     label: string;
     position: Position;
-    superId: SignatureIdJSON;
-    ids?: ObjectIdsJSON;
+    superId: SignatureIdFromServer;
+    ids?: ObjectIdsFromServer;
     //databases?: string[];
     iri?: Iri;
     pimIri?: Iri;
@@ -40,8 +40,8 @@ export class SchemaObject {
         object.key = Key.fromServer(input.key);
         object.label = input.label;
         object.position = new ComparablePosition(input.position);
-        object.superId = SignatureId.fromJSON(input.superId);
-        object.ids = input.ids ? ObjectIds.fromJSON(input.ids) : undefined;
+        object.superId = SignatureId.fromServer(input.superId);
+        object.ids = input.ids ? ObjectIds.fromServer(input.ids) : undefined;
         object._isNew = false;
         object._originalPosition = new ComparablePosition(input.position);
         object.iri = input.iri;
@@ -120,13 +120,13 @@ export class SchemaObject {
     }
     */
 
-    toJSON(): SchemaObjectFromServer {
+    toServer(): SchemaObjectFromServer {
         return {
-            key: this.key.toJSON(),
+            key: this.key.toServer(),
             position: this.position,
             label: this.label,
-            ids: this.ids?.toJSON(),
-            superId: this.superId.toJSON(),
+            ids: this.ids?.toServer(),
+            superId: this.superId.toServer(),
             iri: this.iri,
             pimIri: this.pimIri
         };

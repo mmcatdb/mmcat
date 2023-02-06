@@ -1,4 +1,4 @@
-import { SignatureId, SignatureIdFactory, type SignatureIdJSON } from "./SignatureId";
+import { SignatureId, SignatureIdFactory, type SignatureIdFromServer } from "./SignatureId";
 
 export enum Type {
     Signatures = 'Signatures',
@@ -8,9 +8,9 @@ export enum Type {
 
 export type NonSignaturesType = Type.Value | Type.Generated;
 
-export type ObjectIdsJSON = {
+export type ObjectIdsFromServer = {
     type: Type;
-    signatureIds?: SignatureIdJSON[];
+    signatureIds?: SignatureIdFromServer[];
 };
 
 export class ObjectIds {
@@ -38,16 +38,16 @@ export class ObjectIds {
         return new ObjectIds(type);
     }
 
-    static fromJSON(jsonObject: ObjectIdsJSON): ObjectIds {
-        const type = jsonObject.type;
-        const signatureIds = jsonObject.signatureIds?.map(SignatureId.fromJSON);
+    static fromServer(input: ObjectIdsFromServer): ObjectIds {
+        const type = input.type;
+        const signatureIds = input.signatureIds?.map(SignatureId.fromServer);
         return new ObjectIds(type, signatureIds);
     }
 
-    toJSON(): ObjectIdsJSON {
+    toServer(): ObjectIdsFromServer {
         return {
             type: this.type,
-            signatureIds: this.type === Type.Signatures ? this._signatureIds.map(id => id.toJSON()) : undefined
+            signatureIds: this.type === Type.Signatures ? this._signatureIds.map(id => id.toServer()) : undefined
         };
     }
 

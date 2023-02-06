@@ -1,16 +1,16 @@
 import { Signature, type SignatureFromServer } from "./Signature";
 
-export type NameJSON = StaticNameJSON | DynamicNameJSON;
+export type NameFromServer = StaticNameFromServer | DynamicNameFromServer;
 
-export function nameFromJSON(jsonObject: NameJSON): Name {
-    return 'signature' in  jsonObject
-        ? DynamicName.fromJSON(jsonObject)
-        : StaticName.fromJSON(jsonObject);
+export function nameFromServer(input: NameFromServer): Name {
+    return 'signature' in  input
+        ? DynamicName.fromServer(input)
+        : StaticName.fromServer(input);
 }
 
 export type Name = StaticName | DynamicName;
 
-export type StaticNameJSON = { value: string, type: 'STATIC' | 'ANONYMOUS' };
+export type StaticNameFromServer = { value: string, type: 'STATIC' | 'ANONYMOUS' };
 
 export class StaticName {
     readonly value: string;
@@ -53,11 +53,11 @@ export class StaticName {
         return this._isAnonymous ? '_' : this.value;
     }
 
-    static fromJSON(jsonObject: StaticNameJSON): StaticName {
-        return new StaticName(jsonObject.value, jsonObject.type === 'ANONYMOUS');
+    static fromServer(input: StaticNameFromServer): StaticName {
+        return new StaticName(input.value, input.type === 'ANONYMOUS');
     }
 
-    toJSON(): StaticNameJSON {
+    toServer(): StaticNameFromServer {
         return {
             value: this.value,
             type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC'
@@ -65,7 +65,7 @@ export class StaticName {
     }
 }
 
-export type DynamicNameJSON = { signature: SignatureFromServer };
+export type DynamicNameFromServer = { signature: SignatureFromServer };
 
 export class DynamicName {
     readonly signature: Signature;
@@ -94,13 +94,13 @@ export class DynamicName {
         return `<${this.signature.toString()}>`;
     }
 
-    static fromJSON(jsonObject: DynamicNameJSON): DynamicName {
-        return new DynamicName(Signature.fromServer(jsonObject.signature));
+    static fromServer(input: DynamicNameFromServer): DynamicName {
+        return new DynamicName(Signature.fromServer(input.signature));
     }
 
-    toJSON(): DynamicNameJSON {
+    toServer(): DynamicNameFromServer {
         return {
-            signature: this.signature.toJSON()
+            signature: this.signature.toServer()
         };
     }
 }

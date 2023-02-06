@@ -6,6 +6,7 @@ import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.util.List;
@@ -73,7 +74,7 @@ public class JobRepository {
             setId(statement, 1, job.categoryId);
             setId(statement, 2, job.logicalModelId);
             setId(statement, 3, job.dataSourceId);
-            statement.setString(4, jobJsonWriter.writeValueAsString(job));
+            statement.setString(4, Utils.toJson(job));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -92,7 +93,7 @@ public class JobRepository {
                 SET json_value = ?::jsonb
                 WHERE id = ?;
                 """);
-            statement.setString(1, jobJsonWriter.writeValueAsString(job));
+            statement.setString(1, Utils.toJson(job));
             setId(statement, 2, job.id);
 
             int affectedRows = statement.executeUpdate();

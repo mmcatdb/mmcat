@@ -56,10 +56,10 @@ async function createMapping(primaryKey: SignatureId) {
 
     const result = await API.mappings.createNewMapping({}, {
         logicalModelId: selectedLogicalModel.value.id,
-        rootObject: accessPath.value.node.schemaObject.toJSON(),
-        primaryKey: new SignatureId(selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures).toJSON(),
+        rootObject: accessPath.value.node.schemaObject.toServer(),
+        primaryKey: new SignatureId(selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures).toServer(),
         kindName: accessPath.value.name.toString(),
-        accessPath: accessPath.value.toJSON()
+        accessPath: accessPath.value.toServer()
     });
     if (result.status)
         router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });

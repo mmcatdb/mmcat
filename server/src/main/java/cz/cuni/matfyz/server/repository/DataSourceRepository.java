@@ -3,12 +3,10 @@ package cz.cuni.matfyz.server.repository;
 import static cz.cuni.matfyz.server.repository.utils.Utils.getId;
 import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.datasource.DataSource;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.cuni.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.util.List;
@@ -21,8 +19,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DataSourceRepository {
-
-    private static final ObjectWriter dataSourceJsonWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;
@@ -87,7 +83,7 @@ public class DataSourceRepository {
     private DataSource create(DataSource dataSource) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO data_source (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, dataSourceJsonWriter.writeValueAsString(dataSource));
+            statement.setString(1, Utils.toJson(dataSource));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -104,7 +100,7 @@ public class DataSourceRepository {
     private DataSource update(DataSource dataSource) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("UPDATE data_source SET json_value = ?::jsonb WHERE id = ?;");
-            statement.setString(1, dataSourceJsonWriter.writeValueAsString(dataSource));
+            statement.setString(1, Utils.toJson(dataSource));
             setId(statement, 2, dataSource.id);
 
             int affectedRows = statement.executeUpdate();

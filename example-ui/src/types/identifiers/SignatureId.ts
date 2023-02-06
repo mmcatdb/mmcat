@@ -1,6 +1,6 @@
 import { Signature, type SignatureFromServer } from "./Signature";
 
-export type SignatureIdJSON = SignatureFromServer[];
+export type SignatureIdFromServer = SignatureFromServer[];
 
 export class SignatureId {
     _signatures: Signature[]; // TODO make set?
@@ -11,11 +11,6 @@ export class SignatureId {
 
     get signatures(): Signature[] {
         return this._signatures;
-    }
-
-    static fromJSON(jsonObject: SignatureIdJSON): SignatureId {
-        const signatures = jsonObject.map(signature => Signature.fromServer(signature));
-        return new SignatureId(signatures);
     }
 
     static fromServer(input: SignatureIdFromServer): SignatureId {
@@ -50,12 +45,10 @@ export class SignatureId {
         return new SignatureId(union);
     }
 
-    toJSON(): SignatureIdJSON {
-        return this._signatures.map(signature => signature.toJSON());
+    toServer(): SignatureIdFromServer {
+        return this._signatures.map(signature => signature.toServer());
     }
 }
-
-export type SignatureIdFromServer = SignatureFromServer[];
 
 export class SignatureIdFactory {
     _signatures = [] as Signature[];

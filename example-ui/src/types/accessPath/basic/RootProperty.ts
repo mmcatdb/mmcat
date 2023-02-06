@@ -1,7 +1,7 @@
 import { IntendedStringBuilder } from "@/utils/string";
 import { Signature, StaticName } from "@/types/identifiers";
-import { subpathFromJSON, type ChildProperty } from "./compositeTypes";
-import type { ComplexPropertyJSON, RootPropertyJSON } from "../JSONTypes";
+import { subpathFromFromServer, type ChildProperty } from "./compositeTypes";
+import type { RootPropertyFromServer } from "../serverTypes";
 
 export class RootProperty {
     name: StaticName;
@@ -25,10 +25,10 @@ export class RootProperty {
         return this._subpaths;
     }
 
-    static fromJSON(jsonObject: RootPropertyJSON): RootProperty {
-        const property = new RootProperty(StaticName.fromJSON(jsonObject.name));
+    static fromServer(input: RootPropertyFromServer): RootProperty {
+        const property = new RootProperty(StaticName.fromServer(input.name));
 
-        property._subpaths = jsonObject.subpaths.map(subpath => subpathFromJSON(subpath, property));
+        property._subpaths = input.subpaths.map(subpath => subpathFromFromServer(subpath, property));
 
         return property;
     }
@@ -47,12 +47,12 @@ export class RootProperty {
         return builder.toString();
     }
 
-    toJSON(): ComplexPropertyJSON {
+    toServer(): RootPropertyFromServer {
         return {
-            name: this.name.toJSON(),
-            signature: this._signature.toJSON(),
+            name: this.name.toServer(),
+            signature: this._signature.toServer(),
             isAuxiliary: true,
-            subpaths: this._subpaths.map(subpath => subpath.toJSON())
+            subpaths: this._subpaths.map(subpath => subpath.toServer())
         };
     }
 }
