@@ -6,6 +6,7 @@ import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -37,7 +39,7 @@ public class MappingRepository {
         Id id,
         Id logicalModelId,
         Id categoryId,
-        ParsedJsonValue parsedJsonValue
+        MappingJsonValue parsedJsonValue
     ) {
         public MappingWrapper toMapping(SchemaObjectWrapper rootObject) {
             return new MappingWrapper(
@@ -46,19 +48,24 @@ public class MappingRepository {
                 rootObject,
                 parsedJsonValue.primaryKey,
                 parsedJsonValue.kindName,
-                parsedJsonValue.accessPath
+                parsedJsonValue.accessPath,
+                parsedJsonValue.version,
+                parsedJsonValue.categoryVersion
             );
         }
     }
 
-    private record ParsedJsonValue(
+    public record MappingJsonValue(
         Key rootObjectKey,
         Signature[] primaryKey,
         String kindName,
-        ComplexProperty accessPath
+        ComplexProperty accessPath,
+        Version version,
+        Version categoryVersion
     ) {}
 
-    private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(ParsedJsonValue.class);
+    private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(MappingJsonValue.class);
+    private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(MappingJsonValue.class);
 
     public MappingWrapper find(Id id) {
         final RawMappingWrapper rawMapping = db.get((connection, output) -> {
@@ -78,7 +85,7 @@ public class MappingRepository {
                 String jsonValue = resultSet.getString("json_value");
                 Id logicalModelId = getId(resultSet, "logical_model_id");
                 Id categoryId = getId(resultSet, "schema_category_id");
-                final ParsedJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
+                final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
 
                 output.set(new RawMappingWrapper(id, logicalModelId, categoryId, parsedJsonValue));
             }
@@ -109,7 +116,7 @@ public class MappingRepository {
                 Id foundId = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
                 Id categoryId = getId(resultSet, "schema_category_id");
-                final ParsedJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
+                final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
 
                 output.add(new RawMappingWrapper(foundId, logicalModelId, categoryId, parsedJsonValue));
             }
@@ -161,7 +168,7 @@ public class MappingRepository {
                 Statement.RETURN_GENERATED_KEYS
             );
             setId(statement, 1, init.logicalModelId());
-            statement.setString(2, init.toJsonValue());
+            statement.setString(2, jsonValueWriter.writeValueAsString(init.toJsonValue()));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

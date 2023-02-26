@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.evolution.mapping.MappingUpdate;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
@@ -37,6 +38,12 @@ public class MappingController {
     @PostMapping("/mappings")
     public MappingInfo createNewMapping(@RequestBody MappingInit newMapping) {
         return service.createNew(newMapping);
+    }
+
+    @PostMapping("/mappings/{id}/update")
+    public MappingWrapper updateCategoryWrapper(@RequestBody MappingUpdate update) {
+        // TOOD
+        throw new UnsupportedOperationException();
     }
 
 }

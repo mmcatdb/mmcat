@@ -56,7 +56,7 @@ async function createMapping(primaryKey: SignatureId) {
 
     const result = await API.mappings.createNewMapping({}, {
         logicalModelId: selectedLogicalModel.value.id,
-        rootObject: accessPath.value.node.schemaObject.toServer(),
+        rootObjectKey: accessPath.value.node.schemaObject.key,
         primaryKey: new SignatureId(selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures).toServer(),
         kindName: accessPath.value.name.toString(),
         accessPath: accessPath.value.toServer()

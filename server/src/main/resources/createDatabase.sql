@@ -24,7 +24,7 @@ INSERT INTO schema_category (json_value)
 VALUES
     ('{
         "label": "Article example",
-        "version": "0",
+        "version": "0000000",
         "objects": [
             {"label": "Customer", "position": {"x": -99, "y": -5}, "ids": {"type": "Signatures", "signatureIds": [[[1]]]}, "key": {"value": 1}, "superId": [[1]]},
             {"label": "Id", "position": {"x": -138, "y": 94}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -75,7 +75,7 @@ VALUES
     }'),
     ('{
         "label": "Tables to document",
-        "version": "0",
+        "version": "0000000",
         "objects": [
             {"label": "customer", "position": {"x": -21, "y": 135}, "ids": {"type": "Signatures", "signatureIds": [[[4]]]}, "key": {"value": 1}, "superId": [[4]]},
             {"label": "full name", "position": {"x": -94, "y": 287}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -147,7 +147,7 @@ VALUES
     }'),
     ('{
         "label": "Querying example",
-        "version": "0",
+        "version": "0000000",
         "objects": [
             {"label": "Customer", "position": {"x": 561, "y": 415}, "ids": {"type": "Signatures", "signatureIds": [[[2]]]}, "key": {"value": 1}, "superId": [[2]]},
             {"label": "Name", "position": {"x": 556, "y": 532}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -332,6 +332,8 @@ CREATE TABLE mapping (
 INSERT INTO mapping (logical_model_id, json_value)
 VALUES
     (1, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
         "rootObjectKey": {"value": 4},
         "primaryKey": [[4], [1, 3, 2]],
         "kindName": "order",
@@ -357,14 +359,24 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (2, '{"rootObjectKey": {"value": 1}, "primaryKey": [[1]], "kindName": "customer",
+    (2, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 1},
+        "primaryKey": [[1]],
+        "kindName": "customer",
         "accessPath": {
             "name": {"type": "STATIC", "value": "customer"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "id"}, "signature": [1]}
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{"rootObjectKey": {"value": 1}, "primaryKey": [[4]], "kindName": "app_customer",
+    (3, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 1},
+        "primaryKey": [[4]],
+        "kindName": "app_customer",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_customer"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "id"}, "signature": [4]},
@@ -372,7 +384,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{"rootObjectKey": {"value": 4}, "primaryKey": [[1]], "kindName": "app_contact",
+    (3, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 4},
+        "primaryKey": [[1]],
+        "kindName": "app_contact",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_contact"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "id"}, "signature": [1]},
@@ -381,7 +398,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{"rootObjectKey": {"value": 8}, "primaryKey": [[4, 7], [1, 6]], "kindName": "app_customer_contact",
+    (3, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 8},
+        "primaryKey": [[4, 7], [1, 6]],
+        "kindName": "app_customer_contact",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_customer_contact"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "customer_id"}, "signature": [4, 7]},
@@ -389,7 +411,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{"rootObjectKey": {"value": 9}, "primaryKey": [[13]], "kindName": "app_order",
+    (3, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 9},
+        "primaryKey": [[13]],
+        "kindName": "app_order",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_order"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "id"}, "signature": [13]},
@@ -402,7 +429,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{"rootObjectKey": {"value": 16}, "primaryKey": [[15]], "kindName": "app_product",
+    (3, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 16},
+        "primaryKey": [[15]],
+        "kindName": "app_product",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_product"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "id"}, "signature": [15]},
@@ -411,7 +443,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{"rootObjectKey": {"value": 20}, "primaryKey": [[13, 21], [15, 20]], "kindName": "app_order_item",
+    (3, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 20},
+        "primaryKey": [[13, 21], [15, 20]],
+        "kindName": "app_order_item",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_order_item"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "order_id"}, "signature": [13, 21]},
@@ -421,7 +458,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (4, '{"rootObjectKey": {"value": 9}, "primaryKey": [[13]], "kindName": "order",
+    (4, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 9},
+        "primaryKey": [[13]],
+        "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC", "value": "order"}, "subpaths": [
                 {
@@ -451,7 +493,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (5, '{"rootObjectKey": {"value": 10}, "primaryKey": [[11]], "kindName": "order",
+    (5, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 10},
+        "primaryKey": [[11]],
+        "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC", "value": "order"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "number"}, "signature": [11]}, {
@@ -468,7 +515,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (6, '{"rootObjectKey": {"value": 1}, "primaryKey": [[2]], "kindName": "customer",
+    (6, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 1},
+        "primaryKey": [[2]],
+        "kindName": "customer",
         "accessPath": {
             "name": {"type": "STATIC", "value": "customer"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "id"}, "signature": [2]},
@@ -477,7 +529,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (7, '{"rootObjectKey": {"value": 5}, "primaryKey": [[2, 4], [2, 5]], "kindName": "friends",
+    (7, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 5},
+        "primaryKey": [[2, 4], [2, 5]],
+        "kindName": "friends",
         "accessPath": {
             "name": {"type": "STATIC", "value": "friends"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "first_customer_id"}, "signature": [2, 4]},
@@ -485,7 +542,12 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (7, '{"rootObjectKey": {"value": 6}, "primaryKey": [[7], [8], [2, 6]], "kindName": "contact",
+    (7, '{
+        "version": "00000000",
+        "categoryVersion": "00000000",
+        "rootObjectKey": {"value": 6},
+        "primaryKey": [[7], [8], [2, 6]],
+        "kindName": "contact",
         "accessPath": {
             "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "key"}, "signature": [7]},

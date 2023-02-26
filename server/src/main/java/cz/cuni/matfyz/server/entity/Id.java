@@ -18,7 +18,7 @@ import org.springframework.lang.NonNull;
 public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.lang.CharSequence {
 
     @NonNull
-    public final String value;
+    private final String value;
 
     public Id(String value) {
         this.value = value != null ? value : "";

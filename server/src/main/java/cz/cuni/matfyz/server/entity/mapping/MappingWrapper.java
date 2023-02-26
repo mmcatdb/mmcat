@@ -2,6 +2,7 @@ package cz.cuni.matfyz.server.entity.mapping;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.IEntity;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
@@ -15,5 +16,7 @@ public record MappingWrapper(
     SchemaObjectWrapper rootObject,
     Signature[] primaryKey,
     String kindName,
-    ComplexProperty accessPath
+    ComplexProperty accessPath,
+    Version version,
+    Version categoryVersion
 ) implements IEntity {}

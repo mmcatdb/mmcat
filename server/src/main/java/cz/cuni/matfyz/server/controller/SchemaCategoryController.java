@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.server.controller;
 
+import cz.cuni.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
-import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 import cz.cuni.matfyz.server.service.SchemaObjectService;
@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -66,6 +65,13 @@ public class SchemaCategoryController {
         
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+
+    @PostMapping("/schema-categories/{id}/update")
+    public SchemaCategoryWrapper updateCategoryWrapper(@RequestBody SchemaCategoryUpdate update) {
+        // TOOD
+        throw new UnsupportedOperationException();
+    }
+    
 
     /*
     @PutMapping("/schema-categories/{id}")

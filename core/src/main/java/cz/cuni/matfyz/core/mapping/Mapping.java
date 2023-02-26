@@ -38,6 +38,10 @@ public class Mapping implements Comparable<Mapping> {
         this.primaryKey = primaryKey;
     }
 
+    public Mapping clone() {
+        throw new UnsupportedOperationException();
+    }
+
     public SchemaCategory category() {
         return category;
     }

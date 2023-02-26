@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.entity.schema;
 
+import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.repository.utils.Utils;
 
@@ -20,11 +21,11 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonDeserialize(using = SchemaCategoryWrapper.Deserializer.class)
 public class SchemaCategoryWrapper extends SchemaCategoryInfo {
 
-    public final String version;
+    public final Version version;
     public final SchemaObjectWrapper[] objects;
     public final SchemaMorphismWrapper[] morphisms;
 
-    private SchemaCategoryWrapper(Id id, String label, String version, SchemaObjectWrapper[] objects, SchemaMorphismWrapper[] morphisms) {
+    private SchemaCategoryWrapper(Id id, String label, Version version, SchemaObjectWrapper[] objects, SchemaMorphismWrapper[] morphisms) {
         super(id, label);
         this.version = version;
         this.objects = objects;
@@ -37,7 +38,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         return new SchemaCategoryWrapper(
             null,
             label,
-            "0",
+            Version.generateInitial(),
             new SchemaObjectWrapper[] {},
             new SchemaMorphismWrapper[] {}
         );
@@ -68,6 +69,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         }
 
         private static final ObjectReader idJsonReader = new ObjectMapper().readerFor(Id.class);
+        private static final ObjectReader versionJsonReader = new ObjectMapper().readerFor(Version.class);
         private static final ObjectReader objectsJsonReader = new ObjectMapper().readerFor(SchemaObjectWrapper[].class);
         private static final ObjectReader morphismsJsonReader = new ObjectMapper().readerFor(SchemaMorphismWrapper[].class);
     
@@ -79,7 +81,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
             final Id id = idFromContext != null ? idFromContext : idJsonReader.readValue(node.get("id"));
             
             final var label = node.get("label").asText();
-            final var version = node.get("label").asText();
+            final Version version = versionJsonReader.readValue(node.get("version"));
 
             final SchemaObjectWrapper[] objects = objectsJsonReader.readValue(node.get("objects"));
             final SchemaMorphismWrapper[] morphisms = morphismsJsonReader.readValue(node.get("morphisms"));

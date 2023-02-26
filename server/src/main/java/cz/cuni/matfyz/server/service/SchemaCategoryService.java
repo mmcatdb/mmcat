@@ -3,7 +3,6 @@ package cz.cuni.matfyz.server.service;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
-import cz.cuni.matfyz.server.entity.schema.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismUpdateFixed;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;

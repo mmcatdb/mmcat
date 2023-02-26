@@ -1,7 +1,7 @@
 import { RootProperty } from "@/types/accessPath/basic";
 import type { RootPropertyFromServer } from "./accessPath/serverTypes";
 import type { Entity, Id } from "./id";
-import { SignatureId, type SignatureIdFromServer } from "./identifiers";
+import { Key, SignatureId, type SignatureIdFromServer } from "./identifiers";
 import { SchemaObject, type SchemaObjectFromServer } from "./schema";
 
 export type MappingFromServer = {
@@ -35,7 +35,9 @@ export class Mapping implements Entity {
     }
 }
 
-export type MappingInit = Omit<MappingFromServer, 'id'>;
+export type MappingInit = Omit<MappingFromServer, 'id' | 'rootObject'> & {
+    rootObjectKey: Key;
+};
 
 export type MappingInfoFromServer = {
     id: Id;

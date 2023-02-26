@@ -79,4 +79,8 @@ public class SchemaCategory implements Serializable, Category {
         return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min, max);
     }
 
+    public SchemaCategory clone() {
+        throw new UnsupportedOperationException();
+    }
+
 }

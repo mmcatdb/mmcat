@@ -36,7 +36,7 @@ public abstract class Utils {
                 return;
             }
 
-            statement.setInt(position, Integer.parseInt(id.value));
+            statement.setInt(position, Integer.parseInt(id.toString()));
         }
         catch (NumberFormatException exception) {
             statement.setInt(position, 0);
