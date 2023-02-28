@@ -19,8 +19,9 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
     private final String value;
     private final int integerValue;
 
-    private static int stringSize = 8;
-    private static String stringFormat = "%0" + stringSize + "d";
+    //private static int stringSize = 8;
+    //private static String stringFormat = "%0" + stringSize + "d";
+    private static String stringFormat = "%d";
 
     private Version(int integerValue) {
         this.value = String.format(stringFormat, integerValue);
@@ -28,8 +29,8 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
     }
 
     public Version(String value) {
-        if (value.length() != stringSize)
-            throw new NumberFormatException("Value: " + value + " is not valid version.");
+        //if (value.length() != stringSize)
+        //    throw new NumberFormatException("Value: " + value + " is not valid version.");
 
         this.integerValue = Integer.parseInt(value);
         if (this.integerValue < 0)

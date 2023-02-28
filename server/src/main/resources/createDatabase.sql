@@ -24,7 +24,7 @@ INSERT INTO schema_category (json_value)
 VALUES
     ('{
         "label": "Article example",
-        "version": "00000001",
+        "version": "1",
         "objects": [
             {"label": "Customer", "position": {"x": -99, "y": -5}, "ids": {"type": "Signatures", "signatureIds": [[[1]]]}, "key": {"value": 1}, "superId": [[1]]},
             {"label": "Id", "position": {"x": -138, "y": 94}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -75,7 +75,7 @@ VALUES
     }'),
     ('{
         "label": "Tables to document",
-        "version": "00000000",
+        "version": "0",
         "objects": [
             {"label": "customer", "position": {"x": -21, "y": 135}, "ids": {"type": "Signatures", "signatureIds": [[[4]]]}, "key": {"value": 1}, "superId": [[4]]},
             {"label": "full name", "position": {"x": -94, "y": 287}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -147,7 +147,7 @@ VALUES
     }'),
     ('{
         "label": "Querying example",
-        "version": "00000000",
+        "version": "0",
         "objects": [
             {"label": "Customer", "position": {"x": 561, "y": 415}, "ids": {"type": "Signatures", "signatureIds": [[[2]]]}, "key": {"value": 1}, "superId": [[2]]},
             {"label": "Name", "position": {"x": 556, "y": 532}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -332,8 +332,8 @@ CREATE TABLE mapping (
 INSERT INTO mapping (logical_model_id, json_value)
 VALUES
     (1, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 4},
         "primaryKey": [[4], [1, 3, 2]],
         "kindName": "order",
@@ -360,8 +360,8 @@ VALUES
         }}'
     ),
     (2, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 1},
         "primaryKey": [[1]],
         "kindName": "customer",
@@ -372,8 +372,8 @@ VALUES
         }}'
     ),
     (3, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 1},
         "primaryKey": [[4]],
         "kindName": "app_customer",
@@ -385,8 +385,8 @@ VALUES
         }}'
     ),
     (3, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 4},
         "primaryKey": [[1]],
         "kindName": "app_contact",
@@ -399,8 +399,8 @@ VALUES
         }}'
     ),
     (3, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 8},
         "primaryKey": [[4, 7], [1, 6]],
         "kindName": "app_customer_contact",
@@ -412,8 +412,8 @@ VALUES
         }}'
     ),
     (3, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 9},
         "primaryKey": [[13]],
         "kindName": "app_order",
@@ -430,8 +430,8 @@ VALUES
         }}'
     ),
     (3, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 16},
         "primaryKey": [[15]],
         "kindName": "app_product",
@@ -444,8 +444,8 @@ VALUES
         }}'
     ),
     (3, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 20},
         "primaryKey": [[13, 21], [15, 20]],
         "kindName": "app_order_item",
@@ -459,8 +459,8 @@ VALUES
         }}'
     ),
     (4, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 9},
         "primaryKey": [[13]],
         "kindName": "order",
@@ -494,8 +494,8 @@ VALUES
         }}'
     ),
     (5, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 10},
         "primaryKey": [[11]],
         "kindName": "order",
@@ -516,8 +516,8 @@ VALUES
         }}'
     ),
     (6, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 1},
         "primaryKey": [[2]],
         "kindName": "customer",
@@ -530,8 +530,8 @@ VALUES
         }}'
     ),
     (7, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 5},
         "primaryKey": [[2, 4], [2, 5]],
         "kindName": "friends",
@@ -543,8 +543,8 @@ VALUES
         }}'
     ),
     (7, '{
-        "version": "00000000",
-        "categoryVersion": "00000000",
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 6},
         "primaryKey": [[7], [8], [2, 6]],
         "kindName": "contact",
