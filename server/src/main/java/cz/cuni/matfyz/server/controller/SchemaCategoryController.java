@@ -71,18 +71,6 @@ public class SchemaCategoryController {
 
         return updatedWrapper;
     }
-    
-
-    /*
-    @PutMapping("/schema-categories/{id}")
-    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaCategoryUpdate update) {
-        SchemaCategoryWrapper result = service.update(id, update);
-        if (result != null)
-            return result;
-
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-    }
-    */
 
     /*
     @PutMapping("/schema-categories/{id}/positions")

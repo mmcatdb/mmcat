@@ -156,7 +156,7 @@ class ServerApplicationTests {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper) {
-        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId);
+        var logicalModel = logicalModelService.find(mappingWrapper.logicalModelId());
         var categoryWrapper = categoryService.find(logicalModel.categoryId);
 
         var mapping = new MappingBuilder()

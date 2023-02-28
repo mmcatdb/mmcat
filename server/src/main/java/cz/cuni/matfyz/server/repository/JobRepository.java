@@ -11,8 +11,6 @@ import cz.cuni.matfyz.server.repository.utils.Utils;
 import java.sql.Statement;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -21,8 +19,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class JobRepository {
-
-    private static final ObjectWriter jobJsonWriter = new ObjectMapper().writer();
 
     @Autowired
     private DatabaseWrapper db;

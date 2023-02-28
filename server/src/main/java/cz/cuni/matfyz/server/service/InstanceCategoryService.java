@@ -32,7 +32,6 @@ public class InstanceCategoryService {
         return category != null ? category.getObject(key) : null;
     }
 
-    // TODO what about empty signatures?
     public InstanceMorphism findMorphism(HttpSession session, Id categoryId, Signature signature) {
         var store = UserStore.fromSession(session);
         var category = store.getCategory(categoryId);
