@@ -4,31 +4,15 @@ import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.identification.Identified;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.Set;
-import java.util.TreeSet;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * @author pavel.koupil, jachym.bartik
  */
-@JsonSerialize(using = SchemaMorphism.Serializer.class)
-@JsonDeserialize(using = SchemaMorphism.Deserializer.class)
-public class SchemaMorphism implements Serializable, Morphism, Identified<Signature> {
+public class SchemaMorphism implements Morphism, Identified<Signature> {
     
     private Signature signature;
+    public String label;
     private SchemaObject dom;
     private SchemaObject cod;
     private Min min;
@@ -98,6 +82,10 @@ public class SchemaMorphism implements Serializable, Morphism, Identified<Signat
         return max;
     }
 
+    public Set<Tag> tags() {
+        return tags;
+    }
+
     public boolean isArray() {
         return max == Max.STAR;
     }
@@ -123,90 +111,20 @@ public class SchemaMorphism implements Serializable, Morphism, Identified<Signat
 
     public static class Builder {
 
-        public SchemaMorphism fromArguments(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max) {
+        public SchemaMorphism fromArguments(Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, String label) {
             var morphism = new SchemaMorphism(dom, cod);
             morphism.signature = signature;
             morphism.min = min;
             morphism.max = max;
+            morphism.label = label;
+
             return morphism;
         }
 
         public SchemaMorphism fromDual(SchemaMorphism dualMorphism, Min min, Max max) {
             var dom = dualMorphism.cod;
             var cod = dualMorphism.dom;
-            return fromArguments(dualMorphism.signature.dual(), dom, cod, min, max);
-        }
-
-    }
-
-    public static class Serializer extends StdSerializer<SchemaMorphism> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<SchemaMorphism> t) {
-            super(t);
-        }
-
-        @Override
-        public void serialize(SchemaMorphism morphism, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-            generator.writePOJOField("signature", morphism.signature);
-            generator.writePOJOField("dom", morphism.dom.identifier());
-            generator.writePOJOField("cod", morphism.cod.identifier());
-            generator.writeStringField("min", morphism.min.name());
-            generator.writeStringField("max", morphism.max.name());
-            generator.writeStringField("iri", morphism.iri);
-            generator.writeStringField("pimIri", morphism.pimIri);
-            generator.writeArrayFieldStart("tags");
-            for (final var tag : morphism.tags)
-                generator.writeString(tag.name());
-            generator.writeEndArray();
-            generator.writeEndObject();
-        }
-
-    }
-
-    public static class Deserializer extends StdDeserializer<SchemaMorphism> {
-
-        public Deserializer() {
-            this(null);
-        }
-    
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
-        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
-    
-        @Override
-        public SchemaMorphism deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final Key domKey = keyJsonReader.readValue(node.get("dom"));
-            final Key codKey = keyJsonReader.readValue(node.get("cod"));
-
-            final SchemaCategory category = (SchemaCategory) context.getAttribute("category");
-
-            final var morphism = new SchemaMorphism(category.getObject(domKey), category.getObject(codKey));
-
-            morphism.signature = signatureJsonReader.readValue(node.get("signature"));
-            morphism.min = Min.valueOf(node.get("min").asText());
-            morphism.max = Max.valueOf(node.get("max").asText());
-            morphism.iri = node.hasNonNull("iri") ? node.get("iri").asText() : "";
-            morphism.pimIri = node.hasNonNull("pimIri") ? node.get("pimIri").asText() : "";
-
-            morphism.tags = new TreeSet<>();
-            if (node.hasNonNull("tags")) {
-                final JsonNode tagsArray = node.get("tags");
-                for (final var tagNode : tagsArray) {
-                    morphism.tags.add(Tag.valueOf(tagNode.asText()));
-                }
-            }
-    
-            return morphism;
+            return fromArguments(dualMorphism.signature.dual(), dom, cod, min, max, "");
         }
 
     }

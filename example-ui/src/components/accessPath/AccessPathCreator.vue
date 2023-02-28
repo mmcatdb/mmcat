@@ -61,7 +61,7 @@ async function createMapping(primaryKey: SignatureId) {
         primaryKey: new SignatureId(selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures).toServer(),
         kindName: accessPath.value.name.toString(),
         accessPath: accessPath.value.toServer(),
-        categoryVersion: category.version
+        categoryVersion: category.value.version
     });
     if (result.status)
         router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });

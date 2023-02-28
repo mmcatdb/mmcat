@@ -40,7 +40,8 @@ public class SchemaCategoryRepository {
                     id,
                     json_value::json->>'label' as label,
                     json_value::json->>'version' as version
-                FROM schema_category;
+                FROM schema_category
+                ORDER BY id;
                 """);
 
             while (resultSet.next()) {
@@ -103,6 +104,22 @@ public class SchemaCategoryRepository {
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
                 output.set(getId(generatedKeys, "id"));
+        });
+    }
+
+    public boolean update(SchemaCategoryWrapper wrapper) {
+        return db.get((connection, output) -> {
+            var statement = connection.prepareStatement("""
+                UPDATE schema_category
+                SET json_value = ?::jsonb
+                WHERE id = ?;
+                """
+            );
+            statement.setString(1, wrapper.toJsonValue());
+            setId(statement, 2, wrapper.id);
+
+            int affectedRows = statement.executeUpdate();
+            output.set(affectedRows != 0);
         });
     }
 

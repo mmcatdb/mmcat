@@ -3,28 +3,12 @@ package cz.cuni.matfyz.core.schema;
 import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.identification.Identified;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.Objects;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * @author pavel.koupil, jachymb.bartik
  */
-@JsonSerialize(using = SchemaObject.Serializer.class)
-@JsonDeserialize(using = SchemaObject.Deserializer.class)
-public class SchemaObject implements Serializable, CategoricalObject, Identified<Key> {
+public class SchemaObject implements CategoricalObject, Identified<Key> {
     //private static final Logger LOGGER = LoggerFactory.getLogger(SchemaObject.class);
     
     private final Key key; // Identifies the object, in the paper it's a number >= 100
@@ -102,58 +86,4 @@ public class SchemaObject implements Serializable, CategoricalObject, Identified
         return "SchemaObject TODO";
     }
     
-    public static class Serializer extends StdSerializer<SchemaObject> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<SchemaObject> t) {
-            super(t);
-        }
-
-        @Override
-        public void serialize(SchemaObject object, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-            generator.writePOJOField("key", object.key);
-            generator.writeStringField("label", object.label);
-            generator.writePOJOField("superId", object.superId);
-            generator.writePOJOField("ids", object.ids);
-            generator.writeStringField("iri", object.iri);
-            generator.writeStringField("pimIri", object.pimIri);
-            generator.writeEndObject();
-        }
-
-    }
-
-    public static class Deserializer extends StdDeserializer<SchemaObject> {
-
-        public Deserializer() {
-            this(null);
-        }
-    
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
-        private static final ObjectReader superIdJsonReader = new ObjectMapper().readerFor(SignatureId.class);
-        private static final ObjectReader idsJsonReader = new ObjectMapper().readerFor(ObjectIds.class);
-    
-        @Override
-        public SchemaObject deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final Key key = keyJsonReader.readValue(node.get("key"));
-            final var label = node.get("label").asText();
-            final SignatureId superId = superIdJsonReader.readValue(node.get("superId"));
-            final ObjectIds ids = idsJsonReader.readValue(node.get("ids"));
-            final var iri = node.hasNonNull("iri") ? node.get("iri").asText() : "";
-            final var pimIri = node.hasNonNull("pimIri") ? node.get("pimIri").asText() : "";
-
-            return new SchemaObject(key, label, superId, ids, iri, pimIri);
-        }
-
-    }
-
 }

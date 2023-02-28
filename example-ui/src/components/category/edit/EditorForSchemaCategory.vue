@@ -188,8 +188,6 @@ export default defineComponent({
                 this.setStateToDefault();
         },
         async save() {
-            /*
-            TODO update
             const updateObject = this.graph.schemaCategory.getUpdateObject();
 
             const result = await API.schemas.updateCategoryWrapper({ id: this.graph.schemaCategory.id }, updateObject);
@@ -197,7 +195,6 @@ export default defineComponent({
                 const schemaCategory = SchemaCategory.fromServer(result.data);
                 this.$emit('save', schemaCategory);
             }
-            */
         }
     }
 });

@@ -7,14 +7,19 @@ import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.identification.MapUniqueContext;
 import cz.cuni.matfyz.core.identification.UniqueContext;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 /**
  * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaCategory implements Serializable, Category {
+public class SchemaCategory implements Category {
     
+    public final String label;
+
+    public SchemaCategory(String label) {
+        this.label = label;
+    }
+
     private final UniqueContext<SchemaObject, Key> objectContext = new MapUniqueContext<>();
     private final UniqueContext<SchemaMorphism, Signature> morphismContext = new MapUniqueContext<>();
 
@@ -76,11 +81,7 @@ public class SchemaCategory implements Serializable, Category {
             max = SchemaMorphism.combineMax(max, lastMorphism.max());
         }
 
-        return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min, max);
-    }
-
-    public SchemaCategory clone() {
-        throw new UnsupportedOperationException();
+        return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min, max, "");
     }
 
 }

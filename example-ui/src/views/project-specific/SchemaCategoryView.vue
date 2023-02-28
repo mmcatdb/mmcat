@@ -8,6 +8,7 @@ import { useRoute } from 'vue-router';
 import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
 import { toQueryScalar } from '@/utils/router';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
 
 const graph = ref<Graph>();
 
@@ -31,10 +32,12 @@ async function cytoscapeCreated(newGraph: Graph) {
 }
 
 const graphDisplay = ref<InstanceType<typeof GraphDisplay>>();
+const category = useSchemaCategory();
 
 function schemaCategorySaved(schemaCategory: SchemaCategory) {
     graph.value = undefined;
     graphDisplay.value?.updateSchema(schemaCategory);
+    category.value = schemaCategory;
 }
 </script>
 

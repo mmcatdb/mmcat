@@ -5,8 +5,9 @@ import type { Entity, Id, Version } from "../id";
 import { DynamicName, Key, Signature, ObjectIds } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
-import { SchemaMorphism, type SchemaMorphismFromServer, Tag, type Max, type Min, type SchemaMorphismUpdate } from "./SchemaMorphism";
-import { SchemaObject, type SchemaObjectFromServer, type SchemaObjectUpdate } from "./SchemaObject";
+import { SchemaMorphism, type SchemaMorphismFromServer, Tag, type Max, type Min } from "./SchemaMorphism";
+import { SchemaObject, type SchemaObjectFromServer } from "./SchemaObject";
+import { SchemaCategoryEvolver, type SchemaCategoryUpdate } from "./SchemaCategoryUpdate";
 
 export type CardinalitySettings = {
     domCodMin: Min;
@@ -30,12 +31,7 @@ export class SchemaCategory implements Entity {
     morphisms: SchemaMorphism[];
     notAvailableIris = new Set as Set<Iri>;
 
-    _createdObjects = [] as SchemaObject[];
-    _createdMorphisms = [] as SchemaMorphism[];
-
-    //_objectIdProvider = new UniqueIdProvider<Id>({ function: id => parseInt(id) || 0, inversion: value => '' + value });
-    //_maxExistingObjectId: Id;
-    //_morphismIdProvider = new UniqueIdProvider<Id>({ function: id => parseInt(id) || 0, inversion: value => '' + value });
+    readonly evolver = new SchemaCategoryEvolver();
 
     _keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     _signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
@@ -48,15 +44,12 @@ export class SchemaCategory implements Entity {
         this.morphisms = morphisms;
 
         this.objects.forEach(object => {
-            //this._objectIdProvider.add(object.id);
             this._keysProvider.add(object.key);
             if (object.iri)
                 this.notAvailableIris.add(object.iri);
         });
-        //this._maxExistingObjectId = this._objectIdProvider.maxIdentifier;
 
         this.morphisms.forEach(morphism => {
-            //this._morphismIdProvider.add(morphism.id);
             this._signatureProvider.add(morphism.signature);
             if (morphism.iri)
                 this.notAvailableIris.add(morphism.iri);
@@ -83,10 +76,9 @@ export class SchemaCategory implements Entity {
 
     _createObjectWithoutCheck(label: string, ids?: ObjectIds, iri?: Iri, pimIri?: Iri): SchemaObject {
         const key = this._keysProvider.createAndAdd();
-        //const id = this._objectIdProvider.createAndAdd();
         const object = SchemaObject.createNew(key, label, ids, iri, pimIri);
         this.objects.push(object);
-        this._createdObjects.push(object);
+        this.evolver.addObject(object);
 
         return object;
     }
@@ -115,15 +107,13 @@ export class SchemaCategory implements Entity {
         const dualSignature = signature.dual();
         this._signatureProvider.add(dualSignature);
 
-        //const id = this._morphismIdProvider.createAndAdd();
         const morphism = SchemaMorphism.createNew(signature, dom.key, cod.key, cardinality.domCodMin, cardinality.domCodMax, label, tags);
         this.morphisms.push(morphism);
-        this._createdMorphisms.push(morphism);
+        this.evolver.addMorphism(morphism);
 
-        //const dualId = this._morphismIdProvider.createAndAdd();
         const dualMorphism = SchemaMorphism.createNewFromDualWithoutTags(morphism, dualSignature, cardinality.codDomMin, cardinality.codDomMax);
         this.morphisms.push(dualMorphism);
-        this._createdMorphisms.push(dualMorphism);
+        this.evolver.addMorphism(dualMorphism);
 
         morphism.dual = dualMorphism;
         dualMorphism.dual = morphism;
@@ -155,31 +145,19 @@ export class SchemaCategory implements Entity {
     }
 
     deleteObject(object: SchemaObject) {
-        this._createdObjects = this._createdObjects.filter(o => !o.equals(object));
+        this.evolver.deleteObject(object);
     }
 
     deleteMorphismWithDual(morphism: SchemaMorphism) {
-        this._createdMorphisms = this._createdMorphisms.filter(m => !m.equals(morphism) && !m.equals(morphism.dual));
+        this.evolver.deleteMorphismWithDual(morphism);
     }
 
-    /*
     getUpdateObject(): SchemaCategoryUpdate {
         return {
-            objects: this._createdObjects.map(object => ({
-                temporaryId: object.id,
-                position: object.position,
-                jsonValue: JSON.stringify(object.toJSON())
-            })),
-            morphisms: this._createdMorphisms.map(morphism => ({
-                domId: morphism.domId <= this._maxExistingObjectId ? morphism.domId : undefined,
-                codId: morphism.codId <= this._maxExistingObjectId ? morphism.codId : undefined,
-                temporaryDomId: morphism.domId > this._maxExistingObjectId ? morphism.domId : undefined,
-                temporaryCodId: morphism.codId > this._maxExistingObjectId ? morphism.codId : undefined,
-                jsonValue: JSON.stringify(morphism.toJSON())
-            }))
+            beforeVersion: this.version,
+            operations: this.evolver.generateOperations()
         };
     }
-    */
 
     suggestKey(): Key {
         return this._keysProvider.suggest();
@@ -207,11 +185,6 @@ export class SchemaCategory implements Entity {
         objects.forEach(object => object.setLogicalModel(logicalModel));
     }
 }
-
-export type SchemaCategoryUpdate = {
-    objects: SchemaObjectUpdate[];
-    morphisms: SchemaMorphismUpdate[];
-};
 
 export type SchemaCategoryFromServer = {
     id: Id;

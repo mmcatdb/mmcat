@@ -44,7 +44,7 @@ public class TestData {
     public final Signature orderToFullAddress = Signature.createBase(32);
 
     private SchemaCategory createInitialSchemaCategory() {
-        var schema = new SchemaCategory();
+        var schema = new SchemaCategory("");
 
         var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToId_user));
         var id_user = addSchemaObject(schema, id_userKey, "id_user", ObjectIds.createValue());
@@ -75,7 +75,7 @@ public class TestData {
 
     public static SchemaMorphism addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax) {
         var builder = new SchemaMorphism.Builder();
-        var morphism = builder.fromArguments(signature, dom, cod, min, max);
+        var morphism = builder.fromArguments(signature, dom, cod, min, max, "");
         var dual = builder.fromDual(morphism, dualMin, dualMax);
 
         schema.addMorphism(morphism);

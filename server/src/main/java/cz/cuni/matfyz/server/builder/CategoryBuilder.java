@@ -21,7 +21,7 @@ public class CategoryBuilder {
     }
 
     public SchemaCategory build() {
-        final var category = new SchemaCategory();
+        final var category = new SchemaCategory(categoryWrapper.label);
 
         for (final var objectWrapper : categoryWrapper.objects)
             buildObject(objectWrapper, category);
@@ -52,7 +52,8 @@ public class CategoryBuilder {
             category.getObject(wrapper.domKey()),
             category.getObject(wrapper.codKey()),
             wrapper.min(),
-            wrapper.max()
+            wrapper.max(),
+            wrapper.label()
         );
             
         category.addMorphism(morphism);

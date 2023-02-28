@@ -94,7 +94,7 @@ public class TestData {
     }
 
     public SchemaCategory createDefaultSchemaCategory() {
-        var schema = new SchemaCategory();
+        var schema = new SchemaCategory("");
         var order = buildOrder(schema);
         addArray(schema, order);
         addItems(schema, order);
@@ -107,7 +107,7 @@ public class TestData {
     }
 
     public SchemaCategory createDefaultV3SchemaCategory() {
-        var schema = new SchemaCategory();
+        var schema = new SchemaCategory("");
         var order = createSchemaObject(
             orderKey,
             "OrderV3",
@@ -372,7 +372,7 @@ public class TestData {
     
     private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax) {
         var builder = new SchemaMorphism.Builder();
-        var morphism = builder.fromArguments(signature, dom, cod, min, max);
+        var morphism = builder.fromArguments(signature, dom, cod, min, max, "");
         var dual = builder.fromDual(morphism, dualMin, dualMax);
 
         schema.addMorphism(morphism);

@@ -1,15 +1,14 @@
 package cz.cuni.matfyz.server.service;
 
+import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.cuni.matfyz.server.builder.CategoryBuilder;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.cuni.matfyz.server.entity.schema.SchemaMorphismUpdateFixed;
-import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
-import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
-import cz.cuni.matfyz.server.repository.SchemaMorphismRepository;
-import cz.cuni.matfyz.server.repository.SchemaObjectRepository;
+import cz.cuni.matfyz.server.utils.Position;
 
 import java.util.List;
 import java.util.TreeMap;
@@ -25,12 +24,6 @@ public class SchemaCategoryService {
 
     @Autowired
     private SchemaCategoryRepository repository;
-
-    @Autowired
-    private SchemaObjectRepository objectRepository;
-
-    @Autowired
-    private SchemaMorphismRepository morphismRepository;
 
     public List<SchemaCategoryInfo> findAllInfos() {
         return repository.findAllInfos();
@@ -54,8 +47,37 @@ public class SchemaCategoryService {
         return repository.find(id);
     }
 
-    /*
     public SchemaCategoryWrapper update(Id id, SchemaCategoryUpdate update) {
+        final var wrapper = repository.find(id);
+        if (!update.getBeforeVersion().equals(wrapper.version))
+            return null;
+
+        final var category = new CategoryBuilder()
+            .setCategoryWrapper(wrapper)
+            .build();
+
+        final var result = update.apply(category);
+        if (!result.status)
+            return null;
+
+        final var originalPositions = new TreeMap<Key, Position>();
+        for (final var object : wrapper.objects)
+            originalPositions.put(object.key(), object.position());
+
+        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(
+            result.data,
+            id,
+            wrapper.version.generateNext(),
+            originalPositions
+        );
+
+        if (!repository.update(newWrapper))
+            return null;
+
+        return newWrapper;
+
+        
+        /*
         var temporaryIdMap = new TreeMap<Integer, Id>();
         for (var object : update.objects()) {
             var generatedObjectId = objectRepository.add(object, id);
@@ -77,6 +99,6 @@ public class SchemaCategoryService {
         }
 
         return find(id);
+         */
     }
-    */
 }

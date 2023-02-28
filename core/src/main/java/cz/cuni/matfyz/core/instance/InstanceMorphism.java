@@ -4,7 +4,6 @@ import cz.cuni.matfyz.core.category.Morphism;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceMorphism implements Serializable, Comparable<InstanceMorphism>, Morphism {
+public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingRow.class);
 

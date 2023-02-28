@@ -37,7 +37,7 @@ public class TestData {
     public final Signature orderToU_id = userToOrder.dual().concatenate(userToU_id);
 
     public SchemaCategory createInitialSchemaCategory() {
-        var schema = new SchemaCategory();
+        var schema = new SchemaCategory("");
 
         var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToU_id));
         var u_id = addSchemaObject(schema, u_idKey, "u_id", ObjectIds.createValue());
@@ -61,7 +61,7 @@ public class TestData {
 
     public static SchemaMorphism addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax) {
         var builder = new SchemaMorphism.Builder();
-        var morphism = builder.fromArguments(signature, dom, cod, min, max);
+        var morphism = builder.fromArguments(signature, dom, cod, min, max, "");
         var dual = builder.fromDual(morphism, dualMin, dualMax);
 
         schema.addMorphism(morphism);

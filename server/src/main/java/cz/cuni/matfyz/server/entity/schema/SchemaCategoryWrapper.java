@@ -1,10 +1,14 @@
 package cz.cuni.matfyz.server.entity.schema;
 
+import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.repository.utils.Utils;
+import cz.cuni.matfyz.server.utils.Position;
 
 import java.io.IOException;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,6 +43,22 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
             Version.generateInitial(),
             new SchemaObjectWrapper[] {},
             new SchemaMorphismWrapper[] {}
+        );
+    }
+
+    public static SchemaCategoryWrapper fromSchemaCategory(SchemaCategory category, Id id, Version version, Map<Key, Position> positions) {
+        final var morphisms = category.allMorphisms().stream().map(SchemaMorphismWrapper::fromSchemaMorphism).toArray(SchemaMorphismWrapper[]::new);
+        final var objects = category.allObjects().stream().map(object -> SchemaObjectWrapper.fromSchemaObject(
+            object,
+            positions.getOrDefault(object.key(), new Position(0, 0))
+        )).toArray(SchemaObjectWrapper[]::new);
+
+        return new SchemaCategoryWrapper(
+            id,
+            category.label,
+            version,
+            objects,
+            morphisms
         );
     }
 

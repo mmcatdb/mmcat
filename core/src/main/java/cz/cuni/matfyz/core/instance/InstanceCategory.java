@@ -8,13 +8,12 @@ import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
-import java.io.Serializable;
 import java.util.Map;
 
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceCategory implements Serializable, Category {
+public class InstanceCategory implements Category {
 
     // Evolution extension
     public final SchemaCategory schema;

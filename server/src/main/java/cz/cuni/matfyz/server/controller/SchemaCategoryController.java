@@ -6,7 +6,6 @@ import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
-import cz.cuni.matfyz.server.service.SchemaObjectService;
 import cz.cuni.matfyz.server.utils.Position;
 
 import java.util.List;
@@ -29,9 +28,6 @@ public class SchemaCategoryController {
     @Autowired
     private SchemaCategoryService service;
 
-    @Autowired
-    private SchemaObjectService objectService;
-
     @GetMapping("/schema-categories")
     public List<SchemaCategoryInfo> getAllCategoryInfos() {
         return service.findAllInfos();
@@ -40,36 +36,40 @@ public class SchemaCategoryController {
     @PostMapping("/schema-categories")
     public SchemaCategoryInfo createNewSchema(@RequestBody SchemaCategoryInit init) {
         var newInfo = service.createNewInfo(init);
-        if (newInfo != null)
-            return newInfo;
+        if (newInfo == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        return newInfo;
     }
 
     @GetMapping("/schema-categories/{id}/info")
     public SchemaCategoryInfo getCategoryInfo(@PathVariable Id id) {
         SchemaCategoryInfo schema = service.findInfo(id);
 
-        if (schema != null)
-            return schema;
+        if (schema == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return schema;
     }
 
     @GetMapping("/schema-categories/{id}")
     public SchemaCategoryWrapper getCategoryWrapper(@PathVariable Id id) {
         SchemaCategoryWrapper schema = service.find(id);
 
-        if (schema != null)
-            return schema;
+        if (schema == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return schema;
     }
 
     @PostMapping("/schema-categories/{id}/update")
-    public SchemaCategoryWrapper updateCategoryWrapper(@RequestBody SchemaCategoryUpdate update) {
-        // TOOD
-        throw new UnsupportedOperationException();
+    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaCategoryUpdate update) {
+        SchemaCategoryWrapper updatedWrapper = service.update(id, update);
+
+        if (updatedWrapper == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+
+        return updatedWrapper;
     }
     
 

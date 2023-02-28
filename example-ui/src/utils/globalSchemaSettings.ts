@@ -14,10 +14,10 @@ export function useSchemaCategoryId(): Id {
 
 export const categoryKey: InjectionKey<Ref<SchemaCategoryInfo>> = Symbol('category');
 
-export function useSchemaCategory(): SchemaCategoryInfo {
+export function useSchemaCategory(): Ref<SchemaCategoryInfo> {
     const category = inject(categoryKey);
     if (category === undefined)
         throw new Error('Schema category not injected.');
 
-    return category.value;
+    return category;
 }

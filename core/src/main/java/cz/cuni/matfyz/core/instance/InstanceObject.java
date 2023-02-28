@@ -7,7 +7,6 @@ import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SignatureId;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +18,7 @@ import java.util.TreeSet;
  * Each object from instance category is modeled as a set of tuples ({@link DomainRow}).
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceObject implements Serializable, CategoricalObject {
+public class InstanceObject implements CategoricalObject {
 
     public final SchemaObject schemaObject;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();

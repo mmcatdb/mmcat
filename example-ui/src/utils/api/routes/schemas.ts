@@ -15,8 +15,8 @@ const schemas = {
     getCategoryWrapper: GET<{ id: StringLike }, SchemaCategoryFromServer>(
         u => `/schema-categories/${u.id}`
     ),
-    updateCategoryWrapper: PUT<{ id: StringLike }, SchemaCategoryFromServer, SchemaCategoryUpdate>(
-        u => `/schema-categories/${u.id}`
+    updateCategoryWrapper: POST<{ id: StringLike }, SchemaCategoryFromServer, SchemaCategoryUpdate>(
+        u => `/schema-categories/${u.id}/update`
     ),
     updateCategoryPositions: PUT<{ id: StringLike }, boolean, PositionUpdate[]>(
         u => `/schema-categories/${u.id}/positions`
