@@ -24,7 +24,7 @@ INSERT INTO schema_category (json_value)
 VALUES
     ('{
         "label": "Article example",
-        "version": "00000000",
+        "version": "00000001",
         "objects": [
             {"label": "Customer", "position": {"x": -99, "y": -5}, "ids": {"type": "Signatures", "signatureIds": [[[1]]]}, "key": {"value": 1}, "superId": [[1]]},
             {"label": "Id", "position": {"x": -138, "y": 94}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},

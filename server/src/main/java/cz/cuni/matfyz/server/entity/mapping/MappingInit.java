@@ -30,8 +30,8 @@ public record MappingInit(
             primaryKey,
             kindName,
             accessPath,
-            categoryVersion,
-            version()
+            version(),
+            categoryVersion
         );
     }
 }

@@ -30,6 +30,15 @@ const category = useSchemaCategory();
             <ValueRow label="Version:">
                 <VersionDisplay :version="mapping.version" />
             </ValueRow>
+            <ValueRow
+                v-if="mapping.categoryVersion !== category.version"
+                label="Category Version:"
+            >
+                <VersionDisplay
+                    :version="mapping.categoryVersion"
+                    :error="true"
+                />
+            </ValueRow>
             <ValueRow label="Root object:">
                 {{ mapping.rootObject.label }}
             </ValueRow>

@@ -3,6 +3,7 @@ import type { Version } from '@/types/id';
 
 type VersionDisplayProps = {
     version: Version;
+    error?: boolean;
 };
 
 const props = defineProps<VersionDisplayProps>();
@@ -10,14 +11,8 @@ const props = defineProps<VersionDisplayProps>();
 
 <template>
     <span
-        class="version-display"
+        :class="{ 'text-error': props.error }"
     >
         {{ props.version }}
     </span>
 </template>
-
-<style>
-.version-display {
-
-}
-</style>
