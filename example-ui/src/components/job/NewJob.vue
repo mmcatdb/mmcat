@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { JOB_TYPES, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import type { Id } from '@/types/id';
 import { DataSource } from '@/types/dataSource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
@@ -20,7 +20,7 @@ const jobName = ref<string>('');
 const jobType = ref(JOB_TYPES[0].value);
 const fetching = ref(false);
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 onMounted(async () => {
     const logicalModelResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });

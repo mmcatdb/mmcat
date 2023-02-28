@@ -21,13 +21,11 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonDeserialize(using = SchemaCategoryWrapper.Deserializer.class)
 public class SchemaCategoryWrapper extends SchemaCategoryInfo {
 
-    public final Version version;
     public final SchemaObjectWrapper[] objects;
     public final SchemaMorphismWrapper[] morphisms;
 
     private SchemaCategoryWrapper(Id id, String label, Version version, SchemaObjectWrapper[] objects, SchemaMorphismWrapper[] morphisms) {
-        super(id, label);
-        this.version = version;
+        super(id, label, version);
         this.objects = objects;
         this.morphisms = morphisms;
     }

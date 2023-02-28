@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.entity.mapping;
 
+import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.IEntity;
 import cz.cuni.matfyz.server.entity.Id;
 
@@ -8,5 +9,7 @@ import cz.cuni.matfyz.server.entity.Id;
  */
 public record MappingInfo(
     Id id,
-    String kindName
+    String kindName,
+    Version version,
+    Version categoryVersion
 ) implements IEntity {}

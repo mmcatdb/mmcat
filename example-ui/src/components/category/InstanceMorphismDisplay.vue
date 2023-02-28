@@ -5,7 +5,7 @@ import type { SchemaObject } from '@/types/schema';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import type { Edge, Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import API from '@/utils/api';
 import { InstanceMorphism } from '@/types/instance';
 import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';
@@ -37,7 +37,7 @@ function defineColumn(signature: Signature, node: Node): Column {
     };
 }
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function fetchMorphism() {
     const result = await API.instances.getInstanceMorphism({ categoryId, signature: props.edge.schemaMorphism.signature.toString() });

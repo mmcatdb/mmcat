@@ -6,12 +6,16 @@ import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureIdDisplay from '../category/SignatureIdDisplay.vue';
+import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import VersionDisplay from '../VersionDisplay.vue';
 
 type MappingDisplayProps = {
     mapping: Mapping;
 };
 
 defineProps<MappingDisplayProps>();
+
+const category = useSchemaCategory();
 </script>
 
 <template>
@@ -22,6 +26,9 @@ defineProps<MappingDisplayProps>();
         <ValueContainer>
             <ValueRow label="Id:">
                 {{ mapping.id }}
+            </ValueRow>
+            <ValueRow label="Version:">
+                <VersionDisplay :version="mapping.version" />
             </ValueRow>
             <ValueRow label="Root object:">
                 {{ mapping.rootObject.label }}

@@ -3,13 +3,13 @@ import { ref } from 'vue';
 import { ModelView } from '@/types/model';
 import API from '@/utils/api';
 
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import ModelViewDisplay from '@/components/ModelViewDisplay.vue';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 
 const models = ref<ModelView[]>();
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function fetchModels() {
     const result = await API.models.getAllModelsInCategory({ categoryId });

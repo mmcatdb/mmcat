@@ -6,7 +6,7 @@ import API from '@/utils/api';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 import NewJob from '@/components/job/NewJob.vue';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import type { Id } from '@/types/id';
 
 const jobs = ref<Job[]>();
@@ -19,7 +19,7 @@ function deleteJob(id: Id) {
     jobs.value = jobs.value?.filter(job => job.id !== id) ?? [];
 }
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function fetchJobs() {
     const result = await API.jobs.getAllJobsInCategory({ categoryId });

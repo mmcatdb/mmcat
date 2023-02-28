@@ -142,7 +142,9 @@ public class MappingRepository {
             var statement = connection.prepareStatement("""
                 SELECT
                     mapping.id,
-                    mapping.json_value::json->>'kindName' as kindName
+                    mapping.json_value::json->>'kindName' as kindName,
+                    mapping.json_value::json->>'version' as version,
+                    mapping.json_value::json->>'categoryVersion' as categoryVersion
                 FROM mapping
                 WHERE logical_model_id = ?
                 ORDER BY id;
@@ -153,8 +155,10 @@ public class MappingRepository {
             while (resultSet.next()) {
                 Id foundId = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("kindName");
+                Version version = new Version(resultSet.getString("version"));
+                Version categoryVersion = new Version(resultSet.getString("categoryVersion"));
 
-                output.add(new MappingInfo(foundId, jsonValue));
+                output.add(new MappingInfo(foundId, jsonValue, version, categoryVersion));
             }
         });
     }

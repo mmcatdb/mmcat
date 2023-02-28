@@ -10,7 +10,7 @@ import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import { LogicalModel } from '@/types/logicalModel';
 
 cytoscape.use(fcose);
@@ -23,7 +23,7 @@ const schemaFetched = ref(false);
 const saveButtonDisabled = ref(false);
 const graph = ref<Graph>();
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 onMounted(async () => {
     const result = await API.schemas.getCategoryWrapper({ id: categoryId });

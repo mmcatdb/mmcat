@@ -5,7 +5,7 @@ import ResourceLoader from '@/components/ResourceLoader.vue';
 import { InstanceObject } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import API from '@/utils/api';
 import type { Column } from './InstanceObjectHeaderDisplay.vue';
 import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';
@@ -34,7 +34,7 @@ const emit = defineEmits([ 'object:click' ]);
 
 const fetchedInstanceObject = ref<FetchedInstanceObject>();
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function fetchObject() {
     const result = await API.instances.getInstanceObject({ categoryId, objectKey: props.node.schemaObject.key.value });

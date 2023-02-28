@@ -33,12 +33,14 @@ public class MappingService {
         return repository.findAllInfos(logicalModelId);
     }
 
-    public MappingInfo createNew(MappingInit wrapper) {
-        Id generatedId = repository.add(wrapper);
+    public MappingInfo createNew(MappingInit init) {
+        Id generatedId = repository.add(init);
 
         return generatedId == null ? null : new MappingInfo(
             generatedId,
-            wrapper.kindName()
+            init.kindName(),
+            init.version(),
+            init.categoryVersion()
         );
     }
 }

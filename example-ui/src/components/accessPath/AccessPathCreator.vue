@@ -7,7 +7,7 @@ import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategory, useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
@@ -26,7 +26,8 @@ const databaseAndRootNodeValid = computed(() => {
     return !!selectedLogicalModel.value && !!selectingRootNode.value;
 });
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
+const category = useSchemaCategory();
 
 onMounted(async () => {
     const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
@@ -59,7 +60,8 @@ async function createMapping(primaryKey: SignatureId) {
         rootObjectKey: accessPath.value.node.schemaObject.key,
         primaryKey: new SignatureId(selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures).toServer(),
         kindName: accessPath.value.name.toString(),
-        accessPath: accessPath.value.toServer()
+        accessPath: accessPath.value.toServer(),
+        categoryVersion: category.version
     });
     if (result.status)
         router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });

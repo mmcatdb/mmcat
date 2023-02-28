@@ -6,12 +6,12 @@ import type { Database } from '@/types/database';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import DatabaseDisplay from '@/components/database/DatabaseDisplay.vue';
 import { useRouter } from 'vue-router';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import type { Id } from '@/types/id';
 
 const databasesInCategory = ref<Database[]>();
 const databasesOther = ref<Database[]>();
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function fetchDatabases() {
     const [ resultInCategory, resultOther ] = await Promise.all([

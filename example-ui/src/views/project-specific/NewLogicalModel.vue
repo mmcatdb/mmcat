@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import { DatabaseWithConfiguration } from '@/types/database';
 import API from '@/utils/api';
 import { useRouter } from 'vue-router';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
@@ -20,7 +20,7 @@ onMounted(async () => {
 
 const router = useRouter();
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function createLogicalModel() {
     if (!selectedDatabase.value || !label.value)

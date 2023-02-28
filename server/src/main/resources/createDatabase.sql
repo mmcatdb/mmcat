@@ -24,7 +24,7 @@ INSERT INTO schema_category (json_value)
 VALUES
     ('{
         "label": "Article example",
-        "version": "0000000",
+        "version": "00000000",
         "objects": [
             {"label": "Customer", "position": {"x": -99, "y": -5}, "ids": {"type": "Signatures", "signatureIds": [[[1]]]}, "key": {"value": 1}, "superId": [[1]]},
             {"label": "Id", "position": {"x": -138, "y": 94}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -75,7 +75,7 @@ VALUES
     }'),
     ('{
         "label": "Tables to document",
-        "version": "0000000",
+        "version": "00000000",
         "objects": [
             {"label": "customer", "position": {"x": -21, "y": 135}, "ids": {"type": "Signatures", "signatureIds": [[[4]]]}, "key": {"value": 1}, "superId": [[4]]},
             {"label": "full name", "position": {"x": -94, "y": 287}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},
@@ -147,7 +147,7 @@ VALUES
     }'),
     ('{
         "label": "Querying example",
-        "version": "0000000",
+        "version": "00000000",
         "objects": [
             {"label": "Customer", "position": {"x": 561, "y": 415}, "ids": {"type": "Signatures", "signatureIds": [[[2]]]}, "key": {"value": 1}, "superId": [[2]]},
             {"label": "Name", "position": {"x": 556, "y": 532}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": [[]]},

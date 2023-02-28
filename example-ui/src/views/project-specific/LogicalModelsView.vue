@@ -7,7 +7,7 @@ import ResourceLoader from '@/components/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import { DatabaseInfo } from '@/types/database';
 import { useRouter } from 'vue-router';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 
 type LogicalModelDatabase = {
     logicalModel: LogicalModelInfo;
@@ -16,7 +16,7 @@ type LogicalModelDatabase = {
 
 const infos = ref<LogicalModelDatabase[]>();
 
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function fetchModels() {
     const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId });

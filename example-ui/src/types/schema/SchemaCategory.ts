@@ -1,7 +1,7 @@
 import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
-import type { Entity, Id } from "../id";
+import type { Entity, Id, Version } from "../id";
 import { DynamicName, Key, Signature, ObjectIds } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
@@ -23,9 +23,9 @@ export function compareCardinalitySettings(settings1: CardinalitySettings, setti
 }
 
 export class SchemaCategory implements Entity {
-    id: Id;
-    label: string;
-    version: string;
+    readonly id: Id;
+    readonly label: string;
+    readonly version: Version;
     objects: SchemaObject[];
     morphisms: SchemaMorphism[];
     notAvailableIris = new Set as Set<Iri>;
@@ -40,7 +40,7 @@ export class SchemaCategory implements Entity {
     _keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     _signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
 
-    private constructor(id: Id, label: string, version: string, objects: SchemaObject[], morphisms: SchemaMorphism[]) {
+    private constructor(id: Id, label: string, version: Version, objects: SchemaObject[], morphisms: SchemaMorphism[]) {
         this.id = id;
         this.label = label;
         this.version = version;
@@ -216,7 +216,7 @@ export type SchemaCategoryUpdate = {
 export type SchemaCategoryFromServer = {
     id: Id;
     label: string;
-    version: string;
+    version: Version;
     objects: SchemaObjectFromServer[];
     morphisms: SchemaMorphismFromServer[];
 };
@@ -257,18 +257,21 @@ function findObjectFromSignature(signature: Signature, objects: SchemaObject[], 
 export type SchemaCategoryInfoFromServer = {
     id: Id;
     label: string;
+    version: Version;
 };
 
 export class SchemaCategoryInfo implements Entity {
     private constructor(
         public readonly id: Id,
-        public readonly label: string
+        public readonly label: string,
+        public readonly version: Version
     ) {}
 
     static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
         return new SchemaCategoryInfo(
             input.id,
-            input.label
+            input.label,
+            input.version
         );
     }
 }

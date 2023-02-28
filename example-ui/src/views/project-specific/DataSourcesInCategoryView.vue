@@ -6,12 +6,12 @@ import type { DataSource } from '@/types/dataSource';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import { useRouter } from 'vue-router';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
 import type { Id } from '@/types/id';
 
 const dataSourcesInCategory = ref<DataSource[]>();
 const dataSourcesOther = ref<DataSource[]>();
-const categoryId = useSchemaCategory();
+const categoryId = useSchemaCategoryId();
 
 async function fetchDataSources() {
     const [ resultInCategory, resultOther ] = await Promise.all([

@@ -4,6 +4,7 @@ import static cz.cuni.matfyz.server.repository.utils.Utils.getId;
 import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
 
 import cz.cuni.matfyz.core.schema.Key;
+import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
@@ -37,14 +38,16 @@ public class SchemaCategoryRepository {
             var resultSet = statement.executeQuery("""
                 SELECT
                     id,
-                    json_value::json->>'label' as label
+                    json_value::json->>'label' as label,
+                    json_value::json->>'version' as version
                 FROM schema_category;
                 """);
 
             while (resultSet.next()) {
                 var id = getId(resultSet, "id");
                 var label = resultSet.getString("label");
-                output.add(new SchemaCategoryInfo(id, label));
+                var version = new Version(resultSet.getString("version"));
+                output.add(new SchemaCategoryInfo(id, label, version));
             }
         });
     }
@@ -54,7 +57,8 @@ public class SchemaCategoryRepository {
             var statement = connection.prepareStatement("""
                 SELECT
                     id,
-                    json_value::json->>'label' as label
+                    json_value::json->>'label' as label,
+                    json_value::json->>'version' as version
                 FROM schema_category
                 WHERE id = ?;
                 """);
@@ -63,7 +67,8 @@ public class SchemaCategoryRepository {
             
             if (resultSet.next()) {
                 var label = resultSet.getString("label");
-                output.set(new SchemaCategoryInfo(id, label));
+                var version = new Version(resultSet.getString("version"));
+                output.set(new SchemaCategoryInfo(id, label, version));
             }
         });
     }

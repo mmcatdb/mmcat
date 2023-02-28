@@ -19,6 +19,11 @@ public record MappingInit(
     ComplexProperty accessPath,
     Version categoryVersion
 ) {
+
+    public Version version() {
+        return Version.generateInitial();
+    }
+
     public MappingJsonValue toJsonValue() {
         return new MappingRepository.MappingJsonValue(
             rootObjectKey,
@@ -26,7 +31,7 @@ public record MappingInit(
             kindName,
             accessPath,
             categoryVersion,
-            Version.generateInitial()
+            version()
         );
     }
 }
