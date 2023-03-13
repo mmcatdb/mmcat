@@ -11,6 +11,7 @@ import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.ComparablePair;
 import cz.cuni.matfyz.statements.AbstractStatement;
+import cz.cuni.matfyz.transformations.exception.TransformationException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,7 +84,7 @@ public class ICAlgorithm {
             else
                 // These names are identifiers of given kind so they must be unique among all names.
                 // This quality can't be achieved by dynamic names so they aren't supported here.
-                throw new UnsupportedOperationException();
+                throw new TransformationException("Collect names.");
         }
         
         return new IdentifierStructure(output);
@@ -169,7 +170,7 @@ public class ICAlgorithm {
             if (path.getSubpathBySignature(signature).name() instanceof StaticName staticName)
                 output.put(signature, staticName.getStringName());
             else
-                throw new UnsupportedOperationException();
+                throw new TransformationException();
         }
 
         return output;

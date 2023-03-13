@@ -14,6 +14,7 @@ import cz.cuni.matfyz.core.record.SimpleArrayRecord;
 import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
 import cz.cuni.matfyz.core.utils.UniqueIdProvider;
+import cz.cuni.matfyz.transformations.exception.TransformationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -171,7 +172,7 @@ public class SuperIdsFetcher {
                 else if (childRecord.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))
                     value = dynamicName.value();
                 else
-                    throw new UnsupportedOperationException("FetchSuperIds doesn't support array values for complex records.");
+                    throw new TransformationException("FetchSuperIds doesn't support array values for complex records.");
             }
             else
                 value = parentRow.getValue(signatureInParentRow);

@@ -13,6 +13,7 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.statements.AbstractStatement;
+import cz.cuni.matfyz.transformations.exception.TransformationException;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -150,7 +151,7 @@ public class DMLAlgorithm {
             return new NameValuePair(fullName, objectRow, complexPath);
         }
 
-        throw new UnsupportedOperationException("Get name value pair");
+        throw new TransformationException("Get name value pair.");
     }
 
     private String getStringName(AccessPath objectPath, DomainRow parentRow) {
@@ -165,7 +166,7 @@ public class DMLAlgorithm {
         if (nameRowSet != null && !nameRowSet.isEmpty())
             return nameRowSet.iterator().next().getValue(Signature.createEmpty());
 
-        throw new UnsupportedOperationException("Dynamic name value not found.");
+        throw new TransformationException("Dynamic name value not found.");
     }
 
     private class NameValuePair {

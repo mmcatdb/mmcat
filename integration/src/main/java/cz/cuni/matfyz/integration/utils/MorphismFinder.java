@@ -3,6 +3,7 @@ package cz.cuni.matfyz.integration.utils;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
+import cz.cuni.matfyz.integration.exception.IntegrationException;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -33,7 +34,7 @@ public class MorphismFinder {
             .toList();
 
         if (matchingMorphisms.size() > 1)
-            throw new UnsupportedOperationException("Multiple direct morphisms found from object: " + object.key() + " with pim iri: " + pimIri + ".");
+            throw new IntegrationException("Multiple direct morphisms found from object: " + object.key() + " with pim iri: " + pimIri + ".");
         
         final var result = matchingMorphisms.size() == 1 ? matchingMorphisms.get(0) : null;
         fromDirectObjectCache.put(tuple, result);
@@ -55,7 +56,7 @@ public class MorphismFinder {
             .toList();
 
         if (matchingMorphisms.size() > 1)
-            throw new UnsupportedOperationException("Multiple direct morphisms found to object: " + object.key() + " with pim iri: " + pimIri + ".");
+            throw new IntegrationException("Multiple direct morphisms found to object: " + object.key() + " with pim iri: " + pimIri + ".");
         
         final var result = matchingMorphisms.size() == 1 ? matchingMorphisms.get(0) : null;
         toDirectObjectCache.put(tuple, result);

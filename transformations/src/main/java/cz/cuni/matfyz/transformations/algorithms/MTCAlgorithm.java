@@ -20,6 +20,7 @@ import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SignatureId;
+import cz.cuni.matfyz.transformations.exception.TransformationException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -114,7 +115,7 @@ public class MTCAlgorithm {
             }
             else {
                 LOGGER.warn("A simple record with signature {} is an array record:\n{}\n", signature, simpleRecord);
-                throw new UnsupportedOperationException("FetchSuperId doesn't support array values.");
+                throw new TransformationException("FetchSuperId doesn't support array values.");
             }
         }
         
@@ -240,6 +241,6 @@ public class MTCAlgorithm {
             return List.of(new Child(complexProperty.signature(), complexProperty));
         }
         
-        throw new UnsupportedOperationException("Process");
+        throw new TransformationException("Process");
     }
 }
