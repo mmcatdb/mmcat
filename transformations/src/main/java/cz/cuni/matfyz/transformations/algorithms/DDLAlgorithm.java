@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
@@ -13,7 +14,6 @@ import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -25,9 +25,6 @@ import java.util.TreeSet;
  */
 public class DDLAlgorithm {
     
-    public static final String PATH_SEPARATOR = "/";
-    public static final String EMPTY_NAME = StaticName.createAnonymous().getStringName();
-
     private Mapping mapping;
     private InstanceCategory category;
     private AbstractDDLWrapper wrapper;
@@ -48,7 +45,7 @@ public class DDLAlgorithm {
         
         if (!wrapper.isSchemaLess()) {
             Deque<StackElement> masterStack = new LinkedList<>();
-            addSubpathsToStack(masterStack, mapping.accessPath(), Set.of(EMPTY_NAME));
+            addSubpathsToStack(masterStack, mapping.accessPath(), Set.of(AbstractDDLWrapper.EMPTY_NAME));
 
             while (!masterStack.isEmpty())
                 processTopOfStack(masterStack);
@@ -106,9 +103,9 @@ public class DDLAlgorithm {
     }
 
     public static String concatenatePaths(String path1, String path2) {
-        return DDLAlgorithm.EMPTY_NAME.equals(path1)
+        return AbstractDDLWrapper.EMPTY_NAME.equals(path1)
             ? path2
-            : path1 + DDLAlgorithm.PATH_SEPARATOR + path2;
+            : path1 + AbstractDDLWrapper.PATH_SEPARATOR + path2;
     }
     
     private void processPath(SimpleProperty property, Set<String> names) {

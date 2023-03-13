@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.statements;
+package cz.cuni.matfyz.abstractwrappers;
 
 /**
  * @author pavel.koupil, jachym.bartik

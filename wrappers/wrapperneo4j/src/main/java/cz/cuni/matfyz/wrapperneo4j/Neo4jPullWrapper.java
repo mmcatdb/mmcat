@@ -45,15 +45,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return processNodePath(path, options);
     }
 
-    private static final StaticName fromNodeName = new StaticName("_from");
-    private static final StaticName toNodeName = new StaticName("_to");
+    private static final StaticName fromNodePropertyName = new StaticName(Neo4jControlWrapper.FROM_NODE_PROPERTY_NAME);
+    private static final StaticName toNodePropertyName = new StaticName(Neo4jControlWrapper.TO_NODE_PROPERTY_NAME);
+    private static final StaticName labelPropertyName = new StaticName(Neo4jControlWrapper.LABEL_PROPERTY_NAME);
 
     private ForestOfRecords tryProcessRelationshipPath(ComplexProperty path, PullWrapperOptions options) {
-        final var fromNode = path.getDirectSubpath(fromNodeName);
+        final var fromNode = path.getDirectSubpath(fromNodePropertyName);
         if (fromNode == null || !(fromNode instanceof ComplexProperty fromNodeSubpath))
             return null;
 
-        final var toNode = path.getDirectSubpath(toNodeName);
+        final var toNode = path.getDirectSubpath(toNodePropertyName);
         if (toNode == null || !(toNode instanceof ComplexProperty toNodeSubpath))
             return null;
 
@@ -77,10 +78,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                             final var rootRecord = new RootRecord();
                             addValuePropertiesToRecord(result.get("relationship"), path, rootRecord);
                             
-                            final var fromNodeRecord = rootRecord.addComplexRecord(fromNodeName.toRecordName(), fromNodeSubpath.signature());
+                            final var fromNodeRecord = rootRecord.addComplexRecord(fromNodePropertyName.toRecordName(), fromNodeSubpath.signature());
                             addValuePropertiesToRecord(result.get("from_node"), fromNodeSubpath, fromNodeRecord);
 
-                            final var toNodeRecord = rootRecord.addComplexRecord(toNodeName.toRecordName(), toNodeSubpath.signature());
+                            final var toNodeRecord = rootRecord.addComplexRecord(toNodePropertyName.toRecordName(), toNodeSubpath.signature());
                             addValuePropertiesToRecord(result.get("to_node"), toNodeSubpath, toNodeRecord);
 
                             return rootRecord;
@@ -121,14 +122,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     private void addValuePropertiesToRecord(Value value, ComplexProperty path, ComplexRecord complexRecord) {
         for (final AccessPath subpath : path.subpaths()) {
-            if (!(subpath instanceof SimpleProperty simpleProperty))
-                continue;
-
-            if (!(simpleProperty.name() instanceof StaticName staticName))
+            if (
+                !(subpath instanceof SimpleProperty simpleProperty)
+                || !(simpleProperty.name() instanceof StaticName staticName)
+            )
                 continue;
 
             String name = staticName.getStringName();
-            String stringValue = value.get(name).asString();
+            String stringValue = staticName.equals(labelPropertyName)
+                ? value.asNode().labels().iterator().next()
+                : value.get(name).asString();
             complexRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.signature(), stringValue);
         }
     }

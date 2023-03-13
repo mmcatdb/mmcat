@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.wrapperneo4j;
 
-import cz.cuni.matfyz.statements.AbstractStatement;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 
 /**
  * @author jachymb.bartik

@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.wrapperneo4j;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.core.utils.ComparablePair;
-import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.Set;
 

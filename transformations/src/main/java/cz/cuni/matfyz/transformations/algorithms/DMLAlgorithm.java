@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -12,7 +14,6 @@ import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.statements.AbstractStatement;
 import cz.cuni.matfyz.transformations.exception.TransformationException;
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class DMLAlgorithm {
         List<AbstractStatement> output = new ArrayList<>();
 
         for (DomainRow domainRow : domainRows) {
-            masterStack.push(new DMLStackTriple(domainRow, DDLAlgorithm.EMPTY_NAME, mapping.accessPath()));
+            masterStack.push(new DMLStackTriple(domainRow, AbstractDDLWrapper.EMPTY_NAME, mapping.accessPath()));
             output.add(buildStatement(masterStack));
         }
 
@@ -88,7 +89,7 @@ public class DMLAlgorithm {
     }
 
     private List<NameValuePair> collectNameValuePairs(ComplexProperty path, DomainRow row) {
-        return collectNameValuePairs(path, row, DDLAlgorithm.EMPTY_NAME);
+        return collectNameValuePairs(path, row, AbstractDDLWrapper.EMPTY_NAME);
     }
 
     private List<NameValuePair> collectNameValuePairs(ComplexProperty path, DomainRow row, String prefix) {

@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -10,7 +11,6 @@ import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.ComparablePair;
-import cz.cuni.matfyz.statements.AbstractStatement;
 import cz.cuni.matfyz.transformations.exception.TransformationException;
 
 import java.util.ArrayList;

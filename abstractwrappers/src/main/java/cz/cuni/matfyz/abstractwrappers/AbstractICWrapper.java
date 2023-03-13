@@ -2,7 +2,6 @@ package cz.cuni.matfyz.abstractwrappers;
 
 import cz.cuni.matfyz.core.mapping.IdentifierStructure;
 import cz.cuni.matfyz.core.utils.ComparablePair;
-import cz.cuni.matfyz.statements.AbstractStatement;
 
 import java.util.Set;
 

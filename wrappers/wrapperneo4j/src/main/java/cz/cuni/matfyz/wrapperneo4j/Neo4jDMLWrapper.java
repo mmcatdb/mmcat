@@ -1,272 +1,156 @@
 package cz.cuni.matfyz.wrapperneo4j;
 
+import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
+import cz.cuni.matfyz.abstractwrappers.exception.WrapperException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jachymb.bartik
  */
 public class Neo4jDMLWrapper implements AbstractDMLWrapper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jDMLWrapper.class);
-
+    private record PropertyValue(String name, String value) {}
+    
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
+    private String fromNodeLabel = null;
+    private List<PropertyValue> fromNodeValues = new ArrayList<>();
+    private String toNodeLabel = null;
+    private List<PropertyValue> toNodeValues = new ArrayList<>();
     
     @Override
     public void setKindName(String name) {
+        if (!nameIsValid(name))
+            throw new WrapperException("Kind name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+
         kindName = name;
     }
 
     @Override
     public void append(String name, Object value) {
-        String stringValue = value == null ? null : value.toString();
-        propertyValues.add(new PropertyValue(name, stringValue));
+        final String stringValue = value == null ? null : value.toString();
+
+        final var split = name.split(AbstractDDLWrapper.PATH_SEPARATOR);
+        if (split.length == 1) {
+            if (!nameIsValid(name))
+                throw new WrapperException("Property name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+
+            propertyValues.add(new PropertyValue(name, stringValue));
+            return;
+        }
+
+        final var propertyName = split[1];
+        if (!nameIsValid(propertyName))
+            throw new WrapperException("Property name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+
+        final boolean isFromNode = determineNodeType(split[0], name);
+
+        if (name.equals(Neo4jControlWrapper.LABEL_PROPERTY_NAME)) {
+            if (isFromNode)
+                fromNodeLabel = propertyName;
+            else
+                toNodeLabel = propertyName;
+
+            return;
+        }
+
+        final var propertyValue = new PropertyValue(propertyName, stringValue);
+
+        if (isFromNode)
+            fromNodeValues.add(propertyValue);
+        else
+            toNodeValues.add(propertyValue);
+    }
+
+    private boolean determineNodeType(String firstPart, String fullName) {
+        if (firstPart.equals(Neo4jControlWrapper.FROM_NODE_PROPERTY_NAME))
+            return true;
+        if (firstPart.equals(Neo4jControlWrapper.TO_NODE_PROPERTY_NAME))
+            return false;
+
+        throw new WrapperException("Nested property with name: " + fullName + " is not allowed.");
+    }
+
+    private boolean nameIsValid(String name) {
+        return name.matches("^[\\w.]+$");
     }
 
     @Override
     public Neo4jStatement createDMLStatement() {
-        /*
-        var constructor = new StatementConstructor();
+        if (kindName == null)
+            throw new WrapperException("Kind name is null.");
 
-        String content = "";
-        try {
-            for (var propertyValue : propertyValues)
-                constructor.addProperty(propertyValue);
+        if (fromNodeValues.isEmpty() || toNodeValues.isEmpty())
+            return processNode();
+        else
+            return processRelationship();
+    }
 
-            content = String.format("db.%s.insert(%s);", kindName, constructor.toPrettyString());
-        }
-        catch (Exception exception) {
-            LOGGER.error("Invalid MongoDB Statements resulted in a JSON error.", exception);
-        }
+    private Neo4jStatement processNode() {
+        return new Neo4jStatement(
+            createMergeForNode("", kindName, propertyValues) + ";"
+        );
+    }
 
-        final var command = new BsonDocument();
-        command.append("insert", new BsonString(kindName));
-        command.append("documents", new BsonArray(List.of(BsonDocument.parse(constructor.toString()))));
+    private Neo4jStatement processRelationship() {
+        if (fromNodeLabel == null)
+            throw new WrapperException("From node label is null");
+
+        if (toNodeLabel == null)
+            throw new WrapperException("To node label is null");
+
+        final String fromNodeMerge = createMergeForNode("from", fromNodeLabel, fromNodeValues);
+        final String toNodeMerge = createMergeForNode("to", toNodeLabel, toNodeValues);
+        final String relationshipMerge = String.format("MERGE (from)-[:%s %s]->(to)", kindName, propertiesToString(propertyValues));
+
+        return new Neo4jStatement(
+            fromNodeMerge + "\n"
+            + toNodeMerge + "\n"
+            + relationshipMerge + ";"
+        );
+    }
+
+    private static String createMergeForNode(String boundVariable, String label, List<PropertyValue> properties) {
+        return String.format("MERGE (%s:%s %s)", boundVariable, label, propertiesToString(properties));
+    }
+
+    private static String propertiesToString(List<PropertyValue> properties) {
+        final var output = new StringBuilder();
+        output.append("{");
         
-        return new MongoDBCommandStatement(content, command);
-        */
+        for (final var property : properties)
+            output
+            .append(" ")
+            .append(property.name)
+            .append(": ")
+            .append(escapeString(property.value))
+            .append(",");
+        
+        if (!properties.isEmpty()) // Remove the last comma
+            output.deleteCharAt(output.length() - 1);
+        
+        output.append(" }");
 
-        throw new UnsupportedOperationException();
+        return output.toString();
     }
     
-    /*
-    private String escapeString(String input) {
-        return "\"" + input.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
+    private static String escapeString(String input) {
+        return input == null
+            ? "null"
+            : "'" + input.replace("'", "\\'") + "'";
     }
-    */
 
     @Override
     public void clear() {
         kindName = null;
         propertyValues = new ArrayList<>();
+        fromNodeLabel = null;
+        fromNodeValues = new ArrayList<>();
+        toNodeLabel = null;
+        toNodeValues = new ArrayList<>();
     }
 
-    record PropertyValue(
-        String name,
-        String value
-    ) {}
-
-}
-
-class StatementConstructor {
-
-    private JsonObjectNode root = new JsonObjectNode();
-    private Pattern arrayPattern = Pattern.compile("^([a-zA-Z0-9_-]+)\\[([0-9]+)\\]$");
-
-    public String toString() {
-        return root.object.toString();
-    }
-
-    public String toPrettyString() throws Exception {
-        return root.object.toString(4);
-    }
-
-    void addProperty(Neo4jDMLWrapper.PropertyValue property) throws Exception {
-        List<Key> keys = createKeys(property.name());
-
-        add(root, keys, property.value());
-    }
-
-    private List<Key> createKeys(String path) {
-        String[] split = path.split("/");
-        List<Key> output = new ArrayList<>();
-
-        for (int i = 0; i < split.length; i++) {
-            Matcher arrayMatcher = arrayPattern.matcher(split[i]);
-            if (arrayMatcher.find()) {
-                String name = arrayMatcher.group(1);
-                int index = Integer.parseInt(arrayMatcher.group(2));
-
-                output.add(new Key(name));
-                output.add(new Key(index));
-            }
-            else {
-                output.add(new Key(split[i]));
-            }
-        }
-
-        return output;
-    }
-
-    private void add(JsonNode parent, List<Key> path, String value) throws Exception {
-        Key key = path.get(0);
-
-        if (path.size() == 1) {
-            parent.put(key, value);
-            return;
-        }
-
-        path.remove(0);
-
-        if (parent.has(key)) {
-            JsonNode child = parent.get(key);
-            add(child, path, value);
-            return;
-        }
-
-        JsonNode child = create(path, value);
-        parent.put(key, child);
-    }
-
-    private JsonNode create(List<Key> path, String value) throws Exception {
-        Key key = path.get(0);
-        JsonNode output = JsonNodeBase.fromKey(key);
-
-        if (path.size() == 1) {
-            output.put(key, value);
-        }
-        else {
-            path.remove(0);
-    
-            JsonNode child = create(path, value);
-            output.put(key, child);
-        }
-
-        return output;
-    }
-
-}
-
-class Key {
-    
-    boolean isName;
-    String name;
-    int index;
-
-    Key(String name) {
-        this.name = name;
-        this.isName = true;
-    }
-
-    Key(int index) {
-        this.index = index;
-        this.isName = false;
-    }
-}
-
-interface JsonNode {
-
-    Object toObject();
-
-    void put(Key key, String value) throws Exception;
-
-    void put(Key key, JsonNode child) throws Exception;
-
-    boolean has(Key key);
-
-    JsonNode get(Key key) throws Exception;
-
-}
-
-class JsonNodeBase {
-
-    static JsonNode fromObject(Object object) {
-        if (object instanceof JSONObject jsonObject)
-            return new JsonObjectNode(jsonObject);
-        else if (object instanceof JSONArray jsonArray)
-            return new JsonArrayNode(jsonArray);
-        else
-            return null;
-    }
-
-    static JsonNode fromKey(Key key) {
-        return key.isName ? new JsonObjectNode() : new JsonArrayNode();
-    }
-
-}
-
-class JsonObjectNode implements JsonNode {
-
-    public final JSONObject object;
-
-    JsonObjectNode() {
-        this.object = new JSONObject();
-    }
-
-    JsonObjectNode(JSONObject object) {
-        this.object = object;
-    }
-
-    public Object toObject() {
-        return object;
-    }
-
-    public void put(Key key, String value) throws Exception {
-        object.put(key.name, value);
-    }
-
-    public void put(Key key, JsonNode child) throws Exception {
-        object.put(key.name, child.toObject());
-    }
-
-    public boolean has(Key key) {
-        return object.has(key.name);
-    }
-
-    public JsonNode get(Key key) throws Exception {
-        return JsonNodeBase.fromObject(object.get(key.name));
-    }
-}
-
-class JsonArrayNode implements JsonNode {
-
-    public final JSONArray array;
-
-    JsonArrayNode() {
-        this.array = new JSONArray();
-    }
-
-    JsonArrayNode(JSONArray array) {
-        this.array = array;
-    }
-
-    public Object toObject() {
-        return array;
-    }
-
-    public void put(Key key, String value) throws Exception {
-        array.put(key.index, value);
-    }
-
-    public void put(Key key, JsonNode child) throws Exception {
-        array.put(key.index, child.toObject());
-    }
-
-    public boolean has(Key key) {
-        return !array.isNull(key.index);
-    }
-
-    public JsonNode get(Key key) throws Exception {
-        return JsonNodeBase.fromObject(array.get(key.index));
-    }
 }

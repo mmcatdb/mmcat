@@ -6,7 +6,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.statements.AbstractStatement;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 
 import java.util.Collection;
 

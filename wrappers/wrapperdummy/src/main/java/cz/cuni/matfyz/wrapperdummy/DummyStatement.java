@@ -1,6 +1,6 @@
 package cz.cuni.matfyz.wrapperdummy;
 
-import cz.cuni.matfyz.statements.AbstractStatement;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 
 /**
  * @author jachymb.bartik

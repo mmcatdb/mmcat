@@ -1,7 +1,5 @@
 package cz.cuni.matfyz.abstractwrappers;
 
-import cz.cuni.matfyz.statements.AbstractStatement;
-
 /**
  * @author pavel.koupil
  */

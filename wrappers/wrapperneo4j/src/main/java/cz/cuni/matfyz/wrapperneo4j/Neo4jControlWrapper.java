@@ -6,9 +6,8 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.statements.AbstractStatement;
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 
-import java.sql.SQLException;
 import java.util.Collection;
 
 import org.neo4j.driver.Query;
@@ -22,6 +21,10 @@ import org.slf4j.LoggerFactory;
 public class Neo4jControlWrapper implements AbstractControlWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jControlWrapper.class);
+
+    public static final String FROM_NODE_PROPERTY_NAME = "_from";
+    public static final String TO_NODE_PROPERTY_NAME = "_to";
+    public static final String LABEL_PROPERTY_NAME = "_label";
 
     private SessionProvider sessionProvider;
     
@@ -38,7 +41,7 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
             for (final var statement : statements) {
                 if (statement.equals(Neo4jStatement.createEmpty()))
                     continue;
-                
+
                 final var query = new Query(statement.getContent());
                 session.run(query);
             }
@@ -74,4 +77,5 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     public AbstractPathWrapper getPathWrapper() {
         return new Neo4jPathWrapper();
     }
+
 }

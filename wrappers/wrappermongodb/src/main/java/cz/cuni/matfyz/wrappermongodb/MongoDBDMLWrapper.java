@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.wrappermongodb;
 
+import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 
 import java.util.ArrayList;
@@ -97,7 +98,7 @@ class StatementConstructor {
     }
 
     private List<Key> createKeys(String path) {
-        String[] split = path.split("/");
+        String[] split = path.split(AbstractDDLWrapper.EMPTY_NAME);
         List<Key> output = new ArrayList<>();
 
         for (int i = 0; i < split.length; i++) {
