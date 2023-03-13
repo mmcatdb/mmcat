@@ -92,3 +92,12 @@ CREATE DATABASE mmcat_server_ttd OWNER mmcat_user;
 ```bash
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_ttd?sslmode=require -f src/main/resources/setupPostgresqlTTD.sql
 ```
+
+
+# TODO
+
+
+-- CREATE DATABASE mmcat_database;
+
+-- CREATE USER mmcat_user SET PLAINTEXT PASSWORD 'mmcat_password' SET PASSWORD CHANGE NOT REQUIRED SET HOME DATABASE mmcat_database
+CREATE USER mmcat_user SET PLAINTEXT PASSWORD 'mmcat_password' SET PASSWORD CHANGE NOT REQUIRED;

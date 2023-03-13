@@ -24,6 +24,7 @@ public class PostgreSQLConnectionProvider implements ConnectionProvider {
         this.settings = settings;
     }
 
+    @Override
     public Connection getConnection() {
         try {
             return DriverManager.getConnection(settings.getConnectionString());

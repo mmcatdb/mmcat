@@ -25,7 +25,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
+    public boolean addSimpleProperty(Set<String> names, boolean required) {
         names.forEach(name -> {
             String command = "\"" + name + "\" TEXT" + (required ? " NOT NULL" : "");
             properties.add(new Property(name, command));
@@ -35,7 +35,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public boolean addSimpleArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
+    public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
         names.forEach(name -> {
             String command = "\"" + name + "\" TEXT[]" + (required ? " NOT NULL" : "");
             properties.add(new Property(name, command));
@@ -45,13 +45,13 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public boolean addComplexProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
+    public boolean addComplexProperty(Set<String> names, boolean required) {
         throw new UnsupportedOperationException(); // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
         // TODO dynamic named properties?
     }
 
     @Override
-    public boolean addComplexArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException {
+    public boolean addComplexArrayProperty(Set<String> names, boolean required) {
         throw new UnsupportedOperationException(); // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
     }
 

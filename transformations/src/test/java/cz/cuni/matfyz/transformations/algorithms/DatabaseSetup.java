@@ -2,6 +2,8 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jSessionProvider;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jSettings;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLSettings;
 
@@ -118,4 +120,47 @@ abstract class DatabaseSetup {
         BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
     }
+
+    private static class Neo4j {
+        static final String HOST = Config.get("neo4j.host");
+        static final String PORT = Config.get("neo4j.port");
+        static final String DATABASE = Config.get("neo4j.database");
+        static final String USERNAME = Config.get("neo4j.username");
+        static final String PASSWORD = Config.get("neo4j.password");
+    }
+
+    static Neo4jSessionProvider createNeo4jSessionProvider() {
+        return new Neo4jSessionProvider(new Neo4jSettings(
+            Neo4j.HOST,
+            Neo4j.PORT,
+            Neo4j.DATABASE,
+            Neo4j.USERNAME,
+            Neo4j.PASSWORD
+        ));
+    }
+
+    static void executeNeo4jScript(String pathToFile) throws Exception {
+        String beforePasswordString = new StringBuilder()
+            .append("cypher-shell -f ")
+            .append(pathToFile)
+            .append(" -a bolt://")
+            .append(Neo4j.HOST)
+            .append(":")
+            .append(Neo4j.PORT)
+            .append(" -u ")
+            .append(Neo4j.USERNAME)
+            .append(" -p ")
+            .toString();
+
+        LOGGER.info("Executing: " + beforePasswordString + "********");
+
+        String commandString = beforePasswordString + Neo4j.PASSWORD;
+        Runtime runtime = Runtime.getRuntime();
+        Process process = runtime.exec(commandString);
+        process.waitFor();
+
+        BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
+    }
+
 }

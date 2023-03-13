@@ -19,6 +19,7 @@ public class MongoDBDatabaseProvider implements DatabaseProvider {
         this.settings = settings;
     }
 
+    @Override
     public MongoDatabase getDatabase() {
         if (mongoClient == null)
             mongoClient = MongoClients.create(settings.getConnectionString());

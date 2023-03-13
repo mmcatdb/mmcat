@@ -52,6 +52,12 @@ public class ComplexProperty extends AccessPath {
     public AccessPath getDirectSubpath(Signature signature) {
         return subpathsMap.get(signature);
     }
+
+    public AccessPath getDirectSubpath(Name name) {
+        final var optional = subpathsMap.values().stream().filter(subpath -> subpath.name.equals(name)).findAny();
+
+        return optional.isPresent() ? optional.get() : null;
+    }
     
     public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, List<AccessPath> subpaths) {
         super(name, signature);
@@ -161,7 +167,7 @@ public class ComplexProperty extends AccessPath {
         
         return null;
     }
-    
+
     @Override
     protected boolean hasSignature(Signature signature) {
         if (signature == null)

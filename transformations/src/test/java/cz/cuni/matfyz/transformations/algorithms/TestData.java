@@ -754,4 +754,24 @@ public class TestData {
         );
     }
 
+    public ComplexProperty path_neo4j_order() {
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
+            new SimpleProperty("customer_id", orderToId),
+            new SimpleProperty("number", orderToNumber)
+        );
+    }
+
+    public ComplexProperty path_neo4j_items() {
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
+            new SimpleProperty("quantity", itemsToQuantity),
+            ComplexProperty.create("_from", orderToItems.dual(),
+                new SimpleProperty("customer_id", orderToId)
+            ),
+            ComplexProperty.create("_to", itemsToProduct,
+                new SimpleProperty("id", productToPid),
+                new SimpleProperty("name", productToPname)
+            )
+        );
+    }
+
 }

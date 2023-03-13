@@ -1,16 +1,14 @@
-package cz.cuni.matfyz.wrappermongodb;
+package cz.cuni.matfyz.wrapperneo4j;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 
 import java.util.Set;
 
-import org.bson.BsonDocument;
-import org.bson.BsonString;
 
 /**
  * @author jachymb.bartik
  */
-public class MongoDBDDLWrapper implements AbstractDDLWrapper {
+public class Neo4jDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
     
@@ -45,7 +43,7 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public MongoDBCommandStatement createDDLStatement() {
-        return new MongoDBCommandStatement("db.createCollection(" + kindName + ");", new BsonDocument("create", new BsonString(kindName)));
+    public Neo4jStatement createDDLStatement() {
+        return Neo4jStatement.createEmpty();
     }
 }

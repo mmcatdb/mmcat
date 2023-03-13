@@ -1,0 +1,42 @@
+[
+    {
+        "quantity": "10",
+        "_from": {
+            "customer_id": "1"
+        },
+        "_to": {
+            "id": "A1",
+            "name": "Some name"
+        }
+    },
+    {
+        "quantity": "12",
+        "_from": {
+            "customer_id": "1"
+        },
+        "_to": {
+            "id": "A1",
+            "name": "Some name"
+        }
+    },
+    {
+        "quantity": "17",
+        "_from": {
+            "customer_id": "1"
+        },
+        "_to": {
+            "id": "B2",
+            "name": "Other name"
+        }
+    },
+    {
+        "quantity": "24",
+        "_from": {
+            "customer_id": "2"
+        },
+        "_to": {
+            "id": "B2",
+            "name": "Other name"
+        }
+    }
+]

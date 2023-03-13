@@ -10,3 +10,9 @@ postgresql.port=5432
 postgresql.database=mmcat_test
 postgresql.username=mmcat_user
 postgresql.password=mmcat_password
+
+neo4j.host=localhost
+neo4j.port=7687
+neo4j.database=neo4j
+neo4j.username=mmcat_user
+neo4j.password=mmcat_password
