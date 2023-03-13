@@ -19,7 +19,7 @@ public class PostgreSQLPathWrapper implements AbstractPathWrapper {
 
     @Override
     public boolean check() {
-        return true; // This should be ok
+        throw new UnsupportedOperationException();
     }
 
     // CHECKSTYLE:OFF

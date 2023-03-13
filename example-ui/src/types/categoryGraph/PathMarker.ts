@@ -149,9 +149,9 @@ function createPathSegment(edge: Edge, previousSegment?: PathSegment): PathSegme
 
 export function createDefaultFilter(configuration: DatabaseConfiguration): { function: FilterFunction } {
     return {
-        function: (segment: PathSegment) => segment.previousSegment ?
-            (segment.fullMorphism.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed) :
-            (segment.fullMorphism.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed)
+        function: (segment: PathSegment) => segment.previousSegment
+            ? (segment.fullMorphism.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed)
+            : (segment.fullMorphism.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed)
     };
 }
 
