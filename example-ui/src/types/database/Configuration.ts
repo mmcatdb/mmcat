@@ -15,7 +15,7 @@ export class DatabaseConfiguration {
         this.isPropertyToManyAllowed = input.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = input.isInliningToOneAllowed;
         this.isInliningToManyAllowed = input.isInliningToManyAllowed;
-        this.isGroupingAllowed = input.isGroupingAllowed;
+        this.isGroupingAllowed = input.isGroupingAllowed || true;
         this.isDynamicNamingAllowed = input.isDynamicNamingAllowed;
         this.isAnonymousNamingAllowed = input.isAnonymousNamingAllowed;
         this.isReferenceAllowed = input.isReferenceAllowed;

@@ -31,7 +31,7 @@ public class Neo4jPathWrapper implements AbstractPathWrapper {
     @Override public boolean isDynamicNamingAllowed() { return false; }
     @Override public boolean isAnonymousNamingAllowed() { return false; }
     @Override public boolean isReferenceAllowed() { return false; }
-    @Override public boolean isComplexPropertyAllowed() { return false; } // Except for the _from and _to nodes, right?
+    @Override public boolean isComplexPropertyAllowed() { return true; } // Just for the _from and _to nodes, false otherwise.
     @Override public boolean isSchemaLess() { return true; }
     // CHECKSTYLE:ON
 }

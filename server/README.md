@@ -58,8 +58,9 @@ java -jar target/server-1.0-SNAPSHOT.jar
 
 ## Sample data
 
-- The example database assumes there are two databases for the data import, one PostgreSQL and the other MongoDB.
-- The first one can be created by:
+### PostgreSQL
+
+- The database can be created by:
 ```sql
 CREATE DATABASE mmcat_server_data OWNER mmcat_user;
 ```
@@ -67,7 +68,9 @@ CREATE DATABASE mmcat_server_data OWNER mmcat_user;
 ```bash
 psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_data?sslmode=require -f src/main/resources/setupPostgresql.sql
 ```
-- You also need to create a user for the second one. Open the MongoDB console and write:
+
+### MongoDB
+- You need to create a user for this one. Open the MongoDB console and write:
 ```js
 use admin;
 db.createUser({
@@ -81,7 +84,12 @@ db.createUser({
 ```
 - Then you can create the database:
 ```bash
-mongo --username mmcat_user --password mmcat_password --authenticationDatabase admin localhost:27017/mmcat_server_data src/main/resources/setupMongodb.js
+cypher-shell -f src/main/resources/setupNeo4j.cypher -a bolt://localhost:7687 -u mmcat_user -p mmcat_password
+```
+
+### Neo4j
+```bash
+
 ```
 
 ## Other data

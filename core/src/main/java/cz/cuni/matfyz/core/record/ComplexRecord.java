@@ -65,6 +65,27 @@ public class ComplexRecord extends DataRecord implements IComplexRecord {
         return values.get(signature);
     }
 
+    public SimpleRecord<?> findSimpleRecord(Signature signature) {
+        final var directSimpleRecord = getSimpleRecord(signature);
+        if (directSimpleRecord != null || signature.isBase())
+            return directSimpleRecord;
+
+        var currentPath = Signature.createEmpty();
+        for (final var base : signature.toBasesReverse()) {
+            currentPath = currentPath.concatenate(base);
+            final var childRecords = children.get(currentPath);
+
+            if (childRecords == null)
+                continue;
+            if (childRecords.size() != 1)
+                return null;
+
+            return childRecords.get(0).findSimpleRecord(signature.traverseAlong(currentPath));
+        }
+
+        return null;
+    }
+
     public boolean hasDynamicNameValues() {
         return !dynamicNameValues.isEmpty();
     }

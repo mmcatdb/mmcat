@@ -101,32 +101,6 @@ export const style: cytoscape.Stylesheet[] = [
             'color': 'red'
         }
     },
-    /*
-    {
-        selector: 'node.coloring',
-        style: {
-            'border-width': '0px',
-            width: '100px',
-            height: '100px',
-            label: '',
-            events: 'no'
-        }
-    },
-    {
-        selector: 'node.mongodb',
-        style: {
-            'background-color': 'green',
-            'background-opacity': 0.15,
-        }
-    },
-    {
-        selector: 'node.postgresql',
-        style: {
-            'background-color': 'red',
-            'background-opacity': 0.15,
-        }
-    }
-    */
     {
         selector: '.group-placeholder',
         style: {

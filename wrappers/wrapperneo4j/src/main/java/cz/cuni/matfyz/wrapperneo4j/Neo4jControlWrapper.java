@@ -22,9 +22,8 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jControlWrapper.class);
 
-    public static final String FROM_NODE_PROPERTY_NAME = "_from";
-    public static final String TO_NODE_PROPERTY_NAME = "_to";
-    public static final String LABEL_PROPERTY_NAME = "_label";
+    public static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
+    public static final String TO_NODE_PROPERTY_PREFIX = "_to.";
 
     private SessionProvider sessionProvider;
     

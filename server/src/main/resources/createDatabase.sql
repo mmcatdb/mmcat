@@ -40,7 +40,9 @@ VALUES
             {"label": "Product", "position": {"x": 128, "y": 85}, "ids": {"type": "Signatures", "signatureIds": [[[12]]]}, "key": {"value": 12}, "superId": [[12]]},
             {"label": "Id", "position": {"x": 47, "y": 189}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 13}, "superId": [[]]},
             {"label": "Name", "position": {"x": 125, "y": 187}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 14}, "superId": [[]]},
-            {"label": "Price", "position": {"x": 213, "y": 189}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 15}, "superId": [[]]}
+            {"label": "Price", "position": {"x": 213, "y": 189}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 15}, "superId": [[]]},
+            {"label": "Friend", "position": {"x": -130, "y": -120}, "ids": {"type": "Signatures", "signatureIds": [[[1, 15], [1, 16]]]}, "key": {"value": 16}, "superId": [[1, 15], [1, 16]]},
+            {"label": "Since", "position": {"x": -60, "y": -150}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 17}, "superId": [[]]}
         ],
         "morphisms": [
             {"domKey": {"value": 1}, "codKey": {"value": 2}, "max": "ONE", "min": "ONE", "signature": [1]},
@@ -70,7 +72,13 @@ VALUES
             {"domKey": {"value": 12}, "codKey": {"value": 14}, "max": "STAR", "min": "ZERO", "signature": [13]},
             {"domKey": {"value": 14}, "codKey": {"value": 12}, "max": "STAR", "min": "ZERO", "signature": [-13]},
             {"domKey": {"value": 12}, "codKey": {"value": 15}, "max": "STAR", "min": "ZERO", "signature": [14]},
-            {"domKey": {"value": 15}, "codKey": {"value": 12}, "max": "STAR", "min": "ZERO", "signature": [-14]}
+            {"domKey": {"value": 15}, "codKey": {"value": 12}, "max": "STAR", "min": "ZERO", "signature": [-14]},
+            {"domKey": {"value": 16}, "codKey": {"value": 1}, "max": "ONE", "min": "ONE", "signature": [15]},
+            {"domKey": {"value": 1}, "codKey": {"value": 16}, "max": "STAR", "min": "ZERO", "signature": [-15]},
+            {"domKey": {"value": 16}, "codKey": {"value": 1}, "max": "ONE", "min": "ONE", "signature": [16]},
+            {"domKey": {"value": 1}, "codKey": {"value": 16}, "max": "STAR", "min": "ZERO", "signature": [-16]},
+            {"domKey": {"value": 16}, "codKey": {"value": 17}, "max": "ONE", "min": "ONE", "signature": [17]},
+            {"domKey": {"value": 17}, "codKey": {"value": 16}, "max": "ONE", "min": "ONE", "signature": [-17]}
         ]
     }'),
     ('{
@@ -228,13 +236,22 @@ VALUES
             "password": "mmcat_password"
         }
     }'),
+    ('{ "type": "neo4j", "label": "Neo4j",
+        "settings": {
+            "host": "localhost",
+            "port": 7687,
+            "database": "neo4j",
+            "username": "mmcat_user",
+            "password": "mmcat_password"
+        }
+    }'),
     ('{ "type": "postgresql", "label": "PostgreSQL TTD",
         "settings": {
             "host": "localhost",
             "port": 5432,
             "database": "mmcat_server_ttd",
-            "password": "mmcat_password",
-            "username": "mmcat_user"
+            "username": "mmcat_user",
+            "password": "mmcat_password"
         }
     }'),
     ('{ "type": "mongodb", "label": "MongoDB Experiments",
@@ -261,8 +278,8 @@ VALUES
             "host": "localhost",
             "port": 27017,
             "database": "mmcat_server_querying",
-            "password": "mmcat_password",
             "username": "mmcat_user",
+            "password": "mmcat_password",
             "authenticationDatabase": "admin"
         }
     }'),
@@ -271,8 +288,8 @@ VALUES
             "host": "localhost",
             "port": 5432,
             "database": "mmcat_server_querying",
-            "password": "mmcat_password",
-            "username": "mmcat_user"
+            "username": "mmcat_user",
+            "password": "mmcat_password"
         }
     }'),
     ('{ "type": "postgresql", "label": "Neo4j - Querying",
@@ -309,11 +326,12 @@ INSERT INTO logical_model (schema_category_id, database_id, json_value)
 VALUES
     (1, 1, '{"label": "Mongo - Order"}'),
     (1, 2, '{"label": "Postgres - Customer"}'),
-    (2, 3, '{"label": "Postgres import"}'),
+    (1, 3, '{"label": "Neo4j - Friend"}'),
+    (2, 4, '{"label": "Postgres import"}'),
     (2, 1, '{"label": "Mongo export"}'),
-    (3, 6, '{"label": "MongoDB"}'),
-    (3, 7, '{"label": "PostgreSQL"}'),
-    (3, 8, '{"label": "Neo4j"}');
+    (3, 7, '{"label": "MongoDB"}'),
+    (3, 8, '{"label": "PostgreSQL"}'),
+    (3, 9, '{"label": "Neo4j"}');
 
 CREATE TABLE mapping (
     id SERIAL PRIMARY KEY,
@@ -344,11 +362,13 @@ VALUES
                         {"name": {"type": "STATIC", "value": "customer"}, "signature": [1, 3, 2]},
                         {"name": {"type": "STATIC", "value": "number"}, "signature": [4]}
                     ], "signature": [], "isAuxiliary": true
-                }, {
+                },
+                {
                     "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
                         {"name": {"signature": [8, 7]}, "signature": [6]}
                     ], "signature": [5], "isAuxiliary": false
-                }, {
+                },
+                {
                     "name": {"type": "STATIC", "value": "items"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "id"}, "signature": [12, 10]},
                         {"name": {"type": "STATIC", "value": "name"}, "signature": [13, 10]},
@@ -374,6 +394,28 @@ VALUES
     (3, '{
         "version": "0",
         "categoryVersion": "0",
+        "rootObjectKey": {"value": 16},
+        "primaryKey": [],
+        "kindName": "Friend",
+        "accessPath": {
+            "name": {"type": "STATIC", "value": "friend"}, "subpaths": [
+                {"name": {"type": "STATIC", "value": "since"}, "signature": [17]},
+                {
+                    "name": {"type": "STATIC", "value": "_from.Customer"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "customer_id"}, "signature": [1]}
+                    ], "signature": [15], "isAuxiliary": false
+                },
+                {
+                    "name": {"type": "STATIC", "value": "_to.Customer"}, "subpaths": [
+                        {"name": {"type": "STATIC", "value": "customer_id"}, "signature": [1]}
+                    ], "signature": [16], "isAuxiliary": false
+                }
+            ], "signature": [], "isAuxiliary": true}
+        }'
+    ),
+    (4, '{
+        "version": "0",
+        "categoryVersion": "0",
         "rootObjectKey": {"value": 1},
         "primaryKey": [[4]],
         "kindName": "app_customer",
@@ -384,7 +426,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{
+    (4, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 4},
@@ -398,7 +440,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{
+    (4, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 8},
@@ -411,7 +453,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{
+    (4, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 9},
@@ -429,7 +471,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{
+    (4, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 16},
@@ -443,7 +485,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (3, '{
+    (4, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 20},
@@ -458,7 +500,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (4, '{
+    (5, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 9},
@@ -477,13 +519,15 @@ VALUES
                     ], "signature": [14], "isAuxiliary": false
                 },
                 {"name": {"type": "STATIC", "value": "address"}, "signature": [12]},
-                {"name": {"type": "STATIC", "value": "note"}, "signature": [11]}, {
+                {"name": {"type": "STATIC", "value": "note"}, "signature": [11]},
+                {
                     "name": {"type": "STATIC", "value": "events"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "created"}, "signature": [8]},
                         {"name": {"type": "STATIC", "value": "sent"}, "signature": [9]},
                         {"name": {"type": "STATIC", "value": "paid"}, "signature": [10]}
                     ], "signature": [], "isAuxiliary": true
-                }, {
+                },
+                {
                     "name": {"type": "STATIC", "value": "items"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "amount"}, "signature": [19]},
                         {"name": {"type": "STATIC", "value": "total_price"}, "signature": [18]},
@@ -493,7 +537,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (5, '{
+    (6, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 10},
@@ -501,11 +545,13 @@ VALUES
         "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC", "value": "order"}, "subpaths": [
-                {"name": {"type": "STATIC", "value": "number"}, "signature": [11]}, {
+                {"name": {"type": "STATIC", "value": "number"}, "signature": [11]},
+                {
                     "name": {"type": "STATIC", "value": "customers"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "id"}, "signature": [2]}
                     ], "signature": [9, -10], "isAuxiliary": false
-                }, {
+                },
+                {
                     "name": {"type": "STATIC", "value": "items"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "id"}, "signature": [14, 13]},
                         {"name": {"type": "STATIC", "value": "name"}, "signature": [15, 13]},
@@ -515,7 +561,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (6, '{
+    (7, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 1},
@@ -529,7 +575,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (7, '{
+    (8, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 5},
@@ -542,7 +588,7 @@ VALUES
             ], "signature": [], "isAuxiliary": true
         }}'
     ),
-    (7, '{
+    (8, '{
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 6},
@@ -576,5 +622,7 @@ VALUES
     (1, 1, null, '{"label": "Export Order", "type": "CategoryToModel", "status": "Ready"}'),
     (1, 2, null, '{"label": "Import Customer", "type": "ModelToCategory", "status": "Ready"}'),
     (1, 2, null, '{"label": "Export Customer", "type": "CategoryToModel", "status": "Ready"}'),
-    (2, 3, null, '{"label": "Import from Postgres", "type": "ModelToCategory", "status": "Ready"}'),
-    (2, 4, null, '{"label": "Export to Mongo", "type": "CategoryToModel", "status": "Ready"}');
+    (1, 3, null, '{"label": "Import Friend", "type": "ModelToCategory", "status": "Ready"}'),
+    (1, 3, null, '{"label": "Export Friend", "type": "CategoryToModel", "status": "Ready"}'),
+    (2, 4, null, '{"label": "Import from Postgres", "type": "ModelToCategory", "status": "Ready"}'),
+    (2, 5, null, '{"label": "Export to Mongo", "type": "CategoryToModel", "status": "Ready"}');

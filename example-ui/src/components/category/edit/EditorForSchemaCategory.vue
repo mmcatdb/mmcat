@@ -189,6 +189,7 @@ export default defineComponent({
         },
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
+            console.log(this.graph.schemaCategory);
 
             const result = await API.schemas.updateCategoryWrapper({ id: this.graph.schemaCategory.id }, updateObject);
             if (result.status) {

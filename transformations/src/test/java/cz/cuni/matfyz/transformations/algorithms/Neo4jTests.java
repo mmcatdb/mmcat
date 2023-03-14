@@ -10,7 +10,6 @@ import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jSessionProvider;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jStatement;
-import cz.cuni.matfyz.wrapperneo4j.SessionProvider;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jControlWrapper;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jPullWrapper;
 

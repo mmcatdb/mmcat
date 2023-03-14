@@ -6,6 +6,9 @@ import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jControlWrapper;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jSessionProvider;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jSettings;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLSettings;
@@ -28,6 +31,7 @@ public class WrapperService {
             return switch (database.type) {
                 case mongodb -> getMongoDBControlWrapper(database);
                 case postgresql -> getPostgreSQLControlWrapper(database);
+                case neo4j -> getNeo4jControlWrapper(database);
                 default -> throw new WrapperNotFoundException(wrapperNotFoundText("Pull", database));
             };
         }
@@ -39,6 +43,24 @@ public class WrapperService {
     private String wrapperNotFoundText(String name, Database database) {
         return name + "wrapper for database " + database.id + " with JSON settings: " + database.settings + " not found.";
     }
+
+    public static class WrapperCreationErrorException extends RuntimeException {
+
+        public WrapperCreationErrorException(String errorMessage) {
+            super(errorMessage);
+        }
+
+    }
+
+    public static class WrapperNotFoundException extends RuntimeException {
+
+        public WrapperNotFoundException(String errorMessage) {
+            super(errorMessage);
+        }
+
+    }
+
+    // MongoDB
 
     private Map<Id, MongoDBDatabaseProvider> mongoDBCache = new TreeMap<>();
 
@@ -58,6 +80,8 @@ public class WrapperService {
         return new MongoDBDatabaseProvider(settings);
     }
 
+    // PostgreSQL
+
     private Map<Id, PostgreSQLConnectionProvider> postgreSQLCache = new TreeMap<>();
 
     private PostgreSQLControlWrapper getPostgreSQLControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
@@ -74,20 +98,22 @@ public class WrapperService {
         return new PostgreSQLConnectionProvider(settings);
     }
 
-    public static class WrapperCreationErrorException extends RuntimeException {
+    // Neo4j
 
-        public WrapperCreationErrorException(String errorMessage) {
-            super(errorMessage);
-        }
+    private Map<Id, Neo4jSessionProvider> neo4jCache = new TreeMap<>();
 
+    private Neo4jControlWrapper getNeo4jControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
+        if (!neo4jCache.containsKey(database.id))
+            neo4jCache.put(database.id, createNeo4jProvider(database));
+
+        final var provider = neo4jCache.get(database.id);
+        return new Neo4jControlWrapper(provider);
     }
 
-    public static class WrapperNotFoundException extends RuntimeException {
+    private static Neo4jSessionProvider createNeo4jProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
+        final var settings = mapper.treeToValue(database.settings, Neo4jSettings.class);
 
-        public WrapperNotFoundException(String errorMessage) {
-            super(errorMessage);
-        }
-
+        return new Neo4jSessionProvider(settings);
     }
 
 }

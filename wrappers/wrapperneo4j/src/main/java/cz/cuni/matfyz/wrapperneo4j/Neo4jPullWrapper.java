@@ -45,23 +45,37 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return processNodePath(path, options);
     }
 
-    private static final StaticName fromNodePropertyName = new StaticName(Neo4jControlWrapper.FROM_NODE_PROPERTY_NAME);
-    private static final StaticName toNodePropertyName = new StaticName(Neo4jControlWrapper.TO_NODE_PROPERTY_NAME);
-    private static final StaticName labelPropertyName = new StaticName(Neo4jControlWrapper.LABEL_PROPERTY_NAME);
-
     private ForestOfRecords tryProcessRelationshipPath(ComplexProperty path, PullWrapperOptions options) {
-        final var fromNode = path.getDirectSubpath(fromNodePropertyName);
-        if (fromNode == null || !(fromNode instanceof ComplexProperty fromNodeSubpath))
-            return null;
+        final var fromNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
+        final var toNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
 
-        final var toNode = path.getDirectSubpath(toNodePropertyName);
-        if (toNode == null || !(toNode instanceof ComplexProperty toNodeSubpath))
+        if (fromNodeSubpath == null || toNodeSubpath == null)
             return null;
 
         return processRelationshipPath(path, fromNodeSubpath, toNodeSubpath, options);
     }
 
+    private static ComplexProperty findSubpathByPrefix(ComplexProperty path, String namePrefix) {
+        final var foundSubpath = path.subpaths().stream().filter(subpath -> {
+            if (!(subpath.name() instanceof StaticName staticName))
+                return false;
+
+            return staticName.getStringName().startsWith(namePrefix);
+        })
+        .findFirst();
+
+        if (foundSubpath.isEmpty())
+            return null;
+        
+         return foundSubpath.get() instanceof ComplexProperty complexSubpath
+            ? complexSubpath
+            : null;
+    }
+
     private ForestOfRecords processRelationshipPath(ComplexProperty path, ComplexProperty fromNodeSubpath, ComplexProperty toNodeSubpath, PullWrapperOptions options) {
+        final var fromNodeRecordName = ((StaticName) fromNodeSubpath.name()).toRecordName();
+        final var toNodeRecordName = ((StaticName) toNodeSubpath.name()).toRecordName();
+
         final var forest = new ForestOfRecords();
 
         try (
@@ -78,10 +92,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                             final var rootRecord = new RootRecord();
                             addValuePropertiesToRecord(result.get("relationship"), path, rootRecord);
                             
-                            final var fromNodeRecord = rootRecord.addComplexRecord(fromNodePropertyName.toRecordName(), fromNodeSubpath.signature());
+                            final var fromNodeRecord = rootRecord.addComplexRecord(fromNodeRecordName, fromNodeSubpath.signature());
                             addValuePropertiesToRecord(result.get("from_node"), fromNodeSubpath, fromNodeRecord);
 
-                            final var toNodeRecord = rootRecord.addComplexRecord(toNodePropertyName.toRecordName(), toNodeSubpath.signature());
+                            final var toNodeRecord = rootRecord.addComplexRecord(toNodeRecordName, toNodeSubpath.signature());
                             addValuePropertiesToRecord(result.get("to_node"), toNodeSubpath, toNodeRecord);
 
                             return rootRecord;
@@ -128,10 +142,8 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             )
                 continue;
 
-            String name = staticName.getStringName();
-            String stringValue = staticName.equals(labelPropertyName)
-                ? value.asNode().labels().iterator().next()
-                : value.get(name).asString();
+            final String name = staticName.getStringName();
+            final String stringValue = value.get(name).asString();
             complexRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.signature(), stringValue);
         }
     }

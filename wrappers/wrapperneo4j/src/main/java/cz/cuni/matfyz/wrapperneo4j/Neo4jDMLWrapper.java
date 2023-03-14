@@ -44,34 +44,23 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
 
         final var propertyName = split[1];
         if (!nameIsValid(propertyName))
-            throw new WrapperException("Property name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
-
-        final boolean isFromNode = determineNodeType(split[0], name);
-
-        if (name.equals(Neo4jControlWrapper.LABEL_PROPERTY_NAME)) {
-            if (isFromNode)
-                fromNodeLabel = propertyName;
-            else
-                toNodeLabel = propertyName;
-
-            return;
-        }
+            throw new WrapperException("Nested property name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
 
         final var propertyValue = new PropertyValue(propertyName, stringValue);
 
-        if (isFromNode)
+        final var firstPart = split[0];
+
+        if (firstPart.startsWith(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX)) {
+            fromNodeLabel = firstPart.substring(Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX.length());
             fromNodeValues.add(propertyValue);
-        else
+        }
+        else if (firstPart.startsWith(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX)) {
+            toNodeLabel = firstPart.substring(Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX.length());
             toNodeValues.add(propertyValue);
-    }
-
-    private boolean determineNodeType(String firstPart, String fullName) {
-        if (firstPart.equals(Neo4jControlWrapper.FROM_NODE_PROPERTY_NAME))
-            return true;
-        if (firstPart.equals(Neo4jControlWrapper.TO_NODE_PROPERTY_NAME))
-            return false;
-
-        throw new WrapperException("Nested property with name: " + fullName + " is not allowed.");
+        }
+        else {
+            throw new WrapperException("Nested property with name: " + name + " is not allowed.");
+        }
     }
 
     private boolean nameIsValid(String name) {

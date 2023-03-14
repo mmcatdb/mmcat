@@ -764,10 +764,10 @@ public class TestData {
     public ComplexProperty path_neo4j_items() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("quantity", itemsToQuantity),
-            ComplexProperty.create("_from", orderToItems.dual(),
+            ComplexProperty.create("_from.order", orderToItems.dual(),
                 new SimpleProperty("customer_id", orderToId)
             ),
-            ComplexProperty.create("_to", itemsToProduct,
+            ComplexProperty.create("_to.product", itemsToProduct,
                 new SimpleProperty("id", productToPid),
                 new SimpleProperty("name", productToPname)
             )

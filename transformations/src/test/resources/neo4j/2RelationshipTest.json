@@ -1,40 +1,40 @@
 [
     {
         "quantity": "10",
-        "_from": {
+        "_from.order": {
             "customer_id": "1"
         },
-        "_to": {
+        "_to.product": {
             "id": "A1",
             "name": "Some name"
         }
     },
     {
         "quantity": "12",
-        "_from": {
+        "_from.order": {
             "customer_id": "1"
         },
-        "_to": {
+        "_to.product": {
             "id": "A1",
             "name": "Some name"
         }
     },
     {
         "quantity": "17",
-        "_from": {
+        "_from.order": {
             "customer_id": "1"
         },
-        "_to": {
+        "_to.product": {
             "id": "B2",
             "name": "Other name"
         }
     },
     {
         "quantity": "24",
-        "_from": {
+        "_from.order": {
             "customer_id": "2"
         },
-        "_to": {
+        "_to.product": {
             "id": "B2",
             "name": "Other name"
         }

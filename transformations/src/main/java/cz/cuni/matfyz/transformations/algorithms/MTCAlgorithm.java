@@ -16,6 +16,7 @@ import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.IComplexRecord;
 import cz.cuni.matfyz.core.record.RootRecord;
+import cz.cuni.matfyz.core.record.SimpleArrayRecord;
 import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
 import cz.cuni.matfyz.core.schema.SchemaObject;
@@ -36,6 +37,8 @@ import org.slf4j.LoggerFactory;
  * @author pavel.koupil, jachym.bartik
  */
 public class MTCAlgorithm {
+
+    private record Child(Signature signature, AccessPath property) {}
     
     private static final Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
 
@@ -109,13 +112,17 @@ public class MTCAlgorithm {
             if (value instanceof String stringValue)
                 builder.add(signature, stringValue);
             */
-            SimpleRecord<?> simpleRecord = rootRecord.getSimpleRecord(signature);
+            SimpleRecord<?> simpleRecord = rootRecord.findSimpleRecord(signature);
             if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord) {
                 builder.add(signature, simpleValueRecord.getValue().toString());
             }
-            else {
+            else if (simpleRecord instanceof SimpleArrayRecord<?>) {
                 LOGGER.warn("A simple record with signature {} is an array record:\n{}\n", signature, simpleRecord);
                 throw new TransformationException("FetchSuperId doesn't support array values.");
+            }
+            else {
+                LOGGER.warn("A simple record with signature {} was not fount\n", signature);
+                throw new TransformationException("FetchSuperId doesn't support null values.");
             }
         }
         
@@ -199,9 +206,6 @@ public class MTCAlgorithm {
             stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
         }
     }
-
-    //private record Child(Signature signature, ComplexProperty property) {}
-    private record Child(Signature signature, AccessPath property) {}
 
     /**
      * Determine possible sub-paths to be traversed from this complex property (inner node of an access path).

@@ -24,7 +24,8 @@ public class Database extends Entity {
 
     public enum Type {
         mongodb,
-        postgresql
+        postgresql,
+        neo4j
     }
 
     @JsonCreator

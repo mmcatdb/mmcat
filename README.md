@@ -12,7 +12,7 @@ A multi-model data modelling and evolution framework based on category theory. I
 
 - Make sure you have all the required software for both [Backend](./server/README.md#requirements) and [Frontend](./example-ui/README.md#configuration) applications.
 - To compile the java modules and install dependencies, run:
-```sh
+```bash
 mvn install -Dmaven.test.skip
 ```
 - Then follow the steps in the [Backend](./server/README.md) and [Frontend](./example-ui/README.md) guides.
