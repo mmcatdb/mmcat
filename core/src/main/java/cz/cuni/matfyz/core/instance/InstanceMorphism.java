@@ -33,7 +33,7 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
         this.category = category;
         this.bases = isBase()
             ? List.of(this)
-            : List.of(signature().toBasesReverse().stream().map(category::getMorphism).toArray(InstanceMorphism[]::new));
+            : List.of(signature().toBases().stream().map(category::getMorphism).toArray(InstanceMorphism[]::new));
     }
 
     public boolean isEmpty() {

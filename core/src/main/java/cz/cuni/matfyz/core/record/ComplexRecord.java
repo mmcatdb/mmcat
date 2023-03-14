@@ -71,7 +71,7 @@ public class ComplexRecord extends DataRecord implements IComplexRecord {
             return directSimpleRecord;
 
         var currentPath = Signature.createEmpty();
-        for (final var base : signature.toBasesReverse()) {
+        for (final var base : signature.toBases()) {
             currentPath = currentPath.concatenate(base);
             final var childRecords = children.get(currentPath);
 

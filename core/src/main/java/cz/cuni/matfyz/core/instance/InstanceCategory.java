@@ -76,7 +76,7 @@ public class InstanceCategory implements Category {
         if (signature.getType() != Type.COMPOSITE)
             return;
 
-        var baseSignatures = signature.toBasesReverse();
+        var baseSignatures = signature.toBases();
         var signatureToTarget = Signature.createEmpty();
 
         for (int i = 0; i < baseSignatures.size() - 1; i++) {

@@ -84,7 +84,7 @@ export class Signature {
     }
 
     toBases(): Signature[] {
-        return this._ids.map(id => new Signature(id));
+        return this._ids.map(id => new Signature(id)).reverse();
     }
 
     getFirstBase(): { first: Signature, rest: Signature } | undefined {

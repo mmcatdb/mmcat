@@ -66,15 +66,15 @@ public class SchemaCategory implements Category {
     private SchemaMorphism createCompositeMorphism(Signature signature) {
         Signature[] bases = signature.toBases().toArray(Signature[]::new);
 
-        Signature lastSignature = bases[bases.length - 1];
+        Signature lastSignature = bases[0];
         SchemaMorphism lastMorphism = this.getMorphism(lastSignature);
         SchemaObject dom = lastMorphism.dom();
         SchemaObject cod = lastMorphism.cod();
         Min min = lastMorphism.min();
         Max max = lastMorphism.max();
 
-        for (int i = 2; i <= bases.length; i++) {
-            lastSignature = bases[bases.length - i];
+        for (int i = 1; i < bases.length; i++) {
+            lastSignature = bases[i];
             lastMorphism = this.getMorphism(lastSignature);
             cod = lastMorphism.cod();
             min = SchemaMorphism.combineMin(min, lastMorphism.min());

@@ -93,7 +93,7 @@ public class ICAlgorithm {
     private void processPath(AccessPath path, Mapping lastMapping, Signature signatureFromLastMapping) {
         //final var newSignatureFromLastMapping = signatureFromLastMapping.concatenate(path.signature());
 
-        for (final var baseSignature : path.signature().toBasesReverse()) {
+        for (final var baseSignature : path.signature().toBases()) {
             final var object = mapping.category().getMorphism(baseSignature).cod();
             final var objectMapping = mappingsByObjects.get(object);
 

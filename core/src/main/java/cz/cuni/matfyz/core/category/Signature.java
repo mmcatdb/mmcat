@@ -57,14 +57,6 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     public List<Signature> toBases() {
         var output = new ArrayList<Signature>();
-        for (int id : ids)
-            output.add(createBase(id));
-
-        return output;
-    }
-
-    public List<Signature> toBasesReverse() {
-        var output = new ArrayList<Signature>();
         for (int i = ids.length - 1; i >= 0; i--)
             output.add(createBase(ids[i]));
 
