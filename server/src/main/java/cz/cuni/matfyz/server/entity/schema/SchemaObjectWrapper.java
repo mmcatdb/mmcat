@@ -4,6 +4,7 @@ import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SignatureId;
+import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.utils.Position;
 
 /**
@@ -18,10 +19,11 @@ public record SchemaObjectWrapper(
     String iri,
     String pimIri
 ) {
-    public static SchemaObjectWrapper fromSchemaObject(SchemaObject object, Position position) {
+
+    public static SchemaObjectWrapper fromSchemaObject(SchemaObject object, SchemaCategoryContext context) {
         return new SchemaObjectWrapper(
             object.key(),
-            position,
+            context.getPosition(object.key()),
             object.label(),
             object.superId(),
             object.ids(),
@@ -29,4 +31,13 @@ public record SchemaObjectWrapper(
             object.pimIri
         );
     }
+
+    public SchemaObject toSchemaObject(SchemaCategoryContext context) {
+        context.setPosition(key, position);
+        final var object = new SchemaObject(key, label, superId, ids);
+        context.setObject(object);
+        
+        return object;
+    }
+
 }

@@ -210,6 +210,12 @@ VALUES
         ]
     }');
 
+CREATE TABLE schema_category_update (
+    id SERIAL PRIMARY KEY,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    json_value JSONB NOT NULL
+); 
+
 CREATE TABLE database_for_mapping (
     id SERIAL PRIMARY KEY,
     json_value JSONB NOT NULL

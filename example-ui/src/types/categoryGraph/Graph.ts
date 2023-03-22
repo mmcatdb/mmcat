@@ -140,6 +140,11 @@ export class Graph {
     }
 
     createEdgeWithDual(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
+        const displayedMorphism = (morphism.signature.baseValue && morphism.signature.baseValue > 0) ? morphism : morphism.dual;
+        return this.createEdgeWithDualInner(displayedMorphism, classes);
+    }
+
+    createEdgeWithDualInner(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
         const domNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.domKey)) as Node;
         const codNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.codKey)) as Node;
 

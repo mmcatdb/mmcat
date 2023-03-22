@@ -30,6 +30,7 @@ module.exports = {
         '@typescript-eslint/semi': [ 'error', 'always' ],
         indent: [ 'warn', 4 ],
         'array-bracket-spacing': [ 'warn', 'always' ],
+        "object-curly-spacing": [ "warn", "always" ],
         'space-before-function-paren': [ 'warn', {
             anonymous: 'always',
             named: 'never',

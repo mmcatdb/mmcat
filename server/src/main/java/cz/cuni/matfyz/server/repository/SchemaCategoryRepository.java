@@ -6,6 +6,7 @@ import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.server.entity.evolution.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -107,16 +109,22 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public boolean update(SchemaCategoryWrapper wrapper) {
+    private static final ObjectWriter updateWriter = mapper.writerFor(SchemaCategoryUpdate.class);
+
+    public boolean update(SchemaCategoryWrapper wrapper, SchemaCategoryUpdate update) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 UPDATE schema_category
                 SET json_value = ?::jsonb
                 WHERE id = ?;
+                INSERT INTO schema_category_update (schema_category_id, json_value)
+                VALUES (?, ?::jsonb);
                 """
             );
             statement.setString(1, wrapper.toJsonValue());
             setId(statement, 2, wrapper.id);
+            setId(statement, 3, wrapper.id);
+            statement.setString(4, updateWriter.writeValueAsString(update));
 
             int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);

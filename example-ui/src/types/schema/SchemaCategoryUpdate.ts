@@ -1,26 +1,17 @@
 import type { Version } from "../id";
+import { AddMorphism, AddObject, type SMO, type SMOFromServer } from "./SchemaModificationOperation";
 import type { SchemaMorphism } from "./SchemaMorphism";
 import type { SchemaObject } from "./SchemaObject";
-
-export type SchemaCategoryUpdate = {
-    readonly beforeVersion: Version;
-    readonly operations: SchemaModificationOperation[];
-};
-
-enum SMOType {
-    AddObject = 'addObject'
-}
-
-export type SchemaModificationOperation = {
-    type: SMOType;
-};
 
 export class SchemaCategoryEvolver {
     _newObjects = [] as SchemaObject[];
     _newMorphisms = [] as SchemaMorphism[];
 
+    _operations = [] as SMO[];
+
     addObject(object: SchemaObject) {
         this._newObjects.push(object);
+        this._operations.push(new AddObject(object));
     }
 
     deleteObject(object: SchemaObject) {
@@ -29,14 +20,15 @@ export class SchemaCategoryEvolver {
 
     addMorphism(morphism: SchemaMorphism) {
         this._newMorphisms.push(morphism);
+        this._operations.push(new AddMorphism(morphism));
     }
 
     deleteMorphismWithDual(morphism: SchemaMorphism) {
         this._newMorphisms = this._newMorphisms.filter(m => !m.equals(morphism) && !m.equals(morphism.dual));
     }
 
-    generateOperations(): SchemaModificationOperation[] {
-
+    getOperations(): SMO[] {
+        return this._operations;
         /*
         return {
             objects: this._newObjects.map(object => ({
@@ -53,7 +45,5 @@ export class SchemaCategoryEvolver {
             }))
         };
         */
-
-        return [];
     }
 }

@@ -1,17 +1,14 @@
 package cz.cuni.matfyz.server.service;
 
-import cz.cuni.matfyz.core.schema.Key;
-import cz.cuni.matfyz.evolution.schema.SchemaCategoryUpdate;
-import cz.cuni.matfyz.server.builder.CategoryBuilder;
+import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.server.entity.evolution.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
-import cz.cuni.matfyz.server.utils.Position;
 
 import java.util.List;
-import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,29 +46,22 @@ public class SchemaCategoryService {
 
     public SchemaCategoryWrapper update(Id id, SchemaCategoryUpdate update) {
         final var wrapper = repository.find(id);
-        if (!update.getBeforeVersion().equals(wrapper.version))
+        if (!update.beforeVersion().equals(wrapper.version))
             return null;
 
-        final var category = new CategoryBuilder()
-            .setCategoryWrapper(wrapper)
-            .build();
+        final var context = new SchemaCategoryContext();
+        final var evolutionUpdate = update.toEvolution(context);
+        final var originalCategory = wrapper.toSchemaCategory(context);
 
-        final var result = update.apply(category);
+        final var result = evolutionUpdate.apply(originalCategory);
         if (!result.status)
             return null;
 
-        final var originalPositions = new TreeMap<Key, Position>();
-        for (final var object : wrapper.objects)
-            originalPositions.put(object.key(), object.position());
+        context.setVersion(context.getVersion().generateNext());
 
-        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(
-            result.data,
-            id,
-            wrapper.version.generateNext(),
-            originalPositions
-        );
+        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(result.data, context);
 
-        if (!repository.update(newWrapper))
+        if (!repository.update(newWrapper, update))
             return null;
 
         return newWrapper;

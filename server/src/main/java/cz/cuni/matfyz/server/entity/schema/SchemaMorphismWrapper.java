@@ -6,6 +6,7 @@ import cz.cuni.matfyz.core.category.Morphism.Tag;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
+import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 
 import java.util.Set;
 
@@ -23,6 +24,7 @@ public record SchemaMorphismWrapper(
     String pimIri,
     Set<Tag> tags
 ) {
+
     public static SchemaMorphismWrapper fromSchemaMorphism(SchemaMorphism morphism) {
         return new SchemaMorphismWrapper(
             morphism.signature(),
@@ -36,4 +38,16 @@ public record SchemaMorphismWrapper(
             morphism.tags()
         );
     }
+
+    public SchemaMorphism toSchemaMorphism(SchemaCategoryContext context) {
+        return new SchemaMorphism.Builder().fromArguments(
+            signature,
+            context.getObject(domKey),
+            context.getObject(codKey),
+            min,
+            max,
+            label
+        );
+    }
+    
 }

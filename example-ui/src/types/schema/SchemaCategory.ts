@@ -7,7 +7,8 @@ import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, Tag, type Max, type Min } from "./SchemaMorphism";
 import { SchemaObject, type SchemaObjectFromServer } from "./SchemaObject";
-import { SchemaCategoryEvolver, type SchemaCategoryUpdate } from "./SchemaCategoryUpdate";
+import { SchemaCategoryEvolver } from "./SchemaCategoryUpdate";
+import type { SMOFromServer } from "./SchemaModificationOperation";
 
 export type CardinalitySettings = {
     domCodMin: Min;
@@ -155,7 +156,7 @@ export class SchemaCategory implements Entity {
     getUpdateObject(): SchemaCategoryUpdate {
         return {
             beforeVersion: this.version,
-            operations: this.evolver.generateOperations()
+            operations: this.evolver.getOperations().map(operation => operation.toServer())
         };
     }
 
@@ -251,4 +252,9 @@ export class SchemaCategoryInfo implements Entity {
 
 export type SchemaCategoryInit = {
     label: string;
+};
+
+export type SchemaCategoryUpdate = {
+    readonly beforeVersion: Version;
+    readonly operations: SMOFromServer[];
 };

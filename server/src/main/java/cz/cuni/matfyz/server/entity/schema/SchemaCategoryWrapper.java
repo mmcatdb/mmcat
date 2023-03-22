@@ -1,14 +1,12 @@
 package cz.cuni.matfyz.server.entity.schema;
 
-import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.evolution.Version;
+import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.repository.utils.Utils;
-import cz.cuni.matfyz.server.utils.Position;
 
 import java.io.IOException;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -46,20 +44,34 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         );
     }
 
-    public static SchemaCategoryWrapper fromSchemaCategory(SchemaCategory category, Id id, Version version, Map<Key, Position> positions) {
+    public static SchemaCategoryWrapper fromSchemaCategory(SchemaCategory category, SchemaCategoryContext context) {
         final var morphisms = category.allMorphisms().stream().map(SchemaMorphismWrapper::fromSchemaMorphism).toArray(SchemaMorphismWrapper[]::new);
-        final var objects = category.allObjects().stream().map(object -> SchemaObjectWrapper.fromSchemaObject(
-            object,
-            positions.getOrDefault(object.key(), new Position(0, 0))
-        )).toArray(SchemaObjectWrapper[]::new);
+        final var objects = category.allObjects().stream()
+            .map(object -> SchemaObjectWrapper.fromSchemaObject(object, context))
+            .toArray(SchemaObjectWrapper[]::new);
 
         return new SchemaCategoryWrapper(
-            id,
+            context.getId(),
             category.label,
-            version,
+            context.getVersion(),
             objects,
             morphisms
         );
+    }
+
+    public SchemaCategory toSchemaCategory(SchemaCategoryContext context) {
+        context.setId(id);
+        context.setVersion(version);
+
+        final var category = new SchemaCategory(label);
+
+        for (final var objectWrapper : objects)
+            category.addObject(objectWrapper.toSchemaObject(context));
+
+        for (final var morphismWrapper : morphisms)
+            category.addMorphism(morphismWrapper.toSchemaMorphism(context));
+
+        return category;
     }
 
     /**

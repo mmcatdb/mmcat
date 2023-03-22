@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.server.controller;
 
-import cz.cuni.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.server.entity.evolution.SchemaCategoryUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
