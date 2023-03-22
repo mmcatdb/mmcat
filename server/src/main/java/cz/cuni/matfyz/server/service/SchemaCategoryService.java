@@ -65,30 +65,6 @@ public class SchemaCategoryService {
             return null;
 
         return newWrapper;
-
-        
-        /*
-        var temporaryIdMap = new TreeMap<Integer, Id>();
-        for (var object : update.objects()) {
-            var generatedObjectId = objectRepository.add(object, id);
-            if (generatedObjectId == null)
-                return null;
-
-            temporaryIdMap.put(object.temporaryId(), generatedObjectId);
-        }
-
-        for (var morphism : update.morphisms()) {
-            var domId = morphism.domId() != null ? morphism.domId() : temporaryIdMap.get(morphism.temporaryDomId());
-            var codId = morphism.codId() != null ? morphism.codId() : temporaryIdMap.get(morphism.temporaryCodId());
-            var fixedMorphism = new SchemaMorphismUpdateFixed(domId, codId, morphism.jsonValue());
-
-            var morphismResult = morphismRepository.add(fixedMorphism, id);
-
-            if (morphismResult == null)
-                return null;
-        }
-
-        return find(id);
-         */
     }
+    
 }

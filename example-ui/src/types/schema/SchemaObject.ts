@@ -4,7 +4,7 @@ import type { Position } from "cytoscape";
 import { Key, ObjectIds, SignatureId, type KeyFromServer, type NonSignaturesType, type ObjectIdsFromServer, type SignatureIdFromServer } from "../identifiers";
 import { ComparablePosition, type PositionUpdate } from "./Position";
 import type { LogicalModel } from "../logicalModel";
-import type { Entity, Id } from "../id";
+import type { Id } from "../id";
 
 export type SchemaObjectFromServer = {
     key: KeyFromServer;
@@ -55,7 +55,7 @@ export class SchemaObject {
 
         object.key = key;
         object.label = label;
-        object.position = new ComparablePosition({ x: 0, y: 0});
+        object.position = new ComparablePosition({ x: 0, y: 0 });
         object.ids = ids;
         object._updateDefaultSuperId(); // TODO maybe a computed variable?
 
@@ -136,9 +136,3 @@ export class SchemaObject {
         return !!other && this.key.equals(other.key);
     }
 }
-
-export type SchemaObjectUpdate = {
-    temporaryId: Id;
-    position: Position;
-    jsonValue: string;
-};

@@ -1,5 +1,4 @@
 import type { Iri } from "@/types/integration/";
-import type { Id } from "../id";
 import { Key, Signature, type KeyFromServer, type SignatureFromServer } from "../identifiers";
 
 export type SchemaMorphismFromServer = {
@@ -125,11 +124,3 @@ export class SchemaMorphism {
         return !!other && this.signature.equals(other.signature);
     }
 }
-
-export type SchemaMorphismUpdate = {
-    domId?: Id;
-    codId?: Id;
-    temporaryDomId?: Id;
-    temporaryCodId?: Id;
-    jsonValue: string;
-};
