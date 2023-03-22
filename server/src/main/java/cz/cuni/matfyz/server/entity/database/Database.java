@@ -68,7 +68,7 @@ public class Database extends Entity {
     }
 
     public String toJsonValue() throws JsonProcessingException {
-        return Utils.toJson(this);
+        return Utils.toJsonWithoutProperties(this, "id");
     }
 
     public DatabaseInfo toInfo() {
