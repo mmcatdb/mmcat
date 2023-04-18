@@ -1,83 +1,64 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Graph, Node } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
+import { computed, ref } from 'vue';
 import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import AddId from './AddId.vue';
-import { Type } from '@/types/identifiers';
 import IriDisplay from '@/components/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
-export default defineComponent({
-    expose: [ 'changed' ],
-    components: {
-        ObjectIdsDisplay,
-        AddId,
-        ButtonIcon,
-        IconPlusSquare,
-        IriDisplay,
-        ValueContainer,
-        ValueRow,
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true,
-        },
-        node: {
-            type: Object as () => Node,
-            required: true,
-        },
-    },
-    emits: [ 'save', 'cancel', 'update' ],
-    data() {
-        return {
-            label: this.node.schemaObject.label,
-            addingId: false,
-            Type,
-        };
-    },
-    computed: {
-        changed(): boolean {
-            return this.label !== this.node.schemaObject.label || this.addingId;
-        },
-        isNew(): boolean {
-            return this.node.schemaObject.isNew;
-        },
-    },
-    methods: {
-        save() {
-            this.node.schemaObject.setLabel(this.label);
+type EditObjectProps = {
+    graph: Graph;
+    node: Node;
+};
 
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        },
-        deleteFunction() {
-            this.node.neighbours.forEach(neighbour => {
-                this.graph.schemaCategory.deleteMorphism(neighbour.edge.schemaMorphism);
-                this.graph.deleteEdge(neighbour.edge);
-            });
+const props = defineProps<EditObjectProps>();
 
-            this.graph.schemaCategory.deleteObject(this.node.schemaObject);
-            this.graph.deleteNode(this.node);
+const emit = defineEmits([ 'save', 'cancel', 'update' ]);
 
-            this.$emit('save');
-        },
-        startAddingId() {
-            this.addingId = true;
-        },
-        finishAddingId() {
-            this.addingId = false;
-        },
-        cancelAddingId() {
-            this.addingId = false;
-        },
-    },
-});
+const label = ref(props.node.schemaObject.label);
+const addingId = ref(false);
+
+const changed = computed(() => label.value !== props.node.schemaObject.label || addingId.value);
+const isNew = computed(() => props.node.schemaObject.isNew);
+
+defineExpose({ changed });
+
+function save() {
+    props.node.schemaObject.setLabel(label.value);
+
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
+
+function deleteFunction() {
+    props.node.neighbours.forEach(neighbour => {
+        props.graph.schemaCategory.deleteMorphism(neighbour.edge.schemaMorphism);
+        props.graph.deleteEdge(neighbour.edge);
+    });
+
+    props.graph.schemaCategory.deleteObject(props.node.schemaObject);
+    props.graph.deleteNode(props.node);
+
+    emit('save');
+}
+
+function startAddingId() {
+    addingId.value = true;
+}
+
+function finishAddingId() {
+    addingId.value = false;
+}
+
+function cancelAddingId() {
+    addingId.value = false;
+}
 </script>
 
 <template>

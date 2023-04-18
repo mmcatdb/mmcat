@@ -1,56 +1,45 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Graph } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
+import { ref } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { computed } from '@vue/reactivity';
 
-export default defineComponent({
-    components: {
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        }
-    },
-    emits: [ 'save', 'cancel' ],
-    data() {
-        return {
-            label: '',
-            iri: '',
-            pimIri: '',
-            keyIsValid: true
-        };
-    },
-    computed: {
-        iriIsAvailable() {
-            return this.graph.schemaCategory.iriIsAvailable(this.iri);
-        }
-    },
-    methods: {
-        save() {
-            if (this.iri) {
-                const object = this.graph.schemaCategory.createObjectWithIri(this.label, undefined, this.iri, this.pimIri);
-                if (!object)
-                    return;
+type AddObjectProps = {
+    graph: Graph;
+};
 
-                this.graph.createNode(object, 'new');
-            }
-            else {
-                const object = this.graph.schemaCategory.createObject(this.label);
-                this.graph.createNode(object, 'new');
-            }
+const props = defineProps<AddObjectProps>();
 
-            this.graph.layout();
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        }
+const emit = defineEmits([ 'save', 'cancel' ]);
+
+const label = ref('');
+const iri = ref('');
+const pimIri = ref('');
+const keyIsValid = ref(true);
+
+const iriIsAvailable = computed(() => props.graph.schemaCategory.iriIsAvailable(iri.value));
+
+function save() {
+    if (iri.value) {
+        const object = props.graph.schemaCategory.createObjectWithIri(label.value, undefined, iri.value, pimIri.value);
+        if (!object)
+            return;
+
+        props.graph.createNode(object, 'new');
     }
-});
+    else {
+        const object = props.graph.schemaCategory.createObject(label.value);
+        props.graph.createNode(object, 'new');
+    }
+
+    props.graph.layout();
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
 </script>
 
 <template>

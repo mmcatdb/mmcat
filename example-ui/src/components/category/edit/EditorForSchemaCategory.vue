@@ -1,9 +1,10 @@
-<script lang="ts">
+<script setup lang="ts">
 import { Edge, SelectionType, type Graph, type Node } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { SchemaCategory } from '@/types/schema';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
+import AddComplexStructure from './AddComplexStructure.vue';
 import EditObject from './EditObject.vue';
 import EditMorphism from './EditMorphism.vue';
 import Integration from '../../integration/Integration.vue';
@@ -16,10 +17,11 @@ enum State {
     Default,
     AddObject,
     AddMorphism,
+    AddComplexStructure,
     EditObject,
     EditMorphism,
     EditGroup,
-    Integration
+    Integration,
 }
 
 type GenericStateValue<State, Value> = { type: State } & Value;
@@ -28,181 +30,182 @@ type StateValue =
     GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddObject, unknown> |
     GenericStateValue<State.AddMorphism, unknown> |
+    GenericStateValue<State.AddComplexStructure, unknown> |
     GenericStateValue<State.EditObject, { node: Node }> |
     GenericStateValue<State.EditMorphism, { edge: Edge }> |
     GenericStateValue<State.EditGroup, { nodes: Node[] }> |
     GenericStateValue<State.Integration, unknown>;
 
-export default defineComponent({
-    components: {
-        AddObject,
-        AddMorphism,
-        EditObject,
-        EditMorphism,
-        Divider,
-        Integration,
-        EditGroup,
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true,
-        },
-    },
-    emits: [ 'save' ],
-    data() {
-        return {
-            state: { type: State.Default } as StateValue,
-            State,
-        };
-    },
-    mounted() {
-        this.graph.addNodeListener('tap', this.onNodeTapHandler);
-        this.graph.addEdgeListener('tap', this.onEdgeTapHandler);
-        this.graph.addCanvasListener('tap', this.onCanvasTapHandler);
-    },
-    unmounted() {
-        this.graph.removeNodeListener('tap', this.onNodeTapHandler);
-        this.graph.removeEdgeListener('tap', this.onEdgeTapHandler);
-        this.graph.removeCanvasListener('tap', this.onCanvasTapHandler);
-    },
-    methods: {
-        addObjectClicked() {
-            this.state = { type: State.AddObject };
-        },
-        addMorphismClicked() {
-            this.state = { type: State.AddMorphism };
-        },
-        integrationClicked() {
-            this.state = { type: State.Integration };
-        },
-        setStateToDefault() {
-            if (this.state.type === State.EditObject)
-                this.state.node.unselect();
+type EditorForSchemaCategoryProps = {
+    graph: Graph;
+};
 
-            if (this.state.type === State.EditMorphism)
-                this.state.edge.unselect();
+const props = defineProps<EditorForSchemaCategoryProps>();
 
-            if (this.state.type === State.EditGroup)
-                this.state.nodes.forEach(node => node.unselect());
+const emit = defineEmits([ 'save' ]);
 
-            this.state = { type: State.Default };
-        },
-        onNodeTapHandler(node: Node) {
-            if (this.state.type === State.EditGroup) {
-                if (isKeyPressed(Key.Shift)) {
-                    const currentLength = this.state.nodes.length;
-                    this.state.nodes = this.state.nodes.filter(n => !n.equals(node));
+const state = ref<StateValue>({ type: State.Default });
 
-                    if (this.state.nodes.length < currentLength) {
-                        node.unselect();
+const editedObject = ref<InstanceType<typeof EditObject>>();
+const editedMorphism = ref<InstanceType<typeof EditMorphism>>();
 
-                        if (this.state.nodes.length === 1) {
-                            this.state = { type: State.EditObject, node: this.state.nodes[0] };
-                            return;
-                        }
-                    }
-                    else {
-                        this.state.nodes.push(node);
-                        node.select({ type: SelectionType.Root, level: 0 });
-                        return;
-                    }
-                }
-                else {
-                    // Disband the group and then proceed in the same way as if the node was clicked.
-                    this.state.nodes.forEach(n => n.unselect());
-                    node.select({ type: SelectionType.Root, level: 0 });
-                    this.state = { type: State.EditObject, node };
-                    return;
-                }
-            }
-
-            if (this.state.type !== State.Default && this.state.type !== State.EditObject)
-                return;
-
-            if (this.state.type === State.EditObject) {
-                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed) {
-                    return;
-                }
-                else if (this.state.node.equals(node)) {
-                    this.setStateToDefault();
-                    return;
-                }
-                else {
-                    if (isKeyPressed(Key.Shift)) {
-                        this.state = { type: State.EditGroup, nodes: [ this.state.node, node ] };
-                        node.select({ type: SelectionType.Root, level: 0 });
-                        return;
-                    }
-                    else {
-                        this.state.node.unselect();
-                    }
-                }
-            }
-
-            node.select({ type: SelectionType.Root, level: 0 });
-            this.state = { type: State.EditObject, node };
-        },
-        onEdgeTapHandler(edge: Edge) {
-            if (this.state.type === State.EditObject) {
-                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed)
-                    return;
-
-                this.state.node.unselect();
-                this.state = { type: State.EditMorphism, edge };
-                return;
-            }
-
-            if (this.state.type !== State.Default && this.state.type !== State.EditMorphism)
-                return;
-
-            if (this.state.type === State.EditMorphism) {
-                if ((this.$refs.editedMorphism as InstanceType<typeof EditMorphism>).changed) {
-                    return;
-                }
-                else if (this.state.edge.equals(edge)) {
-                    this.setStateToDefault();
-                    return;
-                }
-                else {
-                    this.state.edge.unselect();
-                }
-            }
-
-            this.state = { type: State.EditMorphism, edge };
-        },
-        onCanvasTapHandler() {
-            if (this.state.type === State.EditObject) {
-                if ((this.$refs.editedObject as InstanceType<typeof EditObject>).changed)
-                    return;
-                this.setStateToDefault();
-            }
-
-            if (this.state.type === State.EditMorphism) {
-                if ((this.$refs.editedMorphism as InstanceType<typeof EditMorphism>).changed)
-                    return;
-                this.setStateToDefault();
-            }
-
-            if (this.state.type === State.EditGroup)
-                this.setStateToDefault();
-        },
-        async save() {
-            const updateObject = this.graph.schemaCategory.getUpdateObject();
-            console.log(this.graph.schemaCategory);
-            if (!updateObject) {
-                console.log('Update object invalid');
-                return;
-            }
-
-            const result = await API.schemas.updateCategoryWrapper({ id: this.graph.schemaCategory.id }, updateObject);
-            if (result.status) {
-                const schemaCategory = SchemaCategory.fromServer(result.data);
-                this.$emit('save', schemaCategory);
-            }
-        },
-    },
+onMounted(() => {
+    props.graph.addNodeListener('tap', onNodeTapHandler);
+    props.graph.addEdgeListener('tap', onEdgeTapHandler);
+    props.graph.addCanvasListener('tap', onCanvasTapHandler);
 });
+
+onUnmounted(() => {
+    props.graph.removeNodeListener('tap', onNodeTapHandler);
+    props.graph.removeEdgeListener('tap', onEdgeTapHandler);
+    props.graph.removeCanvasListener('tap', onCanvasTapHandler);
+});
+
+function addObjectClicked() {
+    state.value = { type: State.AddObject };
+}
+
+function addMorphismClicked() {
+    state.value = { type: State.AddMorphism };
+}
+
+function addComplexStructureClicked() {
+    state.value = { type: State.AddComplexStructure };
+}
+
+function integrationClicked() {
+    state.value = { type: State.Integration };
+}
+
+function setStateToDefault() {
+    if (state.value.type === State.EditObject)
+        state.value.node.unselect();
+
+    if (state.value.type === State.EditMorphism)
+        state.value.edge.unselect();
+
+    if (state.value.type === State.EditGroup)
+        state.value.nodes.forEach(node => node.unselect());
+
+    state.value = { type: State.Default };
+}
+
+function onNodeTapHandler(node: Node) {
+    if (state.value.type === State.EditGroup) {
+        if (isKeyPressed(Key.Shift)) {
+            const currentLength = state.value.nodes.length;
+            state.value.nodes = state.value.nodes.filter(n => !n.equals(node));
+
+            if (state.value.nodes.length < currentLength) {
+                node.unselect();
+
+                if (state.value.nodes.length === 1) {
+                    state.value = { type: State.EditObject, node: state.value.nodes[0] };
+                    return;
+                }
+            }
+            else {
+                state.value.nodes.push(node);
+                node.select({ type: SelectionType.Root, level: 0 });
+                return;
+            }
+        }
+        else {
+            // Disband the group and then proceed in the same way as if the node was clicked.
+            state.value.nodes.forEach(n => n.unselect());
+            node.select({ type: SelectionType.Root, level: 0 });
+            state.value = { type: State.EditObject, node };
+            return;
+        }
+    }
+
+    if (state.value.type !== State.Default && state.value.type !== State.EditObject)
+        return;
+
+    if (state.value.type === State.EditObject) {
+        if (editedObject.value?.changed) {
+            return;
+        }
+        else if (state.value.node.equals(node)) {
+            setStateToDefault();
+            return;
+        }
+        else {
+            if (isKeyPressed(Key.Shift)) {
+                state.value = { type: State.EditGroup, nodes: [ state.value.node, node ] };
+                node.select({ type: SelectionType.Root, level: 0 });
+                return;
+            }
+            else {
+                state.value.node.unselect();
+            }
+        }
+    }
+
+    node.select({ type: SelectionType.Root, level: 0 });
+    state.value = { type: State.EditObject, node };
+}
+
+function onEdgeTapHandler(edge: Edge) {
+    if (state.value.type === State.EditObject) {
+        if (editedObject.value?.changed)
+            return;
+
+        state.value.node.unselect();
+        state.value = { type: State.EditMorphism, edge };
+        return;
+    }
+
+    if (state.value.type !== State.Default && state.value.type !== State.EditMorphism)
+        return;
+
+    if (state.value.type === State.EditMorphism) {
+        if (editedMorphism.value?.changed) {
+            return;
+        }
+        else if (state.value.edge.equals(edge)) {
+            setStateToDefault();
+            return;
+        }
+        else {
+            state.value.edge.unselect();
+        }
+    }
+
+    state.value = { type: State.EditMorphism, edge };
+}
+
+function onCanvasTapHandler() {
+    if (state.value.type === State.EditObject) {
+        if (editedObject.value?.changed)
+            return;
+        setStateToDefault();
+    }
+
+    if (state.value.type === State.EditMorphism) {
+        if (editedMorphism.value?.changed)
+            return;
+        setStateToDefault();
+    }
+
+    if (state.value.type === State.EditGroup)
+        setStateToDefault();
+}
+
+async function save() {
+    const updateObject = props.graph.schemaCategory.getUpdateObject();
+    console.log(props.graph.schemaCategory);
+    if (!updateObject) {
+        console.log('Update object invalid');
+        return;
+    }
+
+    const result = await API.schemas.updateCategoryWrapper({ id: props.graph.schemaCategory.id }, updateObject);
+    if (result.status) {
+        const schemaCategory = SchemaCategory.fromServer(result.data);
+        emit('save', schemaCategory);
+    }
+}
 </script>
 
 <template>
@@ -216,6 +219,9 @@ export default defineComponent({
             </button>
             <button @click="addMorphismClicked">
                 Add morphism
+            </button>
+            <button @click="addComplexStructureClicked">
+                More ...
             </button>
             <Divider />
             <button>
@@ -245,6 +251,13 @@ export default defineComponent({
         </template>
         <template v-else-if="state.type === State.AddMorphism">
             <AddMorphism
+                :graph="graph"
+                @save="setStateToDefault"
+                @cancel="setStateToDefault"
+            />
+        </template>
+        <template v-else-if="state.type === State.AddComplexStructure">
+            <AddComplexStructure
                 :graph="graph"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
@@ -291,12 +304,6 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
 }
-
-/*
-.options button + button {
-    margin-top: 12px;
-}
-*/
 
 .options button {
     margin-top: 6px;

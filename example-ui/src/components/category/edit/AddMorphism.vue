@@ -1,144 +1,131 @@
-<script lang="ts">
+<script setup lang="ts">
 import { SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { Cardinality, type Min } from '@/types/schema';
-import { defineComponent } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import MinimumInput from './MinimumInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { computed } from '@vue/reactivity';
 
-export enum NodeIndices {
+enum NodeIndices {
     First = 0,
     Second = 1
 }
 
-export default defineComponent({
-    components: {
-        MinimumInput,
-        ValueContainer,
-        ValueRow,
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true,
-        },
-    },
-    emits: [ 'save', 'cancel' ],
-    data() {
-        return {
-            node1: null as Node | null,
-            node2: null as Node | null,
-            label: '',
-            iri: '',
-            pimIri: '',
-            lastSelectedNode: NodeIndices.First,
-            temporayEdge: null as TemporaryEdge | null,
-            min: Cardinality.One as Min,
-        };
-    },
-    computed: {
-        nodesSelected() {
-            return !!this.node1 && !!this.node2;
-        },
-        iriIsAvailable() {
-            return this.graph.schemaCategory.iriIsAvailable(this.iri);
-        },
-    },
-    mounted() {
-        this.graph.addNodeListener('tap', this.onNodeTapHandler);
-    },
-    unmounted() {
-        this.graph.removeNodeListener('tap', this.onNodeTapHandler);
-        this.unselectAll();
-    },
-    methods: {
-        save() {
-            if (!this.node1 || !this.node2)
-                return;
+type AddMorphismProps = {
+    graph: Graph;
+};
 
-            if (this.iri) {
-                const morphism = this.graph.schemaCategory.createMorphismWithIri(this.node1.schemaObject, this.node2.schemaObject, this.min, this.iri, this.pimIri, this.label);
-                if (!morphism)
-                    return;
+const props = defineProps<AddMorphismProps>();
 
-                this.temporayEdge?.delete();
-                this.graph.createEdge(morphism, 'new');
-            }
-            else {
-                const morphism = this.graph.schemaCategory.createMorphism(this.node1.schemaObject, this.node2.schemaObject, this.min, this.label);
-                this.temporayEdge?.delete();
-                this.graph.createEdge(morphism, 'new');
-            }
+const emit = defineEmits([ 'save', 'cancel' ]);
 
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        },
-        unselectAll() {
-            this.node1?.unselect();
-            this.node2?.unselect();
-            this.temporayEdge?.delete();
-        },
-        selectAll() {
-            this.node1?.select({ type: SelectionType.Selected, level: 0 });
-            this.node2?.select({ type: SelectionType.Selected, level: 1 });
-            this.temporayEdge = (!!this.node1 && !!this.node2) ? this.graph.createTemporaryEdge(this.node1, this.node2) : null;
-        },
-        onNodeTapHandler(node: Node): void {
-            this.unselectAll();
+const node1 = ref<Node | null>(null);
+const node2 = ref<Node | null>(null);
+const label = ref('');
+const iri = ref('');
+const pimIri = ref('');
+const lastSelectedNode = ref(NodeIndices.First);
+const temporayEdge = ref<TemporaryEdge | null>(null);
+const min = ref<Min>(Cardinality.One);
 
-            let changed = false;
-            if (node.equals(this.node1)) {
-                this.node1 = null;
-                changed = true;
-            }
+const nodesSelected = computed(() => !!node1.value && !!node2.value);
+const iriIsAvailable = computed(() => props.graph.schemaCategory.iriIsAvailable(iri.value));
 
-            if (node.equals(this.node2)) {
-                this.node2 = null;
-                changed = true;
-            }
+onMounted(() => props.graph.addNodeListener('tap', onNodeTapHandler));
 
-            if (!changed)
-                this.handleTapOnNotSelectedNode(node);
-
-            this.selectAll();
-        },
-        handleTapOnNotSelectedNode(node: Node) {
-            // Which node should be changed.
-            const changingNodeIndex = this.node1 === null
-                ? NodeIndices.First
-                : (
-                    this.node2 === null
-                        ? NodeIndices.Second
-                        : this.lastSelectedNode
-                );
-
-            this.setNodeOnIndex(node, changingNodeIndex);
-            this.lastSelectedNode = changingNodeIndex;
-        },
-        indexToNode(index: NodeIndices): Node | null {
-            return index === NodeIndices.First ? this.node1 : this.node2;
-        },
-        setNodeOnIndex(node: Node, index: NodeIndices) {
-            if (index === NodeIndices.First)
-                this.node1 = node;
-            else
-                this.node2 = node;
-        },
-        switchNodes() {
-            if (this.node1 === null || this.node2 === null)
-                return;
-
-            const swap = this.node1;
-            this.node1 = this.node2;
-            this.node2 = swap;
-
-            this.node1.select({ type: SelectionType.Selected, level: 0 });
-            this.node2.select({ type: SelectionType.Selected, level: 1 });
-        },
-    },
+onUnmounted(() => {
+    props.graph.removeNodeListener('tap', onNodeTapHandler);
+    unselectAll();
 });
+
+function save() {
+    if (!node1.value || !node2.value)
+        return;
+
+    if (iri.value) {
+        const morphism = props.graph.schemaCategory.createMorphismWithIri(node1.value.schemaObject, node2.value.schemaObject, min.value, iri.value, pimIri.value, label.value);
+        if (!morphism)
+            return;
+
+        temporayEdge.value?.delete();
+        props.graph.createEdge(morphism, 'new');
+    }
+    else {
+        const morphism = props.graph.schemaCategory.createMorphism(node1.value.schemaObject, node2.value.schemaObject, min.value, label.value);
+        temporayEdge.value?.delete();
+        props.graph.createEdge(morphism, 'new');
+    }
+
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
+
+function unselectAll() {
+    node1.value?.unselect();
+    node2.value?.unselect();
+    temporayEdge.value?.delete();
+}
+
+function selectAll() {
+    node1.value?.select({ type: SelectionType.Selected, level: 0 });
+    node2.value?.select({ type: SelectionType.Selected, level: 1 });
+    temporayEdge.value = (!!node1.value && !!node2.value) ? props.graph.createTemporaryEdge(node1.value, node2.value) : null;
+}
+
+function onNodeTapHandler(node: Node): void {
+    unselectAll();
+
+    let changed = false;
+    if (node.equals(node1.value)) {
+        node1.value = null;
+        changed = true;
+    }
+
+    if (node.equals(node2.value)) {
+        node2.value = null;
+        changed = true;
+    }
+
+    if (!changed)
+        handleTapOnNotSelectedNode(node);
+
+    selectAll();
+}
+
+function handleTapOnNotSelectedNode(node: Node) {
+    // Which node should be changed.
+    const changingNodeIndex = node1.value === null
+        ? NodeIndices.First
+        : node2.value === null
+            ? NodeIndices.Second
+            : lastSelectedNode.value;
+
+    setNodeOnIndex(node, changingNodeIndex);
+    lastSelectedNode.value = changingNodeIndex;
+}
+
+function setNodeOnIndex(node: Node, index: NodeIndices) {
+    if (index === NodeIndices.First)
+        node1.value = node;
+    else
+        node2.value = node;
+}
+
+function switchNodes() {
+    if (node1.value === null || node2.value === null)
+        return;
+
+    const swap = node1.value;
+    node1.value = node2.value;
+    node2.value = swap;
+
+    node1.value.select({ type: SelectionType.Selected, level: 0 });
+    node2.value.select({ type: SelectionType.Selected, level: 1 });
+}
 </script>
 
 <template>
