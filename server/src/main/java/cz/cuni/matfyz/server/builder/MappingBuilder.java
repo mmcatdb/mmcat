@@ -32,7 +32,7 @@ public class MappingBuilder {
 
         return new Mapping(
             category,
-            category.getObject(mappingWrapper.rootObject().key()),
+            category.getObject(mappingWrapper.rootObjectKey()),
             mappingWrapper.accessPath(),
             mappingWrapper.kindName(),
             List.of(mappingWrapper.primaryKey())

@@ -39,8 +39,11 @@ const category = useSchemaCategory();
                     :error="true"
                 />
             </ValueRow>
-            <ValueRow label="Root object:">
-                {{ mapping.rootObject.label }}
+            <ValueRow label="Root object key:">
+                <!--
+                    TODO - load whole schema category and display the object name that corresponds to this key
+                -->
+                {{ mapping.rootObjectKey }}
             </ValueRow>
             <ValueRow label="Primary key:">
                 <SignatureIdDisplay

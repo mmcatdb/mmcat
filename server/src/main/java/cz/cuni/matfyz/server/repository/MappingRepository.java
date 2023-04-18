@@ -11,7 +11,6 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.mapping.MappingInfo;
 import cz.cuni.matfyz.server.entity.mapping.MappingInit;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
-import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
@@ -32,29 +31,6 @@ public class MappingRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    @Autowired
-    private SchemaCategoryRepository categoryRepository;
-
-    private record RawMappingWrapper(
-        Id id,
-        Id logicalModelId,
-        Id categoryId,
-        MappingJsonValue parsedJsonValue
-    ) {
-        public MappingWrapper toMapping(SchemaObjectWrapper rootObject) {
-            return new MappingWrapper(
-                id,
-                logicalModelId,
-                rootObject,
-                parsedJsonValue.primaryKey,
-                parsedJsonValue.kindName,
-                parsedJsonValue.accessPath,
-                parsedJsonValue.version,
-                parsedJsonValue.categoryVersion
-            );
-        }
-    }
-
     public record MappingJsonValue(
         Key rootObjectKey,
         Signature[] primaryKey,
@@ -68,7 +44,7 @@ public class MappingRepository {
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(MappingJsonValue.class);
 
     public MappingWrapper find(Id id) {
-        final RawMappingWrapper rawMapping = db.get((connection, output) -> {
+        return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT
                     mapping.json_value,
@@ -84,21 +60,15 @@ public class MappingRepository {
             if (resultSet.next()) {
                 String jsonValue = resultSet.getString("json_value");
                 Id logicalModelId = getId(resultSet, "logical_model_id");
-                Id categoryId = getId(resultSet, "schema_category_id");
+                //Id categoryId = getId(resultSet, "schema_category_id");
                 final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
-
-                output.set(new RawMappingWrapper(id, logicalModelId, categoryId, parsedJsonValue));
+                output.set(new MappingWrapper(id, logicalModelId, parsedJsonValue));
             }
         }, "Mapping with id: %s not found.", id);
-
-        return DatabaseWrapper.join(
-            mapping -> mapping.toMapping(categoryRepository.findObject(mapping.categoryId, mapping.parsedJsonValue.rootObjectKey)),
-            rawMapping
-        );
     }
 
     public List<MappingWrapper> findAll(Id logicalModelId) {
-        List<RawMappingWrapper> rawMappings = db.getMultiple((connection, output) -> {
+        return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                 SELECT
                     mapping.id,
@@ -115,26 +85,12 @@ public class MappingRepository {
             while (resultSet.next()) {
                 Id foundId = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                Id categoryId = getId(resultSet, "schema_category_id");
+                //Id categoryId = getId(resultSet, "schema_category_id");
                 final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
 
-                output.add(new RawMappingWrapper(foundId, logicalModelId, categoryId, parsedJsonValue));
+                output.add(new MappingWrapper(foundId, logicalModelId, parsedJsonValue));
             }
         });
-
-        if (rawMappings.isEmpty())
-            return List.of();
-
-        final var categoryId = rawMappings.get(0).categoryId;
-        final var objects = List.of(categoryRepository.find(categoryId).objects);
-
-        return DatabaseWrapper.joinMultiple(
-            (mapping, object) -> mapping.parsedJsonValue.rootObjectKey.equals(object.key()),
-            (mapping, object) -> mapping.toMapping(object),
-            rawMappings,
-            objects,
-            mapping -> "Root object with key: " + mapping.parsedJsonValue.rootObjectKey + " not found."
-        );
     }
 
     public List<MappingInfo> findAllInfos(Id logicalModelId) {
