@@ -1,13 +1,17 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Category;
+import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.category.Signature.Type;
+import cz.cuni.matfyz.core.exception.MorphismNotFoundException;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -48,9 +52,15 @@ public class InstanceCategory implements Category {
     }
     
     public InstanceMorphism getMorphism(Signature signature) {
+        if (signature.isBaseDual())
+            throw new MorphismNotFoundException("Instance morphism cannot have dual signature: " + signature);
+
         return morphisms.computeIfAbsent(signature, x -> {
+            if (x.isEmpty() || x.isBase())
+                throw new MorphismNotFoundException("Instance morphism not found for non-composite signature: " + x);
+
             // This must be a composite morphism. These are created dynamically so we have to add it dynamically.
-            SchemaMorphism schemaMorphism = schema.getMorphism(signature);
+            SchemaMorphism schemaMorphism = schema.getMorphism(x);
             InstanceObject dom = getObject(schemaMorphism.dom().key());
             InstanceObject cod = getObject(schemaMorphism.cod().key());
 
@@ -61,11 +71,78 @@ public class InstanceCategory implements Category {
     public InstanceMorphism getMorphism(SchemaMorphism schemaMorphism) {
         return this.getMorphism(schemaMorphism.signature());
     }
-    
-    public InstanceMorphism dual(Signature signatureOfOriginal) {
-        return getMorphism(signatureOfOriginal.dual());
-    }
 
+    public record InstanceEdge(
+        InstanceMorphism morphism,
+        boolean direction
+    ) {
+        public Signature signature() {
+            return direction ? morphism.signature() : morphism.signature().dual();
+        }
+
+        public InstanceObject dom() {
+            return direction ? morphism.dom() : morphism.cod();
+        }
+
+        public InstanceObject cod() {
+            return direction ? morphism.cod() : morphism.dom();
+        }
+
+        public boolean isArray() {
+            return !direction;
+        }
+
+        public void createMapping(DomainRow domainRow, DomainRow codomainRow) {
+            if (direction)
+                morphism.createMapping(domainRow, codomainRow);
+            else
+                morphism.createMapping(codomainRow, domainRow);
+        }
+    }
+    
+    public InstanceEdge getEdge(Signature signature) {
+        return new InstanceEdge(
+            getMorphism(signature.isBaseDual() ? signature.dual() : signature),
+            !signature.isBaseDual()
+        );
+    }
+        
+    public record InstancePath(
+        List<InstanceEdge> edges,
+        Signature signature
+    ) {
+        public InstanceObject dom() {
+            return edges.get(0).dom();
+        }
+
+        public InstanceObject cod() {
+            return edges.get(edges.size() - 1).cod();
+        }
+
+        public boolean isArray() {
+            for (final var edge : edges)
+                if (edge.isArray())
+                    return true;
+
+            return false;
+        }
+
+        public Min min() {
+            for (final var edge : edges)
+                if (edge.isArray() || edge.morphism.min() == Min.ZERO)
+                    return Min.ZERO;
+
+            return Min.ONE;
+        }
+    }
+        
+    public InstancePath getPath(Signature signature) {
+        final var list = new ArrayList<InstanceEdge>();
+        signature.toBases().stream().map(this::getEdge).forEach(list::add);
+        
+        return new InstancePath(list, signature);
+    }
+    
     public void createReferences() {
         for (var object : objects.values())
             for (var signature : object.superId().signatures())
@@ -83,8 +160,8 @@ public class InstanceCategory implements Category {
             var currentBase = baseSignatures.get(i);
             var signatureInTarget = Signature.concatenate(baseSignatures.subList(i + 1, baseSignatures.size()));
             signatureToTarget = signatureToTarget.concatenate(currentBase);
-            
-            var pathFromTarget = getMorphism(signatureToTarget.dual());
+
+            var pathFromTarget = getPath(signatureToTarget.dual());
             var currentTarget = pathFromTarget.cod();
             if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;

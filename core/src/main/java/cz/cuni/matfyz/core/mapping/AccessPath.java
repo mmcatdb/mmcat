@@ -31,6 +31,17 @@ public abstract class AccessPath {
     public Name name() {
         return name;
     }
+
+    // TODO v3
+    // This should be determined by two things:
+    //  - if the min of the morphism is ONE, this should be true
+    //  - if not (or), the user should decide
+    //  - like it could be determined solely by the min of the morphism (if the morphism is not array), but what to do when it is array?
+    protected final boolean isRequired = false;
+
+    public boolean isRequired() {
+        return isRequired;
+    }
     
     protected AccessPath(Name name, Signature signature) {
         this.name = name;

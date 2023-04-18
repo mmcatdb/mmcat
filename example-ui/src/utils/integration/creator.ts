@@ -70,12 +70,12 @@ export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
             return;
         }
 
-        const schemaMorphism = graph.schemaCategory.createMorphismWithDualWithIri(object1, object2, morphism.cardinalitySettings, morphism.iri, morphism.pimIri, morphism.label, morphism.tags);
+        const schemaMorphism = graph.schemaCategory.createMorphismWithIri(object1, object2, morphism.min, morphism.iri, morphism.pimIri, morphism.label, morphism.tags);
         if (!schemaMorphism)
             return;
 
-        const edges = graph.createEdgeWithDual(schemaMorphism, 'new');
-        createdMorphisms.set(morphism, edges[0]);
+        const edge = graph.createEdge(schemaMorphism, 'new');
+        createdMorphisms.set(morphism, edge);
     });
 
     // Only add ids on the newly created objects.

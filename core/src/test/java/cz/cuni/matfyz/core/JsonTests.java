@@ -9,12 +9,11 @@ import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.utils.UniqueIdProvider;
+import cz.cuni.matfyz.core.tests.TestData;
 
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +26,6 @@ public class JsonTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonTests.class);
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final TestData data = new TestData();
-
-    @BeforeEach
-    public void setUp() {
-        UniqueIdProvider.reset();
-    }
 
     @Test
     public void signature() {
@@ -71,7 +65,7 @@ public class JsonTests {
 
 
         final var json = """
-            {"ids": {"type": "Signatures", "signatureIds": [[[1]]]}, "key": {"value": 1}, "label": "Customer", "superId": [[1]]}
+            {"ids": {"type": "Signatures", "signatureIds": [["1"]]}, "key": {"value": 1}, "label": "Customer", "superId": ["1"]}
             """;
 
         LOGGER.info(mapper.writeValueAsString(mapper.readValue(json, SchemaObject.class)));

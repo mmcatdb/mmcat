@@ -1,7 +1,7 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Graph, PathSegment, Node } from '@/types/categoryGraph';
 import { SignatureIdFactory } from '@/types/identifiers';
-import { defineComponent } from 'vue';
+import { ref } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
 import SignatureIdDisplay from '../SignatureIdDisplay.vue';
@@ -10,67 +10,51 @@ import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import SignatureDisplay from '../SignatureDisplay.vue';
 
-export default defineComponent({
-    components: {
-        SignatureIdDisplay,
-        SignatureInput,
-        ButtonIcon,
-        IconPlusSquare,
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        },
-        node: {
-            type: Object as () => Node,
-            required: true
-        }
-    },
-    emits: [ 'save', 'cancel' ],
-    data() {
-        return {
-            signatureIdFactory: new SignatureIdFactory(),
-            addingSignature: false,
-            signature: SequenceSignature.empty(this.node),
-            idIsNotEmpty: false,
-            filter: {
-                function:
-                    (segment: PathSegment) =>
-                        segment.edge.schemaMorphism.min === Cardinality.One
-                        && segment.edge.schemaMorphism.max === Cardinality.One
-                // TODO make the id invalid later
-                // && segment.dual.max === Cardinality.Star;
-            }
-        };
-    },
-    methods: {
-        save() {
-            this.node.addSignatureId(this.signatureIdFactory.signatureId);
+type AddComplexIdProps = {
+    graph: Graph;
+    node: Node;
+};
 
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        },
-        startAddingSignature() {
-            this.signature = SequenceSignature.empty(this.node);
-            this.addingSignature = true;
-            this.idIsNotEmpty = false;
-        },
-        cancelAddingSignature() {
-            this.addingSignature = false;
-        },
-        addSignature() {
-            this.signatureIdFactory.addSignature(this.signature.toSignature());
-            this.addingSignature = false;
-            this.idIsNotEmpty = true;
-        }
-    }
-});
+const props = defineProps<AddComplexIdProps>();
+
+const emit = defineEmits([ 'save', 'cancel' ]);
+
+const signatureIdFactory = ref(new SignatureIdFactory());
+const addingSignature = ref(false);
+const signature = ref(SequenceSignature.empty(props.node));
+const idIsNotEmpty = ref(false);
+
+const filter = {
+    function: (segment: PathSegment) => segment.direction && segment.edge.schemaMorphism.min === Cardinality.One,
+};
+
+function save() {
+    props.node.addSignatureId(signatureIdFactory.value.signatureId);
+
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
+
+function startAddingSignature() {
+    signature.value = SequenceSignature.empty(props.node);
+    addingSignature.value = true;
+    idIsNotEmpty.value = false;
+}
+
+function cancelAddingSignature() {
+    addingSignature.value = false;
+}
+
+function addSignature() {
+    signatureIdFactory.value.addSignature(signature.value.toSignature());
+    addingSignature.value = false;
+    idIsNotEmpty.value = true;
+}
 </script>
 
 <template>
@@ -96,7 +80,7 @@ export default defineComponent({
         <h2>Add signature</h2>
         <ValueContainer>
             <ValueRow label="Signature:">
-                {{ signature }}
+                <SignatureDisplay :signature="signature" />
             </ValueRow>
         </ValueContainer>
         <SignatureInput

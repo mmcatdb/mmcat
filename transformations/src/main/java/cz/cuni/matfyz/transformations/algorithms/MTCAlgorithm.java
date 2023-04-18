@@ -3,7 +3,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceMorphism;
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.Merger;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
@@ -140,34 +140,37 @@ public class MTCAlgorithm {
         return merger.merge(superId, instanceObject);
     }
 
-    private DomainRow addRelation(InstanceMorphism morphism, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {
+    private DomainRow addRelation(InstancePath path, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {
         // First, create a domain row with technical id for each object between the domain and the codomain objects on the path of the morphism.
-        final var baseMorphisms = morphism.bases();
         var currentDomainRow = parentRow;
 
         var parentToCurrent = Signature.createEmpty();
-        var currentToChild = morphism.signature();
+        var currentToChild = path.signature();
 
-        for (var baseMorphism : baseMorphisms) {
-            var instanceObject = baseMorphism.cod();
+        for (final var edge : path.edges()) {
+            var instanceObject = edge.cod();
             
             parentToCurrent = parentToCurrent.concatenate(currentToChild.getFirst());
             currentToChild = currentToChild.cutFirst();
             
             // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
-            if (!instanceObject.equals(morphism.cod())) {
-                var superId = fetchSuperIdForTechnicalRow(instanceObject, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
-                currentDomainRow = InstanceObject.getOrCreateRowWithBaseMorphism(superId, currentDomainRow, baseMorphism);
-            }
+            //if (!instanceObject.equals(morphism.cod())) {
+            final var superId = fetchSuperIdForTechnicalRow(instanceObject, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
+            currentDomainRow = InstanceObject.getOrCreateRowWithEdge(superId, currentDomainRow, edge);
+            //}
+            /*
             else {
-                baseMorphism.createMappingWithDual(currentDomainRow, childRow);
+                baseMorphism.createMapping(currentDomainRow, childRow);
                 // TODO both rows might need to reference the rows to which they are connected by the baseMorphism. Although it is rare, it should be adressed. See a similar comment in the Merger::createNewMappingsForMorphism() function.
             }
+            */
         }
 
+        return currentDomainRow;
+
         // Now try merging them from the codomain object to the domain object (the other way should be already merged).
-        final var merger = new Merger();
-        return merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
+        //final var merger = new Merger();
+        //return merger.mergeAlongMorphism(childRow, baseMorphisms.get(baseMorphisms.size() - 1).dual());
     }
 
     private SuperIdWithValues fetchSuperIdForTechnicalRow(InstanceObject instanceObject, DomainRow parentRow, Signature pathToParent, DomainRow childRow, Signature pathToChild, IComplexRecord parentRecord) {
@@ -202,7 +205,7 @@ public class MTCAlgorithm {
             if (child.signature.isEmpty())
                 continue;
 
-            InstanceMorphism parentToChild = category.getMorphism(child.signature());
+            final var parentToChild = category.getPath(child.signature());
             stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
         }
     }

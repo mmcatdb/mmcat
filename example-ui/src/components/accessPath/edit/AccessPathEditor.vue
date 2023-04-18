@@ -10,7 +10,7 @@ import StaticNameInput from '../input/StaticNameInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import PrimaryKeyInput from '../input/PrimaryKeyInput.vue';
-import { SignatureIdFactory } from '@/types/identifiers';
+import { ObjectIds, SignatureId, SignatureIdFactory } from '@/types/identifiers';
 
 enum State {
     Default,
@@ -24,32 +24,41 @@ type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.AddProperty, { parent: GraphParentProperty }> |
     GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
 
-type AccessPathEditor = {
+type AccessPathEditorProps = {
     graph: Graph;
     database: DatabaseWithConfiguration;
     rootProperty: GraphRootProperty;
 };
 
-const props = defineProps<AccessPathEditor>();
+const props = defineProps<AccessPathEditorProps>();
 
 const emit = defineEmits([ 'finish' ]);
 
-const ids = props.rootProperty.node.schemaObject.ids!;
-
 const state = ref<StateValue>({ type: State.Default });
-const primaryKey = ref((ids.isSignatures && ids.signatureIds.length > 0) ? ids.signatureIds[0] : SignatureIdFactory.createEmpty());
+
+function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
+    if (!ids)
+        return SignatureIdFactory.createEmpty();
+
+    if (ids.isSignatures && ids.signatureIds.length > 0)
+        return ids.signatureIds[0];
+
+    return SignatureIdFactory.createEmpty();
+}
+
+const primaryKey = ref(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
 
 function editPropertyClicked(property: GraphChildProperty) {
     state.value = {
         type: State.EditProperty,
-        property
+        property,
     };
 }
 
 function addPropertyClicked(parentProperty: GraphComplexProperty) {
     state.value = {
         type: State.AddProperty,
-        parent: parentProperty
+        parent: parentProperty,
     };
 }
 

@@ -2,8 +2,8 @@ import { ComparableMap } from "@/utils/ComparableMap";
 import type { NodeSingular } from "cytoscape";
 import type { SignatureId, Signature, NonSignaturesType } from "../identifiers";
 import type { SchemaObject } from "../schema";
-import type { Edge } from "./Edge";
-import { PathMarker, type FilterFunction, type MorphismData } from "./PathMarker";
+import { DirectedEdge, type Edge } from "./Edge";
+import { PathMarker, type MorphismData, type Filter } from "./PathMarker";
 
 export enum NodeTag {
     Root = 'tag-root'
@@ -31,7 +31,7 @@ export type SelectionStatus = {
 
 const defaultSelectionStatus = {
     type: SelectionType.Default,
-    level: 0
+    level: 0,
 };
 
 function getStatusClass(status: SelectionStatus) {
@@ -43,13 +43,34 @@ export enum PropertyType {
     Complex = 'Complex'
 }
 
+export class Neighbour {
+    constructor(
+        readonly edge: Edge,
+        readonly node: Node,
+        readonly signature: Signature,
+    ) {}
+
+    get direction(): boolean {
+        return !this.signature.isBaseDual;
+    }
+
+    toDirectedEdge(sourceNode: Node): DirectedEdge {
+        return new DirectedEdge(
+            this.edge,
+            this.signature,
+            sourceNode,
+            this.node,
+        );
+    }
+}
+
 export class Node {
     schemaObject: SchemaObject;
     node!: NodeSingular;
     _tags = new Set() as Set<NodeTag>;
     availablePathData = null as MorphismData | null;
 
-    _adjacentEdges = new ComparableMap<Signature, string, Edge>(signature => signature.toString());
+    _neighbours = new ComparableMap<Signature, string, Neighbour>(signature => signature.toString());
 
     _groupPlaceholders: NodeSingular[];
     _noGroupPlaceholder = undefined as NodeSingular | undefined;
@@ -78,19 +99,27 @@ export class Node {
         this._updateNoIdsClass();
     }
 
-    addNeighbour(edge: Edge): void {
-        if (!edge.domainNode.equals(this))
-            return;
+    addNeighbour(edge: Edge, direction: boolean): void {
+        const thisNode = direction ? edge.domainNode : edge.codomainNode;
+        if (!thisNode.equals(this))
+            throw new Error(`Cannot add edge with signature: ${edge.schemaMorphism.signature} and direction: ${direction} to node with key: ${this.schemaObject.key}`);
 
-        this._adjacentEdges.set(edge.schemaMorphism.signature, edge);
+        const node = direction ? edge.codomainNode : edge.domainNode;
+
+        const edgeSignature = edge.schemaMorphism.signature;
+        const signature = direction ? edgeSignature : edgeSignature.dual();
+
+        const neighbour = new Neighbour(edge, node, signature);
+        this._neighbours.set(signature, neighbour);
     }
 
     removeNeighbour(node: Node): void {
-        [ ...this._adjacentEdges.values() ].filter(edge => edge.codomainNode.equals(node))
-            .forEach(edgeToRemove => this._adjacentEdges.delete(edgeToRemove.schemaMorphism.signature));
+        [ ...this._neighbours.values() ]
+            .filter(neighbour => neighbour.node.equals(node))
+            .forEach(neighbour => this._neighbours.delete(neighbour.signature));
     }
 
-    getNeighbour(signature: Signature): Node | undefined {
+    getNeighbourNode(signature: Signature): Node | undefined {
         if (signature.isEmpty)
             return this;
 
@@ -98,15 +127,15 @@ export class Node {
         if (!split)
             return undefined;
 
-        const edge = this._adjacentEdges.get(split.first);
-        if (!edge)
+        const neighbour = this._neighbours.get(split.first);
+        if (!neighbour)
             return undefined;
 
-        return split.rest.isEmpty ? edge.codomainNode : edge.codomainNode.getNeighbour(split.rest);
+        return split.rest.isEmpty ? neighbour.node : neighbour.node.getNeighbourNode(split.rest);
     }
 
-    get adjacentEdges(): Edge[] {
-        return [ ...this._adjacentEdges.values() ];
+    get neighbours(): Neighbour[] {
+        return [ ...this._neighbours.values() ];
     }
 
     get determinedPropertyType(): PropertyType | null {
@@ -176,8 +205,8 @@ export class Node {
         return !!other && this.schemaObject.equals(other.schemaObject);
     }
 
-    markAvailablePaths(filters: FilterFunction | FilterFunction[]): void {
-        const pathMarker = new PathMarker(this, filters);
+    markAvailablePaths(filter: Filter): void {
+        const pathMarker = new PathMarker(this, filter);
         pathMarker.markPathsFromRootNode();
     }
 

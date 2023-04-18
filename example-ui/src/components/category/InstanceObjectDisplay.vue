@@ -13,8 +13,8 @@ import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';
 function defineColumn(signature: Signature, node: Node): Column {
     return {
         signature,
-        schemaObject: node.getNeighbour(signature)?.schemaObject,
-        isClickable: !signature.equals(Signature.empty)
+        schemaObject: node.getNeighbourNode(signature)?.schemaObject,
+        isClickable: !signature.equals(Signature.empty),
     };
 }
 
@@ -45,7 +45,7 @@ async function fetchObject() {
     fetchedInstanceObject.value = {
         object,
         columns: object.superId.signatures.map(signature => defineColumn(signature, props.node)),
-        showTechnicalIds: !!object.rows.find(row => row.technicalIds.size > 0)
+        showTechnicalIds: !!object.rows.find(row => row.technicalIds.size > 0),
     };
 
     return true;

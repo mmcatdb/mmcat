@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.core.instance;
 
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.cuni.matfyz.core.instance.InstanceObject.ReferenceToRow;
 
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Merger {
 
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(Merger.class);
 
     private final Queue<MergeRowsJob> jobs;
@@ -59,48 +61,51 @@ public class Merger {
         return instanceObject.getActualRow(superId, Set.of());
     }
 
+    public DomainRow merge(SuperIdWithValues superId, DomainRow parent, InstanceMorphism morphism) {
+        return merge(superId, parent, new InstanceEdge(morphism, true));
+    }
+
     /**
      * @param superId SuperId of the new row we want to create.
      * @param parent Parent row to which we should connect the new row.
-     * @param path Base morphism from parent to the new row.
+     * @param edge Edge from parent to the new row.
      * @return
      */
-    public DomainRow merge(SuperIdWithValues superId, DomainRow parent, InstanceMorphism path) {
-        var object = path.cod();
+    public DomainRow merge(SuperIdWithValues superId, DomainRow parent, InstanceEdge edge) {
+        final var childObject = edge.cod();
 
         // First, we try to find the row by the superId.
-        var currentRow = object.getRow(superId);
+        var currentRow = childObject.getRow(superId);
         if (currentRow != null)
-            return addToRowAndConnect(currentRow, superId, parent, path);
+            return addToRowAndConnect(currentRow, superId, parent, edge);
 
         // Then we try to find it by the connection.
-        if (!path.isArray()) {
-            var mapping = parent.getMappingsFromForMorphism(path).stream().findFirst();
+        if (!edge.isArray()) {
+            var mapping = parent.getMappingsForEdge(edge).stream().findFirst();
             if (mapping.isPresent())
-                return addToRow(mapping.get().codomainRow(), superId, path.cod());
+                return addToRow(mapping.get().codomainRow(), superId, edge.cod());
         }
 
         // No such row exists yet, so we have to create it. It also cannot be merged so we are not doing that.
-        var newRow = object.createRow(superId);
-        path.createMappingWithDual(parent, newRow);
+        var newRow = childObject.createRow(superId);
+        edge.createMapping(parent, newRow);
 
-        addReferenceJob(newRow.superId, newRow.technicalIds, object);
+        addReferenceJob(newRow.superId, newRow.technicalIds, childObject);
         processQueues();
 
         return newRow;
     }
 
-    private DomainRow addToRowAndConnect(DomainRow currentRow, SuperIdWithValues superId, DomainRow parent, InstanceMorphism path) {
-        var mappings = parent.getMappingsFromForMorphism(path);
+    private DomainRow addToRowAndConnect(DomainRow currentRow, SuperIdWithValues superId, DomainRow parent, InstanceEdge edge) {
         // TODO more effective search, e.g., map.
-        for (var mapping : mappings)
-            if (mapping.codomainRow().equals(currentRow))
-                return addToRow(currentRow, superId, path.cod()); // The connection already exists so we just have to add to the superId.
+        for (final var codomainRow : parent.getCodomainForEdge(edge))
+            if (codomainRow.equals(currentRow))
+                return addToRow(currentRow, superId, edge.cod()); // The connection already exists so we just have to add to the superId.
 
         // The connection does not exist yet, so we create it and then merge it.
         // TODO optimization - merging with the knowledge of the connection, so we would not have create it, then delete it and then create it for the new row.
-        path.createMappingWithDual(parent, currentRow);
-        return addToRow(currentRow, superId, path.cod());
+        edge.createMapping(parent, currentRow);
+        return addToRow(currentRow, superId, edge.cod());
     }
 
     /**
@@ -114,6 +119,7 @@ public class Merger {
         return merge(superId, object);
     }
 
+    /*
     public DomainRow mergeAlongMorphism(DomainRow domainRow, InstanceMorphism morphism) {
         // Get all mappings from the domain row for this morphism.
         var mappingsFromRow = domainRow.getMappingsFromForMorphism(morphism);
@@ -128,6 +134,7 @@ public class Merger {
 
         return morphism.dom().getActualRow(domainRow);
     }
+    */
 
     private void addMergeJob(SuperIdWithValues superId, Set<String> technicalId, InstanceObject instanceObject) {
         jobs.add(new MergeRowsJob(this, superId, technicalId, instanceObject));
@@ -211,7 +218,6 @@ public class Merger {
                         
                         // Remove old mappings from their rows.
                         morphism.removeMapping(mappingRow);
-                        morphism.dual().removeMapping(mappingRow.toDual());
                     }
                 }
             }
@@ -221,11 +227,13 @@ public class Merger {
 
         private static void createNewMappingsForMorphism(InstanceMorphism morphism, Set<DomainRow> codomainRows, DomainRow newRow, Merger merger) {
             for (var codomainRow : codomainRows)
-                morphism.createMappingWithDual(newRow, codomainRow);
+                morphism.createMapping(newRow, codomainRow);
     
             // If there are multiple rows but the morphism allows at most one, they have to be merged as well. We do so by creating new merge job.
+            /* Commented out because morphisms from v3 cannot be arrays
             if (!morphism.isArray() && codomainRows.size() > 1)
                 merger.addMergeJob(codomainRows, morphism.cod());
+            */
 
             // TODO Here probably should be reference jobs for the codomainRows. The newRow will reference automatically (because it is a product of merging, so a new information could have be created). The coodmainRows might need to reference as well if the following condition is met:
             // Let C \in codomainRows had a morphism to one of the original rows, O_1.

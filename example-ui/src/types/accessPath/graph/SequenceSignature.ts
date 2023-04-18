@@ -1,4 +1,5 @@
-import { Node, NodeSequence, type FilterFunction } from "@/types/categoryGraph";
+import { Node, NodeSequence } from "@/types/categoryGraph";
+import type { Filter } from "@/types/categoryGraph/PathMarker";
 import type { Signature } from "@/types/identifiers";
 
 export class SequenceSignature {
@@ -35,16 +36,20 @@ export class SequenceSignature {
         return this.toSignature().toString();
     }
 
+    toDisplayString(): string {
+        return this.toSignature().toDisplayString();
+    }
+
     equals(signature: SequenceSignature): boolean {
         return this.sequence.equals(signature.sequence);
     }
 
-    markAvailablePaths(filters: FilterFunction | FilterFunction[]): void {
+    markAvailablePaths(filter: Filter): void {
         if (this.sequence.lengthOfMorphisms === 0) {
             this.sequence.rootNode.unselect();
             this.sequence.rootNode.selectNext();
         }
 
-        this.sequence.lastNode.markAvailablePaths(filters);
+        this.sequence.lastNode.markAvailablePaths(filter);
     }
 }

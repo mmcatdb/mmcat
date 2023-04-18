@@ -6,7 +6,7 @@ import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceMorphism;
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -115,24 +115,26 @@ public class DDLAlgorithm {
             return;
         }
 
-        var morphism = category.getMorphism(property.signature());
+        final var path = category.getPath(property.signature());
+        final var isRequired = isRequired(property, path);
         
-        if (morphism.isArray() && property.name() instanceof StaticName)
-            wrapper.addSimpleArrayProperty(names, isRequired(morphism));
+        if (path.isArray() && property.name() instanceof StaticName)
+            wrapper.addSimpleArrayProperty(names, isRequired);
         else
-            wrapper.addSimpleProperty(names, isRequired(morphism));
+            wrapper.addSimpleProperty(names, isRequired);
     }
     
     private void processPath(ComplexProperty property, Set<String> names) {
-        var morphism = category.getMorphism(property.signature());
-        
-        if (morphism.isArray() && !property.hasDynamicKeys())
-            wrapper.addComplexArrayProperty(names, isRequired(morphism));
+        final var path = category.getPath(property.signature());
+        final var isRequired = isRequired(property, path);
+
+        if (path.isArray() && !property.hasDynamicKeys())
+            wrapper.addComplexArrayProperty(names, isRequired);
         else
-            wrapper.addComplexProperty(names, isRequired(morphism));
+            wrapper.addComplexProperty(names, isRequired);
     }
     
-    private static boolean isRequired(InstanceMorphism morphism) {
-        return morphism.min() != Min.ZERO;
+    private static boolean isRequired(AccessPath property, InstancePath path) {
+        return property.isRequired() || path.min() != Min.ZERO;
     }
 }

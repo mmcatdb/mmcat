@@ -101,10 +101,10 @@ export class Graph {
             node: this._getCytoscape().add({
                 data: {
                     id: 'group_' + id,
-                    label: logicalModel.label
+                    label: logicalModel.label,
                 },
-                classes: 'group ' + 'group-' + id
-            })
+                classes: 'group ' + 'group-' + id,
+            }),
         };
 
         this.groups.push(newGroup);
@@ -139,52 +139,35 @@ export class Graph {
         // However, the no group placeholder has to be removed.
     }
 
-    createEdgeWithDual(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
-        const displayedMorphism = (morphism.signature.baseValue && morphism.signature.baseValue > 0) ? morphism : morphism.dual;
-        return this.createEdgeWithDualInner(displayedMorphism, classes);
-    }
-
-    createEdgeWithDualInner(morphism: SchemaMorphism, classes?: string): [ Edge, Edge ] {
+    createEdge(morphism: SchemaMorphism, classes?: string): Edge {
         const domNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.domKey)) as Node;
         const codNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.codKey)) as Node;
 
-        const edges = [ new Edge(morphism, domNode, codNode), new Edge(morphism.dual, codNode, domNode) ] as [ Edge, Edge ];
-        this._edges.push(...edges);
-        edges[0].dual = edges[1];
-        edges[1].dual = edges[0];
+        const edge = new Edge(morphism, domNode, codNode);
+        this._edges.push(edge);
 
-        //const definitions = [ createEdgeDefinition(morphism, edges[0], classes), createEdgeDefinition(morphism.dual, edges[1], classes) ];
 
         // This ensures the Bezier morphism pairs have allways the same chirality.
         //const noSwitchNeeded = morphism.domId > morphism.codId;
 
-        /*
-        const cytoscapeEdges = this._getCytoscape().add(noSwitchNeeded ? definitions : definitions.reverse());
-        const orderedCytoscapeEdges = noSwitchNeeded ? cytoscapeEdges : cytoscapeEdges;
-        edges[0].setCytoscapeEdge(orderedCytoscapeEdges[0]);
-        edges[1].setCytoscapeEdge(orderedCytoscapeEdges[1]);
-        */
-
-        const definition = createEdgeDefinition(morphism, edges[0], classes);
+        const definition = createEdgeDefinition(morphism, edge, classes);
         const cytoscapeEdge = this._getCytoscape().add(definition);
-        edges[0].setCytoscapeEdge(cytoscapeEdge);
+        edge.setCytoscapeEdge(cytoscapeEdge);
 
-        domNode.addNeighbour(edges[0]);
-        codNode.addNeighbour(edges[1]);
+        domNode.addNeighbour(edge, true);
+        codNode.addNeighbour(edge, false);
 
-        return edges;
+        return edge;
     }
 
-    deleteEdgeWithDual(edge: Edge) {
-        //this._getCytoscape().remove(edge.edge);
-        //this._getCytoscape().remove(edge.dual.edge);
-        const cytoscapeEdge = edge.edge ? edge.edge : edge.dual.edge;
+    deleteEdge(edge: Edge) {
+        const cytoscapeEdge = edge.edge;
         if (cytoscapeEdge)
             this._getCytoscape().remove(cytoscapeEdge);
 
         edge.domainNode.removeNeighbour(edge.codomainNode);
         edge.codomainNode.removeNeighbour(edge.domainNode);
-        this._edges = this._edges.filter(e => !e.equals(edge) && !e.equals(edge.dual));
+        this._edges = this._edges.filter(e => !e.equals(edge));
     }
 
     _lastTemporaryEdgeId = 0;
@@ -198,9 +181,9 @@ export class Graph {
                 id,
                 source: node1.schemaObject.key.toString(),
                 target: node2.schemaObject.key.toString(),
-                label: ''
+                label: '',
             },
-            classes: 'temporary'
+            classes: 'temporary',
         });
 
         return { delete: () => this._getCytoscape().remove('#' + id) };
@@ -219,11 +202,11 @@ export class Graph {
             animate: false,
             fixedNodeConstraint: this._nodes.slice(0, this._fixedNodes).map(node => ({
                 nodeId: node.node.id(),
-                position: node.node.position()
+                position: node.node.position(),
             })),
             //randomize: false,
             //quality: 'proof',
-            nodeDimensionsIncludeLabels: true
+            nodeDimensionsIncludeLabels: true,
             //boundingBox: { x1: 0, x2: 1000, y1: 0, y2: 500 }
         } as LayoutOptions).run();
 
@@ -262,10 +245,10 @@ function createNodeDefinition(object: SchemaObject, node: Node, classes?: string
         data: {
             id: object.key.toString(),
             label: node.label,
-            schemaData: node
+            schemaData: node,
         },
         position: object.position,
-        ...classes ? { classes } : {}
+        ...classes ? { classes } : {},
     };
 }
 
@@ -273,20 +256,20 @@ function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number)
     return {
         data: {
             id: groupId + '_' + object.key.toString(),
-            parent: 'group_' + groupId
+            parent: 'group_' + groupId,
         },
         position: object.position,
-        classes: 'group-placeholder'
+        classes: 'group-placeholder',
     };
 }
 
 function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
     return {
         data: {
-            id: 'no-group_' + object.key.toString()
+            id: 'no-group_' + object.key.toString(),
         },
         position: object.position,
-        classes: 'no-group'
+        classes: 'no-group',
     };
 }
 
@@ -297,8 +280,8 @@ function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''
             source: morphism.domKey.toString(),
             target: morphism.codKey.toString(),
             label: edge.label,
-            schemaData: edge
+            schemaData: edge,
         },
-        classes: classes + ' ' + morphism.tags.join(' ')
+        classes: classes + ' ' + morphism.tags.join(' '),
     };
 }

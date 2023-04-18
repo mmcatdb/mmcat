@@ -12,11 +12,6 @@ public interface Morphism {
         ZERO,
         ONE
     }
-    
-    public enum Max {
-        ONE,
-        STAR
-    }
 
     public enum Tag {
         isa,
@@ -27,12 +22,8 @@ public interface Morphism {
 
     public abstract CategoricalObject cod();
 
-    public abstract Morphism dual();
-    
     public abstract Signature signature();
 
     public abstract Min min();
-
-    public abstract Max max();
 
 }

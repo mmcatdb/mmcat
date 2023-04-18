@@ -6,7 +6,6 @@ import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -31,6 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DMLAlgorithm {
 
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DMLAlgorithm.class);
 
     private Mapping mapping;
@@ -115,12 +115,12 @@ public class DMLAlgorithm {
                     continue;
                 }
 
-                InstanceMorphism morphism = category.getMorphism(subpath.signature());
-                boolean isObjectWithDynamicKeys = subpath instanceof ComplexProperty complexSubpath && complexSubpath.hasDynamicKeys();
-                boolean showIndex = morphism.isArray() && !isObjectWithDynamicKeys;
-                int index = 0;
+                final var instancePath = category.getPath(subpath.signature());
+                final boolean isObjectWithDynamicKeys = subpath instanceof ComplexProperty complexSubpath && complexSubpath.hasDynamicKeys();
+                final boolean showIndex = instancePath.isArray() && !isObjectWithDynamicKeys;
 
-                for (DomainRow objectRow : row.traverseThrough(morphism)) {
+                int index = 0;
+                for (DomainRow objectRow : row.traverseThrough(instancePath)) {
                     output.add(getNameValuePair(subpath, row, objectRow, prefix, index, showIndex));
                     index++;
                 }
@@ -161,8 +161,8 @@ public class DMLAlgorithm {
 
         var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
-        InstanceMorphism nameMorphism = category.getMorphism(dynamicName.signature());
-        var nameRowSet = parentRow.traverseThrough(nameMorphism);
+        final var namePath = category.getPath(dynamicName.signature());
+        var nameRowSet = parentRow.traverseThrough(namePath);
 
         if (nameRowSet != null && !nameRowSet.isEmpty())
             return nameRowSet.iterator().next().getValue(Signature.createEmpty());

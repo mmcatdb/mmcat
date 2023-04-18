@@ -27,7 +27,8 @@ public class MappingBuilder {
     }
 
     public Mapping build() {
-        final var category = new CategoryBuilder().setCategoryWrapper(categoryWrapper).build();
+        final var context = new SchemaCategoryContext();
+        final var category = categoryWrapper.toSchemaCategory(context);
 
         return new Mapping(
             category,

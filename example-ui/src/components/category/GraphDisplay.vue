@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue';
 import API from '@/utils/api';
-import { SchemaCategory, type PositionUpdate } from '@/types/schema';
+import { SchemaCategory } from '@/types/schema';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import layoutUtilities from 'cytoscape-layout-utilities';
@@ -64,7 +64,7 @@ function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Gra
         style,
         boxSelectionEnabled: true,
         wheelSensitivity: 0.3,
-        maxZoom: 2
+        maxZoom: 2,
     });
 
     logicalModels.forEach(logicalModel => {
@@ -77,14 +77,11 @@ function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Gra
     schema.objects.forEach(object => newGraph.createNode(object));
 
     // First we create a dublets of morphisms. Then we create edges from them.
+    // TODO there should only be base morphisms
     const sortedBaseMorphisms = schema.morphisms.filter(morphism => morphism.isBase)
         .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
-    const morphismDublets = [];
-    //for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
-    for (let i = 0; i < sortedBaseMorphisms.length; i += 2)
-        morphismDublets.push({ morphism: sortedBaseMorphisms[i], dualMorphism: sortedBaseMorphisms[i + 1] });
 
-    morphismDublets.forEach(dublet => newGraph.createEdgeWithDual(dublet.morphism));
+    sortedBaseMorphisms.forEach(morphism => newGraph.createEdge(morphism));
 
     // Position the object to the center of the canvas.
     newGraph.fixLayout();
@@ -125,7 +122,7 @@ function updateSchema(schemaCategory: SchemaCategory) {
 }
 
 defineExpose({
-    updateSchema
+    updateSchema,
 });
 </script>
 

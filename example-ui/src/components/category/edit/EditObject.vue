@@ -19,24 +19,24 @@ export default defineComponent({
         IconPlusSquare,
         IriDisplay,
         ValueContainer,
-        ValueRow
+        ValueRow,
     },
     props: {
         graph: {
             type: Object as () => Graph,
-            required: true
+            required: true,
         },
         node: {
             type: Object as () => Node,
-            required: true
-        }
+            required: true,
+        },
     },
     emits: [ 'save', 'cancel', 'update' ],
     data() {
         return {
             label: this.node.schemaObject.label,
             addingId: false,
-            Type
+            Type,
         };
     },
     computed: {
@@ -45,7 +45,7 @@ export default defineComponent({
         },
         isNew(): boolean {
             return this.node.schemaObject.isNew;
-        }
+        },
     },
     methods: {
         save() {
@@ -57,9 +57,9 @@ export default defineComponent({
             this.$emit('cancel');
         },
         deleteFunction() {
-            this.node.adjacentEdges.forEach(edge => {
-                this.graph.schemaCategory.deleteMorphismWithDual(edge.schemaMorphism);
-                this.graph.deleteEdgeWithDual(edge);
+            this.node.neighbours.forEach(neighbour => {
+                this.graph.schemaCategory.deleteMorphism(neighbour.edge.schemaMorphism);
+                this.graph.deleteEdge(neighbour.edge);
             });
 
             this.graph.schemaCategory.deleteObject(this.node.schemaObject);
@@ -75,8 +75,8 @@ export default defineComponent({
         },
         cancelAddingId() {
             this.addingId = false;
-        }
-    }
+        },
+    },
 });
 </script>
 

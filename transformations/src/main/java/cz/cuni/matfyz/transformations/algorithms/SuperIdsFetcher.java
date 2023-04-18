@@ -2,7 +2,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
-import cz.cuni.matfyz.core.instance.InstanceMorphism;
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.mapping.AccessPath;
@@ -31,8 +31,8 @@ public class SuperIdsFetcher {
      * @param morphism Morphism from the parent schema object to the currently processed one.
      * @return
      */
-    public static Iterable<FetchedSuperId> fetch(IComplexRecord parentRecord, DomainRow parentRow, InstanceMorphism morphism, AccessPath childAccessPath) {
-        final var fetcher = new SuperIdsFetcher(parentRow, morphism, childAccessPath);
+    public static Iterable<FetchedSuperId> fetch(IComplexRecord parentRecord, DomainRow parentRow, InstancePath path, AccessPath childAccessPath) {
+        final var fetcher = new SuperIdsFetcher(parentRow, path, childAccessPath);
         fetcher.process(parentRecord);
 
         return fetcher.output;
@@ -46,11 +46,11 @@ public class SuperIdsFetcher {
     final InstanceObject childObject;
     final AccessPath childAccessPath;
 
-    private SuperIdsFetcher(DomainRow parentRow, InstanceMorphism morphism, AccessPath childAccessPath) {
+    private SuperIdsFetcher(DomainRow parentRow, InstancePath path, AccessPath childAccessPath) {
         this.output = new ArrayList<>();
         this.parentRow = parentRow;
-        this.parentToChild = morphism.signature();
-        this.childObject = morphism.cod();
+        this.parentToChild = path.signature();
+        this.childObject = path.cod();
         this.childAccessPath = childAccessPath;
     }
 

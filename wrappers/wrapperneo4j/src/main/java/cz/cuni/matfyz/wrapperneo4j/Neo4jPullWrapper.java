@@ -62,12 +62,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
             return staticName.getStringName().startsWith(namePrefix);
         })
-        .findFirst();
+            .findFirst();
 
         if (foundSubpath.isEmpty())
             return null;
         
-         return foundSubpath.get() instanceof ComplexProperty complexSubpath
+        return foundSubpath.get() instanceof ComplexProperty complexSubpath
             ? complexSubpath
             : null;
     }

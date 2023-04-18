@@ -1,18 +1,20 @@
-package cz.cuni.matfyz.core;
+package cz.cuni.matfyz.core.tests;
 
-import cz.cuni.matfyz.core.category.Morphism.Max;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addMorphism;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addSchemaObject;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.buildInstanceScenario;
+
+import cz.cuni.matfyz.core.TestInstanceCategoryBuilder;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
-import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
 /**
@@ -47,51 +49,44 @@ public class TestData {
     public final Key localeKey = new Key(124);
     
     public final Signature customerToId = Signature.createBase(1);
-    public final Signature customerToOrdered = Signature.createBase(2);
+    public final Signature orderedToCustomer = Signature.createBase(2);
     public final Signature orderedToOrder = Signature.createBase(3);
     public final Signature orderToNestedDoc = Signature.createBase(4);
     public final Signature nestedDocToPropertyA = Signature.createBase(5);
     public final Signature nestedDocToPropertyB = Signature.createBase(6);
     public final Signature nestedDocToPropertyC = Signature.createBase(7);
-    public final Signature orderToItems = Signature.createBase(8);
+    public final Signature itemsToOrder = Signature.createBase(8);
     public final Signature itemsToProduct = Signature.createBase(9);
     public final Signature productToPid = Signature.createBase(10);
     public final Signature productToPrice = Signature.createBase(11);
     public final Signature productToPname = Signature.createBase(12);
     public final Signature itemsToQuantity = Signature.createBase(13);
-    public final Signature orderToContact = Signature.createBase(14);
+    public final Signature contactToOrder = Signature.createBase(14);
     public final Signature contactToType = Signature.createBase(15);
     public final Signature typeToName = Signature.createBase(16);
     public final Signature contactToValue = Signature.createBase(17);
-    public final Signature orderToArray = Signature.createBase(18);
+    public final Signature arrayToOrder = Signature.createBase(18);
     public final Signature orderToNumber = Signature.createBase(19);
-    public final Signature orderToAddress = Signature.createBase(20);
+    public final Signature addressToOrder = Signature.createBase(20);
     public final Signature addressToLabel = Signature.createBase(21);
     public final Signature addressToContent = Signature.createBase(22);
     public final Signature contentToText = Signature.createBase(23);
     public final Signature contentToLocale = Signature.createBase(24);
     
-    public final Signature itemsToNumber = orderToItems.dual().concatenate(orderToNumber);
+    public final Signature itemsToNumber = itemsToOrder.concatenate(orderToNumber);
     public final Signature itemsToPid = itemsToProduct.concatenate(productToPid);
     public final Signature itemsToPname = itemsToProduct.concatenate(productToPname);
     public final Signature itemsToPrice = itemsToProduct.concatenate(productToPrice);
     
-    public final Signature contactToNumber = orderToContact.dual().concatenate(orderToNumber);
+    public final Signature contactToNumber = contactToOrder.concatenate(orderToNumber);
     public final Signature contactToName = contactToType.concatenate(typeToName);
     
     public final Signature orderedToNumber = orderedToOrder.concatenate(orderToNumber);
-    public final Signature orderedToId = customerToOrdered.dual().concatenate(customerToId);
+    public final Signature orderedToId = orderedToCustomer.concatenate(customerToId);
     public final Signature orderToId = orderedToOrder.dual().concatenate(orderedToId);
-    public final Signature orderToCustomer = orderedToOrder.dual().concatenate(customerToOrdered.dual()).concatenate(customerToId);
+    public final Signature orderToCustomer = orderedToOrder.dual().concatenate(orderedToCustomer).concatenate(customerToId);
     
-    public final Signature addressToNumber = orderToAddress.dual().concatenate(orderToNumber);
-
-    private enum Cardinality {
-        ONE_TO_ONE,
-        ONE_TO_MANY,
-        MANY_TO_ONE,
-        MANY_TO_MANY
-    }
+    public final Signature addressToNumber = addressToOrder.concatenate(orderToNumber);
 
     public SchemaCategory createDefaultSchemaCategory() {
         var schema = new SchemaCategory("");
@@ -108,281 +103,247 @@ public class TestData {
 
     public SchemaCategory createDefaultV3SchemaCategory() {
         var schema = new SchemaCategory("");
-        var order = createSchemaObject(
+        var order = addSchemaObject(
+            schema,
             orderKey,
             "OrderV3",
             ObjectIds.createValue()
         );
-        schema.addObject(order);
 
-        var number = createSchemaObject(
+        var number = addSchemaObject(
+            schema,
             numberKey,
             "NumberV3",
             ObjectIds.createValue()
         );
-        schema.addObject(number);
-        addMorphismWithDual(schema, orderToNumber, order, number, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, orderToNumber, order, number, Min.ONE);
 
         return schema;
     }
 
     private SchemaObject buildOrder(SchemaCategory schema) {
-        var order = createSchemaObject(
+        var order = addSchemaObject(
+            schema,
             orderKey,
             "Order",
             new ObjectIds(orderToNumber)
         );
-        schema.addObject(order);
         
-        var number = createSchemaObject(
+        var number = addSchemaObject(
+            schema,
             numberKey,
             "Number",
             ObjectIds.createValue()
         );
-        schema.addObject(number);
-        addMorphismWithDual(schema, orderToNumber, order, number, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, orderToNumber, order, number, Min.ONE);
         
         return order;
     }
 
     private void addArray(SchemaCategory schema, SchemaObject order) {
-        var array = createSchemaObject(
+        var array = addSchemaObject(
+            schema,
             arrayKey,
             "Array",
             ObjectIds.createValue()
         );
-        schema.addObject(array);
-        addMorphismWithDual(schema, orderToArray, order, array, Cardinality.ONE_TO_MANY);
+        addMorphism(schema, arrayToOrder, array, order, Min.ONE);
     }
     
     private void addItems(SchemaCategory schema, SchemaObject order) {
         //var number = schema.getObject(numberKey);
 
-        var items = createSchemaObject(
+        var items = addSchemaObject(
+            schema,
             itemsKey,
             "Items",
             new ObjectIds(itemsToNumber, itemsToPid)
         );
-        schema.addObject(items);
-        addMorphismWithDual(schema, orderToItems, order, items, Cardinality.ONE_TO_MANY);
-        //addMorphismWithDual(schema, itemsToNumber, items, number, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, itemsToOrder, items, order, Min.ONE);
+        //addMorphism(schema, itemsToNumber, items, number, Min.ONE);
         
-        var quantity = createSchemaObject(
+        var quantity = addSchemaObject(
+            schema,
             quantityKey,
             "Quantity",
             ObjectIds.createValue()
         );
-        schema.addObject(quantity);
-        addMorphismWithDual(schema, itemsToQuantity, items, quantity, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, itemsToQuantity, items, quantity, Min.ONE);
         
-        var product = createSchemaObject(
+        var product = addSchemaObject(
+            schema,
             productKey,
             "Product",
             new ObjectIds(productToPid)
         );
-        schema.addObject(product);
-        addMorphismWithDual(schema, itemsToProduct, items, product, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, itemsToProduct, items, product, Min.ONE);
         
-        var pid = createSchemaObject(
+        var pid = addSchemaObject(
+            schema,
             pidKey,
             "Id",
             ObjectIds.createValue()
         );
-        schema.addObject(pid);
-        addMorphismWithDual(schema, productToPid, product, pid, Cardinality.ONE_TO_ONE);
-        //addMorphismWithDual(schema, itemsToPid, items, pid, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, productToPid, product, pid, Min.ONE);
+        //addMorphism(schema, itemsToPid, items, pid, Min.ONE);
 
-        var price = createSchemaObject(
+        var price = addSchemaObject(
+            schema,
             priceKey,
             "Price",
             ObjectIds.createValue()
         );
-        schema.addObject(price);
-        addMorphismWithDual(schema, productToPrice, product, price, Cardinality.MANY_TO_ONE);
-        //addMorphismWithDual(schema, itemsToPrice, items, price, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, productToPrice, product, price, Min.ONE);
+        //addMorphism(schema, itemsToPrice, items, price, Min.ONE);
 
-        var pname = createSchemaObject(
+        var pname = addSchemaObject(
+            schema,
             pnameKey,
             "Name",
             ObjectIds.createValue()
         );
-        schema.addObject(pname);
-        addMorphismWithDual(schema, productToPname, product, pname, Cardinality.MANY_TO_ONE);
-        //addMorphismWithDual(schema, itemsToPname, items, pname, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, productToPname, product, pname, Min.ONE);
+        //addMorphism(schema, itemsToPname, items, pname, Min.ONE);
     }
     
     private void addContact(SchemaCategory schema, SchemaObject order) {
-        var contact = createSchemaObject(
+        var contact = addSchemaObject(
+            schema,
             contactKey,
             "Contact",
             new ObjectIds(contactToNumber, contactToValue, contactToName)
         );
-        schema.addObject(contact);
-        addMorphismWithDual(schema, orderToContact, order, contact, Cardinality.MANY_TO_MANY);
+        addMorphism(schema, contactToOrder, contact, order, Min.ONE);
 
-        var value = createSchemaObject(
+        var value = addSchemaObject(
+            schema,
             valueKey,
             "Value",
             ObjectIds.createValue()
         );
-        schema.addObject(value);
-        addMorphismWithDual(schema, contactToValue, contact, value, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, contactToValue, contact, value, Min.ONE);
 
-        var type = createSchemaObject(
+        var type = addSchemaObject(
+            schema,
             typeKey,
             "Type",
             new ObjectIds(typeToName)
         );
-        schema.addObject(type);
-        addMorphismWithDual(schema, contactToType, contact, type, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, contactToType, contact, type, Min.ONE);
 
-        var name = createSchemaObject(
+        var name = addSchemaObject(
+            schema,
             nameKey,
             "Name",
             ObjectIds.createValue()
         );
-        schema.addObject(name);
-        addMorphismWithDual(schema, typeToName, type, name, Cardinality.ONE_TO_ONE);
-        addMorphismWithDual(schema, contactToName, contact, name, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, typeToName, type, name, Min.ONE);
+        addMorphism(schema, contactToName, contact, name, Min.ONE);
     }
     
     private void addNestedDoc(SchemaCategory schema, SchemaObject order) {
-        var nestedDoc = createSchemaObject(
+        var nestedDoc = addSchemaObject(
+            schema,
             nestedDocKey,
             "NestedDoc",
             ObjectIds.createGenerated()
         );
-        schema.addObject(nestedDoc);
-        addMorphismWithDual(schema, orderToNestedDoc, order, nestedDoc, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, orderToNestedDoc, order, nestedDoc, Min.ONE);
         
-        var propertyA = createSchemaObject(
+        var propertyA = addSchemaObject(
+            schema,
             propertyAKey,
             "PropertyA",
             ObjectIds.createValue()
         );
-        schema.addObject(propertyA);
-        addMorphismWithDual(schema, nestedDocToPropertyA, nestedDoc, propertyA, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, nestedDocToPropertyA, nestedDoc, propertyA, Min.ONE);
 
-        var propertyB = createSchemaObject(
+        var propertyB = addSchemaObject(
+            schema,
             propertyBKey,
             "PropertyB",
             ObjectIds.createValue()
         );
-        schema.addObject(propertyB);
-        addMorphismWithDual(schema, nestedDocToPropertyB, nestedDoc, propertyB, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, nestedDocToPropertyB, nestedDoc, propertyB, Min.ONE);
 
-        var propertyC = createSchemaObject(
+        var propertyC = addSchemaObject(
+            schema,
             propertyCKey,
             "PropertyC",
             ObjectIds.createValue()
         );
-        schema.addObject(propertyC);
-        addMorphismWithDual(schema, nestedDocToPropertyC, nestedDoc, propertyC, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, nestedDocToPropertyC, nestedDoc, propertyC, Min.ONE);
     }
     
     private void addOrdered(SchemaCategory schema, SchemaObject order) {
-        var ordered = createSchemaObject(
+        var ordered = addSchemaObject(
+            schema,
             orderedKey,
             "Ordered",
             new ObjectIds(orderedToNumber, orderedToId)
         );
-        schema.addObject(ordered);
-        addMorphismWithDual(schema, orderedToOrder.dual(), order, ordered, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, orderedToOrder, ordered, order, Min.ONE);
 
-        var customer = createSchemaObject(
+        var customer = addSchemaObject(
+            schema,
             customerKey,
             "Customer",
             new ObjectIds(customerToId)
         );
-        schema.addObject(customer);
-        addMorphismWithDual(schema, customerToOrdered.dual(), ordered, customer, Cardinality.ONE_TO_MANY);
+        addMorphism(schema, orderedToCustomer, ordered, customer, Min.ONE);
 
-        var id = createSchemaObject(
+        var id = addSchemaObject(
+            schema,
             idKey,
             "Id",
             ObjectIds.createValue()
         );
-        schema.addObject(id);
-        addMorphismWithDual(schema, customerToId, customer, id, Cardinality.ONE_TO_ONE);
-        addMorphismWithDual(schema, orderToId, order, id, Cardinality.MANY_TO_ONE);
+        addMorphism(schema, customerToId, customer, id, Min.ONE);
+        //addMorphism(schema, orderToId, order, id, Min.ONE);
     }
 
     private void addAddress(SchemaCategory schema, SchemaObject order) {
-        var address = createSchemaObject(
+        var address = addSchemaObject(
+            schema,
             addressKey,
             "address",
             new ObjectIds(addressToNumber, addressToLabel)
         );
-        schema.addObject(address);
-        addMorphismWithDual(schema, orderToAddress, order, address, Cardinality.MANY_TO_MANY);
+        addMorphism(schema, addressToOrder, address, order, Min.ONE);
 
-        var label = createSchemaObject(
+        var label = addSchemaObject(
+            schema,
             labelKey,
             "label",
             ObjectIds.createValue()
         );
-        schema.addObject(label);
-        addMorphismWithDual(schema, addressToLabel, address, label, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, addressToLabel, address, label, Min.ONE);
 
-        var content = createSchemaObject(
+        var content = addSchemaObject(
+            schema,
             contentKey,
             "content",
             ObjectIds.createGenerated()
         );
-        schema.addObject(content);
-        addMorphismWithDual(schema, addressToContent, address, content, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, addressToContent, address, content, Min.ONE);
         
-        var text = createSchemaObject(
+        var text = addSchemaObject(
+            schema,
             textKey,
             "text",
             ObjectIds.createValue()
         );
-        schema.addObject(text);
-        addMorphismWithDual(schema, contentToText, content, text, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, contentToText, content, text, Min.ONE);
         
-        var locale = createSchemaObject(
+        var locale = addSchemaObject(
+            schema,
             localeKey,
             "locale",
             ObjectIds.createValue()
         );
-        schema.addObject(locale);
-        addMorphismWithDual(schema, contentToLocale, content, locale, Cardinality.ONE_TO_ONE);
+        addMorphism(schema, contentToLocale, content, locale, Min.ONE);
     }
     
-    private SchemaObject createSchemaObject(Key key, String name, ObjectIds ids) {
-        return new SchemaObject(key, name, ids.generateDefaultSuperId(), ids);
-    }
-
-    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Cardinality cardinality) {
-        switch (cardinality) {
-            case ONE_TO_ONE:
-                addMorphismWithDual(schema, signature, dom, cod, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
-                break;
-            case ONE_TO_MANY:
-                addMorphismWithDual(schema, signature, dom, cod, Min.ZERO, Max.STAR, Min.ONE, Max.ONE);
-                break;
-            case MANY_TO_ONE:
-                addMorphismWithDual(schema, signature, dom, cod, Min.ONE, Max.ONE, Min.ZERO, Max.STAR);
-                break;
-            case MANY_TO_MANY:
-                addMorphismWithDual(schema, signature, dom, cod, Min.ZERO, Max.STAR, Min.ZERO, Max.STAR);
-                break;
-        }
-    }
-    
-    private void addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax) {
-        var builder = new SchemaMorphism.Builder();
-        var morphism = builder.fromArguments(signature, dom, cod, min, max, "");
-        var dual = builder.fromDual(morphism, dualMin, dualMax);
-
-        schema.addMorphism(morphism);
-        schema.addMorphism(dual);
-    }
-    
-    private InstanceCategory buildInstanceScenario(SchemaCategory schema) {
-        return new InstanceCategoryBuilder().setSchemaCategory(schema).build();
-    }
-
     public InstanceCategory expectedInstance_order(SchemaCategory schema) {
         InstanceCategory instance = buildInstanceScenario(schema);
         var builder = new TestInstanceCategoryBuilder(instance);
@@ -438,7 +399,7 @@ public class TestData {
         var order = expectedOrder(builder, orderNumber);
         for (String value : array) {
             var arrayItem = builder.value(Signature.createEmpty(), value).object(arrayKey);
-            builder.morphism(orderToArray, order, arrayItem);
+            builder.morphism(arrayToOrder, arrayItem, order);
         }
     }
 
@@ -457,7 +418,7 @@ public class TestData {
 
     private void expectedItem(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue) {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
-        builder.morphism(orderToItems, order, items);
+        builder.morphism(itemsToOrder, items, order);
         var quantity = builder.value(Signature.createEmpty(), quantityValue).object(quantityKey);
         builder.morphism(itemsToQuantity, items, quantity);
 
@@ -500,7 +461,7 @@ public class TestData {
         builder.morphism(contactToValue, contact, value);
         builder.morphism(contactToType, contact, type);
         builder.morphism(typeToName, type, name);
-        builder.morphism(orderToContact, order, contact);
+        builder.morphism(contactToOrder, contact, order);
     }
 
     public InstanceCategory expectedInstance_ordered(SchemaCategory schema) {
@@ -519,9 +480,8 @@ public class TestData {
         var customer = builder.value(customerToId, customerId).object(customerKey);
         var ordered = builder.value(orderedToId, customerId).value(orderedToNumber, orderNumber).object(orderedKey);
 
-        //builder.morphism(orderToId, order, id);
         builder.morphism(orderedToOrder, ordered, order);
-        builder.morphism(customerToOrdered, customer, ordered);
+        builder.morphism(orderedToCustomer, ordered, customer);
         builder.morphism(customerToId, customer, id);
 
         return order;
@@ -597,7 +557,7 @@ public class TestData {
         builder.morphism(addressToContent, address, contentRow);
         builder.morphism(contentToText, contentRow, textRow);
         builder.morphism(contentToLocale, contentRow, localeRow);
-        builder.morphism(orderToAddress, order, address);
+        builder.morphism(addressToOrder, address, order);
     }
 
     public InstanceCategory expectedInstance_itemsMissing(SchemaCategory schema) {
@@ -616,7 +576,7 @@ public class TestData {
 
     private void expectedItemMissing(TestInstanceCategoryBuilder builder, DomainRow order, String orderNumber, String pidValue, String pnameValue, String priceValue, String quantityValue) {
         var items = builder.value(itemsToNumber, orderNumber).value(itemsToPid, pidValue).object(itemsKey);
-        builder.morphism(orderToItems, order, items);
+        builder.morphism(itemsToOrder, items, order);
 
         if (quantityValue != null) {
             var quantity = builder.value(Signature.createEmpty(), quantityValue).object(quantityKey);
@@ -680,14 +640,14 @@ public class TestData {
     public ComplexProperty path_array() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            new SimpleProperty("array", orderToArray)
+            new SimpleProperty("array", arrayToOrder.dual())
         );
     }
 
     public ComplexProperty path_items() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            ComplexProperty.create("items", orderToItems,
+            ComplexProperty.create("items", itemsToOrder.dual(),
                 new SimpleProperty("productId", itemsToPid),
                 new SimpleProperty("name", itemsToPname),
                 new SimpleProperty("price", itemsToPrice),
@@ -699,7 +659,7 @@ public class TestData {
     public ComplexProperty path_contact() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            ComplexProperty.create("contact", orderToContact,
+            ComplexProperty.create("contact", contactToOrder.dual(),
                 new SimpleProperty(contactToName, contactToValue)
             )
         );
@@ -717,7 +677,7 @@ public class TestData {
     public ComplexProperty path_address() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("number", orderToNumber),
-            ComplexProperty.create("address", orderToAddress,
+                ComplexProperty.create("address", addressToOrder.dual(),
                 ComplexProperty.create(addressToLabel, addressToContent,
                     new SimpleProperty("text", contentToText),
                     new SimpleProperty("locale", contentToLocale)
@@ -751,6 +711,26 @@ public class TestData {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
             new SimpleProperty("id", Signature.createEmpty()),
             new SimpleProperty("number", orderToNumber)
+        );
+    }
+
+    public ComplexProperty path_neo4j_order() {
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
+            new SimpleProperty("customer_id", orderToId),
+            new SimpleProperty("number", orderToNumber)
+        );
+    }
+
+    public ComplexProperty path_neo4j_items() {
+        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
+            new SimpleProperty("quantity", itemsToQuantity),
+            ComplexProperty.create("_from.order", itemsToOrder,
+                new SimpleProperty("customer_id", orderToId)
+            ),
+            ComplexProperty.create("_to.product", itemsToProduct,
+                new SimpleProperty("id", productToPid),
+                new SimpleProperty("name", productToPname)
+            )
         );
     }
 

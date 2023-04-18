@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.server;
 
-import cz.cuni.matfyz.core.category.Morphism.Max;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addMorphism;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addSchemaObject;
+
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -10,8 +12,6 @@ import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.core.schema.SchemaObject;
 
 import java.net.URISyntaxException;
 
@@ -21,67 +21,50 @@ import java.net.URISyntaxException;
 public class TestData {
 
     public final Key userKey = new Key(101);
-    public final Key id_userKey = new Key(102);
+    public final Key userIdKey = new Key(102);
     public final Key addressKey = new Key(103);
     public final Key streetKey = new Key(104);
     public final Key cityKey = new Key(105);
 
     public final Key orderKey = new Key(111);
-    public final Key id_orderKey = new Key(112);
+    public final Key idOrderKey = new Key(112);
 
     public final Key fullAddressKey = new Key(131);
     
-    public final Signature userToId_user = Signature.createBase(1);
+    public final Signature userToUserId = Signature.createBase(1);
     public final Signature userToAddress = Signature.createBase(2);
     public final Signature addressToStreet = Signature.createBase(3);
     public final Signature addressToCity = Signature.createBase(4);
     
-    public final Signature orderToId_order = Signature.createBase(11);
+    public final Signature orderToOrderId = Signature.createBase(11);
     
-    public final Signature userToOrder = Signature.createBase(21);
+    public final Signature orderToUser = Signature.createBase(21);
 
     public final Signature addressToFullAddress = Signature.createBase(31);
     public final Signature orderToFullAddress = Signature.createBase(32);
 
     private SchemaCategory createInitialSchemaCategory() {
-        var schema = new SchemaCategory("");
+        final var schema = new SchemaCategory("");
 
-        var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToId_user));
-        var id_user = addSchemaObject(schema, id_userKey, "id_user", ObjectIds.createValue());
-        var address = addSchemaObject(schema, addressKey, "address", new ObjectIds(addressToStreet, addressToCity));
-        var street = addSchemaObject(schema, streetKey, "street", ObjectIds.createValue());
-        var city = addSchemaObject(schema, cityKey, "city", ObjectIds.createValue());
+        final var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToUserId));
+        final var userId = addSchemaObject(schema, userIdKey, "id_user", ObjectIds.createValue());
+        final var address = addSchemaObject(schema, addressKey, "address", new ObjectIds(addressToStreet, addressToCity));
+        final var street = addSchemaObject(schema, streetKey, "street", ObjectIds.createValue());
+        final var city = addSchemaObject(schema, cityKey, "city", ObjectIds.createValue());
 
-        addMorphismWithDual(schema, userToId_user, user, id_user, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
-        addMorphismWithDual(schema, userToAddress, user, address, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
-        addMorphismWithDual(schema, addressToStreet, address, street, Min.ONE, Max.ONE, Min.ONE, Max.STAR);
-        addMorphismWithDual(schema, addressToCity, address, city, Min.ONE, Max.ONE, Min.ZERO, Max.STAR);
+        addMorphism(schema, userToUserId, user, userId, Min.ONE);
+        addMorphism(schema, userToAddress, user, address, Min.ONE);
+        addMorphism(schema, addressToStreet, address, street, Min.ONE);
+        addMorphism(schema, addressToCity, address, city, Min.ONE);
 
-        var order = addSchemaObject(schema, orderKey, "order", new ObjectIds(orderToId_order));
-        var id_order = addSchemaObject(schema, id_orderKey, "id_order", ObjectIds.createValue());
+        final var order = addSchemaObject(schema, orderKey, "order", new ObjectIds(orderToOrderId));
+        final var orderId = addSchemaObject(schema, idOrderKey, "id_order", ObjectIds.createValue());
 
-        addMorphismWithDual(schema, orderToId_order, order, id_order, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
+        addMorphism(schema, orderToOrderId, order, orderId, Min.ONE);
 
-        addMorphismWithDual(schema, userToOrder, user, order, Min.ZERO, Max.STAR, Min.ONE, Max.ONE);
+        addMorphism(schema, orderToUser, order, user, Min.ONE);
 
         return schema;
-    }
-
-    public static SchemaObject addSchemaObject(SchemaCategory schema, Key key, String name, ObjectIds ids) {
-        var object = new SchemaObject(key, name, ids.generateDefaultSuperId(), ids);
-        schema.addObject(object);
-        return object;
-    }
-
-    public static SchemaMorphism addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax) {
-        var builder = new SchemaMorphism.Builder();
-        var morphism = builder.fromArguments(signature, dom, cod, min, max, "");
-        var dual = builder.fromDual(morphism, dualMin, dualMax);
-
-        schema.addMorphism(morphism);
-        schema.addMorphism(dual);
-
-        return morphism;
     }
 
     public Mapping createInitialMapping() throws URISyntaxException {
@@ -103,21 +86,21 @@ public class TestData {
 
     private ComplexProperty createUserAccessPath() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
-            new SimpleProperty("_id", userToId_user),
+            new SimpleProperty("_id", userToUserId),
             ComplexProperty.create("contact_address", userToAddress,
                 new SimpleProperty("street", addressToStreet),
                 new SimpleProperty("city", addressToCity)
             ),
-            ComplexProperty.create("order", userToOrder,
-                new SimpleProperty("id", orderToId_order)
+            ComplexProperty.create("order", orderToUser.dual(),
+                new SimpleProperty("id", orderToOrderId)
             )
         );
     }
 
     private ComplexProperty createOrderAccessPath() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
-            new SimpleProperty("id", orderToId_order),
-            new SimpleProperty("customer_id", userToOrder.dual().concatenate(userToId_user)),
+            new SimpleProperty("id", orderToOrderId),
+            new SimpleProperty("customer_id", orderToUser.concatenate(userToUserId)),
             new SimpleProperty("fullAddress", orderToFullAddress)
         );
     }

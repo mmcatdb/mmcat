@@ -1,5 +1,5 @@
 import { Signature } from "../identifiers";
-import type { Edge } from "./Edge";
+import type { DirectedEdge, Edge } from "./Edge";
 import { AvailabilityStatus, type Node } from "./Node";
 
 type Config = {
@@ -7,15 +7,15 @@ type Config = {
 };
 
 const defaultConfig: Config = {
-    selectNodes: true
+    selectNodes: true,
 };
 
 export class NodeSequence {
     _nodes: Node[];
-    _edges: Edge[];
+    _edges: DirectedEdge[];
     readonly config: Config;
 
-    private constructor(nodes: Node[], edges: Edge[], config: Partial<Config>) {
+    private constructor(nodes: Node[], edges: DirectedEdge[], config: Partial<Config>) {
         this._nodes = [ ...nodes ];
         this._edges = [ ...edges ];
         this.config = { ...defaultConfig, ...config };
@@ -51,9 +51,9 @@ export class NodeSequence {
     }
 
     addBaseSignature(baseSignature: Signature): boolean {
-        for (const edge of this.lastNode.adjacentEdges) {
-            if (edge.schemaMorphism.signature.equals(baseSignature)) {
-                this.addEdge(edge);
+        for (const neighbour of this.lastNode.neighbours) {
+            if (neighbour.signature.equals(baseSignature)) {
+                this.addEdge(neighbour.toDirectedEdge(this.lastNode));
                 return true;
             }
         }
@@ -61,12 +61,12 @@ export class NodeSequence {
         return false;
     }
 
-    addEdge(edge: Edge): void {
+    addEdge(edge: DirectedEdge): void {
         this._edges.push(edge);
-        this._nodes.push(edge.codomainNode);
+        this._nodes.push(edge.targetNode);
 
         if (this.config.selectNodes)
-            edge.codomainNode.selectNext();
+            edge.targetNode.selectNext();
     }
 
     unselectAll(): void {
@@ -114,21 +114,22 @@ export class NodeSequence {
     }
 
     tryAddEdge(edge: Edge): boolean {
-        if (!edge.domainNode.equals(this.lastNode))
+        const direction = edge.domainNode.equals(this.lastNode);
+
+        if (!edge.getSourceNode(direction).equals(this.lastNode))
+            return false;
+
+        if (!edge.isTraversible(direction))
             return false;
 
         // The edge wasn't filtered out during the pathMarker algorithm so we can add it.
-        if (edge.isTraversible) {
-            this.addEdge(edge);
-            return true;
-        }
-
+        this.addEdge(edge.toDirectedEdge(direction));
         return true;
     }
 
     toSignature(): Signature {
         let output = Signature.empty;
-        this._edges.forEach(edge => output = output.concatenate(edge.schemaMorphism.signature));
+        this._edges.forEach(edge => output = output.concatenate(edge.signature));
 
         return output;
     }

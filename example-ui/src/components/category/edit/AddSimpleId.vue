@@ -1,60 +1,48 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Graph, PathSegment, Node } from '@/types/categoryGraph';
 import { SignatureIdFactory } from '@/types/identifiers';
-import { defineComponent } from 'vue';
+import { ref } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import SignatureDisplay from '../SignatureDisplay.vue';
 
-export default defineComponent({
-    components: {
-        SignatureInput,
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        graph: {
-            type: Object as () => Graph,
-            required: true
-        },
-        node: {
-            type: Object as () => Node,
-            required: true
-        }
-    },
-    emits: [ 'save', 'cancel' ],
-    data() {
-        return {
-            signature: SequenceSignature.empty(this.node),
-            filter: {
-                function: (segment: PathSegment) =>
-                    segment.edge.schemaMorphism.min === Cardinality.One
-                        && segment.edge.schemaMorphism.max === Cardinality.One
-                        && segment.edge.schemaMorphism.dual.max === Cardinality.One
-            }
-        };
-    },
-    methods: {
-        save() {
-            const factory = new SignatureIdFactory([ this.signature.toSignature() ]);
-            this.node.addSignatureId(factory.signatureId);
+type AddSimpleIdProps = {
+    graph: Graph;
+    node: Node;
+};
 
-            this.$emit('save');
-        },
-        cancel() {
-            this.$emit('cancel');
-        }
-    }
-});
+const props = defineProps<AddSimpleIdProps>();
+
+const emit = defineEmits([ 'save', 'cancel' ]);
+
+const signature = ref(SequenceSignature.empty(props.node));
+// It is not possible to require the presence of a dual because the whole principle of the v3 is to make things simpler.
+// However, there might be a simple solution that would enforce some morphisms to be bijections.
+// TODO
+const filter = {
+    function: (segment: PathSegment) => segment.direction && segment.edge.schemaMorphism.min === Cardinality.One,
+};
+
+function save() {
+    const factory = new SignatureIdFactory([ signature.value.toSignature() ]);
+    props.node.addSignatureId(factory.signatureId);
+
+    emit('save');
+}
+
+function cancel() {
+    emit('cancel');
+}
 </script>
 
 <template>
     <h2>Add simple Id</h2>
     <ValueContainer>
         <ValueRow label="Signature:">
-            {{ signature }}
+            <SignatureDisplay :signature="signature" />
         </ValueRow>
     </ValueContainer>
     <SignatureInput

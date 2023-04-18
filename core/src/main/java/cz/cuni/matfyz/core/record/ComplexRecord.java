@@ -207,4 +207,15 @@ public class ComplexRecord extends DataRecord implements IComplexRecord {
         
         return builder.toString();
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == this)
+            return true;
+
+        if (!(object instanceof ComplexRecord complexRecord))
+            return false;
+
+        return this.toString().equals(complexRecord.toString());
+    }
 }

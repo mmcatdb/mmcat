@@ -5,6 +5,7 @@ import { computed, ref } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
+import SignatureDisplay from '@/components/category/SignatureDisplay.vue';
 
 type ParentPropertyDisplayProps = {
     property: GraphParentProperty | ParentProperty;
@@ -16,7 +17,7 @@ type ParentPropertyDisplayProps = {
 const props = withDefaults(defineProps<ParentPropertyDisplayProps>(), {
     isLast: true,
     isRoot: true,
-    disableAdditions: false
+    disableAdditions: false,
 });
 
 const emit = defineEmits([ 'complex:click', 'simple:click', 'add:click' ]);
@@ -65,7 +66,12 @@ function emitComplexClick(): void {
                 @mouseenter="highlighted = true;"
                 @mouseleave="highlighted = false"
             >
-                {{ property.name }}: {{ property.isAuxiliary ? '' : (property.signature + ' ') }}{
+                {{ property.name }}:
+                <SignatureDisplay
+                    v-if="!property.isAuxiliary"
+                    :signature="property.signature"
+                />
+                {
             </span>
         </div>
         <div class="property-divide">

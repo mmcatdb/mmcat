@@ -13,7 +13,6 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.ComparablePair;
 import cz.cuni.matfyz.transformations.exception.TransformationException;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +71,7 @@ public class ICAlgorithm {
      * @return The set of names corresponding to signatures from primaryKey.
      */
     private IdentifierStructure collectNames(ComplexProperty path, Collection<Signature> primaryKey) {
-        Collection<String> output = new ArrayList<>();
+        final var output = new TreeSet<String>();
 
         for (Signature signature : primaryKey) {
             final var subpath = path.getSubpathBySignature(signature);
@@ -94,7 +93,7 @@ public class ICAlgorithm {
         //final var newSignatureFromLastMapping = signatureFromLastMapping.concatenate(path.signature());
 
         for (final var baseSignature : path.signature().toBases()) {
-            final var object = mapping.category().getMorphism(baseSignature).cod();
+            final var object = mapping.category().getEdge(baseSignature).cod();
             final var objectMapping = mappingsByObjects.get(object);
 
             if (objectMapping == null) {

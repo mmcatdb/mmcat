@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Neo4jControlWrapper implements AbstractControlWrapper {
 
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jControlWrapper.class);
 
     public static final String FROM_NODE_PROPERTY_PREFIX = "_from.";

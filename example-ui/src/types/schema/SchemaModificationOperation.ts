@@ -11,7 +11,7 @@ export type SMOFromServer<T extends SMOType = SMOType> = {
 };
 
 export interface SMO<T extends SMOType = SMOType> {
-    toServer(): SMOFromServer<T>;
+    toServer(): SMOFromServer<T> | null;
 }
 
 type AddObjectFromServer = SMOFromServer<SMOType.AddObject> & {
@@ -20,19 +20,23 @@ type AddObjectFromServer = SMOFromServer<SMOType.AddObject> & {
 
 export class AddObject implements SMO<SMOType.AddObject> {
     constructor(
-        readonly object: SchemaObject
+        readonly object: SchemaObject,
     ) {}
 
     static fromServer(input: AddObjectFromServer): AddObject {
         return new AddObject(
-            SchemaObject.fromServer(input.object)
+            SchemaObject.fromServer(input.object),
         );
     }
 
-    toServer(): AddObjectFromServer {
+    toServer(): AddObjectFromServer | null {
+        const object = this.object.toServer();
+        if (!object)
+            return null;
+
         return {
             type: SMOType.AddObject,
-            object: this.object.toServer()
+            object,
         };
     }
 }
@@ -43,19 +47,19 @@ type AddMorphismFromServer = SMOFromServer<SMOType.AddMorphism> & {
 
 export class AddMorphism implements SMO<SMOType.AddMorphism> {
     constructor(
-        readonly morphism: SchemaMorphism
+        readonly morphism: SchemaMorphism,
     ) {}
 
     static fromServer(input: AddMorphismFromServer): AddMorphism {
         return new AddMorphism(
-            SchemaMorphism.fromServer(input.morphism)
+            SchemaMorphism.fromServer(input.morphism),
         );
     }
 
     toServer(): AddMorphismFromServer {
         return {
             type: SMOType.AddMorphism,
-            morphism: this.morphism.toServer()
+            morphism: this.morphism.toServer(),
         };
     }
 }

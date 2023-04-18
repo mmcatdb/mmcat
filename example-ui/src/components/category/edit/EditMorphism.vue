@@ -1,8 +1,7 @@
 <script lang="ts">
 import { Edge, SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
-import { compareCardinalitySettings, type CardinalitySettings } from '@/types/schema';
 import { defineComponent } from 'vue';
-import CardinalityInput from './CardinalityInput.vue';
+import MinimumInput from './MinimumInput.vue';
 
 import { NodeIndices } from './AddMorphism.vue';
 import IriDisplay from '@/components/IriDisplay.vue';
@@ -11,20 +10,20 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 
 export default defineComponent({
     components: {
-        CardinalityInput,
+        MinimumInput,
         IriDisplay,
         ValueContainer,
-        ValueRow
+        ValueRow,
     },
     props: {
         graph: {
             type: Object as () => Graph,
-            required: true
+            required: true,
         },
         edge: {
             type: Object as () => Edge,
-            required: true
-        }
+            required: true,
+        },
     },
     emits: [ 'save', 'cancel' ],
     data() {
@@ -34,12 +33,7 @@ export default defineComponent({
             label: this.edge.schemaMorphism.label,
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
-            cardinality: {
-                domCodMin: this.edge.schemaMorphism.min,
-                domCodMax: this.edge.schemaMorphism.max,
-                codDomMin: this.edge.schemaMorphism.dual.min,
-                codDomMax: this.edge.schemaMorphism.dual.max
-            } as CardinalitySettings,
+            min: this.edge.schemaMorphism.min,
         };
     },
     computed: {
@@ -47,22 +41,17 @@ export default defineComponent({
             return !!this.node1 && !!this.node2;
         },
         changed(): boolean {
-            return !this.edge.domainNode.equals(this.node1) ||
-                !this.edge.codomainNode.equals(this.node2) ||
-                this.edge.schemaMorphism.label !== this.label.trim() ||
-                !compareCardinalitySettings(this.cardinality, {
-                    domCodMin: this.edge.schemaMorphism.min,
-                    domCodMax: this.edge.schemaMorphism.max,
-                    codDomMin: this.edge.schemaMorphism.dual.min,
-                    codDomMax: this.edge.schemaMorphism.dual.max
-                });
+            return !this.edge.domainNode.equals(this.node1)
+                || !this.edge.codomainNode.equals(this.node2)
+                || this.edge.schemaMorphism.label !== this.label.trim()
+                || this.edge.schemaMorphism.min !== this.min;
         },
         nodesChanged(): boolean {
             return !this.edge.domainNode.equals(this.node1) || !this.edge.codomainNode.equals(this.node2);
         },
         isNew(): boolean {
             return this.edge.schemaMorphism.isNew;
-        }
+        },
     },
     mounted() {
         if (this.isNew)
@@ -82,11 +71,11 @@ export default defineComponent({
 
             // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
 
-            this.graph.schemaCategory.editMorphismWithDual(this.edge.schemaMorphism, this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.label.trim());
+            this.graph.schemaCategory.editMorphism(this.edge.schemaMorphism, this.node1.schemaObject, this.node2.schemaObject, this.min, this.label.trim());
 
             this.temporayEdge?.delete();
-            this.graph.deleteEdgeWithDual(this.edge);
-            this.graph.createEdgeWithDual(this.edge.schemaMorphism, 'new');
+            this.graph.deleteEdge(this.edge);
+            this.graph.createEdge(this.edge.schemaMorphism, 'new');
             this.graph.layout();
 
             this.$emit('save');
@@ -97,8 +86,8 @@ export default defineComponent({
         deleteFunction() {
             // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
 
-            this.graph.schemaCategory.deleteMorphismWithDual(this.edge.schemaMorphism);
-            this.graph.deleteEdgeWithDual(this.edge);
+            this.graph.schemaCategory.deleteMorphism(this.edge.schemaMorphism);
+            this.graph.deleteEdge(this.edge);
 
             this.$emit('save');
         },
@@ -162,8 +151,8 @@ export default defineComponent({
 
             this.node1.select({ type: SelectionType.Selected, level: 0 });
             this.node2.select({ type: SelectionType.Selected, level: 1 });
-        }
-    }
+        },
+    },
 });
 </script>
 
@@ -195,8 +184,8 @@ export default defineComponent({
             <ValueRow label="Signature:">
                 {{ edge.schemaMorphism.signature }}
             </ValueRow>
-            <CardinalityInput
-                v-model="cardinality"
+            <MinimumInput
+                v-model="min"
                 :disabled="!isNew"
             />
         </ValueContainer>

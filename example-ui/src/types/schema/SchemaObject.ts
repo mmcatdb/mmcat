@@ -5,13 +5,14 @@ import { Key, ObjectIds, SignatureId, type KeyFromServer, type NonSignaturesType
 import { ComparablePosition, type PositionUpdate } from "./Position";
 import type { LogicalModel } from "../logicalModel";
 import type { Id } from "../id";
+import { SchemaCategoryInvalidError } from "./Error";
 
 export type SchemaObjectFromServer = {
     key: KeyFromServer;
     label: string;
     position: Position;
     superId: SignatureIdFromServer;
-    ids?: ObjectIdsFromServer;
+    ids: ObjectIdsFromServer;
     //databases?: string[];
     iri?: Iri;
     pimIri?: Iri;
@@ -41,7 +42,7 @@ export class SchemaObject {
         object.label = input.label;
         object.position = new ComparablePosition(input.position);
         object.superId = SignatureId.fromServer(input.superId);
-        object.ids = input.ids ? ObjectIds.fromServer(input.ids) : undefined;
+        object.ids = ObjectIds.fromServer(input.ids);
         object._isNew = false;
         object._originalPosition = new ComparablePosition(input.position);
         object.iri = input.iri;
@@ -106,6 +107,13 @@ export class SchemaObject {
         return [ ...this._logicalModels.values() ];
     }
 
+    get idsChecked(): ObjectIds {
+        if (!this.ids)
+            throw new SchemaCategoryInvalidError(`Object: ${this.key.toString()} doesn't have ids.`);
+
+        return this.ids;
+    }
+
     setLogicalModel(logicalModel: LogicalModel) {
         this._logicalModels.add(logicalModel);
     }
@@ -120,15 +128,18 @@ export class SchemaObject {
     }
     */
 
-    toServer(): SchemaObjectFromServer {
+    toServer(): SchemaObjectFromServer | null {
+        if (!this.ids)
+            return null;
+
         return {
             key: this.key.toServer(),
             position: this.position,
             label: this.label,
-            ids: this.ids?.toServer(),
+            ids: this.ids.toServer(),
             superId: this.superId.toServer(),
             iri: this.iri,
-            pimIri: this.pimIri
+            pimIri: this.pimIri,
         };
     }
 

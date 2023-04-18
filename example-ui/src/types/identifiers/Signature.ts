@@ -4,7 +4,10 @@ enum SignatureType {
     Empty
 }
 
-export type SignatureFromServer = number[];
+const SEPARATOR_FOR_DISPLAY = '.';
+const SEPARATOR_FROM_SERVER = ';';
+
+export type SignatureFromServer = string;
 
 function determineType(idsLength: number) {
     if (idsLength === 0)
@@ -23,14 +26,17 @@ export class Signature {
     }
 
     static fromServer(input: SignatureFromServer): Signature {
-        return new Signature(input);
+        if (input === 'EMPTY')
+            return Signature.empty;
+
+        return new Signature(input.split(SEPARATOR_FROM_SERVER).map(base => Number.parseInt(base)));
     }
 
     static base(id: number): Signature {
         return new Signature(id);
     }
 
-    static fromIds(ids: number[]) {
+    private static fromIds(ids: number[]) {
         return ids.length === 0 ? Signature.empty : new Signature(ids);
     }
 
@@ -47,7 +53,7 @@ export class Signature {
     }
 
     isBaseAndDualOf(signature: Signature): boolean {
-        return this.baseValue !== null && signature.baseValue !== null && this.baseValue === - signature.baseValue;
+        return this.baseValue !== null && signature.baseValue !== null && this.baseValue === -signature.baseValue;
     }
 
     copy(): Signature {
@@ -55,7 +61,7 @@ export class Signature {
     }
 
     concatenate(other: Signature): Signature {
-        return new Signature(other._ids.concat(this._ids));
+        return new Signature(this._ids.concat(other._ids));
     }
 
     static _emptyInstance = new Signature([]);
@@ -64,12 +70,16 @@ export class Signature {
         return this._emptyInstance;
     }
 
+    get isEmpty(): boolean {
+        return this._type === SignatureType.Empty;
+    }
+
     get isBase(): boolean {
         return this._type === SignatureType.Base;
     }
 
-    get isEmpty(): boolean {
-        return this._type === SignatureType.Empty;
+    get isBaseDual(): boolean {
+        return this.isBase && this._ids[0] < 0;
     }
 
     get baseValue(): number | null {
@@ -80,29 +90,36 @@ export class Signature {
         if (this._type === SignatureType.Empty)
             return 'EMPTY';
 
-        return this._ids.join('.');
+        return this._ids.join(SEPARATOR_FROM_SERVER);
+    }
+
+    toDisplayString(): string {
+        if (this._type === SignatureType.Empty)
+            return 'EMPTY';
+
+        return this._ids.join(SEPARATOR_FOR_DISPLAY);
     }
 
     toBases(): Signature[] {
-        return this._ids.map(id => new Signature(id)).reverse();
+        return this._ids.map(id => new Signature(id));
     }
 
     getFirstBase(): { first: Signature, rest: Signature } | undefined {
-        return this._type === SignatureType.Base || this._type === SignatureType.Composite ?
-            {
-                first: Signature.fromIds([ this._ids[this._ids.length - 1] ]),
-                rest: Signature.fromIds(this._ids.slice(0, -1))
-            } :
-            undefined;
+        return this._type === SignatureType.Base || this._type === SignatureType.Composite
+            ? {
+                first: Signature.base(this._ids[0]),
+                rest: Signature.fromIds(this._ids.slice(1)),
+            }
+            : undefined;
     }
 
     getLastBase(): { rest: Signature, last: Signature} | undefined {
-        return this._type === SignatureType.Base || this._type === SignatureType.Composite ?
-            {
-                rest: Signature.fromIds(this._ids.slice(1)),
-                last: Signature.fromIds([ this._ids[0] ])
-            } :
-            undefined;
+        return this._type === SignatureType.Base || this._type === SignatureType.Composite
+            ? {
+                rest: Signature.fromIds(this._ids.slice(0, -1)),
+                last: Signature.base(this._ids[this._ids.length - 1]),
+            }
+            : undefined;
     }
 
     equals(other: Signature): boolean {
@@ -122,6 +139,6 @@ export class Signature {
     }
 
     toServer(): SignatureFromServer {
-        return this._ids;
+        return this.toString();
     }
 }

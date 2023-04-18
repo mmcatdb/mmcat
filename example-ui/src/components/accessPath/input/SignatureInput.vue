@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import type { Edge, Graph, Node, FilterFunction } from '@/types/categoryGraph';
+import type { Edge, Graph, Node } from '@/types/categoryGraph';
 import type { SequenceSignature } from '@/types/accessPath/graph';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
+import type { Filter } from '@/types/categoryGraph/PathMarker';
 
 type SignatureInputProps = {
     graph: Graph;
-    filter: { function: FilterFunction | FilterFunction[] };
+    filter: Filter;
     modelValue: SequenceSignature;
     disabled?: boolean;
 };
 
 const props = withDefaults(defineProps<SignatureInputProps>(), {
-    disabled: false
+    disabled: false,
 });
 
 const emit = defineEmits([ 'update:modelValue', 'input' ]);
@@ -26,7 +27,7 @@ onMounted(() => {
     props.graph.addNodeListener('tap', onNodeTapHandler);
     props.graph.addEdgeListener('tap', onEdgeTapHandler);
     innerValue.value.sequence.selectAll();
-    innerValue.value.markAvailablePaths(props.filter.function);
+    innerValue.value.markAvailablePaths(props.filter);
 });
 
 onUnmounted(() => {
@@ -48,13 +49,13 @@ function onEdgeTapHandler(edge: Edge): void {
     if (props.disabled)
         return;
 
-    if (innerValue.value.sequence.tryAddEdge(edge) || innerValue.value.sequence.tryAddEdge(edge.dual))
+    if (innerValue.value.sequence.tryAddEdge(edge))
         innerValueUpdated();
 }
 
 function innerValueUpdated() {
     props.graph.resetAvailabilityStatus();
-    innerValue.value.markAvailablePaths(props.filter.function);
+    innerValue.value.markAvailablePaths(props.filter);
 
     emit('update:modelValue', innerValue.value);
     emit('input');
@@ -65,7 +66,7 @@ function setSignature(signature: SequenceSignature) {
     props.graph.resetAvailabilityStatus();
     innerValue.value = signature;
     innerValue.value.sequence.selectAll();
-    innerValue.value.markAvailablePaths(props.filter.function);
+    innerValue.value.markAvailablePaths(props.filter);
 }
 </script>
 

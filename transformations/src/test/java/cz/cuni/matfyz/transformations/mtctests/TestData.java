@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.transformations.mtctests;
 
-import cz.cuni.matfyz.core.category.Morphism.Max;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addMorphism;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addSchemaObject;
+
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -10,8 +12,6 @@ import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.core.schema.SchemaMorphism;
-import cz.cuni.matfyz.core.schema.SchemaObject;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
@@ -24,50 +24,33 @@ public class TestData {
     private final String dataFilePrefix = "MTC_additional/";
 
     public final Key userKey = new Key(100);
-    public final Key u_idKey = new Key(101);
+    public final Key userIdKey = new Key(101);
     public final Key nameKey = new Key(102);
     public final Key orderKey = new Key(103);
-    public final Key o_idKey = new Key(104);
+    public final Key orderIdKey = new Key(104);
     
-    public final Signature userToU_id = Signature.createBase(1);
+    public final Signature userToUserId = Signature.createBase(1);
     public final Signature userToName = Signature.createBase(2);
-    public final Signature userToOrder = Signature.createBase(3);
-    public final Signature orderToO_id = Signature.createBase(4);
+    public final Signature orderToUser = Signature.createBase(3);
+    public final Signature orderToOrderId = Signature.createBase(4);
     
-    public final Signature orderToU_id = userToOrder.dual().concatenate(userToU_id);
+    public final Signature orderToUserId = orderToUser.concatenate(userToUserId);
 
     public SchemaCategory createInitialSchemaCategory() {
-        var schema = new SchemaCategory("");
+        final var schema = new SchemaCategory("");
 
-        var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToU_id));
-        var u_id = addSchemaObject(schema, u_idKey, "u_id", ObjectIds.createValue());
-        var name = addSchemaObject(schema, nameKey, "name", ObjectIds.createValue());
-        var order = addSchemaObject(schema, orderKey, "order", new ObjectIds(orderToO_id));
-        var o_id = addSchemaObject(schema, o_idKey, "o_id", ObjectIds.createValue());
+        final var user = addSchemaObject(schema, userKey, "user", new ObjectIds(userToUserId));
+        final var userId = addSchemaObject(schema, userIdKey, "u_id", ObjectIds.createValue());
+        final var name = addSchemaObject(schema, nameKey, "name", ObjectIds.createValue());
+        final var order = addSchemaObject(schema, orderKey, "order", new ObjectIds(orderToOrderId));
+        final var orderId = addSchemaObject(schema, orderIdKey, "o_id", ObjectIds.createValue());
 
-        addMorphismWithDual(schema, userToU_id, user, u_id, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
-        addMorphismWithDual(schema, userToName, user, name, Min.ONE, Max.ONE, Min.ONE, Max.STAR);
-        addMorphismWithDual(schema, userToOrder, user, order, Min.ZERO, Max.STAR, Min.ONE, Max.ONE);
-        addMorphismWithDual(schema, orderToO_id, order, o_id, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
+        addMorphism(schema, userToUserId, user, userId, Min.ONE);
+        addMorphism(schema, userToName, user, name, Min.ONE);
+        addMorphism(schema, orderToUser, order, user, Min.ONE);
+        addMorphism(schema, orderToOrderId, order, orderId, Min.ONE);
 
         return schema;
-    }
-
-    public static SchemaObject addSchemaObject(SchemaCategory schema, Key key, String name, ObjectIds ids) {
-        var object = new SchemaObject(key, name, ids.generateDefaultSuperId(), ids);
-        schema.addObject(object);
-        return object;
-    }
-
-    public static SchemaMorphism addMorphismWithDual(SchemaCategory schema, Signature signature, SchemaObject dom, SchemaObject cod, Min min, Max max, Min dualMin, Max dualMax) {
-        var builder = new SchemaMorphism.Builder();
-        var morphism = builder.fromArguments(signature, dom, cod, min, max, "");
-        var dual = builder.fromDual(morphism, dualMin, dualMax);
-
-        schema.addMorphism(morphism);
-        schema.addMorphism(dual);
-
-        return morphism;
     }
 
     public Mapping createUserTableMapping(SchemaCategory schema) throws URISyntaxException {
@@ -92,15 +75,15 @@ public class TestData {
 
     private ComplexProperty createUserTableAccessPath() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
-            new SimpleProperty("u_id", userToU_id),
+            new SimpleProperty("u_id", userToUserId),
             new SimpleProperty("name", userToName)
         );
     }
 
     private ComplexProperty createOrderTableAccessPath() {
         return ComplexProperty.createAuxiliary(StaticName.createAnonymous(),
-            new SimpleProperty("o_id", orderToO_id),
-            new SimpleProperty("u_id", orderToU_id)
+            new SimpleProperty("o_id", orderToOrderId),
+            new SimpleProperty("u_id", orderToUserId)
         );
     }
 

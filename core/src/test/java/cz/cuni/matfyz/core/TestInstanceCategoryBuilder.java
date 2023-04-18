@@ -41,9 +41,6 @@ public class TestInstanceCategoryBuilder {
         var row = new MappingRow(domainRow, codomainRow);
         category.getMorphism(signature).addMapping(row);
         
-        var dualRow = new MappingRow(codomainRow, domainRow);
-        category.getMorphism(signature.dual()).addMapping(dualRow);
-        
         return row;
     }
 

@@ -1,9 +1,9 @@
 package cz.cuni.matfyz.core.schema;
 
 import cz.cuni.matfyz.core.category.Category;
-import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.exception.MorphismNotFoundException;
 import cz.cuni.matfyz.core.identification.MapUniqueContext;
 import cz.cuni.matfyz.core.identification.UniqueContext;
 
@@ -37,22 +37,52 @@ public class SchemaCategory implements Category {
         morphismContext.deleteUniqueObject(morphism);
     }
 
-    public SchemaMorphism dual(Signature signatureOfOriginal) {
-        return getMorphism(signatureOfOriginal.dual());
-    }
-
     public SchemaObject getObject(Key key) {
         return objectContext.getUniqueObject(key);
     }
     
     public SchemaMorphism getMorphism(Signature signature) {
+        if (signature.isBaseDual())
+            throw new MorphismNotFoundException("Schema morphism cannot have dual signature: " + signature);
+
         SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
         if (morphism == null) {
-            SchemaMorphism  newMorphism = createCompositeMorphism(signature);
+            if (signature.isEmpty() || signature.isBase())
+                throw new MorphismNotFoundException("Schema morphism not found for non-composite signature: " + signature);
+
+            SchemaMorphism newMorphism = createCompositeMorphism(signature);
             morphism = morphismContext.createUniqueObject(newMorphism);
         }
 
         return morphism;
+    }
+
+    public record SchemaEdge(
+        SchemaMorphism morphism,
+        boolean direction
+    ) {
+        public Signature signature() {
+            return direction ? morphism.signature() : morphism.signature().dual();
+        }
+
+        public SchemaObject dom() {
+            return direction ? morphism.dom() : morphism.cod();
+        }
+
+        public SchemaObject cod() {
+            return direction ? morphism.cod() : morphism.dom();
+        }
+
+        public boolean isArray() {
+            return !direction;
+        }
+    }
+    
+    public SchemaEdge getEdge(Signature signature) {
+        return new SchemaEdge(
+            getMorphism(signature.isBaseDual() ? signature.dual() : signature),
+            !signature.isBaseDual()
+        );
     }
 
     public Collection<SchemaObject> allObjects() {
@@ -71,17 +101,14 @@ public class SchemaCategory implements Category {
         SchemaObject dom = lastMorphism.dom();
         SchemaObject cod = lastMorphism.cod();
         Min min = lastMorphism.min();
-        Max max = lastMorphism.max();
 
-        for (int i = 1; i < bases.length; i++) {
-            lastSignature = bases[i];
-            lastMorphism = this.getMorphism(lastSignature);
+        for (final var base : bases) {
+            lastMorphism = this.getMorphism(base);
             cod = lastMorphism.cod();
             min = SchemaMorphism.combineMin(min, lastMorphism.min());
-            max = SchemaMorphism.combineMax(max, lastMorphism.max());
         }
 
-        return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min, max, "");
+        return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min);
     }
 
 }
