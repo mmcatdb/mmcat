@@ -3,7 +3,7 @@ package cz.cuni.matfyz.evolution.schema;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 
-public class AddObject implements SchemaModificationOperation {
+public class AddObject extends SchemaCategory.Editor implements SchemaModificationOperation {
 
     final SchemaObject object;
 
@@ -13,7 +13,7 @@ public class AddObject implements SchemaModificationOperation {
 
     @Override
     public void apply(SchemaCategory category) {
-        category.addObject(object);
+        getObjectContext(category).createUniqueObject(object);
     }
 
 }

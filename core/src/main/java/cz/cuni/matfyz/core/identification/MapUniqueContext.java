@@ -30,6 +30,11 @@ public class MapUniqueContext<O extends Identified<I>, I extends Comparable<I>> 
     }
 
     @Override
+    public void deleteUniqueObject(I id) {
+        uniqueObjects.remove(id);
+    }
+
+    @Override
     public void deleteUniqueObject(O object) {
         uniqueObjects.remove(object.identifier());
     }

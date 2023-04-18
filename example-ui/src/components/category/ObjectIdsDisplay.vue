@@ -34,7 +34,7 @@ const emit = defineEmits([ 'deleteNonSignature', 'deleteSignature' ]);
         <template v-else>
             <div>
                 <span
-                    class="signature-span"
+                    class="signature-span monospace-font"
                 >
                     {{ ids.type }}
                 </span>

@@ -28,9 +28,7 @@ public class SchemaCategory implements Category {
     }
 
     public SchemaMorphism addMorphism(SchemaMorphism morphism) {
-        var newMorphism = morphismContext.createUniqueObject(morphism);
-        newMorphism.setCategory(this);
-        return newMorphism;
+        return morphismContext.createUniqueObject(morphism);
     }
 
     public void deleteMorphism(SchemaMorphism morphism) {
@@ -109,6 +107,18 @@ public class SchemaCategory implements Category {
         }
 
         return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min);
+    }
+
+    public static class Editor {
+
+        protected UniqueContext<SchemaObject, Key> getObjectContext(SchemaCategory category) {
+            return category.objectContext;
+        }
+
+        protected UniqueContext<SchemaMorphism, Signature> getMorphismContext(SchemaCategory category) {
+            return category.morphismContext;
+        }
+
     }
 
 }

@@ -29,8 +29,6 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         return (min1 == Min.ONE && min2 == Min.ONE) ? Min.ONE : Min.ZERO;
     }
 
-    private SchemaCategory category;
-
     private SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, String label, String iri, String pimIri, Set<Tag> tags) {
         this.signature = signature;
         this.dom = dom;
@@ -40,10 +38,6 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         this.iri = iri;
         this.pimIri = pimIri;
         this.tags = Set.of(tags.toArray(Tag[]::new));
-    }
-
-    public void setCategory(SchemaCategory category) {
-        this.category = category;
     }
 
     @Override

@@ -4,7 +4,7 @@ import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 
-public class AddMorphism implements SchemaModificationOperation {
+public class AddMorphism extends SchemaCategory.Editor implements SchemaModificationOperation {
 
     // dom and cod of the morphism are probably null because they have not been created yet during the creation of this operation
     final SchemaMorphism morphism;
@@ -19,18 +19,21 @@ public class AddMorphism implements SchemaModificationOperation {
 
     @Override
     public void apply(SchemaCategory category) {
-        category.addMorphism(new SchemaMorphism.Builder()
+        final var objects = getObjectContext(category);
+
+        final var newMorphism = new SchemaMorphism.Builder()
             .label(morphism.label)
             .iri(morphism.iri)
             .pimIri(morphism.pimIri)
             .tags(morphism.tags())
             .fromArguments(
                 morphism.signature(),
-                category.getObject(domKey),
-                category.getObject(codKey),
+                objects.getUniqueObject(domKey),
+                objects.getUniqueObject(codKey),
                 morphism.min()
-            )
-        );
+            );
+
+        getMorphismContext(category).createUniqueObject(newMorphism);
     }
 
 }

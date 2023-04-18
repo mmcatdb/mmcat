@@ -23,7 +23,6 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
     private final List<InstanceMorphism> bases;
     private final InstanceObject dom;
     private final InstanceObject cod;
-    private final InstanceCategory category;
 
     private final SortedSet<MappingRow> mappings = new TreeSet<>();
 
@@ -31,7 +30,6 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
         this.schemaMorphism = schemaMorphism;
         this.dom = dom;
         this.cod = cod;
-        this.category = category;
         this.bases = isBase()
             ? List.of(this)
             : List.of(signature().toBases().stream().map(category::getMorphism).toArray(InstanceMorphism[]::new));

@@ -208,7 +208,6 @@ export default defineComponent({
                 Cancel
             </button>
             <button
-                v-if="isNew"
                 @click="deleteFunction"
             >
                 Delete
