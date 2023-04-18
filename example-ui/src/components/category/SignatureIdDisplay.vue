@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { SignatureId } from '@/types/identifiers';
+import SignatureDisplay from './SignatureDisplay.vue';
 
 type SignatureIdDisplayProps = {
     signatureId: SignatureId;
@@ -15,7 +16,7 @@ defineProps<SignatureIdDisplayProps>();
             :key="signatureIndex"
         >
             <span class="signature-span">
-                {{ signature }}
+                <SignatureDisplay :signature="signature" />
             </span>
             <span
                 v-if="signatureIndex < signatureId.signatures.length - 1"

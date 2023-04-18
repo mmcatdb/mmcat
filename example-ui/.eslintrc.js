@@ -3,27 +3,27 @@ module.exports = {
     env: {
         browser: true,
         es2021: true,
-        node: true
+        node: true,
     },
     extends: [
         'plugin:vue/vue3-recommended',
         'eslint:recommended',
-        '@vue/typescript/recommended'
+        '@vue/typescript/recommended',
     ],
     parser: 'vue-eslint-parser',
     parserOptions: {
-        ecmaVersion: 2021
+        ecmaVersion: 2021,
     },
     plugins: [
         'vue',
-        '@typescript-eslint'
+        '@typescript-eslint',
     ],
     rules: {
         'vue/no-multiple-template-root': 'off',
         'vue/html-self-closing': [ 'warn', {
             'html': {
-                'void': 'always'
-            }
+                'void': 'always',
+            },
         } ],
         'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
         'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
@@ -34,7 +34,7 @@ module.exports = {
         'space-before-function-paren': [ 'warn', {
             anonymous: 'always',
             named: 'never',
-            asyncArrow: 'always'
+            asyncArrow: 'always',
         } ],
         curly: [ 'warn', 'multi-or-nest', 'consistent' ],
         'brace-style': [ 'warn', 'stroustrup' ],
@@ -42,6 +42,7 @@ module.exports = {
         'no-empty-function': 'off',
         '@typescript-eslint/no-empty-function': [ 'error', { 'allow': [ 'private-constructors' ] } ],
         'vue/multi-word-component-names': 'off',
-        '@typescript-eslint/member-delimiter-style': [ 'error', { singleline: { delimiter: 'comma' } } ]
-    }
+        '@typescript-eslint/member-delimiter-style': [ 'error', { singleline: { delimiter: 'comma' } } ],
+        'comma-dangle': [ 'warn', 'always-multiline' ],
+    },
 };

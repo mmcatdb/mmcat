@@ -23,7 +23,7 @@ type NameInputProps = {
 };
 
 const props = withDefaults(defineProps<NameInputProps>(), {
-    disabled: false
+    disabled: false,
 });
 
 const emit = defineEmits([ 'update:modelValue' ]);
@@ -44,9 +44,10 @@ watch(() => props.modelValue, (newValue: Name) => {
 });
 
 function getNameType(name: Name): NameType {
-    return name instanceof StaticName
-        ? (name.isAnonymous ? NameType.Anonymous : NameType.Static)
-        : NameType.Dynamic;
+    if (name instanceof DynamicName)
+        return NameType.Dynamic;
+
+    return name.isAnonymous ? NameType.Anonymous : NameType.Static;
 }
 
 function updateInnerValue() {

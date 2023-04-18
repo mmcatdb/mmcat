@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism {
 
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingRow.class);
 
     public final SchemaMorphism schemaMorphism;
@@ -56,11 +57,10 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
         return bases.get(bases.size() - 1);
     }
 
-    public void createMappingWithDual(DomainRow domainRow, DomainRow codomainRow) {
+    public void createMapping(DomainRow domainRow, DomainRow codomainRow) {
         var mapping = new MappingRow(domainRow, codomainRow);
 
         addMapping(mapping);
-        dual().addMapping(mapping.toDual());
 
         // TODO shouldn't there be a merge?
     }
@@ -69,11 +69,13 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
     public void addMapping(MappingRow mapping) {
         mappings.add(mapping);
         mapping.domainRow().addMappingFrom(this, mapping);
+        mapping.codomainRow().addMappingTo(this, mapping);
     }
 
     public void removeMapping(MappingRow mapping) {
         mappings.remove(mapping);
         mapping.domainRow().removeMappingFrom(this, mapping);
+        mapping.codomainRow().removeMappingTo(this, mapping);
     }
 
     public SortedSet<MappingRow> allMappings() {
@@ -91,11 +93,6 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
     }
 
     @Override
-    public InstanceMorphism dual() {
-        return category.dual(signature());
-    }
-
-    @Override
     public Signature signature() {
         return schemaMorphism.signature();
     }
@@ -103,15 +100,6 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
     @Override
     public Min min() {
         return schemaMorphism.min();
-    }
-
-    @Override
-    public Max max() {
-        return schemaMorphism.max();
-    }
-
-    public boolean isArray() {
-        return schemaMorphism.isArray();
     }
 
     @Override

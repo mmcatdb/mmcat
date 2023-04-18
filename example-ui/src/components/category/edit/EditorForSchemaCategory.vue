@@ -41,19 +41,19 @@ export default defineComponent({
         EditMorphism,
         Divider,
         Integration,
-        EditGroup
+        EditGroup,
     },
     props: {
         graph: {
             type: Object as () => Graph,
-            required: true
-        }
+            required: true,
+        },
     },
     emits: [ 'save' ],
     data() {
         return {
             state: { type: State.Default } as StateValue,
-            State
+            State,
         };
     },
     mounted() {
@@ -130,7 +130,7 @@ export default defineComponent({
                 }
                 else {
                     if (isKeyPressed(Key.Shift)) {
-                        this.state = { type: State.EditGroup, nodes: [ this.state.node, node ]};
+                        this.state = { type: State.EditGroup, nodes: [ this.state.node, node ] };
                         node.select({ type: SelectionType.Root, level: 0 });
                         return;
                     }
@@ -190,14 +190,18 @@ export default defineComponent({
         async save() {
             const updateObject = this.graph.schemaCategory.getUpdateObject();
             console.log(this.graph.schemaCategory);
+            if (!updateObject) {
+                console.log('Update object invalid');
+                return;
+            }
 
             const result = await API.schemas.updateCategoryWrapper({ id: this.graph.schemaCategory.id }, updateObject);
             if (result.status) {
                 const schemaCategory = SchemaCategory.fromServer(result.data);
                 this.$emit('save', schemaCategory);
             }
-        }
-    }
+        },
+    },
 });
 </script>
 

@@ -7,7 +7,7 @@ import cz.cuni.matfyz.core.utils.io.FileInputStreamProvider;
 import cz.cuni.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.cuni.matfyz.integration.algorithms.JsonLdToRDF;
 import cz.cuni.matfyz.integration.algorithms.RDFToInstance;
-import cz.cuni.matfyz.server.builder.CategoryBuilder;
+import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
 
@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class IntegrationTests {
 
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);
     
     static final String JSON_LD_FILE_NAME = "test2.jsonld";
@@ -67,9 +68,8 @@ public class IntegrationTests {
         jsonToRDF.input(new FileInputStreamProvider(JSON_LD_FILE_NAME));
 
         final var schemaCategoryWrapper = categoryService.find(CATEGORY_ID);
-        final var schemaCategory = new CategoryBuilder()
-            .setCategoryWrapper(schemaCategoryWrapper)
-            .build();
+        final var context = new SchemaCategoryContext();
+        final var schemaCategory = schemaCategoryWrapper.toSchemaCategory(context);
         final var instanceCategory = new InstanceCategoryBuilder().setSchemaCategory(schemaCategory).build();
 
         assertDoesNotThrow(() -> {

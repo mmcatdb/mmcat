@@ -32,10 +32,6 @@ public class MappingRow implements Serializable, Comparable<MappingRow> {
         this.codomainRow = codomainRow;
     }
 
-    public MappingRow toDual() {
-        return new MappingRow(codomainRow, domainRow);
-    }
-
     @Override
     public int compareTo(MappingRow row) {
         // This is not sufficient generally because there might be multiple different mappings between the same two rows.

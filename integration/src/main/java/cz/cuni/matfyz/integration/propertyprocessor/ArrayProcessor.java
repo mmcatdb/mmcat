@@ -36,11 +36,15 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
     public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
         LOGGER.warn("[Array]: {}", statement);
 
-        final var resourceToElement = finder.findFromObjectWithLastDual(resourceObject, statement.getPredicate().getURI() + DOM_TO_ELEMENT_SUFFIX);
-        if (resourceToElement == null)
+        final var elementToDom = finder.findBaseByPimIri(statement.getPredicate().getURI() + DOM_TO_ELEMENT_SUFFIX);
+        if (!elementToDom.schemaMorphism.hasTag(Tag.role))
             return false;
 
-        final var element = resourceToElement.cod();
+        final var resourceToDom = finder.findFromObjectToObject(resourceObject, elementToDom.cod());
+        if (resourceToDom == null)
+            return false;
+
+        final var element = elementToDom.dom();
         if (!element.schemaObject.ids().isGenerated())
             return false;
         if (!element.schemaObject.pimIri.equals(ELEMENT))
@@ -52,10 +56,6 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
         if (!elementToCod.schemaMorphism.hasTag(Tag.role))
             return false;
 
-        final var elementToDom = resourceToElement.lastBase().dual();
-        if (!elementToDom.schemaMorphism.hasTag(Tag.role))
-            return false;
-
         final var elementToIndex = finder.findDirectFromObject(element, ELEMENT_TO_INDEX);
         if (elementToIndex == null)
             return false;
@@ -63,16 +63,15 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
         if (!index.schemaObject.pimIri.equals(INDEX))
             return false;
 
-        final var domRow = IsaMorphismCreator.getOrCreateLastIsaRow(resourceRow, resourceToElement);
+        final var domRow = IsaMorphismCreator.getOrCreateLastIsaRow(resourceRow, resourceToDom);
         final var newElementSuperId = SuperIdWithValues.fromEmptySignature(UniqueIdProvider.getNext());
 
-        final var domToElement = elementToDom.dual();
-        final var elementRow = InstanceObject.getOrCreateRowWithBaseMorphism(newElementSuperId, domRow, domToElement);
-
+        final var elementRow = elementToDom.dom().getOrCreateRow(newElementSuperId);
+        
         final var codRow = createTypeRow(statement.getObject(), elementToCod.cod());
         InstanceObject.connectRowWithBaseMorphism(codRow, elementRow, elementToCod);
         
-        final var indexValue = domRow.getMappingsFromForMorphism(domToElement).size() - 1; // We index from zero.
+        final var indexValue = domRow.getMappingsToForMorphism(elementToDom).size() - 1; // We index from zero.
         InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature("" + indexValue), elementRow, elementToIndex);
 
         return true;

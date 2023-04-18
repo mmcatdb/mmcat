@@ -32,13 +32,13 @@ const dataTypeDefinitions: DataTypeDefinition[] = [
     {
         iri: OFN_TYPE_PREFIX + 'řetězec',
         type: DataType.string,
-        createAttribute: createAttributeForString
+        createAttribute: createAttributeForString,
     },
     {
         iri: OFN_TYPE_PREFIX + 'text',
         type: DataType.text,
-        createAttribute: createAttributeForText
-    }
+        createAttribute: createAttributeForText,
+    },
 ];
 
 function createAttributeForString(attribute: Attribute, output: ImportedDataspecer): ImportedObject {
@@ -53,7 +53,7 @@ const TEXT = {
     LANGUAGE: TEXT_IRI_PREFIX + 'language',
     ATTRIBUTE_TO_LANGUAGE: TEXT_IRI_PREFIX + 'attribute-to-language',
     VALUE: TEXT_IRI_PREFIX + 'value',
-    ATTRIBUTE_TO_VALUE: TEXT_IRI_PREFIX + 'attribute-to-value'
+    ATTRIBUTE_TO_VALUE: TEXT_IRI_PREFIX + 'attribute-to-value',
 };
 
 function createAttributeForText(attribute: Attribute, output: ImportedDataspecer): ImportedObject {
@@ -62,22 +62,12 @@ function createAttributeForText(attribute: Attribute, output: ImportedDataspecer
 
     const language = new ImportedObject(attribute.iri + '/_language', TEXT.LANGUAGE, attribute.label + '_language', createValueId());
     output.objects.push(language);
-    const attributeToLanguage = new ImportedMorphism(attribute.iri + '/_attribute-to-language', TEXT.ATTRIBUTE_TO_LANGUAGE, '', attributeObject, language, {
-        domCodMin: Cardinality.One,
-        domCodMax: Cardinality.One,
-        codDomMin: Cardinality.Zero,
-        codDomMax: Cardinality.Star
-    });
+    const attributeToLanguage = new ImportedMorphism(attribute.iri + '/_attribute-to-language', TEXT.ATTRIBUTE_TO_LANGUAGE, '', attributeObject, language, Cardinality.One);
     output.morphisms.push(attributeToLanguage);
 
     const value = new ImportedObject(attribute.iri + '/_value', TEXT.VALUE, attribute.label + '_value', createValueId());
     output.objects.push(value);
-    const attributeToValue = new ImportedMorphism(attribute.iri + '/_attribute-to-value', TEXT.ATTRIBUTE_TO_VALUE, '', attributeObject, value, {
-        domCodMin: Cardinality.One,
-        domCodMax: Cardinality.One,
-        codDomMin: Cardinality.Zero,
-        codDomMax: Cardinality.Star
-    });
+    const attributeToValue = new ImportedMorphism(attribute.iri + '/_attribute-to-value', TEXT.ATTRIBUTE_TO_VALUE, '', attributeObject, value, Cardinality.One);
     output.morphisms.push(attributeToValue);
 
     attributeObject.addId(createMorphismId([ [ attributeToLanguage ], [ attributeToValue ] ]));

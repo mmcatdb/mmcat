@@ -2,7 +2,7 @@ import type { DatabaseConfiguration } from "../database";
 import type { Signature } from "../identifiers";
 import { Cardinality, type Max, type Min } from "../schema";
 import type { Edge } from "./Edge";
-import { type Node, AvailabilityStatus } from "./Node";
+import { type Node, AvailabilityStatus, Neighbour } from "./Node";
 
 export type MorphismData = {
     signature: Signature;
@@ -14,62 +14,62 @@ function combineMorphismData(first: MorphismData, second: MorphismData): Morphis
     return {
         signature: first.signature.concatenate(second.signature),
         min: first.min === Cardinality.One && second.min === Cardinality.One ? Cardinality.One : Cardinality.Zero,
-        max: first.max === Cardinality.One && second.max === Cardinality.One ? Cardinality.One : Cardinality.Star
+        max: first.max === Cardinality.One && second.max === Cardinality.One ? Cardinality.One : Cardinality.Star,
     };
 }
 
-function joinMorphisms(parent: MorphismData | undefined, next: MorphismData) {
+function joinMorphisms(parent: MorphismData | undefined, next: MorphismData): MorphismData {
     return parent ? combineMorphismData(parent, next) : next;
 }
 
-function joinDuals(parent: MorphismData | undefined, next: MorphismData) {
-    return parent ? combineMorphismData(next, parent) : next;
-}
-
 export type PathSegment = {
-    targetNode: Node;
     sourceNode: Node;
+    targetNode: Node;
     edge: Edge;
+    direction: boolean;
     fullMorphism: MorphismData;
-    fullDual: MorphismData;
     previousSegment: PathSegment | undefined;
     dependentSegments: PathSegment[];
 };
 
 export type FilterFunction = (segment: PathSegment) => boolean;
 
+export type Filter = {
+    function: FilterFunction | FilterFunction[];
+};
+
 export class PathMarker {
     // It's actually important this is a stack and not a queue, because the paths has to be traversed in one go.
     rootNode: Node;
 
-    filters: FilterFunction[];
+    filterFunctions: FilterFunction[];
 
     readonly stack = [] as PathSegment[];
 
-    constructor(rootNode: Node, filters: FilterFunction | FilterFunction[]) {
+    constructor(rootNode: Node, filter: Filter) {
         this.rootNode = rootNode;
-        this.filters = Array.isArray(filters) ? filters : [ filters ];
+        this.filterFunctions = Array.isArray(filter.function) ? filter.function : [ filter.function ];
     }
 
     getTraversableNeighbours(sourceNode: Node, previousSegment?: PathSegment): PathSegment[] {
-        let neighbours = sourceNode.adjacentEdges
-            .map(edge => createPathSegment(edge, previousSegment))
-            .filter(neighbour => !neighbour.targetNode.equals(this.rootNode));
+        let neighbours = sourceNode.neighbours
+            .map(neighbour => createPathSegment(sourceNode, neighbour, previousSegment))
+            .filter(segment => !segment.targetNode.equals(this.rootNode));
 
         // The edges around the root node are clickable so we have to check if they are valid.
         // First we mark all as invalid.
         if (!previousSegment)
-            neighbours.forEach(neighbour => neighbour.edge.isTraversible = false);
+            neighbours.forEach(neighbour => neighbour.edge.setTraversible(neighbour.direction, false));
 
         if (previousSegment)
             neighbours = filterBackwardPaths(neighbours, previousSegment.fullMorphism);
 
-        for (const filterFunction of this.filters)
+        for (const filterFunction of this.filterFunctions)
             neighbours = neighbours.filter(filterFunction);
 
         // Then we validate those that survive the filters.
         if (!previousSegment)
-            neighbours.forEach(neighbour => neighbour.edge.isTraversible = true);
+            neighbours.forEach(neighbour => neighbour.edge.setTraversible(neighbour.direction, true));
 
         // We have to check that we are not going back to the same node.
         // It's permitted, but the user has to specifically require it.
@@ -135,23 +135,32 @@ export class PathMarker {
     }
 }
 
-function createPathSegment(edge: Edge, previousSegment?: PathSegment): PathSegment {
+function createPathSegment(sourceNode: Node, neighbour: Neighbour, previousSegment?: PathSegment): PathSegment {
+    const direction = neighbour.direction;
+    const edge = neighbour.edge;
+
+    const morphismData: MorphismData = {
+        signature: neighbour.signature,
+        min: direction ? edge.schemaMorphism.min : Cardinality.Zero,
+        max: direction ? Cardinality.One : Cardinality.Star,
+    };
+
     return {
-        targetNode: edge.codomainNode,
-        sourceNode: edge.domainNode,
+        targetNode: neighbour.node,
+        sourceNode,
         edge,
-        fullMorphism: joinMorphisms(previousSegment?.fullMorphism, edge.schemaMorphism),
-        fullDual: joinDuals(previousSegment?.fullDual, edge.schemaMorphism.dual),
+        direction,
+        fullMorphism: joinMorphisms(previousSegment?.fullMorphism, morphismData),
         previousSegment,
-        dependentSegments: [] as PathSegment[]
+        dependentSegments: [] as PathSegment[],
     };
 }
 
-export function createDefaultFilter(configuration: DatabaseConfiguration): { function: FilterFunction } {
+export function createDefaultFilter(configuration: DatabaseConfiguration): Filter {
     return {
         function: (segment: PathSegment) => segment.previousSegment
             ? (segment.fullMorphism.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed)
-            : (segment.fullMorphism.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed)
+            : (segment.fullMorphism.max === Cardinality.One ? configuration.isInliningToOneAllowed : configuration.isInliningToManyAllowed),
     };
 }
 

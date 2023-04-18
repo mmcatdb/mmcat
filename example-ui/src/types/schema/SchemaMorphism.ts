@@ -7,7 +7,6 @@ export type SchemaMorphismFromServer = {
     domKey: KeyFromServer;
     codKey: KeyFromServer;
     min: Min;
-    max: Max;
     iri?: Iri;
     pimIri?: Iri;
     tags?: Tag[];
@@ -32,9 +31,7 @@ export class SchemaMorphism {
     domKey: Key;
     codKey: Key;
     min: Min;
-    max: Max;
     label: string;
-    _dual!: SchemaMorphism;
     _isNew: boolean;
 
     iri?: Iri;
@@ -49,25 +46,16 @@ export class SchemaMorphism {
         return this._isNew;
     }
 
-    get dual(): SchemaMorphism {
-        return this._dual;
-    }
-
-    set dual(value: SchemaMorphism) {
-        this._dual = value;
-    }
-
     get sortBaseValue(): number {
         const baseValue = this.signature.baseValue;
         return Math.abs(baseValue ? baseValue : 0);
     }
 
-    private constructor(signature: Signature, domKey: Key, codKey: Key, min: Min, max: Max, isNew: boolean, label: string, iri: Iri | undefined, pimIri: Iri | undefined, tags: Tag[]) {
+    private constructor(signature: Signature, domKey: Key, codKey: Key, min: Min, isNew: boolean, label: string, iri: Iri | undefined, pimIri: Iri | undefined, tags: Tag[]) {
         this.signature = signature;
         this.domKey = domKey;
         this.codKey = codKey;
         this.min = min;
-        this.max = max;
         this._isNew = isNew;
         this.label = label;
         this.iri = iri;
@@ -81,28 +69,22 @@ export class SchemaMorphism {
             Key.fromServer(input.domKey),
             Key.fromServer(input.codKey),
             input.min,
-            input.max,
             false,
             input.label || '',
             input.iri,
             input.pimIri,
-            input.tags ? input.tags : []
+            input.tags ? input.tags : [],
         );
     }
 
-    static createNew(signature: Signature, domKey: Key, codKey: Key, min: Min, max: Max, label: string, tags: Tag[]): SchemaMorphism {
-        return new SchemaMorphism(signature, domKey, codKey, min, max, true, label, undefined, undefined, tags);
+    static createNew(signature: Signature, domKey: Key, codKey: Key, min: Min, label: string, tags: Tag[]): SchemaMorphism {
+        return new SchemaMorphism(signature, domKey, codKey, min, true, label, undefined, undefined, tags);
     }
 
-    static createNewFromDualWithoutTags(dual: SchemaMorphism, signature: Signature, min: Min, max: Max): SchemaMorphism {
-        return new SchemaMorphism(signature, dual.codKey, dual.domKey, min, max, true, '', '', undefined, []);
-    }
-
-    update(domKey: Key, codKey: Key, min: Min, max: Max, label: string) {
+    update(domKey: Key, codKey: Key, min: Min, label: string) {
         this.domKey = domKey;
         this.codKey = codKey;
         this.min = min;
-        this.max = max;
         this.label = label;
     }
 
@@ -112,11 +94,10 @@ export class SchemaMorphism {
             domKey: this.domKey.toServer(),
             codKey: this.codKey.toServer(),
             min: this.min,
-            max: this.max,
             label: this.label,
             iri: this.iri,
             pimIri: this.pimIri,
-            tags: this.tags
+            tags: this.tags,
         };
     }
 

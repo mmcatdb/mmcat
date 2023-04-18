@@ -5,41 +5,40 @@ export default defineComponent({
     props: {
         modelValue: {
             type: undefined,
-            required: true
+            required: true,
         },
         value: {
             type: undefined,
-            required: true
+            required: true,
         },
         disabled: {
             type: Boolean,
             required: false,
-            default: false
-        }
+            default: false,
+        },
     },
     emits: [ 'update:modelValue' ],
     data() {
         return {
-            active: this.value === this.modelValue
+            active: this.value === this.modelValue,
         };
     },
     watch: {
         modelValue: {
             handler(newValue: string): void {
                 this.active = this.value === newValue;
-            }
-        }
+            },
+        },
     },
     methods: {
         onClick() {
             this.$emit('update:modelValue', this.value);
-        }
-    }
+        },
+    },
 });
 </script>
 
 <template>
-    <!--<slot />-->
     <button
         :class="{ selected: active }"
         :disabled="disabled"

@@ -32,8 +32,8 @@ type Column = {
 function defineColumn(signature: Signature, node: Node): Column {
     return {
         signature,
-        schemaObject: node.getNeighbour(signature)?.schemaObject,
-        isClickable: !signature.equals(Signature.empty)
+        schemaObject: node.getNeighbourNode(signature)?.schemaObject,
+        isClickable: !signature.equals(Signature.empty),
     };
 }
 
@@ -47,7 +47,7 @@ async function fetchMorphism() {
     morphism.value = InstanceMorphism.fromServer(result.data);
     columns.value = {
         dom: morphism.value.domSuperId.signatures.map(signature => defineColumn(signature, props.edge.domainNode)),
-        cod: morphism.value.codSuperId.signatures.map(signature => defineColumn(signature, props.edge.codomainNode))
+        cod: morphism.value.codSuperId.signatures.map(signature => defineColumn(signature, props.edge.codomainNode)),
     };
 
     return true;

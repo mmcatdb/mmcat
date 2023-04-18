@@ -1,6 +1,8 @@
 package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstanceEdge;
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.cuni.matfyz.core.utils.IterableUtils;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 @JsonSerialize(using = DomainRow.Serializer.class)
 public class DomainRow implements Serializable, Comparable<DomainRow> {
 
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
 
     // The tuples that holds the value of this row.
@@ -56,14 +59,28 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
     }
 
     private final Map<InstanceMorphism, Set<MappingRow>> mappingsFrom = new TreeMap<>();
-    //public final Map<InstanceMorphism, Set<MappingRow>> mappingsTo = new TreeMap<>();
+    private final Map<InstanceMorphism, Set<MappingRow>> mappingsTo = new TreeMap<>();
 
     /**
      * Warning: this is a low-level method that works as intended only for the base morphisms. For the composite ones, an empty set might be returned even if connections exist.
      */
     public Set<MappingRow> getMappingsFromForMorphism(InstanceMorphism morphism) {
-        var mappings = mappingsFrom.get(morphism);
+        var mappings = mappingsFrom.computeIfAbsent(morphism, x -> new TreeSet<>());
         return mappings != null ? mappings : new TreeSet<>();
+    }
+
+    public Set<MappingRow> getMappingsToForMorphism(InstanceMorphism morphism) {
+        var mappings = mappingsTo.get(morphism);
+        return mappings != null ? mappings : new TreeSet<>();
+    }
+
+    public Set<MappingRow> getMappingsForEdge(InstanceEdge edge) {
+        var mappings = (edge.direction() ? mappingsFrom : mappingsTo).get(edge.morphism());
+        return mappings != null ? mappings : new TreeSet<>();
+    }
+
+    public List<DomainRow> getCodomainForEdge(InstanceEdge edge) {
+        return getMappingsForEdge(edge).stream().map(mappingRow -> edge.direction() ? mappingRow.codomainRow() : mappingRow.domainRow()).toList();
     }
 
     public Set<Entry<InstanceMorphism, Set<MappingRow>>> getAllMappingsFrom() {
@@ -80,16 +97,25 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
         mappingsOfSameType.remove(mapping);
     }
 
-    public Set<DomainRow> traverseThrough(InstanceMorphism path) {
+    void addMappingTo(InstanceMorphism morphism, MappingRow mapping) {
+        var mappingsOfSameType = mappingsTo.computeIfAbsent(morphism, x -> new TreeSet<>());
+        mappingsOfSameType.add(mapping);
+    }
+
+    void removeMappingTo(InstanceMorphism morphism, MappingRow mapping) {
+        var mappingsOfSameType = mappingsTo.get(morphism);
+        mappingsOfSameType.remove(mapping);
+    }
+
+    public Set<DomainRow> traverseThrough(InstancePath path) {
         var currentSet = new TreeSet<DomainRow>();
         currentSet.add(this);
 
-        for (var baseMorphism : path.bases()) {
-            var nextSet = new TreeSet<DomainRow>();
-            for (var row : currentSet) {
-                var codomainRows = row.getMappingsFromForMorphism(baseMorphism).stream().map(MappingRow::codomainRow).toList();
-                nextSet.addAll(codomainRows);
-            }
+        for (final var edge : path.edges()) {
+            final var nextSet = new TreeSet<DomainRow>();
+            for (final var row : currentSet)
+                nextSet.addAll(row.getCodomainForEdge(edge));
+                
             currentSet = nextSet;
         }
 

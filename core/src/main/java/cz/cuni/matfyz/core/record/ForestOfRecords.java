@@ -54,4 +54,24 @@ public class ForestOfRecords implements Iterable<RootRecord> {
     public int size() {
         return records.size();
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == this)
+            return true;
+            
+        if (!(object instanceof ForestOfRecords forestOfRecords))
+            return false;
+
+        if (records.size() != forestOfRecords.size())
+            return false;
+
+        for (final var record1 : records) {
+            final var match = forestOfRecords.records.stream().anyMatch(record2 -> record2.equals(record1));
+            if (!match)
+                return false;
+        }
+
+        return true;
+    }
 }

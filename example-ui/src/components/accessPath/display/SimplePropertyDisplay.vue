@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { GraphSimpleProperty } from '@/types/accessPath/graph';
 import type { SimpleProperty } from '@/types/accessPath/basic';
+import SignatureDisplay from '@/components/category/SignatureDisplay.vue';
+import NameDisplay from '@/components/category/NameDisplay.vue';
 
 type SimplePropertyDisplayProps = {
     property: GraphSimpleProperty | SimpleProperty;
@@ -17,7 +19,7 @@ const emit = defineEmits([ 'simple:click' ]);
         class="name-text"
         @click="emit('simple:click', property)"
     >
-        {{ property.name }}: {{ property.signature }}{{ isLast ? '' : ',' }}
+        <NameDisplay :name="property.name" />: <SignatureDisplay :signature="property.signature" />{{ isLast ? '' : ',' }}
     </span>
 </template>
 

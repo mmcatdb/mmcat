@@ -2,6 +2,8 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstanceEdge;
+import cz.cuni.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.ObjectIds;
 import cz.cuni.matfyz.core.schema.SchemaObject;
@@ -78,6 +80,11 @@ public class InstanceObject implements CategoricalObject {
     public DomainRow getOrCreateRow(SuperIdWithValues superId) {
         var merger = new Merger();
         return merger.merge(superId, this);
+    }
+
+    public static DomainRow getOrCreateRowWithEdge(SuperIdWithValues superId, DomainRow parent, InstanceEdge edgeFromParent) {
+        var merger = new Merger();
+        return merger.merge(superId, parent, edgeFromParent);
     }
 
     public static DomainRow getOrCreateRowWithBaseMorphism(SuperIdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
@@ -268,7 +275,7 @@ public class InstanceObject implements CategoricalObject {
     
     private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
 
-    public void addReferenceToRow(Signature signatureInThis, InstanceMorphism path, Signature signatureInOther) {
+    public void addReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
         var referencesForSignature = referencesToRows.computeIfAbsent(signatureInThis, x -> new TreeSet<>());
         referencesForSignature.add(new ReferenceToRow(signatureInThis, path, signatureInOther));
     }
@@ -280,10 +287,10 @@ public class InstanceObject implements CategoricalObject {
     public static class ReferenceToRow implements Comparable<ReferenceToRow> {
 
         public final Signature signatureInThis;
-        public final InstanceMorphism path;
+        public final InstancePath path;
         public final Signature signatureInOther;
 
-        public ReferenceToRow(Signature signatureInThis, InstanceMorphism path, Signature signatureInOther) {
+        public ReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
             this.signatureInThis = signatureInThis;
             this.path = path;
             this.signatureInOther = signatureInOther;
@@ -309,7 +316,7 @@ public class InstanceObject implements CategoricalObject {
             if (x1 != 0)
                 return x1;
             
-            var x2 = path.compareTo(reference.path);
+            var x2 = path.signature().compareTo(reference.path.signature());
             if (x2 != 0)
                 return x2;
             

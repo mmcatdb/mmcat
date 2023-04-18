@@ -11,6 +11,7 @@ import NameInput from '../input/NameInput.vue';
 import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import SignatureDisplay from '@/components/category/SignatureDisplay.vue';
 
 enum State {
     SelectSignature,
@@ -60,13 +61,13 @@ function cancel() {
     emit('cancel');
 }
 
-const isSelfIdentifier = computed(() => signature.value.isEmpty && !signature.value.sequence.lastNode.schemaObject.ids!.isSignatures);
+const isSelfIdentifier = computed(() => signature.value.isEmpty && !signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
         return signature.value.isEmpty;
     if (signature.value.isEmpty)
-        return !(signature.value.sequence.lastNode.schemaObject.ids!.isSignatures);
+        return !(signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
     if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
@@ -169,7 +170,7 @@ function isAuxiliaryClicked() {
                 v-if="state >= State.SelectSignature && !isAuxiliary"
                 label="Signature:"
             >
-                {{ signature }}
+                <SignatureDisplay :signature="signature" />
             </ValueRow>
             <ValueRow
                 v-if="state >= State.SelectName"

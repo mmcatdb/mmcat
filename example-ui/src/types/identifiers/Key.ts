@@ -4,7 +4,7 @@ export type KeyFromServer = {
 
 export class Key {
     private constructor(
-        public readonly value: number
+        public readonly value: number,
     ) {}
 
     static fromServer(input: KeyFromServer): Key {
@@ -17,7 +17,7 @@ export class Key {
 
     public toServer(): KeyFromServer {
         return {
-            value: this.value
+            value: this.value,
         };
     }
 

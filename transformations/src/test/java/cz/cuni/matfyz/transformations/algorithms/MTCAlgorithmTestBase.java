@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -13,8 +15,6 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
 
 import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Assertions;
 
@@ -75,7 +75,7 @@ public class MTCAlgorithmTestBase {
         return wrapper.pullForest(path, new PullWrapperOptions.Builder().buildWithKindName(fileName));
     }
 
-    public void testAlgorithm() {
+    public void testAlgorithm() {            
         InstanceCategory category = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 
         ForestOfRecords forest;
@@ -83,7 +83,7 @@ public class MTCAlgorithmTestBase {
             forest = buildForestOfRecords(path);
         }
         catch (Exception e) {
-            Assertions.fail("Exception thrown when building forest.");
+            Assertions.fail(e.getMessage());
             return;
         }
 

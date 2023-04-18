@@ -88,7 +88,7 @@ public class DDLAlgorithmTestBase {
             expectedResult = buildExpectedResult();
         }
         catch (Exception e) {
-            Assertions.fail("Exception thrown when loading test data.");
+            Assertions.fail("Exception thrown when loading test data.", e);
             return;
         }
 

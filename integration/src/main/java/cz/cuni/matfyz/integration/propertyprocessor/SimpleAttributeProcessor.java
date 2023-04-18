@@ -26,7 +26,6 @@ public class SimpleAttributeProcessor extends PropertyProcessorBase implements P
         // This should be merge-safe.
         IsaMorphismCreator.connectRowWithIsaMorphism(propertyRow, resourceRow, resourceToProperty);
         //final var lastIsaResourceRow = IsaMorphismCreator.getOrCreateLastIsaRow(resourceRow, resourceToProperty);
-        //resourceToProperty.createMappingWithDual(lastIsaResourceRow, propertyRow);
 
         return true;
     }

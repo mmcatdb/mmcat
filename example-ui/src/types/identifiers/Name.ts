@@ -60,7 +60,7 @@ export class StaticName {
     toServer(): StaticNameFromServer {
         return {
             value: this.value,
-            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC'
+            type: this._isAnonymous ? 'ANONYMOUS' : 'STATIC',
         };
     }
 }
@@ -100,7 +100,7 @@ export class DynamicName {
 
     toServer(): DynamicNameFromServer {
         return {
-            signature: this.signature.toServer()
+            signature: this.signature.toServer(),
         };
     }
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.core.tests.TestData;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLConnectionProvider;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLPullWrapper;

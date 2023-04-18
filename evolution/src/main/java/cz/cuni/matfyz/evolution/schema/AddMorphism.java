@@ -19,14 +19,18 @@ public class AddMorphism implements SchemaModificationOperation {
 
     @Override
     public void apply(SchemaCategory category) {
-        category.addMorphism(new SchemaMorphism.Builder().fromArguments(
-            morphism.signature(),
-            category.getObject(domKey),
-            category.getObject(codKey),
-            morphism.min(),
-            morphism.max(),
-            morphism.label
-        ));
+        category.addMorphism(new SchemaMorphism.Builder()
+            .label(morphism.label)
+            .iri(morphism.iri)
+            .pimIri(morphism.pimIri)
+            .tags(morphism.tags())
+            .fromArguments(
+                morphism.signature(),
+                category.getObject(domKey),
+                category.getObject(codKey),
+                morphism.min()
+            )
+        );
     }
 
 }

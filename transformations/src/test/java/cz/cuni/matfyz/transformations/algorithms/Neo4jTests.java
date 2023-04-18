@@ -7,11 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.core.tests.TestData;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
-import cz.cuni.matfyz.wrapperneo4j.Neo4jSessionProvider;
-import cz.cuni.matfyz.wrapperneo4j.Neo4jStatement;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jControlWrapper;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jPullWrapper;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jSessionProvider;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jStatement;
 
 import java.nio.file.Paths;
 import java.util.List;
@@ -68,7 +69,7 @@ public class Neo4jTests {
 
         var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));
         
-        assertEquals(expectedForest.toString(), forest.toString());
+        assertEquals(expectedForest, forest);
     }
 
     @Test

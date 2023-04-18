@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
+import cz.cuni.matfyz.core.tests.TestData;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDDLWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDMLWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;

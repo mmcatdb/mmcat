@@ -23,8 +23,8 @@ export class SchemaCategoryEvolver {
         this._operations.push(new AddMorphism(morphism));
     }
 
-    deleteMorphismWithDual(morphism: SchemaMorphism) {
-        this._newMorphisms = this._newMorphisms.filter(m => !m.equals(morphism) && !m.equals(morphism.dual));
+    deleteMorphism(morphism: SchemaMorphism) {
+        this._newMorphisms = this._newMorphisms.filter(m => !m.equals(morphism));
     }
 
     getOperations(): SMO[] {

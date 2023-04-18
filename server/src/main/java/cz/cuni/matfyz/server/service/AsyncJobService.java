@@ -5,8 +5,8 @@ import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.cuni.matfyz.integration.processes.JsonLdToInstance;
-import cz.cuni.matfyz.server.builder.CategoryBuilder;
 import cz.cuni.matfyz.server.builder.MappingBuilder;
+import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
@@ -235,9 +235,8 @@ public class AsyncJobService {
         final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);
 
         final var schemaCategoryWrapper = categoryService.find(job.categoryId);
-        final var schemaCategory = new CategoryBuilder()
-            .setCategoryWrapper(schemaCategoryWrapper)
-            .build();
+        final var context = new SchemaCategoryContext();
+        final var schemaCategory = schemaCategoryWrapper.toSchemaCategory(context);
 
         final var process = new JsonLdToInstance();
         process.input(schemaCategory, instance, inputStreamProvider);

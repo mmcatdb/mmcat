@@ -4,6 +4,7 @@ import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
+import cz.cuni.matfyz.core.tests.TestData;
 
 import java.util.List;
 import java.util.Map;

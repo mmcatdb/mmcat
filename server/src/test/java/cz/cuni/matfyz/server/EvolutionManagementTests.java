@@ -1,7 +1,9 @@
 package cz.cuni.matfyz.server;
 
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addMorphism;
+import static cz.cuni.matfyz.core.tests.TestDataUtils.addSchemaObject;
+
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -80,7 +82,7 @@ public class EvolutionManagementTests {
                 
                 // Create mapping and schema
                 Assertions.assertDoesNotThrow(() -> setMapping());
-                var schema = mapping.category();
+                final var schema = mapping.category();
 
                 // Load data to instance
                 Statistics.start(Interval.IMPORT_JOIN_MOVE);
@@ -131,15 +133,15 @@ public class EvolutionManagementTests {
     }
 
     private void join(SchemaCategory schema, InstanceCategory category) {
-        var fullAddress = TestData.addSchemaObject(schema, data.fullAddressKey, "fullAddress", ObjectIds.createValue());
+        var fullAddress = addSchemaObject(schema, data.fullAddressKey, "fullAddress", ObjectIds.createValue());
         var address = schema.getObject(data.addressKey);
-        var addressToFullAddressMorphism = TestData.addMorphismWithDual(schema, data.addressToFullAddress, address, fullAddress, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
+        var addressToFullAddressMorphism = addMorphism(schema, data.addressToFullAddress, address, fullAddress, Min.ONE);
         
         var fullAddressInstance = new InstanceObject(fullAddress);
         category.objects().put(fullAddressInstance.key(), fullAddressInstance);
 
         var addressInstance = category.getObject(data.addressKey);
-        var addressToFullAddressMorphismInstance = createInstanceMorphismWithDual(category, addressToFullAddressMorphism);
+        var addressToFullAddressMorphismInstance = createInstanceMorphism(category, addressToFullAddressMorphism);
 
         Statistics.set(Counter.JOIN_ROWS, addressInstance.allRowsToSet().size());
         for (var addressRow : addressInstance.allRowsToSet()) {
@@ -160,40 +162,35 @@ public class EvolutionManagementTests {
         // Link order with full address
         var order = schema.getObject(data.orderKey);
         var fullAddress = schema.getObject(data.fullAddressKey);
-        var orderToFullAddressMorphism = TestData.addMorphismWithDual(schema, data.orderToFullAddress, order, fullAddress, Min.ONE, Max.ONE, Min.ONE, Max.ONE);
+        var orderToFullAddressMorphism = addMorphism(schema, data.orderToFullAddress, order, fullAddress, Min.ONE);
 
-        var orderToFullAddressMorphismInstance = createInstanceMorphismWithDual(category, orderToFullAddressMorphism);
+        var orderToFullAddressMorphismInstance = createInstanceMorphism(category, orderToFullAddressMorphism);
 
         Statistics.set(Counter.MOVE_ROWS, category.getObject(data.orderKey).allRowsToSet().size());
 
-        var originalSignature = Signature.concatenate(data.userToOrder.dual(), data.userToAddress, data.addressToFullAddress);
-        var morphismPath = category.getMorphism(originalSignature);
+        var originalSignature = Signature.concatenate(data.orderToUser, data.userToAddress, data.addressToFullAddress);
+        var morphismPath = category.getPath(originalSignature);
         
         for (var orderRow : category.getObject(data.orderKey).allRowsToSet()) {
             var optionalRow = orderRow.traverseThrough(morphismPath).stream().findFirst();
             var fullAddressRow = optionalRow.get();
             orderToFullAddressMorphismInstance.addMapping(new MappingRow(orderRow, fullAddressRow));
-            orderToFullAddressMorphismInstance.dual().addMapping(new MappingRow(fullAddressRow, orderRow));
         }
 
         // Delete address to full address
         var addressToFullAddress = schema.getMorphism(data.addressToFullAddress);
         schema.deleteMorphism(addressToFullAddress);
-        schema.deleteMorphism(addressToFullAddress.dual());
 
         var addressToFullAddressInstance = category.getMorphism(addressToFullAddress);
         category.deleteMorphism(addressToFullAddressInstance);
-        category.deleteMorphism(addressToFullAddressInstance.dual());
     }
 
-    private static InstanceMorphism createInstanceMorphismWithDual(InstanceCategory category, SchemaMorphism morphism) {
+    private static InstanceMorphism createInstanceMorphism(InstanceCategory category, SchemaMorphism morphism) {
         var dom = category.getObject(morphism.dom());
         var cod = category.getObject(morphism.cod());
 
         var morphismInstance = new InstanceMorphism(morphism, dom, cod, category);
-        var dualInstance = new InstanceMorphism(morphism.dual(), cod, dom, category);
         category.morphisms().put(morphismInstance.signature(), morphismInstance);
-        category.morphisms().put(dualInstance.signature(), dualInstance);
 
         return morphismInstance;
     }

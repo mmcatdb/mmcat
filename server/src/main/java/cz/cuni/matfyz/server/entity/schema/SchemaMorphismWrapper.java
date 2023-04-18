@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.server.entity.schema;
 
-import cz.cuni.matfyz.core.category.Morphism.Max;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Morphism.Tag;
 import cz.cuni.matfyz.core.category.Signature;
@@ -9,6 +8,8 @@ import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 
 import java.util.Set;
+
+import org.springframework.lang.Nullable;
 
 /**
  * @author jachym.bartik
@@ -19,9 +20,9 @@ public record SchemaMorphismWrapper(
     Key domKey,
     Key codKey,
     Min min,
-    Max max,
     String iri,
     String pimIri,
+    @Nullable
     Set<Tag> tags
 ) {
 
@@ -32,7 +33,6 @@ public record SchemaMorphismWrapper(
             morphism.dom().key(),
             morphism.cod().key(),
             morphism.min(),
-            morphism.max(),
             morphism.iri,
             morphism.pimIri,
             morphism.tags()
@@ -40,14 +40,17 @@ public record SchemaMorphismWrapper(
     }
 
     public SchemaMorphism toSchemaMorphism(SchemaCategoryContext context) {
-        return new SchemaMorphism.Builder().fromArguments(
-            signature,
-            context.getObject(domKey),
-            context.getObject(codKey),
-            min,
-            max,
-            label
-        );
+        return new SchemaMorphism.Builder()
+            .label(this.label)
+            .iri(this.iri)
+            .pimIri(this.pimIri)
+            .tags(this.tags != null ? this.tags : Set.of())
+            .fromArguments(
+                signature,
+                context.getObject(domKey),
+                context.getObject(codKey),
+                min
+            );
     }
     
 }

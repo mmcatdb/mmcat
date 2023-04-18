@@ -1,8 +1,8 @@
 <script lang="ts">
 import { SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
-import { Cardinality, type CardinalitySettings } from '@/types/schema';
+import { Cardinality, type Min } from '@/types/schema';
 import { defineComponent } from 'vue';
-import CardinalityInput from './CardinalityInput.vue';
+import MinimumInput from './MinimumInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
@@ -13,15 +13,15 @@ export enum NodeIndices {
 
 export default defineComponent({
     components: {
-        CardinalityInput,
+        MinimumInput,
         ValueContainer,
-        ValueRow
+        ValueRow,
     },
     props: {
         graph: {
             type: Object as () => Graph,
-            required: true
-        }
+            required: true,
+        },
     },
     emits: [ 'save', 'cancel' ],
     data() {
@@ -33,12 +33,7 @@ export default defineComponent({
             pimIri: '',
             lastSelectedNode: NodeIndices.First,
             temporayEdge: null as TemporaryEdge | null,
-            cardinality: {
-                domCodMin: Cardinality.One,
-                domCodMax: Cardinality.One,
-                codDomMin: Cardinality.One,
-                codDomMax: Cardinality.One
-            } as CardinalitySettings,
+            min: Cardinality.One as Min,
         };
     },
     computed: {
@@ -47,7 +42,7 @@ export default defineComponent({
         },
         iriIsAvailable() {
             return this.graph.schemaCategory.iriIsAvailable(this.iri);
-        }
+        },
     },
     mounted() {
         this.graph.addNodeListener('tap', this.onNodeTapHandler);
@@ -62,17 +57,17 @@ export default defineComponent({
                 return;
 
             if (this.iri) {
-                const morphism = this.graph.schemaCategory.createMorphismWithDualWithIri(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.iri, this.pimIri, this.label);
+                const morphism = this.graph.schemaCategory.createMorphismWithIri(this.node1.schemaObject, this.node2.schemaObject, this.min, this.iri, this.pimIri, this.label);
                 if (!morphism)
                     return;
 
                 this.temporayEdge?.delete();
-                this.graph.createEdgeWithDual(morphism, 'new');
+                this.graph.createEdge(morphism, 'new');
             }
             else {
-                const morphism = this.graph.schemaCategory.createMorphismWithDual(this.node1.schemaObject, this.node2.schemaObject, this.cardinality, this.label);
+                const morphism = this.graph.schemaCategory.createMorphism(this.node1.schemaObject, this.node2.schemaObject, this.min, this.label);
                 this.temporayEdge?.delete();
-                this.graph.createEdgeWithDual(morphism, 'new');
+                this.graph.createEdge(morphism, 'new');
             }
 
             this.$emit('save');
@@ -111,11 +106,13 @@ export default defineComponent({
         },
         handleTapOnNotSelectedNode(node: Node) {
             // Which node should be changed.
-            const changingNodeIndex = this.node1 === null ?
-                NodeIndices.First :
-                this.node2 === null ?
-                    NodeIndices.Second :
-                    this.lastSelectedNode;
+            const changingNodeIndex = this.node1 === null
+                ? NodeIndices.First
+                : (
+                    this.node2 === null
+                        ? NodeIndices.Second
+                        : this.lastSelectedNode
+                );
 
             this.setNodeOnIndex(node, changingNodeIndex);
             this.lastSelectedNode = changingNodeIndex;
@@ -139,8 +136,8 @@ export default defineComponent({
 
             this.node1.select({ type: SelectionType.Selected, level: 0 });
             this.node2.select({ type: SelectionType.Selected, level: 1 });
-        }
-    }
+        },
+    },
 });
 </script>
 
@@ -163,8 +160,8 @@ export default defineComponent({
             <ValueRow label="Pim Iri?:">
                 <input v-model="pimIri" />
             </ValueRow>
-            <CardinalityInput
-                v-model="cardinality"
+            <MinimumInput
+                v-model="min"
             />
         </ValueContainer>
         <div class="button-row">

@@ -71,9 +71,23 @@ public class MorphismFinder {
         return findFromObjectCached(object, pimIri, findFunction);
     }
 
-    public InstanceMorphism findFromObjectWithLastDual(InstanceObject object, String dualPimIri) {
-        final Function<InstanceMorphism, Boolean> findFunction = morphism -> morphism.dual().schemaMorphism.pimIri.equals(dualPimIri);
-        return findFromObjectCached(object, "dual:" + dualPimIri, findFunction);
+    private Map<String, InstanceMorphism> pimIriCache = new TreeMap<>();
+
+    private InstanceMorphism findBaseByPimIriNotCached(String pimIri) {
+        final var result = category.morphisms().values().stream().filter(morphism -> morphism.schemaMorphism.pimIri.equals(pimIri)).findFirst();
+        if (!result.isPresent())
+            throw new IntegrationException("Morphism not found with pim iri: " + pimIri + ".");
+
+        return result.get();
+    }
+
+    public InstanceMorphism findBaseByPimIri(String pimIri) {
+        return pimIriCache.computeIfAbsent(pimIri, this::findBaseByPimIriNotCached);
+    }
+
+    public InstanceMorphism findFromObjectToObject(InstanceObject fromObject, InstanceObject toObject) {
+        final Function<InstanceMorphism, Boolean> findFunction = morphism -> morphism.cod().equals(toObject);
+        return findFromObjectCached(fromObject, "toObject:" + toObject.schemaObject.pimIri, findFunction);
     }
 
     private InstanceMorphism findFromObjectCached(InstanceObject object, String key, Function<InstanceMorphism, Boolean> findFunction) {

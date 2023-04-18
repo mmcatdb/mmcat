@@ -1,4 +1,4 @@
-import type { CardinalitySettings, Tag } from "@/types/schema";
+import type { Min, Tag } from "@/types/schema";
 import type { Type } from "../identifiers";
 import type { Iri } from "./parser";
 
@@ -20,7 +20,7 @@ export class ImportedObject {
         readonly iri: Iri,
         readonly pimIri: Iri,
         readonly label: string,
-        ids: ImportedId | ImportedId[] = []
+        ids: ImportedId | ImportedId[] = [],
     ) {
         this.ids = Array.isArray(ids) ? ids : [ ids ];
     }
@@ -37,8 +37,8 @@ export class ImportedMorphism {
         readonly label: string,
         readonly dom: ImportedObject,
         readonly cod: ImportedObject,
-        readonly cardinalitySettings: CardinalitySettings,
-        readonly tags: Tag[] = []
+        readonly min: Min,
+        readonly tags: Tag[] = [],
     ) {}
 }
 

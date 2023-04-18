@@ -7,7 +7,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,8 +14,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -51,13 +48,9 @@ public class Signature implements Serializable, Comparable<Signature> {
         return emptyObject;
     }
 
-    public int[] ids() {
-        return this.ids.clone();
-    }
-
     public List<Signature> toBases() {
         var output = new ArrayList<Signature>();
-        for (int i = ids.length - 1; i >= 0; i--)
+        for (int i = 0; i < ids.length; i++)
             output.add(createBase(ids[i]));
 
         return output;
@@ -68,7 +61,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 0)
             return Signature.createEmpty();
 
-        var newIds = Arrays.copyOfRange(ids, 1, ids.length);
+        var newIds = Arrays.copyOfRange(ids, 0, ids.length - 1);
         return createComposite(newIds);
     }
 
@@ -76,14 +69,14 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 0)
             return Signature.createEmpty();
 
-        return createBase(this.ids[0]);
+        return createBase(this.ids[this.ids.length - 1]);
     }
 
     public Signature cutFirst() {
         if (ids.length == 0)
             return Signature.createEmpty();
 
-        var newIds = Arrays.copyOfRange(ids, 0, ids.length - 1);
+        var newIds = Arrays.copyOfRange(ids, 1, ids.length);
         return createComposite(newIds);
     }
 
@@ -91,11 +84,11 @@ public class Signature implements Serializable, Comparable<Signature> {
         if (ids.length == 0)
             return Signature.createEmpty();
 
-        return createBase(this.ids[this.ids.length - 1]);
+        return createBase(this.ids[0]);
     }
 
     public Signature concatenate(Signature other) {
-        return createComposite(ArrayUtils.concatenate(other.ids, ids));
+        return createComposite(ArrayUtils.concatenate(ids, other.ids));
     }
 
     public static Signature concatenate(Signature... signatures) {
@@ -103,9 +96,8 @@ public class Signature implements Serializable, Comparable<Signature> {
     }
 
     public static Signature concatenate(Collection<Signature> signatures) {
-        var signaturesIds = new ArrayList<>(signatures.stream().map(signature -> signature.ids).toList());
-        Collections.reverse(signaturesIds);
-        return createComposite(ArrayUtils.concatenate(signaturesIds));
+        final var signatureIds = signatures.stream().map(signature -> signature.ids).toList();
+        return createComposite(ArrayUtils.concatenate(signatureIds));
     }
     
     public Signature dual() {
@@ -143,6 +135,10 @@ public class Signature implements Serializable, Comparable<Signature> {
         return ids.length == 1;
     }
 
+    public boolean isBaseDual() {
+        return isBase() && ids[0] < 0;
+    }
+
     @Override
     public String toString() {
         if (isEmpty())
@@ -152,7 +148,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         
         builder.append(ids[0]);
         for (int i = 1; i < ids.length; i++)
-            builder.append(".").append(ids[i]);
+            builder.append(";").append(ids[i]);
             
         return builder.toString();
     }
@@ -162,7 +158,7 @@ public class Signature implements Serializable, Comparable<Signature> {
             return createEmpty();
 
         try {
-            final var ids = List.of(string.split("\\.")).stream().mapToInt(Integer::parseInt).toArray();
+            final var ids = List.of(string.split("\\;")).stream().mapToInt(Integer::parseInt).toArray();
             return new Signature(ids);
         }
         catch (NumberFormatException exception) {
@@ -205,45 +201,40 @@ public class Signature implements Serializable, Comparable<Signature> {
         return 0;
     }
     
-    public boolean hasDualOfAsSuffix(Signature signature) {
+    public boolean hasDualOfAsPrefix(Signature signature) {
         if (signature == null)
             return false;
         
-        Signature dual = signature.dual();
-        int dualLength = dual.ids.length;
+        final Signature dual = signature.dual();
+        final int dualLength = dual.ids.length;
         
         if (ids.length < dualLength)
             return false;
         
         for (int i = 0; i < dualLength; i++)
-            if (dual.ids[i] != ids[i + ids.length - dualLength])
+            if (dual.ids[i] != ids[i])
                 return false;
         
         return true;
     }
     
-    public Signature traverseThrough(Signature signature) {
-        if (!hasDualOfAsSuffix(signature))
+    public Signature traverseThrough(Signature path) {
+        if (!hasDualOfAsPrefix(path))
             return null;
         
-        int length = ids.length - signature.ids.length;
-        return createComposite(Arrays.copyOfRange(ids, 0, length));
+        return createComposite(Arrays.copyOfRange(ids, path.ids.length, ids.length));
     }
 
     public Signature traverseAlong(Signature path) {
-        var output = new LinkedList<Integer>();
-        for (var id : ids)
+        final var output = new LinkedList<Integer>();
+        for (final var id : ids)
             output.add(id);
 
-        for (int i = path.ids.length - 1; i >= 0; i--) {
-            var pathId = path.ids[i];
-            var lastId = output.getLast();
-            if (lastId == null)
+        for (final var pathId : path.ids) {
+            if (output.isEmpty() || pathId != output.getFirst())
                 output.addFirst(-pathId);
-            else if (lastId == pathId)
-                output.removeLast();
             else
-                output.addLast(-pathId);
+                output.removeFirst();
         }
 
         return createComposite(output.stream().mapToInt(Integer::intValue).toArray());
@@ -261,7 +252,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
         @Override
         public void serialize(Signature signature, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeArray(signature.ids, 0, signature.ids.length);
+            generator.writeString(signature.toString());
         }
 
     }
@@ -276,15 +267,11 @@ public class Signature implements Serializable, Comparable<Signature> {
             super(vc);
         }
 
-        private static final ObjectReader intsJsonReader = new ObjectMapper().readerFor(int[].class);
-
         @Override
         public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            final int[] values = intsJsonReader.readValue(node);
-
-            return values.length == 0 ? Signature.createEmpty() : new Signature(values);
+            return Signature.fromString(node.asText());
         }
 
     }
