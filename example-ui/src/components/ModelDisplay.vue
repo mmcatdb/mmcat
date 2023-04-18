@@ -1,35 +1,21 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Model } from '@/types/model';
-import { defineComponent } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { onMounted, ref } from 'vue';
 
-export default defineComponent({
-    components: {
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        model: {
-            type: Object as () => Model,
-            required: true
-        }
-    },
-    data() {
-        return {
+defineProps<{ model: Model }>();
 
-        };
-    },
-    mounted() {
-        this.resizeTextArea();
-    },
-    methods: {
-        resizeTextArea() {
-            const textArea = this.$refs.textArea as HTMLTextAreaElement;
-            textArea.style.height = textArea.scrollHeight + 'px';
-        }
-    }
-});
+const textArea = ref<HTMLTextAreaElement>();
+
+onMounted(resizeTextArea);
+
+function resizeTextArea() {
+    if (!textArea.value)
+        return;
+
+    textArea.value.style.height = textArea.value.scrollHeight + 'px';
+}
 </script>
 
 <template>

@@ -1,31 +1,10 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import type { ModelView } from '@/types/model';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
-export default defineComponent({
-    components: {
-        CleverRouterLink,
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        model: {
-            type: Object as () => ModelView,
-            required: true
-        }
-    },
-    data() {
-        return {
-
-        };
-    },
-    methods: {
-
-    }
-});
+defineProps<{ model: ModelView }>();
 </script>
 
 <template>

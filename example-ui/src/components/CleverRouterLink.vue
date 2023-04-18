@@ -1,6 +1,5 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
+<script setup lang="ts">
+import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationRaw } from 'vue-router';
 
 function compareRoutes(to: RouteLocationRaw, route: RouteLocationNormalizedLoaded): boolean {
     if (typeof to === 'string')
@@ -15,24 +14,14 @@ function compareRoutes(to: RouteLocationRaw, route: RouteLocationNormalizedLoade
 /**
  * This component looks like a normal link except for the situation when we are on the exact page the link directs to. Then only a plain content without any link is rendered.
  */
-export default defineComponent({
-    props: {
-        to: {
-            type: Object as () => RouteLocationRaw,
-            required: true
-        }
-    },
-    data() {
-        return {
-            showLink: !compareRoutes(this.to, this.$route)
-        };
-    }
-});
+const props = defineProps<{ to: RouteLocationRaw }>();
+
+const route = useRoute();
 </script>
 
 <template>
     <RouterLink
-        v-if="showLink"
+        v-if="!compareRoutes(props.to, route)"
         :to="to"
     >
         <slot />

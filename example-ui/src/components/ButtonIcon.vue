@@ -1,27 +1,15 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 
-export default defineComponent({
-    props: {
-        disabled: {
-            type: Boolean,
-            required: false,
-            default: false
-        }
-    },
-    emits: [ 'click' ],
-    data() {
-        return {
-
-        };
-    },
-    methods: {
-        onClick() {
-            if (!this.disabled)
-                this.$emit('click');
-        }
-    }
+const props = withDefaults(defineProps<{ disabled?: boolean }>(), {
+    disabled: false,
 });
+
+const emit = defineEmits([ 'click' ]);
+
+function onClick() {
+    if (!props.disabled)
+        emit('click');
+}
 </script>
 
 <template>

@@ -1,20 +1,9 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-    props: {
-        modelValue: {
-            type: String,
-            default: ''
-        }
-    },
-    emits: [ 'update:modelValue' ],
-    data() {
-        return {
-            innerValue: ''
-        };
-    }
+<script setup lang="ts">
+withDefaults(defineProps<{ modelValue: string}>(), {
+    modelValue: '',
 });
+
+const emit = defineEmits([ 'update:modelValue' ]);
 </script>
 
 <template>
@@ -25,7 +14,7 @@ export default defineComponent({
             :value="modelValue"
             class="access-path-input"
             spellcheck="false"
-            @input="(event) => $emit('update:modelValue', (event.target as HTMLInputElement).value)"
+            @input="(event) => emit('update:modelValue', (event.target as HTMLInputElement).value)"
         />
     </div>
 </template>

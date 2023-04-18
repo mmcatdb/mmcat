@@ -1,38 +1,21 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
 import { PropertyType } from '@/types/categoryGraph';
+import { ref, watch } from 'vue';
 
-export default defineComponent({
-    components: {
+const props = defineProps<{ modelValue: PropertyType }>();
 
-    },
-    props: {
-        modelValue: {
-            type: String as () => PropertyType,
-            required: true
-        }
-    },
-    emits: [ 'update:modelValue' ],
-    data() {
-        return {
-            innerValue: this.modelValue,
-            PropertyType
-        };
-    },
-    watch: {
-        modelValue: {
-            handler(newValue: PropertyType): void {
-                if (newValue !== this.innerValue)
-                    this.innerValue = newValue;
-            }
-        }
-    },
-    methods: {
-        updateInnerValue() {
-            this.$emit('update:modelValue', this.innerValue);
-        }
-    }
+const emit = defineEmits([ 'update:modelValue' ]);
+
+const innerValue = ref(props.modelValue);
+
+watch(() => props.modelValue, (newValue: PropertyType) => {
+    if (newValue !== innerValue.value)
+        innerValue.value = newValue;
 });
+
+function updateInnerValue() {
+    emit('update:modelValue', innerValue.value);
+}
 </script>
 
 <template>

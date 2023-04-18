@@ -1,41 +1,27 @@
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script setup lang="ts">
+import { ref, watch } from 'vue';
 
-export default defineComponent({
-    props: {
-        modelValue: {
-            type: undefined,
-            required: true,
-        },
-        value: {
-            type: undefined,
-            required: true,
-        },
-        disabled: {
-            type: Boolean,
-            required: false,
-            default: false,
-        },
-    },
-    emits: [ 'update:modelValue' ],
-    data() {
-        return {
-            active: this.value === this.modelValue,
-        };
-    },
-    watch: {
-        modelValue: {
-            handler(newValue: string): void {
-                this.active = this.value === newValue;
-            },
-        },
-    },
-    methods: {
-        onClick() {
-            this.$emit('update:modelValue', this.value);
-        },
-    },
+type RadioInputProps<T> = {
+    modelValue: T;
+    value: T;
+    disabled?: boolean;
+};
+
+const props = withDefaults(defineProps<RadioInputProps<unknown>>(), {
+    disabled: false,
 });
+
+const emit = defineEmits([ 'update:modelValue' ]);
+
+const active = ref(props.value === props.modelValue);
+
+watch(() => props.modelValue, (newValue: unknown) => {
+    active.value = props.value === newValue;
+});
+
+function onClick() {
+    emit('update:modelValue', props.value);
+}
 </script>
 
 <template>

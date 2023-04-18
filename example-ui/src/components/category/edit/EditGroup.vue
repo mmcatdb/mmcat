@@ -1,31 +1,15 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Node } from '@/types/categoryGraph';
-import { defineComponent } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
-export default defineComponent({
-    components: {
-        ValueContainer,
-        ValueRow
-    },
-    props: {
-        nodes: {
-            type: Object as () => Node[],
-            required: true
-        }
-    },
-    emits: [ 'save', 'cancel', 'update' ],
-    data() {
-        return {
-        };
-    },
-    methods: {
-        cancel() {
-            this.$emit('cancel');
-        },
-    }
-});
+defineProps<{ nodes: Node[] }>();
+
+const emit = defineEmits([ 'cancel' ]);
+
+function cancel() {
+    emit('cancel');
+}
 </script>
 
 <template>
