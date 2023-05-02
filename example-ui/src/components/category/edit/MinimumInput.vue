@@ -4,12 +4,12 @@ import RadioInput from '@/components/RadioInput.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { ref, watch } from 'vue';
 
-type NodeInputProps = {
+type MinimumInputProps = {
     modelValue: Min;
     disabled?: boolean;
 };
 
-const props = defineProps<NodeInputProps>();
+const props = defineProps<MinimumInputProps>();
 
 const emit = defineEmits([ 'update:modelValue' ]);
 

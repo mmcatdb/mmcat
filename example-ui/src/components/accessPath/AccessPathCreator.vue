@@ -2,9 +2,8 @@
 import { computed, onMounted, ref } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId, StaticName } from '@/types/identifiers';
-import type { Node, Graph } from '@/types/categoryGraph';
+import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
-import NodeInput from './input/NodeInput.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategory, useSchemaCategoryId } from '@/utils/globalSchemaSettings';
@@ -12,6 +11,7 @@ import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -61,7 +61,7 @@ async function createMapping(primaryKey: SignatureId) {
         primaryKey: new SignatureId(selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures).toServer(),
         kindName: accessPath.value.name.toString(),
         accessPath: accessPath.value.toServer(),
-        categoryVersion: category.value.version
+        categoryVersion: category.value.version,
     });
     if (result.status)
         router.push({ name: 'logicalModel', params: { id: selectedLogicalModel.value.id } });
@@ -90,9 +90,10 @@ async function createMapping(primaryKey: SignatureId) {
                             </select>
                         </ValueRow>
                         <ValueRow label="Root object:">
-                            <NodeInput
+                            <SingleNodeInput
                                 v-model="selectingRootNode"
                                 :graph="graph"
+                                :type="SelectionType.Root"
                             />
                         </ValueRow>
                     </ValueContainer>

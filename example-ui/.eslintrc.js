@@ -44,5 +44,6 @@ module.exports = {
         'vue/multi-word-component-names': 'off',
         '@typescript-eslint/member-delimiter-style': [ 'error', { singleline: { delimiter: 'comma' } } ],
         'comma-dangle': [ 'warn', 'always-multiline' ],
+        'vue/valid-template-root': 'off',
     },
 };
