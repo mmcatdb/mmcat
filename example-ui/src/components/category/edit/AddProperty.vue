@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { ref } from 'vue';
 import { SelectionType, type Graph, type Node } from '@/types/categoryGraph';
 import { Cardinality, type Min } from '@/types/schema';
 import MinimumInput from './MinimumInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { computed } from '@vue/reactivity';
+import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
+import { ObjectIds, Type } from '@/types/identifiers';
 
 type AddPropertyProps = {
     graph: Graph;
@@ -17,31 +19,14 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 
 const label = ref('');
 const keyIsValid = ref(true);
-const node = ref<Node | null>(null);
+const node = ref<Node>();
 const min = ref<Min>(Cardinality.One);
-
-const nodeSelected = computed(() => !!node.value);
-
-onMounted(() => props.graph.addNodeListener('tap', onNodeTapHandler));
-
-onUnmounted(() => {
-    props.graph.removeNodeListener('tap', onNodeTapHandler);
-    node.value?.unselect();
-});
-
-function onNodeTapHandler(tappedNode: Node): void {
-    node.value?.unselect();
-
-    node.value = tappedNode.equals(node.value) ? null : tappedNode;
-
-    node.value?.select({ type: SelectionType.Selected, level: 0 });
-}
 
 function save() {
     if (!node.value)
         return;
 
-    const object = props.graph.schemaCategory.createObject(label.value);
+    const object = props.graph.schemaCategory.createObject(label.value, ObjectIds.createNonSignatures(Type.Value));
     props.graph.createNode(object, 'new');
 
     const morphism = props.graph.schemaCategory.createMorphism(node.value.schemaObject, object, min.value, '');
@@ -64,7 +49,11 @@ function cancel() {
                 <input v-model="label" />
             </ValueRow>
             <ValueRow label="Parent object:">
-                {{ node?.schemaObject.label }}
+                <SingleNodeInput
+                    v-model="node"
+                    :graph="graph"
+                    :type="SelectionType.Root"
+                />
             </ValueRow>
             <MinimumInput
                 v-model="min"
@@ -72,7 +61,7 @@ function cancel() {
         </ValueContainer>
         <div class="button-row">
             <button
-                :disabled="!keyIsValid || !label || !nodeSelected"
+                :disabled="!keyIsValid || !label || !node"
                 @click="save"
             >
                 Confirm
