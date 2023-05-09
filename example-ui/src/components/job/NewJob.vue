@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { JOB_TYPES, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { DataSource } from '@/types/dataSource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
@@ -51,7 +51,7 @@ async function createJob() {
         logicalModelId: jobType.value === JobType.JsonLdToCategory ? undefined : logicalModelId.value,
         dataSourceId: jobType.value === JobType.JsonLdToCategory ? dataSourceId.value : undefined,
         label: jobName.value,
-        type: jobType.value
+        type: jobType.value,
     });
     if (result.status)
         emit('newJob', result.data);

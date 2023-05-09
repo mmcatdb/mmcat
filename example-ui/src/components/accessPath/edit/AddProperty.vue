@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { GraphSimpleProperty, GraphComplexProperty, SequenceSignature, type GraphParentProperty } from '@/types/accessPath/graph';
-import { PropertyType, type Graph, createDefaultFilter, Node } from '@/types/categoryGraph';
+import { PropertyType, createDefaultFilter, Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { ref, computed } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
@@ -18,7 +18,6 @@ enum State {
 }
 
 type AddPropertyProps = {
-    graph: Graph;
     database: DatabaseWithConfiguration;
     parentProperty: GraphParentProperty;
 };
@@ -177,7 +176,6 @@ function isAuxiliaryClicked() {
             >
                 <NameInput
                     v-model="name"
-                    :graph="graph"
                     :database="database"
                     :root-node="parentProperty.node"
                     :is-self-identifier="isSelfIdentifier"
@@ -187,7 +185,6 @@ function isAuxiliaryClicked() {
         <SignatureInput
             v-if="state === State.SelectSignature && !isAuxiliary"
             v-model="signature"
-            :graph="graph"
             :filter="filter"
         />
         <div class="button-row">

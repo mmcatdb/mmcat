@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { SelectionType, type Graph, type Node } from '@/types/categoryGraph';
+import { SelectionType, type Node } from '@/types/categoryGraph';
 import { Cardinality, type Min } from '@/types/schema';
 import MinimumInput from './MinimumInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import { ObjectIds, Type } from '@/types/identifiers';
+import { useEvocat } from '@/utils/injects';
 
-type AddPropertyProps = {
-    graph: Graph;
-};
-
-const props = defineProps<AddPropertyProps>();
+const evocat = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -25,13 +22,13 @@ function save() {
     if (!node.value)
         return;
 
-    const object = props.graph.schemaCategory.createObject(label.value, ObjectIds.createNonSignatures(Type.Value));
-    props.graph.createNode(object, 'new');
+    const object = evocat.graph.schemaCategory.createObject(label.value, ObjectIds.createNonSignatures(Type.Value));
+    evocat.graph.createNode(object, 'new');
 
-    const morphism = props.graph.schemaCategory.createMorphism(node.value.schemaObject, object, min.value, '');
-    props.graph.createEdge(morphism, 'new');
+    const morphism = evocat.graph.schemaCategory.createMorphism(node.value.schemaObject, object, min.value, '');
+    evocat.graph.createEdge(morphism, 'new');
 
-    props.graph.layout();
+    evocat.graph.layout();
     emit('save');
 }
 
@@ -50,7 +47,6 @@ function cancel() {
             <ValueRow label="Parent object:">
                 <SingleNodeInput
                     v-model="node"
-                    :graph="graph"
                     :type="SelectionType.Root"
                 />
             </ValueRow>

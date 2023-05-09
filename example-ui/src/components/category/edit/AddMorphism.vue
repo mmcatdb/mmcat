@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
+import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { Cardinality, type Min } from '@/types/schema';
 import { onUnmounted, ref, watch } from 'vue';
 import MinimumInput from './MinimumInput.vue';
@@ -7,15 +7,11 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { computed } from '@vue/reactivity';
 import NodeInput from '@/components/input/NodeInput.vue';
+import { useEvocat } from '@/utils/injects';
 
-type AddMorphismProps = {
-    graph: Graph;
-};
-
-const props = defineProps<AddMorphismProps>();
+const evocat = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
-
 
 const label = ref('');
 const iri = ref('');
@@ -25,7 +21,7 @@ const temporayEdge = ref<TemporaryEdge | null>(null);
 const min = ref<Min>(Cardinality.One);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
-const iriIsAvailable = computed(() => props.graph.schemaCategory.iriIsAvailable(iri.value));
+const iriIsAvailable = computed(() => evocat.graph.schemaCategory.iriIsAvailable(iri.value));
 
 watch(nodes, (newValue, oldValue) => {
     if (newValue[0] === oldValue[0] && newValue[1] === oldValue[1])
@@ -36,7 +32,7 @@ watch(nodes, (newValue, oldValue) => {
     if (!newValue[0] || !newValue[1])
         return;
 
-    temporayEdge.value = props.graph.createTemporaryEdge(newValue[0], newValue[1]);
+    temporayEdge.value = evocat.graph.createTemporaryEdge(newValue[0], newValue[1]);
 });
 
 onUnmounted(() => {
@@ -49,17 +45,17 @@ function save() {
         return;
 
     if (iri.value) {
-        const morphism = props.graph.schemaCategory.createMorphismWithIri(node1.schemaObject, node2.schemaObject, min.value, iri.value, pimIri.value, label.value);
+        const morphism = evocat.graph.schemaCategory.createMorphismWithIri(node1.schemaObject, node2.schemaObject, min.value, iri.value, pimIri.value, label.value);
         if (!morphism)
             return;
 
         temporayEdge.value?.delete();
-        props.graph.createEdge(morphism, 'new');
+        evocat.graph.createEdge(morphism, 'new');
     }
     else {
-        const morphism = props.graph.schemaCategory.createMorphism(node1.schemaObject, node2.schemaObject, min.value, label.value);
+        const morphism = evocat.graph.schemaCategory.createMorphism(node1.schemaObject, node2.schemaObject, min.value, label.value);
         temporayEdge.value?.delete();
-        props.graph.createEdge(morphism, 'new');
+        evocat.graph.createEdge(morphism, 'new');
     }
 
     emit('save');
@@ -99,7 +95,6 @@ function switchNodes() {
         </ValueContainer>
         <NodeInput
             v-model="nodes"
-            :graph="graph"
             :count="2"
             :type="SelectionType.Selected"
         />

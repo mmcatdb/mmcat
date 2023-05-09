@@ -6,7 +6,7 @@ import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureIdDisplay from '../category/SignatureIdDisplay.vue';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryInfo } from '@/utils/injects';
 import VersionDisplay from '../VersionDisplay.vue';
 
 type MappingDisplayProps = {
@@ -15,7 +15,7 @@ type MappingDisplayProps = {
 
 defineProps<MappingDisplayProps>();
 
-const category = useSchemaCategory();
+const category = useSchemaCategoryInfo();
 </script>
 
 <template>

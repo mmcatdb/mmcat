@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { onUnmounted, ref, watch } from 'vue';
-import { SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
+import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { Cardinality } from '@/types/schema';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { ObjectIds, SignatureId, Type } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
+import { useEvocat } from '@/utils/injects';
 
-type AddMapProps = {
-    graph: Graph;
-};
-
-const props = defineProps<AddMapProps>();
+const evocat = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -29,7 +26,7 @@ watch(nodes, (newValue, oldValue) => {
     if (!newValue[0] || !newValue[1])
         return;
 
-    temporayEdge.value = props.graph.createTemporaryEdge(newValue[0], newValue[1]);
+    temporayEdge.value = evocat.graph.createTemporaryEdge(newValue[0], newValue[1]);
 });
 
 onUnmounted(() => {
@@ -41,23 +38,23 @@ function save() {
     if (!node1 || !node2)
         return;
 
-    const keyObject = props.graph.schemaCategory.createObject(keyLabel.value, ObjectIds.createNonSignatures(Type.Value));
-    props.graph.createNode(keyObject, 'new');
+    const keyObject = evocat.graph.schemaCategory.createObject(keyLabel.value, ObjectIds.createNonSignatures(Type.Value));
+    evocat.graph.createNode(keyObject, 'new');
 
-    const mapObject = props.graph.schemaCategory.createObject(mapLabel.value);
-    const mapNode = props.graph.createNode(mapObject, 'new');
+    const mapObject = evocat.graph.schemaCategory.createObject(mapLabel.value);
+    const mapNode = evocat.graph.createNode(mapObject, 'new');
 
-    const mapToKey = props.graph.schemaCategory.createMorphism(mapObject, keyObject, Cardinality.One, '#key');
-    props.graph.createEdge(mapToKey, 'new');
+    const mapToKey = evocat.graph.schemaCategory.createMorphism(mapObject, keyObject, Cardinality.One, '#key');
+    evocat.graph.createEdge(mapToKey, 'new');
 
-    const mapToNode1 = props.graph.schemaCategory.createMorphism(mapObject, node1.schemaObject, Cardinality.One, '');
-    props.graph.createEdge(mapToNode1, 'new');
-    const mapToNode2 = props.graph.schemaCategory.createMorphism(mapObject, node2.schemaObject, Cardinality.One, '#value');
-    props.graph.createEdge(mapToNode2, 'new');
+    const mapToNode1 = evocat.graph.schemaCategory.createMorphism(mapObject, node1.schemaObject, Cardinality.One, '');
+    evocat.graph.createEdge(mapToNode1, 'new');
+    const mapToNode2 = evocat.graph.schemaCategory.createMorphism(mapObject, node2.schemaObject, Cardinality.One, '#value');
+    evocat.graph.createEdge(mapToNode2, 'new');
 
     mapNode.addSignatureId(new SignatureId([ mapToKey.signature, mapToNode1.signature ]));
 
-    props.graph.layout();
+    evocat.graph.layout();
     emit('save');
 }
 
@@ -85,7 +82,6 @@ function cancel() {
         </ValueContainer>
         <NodeInput
             v-model="nodes"
-            :graph="graph"
             :count="2"
             :type="SelectionType.Selected"
         />

@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import { DatabaseWithConfiguration } from '@/types/database';
 import API from '@/utils/api';
 import { useRouter } from 'vue-router';
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
@@ -31,7 +31,7 @@ async function createLogicalModel() {
     const result = await API.logicalModels.createNewLogicalModel({}, {
         databaseId: selectedDatabase.value.id,
         categoryId,
-        label: label.value
+        label: label.value,
     });
     if (result.status)
         router.push({ name: 'logicalModels' });

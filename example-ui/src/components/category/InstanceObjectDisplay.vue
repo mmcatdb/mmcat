@@ -5,7 +5,7 @@ import ResourceLoader from '@/components/ResourceLoader.vue';
 import { InstanceObject } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 import API from '@/utils/api';
 import type { Column } from './InstanceObjectHeaderDisplay.vue';
 import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';

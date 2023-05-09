@@ -10,7 +10,7 @@ import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 import { LogicalModel } from '@/types/logicalModel';
 
 cytoscape.use(fcose);

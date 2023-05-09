@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { Edge, Graph, Node } from '@/types/categoryGraph';
+import type { Edge, Node } from '@/types/categoryGraph';
 import type { SequenceSignature } from '@/types/accessPath/graph';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import type { Filter } from '@/types/categoryGraph/PathMarker';
+import { useEvocat } from '@/utils/injects';
+
+const evocat = $(useEvocat());
 
 type SignatureInputProps = {
-    graph: Graph;
     filter: Filter;
     modelValue: SequenceSignature;
     disabled?: boolean;
@@ -24,17 +26,17 @@ watch(() => props.modelValue, (newValue: SequenceSignature) => {
 });
 
 onMounted(() => {
-    props.graph.addNodeListener('tap', onNodeTapHandler);
-    props.graph.addEdgeListener('tap', onEdgeTapHandler);
+    evocat.graph.addNodeListener('tap', onNodeTapHandler);
+    evocat.graph.addEdgeListener('tap', onEdgeTapHandler);
     innerValue.value.sequence.selectAll();
     innerValue.value.markAvailablePaths(props.filter);
 });
 
 onUnmounted(() => {
-    props.graph.removeNodeListener('tap', onNodeTapHandler);
-    props.graph.removeEdgeListener('tap', onEdgeTapHandler);
+    evocat.graph.removeNodeListener('tap', onNodeTapHandler);
+    evocat.graph.removeEdgeListener('tap', onEdgeTapHandler);
     innerValue.value.sequence.unselectAll();
-    props.graph.resetAvailabilityStatus();
+    evocat.graph.resetAvailabilityStatus();
 });
 
 function onNodeTapHandler(node: Node): void {
@@ -54,7 +56,7 @@ function onEdgeTapHandler(edge: Edge): void {
 }
 
 function innerValueUpdated() {
-    props.graph.resetAvailabilityStatus();
+    evocat.graph.resetAvailabilityStatus();
     innerValue.value.markAvailablePaths(props.filter);
 
     emit('update:modelValue', innerValue.value);
@@ -63,7 +65,7 @@ function innerValueUpdated() {
 
 function setSignature(signature: SequenceSignature) {
     innerValue.value.sequence.unselectAll();
-    props.graph.resetAvailabilityStatus();
+    evocat.graph.resetAvailabilityStatus();
     innerValue.value = signature;
     innerValue.value.sequence.selectAll();
     innerValue.value.markAvailablePaths(props.filter);

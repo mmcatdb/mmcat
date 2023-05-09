@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Graph } from '@/types/categoryGraph';
 import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { ref } from 'vue';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
@@ -7,6 +6,7 @@ import type { ImportedDataspecer } from '@/types/integration';
 import Divider from '@/components/layout/Divider.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { useEvocat } from '@/utils/injects';
 
 //const EXAMPLE_IRI = '537f6a7e-0883-4d57-a19c-f275bd28af9f';
 //const EXAMPLE_IRI = 'f2480523-c3ee-4c3c-a36a-9483749bc0d6';
@@ -14,11 +14,7 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 //const EXAMPLE_IRI = 'https://ofn.gov.cz/data-specification/968c3ca7-bc39-4ecc-92c3-ad105cb01a5e';
 const EXAMPLE_IRI = import.meta.env.VITE_DATASPECER_EXAMPLE_IRI;
 
-type IntegrationProps = {
-    graph: Graph;
-};
-
-const props = defineProps<IntegrationProps>();
+const evocat = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -47,7 +43,7 @@ function save() {
     if (!importedDataspecer.value)
         return;
 
-    addImportedToGraph(importedDataspecer.value, props.graph);
+    addImportedToGraph(importedDataspecer.value, evocat.graph);
 
     emit('save');
 }

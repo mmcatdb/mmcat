@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { Edge, SelectionType, type Graph, type Node, type TemporaryEdge } from '@/types/categoryGraph';
+import { Edge, SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import MinimumInput from './MinimumInput.vue';
-
 import IriDisplay from '@/components/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
+import { useEvocat } from '@/utils/injects';
+
+const evocat = $(useEvocat());
 
 type EditMorphismProps = {
-    graph: Graph;
     edge: Edge;
 };
 
@@ -46,7 +47,7 @@ watch(nodes, (newValue, oldValue) => {
     if (props.edge.domainNode.equals(newValue[0]) && props.edge.codomainNode.equals(newValue[1]))
         return;
 
-    temporayEdge.value = props.graph.createTemporaryEdge(newValue[0], newValue[1]);
+    temporayEdge.value = evocat.graph.createTemporaryEdge(newValue[0], newValue[1]);
 }, { immediate: true });
 
 onUnmounted(() => {
@@ -60,12 +61,12 @@ function save() {
 
     // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
 
-    props.graph.schemaCategory.editMorphism(props.edge.schemaMorphism, node1.schemaObject, node2.schemaObject, min.value, label.value.trim());
+    evocat.graph.schemaCategory.editMorphism(props.edge.schemaMorphism, node1.schemaObject, node2.schemaObject, min.value, label.value.trim());
 
     temporayEdge.value?.delete();
-    props.graph.deleteEdge(props.edge);
-    props.graph.createEdge(props.edge.schemaMorphism, 'new');
-    props.graph.layout();
+    evocat.graph.deleteEdge(props.edge);
+    evocat.graph.createEdge(props.edge.schemaMorphism, 'new');
+    evocat.graph.layout();
 
     emit('save');
 }
@@ -77,8 +78,8 @@ function cancel() {
 function deleteFunction() {
     // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
 
-    props.graph.schemaCategory.deleteMorphism(props.edge.schemaMorphism);
-    props.graph.deleteEdge(props.edge);
+    evocat.graph.schemaCategory.deleteMorphism(props.edge.schemaMorphism);
+    evocat.graph.deleteEdge(props.edge);
 
     emit('save');
 }
@@ -123,7 +124,6 @@ function switchNodes() {
         </ValueContainer>
         <NodeInput
             v-model="nodes"
-            :graph="graph"
             :count="2"
             :type="SelectionType.Selected"
             :disabled="!isNew"

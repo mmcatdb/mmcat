@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import type { Graph } from '@/types/categoryGraph';
 import { ref } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { computed } from '@vue/reactivity';
+import { useEvocat } from '@/utils/injects';
 
-type AddObjectProps = {
-    graph: Graph;
-};
-
-const props = defineProps<AddObjectProps>();
+const evocat = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -18,22 +14,22 @@ const iri = ref('');
 const pimIri = ref('');
 const keyIsValid = ref(true);
 
-const iriIsAvailable = computed(() => props.graph.schemaCategory.iriIsAvailable(iri.value));
+const iriIsAvailable = computed(() => evocat.graph.schemaCategory.iriIsAvailable(iri.value));
 
 function save() {
     if (iri.value) {
-        const object = props.graph.schemaCategory.createObjectWithIri(label.value, undefined, iri.value, pimIri.value);
+        const object = evocat.graph.schemaCategory.createObjectWithIri(label.value, undefined, iri.value, pimIri.value);
         if (!object)
             return;
 
-        props.graph.createNode(object, 'new');
+        evocat.graph.createNode(object, 'new');
     }
     else {
-        const object = props.graph.schemaCategory.createObject(label.value);
-        props.graph.createNode(object, 'new');
+        const object = evocat.graph.schemaCategory.createObject(label.value);
+        evocat.graph.createNode(object, 'new');
     }
 
-    props.graph.layout();
+    evocat.graph.layout();
     emit('save');
 }
 

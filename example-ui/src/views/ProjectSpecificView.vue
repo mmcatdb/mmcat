@@ -4,7 +4,7 @@ import VersionDisplay from '@/components/VersionDisplay.vue';
 import type { Id } from '@/types/id';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
-import { categoryIdKey, categoryKey } from '@/utils/globalSchemaSettings';
+import { categoryIdKey, categoryInfoKey } from '@/utils/injects';
 import { onMounted, provide, ref } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
 
@@ -18,7 +18,7 @@ provide(categoryIdKey, ref(props.categoryId));
 
 const schemaCategoryInfo = ref<SchemaCategoryInfo>();
 
-provide(categoryKey, schemaCategoryInfo);
+provide(categoryInfoKey, schemaCategoryInfo);
 
 const router = useRouter();
 

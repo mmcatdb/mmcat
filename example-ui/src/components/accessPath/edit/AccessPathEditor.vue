@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
-import type { Graph } from '@/types/categoryGraph';
 import { ref } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { DatabaseWithConfiguration } from '@/types/database';
@@ -25,7 +24,6 @@ type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
 
 type AccessPathEditorProps = {
-    graph: Graph;
     database: DatabaseWithConfiguration;
     rootProperty: GraphRootProperty;
 };
@@ -106,7 +104,6 @@ function finishMapping() {
                 </template>
                 <template v-else-if="state.type === State.AddProperty">
                     <AddProperty
-                        :graph="graph"
                         :database="database"
                         :parent-property="state.parent"
                         @save="setStateToDefault"
@@ -115,7 +112,6 @@ function finishMapping() {
                 </template>
                 <template v-else-if="state.type === State.EditProperty">
                     <EditProperty
-                        :graph="graph"
                         :database="database"
                         :property="state.property"
                         @save="setStateToDefault"

@@ -6,7 +6,7 @@ import API from '@/utils/api';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 import NewJob from '@/components/job/NewJob.vue';
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
 
 const jobs = ref<Job[]>();

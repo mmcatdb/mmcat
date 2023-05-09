@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Graph, Node } from '@/types/categoryGraph';
+import type { Node } from '@/types/categoryGraph';
 import { Type } from '@/types/identifiers';
 import { ref } from 'vue';
 import AddSimpleId from './AddSimpleId.vue';
@@ -18,7 +18,6 @@ enum State {
 }
 
 type AddIdProps = {
-    graph: Graph;
     node: Node;
 };
 
@@ -80,7 +79,6 @@ function selectGenerated() {
     </template>
     <template v-else-if="state === State.Simple">
         <AddSimpleId
-            :graph="graph"
             :node="node"
             @save="save"
             @cancel="cancel"
@@ -88,7 +86,6 @@ function selectGenerated() {
     </template>
     <template v-else-if="state === State.Complex">
         <AddComplexId
-            :graph="graph"
             :node="node"
             @save="save"
             @cancel="cancel"

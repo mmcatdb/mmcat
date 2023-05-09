@@ -6,17 +6,19 @@ import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategory, useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryInfo, useSchemaCategoryId } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
+import { Evocat } from '@/types/evocat/Evocat';
 
 const route = useRoute();
 const router = useRouter();
 
 const graph = ref<Graph>();
+const evocat = ref<Evocat>();
 const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
 const logicalModels = ref<LogicalModel[]>([]);
@@ -27,7 +29,7 @@ const databaseAndRootNodeValid = computed(() => {
 });
 
 const categoryId = useSchemaCategoryId();
-const category = useSchemaCategory();
+const category = useSchemaCategoryInfo();
 
 onMounted(async () => {
     const result = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
@@ -39,6 +41,7 @@ onMounted(async () => {
 
 function cytoscapeCreated(newGraph: Graph) {
     graph.value = newGraph;
+    evocat.value = Evocat.create(newGraph);
 }
 
 function confirmDatabaseAndRootNode() {
@@ -71,7 +74,7 @@ async function createMapping(primaryKey: SignatureId) {
 <template>
     <div class="divide">
         <GraphDisplay @create:graph="cytoscapeCreated" />
-        <div v-if="graph">
+        <div v-if="evocat">
             <div>
                 <div
                     v-if="!accessPath || !selectedLogicalModel"
@@ -92,7 +95,6 @@ async function createMapping(primaryKey: SignatureId) {
                         <ValueRow label="Root object:">
                             <SingleNodeInput
                                 v-model="selectingRootNode"
-                                :graph="graph"
                                 :type="SelectionType.Root"
                             />
                         </ValueRow>
@@ -108,7 +110,6 @@ async function createMapping(primaryKey: SignatureId) {
                 </div>
                 <AccessPathEditor
                     v-else
-                    :graph="graph"
                     :database="selectedLogicalModel.database"
                     :root-property="accessPath"
                     @finish="createMapping"

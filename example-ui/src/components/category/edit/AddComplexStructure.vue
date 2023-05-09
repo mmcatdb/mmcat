@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Graph } from '@/types/categoryGraph';
 import Divider from '@/components/layout/Divider.vue';
 import AddProperty from './AddProperty.vue';
 import AddSet from './AddSet.vue';
@@ -12,12 +11,6 @@ enum State {
     AddSet,
     AddMap,
 }
-
-type AddComplexStructureProps = {
-    graph: Graph;
-};
-
-defineProps<AddComplexStructureProps>();
 
 const emit = defineEmits([ 'cancel' ]);
 
@@ -57,21 +50,18 @@ function cancel() {
     </div>
     <template v-else-if="state === State.AddProperty">
         <AddProperty
-            :graph="graph"
             @save="setStateToDefault"
             @cancel="setStateToDefault"
         />
     </template>
     <template v-else-if="state === State.AddSet">
         <AddSet
-            :graph="graph"
             @save="setStateToDefault"
             @cancel="setStateToDefault"
         />
     </template>
     <template v-else-if="state === State.AddMap">
         <AddMap
-            :graph="graph"
             @save="setStateToDefault"
             @cancel="setStateToDefault"
         />

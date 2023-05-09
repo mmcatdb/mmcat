@@ -7,7 +7,7 @@ import ResourceLoader from '@/components/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import { DatabaseInfo } from '@/types/database';
 import { useRouter } from 'vue-router';
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 
 type LogicalModelDatabase = {
     logicalModel: LogicalModelInfo;
@@ -25,7 +25,7 @@ async function fetchModels() {
 
     infos.value = result.data.map(info => ({
         logicalModel: LogicalModelInfo.fromServer(info.logicalModel),
-        database: DatabaseInfo.fromServer(info.database)
+        database: DatabaseInfo.fromServer(info.database),
     }));
 
     return true;

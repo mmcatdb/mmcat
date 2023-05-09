@@ -5,7 +5,7 @@ import type { SchemaObject } from '@/types/schema';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import type { Edge, Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 import API from '@/utils/api';
 import { InstanceMorphism } from '@/types/instance';
 import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';

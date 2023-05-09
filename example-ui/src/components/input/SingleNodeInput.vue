@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import type { SelectionType, Graph, Node } from '@/types/categoryGraph';
+import type { SelectionType, Node } from '@/types/categoryGraph';
 import { ref, watch } from 'vue';
 import NodeInput from './NodeInput.vue';
 
 type SingleNodeInputProps = {
-    graph: Graph;
     modelValue?: Node;
     type: SelectionType;
     disabled?: boolean;
@@ -35,7 +34,6 @@ function onValueUpdate(newValue: Node[]) {
 <template>
     <NodeInput
         :model-value="[ innerValue ]"
-        :graph="graph"
         :count="1"
         :type="type"
         :disabled="disabled"

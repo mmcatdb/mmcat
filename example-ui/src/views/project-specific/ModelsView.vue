@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { ModelView } from '@/types/model';
 import API from '@/utils/api';
 
-import { useSchemaCategoryId } from '@/utils/globalSchemaSettings';
+import { useSchemaCategoryId } from '@/utils/injects';
 import ModelViewDisplay from '@/components/ModelViewDisplay.vue';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Edge, SelectionType, type Graph, type Node } from '@/types/categoryGraph';
+import { Edge, SelectionType, type Node } from '@/types/categoryGraph';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { SchemaCategory } from '@/types/schema';
 import AddObject from './AddObject.vue';
@@ -12,6 +12,9 @@ import Divider from '@/components/layout/Divider.vue';
 import API from '@/utils/api';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import EditGroup from './EditGroup.vue';
+import { useEvocat } from '@/utils/injects';
+
+const evocat = $(useEvocat());
 
 enum State {
     Default,
@@ -36,12 +39,6 @@ type StateValue =
     GenericStateValue<State.EditGroup, { nodes: Node[] }> |
     GenericStateValue<State.Integration, unknown>;
 
-type EditorForSchemaCategoryProps = {
-    graph: Graph;
-};
-
-const props = defineProps<EditorForSchemaCategoryProps>();
-
 const emit = defineEmits([ 'save' ]);
 
 const state = ref<StateValue>({ type: State.Default });
@@ -50,15 +47,15 @@ const editedObject = ref<InstanceType<typeof EditObject>>();
 const editedMorphism = ref<InstanceType<typeof EditMorphism>>();
 
 onMounted(() => {
-    props.graph.addNodeListener('tap', onNodeTapHandler);
-    props.graph.addEdgeListener('tap', onEdgeTapHandler);
-    props.graph.addCanvasListener('tap', onCanvasTapHandler);
+    evocat.graph.addNodeListener('tap', onNodeTapHandler);
+    evocat.graph.addEdgeListener('tap', onEdgeTapHandler);
+    evocat.graph.addCanvasListener('tap', onCanvasTapHandler);
 });
 
 onUnmounted(() => {
-    props.graph.removeNodeListener('tap', onNodeTapHandler);
-    props.graph.removeEdgeListener('tap', onEdgeTapHandler);
-    props.graph.removeCanvasListener('tap', onCanvasTapHandler);
+    evocat.graph.removeNodeListener('tap', onNodeTapHandler);
+    evocat.graph.removeEdgeListener('tap', onEdgeTapHandler);
+    evocat.graph.removeCanvasListener('tap', onCanvasTapHandler);
 });
 
 function addObjectClicked() {
@@ -193,14 +190,14 @@ function onCanvasTapHandler() {
 }
 
 async function save() {
-    const updateObject = props.graph.schemaCategory.getUpdateObject();
-    console.log(props.graph.schemaCategory);
+    const updateObject = evocat.graph.schemaCategory.getUpdateObject();
+    console.log(evocat.graph.schemaCategory);
     if (!updateObject) {
         console.log('Update object invalid');
         return;
     }
 
-    const result = await API.schemas.updateCategoryWrapper({ id: props.graph.schemaCategory.id }, updateObject);
+    const result = await API.schemas.updateCategoryWrapper({ id: evocat.graph.schemaCategory.id }, updateObject);
     if (result.status) {
         const schemaCategory = SchemaCategory.fromServer(result.data);
         emit('save', schemaCategory);
@@ -244,21 +241,18 @@ async function save() {
         </div>
         <template v-else-if="state.type === State.AddObject">
             <AddObject
-                :graph="graph"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />
         </template>
         <template v-else-if="state.type === State.AddMorphism">
             <AddMorphism
-                :graph="graph"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />
         </template>
         <template v-else-if="state.type === State.AddComplexStructure">
             <AddComplexStructure
-                :graph="graph"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />
@@ -267,7 +261,6 @@ async function save() {
             <EditObject
                 ref="editedObject"
                 :key="state.node.schemaObject.key.toString()"
-                :graph="graph"
                 :node="state.node"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
@@ -277,7 +270,6 @@ async function save() {
             <EditMorphism
                 ref="editedMorphism"
                 :key="state.edge.schemaMorphism.signature.toString()"
-                :graph="graph"
                 :edge="state.edge"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
@@ -285,7 +277,6 @@ async function save() {
         </template>
         <template v-else-if="state.type === State.Integration">
             <Integration
-                :graph="graph"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />

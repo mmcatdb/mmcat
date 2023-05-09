@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Graph, Node } from '@/types/categoryGraph';
+import type { Node } from '@/types/categoryGraph';
 import { computed, ref } from 'vue';
 import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
@@ -8,9 +8,11 @@ import AddId from './AddId.vue';
 import IriDisplay from '@/components/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { useEvocat } from '@/utils/injects';
+
+const evocat = $(useEvocat());
 
 type EditObjectProps = {
-    graph: Graph;
     node: Node;
 };
 
@@ -38,12 +40,12 @@ function cancel() {
 
 function deleteFunction() {
     props.node.neighbours.forEach(neighbour => {
-        props.graph.schemaCategory.deleteMorphism(neighbour.edge.schemaMorphism);
-        props.graph.deleteEdge(neighbour.edge);
+        evocat.graph.schemaCategory.deleteMorphism(neighbour.edge.schemaMorphism);
+        evocat.graph.deleteEdge(neighbour.edge);
     });
 
-    props.graph.schemaCategory.deleteObject(props.node.schemaObject);
-    props.graph.deleteNode(props.node);
+    evocat.graph.schemaCategory.deleteObject(props.node.schemaObject);
+    evocat.graph.deleteNode(props.node);
 
     emit('save');
 }
@@ -108,7 +110,6 @@ function cancelAddingId() {
             class="editor"
         >
             <AddId
-                :graph="graph"
                 :node="node"
                 @save="finishAddingId"
                 @cancel="cancelAddingId"

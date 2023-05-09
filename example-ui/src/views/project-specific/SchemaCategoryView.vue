@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Graph } from '@/types/categoryGraph';
-import { ref } from 'vue';
+import { provide, ref } from 'vue';
 import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import EditorForSchemaCategory from '@/components/category/edit/EditorForSchemaCategory.vue';
 import type { SchemaCategory } from '@/types/schema';
@@ -8,14 +8,18 @@ import { useRoute } from 'vue-router';
 import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
 import { toQueryScalar } from '@/utils/router';
-import { useSchemaCategory } from '@/utils/globalSchemaSettings';
-
-const graph = ref<Graph>();
+import { evocatKey, useSchemaCategoryInfo } from '@/utils/injects';
+import { Evocat } from '@/types/evocat/Evocat';
 
 const route = useRoute();
+const graph = ref<Graph>();
+const evocat = ref<Evocat>();
+
+provide(evocatKey, evocat);
 
 async function cytoscapeCreated(newGraph: Graph) {
     graph.value = newGraph;
+    evocat.value = Evocat.create(newGraph);
 
     const pimIri = toQueryScalar(route.query.pimIri);
     if (!pimIri)
@@ -28,11 +32,10 @@ async function cytoscapeCreated(newGraph: Graph) {
 
     const importedDataspecer = importDataspecer(importResult.data);
     addImportedToGraph(importedDataspecer, newGraph);
-    graph.value = newGraph;
 }
 
 const graphDisplay = ref<InstanceType<typeof GraphDisplay>>();
-const category = useSchemaCategory();
+const category = useSchemaCategoryInfo();
 
 function schemaCategorySaved(schemaCategory: SchemaCategory) {
     graph.value = undefined;
@@ -48,10 +51,9 @@ function schemaCategorySaved(schemaCategory: SchemaCategory) {
             @create:graph="cytoscapeCreated"
         />
         <div
-            v-if="graph"
+            v-if="evocat"
         >
             <EditorForSchemaCategory
-                :graph="graph"
                 @save="schemaCategorySaved"
             />
         </div>

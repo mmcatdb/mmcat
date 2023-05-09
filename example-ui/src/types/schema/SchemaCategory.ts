@@ -1,5 +1,5 @@
 import type { Iri } from "@/types/integration";
-import { UniqueIdProvider } from "@/utils/UniqueIdProvier";
+import { UniqueIdProvider } from "@/utils/UniqueIdProvider";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id, Version } from "../id";
 import { DynamicName, Key, Signature, ObjectIds } from "../identifiers";

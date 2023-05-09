@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SequenceSignature } from '@/types/accessPath/graph';
-import { type Graph, type Node, createDefaultFilter } from '@/types/categoryGraph';
+import { type Node, createDefaultFilter } from '@/types/categoryGraph';
 import type { DatabaseWithConfiguration } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
 import { ref, watch } from 'vue';
@@ -14,7 +14,6 @@ enum NameType {
 }
 
 type NameInputProps = {
-    graph: Graph;
     database: DatabaseWithConfiguration;
     rootNode: Node;
     modelValue: Name;
@@ -126,7 +125,6 @@ function updateInnerValue() {
     <div v-if="type === NameType.Dynamic">
         <SignatureInput
             v-model="dynamicValue"
-            :graph="graph"
             :filter="filter"
             :disabled="disabled"
             @input="updateInnerValue"

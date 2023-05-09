@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Graph, PathSegment, Node } from '@/types/categoryGraph';
+import type { PathSegment, Node } from '@/types/categoryGraph';
 import { SignatureIdFactory } from '@/types/identifiers';
 import { ref } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
@@ -10,7 +10,6 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '../SignatureDisplay.vue';
 
 type AddSimpleIdProps = {
-    graph: Graph;
     node: Node;
 };
 
@@ -47,7 +46,6 @@ function cancel() {
     </ValueContainer>
     <SignatureInput
         v-model="signature"
-        :graph="graph"
         :filter="filter"
     />
     <div class="button-row">

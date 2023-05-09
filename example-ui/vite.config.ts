@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'url';
 import { defineConfig, loadEnv } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { createHtmlPlugin } from 'vite-plugin-html';
+import ReactivityTransform from '@vue-macros/reactivity-transform/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => {
@@ -16,21 +17,22 @@ export default defineConfig(({ command, mode }) => {
             createHtmlPlugin({
                 inject: {
                     data: {
-                        app_version: process.env.npm_package_version
-                    }
-                }
-            })
+                        app_version: process.env.npm_package_version,
+                    },
+                },
+            }),
+            ReactivityTransform(),
         ],
         resolve: {
             alias: {
-                '@': fileURLToPath(new URL('./src', import.meta.url))
-            }
+                '@': fileURLToPath(new URL('./src', import.meta.url)),
+            },
         },
         base,
         server: {
             cors: {
-                origin: env.VITE_DATASPECER_API_URL
-            }
-        }
+                origin: env.VITE_DATASPECER_API_URL,
+            },
+        },
     };
 });
