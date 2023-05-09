@@ -16,11 +16,11 @@ const props = defineProps<AddMorphismProps>();
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
-const nodes = ref<(Node | undefined)[]>([]);
 
 const label = ref('');
 const iri = ref('');
 const pimIri = ref('');
+const nodes = ref<(Node | undefined)[]>([]);
 const temporayEdge = ref<TemporaryEdge | null>(null);
 const min = ref<Min>(Cardinality.One);
 

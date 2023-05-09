@@ -5,7 +5,6 @@ import { Cardinality, type Min } from '@/types/schema';
 import MinimumInput from './MinimumInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { computed } from '@vue/reactivity';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import { ObjectIds, Type } from '@/types/identifiers';
 

@@ -3,10 +3,14 @@ import { ref } from 'vue';
 import type { Graph } from '@/types/categoryGraph';
 import Divider from '@/components/layout/Divider.vue';
 import AddProperty from './AddProperty.vue';
+import AddSet from './AddSet.vue';
+import AddMap from './AddMap.vue';
 
 enum State {
     Default,
     AddProperty,
+    AddSet,
+    AddMap,
 }
 
 type AddComplexStructureProps = {
@@ -40,6 +44,12 @@ function cancel() {
         <button @click="() => selectType(State.AddProperty)">
             Add property
         </button>
+        <button @click="() => selectType(State.AddSet)">
+            Add set
+        </button>
+        <button @click="() => selectType(State.AddMap)">
+            Add map
+        </button>
         <Divider />
         <button @click="cancel">
             Cancel
@@ -47,6 +57,20 @@ function cancel() {
     </div>
     <template v-else-if="state === State.AddProperty">
         <AddProperty
+            :graph="graph"
+            @save="setStateToDefault"
+            @cancel="setStateToDefault"
+        />
+    </template>
+    <template v-else-if="state === State.AddSet">
+        <AddSet
+            :graph="graph"
+            @save="setStateToDefault"
+            @cancel="setStateToDefault"
+        />
+    </template>
+    <template v-else-if="state === State.AddMap">
+        <AddMap
             :graph="graph"
             @save="setStateToDefault"
             @cancel="setStateToDefault"
