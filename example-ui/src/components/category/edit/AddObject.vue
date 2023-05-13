@@ -5,7 +5,7 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { computed } from '@vue/reactivity';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -14,22 +14,22 @@ const iri = ref('');
 const pimIri = ref('');
 const keyIsValid = ref(true);
 
-const iriIsAvailable = computed(() => evocat.graph.schemaCategory.iriIsAvailable(iri.value));
+const isIriAvailable = computed(() => evocat.schemaCategory.isIriAvailable(iri.value));
 
 function save() {
-    if (iri.value) {
-        const object = evocat.graph.schemaCategory.createObjectWithIri(label.value, undefined, iri.value, pimIri.value);
-        if (!object)
-            return;
+    const iriDefinition = iri.value
+        ? {
+            iri: iri.value,
+            pimIri: pimIri.value,
+        }
+        : {};
 
-        evocat.graph.createNode(object, 'new');
-    }
-    else {
-        const object = evocat.graph.schemaCategory.createObject(label.value);
-        evocat.graph.createNode(object, 'new');
-    }
+    evocat.addObject({
+        label: label.value,
+        ...iriDefinition,
+    });
 
-    evocat.graph.layout();
+    graph.layout();
     emit('save');
 }
 
@@ -54,7 +54,7 @@ function cancel() {
         </ValueContainer>
         <div class="button-row">
             <button
-                :disabled="!keyIsValid || !label || !iriIsAvailable"
+                :disabled="!keyIsValid || !label || !isIriAvailable"
                 @click="save"
             >
                 Confirm

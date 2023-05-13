@@ -5,7 +5,7 @@ import { onMounted, onUnmounted, ref, watch } from 'vue';
 import type { Filter } from '@/types/categoryGraph/PathMarker';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { graph } = $(useEvocat());
 
 type SignatureInputProps = {
     filter: Filter;
@@ -26,17 +26,17 @@ watch(() => props.modelValue, (newValue: SequenceSignature) => {
 });
 
 onMounted(() => {
-    evocat.graph.addNodeListener('tap', onNodeTapHandler);
-    evocat.graph.addEdgeListener('tap', onEdgeTapHandler);
+    graph.addNodeListener('tap', onNodeTapHandler);
+    graph.addEdgeListener('tap', onEdgeTapHandler);
     innerValue.value.sequence.selectAll();
     innerValue.value.markAvailablePaths(props.filter);
 });
 
 onUnmounted(() => {
-    evocat.graph.removeNodeListener('tap', onNodeTapHandler);
-    evocat.graph.removeEdgeListener('tap', onEdgeTapHandler);
+    graph.removeNodeListener('tap', onNodeTapHandler);
+    graph.removeEdgeListener('tap', onEdgeTapHandler);
     innerValue.value.sequence.unselectAll();
-    evocat.graph.resetAvailabilityStatus();
+    graph.resetAvailabilityStatus();
 });
 
 function onNodeTapHandler(node: Node): void {
@@ -56,7 +56,7 @@ function onEdgeTapHandler(edge: Edge): void {
 }
 
 function innerValueUpdated() {
-    evocat.graph.resetAvailabilityStatus();
+    graph.resetAvailabilityStatus();
     innerValue.value.markAvailablePaths(props.filter);
 
     emit('update:modelValue', innerValue.value);
@@ -65,7 +65,7 @@ function innerValueUpdated() {
 
 function setSignature(signature: SequenceSignature) {
     innerValue.value.sequence.unselectAll();
-    evocat.graph.resetAvailabilityStatus();
+    graph.resetAvailabilityStatus();
     innerValue.value = signature;
     innerValue.value.sequence.selectAll();
     innerValue.value.markAvailablePaths(props.filter);

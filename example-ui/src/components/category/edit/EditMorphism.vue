@@ -8,7 +8,7 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 type EditMorphismProps = {
     edge: Edge;
@@ -21,7 +21,7 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 const nodes = ref<(Node | undefined)[]>([ props.edge.domainNode, props.edge.codomainNode ]);
 
 const label = ref(props.edge.schemaMorphism.label);
-const temporayEdge = ref<TemporaryEdge | null>(null);
+const temporayEdge = ref<TemporaryEdge>();
 const min = ref(props.edge.schemaMorphism.min);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
@@ -47,7 +47,7 @@ watch(nodes, (newValue, oldValue) => {
     if (props.edge.domainNode.equals(newValue[0]) && props.edge.codomainNode.equals(newValue[1]))
         return;
 
-    temporayEdge.value = evocat.graph.createTemporaryEdge(newValue[0], newValue[1]);
+    temporayEdge.value = graph.createTemporaryEdge(newValue[0], newValue[1]);
 }, { immediate: true });
 
 onUnmounted(() => {
@@ -61,12 +61,12 @@ function save() {
 
     // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
 
-    evocat.graph.schemaCategory.editMorphism(props.edge.schemaMorphism, node1.schemaObject, node2.schemaObject, min.value, label.value.trim());
+    evocat.schemaCategory.editMorphism(props.edge.schemaMorphism, node1.schemaObject, node2.schemaObject, min.value, label.value.trim());
 
     temporayEdge.value?.delete();
-    evocat.graph.deleteEdge(props.edge);
-    evocat.graph.createEdge(props.edge.schemaMorphism, 'new');
-    evocat.graph.layout();
+    graph.deleteEdge(props.edge.schemaMorphism);
+    graph.createEdge(props.edge.schemaMorphism, 'new');
+    graph.layout();
 
     emit('save');
 }
@@ -76,10 +76,7 @@ function cancel() {
 }
 
 function deleteFunction() {
-    // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
-
-    evocat.graph.schemaCategory.deleteMorphism(props.edge.schemaMorphism);
-    evocat.graph.deleteEdge(props.edge);
+    evocat.removeMorphism(props.edge.schemaMorphism);
 
     emit('save');
 }

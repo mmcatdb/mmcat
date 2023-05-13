@@ -14,7 +14,7 @@ import { useEvocat } from '@/utils/injects';
 //const EXAMPLE_IRI = 'https://ofn.gov.cz/data-specification/968c3ca7-bc39-4ecc-92c3-ad105cb01a5e';
 const EXAMPLE_IRI = import.meta.env.VITE_DATASPECER_EXAMPLE_IRI;
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -43,7 +43,7 @@ function save() {
     if (!importedDataspecer.value)
         return;
 
-    addImportedToGraph(importedDataspecer.value, evocat.graph);
+    addImportedToGraph(importedDataspecer.value, evocat, graph);
 
     emit('save');
 }

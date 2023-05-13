@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { PathSegment, Node } from '@/types/categoryGraph';
-import { SignatureIdFactory } from '@/types/identifiers';
 import { ref } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
@@ -8,6 +7,9 @@ import SignatureInput from '../../accessPath/input/SignatureInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '../SignatureDisplay.vue';
+import { useEvocat } from '@/utils/injects';
+
+const { evocat } = $(useEvocat());
 
 type AddSimpleIdProps = {
     node: Node;
@@ -26,8 +28,7 @@ const filter = {
 };
 
 function save() {
-    const factory = new SignatureIdFactory([ signature.value.toSignature() ]);
-    props.node.addSignatureId(factory.signatureId);
+    evocat.addId(props.node.schemaObject, { signatures: [ signature.value.toSignature() ] });
 
     emit('save');
 }

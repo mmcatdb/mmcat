@@ -10,7 +10,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat } = $(useEvocat());
 
 type EditObjectProps = {
     node: Node;
@@ -40,12 +40,10 @@ function cancel() {
 
 function deleteFunction() {
     props.node.neighbours.forEach(neighbour => {
-        evocat.graph.schemaCategory.deleteMorphism(neighbour.edge.schemaMorphism);
-        evocat.graph.deleteEdge(neighbour.edge);
+        evocat.removeMorphism(neighbour.edge.schemaMorphism);
     });
 
-    evocat.graph.schemaCategory.deleteObject(props.node.schemaObject);
-    evocat.graph.deleteNode(props.node);
+    evocat.removeObject(props.node.schemaObject);
 
     emit('save');
 }

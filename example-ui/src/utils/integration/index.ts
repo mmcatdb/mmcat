@@ -1,5 +1,5 @@
 import type { ImportedDataspecer } from '@/types/integration';
-import { linkDataspecer, } from './linker';
+import { linkDataspecer } from './linker';
 import { parseDataspecer } from './parser';
 
 export function importDataspecer({ resources }: any): ImportedDataspecer {

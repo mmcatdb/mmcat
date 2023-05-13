@@ -4,11 +4,10 @@ import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGr
 import { Cardinality } from '@/types/schema';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { SignatureId } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -25,7 +24,7 @@ watch(nodes, (newValue, oldValue) => {
     if (!newValue[0] || !newValue[1])
         return;
 
-    temporayEdge.value = evocat.graph.createTemporaryEdge(newValue[0], newValue[1]);
+    temporayEdge.value = graph.createTemporaryEdge(newValue[0], newValue[1]);
 });
 
 onUnmounted(() => {
@@ -37,17 +36,27 @@ function save() {
     if (!node1 || !node2)
         return;
 
-    const setObject = evocat.graph.schemaCategory.createObject(setLabel.value);
-    const setNode = evocat.graph.createNode(setObject, 'new');
+    const setObject = evocat.addObject({
+        label: setLabel.value,
+    });
 
-    const setToNode1 = evocat.graph.schemaCategory.createMorphism(setObject, node1.schemaObject, Cardinality.One, '#role');
-    evocat.graph.createEdge(setToNode1, 'new');
-    const setToNode2 = evocat.graph.schemaCategory.createMorphism(setObject, node2.schemaObject, Cardinality.One, '#role');
-    evocat.graph.createEdge(setToNode2, 'new');
+    const setToNode1 = evocat.addMorphism({
+        dom: setObject,
+        cod: node1.schemaObject,
+        min: Cardinality.One,
+        label: '#role',
+    });
 
-    setNode.addSignatureId(new SignatureId([ setToNode1.signature, setToNode2.signature ]));
+    const setToNode2 = evocat.addMorphism({
+        dom: setObject,
+        cod: node2.schemaObject,
+        min: Cardinality.One,
+        label: '#role',
+    });
 
-    evocat.graph.layout();
+    evocat.addId(setObject, { signatures: [ setToNode1.signature, setToNode2.signature ] });
+
+    graph.layout();
     emit('save');
 }
 

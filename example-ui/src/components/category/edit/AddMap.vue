@@ -4,11 +4,11 @@ import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGr
 import { Cardinality } from '@/types/schema';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ObjectIds, SignatureId, Type } from '@/types/identifiers';
+import { ObjectIds, Type } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -26,7 +26,7 @@ watch(nodes, (newValue, oldValue) => {
     if (!newValue[0] || !newValue[1])
         return;
 
-    temporayEdge.value = evocat.graph.createTemporaryEdge(newValue[0], newValue[1]);
+    temporayEdge.value = graph.createTemporaryEdge(newValue[0], newValue[1]);
 });
 
 onUnmounted(() => {
@@ -38,23 +38,39 @@ function save() {
     if (!node1 || !node2)
         return;
 
-    const keyObject = evocat.graph.schemaCategory.createObject(keyLabel.value, ObjectIds.createNonSignatures(Type.Value));
-    evocat.graph.createNode(keyObject, 'new');
+    const keyObject = evocat.addObject({
+        label: keyLabel.value,
+        ids: ObjectIds.createNonSignatures(Type.Value),
+    });
 
-    const mapObject = evocat.graph.schemaCategory.createObject(mapLabel.value);
-    const mapNode = evocat.graph.createNode(mapObject, 'new');
+    const mapObject = evocat.addObject({
+        label: mapLabel.value,
+    });
 
-    const mapToKey = evocat.graph.schemaCategory.createMorphism(mapObject, keyObject, Cardinality.One, '#key');
-    evocat.graph.createEdge(mapToKey, 'new');
+    const mapToKey = evocat.addMorphism({
+        dom: mapObject,
+        cod: keyObject,
+        min: Cardinality.One,
+        label: '#key',
+    });
 
-    const mapToNode1 = evocat.graph.schemaCategory.createMorphism(mapObject, node1.schemaObject, Cardinality.One, '');
-    evocat.graph.createEdge(mapToNode1, 'new');
-    const mapToNode2 = evocat.graph.schemaCategory.createMorphism(mapObject, node2.schemaObject, Cardinality.One, '#value');
-    evocat.graph.createEdge(mapToNode2, 'new');
+    const mapToNode1 = evocat.addMorphism({
+        dom: mapObject,
+        cod: node1.schemaObject,
+        min: Cardinality.One,
+    });
 
-    mapNode.addSignatureId(new SignatureId([ mapToKey.signature, mapToNode1.signature ]));
+    evocat.addMorphism({
+        dom: mapObject,
+        cod: node2.schemaObject,
+        min: Cardinality.One,
+    });
 
-    evocat.graph.layout();
+    evocat.addId(mapObject, {
+        signatures: [ mapToKey.signature, mapToNode1.signature ],
+    });
+
+    graph.layout();
     emit('save');
 }
 

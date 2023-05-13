@@ -1,19 +1,20 @@
-import { NodeSequence, type Edge, type Graph, type Node } from "@/types/categoryGraph";
-import type { SchemaObject } from "@/types/schema";
+import { NodeSequence, type Node, Graph } from "@/types/categoryGraph";
+import type { SchemaMorphism, SchemaObject } from "@/types/schema";
 import type { ImportedMorphism, ImportedDataspecer, ImportedId, ImportedObject, MorphismSequence } from "@/types/integration";
-import { SignatureIdFactory, Signature, Type } from "@/types/identifiers";
+import { Signature, Type } from "@/types/identifiers";
+import type { Evocat } from "@/types/evocat/Evocat";
 
-function sequenceToSignature(morphismSequence: MorphismSequence, node: Node, createdMorphisms: Map<ImportedMorphism, Edge>): Signature | null {
+function sequenceToSignature(morphismSequence: MorphismSequence, node: Node, createdMorphisms: Map<ImportedMorphism, SchemaMorphism>): Signature | null {
     const nodeSequence = NodeSequence.fromRootNode(node, { selectNodes: false });
 
     for (const morphism of morphismSequence) {
-        const edge = createdMorphisms.get(morphism);
-        if (!edge) {
-            console.log('Edge for morphism not found.');
+        const schemaMorphism = createdMorphisms.get(morphism);
+        if (!schemaMorphism) {
+            console.log('Schema morphism for morphism not found.');
             return null;
         }
 
-        const result = nodeSequence.addBaseSignature(edge.schemaMorphism.signature);
+        const result = nodeSequence.addBaseSignature(schemaMorphism.signature);
         if (!result) {
             console.log('Base signature couldn\'t be added.');
             return null;
@@ -23,64 +24,81 @@ function sequenceToSignature(morphismSequence: MorphismSequence, node: Node, cre
     return nodeSequence.toSignature();
 }
 
-function addId(id: ImportedId, node: Node, createdMorphisms: Map<ImportedMorphism, Edge>) {
+function addId(id: ImportedId, evocat: Evocat, graph: Graph, object: SchemaObject, createdMorphisms: Map<ImportedMorphism, SchemaMorphism>) {
     if (id.type !== Type.Signatures) {
-        node.addNonSignatureId(id.type);
+        evocat.addId(object, { type: id.type });
         return;
     }
 
-    const factory = new SignatureIdFactory();
+    const node = graph.getNode(object);
+    if (!node)
+        return;
+
+    const signatures = [];
     for (const morphismSequence of id.keys) {
         const signature = sequenceToSignature(morphismSequence, node, createdMorphisms);
         if (signature === null) {
-            console.log('Id not valid for ' + node.schemaObject.label + '.', id, node);
+            console.log('Id not valid for ' + object.label + '.', id, node);
             return;
         }
-        factory.addSignature(signature);
+        signatures.push(signature);
     }
 
-    node.addSignatureId(factory.signatureId);
+    evocat.addId(object, { signatures });
 }
 
-export function addImportedToGraph(imported: ImportedDataspecer, graph: Graph) {
+// TODO remove the graph dependency
+export function addImportedToGraph(imported: ImportedDataspecer, evocat: Evocat, graph: Graph) {
     const iriToObjectMapping = new Map<string, SchemaObject>();
-    const createdObjects = new Map() as Map<ImportedObject, Node>;
-    const createdMorphisms = new Map() as Map<ImportedMorphism, Edge>;
+    const createdObjects = new Map() as Map<ImportedObject, SchemaObject>;
+    const createdMorphisms = new Map() as Map<ImportedMorphism, SchemaMorphism>;
 
     imported.objects.forEach(object => {
-        const schemaObject = graph.schemaCategory.createObjectWithIri(object.label, undefined, object.iri, object.pimIri);
-        if (!schemaObject)
+        if (!evocat.schemaCategory.isIriAvailable(object.iri))
             return;
 
+        const schemaObject = evocat.addObject({
+            label: object.label,
+            iri: object.iri,
+            pimIri: object.pimIri,
+        });
+
         iriToObjectMapping.set(object.iri, schemaObject);
-        const node = graph.createNode(schemaObject, 'new');
-        createdObjects.set(object, node);
+        createdObjects.set(object, schemaObject);
     });
 
     imported.morphisms.forEach(morphism => {
-        const object1 = iriToObjectMapping.get(morphism.dom.iri) || graph.schemaCategory.findObjectByIri(morphism.dom.iri);
+        const object1 = iriToObjectMapping.get(morphism.dom.iri) || evocat.schemaCategory.findObjectByIri(morphism.dom.iri);
         if (!object1) {
             console.log('Dom object not found: ' + morphism.dom.iri);
             return;
         }
 
-        const object2 = iriToObjectMapping.get(morphism.cod.iri) || graph.schemaCategory.findObjectByIri(morphism.cod.iri);
+        const object2 = iriToObjectMapping.get(morphism.cod.iri) || evocat.schemaCategory.findObjectByIri(morphism.cod.iri);
         if (!object2) {
             console.log('Com object not found: ' + morphism.cod.iri);
             return;
         }
 
-        const schemaMorphism = graph.schemaCategory.createMorphismWithIri(object1, object2, morphism.min, morphism.iri, morphism.pimIri, morphism.label, morphism.tags);
-        if (!schemaMorphism)
+        if (!evocat.schemaCategory.isIriAvailable(morphism.iri))
             return;
 
-        const edge = graph.createEdge(schemaMorphism, 'new');
-        createdMorphisms.set(morphism, edge);
+        const schemaMorphism = evocat.addMorphism({
+            dom: object1,
+            cod: object2,
+            min: morphism.min,
+            iri: morphism.iri,
+            pimIri: morphism.pimIri,
+            label: morphism.label,
+            tags: morphism.tags,
+        });
+
+        createdMorphisms.set(morphism, schemaMorphism);
     });
 
     // Only add ids on the newly created objects.
-    createdObjects.forEach((node, object) => {
-        object.ids.forEach(id => addId(id, node, createdMorphisms));
+    createdObjects.forEach((schemaObject, object) => {
+        object.ids.forEach(id => addId(id, evocat, graph, schemaObject, createdMorphisms));
     });
 
     graph.layout();

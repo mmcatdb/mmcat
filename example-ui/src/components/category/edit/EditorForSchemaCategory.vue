@@ -14,7 +14,7 @@ import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import EditGroup from './EditGroup.vue';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 enum State {
     Default,
@@ -47,15 +47,15 @@ const editedObject = ref<InstanceType<typeof EditObject>>();
 const editedMorphism = ref<InstanceType<typeof EditMorphism>>();
 
 onMounted(() => {
-    evocat.graph.addNodeListener('tap', onNodeTapHandler);
-    evocat.graph.addEdgeListener('tap', onEdgeTapHandler);
-    evocat.graph.addCanvasListener('tap', onCanvasTapHandler);
+    graph.addNodeListener('tap', onNodeTapHandler);
+    graph.addEdgeListener('tap', onEdgeTapHandler);
+    graph.addCanvasListener('tap', onCanvasTapHandler);
 });
 
 onUnmounted(() => {
-    evocat.graph.removeNodeListener('tap', onNodeTapHandler);
-    evocat.graph.removeEdgeListener('tap', onEdgeTapHandler);
-    evocat.graph.removeCanvasListener('tap', onCanvasTapHandler);
+    graph.removeNodeListener('tap', onNodeTapHandler);
+    graph.removeEdgeListener('tap', onEdgeTapHandler);
+    graph.removeCanvasListener('tap', onCanvasTapHandler);
 });
 
 function addObjectClicked() {
@@ -190,14 +190,15 @@ function onCanvasTapHandler() {
 }
 
 async function save() {
-    const updateObject = evocat.graph.schemaCategory.getUpdateObject();
-    console.log(evocat.graph.schemaCategory);
+    // TODO remove
+    const updateObject = evocat.schemaCategory.getUpdateObject();
+    console.log(evocat.schemaCategory);
     if (!updateObject) {
         console.log('Update object invalid');
         return;
     }
 
-    const result = await API.schemas.updateCategoryWrapper({ id: evocat.graph.schemaCategory.id }, updateObject);
+    const result = await API.schemas.updateCategoryWrapper({ id: evocat.schemaCategory.id }, updateObject);
     if (result.status) {
         const schemaCategory = SchemaCategory.fromServer(result.data);
         emit('save', schemaCategory);

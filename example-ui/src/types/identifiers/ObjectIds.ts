@@ -1,3 +1,4 @@
+import type { Signature } from "./Signature";
 import { SignatureId, SignatureIdFactory, type SignatureIdFromServer } from "./SignatureId";
 
 export enum Type {
@@ -47,7 +48,7 @@ export class ObjectIds {
     toServer(): ObjectIdsFromServer {
         return {
             type: this.type,
-            signatureIds: this.type === Type.Signatures ? this._signatureIds.map(id => id.toServer()) : undefined
+            signatureIds: this.type === Type.Signatures ? this._signatureIds.map(id => id.toServer()) : undefined,
         };
     }
 
@@ -59,3 +60,11 @@ export class ObjectIds {
     }
 
 }
+
+export type IdDefinition = {
+    signatures: Signature[];
+} | {
+    type: NonSignaturesType;
+} | {
+    signatureId: SignatureId;
+};

@@ -1,24 +1,31 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, provide, ref, shallowRef } from 'vue';
 import { GraphRootProperty } from '@/types/accessPath/graph';
 import { SignatureId, StaticName } from '@/types/identifiers';
 import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
-import GraphDisplay from '@/components/category/GraphDisplay.vue';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategoryInfo, useSchemaCategoryId } from '@/utils/injects';
+import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
-import { Evocat } from '@/types/evocat/Evocat';
+import type { Evocat } from '@/types/evocat/Evocat';
+import EvocatDisplay from '../category/EvocatDisplay.vue';
 
 const route = useRoute();
 const router = useRouter();
 
-const graph = ref<Graph>();
-const evocat = ref<Evocat>();
+const evocat = shallowRef<Evocat>();
+const graph = shallowRef<Graph>();
+provide(evocatKey, { evocat, graph });
+
+function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
+    evocat.value = context.evocat;
+    graph.value = context.graph;
+}
+
 const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
 const logicalModels = ref<LogicalModel[]>([]);
@@ -38,11 +45,6 @@ onMounted(async () => {
         selectedLogicalModel.value = logicalModels.value.find(model => model.id.toString() === route.query.logicalModelId);
     }
 });
-
-function cytoscapeCreated(newGraph: Graph) {
-    graph.value = newGraph;
-    evocat.value = Evocat.create(newGraph);
-}
 
 function confirmDatabaseAndRootNode() {
     if (!selectedLogicalModel.value || !selectingRootNode.value)
@@ -73,7 +75,7 @@ async function createMapping(primaryKey: SignatureId) {
 
 <template>
     <div class="divide">
-        <GraphDisplay @create:graph="cytoscapeCreated" />
+        <EvocatDisplay @evocat-created="evocatCreated" />
         <div v-if="evocat">
             <div>
                 <div

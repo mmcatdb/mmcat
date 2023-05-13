@@ -1,5 +1,7 @@
 import type { Iri } from "@/types/integration/";
 import { Key, Signature, type KeyFromServer, type SignatureFromServer } from "../identifiers";
+import type { SchemaObject } from "./SchemaObject";
+import type { Optional } from "@/utils/common";
 
 export type SchemaMorphismFromServer = {
     signature: SignatureFromServer;
@@ -77,8 +79,22 @@ export class SchemaMorphism {
         );
     }
 
-    static createNew(signature: Signature, domKey: Key, codKey: Key, min: Min, label: string, tags: Tag[]): SchemaMorphism {
-        return new SchemaMorphism(signature, domKey, codKey, min, true, label, undefined, undefined, tags);
+    static createNew(signature: Signature, def: MorphismDefinition): SchemaMorphism {
+        const [ iri, pimIri ] = 'iri' in def
+            ? [ def.iri, def.pimIri ]
+            : [ undefined, undefined ];
+
+        return new SchemaMorphism(
+            signature,
+            def.dom.key,
+            def.cod.key,
+            def.min,
+            true,
+            def.label ?? '',
+            iri,
+            pimIri,
+            def.tags ?? [],
+        );
     }
 
     update(domKey: Key, codKey: Key, min: Min, label: string) {
@@ -105,3 +121,14 @@ export class SchemaMorphism {
         return !!other && this.signature.equals(other.signature);
     }
 }
+
+export type MorphismDefinition = {
+    dom: SchemaObject;
+    cod: SchemaObject;
+    min: Min;
+    label?: string;
+    tags?: Tag[];
+} & Optional<{
+    iri: Iri;
+    pimIri: Iri;
+}>;

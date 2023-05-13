@@ -11,6 +11,9 @@ import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '../SignatureDisplay.vue';
+import { useEvocat } from '@/utils/injects';
+
+const { evocat } = $(useEvocat());
 
 type AddComplexIdProps = {
     node: Node;
@@ -30,7 +33,7 @@ const filter = {
 };
 
 function save() {
-    props.node.addSignatureId(signatureIdFactory.value.signatureId);
+    evocat.addId(props.node.schemaObject, { signatureId: signatureIdFactory.value.signatureId });
 
     emit('save');
 }

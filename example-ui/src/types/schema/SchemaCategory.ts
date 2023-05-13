@@ -2,11 +2,11 @@ import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvider";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id, Version } from "../id";
-import { DynamicName, Key, Signature, ObjectIds } from "../identifiers";
+import { DynamicName, Key, Signature } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
-import { SchemaMorphism, type SchemaMorphismFromServer, Tag, type Min } from "./SchemaMorphism";
-import { SchemaObject, type SchemaObjectFromServer } from "./SchemaObject";
+import { SchemaMorphism, type SchemaMorphismFromServer, type Min, type MorphismDefinition } from "./SchemaMorphism";
+import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
 import { SchemaCategoryEvolver } from "./SchemaCategoryUpdate";
 import type { SMOFromServer } from "./SchemaModificationOperation";
 
@@ -16,7 +16,7 @@ export class SchemaCategory implements Entity {
     readonly version: Version;
     objects: SchemaObject[];
     morphisms: SchemaMorphism[];
-    notAvailableIris = new Set as Set<Iri>;
+    notAvailableIris: Set<Iri> = new Set;
 
     readonly evolver = new SchemaCategoryEvolver();
 
@@ -55,59 +55,36 @@ export class SchemaCategory implements Entity {
         );
     }
 
-    _createObjectWithoutCheck(label: string, ids?: ObjectIds, iri?: Iri, pimIri?: Iri): SchemaObject {
+    createObject(def: ObjectDefinition): SchemaObject {
+        if ('iri' in def)
+            this.notAvailableIris.add(def.iri);
+
         const key = this._keysProvider.createAndAdd();
-        const object = SchemaObject.createNew(key, label, ids, iri, pimIri);
+        const object = SchemaObject.createNew(key, def);
         this.objects.push(object);
         this.evolver.addObject(object);
 
         return object;
     }
 
-    createObject(label: string, ids?: ObjectIds): SchemaObject {
-        return this._createObjectWithoutCheck(label, ids);
-    }
-
-    createObjectWithIri(label: string, ids: ObjectIds | undefined, iri: Iri, pimIri: Iri): SchemaObject | null {
-        if (!this.iriIsAvailable(iri)) {
-            console.log('Object with iri ' + iri + " already exists.");
-            return null;
-        }
-
-        this.notAvailableIris.add(iri);
-
-        return this._createObjectWithoutCheck(label, ids, iri, pimIri);
-    }
-
     findObjectByIri(iri: Iri): SchemaObject | undefined {
         return this.objects.find(object => object.iri === iri);
     }
 
-    createMorphism(dom: SchemaObject, cod: SchemaObject, min: Min, label: string, tags: Tag[] = []): SchemaMorphism {
+    createMorphism(def: MorphismDefinition): SchemaMorphism {
+        if ('iri' in def)
+            this.notAvailableIris.add(def.iri);
+
         const signature = this._signatureProvider.createAndAdd();
-        const morphism = SchemaMorphism.createNew(signature, dom.key, cod.key, min, label, tags);
+        const morphism = SchemaMorphism.createNew(signature, def);
         this.morphisms.push(morphism);
         this.evolver.addMorphism(morphism);
 
         return morphism;
     }
 
-    iriIsAvailable(iri: Iri): boolean {
+    isIriAvailable(iri: Iri): boolean {
         return !this.notAvailableIris.has(iri);
-    }
-
-    createMorphismWithIri(dom: SchemaObject, cod: SchemaObject, min: Min, iri: Iri, pimIri: Iri, label: string, tags: Tag[] = []): SchemaMorphism | null {
-        if (!this.iriIsAvailable(iri)) {
-            console.log('Morphism with iri ' + iri + " already exists.");
-            return null;
-        }
-
-        this.notAvailableIris.add(iri);
-        const newMorphism = this.createMorphism(dom, cod, min, label, tags);
-        newMorphism.iri = iri;
-        newMorphism.pimIri = pimIri;
-
-        return newMorphism;
     }
 
     editMorphism(morphism: SchemaMorphism, dom: SchemaObject, cod: SchemaObject, min: Min, label: string) {

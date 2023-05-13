@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Graph } from '@/types/categoryGraph';
-import { provide, ref } from 'vue';
-import GraphDisplay from '@/components/category/GraphDisplay.vue';
+import { provide, ref, shallowRef } from 'vue';
 import EditorForSchemaCategory from '@/components/category/edit/EditorForSchemaCategory.vue';
 import type { SchemaCategory } from '@/types/schema';
 import { useRoute } from 'vue-router';
@@ -9,17 +8,18 @@ import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
 import { toQueryScalar } from '@/utils/router';
 import { evocatKey, useSchemaCategoryInfo } from '@/utils/injects';
-import { Evocat } from '@/types/evocat/Evocat';
+import type { Evocat } from '@/types/evocat/Evocat';
+import EvocatDisplay from '@/components/category/EvocatDisplay.vue';
 
 const route = useRoute();
-const graph = ref<Graph>();
-const evocat = ref<Evocat>();
 
-provide(evocatKey, evocat);
+const evocat = shallowRef<Evocat>();
+const graph = shallowRef<Graph>();
+provide(evocatKey, { evocat, graph });
 
-async function cytoscapeCreated(newGraph: Graph) {
-    graph.value = newGraph;
-    evocat.value = Evocat.create(newGraph);
+async function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
+    evocat.value = context.evocat;
+    graph.value = context.graph;
 
     const pimIri = toQueryScalar(route.query.pimIri);
     if (!pimIri)
@@ -31,24 +31,27 @@ async function cytoscapeCreated(newGraph: Graph) {
         return;
 
     const importedDataspecer = importDataspecer(importResult.data);
-    addImportedToGraph(importedDataspecer, newGraph);
+    addImportedToGraph(importedDataspecer, context.evocat, context.graph);
 }
 
-const graphDisplay = ref<InstanceType<typeof GraphDisplay>>();
+//const graphDisplay = ref<InstanceType<typeof GraphDisplay>>();
 const category = useSchemaCategoryInfo();
 
 function schemaCategorySaved(schemaCategory: SchemaCategory) {
     graph.value = undefined;
-    graphDisplay.value?.updateSchema(schemaCategory);
+
+
+    //graphDisplay.value?.updateSchema(schemaCategory);
+
+
     category.value = schemaCategory;
 }
 </script>
 
 <template>
     <div class="divide">
-        <GraphDisplay
-            ref="graphDisplay"
-            @create:graph="cytoscapeCreated"
+        <EvocatDisplay
+            @evocat-created="evocatCreated"
         />
         <div
             v-if="evocat"

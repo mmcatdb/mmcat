@@ -9,7 +9,7 @@ import { computed } from '@vue/reactivity';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -21,7 +21,7 @@ const temporayEdge = ref<TemporaryEdge | null>(null);
 const min = ref<Min>(Cardinality.One);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
-const iriIsAvailable = computed(() => evocat.graph.schemaCategory.iriIsAvailable(iri.value));
+const isIriAvailable = computed(() => evocat.schemaCategory.isIriAvailable(iri.value));
 
 watch(nodes, (newValue, oldValue) => {
     if (newValue[0] === oldValue[0] && newValue[1] === oldValue[1])
@@ -32,7 +32,7 @@ watch(nodes, (newValue, oldValue) => {
     if (!newValue[0] || !newValue[1])
         return;
 
-    temporayEdge.value = evocat.graph.createTemporaryEdge(newValue[0], newValue[1]);
+    temporayEdge.value = graph.createTemporaryEdge(newValue[0], newValue[1]);
 });
 
 onUnmounted(() => {
@@ -44,20 +44,22 @@ function save() {
     if (!node1 || !node2)
         return;
 
-    if (iri.value) {
-        const morphism = evocat.graph.schemaCategory.createMorphismWithIri(node1.schemaObject, node2.schemaObject, min.value, iri.value, pimIri.value, label.value);
-        if (!morphism)
-            return;
+    const iriDefinition = iri.value
+        ? {
+            iri: iri.value,
+            pimIri: pimIri.value,
+        }
+        : {};
 
-        temporayEdge.value?.delete();
-        evocat.graph.createEdge(morphism, 'new');
-    }
-    else {
-        const morphism = evocat.graph.schemaCategory.createMorphism(node1.schemaObject, node2.schemaObject, min.value, label.value);
-        temporayEdge.value?.delete();
-        evocat.graph.createEdge(morphism, 'new');
-    }
+    evocat.addMorphism({
+        dom: node1.schemaObject,
+        cod: node2.schemaObject,
+        min: min.value,
+        label: label.value,
+        ...iriDefinition,
+    });
 
+    temporayEdge.value?.delete();
     emit('save');
 }
 
@@ -100,7 +102,7 @@ function switchNodes() {
         />
         <div class="button-row">
             <button
-                :disabled="!nodesSelected || !iriIsAvailable"
+                :disabled="!nodesSelected || !isIriAvailable"
                 @click="save"
             >
                 Confirm

@@ -1,11 +1,12 @@
 import { ComparableSet } from "@/utils/ComparableSet";
 import type { Iri } from "@/types/integration";
 import type { Position } from "cytoscape";
-import { Key, ObjectIds, SignatureId, type KeyFromServer, type NonSignaturesType, type ObjectIdsFromServer, type SignatureIdFromServer } from "../identifiers";
-import { ComparablePosition, type PositionUpdate } from "./Position";
+import { Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer, type IdDefinition } from "../identifiers";
+import { ComparablePosition } from "./Position";
 import type { LogicalModel } from "../logicalModel";
 import type { Id } from "../id";
 import { SchemaCategoryInvalidError } from "./Error";
+import type { Optional } from "@/utils/common";
 
 export type SchemaObjectFromServer = {
     key: KeyFromServer;
@@ -51,18 +52,21 @@ export class SchemaObject {
         return object;
     }
 
-    static createNew(key: Key, label: string, ids?: ObjectIds, iri?: Iri, pimIri?: Iri): SchemaObject {
+    static createNew(key: Key, def: ObjectDefinition): SchemaObject {
         const object = new SchemaObject();
 
         object.key = key;
-        object.label = label;
+        object.label = def.label;
         object.position = new ComparablePosition({ x: 0, y: 0 });
-        object.ids = ids;
+        object.ids = def.ids;
         object._updateDefaultSuperId(); // TODO maybe a computed variable?
 
         object._isNew = true;
-        object.iri = iri;
-        object.pimIri = pimIri;
+
+        if ('iri' in def) {
+            object.iri = def.iri;
+            object.pimIri = def.pimIri;
+        }
 
         return object;
     }
@@ -71,17 +75,24 @@ export class SchemaObject {
         this.superId = this.ids?.generateDefaultSuperId() || SignatureId.union([]);
     }
 
-    addSignatureId(signatureId: SignatureId): void {
-        if (this.ids && !this.ids.isSignatures)
-            return;
+    addId(def: IdDefinition): void {
+        // TODO check if id already exists - this is important for integration.
+        // Also, in the second case, the id is not added but replaced, which is not consistent with the name of the method (and the SMO operation).
+        if ('type' in def) {
+            this.ids = ObjectIds.createNonSignatures(def.type);
+        }
+        else {
+            if (this.ids && !this.ids.isSignatures)
+                return;
 
-        const currentIds = this.ids ? this.ids.signatureIds : [];
-        this.ids = ObjectIds.createSignatures([ ...currentIds, signatureId ]);
-        this._updateDefaultSuperId();
-    }
+            const signatureId = 'signatureId' in def
+                ? def.signatureId
+                : new SignatureId(def.signatures);
 
-    addNonSignatureId(type: NonSignaturesType) {
-        this.ids = ObjectIds.createNonSignatures(type);
+            const currentIds = this.ids ? this.ids.signatureIds : [];
+            this.ids = ObjectIds.createSignatures([ ...currentIds, signatureId ]);
+        }
+
         this._updateDefaultSuperId();
     }
 
@@ -147,3 +158,11 @@ export class SchemaObject {
         return !!other && this.key.equals(other.key);
     }
 }
+
+export type ObjectDefinition = {
+    label: string;
+    ids?: ObjectIds;
+} & Optional<{
+    iri: Iri;
+    pimIri: Iri;
+}>;

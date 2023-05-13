@@ -1,49 +1,28 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue';
-import API from '@/utils/api';
-import { SchemaCategory } from '@/types/schema';
+import { onMounted, ref, shallowRef } from 'vue';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import layoutUtilities from 'cytoscape-layout-utilities';
-
-import ResourceNotFound from '@/components/ResourceNotFound.vue';
-import ResourceLoading from '@/components/ResourceLoading.vue';
 import { Graph } from '@/types/categoryGraph';
 import { style } from './defaultGraphStyle';
-import { useSchemaCategoryId } from '@/utils/injects';
-import { LogicalModel } from '@/types/logicalModel';
 
 cytoscape.use(fcose);
 cytoscape.use(layoutUtilities);
 
-const emit = defineEmits([ 'create:graph' ]);
+const emit = defineEmits([ 'graphCreated' ]);
 
-const logicalModels = ref<LogicalModel[]>([]);
-const schemaFetched = ref(false);
+const graph = shallowRef<Graph>();
+
 const saveButtonDisabled = ref(false);
-const graph = ref<Graph>();
 
-const categoryId = useSchemaCategoryId();
-
-onMounted(async () => {
-    const result = await API.schemas.getCategoryWrapper({ id: categoryId });
-    // TODO
-    const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
-    if (!result.status || !logicalModelsResult.status)
-        return;
-
-    console.log(result.data);
-    const schemaCategory = SchemaCategory.fromServer(result.data);
-    logicalModels.value = logicalModelsResult.data.map(LogicalModel.fromServer);
-
-    graph.value = createGraph(schemaCategory, logicalModels.value);
-
-    schemaFetched.value = true;
-    emit('create:graph', graph.value);
+onMounted(() => {
+    const newGraph = createGraph();
+    graph.value = newGraph;
+    emit('graphCreated', newGraph);
 });
 
-function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Graph {
-    const container = document.getElementById('cytoscape');
+function getContainer(): HTMLElement | undefined {
+    const container = document.getElementById('cytoscape') ?? undefined;
 
     // This is needed because of some weird bug.
     // It has to do something with the cache (because it doesn't appear after hard refresh).
@@ -57,6 +36,14 @@ function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Gra
         }
     }
 
+    return container;
+}
+
+function createGraph(): Graph {
+    const container = getContainer();
+    if (!container)
+        throw new Error('Container for graph not found');
+
     const cytoscapeInstance = cytoscape({
         container,
         //layout: { name: 'preset' },
@@ -67,28 +54,7 @@ function createGraph(schema: SchemaCategory, logicalModels: LogicalModel[]): Gra
         maxZoom: 2,
     });
 
-    logicalModels.forEach(logicalModel => {
-        logicalModel.mappings.forEach(mapping => {
-            schema.setDatabaseToObjectsFromMapping(mapping, logicalModel);
-        });
-    });
-
-    const newGraph = new Graph(cytoscapeInstance, schema);
-    schema.objects.forEach(object => newGraph.createNode(object));
-
-    // First we create a dublets of morphisms. Then we create edges from them.
-    // TODO there should only be base morphisms
-    const sortedBaseMorphisms = schema.morphisms.filter(morphism => morphism.isBase)
-        .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
-
-    sortedBaseMorphisms.forEach(morphism => newGraph.createEdge(morphism));
-
-    // Position the object to the center of the canvas.
-    newGraph.fixLayout();
-    newGraph.layout();
-    newGraph.center();
-
-    return newGraph;
+    return new Graph(cytoscapeInstance);
 }
 
 async function savePositionChanges() {
@@ -110,6 +76,7 @@ async function savePositionChanges() {
     */
 }
 
+/*
 function updateSchema(schemaCategory: SchemaCategory) {
     schemaFetched.value = false;
     graph.value = undefined;
@@ -117,13 +84,11 @@ function updateSchema(schemaCategory: SchemaCategory) {
     nextTick(() => {
         graph.value = createGraph(schemaCategory, logicalModels.value);
         schemaFetched.value = true;
-        emit('create:graph', graph.value);
+        emit('graphCreated', graph.value);
     });
 }
+*/
 
-defineExpose({
-    updateSchema,
-});
 </script>
 
 <template>
@@ -140,7 +105,7 @@ defineExpose({
                     Save positions
                 </button>
                 <button
-                    @click="graph?.center()"
+                    @click="graph?.center"
                 >
                     Center graph
                 </button>
@@ -151,8 +116,6 @@ defineExpose({
                 </button>
             </div>
         </template>
-        <ResourceNotFound v-else-if="schemaFetched" />
-        <ResourceLoading v-else />
     </div>
 </template>
 

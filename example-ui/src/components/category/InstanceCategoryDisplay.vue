@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Edge, SelectionType, type Node } from '@/types/categoryGraph';
-import type { Graph } from '@/types/categoryGraph';
+import { ref, shallowRef } from 'vue';
+import { Edge, SelectionType, type Node, Graph } from '@/types/categoryGraph';
 import InstanceObjectDisplay from './InstanceObjectDisplay.vue';
-import GraphDisplay from './GraphDisplay.vue';
 import type { SchemaMorphism, SchemaObject } from '@/types/schema';
 import InstanceMorphismDisplay from './InstanceMorphismDisplay.vue';
-import { Evocat } from '@/types/evocat/Evocat';
+import type { Evocat } from '@/types/evocat/Evocat';
+import EvocatDisplay from './EvocatDisplay.vue';
 
-const graph = ref<Graph>();
-const evocat = ref<Evocat>();
+const evocat = shallowRef<Evocat>();
+
 const selectedNode = ref<Node>();
 const selectedEdge = ref<Edge>();
 
-function cytoscapeCreated(newGraph: Graph) {
-    graph.value = newGraph;
-    evocat.value = Evocat.create(newGraph);
-    graph.value.addNodeListener('tap', node => selectNode(node));
-    graph.value.addEdgeListener('tap', edge => selectEdge(edge));
-    graph.value.addCanvasListener('tap', onCanvasTapHandler);
+function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
+    evocat.value = context.evocat;
+    context.graph.addNodeListener('tap', node => selectNode(node));
+    context.graph.addEdgeListener('tap', edge => selectEdge(edge));
+    context.graph.addCanvasListener('tap', onCanvasTapHandler);
 }
 
 function onCanvasTapHandler() {
@@ -29,7 +27,7 @@ function onCanvasTapHandler() {
 }
 
 function objectClicked(object: SchemaObject) {
-    const newNode = graph.value?.getNode(object);
+    const newNode = evocat.value?.graph?.getNode(object);
     if (newNode)
         selectNode(newNode);
 }
@@ -49,7 +47,7 @@ function selectNode(node: Node) {
 }
 
 function edgeClicked(morphism: SchemaMorphism) {
-    const newEdge = graph.value?.getEdge(morphism);
+    const newEdge = evocat.value?.graph?.getEdge(morphism);
     if (newEdge)
         selectEdge(newEdge);
 }
@@ -76,7 +74,7 @@ function selectEdge(edge: Edge) {
 
 <template>
     <div class="divide">
-        <GraphDisplay @create:graph="cytoscapeCreated" />
+        <EvocatDisplay @evocat-created="evocatCreated" />
         <InstanceObjectDisplay
             v-if="selectedNode"
             :key="selectedNode.schemaObject.key.toString()"

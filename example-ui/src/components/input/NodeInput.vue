@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { SelectionType, Node } from '@/types/categoryGraph';
-import { useEvocat } from '@/utils/injects';
 import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { graph } = $(useEvocat());
 
 type NodeInputProps = {
     modelValue: (Node | undefined)[];
@@ -28,11 +28,11 @@ watch(() => props.modelValue, (newValue: (Node | undefined)[]) => {
 
 onMounted(() => {
     if (!props.disabled)
-        evocat.graph.addNodeListener('tap', onNodeTapHandler);
+        graph.addNodeListener('tap', onNodeTapHandler);
 });
 
 onUnmounted(() => {
-    evocat.graph.removeNodeListener('tap', onNodeTapHandler);
+    graph.removeNodeListener('tap', onNodeTapHandler);
     innerValue.value.forEach(node => node?.unselect());
 });
 

@@ -1,7 +1,8 @@
+import type { Graph } from "@/types/categoryGraph";
 import type { Evocat } from "@/types/evocat/Evocat";
 import type { Id } from "@/types/id";
 import type { SchemaCategoryInfo } from "@/types/schema";
-import { inject, type InjectionKey, type Ref } from "vue";
+import { inject, type InjectionKey, type Ref, type ShallowRef } from "vue";
 
 export const categoryIdKey: InjectionKey<Ref<Id>> = Symbol('categoryId');
 
@@ -23,11 +24,16 @@ export function useSchemaCategoryInfo(): Ref<SchemaCategoryInfo> {
     return category;
 }
 
-export const evocatKey: InjectionKey<Ref<Evocat>> = Symbol('evocat');
+export type EvocatContext = {
+    evocat: ShallowRef<Evocat>;
+    graph: ShallowRef<Graph>;
+};
 
-export function useEvocat(): Ref<Evocat> {
+export const evocatKey: InjectionKey<EvocatContext> = Symbol('evocat');
+
+export function useEvocat(): EvocatContext {
     const evocat = inject(evocatKey);
-    if (evocat === undefined)
+    if (!evocat)
         throw new Error('Evocat not injected.');
 
     return evocat;

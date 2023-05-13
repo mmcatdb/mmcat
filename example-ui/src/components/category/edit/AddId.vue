@@ -4,6 +4,9 @@ import { Type } from '@/types/identifiers';
 import { ref } from 'vue';
 import AddSimpleId from './AddSimpleId.vue';
 import AddComplexId from './AddComplexId.vue';
+import { useEvocat } from '@/utils/injects';
+
+const { evocat } = $(useEvocat());
 
 /*
  * When the id is simple (it has exactly one signature) the corresponding morphism must have cardinality 1:1.
@@ -44,12 +47,12 @@ function selectComplex() {
 }
 
 function selectValue() {
-    props.node.addNonSignatureId(Type.Value);
+    evocat.addId(props.node.schemaObject, { type: Type.Value });
     emit('save');
 }
 
 function selectGenerated() {
-    props.node.addNonSignatureId(Type.Generated);
+    evocat.addId(props.node.schemaObject, { type: Type.Generated });
     emit('save');
 }
 </script>

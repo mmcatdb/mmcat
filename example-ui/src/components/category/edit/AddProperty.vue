@@ -9,7 +9,7 @@ import SingleNodeInput from '@/components/input/SingleNodeInput.vue';
 import { ObjectIds, Type } from '@/types/identifiers';
 import { useEvocat } from '@/utils/injects';
 
-const evocat = $(useEvocat());
+const { evocat, graph } = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -22,13 +22,18 @@ function save() {
     if (!node.value)
         return;
 
-    const object = evocat.graph.schemaCategory.createObject(label.value, ObjectIds.createNonSignatures(Type.Value));
-    evocat.graph.createNode(object, 'new');
+    const object = evocat.addObject({
+        label: label.value,
+        ids: ObjectIds.createNonSignatures(Type.Value),
+    });
 
-    const morphism = evocat.graph.schemaCategory.createMorphism(node.value.schemaObject, object, min.value, '');
-    evocat.graph.createEdge(morphism, 'new');
+    evocat.addMorphism({
+        dom: node.value.schemaObject,
+        cod: object,
+        min: min.value,
+    });
 
-    evocat.graph.layout();
+    graph.layout();
     emit('save');
 }
 
