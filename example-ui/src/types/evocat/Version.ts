@@ -1,14 +1,22 @@
 export class Version {
     private children: Version[] = [];
 
+    get firstChild(): Version | undefined {
+        return this.children.length === 1 ? this.children[0] : undefined;
+    }
+
     private constructor(
         private readonly branchId: number,
         private readonly levelIds: number[],
         readonly parent?: Version,
-    ) {}
+    ) {
+        this._id = this.branchId + ':' + this.levelIds.join('.');
+    }
+
+    private readonly _id;
 
     get id(): string {
-        return this.branchId + ':' + this.levelIds.join('.');
+        return this._id;
     }
 
     static fromId(id: string, parent?: Version): Version {
@@ -72,11 +80,27 @@ class BranchContext {
 
 export class VersionContext {
     private relativeLevel = 0;
+    private readonly versions: Version[];
 
     private constructor(
         private readonly branchContext: BranchContext,
-        private currentVersion: Version,
-    ) {}
+        private version: Version,
+    ) {
+        this.versions = [ this.version ];
+    }
+
+    get allVersions() {
+        return [ ...this.versions ];
+    }
+
+    get currentVersion() {
+        return this.version;
+    }
+
+    set currentVersion(version: Version) {
+        this.version = version;
+        this.versionListeners.forEach(listener => listener(this.currentVersion));
+    }
 
     nextLevel() {
         this.relativeLevel++;
@@ -87,10 +111,15 @@ export class VersionContext {
     }
 
     createNextVersion(): Version {
-        this.currentVersion = this.currentVersion.createChild(this.branchContext, this.relativeLevel);
+        const newVersion = this.version.createChild(this.branchContext, this.relativeLevel);
+        this.versions.push(newVersion);
+        this.version = newVersion;
         this.relativeLevel = 0;
 
-        return this.currentVersion;
+        this.collectionListeners.forEach(listener => listener(this.allVersions));
+        this.versionListeners.forEach(listener => listener(this.currentVersion));
+
+        return newVersion;
     }
 
     static createNew(): VersionContext {
@@ -99,4 +128,26 @@ export class VersionContext {
             Version.createRoot(0, [ 0 ]),
         );
     }
+
+    private collectionListeners: VersionsEventFunction[] = [];
+    private versionListeners: VersionEventFunction[] = [];
+
+    addAllListener(listener: VersionsEventFunction) {
+        this.collectionListeners.push(listener);
+    }
+
+    removeAllListener(listener: VersionsEventFunction) {
+        this.collectionListeners = this.collectionListeners.filter(l => l !== listener);
+    }
+
+    addCurrentListener(listener: VersionEventFunction) {
+        this.versionListeners.push(listener);
+    }
+
+    removeCurrentListener(listener: VersionEventFunction) {
+        this.versionListeners = this.versionListeners.filter(l => l !== listener);
+    }
 }
+
+type VersionsEventFunction = (versions: Version[]) => void;
+type VersionEventFunction = (version: Version) => void;

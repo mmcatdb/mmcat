@@ -50,11 +50,11 @@ export class AddObject implements SMO<SMOType.AddObject> {
     }
 
     up(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        category.addObject(this.object);
     }
 
     down(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        category.removeObject(this.object);
     }
 }
 
@@ -83,7 +83,9 @@ export class DeleteObject implements SMO<SMOType.DeleteObject> {
     }
 
     up(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        const object = category.objects.find(o => o.key.equals(this.key));
+        if (object)
+            category.removeObject(object);
     }
 
     down(category: SchemaCategory): void {

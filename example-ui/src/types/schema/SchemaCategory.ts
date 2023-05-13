@@ -2,13 +2,14 @@ import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvider";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id, VersionId } from "../id";
-import { DynamicName, Key, Signature } from "../identifiers";
+import { DynamicName, Key, Signature, type IdDefinition } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, type Min, type MorphismDefinition } from "./SchemaMorphism";
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
 import { SchemaCategoryEvolver } from "./SchemaCategoryUpdate";
 import type { SMOFromServer } from "./SchemaModificationOperation";
+import type { Graph } from "../categoryGraph";
 
 export class SchemaCategory implements Entity {
     readonly id: Id;
@@ -60,16 +61,23 @@ export class SchemaCategory implements Entity {
             this.notAvailableIris.add(def.iri);
 
         const key = this._keysProvider.createAndAdd();
-        const object = SchemaObject.createNew(key, def);
+        return SchemaObject.createNew(key, def);
+    }
+
+    addObject(object: SchemaObject) {
         this.objects.push(object);
-
-        //this.evolver.addObject(object);
-
-        return object;
+        this._graph?.createNode(object, 'new');
     }
 
     deleteObject(object: SchemaObject) {
-        this.evolver.deleteObject(object);
+        // TODO?
+        this.removeObject(object);
+    }
+
+    removeObject(object: SchemaObject) {
+        // TODO make it map?
+        this.objects = this.objects.filter(o => !o.equals(object));
+        this._graph?.deleteNode(object);
     }
 
     findObjectByIri(iri: Iri): SchemaObject | undefined {
@@ -85,7 +93,21 @@ export class SchemaCategory implements Entity {
         this.morphisms.push(morphism);
         this.evolver.addMorphism(morphism);
 
+        this._graph?.createEdge(morphism, 'new');
+
         return morphism;
+    }
+
+    deleteMorphism(morphism: SchemaMorphism) {
+        this.evolver.deleteMorphism(morphism);
+        this._graph?.deleteEdge(morphism);
+    }
+
+    addId(object: SchemaObject, def: IdDefinition): void {
+        object.addId(def);
+
+        const node = this._graph?.getNode(object);
+        node?.updateNoIdsClass();
     }
 
     isIriAvailable(iri: Iri): boolean {
@@ -94,10 +116,6 @@ export class SchemaCategory implements Entity {
 
     editMorphism(morphism: SchemaMorphism, dom: SchemaObject, cod: SchemaObject, min: Min, label: string) {
         morphism.update(dom.key, cod.key, min, label);
-    }
-
-    deleteMorphism(morphism: SchemaMorphism) {
-        this.evolver.deleteMorphism(morphism);
     }
 
     getUpdateObject(): SchemaCategoryUpdate | null {
@@ -140,6 +158,47 @@ export class SchemaCategory implements Entity {
             objects.push(rootObject);
 
         objects.forEach(object => object.setLogicalModel(logicalModel));
+    }
+
+    private _graph?: Graph;
+
+    get graph(): Graph | undefined {
+        return this._graph;
+    }
+
+    set graph(newGraph: Graph | undefined) {
+        this._graph = newGraph;
+
+        if (!newGraph)
+            return;
+
+        // TODO
+
+        // more TODO
+
+        /*
+        this.logicalModels.forEach(logicalModel => {
+            logicalModel.mappings.forEach(mapping => {
+                this.schemaCategory.setDatabaseToObjectsFromMapping(mapping, logicalModel);
+            });
+        });
+        */
+
+        newGraph.getCytoscape().batch(() => {
+            this.objects.forEach(object => newGraph.createNode(object));
+
+            // First we create a dublets of morphisms. Then we create edges from them.
+            // TODO there should only be base morphisms
+            const sortedBaseMorphisms = this.morphisms.filter(morphism => morphism.isBase)
+                .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
+
+            sortedBaseMorphisms.forEach(morphism => newGraph.createEdge(morphism));
+        });
+
+        // Position the object to the center of the canvas.
+        newGraph.fixLayout();
+        newGraph.layout();
+        newGraph.center();
     }
 }
 

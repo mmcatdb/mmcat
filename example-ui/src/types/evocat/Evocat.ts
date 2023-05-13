@@ -3,7 +3,8 @@ import type { SchemaCategory, ObjectDefinition, SchemaObject, MorphismDefinition
 import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
-import { VersionContext } from "./Version";
+import { Version, VersionContext } from "./Version";
+import { AddObject, type SMO } from "../schema/SchemaModificationOperation";
 
 type UpdateFunction = (udpate: SchemaCategoryUpdate) => Promise<Result<SchemaCategory>>;
 
@@ -12,13 +13,12 @@ export type EvocatApi = {
 };
 
 export class Evocat {
-    private readonly versionContext = VersionContext.createNew();
+    readonly versionContext = VersionContext.createNew();
 
     private constructor(
         readonly schemaCategory: SchemaCategory,
         readonly logicalModels: LogicalModel[],
         readonly api: EvocatApi,
-        private _graph?: Graph,
     ) {}
 
     static create(schemaCategory: SchemaCategory, logicalModels: LogicalModel[], api: EvocatApi): Evocat {
@@ -32,85 +32,84 @@ export class Evocat {
     }
 
     get graph(): Graph | undefined {
-        return this._graph;
+        return this.schemaCategory.graph;
     }
 
     set graph(newGraph: Graph | undefined) {
-        this._graph = newGraph;
-
-        if (!newGraph)
-            return;
-
-        // TODO
-
-        this.logicalModels.forEach(logicalModel => {
-            logicalModel.mappings.forEach(mapping => {
-                this.schemaCategory.setDatabaseToObjectsFromMapping(mapping, logicalModel);
-            });
-        });
-
-        newGraph.getCytoscape().batch(() => {
-            this.schemaCategory.objects.forEach(object => newGraph.createNode(object));
-
-            // First we create a dublets of morphisms. Then we create edges from them.
-            // TODO there should only be base morphisms
-            const sortedBaseMorphisms = this.schemaCategory.morphisms.filter(morphism => morphism.isBase)
-                .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
-
-            sortedBaseMorphisms.forEach(morphism => newGraph.createEdge(morphism));
-        });
-
-        // Position the object to the center of the canvas.
-        newGraph.fixLayout();
-        newGraph.layout();
-        newGraph.center();
+        this.schemaCategory.graph = newGraph;
     }
 
-    private readonly operations = new Map as Map<string, string>;
+    private readonly operations = new Map as Map<string, { operation: SMO, version: Version }>;
 
-    private createOperation(name: string) {
-        const newVersion = this.versionContext.createNextVersion();
-        this.operations.set(newVersion.id, name);
-        console.log(`[${newVersion}] : ${name}`);
+    private commitOperation(operation: SMO) {
+        const version = this.versionContext.createNextVersion();
+        this.operations.set(version.id, { operation, version });
+        console.log(`[${version}] : ${operation.type}`);
+
+        operation.up(this.schemaCategory);
+    }
+
+    undo() {
+        const prev = this.versionContext.currentVersion.parent;
+        if (!prev)
+            return;
+
+        const operation = this.operations.get(this.versionContext.currentVersion.id)?.operation;
+        if (!operation)
+            return;
+
+        operation.down(this.schemaCategory);
+        this.versionContext.currentVersion = prev;
+    }
+
+    redo() {
+        const next = this.versionContext.currentVersion.firstChild;
+        if (!next)
+            return;
+
+        const operation = this.operations.get(next.id)?.operation;
+        if (!operation)
+            return;
+
+        operation.up(this.schemaCategory);
+        this.versionContext.currentVersion = next;
     }
 
     compositeOperation<T = void>(name: string, callback: () => T): T {
         this.versionContext.nextLevel();
         const result = callback();
         this.versionContext.prevLevel();
-        this.createOperation(name);
+
+        // TODO create composite operation
+        //this.createOperation(name);
 
         return result;
     }
 
-
-
-
-
-
-
-
     addObject(def: ObjectDefinition): SchemaObject {
         const object = this.schemaCategory.createObject(def);
-        this._graph?.createNode(object, 'new');
+        //this._graph?.createNode(object, 'new');
 
-        this.createOperation('addObject');
+        const operation = new AddObject(object);
+        this.commitOperation(operation);
+
+        //this.createOperation('addObject');
 
         return object;
     }
 
     removeObject(object: SchemaObject): void {
         this.schemaCategory.deleteObject(object);
-        this._graph?.deleteNode(object);
+        //this._graph?.deleteNode(object);
 
-        this.createOperation('removeObject');
+        //this.createOperation('removeObject');
     }
 
     addMorphism(def: MorphismDefinition): SchemaMorphism {
         const morphism = this.schemaCategory.createMorphism(def);
-        this._graph?.createEdge(morphism, 'new');
+        //this._graph?.createEdge(morphism, 'new');
 
-        this.createOperation('addMorphism');
+        //this.createOperation('addMorphism');
 
         return morphism;
     }
@@ -118,17 +117,17 @@ export class Evocat {
     removeMorphism(morphism: SchemaMorphism): void {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
         this.schemaCategory.deleteMorphism(morphism);
-        this._graph?.deleteEdge(morphism);
+        //this._graph?.deleteEdge(morphism);
 
-        this.createOperation('removeMorphism');
+        //this.createOperation('removeMorphism');
     }
 
     addId(object: SchemaObject, def: IdDefinition): void {
         object.addId(def);
 
-        const node = this._graph?.getNode(object);
-        node?.updateNoIdsClass();
+        //const node = this._graph?.getNode(object);
+        //node?.updateNoIdsClass();
 
-        this.createOperation('addId');
+        //this.createOperation('addId');
     }
 }
