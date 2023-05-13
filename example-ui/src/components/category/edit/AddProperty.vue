@@ -19,18 +19,20 @@ const node = ref<Node>();
 const min = ref<Min>(Cardinality.One);
 
 function save() {
-    if (!node.value)
-        return;
+    evocat.compositeOperation('addProperty', () => {
+        if (!node.value)
+            return;
 
-    const object = evocat.addObject({
-        label: label.value,
-        ids: ObjectIds.createNonSignatures(Type.Value),
-    });
+        const object = evocat.addObject({
+            label: label.value,
+            ids: ObjectIds.createNonSignatures(Type.Value),
+        });
 
-    evocat.addMorphism({
-        dom: node.value.schemaObject,
-        cod: object,
-        min: min.value,
+        evocat.addMorphism({
+            dom: node.value.schemaObject,
+            cod: object,
+            min: min.value,
+        });
     });
 
     graph.layout();

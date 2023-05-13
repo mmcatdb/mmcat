@@ -6,4 +6,4 @@ export interface Entity {
     id: Id;
 }
 
-export type Version = UniqueType<string, 'version'>;
+export type VersionId = UniqueType<string, 'version'>;

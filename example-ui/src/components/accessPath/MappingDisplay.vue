@@ -28,14 +28,14 @@ const category = useSchemaCategoryInfo();
                 {{ mapping.id }}
             </ValueRow>
             <ValueRow label="Version:">
-                <VersionDisplay :version="mapping.version" />
+                <VersionDisplay :version-id="mapping.version" />
             </ValueRow>
             <ValueRow
-                v-if="mapping.categoryVersion !== category.version"
+                v-if="mapping.categoryVersionId !== category.versionId"
                 label="Category Version:"
             >
                 <VersionDisplay
-                    :version="mapping.categoryVersion"
+                    :version-id="mapping.categoryVersionId"
                     :error="true"
                 />
             </ValueRow>

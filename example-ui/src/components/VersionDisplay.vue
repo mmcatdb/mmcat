@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Version } from '@/types/id';
+import type { VersionId } from '@/types/id';
 
 type VersionDisplayProps = {
-    version: Version;
+    versionId: VersionId;
     error?: boolean;
 };
 
@@ -13,6 +13,6 @@ const props = defineProps<VersionDisplayProps>();
     <span
         :class="{ 'text-error': props.error }"
     >
-        {{ props.version }}
+        {{ props.versionId }}
     </span>
 </template>

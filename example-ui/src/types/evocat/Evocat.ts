@@ -3,6 +3,7 @@ import type { SchemaCategory, ObjectDefinition, SchemaObject, MorphismDefinition
 import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
+import { VersionContext } from "./Version";
 
 type UpdateFunction = (udpate: SchemaCategoryUpdate) => Promise<Result<SchemaCategory>>;
 
@@ -11,6 +12,7 @@ export type EvocatApi = {
 };
 
 export class Evocat {
+    private readonly versionContext = VersionContext.createNew();
 
     private constructor(
         readonly schemaCategory: SchemaCategory,
@@ -64,9 +66,35 @@ export class Evocat {
         newGraph.center();
     }
 
+    private readonly operations = new Map as Map<string, string>;
+
+    private createOperation(name: string) {
+        const newVersion = this.versionContext.createNextVersion();
+        this.operations.set(newVersion.id, name);
+        console.log(`[${newVersion}] : ${name}`);
+    }
+
+    compositeOperation<T = void>(name: string, callback: () => T): T {
+        this.versionContext.nextLevel();
+        const result = callback();
+        this.versionContext.prevLevel();
+        this.createOperation(name);
+
+        return result;
+    }
+
+
+
+
+
+
+
+
     addObject(def: ObjectDefinition): SchemaObject {
         const object = this.schemaCategory.createObject(def);
         this._graph?.createNode(object, 'new');
+
+        this.createOperation('addObject');
 
         return object;
     }
@@ -74,11 +102,15 @@ export class Evocat {
     removeObject(object: SchemaObject): void {
         this.schemaCategory.deleteObject(object);
         this._graph?.deleteNode(object);
+
+        this.createOperation('removeObject');
     }
 
     addMorphism(def: MorphismDefinition): SchemaMorphism {
         const morphism = this.schemaCategory.createMorphism(def);
         this._graph?.createEdge(morphism, 'new');
+
+        this.createOperation('addMorphism');
 
         return morphism;
     }
@@ -87,6 +119,8 @@ export class Evocat {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
         this.schemaCategory.deleteMorphism(morphism);
         this._graph?.deleteEdge(morphism);
+
+        this.createOperation('removeMorphism');
     }
 
     addId(object: SchemaObject, def: IdDefinition): void {
@@ -94,5 +128,7 @@ export class Evocat {
 
         const node = this._graph?.getNode(object);
         node?.updateNoIdsClass();
+
+        this.createOperation('addId');
     }
 }

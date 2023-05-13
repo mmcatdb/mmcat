@@ -1,4 +1,4 @@
-import type { Version } from "../id";
+import type { VersionId } from "../id";
 import { AddMorphism, AddObject, DeleteMorphism, DeleteObject, type SMO, type SMOFromServer } from "./SchemaModificationOperation";
 import type { SchemaMorphism } from "./SchemaMorphism";
 import type { SchemaObject } from "./SchemaObject";

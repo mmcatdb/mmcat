@@ -1,7 +1,7 @@
 import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvider";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
-import type { Entity, Id, Version } from "../id";
+import type { Entity, Id, VersionId } from "../id";
 import { DynamicName, Key, Signature } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
@@ -13,7 +13,7 @@ import type { SMOFromServer } from "./SchemaModificationOperation";
 export class SchemaCategory implements Entity {
     readonly id: Id;
     readonly label: string;
-    readonly version: Version;
+    readonly versionId: VersionId;
     objects: SchemaObject[];
     morphisms: SchemaMorphism[];
     notAvailableIris: Set<Iri> = new Set;
@@ -23,10 +23,10 @@ export class SchemaCategory implements Entity {
     _keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     _signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
 
-    private constructor(id: Id, label: string, version: Version, objects: SchemaObject[], morphisms: SchemaMorphism[]) {
+    private constructor(id: Id, label: string, versionId: VersionId, objects: SchemaObject[], morphisms: SchemaMorphism[]) {
         this.id = id;
         this.label = label;
-        this.version = version;
+        this.versionId = versionId;
         this.objects = objects;
         this.morphisms = morphisms;
 
@@ -62,9 +62,14 @@ export class SchemaCategory implements Entity {
         const key = this._keysProvider.createAndAdd();
         const object = SchemaObject.createNew(key, def);
         this.objects.push(object);
-        this.evolver.addObject(object);
+
+        //this.evolver.addObject(object);
 
         return object;
+    }
+
+    deleteObject(object: SchemaObject) {
+        this.evolver.deleteObject(object);
     }
 
     findObjectByIri(iri: Iri): SchemaObject | undefined {
@@ -91,10 +96,6 @@ export class SchemaCategory implements Entity {
         morphism.update(dom.key, cod.key, min, label);
     }
 
-    deleteObject(object: SchemaObject) {
-        this.evolver.deleteObject(object);
-    }
-
     deleteMorphism(morphism: SchemaMorphism) {
         this.evolver.deleteMorphism(morphism);
     }
@@ -110,7 +111,7 @@ export class SchemaCategory implements Entity {
         }
 
         return {
-            beforeVersion: this.version,
+            beforeVersion: this.versionId,
             operations,
         };
     }
@@ -145,7 +146,7 @@ export class SchemaCategory implements Entity {
 export type SchemaCategoryFromServer = {
     id: Id;
     label: string;
-    version: Version;
+    version: VersionId;
     objects: SchemaObjectFromServer[];
     morphisms: SchemaMorphismFromServer[];
 };
@@ -186,14 +187,14 @@ function findObjectFromSignature(signature: Signature, objects: SchemaObject[], 
 export type SchemaCategoryInfoFromServer = {
     id: Id;
     label: string;
-    version: Version;
+    version: VersionId;
 };
 
 export class SchemaCategoryInfo implements Entity {
     private constructor(
         public readonly id: Id,
         public readonly label: string,
-        public readonly version: Version,
+        public readonly versionId: VersionId,
     ) {}
 
     static fromServer(input: SchemaCategoryInfoFromServer): SchemaCategoryInfo {
@@ -210,6 +211,6 @@ export type SchemaCategoryInit = {
 };
 
 export type SchemaCategoryUpdate = {
-    readonly beforeVersion: Version;
+    readonly beforeVersion: VersionId;
     readonly operations: SMOFromServer[];
 };

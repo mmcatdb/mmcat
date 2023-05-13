@@ -1,6 +1,6 @@
 import { RootProperty } from "@/types/accessPath/basic";
 import type { RootPropertyFromServer } from "./accessPath/serverTypes";
-import type { Entity, Id, Version } from "./id";
+import type { Entity, Id, VersionId } from "./id";
 import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from "./identifiers";
 
 export type MappingFromServer = {
@@ -10,8 +10,8 @@ export type MappingFromServer = {
     primaryKey: SignatureIdFromServer;
     kindName: string;
     accessPath: RootPropertyFromServer;
-    version: Version;
-    categoryVersion: Version;
+    version: VersionId;
+    categoryVersion: VersionId;
 };
 
 export class Mapping implements Entity {
@@ -23,8 +23,8 @@ export class Mapping implements Entity {
         public readonly rootObjectKey: Key,
         public readonly primaryKey: SignatureId,
         public readonly accessPath: RootProperty,
-        public readonly version: Version,
-        public readonly categoryVersion: Version,
+        public readonly version: VersionId,
+        public readonly categoryVersionId: VersionId,
     ) {}
 
     static fromServer(input: MappingFromServer): Mapping {
@@ -48,16 +48,16 @@ export type MappingInit = Omit<MappingFromServer, 'id' | 'rootObject' | 'version
 export type MappingInfoFromServer = {
     id: Id;
     kindName: string;
-    version: Version;
-    categoryVersio: Version;
+    version: VersionId;
+    categoryVersio: VersionId;
 };
 
 export class MappingInfo implements Entity {
     private constructor(
         public readonly id: Id,
         public readonly kindName: string,
-        public readonly version: Version,
-        public readonly categoryVersio: Version,
+        public readonly version: VersionId,
+        public readonly categoryVersio: VersionId,
     ) {}
 
     static fromServer(input: MappingInfoFromServer): MappingInfo {
