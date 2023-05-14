@@ -115,6 +115,7 @@ export class VersionContext {
         this.versions.push(newVersion);
         this.version = newVersion;
         this.relativeLevel = 0;
+        this.undonedVersions = [];
 
         this.collectionListeners.forEach(listener => listener(this.allVersions));
         this.versionListeners.forEach(listener => listener(this.currentVersion));
@@ -127,6 +128,132 @@ export class VersionContext {
             new BranchContext(0),
             Version.createRoot(0, [ 0 ]),
         );
+    }
+
+    private undonedVersions: Version[] = [];
+
+    /**
+     * Go back through the versions' chain.
+     * @param skipLowerLevels If true, all versions on lower levels are treated as one so they will be all applied at the same time.
+     * @returns A list of versions which should be down-ed (in given order). If there is no way back, an empty array is returned.
+     */
+    undo(skipLowerLevels = true): Version[] {
+        const output = [ this.currentVersion ];
+        let nextVersion = this.currentVersion.parent;
+
+        if (!nextVersion)
+            return [];
+
+        if (skipLowerLevels) {
+            while (nextVersion.level > this.currentVersion.level) {
+                output.push(nextVersion);
+                nextVersion = nextVersion.parent;
+
+                if (!nextVersion)
+                    return [];
+            }
+        }
+
+        this.currentVersion = nextVersion;
+        this.undonedVersions.push(...output);
+
+        return output;
+    }
+
+    /**
+     * Go through the undone versions' chain.
+     * @param skipLowerLevels If true, all versions on lower levels are treated as one so they will be all applied at the same time.
+     * @returns A list of versions which should be upp-ed (in given order).
+     */
+    redo(skipLowerLevels = true): Version[] {
+        if (this.undonedVersions.length === 0)
+            return [];
+
+        let lastUndoned = this.undonedVersions.length - 1;
+        if (skipLowerLevels) {
+            while (lastUndoned >= 0 && this.undonedVersions[lastUndoned].level > this.currentVersion.level)
+                lastUndoned--;
+        }
+
+        this.currentVersion = this.undonedVersions[lastUndoned];
+        const output = this.undonedVersions.slice(lastUndoned).reverse();
+        this.undonedVersions = this.undonedVersions.slice(0, lastUndoned);
+
+        return output;
+    }
+
+    /**
+     * Move from the current version to the target one.
+     */
+    move(target: Version): { undo: Version[], redo: Version[] } {
+        if (target.id === this.currentVersion.id)
+            return { undo: [], redo: [] };
+
+        const ancestor = this.findFirstCommonAncestor(target);
+        if (!ancestor)
+            return { undo: [], redo: [] };
+
+        const sourceToAncestor = [];
+        let a = this.currentVersion;
+        while (a.id !== ancestor.id) {
+            sourceToAncestor.push(a);
+            a = a.parent as Version; // A has to have ancestor because it have been found in the previous function.
+        }
+
+        const targetToAncestor = [];
+        let b = target;
+        while (b.id !== ancestor.id) {
+            targetToAncestor.push(b);
+            b = b.parent as Version; // The same reason as above.
+        }
+
+        const redoOutput = targetToAncestor.reverse(); // NOSONAR - It's the last time we use that array, so it's basically just renaming.
+
+        // If it's a straight redo, we annul the undo and redo versions
+        for (const redoVersion of redoOutput) {
+            const index = this.undonedVersions.length - 1;
+            if (index < 0)
+                break;
+
+            if (this.undonedVersions[index].id === redoVersion.id) {
+                this.undonedVersions.pop();
+            }
+            else {
+                this.undonedVersions = [];
+                break;
+            }
+        }
+
+        this.currentVersion = target;
+
+        return {
+            undo: sourceToAncestor,
+            redo: redoOutput,
+        };
+    }
+
+    private findFirstCommonAncestor(target: Version): Version | undefined {
+        let a: Version | undefined = this.currentVersion;
+        let b: Version | undefined = target;
+
+        const visited: Set<string> = new Set();
+        while (a || b) {
+            if (a) {
+                if (visited.has(a.id))
+                    return a;
+                visited.add(a.id);
+                a = a.parent;
+            }
+
+            if (b) {
+                if (visited.has(b.id))
+                    return b;
+                visited.add(b.id);
+                b = b.parent;
+            }
+        }
+
+        return undefined;
     }
 
     private collectionListeners: VersionsEventFunction[] = [];

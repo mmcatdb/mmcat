@@ -32,29 +32,31 @@ onUnmounted(() => {
 });
 
 function save() {
-    const [ node1, node2 ] = nodes.value;
-    if (!node1 || !node2)
-        return;
+    evocat.compositeOperation('addSet', () => {
+        const [ node1, node2 ] = nodes.value;
+        if (!node1 || !node2)
+            return;
 
-    const setObject = evocat.addObject({
-        label: setLabel.value,
+        const setObject = evocat.addObject({
+            label: setLabel.value,
+        });
+
+        const setToNode1 = evocat.addMorphism({
+            dom: setObject,
+            cod: node1.schemaObject,
+            min: Cardinality.One,
+            label: '#role',
+        });
+
+        const setToNode2 = evocat.addMorphism({
+            dom: setObject,
+            cod: node2.schemaObject,
+            min: Cardinality.One,
+            label: '#role',
+        });
+
+        evocat.addId(setObject, { signatures: [ setToNode1.signature, setToNode2.signature ] });
     });
-
-    const setToNode1 = evocat.addMorphism({
-        dom: setObject,
-        cod: node1.schemaObject,
-        min: Cardinality.One,
-        label: '#role',
-    });
-
-    const setToNode2 = evocat.addMorphism({
-        dom: setObject,
-        cod: node2.schemaObject,
-        min: Cardinality.One,
-        label: '#role',
-    });
-
-    evocat.addId(setObject, { signatures: [ setToNode1.signature, setToNode2.signature ] });
 
     graph.layout();
     emit('save');

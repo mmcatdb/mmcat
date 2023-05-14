@@ -3,6 +3,8 @@ import { AddMorphism, AddObject, DeleteMorphism, DeleteObject, type SMO, type SM
 import type { SchemaMorphism } from "./SchemaMorphism";
 import type { SchemaObject } from "./SchemaObject";
 
+// TODO this should be probably deleted
+
 export class SchemaCategoryEvolver {
     _newObjects = [] as SchemaObject[];
     _deletedObjects = [] as SchemaObject[];
@@ -20,7 +22,7 @@ export class SchemaCategoryEvolver {
     deleteObject(object: SchemaObject) {
         this._newObjects = this._newObjects.filter(o => !o.equals(object));
         this._deletedObjects.push(object);
-        this._operations.push(new DeleteObject(object.key));
+        this._operations.push(new DeleteObject(object));
     }
 
     addMorphism(morphism: SchemaMorphism) {
@@ -31,7 +33,7 @@ export class SchemaCategoryEvolver {
     deleteMorphism(morphism: SchemaMorphism) {
         this._newMorphisms = this._newMorphisms.filter(m => !m.equals(morphism));
         this._deletedMorphisms.push(morphism);
-        this._operations.push(new DeleteMorphism(morphism.signature));
+        this._operations.push(new DeleteMorphism(morphism));
     }
 
     getOperations(): SMO[] {

@@ -32,8 +32,16 @@ function undo() {
     evocat.undo();
 }
 
+function undo1() {
+    evocat.undo(false);
+}
+
 function redo() {
     evocat.redo();
+}
+
+function redo1() {
+    evocat.redo(false);
 }
 </script>
 
@@ -46,17 +54,28 @@ function redo() {
                 Undo
             </button>
             <button
+                @click="undo1"
+            >
+                Undo 1
+            </button>
+            <button
                 @click="redo"
             >
                 Redo
+            </button>
+            <button
+                @click="redo1"
+            >
+                Redo 1
             </button>
         </div>
         <div class="versions">
             <div
                 v-for="version in allVersions"
                 :key="version.id"
-                class="version-display"
-                :class="{ active: version.id === currentVersion.id }"
+                class="version-display monospace-font"
+                :class="{ active: version.id === currentVersion.id, clickable: version.id !== currentVersion.id }"
+                @click="() => version.id !== currentVersion.id && evocat.move(version)"
             >
                 {{ version }}
             </div>

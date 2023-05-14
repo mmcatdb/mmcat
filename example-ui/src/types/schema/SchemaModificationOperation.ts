@@ -1,4 +1,3 @@
-import { Key, Signature, type KeyFromServer, type SignatureFromServer } from "../identifiers";
 import type { SchemaCategory } from "./SchemaCategory";
 import { SchemaMorphism, type SchemaMorphismFromServer } from "./SchemaMorphism";
 import { SchemaObject, type SchemaObjectFromServer } from "./SchemaObject";
@@ -8,6 +7,7 @@ enum SMOType {
     DeleteObject = 'deleteObject',
     AddMorphism = 'addMorphism',
     DeleteMorphism = 'deleteMorphism',
+    Composite = 'composite',
 }
 
 export type SMOFromServer<T extends SMOType = SMOType> = {
@@ -59,37 +59,40 @@ export class AddObject implements SMO<SMOType.AddObject> {
 }
 
 type DeleteObjectFromServer = SMOFromServer<SMOType.DeleteObject> & {
-    key: KeyFromServer;
+    //key: KeyFromServer; // TODO change on backend
+    object: SchemaObjectFromServer;
 };
 
 export class DeleteObject implements SMO<SMOType.DeleteObject> {
     readonly type = SMOType.DeleteObject;
 
     constructor(
-        readonly key: Key,
+        readonly object: SchemaObject,
     ) {}
 
     static fromServer(input: DeleteObjectFromServer): DeleteObject {
         return new DeleteObject(
-            Key.fromServer(input.key),
+            SchemaObject.fromServer(input.object),
         );
     }
 
     toServer(): DeleteObjectFromServer | null {
+        const object = this.object.toServer();
+        if (!object)
+            return null;
+
         return {
             type: SMOType.DeleteObject,
-            key: this.key.toServer(),
+            object,
         };
     }
 
     up(category: SchemaCategory): void {
-        const object = category.objects.find(o => o.key.equals(this.key));
-        if (object)
-            category.removeObject(object);
+        category.removeObject(this.object);
     }
 
     down(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        category.addObject(this.object);
     }
 }
 
@@ -118,44 +121,78 @@ export class AddMorphism implements SMO<SMOType.AddMorphism> {
     }
 
     up(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        category.addMorphism(this.morphism);
     }
 
     down(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        category.removeMorphism(this.morphism);
     }
 }
 
 type DeleteMorphismFromServer = SMOFromServer<SMOType.DeleteMorphism> & {
-    signature: SignatureFromServer;
+    //signature: SignatureFromServer; // TODO change on backend
+    morphism: SchemaMorphismFromServer;
 };
 
 export class DeleteMorphism implements SMO<SMOType.DeleteMorphism> {
     readonly type = SMOType.DeleteMorphism;
 
     constructor(
-        readonly signature: Signature,
+        readonly morphism: SchemaMorphism,
     ) {}
 
     static fromServer(input: DeleteMorphismFromServer): DeleteMorphism {
         return new DeleteMorphism(
-            Signature.fromServer(input.signature),
+            SchemaMorphism.fromServer(input.morphism),
         );
     }
 
     toServer(): DeleteMorphismFromServer {
         return {
             type: SMOType.DeleteMorphism,
-            signature: this.signature.toServer(),
+            morphism: this.morphism.toServer(),
         };
     }
 
     up(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        category.removeMorphism(this.morphism);
     }
 
     down(category: SchemaCategory): void {
-        console.log('TODO up ' + this.type);
+        category.addMorphism(this.morphism);
+    }
+}
+
+type CompositeFromServer = SMOFromServer<SMOType.Composite> & {
+    name: string;
+};
+
+export class Composite implements SMO<SMOType.Composite> {
+    readonly type = SMOType.Composite;
+
+    constructor(
+        readonly name: string,
+    ) {}
+
+    static fromServer(input: CompositeFromServer): Composite {
+        return new Composite(
+            input.name,
+        );
+    }
+
+    toServer(): CompositeFromServer {
+        return {
+            type: SMOType.Composite,
+            name: this.name,
+        };
+    }
+
+    up(): void {
+        /* This function is intentionally empty. */
+    }
+
+    down(): void {
+        /* This function is intentionally empty. */
     }
 }
 
@@ -169,6 +206,8 @@ export function fromServer(input: SMOFromServer): SMO {
         return AddMorphism.fromServer(input as AddMorphismFromServer);
     case SMOType.DeleteMorphism:
         return DeleteMorphism.fromServer(input as DeleteMorphismFromServer);
+    case SMOType.Composite:
+        return Composite.fromServer(input as CompositeFromServer);
     }
 }
 

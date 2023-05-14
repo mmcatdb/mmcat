@@ -64,14 +64,17 @@ export class SchemaCategory implements Entity {
         return SchemaObject.createNew(key, def);
     }
 
+    createMorphism(def: MorphismDefinition): SchemaMorphism {
+        if ('iri' in def)
+            this.notAvailableIris.add(def.iri);
+
+        const signature = this._signatureProvider.createAndAdd();
+        return SchemaMorphism.createNew(signature, def);
+    }
+
     addObject(object: SchemaObject) {
         this.objects.push(object);
         this._graph?.createNode(object, 'new');
-    }
-
-    deleteObject(object: SchemaObject) {
-        // TODO?
-        this.removeObject(object);
     }
 
     removeObject(object: SchemaObject) {
@@ -84,22 +87,14 @@ export class SchemaCategory implements Entity {
         return this.objects.find(object => object.iri === iri);
     }
 
-    createMorphism(def: MorphismDefinition): SchemaMorphism {
-        if ('iri' in def)
-            this.notAvailableIris.add(def.iri);
-
-        const signature = this._signatureProvider.createAndAdd();
-        const morphism = SchemaMorphism.createNew(signature, def);
+    addMorphism(morphism: SchemaMorphism) {
         this.morphisms.push(morphism);
-        this.evolver.addMorphism(morphism);
-
         this._graph?.createEdge(morphism, 'new');
-
-        return morphism;
     }
 
-    deleteMorphism(morphism: SchemaMorphism) {
-        this.evolver.deleteMorphism(morphism);
+    removeMorphism(morphism: SchemaMorphism) {
+        // TODO make it map?
+        this.morphisms = this.morphisms.filter(m => !m.equals(morphism));
         this._graph?.deleteEdge(morphism);
     }
 

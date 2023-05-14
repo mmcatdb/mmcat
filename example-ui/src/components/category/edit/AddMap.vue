@@ -34,40 +34,42 @@ onUnmounted(() => {
 });
 
 function save() {
-    const [ node1, node2 ] = nodes.value;
-    if (!node1 || !node2)
-        return;
+    evocat.compositeOperation('addMap', () => {
+        const [ node1, node2 ] = nodes.value;
+        if (!node1 || !node2)
+            return;
 
-    const keyObject = evocat.addObject({
-        label: keyLabel.value,
-        ids: ObjectIds.createNonSignatures(Type.Value),
-    });
+        const keyObject = evocat.addObject({
+            label: keyLabel.value,
+            ids: ObjectIds.createNonSignatures(Type.Value),
+        });
 
-    const mapObject = evocat.addObject({
-        label: mapLabel.value,
-    });
+        const mapObject = evocat.addObject({
+            label: mapLabel.value,
+        });
 
-    const mapToKey = evocat.addMorphism({
-        dom: mapObject,
-        cod: keyObject,
-        min: Cardinality.One,
-        label: '#key',
-    });
+        const mapToKey = evocat.addMorphism({
+            dom: mapObject,
+            cod: keyObject,
+            min: Cardinality.One,
+            label: '#key',
+        });
 
-    const mapToNode1 = evocat.addMorphism({
-        dom: mapObject,
-        cod: node1.schemaObject,
-        min: Cardinality.One,
-    });
+        const mapToNode1 = evocat.addMorphism({
+            dom: mapObject,
+            cod: node1.schemaObject,
+            min: Cardinality.One,
+        });
 
-    evocat.addMorphism({
-        dom: mapObject,
-        cod: node2.schemaObject,
-        min: Cardinality.One,
-    });
+        evocat.addMorphism({
+            dom: mapObject,
+            cod: node2.schemaObject,
+            min: Cardinality.One,
+        });
 
-    evocat.addId(mapObject, {
-        signatures: [ mapToKey.signature, mapToNode1.signature ],
+        evocat.addId(mapObject, {
+            signatures: [ mapToKey.signature, mapToNode1.signature ],
+        });
     });
 
     graph.layout();
