@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, shallowRef } from 'vue';
+import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
 
 import { useEvocat } from '@/utils/injects';
 
@@ -64,43 +64,56 @@ function undoDown() {
 function redo() {
     evocat.redo();
 }
+
+const showAll = ref(false);
 </script>
 
 <template>
     <div class="versions-control">
-        <div class="button-panel">
-            <button
-                class="button"
-                :disabled="!currentVersion.parent"
-                @click="undo"
-            >
-                <IconArrowLeftBold />
-            </button>
-            <button
-                class="button"
-                :disabled="!compositeParent"
-                @click="redoUp"
-            >
-                <IconArrowUpBold />
-            </button>
-            <button
-                class="button"
-                :disabled="!currentVersion.isCompositeWrapper"
-                @click="undoDown"
-            >
-                <IconArrowDownBold />
-            </button>
-            <button
-                class="button"
-                :disabled="!currentVersion.lastChild"
-                @click="redo"
-            >
-                <IconArrowRightBold />
-            </button>
+        <div>
+            <div class="button-panel">
+                <button
+                    class="button"
+                    :disabled="!currentVersion.parent"
+                    @click="undo"
+                >
+                    <IconArrowLeftBold />
+                </button>
+                <button
+                    class="button"
+                    :disabled="!compositeParent"
+                    @click="redoUp"
+                >
+                    <IconArrowUpBold />
+                </button>
+                <button
+                    class="button"
+                    :disabled="!currentVersion.isCompositeWrapper"
+                    @click="undoDown"
+                >
+                    <IconArrowDownBold />
+                </button>
+                <button
+                    class="button"
+                    :disabled="!currentVersion.lastChild"
+                    @click="redo"
+                >
+                    <IconArrowRightBold />
+                </button>
+            </div>
+            <div>
+                <input
+                    v-model="showAll"
+                    type="checkbox"
+                    style="margin-right: 8px;"
+                />
+                <span>Show all?</span>
+            </div>
         </div>
         <VersionsDisplay
             :current-version="currentVersion"
             :all-versions="allVersions"
+            :show-all="showAll"
         />
     </div>
 </template>
@@ -109,6 +122,7 @@ function redo() {
 .versions-control {
     display: flex;
     padding: 8px;
+    align-items: start;
 }
 
 .button-panel {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 import { useEvocat } from '@/utils/injects';
 
@@ -8,9 +8,12 @@ import type { Version } from '@/types/evocat/Version';
 type VersionsDisplayProps = {
     allVersions: Version[];
     currentVersion: Version;
+    showAll?: boolean;
 };
 
-const props = defineProps<VersionsDisplayProps>();
+const props = withDefaults(defineProps<VersionsDisplayProps>(), {
+    showAll: false,
+});
 
 const latestVersions = computed(() => {
     const output: Version[] = [];
@@ -26,6 +29,14 @@ const latestVersions = computed(() => {
 
 const lastLatestVersion = computed(() => latestVersions.value[latestVersions.value.length - 1]);
 
+const { evocat } = $(useEvocat());
+
+// If we want to hide the older branches, but the current version won't be shown, we pick the latest version as the current one.
+watch(() => props.showAll, (newValue: boolean) => {
+    if (!newValue && !latestVersions.value.find(version => version.id === props.currentVersion.id))
+        evocat.move(lastLatestVersion.value);
+}, { immediate: true });
+
 const displayedVersions = computed(() => {
     const previousVersions: Version[] = [];
     let nextVersion = props.currentVersion.parent;
@@ -37,6 +48,7 @@ const displayedVersions = computed(() => {
         level = Math.min(level, nextVersion.level);
         nextVersion = nextVersion.parent;
     }
+    previousVersions.reverse();
 
     const nextVersions: Version[] = [];
 
@@ -50,7 +62,7 @@ const displayedVersions = computed(() => {
         nextVersion = nextVersion.lastChild;
     }
 
-    const output = [ ...previousVersions.reverse(), props.currentVersion, ...nextVersions ];
+    const output = [ ...previousVersions, props.currentVersion, ...nextVersions ];
 
     if (lastLatestVersion.value.level > 0) {
         const lastOutput = output[output.length - 1];
@@ -62,20 +74,18 @@ const displayedVersions = computed(() => {
             nextVersion = nextVersion.parent;
         }
 
-        output.push(...tailVersions.reverse());
+        tailVersions.reverse();
+        output.push(...tailVersions);
     }
 
     return output;
 });
-
-const { evocat } = $(useEvocat());
-
 </script>
 
 <template>
     <div class="versions-display">
         <div
-            v-for="version in displayedVersions"
+            v-for="version in (showAll ? allVersions : displayedVersions)"
             :key="version.id"
             class="version-display monospace-font"
             :class="{
@@ -86,7 +96,7 @@ const { evocat } = $(useEvocat());
             :style="{ top: `${8 * version.level}px` }"
             @click="() => version.id !== currentVersion.id && evocat.move(version)"
         >
-            {{ version.branchlessId }}
+            {{ showAll ? version.id : version.branchlessId }}
         </div>
     </div>
 </template>
@@ -96,6 +106,7 @@ const { evocat } = $(useEvocat());
     display: flex;
     padding-left: 16px;
     padding-bottom: 8px;
+    padding-top: 8px;
     align-items: center;
     overflow-x: auto;
 }
