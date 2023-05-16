@@ -1,3 +1,56 @@
+td.label {
+    text-align: right;
+    vertical-align: top;
+}
+
+td.value {
+    padding-left: 8px;
+    vertical-align: top;
+    font-weight: bold;
+}
+
+td.value > span {
+    font-weight: bold;
+}
+
+.editor {
+    border: 2px solid var(--color-border);
+    padding: 12px;
+}
+
+.divide {
+    display: flex;
+    flex-direction: row;
+}
+
+.divide > :first-of-type {
+    margin-right: 16px;
+}
+
+/* This rule hide the input but leave its width intact. */
+/* However, it doesn't work on safari ... */
+tr.hidden {
+    /*color: var(--color-text-disabled);*/
+    visibility: collapse;
+    height: 0px;
+}
+
+span.disabled {
+    background-color: var(--color-background-disabled);
+}
+
+.signature-span {
+    background-color: var(--color-background-dark);
+    border-radius: 4px;
+    padding: 0px 6px 0px 6px;
+}
+
+.text-bold {
+    font-weight: bold;
+}
+
+// Buttons
+
 button {
     color: var(--color-text);
     border: 2px solid var(--color-text);
@@ -112,4 +165,26 @@ button.warning:hover, button.warning.selected {
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* IE10+/Edge */
     user-select: none; /* Standard */
+}
+
+// Links
+
+a {
+    text-decoration: none;
+    color: var(--color-primary);
+    transition: 0.4s;
+}
+  
+@media (hover: hover) {
+    a:hover {
+        background-color: var(--color-primary-dark);
+    }
+}
+
+a.router-link-exact-active {
+    color: var(--color-text);
+}
+
+a.router-link-exact-active:hover {
+    background-color: transparent;
 }

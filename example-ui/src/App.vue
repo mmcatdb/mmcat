@@ -25,12 +25,6 @@ import BackToAtlasLink from '@/components/integration/BackToAtlasLink.vue';
 </template>
 
 <style>
-@import "@/assets/base.css";
-@import "@/assets/componentLayout.css";
-@import "@/assets/buttons.css";
-@import "@/assets/links.css";
-/*/ @import "@/assets/screenshot.css"; /**/
-
 #app {
     font-weight: normal;
 }

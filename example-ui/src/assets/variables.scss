@@ -1,0 +1,37 @@
+@import 'bootstrap/scss/functions';
+
+/*
+$primary-50: #DFF1F7;
+$primary-100: #AEDCEB;
+$primary-200: #7BC5DD;
+$primary-300: #47AED1;
+$primary-400: #009FCD;
+$primary-500: #0090C8;
+$primary-600: #0084BB;
+$primary-700: #0072A9;
+$primary-800: #006297;
+$primary-900: #004478;
+
+$primary: $primary-900;
+$background-highlighted-color: $primary-50;
+$background-highlighted-color-accent: $primary-100;
+
+$font-size-base:              0.875rem;
+$h1-font-size:                $font-size-base * 2;
+$h2-font-size:                $font-size-base * 1.25;
+$h3-font-size:                $font-size-base * 1.25;
+*/
+
+$enable-negative-margins: true;
+
+@import 'bootstrap/scss/variables';
+
+/*
+$theme-colors: map-merge($theme-colors, (
+    primary: $primary,
+    success: #0b8560,
+    danger: #eb5757,
+    warning: #F08E18,
+    info: #0C31F8
+));
+*/

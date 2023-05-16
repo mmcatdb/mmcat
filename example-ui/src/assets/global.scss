@@ -1,0 +1,51 @@
+/*
+    Remove arrows in the number inputs.
+*/
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/*
+    Prevent scrollbar from affecting the width.
+*/
+body {
+    overflow: overlay;
+    padding-right: 16px;
+}
+
+/*
+    The same for modals.
+*/
+div[role = dialog] {
+    overflow: overlay;
+}
+
+/*
+    Make certain parts of text (i.e., labels of checkboxes that act like buttons) unselectable.
+*/
+
+.unselectable {
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+}
+
+.clickable {
+    @extend .unselectable;
+    cursor: pointer !important;
+}
+
+.non-clickable {
+    @extend .unselectable;
+    cursor: default !important;
+}
