@@ -92,12 +92,17 @@ export class Evocat {
     compositeOperation<T = void>(name: string, callback: () => T): T {
         this.versionContext.nextLevel();
         const result = callback();
+
+        this.finishCompositeOperation(name);
+
+        return result;
+    }
+
+    finishCompositeOperation(name: string) {
         this.versionContext.prevLevel();
 
         const operation = new Composite(name);
         this.commitOperation(operation);
-
-        return result;
     }
 
     addObject(def: ObjectDefinition): SchemaObject {

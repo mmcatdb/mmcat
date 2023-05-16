@@ -2,7 +2,11 @@ export class Version {
     private children: Version[] = [];
 
     get firstChild(): Version | undefined {
-        return this.children.length === 1 ? this.children[0] : undefined;
+        return this.children.length > 0 ? this.children[0] : undefined;
+    }
+
+    get lastChild(): Version | undefined {
+        return this.children.length > 0 ? this.children[this.children.length - 1] : undefined;
     }
 
     private constructor(
@@ -10,10 +14,16 @@ export class Version {
         private readonly levelIds: number[],
         readonly parent?: Version,
     ) {
-        this._id = this.branchId + ':' + this.levelIds.join('.');
+        this._branchlessId = this.levelIds.join('.');
+        this._id = this.branchId + ':' + this._branchlessId;
     }
 
+    private readonly _branchlessId;
     private readonly _id;
+
+    get branchlessId(): string {
+        return this._branchlessId;
+    }
 
     get id(): string {
         return this._id;
@@ -40,6 +50,10 @@ export class Version {
 
     get levelId(): number {
         return this.levelIds[this.level];
+    }
+
+    get isCompositeWrapper(): boolean {
+        return !!this.parent && this.parent.level > this.level;
     }
 
     static createRoot(branchId: number, levelIds: number[]): Version {
@@ -171,7 +185,7 @@ export class VersionContext {
 
         let lastUndoned = this.undonedVersions.length - 1;
         if (skipLowerLevels) {
-            while (lastUndoned >= 0 && this.undonedVersions[lastUndoned].level > this.currentVersion.level)
+            while (lastUndoned > 0 && this.undonedVersions[lastUndoned].level > this.currentVersion.level)
                 lastUndoned--;
         }
 
@@ -209,7 +223,10 @@ export class VersionContext {
 
         const redoOutput = targetToAncestor.reverse(); // NOSONAR - It's the last time we use that array, so it's basically just renaming.
 
-        // If it's a straight redo, we annul the undo and redo versions
+        // The first part is an undo.
+        this.undonedVersions.push(...sourceToAncestor);
+
+        // If it's a straight redo, we annul the undo and redo versions.
         for (const redoVersion of redoOutput) {
             const index = this.undonedVersions.length - 1;
             if (index < 0)

@@ -10,7 +10,7 @@ import { toQueryScalar } from '@/utils/router';
 import { evocatKey, useSchemaCategoryInfo } from '@/utils/injects';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '@/components/category/EvocatDisplay.vue';
-import VersionsDisplay from '@/components/category/VersionsDisplay.vue';
+import VersionsControl from '@/components/category/version/VersionsControl.vue';
 
 const route = useRoute();
 
@@ -63,6 +63,6 @@ function schemaCategorySaved(schemaCategory: SchemaCategory) {
         </div>
     </div>
     <div v-if="evocat">
-        <VersionsDisplay />
+        <VersionsControl />
     </div>
 </template>

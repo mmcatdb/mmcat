@@ -6,7 +6,7 @@
         fill="currentColor"
         viewBox="0 0 24 24"
     >
-        <title>arrow-left-bold</title>
-        <path d="M 20 9 V 15 H 12 V 20 L 4 12 L 12 4 V 9 H 20 Z" />
+        <title>arrow-right-bold</title>
+        <path d="M 4 15 V 9 H 12 V 4 L 20 12 L 12 20 V 15 H 4 Z" />
     </svg>
 </template>

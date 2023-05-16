@@ -30,7 +30,7 @@ console.log(route);
         class="back-to-atlas"
     >
         <button @click="goBackToAtlas()">
-            <IconArrowLeftBold /> Back to {{ returnLink.name }}
+            <IconArrowLeftBold class="icon" /> Back to {{ returnLink.name }}
         </button>
     </div>
 </template>
@@ -44,5 +44,10 @@ console.log(route);
 .back-to-atlas button {
     font-size: 22.5px;
     padding-right: 16px;
+}
+
+.icon {
+    position: relative;
+    top: 4px;
 }
 </style>
