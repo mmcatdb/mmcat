@@ -27,10 +27,13 @@ type AddObjectFromServer = SMOFromServer<SMOType.AddObject> & {
 
 export class AddObject implements SMO<SMOType.AddObject> {
     readonly type = SMOType.AddObject;
+    private readonly serialized: SchemaObjectFromServer;
 
-    constructor(
+    private constructor(
         readonly object: SchemaObject,
-    ) {}
+    ) {
+        this.serialized = object.toServer();
+    }
 
     static fromServer(input: AddObjectFromServer): AddObject {
         return new AddObject(
@@ -38,14 +41,16 @@ export class AddObject implements SMO<SMOType.AddObject> {
         );
     }
 
-    toServer(): AddObjectFromServer | null {
-        const object = this.object.toServer();
-        if (!object)
-            return null;
+    static create(object: SchemaObject): AddObject {
+        return new AddObject(
+            object,
+        );
+    }
 
+    toServer(): AddObjectFromServer | null {
         return {
             type: SMOType.AddObject,
-            object,
+            object: this.serialized,
         };
     }
 
@@ -65,10 +70,13 @@ type DeleteObjectFromServer = SMOFromServer<SMOType.DeleteObject> & {
 
 export class DeleteObject implements SMO<SMOType.DeleteObject> {
     readonly type = SMOType.DeleteObject;
+    private readonly serialized: SchemaObjectFromServer;
 
     constructor(
         readonly object: SchemaObject,
-    ) {}
+    ) {
+        this.serialized = object.toServer();
+    }
 
     static fromServer(input: DeleteObjectFromServer): DeleteObject {
         return new DeleteObject(
@@ -77,13 +85,9 @@ export class DeleteObject implements SMO<SMOType.DeleteObject> {
     }
 
     toServer(): DeleteObjectFromServer | null {
-        const object = this.object.toServer();
-        if (!object)
-            return null;
-
         return {
             type: SMOType.DeleteObject,
-            object,
+            object: this.serialized,
         };
     }
 

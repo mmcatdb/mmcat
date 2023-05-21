@@ -37,7 +37,7 @@ onMounted(async () => {
         <Teleport to="#app-top-bar-center">
             <h2>{{ schemaCategoryInfo.label }}</h2>
             <div class="version-display-outer">
-                v. <VersionDisplay :version-id="schemaCategoryInfo.version" />
+                v. <VersionDisplay :version-id="schemaCategoryInfo.versionId" />
             </div>
         </Teleport>
         <Teleport to="#app-left-bar-content">

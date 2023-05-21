@@ -101,7 +101,7 @@ const showAll = ref(false);
                     <IconArrowRightBold />
                 </button>
             </div>
-            <div>
+            <div class="py-2 text-center">
                 <input
                     v-model="showAll"
                     type="checkbox"

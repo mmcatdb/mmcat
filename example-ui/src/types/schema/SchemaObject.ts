@@ -13,7 +13,7 @@ export type SchemaObjectFromServer = {
     label: string;
     position: Position;
     superId: SignatureIdFromServer;
-    ids: ObjectIdsFromServer;
+    ids?: ObjectIdsFromServer;
     //databases?: string[];
     iri?: Iri;
     pimIri?: Iri;
@@ -43,7 +43,7 @@ export class SchemaObject {
         object.label = input.label;
         object.position = new ComparablePosition(input.position);
         object.superId = SignatureId.fromServer(input.superId);
-        object.ids = ObjectIds.fromServer(input.ids);
+        object.ids = input.ids ? ObjectIds.fromServer(input.ids) : undefined;
         object._isNew = false;
         object._originalPosition = new ComparablePosition(input.position);
         object.iri = input.iri;
@@ -139,15 +139,12 @@ export class SchemaObject {
     }
     */
 
-    toServer(): SchemaObjectFromServer | null {
-        if (!this.ids)
-            return null;
-
+    toServer(): SchemaObjectFromServer {
         return {
             key: this.key.toServer(),
             position: this.position,
             label: this.label,
-            ids: this.ids.toServer(),
+            ids: this.ids?.toServer(),
             superId: this.superId.toServer(),
             iri: this.iri,
             pimIri: this.pimIri,

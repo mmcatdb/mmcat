@@ -7,7 +7,6 @@ import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, type Min, type MorphismDefinition } from "./SchemaMorphism";
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
-import { SchemaCategoryEvolver } from "./SchemaCategoryUpdate";
 import type { SMOFromServer } from "./SchemaModificationOperation";
 import type { Graph } from "../categoryGraph";
 
@@ -18,8 +17,6 @@ export class SchemaCategory implements Entity {
     objects: SchemaObject[];
     morphisms: SchemaMorphism[];
     notAvailableIris: Set<Iri> = new Set;
-
-    readonly evolver = new SchemaCategoryEvolver();
 
     _keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     _signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
@@ -54,6 +51,10 @@ export class SchemaCategory implements Entity {
             input.objects.map(SchemaObject.fromServer),
             morphisms,
         );
+    }
+
+    getObject(key: Key): SchemaObject | undefined {
+        return this.objects.find(object => object.key.equals(key));
     }
 
     createObject(def: ObjectDefinition): SchemaObject {
@@ -115,6 +116,8 @@ export class SchemaCategory implements Entity {
 
     getUpdateObject(): SchemaCategoryUpdate | null {
         const operations: SMOFromServer[] = [];
+        // TODO
+        /*
         for (const operation of this.evolver.getOperations()) {
             const operationToServer = operation.toServer();
             if (!operationToServer)
@@ -122,6 +125,7 @@ export class SchemaCategory implements Entity {
 
             operations.push(operationToServer);
         }
+        */
 
         return {
             beforeVersion: this.versionId,

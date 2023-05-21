@@ -1,7 +1,5 @@
 package cz.cuni.matfyz.server.entity.evolution;
 
-import cz.cuni.matfyz.core.category.Signature;
-import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
@@ -37,12 +35,12 @@ record AddObject(
 }
 
 record DeleteObject(
-    Key key
+    SchemaObjectWrapper object
 ) implements SchemaModificationOperation {
 
     @Override
     public cz.cuni.matfyz.evolution.schema.DeleteObject toEvolution(SchemaCategoryContext context) {
-        return new cz.cuni.matfyz.evolution.schema.DeleteObject(key);
+        return new cz.cuni.matfyz.evolution.schema.DeleteObject(object.toSchemaObject(context));
     }
 
 }
@@ -63,12 +61,16 @@ record AddMorphism(
 }
 
 record DeleteMorphism(
-    Signature signature
+    SchemaMorphismWrapper morphism
 ) implements SchemaModificationOperation {
 
     @Override
     public cz.cuni.matfyz.evolution.schema.DeleteMorphism toEvolution(SchemaCategoryContext context) {
-        return new cz.cuni.matfyz.evolution.schema.DeleteMorphism(signature);
+        return new cz.cuni.matfyz.evolution.schema.DeleteMorphism(
+            morphism.toSchemaMorphism(context),
+            morphism.domKey(),
+            morphism.codKey()
+        );
     }
 
 }

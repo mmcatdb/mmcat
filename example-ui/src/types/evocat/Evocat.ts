@@ -107,7 +107,7 @@ export class Evocat {
 
     addObject(def: ObjectDefinition): SchemaObject {
         const object = this.schemaCategory.createObject(def);
-        const operation = new AddObject(object);
+        const operation = AddObject.create(object);
         this.commitOperation(operation);
 
         return object;
