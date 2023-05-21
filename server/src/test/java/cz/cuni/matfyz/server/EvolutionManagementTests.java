@@ -179,7 +179,7 @@ public class EvolutionManagementTests {
 
         // Delete address to full address
         var addressToFullAddress = schema.getMorphism(data.addressToFullAddress);
-        schema.deleteMorphism(addressToFullAddress);
+        schema.removeMorphism(addressToFullAddress);
 
         var addressToFullAddressInstance = category.getMorphism(addressToFullAddress);
         category.deleteMorphism(addressToFullAddressInstance);

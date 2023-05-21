@@ -31,7 +31,7 @@ public class SchemaCategory implements Category {
         return morphismContext.createUniqueObject(morphism);
     }
 
-    public void deleteMorphism(SchemaMorphism morphism) {
+    public void removeMorphism(SchemaMorphism morphism) {
         morphismContext.deleteUniqueObject(morphism);
     }
 

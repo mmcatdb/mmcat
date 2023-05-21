@@ -33,7 +33,7 @@ const filter = {
 };
 
 function save() {
-    evocat.addId(props.node.schemaObject, { signatureId: signatureIdFactory.value.signatureId });
+    evocat.createId(props.node.schemaObject, { signatureId: signatureIdFactory.value.signatureId });
 
     emit('save');
 }

@@ -24,7 +24,7 @@ function save() {
         }
         : {};
 
-    evocat.addObject({
+    evocat.createObject({
         label: label.value,
         ...iriDefinition,
     });

@@ -4,7 +4,7 @@ import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
 import { Version, VersionContext } from "./Version";
-import { AddMorphism, AddObject, Composite, DeleteMorphism, DeleteObject, type SMO } from "../schema/SchemaModificationOperation";
+import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO } from "../schema/SchemaModificationOperation";
 
 type UpdateFunction = (udpate: SchemaCategoryUpdate) => Promise<Result<SchemaCategory>>;
 
@@ -105,34 +105,34 @@ export class Evocat {
         this.commitOperation(operation);
     }
 
-    addObject(def: ObjectDefinition): SchemaObject {
+    createObject(def: ObjectDefinition): SchemaObject {
         const object = this.schemaCategory.createObject(def);
-        const operation = AddObject.create(object);
+        const operation = CreateObject.create(object);
         this.commitOperation(operation);
 
         return object;
     }
 
-    removeObject(object: SchemaObject): void {
+    deleteObject(object: SchemaObject): void {
         const operation = new DeleteObject(object);
         this.commitOperation(operation);
     }
 
-    addMorphism(def: MorphismDefinition): SchemaMorphism {
+    createMorphism(def: MorphismDefinition): SchemaMorphism {
         const morphism = this.schemaCategory.createMorphism(def);
-        const operation = new AddMorphism(morphism);
+        const operation = new CreateMorphism(morphism);
         this.commitOperation(operation);
 
         return morphism;
     }
 
-    removeMorphism(morphism: SchemaMorphism): void {
+    deleteMorphism(morphism: SchemaMorphism): void {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
         const operation = new DeleteMorphism(morphism);
         this.commitOperation(operation);
     }
 
-    addId(object: SchemaObject, def: IdDefinition): void {
+    createId(object: SchemaObject, def: IdDefinition): void {
         object.addId(def);
 
         //const node = this._graph?.getNode(object);

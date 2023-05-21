@@ -3,9 +3,9 @@ import { SchemaMorphism, type SchemaMorphismFromServer } from "./SchemaMorphism"
 import { SchemaObject, type SchemaObjectFromServer } from "./SchemaObject";
 
 enum SMOType {
-    AddObject = 'addObject',
+    CreateObject = 'createObject',
     DeleteObject = 'deleteObject',
-    AddMorphism = 'addMorphism',
+    CreateMorphism = 'createMorphism',
     DeleteMorphism = 'deleteMorphism',
     Composite = 'composite',
 }
@@ -21,12 +21,12 @@ export interface SMO<T extends SMOType = SMOType> {
     down(category: SchemaCategory): void;
 }
 
-type AddObjectFromServer = SMOFromServer<SMOType.AddObject> & {
+type CreateObjectFromServer = SMOFromServer<SMOType.CreateObject> & {
     object: SchemaObjectFromServer;
 };
 
-export class AddObject implements SMO<SMOType.AddObject> {
-    readonly type = SMOType.AddObject;
+export class CreateObject implements SMO<SMOType.CreateObject> {
+    readonly type = SMOType.CreateObject;
     private readonly serialized: SchemaObjectFromServer;
 
     private constructor(
@@ -35,21 +35,21 @@ export class AddObject implements SMO<SMOType.AddObject> {
         this.serialized = object.toServer();
     }
 
-    static fromServer(input: AddObjectFromServer): AddObject {
-        return new AddObject(
+    static fromServer(input: CreateObjectFromServer): CreateObject {
+        return new CreateObject(
             SchemaObject.fromServer(input.object),
         );
     }
 
-    static create(object: SchemaObject): AddObject {
-        return new AddObject(
+    static create(object: SchemaObject): CreateObject {
+        return new CreateObject(
             object,
         );
     }
 
-    toServer(): AddObjectFromServer | null {
+    toServer(): CreateObjectFromServer | null {
         return {
-            type: SMOType.AddObject,
+            type: SMOType.CreateObject,
             object: this.serialized,
         };
     }
@@ -100,26 +100,26 @@ export class DeleteObject implements SMO<SMOType.DeleteObject> {
     }
 }
 
-type AddMorphismFromServer = SMOFromServer<SMOType.AddMorphism> & {
+type CreateMorphismFromServer = SMOFromServer<SMOType.CreateMorphism> & {
     morphism: SchemaMorphismFromServer;
 };
 
-export class AddMorphism implements SMO<SMOType.AddMorphism> {
-    readonly type = SMOType.AddMorphism;
+export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
+    readonly type = SMOType.CreateMorphism;
 
     constructor(
         readonly morphism: SchemaMorphism,
     ) {}
 
-    static fromServer(input: AddMorphismFromServer): AddMorphism {
-        return new AddMorphism(
+    static fromServer(input: CreateMorphismFromServer): CreateMorphism {
+        return new CreateMorphism(
             SchemaMorphism.fromServer(input.morphism),
         );
     }
 
-    toServer(): AddMorphismFromServer {
+    toServer(): CreateMorphismFromServer {
         return {
-            type: SMOType.AddMorphism,
+            type: SMOType.CreateMorphism,
             morphism: this.morphism.toServer(),
         };
     }
@@ -202,12 +202,12 @@ export class Composite implements SMO<SMOType.Composite> {
 
 export function fromServer(input: SMOFromServer): SMO {
     switch (input.type) {
-    case SMOType.AddObject:
-        return AddObject.fromServer(input as AddObjectFromServer);
+    case SMOType.CreateObject:
+        return CreateObject.fromServer(input as CreateObjectFromServer);
     case SMOType.DeleteObject:
         return DeleteObject.fromServer(input as DeleteObjectFromServer);
-    case SMOType.AddMorphism:
-        return AddMorphism.fromServer(input as AddMorphismFromServer);
+    case SMOType.CreateMorphism:
+        return CreateMorphism.fromServer(input as CreateMorphismFromServer);
     case SMOType.DeleteMorphism:
         return DeleteMorphism.fromServer(input as DeleteMorphismFromServer);
     case SMOType.Composite:

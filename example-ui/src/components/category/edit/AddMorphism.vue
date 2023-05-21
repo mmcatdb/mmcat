@@ -51,7 +51,7 @@ function save() {
         }
         : {};
 
-    evocat.addMorphism({
+    evocat.createMorphism({
         dom: node1.schemaObject,
         cod: node2.schemaObject,
         min: min.value,

@@ -40,10 +40,10 @@ function cancel() {
 
 function deleteFunction() {
     props.node.neighbours.forEach(neighbour => {
-        evocat.removeMorphism(neighbour.edge.schemaMorphism);
+        evocat.deleteMorphism(neighbour.edge.schemaMorphism);
     });
 
-    evocat.removeObject(props.node.schemaObject);
+    evocat.deleteObject(props.node.schemaObject);
 
     emit('save');
 }

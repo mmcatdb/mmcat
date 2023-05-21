@@ -76,7 +76,7 @@ function cancel() {
 }
 
 function deleteFunction() {
-    evocat.removeMorphism(props.edge.schemaMorphism);
+    evocat.deleteMorphism(props.edge.schemaMorphism);
 
     emit('save');
 }

@@ -39,35 +39,35 @@ function save() {
         if (!node1 || !node2)
             return;
 
-        const keyObject = evocat.addObject({
+        const keyObject = evocat.createObject({
             label: keyLabel.value,
             ids: ObjectIds.createNonSignatures(Type.Value),
         });
 
-        const mapObject = evocat.addObject({
+        const mapObject = evocat.createObject({
             label: mapLabel.value,
         });
 
-        const mapToKey = evocat.addMorphism({
+        const mapToKey = evocat.createMorphism({
             dom: mapObject,
             cod: keyObject,
             min: Cardinality.One,
             label: '#key',
         });
 
-        const mapToNode1 = evocat.addMorphism({
+        const mapToNode1 = evocat.createMorphism({
             dom: mapObject,
             cod: node1.schemaObject,
             min: Cardinality.One,
         });
 
-        evocat.addMorphism({
+        evocat.createMorphism({
             dom: mapObject,
             cod: node2.schemaObject,
             min: Cardinality.One,
         });
 
-        evocat.addId(mapObject, {
+        evocat.createId(mapObject, {
             signatures: [ mapToKey.signature, mapToNode1.signature ],
         });
     });

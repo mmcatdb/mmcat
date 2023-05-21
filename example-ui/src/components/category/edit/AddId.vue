@@ -47,12 +47,12 @@ function selectComplex() {
 }
 
 function selectValue() {
-    evocat.addId(props.node.schemaObject, { type: Type.Value });
+    evocat.createId(props.node.schemaObject, { type: Type.Value });
     emit('save');
 }
 
 function selectGenerated() {
-    evocat.addId(props.node.schemaObject, { type: Type.Generated });
+    evocat.createId(props.node.schemaObject, { type: Type.Generated });
     emit('save');
 }
 </script>

@@ -12,9 +12,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = AddObject.class, name = "addObject"),
+    @JsonSubTypes.Type(value = CreateObject.class, name = "createObject"),
     @JsonSubTypes.Type(value = DeleteObject.class, name = "deleteObject"),
-    @JsonSubTypes.Type(value = AddMorphism.class, name = "addMorphism"),
+    @JsonSubTypes.Type(value = CreateMorphism.class, name = "createMorphism"),
     @JsonSubTypes.Type(value = DeleteMorphism.class, name = "deleteMorphism")
 })
 interface SchemaModificationOperation {
@@ -23,13 +23,13 @@ interface SchemaModificationOperation {
 
 }
 
-record AddObject(
+record CreateObject(
     SchemaObjectWrapper object
 ) implements SchemaModificationOperation {
 
     @Override
-    public cz.cuni.matfyz.evolution.schema.AddObject toEvolution(SchemaCategoryContext context) {
-        return new cz.cuni.matfyz.evolution.schema.AddObject(object.toSchemaObject(context));
+    public cz.cuni.matfyz.evolution.schema.CreateObject toEvolution(SchemaCategoryContext context) {
+        return new cz.cuni.matfyz.evolution.schema.CreateObject(object.toSchemaObject(context));
     }
 
 }
@@ -45,13 +45,13 @@ record DeleteObject(
 
 }
 
-record AddMorphism(
+record CreateMorphism(
     SchemaMorphismWrapper morphism
 ) implements SchemaModificationOperation {
 
     @Override
-    public cz.cuni.matfyz.evolution.schema.AddMorphism toEvolution(SchemaCategoryContext context) {
-        return new cz.cuni.matfyz.evolution.schema.AddMorphism(
+    public cz.cuni.matfyz.evolution.schema.CreateMorphism toEvolution(SchemaCategoryContext context) {
+        return new cz.cuni.matfyz.evolution.schema.CreateMorphism(
             morphism.toSchemaMorphism(context),
             morphism.domKey(),
             morphism.codKey()

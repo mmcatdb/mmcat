@@ -26,7 +26,7 @@ function sequenceToSignature(morphismSequence: MorphismSequence, node: Node, cre
 
 function addId(id: ImportedId, evocat: Evocat, graph: Graph, object: SchemaObject, createdMorphisms: Map<ImportedMorphism, SchemaMorphism>) {
     if (id.type !== Type.Signatures) {
-        evocat.addId(object, { type: id.type });
+        evocat.createId(object, { type: id.type });
         return;
     }
 
@@ -44,7 +44,7 @@ function addId(id: ImportedId, evocat: Evocat, graph: Graph, object: SchemaObjec
         signatures.push(signature);
     }
 
-    evocat.addId(object, { signatures });
+    evocat.createId(object, { signatures });
 }
 
 // TODO remove the graph dependency
@@ -57,7 +57,7 @@ export function addImportedToGraph(imported: ImportedDataspecer, evocat: Evocat,
         if (!evocat.schemaCategory.isIriAvailable(object.iri))
             return;
 
-        const schemaObject = evocat.addObject({
+        const schemaObject = evocat.createObject({
             label: object.label,
             iri: object.iri,
             pimIri: object.pimIri,
@@ -83,7 +83,7 @@ export function addImportedToGraph(imported: ImportedDataspecer, evocat: Evocat,
         if (!evocat.schemaCategory.isIriAvailable(morphism.iri))
             return;
 
-        const schemaMorphism = evocat.addMorphism({
+        const schemaMorphism = evocat.createMorphism({
             dom: object1,
             cod: object2,
             min: morphism.min,

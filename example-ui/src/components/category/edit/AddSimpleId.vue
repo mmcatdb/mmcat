@@ -28,7 +28,7 @@ const filter = {
 };
 
 function save() {
-    evocat.addId(props.node.schemaObject, { signatures: [ signature.value.toSignature() ] });
+    evocat.createId(props.node.schemaObject, { signatures: [ signature.value.toSignature() ] });
 
     emit('save');
 }
