@@ -72,4 +72,7 @@ public class SchemaCategoryService {
         return newWrapper;
     }
     
+    public List<SchemaUpdate> findAllUpdates(Id id) {
+        return repository.findAllUpdates(id);
+    }
 }

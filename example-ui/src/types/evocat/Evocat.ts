@@ -5,7 +5,7 @@ import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
 import { Version, VersionContext } from "./Version";
 import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO } from "../schema/SchemaModificationOperation";
-import type { SchemaUpdateInit } from "../schema/SchemaUpdate";
+import type { SchemaUpdate, SchemaUpdateInit } from "../schema/SchemaUpdate";
 import { VersionedSMO } from "../schema/VersionedSMO";
 
 type UpdateFunction = (udpate: SchemaUpdateInit) => Promise<Result<SchemaCategory>>;
@@ -15,17 +15,23 @@ export type EvocatApi = {
 };
 
 export class Evocat {
-    readonly versionContext = VersionContext.createNew();
+    readonly versionContext;
 
     private constructor(
         public schemaCategory: SchemaCategory,
-        readonly logicalModels: LogicalModel[],
-        readonly api: EvocatApi,
-    ) {}
+        private readonly updates: SchemaUpdate[],
+        private readonly logicalModels: LogicalModel[],
+        private readonly api: EvocatApi,
+    ) {
+        const operations = updates.flatMap(update => update.operations);
+        this.operations = new Map(operations.map(operation => [ operation.version.id, operation ]));
+        this.versionContext = VersionContext.create(operations.map(operation => operation.version));
+    }
 
-    static create(schemaCategory: SchemaCategory, logicalModels: LogicalModel[], api: EvocatApi): Evocat {
+    static create(schemaCategory: SchemaCategory, updates: SchemaUpdate[], logicalModels: LogicalModel[], api: EvocatApi): Evocat {
         const evocat = new Evocat(
             schemaCategory,
+            updates,
             logicalModels,
             api,
         );
@@ -53,7 +59,7 @@ export class Evocat {
         this.schemaCategory.graph = newGraph;
     }
 
-    private readonly operations: Map<string, VersionedSMO> = new Map();
+    private readonly operations: Map<string, VersionedSMO>;
 
     private commitOperation(smo: SMO) {
         const version = this.versionContext.createNextVersion();

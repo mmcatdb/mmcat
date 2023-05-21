@@ -12,7 +12,7 @@ export class Version {
     }
 
     private constructor(
-        private readonly branchId: number,
+        public readonly branchId: number,
         private readonly levelIds: number[],
         private _parent?: Version,
     ) {
@@ -138,13 +138,30 @@ class BranchContext {
 
 export class VersionContext {
     private relativeLevel = 0;
-    private readonly versions: Version[];
 
     private constructor(
         private readonly branchContext: BranchContext,
+        private readonly versions: Version[],
         private version: Version,
-    ) {
-        this.versions = [ this.version ];
+    ) {}
+
+    static create(versions: Version[]) {
+        const root = Version.createRoot(0, [ 0 ]);
+
+        const lastVersion = versions.length === 0
+            ? root
+            : versions[versions.length - 1];
+
+        const allVersions = [ root, ...versions ];
+        // This is only doable because on save, all the versions with lower branch ids are replaced by the higher ones.
+        for (let i = 0; i < allVersions.length - 1; i++)
+            allVersions[i + 1].parent = allVersions[i];
+
+        return new VersionContext(
+            new BranchContext(lastVersion.branchId), // The last version should have the highest branch id.
+            allVersions,
+            lastVersion,
+        );
     }
 
     get allVersions() {
@@ -179,13 +196,6 @@ export class VersionContext {
         this.versionListeners.forEach(listener => listener(this.currentVersion));
 
         return newVersion;
-    }
-
-    static createNew(): VersionContext {
-        return new VersionContext(
-            new BranchContext(0),
-            Version.createRoot(0, [ 0 ]),
-        );
     }
 
     private undonedVersions: Version[] = [];

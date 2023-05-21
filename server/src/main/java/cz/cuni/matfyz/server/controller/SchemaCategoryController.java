@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.Id;
+import cz.cuni.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.cuni.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
@@ -62,7 +63,7 @@ public class SchemaCategoryController {
         return schema;
     }
 
-    @PostMapping("/schema-categories/{id}/update")
+    @PostMapping("/schema-categories/{id}/updates")
     public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaUpdateInit update) {
         SchemaCategoryWrapper updatedWrapper = service.update(id, update);
 
@@ -70,6 +71,16 @@ public class SchemaCategoryController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
         return updatedWrapper;
+    }
+
+    @GetMapping("/schema-categories/{id}/updates")
+    public List<SchemaUpdate> getCategoryUpdates(@PathVariable Id id) {
+        final var updates = service.findAllUpdates(id);
+
+        if (updates == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+        return updates;
     }
 
     /*

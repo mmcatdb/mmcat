@@ -10,7 +10,7 @@ import GraphDisplay from './GraphDisplay.vue';
 import { Evocat } from '@/types/evocat/Evocat';
 import { LogicalModel } from '@/types/logicalModel';
 import { DataResultSuccess } from '@/types/api/result';
-import type { SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
+import { SchemaUpdate, type SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
 
 const categoryId = useSchemaCategoryId();
 
@@ -22,18 +22,20 @@ const emit = defineEmits([ 'evocatCreated' ]);
 
 onMounted(async () => {
     const schemaCategoryResult = await API.schemas.getCategoryWrapper({ id: categoryId });
+    const schemaUpdatesResult = await API.schemas.getCategoryUpdates({ id: categoryId });
     const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
     fetching.value = false;
 
-    if (!schemaCategoryResult.status || !logicalModelsResult.status) {
+    if (!schemaCategoryResult.status || !schemaUpdatesResult.status || !logicalModelsResult.status) {
         // TODO handle error
         return;
     }
 
     const schemaCategory = SchemaCategory.fromServer(schemaCategoryResult.data);
+    const schemaUpdates = schemaUpdatesResult.data.map(SchemaUpdate.fromServer);
     const logicalModels = logicalModelsResult.data.map(LogicalModel.fromServer);
 
-    const newEvocat = Evocat.create(schemaCategory, logicalModels, {
+    const newEvocat = Evocat.create(schemaCategory, schemaUpdates, logicalModels, {
         update: updateFunction,
     });
     evocat.value = newEvocat;
