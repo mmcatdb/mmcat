@@ -18,15 +18,15 @@ import com.fasterxml.jackson.databind.ObjectReader;
 public class SchemaUpdate extends Entity {
 
     public final Id categoryId;
-    public final Version beforeVersion;
-    public Version afterVersion;
+    public final Version prevVersion;
+    public Version nextVersion;
     public final List<VersionedSMO> operations;
 
-    private SchemaUpdate(Id id, Id categoryId, Version beforeVersion, Version afterVersion, List<VersionedSMO> operations) {
+    private SchemaUpdate(Id id, Id categoryId, Version prevVersion, Version nextVersion, List<VersionedSMO> operations) {
         super(id);
         this.categoryId = categoryId;
-        this.beforeVersion = beforeVersion;
-        this.afterVersion = afterVersion;
+        this.prevVersion = prevVersion;
+        this.nextVersion = nextVersion;
         this.operations = operations;
     }
 
@@ -34,7 +34,7 @@ public class SchemaUpdate extends Entity {
         return new SchemaUpdate(
             null,
             categoryId,
-            init.beforeVersion(),
+            init.prevVersion(),
             null,
             init.operations()
         );
@@ -42,7 +42,7 @@ public class SchemaUpdate extends Entity {
 
     public cz.cuni.matfyz.evolution.schema.SchemaCategoryUpdate toEvolution(SchemaCategoryContext context) {
         return new cz.cuni.matfyz.evolution.schema.SchemaCategoryUpdate(
-            beforeVersion,
+            prevVersion,
             operations.stream().map(operation -> operation.smo().toEvolution(context)).toList()
         );
     }
@@ -54,8 +54,8 @@ public class SchemaUpdate extends Entity {
     }
 
     private record JsonValue(
-        Version beforeVersion,
-        Version afterVersion,
+        Version prevVersion,
+        Version nextVersion,
         List<VersionedSMO> operations
     ) {}
 
@@ -67,8 +67,8 @@ public class SchemaUpdate extends Entity {
         return new SchemaUpdate(
             id,
             categoryId,
-            parsedValue.beforeVersion,
-            parsedValue.afterVersion,
+            parsedValue.prevVersion,
+            parsedValue.nextVersion,
             parsedValue.operations
         );
     }

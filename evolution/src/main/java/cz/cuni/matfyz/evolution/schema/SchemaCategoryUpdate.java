@@ -9,16 +9,16 @@ import java.util.List;
 
 public class SchemaCategoryUpdate {
 
-    private final Version beforeVersion;
+    private final Version prevVersion;
 
-    public Version getBeforeVersion() {
-        return beforeVersion;
+    public Version getPrevVersion() {
+        return prevVersion;
     }
 
     private final List<SchemaModificationOperation> operations;
 
-    public SchemaCategoryUpdate(Version beforeVersion, List<SchemaModificationOperation> operations) {
-        this.beforeVersion = beforeVersion;
+    public SchemaCategoryUpdate(Version prevVersion, List<SchemaModificationOperation> operations) {
+        this.prevVersion = prevVersion;
         this.operations = operations;
     }
 

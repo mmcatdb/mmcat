@@ -49,7 +49,7 @@ public class SchemaCategoryService {
         final var wrapper = repository.find(id);
         final var update = SchemaUpdate.fromInit(updateInit, id);
 
-        if (!update.beforeVersion.equals(wrapper.version))
+        if (!update.prevVersion.equals(wrapper.version))
             return null;
 
         final var context = new SchemaCategoryContext();
@@ -62,7 +62,7 @@ public class SchemaCategoryService {
 
         final var nextVersion = context.getVersion().generateNext();
         context.setVersion(nextVersion);
-        update.afterVersion = nextVersion;
+        update.nextVersion = nextVersion;
 
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(result.data, context);
 

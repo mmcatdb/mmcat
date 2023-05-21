@@ -71,7 +71,7 @@ export class Evocat {
             .map(operation => operation.toServer());
 
         return {
-            beforeVersion: this.schemaCategory.versionId,
+            prevVersion: this.schemaCategory.versionId,
             operations,
         };
     }

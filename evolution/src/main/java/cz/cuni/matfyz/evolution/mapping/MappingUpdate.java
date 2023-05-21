@@ -2,22 +2,23 @@ package cz.cuni.matfyz.evolution.mapping;
 
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.DataResult;
+import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.evolution.exception.MappingEvolutionException;
 
 import java.util.List;
 
 public class MappingUpdate {
 
-    private final int beforeVersion;
+    private final Version prevVersion;
 
-    public int getBeforeVersion() {
-        return beforeVersion;
+    public Version getPrevVersion() {
+        return prevVersion;
     }
 
     private final List<MappingModificationOperation> operations;
 
-    public MappingUpdate(int beforeVersion, List<MappingModificationOperation> operations) {
-        this.beforeVersion = beforeVersion;
+    public MappingUpdate(Version prevVersion, List<MappingModificationOperation> operations) {
+        this.prevVersion = prevVersion;
         this.operations = operations;
     }
 

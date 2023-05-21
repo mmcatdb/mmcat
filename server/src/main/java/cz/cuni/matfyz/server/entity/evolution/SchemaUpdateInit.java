@@ -8,6 +8,6 @@ import java.util.List;
  * @author jachym.bartik
  */
 public record SchemaUpdateInit(
-    Version beforeVersion,
+    Version prevVersion,
     List<VersionedSMO> operations
 ) {}

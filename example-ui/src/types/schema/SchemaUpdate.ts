@@ -4,8 +4,8 @@ import { VersionedSMO, type VersionedSMOFromServer } from "./VersionedSMO";
 export type SchemaUpdateFromServer = {
     id: Id;
     categoryId: Id;
-    beforeVersion: VersionId;
-    afterVersion: VersionId;
+    prevVersion: VersionId;
+    nextVersion: VersionId;
     operations: VersionedSMOFromServer[];
 };
 
@@ -13,8 +13,8 @@ export class SchemaUpdate implements Entity {
     private constructor(
         readonly id: Id,
         readonly categoryId: Id,
-        readonly beforeVersion: VersionId,
-        readonly afterVersion: VersionId,
+        readonly prevVersion: VersionId,
+        readonly nextVersion: VersionId,
         readonly operations: VersionedSMO[],
     ) {}
 
@@ -22,14 +22,14 @@ export class SchemaUpdate implements Entity {
         return new SchemaUpdate(
             input.id,
             input.categoryId,
-            input.beforeVersion,
-            input.afterVersion,
+            input.prevVersion,
+            input.nextVersion,
             input.operations.map(VersionedSMO.fromServer),
         );
     }
 }
 
 export type SchemaUpdateInit = {
-    readonly beforeVersion: VersionId;
+    readonly prevVersion: VersionId;
     readonly operations: VersionedSMOFromServer[];
 };
