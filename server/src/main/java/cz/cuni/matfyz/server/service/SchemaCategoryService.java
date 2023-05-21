@@ -2,7 +2,8 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.entity.Id;
-import cz.cuni.matfyz.server.entity.evolution.SchemaCategoryUpdate;
+import cz.cuni.matfyz.server.entity.evolution.SchemaUpdate;
+import cz.cuni.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
@@ -44,9 +45,11 @@ public class SchemaCategoryService {
         return repository.find(id);
     }
 
-    public SchemaCategoryWrapper update(Id id, SchemaCategoryUpdate update) {
+    public SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final var wrapper = repository.find(id);
-        if (!update.beforeVersion().equals(wrapper.version))
+        final var update = SchemaUpdate.fromInit(updateInit, id);
+
+        if (!update.beforeVersion.equals(wrapper.version))
             return null;
 
         final var context = new SchemaCategoryContext();
@@ -57,7 +60,9 @@ public class SchemaCategoryService {
         if (!result.status)
             return null;
 
-        context.setVersion(context.getVersion().generateNext());
+        final var nextVersion = context.getVersion().generateNext();
+        context.setVersion(nextVersion);
+        update.afterVersion = nextVersion;
 
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(result.data, context);
 

@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref, shallowRef } from 'vue';
 import API from '@/utils/api';
-import { SchemaCategory, type SchemaCategoryUpdate } from '@/types/schema';
+import { SchemaCategory } from '@/types/schema';
 
 import ResourceNotFound from '@/components/ResourceNotFound.vue';
 import type { Graph } from '@/types/categoryGraph';
-import { useSchemaCategoryId } from '@/utils/injects';
+import { useSchemaCategoryId, useSchemaCategoryInfo } from '@/utils/injects';
 import GraphDisplay from './GraphDisplay.vue';
 import { Evocat } from '@/types/evocat/Evocat';
 import { LogicalModel } from '@/types/logicalModel';
 import { DataResultSuccess } from '@/types/api/result';
+import type { SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
 
 const categoryId = useSchemaCategoryId();
 
@@ -42,7 +43,9 @@ onMounted(async () => {
 
 });
 
-async function updateFunction(update: SchemaCategoryUpdate) {
+const info = useSchemaCategoryInfo();
+
+async function updateFunction(update: SchemaUpdateInit) {
     fetching.value = true;
     const result = await API.schemas.updateCategoryWrapper({ id: categoryId }, update);
     fetching.value = false;
@@ -54,6 +57,8 @@ async function updateFunction(update: SchemaCategoryUpdate) {
     }
 
     const schemaCategory = SchemaCategory.fromServer(result.data);
+    info.value = schemaCategory;
+
     return DataResultSuccess(schemaCategory);
 }
 

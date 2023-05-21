@@ -26,13 +26,15 @@ watch(() => props.modelValue, (newValue: (Node | undefined)[]) => {
     innerValue.value.forEach((node, index) => node?.select({ type: props.type, level: index }));
 }, { immediate: true });
 
+const listener = graph.listen();
+
 onMounted(() => {
     if (!props.disabled)
-        graph.addNodeListener('tap', onNodeTapHandler);
+        listener.onNode('tap', onNodeTapHandler);
 });
 
 onUnmounted(() => {
-    graph.removeNodeListener('tap', onNodeTapHandler);
+    listener.close();
     innerValue.value.forEach(node => node?.unselect());
 });
 

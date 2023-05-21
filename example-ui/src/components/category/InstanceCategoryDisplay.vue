@@ -14,9 +14,10 @@ const selectedEdge = ref<Edge>();
 
 function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     evocat.value = context.evocat;
-    context.graph.addNodeListener('tap', node => selectNode(node));
-    context.graph.addEdgeListener('tap', edge => selectEdge(edge));
-    context.graph.addCanvasListener('tap', onCanvasTapHandler);
+    const listener = context.graph.listen();
+    listener.onNode('tap', node => selectNode(node));
+    listener.onEdge('tap', edge => selectEdge(edge));
+    listener.onCanvas('tap', onCanvasTapHandler);
 }
 
 function onCanvasTapHandler() {

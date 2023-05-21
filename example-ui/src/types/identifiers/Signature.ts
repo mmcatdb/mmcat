@@ -45,7 +45,7 @@ export class Signature {
         if (n == 0)
             return this;
 
-        const array = [] as number[];
+        const array: number[] = [];
         for (let i = 0; i < n; i++)
             array.push(- this._ids[n - i - 1]);
 

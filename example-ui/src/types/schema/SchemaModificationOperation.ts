@@ -14,9 +14,24 @@ export type SMOFromServer<T extends SMOType = SMOType> = {
     type: T;
 };
 
+export function fromServer(input: SMOFromServer): SMO {
+    switch (input.type) {
+    case SMOType.CreateObject:
+        return CreateObject.fromServer(input as CreateObjectFromServer);
+    case SMOType.DeleteObject:
+        return DeleteObject.fromServer(input as DeleteObjectFromServer);
+    case SMOType.CreateMorphism:
+        return CreateMorphism.fromServer(input as CreateMorphismFromServer);
+    case SMOType.DeleteMorphism:
+        return DeleteMorphism.fromServer(input as DeleteMorphismFromServer);
+    case SMOType.Composite:
+        return Composite.fromServer(input as CompositeFromServer);
+    }
+}
+
 export interface SMO<T extends SMOType = SMOType> {
     readonly type: T;
-    toServer(): SMOFromServer<T> | null;
+    toServer(): SMOFromServer<T>;
     up(category: SchemaCategory): void;
     down(category: SchemaCategory): void;
 }
@@ -47,7 +62,7 @@ export class CreateObject implements SMO<SMOType.CreateObject> {
         );
     }
 
-    toServer(): CreateObjectFromServer | null {
+    toServer(): CreateObjectFromServer {
         return {
             type: SMOType.CreateObject,
             object: this.serialized,
@@ -84,7 +99,7 @@ export class DeleteObject implements SMO<SMOType.DeleteObject> {
         );
     }
 
-    toServer(): DeleteObjectFromServer | null {
+    toServer(): DeleteObjectFromServer {
         return {
             type: SMOType.DeleteObject,
             object: this.serialized,
@@ -199,19 +214,3 @@ export class Composite implements SMO<SMOType.Composite> {
         /* This function is intentionally empty. */
     }
 }
-
-export function fromServer(input: SMOFromServer): SMO {
-    switch (input.type) {
-    case SMOType.CreateObject:
-        return CreateObject.fromServer(input as CreateObjectFromServer);
-    case SMOType.DeleteObject:
-        return DeleteObject.fromServer(input as DeleteObjectFromServer);
-    case SMOType.CreateMorphism:
-        return CreateMorphism.fromServer(input as CreateMorphismFromServer);
-    case SMOType.DeleteMorphism:
-        return DeleteMorphism.fromServer(input as DeleteMorphismFromServer);
-    case SMOType.Composite:
-        return Composite.fromServer(input as CompositeFromServer);
-    }
-}
-

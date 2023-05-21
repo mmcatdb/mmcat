@@ -8,7 +8,7 @@ export function createAxiosInstance(baseURL?: string, withCredentials = true) {
         baseURL,
         withCredentials, // This (true) is required for the backend cookies to work properly.
         // timeout: false,
-        params: {} // do not remove this, its added to add params later in the config
+        params: {}, // do not remove this, its added to add params later in the config
     });
 
     // Add a request interceptor
@@ -20,7 +20,7 @@ export function createAxiosInstance(baseURL?: string, withCredentials = true) {
             // Do something with request error
             console.log('Request error:', error);
             return Promise.reject(error);
-        }
+        },
     );
 
     function generateErrorObject(error: any) {
@@ -50,7 +50,7 @@ export function createAxiosInstance(baseURL?: string, withCredentials = true) {
                 console.log('Error request:', error.request);
 
             return Promise.reject(generateErrorObject(error));
-        }
+        },
     );
 
     return instance;
@@ -61,12 +61,12 @@ export function promiseToResponse<T>(promise: Promise<AxiosResponse<T>>): PullRe
         .then(response => {
             return ({
                 status: true,
-                data: response.data
+                data: response.data,
             } as Result<T>);
         }).catch(error => {
             return ({
                 status: false,
-                error: error
+                error: error,
             } as Result<T>);
         });
 }

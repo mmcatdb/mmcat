@@ -1,3 +1,5 @@
+export type VersionFromServer = string;
+
 export class Version {
     private children: Version[] = [];
 
@@ -12,52 +14,30 @@ export class Version {
     private constructor(
         private readonly branchId: number,
         private readonly levelIds: number[],
-        readonly parent?: Version,
+        private _parent?: Version,
     ) {
         this._branchlessId = this.levelIds.join('.');
         this._id = this.branchId + ':' + this._branchlessId;
     }
 
-    private readonly _branchlessId;
-    private readonly _id;
-
-    get branchlessId(): string {
-        return this._branchlessId;
-    }
-
-    get id(): string {
-        return this._id;
-    }
-
-    static fromId(id: string, parent?: Version): Version {
-        const split = id.split(':');
-        const levelIds = split[1].split('.');
-
-        return new Version(
-            parseInt(split[0]),
-            levelIds.map(parseInt),
-            parent,
-        );
-    }
-
-    toString(): string {
-        return this.id;
-    }
-
-    get level(): number {
-        return this.levelIds.length - 1;
-    }
-
-    get levelId(): number {
-        return this.levelIds[this.level];
-    }
-
-    get isCompositeWrapper(): boolean {
-        return !!this.parent && this.parent.level > this.level;
-    }
-
     static createRoot(branchId: number, levelIds: number[]): Version {
         return new Version(branchId, levelIds);
+    }
+
+    get parent(): Version | undefined {
+        return this._parent;
+    }
+
+    set parent(newValue: Version | undefined) {
+        if (this._parent)
+            throw new Error('Cannot change version\'s parent!');
+
+        if (!newValue)
+            return;
+
+        this._parent = newValue;
+        this._parent.children.push(this);
+        this._parent.children.sort((a, b) => a.branchId - b.branchId);
     }
 
     createChild(context: BranchContext, relativeLevel = 0): Version {
@@ -77,6 +57,70 @@ export class Version {
         this.children.push(child);
 
         return child;
+    }
+
+    static fromServer(input: VersionFromServer, parent?: Version): Version {
+        const split = input.split(':');
+        const levelIds = split[1].split('.');
+
+        const output = new Version(
+            parseInt(split[0]),
+            levelIds.map(parseInt),
+        );
+
+        // Let's make sure the version is properly added to the parent.
+        output.parent = parent;
+        return output;
+    }
+
+    toServer(): VersionFromServer {
+        return this._id;
+    }
+
+    private readonly _branchlessId;
+    private readonly _id;
+
+    get branchlessId(): string {
+        return this._branchlessId;
+    }
+
+    get id(): string {
+        return this._id;
+    }
+
+    toString(): string {
+        return this.id;
+    }
+
+    compare(other: Version): number {
+        const branchComparison = this.branchId - other.branchId;
+        if (branchComparison !== 0)
+            return branchComparison;
+
+        const minLength = Math.min(this.levelIds.length, other.levelIds.length);
+        for (let i = 0; i < minLength; i++) {
+            const comparison = this.levelIds[i] - other.levelIds[i];
+            if (comparison !== 0)
+                return comparison;
+        }
+
+        return this.levelIds.length - other.levelIds.length;
+    }
+
+    equals(other: Version): boolean {
+        return this._id === other._id;
+    }
+
+    get level(): number {
+        return this.levelIds.length - 1;
+    }
+
+    get levelId(): number {
+        return this.levelIds[this.level];
+    }
+
+    get isCompositeWrapper(): boolean {
+        return !!this._parent && this._parent.level > this.level;
     }
 }
 

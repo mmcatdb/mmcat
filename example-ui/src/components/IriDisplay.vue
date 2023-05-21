@@ -15,7 +15,7 @@ const iriRows = computed(() => {
         return [ props.iri ];
 
     const split = props.iri.split('/');
-    const output = [] as string[];
+    const output: string[] = [];
 
     const maxSectionLength = split.reduce((total, section) => Math.max(total, section.length), 0);
     // If the longest section is already longer than the given maxChars, so be it.

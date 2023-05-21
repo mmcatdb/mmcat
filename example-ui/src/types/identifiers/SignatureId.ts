@@ -30,7 +30,7 @@ export class SignatureId {
     }
 
     static union(ids: SignatureId[]): SignatureId {
-        const union = [] as Signature[];
+        const union: Signature[] = [];
         ids.forEach(id => {
             id.signatures.forEach(signature => {
                 for (const signatureInUnion of union) {
@@ -51,7 +51,7 @@ export class SignatureId {
 }
 
 export class SignatureIdFactory {
-    _signatures = [] as Signature[];
+    _signatures: Signature[] = [];
     _signatureId: SignatureId;
 
     constructor(signatures?: Signature[]) {

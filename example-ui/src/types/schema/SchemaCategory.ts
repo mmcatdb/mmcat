@@ -7,8 +7,15 @@ import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, type Min, type MorphismDefinition } from "./SchemaMorphism";
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
-import type { SMOFromServer } from "./SchemaModificationOperation";
 import type { Graph } from "../categoryGraph";
+
+export type SchemaCategoryFromServer = {
+    id: Id;
+    label: string;
+    version: VersionId;
+    objects: SchemaObjectFromServer[];
+    morphisms: SchemaMorphismFromServer[];
+};
 
 export class SchemaCategory implements Entity {
     readonly id: Id;
@@ -114,25 +121,6 @@ export class SchemaCategory implements Entity {
         morphism.update(dom.key, cod.key, min, label);
     }
 
-    getUpdateObject(): SchemaCategoryUpdate | null {
-        const operations: SMOFromServer[] = [];
-        // TODO
-        /*
-        for (const operation of this.evolver.getOperations()) {
-            const operationToServer = operation.toServer();
-            if (!operationToServer)
-                return null;
-
-            operations.push(operationToServer);
-        }
-        */
-
-        return {
-            beforeVersion: this.versionId,
-            operations,
-        };
-    }
-
     suggestKey(): Key {
         return this._keysProvider.suggest();
     }
@@ -183,6 +171,8 @@ export class SchemaCategory implements Entity {
         });
         */
 
+        newGraph.reset();
+
         newGraph.getCytoscape().batch(() => {
             this.objects.forEach(object => newGraph.createNode(object));
 
@@ -201,16 +191,8 @@ export class SchemaCategory implements Entity {
     }
 }
 
-export type SchemaCategoryFromServer = {
-    id: Id;
-    label: string;
-    version: VersionId;
-    objects: SchemaObjectFromServer[];
-    morphisms: SchemaMorphismFromServer[];
-};
-
 function getObjectsFromPath(path: ParentProperty, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject[] {
-    const output = [] as SchemaObject[];
+    const output: SchemaObject[] = [];
 
     path.subpaths.forEach(subpath => {
         const subpathObject = findObjectFromSignature(subpath.signature, objects, morphisms);
@@ -266,9 +248,4 @@ export class SchemaCategoryInfo implements Entity {
 
 export type SchemaCategoryInit = {
     label: string;
-};
-
-export type SchemaCategoryUpdate = {
-    readonly beforeVersion: VersionId;
-    readonly operations: SMOFromServer[];
 };

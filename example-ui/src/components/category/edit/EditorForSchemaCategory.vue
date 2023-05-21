@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Edge, SelectionType, type Node } from '@/types/categoryGraph';
 import { onMounted, onUnmounted, ref } from 'vue';
-import { SchemaCategory } from '@/types/schema';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import AddComplexStructure from './AddComplexStructure.vue';
@@ -9,7 +8,6 @@ import EditObject from './EditObject.vue';
 import EditMorphism from './EditMorphism.vue';
 import Integration from '../../integration/Integration.vue';
 import Divider from '@/components/layout/Divider.vue';
-import API from '@/utils/api';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import EditGroup from './EditGroup.vue';
 import { useEvocat } from '@/utils/injects';
@@ -39,23 +37,21 @@ type StateValue =
     GenericStateValue<State.EditGroup, { nodes: Node[] }> |
     GenericStateValue<State.Integration, unknown>;
 
-const emit = defineEmits([ 'save' ]);
-
 const state = ref<StateValue>({ type: State.Default });
 
 const editedObject = ref<InstanceType<typeof EditObject>>();
 const editedMorphism = ref<InstanceType<typeof EditMorphism>>();
 
+const listener = graph.listen();
+
 onMounted(() => {
-    graph.addNodeListener('tap', onNodeTapHandler);
-    graph.addEdgeListener('tap', onEdgeTapHandler);
-    graph.addCanvasListener('tap', onCanvasTapHandler);
+    listener.onNode('tap', onNodeTapHandler);
+    listener.onEdge('tap', onEdgeTapHandler);
+    listener.onCanvas('tap', onCanvasTapHandler);
 });
 
 onUnmounted(() => {
-    graph.removeNodeListener('tap', onNodeTapHandler);
-    graph.removeEdgeListener('tap', onEdgeTapHandler);
-    graph.removeCanvasListener('tap', onCanvasTapHandler);
+    listener.close();
 });
 
 function addObjectClicked() {
@@ -190,19 +186,7 @@ function onCanvasTapHandler() {
 }
 
 async function save() {
-    // TODO remove
-    const updateObject = evocat.schemaCategory.getUpdateObject();
-    console.log(evocat.schemaCategory);
-    if (!updateObject) {
-        console.log('Update object invalid');
-        return;
-    }
-
-    const result = await API.schemas.updateCategoryWrapper({ id: evocat.schemaCategory.id }, updateObject);
-    if (result.status) {
-        const schemaCategory = SchemaCategory.fromServer(result.data);
-        emit('save', schemaCategory);
-    }
+    evocat.update();
 }
 </script>
 

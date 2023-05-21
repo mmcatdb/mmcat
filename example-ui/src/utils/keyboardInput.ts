@@ -7,7 +7,7 @@ export enum Key {
 const keys = {
     [Key.Shift]: false,
     [Key.Ctrl]: false,
-    [Key.Alt]: false
+    [Key.Alt]: false,
 };
 
 export function startCapturingKeys() {

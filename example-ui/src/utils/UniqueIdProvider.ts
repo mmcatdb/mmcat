@@ -5,12 +5,12 @@ type Bijection<Domain, Codomain> = {
 
 const identityFunction = {
     function: (x: number) => x,
-    inversion: (x: number) => x
+    inversion: (x: number) => x,
 };
 
 export class UniqueIdProvider<T> {
     _mapping: Bijection<T, number>;
-    _currentValues = new Set() as Set<number>;
+    _currentValues: Set<number> = new Set();
     _maxValue = 0;
 
     constructor(mapping: Bijection<T, number>) {

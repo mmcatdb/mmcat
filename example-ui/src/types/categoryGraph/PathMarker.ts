@@ -44,7 +44,7 @@ export class PathMarker {
 
     filterFunctions: FilterFunction[];
 
-    readonly stack = [] as PathSegment[];
+    readonly stack: PathSegment[] = [];
 
     constructor(rootNode: Node, filter: Filter) {
         this.rootNode = rootNode;
@@ -117,7 +117,7 @@ export class PathMarker {
 
         // For the direct neighbours of the root the queue is needed.
         const queue = this.getTraversableNeighbours(this.rootNode);
-        const allProcessedNeighbours = [] as PathSegment[];
+        const allProcessedNeighbours: PathSegment[] = [];
 
         let directNeighbour = queue.shift();
         while (directNeighbour) {

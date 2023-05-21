@@ -6,7 +6,7 @@ import static cz.cuni.matfyz.server.repository.utils.Utils.setId;
 import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.evolution.Version;
 import cz.cuni.matfyz.server.entity.Id;
-import cz.cuni.matfyz.server.entity.evolution.SchemaCategoryUpdate;
+import cz.cuni.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
@@ -18,7 +18,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -109,9 +108,7 @@ public class SchemaCategoryRepository {
         });
     }
 
-    private static final ObjectWriter updateWriter = mapper.writerFor(SchemaCategoryUpdate.class);
-
-    public boolean update(SchemaCategoryWrapper wrapper, SchemaCategoryUpdate update) {
+    public boolean update(SchemaCategoryWrapper wrapper, SchemaUpdate update) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""
                 UPDATE schema_category
@@ -124,10 +121,31 @@ public class SchemaCategoryRepository {
             statement.setString(1, wrapper.toJsonValue());
             setId(statement, 2, wrapper.id);
             setId(statement, 3, wrapper.id);
-            statement.setString(4, updateWriter.writeValueAsString(update));
+            statement.setString(4, update.toJsonValue());
 
             int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);
+        });
+    }
+
+    public List<SchemaUpdate> findAllUpdates(Id categoryId) {
+        return db.getMultiple((connection, output) -> {
+            var statement = connection.prepareStatement("""
+                SELECT
+                    id,
+                    json_value
+                FROM schema_category_update
+                WHERE schema_category_id = ?
+                ORDER BY id;
+                """);
+            setId(statement, 1, categoryId);
+            var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                var id = getId(resultSet, "id");
+                var jsonValue = resultSet.getString("json_value");
+                output.add(SchemaUpdate.fromJsonValue(id, categoryId, jsonValue));
+            }
         });
     }
 

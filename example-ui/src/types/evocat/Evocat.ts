@@ -1,12 +1,14 @@
 import type { Graph } from "@/types/categoryGraph";
-import type { SchemaCategory, ObjectDefinition, SchemaObject, MorphismDefinition, SchemaMorphism, SchemaCategoryUpdate } from "@/types/schema";
+import type { SchemaCategory, ObjectDefinition, SchemaObject, MorphismDefinition, SchemaMorphism } from "@/types/schema";
 import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
 import { Version, VersionContext } from "./Version";
 import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO } from "../schema/SchemaModificationOperation";
+import type { SchemaUpdateInit } from "../schema/SchemaUpdate";
+import { VersionedSMO } from "../schema/VersionedSMO";
 
-type UpdateFunction = (udpate: SchemaCategoryUpdate) => Promise<Result<SchemaCategory>>;
+type UpdateFunction = (udpate: SchemaUpdateInit) => Promise<Result<SchemaCategory>>;
 
 export type EvocatApi = {
     update: UpdateFunction;
@@ -16,7 +18,7 @@ export class Evocat {
     readonly versionContext = VersionContext.createNew();
 
     private constructor(
-        readonly schemaCategory: SchemaCategory,
+        public schemaCategory: SchemaCategory,
         readonly logicalModels: LogicalModel[],
         readonly api: EvocatApi,
     ) {}
@@ -31,6 +33,18 @@ export class Evocat {
         return evocat;
     }
 
+    async update() {
+        const updateObject = this.getUpdateObject();
+
+        const result = await this.api.update(updateObject);
+        if (!result.status)
+            return;
+
+        const beforeCategory = this.schemaCategory;
+        this.schemaCategory = result.data;
+        this.schemaCategory.graph = beforeCategory.graph;
+    }
+
     get graph(): Graph | undefined {
         return this.schemaCategory.graph;
     }
@@ -39,19 +53,32 @@ export class Evocat {
         this.schemaCategory.graph = newGraph;
     }
 
-    private readonly operations = new Map as Map<string, { operation: SMO, version: Version }>;
+    private readonly operations: Map<string, VersionedSMO> = new Map();
 
-    private commitOperation(operation: SMO) {
+    private commitOperation(smo: SMO) {
         const version = this.versionContext.createNextVersion();
-        this.operations.set(version.id, { operation, version });
-        console.log(`[${version}] : ${operation.type}`);
 
-        operation.up(this.schemaCategory);
+        this.operations.set(version.id, VersionedSMO.create(version, smo));
+        console.log(`[${version}] : ${smo.type}`);
+
+        smo.up(this.schemaCategory);
+    }
+
+    private getUpdateObject(): SchemaUpdateInit {
+        const operations = [ ...this.operations.values() ]
+            .filter(operation => operation.isNew)
+            .sort((a, b) => a.version.compare(b.version))
+            .map(operation => operation.toServer());
+
+        return {
+            beforeVersion: this.schemaCategory.versionId,
+            operations,
+        };
     }
 
     undo(skipLowerLevels = true) {
         this.versionContext.undo(skipLowerLevels).forEach(version => {
-            const operation = this.operations.get(version.id)?.operation;
+            const operation = this.operations.get(version.id)?.smo;
             if (!operation)
                 throw new Error(`Undo error: Operation for version: ${version} not found.`);
 
@@ -61,7 +88,7 @@ export class Evocat {
 
     redo(skipLowerLevels = true) {
         this.versionContext.redo(skipLowerLevels).forEach(version => {
-            const operation = this.operations.get(version.id)?.operation;
+            const operation = this.operations.get(version.id)?.smo;
             if (!operation)
                 throw new Error(`Redo error: Operation for version: ${version} not found.`);
 
@@ -73,7 +100,7 @@ export class Evocat {
         const { undo, redo } = this.versionContext.move(target);
 
         undo.forEach(version => {
-            const operation = this.operations.get(version.id)?.operation;
+            const operation = this.operations.get(version.id)?.smo;
             if (!operation)
                 throw new Error(`Move error: Operation for version: ${version} not found.`);
 
@@ -81,7 +108,7 @@ export class Evocat {
         });
 
         redo.forEach(version => {
-            const operation = this.operations.get(version.id)?.operation;
+            const operation = this.operations.get(version.id)?.smo;
             if (!operation)
                 throw new Error(`Move error: Operation for version: ${version} not found.`);
 

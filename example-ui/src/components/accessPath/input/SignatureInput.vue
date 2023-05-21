@@ -25,16 +25,17 @@ watch(() => props.modelValue, (newValue: SequenceSignature) => {
         setSignature(newValue);
 });
 
+const listener = graph.listen();
+
 onMounted(() => {
-    graph.addNodeListener('tap', onNodeTapHandler);
-    graph.addEdgeListener('tap', onEdgeTapHandler);
+    listener.onNode('tap', onNodeTapHandler);
+    listener.onEdge('tap', onEdgeTapHandler);
     innerValue.value.sequence.selectAll();
     innerValue.value.markAvailablePaths(props.filter);
 });
 
 onUnmounted(() => {
-    graph.removeNodeListener('tap', onNodeTapHandler);
-    graph.removeEdgeListener('tap', onEdgeTapHandler);
+    listener.close();
     innerValue.value.sequence.unselectAll();
     graph.resetAvailabilityStatus();
 });

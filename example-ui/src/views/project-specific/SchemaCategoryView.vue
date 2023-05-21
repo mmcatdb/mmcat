@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { Graph } from '@/types/categoryGraph';
-import { provide, ref, shallowRef } from 'vue';
+import { provide, shallowRef } from 'vue';
 import EditorForSchemaCategory from '@/components/category/edit/EditorForSchemaCategory.vue';
-import type { SchemaCategory } from '@/types/schema';
 import { useRoute } from 'vue-router';
 import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
 import { toQueryScalar } from '@/utils/router';
-import { evocatKey, useSchemaCategoryInfo } from '@/utils/injects';
+import { evocatKey } from '@/utils/injects';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '@/components/category/EvocatDisplay.vue';
 import VersionsControl from '@/components/category/version/VersionsControl.vue';
@@ -36,17 +35,6 @@ async function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
 }
 
 //const graphDisplay = ref<InstanceType<typeof GraphDisplay>>();
-const category = useSchemaCategoryInfo();
-
-function schemaCategorySaved(schemaCategory: SchemaCategory) {
-    graph.value = undefined;
-
-
-    //graphDisplay.value?.updateSchema(schemaCategory);
-
-
-    category.value = schemaCategory;
-}
 </script>
 
 <template>
@@ -57,9 +45,7 @@ function schemaCategorySaved(schemaCategory: SchemaCategory) {
         <div
             v-if="evocat"
         >
-            <EditorForSchemaCategory
-                @save="schemaCategorySaved"
-            />
+            <EditorForSchemaCategory />
         </div>
     </div>
     <div v-if="evocat">

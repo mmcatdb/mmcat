@@ -1,6 +1,6 @@
 export class TwoWayMap<Key, Value> implements Map<Key, Value> {
-    _map = new Map() as Map<Key, Value>;
-    _reverseMap = new Map() as Map<Value, Key>;
+    _map: Map<Key, Value> = new Map();
+    _reverseMap: Map<Value, Key> = new Map();
 
     clear(): void {
         this._map.clear();

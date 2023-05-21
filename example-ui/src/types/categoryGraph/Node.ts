@@ -67,13 +67,13 @@ export class Neighbour {
 export class Node {
     schemaObject: SchemaObject;
     node!: NodeSingular;
-    _tags = new Set() as Set<NodeTag>;
-    availablePathData = null as MorphismData | null;
+    _tags: Set<NodeTag> = new Set();
+    availablePathData: MorphismData | null = null;
 
     _neighbours = new ComparableMap<Signature, string, Neighbour>(signature => signature.toString());
 
     _groupPlaceholders: NodeSingular[];
-    _noGroupPlaceholder = undefined as NodeSingular | undefined;
+    _noGroupPlaceholder?: NodeSingular;
 
     constructor(schemaObject: SchemaObject, groupPlaceholders: NodeSingular[], noGroupPlaceholder?: NodeSingular) {
         this.schemaObject = schemaObject;

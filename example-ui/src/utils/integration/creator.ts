@@ -50,8 +50,8 @@ function addId(id: ImportedId, evocat: Evocat, graph: Graph, object: SchemaObjec
 // TODO remove the graph dependency
 export function addImportedToGraph(imported: ImportedDataspecer, evocat: Evocat, graph: Graph) {
     const iriToObjectMapping = new Map<string, SchemaObject>();
-    const createdObjects = new Map() as Map<ImportedObject, SchemaObject>;
-    const createdMorphisms = new Map() as Map<ImportedMorphism, SchemaMorphism>;
+    const createdObjects: Map<ImportedObject, SchemaObject> = new Map();
+    const createdMorphisms: Map<ImportedMorphism, SchemaMorphism> = new Map();
 
     imported.objects.forEach(object => {
         if (!evocat.schemaCategory.isIriAvailable(object.iri))

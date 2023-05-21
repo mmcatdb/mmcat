@@ -4,10 +4,6 @@ import type { SchemaMorphism, SchemaObject } from "../schema";
 import { Edge } from "./Edge";
 import { Node } from "./Node";
 
-export type NodeEventFunction = (node: Node) => void;
-export type EdgeEventFunction = (edge: Edge) => void;
-export type CanvasEventFunction = () => void;
-
 export type TemporaryEdge = {
     delete: () => void;
 };
@@ -20,76 +16,44 @@ type Group = {
 
 export class Graph {
     // Workaround for the vue reactivity (all properties are replaced by proxies, but this way, we can have access to the original Core)
-    _nodes = [] as Node[];
-    _edges = [] as Edge[];
+    _nodes: Node[] = [];
+    _edges: Edge[] = [];
     // How many nodes have fixed positions.
     _fixedNodes = 0;
 
+    private eventListener: GraphEventListener;
+
     constructor(
         private readonly cytoscape: Core,
-    ) {}
+    ) {
+        this.eventListener = new GraphEventListener(cytoscape);
+    }
 
     // Workaround for Evocat - remove as soon as possible
     public getCytoscape(): Core {
         return this.cytoscape;
     }
 
-    _nodeHandlers = new Map() as Map<NodeEventFunction, EventHandler>;
-    _edgeHandlers = new Map() as Map<EdgeEventFunction, EventHandler>;
-    _canvasHandlers = new Map() as Map<CanvasEventFunction, EventHandler>;
+    public reset(): void {
+        this.cytoscape.elements().remove();
 
-    addNodeListener(event: string, handler: NodeEventFunction) {
-        const innerHandler = (event: EventObject) => {
-            const node = (event.target as NodeSingular).data('schemaData') as Node;
-            handler(node);
-        };
+        this._nodes = [];
+        this._edges = [];
+        this._fixedNodes = 0;
+        this.groups = [];
 
-        this.cytoscape.addListener(event, 'node', innerHandler);
-        this._nodeHandlers.set(handler, innerHandler);
+        this.eventListener.clear();
     }
 
-    removeNodeListener(event: string, handler: NodeEventFunction) {
-        const innerHandler = this._nodeHandlers.get(handler);
-        if (innerHandler)
-            this.cytoscape.removeListener(event, innerHandler);
-    }
-
-    addEdgeListener(event: string, handler: EdgeEventFunction) {
-        const innerHandler = (event: EventObject) => {
-            const edge = (event.target as EdgeSingular).data('schemaData') as Edge;
-            handler(edge);
-        };
-
-        this.cytoscape.addListener(event, 'edge', innerHandler);
-        this._edgeHandlers.set(handler, innerHandler);
-    }
-
-    removeEdgeListener(event: string, handler: EdgeEventFunction) {
-        const innerHandler = this._edgeHandlers.get(handler);
-        if (innerHandler)
-            this.cytoscape.removeListener(event, innerHandler);
-    }
-
-    addCanvasListener(event: string, handler: CanvasEventFunction) {
-        const innerHandler = (event: EventObject) => {
-            if (event.target === this.cytoscape)
-                handler();
-        };
-
-        this.cytoscape.addListener(event, innerHandler);
-    }
-
-    removeCanvasListener(event: string, handler: CanvasEventFunction) {
-        const innerHandler = this._canvasHandlers.get(handler);
-        if (innerHandler)
-            this.cytoscape.removeListener(event, innerHandler);
+    listen(): ListenerSession {
+        return this.eventListener.openSession();
     }
 
     resetAvailabilityStatus(): void {
         this._nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
-    groups = [] as Group[];
+    groups: Group[] = [];
 
     getGroupOrAddIt(logicalModel: LogicalModel): Group {
         const results = this.groups.filter(group => group.logicalModel.id === logicalModel.id);
@@ -294,4 +258,107 @@ function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''
         },
         classes: classes + ' ' + morphism.tags.join(' '),
     };
+}
+
+class GraphEventListener {
+    private lastSessionId = -1;
+
+    constructor(
+        private readonly cytoscape: Core,
+    ) {}
+
+    private openSessions: Map<number, ListenerSession> = new Map();
+
+    openSession(): ListenerSession {
+        this.lastSessionId++;
+        const session = new ListenerSession(this.lastSessionId, this, this.cytoscape);
+        this.openSessions.set(this.lastSessionId, session);
+
+        return session;
+    }
+
+    onSessionClose(sessionId: number) {
+        this.openSessions.delete(sessionId);
+    }
+
+    clear() {
+        [ ...this.openSessions.values() ].forEach(session => session.close());
+    }
+}
+
+type NodeEventFunction = (node: Node) => void;
+type EdgeEventFunction = (edge: Edge) => void;
+type CanvasEventFunction = () => void;
+
+type EventHandlerObject = {
+    event: string;
+    handler: EventHandler;
+};
+
+class ListenerSession {
+    private lastHandlerId = -1;
+
+    constructor(
+        private readonly id: number,
+        private readonly eventListener: GraphEventListener,
+        private readonly cytoscape: Core,
+    ) {}
+
+    private eventHandlers: Map<number, EventHandlerObject> = new Map();
+
+    close() {
+        [ ...this.eventHandlers.keys() ].forEach(handler => this.removeEventHandler(handler));
+        this.eventListener.onSessionClose(this.id);
+    }
+
+    private createEventHandler(event: string, handler: EventHandler, selector?: string): number {
+        this.lastHandlerId++;
+        this.eventHandlers.set(this.lastHandlerId, { event, handler });
+        if (selector)
+            this.cytoscape.on(event, selector, handler);
+        else
+            this.cytoscape.on(event, handler);
+
+        return this.lastHandlerId;
+    }
+
+    private removeEventHandler(handlerId: number) {
+        const handler = this.eventHandlers.get(handlerId);
+        if (handler) {
+            this.cytoscape.off(handler.event, handler.handler);
+            this.eventHandlers.delete(handlerId);
+        }
+    }
+
+    onNode(event: string, handler: NodeEventFunction): number {
+        const innerHandler = (event: EventObject) => {
+            const node = (event.target as NodeSingular).data('schemaData') as Node;
+            handler(node);
+        };
+
+        return this.createEventHandler(event, innerHandler, 'node');
+    }
+
+    onEdge(event: string, handler: EdgeEventFunction): number {
+        const innerHandler = (event: EventObject) => {
+            const edge = (event.target as EdgeSingular).data('schemaData') as Edge;
+            handler(edge);
+        };
+
+        return this.createEventHandler(event, innerHandler, 'edge');
+    }
+
+
+    onCanvas(event: string, handler: CanvasEventFunction): number {
+        const innerHandler = (event: EventObject) => {
+            if (event.target === this.cytoscape)
+                handler();
+        };
+
+        return this.createEventHandler(event, innerHandler);
+    }
+
+    off(handlerId: number) {
+        this.removeEventHandler(handlerId);
+    }
 }

@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.server.controller;
 
 import cz.cuni.matfyz.server.entity.Id;
-import cz.cuni.matfyz.server.entity.evolution.SchemaCategoryUpdate;
+import cz.cuni.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
@@ -63,7 +63,7 @@ public class SchemaCategoryController {
     }
 
     @PostMapping("/schema-categories/{id}/update")
-    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaCategoryUpdate update) {
+    public SchemaCategoryWrapper updateCategoryWrapper(@PathVariable Id id, @RequestBody SchemaUpdateInit update) {
         SchemaCategoryWrapper updatedWrapper = service.update(id, update);
 
         if (updatedWrapper == null)

@@ -6,8 +6,8 @@ type Injection<Input, Output> = (input: Input) => Output;
 export class TwoWayComparableMap<Key, KeyId, Value, ValueId> implements Map<Key, Value> {
     _keyToIdFunction: Injection<Key, KeyId>;
     _valueToIdFunction: Injection<Value, ValueId>;
-    _map = new Map() as Map<KeyId, KeyValue<Key, Value>>;
-    _reverseMap = new Map() as Map<ValueId, Key>;
+    _map: Map<KeyId, KeyValue<Key, Value>> = new Map();
+    _reverseMap: Map<ValueId, Key> = new Map();
 
     public constructor(keyToIdFunction: Injection<Key, KeyId>, valueToIdFunction: Injection<Value, ValueId>) {
         this._keyToIdFunction = keyToIdFunction;
