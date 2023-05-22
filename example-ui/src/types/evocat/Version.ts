@@ -29,15 +29,19 @@ export class Version {
     }
 
     set parent(newValue: Version | undefined) {
-        if (this._parent)
-            throw new Error('Cannot change version\'s parent!');
+        if (this._parent) {
+            const index = this._parent.children.indexOf(this);
+            if (index !== -1)
+                this._parent.children.splice(index, 1);
 
-        if (!newValue)
-            return;
+            this._parent = undefined;
+        }
 
-        this._parent = newValue;
-        this._parent.children.push(this);
-        this._parent.children.sort((a, b) => a.branchId - b.branchId);
+        if (newValue) {
+            this._parent = newValue;
+            this._parent.children.push(this);
+            this._parent.children.sort((a, b) => a.branchId - b.branchId);
+        }
     }
 
     createChild(context: BranchContext, relativeLevel = 0): Version {
@@ -65,7 +69,7 @@ export class Version {
 
         const output = new Version(
             parseInt(split[0]),
-            levelIds.map(parseInt),
+            levelIds.map(id => parseInt(id)),
         );
 
         // Let's make sure the version is properly added to the parent.
@@ -141,7 +145,7 @@ export class VersionContext {
 
     private constructor(
         private readonly branchContext: BranchContext,
-        private readonly versions: Version[],
+        private versions: Version[],
         private version: Version,
     ) {}
 
@@ -166,6 +170,10 @@ export class VersionContext {
 
     get allVersions() {
         return [ ...this.versions ];
+    }
+
+    get root() {
+        return this.versions[0];
     }
 
     get currentVersion() {
@@ -196,6 +204,18 @@ export class VersionContext {
         this.versionListeners.forEach(listener => listener(this.currentVersion));
 
         return newVersion;
+    }
+
+    removeVersions(versionsToRemove: Version[]) {
+        versionsToRemove.forEach(version => version.parent = undefined);
+        this.versions = [ this.root, ...this.versions.filter(version => version.parent) ];
+
+        if (versionsToRemove.includes(this.version)) {
+            this.version = this.versions[this.versions.length - 1];
+            this.versionListeners.forEach(listener => listener(this.currentVersion));
+        }
+
+        this.collectionListeners.forEach(listener => listener(this.allVersions));
     }
 
     private undonedVersions: Version[] = [];
@@ -349,3 +369,15 @@ export class VersionContext {
 
 type VersionsEventFunction = (versions: Version[]) => void;
 type VersionEventFunction = (version: Version) => void;
+
+export function computeLatestVersions(rootVersion: Version) {
+    const output: Version[] = [];
+    let nextVersion: Version | undefined = rootVersion;
+
+    while (nextVersion) {
+        output.push(nextVersion);
+        nextVersion = nextVersion.lastChild;
+    }
+
+    return output;
+}

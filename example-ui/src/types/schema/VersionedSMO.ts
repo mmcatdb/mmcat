@@ -10,7 +10,7 @@ export class VersionedSMO {
     private constructor(
         readonly version: Version,
         readonly smo: SMO,
-        readonly isNew: boolean,
+        public isNew: boolean,
     ) {}
 
     static create(version: Version, smo: SMO): VersionedSMO {

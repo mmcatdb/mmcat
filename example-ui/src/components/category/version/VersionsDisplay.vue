@@ -3,7 +3,7 @@ import { computed, watch } from 'vue';
 
 import { useEvocat } from '@/utils/injects';
 
-import type { Version } from '@/types/evocat/Version';
+import { computeLatestVersions, type Version } from '@/types/evocat/Version';
 
 type VersionsDisplayProps = {
     allVersions: Version[];
@@ -15,17 +15,7 @@ const props = withDefaults(defineProps<VersionsDisplayProps>(), {
     showAll: false,
 });
 
-const latestVersions = computed(() => {
-    const output: Version[] = [];
-    let nextVersion: Version | undefined = props.allVersions[0];
-
-    while (nextVersion) {
-        output.push(nextVersion);
-        nextVersion = nextVersion.lastChild;
-    }
-
-    return output;
-});
+const latestVersions = computed(() => computeLatestVersions(props.allVersions[0]));
 
 const lastLatestVersion = computed(() => latestVersions.value[latestVersions.value.length - 1]);
 

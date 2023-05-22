@@ -3,7 +3,7 @@ import type { SchemaCategory, ObjectDefinition, SchemaObject, MorphismDefinition
 import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
-import { Version, VersionContext } from "./Version";
+import { Version, VersionContext, computeLatestVersions } from "./Version";
 import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO } from "../schema/SchemaModificationOperation";
 import type { SchemaUpdate, SchemaUpdateInit } from "../schema/SchemaUpdate";
 import { VersionedSMO } from "../schema/VersionedSMO";
@@ -71,14 +71,24 @@ export class Evocat {
     }
 
     private getUpdateObject(): SchemaUpdateInit {
-        const operations = [ ...this.operations.values() ]
+        const newOperations = computeLatestVersions(this.versionContext.root)
+            .map(version => this.operations.get(version.id))
+            .filter((operation): operation is VersionedSMO => !!operation)
+            .filter(operation => operation.isNew);
+
+        const operationsToServer = newOperations.map(operation => operation.toServer());
+
+        newOperations.forEach(operation => operation.isNew = false);
+        const versionsToRemove =  [ ...this.operations.values() ]
             .filter(operation => operation.isNew)
-            .sort((a, b) => a.version.compare(b.version))
-            .map(operation => operation.toServer());
+            .map(operation => operation.version);
+
+        versionsToRemove.forEach(version => this.operations.delete(version.id));
+        this.versionContext.removeVersions(versionsToRemove);
 
         return {
             prevVersion: this.schemaCategory.versionId,
-            operations,
+            operations: operationsToServer,
         };
     }
 
