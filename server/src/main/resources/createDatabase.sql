@@ -27,40 +27,56 @@ VALUES
         "label": "Article example",
         "version": "1",
         "objects": [
-            {"label": "Customer", "position": {"x": -99, "y": -5}, "ids": {"type": "Signatures", "signatureIds": [["1"]]}, "key": {"value": 1}, "superId": ["1"]},
-            {"label": "Id", "position": {"x": -138, "y": 94}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 2}, "superId": ["EMPTY"]},
-            {"label": "Order", "position": {"x": 134, "y": -85}, "ids": {"type": "Signatures", "signatureIds": [["4", "3;1"]]}, "key": {"value": 4}, "superId": ["4", "3;1"]},
-            {"label": "Number", "position": {"x": 140, "y": -188}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 5}, "superId": ["EMPTY"]},
-            {"label": "Contact", "position": {"x": 271, "y": -83}, "ids": {"type": "Signatures", "signatureIds": [["7;8", "6"]]}, "key": {"value": 6}, "superId": ["7;8", "6"]},
-            {"label": "Value", "position": {"x": 273, "y": -190}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 7}, "superId": ["EMPTY"]},
-            {"label": "Type", "position": {"x": 394, "y": -86}, "ids": {"type": "Signatures", "signatureIds": [["8"]]}, "key": {"value": 8}, "superId": ["8"]},
-            {"label": "Name", "position": {"x": 399, "y": -180}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 9}, "superId": ["EMPTY"]},
-            {"label": "Items", "position": {"x": 136, "y": -6}, "ids": {"type": "Signatures", "signatureIds": [["9;3;1", "9;4", "10;12"]]}, "key": {"value": 10}, "superId": ["9;3;1", "9;4", "10;12"]},
-            {"label": "Quantity", "position": {"x": 258, "y": -5}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 11}, "superId": ["EMPTY"]},
-            {"label": "Product", "position": {"x": 128, "y": 85}, "ids": {"type": "Signatures", "signatureIds": [["12"]]}, "key": {"value": 12}, "superId": ["12"]},
-            {"label": "Id", "position": {"x": 47, "y": 189}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 13}, "superId": ["EMPTY"]},
-            {"label": "Name", "position": {"x": 125, "y": 187}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 14}, "superId": ["EMPTY"]},
-            {"label": "Price", "position": {"x": 213, "y": 189}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 15}, "superId": ["EMPTY"]},
-            {"label": "Friend", "position": {"x": -130, "y": -120}, "ids": {"type": "Signatures", "signatureIds": [["15;1", "16;1"]]}, "key": {"value": 16}, "superId": ["15;1", "16;1"]},
-            {"label": "Since", "position": {"x": -60, "y": -150}, "ids": {"type": "Value", "signatureIds": [[]]}, "key": {"value": 17}, "superId": ["EMPTY"]}
+            {"ids": {"type": "Signatures",  "signatureIds": [["1"]]},                   "key": {"value":  1}, "label": "Customer",  "superId": ["1"],
+                "position": {"x": -99, "y": -5}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value":  2}, "label": "Id",        "superId": ["EMPTY"],
+                "position": {"x": -138, "y": 94}},
+            {"ids": {"type": "Signatures",  "signatureIds": [["2", "3;1"]]},            "key": {"value":  3}, "label": "Order",     "superId": ["2", "3;1"],
+                "position": {"x": 134, "y": -85}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value":  4}, "label": "Number",    "superId": ["EMPTY"],
+                "position": {"x": 140, "y": -188}},
+            {"ids": {"type": "Signatures",  "signatureIds": [["4"]]},                   "key": {"value":  5}, "label": "Product",   "superId": ["4"],
+                "position": {"x": 128, "y": 85}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value":  6}, "label": "Id",        "superId": ["EMPTY"],
+                "position": {"x": 47, "y": 189}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value":  7}, "label": "Name",      "superId": ["EMPTY"],
+                "position": {"x": 125, "y": 187}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value":  8}, "label": "Price",     "superId": ["EMPTY"],
+                "position": {"x": 213, "y": 189}},
+            {"ids": {"type": "Signatures",  "signatureIds": [["7;3;1", "7;2", "8;4"]]}, "key": {"value":  9}, "label": "Items",     "superId": ["7;3;1", "7;2", "8;4"],
+                "position": {"x": 136, "y": -6}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value": 10}, "label": "Quantity", "superId": ["EMPTY"],
+                "position": {"x": 258, "y": -5}},
+            {"ids": {"type": "Signatures",  "signatureIds": [["11;12", "10"]]},         "key": {"value": 11}, "label": "Contact",  "superId": ["11;12", "10"],
+                "position": {"x": 271, "y": -83}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value": 12}, "label": "Value",    "superId": ["EMPTY"],
+                "position": {"x": 273, "y": -190}},
+            {"ids": {"type": "Signatures",  "signatureIds": [["12"]]},                  "key": {"value": 13}, "label": "Type",     "superId": ["12"],
+                "position": {"x": 394, "y": -86}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value": 14}, "label": "Name",     "superId": ["EMPTY"],
+                "position": {"x": 399, "y": -180}},
+            {"ids": {"type": "Signatures",  "signatureIds": [["15;1", "14;1"]]},        "key": {"value": 15}, "label": "Friend",   "superId": ["15;1", "14;1"],
+                "position": {"x": -130, "y": -120}},
+            {"ids": {"type": "Value",       "signatureIds": [[]]},                      "key": {"value": 16}, "label": "Since",    "superId": ["EMPTY"],
+                "position": {"x": -60, "y": -150}}
         ],
         "morphisms": [
-            {"domKey": {"value": 1}, "codKey": {"value": 2}, "min": "ONE", "signature": "1"},
-            {"domKey": {"value": 4}, "codKey": {"value": 1}, "min": "ONE", "signature": "3"},
-            {"domKey": {"value": 4}, "codKey": {"value": 5}, "min": "ONE", "signature": "4"},
-            {"domKey": {"value": 4}, "codKey": {"value": 6}, "min": "ZERO", "signature": "5"},
-            {"domKey": {"value": 6}, "codKey": {"value": 7}, "min": "ONE", "signature": "6"},
-            {"domKey": {"value": 6}, "codKey": {"value": 8}, "min": "ONE", "signature": "7"},
-            {"domKey": {"value": 8}, "codKey": {"value": 9}, "min": "ONE", "signature": "8"},
-            {"domKey": {"value": 10}, "codKey": {"value": 4}, "min": "ONE", "signature": "9"},
-            {"domKey": {"value": 10}, "codKey": {"value": 12}, "min": "ONE", "signature": "10"},
-            {"domKey": {"value": 10}, "codKey": {"value": 11}, "min": "ZERO", "signature": "11"},
-            {"domKey": {"value": 12}, "codKey": {"value": 13}, "min": "ONE", "signature": "12"},
-            {"domKey": {"value": 12}, "codKey": {"value": 14}, "min": "ZERO", "signature": "13"},
-            {"domKey": {"value": 12}, "codKey": {"value": 15}, "min": "ZERO", "signature": "14"},
-            {"domKey": {"value": 16}, "codKey": {"value": 1}, "min": "ONE", "signature": "15"},
-            {"domKey": {"value": 16}, "codKey": {"value": 1}, "min": "ONE", "signature": "16"},
-            {"domKey": {"value": 16}, "codKey": {"value": 17}, "min": "ONE", "signature": "17"}
+            {"min": "ONE",  "label": "",      "domKey": {"value":  1}, "codKey": {"value":  2}, "signature":  "1"},
+            {"min": "ONE",  "label": "",      "domKey": {"value":  3}, "codKey": {"value":  4}, "signature":  "2"},
+            {"min": "ONE",  "label": "",      "domKey": {"value":  3}, "codKey": {"value":  1}, "signature":  "3"},
+            {"min": "ONE",  "label": "",      "domKey": {"value":  5}, "codKey": {"value":  6}, "signature":  "4"},
+            {"min": "ZERO", "label": "",      "domKey": {"value":  5}, "codKey": {"value":  7}, "signature":  "5"},
+            {"min": "ZERO", "label": "",      "domKey": {"value":  5}, "codKey": {"value":  8}, "signature":  "6"},
+            {"min": "ONE",  "label": "#role", "domKey": {"value":  9}, "codKey": {"value":  3}, "signature":  "7"},
+            {"min": "ONE",  "label": "#role", "domKey": {"value":  9}, "codKey": {"value":  5}, "signature":  "8"},
+            {"min": "ONE",  "label": "",      "domKey": {"value":  9}, "codKey": {"value": 10}, "signature":  "9"},
+            {"min": "ONE",  "label": "",      "domKey": {"value": 11}, "codKey": {"value": 12}, "signature": "10"},
+            {"min": "ONE",  "label": "",      "domKey": {"value": 11}, "codKey": {"value": 13}, "signature": "11"},
+            {"min": "ONE",  "label": "",      "domKey": {"value": 13}, "codKey": {"value": 14}, "signature": "12"},
+            {"min": "ZERO", "label": "",      "domKey": {"value":  3}, "codKey": {"value": 11}, "signature": "13"},
+            {"min": "ONE",  "label": "",      "domKey": {"value": 15}, "codKey": {"value":  1}, "signature": "14"},
+            {"min": "ONE",  "label": "",      "domKey": {"value": 15}, "codKey": {"value":  1}, "signature": "15"},
+            {"min": "ONE",  "label": "",      "domKey": {"value": 15}, "codKey": {"value": 16}, "signature": "16"}
         ]
     }'),
     ('{
@@ -159,7 +175,248 @@ CREATE TABLE schema_category_update (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
-); 
+);
+
+INSERT INTO "schema_category_update" ("schema_category_id", "json_value")
+VALUES
+    (1, '{"operations": [
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Signatures", "signatureIds": [["1"]]},
+            "key": {"value": 1},
+            "label": "Customer",
+            "superId": ["1"],
+            "position": {"x": -99, "y": -5}
+        }}, "version": "0:1"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 2},
+            "label": "Id",
+            "superId": ["EMPTY"],
+            "position": {"x": -138, "y": 94}
+        }}, "version": "0:2"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 1},
+            "codKey": {"value": 2},
+            "signature": "1"
+        }}, "version": "0:3"}
+    ], "nextVersion": "1", "prevVersion": "0"}'),
+    (1, '{"operations": [
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Signatures", "signatureIds": [["2", "3;1"]]},
+            "key": {"value": 3},
+            "label": "Order",
+            "superId": ["2", "3;1"],
+            "position": {"x": 134, "y": -85}
+        }}, "version": "0:4"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 4},
+            "label": "Number",
+            "superId": ["EMPTY"],
+            "position": {"x": 140, "y": -188}
+        }}, "version": "0:5"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 3},
+            "codKey": {"value": 4},
+            "signature": "2"
+        }}, "version": "0:6"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 3},
+            "codKey": {"value": 1},
+            "signature": "3"
+        }}, "version": "0:7"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Signatures", "signatureIds": [["4"]]},
+            "key": {"value": 5},
+            "label": "Product",
+            "superId": ["4"],
+            "position": {"x": 128, "y": 85}
+        }}, "version": "0:8"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 6},
+            "label": "Id",
+            "superId": ["EMPTY"],
+            "position": {"x": 47, "y": 189}
+        }}, "version": "0:9"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 7},
+            "label": "Name",
+            "superId": ["EMPTY"],
+            "position": {"x": 125, "y": 187}
+        }}, "version": "0:10"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 8},
+            "label": "Price",
+            "superId": ["EMPTY"],
+            "position": {"x": 213, "y": 189}
+        }}, "version": "0:11"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 5},
+            "codKey": {"value": 6},
+            "signature": "4"
+        }}, "version": "0:12"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ZERO",
+            "label": "",
+            "domKey": {"value": 5},
+            "codKey": {"value": 7},
+            "signature": "5"
+        }}, "version": "0:13"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ZERO",
+            "label": "",
+            "domKey": {"value": 5},
+            "codKey": {"value": 8},
+            "signature": "6"
+        }}, "version": "0:14"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Signatures", "signatureIds": [["7;3;1", "7;2", "8;4"]]},
+            "key": {"value": 9},
+            "label": "Items",
+            "superId": ["7;3;1", "7;2", "8;4"],
+            "position": {"x": 136, "y": -6}
+        }}, "version": "0:14.1"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "#role",
+            "domKey": {"value": 9},
+            "codKey": {"value": 3},
+            "signature": "7"
+        }}, "version": "0:14.2"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "#role",
+            "domKey": {"value": 9},
+            "codKey": {"value": 5},
+            "signature": "8"
+        }}, "version": "0:14.3"},
+        {"smo": {"name": "addSet", "type": "composite"}, "version": "0:15"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 10},
+            "label": "Quantity",
+            "superId": ["EMPTY"],
+            "position": {"x": 258, "y": -5}
+        }}, "version": "0:15.1"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 9},
+            "codKey": {"value": 10},
+            "signature": "9"
+        }}, "version": "0:15.2"},
+        {"smo": {"name": "addProperty", "type": "composite"}, "version": "0:16"}
+    ], "nextVersion": "2", "prevVersion": "1"}'),
+    (1, '{"operations": [
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Signatures", "signatureIds": [["11;12", "10"]]},
+            "key": {"value": 11},
+            "label": "Contact",
+            "superId": ["11;12", "10"],
+            "position": {"x": 271, "y": -83}
+        }}, "version": "0:17"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 12},
+            "label": "Value",
+            "superId": ["EMPTY"],
+            "position": {"x": 273, "y": -190}
+        }}, "version": "0:17.1"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 11},
+            "codKey": {"value": 12},
+            "signature": "10"
+        }}, "version": "0:17.2"},
+        {"smo": {"name": "addProperty", "type": "composite"}, "version": "0:18"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Signatures", "signatureIds": [["12"]]},
+            "key": {"value": 13},
+            "label": "Type",
+            "superId": ["12"],
+            "position": {"x": 394, "y": -86}
+        }}, "version": "0:18.1"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 11},
+            "codKey": {"value": 13},
+            "signature": "11"
+        }}, "version": "0:18.2"},
+        {"smo": {"name": "addProperty", "type": "composite"}, "version": "0:19"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 14},
+            "label": "Name",
+            "superId": ["EMPTY"],
+            "position": {"x": 399, "y": -180}
+        }}, "version": "0:19.1"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 13},
+            "codKey": {"value": 14},
+            "signature": "12"
+        }}, "version": "0:19.2"},
+        {"smo": {"name": "addProperty", "type": "composite"}, "version": "0:20"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ZERO",
+            "label": "",
+            "domKey": {"value": 3},
+            "codKey": {"value": 11},
+            "signature": "13"
+        }}, "version": "0:21"}
+    ], "nextVersion": "3", "prevVersion": "2"}'),
+    (1, '{"operations": [
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Signatures", "signatureIds": [["15;1", "14;1"]]},
+            "key": {"value": 15},
+            "label": "Friend",
+            "superId": ["15;1", "14;1"],
+            "position": {"x": -130, "y": -120}
+        }}, "version": "0:22"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 15},
+            "codKey": {"value": 1},
+            "signature": "14"
+        }}, "version": "0:23"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 15},
+            "codKey": {"value": 1},
+            "signature": "15"
+        }}, "version": "0:24"},
+        {"smo": {"type": "createObject", "object": {
+            "ids": {"type": "Value", "signatureIds": [[]]},
+            "key": {"value": 16},
+            "label": "Since",
+            "superId": ["EMPTY"],
+            "position": {"x": -60, "y": -150}
+        }}, "version": "0:24.1"},
+        {"smo": {"type": "createMorphism", "morphism": {
+            "min": "ONE",
+            "label": "",
+            "domKey": {"value": 15},
+            "codKey": {"value": 16},
+            "signature": "16"
+        }}, "version": "0:24.2"},
+        {"smo": {"name": "addProperty", "type": "composite"}, "version": "0:25"}
+    ], "nextVersion": "4", "prevVersion": "3"}');
 
 CREATE TABLE database_for_mapping (
     id SERIAL PRIMARY KEY,
@@ -303,29 +560,29 @@ VALUES
     (1, '{
         "version": "0",
         "categoryVersion": "0",
-        "rootObjectKey": {"value": 4},
-        "primaryKey": ["4", "3;1"],
+        "rootObjectKey": {"value": 3},
+        "primaryKey": ["2", "3;1"],
         "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC", "value": "order"}, "subpaths": [
                 {
                     "name": {"type": "STATIC", "value": "_id"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "customer"}, "signature": "3;1"},
-                        {"name": {"type": "STATIC", "value": "number"}, "signature": "4"}
+                        {"name": {"type": "STATIC", "value": "number"}, "signature": "2"}
                     ], "signature": "EMPTY", "isAuxiliary": true
                 },
                 {
                     "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
-                        {"name": {"signature": "7;8"}, "signature": "6"}
-                    ], "signature": "5", "isAuxiliary": false
+                        {"name": {"signature": "11;12"}, "signature": "10"}
+                    ], "signature": "13", "isAuxiliary": false
                 },
                 {
                     "name": {"type": "STATIC", "value": "items"}, "subpaths": [
-                        {"name": {"type": "STATIC", "value": "id"}, "signature": "10;12"},
-                        {"name": {"type": "STATIC", "value": "name"}, "signature": "10;13"},
-                        {"name": {"type": "STATIC", "value": "price"}, "signature": "10;14"},
-                        {"name": {"type": "STATIC", "value": "quantity"}, "signature": "11"}
-                    ], "signature": "-9", "isAuxiliary": false
+                        {"name": {"type": "STATIC", "value": "id"}, "signature": "8;4"},
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": "8;5"},
+                        {"name": {"type": "STATIC", "value": "price"}, "signature": "8;6"},
+                        {"name": {"type": "STATIC", "value": "quantity"}, "signature": "9"}
+                    ], "signature": "-7", "isAuxiliary": false
                 }
             ], "signature": "EMPTY", "isAuxiliary": true
         }}'
@@ -345,12 +602,12 @@ VALUES
     (3, '{
         "version": "0",
         "categoryVersion": "0",
-        "rootObjectKey": {"value": 16},
+        "rootObjectKey": {"value": 15},
         "primaryKey": [],
         "kindName": "Friend",
         "accessPath": {
             "name": {"type": "STATIC", "value": "friend"}, "subpaths": [
-                {"name": {"type": "STATIC", "value": "since"}, "signature": "17"},
+                {"name": {"type": "STATIC", "value": "since"}, "signature": "16"},
                 {
                     "name": {"type": "STATIC", "value": "_from.Customer"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "1"}
@@ -359,7 +616,7 @@ VALUES
                 {
                     "name": {"type": "STATIC", "value": "_to.Customer"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "1"}
-                    ], "signature": "16", "isAuxiliary": false
+                    ], "signature": "14", "isAuxiliary": false
                 }
             ], "signature": "EMPTY", "isAuxiliary": true}
         }'
