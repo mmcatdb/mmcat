@@ -7,5 +7,6 @@ COPY docker/neo4j/*.cypher .
 # This doesn't work, because the neo4j crew are morons and the script would be executed before the DB is started.
 # ENV EXTENSION_SCRIPT=entrypoint.sh
 
+RUN chmod +x entrypoint-wrapper.sh
 ENTRYPOINT [ "tini", "-g", "--", "./entrypoint-wrapper.sh" ]
-CMD ["neo4j"]
+CMD [ "neo4j" ]
