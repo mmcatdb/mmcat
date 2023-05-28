@@ -1,12 +1,14 @@
+# Api prefix.
+server.servlet.contextPath=/api/v1
+
 # The port on which the application will listen.
-# Make sure the same number is used in the apache configuration.
-server.port=27500
-# Spring security (i.e., "server-side-cors") - 3000 is the default port of the vite development server.
-server.origin=http://localhost:3000
+server.port=3201
+# Spring security (i.e., "server-side-cors") - 3200 is the default port of the example-ui server.
+server.origin=http://localhost:3200
 
 # Credentials fot the main database (PostgreSQL):
-postgresql.host=localhost
+postgresql.host=mm-postgresql
 postgresql.port=5432
-postgresql.database=mmcat_server
-postgresql.username=mmcat_user
-postgresql.password=mmcat_password
+postgresql.username=mm_user
+postgresql.password=takeyourtime
+postgresql.database=mm_server

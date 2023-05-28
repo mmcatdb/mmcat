@@ -6,7 +6,7 @@ import { useRoute } from 'vue-router';
 import dataspecerAPI from '@/utils/api/dataspecerAPI';
 import { addImportedToGraph, importDataspecer } from '@/utils/integration';
 import { toQueryScalar } from '@/utils/router';
-import { evocatKey } from '@/utils/injects';
+import { evocatKey, type EvocatContext } from '@/utils/injects';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from '@/components/category/EvocatDisplay.vue';
 import VersionsControl from '@/components/category/version/VersionsControl.vue';
@@ -15,7 +15,7 @@ const route = useRoute();
 
 const evocat = shallowRef<Evocat>();
 const graph = shallowRef<Graph>();
-provide(evocatKey, { evocat, graph });
+provide(evocatKey, { evocat, graph } as EvocatContext);
 
 async function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     evocat.value = context.evocat;

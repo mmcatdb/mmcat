@@ -5,7 +5,7 @@ import type { Id } from '@/types/id';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
 import { categoryIdKey, categoryInfoKey } from '@/utils/injects';
-import { onMounted, provide, ref } from 'vue';
+import { onMounted, provide, ref, type Ref } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
 
 type ProjectSpecificViewProps = {
@@ -18,7 +18,7 @@ provide(categoryIdKey, ref(props.categoryId));
 
 const schemaCategoryInfo = ref<SchemaCategoryInfo>();
 
-provide(categoryInfoKey, schemaCategoryInfo);
+provide(categoryInfoKey, schemaCategoryInfo as Ref<SchemaCategoryInfo>);
 
 const router = useRouter();
 

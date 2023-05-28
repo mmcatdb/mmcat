@@ -32,9 +32,9 @@ export type EvocatContext = {
 export const evocatKey: InjectionKey<EvocatContext> = Symbol('evocat');
 
 export function useEvocat(): EvocatContext {
-    const evocat = inject(evocatKey);
-    if (!evocat)
+    const evocatContext = inject(evocatKey);
+    if (!evocatContext)
         throw new Error('Evocat not injected.');
 
-    return evocat;
+    return evocatContext;
 }

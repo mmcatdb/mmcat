@@ -1,7 +1,9 @@
 package cz.cuni.matfyz.server;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -11,6 +13,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  * @author jachym.bartik
  */
 @SpringBootApplication
+// This is needed to prevent the application from trying to automatically connect to the MongoDB database.
+@EnableAutoConfiguration(exclude = { MongoAutoConfiguration.class })
+// This is needed to enable the @Async annotations.
 @EnableAsync
 public class ServerApplication {
 

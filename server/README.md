@@ -84,12 +84,12 @@ db.createUser({
 ```
 - Then you can create the database:
 ```bash
-cypher-shell -f src/main/resources/setupNeo4j.cypher -a bolt://localhost:7687 -u mmcat_user -p mmcat_password
+mongo --username mmcat_user --password mmcat_password --authenticationDatabase admin localhost:27017/mmcat_server_data src/main/resources/setupMongodb.js
 ```
 
 ### Neo4j
 ```bash
-
+cypher-shell -f src/main/resources/setupNeo4j.cypher -a bolt://localhost:7687 -u mmcat_user -p mmcat_password
 ```
 
 ## Other data

@@ -425,90 +425,71 @@ CREATE TABLE database_for_mapping (
 
 INSERT INTO database_for_mapping (json_value)
 VALUES
-    ('{ "type": "mongodb", "label": "MongoDB",
+    (format('{ "type": "mongodb", "label": "MongoDB - Basic",
         "settings": {
-            "host": "localhost",
+            "host": "mm-mongodb",
             "port": "27017",
-            "database": "mmcat_server_data",
+            "database": "mm_example_basic",
             "authenticationDatabase": "admin",
-            "username": "mmcat_user",
-            "password": "mmcat_password"
+            "username": "%s",
+            "password": "%s"
         }
-    }'),
-    ('{ "type": "postgresql", "label": "PostgreSQL",
+    }', :'db_example_username', :'db_example_password')::jsonb),
+    (format('{ "type": "postgresql", "label": "PostgreSQL - Basic",
         "settings": {
-            "host": "localhost",
+            "host": "mm-postgresql",
             "port": "5432",
-            "database": "mmcat_server_data",
-            "username": "mmcat_user",
-            "password": "mmcat_password"
+            "database": "mm_example_basic",
+            "username": "%s",
+            "password": "%s"
         }
-    }'),
-    ('{ "type": "neo4j", "label": "Neo4j",
+    }', :'db_example_username', :'db_example_password')::jsonb),
+    (format('{ "type": "neo4j", "label": "Neo4j - Basic",
         "settings": {
-            "host": "localhost",
-            "port": 7687,
-            "database": "neo4j",
-            "username": "mmcat_user",
-            "password": "mmcat_password"
+            "host": "mm-neo4j",
+            "port": "7687",
+            "database": "mm_example_basic",
+            "username": "neo4j",
+            "password": "%s"
         }
-    }'),
-    ('{ "type": "postgresql", "label": "PostgreSQL TTD",
+    }', :'db_example_password')::jsonb),
+    (format('{ "type": "postgresql", "label": "PostgreSQL - TTD",
         "settings": {
-            "host": "localhost",
-            "port": 5432,
-            "database": "mmcat_server_ttd",
-            "username": "mmcat_user",
-            "password": "mmcat_password"
+            "host": "mm-postgresql",
+            "port": "5432",
+            "database": "mm_example_ttd",
+            "username": "%s",
+            "password": "%s"
         }
-    }'),
-    ('{ "type": "mongodb", "label": "MongoDB Experiments",
+    }', :'db_example_username', :'db_example_password')::jsonb),
+    (format('{ "type": "mongodb", "label": "MongoDB - Query",
         "settings": {
-            "host": "localhost",
+            "host": "mm-mongodb",
             "port": "27017",
-            "database": "mmcat_server_experiments",
-            "authenticationDatabase": "admin",
-            "username": "mmcat_user",
-            "password": "mmcat_password"
-        }
-    }'),
-    ('{ "type": "postgresql", "label": "PostgreSQL Experiments",
-        "settings": {
-            "host": "localhost",
-            "port": "5432",
-            "database": "mmcat_server_experiments",
-            "username": "mmcat_user",
-            "password": "mmcat_password"
-        }
-    }'),
-    ('{ "type": "mongodb", "label": "MongoDB - Querying",
-        "settings": {
-            "host": "localhost",
-            "port": 27017,
-            "database": "mmcat_server_querying",
-            "username": "mmcat_user",
-            "password": "mmcat_password",
+            "database": "mm_example_query",
+            "username": "%s",
+            "password": "%s",
             "authenticationDatabase": "admin"
         }
-    }'),
-    ('{ "type": "postgresql", "label": "PostgreSQL - Querying",
+    }', :'db_example_username', :'db_example_password')::jsonb),
+    (format('{ "type": "postgresql", "label": "PostgreSQL - Query",
         "settings": {
-            "host": "localhost",
-            "port": 5432,
-            "database": "mmcat_server_querying",
-            "username": "mmcat_user",
-            "password": "mmcat_password"
+            "host": "mm-postgresql",
+            "port": "5432",
+            "database": "mm_example_query",
+            "username": "%s",
+            "password": "%s"
         }
-    }'),
-    ('{ "type": "postgresql", "label": "Neo4j - Querying",
+    }', :'db_example_username', :'db_example_password')::jsonb),
+    (format('{ "type": "neo4j", "label": "Neo4j - Query",
         "settings": {
-            "host": "localhost",
-            "port": 5432,
-            "database": "mmcat_server_querying",
-            "password": "mmcat_password",
-            "username": "mmcat_user"
+            "host": "mm-neo4j",
+            "port": "7687",
+            "database": "mm_example_query",
+            "username": "neo4j",
+            "password": "%s"
         }
-    }');
+    }', :'db_example_password')::jsonb);
 
 CREATE TABLE data_source (
     id SERIAL PRIMARY KEY,
@@ -537,9 +518,9 @@ VALUES
     (1, 3, '{"label": "Neo4j - Friend"}'),
     (2, 4, '{"label": "Postgres import"}'),
     (2, 1, '{"label": "Mongo export"}'),
-    (3, 7, '{"label": "MongoDB"}'),
-    (3, 8, '{"label": "PostgreSQL"}'),
-    (3, 9, '{"label": "Neo4j"}');
+    (3, 5, '{"label": "MongoDB"}'),
+    (3, 6, '{"label": "PostgreSQL"}'),
+    (3, 7, '{"label": "Neo4j"}');
 
 CREATE TABLE mapping (
     id SERIAL PRIMARY KEY,

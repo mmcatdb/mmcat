@@ -5,7 +5,7 @@ import { SignatureId, StaticName } from '@/types/identifiers';
 import { type Node, type Graph, SelectionType } from '@/types/categoryGraph';
 import AccessPathEditor from './edit/AccessPathEditor.vue';
 import { LogicalModel } from '@/types/logicalModel';
-import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey } from '@/utils/injects';
+import { useSchemaCategoryInfo, useSchemaCategoryId, evocatKey, type EvocatContext } from '@/utils/injects';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
@@ -19,7 +19,7 @@ const router = useRouter();
 
 const evocat = shallowRef<Evocat>();
 const graph = shallowRef<Graph>();
-provide(evocatKey, { evocat, graph });
+provide(evocatKey, { evocat, graph } as EvocatContext);
 
 function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     evocat.value = context.evocat;

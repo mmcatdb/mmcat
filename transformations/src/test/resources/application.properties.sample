@@ -1,18 +1,18 @@
 mongodb.host=localhost
 mongodb.port=27017
-mongodb.database=mmcat_test
-mongodb.authenticationDatabase=admin
 mongodb.username=mmcat_user
 mongodb.password=mmcat_password
+mongodb.database=mmcat_test
+mongodb.authenticationDatabase=admin
 
 postgresql.host=localhost
 postgresql.port=5432
-postgresql.database=mmcat_test
 postgresql.username=mmcat_user
 postgresql.password=mmcat_password
+postgresql.database=mmcat_test
 
 neo4j.host=localhost
 neo4j.port=7687
-neo4j.database=neo4j
 neo4j.username=mmcat_user
 neo4j.password=mmcat_password
+neo4j.database=neo4j

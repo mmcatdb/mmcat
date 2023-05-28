@@ -1,5 +1,3 @@
--- psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server_ttd?sslmode=require -f src/main/resources/setupPostgresqlTTD.sql
-
 DROP TABLE IF EXISTS app_order_item;
 DROP TABLE IF EXISTS app_product;
 DROP TABLE IF EXISTS app_order;
