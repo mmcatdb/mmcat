@@ -206,7 +206,8 @@ public class AsyncJobService {
             if (!result.status)
                 return CompletableFuture.completedFuture(new DataResult<String>(null, result.error));
 
-            control.execute(result.data.statements());
+            // TODO - find a better way how to execute the changes (currently its too likely to fail)
+            //control.execute(result.data.statements());
 
             output.append(result.data.statementsAsString() + "\n");
         }
