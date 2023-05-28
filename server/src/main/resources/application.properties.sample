@@ -4,12 +4,11 @@ server.servlet.contextPath=/api/v1
 # The port on which the application will listen.
 server.port=3201
 # Spring security (i.e., "server-side-cors") - 3200 is the default port of the example-ui server.
-# server.origin=http://localhost:3200
-server.origin=https://test.mm-evocat.com
+server.origin=http://localhost:3200
 
 # Credentials fot the main database (PostgreSQL):
 postgresql.host=mm-postgresql
 postgresql.port=5432
 postgresql.username=mm_user
-postgresql.password=takeyourtime
+postgresql.password=
 postgresql.database=mm_server

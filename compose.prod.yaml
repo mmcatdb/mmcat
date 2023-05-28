@@ -7,7 +7,10 @@ services:
         build:
             context: .
             dockerfile: docker/server/prod/Dockerfile
-        env_file: .env
+            args:
+                serverPort: ${SERVER_PORT}
+                serverOrigin: ${EXAMPLE_UI_DOMAIN}
+                postgresqlPassword: ${DB_PASSWORD}
         expose:
             - "${SERVER_PORT}"
 
