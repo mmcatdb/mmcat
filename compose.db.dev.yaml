@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+    adminer:
+        container_name: "mm-adminer"
+        restart: on-failure
+        build: 
+            context: .
+            dockerfile: docker/adminer/Dockerfile
+        ports:
+            - ${ADMINER_PORT}:8080
+
+    postgresql:
+        container_name: "mm-postgresql"
+        restart: on-failure
+        build: 
+            context: .
+            dockerfile: docker/postgresql/Dockerfile
+        env_file: .env
+        environment:
+            - POSTGRES_PASSWORD=${POSTGRESQL_SUPERUSER_PASSWORD}
+        expose:
+            - 5432
+        ports:
+            # Make the DB available on localhost for development.
+            - ${POSTGRESQL_PORT}:5432
+
+    mongodb:
+        container_name: "mm-mongodb"
+        restart: on-failure
+        build: 
+            context: .
+            dockerfile: docker/mongodb/Dockerfile
+        env_file: .env
+        expose:
+            - 27017
+        ports:
+            # Make the DB available on localhost for development.
+            - ${MONGODB_PORT}:27017
+
+    neo4j:
+        container_name: "mm-neo4j"
+        restart: on-failure
+        build: 
+            context: .
+            dockerfile: docker/neo4j/Dockerfile
+        env_file: .env
+        environment:
+            - NEO4J_AUTH=neo4j/${DB_EXAMPLE_PASSWORD}
+        expose:
+            - 7473
+            - 7474
+            - 7687
+        ports:
+            # Make the DB available on localhost for development.
+            - ${NEO4J_PORT}:7687
+
+networks:
+    default:
+        name: mm-network

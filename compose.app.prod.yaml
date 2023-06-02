@@ -27,7 +27,7 @@ services:
            dockerfile: docker/prod/Dockerfile
        ports:
            # Map localhost port to 80 in docker
-           - 127.0.0.1:${EXAMPLE_UI_PORT}:80
+           - ${EXAMPLE_UI_PORT}:80
 
 networks:
     default:

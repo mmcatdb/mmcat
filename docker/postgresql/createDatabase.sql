@@ -427,69 +427,69 @@ INSERT INTO database_for_mapping (json_value)
 VALUES
     (format('{ "type": "mongodb", "label": "MongoDB - Basic",
         "settings": {
-            "host": "mm-mongodb",
-            "port": "27017",
+            "host": "localhost",
+            "port": "3204",
             "database": "mm_example_basic",
             "authenticationDatabase": "admin",
             "username": "%s",
             "password": "%s"
         }
-    }', :'db_example_username', :'db_example_password')::jsonb),
+    }', :'db_example_mongodb_host', :'db_example_mongodb_port', :'db_example_username', :'db_example_password')::jsonb),
     (format('{ "type": "postgresql", "label": "PostgreSQL - Basic",
         "settings": {
-            "host": "mm-postgresql",
-            "port": "5432",
+            "host": "localhost",
+            "port": "3203",
             "database": "mm_example_basic",
             "username": "%s",
             "password": "%s"
         }
-    }', :'db_example_username', :'db_example_password')::jsonb),
+    }', :'db_example_postgresql_host', :'db_example_postgresql_port', :'db_example_username', :'db_example_password')::jsonb),
     (format('{ "type": "neo4j", "label": "Neo4j - Basic",
         "settings": {
-            "host": "mm-neo4j",
-            "port": "7687",
-            "database": "mm_example_basic",
+            "host": "localhost",
+            "port": "3205",
+            "database": "neo4j",
             "username": "neo4j",
             "password": "%s"
         }
-    }', :'db_example_password')::jsonb),
+    }', :'db_example_neo4j_host', :'db_example_neo4j_port', :'db_example_password')::jsonb),
     (format('{ "type": "postgresql", "label": "PostgreSQL - TTD",
         "settings": {
-            "host": "mm-postgresql",
-            "port": "5432",
+            "host": "localhost",
+            "port": "3203",
             "database": "mm_example_ttd",
             "username": "%s",
             "password": "%s"
         }
-    }', :'db_example_username', :'db_example_password')::jsonb),
+    }', :'db_example_postgresql_host', :'db_example_postgresql_port', :'db_example_username', :'db_example_password')::jsonb),
     (format('{ "type": "mongodb", "label": "MongoDB - Query",
         "settings": {
-            "host": "mm-mongodb",
-            "port": "27017",
+            "host": "localhost",
+            "port": "3204",
             "database": "mm_example_query",
             "username": "%s",
             "password": "%s",
             "authenticationDatabase": "admin"
         }
-    }', :'db_example_username', :'db_example_password')::jsonb),
+    }', :'db_example_mongodb_host', :'db_example_mongodb_port', :'db_example_username', :'db_example_password')::jsonb),
     (format('{ "type": "postgresql", "label": "PostgreSQL - Query",
         "settings": {
-            "host": "mm-postgresql",
-            "port": "5432",
+            "host": "localhost",
+            "port": "3203",
             "database": "mm_example_query",
             "username": "%s",
             "password": "%s"
         }
-    }', :'db_example_username', :'db_example_password')::jsonb),
+    }', :'db_example_postgresql_host', :'db_example_postgresql_port', :'db_example_username', :'db_example_password')::jsonb),
     (format('{ "type": "neo4j", "label": "Neo4j - Query",
         "settings": {
-            "host": "mm-neo4j",
-            "port": "7687",
-            "database": "mm_example_query",
+            "host": "localhost",
+            "port": "3205",
+            "database": "neo4j",
             "username": "neo4j",
             "password": "%s"
         }
-    }', :'db_example_password')::jsonb);
+    }', :'db_example_neo4j_host', :'db_example_neo4j_port', :'db_example_password')::jsonb);
 
 CREATE TABLE data_source (
     id SERIAL PRIMARY KEY,

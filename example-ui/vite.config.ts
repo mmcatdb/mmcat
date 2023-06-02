@@ -33,6 +33,7 @@ export default defineConfig(({ command, mode }) => {
             cors: {
                 origin: env.VITE_DATASPECER_API_URL,
             },
+            port: env.VITE_DEV_SERVER_PORT,
         },
     };
 });

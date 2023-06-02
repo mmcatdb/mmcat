@@ -8,15 +8,35 @@ A multi-model data modelling and evolution framework based on category theory. I
 - [Backend application](./server/README.md) provides an API which exposes the functionality of the other modules. It also contains a job scheduler for the transformation algorithms.
 - [Frontend application](./example-ui//README.md) is used as a UI for the backend API. It is also a tool for modelling all the necessary data structures which are then used by the other modules.
 
-## Installation
+# Installation
+
+## Custom
 
 - Make sure you have all the required software for both [Backend](./server/README.md#requirements) and [Frontend](./example-ui/README.md#configuration) applications.
 - To compile the java modules and install dependencies, run:
 ```bash
-mvn install -Dmaven.test.skip
+#mvn install -Dmaven.test.skip
+mvn install -DskipTests
 ```
 - Then follow the steps in the [Backend](./server/README.md) and [Frontend](./example-ui/README.md) guides.
 - Lastly, you need a web server to make both applications available.
+
+## Docker
+
+- Set enviromental variables:
+```bash
+cp .env.sample .env
+vim .env
+
+cp example-ui/.env.sample example-ui/.env
+vim example-ui/.env
+```
+
+- First create the databases, then other containers:
+```bash
+docker compose -f compose.db.prod.yaml up -d --build
+docker compose -f compose.app.prod.yaml up -d --build
+```
 
 # Design
 

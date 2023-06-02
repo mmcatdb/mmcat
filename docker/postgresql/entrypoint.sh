@@ -9,6 +9,12 @@ CREATE DATABASE ${DB_DATABASE} OWNER ${DB_USERNAME};
 SET ROLE ${DB_USERNAME};
 \set db_example_username ${DB_EXAMPLE_USERNAME}
 \set db_example_password ${DB_EXAMPLE_PASSWORD}
+\set db_example_postgresql_host ${DB_EXAMPLE_HOST:mm-postgresql}
+\set db_example_postgresql_port ${POSTGRESQL_PORT:5432}
+\set db_example_mongodb_host ${DB_EXAMPLE_HOST:mm-mongodb}
+\set db_example_mongodb_port ${MONGODB_PORT:27017}
+\set db_example_neo4j_host ${DB_EXAMPLE_HOST:mm-neo4j}
+\set db_example_neo4j_port ${NEO4J_PORT:7687}
 \i createDatabase.sql;
 
 SET ROLE postgres;
