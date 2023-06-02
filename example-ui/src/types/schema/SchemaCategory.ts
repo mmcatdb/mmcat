@@ -82,7 +82,7 @@ export class SchemaCategory implements Entity {
 
     addObject(object: SchemaObject) {
         this.objects.push(object);
-        this._graph?.createNode(object, 'new');
+        this._graph?.createNode(object);
     }
 
     removeObject(object: SchemaObject) {
@@ -97,7 +97,7 @@ export class SchemaCategory implements Entity {
 
     addMorphism(morphism: SchemaMorphism) {
         this.morphisms.push(morphism);
-        this._graph?.createEdge(morphism, 'new');
+        this._graph?.createEdge(morphism);
     }
 
     removeMorphism(morphism: SchemaMorphism) {

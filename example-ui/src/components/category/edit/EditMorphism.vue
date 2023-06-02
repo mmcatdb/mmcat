@@ -65,7 +65,7 @@ function save() {
 
     temporayEdge.value?.delete();
     graph.deleteEdge(props.edge.schemaMorphism);
-    graph.createEdge(props.edge.schemaMorphism, 'new');
+    graph.createEdge(props.edge.schemaMorphism);
     graph.layout();
 
     emit('save');

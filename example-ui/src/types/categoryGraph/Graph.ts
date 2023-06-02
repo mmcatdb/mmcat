@@ -77,7 +77,7 @@ export class Graph {
         return newGroup;
     }
 
-    createNode(object: SchemaObject, classes?: string): Node {
+    createNode(object: SchemaObject): Node {
         const groupPlaceholders = object.logicalModels
             .map(logicalModel => this.getGroupOrAddIt(logicalModel))
             .map(group => this.cytoscape.add(createGroupPlaceholderDefinition(object, group.id)));
@@ -89,7 +89,7 @@ export class Graph {
         const node = new Node(object, groupPlaceholders, noGroupPlaceholder);
         this._nodes.push(node);
 
-        const cytoscapeNode = this.cytoscape.add(createNodeDefinition(object, node, classes));
+        const cytoscapeNode = this.cytoscape.add(createNodeDefinition(object, node, object.isNew ? 'new' : ''));
         node.setCytoscapeNode(cytoscapeNode);
 
         cytoscapeNode.on('drag', () => node.refreshGroupPlaceholders());
@@ -109,7 +109,7 @@ export class Graph {
         // However, the no group placeholder has to be removed.
     }
 
-    createEdge(morphism: SchemaMorphism, classes?: string): Edge {
+    createEdge(morphism: SchemaMorphism): Edge {
         const domNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.domKey)) as Node;
         const codNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.codKey)) as Node;
 
@@ -120,7 +120,7 @@ export class Graph {
         // This ensures the Bezier morphism pairs have allways the same chirality.
         //const noSwitchNeeded = morphism.domId > morphism.codId;
 
-        const definition = createEdgeDefinition(morphism, edge, classes);
+        const definition = createEdgeDefinition(morphism, edge, morphism.isNew ? 'new' : '');
         const cytoscapeEdge = this.cytoscape.add(definition);
         edge.setCytoscapeEdge(cytoscapeEdge);
 
