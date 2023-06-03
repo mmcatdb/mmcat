@@ -29,20 +29,17 @@ export class Graph {
         this.eventListener = new GraphEventListener(cytoscape);
     }
 
-    // Workaround for Evocat - remove as soon as possible
-    public getCytoscape(): Core {
-        return this.cytoscape;
-    }
-
-    public reset(): void {
+    public resetElements(): void {
         this.cytoscape.elements().remove();
 
         this._nodes = [];
         this._edges = [];
         this._fixedNodes = 0;
         this.groups = [];
+    }
 
-        this.eventListener.clear();
+    public batch(callback: () => void): void {
+        this.cytoscape.batch(callback);
     }
 
     listen(): ListenerSession {

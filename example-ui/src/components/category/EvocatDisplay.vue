@@ -31,10 +31,10 @@ onMounted(async () => {
         return;
     }
 
-    const schemaCategory = SchemaCategory.fromServer(schemaCategoryResult.data);
     const schemaUpdates = schemaUpdatesResult.data.map(SchemaUpdate.fromServer);
     const logicalModels = logicalModelsResult.data.map(LogicalModel.fromServer);
 
+    const schemaCategory = SchemaCategory.fromServer(schemaCategoryResult.data, logicalModels);
     const newEvocat = Evocat.create(schemaCategory, schemaUpdates, logicalModels, {
         update: updateFunction,
     });
@@ -47,7 +47,7 @@ onMounted(async () => {
 
 const info = useSchemaCategoryInfo();
 
-async function updateFunction(update: SchemaUpdateInit) {
+async function updateFunction(update: SchemaUpdateInit, models: LogicalModel[]) {
     fetching.value = true;
     const result = await API.schemas.updateCategoryWrapper({ id: categoryId }, update);
     fetching.value = false;
@@ -58,7 +58,7 @@ async function updateFunction(update: SchemaUpdateInit) {
         return result;
     }
 
-    const schemaCategory = SchemaCategory.fromServer(result.data);
+    const schemaCategory = SchemaCategory.fromServer(result.data, models);
     info.value = schemaCategory;
 
     return DataResultSuccess(schemaCategory);

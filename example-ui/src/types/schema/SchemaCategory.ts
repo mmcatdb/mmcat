@@ -5,7 +5,7 @@ import type { Entity, Id, VersionId } from "../id";
 import { DynamicName, Key, Signature, type IdDefinition } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Mapping } from "../mapping";
-import { SchemaMorphism, type SchemaMorphismFromServer, type Min, type MorphismDefinition } from "./SchemaMorphism";
+import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition } from "./SchemaMorphism";
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
 import type { Graph } from "../categoryGraph";
 
@@ -18,37 +18,39 @@ export type SchemaCategoryFromServer = {
 };
 
 export class SchemaCategory implements Entity {
-    readonly id: Id;
-    readonly label: string;
-    readonly versionId: VersionId;
-    objects: SchemaObject[];
-    morphisms: SchemaMorphism[];
-    notAvailableIris: Set<Iri> = new Set;
+    private notAvailableIris: Set<Iri> = new Set;
 
-    _keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
-    _signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
+    private keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
+    private signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
 
-    private constructor(id: Id, label: string, versionId: VersionId, objects: SchemaObject[], morphisms: SchemaMorphism[]) {
-        this.id = id;
-        this.label = label;
-        this.versionId = versionId;
-        this.objects = objects;
-        this.morphisms = morphisms;
-
+    private constructor(
+        readonly id: Id,
+        readonly label: string,
+        readonly versionId: VersionId,
+        private objects: SchemaObject[],
+        private morphisms: SchemaMorphism[],
+        private logicalModels: LogicalModel[],
+    ) {
         this.objects.forEach(object => {
-            this._keysProvider.add(object.key);
+            this.keysProvider.add(object.key);
             if (object.iri)
                 this.notAvailableIris.add(object.iri);
         });
 
         this.morphisms.forEach(morphism => {
-            this._signatureProvider.add(morphism.signature);
+            this.signatureProvider.add(morphism.signature);
             if (morphism.iri)
                 this.notAvailableIris.add(morphism.iri);
         });
+
+        this.logicalModels.forEach(logicalModel => {
+            logicalModel.mappings.forEach(mapping => {
+                this.setDatabaseToObjectsFromMapping(mapping, logicalModel);
+            });
+        });
     }
 
-    static fromServer(input: SchemaCategoryFromServer): SchemaCategory {
+    static fromServer(input: SchemaCategoryFromServer, logicalModels: LogicalModel[]): SchemaCategory {
         const morphisms = input.morphisms.map(SchemaMorphism.fromServer);
 
         return new SchemaCategory(
@@ -57,6 +59,7 @@ export class SchemaCategory implements Entity {
             input.version,
             input.objects.map(SchemaObject.fromServer),
             morphisms,
+            logicalModels,
         );
     }
 
@@ -68,7 +71,7 @@ export class SchemaCategory implements Entity {
         if ('iri' in def)
             this.notAvailableIris.add(def.iri);
 
-        const key = this._keysProvider.createAndAdd();
+        const key = this.keysProvider.createAndAdd();
         return SchemaObject.createNew(key, def);
     }
 
@@ -76,7 +79,7 @@ export class SchemaCategory implements Entity {
         if ('iri' in def)
             this.notAvailableIris.add(def.iri);
 
-        const signature = this._signatureProvider.createAndAdd();
+        const signature = this.signatureProvider.createAndAdd();
         return SchemaMorphism.createNew(signature, def);
     }
 
@@ -118,19 +121,19 @@ export class SchemaCategory implements Entity {
     }
 
     suggestKey(): Key {
-        return this._keysProvider.suggest();
+        return this.keysProvider.suggest();
     }
 
     isKeyAvailable(key: Key): boolean {
-        return this._keysProvider.isAvailable(key);
+        return this.keysProvider.isAvailable(key);
     }
 
     suggestBaseSignature(): Signature {
-        return this._signatureProvider.suggest();
+        return this.signatureProvider.suggest();
     }
 
     isBaseSignatureAvailable(signature: Signature): boolean {
-        return this._signatureProvider.isAvailable(signature);
+        return this.signatureProvider.isAvailable(signature);
     }
 
     setDatabaseToObjectsFromMapping(mapping: Mapping, logicalModel: LogicalModel): void {
@@ -151,33 +154,13 @@ export class SchemaCategory implements Entity {
 
     set graph(newGraph: Graph | undefined) {
         this._graph = newGraph;
-
         if (!newGraph)
             return;
 
-        // TODO
-
-        // more TODO
-
-        /*
-        this.logicalModels.forEach(logicalModel => {
-            logicalModel.mappings.forEach(mapping => {
-                this.schemaCategory.setDatabaseToObjectsFromMapping(mapping, logicalModel);
-            });
-        });
-        */
-
-        newGraph.reset();
-
-        newGraph.getCytoscape().batch(() => {
+        newGraph.resetElements();
+        newGraph.batch(() => {
             this.objects.forEach(object => newGraph.createNode(object));
-
-            // First we create a dublets of morphisms. Then we create edges from them.
-            // TODO there should only be base morphisms
-            const sortedBaseMorphisms = this.morphisms.filter(morphism => morphism.isBase)
-                .sort((m1, m2) => m1.sortBaseValue - m2.sortBaseValue);
-
-            sortedBaseMorphisms.forEach(morphism => newGraph.createEdge(morphism));
+            this.morphisms.forEach(morphism => newGraph.createEdge(morphism));
         });
 
         // Position the object to the center of the canvas.

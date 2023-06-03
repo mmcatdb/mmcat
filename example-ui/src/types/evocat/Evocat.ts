@@ -8,7 +8,7 @@ import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, 
 import type { SchemaUpdate, SchemaUpdateInit } from "../schema/SchemaUpdate";
 import { VersionedSMO } from "../schema/VersionedSMO";
 
-type UpdateFunction = (udpate: SchemaUpdateInit) => Promise<Result<SchemaCategory>>;
+type UpdateFunction = (udpate: SchemaUpdateInit, logicalModels: LogicalModel[]) => Promise<Result<SchemaCategory>>;
 
 export type EvocatApi = {
     update: UpdateFunction;
@@ -42,7 +42,7 @@ export class Evocat {
     async update() {
         const updateObject = this.getUpdateObject();
 
-        const result = await this.api.update(updateObject);
+        const result = await this.api.update(updateObject, this.logicalModels);
         if (!result.status)
             return;
 
