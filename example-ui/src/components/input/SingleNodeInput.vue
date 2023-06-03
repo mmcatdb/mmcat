@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SelectionType, Node } from '@/types/categoryGraph';
-import { ref, watch } from 'vue';
+import { shallowRef, watch } from 'vue';
 import NodeInput from './NodeInput.vue';
 
 type SingleNodeInputProps = {
@@ -13,7 +13,7 @@ const props = defineProps<SingleNodeInputProps>();
 
 const emit = defineEmits([ 'update:modelValue' ]);
 
-const innerValue = ref(props.modelValue);
+const innerValue = shallowRef(props.modelValue);
 
 watch(() => props.modelValue, (newValue?: Node) => {
     innerValue.value = newValue;

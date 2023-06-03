@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PathSegment, Node } from '@/types/categoryGraph';
-import { ref } from 'vue';
+import { shallowRef } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
@@ -19,7 +19,7 @@ const props = defineProps<AddSimpleIdProps>();
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
-const signature = ref(SequenceSignature.empty(props.node));
+const signature = shallowRef(SequenceSignature.empty(props.node));
 // It is not possible to require the presence of a dual because the whole principle of the v3 is to make things simpler.
 // However, there might be a simple solution that would enforce some morphisms to be bijections.
 // TODO

@@ -49,7 +49,7 @@ function getNextAvailableIndex(): number {
 
 function onNodeTapHandler(node: Node) {
     const nodes = innerValue.value;
-    const nodeIndex = nodes.findIndex(n => n && n.equals(node));
+    const nodeIndex = nodes.findIndex(n => n?.equals(node));
 
     if (nodeIndex !== -1) {
         node.unselect();

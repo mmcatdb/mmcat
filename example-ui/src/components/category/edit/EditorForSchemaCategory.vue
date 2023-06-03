@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Edge, SelectionType, type Node } from '@/types/categoryGraph';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import AddObject from './AddObject.vue';
 import AddMorphism from './AddMorphism.vue';
 import AddComplexStructure from './AddComplexStructure.vue';
@@ -37,7 +37,7 @@ type StateValue =
     GenericStateValue<State.EditGroup, { nodes: Node[] }> |
     GenericStateValue<State.Integration, unknown>;
 
-const state = ref<StateValue>({ type: State.Default });
+const state = shallowRef<StateValue>({ type: State.Default });
 
 const editedObject = ref<InstanceType<typeof EditObject>>();
 const editedMorphism = ref<InstanceType<typeof EditMorphism>>();

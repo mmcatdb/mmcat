@@ -3,7 +3,7 @@ import { SequenceSignature } from '@/types/accessPath/graph';
 import { type Node, createDefaultFilter } from '@/types/categoryGraph';
 import type { DatabaseWithConfiguration } from '@/types/database';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
-import { ref, watch } from 'vue';
+import { ref, shallowRef, watch } from 'vue';
 import StaticNameInput from './StaticNameInput.vue';
 import SignatureInput from './SignatureInput.vue';
 
@@ -30,7 +30,7 @@ const emit = defineEmits([ 'update:modelValue' ]);
 const innerValue = ref(props.modelValue);
 const type = ref(getNameType(props.modelValue));
 const staticValue = ref(props.modelValue instanceof StaticName && !props.modelValue.isAnonymous ? props.modelValue : StaticName.fromString(''));
-const dynamicValue = ref(SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode));
+const dynamicValue = shallowRef(SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode));
 const filter = ref(createDefaultFilter(props.database.configuration));
 
 watch(() => props.modelValue, (newValue: Name) => {

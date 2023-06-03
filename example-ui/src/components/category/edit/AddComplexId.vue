@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PathSegment, Node } from '@/types/categoryGraph';
 import { SignatureIdFactory } from '@/types/identifiers';
-import { ref } from 'vue';
+import { ref, shallowRef } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
 import SignatureIdDisplay from '../SignatureIdDisplay.vue';
@@ -25,7 +25,7 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 
 const signatureIdFactory = ref(new SignatureIdFactory());
 const addingSignature = ref(false);
-const signature = ref(SequenceSignature.empty(props.node));
+const signature = shallowRef(SequenceSignature.empty(props.node));
 const idIsNotEmpty = ref(false);
 
 const filter = {

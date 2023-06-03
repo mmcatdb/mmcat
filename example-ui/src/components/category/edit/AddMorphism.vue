@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { Cardinality, type Min } from '@/types/schema';
-import { onUnmounted, ref, watch } from 'vue';
+import { onUnmounted, ref, shallowRef, watch } from 'vue';
 import MinimumInput from './MinimumInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
@@ -16,7 +16,7 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 const label = ref('');
 const iri = ref('');
 const pimIri = ref('');
-const nodes = ref<(Node | undefined)[]>([]);
+const nodes = shallowRef<(Node | undefined)[]>([]);
 const temporayEdge = ref<TemporaryEdge | null>(null);
 const min = ref<Min>(Cardinality.One);
 

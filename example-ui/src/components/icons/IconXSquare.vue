@@ -15,6 +15,6 @@
 <style scoped>
 .icon {
     position: relative;
-    top: 4px;
+    top: -3px;
 }
 </style>

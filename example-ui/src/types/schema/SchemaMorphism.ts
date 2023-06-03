@@ -29,41 +29,17 @@ export enum Tag {
 }
 
 export class SchemaMorphism {
-    signature: Signature;
-    domKey: Key;
-    codKey: Key;
-    min: Min;
-    label: string;
-    _isNew: boolean;
-
-    iri?: Iri;
-    pimIri?: Iri;
-    tags: Tag[];
-
-    get isBase(): boolean {
-        return this.signature.isBase;
-    }
-
-    get isNew(): boolean {
-        return this._isNew;
-    }
-
-    get sortBaseValue(): number {
-        const baseValue = this.signature.baseValue;
-        return Math.abs(baseValue ? baseValue : 0);
-    }
-
-    private constructor(signature: Signature, domKey: Key, codKey: Key, min: Min, isNew: boolean, label: string, iri: Iri | undefined, pimIri: Iri | undefined, tags: Tag[]) {
-        this.signature = signature;
-        this.domKey = domKey;
-        this.codKey = codKey;
-        this.min = min;
-        this._isNew = isNew;
-        this.label = label;
-        this.iri = iri;
-        this.pimIri = pimIri;
-        this.tags = [ ...tags ];
-    }
+    private constructor(
+        readonly signature: Signature,
+        readonly domKey: Key,
+        readonly codKey: Key,
+        readonly min: Min,
+        readonly label: string,
+        readonly iri: Iri | undefined,
+        readonly pimIri: Iri | undefined,
+        readonly tags: Tag[],
+        private _isNew: boolean,
+    ) {}
 
     static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
         return new SchemaMorphism(
@@ -71,11 +47,11 @@ export class SchemaMorphism {
             Key.fromServer(input.domKey),
             Key.fromServer(input.codKey),
             input.min,
-            false,
-            input.label || '',
+            input.label ?? '',
             input.iri,
             input.pimIri,
             input.tags ? input.tags : [],
+            false,
         );
     }
 
@@ -89,11 +65,11 @@ export class SchemaMorphism {
             def.dom.key,
             def.cod.key,
             def.min,
-            true,
             def.label ?? '',
             iri,
             pimIri,
             def.tags ?? [],
+            true,
         );
     }
 
@@ -112,6 +88,19 @@ export class SchemaMorphism {
             pimIri: this.pimIri,
             tags: this.tags,
         };
+    }
+
+    get isNew(): boolean {
+        return this._isNew;
+    }
+
+    get isBase(): boolean {
+        return this.signature.isBase;
+    }
+
+    get sortBaseValue(): number {
+        const baseValue = this.signature.baseValue;
+        return Math.abs(baseValue ? baseValue : 0);
     }
 
     equals(other: SchemaMorphism | null | undefined): boolean {

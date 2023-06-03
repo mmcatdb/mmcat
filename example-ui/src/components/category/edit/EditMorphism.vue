@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Edge, SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
-import { computed, onUnmounted, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, shallowRef, watch } from 'vue';
 import MinimumInput from './MinimumInput.vue';
 import IriDisplay from '@/components/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
@@ -18,7 +18,7 @@ const props = defineProps<EditMorphismProps>();
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
-const nodes = ref<(Node | undefined)[]>([ props.edge.domainNode, props.edge.codomainNode ]);
+const nodes = shallowRef<(Node | undefined)[]>([ props.edge.domainNode, props.edge.codomainNode ]);
 const temporayEdge = ref<TemporaryEdge>();
 
 const label = ref(props.edge.schemaMorphism.label);

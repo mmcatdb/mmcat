@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref, watch } from 'vue';
+import { onUnmounted, ref, shallowRef, watch } from 'vue';
 import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { Cardinality } from '@/types/schema';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
@@ -14,7 +14,7 @@ const emit = defineEmits([ 'save', 'cancel' ]);
 
 const mapLabel = ref('');
 const keyLabel = ref('');
-const nodes = ref<(Node | undefined)[]>([]);
+const nodes = shallowRef<(Node | undefined)[]>([]);
 const temporayEdge = ref<TemporaryEdge | null>(null);
 
 watch(nodes, (newValue, oldValue) => {

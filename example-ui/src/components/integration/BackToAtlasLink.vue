@@ -48,6 +48,6 @@ console.log(route);
 
 .icon {
     position: relative;
-    top: 4px;
+    top: -3px;
 }
 </style>

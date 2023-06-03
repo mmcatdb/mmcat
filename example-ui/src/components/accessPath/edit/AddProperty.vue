@@ -2,7 +2,7 @@
 import { GraphSimpleProperty, GraphComplexProperty, SequenceSignature, type GraphParentProperty } from '@/types/accessPath/graph';
 import { PropertyType, createDefaultFilter, Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
-import { ref, computed } from 'vue';
+import { ref, computed, shallowRef } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
@@ -27,7 +27,7 @@ const props = defineProps<AddPropertyProps>();
 const emit = defineEmits([ 'save', 'cancel' ]);
 
 const type = ref(PropertyType.Simple);
-const signature = ref(SequenceSignature.empty(props.parentProperty.node));
+const signature = shallowRef(SequenceSignature.empty(props.parentProperty.node));
 const isAuxiliary = ref(false);
 const name = ref<Name>(StaticName.fromString(''));
 const state = ref(State.SelectSignature);

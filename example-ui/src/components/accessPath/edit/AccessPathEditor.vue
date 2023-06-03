@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
-import { ref } from 'vue';
+import { ref, shallowRef } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { DatabaseWithConfiguration } from '@/types/database';
 import AddProperty from './AddProperty.vue';
@@ -32,7 +32,7 @@ const props = defineProps<AccessPathEditorProps>();
 
 const emit = defineEmits([ 'finish' ]);
 
-const state = ref<StateValue>({ type: State.Default });
+const state = shallowRef<StateValue>({ type: State.Default });
 
 function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     if (!ids)
