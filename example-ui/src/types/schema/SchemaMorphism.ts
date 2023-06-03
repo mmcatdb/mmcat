@@ -97,11 +97,8 @@ export class SchemaMorphism {
         );
     }
 
-    update(domKey: Key, codKey: Key, min: Min, label: string) {
-        this.domKey = domKey;
-        this.codKey = codKey;
-        this.min = min;
-        this.label = label;
+    createCopy(def: MorphismDefinition): SchemaMorphism {
+        return SchemaMorphism.createNew(this.signature, def);
     }
 
     toServer(): SchemaMorphismFromServer {

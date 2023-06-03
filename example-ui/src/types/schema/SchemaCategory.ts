@@ -117,10 +117,6 @@ export class SchemaCategory implements Entity {
         return !this.notAvailableIris.has(iri);
     }
 
-    editMorphism(morphism: SchemaMorphism, dom: SchemaObject, cod: SchemaObject, min: Min, label: string) {
-        morphism.update(dom.key, cod.key, min, label);
-    }
-
     suggestKey(): Key {
         return this._keysProvider.suggest();
     }

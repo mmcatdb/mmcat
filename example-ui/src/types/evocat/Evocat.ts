@@ -4,7 +4,7 @@ import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
 import { Version, VersionContext, computeLatestVersions } from "./Version";
-import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO } from "../schema/SchemaModificationOperation";
+import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, EditMorphism } from "../schema/operations";
 import type { SchemaUpdate, SchemaUpdateInit } from "../schema/SchemaUpdate";
 import { VersionedSMO } from "../schema/VersionedSMO";
 
@@ -144,7 +144,7 @@ export class Evocat {
     finishCompositeOperation(name: string) {
         this.versionContext.prevLevel();
 
-        const operation = new Composite(name);
+        const operation = Composite.create(name);
         this.commitOperation(operation);
     }
 
@@ -157,13 +157,13 @@ export class Evocat {
     }
 
     deleteObject(object: SchemaObject): void {
-        const operation = new DeleteObject(object);
+        const operation = DeleteObject.create(object);
         this.commitOperation(operation);
     }
 
     createMorphism(def: MorphismDefinition): SchemaMorphism {
         const morphism = this.schemaCategory.createMorphism(def);
-        const operation = new CreateMorphism(morphism);
+        const operation = CreateMorphism.create(morphism);
         this.commitOperation(operation);
 
         return morphism;
@@ -171,8 +171,16 @@ export class Evocat {
 
     deleteMorphism(morphism: SchemaMorphism): void {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
-        const operation = new DeleteMorphism(morphism);
+        const operation = DeleteMorphism.create(morphism);
         this.commitOperation(operation);
+    }
+
+    editMorphism(update: MorphismDefinition, oldMorphism: SchemaMorphism): SchemaMorphism {
+        const newMorphism = oldMorphism.createCopy(update);
+        const operation = EditMorphism.create(newMorphism, oldMorphism);
+        this.commitOperation(operation);
+
+        return newMorphism;
     }
 
     createId(object: SchemaObject, def: IdDefinition): void {

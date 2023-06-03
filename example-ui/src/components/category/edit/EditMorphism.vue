@@ -19,9 +19,9 @@ const props = defineProps<EditMorphismProps>();
 const emit = defineEmits([ 'save', 'cancel' ]);
 
 const nodes = ref<(Node | undefined)[]>([ props.edge.domainNode, props.edge.codomainNode ]);
+const temporayEdge = ref<TemporaryEdge>();
 
 const label = ref(props.edge.schemaMorphism.label);
-const temporayEdge = ref<TemporaryEdge>();
 const min = ref(props.edge.schemaMorphism.min);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
@@ -61,13 +61,21 @@ function save() {
 
     // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
 
-    evocat.schemaCategory.editMorphism(props.edge.schemaMorphism, node1.schemaObject, node2.schemaObject, min.value, label.value.trim());
+    const old = props.edge.schemaMorphism;
+    const update = {
+        dom: node1.schemaObject,
+        cod: node2.schemaObject,
+        min: min.value,
+        label: label.value.trim(),
+        tags: old.tags,
+        iri: old.iri,
+        pimIri: old.pimIri,
+    };
+    evocat.editMorphism(update, old);
 
     temporayEdge.value?.delete();
-    graph.deleteEdge(props.edge.schemaMorphism);
-    graph.createEdge(props.edge.schemaMorphism);
-    graph.layout();
 
+    graph.layout();
     emit('save');
 }
 

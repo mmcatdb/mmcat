@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = DeleteObject.class, name = "deleteObject"),
     @JsonSubTypes.Type(value = CreateMorphism.class, name = "createMorphism"),
     @JsonSubTypes.Type(value = DeleteMorphism.class, name = "deleteMorphism"),
+    @JsonSubTypes.Type(value = EditMorphism.class, name = "editMorphism"),
     @JsonSubTypes.Type(value = Composite.class, name = "composite"),
 })
 interface SchemaModificationOperation {
@@ -71,6 +72,22 @@ record DeleteMorphism(
             morphism.toSchemaMorphism(context),
             morphism.domKey(),
             morphism.codKey()
+        );
+    }
+
+}
+
+record EditMorphism(
+    SchemaMorphismWrapper newMorphism,
+    SchemaMorphismWrapper oldMorphism
+) implements SchemaModificationOperation {
+
+    @Override
+    public cz.cuni.matfyz.evolution.schema.EditMorphism toEvolution(SchemaCategoryContext context) {
+        return new cz.cuni.matfyz.evolution.schema.EditMorphism(
+            newMorphism.toSchemaMorphism(context),
+            newMorphism.domKey(),
+            newMorphism.codKey()
         );
     }
 

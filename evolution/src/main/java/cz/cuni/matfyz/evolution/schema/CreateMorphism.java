@@ -21,7 +21,7 @@ public class CreateMorphism extends SchemaCategory.Editor implements SchemaModif
     public void apply(SchemaCategory category) {
         final var objects = getObjectContext(category);
 
-        final var newMorphism = new SchemaMorphism.Builder()
+        final var morphismWithDomCod = new SchemaMorphism.Builder()
             .label(morphism.label)
             .iri(morphism.iri)
             .pimIri(morphism.pimIri)
@@ -33,7 +33,7 @@ public class CreateMorphism extends SchemaCategory.Editor implements SchemaModif
                 morphism.min()
             );
 
-        getMorphismContext(category).createUniqueObject(newMorphism);
+        getMorphismContext(category).createUniqueObject(morphismWithDomCod);
     }
 
 }
