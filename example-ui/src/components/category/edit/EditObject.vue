@@ -29,7 +29,15 @@ const isNew = computed(() => props.node.schemaObject.isNew);
 defineExpose({ changed });
 
 function save() {
-    props.node.schemaObject.setLabel(label.value);
+    const old = props.node.schemaObject;
+    const update = {
+        label: label.value.trim(),
+        ids: old.ids,
+        position: old.position,
+        iri: old.iri,
+        pimIri: old.pimIri,
+    };
+    evocat.editObject(update, old);
 
     emit('save');
 }

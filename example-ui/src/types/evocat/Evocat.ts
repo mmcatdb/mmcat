@@ -4,7 +4,7 @@ import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
 import { Version, VersionContext, computeLatestVersions } from "./Version";
-import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, EditMorphism } from "../schema/operations";
+import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, EditMorphism, EditObject } from "../schema/operations";
 import type { SchemaUpdate, SchemaUpdateInit } from "../schema/SchemaUpdate";
 import { VersionedSMO } from "../schema/VersionedSMO";
 
@@ -159,6 +159,14 @@ export class Evocat {
     deleteObject(object: SchemaObject): void {
         const operation = DeleteObject.create(object);
         this.commitOperation(operation);
+    }
+
+    editObject(update: ObjectDefinition, oldObject: SchemaObject): SchemaObject {
+        const newObject = oldObject.createCopy(update);
+        const operation = EditObject.create(newObject, oldObject);
+        this.commitOperation(operation);
+
+        return newObject;
     }
 
     createMorphism(def: MorphismDefinition): SchemaMorphism {

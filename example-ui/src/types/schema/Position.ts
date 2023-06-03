@@ -2,11 +2,21 @@ import type { Position } from "cytoscape";
 import type { Id } from "../id";
 
 export class ComparablePosition implements Position {
-    x!: number;
-    y!: number;
+    private constructor(
+        public x: number,
+        public y: number,
+    ) {}
 
-    constructor(input: Position) {
-        Object.assign(this, input);
+    static fromPosition(input: Position) {
+        return new ComparablePosition(input.x, input.y);
+    }
+
+    static createDefault() {
+        return new ComparablePosition(0, 0);
+    }
+
+    copy() {
+        return new ComparablePosition(this.x, this.y);
     }
 
     equals(object?: Position) : boolean {

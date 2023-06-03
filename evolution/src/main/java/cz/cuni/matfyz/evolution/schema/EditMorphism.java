@@ -33,10 +33,10 @@ public class EditMorphism extends SchemaCategory.Editor implements SchemaModific
                 newMorphism.min()
             );
 
-        final var morphismContext = getMorphismContext(category);
+        final var morphisms = getMorphismContext(category);
         // Replace the morphism by its newer version. The equality is determined by its signature.
-        morphismContext.deleteUniqueObject(newMorphismWithDomCod);
-        morphismContext.createUniqueObject(newMorphismWithDomCod);
+        morphisms.deleteUniqueObject(newMorphismWithDomCod);
+        morphisms.createUniqueObject(newMorphismWithDomCod);
     }
 
 }

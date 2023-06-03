@@ -35,9 +35,9 @@ export class SchemaMorphism {
         readonly codKey: Key,
         readonly min: Min,
         readonly label: string,
+        readonly tags: Tag[],
         readonly iri: Iri | undefined,
         readonly pimIri: Iri | undefined,
-        readonly tags: Tag[],
         private _isNew: boolean,
     ) {}
 
@@ -48,9 +48,9 @@ export class SchemaMorphism {
             Key.fromServer(input.codKey),
             input.min,
             input.label ?? '',
+            input.tags ? input.tags : [],
             input.iri,
             input.pimIri,
-            input.tags ? input.tags : [],
             false,
         );
     }
@@ -66,9 +66,9 @@ export class SchemaMorphism {
             def.cod.key,
             def.min,
             def.label ?? '',
+            def.tags ?? [],
             iri,
             pimIri,
-            def.tags ?? [],
             true,
         );
     }

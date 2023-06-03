@@ -12,67 +12,72 @@ export type SchemaObjectFromServer = {
     key: KeyFromServer;
     label: string;
     position: Position;
-    superId: SignatureIdFromServer;
     ids?: ObjectIdsFromServer;
+    superId: SignatureIdFromServer;
     //databases?: string[];
     iri?: Iri;
     pimIri?: Iri;
 };
 
 export class SchemaObject {
-    key!: Key;
-    label!: string;
-    position!: ComparablePosition;
-    ids?: ObjectIds;
-    superId!: SignatureId;
-    _isNew!: boolean;
+    private readonly originalPosition?: ComparablePosition;
+    private _logicalModels = new ComparableSet<LogicalModel, Id>(logicalModel => logicalModel.id);
 
-    iri?: Iri;
-    pimIri?: Iri;
-
-    _originalPosition?: ComparablePosition;
-
-    _logicalModels = new ComparableSet<LogicalModel, Id>(logicalModel => logicalModel.id);
-
-    private constructor() {}
+    private constructor(
+        readonly key: Key,
+        readonly label: string,
+        public position: ComparablePosition,
+        public ids: ObjectIds | undefined,
+        public superId: SignatureId,
+        readonly iri: Iri | undefined,
+        readonly pimIri: Iri | undefined,
+        private _isNew: boolean,
+    ) {
+        this.originalPosition = _isNew ? undefined : position.copy();
+    }
 
     static fromServer(input: SchemaObjectFromServer): SchemaObject {
-        const object = new SchemaObject();
-
-        object.key = Key.fromServer(input.key);
-        object.label = input.label;
-        object.position = new ComparablePosition(input.position);
-        object.superId = SignatureId.fromServer(input.superId);
-        object.ids = input.ids ? ObjectIds.fromServer(input.ids) : undefined;
-        object._isNew = false;
-        object._originalPosition = new ComparablePosition(input.position);
-        object.iri = input.iri;
-        object.pimIri = input.pimIri;
+        const object = new SchemaObject(
+            Key.fromServer(input.key),
+            input.label,
+            ComparablePosition.fromPosition(input.position),
+            input.ids ? ObjectIds.fromServer(input.ids) : undefined,
+            SignatureId.fromServer(input.superId),
+            input.iri,
+            input.pimIri,
+            false,
+        );
 
         return object;
     }
 
     static createNew(key: Key, def: ObjectDefinition): SchemaObject {
-        const object = new SchemaObject();
+        const [ iri, pimIri ] = 'iri' in def
+            ? [ def.iri, def.pimIri ]
+            : [ undefined, undefined ];
 
-        object.key = key;
-        object.label = def.label;
-        object.position = new ComparablePosition({ x: 0, y: 0 });
-        object.ids = def.ids;
+        const object = new SchemaObject(
+            key,
+            def.label,
+            def.position?.copy() ?? ComparablePosition.createDefault(),
+            def.ids,
+            SignatureId.union([]),
+            iri,
+            pimIri,
+            true,
+        );
+
         object._updateDefaultSuperId(); // TODO maybe a computed variable?
-
-        object._isNew = true;
-
-        if ('iri' in def) {
-            object.iri = def.iri;
-            object.pimIri = def.pimIri;
-        }
 
         return object;
     }
 
+    createCopy(def: ObjectDefinition): SchemaObject {
+        return SchemaObject.createNew(this.key, def);
+    }
+
     _updateDefaultSuperId() {
-        this.superId = this.ids?.generateDefaultSuperId() || SignatureId.union([]);
+        this.superId = this.ids?.generateDefaultSuperId() ?? SignatureId.union([]);
     }
 
     addId(def: IdDefinition): void {
@@ -125,12 +130,8 @@ export class SchemaObject {
         return this.ids;
     }
 
-    setLogicalModel(logicalModel: LogicalModel) {
-        this._logicalModels.add(logicalModel);
-    }
-
-    setLabel(label: string) {
-        this.label = label;
+    setLogicalModels(logicalModels: ComparableSet<LogicalModel, Id>) {
+        this._logicalModels = logicalModels;
     }
 
     /*
@@ -159,6 +160,7 @@ export class SchemaObject {
 export type ObjectDefinition = {
     label: string;
     ids?: ObjectIds;
+    position?: ComparablePosition;
 } & Optional<{
     iri: Iri;
     pimIri: Iri;

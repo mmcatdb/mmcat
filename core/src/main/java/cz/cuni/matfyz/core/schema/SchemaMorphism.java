@@ -50,6 +50,16 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         return cod;
     }
 
+    /**
+     * Replace old version of dom/cod by its newer version (which has the same key).
+     */
+    public void updateObject(SchemaObject object) {
+        if (this.dom.equals(object))
+            this.dom = object;
+        if (this.cod.equals(object))
+            this.cod = object;
+    }
+
     @Override
     public Min min() {
         return min;

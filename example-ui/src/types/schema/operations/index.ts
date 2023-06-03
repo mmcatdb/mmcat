@@ -1,6 +1,7 @@
 import { SMOType, type SMOFromServer, type SMO } from './schemaModificationOperation';
 import { CreateObject, type CreateObjectFromServer } from './createObject';
 import { DeleteObject, type DeleteObjectFromServer } from './deleteObject';
+import { EditObject, type EditObjectFromServer } from './editObject';
 import { CreateMorphism, type CreateMorphismFromServer } from './createMorphism';
 import { DeleteMorphism, type DeleteMorphismFromServer } from './deleteMorphism';
 import { EditMorphism, type EditMorphismFromServer } from './editMorphism';
@@ -12,6 +13,8 @@ export function fromServer(input: SMOFromServer): SMO {
         return CreateObject.fromServer(input as CreateObjectFromServer);
     case SMOType.DeleteObject:
         return DeleteObject.fromServer(input as DeleteObjectFromServer);
+    case SMOType.EditObject:
+        return EditObject.fromServer(input as EditObjectFromServer);
     case SMOType.CreateMorphism:
         return CreateMorphism.fromServer(input as CreateMorphismFromServer);
     case SMOType.DeleteMorphism:
@@ -28,6 +31,7 @@ export {
     type SMOFromServer,
     CreateObject,
     DeleteObject,
+    EditObject,
     CreateMorphism,
     DeleteMorphism,
     EditMorphism,

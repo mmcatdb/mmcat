@@ -8,6 +8,8 @@ import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition } from "./SchemaMorphism";
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
 import type { Graph } from "../categoryGraph";
+import { ComparableMap } from "@/utils/ComparableMap";
+import { ComparableSet } from "@/utils/ComparableSet";
 
 export type SchemaCategoryFromServer = {
     id: Id;
@@ -23,31 +25,30 @@ export class SchemaCategory implements Entity {
     private keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     private signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
 
+    private logicalModelsMap: LogicalModelsMap;
+
     private constructor(
         readonly id: Id,
         readonly label: string,
         readonly versionId: VersionId,
         private objects: SchemaObject[],
         private morphisms: SchemaMorphism[],
-        private logicalModels: LogicalModel[],
+        logicalModels: LogicalModel[],
     ) {
-        this.objects.forEach(object => {
+        objects.forEach(object => {
             this.keysProvider.add(object.key);
             if (object.iri)
                 this.notAvailableIris.add(object.iri);
         });
 
-        this.morphisms.forEach(morphism => {
+        morphisms.forEach(morphism => {
             this.signatureProvider.add(morphism.signature);
             if (morphism.iri)
                 this.notAvailableIris.add(morphism.iri);
         });
 
-        this.logicalModels.forEach(logicalModel => {
-            logicalModel.mappings.forEach(mapping => {
-                this.setDatabaseToObjectsFromMapping(mapping, logicalModel);
-            });
-        });
+        this.logicalModelsMap = computeLogicalModelsMap(logicalModels, objects, morphisms);
+        this.logicalModelsMap.forEach((set, key) => objects.find(o => o.key.equals(key))?.setLogicalModels(set));
     }
 
     static fromServer(input: SchemaCategoryFromServer, logicalModels: LogicalModel[]): SchemaCategory {
@@ -85,6 +86,10 @@ export class SchemaCategory implements Entity {
 
     addObject(object: SchemaObject) {
         this.objects.push(object);
+        const set = this.logicalModelsMap.get(object.key);
+        if (set)
+            object.setLogicalModels(set);
+
         this._graph?.createNode(object);
     }
 
@@ -136,16 +141,6 @@ export class SchemaCategory implements Entity {
         return this.signatureProvider.isAvailable(signature);
     }
 
-    setDatabaseToObjectsFromMapping(mapping: Mapping, logicalModel: LogicalModel): void {
-        const objects = getObjectsFromPath(mapping.accessPath, this.objects, this.morphisms);
-
-        const rootObject = this.objects.find(object => object.key.equals(mapping.rootObjectKey));
-        if (rootObject)
-            objects.push(rootObject);
-
-        objects.forEach(object => object.setLogicalModel(logicalModel));
-    }
-
     private _graph?: Graph;
 
     get graph(): Graph | undefined {
@@ -168,6 +163,30 @@ export class SchemaCategory implements Entity {
         newGraph.layout();
         newGraph.center();
     }
+}
+
+type LogicalModelsMap = ComparableMap<Key, number, ComparableSet<LogicalModel, Id>>;
+
+function computeLogicalModelsMap(logicalModels: LogicalModel[], objects: SchemaObject[], morphisms: SchemaMorphism[]): LogicalModelsMap {
+    const output = new ComparableMap<Key, number, ComparableSet<LogicalModel, Id>>(key => key.value);
+
+    logicalModels.forEach(logicalModel => {
+        logicalModel.mappings.forEach(mapping => {
+            const pathObjects = getObjectsFromPath(mapping.accessPath, objects, morphisms);
+
+            const rootObject = objects.find(object => object.key.equals(mapping.rootObjectKey));
+            if (rootObject)
+                pathObjects.push(rootObject);
+
+            pathObjects.forEach(object => {
+                const set = output.get(object.key) ?? new ComparableSet(m => m.id);
+                output.set(object.key, set);
+                set.add(logicalModel);
+            });
+        });
+    });
+
+    return output;
 }
 
 function getObjectsFromPath(path: ParentProperty, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject[] {

@@ -3,7 +3,6 @@ import { SchemaMorphism, type SchemaMorphismFromServer } from "../SchemaMorphism
 import { type SMO, type SMOFromServer, SMOType } from "./schemaModificationOperation";
 
 export type EditMorphismFromServer = SMOFromServer<SMOType.EditMorphism> & {
-    //signature: SignatureFromServer; // TODO change on backend
     newMorphism: SchemaMorphismFromServer;
     oldMorphism: SchemaMorphismFromServer;
 };

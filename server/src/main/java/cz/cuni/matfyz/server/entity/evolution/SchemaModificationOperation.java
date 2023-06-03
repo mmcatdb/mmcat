@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = CreateObject.class, name = "createObject"),
     @JsonSubTypes.Type(value = DeleteObject.class, name = "deleteObject"),
+    @JsonSubTypes.Type(value = EditObject.class, name = "editObject"),
     @JsonSubTypes.Type(value = CreateMorphism.class, name = "createMorphism"),
     @JsonSubTypes.Type(value = DeleteMorphism.class, name = "deleteMorphism"),
     @JsonSubTypes.Type(value = EditMorphism.class, name = "editMorphism"),
@@ -43,6 +44,18 @@ record DeleteObject(
     @Override
     public cz.cuni.matfyz.evolution.schema.DeleteObject toEvolution(SchemaCategoryContext context) {
         return new cz.cuni.matfyz.evolution.schema.DeleteObject(object.toSchemaObject(context));
+    }
+
+}
+
+record EditObject(
+    SchemaObjectWrapper newObject,
+    SchemaObjectWrapper oldObject
+) implements SchemaModificationOperation {
+
+    @Override
+    public cz.cuni.matfyz.evolution.schema.EditObject toEvolution(SchemaCategoryContext context) {
+        return new cz.cuni.matfyz.evolution.schema.EditObject(newObject.toSchemaObject(context));
     }
 
 }
