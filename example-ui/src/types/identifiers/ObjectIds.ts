@@ -1,4 +1,3 @@
-import type { Signature } from "./Signature";
 import { SignatureId, SignatureIdFactory, type SignatureIdFromServer } from "./SignatureId";
 
 export enum Type {
@@ -52,19 +51,36 @@ export class ObjectIds {
         };
     }
 
+    equals(other: ObjectIds): boolean {
+        if (this === other)
+            return true;
+
+        if (this.type !== other.type)
+            return false;
+
+        if (!this.isSignatures)
+            return true;
+
+        if (this._signatureIds.length !== other._signatureIds.length)
+            return false;
+
+        // This is O(n^2), however it should be more effective for small ids than the O(n log n) solution.
+        for (const signatureId of this._signatureIds) {
+            if (!other._signatureIds.find(id => id.equals(signatureId)))
+                return false;
+        }
+
+        return true;
+    }
+
     public generateDefaultSuperId(): SignatureId {
         if (this.type !== Type.Signatures)
             return SignatureIdFactory.createEmpty();
 
         return SignatureId.union(this._signatureIds);
     }
-
 }
 
-export type IdDefinition = {
-    signatures: Signature[];
-} | {
-    type: NonSignaturesType;
-} | {
-    signatureId: SignatureId;
-};
+export function idsAreEqual(a: ObjectIds | undefined, b: ObjectIds | undefined) {
+    return (!a && !b) || (b && a?.equals(b));
+}

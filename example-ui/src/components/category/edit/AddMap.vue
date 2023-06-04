@@ -4,7 +4,7 @@ import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGr
 import { Cardinality } from '@/types/schema';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ObjectIds, Type } from '@/types/identifiers';
+import { ObjectIds, SignatureId, Type } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 
@@ -67,9 +67,11 @@ function save() {
             min: Cardinality.One,
         });
 
-        evocat.createId(mapObject, {
-            signatures: [ mapToKey.signature, mapToNode1.signature ],
-        });
+        const mapObjectId = new SignatureId([ mapToKey.signature, mapToNode1.signature ]);
+        evocat.editObject({
+            ...mapObject.toDefinition(),
+            ids: ObjectIds.createSignatures([ mapObjectId ]),
+        }, mapObject);
     });
 
     graph.layout();

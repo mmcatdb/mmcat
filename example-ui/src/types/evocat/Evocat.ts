@@ -1,6 +1,5 @@
 import type { Graph } from "@/types/categoryGraph";
 import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism } from "@/types/schema";
-import type { IdDefinition, Key } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
 import { Version, VersionContext, computeLatestVersions } from "./Version";
@@ -194,18 +193,5 @@ export class Evocat {
         this.commitOperation(operation);
 
         return newMorphism;
-    }
-
-    createId(object: SchemaObject, def: IdDefinition) {
-        object.addId(def);
-
-        //const node = this._graph?.getNode(object);
-        //node?.updateNoIdsClass();
-
-        //this.createOperation('addId');
-    }
-
-    editIds(key: Key, def: IdDefinition) {
-        // TODO
     }
 }

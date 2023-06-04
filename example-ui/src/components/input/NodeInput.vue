@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SelectionType, Node } from '@/types/categoryGraph';
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, shallowRef, watch } from 'vue';
 import { useEvocat } from '@/utils/injects';
 
 const { graph } = $(useEvocat());
@@ -16,9 +16,9 @@ const props = defineProps<NodeInputProps>();
 
 const emit = defineEmits([ 'update:modelValue' ]);
 
-const innerValue = ref([ ...props.modelValue ]);
+const innerValue = shallowRef([ ...props.modelValue ]);
 // The index can't be greater than count - 1 (if count is defined).
-const lastIndex = ref((props.count && props.modelValue.length >= props.count) ? props.count - 1 : props.modelValue.length);
+const lastIndex = shallowRef((props.count && props.modelValue.length >= props.count) ? props.count - 1 : props.modelValue.length);
 
 watch(() => props.modelValue, (newValue: (Node | undefined)[]) => {
     innerValue.value.forEach(node => node?.unselect());

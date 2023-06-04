@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import type { Node } from '@/types/categoryGraph';
-import { computed, ref } from 'vue';
+import { computed, shallowRef, watch } from 'vue';
 import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';
-import AddId from './AddId.vue';
+import IdInput from './IdInput.vue';
 import IriDisplay from '@/components/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useEvocat } from '@/utils/injects';
+import { ObjectIds, idsAreEqual } from '@/types/identifiers/ObjectIds';
 
 const { evocat } = $(useEvocat());
 
@@ -20,25 +21,19 @@ const props = defineProps<EditObjectProps>();
 
 const emit = defineEmits([ 'save', 'cancel', 'update' ]);
 
-const label = ref(props.node.schemaObject.label);
-const addingId = ref(false);
-
-const changed = computed(() => label.value !== props.node.schemaObject.label || addingId.value);
+const label = shallowRef(props.node.schemaObject.label);
+const changed = computed(() => label.value !== props.node.schemaObject.label || !idsAreEqual(objectIds.value, props.node.schemaObject.ids) || addingId.value);
 const isNew = computed(() => props.node.schemaObject.isNew);
 
 defineExpose({ changed });
 
 function save() {
-    const old = props.node.schemaObject;
     const update = {
+        ...props.node.schemaObject.toDefinition(),
         label: label.value.trim(),
-        ids: old.ids,
-        position: old.position,
-        iri: old.iri,
-        pimIri: old.pimIri,
+        ids: objectIds.value,
     };
-    evocat.editObject(update, old);
-
+    evocat.editObject(update, props.node.schemaObject);
     emit('save');
 }
 
@@ -52,20 +47,32 @@ function deleteFunction() {
     });
 
     evocat.deleteObject(props.node.schemaObject);
-
     emit('save');
 }
+
+const addingId = shallowRef(false);
+const objectIds = shallowRef(props.node.schemaObject.ids);
+
+watch(objectIds, () => addingId.value = false);
 
 function startAddingId() {
     addingId.value = true;
 }
 
-function finishAddingId() {
+function cancelAddingId() {
     addingId.value = false;
 }
 
-function cancelAddingId() {
-    addingId.value = false;
+function deleteSignatureId(index: number) {
+    if (!objectIds.value?.isSignatures)
+        return;
+
+    const newIds = objectIds.value.signatureIds.filter((_, i) => i !== index);
+    objectIds.value = newIds.length > 0 ? ObjectIds.createSignatures(newIds) : undefined;
+}
+
+function deleteNonSignatureId() {
+    objectIds.value = undefined;
 }
 </script>
 
@@ -96,15 +103,15 @@ function cancelAddingId() {
             </ValueRow>
             <ValueRow label="Ids:">
                 <ObjectIdsDisplay
-                    v-if="node.schemaObject.ids"
-                    :ids="node.schemaObject.ids"
-                    :disabled="!isNew"
+                    v-if="objectIds"
+                    :ids="objectIds"
+                    :disabled="!isNew || addingId"
                     class="object-ids-display"
-                    @delete-signature="(index) => node.deleteSignatureId(index)"
-                    @delete-non-signature="() => node.deleteNonSignatureId()"
+                    @delete-signature="deleteSignatureId"
+                    @delete-non-signature="deleteNonSignatureId"
                 />
                 <ButtonIcon
-                    v-if="!addingId && isNew && (!node.schemaObject.ids || node.schemaObject.ids.isSignatures)"
+                    v-if="!addingId && isNew && (!objectIds || objectIds.isSignatures)"
                     @click="startAddingId"
                 >
                     <IconPlusSquare />
@@ -115,9 +122,9 @@ function cancelAddingId() {
             v-if="addingId"
             class="editor"
         >
-            <AddId
+            <IdInput
+                v-model="objectIds"
                 :node="node"
-                @save="finishAddingId"
                 @cancel="cancelAddingId"
             />
         </div>

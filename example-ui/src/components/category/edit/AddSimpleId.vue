@@ -7,9 +7,7 @@ import SignatureInput from '../../accessPath/input/SignatureInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '../SignatureDisplay.vue';
-import { useEvocat } from '@/utils/injects';
-
-const { evocat } = $(useEvocat());
+import { SignatureId } from '@/types/identifiers';
 
 type AddSimpleIdProps = {
     node: Node;
@@ -17,9 +15,12 @@ type AddSimpleIdProps = {
 
 const props = defineProps<AddSimpleIdProps>();
 
-const emit = defineEmits([ 'save', 'cancel' ]);
+const emit = defineEmits<{
+    (e: 'save', signatureId: SignatureId): void;
+    (e: 'cancel'): void;
+}>();
 
-const signature = shallowRef(SequenceSignature.empty(props.node));
+const sequence = shallowRef(SequenceSignature.empty(props.node));
 // It is not possible to require the presence of a dual because the whole principle of the v3 is to make things simpler.
 // However, there might be a simple solution that would enforce some morphisms to be bijections.
 // TODO
@@ -28,9 +29,8 @@ const filter = {
 };
 
 function save() {
-    evocat.createId(props.node.schemaObject, { signatures: [ signature.value.toSignature() ] });
-
-    emit('save');
+    const signatureId = new SignatureId([ sequence.value.toSignature() ]);
+    emit('save', signatureId);
 }
 
 function cancel() {
@@ -42,16 +42,16 @@ function cancel() {
     <h2>Add simple Id</h2>
     <ValueContainer>
         <ValueRow label="Signature:">
-            <SignatureDisplay :signature="signature" />
+            <SignatureDisplay :signature="sequence" />
         </ValueRow>
     </ValueContainer>
     <SignatureInput
-        v-model="signature"
+        v-model="sequence"
         :filter="filter"
     />
     <div class="button-row">
         <button
-            :disabled="signature.isEmpty"
+            :disabled="sequence.isEmpty"
             @click="save"
         >
             Confirm

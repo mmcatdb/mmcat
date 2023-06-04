@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import type { Node } from '@/types/categoryGraph';
-import { Type } from '@/types/identifiers';
-import { ref } from 'vue';
+import { ObjectIds, SignatureId, Type } from '@/types/identifiers';
+import { shallowRef, watch } from 'vue';
 import AddSimpleId from './AddSimpleId.vue';
 import AddComplexId from './AddComplexId.vue';
-import { useEvocat } from '@/utils/injects';
-
-const { evocat } = $(useEvocat());
 
 /*
  * When the id is simple (it has exactly one signature) the corresponding morphism must have cardinality 1:1.
@@ -20,18 +17,28 @@ enum State {
     Complex
 }
 
-type AddIdProps = {
+type IdInputProps = {
     node: Node;
+    modelValue: ObjectIds | undefined;
 };
 
-const props = defineProps<AddIdProps>();
+const props = defineProps<IdInputProps>();
+const innerValue = shallowRef(props.modelValue);
 
-const state = ref(State.SelectType);
+watch(() => props.modelValue, (newValue: ObjectIds | undefined) => {
+    if (innerValue.value !== newValue)
+        innerValue.value = newValue;
+});
 
-const emit = defineEmits([ 'save', 'cancel' ]);
+const state = shallowRef(State.SelectType);
 
-function save() {
-    emit('save');
+const emit = defineEmits([ 'save', 'cancel', 'update:modelValue' ]);
+
+function addSignatureId(signatureId: SignatureId) {
+    const currentIds = innerValue.value?.signatureIds ?? [];
+    innerValue.value = ObjectIds.createSignatures([ ...currentIds, signatureId ]);
+
+    emit('update:modelValue', innerValue.value);
 }
 
 function cancel() {
@@ -47,13 +54,13 @@ function selectComplex() {
 }
 
 function selectValue() {
-    evocat.createId(props.node.schemaObject, { type: Type.Value });
-    emit('save');
+    innerValue.value = ObjectIds.createNonSignatures(Type.Value);
+    emit('update:modelValue', innerValue.value);
 }
 
 function selectGenerated() {
-    evocat.createId(props.node.schemaObject, { type: Type.Generated });
-    emit('save');
+    innerValue.value = ObjectIds.createNonSignatures(Type.Generated);
+    emit('update:modelValue', innerValue.value);
 }
 </script>
 
@@ -83,14 +90,14 @@ function selectGenerated() {
     <template v-else-if="state === State.Simple">
         <AddSimpleId
             :node="node"
-            @save="save"
+            @save="addSignatureId"
             @cancel="cancel"
         />
     </template>
     <template v-else-if="state === State.Complex">
         <AddComplexId
             :node="node"
-            @save="save"
+            @save="addSignatureId"
             @cancel="cancel"
         />
     </template>

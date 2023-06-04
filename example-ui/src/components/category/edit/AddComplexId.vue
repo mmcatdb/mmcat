@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PathSegment, Node } from '@/types/categoryGraph';
-import { SignatureIdFactory } from '@/types/identifiers';
+import { SignatureId, SignatureIdFactory } from '@/types/identifiers';
 import { ref, shallowRef } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from "@/types/schema";
@@ -11,9 +11,6 @@ import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '../SignatureDisplay.vue';
-import { useEvocat } from '@/utils/injects';
-
-const { evocat } = $(useEvocat());
 
 type AddComplexIdProps = {
     node: Node;
@@ -21,7 +18,10 @@ type AddComplexIdProps = {
 
 const props = defineProps<AddComplexIdProps>();
 
-const emit = defineEmits([ 'save', 'cancel' ]);
+const emit = defineEmits<{
+    (e: 'save', signatureId: SignatureId): void;
+    (e: 'cancel'): void;
+}>();
 
 const signatureIdFactory = new SignatureIdFactory();
 const signatureId = shallowRef(signatureIdFactory.signatureId);
@@ -34,9 +34,7 @@ const filter = {
 };
 
 function save() {
-    evocat.createId(props.node.schemaObject, { signatureId: signatureId.value });
-
-    emit('save');
+    emit('save', signatureId.value);
 }
 
 function cancel() {
@@ -127,10 +125,6 @@ function addSignature() {
 
 .fix-icon-height .button-icon {
     max-height: 20px;
-}
-
-.fix-icon-height svg.icon {
-    top: 2px;
 }
 
 .ml-2 {

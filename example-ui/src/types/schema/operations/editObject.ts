@@ -26,9 +26,6 @@ export class EditObject implements SMO<SMOType.EditObject> {
         if (!newObject.key.equals(oldObject.key))
             throw new Error('Cannot edit object\'s key.');
 
-        if (newObject.ids !== oldObject.ids)
-            throw new Error('Cannot edit object\'s ids.');
-
         return new EditObject(
             newObject,
             oldObject,

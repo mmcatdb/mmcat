@@ -21,8 +21,9 @@ export class SignatureId {
         if (this._signatures.length !== other._signatures.length)
             return false;
 
-        for (let i = 0; i < this._signatures.length; i++) {
-            if (!this._signatures[i].equals(other._signatures[i]))
+        // This is O(n^2), however it should be more effective for small ids than the O(n log n) solution.
+        for (const signature of this._signatures) {
+            if (!other._signatures.find(s => s.equals(signature)))
                 return false;
         }
 

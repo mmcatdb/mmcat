@@ -95,7 +95,9 @@ export class Node {
             : cytoscape.add(createNoGroupDefinition(object));
 
         const node = new Node(object, groupPlaceholders, noGroupPlaceholder);
-        const nodeDefinition = createNodeDefinition(object, node, object.isNew ? 'new' : '');
+        const classes = (object.isNew ? 'new' : '') + ' ' + (!object.ids ? 'no-ids' : '');
+        console.log(classes);
+        const nodeDefinition = createNodeDefinition(object, node, classes);
         const cytoscapeNode = cytoscape.add(nodeDefinition);
         node.setCytoscapeNode(cytoscapeNode);
 
@@ -104,7 +106,6 @@ export class Node {
 
     private setCytoscapeNode(node: NodeSingular) {
         this.node = node;
-        this.updateNoIdsClass();
         node.on('drag', () => this.refreshGroupPlaceholders());
     }
 
@@ -121,10 +122,11 @@ export class Node {
     update(schemaObject: SchemaObject) {
         this.schemaObject = schemaObject;
         this.node.data('label', this.label);
+        this.node.toggleClass('no-ids', !this.schemaObject.ids);
+
         // TODO position should be tracked elsewhere?
         //this.node.position('x', schemaObject.position.x);
         //this.node.position('y', schemaObject.position.y);
-
 
         if (!this.node.inside()) {
             this.node.restore();
@@ -260,20 +262,6 @@ export class Node {
     markAvailablePaths(filter: Filter): void {
         const pathMarker = new PathMarker(this, filter);
         pathMarker.markPathsFromRootNode();
-    }
-
-    updateNoIdsClass(): void {
-        this.node.toggleClass('no-ids', !this.schemaObject.ids);
-    }
-
-    deleteSignatureId(index: number): void {
-        this.schemaObject.deleteSignatureId(index);
-        this.updateNoIdsClass();
-    }
-
-    deleteNonSignatureId(): void {
-        this.schemaObject.deleteNonSignatureId();
-        this.updateNoIdsClass();
     }
 }
 

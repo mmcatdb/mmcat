@@ -1,7 +1,7 @@
 import { ComparableSet } from "@/utils/ComparableSet";
 import type { Iri } from "@/types/integration";
 import type { Position } from "cytoscape";
-import { Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer, type IdDefinition } from "../identifiers";
+import { Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer } from "../identifiers";
 import { ComparablePosition } from "./Position";
 import type { LogicalModel } from "../logicalModel";
 import type { Id } from "../id";
@@ -27,8 +27,8 @@ export class SchemaObject {
         readonly key: Key,
         readonly label: string,
         public position: ComparablePosition,
-        public ids: ObjectIds | undefined,
-        public superId: SignatureId,
+        readonly ids: ObjectIds | undefined,
+        readonly superId: SignatureId,
         readonly iri: Iri | undefined,
         readonly pimIri: Iri | undefined,
         private _isNew: boolean,
@@ -61,58 +61,27 @@ export class SchemaObject {
             def.label,
             def.position?.copy() ?? ComparablePosition.createDefault(),
             def.ids,
-            SignatureId.union([]),
+            def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             iri,
             pimIri,
             true,
         );
 
-        object._updateDefaultSuperId(); // TODO maybe a computed variable?
-
         return object;
+    }
+
+    toDefinition(): ObjectDefinition {
+        return {
+            label: this.label,
+            ids: this.ids,
+            position: this.position,
+            iri: this.iri,
+            pimIri: this.pimIri,
+        };
     }
 
     createCopy(def: ObjectDefinition): SchemaObject {
         return SchemaObject.createNew(this.key, def);
-    }
-
-    _updateDefaultSuperId() {
-        this.superId = this.ids?.generateDefaultSuperId() ?? SignatureId.union([]);
-    }
-
-    addId(def: IdDefinition): void {
-        // TODO check if id already exists - this is important for integration.
-        // Also, in the second case, the id is not added but replaced, which is not consistent with the name of the method (and the SMO operation).
-        if ('type' in def) {
-            this.ids = ObjectIds.createNonSignatures(def.type);
-        }
-        else {
-            if (this.ids && !this.ids.isSignatures)
-                return;
-
-            const signatureId = 'signatureId' in def
-                ? def.signatureId
-                : new SignatureId(def.signatures);
-
-            const currentIds = this.ids ? this.ids.signatureIds : [];
-            this.ids = ObjectIds.createSignatures([ ...currentIds, signatureId ]);
-        }
-
-        this._updateDefaultSuperId();
-    }
-
-    deleteSignatureId(index: number): void {
-        if (!this.ids?.isSignatures)
-            return;
-
-        const newIds = this.ids.signatureIds.filter((_, i) => i !== index);
-        this.ids = newIds.length > 0 ? ObjectIds.createSignatures(newIds) : undefined;
-        this._updateDefaultSuperId();
-    }
-
-    deleteNonSignatureId() {
-        this.ids = undefined;
-        this._updateDefaultSuperId();
     }
 
     get isNew(): boolean {

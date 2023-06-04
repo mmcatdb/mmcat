@@ -3,15 +3,16 @@ import type { Type } from "../identifiers";
 import type { Iri } from "./parser";
 
 export type MorphismSequence = ImportedMorphism[];
+export type ImportedSignatureId = {
+    type: Type.Signatures;
+    keys: MorphismSequence[];
+};
 
 export type ImportedId = {
     type: Type.Value;
 } | {
     type: Type.Generated;
-} | {
-    type: Type.Signatures;
-    keys: MorphismSequence[];
-};
+} | ImportedSignatureId;
 
 export class ImportedObject {
     ids: ImportedId[];

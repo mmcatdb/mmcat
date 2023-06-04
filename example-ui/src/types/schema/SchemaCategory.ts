@@ -2,7 +2,7 @@ import type { Iri } from "@/types/integration";
 import { UniqueIdProvider } from "@/utils/UniqueIdProvider";
 import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id, VersionId } from "../id";
-import { DynamicName, Key, Signature, type IdDefinition } from "../identifiers";
+import { DynamicName, Key, Signature } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
 import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition, VersionedSchemaMorphism } from "./SchemaMorphism";
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer, VersionedSchemaObject } from "./SchemaObject";
@@ -118,13 +118,6 @@ export class SchemaCategory implements Entity {
 
     findObjectByIri(iri: Iri): SchemaObject | undefined {
         return [ ...this.objects.values() ].map(object => object.current).find(object => object?.iri === iri);
-    }
-
-    addId(object: SchemaObject, def: IdDefinition): void {
-        object.addId(def);
-
-        const node = this._graph?.getNode(object);
-        node?.updateNoIdsClass();
     }
 
     isIriAvailable(iri: Iri): boolean {

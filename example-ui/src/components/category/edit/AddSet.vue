@@ -6,6 +6,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
+import { ObjectIds, SignatureId } from '@/types/identifiers';
 
 const { evocat, graph } = $(useEvocat());
 
@@ -55,7 +56,11 @@ function save() {
             label: '#role',
         });
 
-        evocat.createId(setObject, { signatures: [ setToNode1.signature, setToNode2.signature ] });
+        const setObjectId = new SignatureId([ setToNode1.signature, setToNode2.signature ]);
+        evocat.editObject({
+            ...setObject.toDefinition(),
+            ids: ObjectIds.createSignatures([ setObjectId ]),
+        }, setObject);
     });
 
     graph.layout();

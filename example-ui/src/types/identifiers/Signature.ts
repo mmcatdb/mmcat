@@ -126,19 +126,7 @@ export class Signature {
     }
 
     equals(other: Signature): boolean {
-        return this._type === other._type
-            && this._ids.length === other._ids.length
-            && Signature.compareIdsWithSameLength(this._ids, other._ids) === 0;
-    }
-
-    private static compareIdsWithSameLength(ids1: number[], ids2: number[]): number {
-        for (let i = 0; i < ids1.length; i++) {
-            const diff = ids1[i] - ids2[i];
-            if (diff !== 0)
-                return diff;
-        }
-
-        return 0;
+        return this.value === other.value;
     }
 
     toServer(): SignatureFromServer {

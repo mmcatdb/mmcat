@@ -12,7 +12,7 @@ export function createGeneratedId(): ImportedId {
 export function createMorphismId(morphisms: ImportedMorphism | ImportedMorphism[][]): ImportedId {
     return {
         type: Type.Signatures,
-        keys: Array.isArray(morphisms) ? morphisms : [ [ morphisms ] ]
+        keys: Array.isArray(morphisms) ? morphisms : [ [ morphisms ] ],
     };
 }
 
