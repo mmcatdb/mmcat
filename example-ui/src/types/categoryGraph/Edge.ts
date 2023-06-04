@@ -1,4 +1,4 @@
-import type { EdgeSingular } from "cytoscape";
+import type { Core, EdgeSingular, ElementDefinition } from "cytoscape";
 import type { SchemaMorphism } from "../schema";
 import type { Node } from "./Node";
 import type { Signature } from "../identifiers";
@@ -25,14 +25,11 @@ export class DirectedEdge {
 }
 
 export class Edge {
-    schemaMorphism: SchemaMorphism;
-    edge?: EdgeSingular;
-    domainNode: Node;
-    codomainNode: Node;
+    private edge!: EdgeSingular;
 
     // This is important for the pathMarker algorithm.
-    _isTraversible = false;
-    _isTraversibleDual = false;
+    private _isTraversible = false;
+    private _isTraversibleDual = false;
 
     isTraversible(direction: boolean): boolean {
         return direction ? this._isTraversible : this._isTraversibleDual;
@@ -45,14 +42,33 @@ export class Edge {
             this._isTraversibleDual = value;
     }
 
-    constructor(schemaMorphism: SchemaMorphism, domainNode: Node, codomainNode: Node) {
-        this.schemaMorphism = schemaMorphism;
-        this.domainNode = domainNode;
-        this.codomainNode = codomainNode;
+    private constructor(
+        public schemaMorphism: SchemaMorphism,
+        readonly domainNode: Node,
+        readonly codomainNode: Node,
+    ) {}
+
+    static create(cytoscape: Core, morphism: SchemaMorphism, dom: Node, cod: Node): Edge {
+        const edge = new Edge(morphism, dom, cod);
+        const definition = createEdgeDefinition(morphism, edge, morphism.isNew ? 'new' : '');
+        const cytoscapeEdge = cytoscape.add(definition);
+        edge.setCytoscapeEdge(cytoscapeEdge);
+
+        dom.addNeighbour(edge, true);
+        cod.addNeighbour(edge, false);
+
+        return edge;
     }
 
-    setCytoscapeEdge(edge: EdgeSingular) {
+    private setCytoscapeEdge(edge: EdgeSingular) {
         this.edge = edge;
+    }
+
+    remove() {
+        this.edge.remove();
+
+        this.domainNode.removeNeighbour(this.codomainNode);
+        this.codomainNode.removeNeighbour(this.domainNode);
     }
 
     get label(): string {
@@ -88,4 +104,17 @@ export class Edge {
             direction ? this.codomainNode : this.domainNode,
         );
     }
+}
+
+function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
+    return {
+        data: {
+            id: 'm' + morphism.signature.toString(),
+            source: morphism.domKey.toString(),
+            target: morphism.codKey.toString(),
+            label: edge.label,
+            schemaData: edge,
+        },
+        classes: classes + ' ' + morphism.tags.join(' '),
+    };
 }

@@ -1,9 +1,17 @@
 import { ComparableMap } from "@/utils/ComparableMap";
-import type { NodeSingular } from "cytoscape";
+import type { Core, ElementDefinition, NodeSingular } from "cytoscape";
 import type { Signature } from "../identifiers";
 import type { SchemaObject } from "../schema";
 import { DirectedEdge, type Edge } from "./Edge";
 import { PathMarker, type MorphismData, type Filter } from "./PathMarker";
+import type { LogicalModel, LogicalModelInfo } from "../logicalModel";
+
+export type Group = {
+    id: number;
+    logicalModel: LogicalModelInfo;
+    node: NodeSingular;
+};
+
 
 export enum NodeTag {
     Root = 'tag-root'
@@ -65,38 +73,66 @@ export class Neighbour {
 }
 
 export class Node {
-    schemaObject: SchemaObject;
-    node!: NodeSingular;
-    _tags: Set<NodeTag> = new Set();
-    availablePathData: MorphismData | null = null;
+    private node!: NodeSingular;
+    private tags: Set<NodeTag> = new Set();
+    availablePathData?: MorphismData;
 
-    _neighbours = new ComparableMap<Signature, string, Neighbour>(signature => signature.toString());
+    private _neighbours = new ComparableMap<Signature, string, Neighbour>(signature => signature.toString());
 
-    _groupPlaceholders: NodeSingular[];
-    _noGroupPlaceholder?: NodeSingular;
+    private constructor(
+        public schemaObject: SchemaObject,
+        private groupPlaceholders: NodeSingular[],
+        private noGroupPlaceholder?: NodeSingular,
+    ) {}
 
-    constructor(schemaObject: SchemaObject, groupPlaceholders: NodeSingular[], noGroupPlaceholder?: NodeSingular) {
-        this.schemaObject = schemaObject;
-        this._groupPlaceholders = groupPlaceholders;
-        this._noGroupPlaceholder = noGroupPlaceholder;
+    static create(cytoscape: Core, object: SchemaObject, getGroup: (model: LogicalModel) => Group): Node {
+        const groupPlaceholders = object.logicalModels
+            .map(logicalModel => getGroup(logicalModel))
+            .map(group => cytoscape.add(createGroupPlaceholderDefinition(object, group.id)));
+
+        const noGroupPlaceholder = groupPlaceholders.length > 0
+            ? undefined
+            : cytoscape.add(createNoGroupDefinition(object));
+
+        const node = new Node(object, groupPlaceholders, noGroupPlaceholder);
+        const nodeDefinition = createNodeDefinition(object, node, object.isNew ? 'new' : '');
+        const cytoscapeNode = cytoscape.add(nodeDefinition);
+        node.setCytoscapeNode(cytoscapeNode);
+
+        return node;
+    }
+
+    private setCytoscapeNode(node: NodeSingular) {
+        this.node = node;
+        this.updateNoIdsClass();
+        node.on('drag', () => this.refreshGroupPlaceholders());
     }
 
     remove() {
-        this._noGroupPlaceholder?.remove();
-        this._groupPlaceholders.forEach(placeholder => placeholder.remove());
+        this.noGroupPlaceholder?.remove();
+        this.groupPlaceholders.forEach(placeholder => placeholder.remove());
         this.node.remove();
     }
 
+    update(schemaObject: SchemaObject) {
+        this.schemaObject = schemaObject;
+        this.node.data('label', this.label);
+        this.node.position('x', schemaObject.position.x);
+        this.node.position('y', schemaObject.position.y);
+    }
+
+    get cytoscapeIdPosition() {
+        return {
+            nodeId: this.node.id(),
+            position: this.node.position(),
+        };
+    }
+
     refreshGroupPlaceholders() {
-        this._groupPlaceholders.forEach(placeholder => {
+        this.groupPlaceholders.forEach(placeholder => {
             placeholder.remove();
             placeholder.restore();
         });
-    }
-
-    setCytoscapeNode(node: NodeSingular) {
-        this.node = node;
-        this.updateNoIdsClass();
     }
 
     addNeighbour(edge: Edge, direction: boolean): void {
@@ -145,8 +181,8 @@ export class Node {
         return this.schemaObject.ids.isSignatures ? PropertyType.Complex : null;
     }
 
-    _availabilityStatus = AvailabilityStatus.Default;
-    _selectionStatus = defaultSelectionStatus;
+    private _availabilityStatus = AvailabilityStatus.Default;
+    private _selectionStatus = defaultSelectionStatus;
 
     get availabilityStatus(): AvailabilityStatus {
         return this._availabilityStatus;
@@ -197,7 +233,7 @@ export class Node {
     }
 
     becomeRoot(): void {
-        this._tags.add(NodeTag.Root);
+        this.tags.add(NodeTag.Root);
         this.node.addClass(NodeTag.Root);
     }
 
@@ -225,3 +261,36 @@ export class Node {
     }
 }
 
+function createNodeDefinition(object: SchemaObject, node: Node, classes?: string): ElementDefinition {
+    return {
+        data: {
+            id: object.key.toString(),
+            label: node.label,
+            schemaData: node,
+        },
+        position: object.position,
+        ...classes ? { classes } : {},
+    };
+}
+
+function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number): ElementDefinition {
+    return {
+        data: {
+            id: groupId + '_' + object.key.toString(),
+            parent: 'group_' + groupId,
+        },
+        position: object.position,
+        classes: 'group-placeholder',
+    };
+}
+
+
+function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
+    return {
+        data: {
+            id: 'no-group_' + object.key.toString(),
+        },
+        position: object.position,
+        classes: 'no-group',
+    };
+}

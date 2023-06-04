@@ -1,26 +1,18 @@
-import type { Core, EdgeSingular, ElementDefinition, EventHandler, EventObject, LayoutOptions, NodeSingular } from "cytoscape";
-import type { LogicalModel, LogicalModelInfo } from "../logicalModel";
+import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from "cytoscape";
+import type { LogicalModel } from "../logicalModel";
 import type { SchemaMorphism, SchemaObject } from "../schema";
 import { Edge } from "./Edge";
-import { Node } from "./Node";
+import { Node, type Group } from "./Node";
 
 export type TemporaryEdge = {
     delete: () => void;
 };
 
-type Group = {
-    id: number;
-    logicalModel: LogicalModelInfo;
-    node: NodeSingular;
-};
-
 export class Graph {
-    // Workaround for the vue reactivity (all properties are replaced by proxies, but this way, we can have access to the original Core)
-    _nodes: Node[] = [];
-    _edges: Edge[] = [];
+    private nodes: Node[] = [];
+    private edges: Edge[] = [];
     // How many nodes have fixed positions.
-    _fixedNodes = 0;
-
+    private fixedNodes = 0;
     private eventListener: GraphEventListener;
 
     constructor(
@@ -32,9 +24,9 @@ export class Graph {
     public resetElements(): void {
         this.cytoscape.elements().remove();
 
-        this._nodes = [];
-        this._edges = [];
-        this._fixedNodes = 0;
+        this.nodes = [];
+        this.edges = [];
+        this.fixedNodes = 0;
         this.groups = [];
     }
 
@@ -47,7 +39,7 @@ export class Graph {
     }
 
     resetAvailabilityStatus(): void {
-        this._nodes.forEach(node => node.resetAvailabilityStatus());
+        this.nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
     groups: Group[] = [];
@@ -75,21 +67,8 @@ export class Graph {
     }
 
     createNode(object: SchemaObject): Node {
-        const groupPlaceholders = object.logicalModels
-            .map(logicalModel => this.getGroupOrAddIt(logicalModel))
-            .map(group => this.cytoscape.add(createGroupPlaceholderDefinition(object, group.id)));
-
-        const noGroupPlaceholder = groupPlaceholders.length > 0 ?
-            undefined :
-            this.cytoscape.add(createNoGroupDefinition(object));
-
-        const node = new Node(object, groupPlaceholders, noGroupPlaceholder);
-        this._nodes.push(node);
-
-        const cytoscapeNode = this.cytoscape.add(createNodeDefinition(object, node, object.isNew ? 'new' : ''));
-        node.setCytoscapeNode(cytoscapeNode);
-
-        cytoscapeNode.on('drag', () => node.refreshGroupPlaceholders());
+        const node = Node.create(this.cytoscape, object, (model: LogicalModel) => this.getGroupOrAddIt(model));
+        this.nodes.push(node);
 
         return node;
     }
@@ -100,29 +79,18 @@ export class Graph {
             return;
 
         node.remove();
-        this._nodes = this._nodes.filter(n => !n.equals(node));
+        this.nodes = this.nodes.filter(n => !n.equals(node));
 
         // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
         // However, the no group placeholder has to be removed.
     }
 
     createEdge(morphism: SchemaMorphism): Edge {
-        const domNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.domKey)) as Node;
-        const codNode = this._nodes.find(node => node.schemaObject.key.equals(morphism.codKey)) as Node;
+        const dom = this.nodes.find(node => node.schemaObject.key.equals(morphism.domKey)) as Node;
+        const cod = this.nodes.find(node => node.schemaObject.key.equals(morphism.codKey)) as Node;
 
-        const edge = new Edge(morphism, domNode, codNode);
-        this._edges.push(edge);
-
-
-        // This ensures the Bezier morphism pairs have allways the same chirality.
-        //const noSwitchNeeded = morphism.domId > morphism.codId;
-
-        const definition = createEdgeDefinition(morphism, edge, morphism.isNew ? 'new' : '');
-        const cytoscapeEdge = this.cytoscape.add(definition);
-        edge.setCytoscapeEdge(cytoscapeEdge);
-
-        domNode.addNeighbour(edge, true);
-        codNode.addNeighbour(edge, false);
+        const edge = Edge.create(this.cytoscape, morphism, dom, cod);
+        this.edges.push(edge);
 
         return edge;
     }
@@ -132,13 +100,8 @@ export class Graph {
         if (!edge)
             return;
 
-        const cytoscapeEdge = edge.edge;
-        if (cytoscapeEdge)
-            this.cytoscape.remove(cytoscapeEdge);
-
-        edge.domainNode.removeNeighbour(edge.codomainNode);
-        edge.codomainNode.removeNeighbour(edge.domainNode);
-        this._edges = this._edges.filter(e => !e.equals(edge));
+        edge.remove();
+        this.edges = this.edges.filter(e => !e.equals(edge));
     }
 
     _lastTemporaryEdgeId = 0;
@@ -171,10 +134,7 @@ export class Graph {
             //name: 'cola',
             name: 'fcose',
             animate: false,
-            fixedNodeConstraint: this._nodes.slice(0, this._fixedNodes).map(node => ({
-                nodeId: node.node.id(),
-                position: node.node.position(),
-            })),
+            fixedNodeConstraint: this.nodes.slice(0, this.fixedNodes).map(node => node.cytoscapeIdPosition),
             //randomize: false,
             //quality: 'proof',
             nodeDimensionsIncludeLabels: true,
@@ -185,11 +145,11 @@ export class Graph {
     }
 
     fixLayout() {
-        this._fixedNodes = this._nodes.length;
+        this.fixedNodes = this.nodes.length;
     }
 
     resetLayout() {
-        this._fixedNodes = 0;
+        this.fixedNodes = 0;
 
         // A necessary workaround for the bug with nodes without placeholders. More below.
         // Also, both parts of the workaround DO HAVE to be outside the layout function. Otherwise it causes a particularly hard to find bug (when the layout function is called from AddObject, then a new morphism is added in AddMorphism and then this function is called).
@@ -199,62 +159,16 @@ export class Graph {
 
         // A continuation of the workaround.
         this.groups.forEach(group => group.node.restore());
-        this._nodes.forEach(node => node.refreshGroupPlaceholders());
+        this.nodes.forEach(node => node.refreshGroupPlaceholders());
     }
 
     getNode(object: SchemaObject): Node | undefined {
-        return this._nodes.find(node => node.schemaObject.equals(object));
+        return this.nodes.find(node => node.schemaObject.equals(object));
     }
 
     getEdge(morphism: SchemaMorphism): Edge | undefined {
-        return this._edges.find(edge => edge.schemaMorphism.signature.equals(morphism.signature));
+        return this.edges.find(edge => edge.schemaMorphism.signature.equals(morphism.signature));
     }
-}
-
-function createNodeDefinition(object: SchemaObject, node: Node, classes?: string): ElementDefinition {
-    return {
-        data: {
-            id: object.key.toString(),
-            label: node.label,
-            schemaData: node,
-        },
-        position: object.position,
-        ...classes ? { classes } : {},
-    };
-}
-
-function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number): ElementDefinition {
-    return {
-        data: {
-            id: groupId + '_' + object.key.toString(),
-            parent: 'group_' + groupId,
-        },
-        position: object.position,
-        classes: 'group-placeholder',
-    };
-}
-
-function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
-    return {
-        data: {
-            id: 'no-group_' + object.key.toString(),
-        },
-        position: object.position,
-        classes: 'no-group',
-    };
-}
-
-function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
-    return {
-        data: {
-            id: 'm' + morphism.signature.toString(),
-            source: morphism.domKey.toString(),
-            target: morphism.codKey.toString(),
-            label: edge.label,
-            schemaData: edge,
-        },
-        classes: classes + ' ' + morphism.tags.join(' '),
-    };
 }
 
 class GraphEventListener {

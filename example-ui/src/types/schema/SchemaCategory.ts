@@ -4,7 +4,6 @@ import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id, VersionId } from "../id";
 import { DynamicName, Key, Signature, type IdDefinition } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
-import type { Mapping } from "../mapping";
 import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition } from "./SchemaMorphism";
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
 import type { Graph } from "../categoryGraph";
@@ -97,6 +96,15 @@ export class SchemaCategory implements Entity {
         // TODO make it map?
         this.objects = this.objects.filter(o => !o.equals(object));
         this._graph?.deleteNode(object);
+    }
+
+    editObject(object: SchemaObject) {
+        const index = this.objects.findIndex(o => o.equals(object));
+        if (index === -1)
+            return;
+
+        this.objects[index] = object;
+        this._graph?.getNode(object)?.update(object);
     }
 
     findObjectByIri(iri: Iri): SchemaObject | undefined {
