@@ -73,9 +73,10 @@ export class SignatureIdFactory {
         return this._signatures.length;
     }
 
-    addSignature(signature: Signature): void {
+    addSignature(signature: Signature): SignatureId {
         this._signatures.push(signature);
         this._signatureId = new SignatureId(this._signatures);
+        return this._signatureId;
     }
 
     static createEmpty(): SignatureId {

@@ -23,7 +23,8 @@ const props = defineProps<AddComplexIdProps>();
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
-const signatureIdFactory = ref(new SignatureIdFactory());
+const signatureIdFactory = new SignatureIdFactory();
+const signatureId = shallowRef(signatureIdFactory.signatureId);
 const addingSignature = ref(false);
 const signature = shallowRef(SequenceSignature.empty(props.node));
 const idIsNotEmpty = ref(false);
@@ -33,7 +34,7 @@ const filter = {
 };
 
 function save() {
-    evocat.createId(props.node.schemaObject, { signatureId: signatureIdFactory.value.signatureId });
+    evocat.createId(props.node.schemaObject, { signatureId: signatureId.value });
 
     emit('save');
 }
@@ -53,7 +54,7 @@ function cancelAddingSignature() {
 }
 
 function addSignature() {
-    signatureIdFactory.value.addSignature(signature.value.toSignature());
+    signatureId.value = signatureIdFactory.addSignature(signature.value.toSignature());
     addingSignature.value = false;
     idIsNotEmpty.value = true;
 }
@@ -64,10 +65,10 @@ function addSignature() {
     <ValueContainer>
         <ValueRow label="Id:">
             <span class="fix-icon-height">
-                <SignatureIdDisplay :signature-id="signatureIdFactory.signatureId" />
+                <SignatureIdDisplay :signature-id="signatureId" />
                 <ButtonIcon
                     v-if="!addingSignature"
-                    :class="{ 'ml-2': !signatureIdFactory.isEmpty }"
+                    :class="{ 'ml-2': idIsNotEmpty }"
                     @click="startAddingSignature"
                 >
                     <IconPlusSquare />
@@ -103,7 +104,7 @@ function addSignature() {
     </div>
     <div class="button-row">
         <button
-            :disabled="signatureIdFactory.length <= 1"
+            :disabled="signatureId.signatures.length <= 1"
             @click="save"
         >
             Confirm

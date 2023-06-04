@@ -20,7 +20,7 @@ export class ObjectIds {
 
     private constructor(type: Type, signatureIds?: SignatureId[]) {
         this.type = type;
-        this._signatureIds = signatureIds || [];
+        this._signatureIds = signatureIds ?? [];
     }
 
     get signatureIds(): SignatureId[] {

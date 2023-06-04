@@ -28,8 +28,8 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
 
 const accessPath = ref<GraphRootProperty>();
 const selectingRootNode = ref<Node>();
-const logicalModels = ref<LogicalModel[]>([]);
-const selectedLogicalModel = ref<LogicalModel>();
+const logicalModels = shallowRef<LogicalModel[]>([]);
+const selectedLogicalModel = shallowRef<LogicalModel>();
 
 const databaseAndRootNodeValid = computed(() => {
     return !!selectedLogicalModel.value && !!selectingRootNode.value;

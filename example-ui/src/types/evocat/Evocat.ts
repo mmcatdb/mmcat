@@ -1,6 +1,6 @@
 import type { Graph } from "@/types/categoryGraph";
 import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism } from "@/types/schema";
-import type { IdDefinition } from "@/types/identifiers";
+import type { IdDefinition, Key } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
 import { Version, VersionContext, computeLatestVersions } from "./Version";
@@ -160,7 +160,7 @@ export class Evocat {
         return object;
     }
 
-    deleteObject(object: SchemaObject): void {
+    deleteObject(object: SchemaObject) {
         const operation = DeleteObject.create(object);
         this.commitOperation(operation);
     }
@@ -182,7 +182,7 @@ export class Evocat {
         return morphism;
     }
 
-    deleteMorphism(morphism: SchemaMorphism): void {
+    deleteMorphism(morphism: SchemaMorphism) {
         // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
         const operation = DeleteMorphism.create(morphism);
         this.commitOperation(operation);
@@ -196,12 +196,16 @@ export class Evocat {
         return newMorphism;
     }
 
-    createId(object: SchemaObject, def: IdDefinition): void {
+    createId(object: SchemaObject, def: IdDefinition) {
         object.addId(def);
 
         //const node = this._graph?.getNode(object);
         //node?.updateNoIdsClass();
 
         //this.createOperation('addId');
+    }
+
+    editIds(key: Key, def: IdDefinition) {
+        // TODO
     }
 }

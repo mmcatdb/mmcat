@@ -121,8 +121,10 @@ export class Node {
     update(schemaObject: SchemaObject) {
         this.schemaObject = schemaObject;
         this.node.data('label', this.label);
-        this.node.position('x', schemaObject.position.x);
-        this.node.position('y', schemaObject.position.y);
+        // TODO position should be tracked elsewhere?
+        //this.node.position('x', schemaObject.position.x);
+        //this.node.position('y', schemaObject.position.y);
+
 
         if (!this.node.inside()) {
             this.node.restore();
@@ -214,7 +216,7 @@ export class Node {
         this.node.removeClass(getStatusClass(this._selectionStatus));
         this._selectionStatus = status;
         this.node.addClass(getStatusClass(status));
-        this.node.css({ content: this.label });
+        this.node.data('label', this.label);
     }
 
     selectNext(): void {

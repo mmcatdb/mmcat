@@ -88,7 +88,7 @@ export class SchemaCategory implements Entity {
         let object = this.objects.get(key);
 
         if (!object) {
-            object = VersionedSchemaObject.create(key);
+            object = VersionedSchemaObject.create(key, this._graph);
             this.objects.set(key, object);
             this.keysProvider.add(key);
         }
@@ -108,7 +108,7 @@ export class SchemaCategory implements Entity {
         let morphism = this.morphisms.get(signature);
 
         if (!morphism) {
-            morphism = VersionedSchemaMorphism.create(signature);
+            morphism = VersionedSchemaMorphism.create(signature, this._graph);
             this.morphisms.set(signature, morphism);
             this.signatureProvider.add(signature);
         }

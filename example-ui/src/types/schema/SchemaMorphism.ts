@@ -126,9 +126,10 @@ export class VersionedSchemaMorphism {
         private _graph?: Graph,
     ) {}
 
-    static create(signature: Signature): VersionedSchemaMorphism {
+    static create(signature: Signature, graph: Graph | undefined): VersionedSchemaMorphism {
         return new VersionedSchemaMorphism(
             signature,
+            graph,
         );
     }
 

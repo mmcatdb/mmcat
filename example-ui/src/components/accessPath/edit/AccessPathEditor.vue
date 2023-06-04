@@ -44,7 +44,7 @@ function getInitialPrimaryKey(ids?: ObjectIds): SignatureId {
     return SignatureIdFactory.createEmpty();
 }
 
-const primaryKey = ref(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
+const primaryKey = shallowRef(getInitialPrimaryKey(props.rootProperty.node.schemaObject.ids));
 
 function editPropertyClicked(property: GraphChildProperty) {
     state.value = {

@@ -158,9 +158,10 @@ export class VersionedSchemaObject {
         private _graph?: Graph,
     ) {}
 
-    static create(key: Key): VersionedSchemaObject {
+    static create(key: Key, graph: Graph | undefined): VersionedSchemaObject {
         return new VersionedSchemaObject(
             key,
+            graph,
         );
     }
 

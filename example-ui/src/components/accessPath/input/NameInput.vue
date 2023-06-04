@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<NameInputProps>(), {
 
 const emit = defineEmits([ 'update:modelValue' ]);
 
-const innerValue = ref(props.modelValue);
+const innerValue = shallowRef(props.modelValue);
 const type = ref(getNameType(props.modelValue));
 const staticValue = ref(props.modelValue instanceof StaticName && !props.modelValue.isAnonymous ? props.modelValue : StaticName.fromString(''));
 const dynamicValue = shallowRef(SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode));
