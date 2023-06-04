@@ -33,10 +33,10 @@ export class CreateMorphism implements SMO<SMOType.CreateMorphism> {
     }
 
     up(category: SchemaCategory): void {
-        category.addMorphism(this.morphism);
+        category.getMorphism(this.morphism.signature).current = this.morphism;
     }
 
     down(category: SchemaCategory): void {
-        category.removeMorphism(this.morphism);
+        category.getMorphism(this.morphism.signature).current = undefined;
     }
 }

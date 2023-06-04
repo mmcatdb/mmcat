@@ -37,10 +37,10 @@ export class DeleteObject implements SMO<SMOType.DeleteObject> {
     }
 
     up(category: SchemaCategory): void {
-        category.removeObject(this.object);
+        category.getObject(this.object.key).current = undefined;
     }
 
     down(category: SchemaCategory): void {
-        category.addObject(this.object);
+        category.getObject(this.object.key).current = this.object;
     }
 }

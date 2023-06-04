@@ -78,13 +78,13 @@ function selectEdge(edge: Edge) {
         <EvocatDisplay @evocat-created="evocatCreated" />
         <InstanceObjectDisplay
             v-if="selectedNode"
-            :key="selectedNode.schemaObject.key.toString()"
+            :key="selectedNode.schemaObject.key.value"
             :node="selectedNode"
             @object:click="objectClicked"
         />
         <InstanceMorphismDisplay
             v-if="selectedEdge"
-            :key="selectedEdge.schemaMorphism.signature.toString()"
+            :key="selectedEdge.schemaMorphism.signature.value"
             :edge="selectedEdge"
             @object:click="objectClicked"
         />

@@ -4,7 +4,7 @@ import type { Signature } from "../identifiers";
 import type { SchemaObject } from "../schema";
 import { DirectedEdge, type Edge } from "./Edge";
 import { PathMarker, type MorphismData, type Filter } from "./PathMarker";
-import type { LogicalModel, LogicalModelInfo } from "../logicalModel";
+import type { LogicalModelInfo } from "../logicalModel";
 
 export type Group = {
     id: number;
@@ -77,19 +77,19 @@ export class Node {
     private tags: Set<NodeTag> = new Set();
     availablePathData?: MorphismData;
 
-    private _neighbours = new ComparableMap<Signature, string, Neighbour>(signature => signature.toString());
+    private _neighbours = new ComparableMap<Signature, string, Neighbour>(signature => signature.value);
 
     private constructor(
         public schemaObject: SchemaObject,
-        private groupPlaceholders: NodeSingular[],
+        private groupPlaceholders: { group: Group, node: NodeSingular }[],
         private noGroupPlaceholder?: NodeSingular,
     ) {}
 
-    static create(cytoscape: Core, object: SchemaObject, getGroup: (model: LogicalModel) => Group): Node {
-        const groupPlaceholders = object.logicalModels
-            .map(logicalModel => getGroup(logicalModel))
-            .map(group => cytoscape.add(createGroupPlaceholderDefinition(object, group.id)));
-
+    static create(cytoscape: Core, object: SchemaObject, groups: Group[]): Node {
+        const groupPlaceholders = groups.map(group => ({
+            group,
+            node: cytoscape.add(createGroupPlaceholderDefinition(object, group.id)),
+        }));
         const noGroupPlaceholder = groupPlaceholders.length > 0
             ? undefined
             : cytoscape.add(createNoGroupDefinition(object));
@@ -110,7 +110,11 @@ export class Node {
 
     remove() {
         this.noGroupPlaceholder?.remove();
-        this.groupPlaceholders.forEach(placeholder => placeholder.remove());
+        this.groupPlaceholders.forEach(placeholder => {
+            placeholder.node.remove();
+            if (placeholder.group.node.children().length === 0)
+                placeholder.group.node.remove();
+        });
         this.node.remove();
     }
 
@@ -119,6 +123,16 @@ export class Node {
         this.node.data('label', this.label);
         this.node.position('x', schemaObject.position.x);
         this.node.position('y', schemaObject.position.y);
+
+        if (!this.node.inside()) {
+            this.node.restore();
+            this.noGroupPlaceholder?.restore();
+            this.groupPlaceholders.forEach(placeholder => {
+                if (!placeholder.group.node.inside())
+                    placeholder.group.node.restore();
+                placeholder.node.restore();
+            });
+        }
     }
 
     get cytoscapeIdPosition() {
@@ -130,8 +144,8 @@ export class Node {
 
     refreshGroupPlaceholders() {
         this.groupPlaceholders.forEach(placeholder => {
-            placeholder.remove();
-            placeholder.restore();
+            placeholder.node.remove();
+            placeholder.node.restore();
         });
     }
 
@@ -264,7 +278,7 @@ export class Node {
 function createNodeDefinition(object: SchemaObject, node: Node, classes?: string): ElementDefinition {
     return {
         data: {
-            id: object.key.toString(),
+            id: '' + object.key.value,
             label: node.label,
             schemaData: node,
         },
@@ -276,7 +290,7 @@ function createNodeDefinition(object: SchemaObject, node: Node, classes?: string
 function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number): ElementDefinition {
     return {
         data: {
-            id: groupId + '_' + object.key.toString(),
+            id: groupId + '_' + object.key.value,
             parent: 'group_' + groupId,
         },
         position: object.position,
@@ -288,7 +302,7 @@ function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number)
 function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
     return {
         data: {
-            id: 'no-group_' + object.key.toString(),
+            id: 'no-group_' + object.key.value,
         },
         position: object.position,
         classes: 'no-group',

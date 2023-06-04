@@ -5,14 +5,14 @@ export class InstanceObject {
     private constructor(
         readonly key: Key,
         readonly superId: SignatureId,
-        readonly rows: DomainRow[]
+        readonly rows: DomainRow[],
     ) {}
 
     static fromServer(input: InstanceObjectFromServer): InstanceObject {
         return new InstanceObject(
             Key.fromServer(input.key),
             SignatureId.fromServer(input.superId),
-            input.rows.map(DomainRow.fromServer)
+            input.rows.map(DomainRow.fromServer),
         );
     }
 }
@@ -26,13 +26,13 @@ export type InstanceObjectFromServer = {
 export class DomainRow {
     private constructor(
         readonly superId: SuperIdWithValues,
-        readonly technicalIds: Set<string>
+        readonly technicalIds: Set<string>,
     ) {}
 
     static fromServer(input: DomainRowFromServer) {
         return new DomainRow(
             SuperIdWithValues.fromServer(input.superId),
-            new Set(input.technicalIds)
+            new Set(input.technicalIds),
         );
     }
 
@@ -48,11 +48,11 @@ export type DomainRowFromServer = {
 
 export class SuperIdWithValues {
     private constructor(
-        readonly tuples: ComparableMap<Signature, string, string>
+        readonly tuples: ComparableMap<Signature, string, string>,
     ) {}
 
     static fromServer(input: SuperIdWithValuesFromServer): SuperIdWithValues {
-        const tuples = new ComparableMap<Signature, string, string>(signature => signature.toString());
+        const tuples = new ComparableMap<Signature, string, string>(signature => signature.value);
         input.forEach(tuple => tuples.set(Signature.fromServer(tuple.signature), tuple.value));
 
         return new SuperIdWithValues(tuples);

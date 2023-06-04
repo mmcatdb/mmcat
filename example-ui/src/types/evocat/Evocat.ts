@@ -1,5 +1,5 @@
 import type { Graph } from "@/types/categoryGraph";
-import type { SchemaCategory, ObjectDefinition, SchemaObject, MorphismDefinition, SchemaMorphism } from "@/types/schema";
+import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism } from "@/types/schema";
 import type { IdDefinition } from "@/types/identifiers";
 import type { LogicalModel } from "../logicalModel";
 import type { Result } from "../api/result";
@@ -148,8 +148,12 @@ export class Evocat {
         this.commitOperation(operation);
     }
 
+    /**
+     * Creates a completely new schema object with key that has never been seen before.
+     */
     createObject(def: ObjectDefinition): SchemaObject {
-        const object = this.schemaCategory.createObject(def);
+        const versionedObject = this.schemaCategory.createObject(def);
+        const object = SchemaObject.createNew(versionedObject.key, def);
         const operation = CreateObject.create(object);
         this.commitOperation(operation);
 
@@ -170,7 +174,8 @@ export class Evocat {
     }
 
     createMorphism(def: MorphismDefinition): SchemaMorphism {
-        const morphism = this.schemaCategory.createMorphism(def);
+        const versionedMorphism = this.schemaCategory.createMorphism(def);
+        const morphism = SchemaMorphism.createNew(versionedMorphism.signature, def);
         const operation = CreateMorphism.create(morphism);
         this.commitOperation(operation);
 

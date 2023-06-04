@@ -41,12 +41,10 @@ export class EditMorphism implements SMO<SMOType.EditMorphism> {
     }
 
     up(category: SchemaCategory): void {
-        category.removeMorphism(this.oldMorphism);
-        category.addMorphism(this.newMorphism);
+        category.getMorphism(this.newMorphism.signature).current = this.newMorphism;
     }
 
     down(category: SchemaCategory): void {
-        category.removeMorphism(this.newMorphism);
-        category.addMorphism(this.oldMorphism);
+        category.getMorphism(this.oldMorphism.signature).current = this.oldMorphism;
     }
 }

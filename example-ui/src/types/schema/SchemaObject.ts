@@ -7,6 +7,7 @@ import type { LogicalModel } from "../logicalModel";
 import type { Id } from "../id";
 import { SchemaCategoryInvalidError } from "./Error";
 import type { Optional } from "@/utils/common";
+import type { Graph } from "../categoryGraph";
 
 export type SchemaObjectFromServer = {
     key: KeyFromServer;
@@ -21,7 +22,6 @@ export type SchemaObjectFromServer = {
 
 export class SchemaObject {
     private readonly originalPosition?: ComparablePosition;
-    private _logicalModels = new ComparableSet<LogicalModel, Id>(logicalModel => logicalModel.id);
 
     private constructor(
         readonly key: Key,
@@ -102,7 +102,7 @@ export class SchemaObject {
     }
 
     deleteSignatureId(index: number): void {
-        if (!this.ids || !this.ids.isSignatures)
+        if (!this.ids?.isSignatures)
             return;
 
         const newIds = this.ids.signatureIds.filter((_, i) => i !== index);
@@ -119,26 +119,12 @@ export class SchemaObject {
         return this._isNew;
     }
 
-    get logicalModels(): LogicalModel[] {
-        return [ ...this._logicalModels.values() ];
-    }
-
     get idsChecked(): ObjectIds {
         if (!this.ids)
             throw new SchemaCategoryInvalidError(`Object: ${this.key.toString()} doesn't have ids.`);
 
         return this.ids;
     }
-
-    setLogicalModels(logicalModels: ComparableSet<LogicalModel, Id>) {
-        this._logicalModels = logicalModels;
-    }
-
-    /*
-    toPositionUpdate(): PositionUpdate | null {
-        return this.position.equals(this._originalPosition) ? null : { schemaObjectId: this.id, position: this.position };
-    }
-    */
 
     toServer(): SchemaObjectFromServer {
         return {
@@ -165,3 +151,57 @@ export type ObjectDefinition = {
     iri: Iri;
     pimIri: Iri;
 }>;
+
+export class VersionedSchemaObject {
+    private constructor(
+        readonly key: Key,
+        private _graph?: Graph,
+    ) {}
+
+    static create(key: Key): VersionedSchemaObject {
+        return new VersionedSchemaObject(
+            key,
+        );
+    }
+
+    set graph(newGraph: Graph | undefined) {
+        this._graph = newGraph;
+        if (!newGraph)
+            return;
+
+        this.updateGraph(newGraph);
+    }
+
+    private _current?: SchemaObject;
+
+    get current(): SchemaObject | undefined {
+        return this._current;
+    }
+
+    set current(value: SchemaObject | undefined) {
+        this._current = value;
+        if (this._graph)
+            this.updateGraph(this._graph);
+    }
+
+    private updateGraph(graph: Graph) {
+        const currentNode = graph.getNodeByKey(this.key);
+        if (!currentNode) {
+            if (this._current)
+                graph.createNode(this._current, [ ...this.logicalModels.values() ]);
+
+            return;
+        }
+
+        if (!this._current)
+            currentNode.remove();
+        else
+            currentNode.update(this._current);
+    }
+
+    private logicalModels: ComparableSet<LogicalModel, Id> = new ComparableSet(model => model.id);
+
+    addLogicalModel(model: LogicalModel) {
+        this.logicalModels.add(model);
+    }
+}

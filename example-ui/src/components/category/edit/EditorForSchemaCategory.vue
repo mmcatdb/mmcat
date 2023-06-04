@@ -245,7 +245,7 @@ async function save() {
         <template v-else-if="state.type === State.EditObject">
             <EditObject
                 ref="editedObject"
-                :key="state.node.schemaObject.key.toString()"
+                :key="state.node.schemaObject.key.value"
                 :node="state.node"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
@@ -254,7 +254,7 @@ async function save() {
         <template v-else-if="state.type === State.EditMorphism">
             <EditMorphism
                 ref="editedMorphism"
-                :key="state.edge.schemaMorphism.signature.toString()"
+                :key="state.edge.schemaMorphism.signature.value"
                 :edge="state.edge"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"

@@ -3,6 +3,7 @@ import type { LogicalModel } from "../logicalModel";
 import type { SchemaMorphism, SchemaObject } from "../schema";
 import { Edge } from "./Edge";
 import { Node, type Group } from "./Node";
+import type { Key, Signature } from "../identifiers";
 
 export type TemporaryEdge = {
     delete: () => void;
@@ -66,8 +67,9 @@ export class Graph {
         return newGroup;
     }
 
-    createNode(object: SchemaObject): Node {
-        const node = Node.create(this.cytoscape, object, (model: LogicalModel) => this.getGroupOrAddIt(model));
+    createNode(object: SchemaObject, logicalModels: LogicalModel[]): Node {
+        const groups = logicalModels.map(logicalModel => this.getGroupOrAddIt(logicalModel));
+        const node = Node.create(this.cytoscape, object, groups);
         this.nodes.push(node);
 
         return node;
@@ -113,8 +115,8 @@ export class Graph {
         this.cytoscape.add({
             data: {
                 id,
-                source: node1.schemaObject.key.toString(),
-                target: node2.schemaObject.key.toString(),
+                source: node1.schemaObject.key.value,
+                target: node2.schemaObject.key.value,
                 label: '',
             },
             classes: 'temporary',
@@ -166,8 +168,16 @@ export class Graph {
         return this.nodes.find(node => node.schemaObject.equals(object));
     }
 
+    getNodeByKey(key: Key): Node | undefined {
+        return this.nodes.find(node => node.schemaObject.key.equals(key));
+    }
+
     getEdge(morphism: SchemaMorphism): Edge | undefined {
-        return this.edges.find(edge => edge.schemaMorphism.signature.equals(morphism.signature));
+        return this.edges.find(edge => edge.schemaMorphism.equals(morphism));
+    }
+
+    getEdgeBySignature(signature: Signature): Edge | undefined {
+        return this.edges.find(edge => edge.schemaMorphism.signature.equals(signature));
     }
 }
 

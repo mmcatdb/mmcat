@@ -4,11 +4,10 @@ import { ComplexProperty, type ParentProperty } from "@/types/accessPath/basic";
 import type { Entity, Id, VersionId } from "../id";
 import { DynamicName, Key, Signature, type IdDefinition } from "../identifiers";
 import type { LogicalModel } from "../logicalModel";
-import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition } from "./SchemaMorphism";
-import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer } from "./SchemaObject";
+import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition, VersionedSchemaMorphism } from "./SchemaMorphism";
+import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer, VersionedSchemaObject } from "./SchemaObject";
 import type { Graph } from "../categoryGraph";
 import { ComparableMap } from "@/utils/ComparableMap";
-import { ComparableSet } from "@/utils/ComparableSet";
 
 export type SchemaCategoryFromServer = {
     id: Id;
@@ -24,30 +23,41 @@ export class SchemaCategory implements Entity {
     private keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     private signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
 
-    private logicalModelsMap: LogicalModelsMap;
-
     private constructor(
         readonly id: Id,
         readonly label: string,
         readonly versionId: VersionId,
-        private objects: SchemaObject[],
-        private morphisms: SchemaMorphism[],
+        objects: SchemaObject[],
+        morphisms: SchemaMorphism[],
         logicalModels: LogicalModel[],
     ) {
         objects.forEach(object => {
-            this.keysProvider.add(object.key);
             if (object.iri)
                 this.notAvailableIris.add(object.iri);
+
+            const versionedObject = this.getObject(object.key);
+            versionedObject.current = object;
         });
 
         morphisms.forEach(morphism => {
-            this.signatureProvider.add(morphism.signature);
             if (morphism.iri)
                 this.notAvailableIris.add(morphism.iri);
+
+            const versionedMorphism = this.getMorphism(morphism.signature);
+            versionedMorphism.current = morphism;
         });
 
-        this.logicalModelsMap = computeLogicalModelsMap(logicalModels, objects, morphisms);
-        this.logicalModelsMap.forEach((set, key) => objects.find(o => o.key.equals(key))?.setLogicalModels(set));
+        logicalModels.forEach(logicalModel => {
+            logicalModel.mappings.forEach(mapping => {
+                const pathObjects = getObjectsFromPath(mapping.accessPath, objects, morphisms);
+
+                const rootObject = objects.find(object => object.key.equals(mapping.rootObjectKey));
+                if (rootObject)
+                    pathObjects.push(rootObject);
+
+                pathObjects.forEach(object => this.getObject(object.key)?.addLogicalModel(logicalModel));
+            });
+        });
     }
 
     static fromServer(input: SchemaCategoryFromServer, logicalModels: LogicalModel[]): SchemaCategory {
@@ -63,63 +73,51 @@ export class SchemaCategory implements Entity {
         );
     }
 
-    getObject(key: Key): SchemaObject | undefined {
-        return this.objects.find(object => object.key.equals(key));
-    }
+    private objects = new ComparableMap<Key, number, VersionedSchemaObject>(key => key.value);
+    private morphisms = new ComparableMap<Signature, string, VersionedSchemaMorphism>(signature => signature.value);
 
-    createObject(def: ObjectDefinition): SchemaObject {
+    createObject(def: ObjectDefinition): VersionedSchemaObject {
         if ('iri' in def)
             this.notAvailableIris.add(def.iri);
 
         const key = this.keysProvider.createAndAdd();
-        return SchemaObject.createNew(key, def);
+        return this.getObject(key);
     }
 
-    createMorphism(def: MorphismDefinition): SchemaMorphism {
+    getObject(key: Key): VersionedSchemaObject {
+        let object = this.objects.get(key);
+
+        if (!object) {
+            object = VersionedSchemaObject.create(key);
+            this.objects.set(key, object);
+            this.keysProvider.add(key);
+        }
+
+        return object;
+    }
+
+    createMorphism(def: MorphismDefinition): VersionedSchemaMorphism {
         if ('iri' in def)
             this.notAvailableIris.add(def.iri);
 
         const signature = this.signatureProvider.createAndAdd();
-        return SchemaMorphism.createNew(signature, def);
+        return this.getMorphism(signature);
     }
 
-    addObject(object: SchemaObject) {
-        this.objects.push(object);
-        const set = this.logicalModelsMap.get(object.key);
-        if (set)
-            object.setLogicalModels(set);
+    getMorphism(signature: Signature): VersionedSchemaMorphism {
+        let morphism = this.morphisms.get(signature);
 
-        this._graph?.createNode(object);
-    }
+        if (!morphism) {
+            morphism = VersionedSchemaMorphism.create(signature);
+            this.morphisms.set(signature, morphism);
+            this.signatureProvider.add(signature);
+        }
 
-    removeObject(object: SchemaObject) {
-        // TODO make it map?
-        this.objects = this.objects.filter(o => !o.equals(object));
-        this._graph?.deleteNode(object);
-    }
-
-    editObject(object: SchemaObject) {
-        const index = this.objects.findIndex(o => o.equals(object));
-        if (index === -1)
-            return;
-
-        this.objects[index] = object;
-        this._graph?.getNode(object)?.update(object);
+        return morphism;
     }
 
     findObjectByIri(iri: Iri): SchemaObject | undefined {
-        return this.objects.find(object => object.iri === iri);
-    }
-
-    addMorphism(morphism: SchemaMorphism) {
-        this.morphisms.push(morphism);
-        this._graph?.createEdge(morphism);
-    }
-
-    removeMorphism(morphism: SchemaMorphism) {
-        // TODO make it map?
-        this.morphisms = this.morphisms.filter(m => !m.equals(morphism));
-        this._graph?.deleteEdge(morphism);
+        return [ ...this.objects.values() ].map(object => object.current).find(object => object?.iri === iri);
     }
 
     addId(object: SchemaObject, def: IdDefinition): void {
@@ -133,22 +131,6 @@ export class SchemaCategory implements Entity {
         return !this.notAvailableIris.has(iri);
     }
 
-    suggestKey(): Key {
-        return this.keysProvider.suggest();
-    }
-
-    isKeyAvailable(key: Key): boolean {
-        return this.keysProvider.isAvailable(key);
-    }
-
-    suggestBaseSignature(): Signature {
-        return this.signatureProvider.suggest();
-    }
-
-    isBaseSignatureAvailable(signature: Signature): boolean {
-        return this.signatureProvider.isAvailable(signature);
-    }
-
     private _graph?: Graph;
 
     get graph(): Graph | undefined {
@@ -157,13 +139,16 @@ export class SchemaCategory implements Entity {
 
     set graph(newGraph: Graph | undefined) {
         this._graph = newGraph;
-        if (!newGraph)
+        if (!newGraph) {
+            this.objects.forEach(object => object.graph = undefined);
+            this.morphisms.forEach(morphism => morphism.graph = undefined);
             return;
+        }
 
         newGraph.resetElements();
         newGraph.batch(() => {
-            this.objects.forEach(object => newGraph.createNode(object));
-            this.morphisms.forEach(morphism => newGraph.createEdge(morphism));
+            this.objects.forEach(object => object.graph = newGraph);
+            this.morphisms.forEach(morphism => morphism.graph = newGraph);
         });
 
         // Position the object to the center of the canvas.
@@ -171,30 +156,6 @@ export class SchemaCategory implements Entity {
         newGraph.layout();
         newGraph.center();
     }
-}
-
-type LogicalModelsMap = ComparableMap<Key, number, ComparableSet<LogicalModel, Id>>;
-
-function computeLogicalModelsMap(logicalModels: LogicalModel[], objects: SchemaObject[], morphisms: SchemaMorphism[]): LogicalModelsMap {
-    const output = new ComparableMap<Key, number, ComparableSet<LogicalModel, Id>>(key => key.value);
-
-    logicalModels.forEach(logicalModel => {
-        logicalModel.mappings.forEach(mapping => {
-            const pathObjects = getObjectsFromPath(mapping.accessPath, objects, morphisms);
-
-            const rootObject = objects.find(object => object.key.equals(mapping.rootObjectKey));
-            if (rootObject)
-                pathObjects.push(rootObject);
-
-            pathObjects.forEach(object => {
-                const set = output.get(object.key) ?? new ComparableSet(m => m.id);
-                output.set(object.key, set);
-                set.add(logicalModel);
-            });
-        });
-    });
-
-    return output;
 }
 
 function getObjectsFromPath(path: ParentProperty, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject[] {

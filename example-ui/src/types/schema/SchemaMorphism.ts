@@ -2,6 +2,7 @@ import type { Iri } from "@/types/integration/";
 import { Key, Signature, type KeyFromServer, type SignatureFromServer } from "../identifiers";
 import type { SchemaObject } from "./SchemaObject";
 import type { Optional } from "@/utils/common";
+import type { Graph } from "../categoryGraph";
 
 export type SchemaMorphismFromServer = {
     signature: SignatureFromServer;
@@ -118,3 +119,51 @@ export type MorphismDefinition = {
     iri: Iri;
     pimIri: Iri;
 }>;
+
+export class VersionedSchemaMorphism {
+    private constructor(
+        readonly signature: Signature,
+        private _graph?: Graph,
+    ) {}
+
+    static create(signature: Signature): VersionedSchemaMorphism {
+        return new VersionedSchemaMorphism(
+            signature,
+        );
+    }
+
+    set graph(newGraph: Graph | undefined) {
+        this._graph = newGraph;
+        if (!newGraph)
+            return;
+
+        this.updateGraph(newGraph);
+    }
+
+    private _current?: SchemaMorphism;
+
+    get current(): SchemaMorphism | undefined {
+        return this._current;
+    }
+
+    set current(value: SchemaMorphism | undefined) {
+        this._current = value;
+        if (this._graph)
+            this.updateGraph(this._graph);
+    }
+
+    private updateGraph(graph: Graph) {
+        const currentEdge = graph.getEdgeBySignature(this.signature);
+        if (!currentEdge) {
+            if (this._current)
+                graph.createEdge(this._current);
+
+            return;
+        }
+
+        if (!this._current)
+            currentEdge.remove();
+        else
+            currentEdge.update(this._current);
+    }
+}

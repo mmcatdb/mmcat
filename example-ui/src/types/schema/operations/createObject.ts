@@ -36,10 +36,10 @@ export class CreateObject implements SMO<SMOType.CreateObject> {
     }
 
     up(category: SchemaCategory): void {
-        category.addObject(this.object);
+        category.getObject(this.object.key).current = this.object;
     }
 
     down(category: SchemaCategory): void {
-        category.removeObject(this.object);
+        category.getObject(this.object.key).current = undefined;
     }
 }

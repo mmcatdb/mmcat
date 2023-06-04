@@ -23,6 +23,7 @@ export class Signature {
     private constructor(input: number | number[]) {
         this._ids = typeof input === 'number' ? [ input ] : [ ...input ];
         this._type = determineType(this._ids.length);
+        this.value = this.toValue();
     }
 
     static fromServer(input: SignatureFromServer): Signature {
@@ -86,14 +87,16 @@ export class Signature {
         return this.isBase ? this._ids[0] : null;
     }
 
-    toString(): string {
+    readonly value: string;
+
+    private toValue(): string {
         if (this._type === SignatureType.Empty)
             return 'EMPTY';
 
         return this._ids.join(SEPARATOR_FROM_SERVER);
     }
 
-    toDisplayString(): string {
+    toString(): string {
         if (this._type === SignatureType.Empty)
             return 'EMPTY';
 

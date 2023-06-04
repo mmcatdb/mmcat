@@ -44,10 +44,10 @@ export class EditObject implements SMO<SMOType.EditObject> {
     }
 
     up(category: SchemaCategory): void {
-        category.editObject(this.newObject);
+        category.getObject(this.newObject.key).current = this.newObject;
     }
 
     down(category: SchemaCategory): void {
-        category.editObject(this.oldObject);
+        category.getObject(this.oldObject.key).current = this.oldObject;
     }
 }

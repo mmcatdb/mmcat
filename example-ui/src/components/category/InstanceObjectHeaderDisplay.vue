@@ -29,7 +29,7 @@ function columnClicked(column: Column) {
     </th>
     <th
         v-for="column in columns"
-        :key="column.signature.toString()"
+        :key="column.signature.value"
         :class="{ clickable: column.isClickable }"
         @click="() => columnClicked(column)"
     >

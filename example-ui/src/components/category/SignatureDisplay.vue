@@ -10,5 +10,5 @@ defineProps<SignatureDisplayProps>();
 </script>
 
 <template>
-    <span class="monospace-font">{{ signature.toDisplayString() }}</span>
+    <span class="monospace-font">{{ signature.toString() }}</span>
 </template>

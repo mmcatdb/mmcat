@@ -34,10 +34,10 @@ export class DeleteMorphism implements SMO<SMOType.DeleteMorphism> {
     }
 
     up(category: SchemaCategory): void {
-        category.removeMorphism(this.morphism);
+        category.getMorphism(this.morphism.signature).current = undefined;
     }
 
     down(category: SchemaCategory): void {
-        category.addMorphism(this.morphism);
+        category.getMorphism(this.morphism.signature).current = this.morphism;
     }
 }

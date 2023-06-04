@@ -36,10 +36,6 @@ export class SequenceSignature {
         return this.toSignature().toString();
     }
 
-    toDisplayString(): string {
-        return this.toSignature().toDisplayString();
-    }
-
     equals(signature: SequenceSignature): boolean {
         return this.sequence.equals(signature.sequence);
     }

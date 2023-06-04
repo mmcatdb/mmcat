@@ -71,6 +71,19 @@ export class Edge {
         this.codomainNode.removeNeighbour(this.domainNode);
     }
 
+    update(schemaMorphism: SchemaMorphism) {
+        this.schemaMorphism = schemaMorphism;
+        this.edge.data('source', this.schemaMorphism.domKey.value);
+        this.edge.data('target', this.schemaMorphism.codKey.value);
+        this.edge.data('label', this.schemaMorphism.label);
+
+        if (!this.edge.inside()) {
+            this.edge.restore();
+            this.domainNode.addNeighbour(this, true);
+            this.codomainNode.addNeighbour(this, false);
+        }
+    }
+
     get label(): string {
         return this.schemaMorphism.signature +
             (this.schemaMorphism.label === '' ? '' : ' - ' + this.schemaMorphism.label) +
@@ -109,9 +122,9 @@ export class Edge {
 function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
     return {
         data: {
-            id: 'm' + morphism.signature.toString(),
-            source: morphism.domKey.toString(),
-            target: morphism.codKey.toString(),
+            id: 'm' + morphism.signature.value,
+            source: morphism.domKey.value,
+            target: morphism.codKey.value,
             label: edge.label,
             schemaData: edge,
         },
