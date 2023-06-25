@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.core.mapping;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -14,7 +15,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
  * @author pavel.koupil, jachym.bartik
  */
 @JsonDeserialize(using = Name.Deserializer.class)
-public abstract class Name {
+public abstract class Name implements Serializable {
 
     protected Name() {}
 

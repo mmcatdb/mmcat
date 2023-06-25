@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.transformations.algorithms;
 
+import cz.cuni.matfyz.core.utils.Config;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jSessionProvider;

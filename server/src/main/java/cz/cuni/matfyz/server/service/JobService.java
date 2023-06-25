@@ -40,7 +40,7 @@ public class JobService {
     }
 
     public Job start(Job job, UserStore store) {
-        if (!setJobStatus(job, Job.Status.Running))
+        if (!setJobState(job, Job.State.Running))
             return null;
 
         asyncService.runJob(job, store);
@@ -48,8 +48,8 @@ public class JobService {
         return job;
     }
 
-    private boolean setJobStatus(Job job, Job.Status status) {
-        job.status = status;
+    private boolean setJobState(Job job, Job.State state) {
+        job.state = state;
         return repository.updateJsonValue(job);
     }
 
@@ -58,7 +58,7 @@ public class JobService {
     }
 
     public Job cancel(Job job) {
-        return setJobStatus(job, Job.Status.Canceled) ? job : null;
+        return setJobState(job, Job.State.Canceled) ? job : null;
     }
 
 }

@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.wrapperpostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.cuni.matfyz.abstractwrappers.exception.UnsupportedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,13 +47,15 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
     @Override
     public boolean addComplexProperty(Set<String> names, boolean required) {
-        throw new UnsupportedOperationException(); // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
+        throw UnsupportedException.addComplexProperty(PostgreSQLControlWrapper.TYPE);
+        // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
         // TODO dynamic named properties?
     }
 
     @Override
     public boolean addComplexArrayProperty(Set<String> names, boolean required) {
-        throw new UnsupportedOperationException(); // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
+        throw UnsupportedException.addComplexArrayProperty(PostgreSQLControlWrapper.TYPE);
+        // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
     }
 
     @Override
@@ -66,15 +69,9 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         
         return new PostgreSQLStatement(content);
     }
-}
 
-class Property {
-    
-    public String name;
-    public String command;
-    
-    public Property(String name, String command) {
-        this.name = name;
-        this.command = command;
-    }
+    private record Property(
+        String name,
+        String command
+    ) {}
 }

@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.abstractwrappers;
 
+import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
+
 import java.util.Collection;
 
 /**
@@ -7,7 +9,7 @@ import java.util.Collection;
  */
 public interface AbstractControlWrapper {
 
-    public abstract boolean execute(Collection<AbstractStatement> statement);
+    public abstract void execute(Collection<AbstractStatement> statement) throws ExecuteException;
 
     public abstract AbstractDDLWrapper getDDLWrapper();
 

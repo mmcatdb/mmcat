@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.abstractwrappers;
 
+import cz.cuni.matfyz.abstractwrappers.exception.UnsupportedException;
 import cz.cuni.matfyz.core.mapping.StaticName;
 
 import java.util.Set;
@@ -18,13 +19,13 @@ public interface AbstractDDLWrapper {
 
     public abstract boolean isSchemaLess();
 
-    public abstract boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedOperationException;
+    public abstract boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedException;
 
-    public abstract boolean addSimpleArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException;
+    public abstract boolean addSimpleArrayProperty(Set<String> names, boolean required) throws UnsupportedException;
 
-    public abstract boolean addComplexProperty(Set<String> names, boolean required) throws UnsupportedOperationException;
+    public abstract boolean addComplexProperty(Set<String> names, boolean required) throws UnsupportedException;
 
-    public abstract boolean addComplexArrayProperty(Set<String> names, boolean required) throws UnsupportedOperationException;
+    public abstract boolean addComplexArrayProperty(Set<String> names, boolean required) throws UnsupportedException;
 
     public abstract AbstractStatement createDDLStatement();
 

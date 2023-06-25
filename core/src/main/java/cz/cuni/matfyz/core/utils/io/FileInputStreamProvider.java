@@ -26,8 +26,8 @@ public class FileInputStreamProvider implements InputStreamProvider {
     
             return new FileInputStream(dataFile);
         }
-        catch (Exception exception) {
-            throw new IOException("Cannot read from local file " + fileName + ".", exception.getCause());
+        catch (Exception e) {
+            throw new IOException("Cannot read from local file " + fileName + ".", e.getCause());
         }
     }
     

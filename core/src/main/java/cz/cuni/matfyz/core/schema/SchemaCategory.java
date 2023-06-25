@@ -41,12 +41,12 @@ public class SchemaCategory implements Category {
     
     public SchemaMorphism getMorphism(Signature signature) {
         if (signature.isBaseDual())
-            throw new MorphismNotFoundException("Schema morphism cannot have dual signature: " + signature);
+            throw MorphismNotFoundException.signatureIsDual(signature);
 
         SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
         if (morphism == null) {
             if (signature.isEmpty() || signature.isBase())
-                throw new MorphismNotFoundException("Schema morphism not found for non-composite signature: " + signature);
+                throw MorphismNotFoundException.baseNotFound(signature);
 
             SchemaMorphism newMorphism = createCompositeMorphism(signature);
             morphism = morphismContext.createUniqueObject(newMorphism);

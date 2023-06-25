@@ -1,9 +1,7 @@
 package cz.cuni.matfyz.evolution.schema;
 
 import cz.cuni.matfyz.core.schema.SchemaCategory;
-import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.evolution.Version;
-import cz.cuni.matfyz.evolution.exception.SchemaEvolutionException;
 
 import java.util.List;
 
@@ -22,17 +20,11 @@ public class SchemaCategoryUpdate {
         this.operations = operations;
     }
 
-    public DataResult<SchemaCategory> apply(SchemaCategory category) {
-        for (final var operation : operations) {
-            try {
-                operation.apply(category);
-            }
-            catch (SchemaEvolutionException exception) {
-                return new DataResult<>(null, exception.getMessage());
-            }
-        }
+    public SchemaCategory apply(SchemaCategory category) {
+        for (final var operation : operations)
+            operation.apply(category);
 
-        return new DataResult<>(category);
+        return category;
     }
 
 }

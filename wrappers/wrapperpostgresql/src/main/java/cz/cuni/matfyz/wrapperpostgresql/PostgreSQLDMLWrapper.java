@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.wrapperpostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
-import cz.cuni.matfyz.abstractwrappers.exception.WrapperException;
+import cz.cuni.matfyz.abstractwrappers.exception.InvalidNameException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
     @Override
     public void setKindName(String name) {
         if (!nameIsValid(name))
-            throw new WrapperException("Kind name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+            throw InvalidNameException.kind(name);
 
         kindName = name;
     }
@@ -28,7 +28,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
     @Override
     public void append(String name, Object value) {
         if (!nameIsValid(name))
-            throw new WrapperException("Property name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+            throw InvalidNameException.property(name);
 
         String stringValue = value == null ? null : value.toString();
         propertyValues.add(new PropertyValue(name, stringValue));
@@ -41,7 +41,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
     @Override
     public PostgreSQLStatement createDMLStatement() {
         if (kindName == null)
-            throw new WrapperException("Kind name is null.");
+            throw InvalidNameException.kind(null);
 
         List<String> escapedNames = propertyValues.stream().map(propertyValue -> '"' + propertyValue.name + '"').toList();
         List<String> escapedValues = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();

@@ -24,7 +24,7 @@ public class ServerApplication {
     }
 
     @Bean(name = "jobExecutor")
-      public TaskExecutor taskExecutor() {
+    public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setThreadNamePrefix("AsyncJob-");

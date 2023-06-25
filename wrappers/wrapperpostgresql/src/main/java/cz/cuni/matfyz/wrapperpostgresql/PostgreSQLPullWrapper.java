@@ -2,6 +2,7 @@ package cz.cuni.matfyz.wrapperpostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLPullWrapper.class);
 
     private ConnectionProvider connectionProvider;
@@ -50,7 +52,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception {
+    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
         try (
             Connection connection = connectionProvider.getConnection();
             PreparedStatement statement = prepareStatement(connection, options);
@@ -75,9 +77,8 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 return forest;
             }
         }
-        catch (SQLException exception) {
-            LOGGER.error("PostgeSQL exception: ", exception);
-            throw exception;
+        catch (Exception e) {
+            throw new PullForestException(e);
         }
     }
 
@@ -94,10 +95,5 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 return output.toString();
             }
         }
-        catch (SQLException exception) {
-            LOGGER.error("Cannot create prepared statement or connection.", exception);
-        }
-
-        throw new SQLException();
     }
 }

@@ -116,11 +116,10 @@ class ServerApplicationTests {
         Database database = databaseService.find(databaseId);
         AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
 
-        var process = new DatabaseToInstance();
-        process.setLimit(records);
-        process.input(mapping, instance, pullWrapper);
-
-        var result = process.run();
+        var newInstance = new DatabaseToInstance()
+            .setLimit(records)
+            .input(mapping, instance, pullWrapper)
+            .run();
 
         message += "#" + mapping.kindName()
             + ", " + Statistics.getInfo(Counter.PULLED_RECORDS)
@@ -129,7 +128,7 @@ class ServerApplicationTests {
 
         Statistics.reset();
 
-        return result.data;
+        return newInstance;
     }
 
     private void exportMapping(InstanceCategory instance, Id mappingId, Id databaseId) throws Exception {
@@ -144,7 +143,6 @@ class ServerApplicationTests {
 
         var process = new InstanceToDatabase();
         process.input(mapping, List.of(mapping), instance, ddlWrapper, dmlWrapper, icWrapper);
-
         process.run();
 
         message += "#" + mapping.kindName()

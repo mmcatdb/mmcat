@@ -56,15 +56,13 @@ public class SchemaCategoryService {
         final var evolutionUpdate = update.toEvolution(context);
         final var originalCategory = wrapper.toSchemaCategory(context);
 
-        final var result = evolutionUpdate.apply(originalCategory);
-        if (!result.status)
-            return null;
+        final var newCategory = evolutionUpdate.apply(originalCategory);
 
         final var nextVersion = context.getVersion().generateNext();
         context.setVersion(nextVersion);
         update.nextVersion = nextVersion;
 
-        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(result.data, context);
+        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(newCategory, context);
 
         if (!repository.update(newWrapper, update))
             return null;

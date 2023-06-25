@@ -5,7 +5,7 @@ import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceMorphism;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.integration.exception.IntegrationException;
+import cz.cuni.matfyz.integration.exception.MorphismException;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -21,7 +21,7 @@ public class FromObjectIsaSearch {
     private final InstanceCategory category;
     private final InstanceObject object;
     private final Function<InstanceMorphism, Boolean> findFunction;
-
+    
     public FromObjectIsaSearch(InstanceCategory category, InstanceObject object, Function<InstanceMorphism, Boolean> findFunction) {
         this.category = category;
         this.object = object;
@@ -38,7 +38,7 @@ public class FromObjectIsaSearch {
             processPath(queue.poll());
 
         if (outputCandidates.size() > 1)
-            throw new IntegrationException("Multiple morphisms found from object: " + object.key() + ".");
+            throw MorphismException.multipleFound(object.key());
         
         return outputCandidates.size() == 1 ? outputCandidates.get(0) : null;
     }

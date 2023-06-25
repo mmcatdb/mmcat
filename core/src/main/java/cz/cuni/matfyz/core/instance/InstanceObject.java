@@ -2,6 +2,7 @@ package cz.cuni.matfyz.core.instance;
 
 import cz.cuni.matfyz.core.category.CategoricalObject;
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.exception.ObjectException;
 import cz.cuni.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.cuni.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.cuni.matfyz.core.schema.Key;
@@ -140,8 +141,7 @@ public class InstanceObject implements CategoricalObject {
         if (technicalId.isPresent())
             return getRowByTechnicalId(technicalId.get());
 
-        // This should not happen.
-        throw new UnsupportedOperationException("Actual row not found for superId: " + superId + " and technicalIds: " + technicalIds + " .");
+        throw ObjectException.actualRowNotFound(superId, technicalIds);
     }
 
     /**

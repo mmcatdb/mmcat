@@ -12,16 +12,14 @@ import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.Name;
-import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.IComplexRecord;
 import cz.cuni.matfyz.core.record.RootRecord;
-import cz.cuni.matfyz.core.record.SimpleArrayRecord;
 import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SignatureId;
-import cz.cuni.matfyz.transformations.exception.TransformationException;
+import cz.cuni.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -113,17 +111,10 @@ public class MTCAlgorithm {
                 builder.add(signature, stringValue);
             */
             SimpleRecord<?> simpleRecord = rootRecord.findSimpleRecord(signature);
-            if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord) {
+            if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
                 builder.add(signature, simpleValueRecord.getValue().toString());
-            }
-            else if (simpleRecord instanceof SimpleArrayRecord<?>) {
-                LOGGER.warn("A simple record with signature {} is an array record:\n{}\n", signature, simpleRecord);
-                throw new TransformationException("FetchSuperId doesn't support array values.");
-            }
-            else {
-                LOGGER.warn("A simple record with signature {} was not fount\n", signature);
-                throw new TransformationException("FetchSuperId doesn't support null values.");
-            }
+            else
+                throw InvalidStateException.simpleRecordIsNotValue(simpleRecord);
         }
         
         return builder.build();
@@ -185,10 +176,8 @@ public class MTCAlgorithm {
             }
             
             var signatureInLastRow = signature.traverseAlong(pathToChild);
-            if (childRow.hasSignature(signatureInLastRow)) {
+            if (childRow.hasSignature(signatureInLastRow))
                 builder.add(signature, childRow.getValue(signatureInLastRow));
-                continue;
-            }
 
             // TODO find the value in parent record
         }
@@ -241,13 +230,6 @@ public class MTCAlgorithm {
     }
     
     private static Collection<Child> process(AccessPath accessPath) {
-        if (accessPath instanceof SimpleProperty simpleProperty) {
-            return List.of(new Child(simpleProperty.signature(), accessPath));
-        }
-        else if (accessPath instanceof ComplexProperty complexProperty) {
-            return List.of(new Child(complexProperty.signature(), complexProperty));
-        }
-        
-        throw new TransformationException("Process");
+        return List.of(new Child(accessPath.signature(), accessPath));
     }
 }

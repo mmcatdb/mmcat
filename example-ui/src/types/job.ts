@@ -1,6 +1,6 @@
-import { DataSource, type DataSourceFromServer } from "./dataSource";
-import type { Entity, Id } from "./id";
-import { LogicalModelInfo, type LogicalModelInfoFromServer } from "./logicalModel";
+import { DataSource, type DataSourceFromServer } from './dataSource';
+import type { Entity, Id } from './id';
+import { LogicalModelInfo, type LogicalModelInfoFromServer } from './logicalModel';
 
 export enum JobType {
     ModelToCategory = 'ModelToCategory',
@@ -11,16 +11,16 @@ export enum JobType {
 export const JOB_TYPES = [
     {
         label: 'Model to Category',
-        value: JobType.ModelToCategory
+        value: JobType.ModelToCategory,
     },
     {
         label: 'Category to Model',
-        value: JobType.CategoryToModel
+        value: JobType.CategoryToModel,
     },
     {
         label: 'Import data', // TODO
-        value: JobType.JsonLdToCategory
-    }
+        value: JobType.JsonLdToCategory,
+    },
 ];
 
 export class Job implements Entity {
@@ -31,7 +31,7 @@ export class Job implements Entity {
         public readonly dataSource: DataSource | undefined,
         public readonly label: string,
         public readonly type: JobType,
-        public status: Status
+        public state: JobState,
     ) {}
 
     static fromServer(input: JobFromServer): Job {
@@ -42,12 +42,12 @@ export class Job implements Entity {
             input.dataSource ? DataSource.fromServer(input.dataSource) : undefined,
             input.label,
             input.type,
-            input.status
+            input.state,
         );
     }
 
-    setStatus(status: Status) {
-        this.status = status;
+    setState(state: JobState) {
+        this.state = state;
     }
 }
 
@@ -58,15 +58,16 @@ export type JobFromServer = {
     dataSource?: DataSourceFromServer;
     label: string;
     type: JobType;
-    status: Status;
+    state: JobState;
 };
 
-export enum Status {
+export enum JobState {
     Default = 'Default',
     Ready = 'Ready',
     Running = 'Running',
     Finished = 'Finished',
-    Canceled = 'Canceled'
+    Canceled = 'Canceled',
+    Failed = 'Failed',
 }
 
 export type JobInit = {

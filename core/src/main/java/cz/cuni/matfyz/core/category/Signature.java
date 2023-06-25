@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.core.category;
 
+import cz.cuni.matfyz.core.exception.SignatureException;
 import cz.cuni.matfyz.core.utils.ArrayUtils;
 
 import java.io.IOException;
@@ -161,8 +162,8 @@ public class Signature implements Serializable, Comparable<Signature> {
             final var ids = List.of(string.split("\\;")).stream().mapToInt(Integer::parseInt).toArray();
             return new Signature(ids);
         }
-        catch (NumberFormatException exception) {
-            return null;
+        catch (NumberFormatException e) {
+            throw SignatureException.invalid(string);
         }
     }
 

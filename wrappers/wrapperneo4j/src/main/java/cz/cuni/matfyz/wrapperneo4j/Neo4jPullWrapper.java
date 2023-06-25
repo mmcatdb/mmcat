@@ -2,6 +2,7 @@ package cz.cuni.matfyz.wrapperneo4j;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
@@ -37,7 +38,16 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     }
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception {
+    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
+        try {
+            return innerPullForest(path, options);
+        }
+        catch (Exception e) {
+            throw new PullForestException(e);
+        }
+    }
+
+    private ForestOfRecords innerPullForest(ComplexProperty path, PullWrapperOptions options) {
         final var relationshipResult = tryProcessRelationshipPath(path, options);
         if (relationshipResult != null)
             return relationshipResult;
@@ -138,7 +148,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         for (final AccessPath subpath : path.subpaths()) {
             if (
                 !(subpath instanceof SimpleProperty simpleProperty)
-                || !(simpleProperty.name() instanceof StaticName staticName)
+                    || !(simpleProperty.name() instanceof StaticName staticName)
             )
                 continue;
 

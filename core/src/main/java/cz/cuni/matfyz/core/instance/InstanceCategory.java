@@ -53,11 +53,11 @@ public class InstanceCategory implements Category {
     
     public InstanceMorphism getMorphism(Signature signature) {
         if (signature.isBaseDual())
-            throw new MorphismNotFoundException("Instance morphism cannot have dual signature: " + signature);
+            throw MorphismNotFoundException.signatureIsDual(signature);
 
         return morphisms.computeIfAbsent(signature, x -> {
             if (x.isEmpty() || x.isBase())
-                throw new MorphismNotFoundException("Instance morphism not found for non-composite signature: " + x);
+                throw MorphismNotFoundException.baseNotFound(x);
 
             // This must be a composite morphism. These are created dynamically so we have to add it dynamically.
             SchemaMorphism schemaMorphism = schema.getMorphism(x);

@@ -50,5 +50,6 @@ module.exports = {
         '@typescript-eslint/member-delimiter-style': [ 'error', { singleline: { delimiter: 'comma' } } ],
         'comma-dangle': [ 'warn', 'always-multiline' ],
         'vue/valid-template-root': 'off',
+        'quotes': [ 'warn', 'single', { 'allowTemplateLiterals': true } ],
     },
 };

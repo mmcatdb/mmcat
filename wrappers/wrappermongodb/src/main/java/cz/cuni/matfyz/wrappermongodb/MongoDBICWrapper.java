@@ -14,12 +14,12 @@ public class MongoDBICWrapper implements AbstractICWrapper {
     
     @Override
     public void appendIdentifier(String kindName, IdentifierStructure identifier) {
-        //throw new UnsupportedOperationException();
+        // Intentionally empty
     }
 
     @Override
     public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
-        //throw new UnsupportedOperationException();
+        // Intentionally empty
     }
 
     @Override

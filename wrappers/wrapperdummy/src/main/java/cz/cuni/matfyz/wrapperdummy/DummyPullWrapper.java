@@ -2,6 +2,7 @@ package cz.cuni.matfyz.wrapperdummy;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
@@ -13,6 +14,7 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.RecordName;
 import cz.cuni.matfyz.core.record.RootRecord;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -29,7 +32,16 @@ import org.json.JSONObject;
 public class DummyPullWrapper implements AbstractPullWrapper {
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception {
+    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
+        try {
+            return innerPullForest(path, options);
+        }
+        catch (Exception e) {
+            throw new PullForestException(e);
+        }
+    }
+
+    private ForestOfRecords innerPullForest(ComplexProperty path, PullWrapperOptions options) throws IOException, JSONException {
         String resourceFileName = options.getKindName();
         String jsonString = Files.readString(Path.of(resourceFileName));
         var json = new JSONArray(jsonString);
@@ -51,7 +63,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         return forest;
     }
     
-    private void getDataFromObject(ComplexRecord parentRecord, JSONObject object, ComplexProperty path) throws Exception {
+    private void getDataFromObject(ComplexRecord parentRecord, JSONObject object, ComplexProperty path) throws JSONException {
         boolean hasSubpathWithDynamicName = false;
         
         for (AccessPath subpath : path.subpaths()) {
@@ -65,7 +77,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
             getDataFromDynamicFieldsOfObject(parentRecord, object, path);
     }
     
-    private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, JSONObject object, ComplexProperty path) throws Exception {
+    private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, JSONObject object, ComplexProperty path) throws JSONException {
         // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name
         AccessPath subpathWithDynamicName = null;
         Set<String> otherSubpathNames = new TreeSet<>();
@@ -87,7 +99,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         }
     }
     
-    private void getFieldWithKeyForSubpathFromObject(ComplexRecord parentRecord, JSONObject object, String key, AccessPath subpath) throws Exception {
+    private void getFieldWithKeyForSubpathFromObject(ComplexRecord parentRecord, JSONObject object, String key, AccessPath subpath) throws JSONException {
         if (object.isNull(key)) // Returns if the value is null or if the value doesn't exist.
             return;
         
@@ -117,7 +129,7 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         }
     }
     
-    private void addComplexValueToRecord(ComplexRecord parentRecord, JSONObject value, String key, ComplexProperty complexProperty) throws Exception {
+    private void addComplexValueToRecord(ComplexRecord parentRecord, JSONObject value, String key, ComplexProperty complexProperty) throws JSONException {
         // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
         // We do so by passing the parent record instead of creating a new one.
         if (complexProperty.isAuxiliary())

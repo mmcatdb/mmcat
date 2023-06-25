@@ -3,6 +3,7 @@ package cz.cuni.matfyz.server.service;
 import cz.cuni.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
+import cz.cuni.matfyz.server.exception.DatabaseException;
 import cz.cuni.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
 import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
@@ -32,32 +33,12 @@ public class WrapperService {
                 case mongodb -> getMongoDBControlWrapper(database);
                 case postgresql -> getPostgreSQLControlWrapper(database);
                 case neo4j -> getNeo4jControlWrapper(database);
-                default -> throw new WrapperNotFoundException(wrapperNotFoundText("Pull", database));
+                default -> throw DatabaseException.wrapperNotFound(database);
             };
         }
         catch (Exception exception) {
-            throw new WrapperCreationErrorException("Pull wrapper for database " + database.id + " with JSON settings: " + database.settings + " can't be created due to following exception: " + exception.getMessage());
+            throw DatabaseException.wrapperNotCreated(database, exception);
         }
-    }
-
-    private String wrapperNotFoundText(String name, Database database) {
-        return name + "wrapper for database " + database.id + " with JSON settings: " + database.settings + " not found.";
-    }
-
-    public static class WrapperCreationErrorException extends RuntimeException {
-
-        public WrapperCreationErrorException(String errorMessage) {
-            super(errorMessage);
-        }
-
-    }
-
-    public static class WrapperNotFoundException extends RuntimeException {
-
-        public WrapperNotFoundException(String errorMessage) {
-            super(errorMessage);
-        }
-
     }
 
     // MongoDB

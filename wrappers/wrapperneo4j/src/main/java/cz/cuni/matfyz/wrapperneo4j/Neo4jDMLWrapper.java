@@ -2,7 +2,7 @@ package cz.cuni.matfyz.wrapperneo4j;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
-import cz.cuni.matfyz.abstractwrappers.exception.WrapperException;
+import cz.cuni.matfyz.abstractwrappers.exception.InvalidNameException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     @Override
     public void setKindName(String name) {
         if (!nameIsValid(name))
-            throw new WrapperException("Kind name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+            throw InvalidNameException.kind(name);
 
         kindName = name;
     }
@@ -36,7 +36,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
         final var split = name.split(AbstractDDLWrapper.PATH_SEPARATOR);
         if (split.length == 1) {
             if (!nameIsValid(name))
-                throw new WrapperException("Property name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+                throw InvalidNameException.property(name);
 
             propertyValues.add(new PropertyValue(name, stringValue));
             return;
@@ -44,7 +44,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
 
         final var propertyName = split[1];
         if (!nameIsValid(propertyName))
-            throw new WrapperException("Nested property name \"" + name + "\" doesn't match the required pattern /^[\\w]+$/.");
+            throw InvalidNameException.property(name);
 
         final var propertyValue = new PropertyValue(propertyName, stringValue);
 
@@ -59,7 +59,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
             toNodeValues.add(propertyValue);
         }
         else {
-            throw new WrapperException("Nested property with name: " + name + " is not allowed.");
+            throw InvalidNameException.property(name);
         }
     }
 
@@ -70,7 +70,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     @Override
     public Neo4jStatement createDMLStatement() {
         if (kindName == null)
-            throw new WrapperException("Kind name is null.");
+            throw InvalidNameException.kind(null);
 
         if (fromNodeValues.isEmpty() || toNodeValues.isEmpty())
             return processNode();
@@ -85,11 +85,8 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     }
 
     private Neo4jStatement processRelationship() {
-        if (fromNodeLabel == null)
-            throw new WrapperException("From node label is null");
-
-        if (toNodeLabel == null)
-            throw new WrapperException("To node label is null");
+        if (fromNodeLabel == null || toNodeLabel == null)
+            throw InvalidNameException.node(null);
 
         final String fromNodeMerge = createMergeForNode("from", fromNodeLabel, fromNodeValues);
         final String toNodeMerge = createMergeForNode("to", toNodeLabel, toNodeValues);

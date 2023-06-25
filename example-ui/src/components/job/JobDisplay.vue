@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Job, Status, JobType } from '@/types/job';
+import { type Job, JobState, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { computed, ref } from 'vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
@@ -16,11 +16,15 @@ const emit = defineEmits([ 'deleteJob' ]);
 
 const fetching = ref(false);
 
-const jobStatusClass = computed(() => {
-    switch (props.job.status) {
-    case Status.Canceled:
+const jobStateClass = computed(() => {
+    switch (props.job.state) {
+    case JobState.Running:
+        return 'text-info';
+    case JobState.Failed:
         return 'text-error';
-    case Status.Finished:
+    case JobState.Canceled:
+        return 'text-warning';
+    case JobState.Finished:
         return 'text-success';
     default:
         return '';
@@ -32,7 +36,7 @@ async function startJob() {
 
     const result = await API.jobs.startJob({ id: props.job.id });
     if (result.status)
-        props.job.setStatus(result.data.status);
+        props.job.setState(result.data.state);
 
     fetching.value = false;
 }
@@ -52,7 +56,7 @@ async function cancelJob() {
 
     const result = await API.jobs.cancelJob({ id: props.job.id });
     if (result.status)
-        props.job.setStatus(result.data.status);
+        props.job.setState(result.data.state);
 
     fetching.value = false;
 }
@@ -62,7 +66,7 @@ async function restartJob() {
 
     const result = await API.jobs.startJob({ id: props.job.id });
     if (result.status)
-        props.job.setStatus(result.data.status);
+        props.job.setState(result.data.state);
 
     fetching.value = false;
 }
@@ -96,15 +100,15 @@ async function restartJob() {
                     {{ job.logicalModel.label }}
                 </RouterLink>
             </ValueRow>
-            <ValueRow label="Status:">
-                <span :class="jobStatusClass">
-                    {{ job.status }}
+            <ValueRow label="State:">
+                <span :class="jobStateClass">
+                    {{ job.state }}
                 </span>
             </ValueRow>
         </ValueContainer>
         <div class="button-row">
             <button
-                v-if="job.status === Status.Ready"
+                v-if="job.state === JobState.Ready"
                 :disabled="fetching"
                 class="success"
                 @click="startJob"
@@ -112,7 +116,7 @@ async function restartJob() {
                 Start
             </button>
             <button
-                v-if="job.status !== Status.Running"
+                v-if="job.state !== JobState.Running"
                 :disabled="fetching"
                 class="error"
                 @click="deleteJob"
@@ -120,17 +124,17 @@ async function restartJob() {
                 Delete
             </button>
             <button
-                v-if="job.status === Status.Finished || job.status === Status.Canceled"
+                v-if="job.state === JobState.Finished || job.state === JobState.Canceled"
                 :disabled="fetching"
-                class="warning"
+                class="info"
                 @click="restartJob"
             >
                 Restart
             </button>
             <button
-                v-if="job.status === Status.Running"
+                v-if="job.state === JobState.Running"
                 :disabled="fetching"
-                class="error"
+                class="warning"
                 @click="cancelJob"
             >
                 Cancel

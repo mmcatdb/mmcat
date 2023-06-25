@@ -26,7 +26,7 @@ async function confirmNewCategory() {
         return;
 
     const result = await API.schemas.createNewSchema({}, {
-        label: newCategoryLabel.value
+        label: newCategoryLabel.value,
     });
     if (!result.status)
         return;

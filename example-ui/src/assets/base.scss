@@ -38,9 +38,7 @@
     --color-text: var(--vt-c-text-light-1);
 
     --section-gap: 160px;
-}
 
-:root {
     --top-bar-height: 64px;
 }
 
@@ -118,8 +116,6 @@
 }
 
 body {
-    min-height: 100vh;
-    min-width: 1000px;
     margin: 0;
     color: var(--color-text);
     background: var(--color-background);
@@ -166,4 +162,19 @@ body, button {
 
 .monospace-font {
     font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+}
+
+/*
+    Layout
+*/
+
+.content {
+    margin-top: var(--top-bar-height);
+    padding-left: var(--left-bar-width);
+    height: calc(100vh - var(--top-bar-height));
+    @extend .scrollbar-fix;
+}
+
+.inner-content {
+    padding: 10px 20px;
 }

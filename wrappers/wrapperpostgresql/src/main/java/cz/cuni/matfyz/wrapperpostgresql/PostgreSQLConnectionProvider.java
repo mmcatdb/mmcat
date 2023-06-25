@@ -1,18 +1,15 @@
 package cz.cuni.matfyz.wrapperpostgresql;
 
+import cz.cuni.matfyz.core.exception.OtherException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jachymb.bartik
  */
 public class PostgreSQLConnectionProvider implements ConnectionProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLConnectionProvider.class);
 
     private PostgreSQLSettings settings;
 
@@ -29,11 +26,9 @@ public class PostgreSQLConnectionProvider implements ConnectionProvider {
         try {
             return DriverManager.getConnection(settings.getConnectionString());
         }
-        catch (SQLException exception) {
-            LOGGER.error("Cannot create connection to PostgreSQL.", exception);
+        catch (SQLException e) {
+            throw new OtherException(e);
         }
-
-        return null;
     }
 
 }

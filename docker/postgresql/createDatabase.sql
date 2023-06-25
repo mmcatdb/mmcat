@@ -807,11 +807,11 @@ CREATE TABLE job (
 
 INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value)
 VALUES
-    (1, 1, null, '{"label": "Import Order", "type": "ModelToCategory", "status": "Ready"}'),
-    (1, 1, null, '{"label": "Export Order", "type": "CategoryToModel", "status": "Ready"}'),
-    (1, 2, null, '{"label": "Import Customer", "type": "ModelToCategory", "status": "Ready"}'),
-    (1, 2, null, '{"label": "Export Customer", "type": "CategoryToModel", "status": "Ready"}'),
-    (1, 3, null, '{"label": "Import Friend", "type": "ModelToCategory", "status": "Ready"}'),
-    (1, 3, null, '{"label": "Export Friend", "type": "CategoryToModel", "status": "Ready"}'),
-    (2, 4, null, '{"label": "Import from Postgres", "type": "ModelToCategory", "status": "Ready"}'),
-    (2, 5, null, '{"label": "Export to Mongo", "type": "CategoryToModel", "status": "Ready"}');
+    (1, 1, null, '{"label": "Import Order", "type": "ModelToCategory", "state": "Ready"}'),
+    (1, 1, null, '{"label": "Export Order", "type": "CategoryToModel", "state": "Ready"}'),
+    (1, 2, null, '{"label": "Import Customer", "type": "ModelToCategory", "state": "Ready"}'),
+    (1, 2, null, '{"label": "Export Customer", "type": "CategoryToModel", "state": "Ready"}'),
+    (1, 3, null, '{"label": "Import Friend", "type": "ModelToCategory", "state": "Ready"}'),
+    (1, 3, null, '{"label": "Export Friend", "type": "CategoryToModel", "state": "Ready"}'),
+    (2, 4, null, '{"label": "Import from Postgres", "type": "ModelToCategory", "state": "Ready"}'),
+    (2, 5, null, '{"label": "Export to Mongo", "type": "CategoryToModel", "state": "Ready"}');

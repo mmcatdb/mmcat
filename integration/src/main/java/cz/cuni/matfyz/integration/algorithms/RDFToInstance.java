@@ -4,7 +4,7 @@ import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceObject;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
-import cz.cuni.matfyz.integration.exception.IntegrationException;
+import cz.cuni.matfyz.integration.exception.ObjectException;
 import cz.cuni.matfyz.integration.propertyprocessor.ArrayProcessor;
 import cz.cuni.matfyz.integration.propertyprocessor.PropertyProcessor;
 import cz.cuni.matfyz.integration.propertyprocessor.SimpleAttributeProcessor;
@@ -99,21 +99,20 @@ public class RDFToInstance {
             if (processor.tryProcessProperty(statement, resourceObject, resourceRow))
                 return;
 
-        //throw new IntegrationException("No processor found for statement: " + statement + ".");
         LOGGER.error("No processor found for statement: {}.", statement);
     }
 
     private InstanceObject findObject(String pimIri) {
         final var objects = this.category.objects().values().stream().filter(object -> object.schemaObject.pimIri.equals(pimIri)).toList();
         if (objects.size() != 1)
-            throw new IntegrationException("No instance object found for pimIri: " + pimIri + ".");
+            throw ObjectException.notFound(pimIri);
 
         return objects.get(0);
     }
 
     private DomainRow getOrCreateInitialDomainRow(Resource resource, InstanceObject resourceObject) {
         if (!resourceObject.schemaObject.ids().isValue())
-            throw new IntegrationException("Identifier has wrong id for resource:" + resource.getURI() + ".");
+            throw ObjectException.idsIsNotValue(resourceObject.schemaObject.pimIri, resource.asNode());
 
         final var resourceSuperId = SuperIdWithValues.fromEmptySignature(resource.getURI());
 

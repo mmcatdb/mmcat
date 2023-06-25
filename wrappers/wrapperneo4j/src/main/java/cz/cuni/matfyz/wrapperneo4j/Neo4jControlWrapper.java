@@ -7,6 +7,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
+import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.util.Collection;
 
@@ -23,8 +24,10 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jControlWrapper.class);
 
-    public static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
-    public static final String TO_NODE_PROPERTY_PREFIX = "_to.";
+    static final String TYPE = "neo4j";
+
+    static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
+    static final String TO_NODE_PROPERTY_PREFIX = "_to.";
 
     private SessionProvider sessionProvider;
     
@@ -33,7 +36,7 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     }
 
     @Override
-    public boolean execute(Collection<AbstractStatement> statements) {
+    public void execute(Collection<AbstractStatement> statements) {
         try (
             final Session session = sessionProvider.getSession();
         ) {
@@ -45,11 +48,9 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
                 final var query = new Query(statement.getContent());
                 session.run(query);
             }
-
-            return true;
         }
-        catch (Exception exception) {
-            return false;
+        catch (Exception e) {
+            throw new ExecuteException(e);
         }
     }
 

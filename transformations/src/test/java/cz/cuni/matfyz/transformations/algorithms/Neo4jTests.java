@@ -2,10 +2,11 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.tests.TestData;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
@@ -86,18 +87,20 @@ public class Neo4jTests {
     public void testOfWrite() {
         var wrapper = new Neo4jControlWrapper(sessionProvider);
 
-        assertTrue(
+        assertDoesNotThrow(() -> {
             wrapper.execute(List.of(
                 Neo4jStatement.createEmpty(),
                 new Neo4jStatement("CREATE (a { test: '1' });")
-            ))
+            ));
+        });
+
+        List<AbstractStatement> invalidStatements = List.of(
+            new Neo4jStatement("invalid statement")
         );
 
-        assertFalse(
-            wrapper.execute(List.of(
-                new Neo4jStatement("invalid statement")
-            ))
-        );
+        assertThrows(ExecuteException.class, () -> {
+            wrapper.execute(invalidStatements);
+        });
     }
 
 }

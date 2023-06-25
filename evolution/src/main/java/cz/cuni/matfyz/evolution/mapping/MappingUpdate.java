@@ -1,9 +1,7 @@
 package cz.cuni.matfyz.evolution.mapping;
 
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.evolution.Version;
-import cz.cuni.matfyz.evolution.exception.MappingEvolutionException;
 
 import java.util.List;
 
@@ -22,19 +20,13 @@ public class MappingUpdate {
         this.operations = operations;
     }
 
-    public DataResult<Mapping> apply(Mapping originalCategory) {
-        final var category = originalCategory.clone();
+    public Mapping apply(Mapping originalMapping) {
+        final var mapping = originalMapping.clone();
 
-        for (final var operation : operations) {
-            try {
-                operation.apply(category);
-            }
-            catch (MappingEvolutionException exception) {
-                return new DataResult<>(null, exception.getMessage());
-            }
-        }
+        for (final var operation : operations)
+            operation.apply(mapping);
 
-        return new DataResult<>(category);
+        return mapping;
     }
 
 }

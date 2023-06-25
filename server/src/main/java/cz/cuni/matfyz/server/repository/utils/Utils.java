@@ -38,7 +38,7 @@ public abstract class Utils {
 
             statement.setInt(position, Integer.parseInt(id.toString()));
         }
-        catch (NumberFormatException exception) {
+        catch (NumberFormatException e) {
             statement.setInt(position, 0);
         }
     }
@@ -56,8 +56,8 @@ public abstract class Utils {
             node.remove(propertyName);
             return node.toString();
         }
-        catch (IllegalArgumentException exception) {
-            throw new JsonMappingException(exception.getMessage(), exception);
+        catch (IllegalArgumentException e) {
+            throw new JsonMappingException(e.getMessage(), e);
         }
     }
 
@@ -68,8 +68,8 @@ public abstract class Utils {
             node.remove(propertyNames);
             return node.toString();
         }
-        catch (IllegalArgumentException exception) {
-            throw new JsonMappingException(exception.getMessage(), exception);
+        catch (IllegalArgumentException e) {
+            throw new JsonMappingException(e.getMessage(), e);
         }
     }
 

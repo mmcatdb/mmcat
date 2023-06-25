@@ -1,12 +1,16 @@
 package cz.cuni.matfyz.abstractwrappers.exception;
 
+import cz.cuni.matfyz.core.exception.NamedException;
+
+import java.io.Serializable;
+
 /**
  * @author jachymb.bartik
  */
-public class WrapperException extends RuntimeException {
+public abstract class WrapperException extends NamedException {
     
-    public WrapperException(String errorMessage) {
-        super(errorMessage);
+    protected WrapperException(String name, Serializable data, Throwable cause) {
+        super("wrapper." + name, data, cause);
     }
 
 }

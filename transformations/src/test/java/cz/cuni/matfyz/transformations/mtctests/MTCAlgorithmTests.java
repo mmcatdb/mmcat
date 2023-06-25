@@ -33,11 +33,10 @@ public class MTCAlgorithmTests {
     public void basicTest() throws URISyntaxException {
         var schema = data.createInitialSchemaCategory();
 
-        var databaseToInstance = new DatabaseToInstance();
         var mapping = data.createOrderTableMapping(schema);
-        databaseToInstance.input(mapping, null, pullWrapper);
-        var result = databaseToInstance.run();
-        var category = result.data;
+        var category = new DatabaseToInstance()
+            .input(mapping, null, pullWrapper)
+            .run();
 
         LOGGER.info(category.toString());
     }

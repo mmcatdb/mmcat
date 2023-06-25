@@ -7,6 +7,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
+import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.util.Collection;
 
@@ -19,7 +20,10 @@ import org.slf4j.LoggerFactory;
  */
 public class MongoDBControlWrapper implements AbstractControlWrapper {
 
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBControlWrapper.class);
+
+    static final String TYPE = "mongodb";
 
     private DatabaseProvider databaseProvider;
     
@@ -28,18 +32,16 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
     }
 
     @Override
-    public boolean execute(Collection<AbstractStatement> statements) {
+    public void execute(Collection<AbstractStatement> statements) {
         for (final var statement : statements) {
             try {
                 if (statement instanceof MongoDBCommandStatement commandStatement)
                     databaseProvider.getDatabase().runCommand(commandStatement.getCommand());
             }
-            catch (MongoException exception) {
-                LOGGER.error("MongoDB exception: ", exception);
+            catch (MongoException e) {
+                throw new ExecuteException(e);
             }
         }
-        
-        return true;
     }
 
     @Override

@@ -1,12 +1,15 @@
 package cz.cuni.matfyz.core.exception;
 
+import java.io.Serializable;
+
 /**
+ * A base class for all core exceptions.
  * @author jachymb.bartik
  */
-public class CoreException extends RuntimeException {
-    
-    public CoreException(String errorMessage) {
-        super(errorMessage);
+public abstract class CoreException extends NamedException {
+
+    protected CoreException(String name, Serializable data, Throwable cause) {
+        super("core." + name, data, cause);
     }
 
 }

@@ -12,6 +12,7 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.tests.TestData;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -30,28 +31,27 @@ public class JsonTests {
     @Test
     public void signature() {
         final var empty = Signature.createEmpty();
-        testAlgorithm(empty);
+        fullTest(empty);
 
         final var base = Signature.createBase(69);
-        testAlgorithm(base);
+        fullTest(base);
 
         final var composite = Signature.createBase(42).concatenate(Signature.createBase(69));
-        testAlgorithm(composite);
+        fullTest(composite);
     }
 
     @Test
     public void name() {
         final var anonymous = StaticName.createAnonymous();
-        testAlgorithm(anonymous);
+        fullTest(anonymous);
 
         final var _static = new StaticName("Static name");
-        testAlgorithm(_static);
+        fullTest(_static);
 
         final var dynamic = new DynamicName(Signature.createBase(69));
-        testAlgorithm(dynamic);
+        fullTest(dynamic);
     }
 
-    @Test
     // TODO reorganize and rename later
     public void toJsonConversion() throws Exception {
         final var category = data.createDefaultSchemaCategory();
@@ -74,13 +74,37 @@ public class JsonTests {
     @Test
     public void accessPath() {
         final var simple = new SimpleProperty("number", data.orderToNumber);
-        testAlgorithm(simple);
+        fullTest(simple);
 
         final var complex = data.path_orderRoot();
-        testAlgorithm(complex);
+        fullTest(complex);
 
         final var nested = data.path_nestedDoc();
-        testAlgorithm(nested);
+        fullTest(nested);
+    }
+
+    private record ExceptionData(
+        String a,
+        int b
+    ) implements Serializable {}
+
+    @Test
+    public void namedException() {
+        final var simple = new TestException("simple", null, null);
+        LOGGER.info(simple.toString());
+        serializationTest(simple);
+
+        final var stringData = new TestException("stringData", "some string", null);
+        LOGGER.info(stringData.toString());
+        serializationTest(stringData);
+
+        final var classData = new TestException("classData", new ExceptionData("other string", 69), null);
+        LOGGER.info(classData.toString());
+        serializationTest(classData);
+
+        final var cause = new TestException("classData", new ExceptionData("other string", 69), new UnsupportedOperationException("Something is unsupported"));
+        LOGGER.info(cause.toString());
+        serializationTest(cause);
     }
 
     private String serialize(Object object) throws IOException {
@@ -95,21 +119,24 @@ public class JsonTests {
 
     private static String WHITE_COLOR_CODE = "\u001b[1;37m";
 
-    private void testAlgorithm(Object object) {
-        final Output json = new Output();
+    private void fullTest(Object object) {
+        final Output json = serializationTest(object);
 
+        final Output secondJson = new Output();
+        assertDoesNotThrow(() -> {
+            secondJson.value = serialize(deserialize(json.value));
+        });
+        assertEquals(json.value, secondJson.value);
+    }
+
+    private Output serializationTest(Object object) {
+        final Output json = new Output();
         assertDoesNotThrow(() -> {
             json.value = serialize(object);
             LOGGER.info("\n{}Original:\n{}\n{}Serialized:\n{}", WHITE_COLOR_CODE, object, WHITE_COLOR_CODE, json.value);
         });
 
-        final Output secondJson = new Output();
-
-        assertDoesNotThrow(() -> {
-            secondJson.value = serialize(deserialize(json.value));
-        });
-
-        assertEquals(json.value, secondJson.value);
+        return json;
     }
 
 }

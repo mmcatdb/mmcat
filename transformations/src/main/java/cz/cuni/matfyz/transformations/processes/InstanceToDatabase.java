@@ -4,10 +4,11 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
+import cz.cuni.matfyz.core.exception.NamedException;
+import cz.cuni.matfyz.core.exception.OtherException;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.utils.DataResult;
 import cz.cuni.matfyz.core.utils.Statistics;
 import cz.cuni.matfyz.core.utils.Statistics.Counter;
 import cz.cuni.matfyz.core.utils.Statistics.Interval;
@@ -31,13 +32,22 @@ public class InstanceToDatabase {
     private AbstractDMLWrapper dmlWrapper;
     private AbstractICWrapper icWrapper;
 
-    public void input(Mapping mapping, Iterable<Mapping> allMappings, InstanceCategory currentInstance, AbstractDDLWrapper ddlWrapper, AbstractDMLWrapper dmlWrapper, AbstractICWrapper icWrapper) {
+    public InstanceToDatabase input(
+        Mapping mapping,
+        Iterable<Mapping> allMappings,
+        InstanceCategory currentInstance,
+        AbstractDDLWrapper ddlWrapper,
+        AbstractDMLWrapper dmlWrapper,
+        AbstractICWrapper icWrapper
+    ) {
         this.mapping = mapping;
         this.allMappings = allMappings;
         this.currentInstance = currentInstance;
         this.ddlWrapper = ddlWrapper;
         this.dmlWrapper = dmlWrapper;
         this.icWrapper = icWrapper;
+
+        return this;
     }
 
     public record InstanceToDatabaseResult(
@@ -45,7 +55,19 @@ public class InstanceToDatabase {
         Collection<AbstractStatement> statements
     ) {}
     
-    public DataResult<InstanceToDatabaseResult> run() {
+    public InstanceToDatabaseResult run() {
+        try {
+            return innerRun();
+        }
+        catch (NamedException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new OtherException(e);
+        }
+    }
+
+    private InstanceToDatabaseResult innerRun() {
         Statistics.start(Interval.INSTANCE_TO_DATABASE);
 
         final InstanceCategory instance = currentInstance != null
@@ -77,7 +99,7 @@ public class InstanceToDatabase {
 
         Statistics.end(Interval.INSTANCE_TO_DATABASE);
 
-        return new DataResult<>(new InstanceToDatabaseResult(statementsAsString, statements));
+        return new InstanceToDatabaseResult(statementsAsString, statements);
     }
 
     private String statementsToString(AbstractStatement ddlStatement, AbstractStatement icStatement, List<AbstractStatement> dmlStatements) {

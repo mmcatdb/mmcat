@@ -17,7 +17,7 @@ public record JobDetail(
     @Nullable DataSource dataSource,
     String label,
     Job.Type type,
-    Job.Status status
+    Job.State state
 ) implements IEntity {
 
     public JobDetail(Job job, LogicalModelInfo logicalModel) {
@@ -28,7 +28,7 @@ public record JobDetail(
             null,
             job.label,
             job.type,
-            job.status
+            job.state
         );
     }
 
@@ -40,7 +40,7 @@ public record JobDetail(
             dataSource,
             job.label,
             job.type,
-            job.status
+            job.state
         );
     }
 

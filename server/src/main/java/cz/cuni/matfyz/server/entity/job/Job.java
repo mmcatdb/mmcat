@@ -33,17 +33,17 @@ public class Job extends Entity {
     public final Id dataSourceId;
     public String label;
     public Type type;
-    public Status status;
+    public State state;
 
     /*
     public Job(
         @JsonProperty("id") Integer id,
         @JsonProperty("logicalModelId") int logicalModelId,
-        @JsonProperty("status") Status status
+        @JsonProperty("state") JobState state
     ) {
         super(id);
         this.logicalModelId = logicalModelId;
-        this.status = status;
+        this.state = state;
     }
     */
 
@@ -54,12 +54,13 @@ public class Job extends Entity {
         this.dataSourceId = dataSourceId;
     }
 
-    public enum Status {
+    public enum State {
         Default, // The job isn't created yet.
         Ready, // The job can be started now.
         Running, // The job is currently being processed.
         Finished, // The job is finished, either with a success or with an error.
-        Canceled // The job was canceled while being in one of the previous states. It can never be started (again).
+        Canceled, // The job was canceled while being in one of the previous states. It can never be started (again).
+        Failed // The job failed.
     }
 
     public enum Type {
@@ -87,11 +88,11 @@ public class Job extends Entity {
                 .readValue(jsonValue);
         }
 
-        public Job fromArguments(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String label, Type type, Status status) {
+        public Job fromArguments(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String label, Type type, State state) {
             var job = new Job(id, categoryId, logicalModelId, dataSourceId);
             job.label = label;
             job.type = type;
-            job.status = status;
+            job.state = state;
 
             return job;
         }
@@ -100,7 +101,7 @@ public class Job extends Entity {
             final var job = new Job(null, init.categoryId(), init.logicalModelId(), init.dataSourceId());
             job.label = init.label();
             job.type = init.type();
-            job.status = Status.Ready;
+            job.state = State.Ready;
 
             return job;
         }
@@ -122,7 +123,7 @@ public class Job extends Entity {
             generator.writeStartObject();
             generator.writeStringField("label", job.label);
             generator.writeStringField("type", job.type.name());
-            generator.writeStringField("status", job.status.name());
+            generator.writeStringField("state", job.state.name());
             generator.writeEndObject();
         }
     
@@ -151,7 +152,7 @@ public class Job extends Entity {
 
             job.label = node.get("label").asText();
             job.type = Type.valueOf(node.get("type").asText());
-            job.status = Status.valueOf(node.get("status").asText());
+            job.state = State.valueOf(node.get("state").asText());
 
             return job;
         }

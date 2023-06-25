@@ -17,16 +17,9 @@ input[type=number] {
 /*
     Prevent scrollbar from affecting the width.
 */
-body {
-    overflow: overlay;
-    padding-right: 16px;
-}
-
-/*
-    The same for modals.
-*/
-div[role = dialog] {
-    overflow: overlay;
+.scrollbar-fix {
+    overflow: auto;
+    scrollbar-gutter: stable;
 }
 
 /*

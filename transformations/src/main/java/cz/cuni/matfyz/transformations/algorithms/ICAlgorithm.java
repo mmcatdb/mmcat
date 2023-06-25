@@ -11,7 +11,7 @@ import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.utils.ComparablePair;
-import cz.cuni.matfyz.transformations.exception.TransformationException;
+import cz.cuni.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.Collection;
 import java.util.Map;
@@ -83,7 +83,7 @@ public class ICAlgorithm {
             else
                 // These names are identifiers of given kind so they must be unique among all names.
                 // This quality can't be achieved by dynamic names so they aren't supported here.
-                throw new TransformationException("Collect names.");
+                throw InvalidStateException.nameIsNotStatic(subpath.name());
         }
         
         return new IdentifierStructure(output);
@@ -130,9 +130,10 @@ public class ICAlgorithm {
             return;
 
         final var referencesForKind = referencesForAllKinds.computeIfAbsent(lastMapping.kindName(), x -> new TreeSet<>());
-        referencesForKind.add(new ComparablePair<String,String>(referencingName.toString(), referencedName.toString()));
+        referencesForKind.add(new ComparablePair<>(referencingName.toString(), referencedName.toString()));
     }
-/*
+
+    /*
     private void processComplexSubpath(ComplexProperty property, Mapping lastMapping, Signature signatureFromLastMapping) {
         if (property.isAuxiliary()) {
             processAllSubpaths(property, lastMapping, signatureFromLastMapping);
@@ -151,16 +152,12 @@ public class ICAlgorithm {
         // We take the mapping as a new potential holder of the referenced properties and we start building new signature from it towards the simple properties in order to compare it with the primary keys of this mapping.
         processAllSubpaths(property, pathMapping, Signature.createEmpty());
     }
- */
+    */
+    
     private void processAllSubpaths(ComplexProperty complexProperty, Mapping lastMapping, Signature signatureFromLastMapping) {
         complexProperty.subpaths().forEach(subpath -> processPath(subpath, lastMapping, signatureFromLastMapping));
     }
 
-    /**
-     * @param path
-     * @param referenceProperties A set of signatures.
-     * @return
-     */
     /*
     private Map<Signature, String> collectSignatureNamePairs(ComplexProperty path, Set<Signature> referenceProperties) {
         var output = new TreeMap<Signature, String>();

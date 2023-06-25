@@ -7,10 +7,10 @@ import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
+import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -21,7 +21,10 @@ import org.slf4j.LoggerFactory;
  */
 public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     
+    @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLControlWrapper.class);
+
+    static final String TYPE = "postgresql";
 
     private ConnectionProvider connectionProvider;
 
@@ -30,7 +33,7 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     }
 
     @Override
-    public boolean execute(Collection<AbstractStatement> statements) {
+    public void execute(Collection<AbstractStatement> statements) {
         try (
             Connection connection = connectionProvider.getConnection();
         ) {
@@ -39,17 +42,12 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
                 try (
                     PreparedStatement preparedStatement = connection.prepareStatement(statement.getContent());
                 ) {
-                    final var result = preparedStatement.execute();
-                    if (!result)
-                        return false;
+                    preparedStatement.execute();
                 }
             }
-
-            return true;
         }
-        catch (SQLException exception) {
-            LOGGER.error("PostgeSQL exception: ", exception);
-            return false;
+        catch (Exception e) {
+            throw new ExecuteException(e);
         }
     }
 

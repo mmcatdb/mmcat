@@ -1,9 +1,11 @@
 package cz.cuni.matfyz.core.record;
 
+import java.io.Serializable;
+
 /**
  * @author jachym.bartik
  */
-public abstract class RecordName {
+public abstract class RecordName implements Serializable {
     
     protected final String value;
     

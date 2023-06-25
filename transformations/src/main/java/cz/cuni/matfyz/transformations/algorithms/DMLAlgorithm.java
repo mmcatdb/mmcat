@@ -11,9 +11,8 @@ import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.transformations.exception.TransformationException;
+import cz.cuni.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -143,16 +142,12 @@ public class DMLAlgorithm {
         String name = getStringName(objectPath, parentRow) + (showIndex ? "[" + index + "]" : "");
         String fullName = DDLAlgorithm.concatenatePaths(prefix, name);
 
-        if (objectPath instanceof SimpleProperty) {
-            String value = objectRow.getValue(Signature.createEmpty());
-
-            return new NameValuePair(fullName, value);
-        }
-        else if (objectPath instanceof ComplexProperty complexPath) {
+        if (objectPath instanceof ComplexProperty complexPath) {
             return new NameValuePair(fullName, objectRow, complexPath);
         }
 
-        throw new TransformationException("Get name value pair.");
+        String value = objectRow.getValue(Signature.createEmpty());
+        return new NameValuePair(fullName, value);
     }
 
     private String getStringName(AccessPath objectPath, DomainRow parentRow) {
@@ -167,7 +162,7 @@ public class DMLAlgorithm {
         if (nameRowSet != null && !nameRowSet.isEmpty())
             return nameRowSet.iterator().next().getValue(Signature.createEmpty());
 
-        throw new TransformationException("Dynamic name value not found.");
+        throw InvalidStateException.dynamicNameNotFound(dynamicName);
     }
 
     private class NameValuePair {

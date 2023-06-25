@@ -1,12 +1,22 @@
 package cz.cuni.matfyz.core.exception;
 
+import cz.cuni.matfyz.core.category.Signature;
+
 /**
  * @author jachymb.bartik
  */
 public class MorphismNotFoundException extends CoreException {
     
-    public MorphismNotFoundException(String errorMessage) {
-        super(errorMessage);
+    private MorphismNotFoundException(String name, Signature signature) {
+        super("morphismNotFound." + name, signature, null);
+    }
+
+    public static MorphismNotFoundException signatureIsDual(Signature signature) {
+        return new MorphismNotFoundException("signatureIsDual", signature);
+    }
+
+    public static MorphismNotFoundException baseNotFound(Signature signature) {
+        return new MorphismNotFoundException("baseNotFound", signature);
     }
 
 }

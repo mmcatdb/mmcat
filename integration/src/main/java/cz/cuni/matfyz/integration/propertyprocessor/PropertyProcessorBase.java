@@ -3,7 +3,7 @@ package cz.cuni.matfyz.integration.propertyprocessor;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.integration.exception.IntegrationException;
+import cz.cuni.matfyz.integration.exception.RDFNodeException;
 import cz.cuni.matfyz.integration.utils.MorphismFinder;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class PropertyProcessorBase {
                 return row;
         }
 
-        throw new IntegrationException("No type processor found for object: " + statementObject + ".");
+        throw RDFNodeException.unprocessable(statementObject.asNode());
     }
     
 }

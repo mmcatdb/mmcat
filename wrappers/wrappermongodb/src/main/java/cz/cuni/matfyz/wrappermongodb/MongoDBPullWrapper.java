@@ -2,6 +2,7 @@ package cz.cuni.matfyz.wrappermongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
@@ -47,7 +48,16 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws Exception {
+    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
+        try {
+            return innerPullForest(path, options);
+        }
+        catch (Exception e) {
+            throw new PullForestException(e);
+        }
+    }
+
+    private ForestOfRecords innerPullForest(ComplexProperty path, PullWrapperOptions options) {
         var forest = new ForestOfRecords();
         var iterator = getDocumentIterator(options);
         
@@ -61,7 +71,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         return forest;
     }
 
-    private void getDataFromDocument(ComplexRecord parentRecord, Document document, ComplexProperty path) throws Exception {
+    private void getDataFromDocument(ComplexRecord parentRecord, Document document, ComplexProperty path) {
         boolean hasSubpathWithDynamicName = false;
         
         for (AccessPath subpath : path.subpaths()) {
@@ -75,7 +85,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             getDataFromDynamicFieldsOfObject(parentRecord, document, path);
     }
     
-    private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, Document document, ComplexProperty path) throws Exception {
+    private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, Document document, ComplexProperty path) {
         // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name.
         AccessPath subpathWithDynamicName = null;
         Set<String> otherSubpathNames = new TreeSet<>();
@@ -94,7 +104,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
     
-    private void getFieldFromObjectForSubpath(ComplexRecord parentRecord, Document document, String key, AccessPath subpath) throws Exception {
+    private void getFieldFromObjectForSubpath(ComplexRecord parentRecord, Document document, String key, AccessPath subpath) {
         // TODO Check for the null values if necessary.
         /*
         if (document.isNull(key)) // Returns if the value is null or if the value doesn't exist.
@@ -109,7 +119,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             getFieldFromObjectForSimpleSubpath(parentRecord, key, value, simpleSubpath);
     }
 
-    private void getFieldFromObjectForComplexSubpath(ComplexRecord parentRecord, String key, Object value, ComplexProperty complexSubpath) throws Exception {
+    private void getFieldFromObjectForComplexSubpath(ComplexRecord parentRecord, String key, Object value, ComplexProperty complexSubpath) {
         if (value instanceof ArrayList<?> childArray) {
             for (int i = 0; i < childArray.size(); i++)
                 if (childArray.get(i) instanceof Document childDocument)
@@ -134,7 +144,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         }
     }
     
-    private void addComplexValueToRecord(ComplexRecord parentRecord, Document value, String key, ComplexProperty complexProperty) throws Exception {
+    private void addComplexValueToRecord(ComplexRecord parentRecord, Document value, String key, ComplexProperty complexProperty) {
         // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
         // We do so by passing the parent record instead of creating a new one.
         if (complexProperty.isAuxiliary())

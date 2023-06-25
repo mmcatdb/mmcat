@@ -87,11 +87,10 @@ public class EvolutionManagementTests {
                 // Load data to instance
                 Statistics.start(Interval.IMPORT_JOIN_MOVE);
 
-                var process = new DatabaseToInstance();
-                process.setLimit(batch * batchMultiplier);
-                process.input(mapping, null, pullWrapper);
-
-                var category = process.run().data;
+                var category = new DatabaseToInstance()
+                    .setLimit(batch * batchMultiplier)
+                    .input(mapping, null, pullWrapper)
+                    .run();
 
                 // JOIN
                 Statistics.start(Interval.JOIN);

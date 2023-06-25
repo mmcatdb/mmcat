@@ -52,11 +52,6 @@ public class SimpleProperty extends AccessPath {
         return builder.toString();
     }
     
-    @Override
-    public Signature signature() {
-        return signature;
-    }
-
     public static class Serializer extends StdSerializer<SimpleProperty> {
 
         public Serializer() {

@@ -2,6 +2,7 @@ package cz.cuni.matfyz.wrappermongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
+import cz.cuni.matfyz.core.exception.OtherException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +14,11 @@ import org.bson.BsonDocument;
 import org.bson.BsonString;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author jachymb.bartik
  */
 public class MongoDBDMLWrapper implements AbstractDMLWrapper {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBDMLWrapper.class);
 
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
@@ -48,8 +45,8 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
             content = String.format("db.%s.insert(%s);", kindName, constructor.toPrettyString());
         }
-        catch (Exception exception) {
-            LOGGER.error("Invalid MongoDB Statements resulted in a JSON error.", exception);
+        catch (Exception e) {
+            throw new OtherException(e);
         }
 
         final var command = new BsonDocument();
