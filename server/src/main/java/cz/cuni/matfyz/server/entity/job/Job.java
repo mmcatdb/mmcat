@@ -4,6 +4,7 @@ import cz.cuni.matfyz.server.entity.Entity;
 import cz.cuni.matfyz.server.entity.Id;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -34,6 +35,9 @@ public class Job extends Entity {
     public String label;
     public Type type;
     public State state;
+
+    @Nullable
+    public Serializable data;
 
     /*
     public Job(
@@ -88,15 +92,6 @@ public class Job extends Entity {
                 .readValue(jsonValue);
         }
 
-        public Job fromArguments(Id id, Id categoryId, Id logicalModelId, Id dataSourceId, String label, Type type, State state) {
-            var job = new Job(id, categoryId, logicalModelId, dataSourceId);
-            job.label = label;
-            job.type = type;
-            job.state = state;
-
-            return job;
-        }
-
         public Job fromInit(JobInit init) {
             final var job = new Job(null, init.categoryId(), init.logicalModelId(), init.dataSourceId());
             job.label = init.label();
@@ -124,6 +119,7 @@ public class Job extends Entity {
             generator.writeStringField("label", job.label);
             generator.writeStringField("type", job.type.name());
             generator.writeStringField("state", job.state.name());
+            generator.writeObjectField("data", job.data);
             generator.writeEndObject();
         }
     
@@ -138,6 +134,8 @@ public class Job extends Entity {
         public Deserializer(Class<?> vc) {
             super(vc);
         }
+
+        private static final ObjectReader dataReader = new ObjectMapper().readerFor(Serializable.class);
     
         @Override
         public Job deserialize(JsonParser parser, DeserializationContext context) throws IOException {
@@ -153,6 +151,9 @@ public class Job extends Entity {
             job.label = node.get("label").asText();
             job.type = Type.valueOf(node.get("type").asText());
             job.state = State.valueOf(node.get("state").asText());
+
+            if (node.hasNonNull("data"))
+                job.data = dataReader.readValue(node.get("data"));
 
             return job;
         }

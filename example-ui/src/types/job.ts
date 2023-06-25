@@ -32,6 +32,7 @@ export class Job implements Entity {
         public readonly label: string,
         public readonly type: JobType,
         public state: JobState,
+        public readonly data?: JobError,
     ) {}
 
     static fromServer(input: JobFromServer): Job {
@@ -43,6 +44,7 @@ export class Job implements Entity {
             input.label,
             input.type,
             input.state,
+            input.data ?? undefined,
         );
     }
 
@@ -59,6 +61,7 @@ export type JobFromServer = {
     label: string;
     type: JobType;
     state: JobState;
+    data: JobError | null;
 };
 
 export enum JobState {
@@ -76,4 +79,9 @@ export type JobInit = {
     dataSourceId?: Id;
     label: string;
     type: JobType;
+};
+
+type JobError = {
+    name: string;
+    data: unknown;
 };

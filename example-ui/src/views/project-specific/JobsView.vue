@@ -19,6 +19,19 @@ function deleteJob(id: Id) {
     jobs.value = jobs.value?.filter(job => job.id !== id) ?? [];
 }
 
+function updateJob(job: Job) {
+    if (!jobs.value)
+        return;
+
+    const index = jobs.value.findIndex(j => j.id === job.id);
+    if (index === -1)
+        return;
+
+    const newJobs = [ ...jobs.value ];
+    newJobs[index] = job;
+    jobs.value = newJobs;
+}
+
 const categoryId = useSchemaCategoryId();
 
 async function fetchJobs() {
@@ -49,12 +62,13 @@ async function fetchJobs() {
                 <JobDisplay
                     :job="job"
                     @delete-job="() => deleteJob(job.id)"
+                    @update-job="updateJob"
                 />
             </div>
         </div>
         <ResourceLoader
             :loading-function="fetchJobs"
-            :refresh-period="1000"
+            :refresh-period="1000000"
         />
     </div>
 </template>

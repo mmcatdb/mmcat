@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Job, JobState, JobType } from '@/types/job';
+import { Job, JobState, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { computed, ref } from 'vue';
 import CleverRouterLink from '@/components/CleverRouterLink.vue';
@@ -12,7 +12,10 @@ type JobDisplayProps = {
 
 const props = defineProps<JobDisplayProps>();
 
-const emit = defineEmits([ 'deleteJob' ]);
+const emit = defineEmits<{
+    (e: 'deleteJob'): void;
+    (e: 'updateJob', job: Job): void;
+}>();
 
 const fetching = ref(false);
 
@@ -36,7 +39,7 @@ async function startJob() {
 
     const result = await API.jobs.startJob({ id: props.job.id });
     if (result.status)
-        props.job.setState(result.data.state);
+        emit('updateJob', Job.fromServer(result.data));
 
     fetching.value = false;
 }
@@ -56,7 +59,7 @@ async function cancelJob() {
 
     const result = await API.jobs.cancelJob({ id: props.job.id });
     if (result.status)
-        props.job.setState(result.data.state);
+        emit('updateJob', Job.fromServer(result.data));
 
     fetching.value = false;
 }
@@ -66,7 +69,7 @@ async function restartJob() {
 
     const result = await API.jobs.startJob({ id: props.job.id });
     if (result.status)
-        props.job.setState(result.data.state);
+        emit('updateJob', Job.fromServer(result.data));
 
     fetching.value = false;
 }
@@ -105,6 +108,15 @@ async function restartJob() {
                     {{ job.state }}
                 </span>
             </ValueRow>
+            <ValueRow
+                v-if="job.state === JobState.Failed && job.data"
+                label="Error:"
+            >
+                {{ job.data.name }}
+            </ValueRow>
+            <ValueRow v-else>
+                &nbsp;
+            </ValueRow>
         </ValueContainer>
         <div class="button-row">
             <button
@@ -124,7 +136,7 @@ async function restartJob() {
                 Delete
             </button>
             <button
-                v-if="job.state === JobState.Finished || job.state === JobState.Canceled"
+                v-if="job.state === JobState.Failed || job.state === JobState.Canceled"
                 :disabled="fetching"
                 class="info"
                 @click="restartJob"

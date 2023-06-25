@@ -42,6 +42,15 @@ public abstract class NamedException extends RuntimeException {
         return name + " (" + dataString + ")";
     }
 
+    public record SerializedException(
+        String name,
+        Serializable data
+    ) implements Serializable {}
+
+    public SerializedException toSerializedException() {
+        return new SerializedException(name, data);
+    }
+
     public static class Serializer extends StdSerializer<NamedException> {
 
         public Serializer() {
@@ -54,12 +63,8 @@ public abstract class NamedException extends RuntimeException {
 
         @Override
         public void serialize(NamedException exception, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-            generator.writeStringField("type", exception.name);
-            if (exception.data != null) {
-                generator.writeObjectField("data", exception.data);
-            }
-            generator.writeEndObject();
+            final var serializedException = exception.toSerializedException();
+            generator.writeObject(serializedException);
         }
 
     }

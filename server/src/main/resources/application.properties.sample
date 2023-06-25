@@ -6,6 +6,10 @@ server.port=3201
 # Spring security (i.e., "server-side-cors") - 3200 is the default port of the example-ui server.
 server.origin=http://localhost:3200
 
+# If true, the statements of all created models will be automatically executed.
+# Default: true
+# server.executeModels=true
+
 # Credentials fot the main database (PostgreSQL):
 postgresql.host=mm-postgresql
 postgresql.port=5432

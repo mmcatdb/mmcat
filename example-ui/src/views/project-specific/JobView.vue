@@ -22,11 +22,9 @@ async function fetchJob() {
 
 const router = useRouter();
 
-function deleteJob(): void {
+function deleteJob() {
     router.push({ name: 'jobs' });
 }
-
-
 </script>
 
 <template>
@@ -38,6 +36,7 @@ function deleteJob(): void {
         <JobDisplay
             :job="job"
             @delete-job="deleteJob"
+            @update-job="newJob => job = newJob"
         />
     </div>
     <ResourceLoader :loading-function="fetchJob" />

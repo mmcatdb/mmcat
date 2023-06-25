@@ -5,6 +5,8 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.datasource.DataSource;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModelInfo;
 
+import java.io.Serializable;
+
 import org.springframework.lang.Nullable;
 
 /**
@@ -17,7 +19,8 @@ public record JobDetail(
     @Nullable DataSource dataSource,
     String label,
     Job.Type type,
-    Job.State state
+    Job.State state,
+    @Nullable Serializable data
 ) implements IEntity {
 
     public JobDetail(Job job, LogicalModelInfo logicalModel) {
@@ -28,7 +31,8 @@ public record JobDetail(
             null,
             job.label,
             job.type,
-            job.state
+            job.state,
+            job.data
         );
     }
 
@@ -40,7 +44,8 @@ public record JobDetail(
             dataSource,
             job.label,
             job.type,
-            job.state
+            job.state,
+            job.data
         );
     }
 

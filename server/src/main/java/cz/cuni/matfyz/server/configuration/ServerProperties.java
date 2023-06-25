@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("server")
 public class ServerProperties {
 
-    public String port() {
+    public Integer port() {
         return port;
     }
 
@@ -18,15 +18,24 @@ public class ServerProperties {
         return origin;
     }
 
-    private String port;
-    private String origin;
+    public boolean executeModels() {
+        return executeModels;
+    }
 
-    public void setPort(String port) {
+    private Integer port;
+    private String origin;
+    private boolean executeModels = true;
+
+    public void setPort(Integer port) {
         this.port = port;
     }
 
     public void setOrigin(String origin) {
         this.origin = origin;
+    }
+
+    public void setExecuteModels(boolean executeModels) {
+        this.executeModels = executeModels;
     }
 
 }

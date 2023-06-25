@@ -53,7 +53,7 @@ services:
             - 7687
         ports:
             # Make the DB available on localhost for development.
-            - ${NEO4J_PORT}:7687
+            - ${MM_NEO4J_PORT}:7687
 
 networks:
     default:

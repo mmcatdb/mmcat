@@ -2,6 +2,8 @@ package cz.cuni.matfyz.server.service;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.core.exception.NamedException;
+import cz.cuni.matfyz.core.exception.OtherException;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
@@ -9,6 +11,7 @@ import cz.cuni.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.cuni.matfyz.integration.processes.JsonLdToInstance;
 import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
+import cz.cuni.matfyz.server.configuration.ServerProperties;
 import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.datasource.DataSource;
@@ -21,6 +24,7 @@ import cz.cuni.matfyz.server.utils.UserStore;
 import cz.cuni.matfyz.transformations.processes.DatabaseToInstance;
 import cz.cuni.matfyz.transformations.processes.InstanceToDatabase;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -73,6 +77,9 @@ public class AsyncJobService {
     @Autowired
     private ModelService modelService;
 
+    @Autowired
+    private ServerProperties server;
+
     public void runJob(Job job, UserStore store) {
         jobQueue.add(new RunJobData(job, store));
         
@@ -101,19 +108,22 @@ public class AsyncJobService {
         
         try {
             processJobByType(job, store);
-            setJobState(job, Job.State.Finished);
+            LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
+            setJobState(job, Job.State.Finished, null);
         }
-        catch (Exception exception) {
-            LOGGER.error(String.format("Job { id: %s, name: '%s' } interrupted.", job.id, job.label), exception);
-            setJobState(job, Job.State.Failed);
+        catch (Exception e) {
+            final NamedException finalException = e instanceof NamedException namedException ? namedException : new OtherException(e);
+            
+            LOGGER.error(String.format("Job { id: %s, name: '%s' } failed.", job.id, job.label), finalException);
+            setJobState(job, Job.State.Failed, finalException.toSerializedException());
         }
 
-        LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
         tryStartNextJob(true);
     }
 
-    private void setJobState(Job job, Job.State state) {
+    private void setJobState(Job job, Job.State state, Serializable data) {
         job.state = state;
+        job.data = data;
         repository.updateJsonValue(job);
     }
 
@@ -180,7 +190,11 @@ public class AsyncJobService {
             output.append(result.statementsAsString() + "\n");
 
             // TODO - find a better way how to execute the changes (currently its too likely to fail)
-            //control.execute(result.statements());
+            if (server.executeModels()) {
+                LOGGER.info("Start executing models ...");
+                control.execute(result.statements());
+                LOGGER.info("... models executed.");
+            }
         }
         
         modelService.createNew(store, job, job.label, output.toString());
