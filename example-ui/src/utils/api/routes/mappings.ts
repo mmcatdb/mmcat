@@ -1,17 +1,17 @@
-import type { Empty, StringLike } from "@/types/api/routes";
-import { GET, POST } from "../routeFunctions";
-import type { MappingFromServer, MappingInfoFromServer, MappingInit } from "@/types/mapping";
+import type { Empty, StringLike } from '@/types/api/routes';
+import { GET, POST } from '../routeFunctions';
+import type { MappingFromServer, MappingInfoFromServer, MappingInit } from '@/types/mapping';
 
 const mappings = {
     getMapping: GET<{ id: StringLike }, MappingFromServer>(
-        u => `/mappings/${u.id}`
+        u => `/mappings/${u.id}`,
     ),
     getAllMappingsInLogicalModel: GET<{ logicalModelId: StringLike }, MappingFromServer[]>(
-        u => `/logical-models/${u.logicalModelId}/mappings`
+        u => `/logical-models/${u.logicalModelId}/mappings`,
     ),
     createNewMapping: POST<Empty, MappingInfoFromServer, MappingInit>(
-        () => `/mappings`
-    )
+        () => `/mappings`,
+    ),
 };
 
 export default mappings;

@@ -1,6 +1,6 @@
-import { Signature } from "../identifiers";
-import type { DirectedEdge, Edge } from "./Edge";
-import { AvailabilityStatus, type Node } from "./Node";
+import { Signature } from '../identifiers';
+import type { DirectedEdge, Edge } from './Edge';
+import { AvailabilityStatus, type Node } from './Node';
 
 type Config = {
     selectNodes: boolean;

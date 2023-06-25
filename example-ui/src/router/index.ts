@@ -8,24 +8,24 @@ const router = createRouter({
         {
             path: '/',
             component: () => import('@/views/ProjectIndependentView.vue'),
-            children: projectIndependentRoutes
+            children: projectIndependentRoutes,
         },
         {
             path: '/:categoryId',
             component: () => import('@/views/ProjectSpecificView.vue'),
             props: route => ({ categoryId: route.params.categoryId }),
-            children: projectSpecificRoutes
+            children: projectSpecificRoutes,
         },
         {
             path: '/404',
             name: 'notFound',
-            component: () => import('@/views/PageNotFoundView.vue')
+            component: () => import('@/views/PageNotFoundView.vue'),
         },
         {
             path: '/:catchAll(.*)',
-            redirect: { name: 'notFound' }
-        }
-    ]
+            redirect: { name: 'notFound' },
+        },
+    ],
 });
 
 export default router;

@@ -1,5 +1,5 @@
-import { Key, Signature, SignatureId, type KeyFromServer, type SignatureFromServer, type SignatureIdFromServer } from "../identifiers";
-import { DomainRow, type DomainRowFromServer } from "./InstanceObject";
+import { Key, Signature, SignatureId, type KeyFromServer, type SignatureFromServer, type SignatureIdFromServer } from '../identifiers';
+import { DomainRow, type DomainRowFromServer } from './InstanceObject';
 
 export class InstanceMorphism {
     private constructor(
@@ -8,7 +8,7 @@ export class InstanceMorphism {
         readonly codKey: Key,
         readonly domSuperId: SignatureId,
         readonly codSuperId: SignatureId,
-        readonly mappings: MappingRow[]
+        readonly mappings: MappingRow[],
     ) {}
 
     static fromServer(input: InstanceMorphismFromServer): InstanceMorphism {
@@ -18,7 +18,7 @@ export class InstanceMorphism {
             Key.fromServer(input.codKey),
             SignatureId.fromServer(input.domSuperId),
             SignatureId.fromServer(input.codSuperId),
-            input.mappings.map(MappingRow.fromServer)
+            input.mappings.map(MappingRow.fromServer),
         );
     }
 
@@ -43,7 +43,7 @@ export type InstanceMorphismFromServer = {
 export class MappingRow {
     private constructor(
         readonly domRow: DomainRow,
-        readonly codRow: DomainRow
+        readonly codRow: DomainRow,
     ) {}
 
     static fromServer(input: MappingRowFromServer) {

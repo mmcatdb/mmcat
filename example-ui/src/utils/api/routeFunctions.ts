@@ -1,5 +1,5 @@
-import type { PullRoute, PushData, PushRoute, QueryParams, Url, UrlParams } from "@/types/api/routes";
-import rawAPI from "./rawAPI";
+import type { PullRoute, PushData, PushRoute, QueryParams, Url, UrlParams } from '@/types/api/routes';
+import rawAPI from './rawAPI';
 
 /*
 export function GET<U extends UrlParams, T>(url: Url<U>): PullRoute<U, T> {

@@ -1,5 +1,5 @@
-import { Version, type VersionFromServer } from "../evocat/Version";
-import { fromServer, type SMO, type SMOFromServer } from "./operations";
+import { Version, type VersionFromServer } from '../evocat/Version';
+import { fromServer, type SMO, type SMOFromServer } from './operations';
 
 export type VersionedSMOFromServer = {
     version: VersionFromServer;

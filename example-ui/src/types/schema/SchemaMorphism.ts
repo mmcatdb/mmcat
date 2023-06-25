@@ -1,8 +1,8 @@
-import type { Iri } from "@/types/integration/";
-import { Key, Signature, type KeyFromServer, type SignatureFromServer } from "../identifiers";
-import type { SchemaObject } from "./SchemaObject";
-import type { Optional } from "@/utils/common";
-import type { Graph } from "../categoryGraph";
+import type { Iri } from '@/types/integration/';
+import { Key, Signature, type KeyFromServer, type SignatureFromServer } from '../identifiers';
+import type { SchemaObject } from './SchemaObject';
+import type { Optional } from '@/utils/common';
+import type { Graph } from '../categoryGraph';
 
 export type SchemaMorphismFromServer = {
     signature: SignatureFromServer;

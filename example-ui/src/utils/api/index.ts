@@ -1,11 +1,11 @@
-import databases from "./routes/databases";
-import dataSources from "./routes/dataSource";
-import instances from "./routes/instances";
-import jobs from "./routes/jobs";
-import logicalModels from "./routes/logicalModels";
-import mappings from "./routes/mappings";
-import models from "./routes/models";
-import schemas from "./routes/schemas";
+import databases from './routes/databases';
+import dataSources from './routes/dataSource';
+import instances from './routes/instances';
+import jobs from './routes/jobs';
+import logicalModels from './routes/logicalModels';
+import mappings from './routes/mappings';
+import models from './routes/models';
+import schemas from './routes/schemas';
 
 const API = {
     databases,
@@ -15,7 +15,7 @@ const API = {
     logicalModels,
     models,
     schemas,
-    instances
+    instances,
 };
 
 export default API;

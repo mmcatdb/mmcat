@@ -1,9 +1,9 @@
-import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from "cytoscape";
-import type { LogicalModel } from "../logicalModel";
-import type { SchemaMorphism, SchemaObject } from "../schema";
-import { Edge } from "./Edge";
-import { Node, type Group } from "./Node";
-import type { Key, Signature } from "../identifiers";
+import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from 'cytoscape';
+import type { LogicalModel } from '../logicalModel';
+import type { SchemaMorphism, SchemaObject } from '../schema';
+import { Edge } from './Edge';
+import { Node, type Group } from './Node';
+import type { Key, Signature } from '../identifiers';
 
 export type TemporaryEdge = {
     delete: () => void;

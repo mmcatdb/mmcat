@@ -1,8 +1,8 @@
-import type { Node } from "@/types/categoryGraph";
-import type { Name } from "@/types/identifiers";
-import type { SimplePropertyFromServer } from "../serverTypes";
-import type { GraphParentProperty } from "./compositeTypes";
-import type { SequenceSignature } from "./SequenceSignature";
+import type { Node } from '@/types/categoryGraph';
+import type { Name } from '@/types/identifiers';
+import type { SimplePropertyFromServer } from '../serverTypes';
+import type { GraphParentProperty } from './compositeTypes';
+import type { SequenceSignature } from './SequenceSignature';
 
 export class GraphSimpleProperty {
     name: Name;
@@ -38,7 +38,7 @@ export class GraphSimpleProperty {
     toServer(): SimplePropertyFromServer {
         return {
             name: this.name.toServer(),
-            signature: this._signature.toSignature().toServer()
+            signature: this._signature.toSignature().toServer(),
         };
     }
 }

@@ -2,7 +2,7 @@ import { type Attribute, type DataTypeDefinition, type ImportedDataspecer, type 
 import { Cardinality } from '@/types/schema';
 import { createValueId, createMorphismId, CUSTOM_IRI_PREFIX } from './common';
 
-const OFN_TYPE_PREFIX = "https://ofn.gov.cz/zdroj/základní-datové-typy/2020-07-01/";
+const OFN_TYPE_PREFIX = 'https://ofn.gov.cz/zdroj/základní-datové-typy/2020-07-01/';
 
 const DEFAULT_DATA_TYPE = DataType.string;
 

@@ -1,10 +1,10 @@
-import type { Id } from "./id";
+import type { Id } from './id';
 
 export class Model {
     private constructor(
         public readonly jobId: Id,
         public readonly jobLabel: string,
-        public readonly commands: string
+        public readonly commands: string,
     ) {}
 
     static fromServer(input: ModelFromServer): Model {

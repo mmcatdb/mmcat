@@ -1,6 +1,6 @@
-import type { SchemaCategory } from "../SchemaCategory";
-import { SchemaObject, type SchemaObjectFromServer } from "../SchemaObject";
-import { type SMO, type SMOFromServer, SMOType } from "./schemaModificationOperation";
+import type { SchemaCategory } from '../SchemaCategory';
+import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
+import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
 
 export type DeleteObjectFromServer = SMOFromServer<SMOType.DeleteObject> & {
     //key: KeyFromServer; // TODO change on backend

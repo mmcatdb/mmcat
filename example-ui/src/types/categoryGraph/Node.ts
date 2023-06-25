@@ -1,10 +1,10 @@
-import { ComparableMap } from "@/utils/ComparableMap";
-import type { Core, ElementDefinition, NodeSingular } from "cytoscape";
-import type { Signature } from "../identifiers";
-import type { SchemaObject } from "../schema";
-import { DirectedEdge, type Edge } from "./Edge";
-import { PathMarker, type MorphismData, type Filter } from "./PathMarker";
-import type { LogicalModelInfo } from "../logicalModel";
+import { ComparableMap } from '@/utils/ComparableMap';
+import type { Core, ElementDefinition, NodeSingular } from 'cytoscape';
+import type { Signature } from '../identifiers';
+import type { SchemaObject } from '../schema';
+import { DirectedEdge, type Edge } from './Edge';
+import { PathMarker, type MorphismData, type Filter } from './PathMarker';
+import type { LogicalModelInfo } from '../logicalModel';
 
 export type Group = {
     id: number;

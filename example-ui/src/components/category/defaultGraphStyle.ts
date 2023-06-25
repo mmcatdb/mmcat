@@ -5,54 +5,54 @@ export const style: cytoscape.Stylesheet[] = [
             'background-color': 'white',
             'border-color': 'black',
             'border-width': '1px',
-            label: 'data(label)'
-        }
+            label: 'data(label)',
+        },
     },
     {
         selector: '.tag-root',
         style: {
             'background-color': 'red',
-        }
+        },
     },
     {
         selector: '.availability-available',
         style: {
             'border-color': 'greenyellow',
             'border-width': '4px',
-        }
+        },
     },
     {
         selector: '.availability-certainly-available',
         style: {
             'border-color': 'darkgreen',
             'border-width': '4px',
-        }
+        },
     },
     {
         selector: '.availability-ambiguous',
         style: {
             'border-color': 'orange',
             'border-width': '4px',
-        }
+        },
     },
     {
         selector: '.availability-removable',
         style: {
             'border-color': 'red',
             'border-width': '4px',
-        }
+        },
     },
     {
         selector: '.selection-root',
         style: {
             'background-color': 'purple',
-        }
+        },
     },
     {
         selector: '.selection-selected',
         style: {
             'background-color': 'blue',
-        }
+        },
     },
     {
         selector: 'edge[label]',
@@ -61,53 +61,53 @@ export const style: cytoscape.Stylesheet[] = [
             label: 'data(label)',
             'curve-style': 'bezier',
             'target-arrow-shape': 'triangle-backcurve',
-            'arrow-scale': 2
-        }
+            'arrow-scale': 2,
+        },
     },
     {
         selector: 'edge.temporary',
         style: {
             'line-style': 'dashed',
-            'line-color': 'blue'
-        }
+            'line-color': 'blue',
+        },
     },
     {
         selector: 'edge.isa',
         style: {
-            'line-color': 'green'
-        }
+            'line-color': 'green',
+        },
     },
     {
         selector: 'edge.role',
         style: {
-            'line-color': 'orange'
-        }
+            'line-color': 'orange',
+        },
     },
     {
         selector: 'node.new',
         style: {
-            'border-style': 'dashed'
-        }
+            'border-style': 'dashed',
+        },
     },
     {
         selector: 'edge.new',
         style: {
             'line-style': 'dashed',
-        }
+        },
     },
     {
         selector: 'node.no-ids[label]',
         style: {
-            'color': 'red'
-        }
+            'color': 'red',
+        },
     },
     {
         selector: '.group-placeholder',
         style: {
             events: 'no',
             opacity: 0,
-            label: ''
-        }
+            label: '',
+        },
     },
     {
         selector: '.group',
@@ -116,8 +116,8 @@ export const style: cytoscape.Stylesheet[] = [
             events: 'no',
             'shape': 'round-rectangle',
             'border-style': 'dashed',
-            'background-opacity': 0.01
-        }
+            'background-opacity': 0.01,
+        },
     },
     {
         selector: '.group-1',
@@ -125,8 +125,8 @@ export const style: cytoscape.Stylesheet[] = [
             'background-color': 'green',
             'color': 'green',
             'border-color': 'green',
-            'padding-right': '8px'
-        }
+            'padding-right': '8px',
+        },
     },
     {
         selector: '.group-2',
@@ -134,8 +134,8 @@ export const style: cytoscape.Stylesheet[] = [
             'background-color': 'red',
             'color': 'red',
             'border-color': 'red',
-            'padding-right': '12px'
-        }
+            'padding-right': '12px',
+        },
     },
     {
         selector: '.group-3',
@@ -143,8 +143,8 @@ export const style: cytoscape.Stylesheet[] = [
             'background-color': 'blue',
             'color': 'blue',
             'border-color': 'blue',
-            'padding-right': '16px'
-        }
+            'padding-right': '16px',
+        },
     },
     {
         selector: '.group-4',
@@ -152,8 +152,8 @@ export const style: cytoscape.Stylesheet[] = [
             'background-color': 'orange',
             'color': 'orange',
             'border-color': 'orange',
-            'padding-right': '20px'
-        }
+            'padding-right': '20px',
+        },
     },
     {
         selector: '.no-group',
@@ -164,7 +164,7 @@ export const style: cytoscape.Stylesheet[] = [
             'background-color': 'red',
             width: '60px',
             height: '60px',
-            'z-compound-depth': 'bottom'
-        }
-    }
+            'z-compound-depth': 'bottom',
+        },
+    },
 ];

@@ -1,6 +1,6 @@
-import type { Min, Tag } from "@/types/schema";
-import type { Type } from "../identifiers";
-import type { Iri } from "./parser";
+import type { Min, Tag } from '@/types/schema';
+import type { Type } from '../identifiers';
+import type { Iri } from './parser';
 
 export type MorphismSequence = ImportedMorphism[];
 export type ImportedSignatureId = {

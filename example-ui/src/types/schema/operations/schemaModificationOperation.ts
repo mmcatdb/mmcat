@@ -1,4 +1,4 @@
-import type { SchemaCategory } from "../SchemaCategory";
+import type { SchemaCategory } from '../SchemaCategory';
 
 export enum SMOType {
     CreateObject = 'createObject',

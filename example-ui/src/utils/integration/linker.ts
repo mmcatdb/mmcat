@@ -1,8 +1,8 @@
-import { ImportedMorphism, ImportedObject, type ImportedDataspecer, type Iri } from "@/types/integration";
-import type { ParsedDataspecer } from "@/types/integration";
-import { Cardinality, Tag, type Min, type Max } from "@/types/schema";
-import { createAttribute } from "./dataTypes";
-import { createValueId, createGeneratedId, CUSTOM_IRI_PREFIX } from "./common";
+import { ImportedMorphism, ImportedObject, type ImportedDataspecer, type Iri } from '@/types/integration';
+import type { ParsedDataspecer } from '@/types/integration';
+import { Cardinality, Tag, type Min, type Max } from '@/types/schema';
+import { createAttribute } from './dataTypes';
+import { createValueId, createGeneratedId, CUSTOM_IRI_PREFIX } from './common';
 
 const CLASS_TO_ISA_IRI: Iri = CUSTOM_IRI_PREFIX + 'class-to-isa';
 

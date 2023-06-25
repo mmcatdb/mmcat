@@ -1,7 +1,7 @@
-import { RootProperty } from "@/types/accessPath/basic";
-import type { RootPropertyFromServer } from "./accessPath/serverTypes";
-import type { Entity, Id, VersionId } from "./id";
-import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from "./identifiers";
+import { RootProperty } from '@/types/accessPath/basic';
+import type { RootPropertyFromServer } from './accessPath/serverTypes';
+import type { Entity, Id, VersionId } from './id';
+import { Key, SignatureId, type KeyFromServer, type SignatureIdFromServer } from './identifiers';
 
 export type MappingFromServer = {
     id: Id;

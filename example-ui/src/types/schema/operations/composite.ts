@@ -1,4 +1,4 @@
-import { type SMO, type SMOFromServer, SMOType } from "./schemaModificationOperation";
+import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
 
 export type CompositeFromServer = SMOFromServer<SMOType.Composite> & {
     name: string;

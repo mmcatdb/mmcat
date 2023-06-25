@@ -1,5 +1,5 @@
-import type { KeyValue } from "./ComparableMap";
-import { injectionIterator } from "./ComparableSet";
+import type { KeyValue } from './ComparableMap';
+import { injectionIterator } from './ComparableSet';
 
 type Injection<Input, Output> = (input: Input) => Output;
 

@@ -1,5 +1,5 @@
-import { Type } from "@/types/identifiers";
-import type { ImportedMorphism, ImportedId } from "@/types/integration";
+import { Type } from '@/types/identifiers';
+import type { ImportedMorphism, ImportedId } from '@/types/integration';
 
 export function createValueId(): ImportedId {
     return { type: Type.Value };

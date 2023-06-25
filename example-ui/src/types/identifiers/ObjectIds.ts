@@ -1,4 +1,4 @@
-import { SignatureId, SignatureIdFactory, type SignatureIdFromServer } from "./SignatureId";
+import { SignatureId, SignatureIdFactory, type SignatureIdFromServer } from './SignatureId';
 
 export enum Type {
     Signatures = 'Signatures',

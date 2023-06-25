@@ -1,8 +1,8 @@
-import type { DatabaseConfiguration } from "../database";
-import type { Signature } from "../identifiers";
-import { Cardinality, type Max, type Min } from "../schema";
-import type { Edge } from "./Edge";
-import { type Node, AvailabilityStatus, Neighbour } from "./Node";
+import type { DatabaseConfiguration } from '../database';
+import type { Signature } from '../identifiers';
+import { Cardinality, type Max, type Min } from '../schema';
+import type { Edge } from './Edge';
+import { type Node, AvailabilityStatus, Neighbour } from './Node';
 
 export type MorphismData = {
     signature: Signature;

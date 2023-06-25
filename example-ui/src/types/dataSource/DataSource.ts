@@ -1,4 +1,4 @@
-import type { Entity, Id } from "../id";
+import type { Entity, Id } from '../id';
 
 export enum Type {
     JsonLdStore = 'JsonLdStore'
@@ -7,8 +7,8 @@ export enum Type {
 export const DATA_SOURCE_TYPES: { type: Type, label: string }[] = [
     {
         type: Type.JsonLdStore,
-        label: 'JSON-LD store'
-    }
+        label: 'JSON-LD store',
+    },
 ];
 
 export class DataSource implements Entity {
@@ -16,7 +16,7 @@ export class DataSource implements Entity {
         public readonly id: Id,
         public readonly url: string,
         public readonly label: string,
-        public readonly type: Type
+        public readonly type: Type,
     ) {}
 
     static fromServer(input: DataSourceFromServer): DataSource {
@@ -24,7 +24,7 @@ export class DataSource implements Entity {
             input.id,
             input.url,
             input.label,
-            input.type
+            input.type,
         );
     }
 }

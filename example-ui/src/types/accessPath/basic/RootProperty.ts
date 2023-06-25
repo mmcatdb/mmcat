@@ -1,7 +1,7 @@
-import { IntendedStringBuilder } from "@/utils/string";
-import { Signature, StaticName } from "@/types/identifiers";
-import { subpathFromFromServer, type ChildProperty } from "./compositeTypes";
-import type { RootPropertyFromServer } from "../serverTypes";
+import { IntendedStringBuilder } from '@/utils/string';
+import { Signature, StaticName } from '@/types/identifiers';
+import { subpathFromFromServer, type ChildProperty } from './compositeTypes';
+import type { RootPropertyFromServer } from '../serverTypes';
 
 export class RootProperty {
     name: StaticName;
@@ -52,7 +52,7 @@ export class RootProperty {
             name: this.name.toServer(),
             signature: this._signature.toServer(),
             isAuxiliary: true,
-            subpaths: this._subpaths.map(subpath => subpath.toServer())
+            subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }
 }

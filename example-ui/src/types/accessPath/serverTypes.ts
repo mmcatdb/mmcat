@@ -1,4 +1,4 @@
-import type { NameFromServer, SignatureFromServer, StaticNameFromServer } from "../identifiers";
+import type { NameFromServer, SignatureFromServer, StaticNameFromServer } from '../identifiers';
 
 export type SimplePropertyFromServer = {
     name: NameFromServer;

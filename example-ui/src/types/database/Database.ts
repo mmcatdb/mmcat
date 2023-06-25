@@ -1,6 +1,6 @@
-import type { Entity, Id } from "../id";
-import type { DeepPartial } from "../utils";
-import { DatabaseConfiguration, type DatabaseConfigurationFromServer } from "./Configuration";
+import type { Entity, Id } from '../id';
+import type { DeepPartial } from '../utils';
+import { DatabaseConfiguration, type DatabaseConfigurationFromServer } from './Configuration';
 
 export class DatabaseInfo implements Entity {
     private constructor(
@@ -13,7 +13,7 @@ export class DatabaseInfo implements Entity {
         return new DatabaseInfo(
             input.id,
             input.type,
-            input.label
+            input.label,
         );
     }
 }
@@ -29,7 +29,7 @@ export class DatabaseWithConfiguration implements Entity {
         public readonly id: Id,
         public readonly type: Type,
         public readonly label: string,
-        public readonly configuration: DatabaseConfiguration
+        public readonly configuration: DatabaseConfiguration,
     ) {}
 
     static fromServer(input: DatabaseWithConfigurationFromServer): DatabaseWithConfiguration {
@@ -37,7 +37,7 @@ export class DatabaseWithConfiguration implements Entity {
             input.id,
             input.type,
             input.label,
-            new DatabaseConfiguration(input.configuration)
+            new DatabaseConfiguration(input.configuration),
         );
     }
 }
@@ -78,16 +78,16 @@ export enum Type {
 export const DB_TYPES: { type: Type, label: string }[] = [
     {
         type: Type.mongodb,
-        label: 'MongoDB'
+        label: 'MongoDB',
     },
     {
         type: Type.postgresql,
-        label: 'PostgreSQL'
+        label: 'PostgreSQL',
     },
     {
         type: Type.neo4j,
-        label: 'Neo4j'
-    }
+        label: 'Neo4j',
+    },
 ];
 
 export function copyDatabaseUpdate(database: DatabaseUpdate | Database): DatabaseUpdate {
@@ -122,7 +122,7 @@ export function createInitFromUpdate(update: DatabaseUpdate): DatabaseInit | nul
             database: update.settings.database,
             authenticationDatabase: update.settings.authenticationDatabase ?? undefined,
             username: update.settings.username,
-            password: update.settings.password
-        }
+            password: update.settings.password,
+        },
     };
 }

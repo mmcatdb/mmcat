@@ -1,4 +1,4 @@
-import { Signature, type SignatureFromServer } from "./Signature";
+import { Signature, type SignatureFromServer } from './Signature';
 
 export type NameFromServer = StaticNameFromServer | DynamicNameFromServer;
 

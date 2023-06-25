@@ -1,11 +1,17 @@
-import { NodeSequence, type Node, Graph } from "@/types/categoryGraph";
-import type { SchemaObject, SchemaMorphism } from "@/types/schema";
-import type { ImportedMorphism, ImportedDataspecer, ImportedObject, MorphismSequence, ImportedSignatureId } from "@/types/integration";
-import { ObjectIds, Signature, SignatureId, Type } from "@/types/identifiers";
-import type { Evocat } from "@/types/evocat/Evocat";
+import { NodeSequence, type Node, Graph } from '@/types/categoryGraph';
+import type { SchemaObject, SchemaMorphism } from '@/types/schema';
+import type { ImportedMorphism, ImportedDataspecer, ImportedObject, MorphismSequence, ImportedSignatureId } from '@/types/integration';
+import { ObjectIds, Signature, SignatureId, Type } from '@/types/identifiers';
+import type { Evocat } from '@/types/evocat/Evocat';
+
+export function addImportedToGraph(imported: ImportedDataspecer, evocat: Evocat, graph: Graph) {
+    evocat.compositeOperation('integration', () => {
+        innerAddImportedToGraph(imported, evocat, graph);
+    });
+}
 
 // TODO remove the graph dependency
-export function addImportedToGraph(imported: ImportedDataspecer, evocat: Evocat, graph: Graph) {
+function innerAddImportedToGraph(imported: ImportedDataspecer, evocat: Evocat, graph: Graph) {
     const iriToObjectMapping = new Map<string, SchemaObject>();
     const createdObjects: Map<ImportedObject, SchemaObject> = new Map();
     const createdMorphisms: Map<ImportedMorphism, SchemaMorphism> = new Map();

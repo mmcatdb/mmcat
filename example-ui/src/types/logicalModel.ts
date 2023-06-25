@@ -1,6 +1,6 @@
-import { DatabaseWithConfiguration, type DatabaseWithConfigurationFromServer } from "./database";
-import type { Id, Entity } from "./id";
-import { Mapping, type MappingFromServer } from "./mapping";
+import { DatabaseWithConfiguration, type DatabaseWithConfigurationFromServer } from './database';
+import type { Id, Entity } from './id';
+import { Mapping, type MappingFromServer } from './mapping';
 
 export type LogicalModelInit = {
     databaseId: Id;
@@ -11,13 +11,13 @@ export type LogicalModelInit = {
 export class LogicalModelInfo implements Entity {
     private constructor(
         public readonly id: Id,
-        public readonly label: string
+        public readonly label: string,
     ) {}
 
     static fromServer(input: LogicalModelInfoFromServer): LogicalModelInfo {
         return new LogicalModelInfo(
             input.id,
-            input.label
+            input.label,
         );
     }
 }
@@ -33,7 +33,7 @@ export class LogicalModel implements Entity {
         public readonly label: string,
         public readonly categoryId: Id,
         public readonly database: DatabaseWithConfiguration,
-        public readonly mappings: Mapping[]
+        public readonly mappings: Mapping[],
     ) {}
 
     static fromServer(input: LogicalModelFromServer): LogicalModel {
@@ -43,7 +43,7 @@ export class LogicalModel implements Entity {
             input.label,
             input.categoryId,
             DatabaseWithConfiguration.fromServer(input.database),
-            input.mappings.map(Mapping.fromServer)
+            input.mappings.map(Mapping.fromServer),
         );
     }
 }

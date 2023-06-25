@@ -1,7 +1,7 @@
 
-import type { PullResult } from "@/types/api/routes";
-import qs from "qs";
-import { createAxiosInstance, promiseToResponse } from "./common";
+import type { PullResult } from '@/types/api/routes';
+import qs from 'qs';
+import { createAxiosInstance, promiseToResponse } from './common';
 
 const DATASPECER_API_URL = import.meta.env.VITE_DATASPECER_API_URL;
 
@@ -12,7 +12,7 @@ function GET<T>(url: string, params = {}): PullResult<T> {
         params,
         paramsSerializer: function (params) {
             return qs.stringify(params, { arrayFormat: 'repeat' });
-        }
+        },
     }));
 }
 
@@ -41,7 +41,7 @@ async function getStoreForIri(iri: string): PullResult<unknown> {
 }
 
 const dataspecerAPI = {
-    getStoreForIri
+    getStoreForIri,
 };
 
 export default dataspecerAPI;

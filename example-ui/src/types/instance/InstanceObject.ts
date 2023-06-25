@@ -1,5 +1,5 @@
-import { ComparableMap } from "@/utils/ComparableMap";
-import { Key, Signature, SignatureId, type KeyFromServer, type SignatureFromServer, type SignatureIdFromServer } from "../identifiers";
+import { ComparableMap } from '@/utils/ComparableMap';
+import { Key, Signature, SignatureId, type KeyFromServer, type SignatureFromServer, type SignatureIdFromServer } from '../identifiers';
 
 export class InstanceObject {
     private constructor(

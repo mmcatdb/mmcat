@@ -1,5 +1,5 @@
-import type { Entity, Id, VersionId } from "../id";
-import { VersionedSMO, type VersionedSMOFromServer } from "./VersionedSMO";
+import type { Entity, Id, VersionId } from '../id';
+import { VersionedSMO, type VersionedSMOFromServer } from './VersionedSMO';
 
 export type SchemaUpdateFromServer = {
     id: Id;

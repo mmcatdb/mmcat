@@ -1,6 +1,6 @@
-import { Node, NodeSequence } from "@/types/categoryGraph";
-import type { Filter } from "@/types/categoryGraph/PathMarker";
-import type { Signature } from "@/types/identifiers";
+import { Node, NodeSequence } from '@/types/categoryGraph';
+import type { Filter } from '@/types/categoryGraph/PathMarker';
+import type { Signature } from '@/types/identifiers';
 
 export class SequenceSignature {
     readonly sequence: NodeSequence;

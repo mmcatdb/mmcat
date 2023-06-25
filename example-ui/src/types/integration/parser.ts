@@ -1,5 +1,5 @@
-import type { Max, Min } from "@/types/schema";
-import type { DataType } from "./dataTypes";
+import type { Max, Min } from '@/types/schema';
+import type { DataType } from './dataTypes';
 
 export type Iri = string;
 

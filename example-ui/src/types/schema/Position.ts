@@ -1,5 +1,5 @@
-import type { Position } from "cytoscape";
-import type { Id } from "../id";
+import type { Position } from 'cytoscape';
+import type { Id } from '../id';
 
 export class ComparablePosition implements Position {
     private constructor(

@@ -1,7 +1,7 @@
-import { IntendedStringBuilder } from "@/utils/string";
-import { nameFromServer, Signature, type Name } from "@/types/identifiers";
-import type { ParentProperty } from "./compositeTypes";
-import type { SimplePropertyFromServer } from "../serverTypes";
+import { IntendedStringBuilder } from '@/utils/string';
+import { nameFromServer, Signature, type Name } from '@/types/identifiers';
+import type { ParentProperty } from './compositeTypes';
+import type { SimplePropertyFromServer } from '../serverTypes';
 
 export class SimpleProperty {
     name: Name;
@@ -35,14 +35,14 @@ export class SimpleProperty {
         return new SimpleProperty(
             nameFromServer(input.name),
             Signature.fromServer(input.signature),
-            parent
+            parent,
         );
     }
 
     toServer(): SimplePropertyFromServer {
         return {
             name: this.name.toServer(),
-            signature: this._signature.toServer()
+            signature: this._signature.toServer(),
         };
     }
 }

@@ -1,8 +1,8 @@
-import type { Name } from "@/types/identifiers";
-import type { GraphChildProperty, GraphParentProperty } from "./compositeTypes";
-import type { Node } from "@/types/categoryGraph";
-import type { SequenceSignature } from "./SequenceSignature";
-import type { ComplexPropertyFromServer } from "../serverTypes";
+import type { Name } from '@/types/identifiers';
+import type { GraphChildProperty, GraphParentProperty } from './compositeTypes';
+import type { Node } from '@/types/categoryGraph';
+import type { SequenceSignature } from './SequenceSignature';
+import type { ComplexPropertyFromServer } from '../serverTypes';
 
 export class GraphComplexProperty {
     name: Name;
@@ -67,7 +67,7 @@ export class GraphComplexProperty {
             name: this.name.toServer(),
             signature: this._signature.toSignature().toServer(),
             isAuxiliary: this._isAuxiliary,
-            subpaths: this._subpaths.map(subpath => subpath.toServer())
+            subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }
 }

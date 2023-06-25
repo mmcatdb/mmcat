@@ -1,7 +1,7 @@
-import type { ChildPropertyFromServer } from "../serverTypes";
-import { ComplexProperty } from "./ComplexProperty";
-import type { RootProperty } from "./RootProperty";
-import { SimpleProperty } from "./SimpleProperty";
+import type { ChildPropertyFromServer } from '../serverTypes';
+import { ComplexProperty } from './ComplexProperty';
+import type { RootProperty } from './RootProperty';
+import { SimpleProperty } from './SimpleProperty';
 
 export type ParentProperty = RootProperty | ComplexProperty;
 

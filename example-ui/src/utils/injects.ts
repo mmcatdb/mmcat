@@ -1,8 +1,8 @@
-import type { Graph } from "@/types/categoryGraph";
-import type { Evocat } from "@/types/evocat/Evocat";
-import type { Id } from "@/types/id";
-import type { SchemaCategoryInfo } from "@/types/schema";
-import { inject, type InjectionKey, type Ref, type ShallowRef } from "vue";
+import type { Graph } from '@/types/categoryGraph';
+import type { Evocat } from '@/types/evocat/Evocat';
+import type { Id } from '@/types/id';
+import type { SchemaCategoryInfo } from '@/types/schema';
+import { inject, type InjectionKey, type Ref, type ShallowRef } from 'vue';
 
 export const categoryIdKey: InjectionKey<Ref<Id>> = Symbol('categoryId');
 

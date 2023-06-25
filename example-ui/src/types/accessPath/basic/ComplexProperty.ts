@@ -1,7 +1,7 @@
-import { DynamicName, nameFromServer, Signature, StaticName, type Name } from "@/types/identifiers";
-import { IntendedStringBuilder } from "@/utils/string";
-import type { ComplexPropertyFromServer } from "../serverTypes";
-import { subpathFromFromServer, type ChildProperty, type ParentProperty } from "./compositeTypes";
+import { DynamicName, nameFromServer, Signature, StaticName, type Name } from '@/types/identifiers';
+import { IntendedStringBuilder } from '@/utils/string';
+import type { ComplexPropertyFromServer } from '../serverTypes';
+import { subpathFromFromServer, type ChildProperty, type ParentProperty } from './compositeTypes';
 
 export class ComplexProperty {
     name: Name;
@@ -56,7 +56,7 @@ export class ComplexProperty {
             nameFromServer(input.name),
             Signature.fromServer(input.signature),
             input.isAuxiliary,
-            parent
+            parent,
         );
 
         property._subpaths = input.subpaths.map(subpath => subpathFromFromServer(subpath, property));
@@ -69,7 +69,7 @@ export class ComplexProperty {
             name: this.name.toServer(),
             signature: this._signature.toServer(),
             isAuxiliary: this._isAuxiliary,
-            subpaths: this._subpaths.map(subpath => subpath.toServer())
+            subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }
 }

@@ -1,8 +1,8 @@
-import type { Node } from "@/types/categoryGraph";
-import type { StaticName } from "@/types/identifiers";
-import type { RootPropertyFromServer } from "../serverTypes";
-import type { GraphChildProperty } from "./compositeTypes";
-import { SequenceSignature } from "./SequenceSignature";
+import type { Node } from '@/types/categoryGraph';
+import type { StaticName } from '@/types/identifiers';
+import type { RootPropertyFromServer } from '../serverTypes';
+import type { GraphChildProperty } from './compositeTypes';
+import { SequenceSignature } from './SequenceSignature';
 
 export class GraphRootProperty {
     name: StaticName;
@@ -54,7 +54,7 @@ export class GraphRootProperty {
             name: this.name.toServer(),
             signature: this._signature.toSignature().toServer(),
             isAuxiliary: true,
-            subpaths: this._subpaths.map(subpath => subpath.toServer())
+            subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }
 }

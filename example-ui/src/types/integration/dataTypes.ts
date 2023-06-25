@@ -1,5 +1,5 @@
-import type { ImportedDataspecer, ImportedObject } from "./linker";
-import type { Attribute } from "./parser";
+import type { ImportedDataspecer, ImportedObject } from './linker';
+import type { Attribute } from './parser';
 
 export enum DataType {
     string = 'string',
