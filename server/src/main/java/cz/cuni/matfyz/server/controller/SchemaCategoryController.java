@@ -6,8 +6,8 @@ import cz.cuni.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.cuni.matfyz.server.service.SchemaCategoryService;
-import cz.cuni.matfyz.server.utils.Position;
 
 import java.util.List;
 
@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -83,30 +84,10 @@ public class SchemaCategoryController {
         return updates;
     }
 
-    /*
-    @PutMapping("/schema-categories/{id}/positions")
-    public boolean updateCategoryPositions(@PathVariable Id id, @RequestBody PositionUpdate[] positionUpdates) {
-        boolean result = true;
-        for (PositionUpdate update : positionUpdates)
-            result = result && objectService.updatePosition(id, update.schemaObjectId, update.position);
-        
-        if (result)
-            return true;
-
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    @PutMapping("/schema-categories/{id}/metadata")
+    public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataUpdate> metadataUpdates) {
+        if (!service.updateMetadata(id, metadataUpdates))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
-    */
 
-    static record PositionUpdate(
-        //int schemaObjectId,
-        Id schemaObjectId,
-        Position position
-    ) {}
-
-    /*
-    @GetMapping("/schema-categories/{id}/mapping-options")
-    public MappingOptionsView getMappingOptions(@PathVariable Id id) {
-        return new MappingOptionsView(id, databaseService.findAll());
-    }
-    */
 }

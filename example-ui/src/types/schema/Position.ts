@@ -1,10 +1,9 @@
 import type { Position } from 'cytoscape';
-import type { Id } from '../id';
 
 export class ComparablePosition implements Position {
     private constructor(
-        public x: number,
-        public y: number,
+        readonly x: number,
+        readonly y: number,
     ) {}
 
     static fromPosition(input: Position) {
@@ -23,8 +22,3 @@ export class ComparablePosition implements Position {
         return !!object && this.x === object.x && this.y === object.y;
     }
 }
-
-export type PositionUpdate = {
-    schemaObjectId: Id;
-    position: Position;
-};

@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.server.entity.evolution;
 
+import cz.cuni.matfyz.core.schema.Key;
 import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper;
@@ -27,35 +28,38 @@ interface SchemaModificationOperation {
 }
 
 record CreateObject(
-    SchemaObjectWrapper object
+    Key key,
+    SchemaObjectWrapper.Data object
 ) implements SchemaModificationOperation {
 
     @Override
     public cz.cuni.matfyz.evolution.schema.CreateObject toEvolution(SchemaCategoryContext context) {
-        return new cz.cuni.matfyz.evolution.schema.CreateObject(object.toSchemaObject(context));
+        return new cz.cuni.matfyz.evolution.schema.CreateObject(object.toSchemaObject(key, context));
     }
 
 }
 
 record DeleteObject(
-    SchemaObjectWrapper object
+    Key key,
+    SchemaObjectWrapper.Data object
 ) implements SchemaModificationOperation {
 
     @Override
     public cz.cuni.matfyz.evolution.schema.DeleteObject toEvolution(SchemaCategoryContext context) {
-        return new cz.cuni.matfyz.evolution.schema.DeleteObject(object.toSchemaObject(context));
+        return new cz.cuni.matfyz.evolution.schema.DeleteObject(key);
     }
 
 }
 
 record EditObject(
-    SchemaObjectWrapper newObject,
-    SchemaObjectWrapper oldObject
+    Key key,
+    SchemaObjectWrapper.Data newObject,
+    SchemaObjectWrapper.Data oldObject
 ) implements SchemaModificationOperation {
 
     @Override
     public cz.cuni.matfyz.evolution.schema.EditObject toEvolution(SchemaCategoryContext context) {
-        return new cz.cuni.matfyz.evolution.schema.EditObject(newObject.toSchemaObject(context));
+        return new cz.cuni.matfyz.evolution.schema.EditObject(newObject.toSchemaObject(key, context));
     }
 
 }

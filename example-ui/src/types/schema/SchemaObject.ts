@@ -9,38 +9,36 @@ import { SchemaCategoryInvalidError } from './Error';
 import type { Optional } from '@/utils/common';
 import type { Graph } from '../categoryGraph';
 
-export type SchemaObjectFromServer = {
-    key: KeyFromServer;
+export type SchemaObjectDataFromServer = {
     label: string;
-    position: Position;
     ids?: ObjectIdsFromServer;
     superId: SignatureIdFromServer;
-    //databases?: string[];
     iri?: Iri;
     pimIri?: Iri;
 };
 
-export class SchemaObject {
-    private readonly originalPosition?: ComparablePosition;
+export type SchemaObjectMetadataFromServer = {
+    position: Position;
+};
 
+export class SchemaObject {
     private constructor(
         readonly key: Key,
         readonly label: string,
-        public position: ComparablePosition,
+        // readonly position: ComparablePosition,
         readonly ids: ObjectIds | undefined,
         readonly superId: SignatureId,
         readonly iri: Iri | undefined,
         readonly pimIri: Iri | undefined,
         private _isNew: boolean,
-    ) {
-        this.originalPosition = _isNew ? undefined : position.copy();
-    }
+    ) {}
 
-    static fromServer(input: SchemaObjectFromServer): SchemaObject {
+    // static fromServer(key: Key, input: SchemaObjectDataFromServer): SchemaObject {
+    static fromServer(key: KeyFromServer, input: SchemaObjectDataFromServer): SchemaObject {
         const object = new SchemaObject(
-            Key.fromServer(input.key),
+            Key.fromServer(key),
             input.label,
-            ComparablePosition.fromPosition(input.position),
+            // ComparablePosition.fromPosition(input.position),
             input.ids ? ObjectIds.fromServer(input.ids) : undefined,
             SignatureId.fromServer(input.superId),
             input.iri,
@@ -59,7 +57,7 @@ export class SchemaObject {
         const object = new SchemaObject(
             key,
             def.label,
-            def.position?.copy() ?? ComparablePosition.createDefault(),
+            // def.position?.copy() ?? ComparablePosition.createDefault(),
             def.ids,
             def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
             iri,
@@ -74,7 +72,7 @@ export class SchemaObject {
         return {
             label: this.label,
             ids: this.ids,
-            position: this.position,
+            // position: this.position,
             iri: this.iri,
             pimIri: this.pimIri,
         };
@@ -95,10 +93,10 @@ export class SchemaObject {
         return this.ids;
     }
 
-    toServer(): SchemaObjectFromServer {
+    toServer(): SchemaObjectDataFromServer {
         return {
-            key: this.key.toServer(),
-            position: this.position,
+            // key: this.key.toServer(),
+            // position: this.position,
             label: this.label,
             ids: this.ids?.toServer(),
             superId: this.superId.toServer(),
@@ -115,21 +113,41 @@ export class SchemaObject {
 export type ObjectDefinition = {
     label: string;
     ids?: ObjectIds;
-    position?: ComparablePosition;
+    // position?: ComparablePosition;
 } & Optional<{
     iri: Iri;
     pimIri: Iri;
 }>;
 
+export type SchemaObjectFromServer = {
+    key: KeyFromServer;
+    data: SchemaObjectDataFromServer;
+    metadata: SchemaObjectMetadataFromServer;
+};
+
+// TODO rename for consistency
+
 export class VersionedSchemaObject {
     private constructor(
         readonly key: Key,
+        private _position: ComparablePosition,
         private _graph?: Graph,
     ) {}
+
+    static fromServer(input: SchemaObjectFromServer): VersionedSchemaObject {
+        const output = new VersionedSchemaObject(
+            Key.fromServer(input.key),
+            ComparablePosition.fromPosition(input.metadata.position),
+        );
+        output.current = SchemaObject.fromServer(input.key, input.data);
+
+        return output;
+    }
 
     static create(key: Key, graph: Graph | undefined): VersionedSchemaObject {
         return new VersionedSchemaObject(
             key,
+            ComparablePosition.createDefault(),
             graph,
         );
     }
@@ -154,11 +172,17 @@ export class VersionedSchemaObject {
             this.updateGraph(this._graph);
     }
 
+    get position(): ComparablePosition {
+        const currentPosition = this._graph?.getNodeByKey(this.key)?.cytoscapeIdAndPosition.position;
+        // The fallback option this._position represents the original position the object has if it isn't in any graph.
+        return currentPosition ? ComparablePosition.fromPosition(currentPosition) : this._position;
+    }
+
     private updateGraph(graph: Graph) {
         const currentNode = graph.getNodeByKey(this.key);
         if (!currentNode) {
             if (this._current)
-                graph.createNode(this._current, [ ...this.logicalModels.values() ]);
+                graph.createNode(this._current, this._position, [ ...this.logicalModels.values() ]);
 
             return;
         }

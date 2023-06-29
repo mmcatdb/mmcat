@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class DatabaseWrapper {
+
+    @SuppressWarnings({ "java:s1068", "unused" })
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
 
     @Autowired
     private DatabaseProperties databaseProperties;
@@ -100,9 +105,11 @@ public class DatabaseWrapper {
             return function.execute(connection);
         }
         catch (SQLException e) {
+            LOGGER.error("resolveDatabaseFunction", e);
             throw RepositoryException.executeSql(e);
         }
         catch (JsonProcessingException e) {
+            LOGGER.error("resolveDatabaseFunction", e);
             throw RepositoryException.processJson(e);
         }
     }

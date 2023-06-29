@@ -39,6 +39,8 @@ function save() {
 
 function cancel() {
     emit('cancel');
+    console.log(props.node.cytoscapeIdAndPosition);
+    console.log(props.node.schemaObject);
 }
 
 function deleteFunction() {

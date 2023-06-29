@@ -16,7 +16,7 @@ import cz.cuni.matfyz.core.schema.SchemaObject;
 public class TestDataUtils {
 
     public static SchemaObject addSchemaObject(SchemaCategory schema, Key key, String name, ObjectIds ids) {
-        var object = new SchemaObject(key, name, ids.generateDefaultSuperId(), ids);
+        var object = new SchemaObject(key, name, ids.generateDefaultSuperId(), ids, null, null);
         schema.addObject(object);
 
         return object;

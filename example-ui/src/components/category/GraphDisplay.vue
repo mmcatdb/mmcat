@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef } from 'vue';
+import { onMounted, shallowRef } from 'vue';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import layoutUtilities from 'cytoscape-layout-utilities';
@@ -9,11 +9,13 @@ import { style } from './defaultGraphStyle';
 cytoscape.use(fcose);
 cytoscape.use(layoutUtilities);
 
-const emit = defineEmits([ 'graphCreated' ]);
+const emit = defineEmits([ 'graphCreated', 'updatePositions' ]);
 
 const graph = shallowRef<Graph>();
 
-const saveButtonDisabled = ref(false);
+withDefaults(defineProps<{ fetching?: boolean }>(), {
+    fetching: false,
+});
 
 onMounted(() => {
     const newGraph = createGraph();
@@ -56,39 +58,6 @@ function createGraph(): Graph {
 
     return new Graph(cytoscapeInstance);
 }
-
-async function savePositionChanges() {
-    /*
-    if (!graph.value)
-        return;
-
-    saveButtonDisabled.value = true;
-    console.log('Saving position changes');
-
-    const updatedPositions = graph.value.schemaCategory.objects
-        .map(object => object.toPositionUpdate())
-        .filter((update): update is PositionUpdate => update !== null);
-
-    const result = await API.schemas.updateCategoryPositions({ id: graph.value.schemaCategory.id }, updatedPositions);
-    console.log(result);
-
-    saveButtonDisabled.value = false;
-    */
-}
-
-/*
-function updateSchema(schemaCategory: SchemaCategory) {
-    schemaFetched.value = false;
-    graph.value = undefined;
-
-    nextTick(() => {
-        graph.value = createGraph(schemaCategory, logicalModels.value);
-        schemaFetched.value = true;
-        emit('graphCreated', graph.value);
-    });
-}
-*/
-
 </script>
 
 <template>
@@ -99,8 +68,8 @@ function updateSchema(schemaCategory: SchemaCategory) {
         <template v-if="graph">
             <div class="category-command-panel button-panel">
                 <button
-                    :disabled="saveButtonDisabled"
-                    @click="savePositionChanges"
+                    :disabled="fetching"
+                    @click="() => emit('updatePositions')"
                 >
                     Save positions
                 </button>

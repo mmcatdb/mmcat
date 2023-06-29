@@ -1,4 +1,6 @@
+import type { Position } from 'cytoscape';
 import type { Entity, Id, VersionId } from '../id';
+import type { KeyFromServer } from '../identifiers';
 import { VersionedSMO, type VersionedSMOFromServer } from './VersionedSMO';
 
 export type SchemaUpdateFromServer = {
@@ -29,7 +31,13 @@ export class SchemaUpdate implements Entity {
     }
 }
 
+export type MetadataUpdate = {
+    key: KeyFromServer;
+    position: Position;
+};
+
 export type SchemaUpdateInit = {
     readonly prevVersion: VersionId;
     readonly operations: VersionedSMOFromServer[];
+    readonly metadata: MetadataUpdate[];
 };

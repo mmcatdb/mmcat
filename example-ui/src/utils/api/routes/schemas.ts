@@ -1,7 +1,7 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST, PUT } from '../routeFunctions';
-import type { PositionUpdate, SchemaCategoryFromServer, SchemaCategoryInfoFromServer, SchemaCategoryInit } from '@/types/schema';
-import type { SchemaUpdateFromServer, SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
+import type { SchemaCategoryFromServer, SchemaCategoryInfoFromServer, SchemaCategoryInit } from '@/types/schema';
+import type { MetadataUpdate, SchemaUpdateFromServer, SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
 
 const schemas = {
     getAllCategoryInfos: GET<Empty, SchemaCategoryInfoFromServer[]>(
@@ -22,8 +22,8 @@ const schemas = {
     getCategoryUpdates: GET<{ id: StringLike }, SchemaUpdateFromServer[]>(
         u => `/schema-categories/${u.id}/updates`,
     ),
-    updateCategoryPositions: PUT<{ id: StringLike }, boolean, PositionUpdate[]>(
-        u => `/schema-categories/${u.id}/positions`,
+    updateCategoryMetadata: PUT<{ id: StringLike }, boolean, MetadataUpdate[]>(
+        u => `/schema-categories/${u.id}/metadata`,
     ),
 };
 

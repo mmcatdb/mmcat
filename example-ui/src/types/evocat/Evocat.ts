@@ -4,13 +4,15 @@ import type { LogicalModel } from '../logicalModel';
 import type { Result } from '../api/result';
 import { Version, VersionContext, computeLatestVersions } from './Version';
 import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, EditMorphism, EditObject } from '../schema/operations';
-import type { SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
+import type { MetadataUpdate, SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
 import { VersionedSMO } from '../schema/VersionedSMO';
 
 type UpdateFunction = (udpate: SchemaUpdateInit, logicalModels: LogicalModel[]) => Promise<Result<SchemaCategory>>;
+type UpdateMetadataFunction = (metadata: MetadataUpdate[]) => Promise<void>;
 
 export type EvocatApi = {
     update: UpdateFunction;
+    updateMetadata: UpdateMetadataFunction;
 };
 
 export class Evocat {
@@ -40,6 +42,11 @@ export class Evocat {
 
     async update() {
         const updateObject = this.getUpdateObject();
+        if (updateObject.operations.length === 0) {
+            // If there are no SMOs to create, we just update the metadata.
+            await this.api.updateMetadata(updateObject.metadata);
+            return;
+        }
 
         const result = await this.api.update(updateObject, this.logicalModels);
         if (!result.status)
@@ -48,6 +55,10 @@ export class Evocat {
         const beforeCategory = this.schemaCategory;
         this.schemaCategory = result.data;
         this.schemaCategory.graph = beforeCategory.graph;
+    }
+
+    async updateMetadata() {
+        await this.api.updateMetadata(this.getMetadataUpdates());
     }
 
     get graph(): Graph | undefined {
@@ -88,7 +99,15 @@ export class Evocat {
         return {
             prevVersion: this.schemaCategory.versionId,
             operations: operationsToServer,
+            metadata: this.getMetadataUpdates(),
         };
+    }
+
+    private getMetadataUpdates(): MetadataUpdate[] {
+        return this.schemaCategory.getObjects().map(object => ({
+            key: object.key.toServer(),
+            position: object.position,
+        }));
     }
 
     undo(skipLowerLevels = true) {

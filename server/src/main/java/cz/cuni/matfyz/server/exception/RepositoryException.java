@@ -6,7 +6,7 @@ package cz.cuni.matfyz.server.exception;
 public class RepositoryException extends ServerException {
 
     private RepositoryException(String name, Throwable cause) {
-        super("serverDatabase." + name, null, cause);
+        super("repository." + name, null, cause);
     }
 
     public static RepositoryException createConnection(Throwable cause) {

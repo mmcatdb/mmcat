@@ -1,6 +1,6 @@
 import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from 'cytoscape';
 import type { LogicalModel } from '../logicalModel';
-import type { SchemaMorphism, SchemaObject } from '../schema';
+import type { ComparablePosition, SchemaMorphism, SchemaObject } from '../schema';
 import { Edge } from './Edge';
 import { Node, type Group } from './Node';
 import type { Key, Signature } from '../identifiers';
@@ -67,9 +67,9 @@ export class Graph {
         return newGroup;
     }
 
-    createNode(object: SchemaObject, logicalModels: LogicalModel[]): Node {
+    createNode(object: SchemaObject, position: ComparablePosition, logicalModels: LogicalModel[]): Node {
         const groups = logicalModels.map(logicalModel => this.getGroupOrAddIt(logicalModel));
-        const node = Node.create(this.cytoscape, object, groups);
+        const node = Node.create(this.cytoscape, object, position, groups);
         this.nodes.push(node);
 
         return node;
@@ -136,7 +136,7 @@ export class Graph {
             //name: 'cola',
             name: 'fcose',
             animate: false,
-            fixedNodeConstraint: this.nodes.slice(0, this.fixedNodes).map(node => node.cytoscapeIdPosition),
+            fixedNodeConstraint: this.nodes.slice(0, this.fixedNodes).map(node => node.cytoscapeIdAndPosition),
             //randomize: false,
             //quality: 'proof',
             nodeDimensionsIncludeLabels: true,

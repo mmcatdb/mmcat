@@ -15,11 +15,6 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
     private final String label;
     private final SignatureId superId; // Should be a union of all ids (super key).
     private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
-
-    public SchemaObject(Key key, String label, SignatureId superId, ObjectIds ids) {
-        this(key, label, superId, ids, "", "");
-    }
-
     public final String iri;
     public final String pimIri;
 

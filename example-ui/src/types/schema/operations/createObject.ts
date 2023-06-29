@@ -1,29 +1,31 @@
+import { Key, type KeyFromServer } from '@/types/identifiers';
 import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
+import { SchemaObject, type SchemaObjectDataFromServer } from '../SchemaObject';
 import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
 
 export type CreateObjectFromServer = SMOFromServer<SMOType.CreateObject> & {
-    object: SchemaObjectFromServer;
+    key: KeyFromServer;
+    object: SchemaObjectDataFromServer;
 };
 
 export class CreateObject implements SMO<SMOType.CreateObject> {
     readonly type = SMOType.CreateObject;
-    private readonly serialized: SchemaObjectFromServer;
 
     private constructor(
-        readonly object: SchemaObject,
-    ) {
-        this.serialized = object.toServer();
-    }
+        private readonly key: Key,
+        private readonly object: SchemaObject,
+    ) {}
 
     static fromServer(input: CreateObjectFromServer): CreateObject {
         return new CreateObject(
-            SchemaObject.fromServer(input.object),
+            Key.fromServer(input.key),
+            SchemaObject.fromServer(input.key, input.object),
         );
     }
 
     static create(object: SchemaObject): CreateObject {
         return new CreateObject(
+            object.key,
             object,
         );
     }
@@ -31,7 +33,8 @@ export class CreateObject implements SMO<SMOType.CreateObject> {
     toServer(): CreateObjectFromServer {
         return {
             type: SMOType.CreateObject,
-            object: this.serialized,
+            key: this.key.toServer(),
+            object: this.object.toServer(),
         };
     }
 

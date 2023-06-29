@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.entity.evolution;
 
 import cz.cuni.matfyz.evolution.Version;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 
 import java.util.List;
 
@@ -9,5 +10,6 @@ import java.util.List;
  */
 public record SchemaUpdateInit(
     Version prevVersion,
-    List<VersionedSMO> operations
+    List<VersionedSMO> operations,
+    List<MetadataUpdate> metadata
 ) {}

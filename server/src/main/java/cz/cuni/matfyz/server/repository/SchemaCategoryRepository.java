@@ -128,6 +128,22 @@ public class SchemaCategoryRepository {
         });
     }
 
+    public boolean updateMetadata(SchemaCategoryWrapper wrapper) {
+        return db.get((connection, output) -> {
+            var statement = connection.prepareStatement("""
+                UPDATE schema_category
+                SET json_value = ?::jsonb
+                WHERE id = ?;
+                """
+            );
+            statement.setString(1, wrapper.toJsonValue());
+            setId(statement, 2, wrapper.id);
+
+            int affectedRows = statement.executeUpdate();
+            output.set(affectedRows != 0);
+        });
+    }
+
     public List<SchemaUpdate> findAllUpdates(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""

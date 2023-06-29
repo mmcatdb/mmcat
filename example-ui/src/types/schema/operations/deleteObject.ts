@@ -1,30 +1,31 @@
+import { Key, type KeyFromServer } from '@/types/identifiers';
 import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
+import { SchemaObject, type SchemaObjectDataFromServer } from '../SchemaObject';
 import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
 
 export type DeleteObjectFromServer = SMOFromServer<SMOType.DeleteObject> & {
-    //key: KeyFromServer; // TODO change on backend
-    object: SchemaObjectFromServer;
+    key: KeyFromServer;
+    object: SchemaObjectDataFromServer;
 };
 
 export class DeleteObject implements SMO<SMOType.DeleteObject> {
     readonly type = SMOType.DeleteObject;
-    private readonly serialized: SchemaObjectFromServer;
 
     private constructor(
-        readonly object: SchemaObject,
-    ) {
-        this.serialized = object.toServer();
-    }
+        private readonly key: Key,
+        private readonly object: SchemaObject,
+    ) {}
 
     static fromServer(input: DeleteObjectFromServer): DeleteObject {
         return new DeleteObject(
-            SchemaObject.fromServer(input.object),
+            Key.fromServer(input.key),
+            SchemaObject.fromServer(input.key, input.object),
         );
     }
 
     static create(object: SchemaObject): DeleteObject {
         return new DeleteObject(
+            object.key,
             object,
         );
     }
@@ -32,7 +33,8 @@ export class DeleteObject implements SMO<SMOType.DeleteObject> {
     toServer(): DeleteObjectFromServer {
         return {
             type: SMOType.DeleteObject,
-            object: this.serialized,
+            key: this.key.toServer(),
+            object: this.object.toServer(),
         };
     }
 

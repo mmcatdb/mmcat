@@ -1,24 +1,28 @@
+import { Key, type KeyFromServer } from '@/types/identifiers';
 import type { SchemaCategory } from '../SchemaCategory';
-import { SchemaObject, type SchemaObjectFromServer } from '../SchemaObject';
+import { SchemaObject, type SchemaObjectDataFromServer } from '../SchemaObject';
 import { type SMO, type SMOFromServer, SMOType } from './schemaModificationOperation';
 
 export type EditObjectFromServer = SMOFromServer<SMOType.EditObject> & {
-    newObject: SchemaObjectFromServer;
-    oldObject: SchemaObjectFromServer;
+    key: KeyFromServer;
+    newObject: SchemaObjectDataFromServer;
+    oldObject: SchemaObjectDataFromServer;
 };
 
 export class EditObject implements SMO<SMOType.EditObject> {
     readonly type = SMOType.EditObject;
 
     private constructor(
+        private readonly key: Key,
         readonly newObject: SchemaObject,
         readonly oldObject: SchemaObject,
     ) {}
 
     static fromServer(input: EditObjectFromServer): EditObject {
         return new EditObject(
-            SchemaObject.fromServer(input.newObject),
-            SchemaObject.fromServer(input.oldObject),
+            Key.fromServer(input.key),
+            SchemaObject.fromServer(input.key, input.newObject),
+            SchemaObject.fromServer(input.key, input.oldObject),
         );
     }
 
@@ -27,6 +31,7 @@ export class EditObject implements SMO<SMOType.EditObject> {
             throw new Error('Cannot edit object\'s key.');
 
         return new EditObject(
+            newObject.key,
             newObject,
             oldObject,
         );
@@ -35,6 +40,7 @@ export class EditObject implements SMO<SMOType.EditObject> {
     toServer(): EditObjectFromServer {
         return {
             type: SMOType.EditObject,
+            key: this.key.toServer(),
             newObject: this.newObject.toServer(),
             oldObject: this.oldObject.toServer(),
         };

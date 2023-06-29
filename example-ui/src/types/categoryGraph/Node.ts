@@ -1,7 +1,7 @@
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Core, ElementDefinition, NodeSingular } from 'cytoscape';
 import type { Signature } from '../identifiers';
-import type { SchemaObject } from '../schema';
+import type { ComparablePosition, SchemaObject } from '../schema';
 import { DirectedEdge, type Edge } from './Edge';
 import { PathMarker, type MorphismData, type Filter } from './PathMarker';
 import type { LogicalModelInfo } from '../logicalModel';
@@ -85,19 +85,18 @@ export class Node {
         private noGroupPlaceholder?: NodeSingular,
     ) {}
 
-    static create(cytoscape: Core, object: SchemaObject, groups: Group[]): Node {
+    static create(cytoscape: Core, object: SchemaObject, position: ComparablePosition, groups: Group[]): Node {
         const groupPlaceholders = groups.map(group => ({
             group,
-            node: cytoscape.add(createGroupPlaceholderDefinition(object, group.id)),
+            node: cytoscape.add(createGroupPlaceholderDefinition(object, position, group.id)),
         }));
         const noGroupPlaceholder = groupPlaceholders.length > 0
             ? undefined
-            : cytoscape.add(createNoGroupDefinition(object));
+            : cytoscape.add(createNoGroupDefinition(object, position));
 
         const node = new Node(object, groupPlaceholders, noGroupPlaceholder);
         const classes = (object.isNew ? 'new' : '') + ' ' + (!object.ids ? 'no-ids' : '');
-        console.log(classes);
-        const nodeDefinition = createNodeDefinition(object, node, classes);
+        const nodeDefinition = createNodeDefinition(object, position, node, classes);
         const cytoscapeNode = cytoscape.add(nodeDefinition);
         node.setCytoscapeNode(cytoscapeNode);
 
@@ -139,7 +138,7 @@ export class Node {
         }
     }
 
-    get cytoscapeIdPosition() {
+    get cytoscapeIdAndPosition() {
         return {
             nodeId: this.node.id(),
             position: this.node.position(),
@@ -265,36 +264,36 @@ export class Node {
     }
 }
 
-function createNodeDefinition(object: SchemaObject, node: Node, classes?: string): ElementDefinition {
+function createNodeDefinition(object: SchemaObject, position: ComparablePosition, node: Node, classes?: string): ElementDefinition {
     return {
         data: {
             id: '' + object.key.value,
             label: node.label,
             schemaData: node,
         },
-        position: object.position,
+        position: position,
         ...classes ? { classes } : {},
     };
 }
 
-function createGroupPlaceholderDefinition(object: SchemaObject, groupId: number): ElementDefinition {
+function createGroupPlaceholderDefinition(object: SchemaObject, position: ComparablePosition, groupId: number): ElementDefinition {
     return {
         data: {
             id: groupId + '_' + object.key.value,
             parent: 'group_' + groupId,
         },
-        position: object.position,
+        position: position,
         classes: 'group-placeholder',
     };
 }
 
 
-function createNoGroupDefinition(object: SchemaObject): ElementDefinition {
+function createNoGroupDefinition(object: SchemaObject, position: ComparablePosition): ElementDefinition {
     return {
         data: {
             id: 'no-group_' + object.key.value,
         },
-        position: object.position,
+        position: position,
         classes: 'no-group',
     };
 }

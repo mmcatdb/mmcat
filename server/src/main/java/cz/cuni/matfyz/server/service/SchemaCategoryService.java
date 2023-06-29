@@ -7,6 +7,7 @@ import cz.cuni.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.cuni.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.cuni.matfyz.server.repository.SchemaCategoryRepository;
 
 import java.util.List;
@@ -55,6 +56,7 @@ public class SchemaCategoryService {
         final var context = new SchemaCategoryContext();
         final var evolutionUpdate = update.toEvolution(context);
         final var originalCategory = wrapper.toSchemaCategory(context);
+        updateInit.metadata().forEach(m -> context.setPosition(m.key(), m.position()));
 
         final var newCategory = evolutionUpdate.apply(originalCategory);
 
@@ -68,6 +70,18 @@ public class SchemaCategoryService {
             return null;
 
         return newWrapper;
+    }
+
+    public boolean updateMetadata(Id id, List<MetadataUpdate> metadataUpdates) {
+        final var wrapper = repository.find(id);
+
+        final var context = new SchemaCategoryContext();
+        final var category = wrapper.toSchemaCategory(context);
+        metadataUpdates.forEach(m -> context.setPosition(m.key(), m.position()));
+
+        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
+
+        return repository.updateMetadata(newWrapper);
     }
     
     public List<SchemaUpdate> findAllUpdates(Id id) {

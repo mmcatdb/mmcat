@@ -27,16 +27,19 @@ export class SchemaCategory implements Entity {
         readonly id: Id,
         readonly label: string,
         readonly versionId: VersionId,
-        objects: SchemaObject[],
+        objects: VersionedSchemaObject[],
         morphisms: SchemaMorphism[],
         logicalModels: LogicalModel[],
     ) {
         objects.forEach(object => {
-            if (object.iri)
-                this.notAvailableIris.add(object.iri);
+            if (!object.current)
+                return;
 
-            const versionedObject = this.getObject(object.key);
-            versionedObject.current = object;
+            if (object.current.iri)
+                this.notAvailableIris.add(object.current.iri);
+
+            this.objects.set(object.key, object);
+            this.keysProvider.add(object.key);
         });
 
         morphisms.forEach(morphism => {
@@ -47,13 +50,15 @@ export class SchemaCategory implements Entity {
             versionedMorphism.current = morphism;
         });
 
+        const rawObjects = objects.map(object => object.current).filter((o): o is SchemaObject => !!o);
+
         logicalModels.forEach(logicalModel => {
             logicalModel.mappings.forEach(mapping => {
-                const pathObjects = getObjectsFromPath(mapping.accessPath, objects, morphisms);
+                const pathObjects = getObjectsFromPath(mapping.accessPath, rawObjects, morphisms);
 
                 const rootObject = objects.find(object => object.key.equals(mapping.rootObjectKey));
-                if (rootObject)
-                    pathObjects.push(rootObject);
+                if (rootObject?.current)
+                    pathObjects.push(rootObject.current);
 
                 pathObjects.forEach(object => this.getObject(object.key)?.addLogicalModel(logicalModel));
             });
@@ -67,7 +72,7 @@ export class SchemaCategory implements Entity {
             input.id,
             input.label,
             input.version,
-            input.objects.map(SchemaObject.fromServer),
+            input.objects.map(VersionedSchemaObject.fromServer),
             morphisms,
             logicalModels,
         );
@@ -94,6 +99,10 @@ export class SchemaCategory implements Entity {
         }
 
         return object;
+    }
+
+    getObjects(): VersionedSchemaObject[] {
+        return [ ...this.objects.values() ];
     }
 
     createMorphism(def: MorphismDefinition): VersionedSchemaMorphism {
