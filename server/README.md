@@ -35,7 +35,7 @@ CREATE DATABASE mmcat_server OWNER mmcat_user;
 - Feel free to use different credentials and database name (just make sure you replace them in the rest of this document).
 - Then create the database structure from the sample script:
 ```bash
-psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server?sslmode=require -f src/main/resources/createDatabase.sql
+psql postgresql://mmcat_user:mmcat_password@localhost/mmcat_server?sslmode=require -f ../docker/postgresql/createDatabase.sql
 ```
 
 ### Run development server
