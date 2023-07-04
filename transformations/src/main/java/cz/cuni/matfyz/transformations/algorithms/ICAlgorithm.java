@@ -40,7 +40,9 @@ public class ICAlgorithm {
     public AbstractStatement algorithm() {
         // Primary key constraint
         IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
-        wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
+        // If there are no signatures, we can't create the primary key.
+        if (!identifierStructure.isEmpty())
+            wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
         
         // Reference keys constraints
         processPath(mapping.accessPath(), mapping, Signature.createEmpty());
@@ -74,6 +76,10 @@ public class ICAlgorithm {
         final var output = new TreeSet<String>();
 
         for (Signature signature : primaryKey) {
+            // The empty signature does mean the object is identified by its value, i.e., there is no scecial primary key
+            if (signature.isEmpty())
+                continue;
+
             final var subpath = path.getSubpathBySignature(signature);
             if (subpath == null)
                 continue;

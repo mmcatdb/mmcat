@@ -19,6 +19,10 @@ public class IdentifierStructure {
         return properties;
     }
 
+    public boolean isEmpty() {
+        return properties.isEmpty();
+    }
+
     @Override
     public String toString() {
         return String.join(", ", properties);
