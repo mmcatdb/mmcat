@@ -47,7 +47,7 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
             }
         }
         catch (Exception e) {
-            throw new ExecuteException(e);
+            throw new ExecuteException(e, statements);
         }
     }
 

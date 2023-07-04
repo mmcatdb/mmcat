@@ -39,7 +39,7 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
                     databaseProvider.getDatabase().runCommand(commandStatement.getCommand());
             }
             catch (MongoException e) {
-                throw new ExecuteException(e);
+                throw new ExecuteException(e, statements);
             }
         }
     }

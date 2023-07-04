@@ -50,7 +50,7 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
             }
         }
         catch (Exception e) {
-            throw new ExecuteException(e);
+            throw new ExecuteException(e, statements);
         }
     }
 
