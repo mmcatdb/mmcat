@@ -140,6 +140,8 @@ public class Signature implements Serializable, Comparable<Signature> {
         return isBase() && ids[0] < 0;
     }
 
+    private static final String SEPARATOR = ".";
+
     @Override
     public String toString() {
         if (isEmpty())
@@ -149,7 +151,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         
         builder.append(ids[0]);
         for (int i = 1; i < ids.length; i++)
-            builder.append(";").append(ids[i]);
+            builder.append(SEPARATOR).append(ids[i]);
             
         return builder.toString();
     }
@@ -159,7 +161,7 @@ public class Signature implements Serializable, Comparable<Signature> {
             return createEmpty();
 
         try {
-            final var ids = List.of(string.split("\\;")).stream().mapToInt(Integer::parseInt).toArray();
+            final var ids = List.of(string.split("\\" + SEPARATOR)).stream().mapToInt(Integer::parseInt).toArray();
             return new Signature(ids);
         }
         catch (NumberFormatException e) {

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism {
 
     @SuppressWarnings({ "java:s1068", "unused" })
-    private static final Logger LOGGER = LoggerFactory.getLogger(MappingRow.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMorphism.class);
 
     public final SchemaMorphism schemaMorphism;
     private final List<InstanceMorphism> bases;

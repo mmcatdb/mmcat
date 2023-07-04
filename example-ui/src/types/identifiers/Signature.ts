@@ -4,8 +4,7 @@ enum SignatureType {
     Empty
 }
 
-const SEPARATOR_FOR_DISPLAY = '.';
-const SEPARATOR_FROM_SERVER = ';';
+const SEPARATOR = '.';
 
 export type SignatureFromServer = string;
 
@@ -30,7 +29,7 @@ export class Signature {
         if (input === 'EMPTY')
             return Signature.empty;
 
-        return new Signature(input.split(SEPARATOR_FROM_SERVER).map(base => Number.parseInt(base)));
+        return new Signature(input.split(SEPARATOR).map(base => Number.parseInt(base)));
     }
 
     static base(id: number): Signature {
@@ -93,14 +92,11 @@ export class Signature {
         if (this._type === SignatureType.Empty)
             return 'EMPTY';
 
-        return this._ids.join(SEPARATOR_FROM_SERVER);
+        return this._ids.join(SEPARATOR);
     }
 
     toString(): string {
-        if (this._type === SignatureType.Empty)
-            return 'EMPTY';
-
-        return this._ids.join(SEPARATOR_FOR_DISPLAY);
+        return this.value;
     }
 
     toBases(): Signature[] {
@@ -130,6 +126,6 @@ export class Signature {
     }
 
     toServer(): SignatureFromServer {
-        return this.toString();
+        return this.value;
     }
 }

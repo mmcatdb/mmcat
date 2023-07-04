@@ -39,7 +39,7 @@ VALUES
             },
             {
                 "key": {"value":  3},
-                "data": {"ids": {"type": "Signatures",  "signatureIds": [["2", "3;1"]]},            "label": "Order",     "superId": ["2", "3;1"]},
+                "data": {"ids": {"type": "Signatures",  "signatureIds": [["2", "3.1"]]},            "label": "Order",     "superId": ["2", "3.1"]},
                 "metadata": {"position": {"x": 134, "y": -85}}
             },
             {
@@ -69,7 +69,7 @@ VALUES
             },
             {
                 "key": {"value":  9},
-                "data": {"ids": {"type": "Signatures",  "signatureIds": [["7;3;1", "7;2", "8;4"]]}, "label": "Items",     "superId": ["7;3;1", "7;2", "8;4"]},
+                "data": {"ids": {"type": "Signatures",  "signatureIds": [["7.3.1", "7.2", "8.4"]]}, "label": "Items",     "superId": ["7.3.1", "7.2", "8.4"]},
                 "metadata": {"position": {"x": 136, "y": -6}}
             },
             {
@@ -79,7 +79,7 @@ VALUES
             },
             {
                 "key": {"value": 11},
-                "data": {"ids": {"type": "Signatures",  "signatureIds": [["11;12", "10"]]},         "label": "Contact",  "superId": ["11;12", "10"]},
+                "data": {"ids": {"type": "Signatures",  "signatureIds": [["11.12", "10"]]},         "label": "Contact",  "superId": ["11.12", "10"]},
                 "metadata": {"position": {"x": 271, "y": -83}}
             },
             {
@@ -99,7 +99,7 @@ VALUES
             },
             {
                 "key": {"value": 15},
-                "data": {"ids": {"type": "Signatures",  "signatureIds": [["15;1", "14;1"]]},        "label": "Friend",   "superId": ["15;1", "14;1"]},
+                "data": {"ids": {"type": "Signatures",  "signatureIds": [["15.1", "14.1"]]},        "label": "Friend",   "superId": ["15.1", "14.1"]},
                 "metadata": {"position": {"x": -130, "y": -120}}
             },
             {
@@ -168,7 +168,7 @@ VALUES
             },
             {
                 "key": {"value": 8},
-                "data": {"label": "customer contact", "ids": {"type": "Signatures", "signatureIds": [["7;4", "6;1"]]}, "superId": ["7;4", "6;1"]},
+                "data": {"label": "customer contact", "ids": {"type": "Signatures", "signatureIds": [["7.4", "6.1"]]}, "superId": ["7.4", "6.1"]},
                 "metadata": {"position": {"x": -172, "y": 194}}
             },
             {
@@ -228,7 +228,7 @@ VALUES
             },
             {
                 "key": {"value": 20},
-                "data": {"label": "order item", "ids": {"type": "Signatures", "signatureIds": [["21;13", "20;15"]]}, "superId": ["21;13", "20;15"]},
+                "data": {"label": "order item", "ids": {"type": "Signatures", "signatureIds": [["21.13", "20.15"]]}, "superId": ["21.13", "20.15"]},
                 "metadata": {"position": {"x": 94, "y": -22}}
             },
             {
@@ -292,12 +292,12 @@ VALUES
             },
             {
                 "key": {"value": 5},
-                "data": {"label": "Friends", "ids": {"type": "Signatures", "signatureIds": [["4;2", "5;2"]]}, "superId": ["4;2", "5;2"]},
+                "data": {"label": "Friends", "ids": {"type": "Signatures", "signatureIds": [["4.2", "5.2"]]}, "superId": ["4.2", "5.2"]},
                 "metadata": {"position": {"x": 722, "y": 525}}
             },
             {
                 "key": {"value": 6},
-                "data": {"label": "Contact", "ids": {"type": "Signatures", "signatureIds": [["7", "8", "6;2"]]}, "superId": ["7", "8", "6;2"]},
+                "data": {"label": "Contact", "ids": {"type": "Signatures", "signatureIds": [["7", "8", "6.2"]]}, "superId": ["7", "8", "6.2"]},
                 "metadata": {"position": {"x": 293, "y": 307}}
             },
             {
@@ -312,7 +312,7 @@ VALUES
             },
             {
                 "key": {"value": 9},
-                "data": {"label": "Orders", "ids": {"type": "Signatures", "signatureIds": [["9;2", "10;11"]]}, "superId": ["9;2", "10;11"]},
+                "data": {"label": "Orders", "ids": {"type": "Signatures", "signatureIds": [["9.2", "10.11"]]}, "superId": ["9.2", "10.11"]},
                 "metadata": {"position": {"x": 141, "y": 404}}
             },
             {
@@ -327,7 +327,7 @@ VALUES
             },
             {
                 "key": {"value": 12},
-                "data": {"label": "Items", "ids": {"type": "Signatures", "signatureIds": [["12;11", "13;14"]]}, "superId": ["12;11", "13;14"]},
+                "data": {"label": "Items", "ids": {"type": "Signatures", "signatureIds": [["12.11", "13.14"]]}, "superId": ["12.11", "13.14"]},
                 "metadata": {"position": {"x": 189, "y": 656}}
             },
             {
@@ -400,9 +400,9 @@ VALUES
     ], "nextVersion": "1", "prevVersion": "0"}'),
     (1, '{"operations": [
         {"smo": {"type": "createObject", "key": {"value": 3}, "object": {
-            "ids": {"type": "Signatures", "signatureIds": [["2", "3;1"]]},
+            "ids": {"type": "Signatures", "signatureIds": [["2", "3.1"]]},
             "label": "Order",
-            "superId": ["2", "3;1"]
+            "superId": ["2", "3.1"]
         }}, "version": "0:4"},
         {"smo": {"type": "createObject", "key": {"value": 4}, "object": {
             "ids": {"type": "Value", "signatureIds": [[]]},
@@ -465,9 +465,9 @@ VALUES
             "signature": "6"
         }}, "version": "0:14"},
         {"smo": {"type": "createObject", "key": {"value": 9}, "object": {
-            "ids": {"type": "Signatures", "signatureIds": [["7;3;1", "7;2", "8;4"]]},
+            "ids": {"type": "Signatures", "signatureIds": [["7.3.1", "7.2", "8.4"]]},
             "label": "Items",
-            "superId": ["7;3;1", "7;2", "8;4"]
+            "superId": ["7.3.1", "7.2", "8.4"]
         }}, "version": "0:14.1"},
         {"smo": {"type": "createMorphism", "morphism": {
             "min": "ONE",
@@ -500,9 +500,9 @@ VALUES
     ], "nextVersion": "2", "prevVersion": "1"}'),
     (1, '{"operations": [
         {"smo": {"type": "createObject", "key": {"value": 11}, "object": {
-            "ids": {"type": "Signatures", "signatureIds": [["11;12", "10"]]},
+            "ids": {"type": "Signatures", "signatureIds": [["11.12", "10"]]},
             "label": "Contact",
-            "superId": ["11;12", "10"]
+            "superId": ["11.12", "10"]
         }}, "version": "0:17"},
         {"smo": {"type": "createObject", "key": {"value": 12}, "object": {
             "ids": {"type": "Value", "signatureIds": [[]]},
@@ -553,9 +553,9 @@ VALUES
     ], "nextVersion": "3", "prevVersion": "2"}'),
     (1, '{"operations": [
         {"smo": {"type": "createObject", "key": {"value": 15}, "object": {
-            "ids": {"type": "Signatures", "signatureIds": [["15;1", "14;1"]]},
+            "ids": {"type": "Signatures", "signatureIds": [["15.1", "14.1"]]},
             "label": "Friend",
-            "superId": ["15;1", "14;1"]
+            "superId": ["15.1", "14.1"]
         }}, "version": "0:22"},
         {"smo": {"type": "createMorphism", "morphism": {
             "min": "ONE",
@@ -710,26 +710,26 @@ VALUES
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 3},
-        "primaryKey": ["2", "3;1"],
+        "primaryKey": ["2", "3.1"],
         "kindName": "order",
         "accessPath": {
             "name": {"type": "STATIC", "value": "order"}, "subpaths": [
                 {
                     "name": {"type": "STATIC", "value": "_id"}, "subpaths": [
-                        {"name": {"type": "STATIC", "value": "customer"}, "signature": "3;1"},
+                        {"name": {"type": "STATIC", "value": "customer"}, "signature": "3.1"},
                         {"name": {"type": "STATIC", "value": "number"}, "signature": "2"}
                     ], "signature": "EMPTY", "isAuxiliary": true
                 },
                 {
                     "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
-                        {"name": {"signature": "11;12"}, "signature": "10"}
+                        {"name": {"signature": "11.12"}, "signature": "10"}
                     ], "signature": "13", "isAuxiliary": false
                 },
                 {
                     "name": {"type": "STATIC", "value": "items"}, "subpaths": [
-                        {"name": {"type": "STATIC", "value": "id"}, "signature": "8;4"},
-                        {"name": {"type": "STATIC", "value": "name"}, "signature": "8;5"},
-                        {"name": {"type": "STATIC", "value": "price"}, "signature": "8;6"},
+                        {"name": {"type": "STATIC", "value": "id"}, "signature": "8.4"},
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": "8.5"},
+                        {"name": {"type": "STATIC", "value": "price"}, "signature": "8.6"},
                         {"name": {"type": "STATIC", "value": "quantity"}, "signature": "9"}
                     ], "signature": "-7", "isAuxiliary": false
                 }
@@ -801,12 +801,12 @@ VALUES
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 8},
-        "primaryKey": ["7;4", "6;1"],
+        "primaryKey": ["7.4", "6.1"],
         "kindName": "app_customer_contact",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_customer_contact"}, "subpaths": [
-                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "7;4"},
-                {"name": {"type": "STATIC", "value": "contact_id"}, "signature": "6;1"}
+                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "7.4"},
+                {"name": {"type": "STATIC", "value": "contact_id"}, "signature": "6.1"}
             ], "signature": "EMPTY", "isAuxiliary": true
         }}'
     ),
@@ -824,7 +824,7 @@ VALUES
                 {"name": {"type": "STATIC", "value": "created"}, "signature": "8"},
                 {"name": {"type": "STATIC", "value": "sent"}, "signature": "9"},
                 {"name": {"type": "STATIC", "value": "paid"}, "signature": "10"},
-                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "14;4"}
+                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "14.4"}
             ], "signature": "EMPTY", "isAuxiliary": true
         }}'
     ),
@@ -846,12 +846,12 @@ VALUES
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 20},
-        "primaryKey": ["21;13", "20;15"],
+        "primaryKey": ["21.13", "20.15"],
         "kindName": "app_order_item",
         "accessPath": {
             "name": {"type": "STATIC", "value": "app_order_item"}, "subpaths": [
-                {"name": {"type": "STATIC", "value": "order_id"}, "signature": "21;13"},
-                {"name": {"type": "STATIC", "value": "product_id"}, "signature": "20;15"},
+                {"name": {"type": "STATIC", "value": "order_id"}, "signature": "21.13"},
+                {"name": {"type": "STATIC", "value": "product_id"}, "signature": "20.15"},
                 {"name": {"type": "STATIC", "value": "amount"}, "signature": "19"},
                 {"name": {"type": "STATIC", "value": "total_price"}, "signature": "18"}
             ], "signature": "EMPTY", "isAuxiliary": true
@@ -870,7 +870,7 @@ VALUES
                         {
                             "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
                                 {"name": {"signature": "3"}, "signature": "2"}
-                            ], "signature": "-7;6", "isAuxiliary": false
+                            ], "signature": "-7.6", "isAuxiliary": false
                         },
                         {"name": {"type": "STATIC", "value": "name"}, "signature": "5"}
                     ], "signature": "14", "isAuxiliary": false
@@ -888,7 +888,7 @@ VALUES
                     "name": {"type": "STATIC", "value": "items"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "amount"}, "signature": "19"},
                         {"name": {"type": "STATIC", "value": "total_price"}, "signature": "18"},
-                        {"name": {"type": "STATIC", "value": "name"}, "signature": "20;16"}
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": "20.16"}
                     ], "signature": "-21", "isAuxiliary": false
                 }
             ], "signature": "EMPTY", "isAuxiliary": true
@@ -906,13 +906,13 @@ VALUES
                 {
                     "name": {"type": "STATIC", "value": "customers"}, "subpaths": [
                         {"name": {"type": "STATIC", "value": "id"}, "signature": "2"}
-                    ], "signature": "-10;9", "isAuxiliary": false
+                    ], "signature": "-10.9", "isAuxiliary": false
                 },
                 {
                     "name": {"type": "STATIC", "value": "items"}, "subpaths": [
-                        {"name": {"type": "STATIC", "value": "id"}, "signature": "13;14"},
-                        {"name": {"type": "STATIC", "value": "name"}, "signature": "13;15"},
-                        {"name": {"type": "STATIC", "value": "price"}, "signature": "13;16"}
+                        {"name": {"type": "STATIC", "value": "id"}, "signature": "13.14"},
+                        {"name": {"type": "STATIC", "value": "name"}, "signature": "13.15"},
+                        {"name": {"type": "STATIC", "value": "price"}, "signature": "13.16"}
                     ], "signature": "-12", "isAuxiliary": false
                 }
             ], "signature": "EMPTY", "isAuxiliary": true
@@ -936,12 +936,12 @@ VALUES
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 5},
-        "primaryKey": ["4;2", "5;2"],
+        "primaryKey": ["4.2", "5.2"],
         "kindName": "friends",
         "accessPath": {
             "name": {"type": "STATIC", "value": "friends"}, "subpaths": [
-                {"name": {"type": "STATIC", "value": "first_customer_id"}, "signature": "4;2"},
-                {"name": {"type": "STATIC", "value": "second_customer_id"}, "signature": "5;2"}
+                {"name": {"type": "STATIC", "value": "first_customer_id"}, "signature": "4.2"},
+                {"name": {"type": "STATIC", "value": "second_customer_id"}, "signature": "5.2"}
             ], "signature": "EMPTY", "isAuxiliary": true
         }}'
     ),
@@ -949,13 +949,13 @@ VALUES
         "version": "0",
         "categoryVersion": "0",
         "rootObjectKey": {"value": 6},
-        "primaryKey": ["7", "8", "6;2"],
+        "primaryKey": ["7", "8", "6.2"],
         "kindName": "contact",
         "accessPath": {
             "name": {"type": "STATIC", "value": "contact"}, "subpaths": [
                 {"name": {"type": "STATIC", "value": "key"}, "signature": "7"},
                 {"name": {"type": "STATIC", "value": "value"}, "signature": "8"},
-                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "6;2"}
+                {"name": {"type": "STATIC", "value": "customer_id"}, "signature": "6.2"}
             ], "signature": "EMPTY", "isAuxiliary": true
         }}'
     );

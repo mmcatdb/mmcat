@@ -1,3 +1,5 @@
+@import './base.scss';
+
 td.label {
     text-align: right;
     vertical-align: top;
@@ -187,4 +189,10 @@ a.router-link-exact-active {
 
 a.router-link-exact-active:hover {
     background-color: transparent;
+}
+
+// Forms
+
+input[type=radio] {
+    @extend .me-2;
 }

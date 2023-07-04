@@ -95,7 +95,7 @@ class StatementConstructor {
     }
 
     private List<Key> createKeys(String path) {
-        String[] split = path.split(AbstractDDLWrapper.EMPTY_NAME);
+        String[] split = path.split(AbstractDDLWrapper.PATH_SEPARATOR);
         List<Key> output = new ArrayList<>();
 
         for (int i = 0; i < split.length; i++) {

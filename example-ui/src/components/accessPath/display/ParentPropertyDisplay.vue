@@ -58,7 +58,7 @@ function emitComplexClick(): void {
 
 <template>
     <div class="outer">
-        <div class="row">
+        <div>
             <span
                 class="name-text"
                 :class="{ highlighted, clickable: !isRoot }"
@@ -111,7 +111,7 @@ function emitComplexClick(): void {
                 </ButtonIcon>
             </div>
         </div>
-        <div class="row">
+        <div>
             <span
                 ref="bracketText"
                 class="bracket-text"

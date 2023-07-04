@@ -8,7 +8,7 @@ import org.apache.jena.graph.Node;
 public class RDFNodeException extends IntegrationException {
     
     protected RDFNodeException(String name, Node node) {
-        super("object." + name, node, null);
+        super("object." + name, node.toString(), null);
     }
 
     public static RDFNodeException unprocessable(Node node) {
