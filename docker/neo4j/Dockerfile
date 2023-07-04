@@ -8,5 +8,6 @@ COPY docker/neo4j/*.cypher .
 # ENV EXTENSION_SCRIPT=entrypoint.sh
 
 RUN chmod +x entrypoint-wrapper.sh
+RUN chmod +x entrypoint.sh
 ENTRYPOINT [ "tini", "-g", "--", "./entrypoint-wrapper.sh" ]
 CMD [ "neo4j" ]
