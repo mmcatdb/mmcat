@@ -8,7 +8,7 @@ import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.core.utils.io.UrlInputStreamProvider;
-import cz.cuni.matfyz.integration.processes.JsonLdToInstance;
+import cz.cuni.matfyz.integration.processes.JsonLdToCategory;
 import cz.cuni.matfyz.server.builder.MappingBuilder;
 import cz.cuni.matfyz.server.builder.SchemaCategoryContext;
 import cz.cuni.matfyz.server.configuration.ServerProperties;
@@ -16,6 +16,9 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.entity.datasource.DataSource;
 import cz.cuni.matfyz.server.entity.job.Job;
+import cz.cuni.matfyz.server.entity.job.payload.CategoryToModelPayload;
+import cz.cuni.matfyz.server.entity.job.payload.JsonLdToCategoryPayload;
+import cz.cuni.matfyz.server.entity.job.payload.ModelToCategoryPayload;
 import cz.cuni.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
@@ -129,28 +132,23 @@ public class AsyncJobService {
 
     @Async("jobExecutor")
     private void processJobByType(Job job, UserStore store) {
-        switch (job.type) {
-            case CategoryToModel:
-                categoryToModelAlgorithm(job, store);
-                break;
-            case ModelToCategory:
-                modelToCategoryAlgorithm(job, store);
-                break;
-            case JsonLdToCategory:
-                jsonLdToCategoryAlgorithm(job, store);
-                break;
-        }
+        if (job.payload instanceof CategoryToModelPayload categoryToModelPayload)
+            categoryToModelAlgorithm(job, categoryToModelPayload, store);
+        else if (job.payload instanceof ModelToCategoryPayload modelToCategoryPayload)
+            modelToCategoryAlgorithm(job, modelToCategoryPayload, store);
+        else if (job.payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload)
+            jsonLdToCategoryAlgorithm(job, jsonLdToCategoryPayload, store);
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
 
     @Async("jobExecutor")
-    private void modelToCategoryAlgorithm(Job job, UserStore store) {
-        final LogicalModel logicalModel = logicalModelService.find(job.logicalModelId);
+    private void modelToCategoryAlgorithm(Job job, ModelToCategoryPayload payload, UserStore store) {
+        final LogicalModel logicalModel = logicalModelService.find(payload.logicalModelId());
         final Database database = databaseService.find(logicalModel.databaseId);
 
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
-        final List<MappingWrapper> mappingWrappers = mappingService.findAll(job.logicalModelId);
+        final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
         InstanceCategory instance = store.getCategory(job.categoryId);
 
@@ -163,12 +161,12 @@ public class AsyncJobService {
     }
 
     @Async("jobExecutor")
-    private void categoryToModelAlgorithm(Job job, UserStore store) {
+    private void categoryToModelAlgorithm(Job job, CategoryToModelPayload payload, UserStore store) {
         final InstanceCategory instance = store.getCategory(job.categoryId);
 
-        final LogicalModel logicalModel = logicalModelService.find(job.logicalModelId);
+        final LogicalModel logicalModel = logicalModelService.find(payload.logicalModelId());
         final Database database = databaseService.find(logicalModel.databaseId);
-        final List<Mapping> mappings = mappingService.findAll(job.logicalModelId).stream()
+        final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
             .map(wrapper -> createMapping(wrapper, job.categoryId))
             .toList();
 
@@ -199,19 +197,19 @@ public class AsyncJobService {
         
         modelService.createNew(store, job, job.label, output.toString());
     }
-
+    
     @Async("jobExecutor")
-    private void jsonLdToCategoryAlgorithm(Job job, UserStore store) {
+    private void jsonLdToCategoryAlgorithm(Job job, JsonLdToCategoryPayload payload, UserStore store) {
         final InstanceCategory instance = store.getCategory(job.categoryId);
 
-        final DataSource dataSource = dataSourceService.find(job.dataSourceId);
+        final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
         final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);
 
         final SchemaCategoryWrapper schemaWrapper = categoryService.find(job.categoryId);
         final var context = new SchemaCategoryContext();
         final SchemaCategory schema = schemaWrapper.toSchemaCategory(context);
 
-        final var newInstance = new JsonLdToInstance().input(schema, instance, inputStreamProvider).run();
+        final var newInstance = new JsonLdToCategory().input(schema, instance, inputStreamProvider).run();
         store.setInstance(job.categoryId, newInstance);
     }
 

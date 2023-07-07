@@ -16,13 +16,13 @@ import java.io.IOException;
 /**
  * @author jachym.bartik
  */
-public class JsonLdToInstance {
+public class JsonLdToCategory {
 
     private SchemaCategory category;
     private InstanceCategory currentInstance;
     private InputStreamProvider inputStreamProvider;
 
-    public JsonLdToInstance input(SchemaCategory category, InstanceCategory currentInstance, InputStreamProvider inputStreamProvider) {
+    public JsonLdToCategory input(SchemaCategory category, InstanceCategory currentInstance, InputStreamProvider inputStreamProvider) {
         this.category = category;
         this.currentInstance = currentInstance;
         this.inputStreamProvider = inputStreamProvider;

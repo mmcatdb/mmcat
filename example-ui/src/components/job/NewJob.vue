@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { JOB_TYPES, JobType } from '@/types/job';
+import { JOB_TYPES, JobType, type JobPayloadInit } from '@/types/job';
 import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
@@ -46,12 +46,18 @@ const dataValid = computed(() => {
 async function createJob() {
     fetching.value = true;
 
+    const payload = jobType.value === JobType.JsonLdToCategory ? {
+        type: JobType.JsonLdToCategory,
+        dataSourceId: dataSourceId.value,
+    } : {
+        type: jobType.value,
+        logicalModelId: logicalModelId.value,
+    };
+
     const result = await API.jobs.createNewJob({}, {
         categoryId,
-        logicalModelId: jobType.value === JobType.JsonLdToCategory ? undefined : logicalModelId.value,
-        dataSourceId: jobType.value === JobType.JsonLdToCategory ? dataSourceId.value : undefined,
         label: jobName.value,
-        type: jobType.value,
+        payload: payload as JobPayloadInit,
     });
     if (result.status)
         emit('newJob', result.data);

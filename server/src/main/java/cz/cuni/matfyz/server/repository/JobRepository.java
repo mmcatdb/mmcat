@@ -36,10 +36,8 @@ public class JobRepository {
 
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
-                Id logicalModelId = getId(resultSet, "logical_model_id");
-                Id dataSourceId = getId(resultSet, "data_source_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(new Job.Builder().fromJsonValue(id, categoryId, logicalModelId, dataSourceId, jsonValue));
+                output.add(new Job.Builder().fromJsonValue(id, categoryId, jsonValue));
             }
         });
     }
@@ -56,21 +54,18 @@ public class JobRepository {
 
             if (resultSet.next()) {
                 Id categoryId = getId(resultSet, "schema_category_id");
-                Id logicalModelId = getId(resultSet, "logical_model_id");
-                Id dataSourceId = getId(resultSet, "data_source_id");
                 String jsonValue = resultSet.getString("json_value");
-                output.set(new Job.Builder().fromJsonValue(id, categoryId, logicalModelId, dataSourceId, jsonValue));
+                output.set(new Job.Builder().fromJsonValue(id, categoryId, jsonValue));
             }
         });
     }
 
     public Id add(Job job) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value) VALUES (?, ?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            // var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value) VALUES (?, ?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             setId(statement, 1, job.categoryId);
-            setId(statement, 2, job.logicalModelId);
-            setId(statement, 3, job.dataSourceId);
-            statement.setString(4, Utils.toJson(job));
+            statement.setString(2, Utils.toJson(job));
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)

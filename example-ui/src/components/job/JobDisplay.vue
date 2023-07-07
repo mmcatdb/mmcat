@@ -85,22 +85,22 @@ async function restartJob() {
                 {{ job.id }}
             </ValueRow>
             <ValueRow label="Type:">
-                {{ job.type }}
+                {{ job.payload.type }}
             </ValueRow>
             <ValueRow
-                v-if="job.type === JobType.JsonLdToCategory && job.dataSource"
+                v-if="job.payload.type === JobType.JsonLdToCategory"
                 label="Data source:"
             >
-                <RouterLink :to="{ name: 'dataSource', params: { id: job.dataSource.id }, query: { categoryId: job.categoryId } }">
-                    {{ job.dataSource.label }}
+                <RouterLink :to="{ name: 'dataSource', params: { id: job.payload.dataSource.id }, query: { categoryId: job.categoryId } }">
+                    {{ job.payload.dataSource.label }}
                 </RouterLink>
             </ValueRow>
             <ValueRow
-                v-else-if="job.logicalModel"
+                v-else
                 label="Logical model:"
             >
-                <RouterLink :to="{ name: 'logicalModel', params: { id: job.logicalModel.id } }">
-                    {{ job.logicalModel.label }}
+                <RouterLink :to="{ name: 'logicalModel', params: { id: job.payload.logicalModel.id } }">
+                    {{ job.payload.logicalModel.label }}
                 </RouterLink>
             </ValueRow>
             <ValueRow label="State:">

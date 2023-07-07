@@ -7,8 +7,6 @@ import cz.cuni.matfyz.server.entity.Id;
  */
 public record JobInit(
     Id categoryId,
-    Id logicalModelId,
-    Id dataSourceId,
     String label,
-    Job.Type type
+    JobPayload payload
 ) {}

@@ -31,9 +31,6 @@ public class JobService {
     }
 
     public Job createNew(Job job) {
-        if (!job.isValid())
-            return null;
-
         Id generatedId = repository.add(job);
 
         return repository.find(generatedId);

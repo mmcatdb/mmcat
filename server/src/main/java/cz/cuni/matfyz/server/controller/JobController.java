@@ -4,7 +4,9 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.job.Job;
 import cz.cuni.matfyz.server.entity.job.JobDetail;
 import cz.cuni.matfyz.server.entity.job.JobInit;
-import cz.cuni.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.cuni.matfyz.server.entity.job.payload.CategoryToModelPayload;
+import cz.cuni.matfyz.server.entity.job.payload.JsonLdToCategoryPayload;
+import cz.cuni.matfyz.server.entity.job.payload.ModelToCategoryPayload;
 import cz.cuni.matfyz.server.service.DataSourceService;
 import cz.cuni.matfyz.server.service.JobService;
 import cz.cuni.matfyz.server.service.LogicalModelService;
@@ -85,13 +87,21 @@ public class JobController {
         return jobToJobDetail(canceledJob);
     }
 
-    private JobDetail jobToJobDetail(Job job) {
-        return DatabaseWrapper.join(
-            rawJob -> rawJob.logicalModelId != null && !rawJob.logicalModelId.isEmpty()
-                ? new JobDetail(rawJob, logicalModelService.find(rawJob.logicalModelId).toInfo())
-                : new JobDetail(rawJob, dataSourceService.find(rawJob.dataSourceId)),
-            job
-        );
+    private JobDetail jobToJobDetail(Job job) {        
+        if (job.payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
+            final var logicalModel = logicalModelService.find(modelToCategoryPayload.logicalModelId()).toInfo();
+            return new JobDetail(job, new ModelToCategoryPayload.Detail(logicalModel));
+        }
+        else if (job.payload instanceof CategoryToModelPayload categoryToModelPayload) {
+            final var logicalModel = logicalModelService.find(categoryToModelPayload.logicalModelId()).toInfo();
+            return new JobDetail(job, new CategoryToModelPayload.Detail(logicalModel));
+        }
+        else if (job.payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload) {
+            final var logicalModel = dataSourceService.find(jsonLdToCategoryPayload.dataSourceId());
+            return new JobDetail(job, new JsonLdToCategoryPayload.Detail(logicalModel));
+        }
+
+        throw new UnsupportedOperationException();
     }
 
 }
