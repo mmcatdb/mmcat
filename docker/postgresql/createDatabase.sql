@@ -963,8 +963,8 @@ VALUES
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
-    logical_model_id INTEGER REFERENCES logical_model,
-    data_source_id INTEGER REFERENCES database_for_mapping, -- TODO make job to contain either logical_model_id or data_source_id
+    -- logical_model_id INTEGER REFERENCES logical_model,
+    -- data_source_id INTEGER REFERENCES database_for_mapping, -- TODO make job to contain either logical_model_id or data_source_id
     json_value JSONB NOT NULL
     -- přidat typ jobu, vstup, výstup, vše serializované v jsonu
         -- podobně jako ukládání logování
@@ -975,11 +975,35 @@ CREATE TABLE job (
 
 INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value)
 VALUES
-    (1, 1, null, '{"label": "Import Order", "type": "ModelToCategory", "state": "Ready"}'),
-    (1, 1, null, '{"label": "Export Order", "type": "CategoryToModel", "state": "Ready"}'),
-    (1, 2, null, '{"label": "Import Customer", "type": "ModelToCategory", "state": "Ready"}'),
-    (1, 2, null, '{"label": "Export Customer", "type": "CategoryToModel", "state": "Ready"}'),
-    (1, 3, null, '{"label": "Import Friend", "type": "ModelToCategory", "state": "Ready"}'),
-    (1, 3, null, '{"label": "Export Friend", "type": "CategoryToModel", "state": "Ready"}'),
-    (2, 4, null, '{"label": "Import from Postgres", "type": "ModelToCategory", "state": "Ready"}'),
-    (2, 5, null, '{"label": "Export to Mongo", "type": "CategoryToModel", "state": "Ready"}');
+    (1, '{"label": "Import Order", "state": "Ready", "payload: {
+        "type": "ModelToCategory",
+        "logicalModelId": 1
+    }}'),
+    (1, '{"label": "Export Order", "state": "Ready", "payload: {
+        "type": "CategoryToModel",
+        "logicalModelId": 1
+    }}'),
+    (1, '{"label": "Import Customer", "state": "Ready", "payload: {
+        "type": "ModelToCategory",
+        "logicalModelId": 2
+    }}'),
+    (1, '{"label": "Export Customer", "state": "Ready", "payload: {
+        "type": "CategoryToModel",
+        "logicalModelId": 2
+    }}'),
+    (1, '{"label": "Import Friend", "state": "Ready", "payload: {
+        "type": "ModelToCategory",
+        "logicalModelId": 3
+    }}'),
+    (1, '{"label": "Export Friend", "state": "Ready", "payload: {
+        "type": "CategoryToModel",
+        "logicalModelId": 3
+    }}'),
+    (2, '{"label": "Import from Postgres", "state": "Ready", "payload: {
+        "type": "ModelToCategory",
+        "logicalModelId": 4
+    }}'),
+    (2, '{"label": "Export to Mongo", "state": "Ready", "payload: {
+        "type": "CategoryToModel",
+        "logicalModelId": 5
+    }}');
