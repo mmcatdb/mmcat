@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.transformations.processes;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.exception.NamedException;
 import cz.cuni.matfyz.core.exception.OtherException;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -21,6 +21,7 @@ public class DatabaseToInstance {
     private Mapping mapping;
     private InstanceCategory currentInstance;
     private AbstractPullWrapper pullWrapper;
+    private PullQuery query = null;
 
     public DatabaseToInstance input(Mapping mapping, InstanceCategory currentInstance, AbstractPullWrapper pullWrapper) {
         this.mapping = mapping;
@@ -30,12 +31,10 @@ public class DatabaseToInstance {
         return this;
     }
 
-    private Integer limit = null;
+    public DatabaseToInstance input(Mapping mapping, InstanceCategory currentInstance, AbstractPullWrapper pullWrapper, PullQuery query) {
+        this.query = query;
 
-    public DatabaseToInstance setLimit(Integer limit) {
-        this.limit = limit;
-
-        return this;
+        return this.input(mapping, currentInstance, pullWrapper);
     }
 
     public InstanceCategory run() {
@@ -53,8 +52,9 @@ public class DatabaseToInstance {
     private InstanceCategory innerRun() throws Exception {
         Statistics.start(Interval.DATABASE_TO_INSTANCE);
 
-        ForestOfRecords forest;
-        forest = pullWrapper.pullForest(mapping.accessPath(), new PullWrapperOptions.Builder().limit(limit).buildWithKindName(mapping.kindName()));
+        var finalQuery = query != null ? query : PullQuery.fromKindName(mapping.kindName());
+
+        ForestOfRecords forest = pullWrapper.pullForest(mapping.accessPath(), finalQuery);
 
         Statistics.set(Counter.PULLED_RECORDS, forest.size());
 

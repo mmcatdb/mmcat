@@ -11,7 +11,6 @@ import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.Mapping;
-import cz.cuni.matfyz.core.mapping.Name;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 import cz.cuni.matfyz.core.record.IComplexRecord;
 import cz.cuni.matfyz.core.record.RootRecord;
@@ -19,11 +18,9 @@ import cz.cuni.matfyz.core.record.SimpleRecord;
 import cz.cuni.matfyz.core.record.SimpleValueRecord;
 import cz.cuni.matfyz.core.schema.SchemaObject;
 import cz.cuni.matfyz.core.schema.SignatureId;
-import cz.cuni.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,8 +32,6 @@ import org.slf4j.LoggerFactory;
  * @author pavel.koupil, jachym.bartik
  */
 public class MTCAlgorithm {
-
-    private record Child(Signature signature, AccessPath property) {}
     
     private static final Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
 
@@ -113,8 +108,8 @@ public class MTCAlgorithm {
             SimpleRecord<?> simpleRecord = rootRecord.findSimpleRecord(signature);
             if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
                 builder.add(signature, simpleValueRecord.getValue().toString());
-            else
-                throw InvalidStateException.simpleRecordIsNotValue(simpleRecord);
+            // else
+            //     throw InvalidStateException.simpleRecordIsNotValue(simpleRecord);
         }
         
         return builder.build();
@@ -185,6 +180,8 @@ public class MTCAlgorithm {
         return builder.build();
     }
 
+    private record Child(Signature signature, AccessPath property) {}
+
     private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, IComplexRecord complexRecord) {
         //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
         if (!(path instanceof ComplexProperty complexPath))
@@ -209,27 +206,12 @@ public class MTCAlgorithm {
         final List<Child> output = new ArrayList<>();
         
         for (AccessPath subpath : complexProperty.subpaths()) {
-            output.addAll(process(subpath.name()));
-            output.addAll(process(subpath));
+            if (subpath.name() instanceof DynamicName dynamicName)
+                output.add(new Child(dynamicName.signature(), ComplexProperty.createEmpty()));
+
+            output.add(new Child(subpath.signature(), subpath));
         }
         
         return output;
-    }
-    
-    /**
-     * Process (name, context and value) according to the "process" function from the paper.
-     * This function is divided to two parts - one for name and other for context and value.
-     * @param name
-     * @return see {@link #children()}
-     */
-    private static Collection<Child> process(Name name) {
-        if (name instanceof DynamicName dynamicName)
-            return List.of(new Child(dynamicName.signature(), ComplexProperty.createEmpty()));
-        else // Static or anonymous (empty) name
-            return Collections.<Child>emptyList();
-    }
-    
-    private static Collection<Child> process(AccessPath accessPath) {
-        return List.of(new Child(accessPath.signature(), accessPath));
     }
 }

@@ -4,6 +4,7 @@ import static cz.cuni.matfyz.core.tests.TestDataUtils.addMorphism;
 import static cz.cuni.matfyz.core.tests.TestDataUtils.addSchemaObject;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.category.Morphism.Min;
 import cz.cuni.matfyz.core.category.Signature;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
@@ -88,8 +89,7 @@ public class EvolutionManagementTests {
                 Statistics.start(Interval.IMPORT_JOIN_MOVE);
 
                 var category = new DatabaseToInstance()
-                    .setLimit(batch * batchMultiplier)
-                    .input(mapping, null, pullWrapper)
+                    .input(mapping, null, pullWrapper, PullQuery.withLimit(batch * batchMultiplier).fromKindName(mapping.kindName()))
                     .run();
 
                 // JOIN

@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.tests.TestData;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
@@ -61,14 +61,14 @@ public class Neo4jTests {
     private void pullForestTestAlgorithm(String kindName, String expectedDataFileName, ComplexProperty accessPath) throws Exception {
         var inputWrapper = createPullWrapper();
 
-        var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(kindName));
+        var forest = inputWrapper.pullForest(accessPath, PullQuery.fromKindName(kindName));
         LOGGER.debug("Pulled forest:\n" + forest);
 
         var dummyWrapper = new DummyPullWrapper();
         var url = ClassLoader.getSystemResource("neo4j/" + expectedDataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
-        var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));
+        var expectedForest = dummyWrapper.pullForest(accessPath, PullQuery.fromKindName(fileName));
         
         assertEquals(expectedForest, forest);
     }

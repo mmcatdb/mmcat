@@ -3,6 +3,7 @@ package cz.cuni.matfyz.core.mapping;
 import cz.cuni.matfyz.core.category.Signature;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -49,6 +50,13 @@ public abstract class AccessPath {
     }
     
     protected abstract boolean hasSignature(Signature signature);
+
+    /**
+     * Find the path to the given signature in and return the properties along the way.
+     * The list is "reversed", meaning that the last subpath is first and the root property is last.
+     * If the signature isn't found, null is returned.
+     */
+    protected abstract List<AccessPath> getPropertyPathInternal(Signature signature);
     
     @Override
     public boolean equals(Object object) {

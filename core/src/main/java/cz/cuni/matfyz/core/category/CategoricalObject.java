@@ -19,5 +19,10 @@ public interface CategoricalObject extends Comparable<CategoricalObject> {
      * Immutable.
      */
     public ObjectIds ids();
+
+    @Override
+    public default int compareTo(CategoricalObject categoricalObject) {
+        return key().compareTo(categoricalObject.key());
+    }
     
 }

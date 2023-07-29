@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.wrapperneo4j;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
@@ -26,43 +26,57 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         this.sessionProvider = sessionProvider;
     }
 
-    private String getOffsetAndLimit(PullWrapperOptions options) {
+    private String createRelationshipQueryString(PullQuery query) {
+        if (query.hasStringContent())
+            return query.getStringContent();
+
+        return "MATCH (from_node)-[relationship: " + query.getKindName() + "]->(to_node) RETURN from_node, relationship, to_node" + getOffsetAndLimit(query) + ";";
+    }
+
+    private String createNodeQueryString(PullQuery query) {
+        if (query.hasStringContent())
+            return query.getStringContent();
+
+        return "MATCH (node: " + query.getKindName() + ") RETURN node" + getOffsetAndLimit(query) + ";";
+    }
+
+    private String getOffsetAndLimit(PullQuery query) {
         String output = "";
-        if (options.hasOffset())
-            output += " SKIP " + options.getOffset();
+        if (query.hasOffset())
+            output += " SKIP " + query.getOffset();
         
-        if (options.hasLimit())
-            output += " LIMIT " + options.getLimit();
+        if (query.hasLimit())
+            output += " LIMIT " + query.getLimit();
 
         return output;
     }
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
+    public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
         try {
-            return innerPullForest(path, options);
+            return innerPullForest(path, query);
         }
         catch (Exception e) {
             throw new PullForestException(e);
         }
     }
 
-    private ForestOfRecords innerPullForest(ComplexProperty path, PullWrapperOptions options) {
-        final var relationshipResult = tryProcessRelationshipPath(path, options);
+    private ForestOfRecords innerPullForest(ComplexProperty path, PullQuery query) {
+        final var relationshipResult = tryProcessRelationshipPath(path, query);
         if (relationshipResult != null)
             return relationshipResult;
 
-        return processNodePath(path, options);
+        return processNodePath(path, query);
     }
 
-    private ForestOfRecords tryProcessRelationshipPath(ComplexProperty path, PullWrapperOptions options) {
+    private ForestOfRecords tryProcessRelationshipPath(ComplexProperty path, PullQuery query) {
         final var fromNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.FROM_NODE_PROPERTY_PREFIX);
         final var toNodeSubpath = findSubpathByPrefix(path, Neo4jControlWrapper.TO_NODE_PROPERTY_PREFIX);
 
         if (fromNodeSubpath == null || toNodeSubpath == null)
             return null;
 
-        return processRelationshipPath(path, fromNodeSubpath, toNodeSubpath, options);
+        return processRelationshipPath(path, fromNodeSubpath, toNodeSubpath, query);
     }
 
     private static ComplexProperty findSubpathByPrefix(ComplexProperty path, String namePrefix) {
@@ -82,7 +96,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             : null;
     }
 
-    private ForestOfRecords processRelationshipPath(ComplexProperty path, ComplexProperty fromNodeSubpath, ComplexProperty toNodeSubpath, PullWrapperOptions options) {
+    private ForestOfRecords processRelationshipPath(ComplexProperty path, ComplexProperty fromNodeSubpath, ComplexProperty toNodeSubpath, PullQuery query) {
         final var fromNodeRecordName = ((StaticName) fromNodeSubpath.name()).toRecordName();
         final var toNodeRecordName = ((StaticName) toNodeSubpath.name()).toRecordName();
 
@@ -93,10 +107,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         ) {
             session
                 .executeRead(tx -> {
-                    final var query = new Query("MATCH (from_node)-[relationship: " + options.getKindName() + "]->(to_node) RETURN from_node, relationship, to_node" + getOffsetAndLimit(options) + ";");
+                    final var queryCommand = new Query(createRelationshipQueryString(query));
 
                     return tx
-                        .run(query)
+                        .run(queryCommand)
                         .stream()
                         .map(result -> {
                             final var rootRecord = new RootRecord();
@@ -118,7 +132,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return forest;
     }
 
-    private ForestOfRecords processNodePath(ComplexProperty path, PullWrapperOptions options) {
+    private ForestOfRecords processNodePath(ComplexProperty path, PullQuery query) {
         final var forest = new ForestOfRecords();
 
         try (
@@ -126,10 +140,10 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         ) {
             session
                 .executeRead(tx -> {
-                    final var query = new Query("MATCH (node: " + options.getKindName() + ") RETURN node" + getOffsetAndLimit(options) + ";");
+                    final var queryCommand = new Query(createNodeQueryString(query));
 
                     return tx
-                        .run(query)
+                        .run(queryCommand)
                         .stream()
                         .map(result -> {
                             final var rootRecord = new RootRecord();

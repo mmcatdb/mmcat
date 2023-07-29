@@ -31,6 +31,22 @@ public class InstanceObject implements CategoricalObject {
         this.schemaObject = schemaObject;
     }
 
+    /**
+     * Copies all data from the source instance object to this object. All previous data is discareded!
+     */
+    public void load(InstanceObject source) {
+        domain.clear();
+        source.domain.entrySet().forEach(entry -> {
+            // Both SuperIdWithValues and DomainRow are immutable, so we just need to copy the map.
+            // TODO - this is not true for the pending references. But that is not an issue (yet).
+            var newRowsWithSameId = new TreeMap<>(entry.getValue());
+            domain.put(entry.getKey(), newRowsWithSameId);
+        });
+
+        domainByTechnicalIds.clear(); 
+        domainByTechnicalIds.putAll(source.domainByTechnicalIds);
+    }
+
     public Key key() {
         return schemaObject.key();
     }
@@ -247,11 +263,6 @@ public class InstanceObject implements CategoricalObject {
         return output;
     }
 
-    @Override
-    public int compareTo(CategoricalObject categoricalObject) {
-        return key().compareTo(categoricalObject.key());
-    }
-    
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

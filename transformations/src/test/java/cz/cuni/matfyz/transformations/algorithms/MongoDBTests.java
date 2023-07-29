@@ -3,7 +3,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.tests.TestData;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
@@ -55,14 +55,14 @@ public class MongoDBTests {
     private void pullForestTestAlgorithm(String collectionName, String expectedDataFileName, ComplexProperty accessPath) throws Exception {
         var inputWrapper = createPullWrapper();
 
-        var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(collectionName));
+        var forest = inputWrapper.pullForest(accessPath, PullQuery.fromKindName(collectionName));
         LOGGER.trace("Pulled forest:\n" + forest);
 
         var dummyWrapper = new DummyPullWrapper();
         var url = ClassLoader.getSystemResource("modelToCategory/" + expectedDataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
-        var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));
+        var expectedForest = dummyWrapper.pullForest(accessPath, PullQuery.fromKindName(fileName));
         
         assertEquals(expectedForest.toString(), forest.toString());
     }

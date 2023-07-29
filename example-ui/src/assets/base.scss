@@ -152,8 +152,9 @@ body, button {
 }
 
 /* To remove the small space under the text area. */
-.textarea {
+textarea {
     vertical-align: top;
+    resize: none !important;
 }
 
 .number-input {

@@ -3,7 +3,7 @@ version: '3'
 services:
     adminer:
         container_name: "mm-adminer"
-        restart: on-failure
+        restart: always
         build: 
             context: .
             dockerfile: docker/adminer/Dockerfile
@@ -12,7 +12,7 @@ services:
 
     postgresql:
         container_name: "mm-postgresql"
-        restart: on-failure
+        restart: always
         build: 
             context: .
             dockerfile: docker/postgresql/Dockerfile
@@ -27,7 +27,7 @@ services:
 
     mongodb:
         container_name: "mm-mongodb"
-        restart: on-failure
+        restart: always
         build: 
             context: .
             dockerfile: docker/mongodb/Dockerfile
@@ -40,7 +40,7 @@ services:
 
     neo4j:
         container_name: "mm-neo4j"
-        restart: on-failure
+        restart: always
         build: 
             context: .
             dockerfile: docker/neo4j/Dockerfile

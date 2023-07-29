@@ -5,6 +5,6 @@ package cz.cuni.matfyz.abstractwrappers;
  */
 public interface AbstractStatement {
 
-    public String getContent();
+    String getContent();
     
 }

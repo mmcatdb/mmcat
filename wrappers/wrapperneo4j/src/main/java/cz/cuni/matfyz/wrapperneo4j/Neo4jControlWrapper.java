@@ -6,6 +6,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
@@ -77,6 +78,11 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     @Override
     public AbstractPathWrapper getPathWrapper() {
         return new Neo4jPathWrapper();
+    }
+
+    @Override
+    public AbstractQueryWrapper getQueryWrapper() {
+        throw new UnsupportedOperationException();
     }
 
 }

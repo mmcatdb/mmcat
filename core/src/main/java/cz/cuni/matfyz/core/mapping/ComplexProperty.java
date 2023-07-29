@@ -59,6 +59,7 @@ public class ComplexProperty extends AccessPath {
         return optional.isPresent() ? optional.get() : null;
     }
     
+    // TODO property is auxiliary if and only if its signature is EMPTY.
     public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, List<AccessPath> subpaths) {
         super(name, signature);
         
@@ -97,8 +98,12 @@ public class ComplexProperty extends AccessPath {
         return new ComplexProperty(null, Signature.createEmpty(), true, Collections.<AccessPath>emptyList());
     }
 
+    public static ComplexProperty createAuxiliary(Name name, List<AccessPath> subpaths) {
+        return new ComplexProperty(name, Signature.createEmpty(), true, subpaths);
+    }
+
     public static ComplexProperty createAuxiliary(Name name, AccessPath... subpaths) {
-        return new ComplexProperty(name, Signature.createEmpty(), true, Arrays.asList(subpaths));
+        return createAuxiliary(name, Arrays.asList(subpaths));
     }
     
     /**
@@ -170,10 +175,37 @@ public class ComplexProperty extends AccessPath {
 
     @Override
     protected boolean hasSignature(Signature signature) {
-        if (signature == null)
-            return false;
+        return this.signature.equals(signature);
+    }
+
+    /**
+     * Find the path to the given signature in and return the properties along the way.
+     * If the signature isn't found, null is returned.
+     */
+    protected List<AccessPath> getPropertyPath(Signature signature) {
+        var path = this.getPropertyPathInternal(signature);
+        if (path != null) {
+            Collections.reverse(path);
+            return path;
+        }
+
+        return null;
+    }
+
+    @Override
+    protected List<AccessPath> getPropertyPathInternal(Signature signature) {
+        if (this.signature.contains(signature))
+            return new ArrayList<>(List.of(this));
         
-        return signature.equals(this.signature);
+        for (var subpath : subpaths) {
+            var path = subpath.getPropertyPathInternal(signature);
+            if (path != null) {
+                path.add(this);
+                return path;
+            }
+        }
+
+        return null;
     }
     
     /**

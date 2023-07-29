@@ -6,6 +6,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
@@ -68,4 +69,10 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
     public AbstractPathWrapper getPathWrapper() {
         return new MongoDBPathWrapper();
     }
+
+    @Override
+    public AbstractQueryWrapper getQueryWrapper() {
+        return new MongoDBQueryWrapper();
+    }
+
 }

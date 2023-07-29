@@ -10,12 +10,12 @@ import java.util.Set;
  */
 public interface AbstractICWrapper {
 
-    public abstract void appendIdentifier(String kindName, IdentifierStructure identifier);
+    void appendIdentifier(String kindName, IdentifierStructure identifier);
 
-    public abstract void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs);
+    void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs);
 
-    public abstract AbstractStatement createICStatement();
+    AbstractStatement createICStatement();
 
-    public abstract AbstractStatement createICRemoveStatement();
+    AbstractStatement createICRemoveStatement();
 
 }

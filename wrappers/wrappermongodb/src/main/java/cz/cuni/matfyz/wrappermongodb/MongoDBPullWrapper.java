@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.wrappermongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
@@ -16,11 +16,16 @@ import cz.cuni.matfyz.core.record.RootRecord;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * @author jachymb.bartik
@@ -33,33 +38,60 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         this.databaseProvider = databaseProvider;
     }
 
-    private Iterator<Document> getDocumentIterator(PullWrapperOptions options) {
-        String kindName = options.getKindName();
+    private Iterator<Document> getDocumentIterator(PullQuery query) {
+        if (query.hasStringContent())
+            return getDocumentIteratorFromString(query.getStringContent());
+
+        String kindName = query.getKindName();
         var database = databaseProvider.getDatabase();
         var find = database.getCollection(kindName).find();
 
-        if (options.hasOffset())
-            find = find.skip(options.getOffset());
+        if (query.hasOffset())
+            find = find.skip(query.getOffset());
         
-        if (options.hasLimit())
-            find = find.limit(options.getLimit());
+        if (query.hasLimit())
+            find = find.limit(query.getLimit());
 
         return find.iterator();
     }
 
-    @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
+    private Iterator<Document> getDocumentIteratorFromString(String query) {
+        Pattern pattern = Pattern.compile("db\\.(.*)\\.aggregate\\((.*)\\)");
+        Matcher matcher = pattern.matcher(query);
+        matcher.find();
+        String collection = matcher.group(1);
+        String aggregationCommands = matcher.group(2).replace("\\\\\"", "\"");
+
+        // TODO this is seriously bad. It would be much better to use some kind of structured query object instead.
         try {
-            return innerPullForest(path, options);
+            var jsonArray = new JSONArray(aggregationCommands);
+            List<Document> pipeline = new ArrayList<>();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                Object item = jsonArray.get(i);
+                Document document = Document.parse(item.toString());
+                pipeline.add(document);
+            }
+
+            return databaseProvider.getDatabase().getCollection(collection).aggregate(pipeline).iterator();
+        }
+        catch (JSONException e) {
+            throw new PullForestException(e);
+        }
+    }
+
+    @Override
+    public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
+        try {
+            return innerPullForest(path, query);
         }
         catch (Exception e) {
             throw new PullForestException(e);
         }
     }
 
-    private ForestOfRecords innerPullForest(ComplexProperty path, PullWrapperOptions options) {
+    private ForestOfRecords innerPullForest(ComplexProperty path, PullQuery query) {
         var forest = new ForestOfRecords();
-        var iterator = getDocumentIterator(options);
+        var iterator = getDocumentIterator(query);
         
         while (iterator.hasNext()) {
             Document document = iterator.next();

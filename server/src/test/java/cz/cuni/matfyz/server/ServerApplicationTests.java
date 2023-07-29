@@ -4,6 +4,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.utils.Statistics;
@@ -117,8 +118,7 @@ class ServerApplicationTests {
         AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
 
         var newInstance = new DatabaseToInstance()
-            .setLimit(records)
-            .input(mapping, instance, pullWrapper)
+            .input(mapping, instance, pullWrapper, PullQuery.withLimit(records).fromKindName(mapping.kindName()))
             .run();
 
         message += "#" + mapping.kindName()
