@@ -140,9 +140,9 @@ public class Merger {
         jobs.add(new MergeRowsJob(this, superId, technicalId, instanceObject));
     }
 
-    private void addMergeJob(Set<DomainRow> rows, InstanceObject instanceObject) {
-        jobs.add(new MergeRowsJob(this, InstanceObject.mergeSuperIds(rows), InstanceObject.mergeTechnicalIds(rows), instanceObject));
-    }
+    // private void addMergeJob(Set<DomainRow> rows, InstanceObject instanceObject) {
+    //     jobs.add(new MergeRowsJob(this, InstanceObject.mergeSuperIds(rows), InstanceObject.mergeTechnicalIds(rows), instanceObject));
+    // }
 
     private void addReferenceJob(SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
         referenceJobs.add(new ReferenceJob(this, superId, technicalIds, instanceObject));

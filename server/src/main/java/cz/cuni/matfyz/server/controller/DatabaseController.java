@@ -39,7 +39,7 @@ public class DatabaseController {
     @GetMapping("/databases")
     public List<Database> getAllDatabases(@RequestParam Optional<Id> categoryId) {
         var databases = categoryId.isPresent() ? service.findAllInCategory(categoryId.get()) : service.findAll();
-        databases.stream().forEach(Database::hidePassword);
+        databases.forEach(Database::hidePassword);
         return databases;
     }
 

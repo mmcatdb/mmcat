@@ -2,7 +2,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
@@ -72,7 +72,7 @@ public class MTCAlgorithmTestBase {
         var url = ClassLoader.getSystemResource(fileNamePrefix + dataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
         
-        return wrapper.pullForest(path, new PullWrapperOptions.Builder().buildWithKindName(fileName));
+        return wrapper.pullForest(path, PullQuery.fromKindName(fileName));
     }
 
     public void testAlgorithm() {            

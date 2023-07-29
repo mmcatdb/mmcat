@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.server.builder;
 
 import cz.cuni.matfyz.core.mapping.Mapping;
+import cz.cuni.matfyz.core.schema.SchemaCategory;
 import cz.cuni.matfyz.server.entity.mapping.MappingWrapper;
 import cz.cuni.matfyz.server.entity.schema.SchemaCategoryWrapper;
 
@@ -30,6 +31,10 @@ public class MappingBuilder {
         final var context = new SchemaCategoryContext();
         final var category = categoryWrapper.toSchemaCategory(context);
 
+        return build(category, mappingWrapper);
+    }
+
+    public static Mapping build(SchemaCategory category, MappingWrapper mappingWrapper) {
         return new Mapping(
             category,
             category.getObject(mappingWrapper.rootObjectKey()),

@@ -54,6 +54,20 @@ public class Mapping implements Comparable<Mapping> {
         return accessPath;
     }
 
+    /**
+     * Find the path to the given signature in and return the properties along the way (without the root property).
+     * If the signature isn't found, null is returned.
+     */
+    public List<AccessPath> getPropertyPath(Signature signature) {
+        final var fullPath = this.accessPath.getPropertyPath(signature);
+        if (fullPath == null)
+            return null;
+
+        fullPath.remove(0);
+
+        return fullPath;
+    }
+
     public String kindName() {
         return kindName;
     }

@@ -115,13 +115,6 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return new FindIdsResult(foundIds, notFoundIds);
     }
 
-    // Evolution extension
-    public SuperIdWithValues copy() {
-        var mapCopy = new TreeMap<Signature, String>();
-        this.tuples.forEach((signature, string) -> mapCopy.put(signature, string));
-        return new SuperIdWithValues(mapCopy);
-    }
-
     public static SuperIdWithValues merge(SuperIdWithValues... ids) {
         var builder = new Builder();
         for (var id : ids)

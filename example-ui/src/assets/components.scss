@@ -196,3 +196,13 @@ a.router-link-exact-active:hover {
 input[type=radio] {
     @extend .me-2;
 }
+
+.textarea-dark {
+    color: white;
+    background-color: var(--color-background-dark);
+    font-family: Consolas, monospace;
+    font-size: 15px;
+    overflow: hidden;
+    padding: 8px;
+    border-radius: 8px;
+}

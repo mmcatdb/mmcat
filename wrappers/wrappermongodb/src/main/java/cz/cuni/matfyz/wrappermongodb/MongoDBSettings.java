@@ -29,6 +29,11 @@ public class MongoDBSettings {
         return database;
     }
 
+    // It should be possible something like this:
+    // mongosh mongodb://<username>:<password>@<host>:<port>/<database>?authSource=<authenticationDatabase>
+    // Meaning that it would be possible to specify the database here without the need for the getDatabase() function.
+    // However, the java mongo client still needs the database so there's probably no way around it.
+
     private String createConnectionStringFromCredentials() {
         return new StringBuilder()
             .append("mongodb://")

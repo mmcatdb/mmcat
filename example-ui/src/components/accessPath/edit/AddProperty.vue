@@ -51,6 +51,7 @@ function cancel() {
 const isSelfIdentifier = computed(() => signature.value.isEmpty && signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
+    // TODO property is auxiliary if and only if its signature is EMPTY.
     if (isAuxiliary.value)
         return signature.value.isEmpty;
     if (signature.value.isEmpty)

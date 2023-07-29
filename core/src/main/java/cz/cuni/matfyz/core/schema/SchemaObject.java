@@ -56,11 +56,6 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
     }
 
     @Override
-    public int compareTo(CategoricalObject categoricalObject) {
-        return key.compareTo(categoricalObject.key());
-    }
-
-    @Override
     public boolean equals(Object obj) {
         return obj instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
     }

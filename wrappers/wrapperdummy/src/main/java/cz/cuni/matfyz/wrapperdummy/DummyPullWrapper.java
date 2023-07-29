@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.wrapperdummy;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
@@ -32,25 +32,25 @@ import org.json.JSONObject;
 public class DummyPullWrapper implements AbstractPullWrapper {
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
+    public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
         try {
-            return innerPullForest(path, options);
+            return innerPullForest(path, query);
         }
         catch (Exception e) {
             throw new PullForestException(e);
         }
     }
 
-    private ForestOfRecords innerPullForest(ComplexProperty path, PullWrapperOptions options) throws IOException, JSONException {
-        String resourceFileName = options.getKindName();
+    private ForestOfRecords innerPullForest(ComplexProperty path, PullQuery query) throws IOException, JSONException {
+        String resourceFileName = query.getKindName();
         String jsonString = Files.readString(Path.of(resourceFileName));
         var json = new JSONArray(jsonString);
         
         var forest = new ForestOfRecords();
         
-        int offset = options.hasOffset() ? options.getOffset() : 0;
+        int offset = query.hasOffset() ? query.getOffset() : 0;
         for (int i = offset; i < json.length(); i++) {
-            if (options.hasLimit() && i >= options.getLimit())
+            if (query.hasLimit() && i >= query.getLimit())
                 break;
 
             JSONObject object = json.getJSONObject(i);

@@ -3,7 +3,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -90,7 +90,7 @@ public class PullToDDLAndDMLTestBase {
 
         ForestOfRecords forest;
         try {
-            forest = pullWrapper.pullForest(path, new PullWrapperOptions.Builder().buildWithKindName(kindName));
+            forest = pullWrapper.pullForest(path, PullQuery.fromKindName(kindName));
         }
         catch (Exception e) {
             Assertions.fail("Exception thrown when building forest.", e);

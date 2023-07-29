@@ -5,12 +5,12 @@ package cz.cuni.matfyz.abstractwrappers;
  */
 public interface AbstractDMLWrapper {
 
-    public abstract void setKindName(String name);
+    void setKindName(String name);
 
-    public abstract void append(String name, Object value);
+    void append(String name, Object value);
 
-    public abstract AbstractStatement createDMLStatement();
+    AbstractStatement createDMLStatement();
 
-    public abstract void clear();
+    void clear();
 
 }

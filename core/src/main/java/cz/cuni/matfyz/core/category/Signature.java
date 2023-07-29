@@ -100,6 +100,28 @@ public class Signature implements Serializable, Comparable<Signature> {
         final var signatureIds = signatures.stream().map(signature -> signature.ids).toList();
         return createComposite(ArrayUtils.concatenate(signatureIds));
     }
+
+    public boolean contains(Signature other) {
+        if (other.ids.length == 0)
+            return true;
+
+        for (int i = 0; i < this.ids.length; i++) {
+            if (ids[i] != other.ids[0])
+                continue;
+
+            int j = 1;
+            while (i + j < ids.length && j < other.ids.length) {
+                if (ids[i + j] != other.ids[j])
+                    break;
+                j++;
+            }
+
+            if (j == other.ids.length)
+                return true;
+        }
+
+        return false;
+    }
     
     public Signature dual() {
         int n = ids.length;
@@ -138,6 +160,10 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     public boolean isBaseDual() {
         return isBase() && ids[0] < 0;
+    }
+
+    public int getBaseValue() {
+        return this.isEmpty() ? 0 : this.ids[0];
     }
 
     private static final String SEPARATOR = ".";
@@ -275,6 +301,23 @@ public class Signature implements Serializable, Comparable<Signature> {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             return Signature.fromString(node.asText());
+        }
+
+    }
+
+    public static class Generator {
+
+        private int max;
+
+        public Generator(Collection<Signature> current) {
+            max = current.stream().flatMapToInt(signature -> Arrays.stream(signature.ids))
+                .map(Math::abs)
+                .reduce(0, Math::max);
+        }
+
+        public Signature next() {
+            max++;
+            return Signature.createBase(max);
         }
 
     }

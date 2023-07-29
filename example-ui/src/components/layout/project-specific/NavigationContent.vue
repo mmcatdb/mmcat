@@ -13,7 +13,7 @@ const route = useRoute();
 
 function defineLink(pathName: string, label: string): Link {
     return { pathName, label, params: {
-        categoryId: route.params.categoryId
+        categoryId: route.params.categoryId,
     } };
 }
 
@@ -24,7 +24,8 @@ const links = [
     defineLink('dataSourcesInCategory', 'Data sources'),
     defineLink('jobs', 'Jobs'),
     defineLink('instanceCategory', 'Instance Category'),
-    defineLink('models', 'Models')
+    defineLink('models', 'Models'),
+    defineLink('query', 'Querying'),
 ];
 </script>
 

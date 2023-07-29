@@ -2,6 +2,7 @@ package cz.cuni.matfyz.core.schema;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -69,6 +70,21 @@ public class Key implements Serializable, Comparable<Key> {
             generator.writeStartObject();
             generator.writeNumberField("value", key.value);
             generator.writeEndObject();
+        }
+
+    }
+
+    public static class Generator {
+
+        private int max;
+
+        public Generator(Collection<Key> current) {
+            max = current.stream().map(key -> key.value).reduce(0, Math::max);
+        }
+
+        public Key next() {
+            max++;
+            return new Key(max);
         }
 
     }

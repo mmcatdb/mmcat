@@ -6,6 +6,7 @@ import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.cuni.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
@@ -74,6 +75,11 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     @Override
     public AbstractPathWrapper getPathWrapper() {
         return new PostgreSQLPathWrapper();
+    }
+
+    @Override
+    public AbstractQueryWrapper getQueryWrapper() {
+        return new PostgreSQLQueryWrapper();
     }
 
 }

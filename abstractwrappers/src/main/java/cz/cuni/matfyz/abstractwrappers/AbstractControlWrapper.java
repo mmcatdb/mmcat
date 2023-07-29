@@ -9,16 +9,18 @@ import java.util.Collection;
  */
 public interface AbstractControlWrapper {
 
-    public abstract void execute(Collection<AbstractStatement> statement) throws ExecuteException;
+    void execute(Collection<AbstractStatement> statement) throws ExecuteException;
 
-    public abstract AbstractDDLWrapper getDDLWrapper();
+    AbstractDDLWrapper getDDLWrapper();
 
-    public abstract AbstractICWrapper getICWrapper();
+    AbstractICWrapper getICWrapper();
 
-    public abstract AbstractDMLWrapper getDMLWrapper();
+    AbstractDMLWrapper getDMLWrapper();
 
-    public abstract AbstractPullWrapper getPullWrapper();
+    AbstractPullWrapper getPullWrapper();
 
-    public abstract AbstractPathWrapper getPathWrapper();
+    AbstractPathWrapper getPathWrapper();
+
+    AbstractQueryWrapper getQueryWrapper();
 
 }

@@ -3,6 +3,8 @@ package cz.cuni.matfyz.core.mapping;
 import cz.cuni.matfyz.core.category.Signature;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -38,10 +40,14 @@ public class SimpleProperty extends AccessPath {
     
     @Override
     protected boolean hasSignature(Signature signature) {
-        if (signature == null)
-            return this.signature.isEmpty();
-        
         return this.signature.equals(signature);
+    }
+
+    @Override
+    protected List<AccessPath> getPropertyPathInternal(Signature signature) {
+        return this.signature.contains(signature)
+            ? new ArrayList<>(List.of(this))
+            : null;
     }
     
     @Override

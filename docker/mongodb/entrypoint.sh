@@ -8,14 +8,14 @@ db.createUser({
     user: "${DB_EXAMPLE_USERNAME}",
     pwd: "${DB_EXAMPLE_PASSWORD}",
     roles: [
-        { role: "readWrite", db: "example_basic" },
-        { role: "readWrite", db: "example_query" },
+        { role: "readWrite", db: "mm_example_basic" },
+        { role: "readWrite", db: "mm_example_query" },
     ],
 });
 db.auth("${DB_EXAMPLE_USERNAME}", "${DB_EXAMPLE_PASSWORD}");
-use example_basic;
+use mm_example_basic;
 load('example_basic.js');
 
-use example_query;
+use mm_example_query;
 load('example_query.js');
 EOSQL

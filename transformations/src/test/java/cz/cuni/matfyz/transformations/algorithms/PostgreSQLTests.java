@@ -3,7 +3,7 @@ package cz.cuni.matfyz.transformations.algorithms;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.tests.TestData;
 import cz.cuni.matfyz.wrapperdummy.DummyPullWrapper;
@@ -55,14 +55,14 @@ public class PostgreSQLTests {
     private void pullForestTestAlgorithm(String databaseName, String expectedDataFileName, ComplexProperty accessPath) throws Exception {
         var inputWrapper = createPullWrapper();
 
-        var forest = inputWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(databaseName));
+        var forest = inputWrapper.pullForest(accessPath, PullQuery.fromKindName(databaseName));
         LOGGER.debug("Pulled forest:\n" + forest);
 
         var dummyWrapper = new DummyPullWrapper();
         var url = ClassLoader.getSystemResource("postgresql/" + expectedDataFileName);
         String fileName = Paths.get(url.toURI()).toAbsolutePath().toString();
 
-        var expectedForest = dummyWrapper.pullForest(accessPath, new PullWrapperOptions.Builder().buildWithKindName(fileName));
+        var expectedForest = dummyWrapper.pullForest(accessPath, PullQuery.fromKindName(fileName));
         
         assertEquals(expectedForest.toString(), forest.toString());
     }

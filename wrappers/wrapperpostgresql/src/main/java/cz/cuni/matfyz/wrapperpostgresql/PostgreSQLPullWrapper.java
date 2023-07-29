@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.wrapperpostgresql;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.PullWrapperOptions;
 import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
@@ -33,18 +33,17 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         this.connectionProvider = connectionProvider;
     }
 
-    private PreparedStatement prepareStatement(Connection connection, PullWrapperOptions options) throws SQLException {
-        // Prevent SQL injection.
-        if (!options.getKindName().matches("^[_a-zA-Z0-9.]+$"))
-            throw new SQLException("Invalid table name.");
+    private PreparedStatement prepareStatement(Connection connection, PullQuery query) throws SQLException {
+        if (query.hasStringContent())
+            return connection.prepareStatement(query.getStringContent());
 
-        String command = "SELECT * FROM " + options.getKindName();
+        var command = "SELECT * FROM " + query.getKindName();
 
-        if (options.hasLimit())
-            command += "\nLIMIT " + options.getLimit();
+        if (query.hasLimit())
+            command += "\nLIMIT " + query.getLimit();
 
-        if (options.hasOffset())
-            command += "\nOFFSET " + options.getOffset();
+        if (query.hasOffset())
+            command += "\nOFFSET " + query.getOffset();
 
         command += ";";
 
@@ -52,11 +51,13 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException {
+    public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
         try (
             Connection connection = connectionProvider.getConnection();
-            PreparedStatement statement = prepareStatement(connection, options);
+            PreparedStatement statement = prepareStatement(connection, query);
         ) {
+            LOGGER.info("Execute PostgreSQL query:\n{}", statement);
+
             try (ResultSet resultSet = statement.executeQuery()) {
                 ForestOfRecords forest = new ForestOfRecords();
                 

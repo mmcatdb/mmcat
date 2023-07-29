@@ -67,8 +67,16 @@ public class ComplexRecord extends DataRecord implements IComplexRecord {
 
     public SimpleRecord<?> findSimpleRecord(Signature signature) {
         final var directSimpleRecord = getSimpleRecord(signature);
-        if (directSimpleRecord != null || signature.isBase())
+        if (directSimpleRecord != null)
             return directSimpleRecord;
+
+        final var auxiliaryChildren = children.get(Signature.createEmpty());
+        if (auxiliaryChildren != null && auxiliaryChildren.size() == 1)
+            return auxiliaryChildren.get(0).findSimpleRecord(signature);
+
+        // There is no hope to find the simple record in the children because that would require at least two-part signature (one base to find the child and one to find the record in it)
+        if (signature.isBase())
+            return null;
 
         var currentPath = Signature.createEmpty();
         for (final var base : signature.toBases()) {
@@ -151,7 +159,7 @@ public class ComplexRecord extends DataRecord implements IComplexRecord {
     @Override
     Set<DataRecord> records() {
         Set output = Set.of(this);
-        children.values().stream().forEach(set -> output.addAll(set));
+        children.values().forEach(set -> output.addAll(set));
         
         return output;
     }

@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.abstractwrappers;
 
 import cz.cuni.matfyz.abstractwrappers.exception.PullForestException;
+import cz.cuni.matfyz.abstractwrappers.utils.PullQuery;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.record.ForestOfRecords;
 
@@ -9,6 +10,6 @@ import cz.cuni.matfyz.core.record.ForestOfRecords;
  */
 public interface AbstractPullWrapper {
 
-    public abstract ForestOfRecords pullForest(ComplexProperty path, PullWrapperOptions options) throws PullForestException;
+    ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException;
 
 }

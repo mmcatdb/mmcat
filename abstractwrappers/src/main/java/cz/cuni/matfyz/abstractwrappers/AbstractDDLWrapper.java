@@ -10,23 +10,22 @@ import java.util.Set;
  */
 public interface AbstractDDLWrapper {
 
-    public static final String PATH_SEPARATOR = "/";
-    public static final String EMPTY_NAME = StaticName.createAnonymous().getStringName();
+    static final String PATH_SEPARATOR = "/";
+    static final String EMPTY_NAME = StaticName.createAnonymous().getStringName();
+    static final String INDENTATION = "    ";
 
-    public static final String INDENTATION = "    ";
+    void setKindName(String name);
 
-    public abstract void setKindName(String name);
+    boolean isSchemaLess();
 
-    public abstract boolean isSchemaLess();
+    boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedException;
 
-    public abstract boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedException;
+    boolean addSimpleArrayProperty(Set<String> names, boolean required) throws UnsupportedException;
 
-    public abstract boolean addSimpleArrayProperty(Set<String> names, boolean required) throws UnsupportedException;
+    boolean addComplexProperty(Set<String> names, boolean required) throws UnsupportedException;
 
-    public abstract boolean addComplexProperty(Set<String> names, boolean required) throws UnsupportedException;
+    boolean addComplexArrayProperty(Set<String> names, boolean required) throws UnsupportedException;
 
-    public abstract boolean addComplexArrayProperty(Set<String> names, boolean required) throws UnsupportedException;
-
-    public abstract AbstractStatement createDDLStatement();
+    AbstractStatement createDDLStatement();
 
 }

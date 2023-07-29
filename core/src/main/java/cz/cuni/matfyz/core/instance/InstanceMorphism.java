@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism {
+public class InstanceMorphism implements Morphism {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMorphism.class);
@@ -100,12 +100,6 @@ public class InstanceMorphism implements Comparable<InstanceMorphism>, Morphism 
         return schemaMorphism.min();
     }
 
-    @Override
-    public int compareTo(InstanceMorphism instanceMorphism) {
-        var domainComparison = dom.compareTo(instanceMorphism.dom);
-        return domainComparison != 0 ? domainComparison : cod.compareTo(instanceMorphism.cod);
-    }
-    
     @Override
     public String toString() {
         var builder = new StringBuilder();

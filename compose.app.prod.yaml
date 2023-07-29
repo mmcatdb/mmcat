@@ -3,7 +3,7 @@ version: '3'
 services:
     server:
         container_name: "mm-server"
-        restart: on-failure
+        restart: always
         build:
             context: .
             dockerfile: docker/server/prod/Dockerfile
@@ -17,7 +17,7 @@ services:
     example-ui:
        container_name: "mm-example-ui"
        # image: ${IMAGE_TAG}
-       restart: on-failure
+       restart: always
        environment:
            - NODE_ENV=production
        build:

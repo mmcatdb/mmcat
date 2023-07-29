@@ -58,6 +58,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
         return superId.getValue(signature);
     }
 
+    // These properties are managed by the morphisms, so they should not be cloned
     private final Map<InstanceMorphism, Set<MappingRow>> mappingsFrom = new TreeMap<>();
     private final Map<InstanceMorphism, Set<MappingRow>> mappingsTo = new TreeMap<>();
 
