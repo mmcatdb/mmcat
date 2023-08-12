@@ -2,7 +2,7 @@ version: '3'
 
 services:
     adminer:
-        container_name: "mm-adminer"
+        container_name: "mmcat-adminer"
         restart: always
         build: 
             context: .
@@ -11,7 +11,7 @@ services:
             - ${ADMINER_PORT}:8080
 
     postgresql:
-        container_name: "mm-postgresql"
+        container_name: "mmcat-postgresql"
         restart: always
         build: 
             context: .
@@ -26,7 +26,7 @@ services:
             - ${POSTGRESQL_PORT}:5432
 
     mongodb:
-        container_name: "mm-mongodb"
+        container_name: "mmcat-mongodb"
         restart: always
         build: 
             context: .
@@ -39,7 +39,7 @@ services:
             - ${MONGODB_PORT}:27017
 
     neo4j:
-        container_name: "mm-neo4j"
+        container_name: "mmcat-neo4j"
         restart: always
         build: 
             context: .
@@ -59,4 +59,4 @@ services:
 
 networks:
     default:
-        name: mm-network
+        name: mmcat-network

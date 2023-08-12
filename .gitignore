@@ -1,9 +1,2 @@
-*DS_Store
-*/MyNeo4jDB/*
-/mm-cat/transformations/nbproject/
-/mm-cat/tests/nbproject/
-**/target/**
 .vscode
-*.properties
-!*.sample
 .env

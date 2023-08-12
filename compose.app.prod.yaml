@@ -2,10 +2,10 @@ version: '3'
 
 services:
     server:
-        container_name: "mm-server"
+        container_name: "mmcat-server"
         restart: always
         build:
-            context: .
+            context: library
             dockerfile: docker/server/prod/Dockerfile
             args:
                 serverPort: ${SERVER_PORT}
@@ -14,15 +14,15 @@ services:
         expose:
             - "${SERVER_PORT}"
 
-    example-ui:
-       container_name: "mm-example-ui"
+    client:
+       container_name: "mmcat-client"
        # image: ${IMAGE_TAG}
        restart: always
        environment:
            - NODE_ENV=production
        build:
            # Sets source directory for all COPY, ADD, etc. commands in the Dockerfile
-           context: example-ui
+           context: client
            # Path to the dockerfile
            dockerfile: docker/prod/Dockerfile
        ports:
@@ -31,5 +31,5 @@ services:
 
 networks:
     default:
-        name: mm-network
+        name: mmcat-network
         external: true

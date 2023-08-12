@@ -1,24 +1,25 @@
-# MM-evocat
+# MM-cat
 
 A multi-model data modelling and evolution framework based on category theory. It consists of the following modules:
-- [Core](./core/README.md) defines classes needed by other modules.
-- [Transformations](./transformations/README.md) contains algorithms for transforming data from logical to conceptual model (and back).
-- [Wrappers](./wrappers/README.md) provides funcionalities specific for different databases.
-- [Evolution](./evolution/README.md) will be implemented later and it will include algorithms for the evolution of both the conceptual and the logical models.
-- [Backend application](./server/README.md) provides an API which exposes the functionality of the other modules. It also contains a job scheduler for the transformation algorithms.
-- [Frontend application](./example-ui//README.md) is used as a UI for the backend API. It is also a tool for modelling all the necessary data structures which are then used by the other modules.
+- [Core](./library/core/README.md) defines classes needed by other modules.
+- [Transformations](./library/transformations/README.md) contains algorithms for transforming data from logical to conceptual model (and back).
+- [Wrappers](./library/wrappers/README.md) provides funcionalities specific for different databases.
+- [Evolution](./library/evolution/README.md) will be implemented later and it will include algorithms for the evolution of both the conceptual and the logical models.
+- [Backend application](./library/server/README.md) provides an API which exposes the functionality of the other modules. It also contains a job scheduler for the transformation algorithms.
+- [Frontend application](./client/README.md) is used as a UI for the backend API. It is also a tool for modelling all the necessary data structures which are then used by the other modules.
 
 # Installation
 
 ## Custom
 
-- Make sure you have all the required software for both [Backend](./server/README.md#requirements) and [Frontend](./example-ui/README.md#configuration) applications.
+- Make sure you have all the required software for both [Backend](./library/server/README.md#requirements) and [Frontend](./client/README.md#configuration) applications.
 - To compile the java modules and install dependencies, run:
 ```bash
+cd library
 #mvn clean install -Dmaven.test.skip
 mvn clean install -DskipTests
 ```
-- Then follow the steps in the [Backend](./server/README.md) and [Frontend](./example-ui/README.md) guides.
+- Then follow the steps in the [Backend](./library/server/README.md) and [Frontend](./client/README.md) guides.
 - Lastly, you need a web server to make both applications available.
 
 ## Docker
@@ -28,8 +29,8 @@ mvn clean install -DskipTests
 cp .env.sample .env
 vim .env
 
-cp example-ui/.env.sample example-ui/.env
-vim example-ui/.env
+cp client/.env.sample client/.env
+vim client/.env
 ```
 
 - First create the databases, then other containers:
