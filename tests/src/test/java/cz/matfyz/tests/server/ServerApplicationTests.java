@@ -11,6 +11,7 @@ import cz.matfyz.core.utils.Statistics;
 import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdProvider;
+import cz.matfyz.server.ServerApplication;
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.database.Database;
@@ -24,7 +25,6 @@ import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -35,7 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * @author jachymb.bartik
  */
-@SpringBootTest
+@SpringBootTest(classes = ServerApplication.class)
 class ServerApplicationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);

@@ -7,6 +7,7 @@ import cz.matfyz.core.utils.io.FileInputStreamProvider;
 import cz.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.matfyz.integration.algorithms.JsonLdToRDF;
 import cz.matfyz.integration.algorithms.RDFToInstance;
+import cz.matfyz.server.ServerApplication;
 import cz.matfyz.server.builder.SchemaCategoryContext;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.service.SchemaCategoryService;
@@ -22,7 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * @author jachymb.bartik
  */
-@SpringBootTest
+@SpringBootTest(classes = ServerApplication.class)
 public class IntegrationTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
