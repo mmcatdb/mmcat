@@ -44,45 +44,45 @@ public abstract class BaseQueryWrapper {
         return value;
     }
 
-    public void defineKind(KindInstance kind, String kindName) {
-        LOGGER.info("[define kind] {}", kindName);
-        kinds.put(kind, kindName);
-    }
+    // public void defineKind(KindInstance kind, String kindName) {
+    //     // LOGGER.info("[define kind] {}", kindName);
+    //     kinds.put(kind, kindName);
+    // }
 
     public void addProjection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId) {
-        LOGGER.info("[add projection]\n{}\n{}\n{}", propertyPath, kind, variableId);
+        // LOGGER.info("[add projection]\n{}\n{}\n{}", propertyPath, kind, variableId);
         projections.put(variableId, new Projection(propertyPath, kind, variableId));
     }
 
     public void addConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant) {
-        LOGGER.info("[add constant filter]\n{}\n{}\n{}", variableId, operator, constant);
+        // LOGGER.info("[add constant filter]\n{}\n{}\n{}", variableId, operator, constant);
         constantFilters.add(new ConstantFilter(variableId, operator, constant));
     }
 
     public void addVariablesFilter(VariableIdentifier lhsVariableId, ComparisonOperator operator, VariableIdentifier rhsVariableId) {
-        LOGGER.info("[add variables filter]\n{}\n{}\n{}", lhsVariableId, operator, rhsVariableId);
+        // LOGGER.info("[add variables filter]\n{}\n{}\n{}", lhsVariableId, operator, rhsVariableId);
         variablesFilters.add(new VariablesFilter(lhsVariableId, operator, rhsVariableId));
     }
 
     public void addValuesFilter(VariableIdentifier variableId, List<String> constants) {
-        LOGGER.info("[add values filter]\n{}\n{}", variableId, constants);
+        // LOGGER.info("[add values filter]\n{}\n{}", variableId, constants);
         valuesFilters.add(new ValuesFilter(variableId, constants));
     }
 
-    public void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind) {
+    // public void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind) {
+    public void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind) {
         LOGGER.info("[add join]\n{}\n{}\n{}", lhsKind, joinProperties, rhsKind);
-        // var newJoin = new Join(lhsKind, joinProperties, rhsKind);
+        for (final var join : joins) {
+            if (lhsKind.equals(join.lhsKind) && rhsKind.equals(join.rhsKind)) {
+                LOGGER.info("Duplicate join found.");
+                return;
+            }
 
-        // for (var existingJoin : joins) {
-        //     if (existingJoin == newJoin) {
-        //         System.out.println("Duplicate join found, ignoring");
-        //         return;
-        //     }
-        //     else if (existingJoin.lhsKind.equals(rhsKind) && existingJoin.rhsKind.equals(lhsKind)) {
-        //         System.out.println("Reversed duplicate join found, ignoring");
-        //         return;
-        //     }
-        // }
+            if (lhsKind.equals(join.rhsKind) && rhsKind.equals(join.lhsKind)) {
+                LOGGER.info("Duplicate reverse join found.");
+                return;
+            }
+        }
 
         joins.add(new Join(lhsKind, joinProperties, rhsKind));
     }

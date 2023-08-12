@@ -35,4 +35,9 @@ public class Variable extends QueryNode implements ValueNode {
         return other instanceof Variable variable && variable.name.equals(name);
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
 }

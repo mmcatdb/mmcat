@@ -37,9 +37,9 @@ public class MappingBuilder {
     public static Mapping build(SchemaCategory category, MappingWrapper mappingWrapper) {
         return new Mapping(
             category,
-            category.getObject(mappingWrapper.rootObjectKey()),
-            mappingWrapper.accessPath(),
+            mappingWrapper.rootObjectKey(),
             mappingWrapper.kindName(),
+            mappingWrapper.accessPath(),
             List.of(mappingWrapper.primaryKey())
         );
     }

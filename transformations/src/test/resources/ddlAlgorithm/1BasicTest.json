@@ -1,6 +1,0 @@
-[
-    "setKindName(order)",
-    "isSchemaLess()",
-    "createDDLStatement()",
-    "addSimpleProperty([ number ], true)"
-]

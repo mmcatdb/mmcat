@@ -1,7 +1,0 @@
-[
-    "setKindName(order)",
-    "isSchemaLess()",
-    "createDDLStatement()",
-    "addSimpleProperty([ _id/number ], true)",
-    "addSimpleArrayProperty([ _id/customer ], false)"
-]

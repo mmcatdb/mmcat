@@ -41,11 +41,16 @@ public class DummyPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    private ForestOfRecords innerPullForest(ComplexProperty path, PullQuery query) throws IOException, JSONException {
+    private String getJsonString(PullQuery query) throws IOException {
+        if (query.hasStringContent())
+            return query.getStringContent();
+
         String resourceFileName = query.getKindName();
-        String jsonString = Files.readString(Path.of(resourceFileName));
-        var json = new JSONArray(jsonString);
-        
+        return Files.readString(Path.of(resourceFileName));
+    }
+
+    private ForestOfRecords innerPullForest(ComplexProperty path, PullQuery query) throws IOException, JSONException {
+        var json = new JSONArray(getJsonString(query));
         var forest = new ForestOfRecords();
         
         int offset = query.hasOffset() ? query.getOffset() : 0;

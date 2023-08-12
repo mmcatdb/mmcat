@@ -20,10 +20,10 @@ import org.neo4j.driver.Value;
  */
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
-    private SessionProvider sessionProvider;
+    private Neo4jProvider provider;
     
-    public Neo4jPullWrapper(SessionProvider sessionProvider) {
-        this.sessionProvider = sessionProvider;
+    public Neo4jPullWrapper(Neo4jProvider provider) {
+        this.provider = provider;
     }
 
     private String createRelationshipQueryString(PullQuery query) {
@@ -103,7 +103,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         final var forest = new ForestOfRecords();
 
         try (
-            final Session session = sessionProvider.getSession();
+            final Session session = provider.getSession();
         ) {
             session
                 .executeRead(tx -> {
@@ -136,7 +136,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         final var forest = new ForestOfRecords();
 
         try (
-            final Session session = sessionProvider.getSession();
+            final Session session = provider.getSession();
         ) {
             session
                 .executeRead(tx -> {
@@ -174,7 +174,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     public String readAllAsStringForTests() {
         try (
-            final Session session = sessionProvider.getSession();
+            final Session session = provider.getSession();
         ) {
             /*
             final var results = session.executeRead(tx -> {
@@ -190,7 +190,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
             */
 
             final var results = session.executeRead(tx -> {
-                final var query = new Query("MATCH (a: order) RETURN a;");
+                final var query = new Query("MATCH (a:Order) RETURN a;");
 
                 return tx.run(query).stream().map(node -> {
                     return nodeToString(node.get("a"));

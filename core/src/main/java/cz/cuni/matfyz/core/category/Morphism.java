@@ -10,18 +10,19 @@ public interface Morphism extends Comparable<Morphism> {
     // However, it doesn't mean there is one object from the codomain for each object from the domain.
     public enum Min {
         ZERO,
-        ONE
+        ONE,
     }
 
     public enum Max {
         ONE,
-        STAR
+        STAR,
     }
 
     public enum Tag {
         isa,
         role,
-        projection
+        projection,
+        key,
     }
 
     public abstract CategoricalObject dom();

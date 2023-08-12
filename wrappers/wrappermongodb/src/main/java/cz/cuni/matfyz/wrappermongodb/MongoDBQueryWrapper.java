@@ -57,7 +57,8 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     }
 
     private String baseCollectionName() {
-        final var kindNames = new TreeSet<>(projections.values().stream().map(projection -> kinds.get(projection.kind)).toList());
+        // final var kindNames = new TreeSet<>(projections.values().stream().map(projection -> kinds.get(projection.kind)).toList());
+        final var kindNames = new TreeSet<>(projections.values().stream().map(projection -> projection.kind.mapping.kindName()).toList());
         if (kindNames.isEmpty())
             throw QueryException.message("No collection to aggregate on.");
         if (kindNames.size() > 1)

@@ -5,7 +5,6 @@ import cz.cuni.matfyz.core.instance.DomainRow;
 import cz.cuni.matfyz.core.instance.InstanceCategory;
 import cz.cuni.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.cuni.matfyz.core.instance.InstanceObject;
-import cz.cuni.matfyz.core.instance.Merger;
 import cz.cuni.matfyz.core.instance.SuperIdWithValues;
 import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.ComplexProperty;
@@ -71,7 +70,7 @@ public class MTCAlgorithm {
         SuperIdWithValues superId = fetchSuperId(object.superId(), rootRecord);
         Deque<StackTriple> masterStack = new LinkedList<>();
         
-        DomainRow row = modifyActiveDomain(instanceObject, superId);
+        DomainRow row = instanceObject.getOrCreateRow(superId);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
         
         return masterStack;
@@ -86,7 +85,7 @@ public class MTCAlgorithm {
         InstanceObject childInstance = triple.parentToChild.cod();
         
         for (final var superId : superIds) {
-            DomainRow childRow = modifyActiveDomain(childInstance, superId.superId());
+            DomainRow childRow = childInstance.getOrCreateRow(superId.superId());
             childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
 
             //childInstance.merge(childRow);
@@ -113,17 +112,6 @@ public class MTCAlgorithm {
         }
         
         return builder.build();
-    }
-
-    /**
-     * Creates DomainRow from given SuperIdWithValues, adds it to the instance object and merges it with other potentially duplicite rows.
-     * @param instanceObject
-     * @param superId
-     * @return
-     */
-    private static DomainRow modifyActiveDomain(InstanceObject instanceObject, SuperIdWithValues superId) {
-        var merger = new Merger();
-        return merger.merge(superId, instanceObject);
     }
 
     private DomainRow addRelation(InstancePath path, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {

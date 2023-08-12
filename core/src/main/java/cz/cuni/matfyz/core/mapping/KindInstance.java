@@ -21,6 +21,13 @@ public class KindInstance implements Comparable<KindInstance> {
         return id - other.id;
     }
 
+    /**
+     * When joining in databases, each kind can be accessed only once. Therefore, we have to identify the kinds by their database and name.
+     */
+    public boolean isSameKind(KindInstance other) {
+        return databaseId.equals(other.databaseId) && mapping.kindName().equals(other.mapping.kindName());
+    }
+
     public static class KindInstanceBuilder {
 
         private int id = 0;
@@ -36,8 +43,8 @@ public class KindInstance implements Comparable<KindInstance> {
         final var builder = new StringBuilder();
         builder.append("{\n")
             .append("    id: ").append(id).append(",\n")
-            .append("    kindName: ").append(databaseId).append(",\n")
-            .append("    databaseId: ").append(mapping.kindName()).append(",\n")
+            .append("    databaseId: ").append(databaseId).append(",\n")
+            .append("    kindName: ").append(mapping.kindName()).append(",\n")
             .append("}");
 
         return builder.toString();

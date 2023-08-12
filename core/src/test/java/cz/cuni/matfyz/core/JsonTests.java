@@ -4,12 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import cz.cuni.matfyz.core.category.Signature;
+import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.DynamicName;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
-import cz.cuni.matfyz.core.schema.Key;
-import cz.cuni.matfyz.core.schema.SchemaObject;
-import cz.cuni.matfyz.core.tests.TestData;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,7 +24,6 @@ public class JsonTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonTests.class);
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static final TestData data = new TestData();
 
     @Test
     public void signature() {
@@ -52,35 +49,25 @@ public class JsonTests {
         fullTest(dynamic);
     }
 
-    // TODO reorganize and rename later
-    public void toJsonConversion() throws Exception {
-        final var category = data.createDefaultSchemaCategory();
-
-        final var order = category.getObject(data.orderKey);
-        
-        LOGGER.info(mapper.writeValueAsString(order.key()));
-        LOGGER.info(mapper.writeValueAsString(mapper.readValue(mapper.writeValueAsString(order.key()), Key.class)));
-        LOGGER.info(mapper.writeValueAsString(order));
-        LOGGER.info(mapper.writeValueAsString(mapper.readValue(mapper.writeValueAsString(order), SchemaObject.class)));
-
-
-        final var json = """
-            {"ids": {"type": "Signatures", "signatureIds": [["1"]]}, "key": {"value": 1}, "label": "Customer", "superId": ["1"]}
-            """;
-
-        LOGGER.info(mapper.writeValueAsString(mapper.readValue(json, SchemaObject.class)));
-    }
-
     @Test
     public void accessPath() {
-        final var simple = new SimpleProperty("number", data.orderToNumber);
+        final var simple = new SimpleProperty("simple", Signature.createBase(1));
         fullTest(simple);
 
-        final var complex = data.path_orderRoot();
+        final var complex = ComplexProperty.create("complex", Signature.createBase(2),
+            simple,
+            new SimpleProperty("simple2", Signature.createBase(3))
+        );
         fullTest(complex);
 
-        final var nested = data.path_nestedDoc();
-        fullTest(nested);
+        final var path = ComplexProperty.createRoot(
+            complex,
+            ComplexProperty.createAuxiliary(new StaticName("auxiliary")),
+            ComplexProperty.create("dynamic", Signature.createBase(4).concatenate(Signature.createBase(5)),
+                new SimpleProperty(Signature.createBase(6), Signature.createBase(7))
+            )
+        );
+        fullTest(path);
     }
 
     private record ExceptionData(

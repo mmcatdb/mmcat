@@ -18,8 +18,8 @@ public class SignatureTests {
 
     static Stream<Arguments> traverseThroughSucceedsArguments() {
         return Stream.of(
-            Arguments.of("1;2;3;4", "-2;-1", "3;4"),
-            Arguments.of("1;2;3;4", "EMPTY", "1;2;3;4"),
+            Arguments.of("1.2.3.4", "-2.-1", "3.4"),
+            Arguments.of("1.2.3.4", "EMPTY", "1.2.3.4"),
             Arguments.of("EMPTY", "EMPTY", "EMPTY")
         );
     }
@@ -38,8 +38,8 @@ public class SignatureTests {
 
     static Stream<Arguments> traverseThroughFailsArguments() {
         return Stream.of(
-            Arguments.of("1;2;3;4", "-1;-2"),
-            Arguments.of("1;2", "-3;-2;-1")
+            Arguments.of("1.2.3.4", "-1.-2"),
+            Arguments.of("1.2", "-3.-2.-1")
         );
     }
 
@@ -56,12 +56,12 @@ public class SignatureTests {
 
     static Stream<Arguments> traverseAlongSucceedsArguments() {
         return Stream.of(
-            Arguments.of("1;2;3;4", "1;2", "3;4"),
-            Arguments.of("1;2;3;4", "EMPTY", "1;2;3;4"),
-            Arguments.of("EMPTY", "1;2;3;4", "-4;-3;-2;-1"),
+            Arguments.of("1.2.3.4", "1.2", "3.4"),
+            Arguments.of("1.2.3.4", "EMPTY", "1.2.3.4"),
+            Arguments.of("EMPTY", "1.2.3.4", "-4.-3.-2.-1"),
             Arguments.of("EMPTY", "EMPTY", "EMPTY"),
-            Arguments.of("1;2", "1;2;3;4", "-4;-3"),
-            Arguments.of("1;2", "-1", "1;1;2")
+            Arguments.of("1.2", "1.2.3.4", "-4.-3"),
+            Arguments.of("1.2", "-1", "1.1.2")
         );
     }
 

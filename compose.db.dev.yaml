@@ -48,12 +48,14 @@ services:
         environment:
             - NEO4J_AUTH=neo4j/${DB_EXAMPLE_PASSWORD}
         expose:
-            - 7473
+            - 7473 # This one is for https, which can be ignored on localhost
             - 7474
             - 7687
         ports:
             # Make the DB available on localhost for development.
             - ${MM_NEO4J_PORT}:7687
+            # The bolt port has to be as is because the browser client expects it to be there.
+            - ${MM_NEO4J_BROWSER_PORT}:7474
 
 networks:
     default:

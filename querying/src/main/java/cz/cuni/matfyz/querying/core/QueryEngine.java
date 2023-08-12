@@ -54,8 +54,8 @@ public class QueryEngine {
         var controlWrapper = allKinds.stream().filter(k -> k.databaseId == kindsInPart.get(0).databaseId).findFirst().get().wrapper;
         var queryWrapper = controlWrapper.getQueryWrapper();
 
-        for (var kind : kindsInPart)
-            queryWrapper.defineKind(kind, kind.mapping.kindName());
+        // for (var kind : kindsInPart)
+        //     queryWrapper.defineKind(kind, kind.mapping.kindName());
 
         processProjectionTriples(part, variableTypes, mappingBuilder, queryWrapper);
         processJoinTriples(part, variableTypes, queryWrapper);
@@ -95,13 +95,11 @@ public class QueryEngine {
     private void processJoinTriples(QueryPart part, Map<String, SchemaObject> variableTypes, AbstractQueryWrapper queryWrapper) {
         for (var tripleKindA : part.triplesMapping) {
             for (var tripleKindB : part.triplesMapping) {
-                // TODO equals
                 if (!tripleKindA.triple.object.equals(tripleKindB.triple.subject) && !tripleKindA.triple.subject.equals(tripleKindB.triple.subject))
                     continue;
 
                 if (tripleKindA.equals(tripleKindB))
                     continue;
-
                 
                 var intersectionVar = tripleKindB.triple.subject;
                 var intersectionObject = variableTypes.get(intersectionVar.name);
@@ -128,7 +126,7 @@ public class QueryEngine {
                     joinProperties.add(new JoinedProperty(lhsPropertyPath, rhsPropertyPath));
                 }
 
-                queryWrapper.addJoin(tripleKindA.kind, joinProperties, tripleKindB.kind);
+                queryWrapper.addJoin(tripleKindA.kind.mapping.kindName(), joinProperties, tripleKindB.kind.mapping.kindName());
             }
         }
     }

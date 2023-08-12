@@ -48,6 +48,8 @@ function cancel() {
     emit('cancel');
 }
 
+// TODO this should probably also change thanks to the auxiliary - EMPTY signature thing.
+// However, it's not that trivial. Currently, because of removing of auxiliary nodes before MTC, a complex property with dynamic name can't be auxiliary.
 const isSelfIdentifier = computed(() => signature.value.isEmpty && signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {

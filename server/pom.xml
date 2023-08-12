@@ -99,6 +99,7 @@
                 <configuration>
                     <mainClass>cz.cuni.matfyz.server.ServerApplication</mainClass>
                     <executable>true</executable>
+                    <classifier>app</classifier>
                 </configuration>
                 <executions>
                     <execution>

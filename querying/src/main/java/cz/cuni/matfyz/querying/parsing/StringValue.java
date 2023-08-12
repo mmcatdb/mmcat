@@ -21,4 +21,9 @@ public class StringValue extends QueryNode implements ValueNode {
         return other instanceof StringValue wrapper && wrapper.value.equals(value);
     }
 
+    @Override
+    public String toString() {
+        return this.value;
+    }
+
 }

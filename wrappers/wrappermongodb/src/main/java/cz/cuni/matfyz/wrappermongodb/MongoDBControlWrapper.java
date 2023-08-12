@@ -1,16 +1,15 @@
 package cz.cuni.matfyz.wrappermongodb;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import com.mongodb.MongoException;
 import org.slf4j.Logger;
@@ -26,10 +25,10 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
 
     static final String TYPE = "mongodb";
 
-    private DatabaseProvider databaseProvider;
+    private MongoDBProvider provider;
     
-    public MongoDBControlWrapper(DatabaseProvider databaseProvider) {
-        this.databaseProvider = databaseProvider;
+    public MongoDBControlWrapper(MongoDBProvider provider) {
+        this.provider = provider;
     }
 
     @Override
@@ -37,7 +36,7 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
         for (final var statement : statements) {
             try {
                 if (statement instanceof MongoDBCommandStatement commandStatement)
-                    databaseProvider.getDatabase().runCommand(commandStatement.getCommand());
+                    provider.getDatabase().runCommand(commandStatement.getCommand());
             }
             catch (MongoException e) {
                 throw new ExecuteException(e, statements);
@@ -45,33 +44,53 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
         }
     }
 
+    // @Override
+    public void execute(Path path) {
+        try {
+            String commandString = "mongosh " + provider.settings.getConnectionString() + " " + path.toString();
+
+            Runtime runtime = Runtime.getRuntime();
+            Process process = runtime.exec(commandString);
+            process.waitFor();
+
+            BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
+        }
+        catch (InterruptedException e) {
+            throw new ExecuteException(e, path);
+        }
+        catch (IOException e) {
+            throw new ExecuteException(e, path);
+        }
+    }
+
     @Override
-    public AbstractDDLWrapper getDDLWrapper() {
+    public MongoDBDDLWrapper getDDLWrapper() {
         return new MongoDBDDLWrapper();
     }
 
     @Override
-    public AbstractICWrapper getICWrapper() {
+    public MongoDBICWrapper getICWrapper() {
         return new MongoDBICWrapper();
     }
 
     @Override
-    public AbstractDMLWrapper getDMLWrapper() {
+    public MongoDBDMLWrapper getDMLWrapper() {
         return new MongoDBDMLWrapper();
     }
 
     @Override
-    public AbstractPullWrapper getPullWrapper() {
-        return new MongoDBPullWrapper(databaseProvider);
+    public MongoDBPullWrapper getPullWrapper() {
+        return new MongoDBPullWrapper(provider);
     }
 
     @Override
-    public AbstractPathWrapper getPathWrapper() {
+    public MongoDBPathWrapper getPathWrapper() {
         return new MongoDBPathWrapper();
     }
 
     @Override
-    public AbstractQueryWrapper getQueryWrapper() {
+    public MongoDBQueryWrapper getQueryWrapper() {
         return new MongoDBQueryWrapper();
     }
 

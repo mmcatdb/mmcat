@@ -49,7 +49,7 @@ public interface AbstractQueryWrapper {
      */
     QueryStatement buildStatement();
 
-    void defineKind(KindInstance kind, String kindName);
+    // void defineKind(KindInstance kind, String kindName);
 
     void addProjection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId);
 
@@ -59,7 +59,8 @@ public interface AbstractQueryWrapper {
 
     void addValuesFilter(VariableIdentifier variableId, List<String> constants);
 
-    void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind);
+    // void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind);
+    void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind);
     
     enum ComparisonOperator {
         EQUALS,
@@ -146,11 +147,13 @@ public interface AbstractQueryWrapper {
      * The `join_properties` contains a list of tuples, each of which contains a property path from the left kind, meaning that this property should be inner joined on equality to the corresponding property from the right kind.
      */
     public static class Join implements Operation {
-        public final KindInstance lhsKind;
+        // public final KindInstance lhsKind;
+        public final String lhsKind;
         public final List<JoinedProperty> joinProperties;
-        public final KindInstance rhsKind;
+        // public final KindInstance rhsKind;
+        public final String rhsKind;
 
-        public Join(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind) {
+        public Join(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind) {
             this.lhsKind = lhsKind;
             this.joinProperties = joinProperties;
             this.rhsKind = rhsKind;

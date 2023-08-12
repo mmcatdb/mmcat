@@ -5,12 +5,12 @@ import cz.cuni.matfyz.server.entity.Id;
 import cz.cuni.matfyz.server.entity.database.Database;
 import cz.cuni.matfyz.server.exception.DatabaseException;
 import cz.cuni.matfyz.wrappermongodb.MongoDBControlWrapper;
-import cz.cuni.matfyz.wrappermongodb.MongoDBDatabaseProvider;
+import cz.cuni.matfyz.wrappermongodb.MongoDBProvider;
 import cz.cuni.matfyz.wrappermongodb.MongoDBSettings;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jControlWrapper;
-import cz.cuni.matfyz.wrapperneo4j.Neo4jSessionProvider;
+import cz.cuni.matfyz.wrapperneo4j.Neo4jProvider;
 import cz.cuni.matfyz.wrapperneo4j.Neo4jSettings;
-import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLConnectionProvider;
+import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLProvider;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 import cz.cuni.matfyz.wrapperpostgresql.PostgreSQLSettings;
 
@@ -43,7 +43,7 @@ public class WrapperService {
 
     // MongoDB
 
-    private Map<Id, MongoDBDatabaseProvider> mongoDBCache = new TreeMap<>();
+    private Map<Id, MongoDBProvider> mongoDBCache = new TreeMap<>();
 
     private MongoDBControlWrapper getMongoDBControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!mongoDBCache.containsKey(database.id))
@@ -55,15 +55,15 @@ public class WrapperService {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static MongoDBDatabaseProvider createMongoDBProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private static MongoDBProvider createMongoDBProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(database.settings, MongoDBSettings.class);
 
-        return new MongoDBDatabaseProvider(settings);
+        return new MongoDBProvider(settings);
     }
 
     // PostgreSQL
 
-    private Map<Id, PostgreSQLConnectionProvider> postgreSQLCache = new TreeMap<>();
+    private Map<Id, PostgreSQLProvider> postgreSQLCache = new TreeMap<>();
 
     private PostgreSQLControlWrapper getPostgreSQLControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!postgreSQLCache.containsKey(database.id))
@@ -73,15 +73,15 @@ public class WrapperService {
         return new PostgreSQLControlWrapper(provider);
     }
 
-    private static PostgreSQLConnectionProvider createPostgreSQLProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private static PostgreSQLProvider createPostgreSQLProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(database.settings, PostgreSQLSettings.class);
 
-        return new PostgreSQLConnectionProvider(settings);
+        return new PostgreSQLProvider(settings);
     }
 
     // Neo4j
 
-    private Map<Id, Neo4jSessionProvider> neo4jCache = new TreeMap<>();
+    private Map<Id, Neo4jProvider> neo4jCache = new TreeMap<>();
 
     private Neo4jControlWrapper getNeo4jControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
         if (!neo4jCache.containsKey(database.id))
@@ -91,10 +91,10 @@ public class WrapperService {
         return new Neo4jControlWrapper(provider);
     }
 
-    private static Neo4jSessionProvider createNeo4jProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private static Neo4jProvider createNeo4jProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(database.settings, Neo4jSettings.class);
 
-        return new Neo4jSessionProvider(settings);
+        return new Neo4jProvider(settings);
     }
 
 }

@@ -1,6 +1,0 @@
-[
-    "appendIdentifier(ordered, [ customer_id, order_number ])",
-    "appendReference(ordered, customer, [ (customer_id, id) ])",
-    "appendReference(ordered, order, [ (order_number, number) ])",
-    "createICStatement()"
-]

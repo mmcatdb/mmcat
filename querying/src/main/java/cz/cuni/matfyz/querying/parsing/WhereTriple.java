@@ -5,7 +5,6 @@ import cz.cuni.matfyz.querying.exception.ParsingException;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class WhereTriple implements Statement {
 
@@ -61,6 +60,11 @@ public class WhereTriple implements Statement {
         WhereTriple toTriple() {
             return new WhereTriple(subject, signature, object);
         }
+    }
+
+    @Override
+    public String toString() {
+        return subject.toString() + " " + signature.toString() + " " + object.toString();
     }
 
 }

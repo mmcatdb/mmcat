@@ -43,9 +43,9 @@ public class MappingBuilder {
 
         return new Mapping(
             rootKindMapping.category(),
-            rootKindMapping.rootObject(),
-            createAccessPath(variableMap),
+            rootKindMapping.rootObject().key(),
             rootKindMapping.kindName(),
+            createAccessPath(variableMap),
             rootKindMapping.primaryKey()
         );
     }
@@ -65,7 +65,7 @@ public class MappingBuilder {
         final Tree<PathSegment> variableTree = Common.getTreeFromLists(paths);
         // final var subpaths = variableMap.entrySet().stream().map(entry -> buildPropertySubpath(entry.getKey(), entry.getValue(), variableTree)).toArray(AccessPath[]::new);
         
-        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(), createSubpaths(variableTree));
+        return ComplexProperty.createRoot(createSubpaths(variableTree));
     }
 
     private List<PathSegment> createPathDefinition(List<AccessPath> originalPath, List<String> names) {

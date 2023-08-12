@@ -8,7 +8,7 @@ import type { Id } from '@/types/id';
 type DatabaseDisplayProps = {
     database: Database;
     categoryId?: Id;
-}
+};
 
 defineProps<DatabaseDisplayProps>();
 
