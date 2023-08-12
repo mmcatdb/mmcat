@@ -15,7 +15,7 @@ A backend application for the MM-evocat tool. It is based on the Spring Boot fra
 ```bash
 cp src/main/resources/application.properties.sample src/main/resources/application.properties
 ```
-- Additional settings are in the `src/main/java/cz/cuni/matfyz/server/Settings.java` file.
+- Additional settings are in the `src/main/java/cz/matfyz/server/Settings.java` file.
 - For more information see the [Configuration Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config).
 
 ## Installation

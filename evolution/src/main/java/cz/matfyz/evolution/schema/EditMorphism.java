@@ -1,0 +1,42 @@
+package cz.matfyz.evolution.schema;
+
+import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
+
+public class EditMorphism extends SchemaCategory.Editor implements SchemaModificationOperation {
+
+    // dom and cod of the morphism are probably null because they have not been created yet during the creation of this operation
+    final SchemaMorphism newMorphism;
+    final Key domKey;
+    final Key codKey;
+
+    public EditMorphism(SchemaMorphism newMorphism, Key domKey, Key codKey) {
+        this.newMorphism = newMorphism;
+        this.domKey = domKey;
+        this.codKey = codKey;
+    }
+
+    @Override
+    public void apply(SchemaCategory category) {
+        final var objects = getObjectContext(category);
+
+        final var newMorphismWithDomCod = new SchemaMorphism.Builder()
+            .label(newMorphism.label)
+            .iri(newMorphism.iri)
+            .pimIri(newMorphism.pimIri)
+            .tags(newMorphism.tags())
+            .fromArguments(
+                newMorphism.signature(),
+                objects.getUniqueObject(domKey),
+                objects.getUniqueObject(codKey),
+                newMorphism.min()
+            );
+
+        final var morphisms = getMorphismContext(category);
+        // Replace the morphism by its newer version. The equality is determined by its signature.
+        morphisms.deleteUniqueObject(newMorphismWithDomCod);
+        morphisms.createUniqueObject(newMorphismWithDomCod);
+    }
+
+}
