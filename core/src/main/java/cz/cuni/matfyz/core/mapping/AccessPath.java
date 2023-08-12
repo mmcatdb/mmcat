@@ -48,7 +48,7 @@ public abstract class AccessPath {
         this.name = name;
         this.signature = signature;
     }
-    
+
     protected abstract boolean hasSignature(Signature signature);
 
     /**

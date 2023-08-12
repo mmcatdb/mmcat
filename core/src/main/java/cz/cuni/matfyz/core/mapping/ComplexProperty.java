@@ -105,6 +105,14 @@ public class ComplexProperty extends AccessPath {
     public static ComplexProperty createAuxiliary(Name name, AccessPath... subpaths) {
         return createAuxiliary(name, Arrays.asList(subpaths));
     }
+
+    public static ComplexProperty createRoot(List<AccessPath> subpaths) {
+        return createAuxiliary(StaticName.createAnonymous(), subpaths);
+    }
+
+    public static ComplexProperty createRoot(AccessPath... subpaths) {
+        return createAuxiliary(StaticName.createAnonymous(), subpaths);
+    }
     
     /**
      * Given a signature M, this function finds such a direct subpath S of this path that for each of the leaves L of S holds:

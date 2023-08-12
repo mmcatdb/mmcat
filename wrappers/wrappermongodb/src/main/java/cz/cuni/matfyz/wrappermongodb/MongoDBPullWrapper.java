@@ -32,10 +32,10 @@ import org.json.JSONException;
  */
 public class MongoDBPullWrapper implements AbstractPullWrapper {
 
-    private DatabaseProvider databaseProvider;
+    private MongoDBProvider provider;
     
-    public MongoDBPullWrapper(DatabaseProvider databaseProvider) {
-        this.databaseProvider = databaseProvider;
+    public MongoDBPullWrapper(MongoDBProvider provider) {
+        this.provider = provider;
     }
 
     private Iterator<Document> getDocumentIterator(PullQuery query) {
@@ -43,7 +43,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return getDocumentIteratorFromString(query.getStringContent());
 
         String kindName = query.getKindName();
-        var database = databaseProvider.getDatabase();
+        var database = provider.getDatabase();
         var find = database.getCollection(kindName).find();
 
         if (query.hasOffset())
@@ -72,7 +72,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 pipeline.add(document);
             }
 
-            return databaseProvider.getDatabase().getCollection(collection).aggregate(pipeline).iterator();
+            return provider.getDatabase().getCollection(collection).aggregate(pipeline).iterator();
         }
         catch (JSONException e) {
             throw new PullForestException(e);
@@ -196,7 +196,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     public String readCollectionAsStringForTests(String selectAll) {
-        var database = databaseProvider.getDatabase();
+        var database = provider.getDatabase();
         String kindName = selectAll.substring("database.getCollection(\"".length(), selectAll.length() - "\");".length());
         MongoCollection<Document> collection = database.getCollection(kindName);
         Iterator<Document> iterator = collection.find().iterator();

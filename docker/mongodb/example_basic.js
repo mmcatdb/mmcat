@@ -2,8 +2,8 @@ db.dropDatabase();
 
 db.order.insertMany([
     {
-        _id: {
-            customer: '1',
+        customer: {
+            name: '1',
             number: '1'
         },
         contact: {
@@ -25,8 +25,8 @@ db.order.insertMany([
         ]
     },
     {
-        _id: {
-            customer: '1',
+        customer: {
+            name: '1',
             number: '2'
         },
         contact: {
@@ -49,8 +49,8 @@ db.order.insertMany([
         ]
     },
     {
-        _id: {
-            customer: '2',
+        customer: {
+            name: '2',
             number: '1'
         },
         contact: {
@@ -66,8 +66,8 @@ db.order.insertMany([
         ]
     },
     {
-        _id: {
-            customer: '2',
+        customer: {
+            name: '2',
             number: '2'
         },
         contact: {

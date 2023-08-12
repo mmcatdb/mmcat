@@ -76,7 +76,7 @@ public class InstanceObject implements CategoricalObject {
         return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
     }
 
-    public DomainRow getRowByTechnicalId(String technicalId) {
+    private DomainRow getRowByTechnicalId(String technicalId) {
         return domainByTechnicalIds.get(technicalId);
     }
 
@@ -95,6 +95,10 @@ public class InstanceObject implements CategoricalObject {
     }
 
     public DomainRow getOrCreateRow(SuperIdWithValues superId) {
+        // If the superId doesn't contain any id, we have to create a technical one.
+        if (superId.findFirstId(ids()) == null)
+            return createRow(superId, Set.of(generateTechnicalId()), Set.of());
+
         var merger = new Merger();
         return merger.merge(superId, this);
     }
@@ -105,8 +109,7 @@ public class InstanceObject implements CategoricalObject {
     }
 
     public static DomainRow getOrCreateRowWithBaseMorphism(SuperIdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
-        var merger = new Merger();
-        return merger.merge(superId, parent, baseMorphismFromParent);
+        return getOrCreateRowWithEdge(superId, parent, new InstanceEdge(baseMorphismFromParent, true));
     }
 
     public static DomainRow connectRowWithBaseMorphism(DomainRow domainRow, DomainRow parent, InstanceMorphism baseMorphismFromParent) {

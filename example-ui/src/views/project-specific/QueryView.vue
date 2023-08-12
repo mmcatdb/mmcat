@@ -2,7 +2,7 @@
 import TextArea from '@/components/input/TextArea.vue';
 import queries from '@/utils/api/routes/queries';
 import { useSchemaCategoryId } from '@/utils/injects';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 const queryString = ref(`SELECT {
     ?customer has ?id .
@@ -11,21 +11,33 @@ WHERE {
     ?customer 1 ?id .
 }`);
 
+type QueryLog = {
+    query: string;
+    result: string;
+    id: number;
+};
+
+const logs = ref<QueryLog[]>([]);
 const queryResult = ref<string>();
 
 const categoryId = useSchemaCategoryId();
 
+let lastQueryId = 0;
+
 async function executeQuery() {
-    const result = await queries.execute({}, {
-        categoryId,
-        queryString: queryString.value,
-    });
-    console.log(result);
-    if (result.status)
-        queryResult.value = result.data.jsonValues.join(',\n');
-    else
-        queryResult.value = undefined;
+    const query = queryString.value;
+    queryResult.value = undefined;
+
+    const response = await queries.execute({}, { categoryId, queryString: query });
+    const result = response.status
+        ? response.data.jsonValues.join(',\n')
+        : 'Error :(';
+
+    queryResult.value = result;
+    logs.value.push({ query, result, id: lastQueryId++ });
 }
+
+const displayedLogs = computed(() => logs.value.length > 1 ? logs.value.slice(0, logs.value.length - 1).reverse() : undefined);
 </script>
 
 <template>
@@ -48,6 +60,27 @@ async function executeQuery() {
         >
             Execute
         </button>
+        <template v-if="displayedLogs">
+            <h2 class="mt-4">
+                Previous queries
+            </h2>
+            <div
+                v-for="log in displayedLogs"
+                :key="log.id"
+                class="mt-4 d-flex"
+            >
+                <TextArea
+                    v-model="log.query"
+                    class="query-input"
+                    :min-rows="1"
+                />
+                <TextArea
+                    v-model="log.result"
+                    class="query-output ms-4"
+                    :min-rows="1"
+                />
+            </div>
+        </template>
     </div>
 </template>
 

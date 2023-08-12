@@ -32,7 +32,7 @@ public abstract class Utils {
      * Get the set of variables from the query part, along with the corresponding schema object for each variable.
      */
     public static Map<String, SchemaObject> getVariableTypesFromPart(QueryPart part, SchemaCategory schemaCategory) {
-        var triples = part.triplesMapping.stream().map(t -> t.triple).toList();
+        final var triples = part.triplesMapping.stream().map(t -> t.triple).toList();
         return getVariableTypes(triples, schemaCategory);
     }
 
@@ -40,12 +40,12 @@ public abstract class Utils {
      * Get the set of variables from the provided set of triples, along with the corresponding schema object for each variable.
      */
     public static Map<String, SchemaObject> getVariableTypes(List<WhereTriple> triples, SchemaCategory schemaCategory) {
-        var variableTypes = new TreeMap<String, SchemaObject>();
+        final var variableTypes = new TreeMap<String, SchemaObject>();
 
-        for (var triple : triples) {
-            var morphism = schemaCategory.getMorphism(triple.signature);
-            var subjectType = morphism.dom();
-            var objectType = morphism.cod();
+        for (final var triple : triples) {
+            final var edge = schemaCategory.getEdge(triple.signature);
+            final var subjectType = edge.dom();
+            final var objectType = edge.cod();
 
             if (!variableTypes.containsKey(triple.subject.name))
                 variableTypes.put(triple.subject.name, subjectType);

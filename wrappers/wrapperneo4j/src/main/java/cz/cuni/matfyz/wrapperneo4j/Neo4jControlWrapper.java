@@ -1,16 +1,15 @@
 package cz.cuni.matfyz.wrapperneo4j;
 
 import cz.cuni.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractDMLWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractICWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPathWrapper;
-import cz.cuni.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.cuni.matfyz.abstractwrappers.AbstractStatement;
 import cz.cuni.matfyz.abstractwrappers.exception.ExecuteException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import org.neo4j.driver.Query;
 import org.neo4j.driver.Session;
@@ -30,16 +29,16 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
     static final String TO_NODE_PROPERTY_PREFIX = "_to.";
 
-    private SessionProvider sessionProvider;
+    private Neo4jProvider provider;
     
-    public Neo4jControlWrapper(SessionProvider sessionProvider) {
-        this.sessionProvider = sessionProvider;
+    public Neo4jControlWrapper(Neo4jProvider provider) {
+        this.provider = provider;
     }
 
     @Override
     public void execute(Collection<AbstractStatement> statements) {
         try (
-            final Session session = sessionProvider.getSession();
+            final Session session = provider.getSession();
         ) {
             // TODO transactions?
             for (final var statement : statements) {
@@ -55,28 +54,71 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
         }
     }
 
+    /**
+     * The point of this method is that the neo4j driver doesn't allow to run whole script at one. So we have to split it manually.
+     * This is of course not ideal since we don't want to parse the whole thing. But close enough.
+     */
     @Override
-    public AbstractDDLWrapper getDDLWrapper() {
+    public void execute(Path path) {
+        try {
+            String script = Files.readString(path);
+            // Split the queries by the ; character, followed by any number of whitespaces and newline.
+            final var statements = Stream.of(script.split(";\\s*\n"))
+                .filter(s -> !s.isBlank())
+                .map(s -> (AbstractStatement) new Neo4jStatement(s))
+                .toList();
+
+            execute(statements);
+        }
+        catch (IOException e) {
+            throw new ExecuteException(e, path);
+        }
+    }
+
+    // String beforePasswordString = new StringBuilder()
+    //     .append("cypher-shell -f ")
+    //     .append(path.toString())
+    //     .append(" -a bolt://")
+    //     .append(Neo4j.HOST)
+    //     .append(":")
+    //     .append(Neo4j.PORT)
+    //     .append(" -u ")
+    //     .append(Neo4j.USERNAME)
+    //     .append(" -p ")
+    //     .toString();
+
+    // LOGGER.info("Executing: " + beforePasswordString + "********");
+
+    // String commandString = beforePasswordString + Neo4j.PASSWORD;
+    // Runtime runtime = Runtime.getRuntime();
+    // Process process = runtime.exec(commandString);
+    // process.waitFor();
+
+    // BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    // LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
+
+    @Override
+    public Neo4jDDLWrapper getDDLWrapper() {
         return new Neo4jDDLWrapper();
     }
 
     @Override
-    public AbstractICWrapper getICWrapper() {
+    public Neo4jICWrapper getICWrapper() {
         return new Neo4jICWrapper();
     }
 
     @Override
-    public AbstractDMLWrapper getDMLWrapper() {
+    public Neo4jDMLWrapper getDMLWrapper() {
         return new Neo4jDMLWrapper();
     }
 
     @Override
-    public AbstractPullWrapper getPullWrapper() {
-        return new Neo4jPullWrapper(sessionProvider);
+    public Neo4jPullWrapper getPullWrapper() {
+        return new Neo4jPullWrapper(provider);
     }
 
     @Override
-    public AbstractPathWrapper getPathWrapper() {
+    public Neo4jPathWrapper getPathWrapper() {
         return new Neo4jPathWrapper();
     }
 

@@ -9,6 +9,7 @@ import cz.cuni.matfyz.core.mapping.ComplexProperty;
 import cz.cuni.matfyz.core.mapping.Mapping;
 import cz.cuni.matfyz.core.mapping.SimpleProperty;
 import cz.cuni.matfyz.core.mapping.StaticName;
+import cz.cuni.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.cuni.matfyz.core.schema.SchemaGraph;
 import cz.cuni.matfyz.core.schema.SchemaMorphism;
 import cz.cuni.matfyz.core.schema.SchemaObject;
@@ -63,7 +64,8 @@ public class QueryMappingProjector {
 
         final var whereMorphisms = plan.query.where.triples.stream()
             .map(triple -> triple.signature) // All signatures that appeared in the where clause
-            .map(whereInstance.schema::getMorphism) // Corresponding schema morphisms
+            .map(whereInstance.schema::getEdge) // Corresponding schema edges
+            .map(SchemaEdge::morphism)
             .toList();
         whereGraph = new SchemaGraph(whereMorphisms);
 
@@ -71,7 +73,7 @@ public class QueryMappingProjector {
         final var rootObject = selectRoots.get(0);
         final var accessPath = createAccessPath(rootObject);
 
-        return new Mapping(whereInstance.schema, rootObject, accessPath, "", List.of());
+        return new Mapping(whereInstance.schema, rootObject.key(), null, accessPath, List.of());
     }
 
     /**
@@ -93,7 +95,7 @@ public class QueryMappingProjector {
     }
 
     private ComplexProperty createAccessPath(SchemaObject rootObject) {
-        return ComplexProperty.createAuxiliary(StaticName.createAnonymous(), createSubpaths(rootObject));
+        return ComplexProperty.createRoot(createSubpaths(rootObject));
     }
 
     private List<AccessPath> createSubpaths(SchemaObject parentObject) {

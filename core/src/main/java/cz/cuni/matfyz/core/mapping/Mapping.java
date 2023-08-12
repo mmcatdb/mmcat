@@ -26,16 +26,28 @@ public class Mapping implements Comparable<Mapping> {
     private final SchemaCategory category;
     private final SchemaObject rootObject;
     
-    private ComplexProperty accessPath;
     private String kindName;
+    private ComplexProperty accessPath;
     private Collection<Signature> primaryKey;
     
-    public Mapping(SchemaCategory category, SchemaObject rootObject, ComplexProperty accessPath, String kindName, Collection<Signature> primaryKey) {
+    public Mapping(SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath, Collection<Signature> primaryKey) {
         this.category = category;
-        this.rootObject = rootObject;
-        this.accessPath = accessPath;
+        this.rootObject = category.getObject(rootKey);
         this.kindName = kindName;
+        this.accessPath = accessPath;
         this.primaryKey = primaryKey;
+    }
+
+    public static Mapping create(SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath) {
+        final var rootObject = category.getObject(rootKey);
+
+        return new Mapping(category, rootKey, kindName, accessPath, defaultPrimaryKey(rootObject));
+    }
+
+    public static List<Signature> defaultPrimaryKey(SchemaObject object) {
+        return object.ids().isSignatures()
+            ? object.ids().toSignatureIds().first().signatures().stream().toList()
+            : List.of(Signature.createEmpty());
     }
 
     public Mapping clone() {
@@ -130,9 +142,9 @@ public class Mapping implements Comparable<Mapping> {
     
             return new Mapping(
                 category,
-                category.getObject(rootObjectKey),
-                accessPath,
+                rootObjectKey,
                 kindName,
+                accessPath,
                 primaryKey
             );
         }

@@ -3,7 +3,7 @@ package cz.cuni.matfyz.wrapperpostgresql;
 import cz.cuni.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.cuni.matfyz.abstractwrappers.exception.QueryException;
 import cz.cuni.matfyz.abstractwrappers.utils.BaseQueryWrapper;
-import cz.cuni.matfyz.core.mapping.KindInstance;
+import cz.cuni.matfyz.core.mapping.AccessPath;
 import cz.cuni.matfyz.core.mapping.StaticName;
 
 import java.util.ArrayList;
@@ -34,10 +34,8 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     @Override
     public QueryStatement buildStatement() {
-        var select = buildSelect();
-        var query = select.stringContent();
-        query += " " + buildFrom();
-        query += " " + buildWhere();
+        final QueryStatement select = buildSelect();
+        final String query = select.stringContent() + "\n" + buildFrom() + "\n" + buildWhere();
 
         return new QueryStatement(query, select.nameMap());
     }
@@ -51,72 +49,77 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         return new QueryStatement(select, variableNameMap);
     }
 
-    private String getVariableSelection(Projection projection) {
-        var staticName = (StaticName) projection.propertyPath.get(projection.propertyPath.size() - 1).name();
-        return kinds.get(projection.kind) + "." + staticName.getStringName();
+    private String getVariableAlias(Projection projection) {
+        return getVariableSelection(projection) + " AS " + getVariableName(projection);
     }
 
-    private String getVariableAlias(Projection projection) {
-        var selection = getVariableSelection(projection);
-        var alias = getVariableName(projection);
-        return selection + " AS " + alias;
+    private String getVariableSelection(Projection projection) {
+        return escapeKindName(projection.kind.mapping.kindName()) + "." + getPropertyName(projection.propertyPath);
     }
 
     private String getVariableName(Projection projection) {
-        var staticName = (StaticName) projection.propertyPath.get(projection.propertyPath.size() - 1).name();
-        return kinds.get(projection.kind) + "_" + staticName.getStringName();
+        // return kinds.get(projection.kind) + "_" + getPropertyName(projection.propertyPath);
+        return projection.kind.mapping.kindName() + "_" + getPropertyName(projection.propertyPath);
+    }
+
+    // private String getEscapedKindName(KindInstance kind) {
+    //     return escapeKindName(kinds.get(kind));
+    // }
+
+    private String escapeKindName(String name) {
+        return "\"" + name + "\"";
+    }
+
+    private String getPropertyName(List<AccessPath> path) {
+        if (path.get(path.size() - 1).name() instanceof StaticName staticName)
+            return staticName.getStringName();
+
+        throw QueryException.message("Property name is dynamic.");
     }
 
     private String buildFrom() {
-        if (joins.isEmpty()) {
-            // TODO - I am not sure what the next-iter construction should mean.
-            // if not _joins:
-            //     table = next(iter(_kinds.values()), None)
-            String table = kinds.values().iterator().next();
-            if (table == null)
-                throw QueryException.message("No tables are selected in FROM clause.");
+        if (!joins.isEmpty())
+            return "FROM " + buildJoins();
+        
+        // final String firstKind = kinds.values().stream().findFirst().orElseThrow(() -> QueryException.message("No tables are selected in FROM clause."));
+        final String firstKind = projections.values().stream().findFirst()
+            .orElseThrow(() -> QueryException.message("No tables are selected in FROM clause."))
+            .kind.mapping.kindName();
 
-            return "FROM " + table;
-        }
-        return "FROM " + buildJoins();
+        return "FROM " +  escapeKindName(firstKind);
     }
 
     private String buildJoins() {
-        var joinedKinds = new TreeSet<KindInstance>();
-        var joinedTables = "";
-        
-        for (var join : joins) {
-            KindInstance newKind;
-            if (joinedKinds.contains(join.rhsKind))
-                newKind = join.lhsKind;
-            else {
-                if (joinedKinds.isEmpty()) {
-                    joinedKinds.add(join.lhsKind);
-                    joinedTables += kinds.get(join.lhsKind);
-                }
+        final var joinedKinds = new TreeSet<String>();
 
+        final String fromKind = joins.get(0).lhsKind;
+        joinedKinds.add(fromKind);
+
+        var output = escapeKindName(fromKind);
+        
+        for (final var join : joins) {
+            String newKind;
+            if (!joinedKinds.contains(join.rhsKind))
                 newKind = join.rhsKind;
-            }
+            else if (!joinedKinds.contains(join.lhsKind))
+                newKind = join.lhsKind;
+            else
+                continue;
 
             joinedKinds.add(newKind);
-            var joinConditions = "";
 
-            for (var property : join.joinProperties) {
-                var lhsStaticName = (StaticName) property.lhsList().get(property.lhsList().size() - 1).name();
-                var lhsProjection = kinds.get(join.lhsKind) + "." + lhsStaticName.getStringName();
-                var rhsStaticName = (StaticName) property.rhsList().get(property.rhsList().size() - 1).name();
-                var rhsProjection = kinds.get(join.rhsKind) + "." + rhsStaticName.getStringName();
+            final var joinConditions = join.joinProperties.stream().map(property -> {
+                final String lhsProjection = escapeKindName(join.lhsKind) + "." + getPropertyName(property.lhsList());
+                final String rhsProjection = escapeKindName(join.rhsKind) + "." + getPropertyName(property.rhsList());
+                
+                return lhsProjection + " = " + rhsProjection;
+            }).toList();
 
-                if (!joinConditions.equals(""))
-                    joinConditions += " AND ";
-
-                joinConditions += lhsProjection + " = " + rhsProjection;
-            }
-
-            joinedTables += " JOIN " + kinds.get(newKind) + " ON (" + joinConditions + ")";
+            final String allConditions = String.join(" AND ", joinConditions);
+            output += " JOIN " + escapeKindName(newKind) + " ON (" + allConditions + ")";
         }
             
-        return joinedTables;
+        return output;
     }
 
     private String buildWhere() {
@@ -170,7 +173,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
             var sqlValueStrings = values.constants.stream().map(c -> "'" + c + "'").toList();
             
-            newValuesFilters.add(variableAlias + " IN (" + String.join(",", sqlValueStrings) + ")");
+            newValuesFilters.add(variableAlias + " IN (" + String.join(", ", sqlValueStrings) + ")");
         }
 
         return String.join(" AND ", newValuesFilters);

@@ -27,17 +27,18 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLPullWrapper.class);
 
-    private ConnectionProvider connectionProvider;
+    private PostgreSQLProvider provider;
     
-    public PostgreSQLPullWrapper(ConnectionProvider connectionProvider) {
-        this.connectionProvider = connectionProvider;
+    public PostgreSQLPullWrapper(PostgreSQLProvider provider) {
+        this.provider = provider;
     }
 
     private PreparedStatement prepareStatement(Connection connection, PullQuery query) throws SQLException {
         if (query.hasStringContent())
             return connection.prepareStatement(query.getStringContent());
 
-        var command = "SELECT * FROM " + query.getKindName();
+        // TODO escape all table names globally
+        var command = "SELECT * FROM " + "\"" + query.getKindName() + "\"";
 
         if (query.hasLimit())
             command += "\nLIMIT " + query.getLimit();
@@ -53,7 +54,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     @Override
     public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
         try (
-            Connection connection = connectionProvider.getConnection();
+            Connection connection = provider.getConnection();
             PreparedStatement statement = prepareStatement(connection, query);
         ) {
             LOGGER.info("Execute PostgreSQL query:\n{}", statement);
@@ -85,16 +86,17 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
     public String readTableAsStringForTests(String selectAll) throws SQLException {
         try (
-            Connection connection = connectionProvider.getConnection();
+            Connection connection = provider.getConnection();
             Statement statement = connection.createStatement();
         ) {
             try (ResultSet resultSet = statement.executeQuery(selectAll)) {
                 var output = new StringBuilder();
                 while (resultSet.next())
-                    output.append(resultSet.getInt("number")).append("\n");
+                    output.append(resultSet.getString("number")).append("\n");
 
                 return output.toString();
             }
         }
     }
+
 }

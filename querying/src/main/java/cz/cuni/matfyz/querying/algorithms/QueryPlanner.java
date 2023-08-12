@@ -36,8 +36,6 @@ public class QueryPlanner {
         this.allKinds = allKinds;
     }
 
-    private final KindInstanceBuilder kindInstanceBuilder = new KindInstanceBuilder();
-
     private static record TripleKindDefinition(WhereTriple triple, KindDefinition kind) {}
 
     /**
@@ -45,27 +43,29 @@ public class QueryPlanner {
      * In the case of no data redundancy, the result will always contain only one query plan. In the case that redundancy is present, there can be multiple plans.
      */
     public List<QueryPlan> createPlans(Query query) {
-        var variableTypes = Utils.getVariableTypesFromQuery(query, schemaCategory);
-        var usedSchemaObjectKeys = new TreeSet<Key>();
-        variableTypes.values().forEach(s -> usedSchemaObjectKeys.add(s.key()));
+        final var variableTypes = Utils.getVariableTypesFromQuery(query, schemaCategory);
+        final var usedSchemaObjectKeys = new TreeSet<Key>();
+        variableTypes.values().forEach(schemaObject -> usedSchemaObjectKeys.add(schemaObject.key()));
         
-        var tripleKindsAssignments = new ArrayList<List<TripleKindDefinition>>();
+        final var tripleKindsAssignments = new ArrayList<List<TripleKindDefinition>>();
 
-        for (var triple : query.where.triples) {
-            var selectedKinds = allKinds.stream().filter(k -> Utils.getPropertyPath(k.mapping, triple.signature) != null && usedSchemaObjectKeys.contains(k.mapping.rootObject().key())).toList();
+        for (final WhereTriple triple : query.where.triples) {
+            final var selectedKinds = allKinds.stream().filter(k ->
+                Utils.getPropertyPath(k.mapping, triple.signature) != null && usedSchemaObjectKeys.contains(k.mapping.rootObject().key())
+            ).toList();
             if (selectedKinds.isEmpty())
                 throw GeneralException.message("Cannot create query plan - morphism not in mapping or root object not in mapping");
 
-            List<TripleKindDefinition> assignments = selectedKinds.stream().map(k -> new TripleKindDefinition(triple, k)).toList();
+            final List<TripleKindDefinition> assignments = selectedKinds.stream().map(k -> new TripleKindDefinition(triple, k)).toList();
             tripleKindsAssignments.add(assignments);
         }
 
-        var assignmentsProduct = cartesianProduct(tripleKindsAssignments);
-        var queryPlans = new ArrayList<QueryPlan>();
+        final var assignmentsProduct = cartesianProduct(tripleKindsAssignments);
+        final var queryPlans = new ArrayList<QueryPlan>();
         
-        for (var assignment : assignmentsProduct) {
+        for (final var assignment : assignmentsProduct) {
             try {
-                QueryPlan queryPlan = createPlanFromAssignment(query, variableTypes, assignment);
+                final QueryPlan queryPlan = createPlanFromAssignment(query, variableTypes, assignment);
                 queryPlans.add(queryPlan);
             }
             catch (InvalidPlanException e) {
@@ -96,6 +96,8 @@ public class QueryPlanner {
 
         return output;
     }
+
+    private final KindInstanceBuilder kindInstanceBuilder = new KindInstanceBuilder();
 
     private QueryPlan createPlanFromAssignment(Query query, Map<String, SchemaObject> variableTypes, List<TripleKindDefinition> assignment) {
         var kindInstances = assignment.stream().map(tripleKind -> new TripleKind(

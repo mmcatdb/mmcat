@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachym.bartik
  */
-public class Merger {
+class Merger {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(Merger.class);
@@ -53,16 +53,14 @@ public class Merger {
 
     /**
      * Merges the row and then iterativelly merges rows from other instance objects that might be affected.
+     * 
+     * @param superId The super id must contain at least one id.
      */
     public DomainRow merge(SuperIdWithValues superId, InstanceObject instanceObject) {
         addMergeJob(superId, Set.of(), instanceObject);
         processQueues();
 
         return instanceObject.getActualRow(superId, Set.of());
-    }
-
-    public DomainRow merge(SuperIdWithValues superId, DomainRow parent, InstanceMorphism morphism) {
-        return merge(superId, parent, new InstanceEdge(morphism, true));
     }
 
     /**

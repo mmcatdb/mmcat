@@ -18,7 +18,9 @@ public abstract class QueryPreprocessor {
      */
     public static Query preprocessQuery(Query query) {
         var whereTriples = splitCompoundMorphisms(query.where.triples);
-        whereTriples = reverseBaseMorphisms(whereTriples);
+        // The morphisms shouldn't be reversed. In the mappings, the morphisms are being found by their signature so the reversed one wouldn't be found.
+        // But this is probably an issue of the query
+        // whereTriples = reverseBaseMorphisms(whereTriples);
 
         var where = new WhereClause(
             whereTriples,
