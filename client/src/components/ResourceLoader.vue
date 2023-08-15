@@ -1,4 +1,5 @@
-<script setup lang="ts">import { onMounted, onUnmounted, ref } from 'vue';
+<script setup lang="ts">
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const LOADING_WAIT_TIME_IN_MILLISECONDS = 400;
 
@@ -61,7 +62,7 @@ const stateTexts = {
     [State.Loading]: '',
     [State.LoadingVisible]: 'Loading ...',
     [State.NotFound]: 'Resource not found.',
-    [State.Reloading]: 'Loading ...'
+    [State.Reloading]: 'Loading ...',
 };
 </script>
 

@@ -23,7 +23,7 @@ const fetching = ref(false);
 const innerValue = ref<DataSourceEdit>(props.dataSource ? { ...props.dataSource } : {
     url: '',
     label: '',
-    type: Type.JsonLdStore
+    type: Type.JsonLdStore,
 });
 
 function toInit(edit: DataSourceEdit): DataSourceInit | null {

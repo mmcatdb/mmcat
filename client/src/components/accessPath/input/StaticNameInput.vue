@@ -8,7 +8,7 @@ type StaticNameInputProps = {
 };
 
 const props = withDefaults(defineProps<StaticNameInputProps>(), {
-    disabled: false
+    disabled: false,
 });
 
 const emit = defineEmits([ 'update:modelValue' ]);

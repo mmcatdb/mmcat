@@ -96,7 +96,6 @@ export function jobPayloadFromServer(input: JobPayloadFromServer): JobPayload {
     }
 }
 
-
 type ModelToCategoryPayloadFromServer = JobPayloadFromServer<JobType.ModelToCategory> & {
     logicalModel: LogicalModelInfoFromServer;
 };
@@ -114,7 +113,6 @@ class ModelToCategoryPayload implements JobPayloadType<JobType.ModelToCategory> 
         );
     }
 }
-
 
 type CategoryToModelPayloadFromServer = JobPayloadFromServer<JobType.CategoryToModel> & {
     logicalModel: LogicalModelInfoFromServer;
@@ -134,7 +132,6 @@ class CategoryToModelPayload implements JobPayloadType<JobType.CategoryToModel> 
     }
 }
 
-
 type JsonLdToCategoryPayloadFromServer = JobPayloadFromServer<JobType.JsonLdToCategory> & {
     dataSource: DataSourceFromServer;
 };
@@ -152,7 +149,6 @@ class JsonLdToCategoryPayload implements JobPayloadType<JobType.JsonLdToCategory
         );
     }
 }
-
 
 export type JobInit = {
     categoryId: Id;

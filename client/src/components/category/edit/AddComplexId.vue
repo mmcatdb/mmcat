@@ -3,7 +3,7 @@ import type { PathSegment, Node } from '@/types/categoryGraph';
 import { SignatureId, SignatureIdFactory } from '@/types/identifiers';
 import { ref, shallowRef } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
-import { Cardinality } from "@/types/schema";
+import { Cardinality } from '@/types/schema';
 import SignatureIdDisplay from '../SignatureIdDisplay.vue';
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
 import ButtonIcon from '@/components/ButtonIcon.vue';

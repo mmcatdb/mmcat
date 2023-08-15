@@ -2,7 +2,7 @@
 import type { PathSegment, Node } from '@/types/categoryGraph';
 import { shallowRef } from 'vue';
 import { SequenceSignature } from '@/types/accessPath/graph';
-import { Cardinality } from "@/types/schema";
+import { Cardinality } from '@/types/schema';
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';

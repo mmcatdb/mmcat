@@ -6,7 +6,7 @@ import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-// import rawAPI from '@/utils/api/rawAPI';
+import rawAPI from '@/utils/api/rawAPI';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
@@ -38,9 +38,9 @@ async function confirmNewCategory() {
     newCategoryLabel.value = '';
 }
 
-// async function resetDatabase() {
-//     rawAPI.POST('/reset-database');
-// }
+async function resetDatabase() {
+    rawAPI.POST('/reset-database');
+}
 </script>
 
 <template>
@@ -48,9 +48,11 @@ async function confirmNewCategory() {
     <p>
         A multi-model data modeling framework based on category theory.
     </p>
-    {{/*  <Button :onclick="resetDatabase">
-            Reset database
-        </Button>  */}}
+    <!--
+    <Button :onclick="resetDatabase">
+        Reset database
+    </Button>
+    -->
     <br />
     <p>
         Detailed instructions on how to use this tool can be found <a :href="DOCUMENTATION_URL">here</a>.
