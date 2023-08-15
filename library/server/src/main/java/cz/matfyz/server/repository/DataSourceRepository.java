@@ -61,7 +61,7 @@ public class DataSourceRepository {
                     DISTINCT data_source.id as id,
                     data_source.json_value as json_value
                 FROM data_source
-                JOIN job on job.data_source_id = data_source.id
+                JOIN job on job.json_value->'payload'->>'dataSourceId' = data_source.id::text
                 WHERE job.schema_category_id = ?
                 ORDER BY data_source.id;
                 """);

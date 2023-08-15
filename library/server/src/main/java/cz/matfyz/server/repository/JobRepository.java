@@ -62,7 +62,6 @@ public class JobRepository {
 
     public Id add(Job job) {
         return db.get((connection, output) -> {
-            // var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value) VALUES (?, ?, ?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             setId(statement, 1, job.categoryId);
             statement.setString(2, Utils.toJson(job));

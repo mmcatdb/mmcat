@@ -65,8 +65,6 @@ CREATE TABLE mapping (
 CREATE TABLE job (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
-    -- logical_model_id INTEGER REFERENCES logical_model,
-    -- data_source_id INTEGER REFERENCES database_for_mapping, -- TODO make job to contain either logical_model_id or data_source_id
     json_value JSONB NOT NULL
     -- přidat typ jobu, vstup, výstup, vše serializované v jsonu
         -- podobně jako ukládání logování
