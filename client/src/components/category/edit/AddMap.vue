@@ -4,7 +4,7 @@ import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGr
 import { Cardinality } from '@/types/schema';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ObjectIds, SignatureId, Type } from '@/types/identifiers';
+import { ObjectIds, Type } from '@/types/identifiers';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
 
@@ -36,12 +36,13 @@ onUnmounted(() => {
 function save() {
     evocat.compositeOperation('addMap', () => {
         const [ node1, node2 ] = nodes.value;
-        if (!node1 || !node2)
+        if (!node1 || !node2 || !node1.schemaObject.ids)
             return;
 
+        const keyObjectIds = ObjectIds.createNonSignatures(Type.Value);
         const keyObject = evocat.createObject({
             label: keyLabel.value,
-            ids: ObjectIds.createNonSignatures(Type.Value),
+            ids: keyObjectIds,
         });
 
         const mapObject = evocat.createObject({
@@ -67,10 +68,12 @@ function save() {
             min: Cardinality.One,
         });
 
-        const mapObjectId = new SignatureId([ mapToKey.signature, mapToNode1.signature ]);
         evocat.editObject({
             ...mapObject.toDefinition(),
-            ids: ObjectIds.createSignatures([ mapObjectId ]),
+            ids: ObjectIds.createCrossProduct(
+                [ mapToKey.signature, mapToNode1.signature ],
+                [ keyObjectIds, node1.schemaObject.ids ],
+            ),
         }, mapObject);
     });
 

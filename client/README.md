@@ -10,9 +10,9 @@ A frontend application for the MM-cat tool. It is based on [Vue 3](https://vuejs
 ## Configuration
 
 - All the configuration should be done via the `.env` files.
-- For start, simply create a `.env.local` file from the `.env.local.sample` and fill all required information.
+- For start, simply create a `.env` file from the `.env.sample` and fill all the required information.
 ```sh
-cp .env.local.sample .env.local
+cp .env.sample .env
 ```
 - How to configure different modes is described in the [Modes and Environment Variables](https://vitejs.dev/guide/env-and-mode.html).
 - For more advanced options see the [Vite Configuration Reference](https://vitejs.dev/config/).

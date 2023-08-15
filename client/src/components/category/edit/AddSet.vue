@@ -6,7 +6,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 import { useEvocat } from '@/utils/injects';
-import { ObjectIds, SignatureId } from '@/types/identifiers';
+import { ObjectIds } from '@/types/identifiers';
 
 const { evocat, graph } = $(useEvocat());
 
@@ -35,7 +35,7 @@ onUnmounted(() => {
 function save() {
     evocat.compositeOperation('addSet', () => {
         const [ node1, node2 ] = nodes.value;
-        if (!node1 || !node2)
+        if (!node1 || !node2 || !node1.schemaObject.ids || !node2.schemaObject.ids)
             return;
 
         const setObject = evocat.createObject({
@@ -56,10 +56,12 @@ function save() {
             label: '#role',
         });
 
-        const setObjectId = new SignatureId([ setToNode1.signature, setToNode2.signature ]);
         evocat.editObject({
             ...setObject.toDefinition(),
-            ids: ObjectIds.createSignatures([ setObjectId ]),
+            ids: ObjectIds.createCrossProduct(
+                [ setToNode1.signature, setToNode2.signature ],
+                [ node1.schemaObject.ids, node2.schemaObject.ids ],
+            ),
         }, setObject);
     });
 

@@ -7,9 +7,9 @@ import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
 
-public class TestSchema {
+public class BasicSchema {
 
-    public static final String schemaLabel = "basicExample";
+    public static final String schemaLabel = "basicSchema";
 
     // Keys
 
@@ -90,7 +90,7 @@ public class TestSchema {
 
     public static final Signature noteToNumber = noteToOrder.concatenate(orderToNumber);
     
-    public TestSchema() {
+    public BasicSchema() {
         this.addOrder();
     }
 
@@ -102,7 +102,7 @@ public class TestSchema {
      * Create new full schema category.
      */
     public static SchemaCategory newSchemaCategory() {
-        return new TestSchema()
+        return new BasicSchema()
             .addCustomer()
             .addAddress()
             .addItem()
@@ -114,7 +114,7 @@ public class TestSchema {
     private final SchemaBuilder builder = new SchemaBuilder();
 
     // This one is mandatory.
-    private TestSchema addOrder() {
+    private BasicSchema addOrder() {
         builder.object(order, "order", new ObjectIds(orderToNumber));
         builder.object(number, "number", ObjectIds.createValue());
         builder.object(tag, "tag", ObjectIds.createValue());
@@ -125,7 +125,7 @@ public class TestSchema {
         return this;
     }
 
-    public TestSchema addCustomer() {
+    public BasicSchema addCustomer() {
         builder.object(customer, "customer", new ObjectIds(customerToName));
         builder.object(name, "name", ObjectIds.createValue());
         builder.object(friend, "friend", new ObjectIds(friendToCustomerA, friendToCustomerB));
@@ -140,7 +140,7 @@ public class TestSchema {
         return this;
     }
 
-    public TestSchema addAddress() {
+    public BasicSchema addAddress() {
         builder.object(address, "address", ObjectIds.createGenerated());
         builder.object(street, "street", ObjectIds.createValue());
         builder.object(city, "city", ObjectIds.createValue());
@@ -154,7 +154,7 @@ public class TestSchema {
         return this;
     }
 
-    public TestSchema addItem() {
+    public BasicSchema addItem() {
         builder.object(item, "item", new ObjectIds(itemToNumber, itemToId));
         builder.object(product, "product", new ObjectIds(productToId));
         builder.object(quantity, "quantity", ObjectIds.createValue());
@@ -172,19 +172,19 @@ public class TestSchema {
         return this;
     }
 
-    public TestSchema addContact() {
+    public BasicSchema addContact() {
         builder.object(contact, "contact", new ObjectIds(contactToNumber, contactToType, contactToValue));
         builder.object(type, "type", ObjectIds.createValue());
         builder.object(value, "value", ObjectIds.createValue());
 
         builder.morphism(contactToOrder, contact, order, Min.ONE);
-        builder.morphism(contactToValue, contact, value, Min.ONE);
         builder.morphism(contactToType, contact, type, Min.ONE, Tag.key);
+        builder.morphism(contactToValue, contact, value, Min.ONE);
 
         return this;
     }
 
-    public TestSchema addNote() {
+    public BasicSchema addNote() {
         builder.object(note, "note", new ObjectIds(noteToNumber, noteToLocale));
         builder.object(locale, "locale", ObjectIds.createValue());
         builder.object(data, "data", ObjectIds.createGenerated());
@@ -192,10 +192,10 @@ public class TestSchema {
         builder.object(content, "content", ObjectIds.createValue());
 
         builder.morphism(noteToOrder, note, order, Min.ONE);
-        builder.morphism(noteToLocale, note, locale, Min.ONE);
+        builder.morphism(noteToLocale, note, locale, Min.ONE, Tag.key);
         builder.morphism(noteToData, note, data, Min.ONE);
-        builder.morphism(dataToSubject, data, subject, Min.ONE, Tag.key);
-        builder.morphism(dataToContent, data, content, Min.ONE, Tag.key);
+        builder.morphism(dataToSubject, data, subject, Min.ONE);
+        builder.morphism(dataToContent, data, content, Min.ONE);
 
         return this;
     }

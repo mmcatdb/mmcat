@@ -4,11 +4,11 @@ import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
+import cz.matfyz.core.utils.Config;
 import cz.matfyz.integration.exception.ObjectException;
 import cz.matfyz.integration.propertyprocessor.ArrayProcessor;
 import cz.matfyz.integration.propertyprocessor.PropertyProcessor;
 import cz.matfyz.integration.propertyprocessor.SimpleAttributeProcessor;
-import cz.matfyz.integration.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class RDFToInstance {
 
     static final String RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
-    static final String CLASS_TO_ISA_IRI = Constants.CUSTOM_IRI_PREFIX + "class-to-isa";
+    static final String CLASS_TO_ISA_IRI = Config.get("integration.iriPrefix") + "class-to-isa";
 
     private Dataset dataset;
     private InstanceCategory category;

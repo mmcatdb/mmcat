@@ -5,7 +5,7 @@ import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.instance.InstanceBuilder;
-import cz.matfyz.tests.schema.TestSchema;
+import cz.matfyz.tests.schema.BasicSchema;
 
 public abstract class MongoDB {
 
@@ -19,14 +19,14 @@ public abstract class MongoDB {
     
     public static TestMapping address(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             orderKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", TestSchema.orderToNumber),
-                ComplexProperty.create("address", TestSchema.orderToAddress,
-                    new SimpleProperty("street", TestSchema.addressToStreet),
-                    new SimpleProperty("city", TestSchema.addressToCity),
-                    new SimpleProperty("zip", TestSchema.addressToZip)
+                new SimpleProperty("number", BasicSchema.orderToNumber),
+                ComplexProperty.create("address", BasicSchema.orderToAddress,
+                    new SimpleProperty("street", BasicSchema.addressToStreet),
+                    new SimpleProperty("city", BasicSchema.addressToCity),
+                    new SimpleProperty("zip", BasicSchema.addressToZip)
                 )
             )
         );
@@ -38,29 +38,29 @@ public abstract class MongoDB {
     // }
 
     public static void addAddress(InstanceBuilder builder, int orderIndex, String uniqueId, String streetValue, String cityValue, String zipValue) {
-        final var address = builder.valueObject(uniqueId, TestSchema.address);
-        builder.morphism(TestSchema.orderToAddress,
-            builder.getRow(TestSchema.order, orderIndex),
+        final var address = builder.valueObject(uniqueId, BasicSchema.address);
+        builder.morphism(BasicSchema.orderToAddress,
+            builder.getRow(BasicSchema.order, orderIndex),
             address
         );
 
         if (streetValue != null)
-            builder.morphism(TestSchema.addressToStreet, address, builder.valueObject(streetValue, TestSchema.street));
+            builder.morphism(BasicSchema.addressToStreet, address, builder.valueObject(streetValue, BasicSchema.street));
 
         if (cityValue != null)
-            builder.morphism(TestSchema.addressToCity, address, builder.valueObject(cityValue, TestSchema.city));
+            builder.morphism(BasicSchema.addressToCity, address, builder.valueObject(cityValue, BasicSchema.city));
 
         if (zipValue != null)
-            builder.morphism(TestSchema.addressToZip, address, builder.valueObject(zipValue, TestSchema.zip));
+            builder.morphism(BasicSchema.addressToZip, address, builder.valueObject(zipValue, BasicSchema.zip));
     }
 
     public static TestMapping tag(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             orderKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", TestSchema.orderToNumber),
-                new SimpleProperty("tags", TestSchema.tagToOrder.dual())
+                new SimpleProperty("number", BasicSchema.orderToNumber),
+                new SimpleProperty("tags", BasicSchema.tagToOrder.dual())
             )
         );
     }
@@ -71,11 +71,11 @@ public abstract class MongoDB {
     // }
 
     public static void addTag(InstanceBuilder builder, int orderIndex, String[] messageValues) {
-        final var order = builder.getRow(TestSchema.order, orderIndex);
+        final var order = builder.getRow(BasicSchema.order, orderIndex);
 
         for (String value : messageValues) {
-            builder.morphism(TestSchema.tagToOrder,
-                builder.valueObject(value, TestSchema.tag),
+            builder.morphism(BasicSchema.tagToOrder,
+                builder.valueObject(value, BasicSchema.tag),
                 order
             );
         }
@@ -83,15 +83,15 @@ public abstract class MongoDB {
 
     private static TestMapping createItem(SchemaCategory schema, String kindName) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             kindName,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", TestSchema.orderToNumber),
-                ComplexProperty.create("items", TestSchema.itemToOrder.dual(),
-                    new SimpleProperty("id", TestSchema.itemToId),
-                    new SimpleProperty("label", TestSchema.itemToLabel),
-                    new SimpleProperty("price", TestSchema.itemToPrice),
-                    new SimpleProperty("quantity", TestSchema.itemToQuantity)
+                new SimpleProperty("number", BasicSchema.orderToNumber),
+                ComplexProperty.create("items", BasicSchema.itemToOrder.dual(),
+                    new SimpleProperty("id", BasicSchema.itemToId),
+                    new SimpleProperty("label", BasicSchema.itemToLabel),
+                    new SimpleProperty("price", BasicSchema.itemToPrice),
+                    new SimpleProperty("quantity", BasicSchema.itemToQuantity)
                 )
             )
         );
@@ -109,17 +109,17 @@ public abstract class MongoDB {
     // }
 
     public static void addItem(InstanceBuilder builder, int orderIndex, int productIndex, String quantityValue) {
-        final var order = builder.getRow(TestSchema.order, orderIndex);
-        final var numberValue = order.superId.getValue(TestSchema.orderToNumber);
+        final var order = builder.getRow(BasicSchema.order, orderIndex);
+        final var numberValue = order.superId.getValue(BasicSchema.orderToNumber);
 
-        final var product = builder.getRow(TestSchema.product, productIndex);
-        final var idValue = product.superId.getValue(TestSchema.productToId);
+        final var product = builder.getRow(BasicSchema.product, productIndex);
+        final var idValue = product.superId.getValue(BasicSchema.productToId);
 
-        final var item = builder.value(TestSchema.itemToNumber, numberValue).value(TestSchema.itemToId, idValue).object(TestSchema.item);
-        builder.morphism(TestSchema.itemToOrder, item, order);
-        builder.morphism(TestSchema.itemToProduct, item, product);
-        builder.morphism(TestSchema.itemToQuantity, item,
-            builder.valueObject(quantityValue, TestSchema.quantity)
+        final var item = builder.value(BasicSchema.itemToNumber, numberValue).value(BasicSchema.itemToId, idValue).object(BasicSchema.item);
+        builder.morphism(BasicSchema.itemToOrder, item, order);
+        builder.morphism(BasicSchema.itemToProduct, item, product);
+        builder.morphism(BasicSchema.itemToQuantity, item,
+            builder.valueObject(quantityValue, BasicSchema.quantity)
         );
     }
 
@@ -129,12 +129,12 @@ public abstract class MongoDB {
 
     public static TestMapping contact(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             orderKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", TestSchema.orderToNumber),
-                ComplexProperty.create("contact", TestSchema.contactToOrder.dual(),
-                    new SimpleProperty(TestSchema.contactToType, TestSchema.contactToValue)
+                new SimpleProperty("number", BasicSchema.orderToNumber),
+                ComplexProperty.create("contact", BasicSchema.contactToOrder.dual(),
+                    new SimpleProperty(BasicSchema.contactToType, BasicSchema.contactToValue)
                 )
             )
         );
@@ -148,32 +148,32 @@ public abstract class MongoDB {
     // }
 
     public static void addContact(InstanceBuilder builder, int orderIndex, String typeValue, String valueValue) {
-        final var order = builder.getRow(TestSchema.order, orderIndex);
-        final var numberValue = order.superId.getValue(TestSchema.orderToNumber);
+        final var order = builder.getRow(BasicSchema.order, orderIndex);
+        final var numberValue = order.superId.getValue(BasicSchema.orderToNumber);
 
         final var contact = builder
-            .value(TestSchema.contactToNumber, numberValue)
-            .value(TestSchema.contactToType, typeValue)
-            .value(TestSchema.contactToValue, valueValue).object(TestSchema.contact);
+            .value(BasicSchema.contactToNumber, numberValue)
+            .value(BasicSchema.contactToType, typeValue)
+            .value(BasicSchema.contactToValue, valueValue).object(BasicSchema.contact);
 
-        builder.morphism(TestSchema.contactToOrder, contact, order);
+        builder.morphism(BasicSchema.contactToOrder, contact, order);
 
-        builder.morphism(TestSchema.contactToType, contact,
-            builder.valueObject(typeValue, TestSchema.type)
+        builder.morphism(BasicSchema.contactToType, contact,
+            builder.valueObject(typeValue, BasicSchema.type)
         );
-        builder.morphism(TestSchema.contactToValue, contact,
-            builder.valueObject(valueValue, TestSchema.value)
+        builder.morphism(BasicSchema.contactToValue, contact,
+            builder.valueObject(valueValue, BasicSchema.value)
         );
     }
 
     public static TestMapping customer(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             orderKind,
             () -> ComplexProperty.createRoot(
                 ComplexProperty.createAuxiliary(new StaticName("customer"),
-                    new SimpleProperty("name", TestSchema.orderToName),
-                    new SimpleProperty("number", TestSchema.orderToNumber)
+                    new SimpleProperty("name", BasicSchema.orderToName),
+                    new SimpleProperty("number", BasicSchema.orderToNumber)
                 )
             )
         );
@@ -185,26 +185,26 @@ public abstract class MongoDB {
     // }
 
     public static void addCustomer(InstanceBuilder builder, int orderIndex, String name) {
-        final var order = builder.getRow(TestSchema.order, orderIndex);
+        final var order = builder.getRow(BasicSchema.order, orderIndex);
 
-        final var customer = builder.value(TestSchema.customerToName, name).object(TestSchema.customer);
-        builder.morphism(TestSchema.customerToName, customer,
-            builder.valueObject(name, TestSchema.name)
+        final var customer = builder.value(BasicSchema.customerToName, name).object(BasicSchema.customer);
+        builder.morphism(BasicSchema.customerToName, customer,
+            builder.valueObject(name, BasicSchema.name)
         );
 
-        builder.morphism(TestSchema.orderToCustomer, order, customer);
+        builder.morphism(BasicSchema.orderToCustomer, order, customer);
     }
 
     public static TestMapping note(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             orderKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", TestSchema.orderToNumber),
-                ComplexProperty.create("note", TestSchema.noteToOrder.dual(),
-                    ComplexProperty.create(TestSchema.noteToLocale, TestSchema.noteToData,
-                        new SimpleProperty("subject", TestSchema.dataToSubject),
-                        new SimpleProperty("content", TestSchema.dataToContent)
+                new SimpleProperty("number", BasicSchema.orderToNumber),
+                ComplexProperty.create("note", BasicSchema.noteToOrder.dual(),
+                    ComplexProperty.create(BasicSchema.noteToLocale, BasicSchema.noteToData,
+                        new SimpleProperty("subject", BasicSchema.dataToSubject),
+                        new SimpleProperty("content", BasicSchema.dataToContent)
                     )
                 )
             )
@@ -219,23 +219,23 @@ public abstract class MongoDB {
     // }
 
     public static void addNote(InstanceBuilder builder, int orderIndex, String localeValue, String uniqueId, String subjectValue, String contentValue) {
-        final var order = builder.getRow(TestSchema.order, orderIndex);
-        final var numberValue = order.superId.getValue(TestSchema.orderToNumber);
+        final var order = builder.getRow(BasicSchema.order, orderIndex);
+        final var numberValue = order.superId.getValue(BasicSchema.orderToNumber);
 
         final var note = builder
-            .value(TestSchema.noteToNumber, numberValue)
-            .value(TestSchema.noteToLocale, localeValue).object(TestSchema.note);
+            .value(BasicSchema.noteToNumber, numberValue)
+            .value(BasicSchema.noteToLocale, localeValue).object(BasicSchema.note);
 
-        builder.morphism(TestSchema.noteToOrder, note, order);
-        builder.morphism(TestSchema.noteToLocale, note,
-            builder.valueObject(localeValue, TestSchema.locale)
+        builder.morphism(BasicSchema.noteToOrder, note, order);
+        builder.morphism(BasicSchema.noteToLocale, note,
+            builder.valueObject(localeValue, BasicSchema.locale)
         );
 
-        final var data = builder.valueObject(uniqueId, TestSchema.data);
-        builder.morphism(TestSchema.noteToData, note, data);
+        final var data = builder.valueObject(uniqueId, BasicSchema.data);
+        builder.morphism(BasicSchema.noteToData, note, data);
 
-        builder.morphism(TestSchema.dataToSubject, data, builder.valueObject(subjectValue, TestSchema.subject));
-        builder.morphism(TestSchema.dataToContent, data, builder.valueObject(contentValue, TestSchema.content));
+        builder.morphism(BasicSchema.dataToSubject, data, builder.valueObject(subjectValue, BasicSchema.subject));
+        builder.morphism(BasicSchema.dataToContent, data, builder.valueObject(contentValue, BasicSchema.content));
     }
 
 }

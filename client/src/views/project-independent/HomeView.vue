@@ -6,6 +6,7 @@ import CleverRouterLink from '@/components/CleverRouterLink.vue';
 import ResourceLoader from '@/components/ResourceLoader.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+// import rawAPI from '@/utils/api/rawAPI';
 
 const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 
@@ -36,13 +37,20 @@ async function confirmNewCategory() {
 
     newCategoryLabel.value = '';
 }
+
+// async function resetDatabase() {
+//     rawAPI.POST('/reset-database');
+// }
 </script>
 
 <template>
     <h1>MM-cat</h1>
     <p>
-        A multi-model data modelling framework based on category theory.
+        A multi-model data modeling framework based on category theory.
     </p>
+    {{/*  <Button :onclick="resetDatabase">
+            Reset database
+        </Button>  */}}
     <br />
     <p>
         Detailed instructions on how to use this tool can be found <a :href="DOCUMENTATION_URL">here</a>.

@@ -4,7 +4,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.instance.InstanceBuilder;
-import cz.matfyz.tests.schema.TestSchema;
+import cz.matfyz.tests.schema.BasicSchema;
 
 public abstract class PostgreSQL {
 
@@ -14,70 +14,70 @@ public abstract class PostgreSQL {
 
     public static TestMapping order(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             orderKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", TestSchema.orderToNumber)
+                new SimpleProperty("number", BasicSchema.orderToNumber)
             )
         );
     }
 
     public static void addOrder(InstanceBuilder builder, String numberValue) {
-        builder.morphism(TestSchema.orderToNumber,
-            builder.value(TestSchema.orderToNumber, numberValue).object(TestSchema.order),
-            builder.valueObject(numberValue, TestSchema.number)
+        builder.morphism(BasicSchema.orderToNumber,
+            builder.value(BasicSchema.orderToNumber, numberValue).object(BasicSchema.order),
+            builder.valueObject(numberValue, BasicSchema.number)
         );
     }
 
     public static TestMapping product(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.product,
+            BasicSchema.product,
             productKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("id", TestSchema.productToId),
-                new SimpleProperty("label", TestSchema.productToLabel),
-                new SimpleProperty("price", TestSchema.productToPrice)
+                new SimpleProperty("id", BasicSchema.productToId),
+                new SimpleProperty("label", BasicSchema.productToLabel),
+                new SimpleProperty("price", BasicSchema.productToPrice)
             )
         );
     }
 
     public static void addProduct(InstanceBuilder builder, String idValue, String labelValue, String priceValue) {
-        final var product = builder.value(TestSchema.productToId, idValue).object(TestSchema.product);
+        final var product = builder.value(BasicSchema.productToId, idValue).object(BasicSchema.product);
         
         if (idValue != null)
-            builder.morphism(TestSchema.productToId, product, builder.valueObject(idValue, TestSchema.id));
+            builder.morphism(BasicSchema.productToId, product, builder.valueObject(idValue, BasicSchema.id));
 
         if (labelValue != null)
-            builder.morphism(TestSchema.productToLabel, product, builder.valueObject(labelValue, TestSchema.label));
+            builder.morphism(BasicSchema.productToLabel, product, builder.valueObject(labelValue, BasicSchema.label));
 
         if (priceValue != null)
-            builder.morphism(TestSchema.productToPrice, product, builder.valueObject(priceValue, TestSchema.price));
+            builder.morphism(BasicSchema.productToPrice, product, builder.valueObject(priceValue, BasicSchema.price));
     }
 
     public static TestMapping item(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.item,
+            BasicSchema.item,
             itemKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("order_number", TestSchema.itemToNumber),
-                new SimpleProperty("product_id", TestSchema.itemToId),
-                new SimpleProperty("quantity", TestSchema.itemToQuantity)
+                new SimpleProperty("order_number", BasicSchema.itemToNumber),
+                new SimpleProperty("product_id", BasicSchema.itemToId),
+                new SimpleProperty("quantity", BasicSchema.itemToQuantity)
             )
         );
     }
 
     public static void addItem(InstanceBuilder builder, int orderIndex, int productIndex, String quantityValue) {
-        final var order = builder.getRow(TestSchema.order, orderIndex);
-        final var numberValue = order.superId.getValue(TestSchema.orderToNumber);
+        final var order = builder.getRow(BasicSchema.order, orderIndex);
+        final var numberValue = order.superId.getValue(BasicSchema.orderToNumber);
 
-        final var product = builder.getRow(TestSchema.product, productIndex);
-        final var idValue = product.superId.getValue(TestSchema.productToId);
+        final var product = builder.getRow(BasicSchema.product, productIndex);
+        final var idValue = product.superId.getValue(BasicSchema.productToId);
 
-        final var item = builder.value(TestSchema.itemToNumber, numberValue).value(TestSchema.itemToId, idValue).object(TestSchema.item);
-        builder.morphism(TestSchema.itemToOrder, item, order);
-        builder.morphism(TestSchema.itemToProduct, item, product);
-        builder.morphism(TestSchema.itemToQuantity, item,
-            builder.valueObject(quantityValue, TestSchema.quantity)
+        final var item = builder.value(BasicSchema.itemToNumber, numberValue).value(BasicSchema.itemToId, idValue).object(BasicSchema.item);
+        builder.morphism(BasicSchema.itemToOrder, item, order);
+        builder.morphism(BasicSchema.itemToProduct, item, product);
+        builder.morphism(BasicSchema.itemToQuantity, item,
+            builder.valueObject(quantityValue, BasicSchema.quantity)
         );
     }
 

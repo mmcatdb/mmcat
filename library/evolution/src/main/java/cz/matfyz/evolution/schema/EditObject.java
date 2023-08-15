@@ -5,7 +5,7 @@ import cz.matfyz.core.schema.SchemaObject;
 
 public class EditObject extends SchemaCategory.Editor implements SchemaModificationOperation {
 
-    final SchemaObject newObject;
+    public final SchemaObject newObject;
 
     public EditObject(SchemaObject newObject) {
         this.newObject = newObject;

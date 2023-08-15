@@ -1,3 +1,4 @@
+import { Signature } from './Signature';
 import { SignatureId, SignatureIdFactory, type SignatureIdFromServer } from './SignatureId';
 
 export enum Type {
@@ -36,6 +37,24 @@ export class ObjectIds {
 
     static createNonSignatures(type: NonSignaturesType): ObjectIds {
         return new ObjectIds(type);
+    }
+
+    static createCrossProduct(signatures: Signature[], ids: ObjectIds[]): ObjectIds {
+        let signatureIds = [ new SignatureId([]) ];
+        for (let i = 0; i < signatures.length; i++)
+            signatureIds = ObjectIds.combineCrossProductIds(signatureIds, signatures[i], ids[i]);
+
+        return ObjectIds.createSignatures(signatureIds);
+    }
+
+    private static combineCrossProductIds(current: SignatureId[], signature: Signature, ids: ObjectIds): SignatureId[] {
+        const newSignatureIds = ids.isSignatures
+            ? ids._signatureIds.map(id => id.signatures)
+            : [ [ Signature.empty ] ];
+
+        const concatenatedSignatureIds = newSignatureIds.map(signatureId => signatureId.map(signature.concatenate));
+
+        return current.flatMap(currentId => concatenatedSignatureIds.map(signatureId => new SignatureId([ ...currentId.signatures, ...signatureId ])));
     }
 
     static fromServer(input: ObjectIdsFromServer): ObjectIds {

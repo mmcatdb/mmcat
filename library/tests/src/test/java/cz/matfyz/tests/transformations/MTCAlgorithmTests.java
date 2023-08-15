@@ -4,7 +4,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.UniqueIdProvider;
 import cz.matfyz.tests.mapping.MongoDB;
 import cz.matfyz.tests.mapping.PostgreSQL;
-import cz.matfyz.tests.schema.TestSchema;
+import cz.matfyz.tests.schema.BasicSchema;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
  */
 public class MTCAlgorithmTests {
 
-    private static final SchemaCategory schema = TestSchema.newSchemaCategory();
+    private static final SchemaCategory schema = BasicSchema.newSchemaCategory();
     
     @BeforeEach
     public void setUp() {

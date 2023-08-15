@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -89,9 +90,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         StringBuilder builder = new StringBuilder();
 
         builder.append("(");
-        for (Signature signature : signatures.headSet(signatures.last()))
-            builder.append(signature).append(", ");
-        builder.append(signatures.last());
+        builder.append(signatures.stream().map(Object::toString).collect(Collectors.joining(", ")));
         builder.append(")");
 
         return builder.toString();

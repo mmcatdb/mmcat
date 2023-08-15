@@ -55,8 +55,7 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     public void execute(Path path) {
         try {
             String script = Files.readString(path);
-            final var statements = Stream.of(script.split(";\\s*\n"))
-                .filter(s -> !s.isBlank())
+            final var statements = splitScript(script)
                 .map(s -> (AbstractStatement) new PostgreSQLStatement(s))
                 .toList();
 
@@ -65,6 +64,12 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
         catch (IOException e) {
             throw new ExecuteException(e, path);
         }
+    }
+
+    public static Stream<String> splitScript(String script) {
+        return Stream.of(script.split(";\\s*\n"))
+            .map(s -> s.trim())
+            .filter(s -> !s.isBlank());
     }
 
     // String beforePasswordString = new StringBuilder()

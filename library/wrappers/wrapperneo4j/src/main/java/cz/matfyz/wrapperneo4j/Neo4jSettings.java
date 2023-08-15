@@ -1,5 +1,6 @@
 package cz.matfyz.wrapperneo4j;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.neo4j.driver.AuthToken;
 import org.neo4j.driver.AuthTokens;
@@ -8,6 +9,7 @@ import org.neo4j.driver.AuthTokens;
  * @author jachymb.bartik
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Neo4jSettings {
 
     private String host;

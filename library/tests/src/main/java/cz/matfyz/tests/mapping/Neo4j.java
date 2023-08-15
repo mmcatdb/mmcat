@@ -3,7 +3,7 @@ package cz.matfyz.tests.mapping;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.schema.TestSchema;
+import cz.matfyz.tests.schema.BasicSchema;
 
 public abstract class Neo4j {
 
@@ -12,27 +12,27 @@ public abstract class Neo4j {
     
     public static TestMapping order(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.order,
+            BasicSchema.order,
             orderKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("customer", TestSchema.orderToName),
-                new SimpleProperty("number", TestSchema.orderToNumber)
+                new SimpleProperty("customer", BasicSchema.orderToName),
+                new SimpleProperty("number", BasicSchema.orderToNumber)
             )
         );
     }
 
     public static TestMapping item(SchemaCategory schema) {
         return new TestMapping(schema,
-            TestSchema.item,
+            BasicSchema.item,
             itemKind,
             () -> ComplexProperty.createRoot(
-                new SimpleProperty("quantity", TestSchema.itemToQuantity),
-                ComplexProperty.create("_from.Order", TestSchema.itemToOrder,
-                    new SimpleProperty("customer", TestSchema.orderToName)
+                new SimpleProperty("quantity", BasicSchema.itemToQuantity),
+                ComplexProperty.create("_from.Order", BasicSchema.itemToOrder,
+                    new SimpleProperty("customer", BasicSchema.orderToName)
                 ),
-                ComplexProperty.create("_to.Product", TestSchema.itemToProduct,
-                    new SimpleProperty("id", TestSchema.productToId),
-                    new SimpleProperty("label", TestSchema.productToLabel)
+                ComplexProperty.create("_to.Product", BasicSchema.itemToProduct,
+                    new SimpleProperty("id", BasicSchema.productToId),
+                    new SimpleProperty("label", BasicSchema.productToLabel)
                 )
             )
         );

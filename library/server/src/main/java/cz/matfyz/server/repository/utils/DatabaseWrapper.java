@@ -1,12 +1,14 @@
 package cz.matfyz.server.repository.utils;
 
+import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.server.configuration.DatabaseProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.exception.NotFoundException;
 import cz.matfyz.server.exception.RepositoryException;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
+import cz.matfyz.wrapperpostgresql.PostgreSQLSettings;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.function.Function;
@@ -29,35 +31,33 @@ public class DatabaseWrapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseWrapper.class);
 
     @Autowired
-    private DatabaseProperties databaseProperties;
+    private DatabaseProperties properties;
 
     private DatabaseWrapper() {}
-
+    
     public Connection getConnection() {
-        return createConnection();
-    }
-
-    private Connection createConnection() {
         try {
-            var connectionBuilder = new StringBuilder();
-            var connectionString = connectionBuilder
-                .append("jdbc:postgresql://")
-                .append(databaseProperties.host())
-                .append(":")
-                .append(databaseProperties.port())
-                .append("/")
-                .append(databaseProperties.database())
-                .append("?user=")
-                .append(databaseProperties.username())
-                .append("&password=")
-                .append(databaseProperties.password())
-                .toString();
-
-            return DriverManager.getConnection(connectionString);
+            return getConnectionProvider().getConnection();
         }
-        catch (SQLException e) {
+        catch (OtherException e) {
+            LOGGER.error("createConnection", e);
             throw RepositoryException.createConnection(e);
         }
+    }
+    
+    private PostgreSQLProvider connectionProvider;
+
+    private PostgreSQLProvider getConnectionProvider() {
+        if (connectionProvider == null)
+            connectionProvider = new PostgreSQLProvider(new PostgreSQLSettings(
+                properties.host(),
+                properties.port(),
+                properties.database(),
+                properties.username(),
+                properties.password()
+            ));
+
+        return connectionProvider;
     }
 
     public <T> T get(DatabaseGetSingleFunction<T> function, String type, Id id) {
@@ -100,7 +100,7 @@ public class DatabaseWrapper {
 
     private <T> T resolveDatabaseFunction(DatabaseFunction<T> function) {
         try (
-            final Connection connection = createConnection();
+            final Connection connection = getConnection();
         ) {
             return function.execute(connection);
         }
@@ -111,6 +111,23 @@ public class DatabaseWrapper {
         catch (JsonProcessingException e) {
             LOGGER.error("resolveDatabaseFunction", e);
             throw RepositoryException.processJson(e);
+        }
+    }
+
+    public void execute(String ...statements) {
+        try (
+            final Connection connection = getConnection()
+        ) {
+            connection.setAutoCommit(false);
+
+            for (final String statement : statements)
+                connection.prepareStatement(statement).executeUpdate();
+
+            connection.commit();
+        }
+        catch (SQLException e) {
+            LOGGER.error("executeSql", e);
+            throw RepositoryException.executeSql(e);
         }
     }
 

@@ -4,7 +4,7 @@ import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
-import cz.matfyz.integration.utils.Constants;
+import cz.matfyz.core.utils.Config;
 
 import org.apache.jena.rdf.model.RDFNode;
 
@@ -13,7 +13,7 @@ import org.apache.jena.rdf.model.RDFNode;
  */
 public class TextProcessor extends TypeProcessorBase implements TypeProcessor {
 
-    private static final String TEXT_IRI_PREFIX = Constants.CUSTOM_IRI_PREFIX + "text/";
+    private static final String TEXT_IRI_PREFIX = Config.get("integration.iriPrefix") + "text/";
 
     //private static final String LANGUAGE = TEXT_IRI_PREFIX + "language";
     private static final String ATTRIBUTE_TO_LANGUAGE = TEXT_IRI_PREFIX + "attribute-to-language";

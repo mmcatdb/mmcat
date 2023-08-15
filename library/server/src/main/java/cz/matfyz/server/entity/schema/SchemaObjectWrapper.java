@@ -31,8 +31,8 @@ public record SchemaObjectWrapper(
 
     public record Data(
         String label,
-        SignatureId superId,
         ObjectIds ids,
+        SignatureId superId,
         String iri,
         String pimIri
     ) {
@@ -40,15 +40,15 @@ public record SchemaObjectWrapper(
         public static Data fromSchemaObject(SchemaObject object) {
             return new Data(
                 object.label(),
-                object.superId(),
                 object.ids(),
+                object.superId(),
                 object.iri,
                 object.pimIri
             );
         }
 
         public SchemaObject toSchemaObject(Key key, SchemaCategoryContext context) {
-            final var object = new SchemaObject(key, label, superId, ids, iri, pimIri);
+            final var object = new SchemaObject(key, label, ids, superId, iri, pimIri);
             context.setObject(object);
             
             return object;

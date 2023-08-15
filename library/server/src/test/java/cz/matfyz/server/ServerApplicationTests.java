@@ -1,4 +1,4 @@
-package cz.matfyz.tests.server;
+package cz.matfyz.server;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
@@ -11,7 +11,6 @@ import cz.matfyz.core.utils.Statistics;
 import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdProvider;
-import cz.matfyz.server.ServerApplication;
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.database.Database;
@@ -35,7 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 /**
  * @author jachymb.bartik
  */
-@SpringBootTest(classes = ServerApplication.class)
+@SpringBootTest()
 class ServerApplicationTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerApplicationTests.class);

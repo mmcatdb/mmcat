@@ -7,51 +7,51 @@ import org.springframework.stereotype.Component;
  * @author jachym.bartik
  */
 @Component
-@ConfigurationProperties("postgresql")
+@ConfigurationProperties("database")
 public class DatabaseProperties {
-
-    public String host() {
-        return host;
-    }
-
-    public String port() {
-        return port;
-    }
-    
-    public String database() {
-        return database;
-    }
-    
-    public String username() {
-        return username;
-    }
-    
-    public String password() {
-        return password;
-    }
 
     private String host;
     private String port;
     private String database;
     private String username;
     private String password;
+
+    public String host() {
+        return host;
+    }
     
     public void setHost(String host) {
         this.host = host;
+    }
+
+    public String port() {
+        return port;
     }
 
     public void setPort(String port) {
         this.port = port;
     }
 
+    public String database() {
+        return database;
+    }
+    
     public void setDatabase(String database) {
         this.database = database;
+    }
+    
+    public String username() {
+        return username;
     }
     
     public void setUsername(String username) {
         this.username = username;
     }
 
+    public String password() {
+        return password;
+    }
+    
     public void setPassword(String password) {
         this.password = password;
     }

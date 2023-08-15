@@ -21,29 +21,43 @@ public abstract class Config {
             loadProperties();
 
         String property = properties.getProperty(key);
-        if (property == null) {
+        if (property == null)
             throw ConfigurationException.keyNotFound(key);
-        }
 
         return property;
     }
 
+    public static boolean getBool(String key) {
+        return Boolean.parseBoolean(get(key));
+    }
+
     private static void loadProperties() {
+        final Properties defaultProperties = getProperties("default.properties", null);
+        properties = getProperties("application.properties", defaultProperties);
+    }
+
+    private static Properties getProperties(String fileName, Properties defaultProperties) {
         try {
-            properties = new Properties();
+            final Properties output = new Properties(defaultProperties);
             
-            var url = ClassLoader.getSystemResource("application.properties");
-            String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
-            var configFile = new File(pathToFile);
+            final var url = ClassLoader.getSystemResource(fileName);
+            // If the file can't be found that's fine, provided we already have default properties.
+            if (url == null && defaultProperties != null)
+                return defaultProperties;
+
+            final String pathToFile = Paths.get(url.toURI()).toAbsolutePath().toString();
+            final var configFile = new File(pathToFile);
 
             try (
-                var reader = new FileReader(configFile);
+                final var reader = new FileReader(configFile);
             ) {
-                properties.load(reader);
+                output.load(reader);
+                return output;
             }
         }
         catch (Exception e) {
             throw ConfigurationException.notAvailable(e);
         }
     }
+
 }

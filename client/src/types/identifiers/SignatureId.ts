@@ -3,7 +3,7 @@ import { Signature, type SignatureFromServer } from './Signature';
 export type SignatureIdFromServer = SignatureFromServer[];
 
 export class SignatureId {
-    _signatures: Signature[]; // TODO make set?
+    private _signatures: Signature[]; // TODO make set?
 
     constructor(signatures: Signature[]) {
         this._signatures = signatures;

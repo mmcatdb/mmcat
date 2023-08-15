@@ -13,16 +13,16 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
     
     private final Key key; // Identifies the object, in the paper it's a number >= 100
     private final String label;
-    private final SignatureId superId; // Should be a union of all ids (super key).
     private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
+    private final SignatureId superId; // Should be a union of all ids (super key).
     public final String iri;
     public final String pimIri;
 
-    public SchemaObject(Key key, String label, SignatureId superId, ObjectIds ids, String iri, String pimIri) {
+    public SchemaObject(Key key, String label, ObjectIds ids, SignatureId superId, String iri, String pimIri) {
         this.key = key;
         this.label = label;
-        this.superId = superId;
         this.ids = ids;
+        this.superId = superId;
         this.iri = iri;
         this.pimIri = pimIri;
     }

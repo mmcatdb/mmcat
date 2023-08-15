@@ -1,6 +1,8 @@
 import { Type } from '@/types/identifiers';
 import type { ImportedMorphism, ImportedId } from '@/types/integration';
 
+export const CUSTOM_IRI_PREFIX = import.meta.env.VITE_CUSTOM_IRI_PREFIX;
+
 export function createValueId(): ImportedId {
     return { type: Type.Value };
 }
@@ -16,4 +18,3 @@ export function createMorphismId(morphisms: ImportedMorphism | ImportedMorphism[
     };
 }
 
-export const CUSTOM_IRI_PREFIX = 'https://mm-evocat.com/iri/';

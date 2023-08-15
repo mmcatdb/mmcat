@@ -1,22 +1,27 @@
 package cz.matfyz.wrappermongodb;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author jachymb.bartik
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class MongoDBSettings {
 
     private String host;
     private String port;
-    private String database;
     private String authenticationDatabase;
+    private String database;
     private String username;
     private String password;
 
-    public MongoDBSettings(String host, String port, String database, String authenticationDatabase, String username, String password) {
+    public MongoDBSettings(String host, String port, String authenticationDatabase, String database, String username, String password) {
         this.host = host;
         this.port = port;
-        this.database = database;
         this.authenticationDatabase = authenticationDatabase;
+        this.database = database;
         this.username = username;
         this.password = password;
     }
@@ -57,12 +62,12 @@ public class MongoDBSettings {
         this.port = port;
     }
 
-    public void setDatabase(String database) {
-        this.database = database;
-    }
-
     public void setAuthenticationDatabase(String authenticationDatabase) {
         this.authenticationDatabase = authenticationDatabase;
+    }
+
+    public void setDatabase(String database) {
+        this.database = database;
     }
 
     public void setUsername(String username) {

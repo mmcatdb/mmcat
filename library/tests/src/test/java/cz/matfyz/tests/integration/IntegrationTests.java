@@ -1,4 +1,4 @@
-package cz.matfyz.tests.server;
+package cz.matfyz.tests.integration;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
@@ -7,23 +7,17 @@ import cz.matfyz.core.utils.io.FileInputStreamProvider;
 import cz.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.matfyz.integration.algorithms.JsonLdToRDF;
 import cz.matfyz.integration.algorithms.RDFToInstance;
-import cz.matfyz.server.ServerApplication;
-import cz.matfyz.server.builder.SchemaCategoryContext;
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.service.SchemaCategoryService;
+import cz.matfyz.tests.schema.IntegrationSchema;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * @author jachymb.bartik
  */
-@SpringBootTest(classes = ServerApplication.class)
 public class IntegrationTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
@@ -31,13 +25,8 @@ public class IntegrationTests {
     
     static final String JSON_LD_FILE_NAME = "test2.jsonld";
     //static final String JSON_LD_FILE_NAME = "test1.jsonld";
-    static final String JSON_LD_URL = "http://localhost/data-sources/test2.jsonld";
+    static final String JSON_LD_URL = "https://demo.mm-evocat.com/data-sources/test2.jsonld";
     //static final String JSON_LD_URL = "http://localhost/data-sources/test1.jsonld";
-    static final Id CATEGORY_ID = new Id("4");
-    //static final Id CATEGORY_ID = new Id("7");
-
-    @Autowired
-    private SchemaCategoryService categoryService;
 
     @Test
     public void jsonLdToRdfFromLocalFile_DoesNotThrow() {
@@ -68,9 +57,7 @@ public class IntegrationTests {
         final var jsonToRDF = new JsonLdToRDF();
         jsonToRDF.input(new FileInputStreamProvider(JSON_LD_FILE_NAME));
 
-        final var schemaCategoryWrapper = categoryService.find(CATEGORY_ID);
-        final var context = new SchemaCategoryContext();
-        final var schemaCategory = schemaCategoryWrapper.toSchemaCategory(context);
+        final var schemaCategory = IntegrationSchema.newSchemaCategory();
         final var instanceCategory = new InstanceCategoryBuilder().setSchemaCategory(schemaCategory).build();
 
         assertDoesNotThrow(() -> {

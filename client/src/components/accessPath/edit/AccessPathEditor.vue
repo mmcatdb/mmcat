@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
-import { ref, shallowRef } from 'vue';
+import { shallowRef } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
 import type { DatabaseWithConfiguration } from '@/types/database';
 import AddProperty from './AddProperty.vue';

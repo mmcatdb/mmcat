@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DeleteObject extends SchemaCategory.Editor implements SchemaModificationOperation {
 
-    final Key key;
+    public final Key key;
 
     public DeleteObject(Key key) {
         this.key = key;

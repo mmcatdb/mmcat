@@ -24,6 +24,9 @@ COPY --from=stage-build /app/dist /var/www/html
 
 COPY docker/prod/nginx.conf /etc/nginx/
 COPY docker/prod/app.conf /etc/nginx/sites-enabled/
+# COPY docker/prod/app.conf.template /etc/nginx/sites-enabled/
+# RUN envsubst "\$SERVER_PORT" < /etc/nginx/sites-enabled/app.conf.template > /etc/nginx/sites-enabled/app.conf
+# RUN rm /etc/nginx/sites-enabled/app.conf.template
 
 EXPOSE 80
 

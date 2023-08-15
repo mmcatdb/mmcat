@@ -39,7 +39,7 @@ public class SchemaBuilder {
         final var schema = new SchemaCategory(label);
 
         this.objects.forEach(o -> {
-            final var object = new SchemaObject(o.key, o.name, o.ids.generateDefaultSuperId(), o.ids, null, null);
+            final var object = new SchemaObject(o.key, o.name, o.ids, o.ids.generateDefaultSuperId(), null, null);
             schema.addObject(object);
         });
 

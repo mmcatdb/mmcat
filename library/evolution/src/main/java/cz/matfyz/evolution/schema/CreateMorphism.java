@@ -7,9 +7,9 @@ import cz.matfyz.core.schema.SchemaMorphism;
 public class CreateMorphism extends SchemaCategory.Editor implements SchemaModificationOperation {
 
     // dom and cod of the morphism are probably null because they have not been created yet during the creation of this operation
-    final SchemaMorphism morphism;
-    final Key domKey;
-    final Key codKey;
+    public final SchemaMorphism morphism;
+    public final Key domKey;
+    public final Key codKey;
 
     public CreateMorphism(SchemaMorphism morphism, Key domKey, Key codKey) {
         this.morphism = morphism;

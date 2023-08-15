@@ -10,6 +10,21 @@ services:
         ports:
             - ${ADMINER_PORT}:8080
 
+    database:
+        container_name: "mmcat-database"
+        restart: always
+        build: 
+            context: .
+            dockerfile: docker/database/Dockerfile
+        env_file: .env
+        environment:
+            - POSTGRES_PASSWORD=${POSTGRESQL_SUPERUSER_PASSWORD}
+        expose:
+            - 5432
+        ports:
+            # Make the DB available on localhost for development.
+            - ${DATABASE_PORT}:5432
+
     postgresql:
         container_name: "mmcat-postgresql"
         restart: always
@@ -46,16 +61,17 @@ services:
             dockerfile: docker/neo4j/Dockerfile
         env_file: .env
         environment:
-            - NEO4J_AUTH=neo4j/${DB_EXAMPLE_PASSWORD}
+            - NEO4J_AUTH=neo4j/${EXAMPLE_PASSWORD}
         expose:
             - 7473 # This one is for https, which can be ignored on localhost
             - 7474
             - 7687
         ports:
             # Make the DB available on localhost for development.
-            - ${MM_NEO4J_PORT}:7687
+            # The NEO4J_PORT variable is already taken.
+            - ${MMCAT_NEO4J_PORT}:7687
             # The bolt port has to be as is because the browser client expects it to be there.
-            - ${MM_NEO4J_BROWSER_PORT}:7474
+            - ${MMCAT_NEO4J_BROWSER_PORT}:7474
 
 networks:
     default:

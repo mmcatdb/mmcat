@@ -5,7 +5,7 @@ import cz.matfyz.core.utils.Config;
 import cz.matfyz.tests.mapping.MongoDB;
 import cz.matfyz.tests.mapping.Neo4j;
 import cz.matfyz.tests.mapping.PostgreSQL;
-import cz.matfyz.tests.schema.TestSchema;
+import cz.matfyz.tests.schema.BasicSchema;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
 import cz.matfyz.wrappermongodb.MongoDBSettings;
@@ -18,7 +18,7 @@ import cz.matfyz.wrapperpostgresql.PostgreSQLSettings;
 
 public class BasicDatabases {
     
-    public final SchemaCategory schema = TestSchema.newSchemaCategory();
+    public final SchemaCategory schema = BasicSchema.newSchemaCategory();
 
     /**
      * PostgreSQL
@@ -45,11 +45,11 @@ public class BasicDatabases {
     private static PostgreSQLProvider getPostgreSQLProvider() {
         if (postgreSQLProvider == null) {
             postgreSQLProvider = new PostgreSQLProvider(new PostgreSQLSettings(
-                Config.get("postgresql.host"),
-                Config.get("postgresql.port"),
-                Config.get("postgresql.database"),
-                Config.get("postgresql.username"),
-                Config.get("postgresql.password")
+                Config.getBool("tests.isInDocker") ? "mmcat-postgresql" : "localhost",
+                Config.get("tests.postgresqlPort"),
+                Config.get("tests.database"),
+                Config.get("tests.username"),
+                Config.get("tests.password")
             ));
         }
 
@@ -85,12 +85,12 @@ public class BasicDatabases {
     private static MongoDBProvider getMongoDBProvider() {
         if (mongoDBProvider == null) {
             mongoDBProvider = new MongoDBProvider(new MongoDBSettings(
-                Config.get("mongodb.host"),
-                Config.get("mongodb.port"),
-                Config.get("mongodb.database"),
-                Config.get("mongodb.authenticationDatabase"),
-                Config.get("mongodb.username"),
-                Config.get("mongodb.password")
+                Config.getBool("tests.isInDocker") ? "mmcat-mongodb" : "localhost",
+                Config.get("tests.mongodbPort"),
+                "admin",
+                Config.get("tests.database"),
+                Config.get("tests.username"),
+                Config.get("tests.password")
             ));
         }
 
@@ -121,11 +121,11 @@ public class BasicDatabases {
     private static Neo4jProvider getNeo4jProvider() {
         if (neo4jProvider == null) {
             neo4jProvider = new Neo4jProvider(new Neo4jSettings(
-                Config.get("neo4j.host"),
-                Config.get("neo4j.port"),
-                Config.get("neo4j.database"),
-                Config.get("neo4j.username"),
-                Config.get("neo4j.password")
+                Config.getBool("tests.isInDocker") ? "mmcat-neo4j" : "localhost",
+                Config.get("tests.neo4jPort"),
+                "neo4j",
+                "neo4j",
+                Config.get("tests.password")
             ));
         }
 

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# cypher-shell -f example_basic.cypher -a bolt://localhost:7687 -u ${DB_EXAMPLE_USERNAME} -p ${DB_EXAMPLE_PASSWORD}
-
 # Enable job monitor.
 set -m
 
