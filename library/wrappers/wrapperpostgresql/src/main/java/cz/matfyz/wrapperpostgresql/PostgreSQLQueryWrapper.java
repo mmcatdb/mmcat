@@ -62,10 +62,6 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         return projection.kind.mapping.kindName() + "_" + getPropertyName(projection.propertyPath);
     }
 
-    // private String getEscapedKindName(KindInstance kind) {
-    //     return escapeKindName(kinds.get(kind));
-    // }
-
     private String escapeKindName(String name) {
         return "\"" + name + "\"";
     }

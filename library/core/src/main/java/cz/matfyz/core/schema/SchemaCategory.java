@@ -100,6 +100,14 @@ public class SchemaCategory implements Category {
         return morphismContext.getAllUniqueObjects();
     }
 
+    public boolean hasObject(Key key) {
+        return objectContext.getUniqueObject(key) != null;
+    }
+
+    public boolean hasMorphism(Signature signature) {
+        return morphismContext.getUniqueObject(signature) != null;
+    }
+
     private SchemaMorphism createCompositeMorphism(Signature signature) {
         Signature[] bases = signature.toBases().toArray(Signature[]::new);
 

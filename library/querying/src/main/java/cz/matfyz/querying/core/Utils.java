@@ -3,7 +3,7 @@ package cz.matfyz.querying.core;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.KindInstance;
+import cz.matfyz.core.mapping.Kind;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
@@ -67,7 +67,7 @@ public abstract class Utils {
      * Given a query part, return the set of kinds occurring in this query part.
      * Note that there can be multiple kinds for multiple variables which refer to the same underlying database kind.
      */
-    public static List<KindInstance> getKindsFromPart(QueryPart part) {
+    public static List<Kind> getKindsFromPart(QueryPart part) {
         // TODO this sus
         return part.triplesMapping.stream().map(t -> t.kind).toList();
     }

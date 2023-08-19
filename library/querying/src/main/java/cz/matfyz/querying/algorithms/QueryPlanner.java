@@ -1,7 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.core.mapping.KindInstance;
-import cz.matfyz.core.mapping.KindInstance.KindInstanceBuilder;
+import cz.matfyz.core.mapping.Kind;
+import cz.matfyz.core.mapping.Kind.KindBuilder;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
@@ -28,11 +28,11 @@ import java.util.TreeSet;
  */
 public class QueryPlanner {
 
-    private final SchemaCategory schemaCategory;
+    private final SchemaCategory schema;
     private final List<KindDefinition> allKinds;
 
-    public QueryPlanner(SchemaCategory schemaCategory, List<KindDefinition> allKinds) {
-        this.schemaCategory = schemaCategory;
+    public QueryPlanner(SchemaCategory schema, List<KindDefinition> allKinds) {
+        this.schema = schema;
         this.allKinds = allKinds;
     }
 
@@ -43,7 +43,7 @@ public class QueryPlanner {
      * In the case of no data redundancy, the result will always contain only one query plan. In the case that redundancy is present, there can be multiple plans.
      */
     public List<QueryPlan> createPlans(Query query) {
-        final var variableTypes = Utils.getVariableTypesFromQuery(query, schemaCategory);
+        final var variableTypes = Utils.getVariableTypesFromQuery(query, schema);
         final var usedSchemaObjectKeys = new TreeSet<Key>();
         variableTypes.values().forEach(schemaObject -> usedSchemaObjectKeys.add(schemaObject.key()));
         
@@ -97,14 +97,14 @@ public class QueryPlanner {
         return output;
     }
 
-    private final KindInstanceBuilder kindInstanceBuilder = new KindInstanceBuilder();
+    private final KindBuilder kindBuilder = new KindBuilder();
 
     private QueryPlan createPlanFromAssignment(Query query, Map<String, SchemaObject> variableTypes, List<TripleKindDefinition> assignment) {
-        var kindInstances = assignment.stream().map(tripleKind -> new TripleKind(
+        var kinds = assignment.stream().map(tripleKind -> new TripleKind(
             tripleKind.triple,
-            kindInstanceBuilder.next(tripleKind.kind.mapping, tripleKind.kind.databaseId)
+            kindBuilder.next(tripleKind.kind.mapping, tripleKind.kind.databaseId)
         )).toList();
-        var initialQueryPart = new QueryPart(kindInstances, new ArrayList<>());
+        var initialQueryPart = new QueryPart(kinds, new ArrayList<>());
 
         var finishedQueryParts = new ArrayList<QueryPart>();
         var queryPartQueue = new LinkedList<QueryPart>();
@@ -153,16 +153,16 @@ public class QueryPlanner {
 
     static record QueryPartKind(
         QueryPart queryPart,
-        KindInstance kind
+        Kind kind
     ) {}
 
     private List<QueryPart> splitJoinPoint(
         Map<String, SchemaObject> variableTypes,
         QueryPart queryPart,
         WhereTriple tripleA,
-        KindInstance kindA,
+        Kind kindA,
         WhereTriple tripleB,
-        KindInstance kindB
+        Kind kindB
     ) {
         var intersectionVariable = tripleB.subject;
         var intersectionObject = variableTypes.get(intersectionVariable.name);

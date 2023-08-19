@@ -20,17 +20,13 @@ public class QueryVisitor extends QuerycatBaseVisitor<QueryNode> {
     protected QueryNode aggregateResult(QueryNode aggregate, QueryNode nextResult) {
         return nextResult == null ? aggregate : nextResult;
     }
-    // def aggregateResult(self, aggregate, nextResult):
-    //     // Maybe it would be more convenient to aggregate the results into a tuple or list?
-    //     return nextResult if nextResult is not None else aggregate
 
     @Override
     public Query visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
         var selectClause = ctx.selectClause().accept(this).asSelectClause();
         var whereClause = ctx.whereClause().accept(this).asWhereClause();
-        var variables = selectClause.variables;
 
-        return new Query(selectClause, whereClause, variables);
+        return new Query(selectClause, whereClause);
     }
 
     @Override

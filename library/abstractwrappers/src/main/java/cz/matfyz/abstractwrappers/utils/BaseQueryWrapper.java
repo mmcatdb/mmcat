@@ -10,7 +10,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariablesFilter;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.KindInstance;
+import cz.matfyz.core.mapping.Kind;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public abstract class BaseQueryWrapper {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseQueryWrapper.class);
 
-    protected Map<KindInstance, String> kinds = new TreeMap<>();
+    protected Map<Kind, String> kinds = new TreeMap<>();
     protected Map<VariableIdentifier, Projection> projections = new TreeMap<>();
     protected List<ConstantFilter> constantFilters = new ArrayList<>();
     protected List<VariablesFilter> variablesFilters = new ArrayList<>();
@@ -44,12 +44,7 @@ public abstract class BaseQueryWrapper {
         return value;
     }
 
-    // public void defineKind(KindInstance kind, String kindName) {
-    //     // LOGGER.info("[define kind] {}", kindName);
-    //     kinds.put(kind, kindName);
-    // }
-
-    public void addProjection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId) {
+    public void addProjection(List<AccessPath> propertyPath, Kind kind, VariableIdentifier variableId) {
         // LOGGER.info("[add projection]\n{}\n{}\n{}", propertyPath, kind, variableId);
         projections.put(variableId, new Projection(propertyPath, kind, variableId));
     }
@@ -69,7 +64,6 @@ public abstract class BaseQueryWrapper {
         valuesFilters.add(new ValuesFilter(variableId, constants));
     }
 
-    // public void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind) {
     public void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind) {
         LOGGER.info("[add join]\n{}\n{}\n{}", lhsKind, joinProperties, rhsKind);
         for (final var join : joins) {

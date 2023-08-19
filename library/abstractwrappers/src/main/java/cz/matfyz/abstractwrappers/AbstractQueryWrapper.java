@@ -1,7 +1,7 @@
 package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.KindInstance;
+import cz.matfyz.core.mapping.Kind;
 
 import java.util.List;
 import java.util.Map;
@@ -49,9 +49,7 @@ public interface AbstractQueryWrapper {
      */
     QueryStatement buildStatement();
 
-    // void defineKind(KindInstance kind, String kindName);
-
-    void addProjection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId);
+    void addProjection(List<AccessPath> propertyPath, Kind kind, VariableIdentifier variableId);
 
     void addConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant);
 
@@ -59,7 +57,6 @@ public interface AbstractQueryWrapper {
 
     void addValuesFilter(VariableIdentifier variableId, List<String> constants);
 
-    // void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind);
     void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind);
     
     enum ComparisonOperator {
@@ -83,10 +80,10 @@ public interface AbstractQueryWrapper {
      */
     public static class Projection implements Operation {
         public final List<AccessPath> propertyPath;
-        public final KindInstance kind;
+        public final Kind kind;
         public final VariableIdentifier variableId;
         
-        public Projection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId) {
+        public Projection(List<AccessPath> propertyPath, Kind kind, VariableIdentifier variableId) {
             this.propertyPath = propertyPath;
             this.kind = kind;
             this.variableId = variableId;
@@ -147,10 +144,8 @@ public interface AbstractQueryWrapper {
      * The `join_properties` contains a list of tuples, each of which contains a property path from the left kind, meaning that this property should be inner joined on equality to the corresponding property from the right kind.
      */
     public static class Join implements Operation {
-        // public final KindInstance lhsKind;
         public final String lhsKind;
         public final List<JoinedProperty> joinProperties;
-        // public final KindInstance rhsKind;
         public final String rhsKind;
 
         public Join(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind) {
