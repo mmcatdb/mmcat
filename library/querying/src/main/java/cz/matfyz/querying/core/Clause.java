@@ -27,8 +27,9 @@ public class Clause {
     }
 
     // These properties are gradually added as the query gets processed.
-    public SchemaCategory schema = null;
-    public List<KindDefinition> kinds = null;
+    public SchemaCategory schema;
+    public List<KindDefinition> kinds;
     public Set<Kind> patternPlan;
+    public List<QueryPart2> parts;
 
 }
