@@ -39,11 +39,7 @@ public class QueryToInstance2 {
 
     public Result algorithm() {
         final Query query = QueryParser.parse(queryString);
-        final Query preprocessedQuery = QueryPreprocessor.preprocessQuery(query);
-
-
-        final var planner = new QueryPlanner(schema, kinds);
-        final List<QueryPlan> queryPlans = planner.createPlans(preprocessedQuery);
+        processClause(query.whereClause);
 
         final QueryPlan bestPlan = queryPlans.get(0);
         
@@ -66,7 +62,10 @@ public class QueryToInstance2 {
         clause.kinds = extracted.kinds();
 
         final var plans = new QueryPlanner2(clause.schema, clause.kinds).run();
+        // TODO select plan somehow
+        clause.patternPlan = plans.get(0);
         
+        clause.nestedClauses.forEach(nestedClause -> processClause(nestedClause));
     }
 
     private List<String> createJsonResults(QueryPlan bestPlan, InstanceCategory whereInstance) {

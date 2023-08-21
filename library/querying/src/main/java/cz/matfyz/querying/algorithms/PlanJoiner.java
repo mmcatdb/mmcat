@@ -48,16 +48,17 @@ public class PlanJoiner {
         }
 
         final Coloring coloring = Coloring.create(clause.schema, clause.patternPlan);
+        final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
+        mergeNeighbours(clause, joinCandidates);
+        splitLeaf(clause, joinCandidates);
+    }
+
+    private List<JoinCandidate> createJoinCandidates(Coloring coloring) {
+
         final Set<SchemaObject> colorfulObjects = coloring.selectObjects();
         final Set<SchemaMorphism> colorfulMorphisms = coloring.selectMorphisms();
 
-        final List<JoinCandidate> joinCandidates = createJoinCandidates(colorfulObjects, colorfulMorphisms);
-        mergeNeighbours(clause, joinCandidates);
-        splitLeat(clause, joinCandidates);
-
-    }
-
-    private List<JoinCandidate> createJoinCandidates(Set<SchemaObject> objects, Set<SchemaMorphism> morphisms) {
+        
         throw new UnsupportedOperationException();
     }
 
@@ -65,7 +66,7 @@ public class PlanJoiner {
         throw new UnsupportedOperationException();
     }
 
-    private void splitLeat(Clause clause, List<JoinCandidate> candidates) {
+    private void splitLeaf(Clause clause, List<JoinCandidate> candidates) {
         throw new UnsupportedOperationException();
     }
     
@@ -119,7 +120,7 @@ public class PlanJoiner {
         /**
          * Select all objects that have more than one color.
          */
-         public Set<SchemaObject> selectObjects() {
+        public Set<SchemaObject> selectObjects() {
             return Set.of(
                 objectColors.keySet().stream().filter(key -> objectColors.get(key).size() > 1)
                     .map(schema::getObject).toArray(SchemaObject[]::new)
@@ -134,6 +135,14 @@ public class PlanJoiner {
                 morphismColors.keySet().stream().filter(signature -> morphismColors.get(signature).size() > 1)
                     .map(schema::getMorphism).toArray(SchemaMorphism[]::new)
             );
+        }
+
+        public Set<Kind> getColors(SchemaObject object) {
+            return objectColors.get(object);
+        }
+
+        public Set<Kind> getColors(SchemaMorphism morphism) {
+            return morphismColors.get(morphism);
         }
 
     }
