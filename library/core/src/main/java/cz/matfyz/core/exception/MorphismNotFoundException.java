@@ -1,5 +1,6 @@
 package cz.matfyz.core.exception;
 
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
 
 /**
@@ -15,7 +16,11 @@ public class MorphismNotFoundException extends CoreException {
         return new MorphismNotFoundException("signatureIsDual", signature);
     }
 
-    public static MorphismNotFoundException baseNotFound(Signature signature) {
+    public static MorphismNotFoundException signatureIsEmpty() {
+        return new MorphismNotFoundException("signatureIsEmpty", Signature.createEmpty());
+    }
+
+    public static MorphismNotFoundException baseNotFound(BaseSignature signature) {
         return new MorphismNotFoundException("baseNotFound", signature);
     }
 

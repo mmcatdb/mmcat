@@ -40,9 +40,8 @@ public class QueryToInstance {
     public Result algorithm() {
         final Query query = QueryParser.parse(queryString);
         
-        final Query preprocessedQuery = QueryPreprocessor.preprocessQuery(query);
         final var planner = new QueryPlanner(category, kinds);
-        final List<QueryPlan> queryPlans = planner.createPlans(preprocessedQuery);
+        final List<QueryPlan> queryPlans = planner.createPlans(query);
 
         
         final QueryPlan bestPlan = planNumber == null

@@ -13,4 +13,8 @@ public class SignatureException extends CoreException {
         return new SignatureException("invalid", value);
     }
 
+    public static SignatureException isEmpty() {
+        return new SignatureException("isEmpty", "");
+    }
+
 }

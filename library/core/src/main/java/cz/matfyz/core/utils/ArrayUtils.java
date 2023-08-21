@@ -36,7 +36,7 @@ public class ArrayUtils {
     public static int[] concatenate(int[]... arrays) {
         return concatenate(Arrays.asList(arrays));
     }
-    
+
     public static int[] concatenate(List<int[]> arrays) {
         int length = 0;
         for (int[] array : arrays)

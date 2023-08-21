@@ -1,5 +1,6 @@
 package cz.matfyz.core.schema;
 
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Morphism;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.identification.Identified;
@@ -70,7 +71,7 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
     }
 
     public boolean isBase() {
-        return signature.isBase();
+        return signature instanceof BaseSignature;
     }
 
     @Override

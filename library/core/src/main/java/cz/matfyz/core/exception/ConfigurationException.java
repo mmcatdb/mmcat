@@ -16,7 +16,7 @@ public class ConfigurationException extends NamedException {
         return new ConfigurationException("keyNotFound", key, null);
     }
 
-    public static ConfigurationException notAvailable(Exception exception) {
+    public static ConfigurationException notAvailable(String file, Exception exception) {
         return new ConfigurationException("notAvailable", null, exception);
     }
 

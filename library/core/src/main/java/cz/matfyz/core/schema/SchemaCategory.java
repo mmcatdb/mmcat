@@ -1,5 +1,6 @@
 package cz.matfyz.core.schema;
 
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Category;
 import cz.matfyz.core.category.Morphism.Min;
 import cz.matfyz.core.category.Signature;
@@ -40,19 +41,27 @@ public class SchemaCategory implements Category {
     }
     
     public SchemaMorphism getMorphism(Signature signature) {
-        if (signature.isBaseDual())
-            throw MorphismNotFoundException.signatureIsDual(signature);
+        if (signature.isEmpty())
+            throw MorphismNotFoundException.signatureIsEmpty();
 
-        SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
-        if (morphism == null) {
-            if (signature.isEmpty() || signature.isBase())
-                throw MorphismNotFoundException.baseNotFound(signature);
+        if (signature instanceof BaseSignature baseSignature) {
+            if (baseSignature.isDual())
+                throw MorphismNotFoundException.signatureIsDual(baseSignature);
 
-            SchemaMorphism newMorphism = createCompositeMorphism(signature);
-            morphism = morphismContext.createUniqueObject(newMorphism);
+            final SchemaMorphism baseMorphism = morphismContext.getUniqueObject(baseSignature);
+            if (baseMorphism == null)
+                throw MorphismNotFoundException.baseNotFound(baseSignature);
+
+            return baseMorphism;
         }
 
-        return morphism;
+
+        final SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
+        if (morphism != null)
+            return morphism;
+
+        final SchemaMorphism newMorphism = createCompositeMorphism(signature);
+        return morphismContext.createUniqueObject(newMorphism);
     }
 
     public record SchemaEdge(
@@ -76,10 +85,10 @@ public class SchemaCategory implements Category {
         }
     }
     
-    public SchemaEdge getEdge(Signature signature) {
+    public SchemaEdge getEdge(BaseSignature base) {
         return new SchemaEdge(
-            getMorphism(signature.isBaseDual() ? signature.dual() : signature),
-            !signature.isBaseDual()
+            getMorphism(base.isDual() ? base.dual() : base),
+            !base.isDual()
         );
     }
 

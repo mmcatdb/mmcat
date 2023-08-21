@@ -1,6 +1,8 @@
 package cz.matfyz.querying.parsing;
 
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ParsingException;
 
 import java.util.Arrays;
@@ -9,32 +11,33 @@ import java.util.List;
 public class WhereTriple implements Statement {
 
     public final Variable subject;
-    public final Signature signature;
+    public final BaseSignature signature;
     public final ValueNode object;
     
-    public WhereTriple(Variable subject, Signature signature, ValueNode object) {
+    public WhereTriple(Variable subject, BaseSignature signature, ValueNode object) {
         this.subject = subject;
         this.signature = signature;
         this.object = object;
     }
 
-    static WhereTriple fromCommonTriple(CommonTriple common) {
+    static List<WhereTriple> fromCommonTriple(CommonTriple common) {
         try {
-            var bases = Arrays.stream(common.predicate.split("/"))
+            final var bases = Arrays.stream(common.predicate.split("/"))
                 .map(base -> Signature.createBase(Integer.parseInt(base)))
                 .toList();
 
-            var signature = Signature.concatenate(bases);
-
-            return new WhereTriple(common.subject, signature, common.object);
+            return createSplit(common.subject, bases, common.object);
         }
         catch (NumberFormatException e) {
             throw ParsingException.signature(common.predicate);
         }
     }
 
-    public List<WhereTriple> toBases() {
-        var splitTriples = signature.toBases().stream().map(base -> {
+    /**
+     * For each compound morphism (A) -x/y-> (B), split it by inserting intermediate internal variables in such a way that each triple contains a base morphism only.
+     */
+    private static List<WhereTriple> createSplit(Variable subject, List<BaseSignature> bases, ValueNode object) {
+        var splitTriples = bases.stream().map(base -> {
             var editableTriple = new EditableWhereTriple();
             editableTriple.signature = base;
             return editableTriple;
@@ -54,11 +57,21 @@ public class WhereTriple implements Statement {
 
     private static class EditableWhereTriple {
         Variable subject;
-        Signature signature;
+        BaseSignature signature;
         ValueNode object;
 
+        /**
+         * For each triple with a base dual morphism, reverse its direction so that we have a non-dual morphism.
+         */
         WhereTriple toTriple() {
-            return new WhereTriple(subject, signature, object);
+            if (!signature.isDual())
+                return new WhereTriple(subject, signature, object);
+
+            if (!(object instanceof Variable variable))
+                // TODO - Is this necessary? Shouldn't the where triples always had Variable as object?
+                throw GeneralException.message("WTF type inconsistency in reverseBaseMorphisms");
+
+            return new WhereTriple(variable, signature.dual(), subject);
         }
     }
 
