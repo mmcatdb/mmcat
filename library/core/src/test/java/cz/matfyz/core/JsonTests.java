@@ -2,7 +2,9 @@ package cz.matfyz.core;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -12,6 +14,7 @@ import cz.matfyz.core.mapping.StaticName;
 import java.io.IOException;
 import java.io.Serializable;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -26,7 +29,7 @@ public class JsonTests {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void signature() {
+    public void signature() throws JsonProcessingException, IOException {
         final var empty = Signature.createEmpty();
         fullTest(empty);
 
@@ -35,6 +38,13 @@ public class JsonTests {
 
         final var composite = Signature.createBase(42).concatenate(Signature.createBase(69));
         fullTest(composite);
+
+        final Signature emptyParsed = mapper.readValue(serialize(empty), Signature.class);
+        assertInstanceOf(Signature.class, emptyParsed);
+        final Signature baseParsed = mapper.readValue(serialize(base), Signature.class);
+        assertInstanceOf(BaseSignature.class, baseParsed);
+        final Signature compositeParsed = mapper.readValue(serialize(composite), Signature.class);
+        assertInstanceOf(Signature.class, compositeParsed);
     }
 
     @Test

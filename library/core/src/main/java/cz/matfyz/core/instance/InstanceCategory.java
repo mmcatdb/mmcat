@@ -1,5 +1,6 @@
 package cz.matfyz.core.instance;
 
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Category;
 import cz.matfyz.core.category.Morphism.Min;
 import cz.matfyz.core.category.Signature;
@@ -50,16 +51,22 @@ public class InstanceCategory implements Category {
     public InstanceObject getObject(SchemaObject schemaObject) {
         return this.getObject(schemaObject.key());
     }
-    
+
     public InstanceMorphism getMorphism(Signature signature) {
-        if (signature.isBaseDual())
-            throw MorphismNotFoundException.signatureIsDual(signature);
+        if (signature.isEmpty())
+            throw MorphismNotFoundException.signatureIsEmpty();
+
+        if (signature instanceof BaseSignature baseSignature) {
+            if (baseSignature.isDual())
+                throw MorphismNotFoundException.signatureIsDual(baseSignature);
+
+            return morphisms.computeIfAbsent(baseSignature, x -> {
+                throw MorphismNotFoundException.baseNotFound(baseSignature);
+            });
+        }
 
         return morphisms.computeIfAbsent(signature, x -> {
-            if (x.isEmpty() || x.isBase())
-                throw MorphismNotFoundException.baseNotFound(x);
-
-            // This must be a composite morphism. These are created dynamically so we have to add it dynamically.
+            // The composite morphisms are created dynamically when needed.
             SchemaMorphism schemaMorphism = schema.getMorphism(x);
             InstanceObject dom = getObject(schemaMorphism.dom().key());
             InstanceObject cod = getObject(schemaMorphism.cod().key());
@@ -100,10 +107,10 @@ public class InstanceCategory implements Category {
         }
     }
     
-    public InstanceEdge getEdge(Signature signature) {
+    public InstanceEdge getEdge(BaseSignature base) {
         return new InstanceEdge(
-            getMorphism(signature.isBaseDual() ? signature.dual() : signature),
-            !signature.isBaseDual()
+            getMorphism(base.isDual() ? base.dual() : base),
+            !base.isDual()
         );
     }
         

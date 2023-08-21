@@ -29,17 +29,20 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonDeserialize(using = Signature.Deserializer.class)
 public class Signature implements Serializable, Comparable<Signature> {
 
-    private final int[] ids;
+    protected final int[] ids;
     
-    private Signature(int[] ids) {
+    protected Signature(int[] ids) {
         this.ids = ids;
     }
     
-    public static Signature createBase(int id) {
-        return new Signature(new int[] { id });
+    public static BaseSignature createBase(int id) {
+        return new BaseSignature(id);
     }
 
-    private static Signature createComposite(int[] ids) {
+    protected static Signature createComposite(int[] ids) {
+        if (ids.length == 1)
+            return new BaseSignature(ids[0]);
+
         return ids.length == 0 ? createEmpty() : new Signature(ids);
     }
 
@@ -49,15 +52,14 @@ public class Signature implements Serializable, Comparable<Signature> {
         return emptyObject;
     }
 
-    public List<Signature> toBases() {
-        var output = new ArrayList<Signature>();
+    public List<BaseSignature> toBases() {
+        var output = new ArrayList<BaseSignature>();
         for (int i = 0; i < ids.length; i++)
             output.add(createBase(ids[i]));
 
         return output;
     }
 
-    // Evolution extension
     public Signature cutLast() {
         if (ids.length == 0)
             return Signature.createEmpty();
@@ -66,9 +68,9 @@ public class Signature implements Serializable, Comparable<Signature> {
         return createComposite(newIds);
     }
 
-    public Signature getLast() {
+    public BaseSignature getLast() {
         if (ids.length == 0)
-            return Signature.createEmpty();
+            throw SignatureException.isEmpty();
 
         return createBase(this.ids[this.ids.length - 1]);
     }
@@ -81,9 +83,9 @@ public class Signature implements Serializable, Comparable<Signature> {
         return createComposite(newIds);
     }
 
-    public Signature getFirst() {
+    public BaseSignature getFirst() {
         if (ids.length == 0)
-            return Signature.createEmpty();
+            throw SignatureException.isEmpty();
 
         return createBase(this.ids[0]);
     }
@@ -96,7 +98,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         return concatenate(List.of(signatures));
     }
 
-    public static Signature concatenate(Collection<Signature> signatures) {
+    public static Signature concatenate(Collection<? extends Signature> signatures) {
         final var signatureIds = signatures.stream().map(signature -> signature.ids).toList();
         return createComposite(ArrayUtils.concatenate(signatureIds));
     }
@@ -143,27 +145,11 @@ public class Signature implements Serializable, Comparable<Signature> {
     }
     
     public Type getType() {
-        if (isEmpty())
-            return Type.EMPTY;
-        if (isBase())
-            return Type.BASE;
-        return Type.COMPOSITE;
+        return isEmpty() ? Type.EMPTY : Type.COMPOSITE;
     }
 
     public boolean isEmpty() {
         return ids.length == 0;
-    }
-
-    public boolean isBase() {
-        return ids.length == 1;
-    }
-
-    public boolean isBaseDual() {
-        return isBase() && ids[0] < 0;
-    }
-
-    public int getBaseValue() {
-        return this.isEmpty() ? 0 : this.ids[0];
     }
 
     private static final String SEPARATOR = ".";
@@ -188,7 +174,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
         try {
             final var ids = List.of(string.split("\\" + SEPARATOR)).stream().mapToInt(Integer::parseInt).toArray();
-            return new Signature(ids);
+            return createComposite(ids);
         }
         catch (NumberFormatException e) {
             throw SignatureException.invalid(string);
@@ -231,9 +217,6 @@ public class Signature implements Serializable, Comparable<Signature> {
     }
     
     public boolean hasDualOfAsPrefix(Signature signature) {
-        if (signature == null)
-            return false;
-        
         final Signature dual = signature.dual();
         final int dualLength = dual.ids.length;
         

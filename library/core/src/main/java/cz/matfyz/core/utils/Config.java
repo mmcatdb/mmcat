@@ -56,7 +56,7 @@ public abstract class Config {
             }
         }
         catch (Exception e) {
-            throw ConfigurationException.notAvailable(e);
+            throw ConfigurationException.notAvailable(fileName, e);
         }
     }
 

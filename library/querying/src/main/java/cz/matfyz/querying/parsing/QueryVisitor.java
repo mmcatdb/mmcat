@@ -70,7 +70,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<QueryNode> {
             : moreTriplesNode.accept(this).asWhereTriplesList().triples;
 
         var allTriples = Stream.concat(
-            sameSubjectTriples.stream().map(WhereTriple::fromCommonTriple),
+            sameSubjectTriples.stream().flatMap(commonTriple -> WhereTriple.fromCommonTriple(commonTriple).stream()),
             moreTriples.stream()
         ).toList();
 
