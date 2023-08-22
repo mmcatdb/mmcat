@@ -44,8 +44,8 @@ function cancel() {
 }
 
 function deleteFunction() {
-    props.node.neighbours.forEach(neighbour => {
-        evocat.deleteMorphism(neighbour.edge.schemaMorphism);
+    props.node.neighbors.forEach(neighbor => {
+        evocat.deleteMorphism(neighbor.edge.schemaMorphism);
     });
 
     evocat.deleteObject(props.node.schemaObject);

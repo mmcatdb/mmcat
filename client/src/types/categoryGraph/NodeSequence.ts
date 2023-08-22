@@ -51,9 +51,9 @@ export class NodeSequence {
     }
 
     addBaseSignature(baseSignature: Signature): boolean {
-        for (const neighbour of this.lastNode.neighbours) {
-            if (neighbour.signature.equals(baseSignature)) {
-                this.addEdge(neighbour.toDirectedEdge(this.lastNode));
+        for (const neighbor of this.lastNode.neighbors) {
+            if (neighbor.signature.equals(baseSignature)) {
+                this.addEdge(neighbor.toDirectedEdge(this.lastNode));
                 return true;
             }
         }
@@ -80,7 +80,7 @@ export class NodeSequence {
 
     tryAddNode(node: Node): boolean {
         /*
-        const morphism = this.lastNode.neighbours.get(node);
+        const morphism = this.lastNode.neighbors.get(node);
 
         if (!morphism || this.nodes.find(o => o === node))
             return false;

@@ -32,7 +32,7 @@ type Column = {
 function defineColumn(signature: Signature, node: Node): Column {
     return {
         signature,
-        schemaObject: node.getNeighbourNode(signature)?.schemaObject,
+        schemaObject: node.getNeighborNode(signature)?.schemaObject,
         isClickable: !signature.equals(Signature.empty),
     };
 }

@@ -50,7 +50,7 @@ public class PlanJoiner {
 
         final Coloring coloring = Coloring.create(clause.schema, clause.patternPlan);
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
-        mergeNeighbours(clause, joinCandidates);
+        mergeNeighbors(clause, joinCandidates);
         splitLeaf(clause, joinCandidates);
     }
 
@@ -75,7 +75,7 @@ public class PlanJoiner {
         throw new UnsupportedOperationException();
     }
 
-    private void mergeNeighbours(Clause clause, List<JoinCandidate> candidates) {
+    private void mergeNeighbors(Clause clause, List<JoinCandidate> candidates) {
         throw new UnsupportedOperationException();
     }
 

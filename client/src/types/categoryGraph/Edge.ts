@@ -54,8 +54,8 @@ export class Edge {
         const cytoscapeEdge = cytoscape.add(definition);
         edge.setCytoscapeEdge(cytoscapeEdge);
 
-        dom.addNeighbour(edge, true);
-        cod.addNeighbour(edge, false);
+        dom.addNeighbor(edge, true);
+        cod.addNeighbor(edge, false);
 
         return edge;
     }
@@ -67,8 +67,8 @@ export class Edge {
     remove() {
         this.edge.remove();
 
-        this.domainNode.removeNeighbour(this.codomainNode);
-        this.codomainNode.removeNeighbour(this.domainNode);
+        this.domainNode.removeNeighbor(this.codomainNode);
+        this.codomainNode.removeNeighbor(this.domainNode);
     }
 
     update(schemaMorphism: SchemaMorphism) {
@@ -79,8 +79,8 @@ export class Edge {
 
         if (!this.edge.inside()) {
             this.edge.restore();
-            this.domainNode.addNeighbour(this, true);
-            this.codomainNode.addNeighbour(this, false);
+            this.domainNode.addNeighbor(this, true);
+            this.codomainNode.addNeighbor(this, false);
         }
     }
 
