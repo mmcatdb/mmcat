@@ -11,6 +11,7 @@ import cz.matfyz.querying.core.Clause;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryPart2;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -54,11 +55,23 @@ public class PlanJoiner {
     }
 
     private List<JoinCandidate> createJoinCandidates(Coloring coloring) {
-
-        final Set<SchemaObject> colorfulObjects = coloring.selectObjects();
-        final Set<SchemaMorphism> colorfulMorphisms = coloring.selectMorphisms();
-
+        final var output = new ArrayList<JoinCandidate>();
+        for (final SchemaObject object : coloring.selectMulticolorObjects()) {
+            // The set of all objects that have two or more colors.
+            final var kinds = coloring.getColors(object).stream().toArray(Kind[]::new);
+            // We try each pair of colors.
+            for (int i = 0; i < kinds.length; i++)
+                for (int j = i + 1; j < kinds.length; j++) {
+                    final JoinCandidate candidate = tryCreateCandidate(object, kinds[i], kinds[j]);
+                    if (candidate != null)
+                        output.add(candidate);
+                }
+        }
         
+        return output;
+    }
+
+    private JoinCandidate tryCreateCandidate(SchemaObject object, Kind kind1, Kind kind2) {
         throw new UnsupportedOperationException();
     }
 
@@ -97,18 +110,20 @@ public class PlanJoiner {
 
         private void colorObjectsAndMorphisms(Kind kind, ComplexProperty path) {
             for (final var subpath : path.subpaths()) {
-                final var edge = schema.getEdge(subpath.signature());
-                morphismColors
-                    .computeIfAbsent(edge.morphism().signature(), x -> new TreeSet<>())
-                    .add(kind);
+                subpath.signature().toBases().forEach(base -> {
+                    final var edge = schema.getEdge(base);
+                    morphismColors
+                        .computeIfAbsent(edge.morphism().signature(), x -> new TreeSet<>())
+                        .add(kind);
 
-                objectColors
-                    .computeIfAbsent(edge.dom().key(), x -> new TreeSet<>())
-                    .add(kind);
+                    objectColors
+                        .computeIfAbsent(edge.dom().key(), x -> new TreeSet<>())
+                        .add(kind);
 
-                objectColors
-                    .computeIfAbsent(edge.cod().key(), x -> new TreeSet<>())
-                    .add(kind);
+                    objectColors
+                        .computeIfAbsent(edge.cod().key(), x -> new TreeSet<>())
+                        .add(kind);
+                });
 
                 if (!(subpath instanceof ComplexProperty complexSubpath))
                     continue;
@@ -120,7 +135,7 @@ public class PlanJoiner {
         /**
          * Select all objects that have more than one color.
          */
-        public Set<SchemaObject> selectObjects() {
+        public Set<SchemaObject> selectMulticolorObjects() {
             return Set.of(
                 objectColors.keySet().stream().filter(key -> objectColors.get(key).size() > 1)
                     .map(schema::getObject).toArray(SchemaObject[]::new)

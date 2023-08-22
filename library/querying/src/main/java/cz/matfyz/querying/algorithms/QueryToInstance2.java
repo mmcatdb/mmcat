@@ -56,8 +56,7 @@ public class QueryToInstance2 {
     }
 
     private void processClause(Clause clause) {
-        final List<WhereTriple> preprocessedPattern = QueryPreprocessor2.preprocessPattern(clause.pattern);
-        final var extracted = new QueryExtractor(schema, kinds, preprocessedPattern).run();
+        final var extracted = new QueryExtractor(schema, kinds, clause.pattern).run();
         clause.schema = extracted.schema();
         clause.kinds = extracted.kinds();
 

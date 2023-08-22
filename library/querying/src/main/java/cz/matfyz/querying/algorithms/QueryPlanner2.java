@@ -125,10 +125,12 @@ public class QueryPlanner2 {
 
         private void colorMorphisms(Kind kind, ComplexProperty path) {
             for (final var subpath : path.subpaths()) {
-                final var edge = schema.getEdge(subpath.signature());
-                colors
-                    .computeIfAbsent(edge.morphism().signature(), x -> new TreeSet<>())
-                    .add(kind);
+                subpath.signature().toBases().forEach(base -> {
+                    final var edge = schema.getEdge(base);
+                    colors
+                        .computeIfAbsent(edge.morphism().signature(), x -> new TreeSet<>())
+                        .add(kind);
+                });
 
                 if (!(subpath instanceof ComplexProperty complexSubpath))
                     continue;
