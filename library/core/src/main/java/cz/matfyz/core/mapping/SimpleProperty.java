@@ -1,6 +1,9 @@
 package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +51,13 @@ public class SimpleProperty extends AccessPath {
         return this.signature.contains(signature)
             ? new ArrayList<>(List.of(this))
             : null;
+    }
+
+    @Override
+    public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+        final SchemaMorphism morphism = schema.getMorphism(signature);
+
+        return morphism.dom().key().equals(key) ? this : null;
     }
     
     @Override

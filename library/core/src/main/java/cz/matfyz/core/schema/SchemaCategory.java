@@ -55,7 +55,6 @@ public class SchemaCategory implements Category {
             return baseMorphism;
         }
 
-
         final SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
         if (morphism != null)
             return morphism;

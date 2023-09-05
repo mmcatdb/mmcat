@@ -1,11 +1,12 @@
 package cz.matfyz.querying.core;
 
+import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.Kind;
-import cz.matfyz.core.mapping.SimpleProperty;
 
 import java.util.List;
 
 public record JoinCandidate(
+    JoinType type,
     Kind from,
     Kind to,
     List<JoinProperty> joinProperties,
@@ -13,8 +14,13 @@ public record JoinCandidate(
 ) {
 
     public static record JoinProperty(
-        SimpleProperty from,
-        SimpleProperty to
+        AccessPath from,
+        AccessPath to
     ) {}
+
+    public enum JoinType {
+        IdRef,
+        Value,
+    }
 
 }

@@ -125,6 +125,7 @@ public class QueryPlanner2 {
 
         private void colorMorphisms(Kind kind, ComplexProperty path) {
             for (final var subpath : path.subpaths()) {
+                // TODO splitting might not work there?
                 subpath.signature().toBases().forEach(base -> {
                     final var edge = schema.getEdge(base);
                     colors

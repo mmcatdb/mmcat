@@ -1,6 +1,9 @@
 package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.utils.IndentedStringBuilder;
 
 import java.io.IOException;
@@ -211,6 +214,21 @@ public class ComplexProperty extends AccessPath {
                 path.add(this);
                 return path;
             }
+        }
+
+        return null;
+    }
+
+    @Override
+    public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+        final SchemaMorphism morphism = schema.getMorphism(signature);
+        if (morphism.dom().key().equals(key))
+            return this;
+
+        for (final var subpath : subpaths) {
+            final var subProperty = subpath.tryGetSubpathForObject(key, schema);
+            if (subProperty != null)
+                return subProperty;
         }
 
         return null;
