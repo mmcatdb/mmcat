@@ -25,11 +25,9 @@ import java.util.Map;
 public class QueryEngine {
 
     private final SchemaCategory schemaCategory;
-    private final List<KindDefinition> allKinds;
 
-    public QueryEngine(SchemaCategory schemaCategory, List<KindDefinition> allKinds) {
+    public QueryEngine(SchemaCategory schemaCategory) {
         this.schemaCategory = schemaCategory;
-        this.allKinds = allKinds;
     }
 
     /**
@@ -50,8 +48,7 @@ public class QueryEngine {
 
         var kindsInPart = Utils.getKindsFromPart(part);
         // There is one common wrapper for all kinds in the part.
-        // TODO hack
-        var controlWrapper = allKinds.stream().filter(k -> k.databaseId == kindsInPart.get(0).databaseId).findFirst().get().wrapper;
+        var controlWrapper = kindsInPart.get(0).database.control;
         var queryWrapper = controlWrapper.getQueryWrapper();
 
         // for (var kind : kindsInPart)

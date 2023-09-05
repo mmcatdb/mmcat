@@ -1,5 +1,6 @@
 package cz.matfyz.server.entity.database;
 
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.server.entity.Id;
 
 /**
@@ -8,7 +9,7 @@ import cz.matfyz.server.entity.Id;
 public class DatabaseWithConfiguration {
 
     public final Id id;
-    public final Database.Type type;
+    public final DatabaseType type;
     public final String label;
     public final DatabaseConfiguration configuration;
 

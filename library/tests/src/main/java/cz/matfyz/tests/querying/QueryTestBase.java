@@ -3,9 +3,10 @@ package cz.matfyz.tests.querying;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import cz.matfyz.abstractwrappers.database.Database;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
-import cz.matfyz.querying.core.KindDefinition;
 import cz.matfyz.tests.database.TestDatabase;
 
 import java.util.ArrayList;
@@ -71,11 +72,14 @@ public class QueryTestBase {
         assertEquals(expectedResult, jsonResult);
     }
 
-    private List<KindDefinition> defineKinds() {
-        return databases.stream().flatMap(database ->
-            database.mappings.stream().map(mapping ->
-                new KindDefinition(mapping, database.id, database.wrapper)
-            )
+    private List<Kind> defineKinds() {
+        return databases.stream().flatMap(testDatabase -> {
+                final var builder = new Database.Builder();
+                testDatabase.mappings.stream().map(mapping -> builder.mapping(mapping));
+                final var database = builder.build(testDatabase.type, testDatabase.wrapper, testDatabase.id);
+
+                return database.kinds.stream();
+            }
         ).toList();
     }
 

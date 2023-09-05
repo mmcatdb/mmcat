@@ -1,12 +1,10 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.core.mapping.Kind;
-import cz.matfyz.core.mapping.Kind.KindBuilder;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
-import cz.matfyz.querying.core.KindDefinition;
 import cz.matfyz.querying.core.QueryPart;
 import cz.matfyz.querying.core.QueryPlan;
 import cz.matfyz.querying.core.TripleKind;
@@ -29,14 +27,12 @@ import java.util.TreeSet;
 public class QueryPlanner {
 
     private final SchemaCategory schema;
-    private final List<KindDefinition> allKinds;
+    private final List<Kind> allKinds;
 
-    public QueryPlanner(SchemaCategory schema, List<KindDefinition> allKinds) {
+    public QueryPlanner(SchemaCategory schema, List<Kind> allKinds) {
         this.schema = schema;
         this.allKinds = allKinds;
     }
-
-    private static record TripleKindDefinition(WhereTriple triple, KindDefinition kind) {}
 
     /**
      * Given an input query, generate all possible query plans.
@@ -47,7 +43,7 @@ public class QueryPlanner {
         final var usedSchemaObjectKeys = new TreeSet<Key>();
         variableTypes.values().forEach(schemaObject -> usedSchemaObjectKeys.add(schemaObject.key()));
         
-        final var tripleKindsAssignments = new ArrayList<List<TripleKindDefinition>>();
+        final var tripleKindsAssignments = new ArrayList<List<TripleKind>>();
 
         for (final WhereTriple triple : query.where.triples) {
             final var selectedKinds = allKinds.stream().filter(k ->
@@ -56,7 +52,7 @@ public class QueryPlanner {
             if (selectedKinds.isEmpty())
                 throw GeneralException.message("Cannot create query plan - morphism not in mapping or root object not in mapping");
 
-            final List<TripleKindDefinition> assignments = selectedKinds.stream().map(k -> new TripleKindDefinition(triple, k)).toList();
+            final List<TripleKind> assignments = selectedKinds.stream().map(k -> new TripleKind(triple, k)).toList();
             tripleKindsAssignments.add(assignments);
         }
 
@@ -97,14 +93,8 @@ public class QueryPlanner {
         return output;
     }
 
-    private final KindBuilder kindBuilder = new KindBuilder();
-
-    private QueryPlan createPlanFromAssignment(Query query, Map<String, SchemaObject> variableTypes, List<TripleKindDefinition> assignment) {
-        var kinds = assignment.stream().map(tripleKind -> new TripleKind(
-            tripleKind.triple,
-            kindBuilder.next(tripleKind.kind.mapping, tripleKind.kind.databaseId)
-        )).toList();
-        var initialQueryPart = new QueryPart(kinds, new ArrayList<>());
+    private QueryPlan createPlanFromAssignment(Query query, Map<String, SchemaObject> variableTypes, List<TripleKind> assignment) {
+        var initialQueryPart = new QueryPart(assignment.stream().toList(), new ArrayList<>());
 
         var finishedQueryParts = new ArrayList<QueryPart>();
         var queryPartQueue = new LinkedList<QueryPart>();
@@ -112,7 +102,7 @@ public class QueryPlanner {
 
         while (!queryPartQueue.isEmpty()) {
             var queryPart = queryPartQueue.pop();
-            var tmpSet = new TreeSet<>(queryPart.triplesMapping.stream().map(tm -> tm.kind.databaseId).toList());
+            var tmpSet = new TreeSet<>(queryPart.triplesMapping.stream().map(tm -> tm.kind.database).toList());
             if (tmpSet.size() == 1) {
                 finishedQueryParts.add(queryPart);
                 continue;
@@ -135,7 +125,7 @@ public class QueryPlanner {
         for (var tripleKindA : queryPart.triplesMapping) {
             for (var tripleKindB : queryPart.triplesMapping) {
                 // This condition needs to change in the cases of databases without joins, but mmcat doesn't support joins yet anyway.
-                if (tripleKindA.kind.databaseId.equals(tripleKindB.kind.databaseId))
+                if (tripleKindA.kind.database.equals(tripleKindB.kind.database))
                     continue;
 
                 if (
@@ -180,7 +170,7 @@ public class QueryPlanner {
             throw InvalidPlanException.message("Well that's a shame (" + tripleA.signature + ", " + tripleB + ")");
 
         // When mmcat supports joins and we can implement them, non-contiguous database parts (like mongo-postgre-mongo) could leave gaps in the query parts with this implementation.
-        var triplesMappingA = queryPart.triplesMapping.stream().filter(tm -> tm.kind.databaseId.equals(kindB.databaseId)).toList();
+        var triplesMappingA = queryPart.triplesMapping.stream().filter(tm -> tm.kind.database.equals(kindB.database)).toList();
         var triplesMappingB = queryPart.triplesMapping.stream().filter(tm -> !triplesMappingA.contains(tm)).toList();
 
         var queryPartA = new QueryPart(triplesMappingA, new ArrayList<>());

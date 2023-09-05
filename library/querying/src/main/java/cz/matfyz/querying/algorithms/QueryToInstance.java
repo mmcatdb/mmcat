@@ -1,10 +1,10 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.other.JsonDMLWrapper;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.core.KindDefinition;
 import cz.matfyz.querying.core.QueryEngine;
 import cz.matfyz.querying.core.QueryPlan;
 import cz.matfyz.querying.parsing.Query;
@@ -22,9 +22,9 @@ public class QueryToInstance {
     private String queryString;
     private SchemaCategory schema;
     private Integer planNumber;
-    private List<KindDefinition> kinds;
+    private List<Kind> kinds;
 
-    public void input(SchemaCategory category, String queryString, Integer planNumber, List<KindDefinition> kinds) {
+    public void input(SchemaCategory category, String queryString, Integer planNumber, List<Kind> kinds) {
         this.schema = category;
         this.queryString = queryString;
         this.planNumber = planNumber;
@@ -47,7 +47,7 @@ public class QueryToInstance {
             ? planner.selectBestPlan(queryPlans)
             : queryPlans.get(planNumber);
         
-        final var engine = new QueryEngine(schema, kinds);
+        final var engine = new QueryEngine(schema);
         engine.compileStatements(bestPlan);
         final InstanceCategory whereInstance = engine.executePlan(bestPlan);
 

@@ -1,9 +1,9 @@
 package cz.matfyz.querying.algorithms;
 
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.Kind;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;

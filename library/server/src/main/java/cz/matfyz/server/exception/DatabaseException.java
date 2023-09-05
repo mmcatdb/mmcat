@@ -1,5 +1,6 @@
 package cz.matfyz.server.exception;
 
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.database.Database;
 
@@ -12,7 +13,7 @@ public class DatabaseException extends ServerException {
 
     private record Data(
         Id databseId,
-        Database.Type type
+        DatabaseType type
     ) implements Serializable {}
 
     private DatabaseException(String name, Database database, Throwable cause) {

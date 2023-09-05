@@ -8,9 +8,9 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Projection;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ValuesFilter;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariablesFilter;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.Kind;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
 package cz.matfyz.querying.core;
 
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.Kind;
 
 import java.util.List;
 

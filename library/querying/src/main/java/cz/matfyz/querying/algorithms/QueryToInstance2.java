@@ -1,16 +1,15 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.other.JsonDMLWrapper;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.Clause;
-import cz.matfyz.querying.core.KindDefinition;
 import cz.matfyz.querying.core.QueryEngine;
 import cz.matfyz.querying.core.QueryPlan;
 import cz.matfyz.querying.parsing.Query;
 import cz.matfyz.querying.parsing.QueryParser;
-import cz.matfyz.querying.parsing.WhereTriple;
 import cz.matfyz.transformations.algorithms.DMLAlgorithm;
 
 import java.util.List;
@@ -23,9 +22,9 @@ public class QueryToInstance2 {
 
     private String queryString;
     private SchemaCategory schema;
-    private List<KindDefinition> kinds;
+    private List<Kind> kinds;
 
-    public void input(SchemaCategory category, String queryString, List<KindDefinition> kinds) {
+    public void input(SchemaCategory category, String queryString, List<Kind> kinds) {
         this.schema = category;
         this.queryString = queryString;
         this.kinds = kinds;
@@ -43,7 +42,7 @@ public class QueryToInstance2 {
 
         final QueryPlan bestPlan = queryPlans.get(0);
         
-        final var engine = new QueryEngine(schema, kinds);
+        final var engine = new QueryEngine(schema);
         engine.compileStatements(bestPlan);
         final InstanceCategory whereInstance = engine.executePlan(bestPlan);
 

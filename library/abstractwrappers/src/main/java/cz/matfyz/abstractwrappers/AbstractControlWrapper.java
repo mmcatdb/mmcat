@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 /**
- * @author pavel.koupil
+ * @author jachym.bartik
  */
 public interface AbstractControlWrapper {
 

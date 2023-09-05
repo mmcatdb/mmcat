@@ -1,11 +1,11 @@
 package cz.matfyz.querying.algorithms;
 
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.core.KindDefinition;
 import cz.matfyz.querying.parsing.WhereTriple;
 
 import java.util.LinkedList;
@@ -18,10 +18,10 @@ import java.util.Queue;
 public class QueryExtractor {
 
     private final SchemaCategory schema;
-    private final List<KindDefinition> kinds;
+    private final List<Kind> kinds;
     private final List<WhereTriple> pattern;
 
-    public QueryExtractor(SchemaCategory schema, List<KindDefinition> kinds, List<WhereTriple> pattern) {
+    public QueryExtractor(SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
         this.schema = schema;
         this.kinds = kinds;
         this.pattern = pattern;
@@ -29,7 +29,7 @@ public class QueryExtractor {
 
     public static record Result(
         SchemaCategory schema,
-        List<KindDefinition> kinds
+        List<Kind> kinds
     ) {}
 
     public Result run() {
@@ -73,13 +73,14 @@ public class QueryExtractor {
             .forEach(base -> morphismQueue.add(schema.getMorphism(base)));
     }
 
-    private List<KindDefinition> createNewMappings() {
+    private List<Kind> createNewMappings() {
         return kinds.stream()
             .filter(kind -> newSchema.hasObject(kind.mapping.rootObject().key()))
             .map(kind -> {
                 final var newAccessPath = purgeComplexProperty(kind.mapping.accessPath());
                 final var newMapping = new Mapping(newSchema, kind.mapping.rootObject().key(), kind.mapping.kindName(), newAccessPath, kind.mapping.primaryKey());
-                return new KindDefinition(newMapping, kind.databaseId, kind.wrapper);
+                
+                return kind.updateMapping(newMapping);
             }).toList();
     }
 

@@ -1,9 +1,9 @@
 package cz.matfyz.querying.core;
 
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.Kind;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;

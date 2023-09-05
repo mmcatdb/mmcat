@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.core.mapping.Kind;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.querying.parsing.WhereTriple;
 
 public class TripleKind {

@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.core.mapping.Kind;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.parsing.WhereTriple;
 
@@ -28,7 +28,7 @@ public class Clause {
 
     // These properties are gradually added as the query gets processed.
     public SchemaCategory schema;
-    public List<KindDefinition> kinds;
+    public List<Kind> kinds;
     public Set<Kind> patternPlan;
     public List<QueryPart2> parts;
 

@@ -1,12 +1,10 @@
 package cz.matfyz.querying.algorithms;
 
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.Kind;
-import cz.matfyz.core.mapping.Kind.KindBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.core.KindDefinition;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -25,10 +23,9 @@ public class QueryPlanner2 {
     private final SchemaCategory schema;
     private final List<Kind> allKinds;
 
-    public QueryPlanner2(SchemaCategory schema, List<KindDefinition> kinds) {
+    public QueryPlanner2(SchemaCategory schema, List<Kind> allKinds) {
         this.schema = schema;
-        final var kindBuilder = new KindBuilder();
-        this.allKinds = kinds.stream().map(k -> kindBuilder.next(k.mapping, k.databaseId)).toList();
+        this.allKinds = allKinds;
     }
 
     public List<Set<Kind>> run() {
