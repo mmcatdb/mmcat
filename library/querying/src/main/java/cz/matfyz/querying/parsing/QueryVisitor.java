@@ -182,12 +182,12 @@ public class QueryVisitor extends QuerycatBaseVisitor<QueryNode> {
 
     private static Map<String, ComparisonOperator> defineComparisonOperators() {
         var output = new TreeMap<String, ComparisonOperator>();
-        output.put("=", ComparisonOperator.EQUALS);
-        output.put("!=", ComparisonOperator.NOT_EQUALS);
-        output.put("<", ComparisonOperator.LESS_THAN);
-        output.put("<=", ComparisonOperator.LESS_THAN_EQUALS);
-        output.put(">", ComparisonOperator.GREATER_THAN);
-        output.put(">=", ComparisonOperator.GREATER_THAN_EQUALS);
+        output.put("=", ComparisonOperator.Equal);
+        output.put("!=", ComparisonOperator.NotEqual);
+        output.put("<", ComparisonOperator.Less);
+        output.put("<=", ComparisonOperator.LessOrEqual);
+        output.put(">", ComparisonOperator.Greater);
+        output.put(">=", ComparisonOperator.GreaterOrEqual);
         return output;
     }
 

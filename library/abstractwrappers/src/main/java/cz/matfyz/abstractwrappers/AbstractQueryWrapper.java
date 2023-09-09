@@ -49,6 +49,16 @@ public interface AbstractQueryWrapper {
      */
     QueryStatement buildStatement();
 
+    /**
+     * Sets the given kind as a context for all other operations.
+     */
+    void pushKind(Kind kind);
+
+    /**
+     * Returns to the previous context.
+     */
+    void popKind();
+
     void addProjection(List<AccessPath> propertyPath, Kind kind, VariableIdentifier variableId);
 
     void addConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant);
@@ -59,13 +69,13 @@ public interface AbstractQueryWrapper {
 
     void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind);
     
-    enum ComparisonOperator {
-        EQUALS,
-        NOT_EQUALS,
-        LESS_THAN,
-        LESS_THAN_EQUALS,
-        GREATER_THAN,
-        GREATER_THAN_EQUALS,
+    public enum ComparisonOperator {
+        Equal,
+        NotEqual,
+        Less,
+        LessOrEqual,
+        Greater,
+        GreaterOrEqual,
     }
 
     /**
@@ -154,4 +164,20 @@ public interface AbstractQueryWrapper {
             this.rhsKind = rhsKind;
         }
     }
+
+    // New stuff
+
+    public static enum PostponedOperation {
+        Filtering,
+        FilteringAggregation,
+    }
+
+    void addProjection(String path, boolean isOptional);
+    void addFilterOrPostpone(Kind kind1, String path1, Kind kind2, String path2, ComparisonOperator operator, PostponedOperation operation);
+    void addFilterOrPostpone(Kind kind1, String path1, Kind kind2, String path2, ComparisonOperator operator, PostponedOperation operation, Object aggregationRoot1);
+    void addFilterOrPostpone(Kind kind1, String path1, Kind kind2, String path2, ComparisonOperator operator, PostponedOperation operation, Object aggregationRoot1, Object aggregationRoot2);
+
+    void addJoin(Kind from, Kind to, Object match);
+    void addRecursiveJoinOrPostpone(Kind from, Kind to, Object match, int recursion);
+    void addOptionalJoinOrPostpone(Kind from, Kind to, Object match);
 }

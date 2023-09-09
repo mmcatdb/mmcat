@@ -1,18 +1,18 @@
 package cz.matfyz.querying.algorithms;
 
+import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
+import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.Clause;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryPart2;
-import cz.matfyz.querying.core.JoinCandidate.JoinProperty;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 
 import java.util.ArrayList;
@@ -48,14 +48,21 @@ public class PlanJoiner {
     private void processPattern(Clause clause) {
         if (clause.patternPlan.size() == 1) {
             final Kind kind = clause.patternPlan.stream().findFirst().get();
-            clause.parts = List.of(new QueryPart2(List.of(kind)));
+            clause.parts = List.of(QueryPart2.create(kind));
             return;
         }
 
         final Coloring coloring = Coloring.create(clause.schema, clause.patternPlan);
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring, clause);
-        mergeNeighbors(clause, joinCandidates);
-        splitLeaf(clause, joinCandidates);
+        final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
+        final List<JoinGroup> filteredGroups = filterJoinGroups(candidateGroups);
+
+        final var candidatesBetweenParts = new ArrayList<JoinCandidate>();
+        final List<QueryPart2> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts);
+
+
+
+        // splitLeaf(clause, joinCandidates);
     }
 
     private List<JoinCandidate> createJoinCandidates(Coloring coloring, Clause clause) {
@@ -65,53 +72,134 @@ public class PlanJoiner {
             final var kinds = coloring.getColors(object).stream().toArray(Kind[]::new);
             // We try each pair of colors.
             for (int i = 0; i < kinds.length; i++)
-                for (int j = i + 1; j < kinds.length; j++)
-                    output.addAll(tryCreateCandidate(object, kinds[i], kinds[j], clause, coloring));
+                for (int j = i + 1; j < kinds.length; j++) {
+                    final var candidate = tryCreateCandidate(object, kinds[i], kinds[j], clause, coloring);
+                    if (candidate != null)
+                        output.add(candidate);
+                }
         }
         
         return output;
     }
 
-    private List<JoinCandidate> tryCreateCandidate(SchemaObject object, Kind kind1, Kind kind2, Clause clause, Coloring coloring) {
-        if (!object.ids().isSignatures()) {
-            final AccessPath path1 = kind1.mapping.accessPath().tryGetSubpathForObject(object.key(), clause.schema);
-            if (path1 == null)
-                return List.of();
+    private JoinCandidate tryCreateCandidate(SchemaObject object, Kind kind1, Kind kind2, Clause clause, Coloring coloring) {
+        final var candidate1 = tryCreateIdRefCandidate(object, kind1, kind2, clause);
+        if (candidate1 != null)
+            return candidate1;
 
-            final AccessPath path2 = kind2.mapping.accessPath().tryGetSubpathForObject(object.key(), clause.schema);
-            if (path2 == null)
-                return List.of();
+        final var candidate2 = tryCreateIdRefCandidate(object, kind2, kind1, clause);
+        if (candidate2 != null)
+            return candidate2;
 
-            final var candidate = new JoinCandidate(JoinType.Value, kind1, kind2, List.of(new JoinProperty(path1, path2)), 1);
-            return List.of(candidate);
+        // TODO recursion
+        return new JoinCandidate(JoinType.Value, kind1, kind2, 0);
+    }
+
+    /**
+     * This object matches the id-ref join pattern. This means that an object (rootObject) is identified by another object (idObject). The first kind (idKind) has A as a root object and B as a normal property. The second kind (refKind) has the idObject.
+     */
+    private JoinCandidate tryCreateIdRefCandidate(SchemaObject idObject, Kind idKind, Kind refKind, Clause clause) {
+        // First, check if the idObject is an identifier of the root of the idKind.
+        final SchemaObject rootObject = idKind.mapping.rootObject();
+        if (!rootObject.ids().isSignatures())
+            return null;
+        // TODO currently, we are using only the first id for joining.
+        final SignatureId firstId = rootObject.ids().toSignatureIds().first();
+        // TODO currently, we are accepting only signature ids with exactly one signature.
+        if (firstId.signatures().size() != 1)
+            return null;
+        
+        final SchemaObject rootIdObject = clause.schema.getEdge(firstId.signatures().first().getLast()).to();
+        if (!idObject.equals(rootIdObject))
+            return null;
+
+        // The idObject is in fact an identifier of the root of the idKind. We also know that both idKind and refKind contains the object. Therefore we can create the join candidate.
+        // TODO recursion
+        return new JoinCandidate(JoinType.IdRef, idKind, refKind, 0);
+    }
+
+    private static record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
+        public static DatabasePair create(JoinCandidate candidate) {
+            final var a = candidate.from().database;
+            final var b = candidate.to().database;
+            final boolean comparison = a.compareTo(b) > 0;
+
+            return new DatabasePair(comparison ? a : b, comparison ? b : a);
         }
 
-        // Now we have to connect the kinds via all possible ids of given object.
-        return object.ids().toSignatureIds().stream()
-            .map(id -> tryCreateCandidateFromId(id, kind1, kind2))
-            .filter(candidate -> candidate != null)
+        @Override
+        public int compareTo(DatabasePair other) {
+            final int firstComparison = first.compareTo(other.first);
+            return firstComparison != 0 ? firstComparison : second.compareTo(other.second);
+        }
+
+        public boolean isSameDatabase() {
+            return first.equals(second);
+        }
+    }
+
+    private static record JoinGroup(DatabasePair databases, List<JoinCandidate> candidates) {}
+
+    /**
+     * Groups the join candidates by the database pairs of their two kinds.
+     * @param candidates
+     * @return
+     */
+    private List<JoinGroup> groupJoinCandidates(List<JoinCandidate> candidates) {
+        final var output = new TreeMap<DatabasePair, List<JoinCandidate>>();
+        candidates.forEach(c -> output.computeIfAbsent(DatabasePair.create(c), p -> new ArrayList<>()));
+
+        return output.entrySet().stream()
+            .map(e -> new JoinGroup(e.getKey(), e.getValue()))
             .toList();
     }
 
-    private JoinCandidate tryCreateCandidateFromId(SignatureId id, Kind kind1, Kind kind2) {
-        final var properties = new ArrayList<JoinProperty>();
-        for (final Signature signature : id.signatures()) {
-            final AccessPath path1 = kind1.mapping.accessPath().getSubpathBySignature(signature);
-            if (path1 == null)
-                return null;
-
-            final AccessPath path2 = kind2.mapping.accessPath().getSubpathBySignature(signature);
-            if (path2 == null)
-                return null;
-
-            properties.add(new JoinProperty(path1, path2));
-        }
-
-        return new JoinCandidate(JoinType.IdRef, kind1, kind2, properties, 1);
+    /**
+     * If there are multiple join candidates between the same databases, we don't need them all.
+     * If there are any id-ref joins, we select one of them and discard all others.
+     * Otherwise, we keep all value-value joins.
+     */
+    private List<JoinGroup> filterJoinGroups(List<JoinGroup> groups) {
+        return groups.stream().map(g -> {
+            final var idRefCandidate = g.candidates.stream().filter(c -> c.type() == JoinType.IdRef).findFirst();
+            return idRefCandidate.isPresent()
+                ? new JoinGroup(g.databases, List.of(idRefCandidate.get()))
+                : g;
+        }).toList();
     }
 
-    private void mergeNeighbors(Clause clause, List<JoinCandidate> candidates) {
-        throw new UnsupportedOperationException();
+    private List<QueryPart2> createQueryParts(List<JoinGroup> groups, List<JoinCandidate> candidatesBetweenParts) {
+        // First, we find all candidates between different databases and add them to the `between parts` category.
+        groups.stream()
+            .filter(g -> !g.databases.isSameDatabase())
+            .forEach(g -> candidatesBetweenParts.addAll(g.candidates));
+        
+        // Then we find all candidates that join kinds from the same db and merge them.
+        return groups.stream()
+            .filter(g -> g.databases.isSameDatabase())
+            .flatMap(g -> mergeNeighbors(g.candidates, candidatesBetweenParts).stream()).toList();
+    }
+
+    /**
+     * Merges kinds from a single database to a minimal number of query parts.
+     */
+    private List<QueryPart2> mergeNeighbors(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
+        // All of the candidates have to have the same database.
+        final Database database = candidates.get(0).from().database;
+        // If the database supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
+        if (database.control.getQueryWrapper().isJoinSupported())
+            return GraphUtils.findComponents(candidates).stream().map(c -> QueryPart2.create(c.nodes(), c.edges())).toList();
+        
+        // Othervise, we have to create custom query part for each kind.
+        final var kinds = new TreeSet<Kind>();
+        candidates.forEach(c -> {
+            kinds.add(c.from());
+            kinds.add(c.to());
+        });
+        // Also, all candidates will join different parts so we add them to the `between parts` category.
+        candidatesBetweenParts.addAll(candidates);
+
+        return kinds.stream().map(kind -> QueryPart2.create(kind)).toList();
     }
 
     private void splitLeaf(Clause clause, List<JoinCandidate> candidates) {
@@ -153,11 +241,11 @@ public class PlanJoiner {
                         .add(kind);
 
                     objectColors
-                        .computeIfAbsent(edge.dom().key(), x -> new TreeSet<>())
+                        .computeIfAbsent(edge.from().key(), x -> new TreeSet<>())
                         .add(kind);
 
                     objectColors
-                        .computeIfAbsent(edge.cod().key(), x -> new TreeSet<>())
+                        .computeIfAbsent(edge.to().key(), x -> new TreeSet<>())
                         .add(kind);
                 });
 

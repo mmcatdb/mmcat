@@ -10,6 +10,10 @@ public class StringValue extends QueryNode implements ValueNode {
         return this;
     }
 
+    @Override public String name() {
+        return value;
+    }
+
     public final String value;
 
     public StringValue(String value) {

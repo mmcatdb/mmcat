@@ -14,6 +14,10 @@ public class Variable extends QueryNode implements ValueNode {
         return this;
     }
 
+    @Override public String name() {
+        return name;
+    }
+
     public final String name;
     public final VariableIdentifier id;
     

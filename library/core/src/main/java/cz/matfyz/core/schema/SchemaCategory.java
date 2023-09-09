@@ -71,11 +71,11 @@ public class SchemaCategory implements Category {
             return direction ? morphism.signature() : morphism.signature().dual();
         }
 
-        public SchemaObject dom() {
+        public SchemaObject from() {
             return direction ? morphism.dom() : morphism.cod();
         }
 
-        public SchemaObject cod() {
+        public SchemaObject to() {
             return direction ? morphism.cod() : morphism.dom();
         }
 

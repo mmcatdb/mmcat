@@ -25,12 +25,12 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     @Override
     protected Map<ComparisonOperator, String> defineComparisonOperators() {
         var output = new TreeMap<ComparisonOperator, String>();
-        output.put(ComparisonOperator.EQUALS, "$eq");
-        output.put(ComparisonOperator.NOT_EQUALS, "$ne");
-        output.put(ComparisonOperator.LESS_THAN, "$lt");
-        output.put(ComparisonOperator.LESS_THAN_EQUALS, "$lte");
-        output.put(ComparisonOperator.GREATER_THAN, "$gt");
-        output.put(ComparisonOperator.GREATER_THAN_EQUALS, "$gte");
+        output.put(ComparisonOperator.Equal, "$eq");
+        output.put(ComparisonOperator.NotEqual, "$ne");
+        output.put(ComparisonOperator.Less, "$lt");
+        output.put(ComparisonOperator.LessOrEqual, "$lte");
+        output.put(ComparisonOperator.Greater, "$gt");
+        output.put(ComparisonOperator.GreaterOrEqual, "$gte");
         return output;
     }
 

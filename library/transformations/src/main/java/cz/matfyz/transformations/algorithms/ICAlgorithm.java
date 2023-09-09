@@ -99,7 +99,7 @@ public class ICAlgorithm {
         //final var newSignatureFromLastMapping = signatureFromLastMapping.concatenate(path.signature());
 
         for (final var baseSignature : path.signature().toBases()) {
-            final var object = mapping.category().getEdge(baseSignature).cod();
+            final var object = mapping.category().getEdge(baseSignature).to();
             final var objectMapping = mappingsByObjects.get(object);
 
             if (objectMapping == null) {

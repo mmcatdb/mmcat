@@ -44,8 +44,8 @@ public abstract class Utils {
 
         for (final var triple : triples) {
             final var edge = schemaCategory.getEdge(triple.signature);
-            final var subjectType = edge.dom();
-            final var objectType = edge.cod();
+            final var subjectType = edge.from();
+            final var objectType = edge.to();
 
             if (!variableTypes.containsKey(triple.subject.name))
                 variableTypes.put(triple.subject.name, subjectType);
