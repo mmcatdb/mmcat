@@ -3,7 +3,7 @@ package cz.matfyz.server.controller;
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.algorithms.QueryToInstance;
+import cz.matfyz.querying.algorithms.QueryToInstance_old;
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.builder.SchemaCategoryContext;
 import cz.matfyz.server.entity.Id;
@@ -59,7 +59,7 @@ public class QueryController {
 
         final var kinds = defineKinds(categoryWrapper.id, category);
 
-        final var queryToInstance = new QueryToInstance();
+        final var queryToInstance = new QueryToInstance_old();
         queryToInstance.input(category, data.queryString, null, kinds);
         final var result = queryToInstance.algorithm();
 

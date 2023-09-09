@@ -8,11 +8,11 @@ import java.util.List;
 public class QueryPlan {
 
     public final Query query;
-    public final List<QueryPart> parts;
+    public final List<QueryPart_old> parts;
     public final List<Statement> deferredStatements;
     public final int cost;
 
-    public QueryPlan(Query query, List<QueryPart> parts, List<Statement> deferredStatements, int cost) {
+    public QueryPlan(Query query, List<QueryPart_old> parts, List<Statement> deferredStatements, int cost) {
         this.query = query;
         this.parts = parts;
         this.deferredStatements = deferredStatements;

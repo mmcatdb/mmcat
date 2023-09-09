@@ -1,28 +1,22 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SignatureId;
-import cz.matfyz.querying.core.QueryPart;
-import cz.matfyz.querying.core.QueryPlan;
-import cz.matfyz.querying.core.TripleKind;
-import cz.matfyz.querying.core.Utils;
-import cz.matfyz.querying.exception.GeneralException;
-import cz.matfyz.querying.exception.InvalidPlanException;
-import cz.matfyz.querying.parsing.Query;
-import cz.matfyz.querying.parsing.Variable;
-import cz.matfyz.querying.parsing.WhereTriple;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * Query planner class which is responsible for the creation of query plans for a given query.
+ * This class is responsible for the creation of query plans for a given pattern. The pattern is represented by the extracted schema category.
  */
 public class QueryPlanner {
 
@@ -34,199 +28,162 @@ public class QueryPlanner {
         this.allKinds = allKinds;
     }
 
-    /**
-     * Given an input query, generate all possible query plans.
-     * In the case of no data redundancy, the result will always contain only one query plan. In the case that redundancy is present, there can be multiple plans.
-     */
-    public List<QueryPlan> createPlans(Query query) {
-        final var variableTypes = Utils.getVariableTypesFromQuery(query, schema);
-        final var usedSchemaObjectKeys = new TreeSet<Key>();
-        variableTypes.values().forEach(schemaObject -> usedSchemaObjectKeys.add(schemaObject.key()));
-        
-        final var tripleKindsAssignments = new ArrayList<List<TripleKind>>();
+    public List<Set<Kind>> run() {
+        createQueryPlans();
 
-        for (final WhereTriple triple : query.where.triples) {
-            final var selectedKinds = allKinds.stream().filter(k ->
-                Utils.getPropertyPath(k.mapping, triple.signature) != null && usedSchemaObjectKeys.contains(k.mapping.rootObject().key())
-            ).toList();
-            if (selectedKinds.isEmpty())
-                throw GeneralException.message("Cannot create query plan - morphism not in mapping or root object not in mapping");
+        return plans;
+    }
+    
+    private record StackItem(
+        Set<Kind> selected,
+        List<Kind> rest,
+        Coloring coloring
+    ) {}
 
-            final List<TripleKind> assignments = selectedKinds.stream().map(k -> new TripleKind(triple, k)).toList();
-            tripleKindsAssignments.add(assignments);
-        }
+    private List<Set<Kind>> plans = new ArrayList<>();
+    private Stack<StackItem> stack = new Stack<>();
 
-        final var assignmentsProduct = cartesianProduct(tripleKindsAssignments);
-        final var queryPlans = new ArrayList<QueryPlan>();
-        
-        for (final var assignment : assignmentsProduct) {
-            try {
-                final QueryPlan queryPlan = createPlanFromAssignment(query, variableTypes, assignment);
-                queryPlans.add(queryPlan);
-            }
-            catch (InvalidPlanException e) {
-                // TODO - what here?
-            }
-        }
+    private void createQueryPlans() {
+        final Coloring initialColoring = Coloring.create(schema, allKinds);
+        final List<Kind> initialSortedKinds = initialColoring.sortKinds(allKinds);
 
-        return queryPlans;
+        stack.push(new StackItem(new TreeSet<>(), new LinkedList<>(initialSortedKinds), initialColoring));
+
+        while (!stack.isEmpty())
+            processStackItem(stack.pop());
     }
 
-    private static <T> List<List<T>> cartesianProduct(List<List<T>> input) {
-        if (input.size() < 2)
-            return input;
+    private void processStackItem(StackItem item) {
+        if (item.rest.isEmpty()) {
+            plans.add(item.selected);
+            return;
+        }
 
-        var firstList = input.get(0);
-        var rest = input.subList(1, input.size());
-        var restPoduct = cartesianProduct(rest);
+        for (final Kind kind : touchFirst(item.rest, item.coloring)) {
+            final List<Kind> restWithoutKind = item.rest.stream().filter(k -> !k.equals(kind)).toList();
 
-        var output = new ArrayList<List<T>>();
-        for (var item : firstList) {
-            for (var list : restPoduct) {
-                var newList = new ArrayList<T>();
-                newList.add(item);
-                newList.addAll(list);
-                output.add(newList);
-            }
+            final var coloringWithoutKind = item.coloring.removeKind(kind);
+            final var sortedRestKinds = coloringWithoutKind.sortKinds(restWithoutKind);
+            final var selectedWithKind = new TreeSet<>(item.selected);
+            selectedWithKind.add(kind);
+
+            stack.push(new StackItem(selectedWithKind, sortedRestKinds, coloringWithoutKind));
+        }
+    }
+
+    /**
+     * Returns all kinds from the given queue with the minimal price.
+     */
+    private List<Kind> touchFirst(List<Kind> kindQueue, Coloring coloring) {
+        final int lowestCost = coloring.getKindCost(kindQueue.get(0));
+        final List<Kind> output = new ArrayList<>();
+
+        for (final var kind : kindQueue) {
+            if (coloring.getKindCost(kind) != lowestCost)
+                break;
+
+            output.add(kind);
         }
 
         return output;
     }
 
-    private QueryPlan createPlanFromAssignment(Query query, Map<String, SchemaObject> variableTypes, List<TripleKind> assignment) {
-        var initialQueryPart = new QueryPart(assignment.stream().toList(), new ArrayList<>());
+    private static Set<Signature> getAllMorphismsInKind(Kind kind) {
+        final Set<Signature> output = new TreeSet<>();
+        addAllMorphismsInPath(kind.mapping.accessPath(), output);
 
-        var finishedQueryParts = new ArrayList<QueryPart>();
-        var queryPartQueue = new LinkedList<QueryPart>();
-        queryPartQueue.add(initialQueryPart);
-
-        while (!queryPartQueue.isEmpty()) {
-            var queryPart = queryPartQueue.pop();
-            var tmpSet = new TreeSet<>(queryPart.triplesMapping.stream().map(tm -> tm.kind.database).toList());
-            if (tmpSet.size() == 1) {
-                finishedQueryParts.add(queryPart);
-                continue;
-            }
-
-            var splitQueryParts = splitSingleQueryPart(variableTypes, queryPart);
-            queryPartQueue.addAll(splitQueryParts);
-        }
-
-        assignStatementsToParts(query, finishedQueryParts);
-        var cost = finishedQueryParts.size() * 100;
-
-        return new QueryPlan(query, finishedQueryParts, new ArrayList<>(), cost);
+        return output;
     }
 
-    /**
-     * Match triples pattern () -A-> (I) -B-> () or () <-A- (I) -B-> ()
-     */
-    private List<QueryPart> splitSingleQueryPart(Map<String, SchemaObject> variableTypes, QueryPart queryPart) {
-        for (var tripleKindA : queryPart.triplesMapping) {
-            for (var tripleKindB : queryPart.triplesMapping) {
-                // This condition needs to change in the cases of databases without joins, but mmcat doesn't support joins yet anyway.
-                if (tripleKindA.kind.database.equals(tripleKindB.kind.database))
+    private static void addAllMorphismsInPath(AccessPath path, Set<Signature> output) {
+        output.add(path.signature());
+        if (path instanceof ComplexProperty complex)
+            complex.subpaths().forEach(subpath -> addAllMorphismsInPath(subpath, output));
+    }
+
+    private static class Coloring {
+
+        private final SchemaCategory schema;
+        private final Map<Signature, Set<Kind>> colors;
+
+        private Coloring(SchemaCategory schema, Map<Signature, Set<Kind>> colors) {
+            this.schema = schema;
+            this.colors = colors;
+        }
+
+        public static Coloring create(SchemaCategory schema, List<Kind> kinds) {
+            final var coloring = new Coloring(schema, new TreeMap<>());
+            
+            for (final var kind : kinds)
+                coloring.colorMorphisms(kind, kind.mapping.accessPath());
+
+            return coloring;
+        }
+
+        private void colorMorphisms(Kind kind, ComplexProperty path) {
+            for (final var subpath : path.subpaths()) {
+                // TODO splitting might not work there?
+                subpath.signature().toBases().forEach(base -> {
+                    final var edge = schema.getEdge(base);
+                    colors
+                        .computeIfAbsent(edge.morphism().signature(), x -> new TreeSet<>())
+                        .add(kind);
+                });
+
+                if (!(subpath instanceof ComplexProperty complexSubpath))
                     continue;
 
-                if (
-                    !tripleKindA.triple.object.equals(tripleKindB.triple.subject)
-                        && !tripleKindA.triple.subject.equals(tripleKindB.triple.subject)
-                )
-                    continue;
-
-                return splitJoinPoint(variableTypes, queryPart, tripleKindA.triple, tripleKindA.kind, tripleKindB.triple, tripleKindB.kind);
+                colorMorphisms(kind, complexSubpath);
             }
         }
 
-        throw InvalidPlanException.message("Missing join point");
-    }
+        private Map<Kind, Integer> kindCosts = new TreeMap<>();
 
-    static record QueryPartKind(
-        QueryPart queryPart,
-        Kind kind
-    ) {}
-
-    private List<QueryPart> splitJoinPoint(
-        Map<String, SchemaObject> variableTypes,
-        QueryPart queryPart,
-        WhereTriple tripleA,
-        Kind kindA,
-        WhereTriple tripleB,
-        Kind kindB
-    ) {
-        var intersectionVariable = tripleB.subject;
-        var intersectionObject = variableTypes.get(intersectionVariable.name);
-        SignatureId intersectionIdentifier = null;
-
-        for (var identifier : intersectionObject.ids().toSignatureIds()) {
-            if (identifier.signatures().stream().allMatch(signature -> 
-                signature.toBases().stream().allMatch(base -> Utils.getPropertyPath(kindA.mapping, base) != null)
-            ))
-                intersectionIdentifier = identifier;
+        public int getKindCost(Kind kind) {
+            return kindCosts.computeIfAbsent(kind, k -> computePathCost(k.mapping.accessPath()));
         }
 
-        // Project identifier from both kinds and split query part
-        if (intersectionIdentifier == null)
-            throw InvalidPlanException.message("Well that's a shame (" + tripleA.signature + ", " + tripleB + ")");
+        private int computePathCost(AccessPath path) {
+            int min = colors.get(path.signature()).size();
 
-        // When mmcat supports joins and we can implement them, non-contiguous database parts (like mongo-postgre-mongo) could leave gaps in the query parts with this implementation.
-        var triplesMappingA = queryPart.triplesMapping.stream().filter(tm -> tm.kind.database.equals(kindB.database)).toList();
-        var triplesMappingB = queryPart.triplesMapping.stream().filter(tm -> !triplesMappingA.contains(tm)).toList();
+            if (path instanceof ComplexProperty complex)
+                for (final var subpath : complex.subpaths())
+                    min = Math.min(min, computePathCost(subpath));
 
-        var queryPartA = new QueryPart(triplesMappingA, new ArrayList<>());
-        var queryPartB = new QueryPart(triplesMappingB, new ArrayList<>());
-
-        var tmp = List.of(
-            new QueryPartKind(queryPartA, kindA),
-            new QueryPartKind(queryPartB, kindB)
-        );
-
-        for (var queryPartKind : tmp) {
-            for (var signature : intersectionIdentifier.signatures()) {
-                // In the case that an identifier is a compound signature, this will not suffice.
-                var morphismSignature = signature.getFirst();
-                var anyTriples = queryPartKind.queryPart.triplesMapping.stream().anyMatch(tm ->
-                    tm.triple.subject.name.equals(intersectionVariable.name) && tm.triple.signature.equals(morphismSignature)
-                );
-                if (!anyTriples) {
-                    // Note that the variable name will be different for both query parts, but this is not a problem since the morphisms dictate data placement when joining instance categories.
-                    var newTriple = new WhereTriple(intersectionVariable, morphismSignature, Variable.generated());
-                    queryPartKind.queryPart.triplesMapping.add(new TripleKind(newTriple, queryPartKind.kind));
-                }
-            }
+            return min;
         }
 
-        return List.of(queryPartA, queryPartB);
-    }
+        private static record KindWithCost(Kind kind, int cost) {}
 
-    /**
-     * Given a list of finished query parts for a query plan, go through the non-triple statements in the query and assign them to query parts.
-     * Note that a single statement may be assigned to multiple query parts, for example filtering the value of a variable which is selected from multiple query parts must naturally apply this filter to all relevant query parts.
-     */
-    private void assignStatementsToParts(Query query, List<QueryPart> parts) {
-        for (var part : parts) {
-            for (var filter : query.where.filters) {
-                for (var tripleKind : part.triplesMapping) {
-                    // Whenever we implement deferred statements, we will need to check whether a potential rhs variable/aggregation is in the same query part.
-                    if (filter.lhs instanceof Variable variable && variable.equals(tripleKind.triple.object))
-                        part.statements.add(filter);
-                }
-            }
-
-            for (var values : query.where.values)
-                for (var tripleKind : part.triplesMapping)
-                    if (values.variable.equals(tripleKind.triple.object))
-                        part.statements.add(values);
+        /**
+         * Sorts given kinds based on the coloring.
+         * Also removes the zero-cost kinds because they aren't needed anymore.
+         */
+        public List<Kind> sortKinds(List<Kind> kinds) {
+            return kinds.stream()
+                .map(kind -> new KindWithCost(kind, getKindCost(kind)))
+                .filter(kindWithCost -> kindWithCost.cost > 0)
+                .sorted((a, b) -> a.cost - b.cost)
+                .map(KindWithCost::kind)
+                .toList();
         }
-    }
 
-    /**
-     * Given a set of query plans, evaluate the cost of each plan and return the best plan.
-     */
-    public QueryPlan selectBestPlan(List<QueryPlan> plans) {
-        // Selection of the best plan is outside the scope of my thesis,
-        // but I will probably soon add some basic algorithm for this.
-        return plans.get(0);
+        /**
+         * Creates a new coloring (the current one stays unchanged).
+         * For each morphism in the given kind, we zero the cost of the morphism in all the other kinds.
+         * This basically means that we just remove all colors of the morphism.
+         */
+        public Coloring removeKind(Kind kind) {
+            final Set<Signature> removedMorphisms = getAllMorphismsInKind(kind);
+            final var newColors = new TreeMap<Signature, Set<Kind>>();
+            colors.forEach((signature, set) -> {
+                if (!removedMorphisms.contains(signature))
+                    newColors.put(signature, new TreeSet<>(set));
+            });
+
+            return new Coloring(schema, newColors);
+        }
+
     }
 
 }

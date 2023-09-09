@@ -30,6 +30,6 @@ public class Clause {
     public SchemaCategory schema;
     public List<Kind> kinds;
     public Set<Kind> patternPlan;
-    public List<QueryPart2> parts;
+    public List<QueryPart> parts;
 
 }

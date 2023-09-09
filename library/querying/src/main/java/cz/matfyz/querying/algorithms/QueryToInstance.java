@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.other.JsonDMLWrapper;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.querying.core.Clause;
 import cz.matfyz.querying.core.QueryEngine;
 import cz.matfyz.querying.core.QueryPlan;
 import cz.matfyz.querying.parsing.Query;
@@ -21,13 +22,11 @@ public class QueryToInstance {
 
     private String queryString;
     private SchemaCategory schema;
-    private Integer planNumber;
     private List<Kind> kinds;
 
-    public void input(SchemaCategory category, String queryString, Integer planNumber, List<Kind> kinds) {
+    public void input(SchemaCategory category, String queryString, List<Kind> kinds) {
         this.schema = category;
         this.queryString = queryString;
-        this.planNumber = planNumber;
         this.kinds = kinds;
     }
 
@@ -39,13 +38,9 @@ public class QueryToInstance {
 
     public Result algorithm() {
         final Query query = QueryParser.parse(queryString);
-        
-        final var planner = new QueryPlanner(schema, kinds);
-        final List<QueryPlan> queryPlans = planner.createPlans(query);
-        
-        final QueryPlan bestPlan = planNumber == null
-            ? planner.selectBestPlan(queryPlans)
-            : queryPlans.get(planNumber);
+        processClause(query.whereClause);
+
+        final QueryPlan bestPlan = queryPlans.get(0);
         
         final var engine = new QueryEngine(schema);
         engine.compileStatements(bestPlan);
@@ -57,6 +52,18 @@ public class QueryToInstance {
         final List<String> jsonResults = createJsonResults(bestPlan, whereInstance);
 
         return new Result(whereInstance, bestPlan, jsonResults);
+    }
+
+    private void processClause(Clause clause) {
+        final var extracted = new QueryExtractor(schema, kinds, clause.pattern).run();
+        clause.schema = extracted.schema();
+        clause.kinds = extracted.kinds();
+
+        final var plans = new QueryPlanner(clause.schema, clause.kinds).run();
+        // TODO select plan somehow
+        clause.patternPlan = plans.get(0);
+        
+        clause.nestedClauses.forEach(nestedClause -> processClause(nestedClause));
     }
 
     private List<String> createJsonResults(QueryPlan bestPlan, InstanceCategory whereInstance) {
