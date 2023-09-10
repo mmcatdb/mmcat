@@ -6,7 +6,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.PostponedOperation;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.KindTree;
-import cz.matfyz.querying.core.QueryPart2;
+import cz.matfyz.querying.core.QueryPart;
 import cz.matfyz.querying.parsing.StringValue;
 import cz.matfyz.querying.parsing.ValueNode;
 import cz.matfyz.querying.parsing.WhereTriple;
@@ -20,10 +20,10 @@ public class QueryPartTranslator {
 
     private static final String PATH_SEPARATOR = "/";
 
-    private final QueryPart2 queryPart;
+    private final QueryPart queryPart;
     private final AbstractQueryWrapper wrapper;
 
-    public QueryPartTranslator(QueryPart2 queryPart) {
+    public QueryPartTranslator(QueryPart queryPart) {
         this.queryPart = queryPart;
         this.wrapper = queryPart.database().control.getQueryWrapper();
     }

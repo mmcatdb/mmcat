@@ -42,7 +42,7 @@ public class QueryEngine {
     /**
      * Compile the native database query and corresponding mapping for a single query part.
      */
-    private void compileQueryPart(QueryPart part) {
+    private void compileQueryPart(QueryPart_old part) {
         var variableTypes = Utils.getVariableTypesFromPart(part, schemaCategory);
         var mappingBuilder = new MappingBuilder();
 
@@ -65,7 +65,7 @@ public class QueryEngine {
         part.compiled = new QueryPartCompiled(statement.stringContent(), mapping, controlWrapper);
     }
 
-    private void processProjectionTriples(QueryPart part, Map<String, SchemaObject> variableTypes, MappingBuilder mappingBuilder, AbstractQueryWrapper queryWrapper) {
+    private void processProjectionTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, MappingBuilder mappingBuilder, AbstractQueryWrapper queryWrapper) {
         for (var tripleKind : part.triplesMapping) {
             var object = tripleKind.triple.object;
 
@@ -89,7 +89,7 @@ public class QueryEngine {
         }
     }
 
-    private void processJoinTriples(QueryPart part, Map<String, SchemaObject> variableTypes, AbstractQueryWrapper queryWrapper) {
+    private void processJoinTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, AbstractQueryWrapper queryWrapper) {
         for (var tripleKindA : part.triplesMapping) {
             for (var tripleKindB : part.triplesMapping) {
                 if (!tripleKindA.triple.object.equals(tripleKindB.triple.subject) && !tripleKindA.triple.subject.equals(tripleKindB.triple.subject))
@@ -128,7 +128,7 @@ public class QueryEngine {
         }
     }
 
-    private void processFilters(QueryPart part, AbstractQueryWrapper queryWrapper) {
+    private void processFilters(QueryPart_old part, AbstractQueryWrapper queryWrapper) {
         var filters = part.statements.stream().filter(Filter.class::isInstance).map(f -> (Filter) f).toList();
 
         for (var filter : filters) {
@@ -152,7 +152,7 @@ public class QueryEngine {
         }
     }
 
-    private void processValues(QueryPart part, AbstractQueryWrapper queryWrapper) {
+    private void processValues(QueryPart_old part, AbstractQueryWrapper queryWrapper) {
         var valuesFilters = part.statements.stream().filter(Values.class::isInstance).map(v -> (Values) v).toList();
         for (var values : valuesFilters) {
             queryWrapper.addValuesFilter(

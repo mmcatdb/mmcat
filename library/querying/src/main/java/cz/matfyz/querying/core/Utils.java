@@ -31,7 +31,7 @@ public abstract class Utils {
     /**
      * Get the set of variables from the query part, along with the corresponding schema object for each variable.
      */
-    public static Map<String, SchemaObject> getVariableTypesFromPart(QueryPart part, SchemaCategory schemaCategory) {
+    public static Map<String, SchemaObject> getVariableTypesFromPart(QueryPart_old part, SchemaCategory schemaCategory) {
         final var triples = part.triplesMapping.stream().map(t -> t.triple).toList();
         return getVariableTypes(triples, schemaCategory);
     }
@@ -67,7 +67,7 @@ public abstract class Utils {
      * Given a query part, return the set of kinds occurring in this query part.
      * Note that there can be multiple kinds for multiple variables which refer to the same underlying database kind.
      */
-    public static List<Kind> getKindsFromPart(QueryPart part) {
+    public static List<Kind> getKindsFromPart(QueryPart_old part) {
         // TODO this sus
         return part.triplesMapping.stream().map(t -> t.kind).toList();
     }

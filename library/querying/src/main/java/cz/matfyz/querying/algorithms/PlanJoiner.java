@@ -10,10 +10,15 @@ import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.core.utils.GraphUtils;
-import cz.matfyz.querying.core.Clause;
 import cz.matfyz.querying.core.JoinCandidate;
-import cz.matfyz.querying.core.QueryPart2;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
+import cz.matfyz.querying.core.querytree.Filter;
+import cz.matfyz.querying.core.querytree.GroupNode;
+import cz.matfyz.querying.core.querytree.HasKinds;
+import cz.matfyz.querying.core.querytree.JoinNode;
+import cz.matfyz.querying.core.querytree.OperationNode;
+import cz.matfyz.querying.core.querytree.PatternNode;
+import cz.matfyz.querying.exception.JoinException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 /**
  * This class is responsible for joining multiple kinds from the same pattern plan and the same database together.
@@ -29,43 +35,46 @@ import java.util.TreeSet;
  */
 public class PlanJoiner {
 
-    private final Clause rootClause;
+    private final GroupNode rootGroup;
+    // private final Clause rootClause;
 
-    public PlanJoiner(Clause rootClause) {
-        this.rootClause = rootClause;
+    public PlanJoiner(GroupNode rootGroup) {
+        this.rootGroup = rootGroup;
     }
 
-    public void run() {
-        processClause(rootClause);
-        optimizeJoinPlan();
+    public GroupNode run() {
+        return processGroup(rootGroup);
+        // optimizeJoinPlan();
     }
 
-    private void processClause(Clause clause) {
-        processPattern(clause);
-        clause.nestedClauses.stream().forEach(nestedClause -> processClause(nestedClause));
-    }
+    private GroupNode processGroup(GroupNode group) {
+        final var pattern = group.pattern;
+        if (pattern.kinds.size() == 1)
+            return group;
 
-    private void processPattern(Clause clause) {
-        if (clause.patternPlan.size() == 1) {
-            final Kind kind = clause.patternPlan.stream().findFirst().get();
-            clause.parts = List.of(QueryPart2.create(kind));
-            return;
-        }
+        // TODO there might be some joining needed for OPTIONAL joins?
 
-        final Coloring coloring = Coloring.create(clause.schema, clause.patternPlan);
-        final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring, clause);
+        final var newOperations = group.operations.stream().map(this::processOperation).toList();
+        // TODO ignoring OPTIONAL and MINUS for now ...
+
+
+        final Coloring coloring = Coloring.create(pattern.schema, pattern.kinds);
+        final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
         final List<JoinGroup> filteredGroups = filterJoinGroups(candidateGroups);
 
         final var candidatesBetweenParts = new ArrayList<JoinCandidate>();
-        final List<QueryPart2> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts);
+        final List<QueryPart> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts);
 
-
-
-        // splitLeaf(clause, joinCandidates);
+        return splitLeaf(queryParts, candidatesBetweenParts, newOperations, group.filters);
     }
 
-    private List<JoinCandidate> createJoinCandidates(Coloring coloring, Clause clause) {
+    private OperationNode processOperation(OperationNode operation) {
+        final var newGroup = processGroup(operation.group());
+        return operation.updateGroup(newGroup);
+    }
+
+    private List<JoinCandidate> createJoinCandidates(Coloring coloring) {
         final var output = new ArrayList<JoinCandidate>();
         for (final SchemaObject object : coloring.selectMulticolorObjects()) {
             // The set of all objects that have two or more colors.
@@ -73,7 +82,7 @@ public class PlanJoiner {
             // We try each pair of colors.
             for (int i = 0; i < kinds.length; i++)
                 for (int j = i + 1; j < kinds.length; j++) {
-                    final var candidate = tryCreateCandidate(object, kinds[i], kinds[j], clause, coloring);
+                    final var candidate = tryCreateCandidate(object, kinds[i], kinds[j], coloring);
                     if (candidate != null)
                         output.add(candidate);
                 }
@@ -82,12 +91,12 @@ public class PlanJoiner {
         return output;
     }
 
-    private JoinCandidate tryCreateCandidate(SchemaObject object, Kind kind1, Kind kind2, Clause clause, Coloring coloring) {
-        final var candidate1 = tryCreateIdRefCandidate(object, kind1, kind2, clause);
+    private JoinCandidate tryCreateCandidate(SchemaObject object, Kind kind1, Kind kind2, Coloring coloring) {
+        final var candidate1 = tryCreateIdRefCandidate(object, kind1, kind2, coloring);
         if (candidate1 != null)
             return candidate1;
 
-        final var candidate2 = tryCreateIdRefCandidate(object, kind2, kind1, clause);
+        final var candidate2 = tryCreateIdRefCandidate(object, kind2, kind1, coloring);
         if (candidate2 != null)
             return candidate2;
 
@@ -98,7 +107,7 @@ public class PlanJoiner {
     /**
      * This object matches the id-ref join pattern. This means that an object (rootObject) is identified by another object (idObject). The first kind (idKind) has A as a root object and B as a normal property. The second kind (refKind) has the idObject.
      */
-    private JoinCandidate tryCreateIdRefCandidate(SchemaObject idObject, Kind idKind, Kind refKind, Clause clause) {
+    private JoinCandidate tryCreateIdRefCandidate(SchemaObject idObject, Kind idKind, Kind refKind, Coloring coloring) {
         // First, check if the idObject is an identifier of the root of the idKind.
         final SchemaObject rootObject = idKind.mapping.rootObject();
         if (!rootObject.ids().isSignatures())
@@ -109,7 +118,7 @@ public class PlanJoiner {
         if (firstId.signatures().size() != 1)
             return null;
         
-        final SchemaObject rootIdObject = clause.schema.getEdge(firstId.signatures().first().getLast()).to();
+        final SchemaObject rootIdObject = coloring.schema.getEdge(firstId.signatures().first().getLast()).to();
         if (!idObject.equals(rootIdObject))
             return null;
 
@@ -168,7 +177,7 @@ public class PlanJoiner {
         }).toList();
     }
 
-    private List<QueryPart2> createQueryParts(List<JoinGroup> groups, List<JoinCandidate> candidatesBetweenParts) {
+    private List<QueryPart> createQueryParts(List<JoinGroup> groups, List<JoinCandidate> candidatesBetweenParts) {
         // First, we find all candidates between different databases and add them to the `between parts` category.
         groups.stream()
             .filter(g -> !g.databases.isSameDatabase())
@@ -180,15 +189,17 @@ public class PlanJoiner {
             .flatMap(g -> mergeNeighbors(g.candidates, candidatesBetweenParts).stream()).toList();
     }
 
+    public record QueryPart(Set<Kind> kinds, List<JoinCandidate> joinCandidates) {}
+
     /**
      * Merges kinds from a single database to a minimal number of query parts.
      */
-    private List<QueryPart2> mergeNeighbors(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
+    private List<QueryPart> mergeNeighbors(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
         // All of the candidates have to have the same database.
         final Database database = candidates.get(0).from().database;
         // If the database supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
         if (database.control.getQueryWrapper().isJoinSupported())
-            return GraphUtils.findComponents(candidates).stream().map(c -> QueryPart2.create(c.nodes(), c.edges())).toList();
+            return GraphUtils.findComponents(candidates).stream().map(c -> new QueryPart(c.nodes(), c.edges())).toList();
         
         // Othervise, we have to create custom query part for each kind.
         final var kinds = new TreeSet<Kind>();
@@ -199,11 +210,89 @@ public class PlanJoiner {
         // Also, all candidates will join different parts so we add them to the `between parts` category.
         candidatesBetweenParts.addAll(candidates);
 
-        return kinds.stream().map(kind -> QueryPart2.create(kind)).toList();
+        return kinds.stream().map(kind -> new QueryPart(Set.of(kind), List.of())).toList();
     }
 
-    private void splitLeaf(Clause clause, List<JoinCandidate> candidates) {
-        throw new UnsupportedOperationException();
+    private static interface JoinTreeNode {
+        Set<Kind> kinds();
+        GroupNode toGroupNode(List<OperationNode> operations, List<Filter> filters);
+    }
+    
+    private static record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<Kind> kinds) implements JoinTreeNode {
+        public GroupNode toGroupNode(List<OperationNode> operations, List<Filter> filters) {
+            // First, we try to move operations and filters down the tree.
+            final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
+            final var fromFilters = HasKinds.splitByKinds(filters, from.kinds());
+            
+            // Then we try to do the same with the other branch of the tree.
+            final var toOperations = HasKinds.splitByKinds(fromOperations.rest(), to.kinds());
+            final var toFilters = HasKinds.splitByKinds(fromFilters.rest(), to.kinds());
+            // We can construct the joined group.
+            final var toGroup = to().toGroupNode(toOperations.included(), toFilters.included());
+            
+            // Finally, we add the joined group as a join operation to the first group.
+            final var join = new JoinNode(toGroup, candidate);
+            final var newFromOperations = fromOperations.included();
+            newFromOperations.add(join);
+
+            return from().toGroupNode(newFromOperations, fromFilters.included());
+        }
+    }
+
+    private static record JoinTreeLeaf(QueryPart queryPart) implements JoinTreeNode {
+        public Set<Kind> kinds() {
+            return queryPart.kinds;
+        }
+
+        public GroupNode toGroupNode(List<OperationNode> operations, List<Filter> filters) {
+            // TODO schema
+            final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
+            return new GroupNode(pattern, operations, filters);
+        }
+    }
+
+    /**
+     * On the input, we get a list of query parts and a list of joins that can be used to connect kinds from different query parts (thus joining whole query parts together).
+     * We construct a tree of joins (inner nodes) and query parts (leaves).
+     */
+    private GroupNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates, List<OperationNode> operations, List<Filter> filters) {
+        // TODO schema? it should be splitted somehow?
+        // maybe just take the coloring and get a subset of a schema that is contained in the part
+        
+        final JoinTreeNode joinTree = computeJoinTree(queryParts, candidates);
+        return joinTree.toGroupNode(operations, filters);
+    }
+
+    private JoinTreeNode computeJoinTree(List<QueryPart> queryParts, List<JoinCandidate> candidates) {
+        // We want to try the id-ref ones first.
+        final var orderedCandidates = Stream.concat(
+            candidates.stream().filter(c -> c.type() == JoinType.IdRef),
+            candidates.stream().filter(c -> c.type() == JoinType.Value)
+        );
+
+        final List<JoinTreeNode> nodes = queryParts.stream().map(part -> (JoinTreeNode) new JoinTreeLeaf(part)).toList();
+
+        orderedCandidates.forEach(c -> {
+            final var fromNode = nodes.stream().filter(n -> n.kinds().contains(c.from())).findFirst().get();
+            final var toNode = nodes.stream().filter(n -> n.kinds().contains(c.to())).findFirst().get();
+
+            // Nothing to do here, the nodes are already joined.
+            if (fromNode == toNode)
+                return;
+
+            nodes.remove(fromNode);
+            nodes.remove(toNode);
+
+            final var kindsUnion = new TreeSet<>(fromNode.kinds());
+            kindsUnion.addAll(toNode.kinds());
+            nodes.add(new JoinTreeInner(fromNode, toNode, c, kindsUnion));
+        });
+
+        // Now, there should be only one join node. If not, the query is invalid.
+        if (nodes.size() != 1)
+            throw JoinException.impossible();
+
+        return nodes.get(0);
     }
     
     private void optimizeJoinPlan() {
@@ -212,7 +301,7 @@ public class PlanJoiner {
 
     private static class Coloring {
 
-        private final SchemaCategory schema;
+        public final SchemaCategory schema;
         private final Map<Key, Set<Kind>> objectColors;
         private final Map<Signature, Set<Kind>> morphismColors;
 

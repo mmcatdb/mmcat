@@ -9,7 +9,7 @@ import cz.matfyz.server.builder.SchemaCategoryContext;
 
 import java.util.Set;
 
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author jachym.bartik
