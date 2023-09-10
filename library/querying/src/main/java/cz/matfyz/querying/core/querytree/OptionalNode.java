@@ -1,19 +1,16 @@
 package cz.matfyz.querying.core.querytree;
 
-public class OptionalNode extends OperationNode {
+public class OptionalNode extends QueryNode {
  
-    @Override
-    public Operation operation() {
-        return Operation.Optional;
-    }
+    public final QueryNode primaryChild;
+    public final QueryNode optionalChild;
 
-    public OptionalNode(GroupNode group) {
-        super(group);
-    }
-
-    @Override
-    public OptionalNode updateGroup(GroupNode group) {
-        return new OptionalNode(group);
+    public OptionalNode(QueryNode primaryChild, QueryNode optionalChild) {
+        this.primaryChild = primaryChild;
+        this.optionalChild = optionalChild;
+        
+        primaryChild.setParent(this);
+        optionalChild.setParent(this);
     }
 
 }

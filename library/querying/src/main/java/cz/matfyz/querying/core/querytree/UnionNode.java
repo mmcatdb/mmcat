@@ -1,19 +1,15 @@
 package cz.matfyz.querying.core.querytree;
 
-public class UnionNode extends OperationNode {
-    
-    @Override
-    public Operation operation() {
-        return Operation.Union;
-    }
+import java.util.List;
 
-    public UnionNode(GroupNode group) {
-        super(group);
-    }
+public class UnionNode extends QueryNode {
 
-    @Override
-    public UnionNode updateGroup(GroupNode group) {
-        return new UnionNode(group);
+    public final List<QueryNode> children;
+
+    public UnionNode(List<QueryNode> children) {
+        this.children = children;
+        
+        children.forEach(c -> setParent(this));
     }
 
 }

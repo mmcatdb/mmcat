@@ -2,7 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-class WhereTriplesList extends QueryNode {
+class WhereTriplesList extends ParserNode {
 
     @Override WhereTriplesList asWhereTriplesList() {
         return this;

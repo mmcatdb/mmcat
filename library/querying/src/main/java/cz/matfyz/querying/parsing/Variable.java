@@ -4,7 +4,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 
 import java.util.UUID;
 
-public class Variable extends QueryNode implements ValueNode {
+public class Variable extends ParserNode implements ValueNode {
 
     @Override Variable asVariable() {
         return this;

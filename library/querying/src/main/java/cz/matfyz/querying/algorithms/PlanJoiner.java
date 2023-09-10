@@ -11,13 +11,11 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
+import cz.matfyz.querying.core.Pattern;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
-import cz.matfyz.querying.core.querytree.Filter;
-import cz.matfyz.querying.core.querytree.GroupNode;
-import cz.matfyz.querying.core.querytree.HasKinds;
 import cz.matfyz.querying.core.querytree.JoinNode;
-import cz.matfyz.querying.core.querytree.OperationNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
+import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.exception.JoinException;
 
 import java.util.ArrayList;
@@ -35,29 +33,28 @@ import java.util.stream.Stream;
  */
 public class PlanJoiner {
 
-    private final GroupNode rootGroup;
+    private final Pattern pattern;
     // private final Clause rootClause;
 
-    public PlanJoiner(GroupNode rootGroup) {
-        this.rootGroup = rootGroup;
+    public PlanJoiner(Pattern pattern) {
+        this.pattern = pattern;
     }
+    
+    public QueryNode run() {
+        if (pattern.kinds.size() == 1) {
+            final var patternNode = new PatternNode(pattern.kinds, pattern.schema, List.of());
+            final var database = pattern.kinds.stream().findFirst().get().database;
+            patternNode.setDatabase(database);
 
-    public GroupNode run() {
-        return processGroup(rootGroup);
-        // optimizeJoinPlan();
-    }
-
-    private GroupNode processGroup(GroupNode group) {
-        final var pattern = group.pattern;
-        if (pattern.kinds.size() == 1)
-            return group;
-
+            return patternNode;
+        }
+        
         // TODO there might be some joining needed for OPTIONAL joins?
-
-        final var newOperations = group.operations.stream().map(this::processOperation).toList();
+        
+        // final var newOperations = group.operations.stream().map(this::processOperation).toList();
         // TODO ignoring OPTIONAL and MINUS for now ...
-
-
+        
+        
         final Coloring coloring = Coloring.create(pattern.schema, pattern.kinds);
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
@@ -66,12 +63,10 @@ public class PlanJoiner {
         final var candidatesBetweenParts = new ArrayList<JoinCandidate>();
         final List<QueryPart> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts);
 
-        return splitLeaf(queryParts, candidatesBetweenParts, newOperations, group.filters);
-    }
+        // return splitLeaf(queryParts, candidatesBetweenParts, newOperations, group.filters);
+        // optimizeJoinPlan();
 
-    private OperationNode processOperation(OperationNode operation) {
-        final var newGroup = processGroup(operation.group());
-        return operation.updateGroup(newGroup);
+        return splitLeaf(queryParts, candidatesBetweenParts);
     }
 
     private List<JoinCandidate> createJoinCandidates(Coloring coloring) {
@@ -215,27 +210,44 @@ public class PlanJoiner {
 
     private static interface JoinTreeNode {
         Set<Kind> kinds();
-        GroupNode toGroupNode(List<OperationNode> operations, List<Filter> filters);
+        QueryNode toQueryNode(SchemaCategory schema);
     }
+
+    // public interface HasKinds {
+    
+    //     Set<Kind> kinds();
+    
+    //     public static record SplitResult<T extends HasKinds>(List<T> included, List<T> rest) {}
+    
+    //     public static <T extends HasKinds> SplitResult<T> splitByKinds(List<T> all, Set<Kind> kinds) {
+    //         final var included = new ArrayList<T>();
+    //         final var rest = new ArrayList<T>();
+    //         all.forEach(item -> (kinds.containsAll(item.kinds()) ? included : rest).add(item));
+    
+    //         return new SplitResult<>(included, rest);
+    //     }
+    
+    // }
     
     private static record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<Kind> kinds) implements JoinTreeNode {
-        public GroupNode toGroupNode(List<OperationNode> operations, List<Filter> filters) {
+        public JoinNode toQueryNode(SchemaCategory schema) {
             // First, we try to move operations and filters down the tree.
-            final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
-            final var fromFilters = HasKinds.splitByKinds(filters, from.kinds());
+            // final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
+            // final var fromFilters = HasKinds.splitByKinds(filters, from.kinds());
             
             // Then we try to do the same with the other branch of the tree.
-            final var toOperations = HasKinds.splitByKinds(fromOperations.rest(), to.kinds());
-            final var toFilters = HasKinds.splitByKinds(fromFilters.rest(), to.kinds());
+            // final var toOperations = HasKinds.splitByKinds(fromOperations.rest(), to.kinds());
+            // final var toFilters = HasKinds.splitByKinds(fromFilters.rest(), to.kinds());
             // We can construct the joined group.
-            final var toGroup = to().toGroupNode(toOperations.included(), toFilters.included());
+            // final var toGroup = to().toQueryNode();
+        
             
             // Finally, we add the joined group as a join operation to the first group.
-            final var join = new JoinNode(toGroup, candidate);
-            final var newFromOperations = fromOperations.included();
-            newFromOperations.add(join);
+            // final var join = new JoinNode(toGroup, candidate);
+            // final var newFromOperations = fromOperations.included();
+            // newFromOperations.add(join);
 
-            return from().toGroupNode(newFromOperations, fromFilters.included());
+            return new JoinNode(from().toQueryNode(schema), to().toQueryNode(schema), candidate);
         }
     }
 
@@ -244,10 +256,15 @@ public class PlanJoiner {
             return queryPart.kinds;
         }
 
-        public GroupNode toGroupNode(List<OperationNode> operations, List<Filter> filters) {
+        public PatternNode toQueryNode(SchemaCategory schema) {
             // TODO schema
-            final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
-            return new GroupNode(pattern, operations, filters);
+            // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
+            // return new GroupNode(pattern, operations, filters);
+            final var patternNode = new PatternNode(queryPart.kinds, schema, queryPart.joinCandidates);
+            final var database = queryPart.kinds.stream().findFirst().get().database;
+            patternNode.setDatabase(database);
+
+            return patternNode;
         }
     }
 
@@ -255,12 +272,11 @@ public class PlanJoiner {
      * On the input, we get a list of query parts and a list of joins that can be used to connect kinds from different query parts (thus joining whole query parts together).
      * We construct a tree of joins (inner nodes) and query parts (leaves).
      */
-    private GroupNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates, List<OperationNode> operations, List<Filter> filters) {
-        // TODO schema? it should be splitted somehow?
-        // maybe just take the coloring and get a subset of a schema that is contained in the part
-        
+    // private QueryNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates, List<OperationNode> operations, List<FilterNode> filters) {
+    private QueryNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates) {
         final JoinTreeNode joinTree = computeJoinTree(queryParts, candidates);
-        return joinTree.toGroupNode(operations, filters);
+        // The schema category is not splitted - it stays as is for all sub-patterns
+        return joinTree.toQueryNode(pattern.schema);
     }
 
     private JoinTreeNode computeJoinTree(List<QueryPart> queryParts, List<JoinCandidate> candidates) {

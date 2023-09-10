@@ -2,23 +2,19 @@ package cz.matfyz.querying.core.querytree;
 
 import cz.matfyz.querying.core.JoinCandidate;
 
-public class JoinNode extends OperationNode {
+public class JoinNode extends QueryNode {
     
-    @Override
-    public Operation operation() {
-        return Operation.Join;
-    }
-
+    public final QueryNode fromChild;
+    public final QueryNode toChild;
     public final JoinCandidate candidate;
 
-    public JoinNode(GroupNode group, JoinCandidate candidate) {
-        super(group);
+    public JoinNode(QueryNode fromChild, QueryNode toChild, JoinCandidate candidate) {
+        this.fromChild = fromChild;
+        this.toChild = toChild;
         this.candidate = candidate;
-    }
-
-    @Override
-    public JoinNode updateGroup(GroupNode group) {
-        return new JoinNode(group, candidate);
+        
+        fromChild.setParent(this);
+        toChild.setParent(this);
     }
 
 }

@@ -1,6 +1,6 @@
 package cz.matfyz.querying.exception;
 
-import cz.matfyz.querying.parsing.QueryNode;
+import cz.matfyz.querying.parsing.ParserNode;
 
 import java.io.Serializable;
 
@@ -15,10 +15,10 @@ public class ParsingException extends QueryingException {
 
     private record WrongNodeData(
         String supposedType,
-        QueryNode actualNode
+        ParserNode actualNode
     ) implements Serializable {}
 
-    public static <T> ParsingException wrongNode(Class<T> supposedType, QueryNode actualNode) {
+    public static <T> ParsingException wrongNode(Class<T> supposedType, ParserNode actualNode) {
         return new ParsingException("wrongNode", new WrongNodeData(supposedType.getSimpleName(), actualNode));
     }
 

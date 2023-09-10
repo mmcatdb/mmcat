@@ -2,7 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-public class WhereClause extends QueryNode {
+public class WhereClause extends ParserNode {
 
     @Override WhereClause asWhereClause() {
         return this;

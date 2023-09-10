@@ -4,7 +4,7 @@ import cz.matfyz.querying.exception.ParsingException;
 
 import java.io.Serializable;
 
-public abstract class QueryNode implements Serializable {
+public abstract class ParserNode implements Serializable {
 
     Query asQuery() {
         throw ParsingException.wrongNode(Query.class, this);

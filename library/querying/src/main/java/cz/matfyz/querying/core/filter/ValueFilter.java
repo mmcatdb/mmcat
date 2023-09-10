@@ -1,4 +1,4 @@
-package cz.matfyz.querying.core.querytree;
+package cz.matfyz.querying.core.filter;
 
 public class ValueFilter extends Filter {
     

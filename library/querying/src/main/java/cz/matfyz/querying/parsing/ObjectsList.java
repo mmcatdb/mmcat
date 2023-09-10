@@ -2,7 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-class ObjectsList extends QueryNode {
+class ObjectsList extends ParserNode {
 
     @Override ObjectsList asObjectsList() {
         return this;

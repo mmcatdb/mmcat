@@ -1,6 +1,6 @@
 package cz.matfyz.querying.parsing;
 
-public class StringValue extends QueryNode implements ValueNode {
+public class StringValue extends ParserNode implements ValueNode {
 
     @Override StringValue asStringValue() {
         return this;

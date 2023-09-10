@@ -2,7 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-class MorphismsList extends QueryNode {
+class MorphismsList extends ParserNode {
 
     @Override MorphismsList asMorphisms() {
         return this;

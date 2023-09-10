@@ -1,19 +1,16 @@
 package cz.matfyz.querying.core.querytree;
 
-public class MinusNode extends OperationNode {
+public class MinusNode extends QueryNode {
  
-    @Override
-    public Operation operation() {
-        return Operation.Minus;
-    }
+    public final QueryNode primaryChild;
+    public final QueryNode minusChild;
 
-    public MinusNode(GroupNode group) {
-        super(group);
-    }
-
-    @Override
-    public MinusNode updateGroup(GroupNode group) {
-        return new MinusNode(group);
+    public MinusNode(QueryNode primaryChild, QueryNode minusChild) {
+        this.primaryChild = primaryChild;
+        this.minusChild = minusChild;
+        
+        primaryChild.setParent(this);
+        minusChild.setParent(this);
     }
 
 }

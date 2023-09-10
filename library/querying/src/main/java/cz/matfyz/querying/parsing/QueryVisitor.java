@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 /**
  * Visitor class whose job is to traverse the AST parsed from each MMQL query, and construct the internal query representation which is subsequently processed by the rest of the algorithm.
  */
-public class QueryVisitor extends QuerycatBaseVisitor<QueryNode> {
+public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     @Override
-    protected QueryNode aggregateResult(QueryNode aggregate, QueryNode nextResult) {
+    protected ParserNode aggregateResult(ParserNode aggregate, ParserNode nextResult) {
         return nextResult == null ? aggregate : nextResult;
     }
 
@@ -155,7 +155,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<QueryNode> {
     }
 
     @Override
-    public QueryNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {
+    public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {
         var children = ctx.children;
 
         if (children.size() == 1)

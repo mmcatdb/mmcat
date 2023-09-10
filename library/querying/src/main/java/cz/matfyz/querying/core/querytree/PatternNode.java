@@ -18,18 +18,10 @@ public class PatternNode extends QueryNode {
     public final SchemaCategory schema;
     public final List<JoinCandidate> joinCandidates;
 
-    private PatternNode(Set<Kind> kinds, SchemaCategory schema, List<JoinCandidate> joinCandidates) {
+    public PatternNode(Set<Kind> kinds, SchemaCategory schema, List<JoinCandidate> joinCandidates) {
         this.kinds = kinds;
         this.schema = schema;
         this.joinCandidates = joinCandidates;
-    }
-
-    public static PatternNode createNew(Set<Kind> kinds, SchemaCategory schema) {
-        return new PatternNode(kinds, schema, null);
-    }
-
-    public static PatternNode createFinal(Set<Kind> kinds, SchemaCategory schema, List<JoinCandidate> joinCandidates) {
-        return new PatternNode(kinds, schema, joinCandidates);
     }
 
 }

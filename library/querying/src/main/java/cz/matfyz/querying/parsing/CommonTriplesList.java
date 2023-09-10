@@ -2,7 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-class CommonTriplesList extends QueryNode {
+class CommonTriplesList extends ParserNode {
 
     @Override CommonTriplesList asCommonTriplesList() {
         return this;

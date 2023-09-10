@@ -2,7 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-public class Values extends QueryNode implements Statement {
+public class Values extends ParserNode implements Statement {
 
     @Override Values asValues() {
         return this;

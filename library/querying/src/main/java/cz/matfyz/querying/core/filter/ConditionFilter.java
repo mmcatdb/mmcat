@@ -1,18 +1,15 @@
-package cz.matfyz.querying.parsing;
+package cz.matfyz.querying.core.filter;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
+import cz.matfyz.querying.parsing.ValueNode;
 
-public class Filter extends ParserNode implements Statement {
-
-    @Override public Filter asFilter() {
-        return this;
-    }
-
+public class ConditionFilter extends Filter {
+    
     public final ValueNode lhs;
     public final ComparisonOperator operator;
     public final ValueNode rhs;
     
-    public Filter(ValueNode lhs, ComparisonOperator operator, ValueNode rhs) {
+    public ConditionFilter(ValueNode lhs, ComparisonOperator operator, ValueNode rhs) {
         this.lhs = lhs;
         this.operator = operator;
         this.rhs = rhs;

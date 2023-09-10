@@ -4,7 +4,7 @@ import cz.matfyz.querying.exception.GeneralException;
 
 import java.util.List;
 
-public class SelectClause extends QueryNode {
+public class SelectClause extends ParserNode {
 
     @Override SelectClause asSelectClause() {
         return this;

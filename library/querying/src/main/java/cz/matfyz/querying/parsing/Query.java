@@ -5,7 +5,7 @@ import cz.matfyz.querying.core.Clause.ClauseType;
 
 import java.util.List;
 
-public class Query extends QueryNode {
+public class Query extends ParserNode {
 
     @Override Query asQuery() {
         return this;
