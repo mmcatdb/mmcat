@@ -1,4 +1,4 @@
-package cz.matfyz.wrapperpostgresql;
+package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.Projection;
@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
+public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
 
     // CHECKSTYLE:OFF
     @Override public boolean isJoinSupported() { return true; }
@@ -38,10 +38,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     @Override
     public QueryStatement createDSLStatement() {
-        final QueryStatement select = buildSelect();
-        final String query = select.stringContent() + "\n" + buildFrom() + "\n" + buildWhere();
-
-        return new QueryStatement(query);
+        throw new UnsupportedOperationException();
     }
 
     private QueryStatement buildSelect() {

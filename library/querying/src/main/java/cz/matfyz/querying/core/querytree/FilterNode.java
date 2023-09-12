@@ -7,7 +7,7 @@ public class FilterNode extends QueryNode {
     public final QueryNode child;
     public final Filter filter;
 
-    private FilterNode(QueryNode child, Filter filter) {
+    public FilterNode(QueryNode child, Filter filter) {
         this.child = child;
         this.filter = filter;
 

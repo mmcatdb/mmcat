@@ -1,9 +1,10 @@
 package cz.matfyz.wrapperpostgresql;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.Projection;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
+import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper_old;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.StaticName;
 
@@ -13,15 +14,13 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
+@Deprecated
+public class PostgreSQLQueryWrapper_old extends BaseQueryWrapper_old implements AbstractQueryWrapper_old {
 
     // CHECKSTYLE:OFF
     @Override public boolean isJoinSupported() { return true; }
     @Override public boolean isOptionalJoinSupported() { return true; }
-    @Override public boolean isRecursiveJoinSupported() { return true; }
-    @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean IsFilteringNotIndexedSupported() { return true; }
-    @Override public boolean isAggregationSupported() { return true; }
+    @Override public boolean isNonIdFilterSupported() { return true; }
     // CHECKSTYLE:ON
 
     @Override
@@ -37,11 +36,11 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     @Override
-    public QueryStatement createDSLStatement() {
+    public QueryStatement buildStatement() {
         final QueryStatement select = buildSelect();
         final String query = select.stringContent() + "\n" + buildFrom() + "\n" + buildWhere();
 
-        return new QueryStatement(query);
+        return new QueryStatement(query, select.nameMap());
     }
 
     private QueryStatement buildSelect() {

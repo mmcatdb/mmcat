@@ -1,10 +1,13 @@
 package cz.matfyz.abstractwrappers.utils;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.FilterProperty;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.ConstantFilter;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.Join;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.JoinedProperty;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.Projection;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.ValuesFilter;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.VariablesFilter;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.core.mapping.AccessPath;
@@ -12,23 +15,19 @@ import cz.matfyz.core.mapping.AccessPath;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BaseQueryWrapper {
+@Deprecated
+public abstract class BaseQueryWrapper_old {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseQueryWrapper.class);
 
     protected Map<Kind, String> kinds = new TreeMap<>();
-
-    protected record Projection(Property property, boolean isOptional) {}
-
-    protected List<Projection> projections = new ArrayList<>();
+    protected Map<VariableIdentifier, Projection> projections = new TreeMap<>();
     protected List<ConstantFilter> constantFilters = new ArrayList<>();
     protected List<VariablesFilter> variablesFilters = new ArrayList<>();
     protected List<ValuesFilter> valuesFilters = new ArrayList<>();
@@ -46,7 +45,10 @@ public abstract class BaseQueryWrapper {
         return value;
     }
 
-    // TODO OLD BENEATH
+    public void addProjection(List<AccessPath> propertyPath, Kind kind, VariableIdentifier variableId) {
+        // LOGGER.info("[add projection]\n{}\n{}\n{}", propertyPath, kind, variableId);
+        projections.put(variableId, new Projection(propertyPath, kind, variableId));
+    }
 
     public void addConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant) {
         // LOGGER.info("[add constant filter]\n{}\n{}\n{}", variableId, operator, constant);
@@ -78,24 +80,6 @@ public abstract class BaseQueryWrapper {
         }
 
         joins.add(new Join(lhsKind, joinProperties, rhsKind));
-    }
-
-    // TODO OLD ABOVE
-    
-    public void addProjection(Property property, boolean isOptional) {
-        projections.add(new Projection(property, isOptional));
-    }
-
-    public void addJoin(Property from, Property to, int repetition, boolean isOptional) {
-        
-    }
-
-    public void addFilter(FilterProperty left, FilterProperty right, ComparisonOperator operator) {
-        
-    }
-
-    public void addFilter(FilterProperty left, Constant right, ComparisonOperator operator) {
-        
     }
     
 }

@@ -1,9 +1,10 @@
 package cz.matfyz.wrappermongodb;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.Projection;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
+import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper_old;
 import cz.matfyz.core.mapping.StaticName;
 
 import java.util.ArrayList;
@@ -15,15 +16,13 @@ import java.util.TreeSet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
+@Deprecated
+public class MongoDBQueryWrapper_old extends BaseQueryWrapper_old implements AbstractQueryWrapper_old {
 
     // CHECKSTYLE:OFF
     @Override public boolean isJoinSupported() { return false; }
-    @Override public boolean isOptionalJoinSupported() { return false; }
-    @Override public boolean isRecursiveJoinSupported() { return false; }
-    @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean IsFilteringNotIndexedSupported() { return true; }
-    @Override public boolean isAggregationSupported() { return true; }
+    @Override public boolean isOptionalJoinSupported() { return true; }
+    @Override public boolean isNonIdFilterSupported() { return true; }
     // CHECKSTYLE:ON
 
     @Override
@@ -49,7 +48,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         }
     }
 
-    public QueryStatement createDSLStatement() {
+    public QueryStatement buildStatement() {
         var query = "db.";
         query += baseCollectionName();
         

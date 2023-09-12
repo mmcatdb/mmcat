@@ -2,7 +2,6 @@ package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.PostponedOperation;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.querying.core.JoinCandidate;
@@ -117,12 +116,7 @@ public class QueryTranslator implements QueryVisitor {
     }
 
     private void processJoinCandidate(JoinCandidate candidate) {
-        if (candidate.isRecursive())
-            wrapper.addRecursiveJoinOrPostpone(candidate.from(), candidate.to(), candidate.match(), candidate.recursion());
-        else if (candidate.isOptional())
-            wrapper.addOptionalJoinOrPostpone(candidate.from(), candidate.to(), candidate.match());
-        else
-            wrapper.addJoin(candidate.from(), candidate.to(), candidate.match());
+        wrapper.addJoin(candidate.from(), candidate.to(), candidate.recursion(), candidate.isOptional());
     }
 
     private static enum OperandType {

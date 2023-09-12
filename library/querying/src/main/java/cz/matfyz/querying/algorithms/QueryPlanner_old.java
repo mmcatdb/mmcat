@@ -191,8 +191,9 @@ public class QueryPlanner_old {
                 );
                 if (!anyTriples) {
                     // Note that the variable name will be different for both query parts, but this is not a problem since the morphisms dictate data placement when joining instance categories.
-                    var newTriple = new WhereTriple(intersectionVariable, morphismSignature, Variable.generated());
-                    queryPartKind.queryPart.triplesMapping.add(new TripleKind(newTriple, queryPartKind.kind));
+                    throw new UnsupportedOperationException();
+                    // var newTriple = new WhereTriple(intersectionVariable, morphismSignature, Variable.generated());
+                    // queryPartKind.queryPart.triplesMapping.add(new TripleKind(newTriple, queryPartKind.kind));
                 }
             }
         }

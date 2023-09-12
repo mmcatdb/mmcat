@@ -1,27 +1,44 @@
 package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.category.Signature;
 
 import java.util.List;
-import java.util.Map;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractQueryWrapper {
 
     /**
-     * Defines whether non-optional (inner) joins are supported.
+     * Determines whether non-optional (inner) joins are supported.
      */
     boolean isJoinSupported();
 
     /**
-     * Defines whether optional (left outer) joins are supported.
+     * Determines whether optional (left outer) joins are supported.
      */
     boolean isOptionalJoinSupported();
 
     /**
-     * Defines whether it is possible to filter on properties which are not in an object's ids.
+     * Determines whether recursive queries or their equivalents (e.g., recursive graph traversals) are supported.
      */
-    boolean isNonIdFilterSupported();
+    boolean isRecursiveJoinSupported();
+
+    /**
+     * Determines whether filtering of values of a specific property is supported in general.
+     */
+    boolean isFilteringSupported();
+
+    /**
+     * Determines whether filtering of values of a specific property is supported if the property is not part of the identifier (key) of a specific kind.
+     */
+    boolean IsFilteringNotIndexedSupported();
+
+    /**
+     * Determines whether the aggregation functions are supported.
+     */
+    boolean isAggregationSupported();
+
 
     public static class VariableIdentifier implements Comparable<VariableIdentifier> {
 
@@ -38,37 +55,6 @@ public interface AbstractQueryWrapper {
 
     }
 
-    public static record QueryStatement(
-        String stringContent,
-        Map<VariableIdentifier, List<String>> nameMap
-    ) {}
-
-    /**
-     * Build the native query using this wrapper, returning a tuple `(native_query, variable_name_map)` where `native_query` is the compiled native database query,
-     * and `variable_name_map` maps variable identifiers to final name paths within the native query result.
-     */
-    QueryStatement buildStatement();
-
-    /**
-     * Sets the given kind as a context for all other operations.
-     */
-    void pushKind(Kind kind);
-
-    /**
-     * Returns to the previous context.
-     */
-    void popKind();
-
-    void addProjection(List<AccessPath> propertyPath, Kind kind, VariableIdentifier variableId);
-
-    void addConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant);
-
-    void addVariablesFilter(VariableIdentifier lhsVariableId, ComparisonOperator operator, VariableIdentifier rhsVariableId);
-
-    void addValuesFilter(VariableIdentifier variableId, List<String> constants);
-
-    void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind);
-    
     public enum ComparisonOperator {
         Equal,
         NotEqual,
@@ -78,106 +64,76 @@ public interface AbstractQueryWrapper {
         GreaterOrEqual,
     }
 
-    /**
-     * Base class for all operations which can be stored by the wrapper.
-     */
-    interface Operation {
+    public static record Property(
+        Kind kind,
+        Signature path,
+        @Nullable Signature aggregationRoot
+    ) implements Comparable<Property> {
 
-    }
+        @Override
+        public int compareTo(Property other) {
+            final int kindComparison = kind.compareTo(other.kind);
+            if (kindComparison != 0)
+                return kindComparison;
 
-    /**
-     * Operation corresponding to projection of a property, as defined by graph patterns in MMQL.
-     */
-    public static class Projection implements Operation {
-        public final List<AccessPath> propertyPath;
-        public final Kind kind;
-        public final VariableIdentifier variableId;
-        
-        public Projection(List<AccessPath> propertyPath, Kind kind, VariableIdentifier variableId) {
-            this.propertyPath = propertyPath;
-            this.kind = kind;
-            this.variableId = variableId;
+            final int pathComparison = path.compareTo(other.path);
+            if (pathComparison != 0)
+                return pathComparison;
+
+            if (aggregationRoot == null)
+                return other.aggregationRoot == null ? 0 : -1;
+            
+            return other.aggregationRoot == null ? 1 : aggregationRoot.compareTo(other.aggregationRoot);
         }
-    }
 
-    /**
-     * Operation corresponding to a MMQL `FILTER` statement of the form `FILTER(?var op constant).
-     */
-    public static class ConstantFilter implements Operation {
-        public final VariableIdentifier variableId;
-        public final ComparisonOperator operator;
-        public final String constant;
-
-        public ConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant) {
-            this.variableId = variableId;
-            this.operator = operator;
-            this.constant = constant;
+        public static Property createSimple(Kind kind, Signature path) {
+            return new Property(kind, path, null);
         }
-    }
 
-    /**
-     * Operation corresponding to a MMQL `FILTER` statement of the form `FILTER(?var1 op ?var2)`.
-     */
-    public static class VariablesFilter implements Operation {
-        public final VariableIdentifier lhsVariableId;
-        public final ComparisonOperator operator;
-        public final VariableIdentifier rhsVariableId;
-        
-        public VariablesFilter(VariableIdentifier lhsVariableId, ComparisonOperator operator, VariableIdentifier rhsVariableId) {
-            this.lhsVariableId = lhsVariableId;
-            this.operator = operator;
-            this.rhsVariableId = rhsVariableId;
+        public static Property createAggregation(Kind kind, Signature path, Signature aggregationRoot) {
+            return new Property(kind, path, aggregationRoot);
         }
+
     }
 
-    /**
-     * Operation corresponding to a MMQL `VALUES` statement of the form `VALUES ?var {constant1, constant2}`.
-     */
-    public static class ValuesFilter implements Operation {
-        public final VariableIdentifier variableId;
-        public final List<String> constants;
-
-        public ValuesFilter(VariableIdentifier variableId, List<String> constants) {
-            this.variableId = variableId;
-            this.constants = constants;
-        }
-    }
-
-    // type JoinProperties = List<Tuple<List<AccessPath>, List<AccessPath>>>
-    public static record JoinedProperty(
-        List<AccessPath> lhsList,
-        List<AccessPath> rhsList
+    public static record Constant(
+        List<String> values
     ) {}
 
     /**
-     * Operation corresponding to an inner join between the two specified kinds on the specified properties.
-     * The `join_properties` contains a list of tuples, each of which contains a property path from the left kind, meaning that this property should be inner joined on equality to the corresponding property from the right kind.
+     * Adds a projection to attribute hierarchicalPath which can eventually be optional (isOptional).
      */
-    public static class Join implements Operation {
-        public final String lhsKind;
-        public final List<JoinedProperty> joinProperties;
-        public final String rhsKind;
+    void addProjection(Property property, boolean isOptional);
 
-        public Join(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind) {
-            this.lhsKind = lhsKind;
-            this.joinProperties = joinProperties;
-            this.rhsKind = rhsKind;
-        }
-    }
+    /**
+     * Adds a join (or graph traversal).
+     * @param from Property from which we are joining.
+     * @param to Property to which we are joining.
+     * @param repetition If not 1, the join will be recursive.
+     * @param isOptional If true, the join will be optional.
+     */
+    void addJoin(Property from, Property to, int repetition, boolean isOptional);
 
-    // New stuff
+    /**
+     * Adds a filtering between two variables or aggregations. E.g.:
+     * FILTER(?price > ?minimalPrice),
+     * FILTER(SUM(?price) > ?minimalTotal),
+     * FILTER(?minimalTotal < SUM(?price)),
+     * FILTER(SUM(?price1) < SUM(?price2)).
+     */
+    void addFilter(Property left, Property right, ComparisonOperator operator);
 
-    public static enum PostponedOperation {
-        Filtering,
-        FilteringAggregation,
-    }
+    /**
+     * Adds a filtering between one variables or aggregation and one constant. E.g.:
+     * FILTER(?price > 42),
+     * FILTER(SUM(?price) > 69).
+     */
+    void addFilter(Property left, Constant right, ComparisonOperator operator);
 
-    void addProjection(String path, boolean isOptional);
-    void addFilterOrPostpone(Kind kind1, String path1, Kind kind2, String path2, ComparisonOperator operator, PostponedOperation operation);
-    void addFilterOrPostpone(Kind kind1, String path1, Kind kind2, String path2, ComparisonOperator operator, PostponedOperation operation, Object aggregationRoot1);
-    void addFilterOrPostpone(Kind kind1, String path1, Kind kind2, String path2, ComparisonOperator operator, PostponedOperation operation, Object aggregationRoot1, Object aggregationRoot2);
+    public static record QueryStatement(String stringContent) {}
 
-    void addJoin(Kind from, Kind to, Object match);
-    void addRecursiveJoinOrPostpone(Kind from, Kind to, Object match, int recursion);
-    void addOptionalJoinOrPostpone(Kind from, Kind to, Object match);
+    /**
+     * Builds a DSL statement based on the information obtained by calling the wrapper methods.
+     */
+    QueryStatement createDSLStatement();
 }

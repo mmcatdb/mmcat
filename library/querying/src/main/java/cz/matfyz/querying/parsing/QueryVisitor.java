@@ -2,6 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.querying.exception.GeneralException;
+import cz.matfyz.querying.parsing.Variable.VariableBuilder;
 import cz.matfyz.querying.parsing.WhereClause.Type;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatBaseVisitor;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatParser;
@@ -9,6 +10,7 @@ import cz.matfyz.querying.parsing.antlr4generated.QuerycatParser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -50,11 +52,17 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new WhereClause(Type.Where, pattern, List.of());
     }
 
+    private Stack<VariableBuilder> variableBuilders = new Stack<>();
+
     @Override
     public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
+        variableBuilders.push(new VariableBuilder());
+
         var triples = ctx.triplesBlock().stream().flatMap(tb -> visit(tb).asWhereTriplesList().triples.stream()).toList();
         var filters = ctx.filter_().stream().map(f -> visit(f).asFilter()).toList();
         var values = ctx.graphPatternNotTriples().stream().map(v -> visit(v).asValues()).toList();
+
+        variableBuilders.pop();
         
         return new GroupGraphPattern(triples, filters, values);
     }
@@ -70,7 +78,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
             : moreTriplesNode.accept(this).asWhereTriplesList().triples;
 
         var allTriples = Stream.concat(
-            sameSubjectTriples.stream().flatMap(commonTriple -> WhereTriple.fromCommonTriple(commonTriple).stream()),
+            sameSubjectTriples.stream().flatMap(commonTriple -> WhereTriple.fromCommonTriple(commonTriple, variableBuilders.peek()).stream()),
             moreTriples.stream()
         ).toList();
 
@@ -149,7 +157,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         var variableNameNode = ctx.VAR1() != null ? ctx.VAR1() : ctx.VAR2();
         var variableName = variableNameNode.getSymbol().getText().substring(1);
 
-        return Variable.fromName(variableName);
+        return variableBuilders.peek().fromName(variableName);
     }
 
     @Override

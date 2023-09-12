@@ -2,6 +2,7 @@ package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
@@ -123,7 +124,13 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     }
 
     @Override
-    public AbstractQueryWrapper getQueryWrapper() {
+    @Deprecated
+    public AbstractQueryWrapper_old getQueryWrapper_old() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Neo4jQueryWrapper getQueryWrapper() {
         throw new UnsupportedOperationException();
     }
 

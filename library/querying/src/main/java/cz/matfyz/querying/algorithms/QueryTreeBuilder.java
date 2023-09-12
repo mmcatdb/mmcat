@@ -43,7 +43,7 @@ public class QueryTreeBuilder {
     }
 
     private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
-        final var extracted = new SchemaExtractor(originalSchema, allKinds, clause.pattern.triples).run();
+        final var extracted = SchemaExtractor.run(originalSchema, allKinds, clause.pattern.triples);
         final List<Set<Kind>> plans = QueryPlanner.run(extracted.schema(), extracted.kinds());
         // TODO better selection?
         final Set<Kind> selectedPlan = plans.get(0);

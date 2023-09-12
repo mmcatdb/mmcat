@@ -2,7 +2,8 @@ package cz.matfyz.querying.parsing;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 
-import java.util.UUID;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Variable extends ParserNode implements ValueNode {
 
@@ -21,17 +22,9 @@ public class Variable extends ParserNode implements ValueNode {
     public final String name;
     public final VariableIdentifier id;
     
-    private Variable(String name) {
+    private Variable(String name, VariableIdentifier id) {
         this.name = name;
         this.id = new VariableIdentifier(name);
-    }
-
-    public static Variable fromName(String name) {
-        return new Variable(name);
-    }
-
-    public static Variable generated() {
-        return new Variable(UUID.randomUUID().toString());
     }
 
     @Override
@@ -42,6 +35,32 @@ public class Variable extends ParserNode implements ValueNode {
     @Override
     public String toString() {
         return this.name;
+    }
+
+    public static class VariableBuilder {
+
+        private int lastIdentifier = 0;
+        private Map<String, VariableIdentifier> nameToIdentifier = new TreeMap<>();
+        
+        private VariableIdentifier generateIdentifier() {
+            return new VariableIdentifier("" + lastIdentifier++);
+        }
+
+        public Variable fromName(String name) {
+            final var identifier = nameToIdentifier.computeIfAbsent(name, x -> generateIdentifier());
+            return new Variable(name, identifier);
+        }
+
+        private int lastGeneratedNameId = 0;
+
+        private String generateName() {
+            return "#var" + lastGeneratedNameId++;
+        }
+
+        public Variable generated() {
+            return new Variable(generateName(), generateIdentifier());
+        }
+
     }
 
 }

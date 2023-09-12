@@ -1,7 +1,7 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinedProperty;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.JoinedProperty;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -22,6 +22,7 @@ import java.util.Map;
 /**
  * Query engine class which is responsible for the translation of query parts into native queries, and the subsequent execution of those query parts.
  */
+@Deprecated
 public class QueryEngine {
 
     private final SchemaCategory schemaCategory;
@@ -49,7 +50,7 @@ public class QueryEngine {
         var kindsInPart = Utils.getKindsFromPart(part);
         // There is one common wrapper for all kinds in the part.
         var controlWrapper = kindsInPart.get(0).database.control;
-        var queryWrapper = controlWrapper.getQueryWrapper();
+        var queryWrapper = controlWrapper.getQueryWrapper_old();
 
         // for (var kind : kindsInPart)
         //     queryWrapper.defineKind(kind, kind.mapping.kindName());
@@ -65,7 +66,7 @@ public class QueryEngine {
         part.compiled = new QueryPartCompiled(statement.stringContent(), mapping, controlWrapper);
     }
 
-    private void processProjectionTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, MappingBuilder mappingBuilder, AbstractQueryWrapper queryWrapper) {
+    private void processProjectionTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, MappingBuilder mappingBuilder, AbstractQueryWrapper_old queryWrapper) {
         for (var tripleKind : part.triplesMapping) {
             var object = tripleKind.triple.object;
 
@@ -89,7 +90,7 @@ public class QueryEngine {
         }
     }
 
-    private void processJoinTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, AbstractQueryWrapper queryWrapper) {
+    private void processJoinTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, AbstractQueryWrapper_old queryWrapper) {
         for (var tripleKindA : part.triplesMapping) {
             for (var tripleKindB : part.triplesMapping) {
                 if (!tripleKindA.triple.object.equals(tripleKindB.triple.subject) && !tripleKindA.triple.subject.equals(tripleKindB.triple.subject))
@@ -128,7 +129,7 @@ public class QueryEngine {
         }
     }
 
-    private void processFilters(QueryPart_old part, AbstractQueryWrapper queryWrapper) {
+    private void processFilters(QueryPart_old part, AbstractQueryWrapper_old queryWrapper) {
         var filters = part.statements.stream().filter(Filter.class::isInstance).map(f -> (Filter) f).toList();
 
         for (var filter : filters) {
@@ -152,7 +153,7 @@ public class QueryEngine {
         }
     }
 
-    private void processValues(QueryPart_old part, AbstractQueryWrapper queryWrapper) {
+    private void processValues(QueryPart_old part, AbstractQueryWrapper_old queryWrapper) {
         var valuesFilters = part.statements.stream().filter(Values.class::isInstance).map(v -> (Values) v).toList();
         for (var values : valuesFilters) {
             queryWrapper.addValuesFilter(

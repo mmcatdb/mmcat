@@ -5,6 +5,7 @@ import cz.matfyz.querying.parsing.Statement;
 
 import java.util.List;
 
+@Deprecated
 public class QueryPlan {
 
     public final Query query;

@@ -127,6 +127,12 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     }
 
     @Override
+    @Deprecated
+    public PostgreSQLQueryWrapper_old getQueryWrapper_old() {
+        return new PostgreSQLQueryWrapper_old();
+    }
+
+    @Override
     public PostgreSQLQueryWrapper getQueryWrapper() {
         return new PostgreSQLQueryWrapper();
     }
