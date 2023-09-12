@@ -13,4 +13,9 @@ public class OptionalNode extends QueryNode {
         optionalChild.setParent(this);
     }
 
+    @Override
+    public void accept(QueryVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

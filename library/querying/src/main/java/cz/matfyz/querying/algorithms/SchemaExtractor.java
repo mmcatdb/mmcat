@@ -15,13 +15,13 @@ import java.util.Queue;
 /**
  * This class extract a subset of schema category based on the query pattern. It also modifies mappings by discarding unnecessary objects.
  */
-public class QueryExtractor {
+public class SchemaExtractor {
 
     private final SchemaCategory schema;
     private final List<Kind> kinds;
     private final List<WhereTriple> pattern;
 
-    public QueryExtractor(SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
+    public SchemaExtractor(SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
         this.schema = schema;
         this.kinds = kinds;
         this.pattern = pattern;

@@ -2,22 +2,30 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class WhereClause extends ParserNode {
 
     @Override WhereClause asWhereClause() {
         return this;
     }
 
-    public final List<WhereTriple> triples;
-    public final List<Variable> variables;
-    public final List<Filter> filters;
-    public final List<Values> values;
-    
-    public WhereClause(List<WhereTriple> triples, List<Variable> variables, List<Filter> filters, List<Values> values) {
-        this.triples = triples;
-        this.variables = variables;
-        this.filters = filters;
-        this.values = values;
+    public static enum Type {
+        Where,
+        Optional,
+        Minus,
+        Union,
+    }
+
+    public final Type type;
+    @Nullable
+    public final GroupGraphPattern pattern;
+    public final List<WhereClause> nestedClauses;
+
+    public WhereClause(Type type, GroupGraphPattern pattern, List<WhereClause> nestedClauses) {
+        this.type = type;
+        this.pattern = pattern;
+        this.nestedClauses = nestedClauses;
     }
     
 }

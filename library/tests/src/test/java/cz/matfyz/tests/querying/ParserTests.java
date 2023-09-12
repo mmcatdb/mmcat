@@ -25,7 +25,7 @@ public class ParserTests {
     public void parserTest(String queryString) {
         LOGGER.info("Parsing query:\n{}", queryString);
         Assertions.assertDoesNotThrow(() -> {
-            Query query = QueryParser.parse(queryString);
+            Query query = QueryParser.run(queryString);
             LOGGER.info("Parsed result:\n{}", query);
         });
     }

@@ -13,4 +13,9 @@ public class MinusNode extends QueryNode {
         minusChild.setParent(this);
     }
 
+    @Override
+    public void accept(QueryVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

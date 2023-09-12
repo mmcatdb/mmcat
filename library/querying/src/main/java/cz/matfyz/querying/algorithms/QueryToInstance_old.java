@@ -39,7 +39,7 @@ public class QueryToInstance_old {
     ) {}
 
     public Result algorithm() {
-        final Query query = QueryParser.parse(queryString);
+        final Query query = QueryParser.run(queryString);
         
         final var planner = new QueryPlanner_old(schema, kinds);
         final List<QueryPlan> queryPlans = planner.createPlans(query);
@@ -55,14 +55,14 @@ public class QueryToInstance_old {
         // TODO
         // engine.runDeferredStatements();
 
-        final List<String> jsonResults = createJsonResults(bestPlan, whereInstance);
+        final List<String> jsonResults = createJsonResults(query, whereInstance);
 
         return new Result(whereInstance, bestPlan, jsonResults);
     }
 
-    private List<String> createJsonResults(QueryPlan bestPlan, InstanceCategory whereInstance) {
+    private List<String> createJsonResults(Query query, InstanceCategory whereInstance) {
         final var projector = new QueryMappingProjector();
-        final var projectionMapping = projector.project(bestPlan, whereInstance);
+        final var projectionMapping = projector.project(query, whereInstance);
 
         final var dmlTransformation = new DMLAlgorithm();
         dmlTransformation.input(projectionMapping, whereInstance, new JsonDMLWrapper());

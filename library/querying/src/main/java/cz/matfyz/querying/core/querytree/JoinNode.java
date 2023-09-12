@@ -12,9 +12,14 @@ public class JoinNode extends QueryNode {
         this.fromChild = fromChild;
         this.toChild = toChild;
         this.candidate = candidate;
-        
+
         fromChild.setParent(this);
         toChild.setParent(this);
+    }
+
+    @Override
+    public void accept(QueryVisitor visitor) {
+        visitor.visit(this);
     }
 
 }

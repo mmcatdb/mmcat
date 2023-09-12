@@ -2,6 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.querying.exception.GeneralException;
+import cz.matfyz.querying.parsing.WhereClause.Type;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatBaseVisitor;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatParser;
 
@@ -41,9 +42,12 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     @Override
     public WhereClause visitWhereClause(QuerycatParser.WhereClauseContext ctx) {
-        var pattern = visitGroupGraphPattern(ctx.groupGraphPattern());
+        // TODO if the pattern is null (or empty? - basically just nested UNION), use the first group's pattern instead.
+        // The antlr file probably needs an update tho ...
+        final var pattern = visitGroupGraphPattern(ctx.groupGraphPattern());
 
-        return new WhereClause(pattern.triples, List.of(), pattern.filters, pattern.values);
+        // TODO nested clauses
+        return new WhereClause(Type.Where, pattern, List.of());
     }
 
     @Override

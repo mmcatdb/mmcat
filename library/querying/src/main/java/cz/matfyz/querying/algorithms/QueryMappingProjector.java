@@ -13,9 +13,9 @@ import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaGraph;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.core.QueryPlan;
 import cz.matfyz.querying.core.Utils;
 import cz.matfyz.querying.exception.ProjectionException;
+import cz.matfyz.querying.parsing.Query;
 import cz.matfyz.querying.parsing.SelectTriple;
 import cz.matfyz.querying.parsing.StringValue;
 import cz.matfyz.querying.parsing.Variable;
@@ -29,17 +29,17 @@ import java.util.Set;
  */
 public class QueryMappingProjector {
 
-    private QueryPlan plan;
+    private Query query;
     private InstanceCategory whereInstance;
     private Map<String, SchemaObject> variableTypes;
 
     /**
-     * Given a query plan `plan` and the instance category `whereInstance` containing the results of the `WHERE` clause, perform projection to the final MMQL query result instance category.
+     * Given a query `query` and the instance category `whereInstance` containing the results of the `WHERE` clause, perform projection to the final MMQL query result instance category.
      */
-    public Mapping project(QueryPlan plan, InstanceCategory whereInstance) {
-        this.plan = plan;
+    public Mapping project(Query query, InstanceCategory whereInstance) {
+        this.query = query;
         this.whereInstance = whereInstance;
-        this.variableTypes = Utils.getVariableTypesFromQuery(plan.query, whereInstance.schema);
+        this.variableTypes = Utils.getVariableTypesFromQuery(query, whereInstance.schema);
 
         return createMapping();
     }
@@ -53,7 +53,7 @@ public class QueryMappingProjector {
      */
     private Mapping createMapping() {
         signatureGenerator = new Signature.Generator(whereInstance.schema.allMorphisms().stream().map(m -> m.signature()).toList());
-        final var selectMorphisms = plan.query.select.triples.stream().map(this::createSelectMorphism).toList();
+        final var selectMorphisms = query.select.triples.stream().map(this::createSelectMorphism).toList();
         selectGraph = new SchemaGraph(selectMorphisms); // Proxy morphisms representing the select triples.
         if (!selectGraph.findIsDirectedTrees())
             throw ProjectionException.notTree();
@@ -62,7 +62,7 @@ public class QueryMappingProjector {
         if (selectRoots.size() != 1)
             throw ProjectionException.notSingleRoot(selectRoots);
 
-        final var whereMorphisms = plan.query.where.triples.stream()
+        final var whereMorphisms = query.where.pattern.triples.stream()
             .map(triple -> triple.signature) // All signatures that appeared in the where clause
             .map(whereInstance.schema::getEdge) // Corresponding schema edges
             .map(SchemaEdge::morphism)

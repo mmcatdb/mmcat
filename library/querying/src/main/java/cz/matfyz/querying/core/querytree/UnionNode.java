@@ -12,4 +12,9 @@ public class UnionNode extends QueryNode {
         children.forEach(c -> setParent(this));
     }
 
+    @Override
+    public void accept(QueryVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

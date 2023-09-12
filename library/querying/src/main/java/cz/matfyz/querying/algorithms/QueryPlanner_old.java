@@ -46,7 +46,7 @@ public class QueryPlanner_old {
         
         final var tripleKindsAssignments = new ArrayList<List<TripleKind>>();
 
-        for (final WhereTriple triple : query.where.triples) {
+        for (final WhereTriple triple : query.where.pattern.triples) {
             final var selectedKinds = allKinds.stream().filter(k ->
                 Utils.getPropertyPath(k.mapping, triple.signature) != null && usedSchemaObjectKeys.contains(k.mapping.rootObject().key())
             ).toList();
@@ -206,7 +206,7 @@ public class QueryPlanner_old {
      */
     private void assignStatementsToParts(Query query, List<QueryPart_old> parts) {
         for (var part : parts) {
-            for (var filter : query.where.filters) {
+            for (var filter : query.where.pattern.filters) {
                 for (var tripleKind : part.triplesMapping) {
                     // Whenever we implement deferred statements, we will need to check whether a potential rhs variable/aggregation is in the same query part.
                     if (filter.lhs instanceof Variable variable && variable.equals(tripleKind.triple.object))
@@ -214,7 +214,7 @@ public class QueryPlanner_old {
                 }
             }
 
-            for (var values : query.where.values)
+            for (var values : query.where.pattern.values)
                 for (var tripleKind : part.triplesMapping)
                     if (values.variable.equals(tripleKind.triple.object))
                         part.statements.add(values);

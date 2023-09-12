@@ -2,7 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-class GroupGraphPattern extends ParserNode {
+public class GroupGraphPattern extends ParserNode {
 
     @Override GroupGraphPattern asGroupGraphPattern() {
         return this;

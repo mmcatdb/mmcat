@@ -25,7 +25,7 @@ public abstract class Utils {
      * Get the set of variables from the query, along with the corresponding schema object for each variable.
      */
     public static Map<String, SchemaObject> getVariableTypesFromQuery(Query query, SchemaCategory schemaCategory) {
-        return getVariableTypes(query.where.triples, schemaCategory);
+        return getVariableTypes(query.where.pattern.triples, schemaCategory);
     }
 
     /**

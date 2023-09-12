@@ -20,15 +20,19 @@ import java.util.TreeSet;
  */
 public class QueryPlanner {
 
+    public static List<Set<Kind>> run(SchemaCategory schema, List<Kind> allKinds) {
+        return new QueryPlanner(schema, allKinds).run();
+    }
+    
     private final SchemaCategory schema;
     private final List<Kind> allKinds;
 
-    public QueryPlanner(SchemaCategory schema, List<Kind> allKinds) {
+    private QueryPlanner(SchemaCategory schema, List<Kind> allKinds) {
         this.schema = schema;
         this.allKinds = allKinds;
     }
 
-    public List<Set<Kind>> run() {
+    private List<Set<Kind>> run() {
         createQueryPlans();
 
         return plans;

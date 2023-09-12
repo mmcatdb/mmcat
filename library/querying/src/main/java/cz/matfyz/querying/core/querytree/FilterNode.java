@@ -14,4 +14,9 @@ public class FilterNode extends QueryNode {
         child.setParent(this);
     }
 
+    @Override
+    public void accept(QueryVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

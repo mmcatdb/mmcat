@@ -24,4 +24,9 @@ public class PatternNode extends QueryNode {
         this.joinCandidates = joinCandidates;
     }
 
+    @Override
+    public void accept(QueryVisitor visitor) {
+        visitor.visit(this);
+    }
+
 }

@@ -3,10 +3,21 @@ package cz.matfyz.querying.algorithms;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.PostponedOperation;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.KindTree;
-import cz.matfyz.querying.core.QueryPart;
+import cz.matfyz.querying.core.filter.ConditionFilter;
+import cz.matfyz.querying.core.filter.ValueFilter;
+import cz.matfyz.querying.core.querytree.DatabaseNode;
+import cz.matfyz.querying.core.querytree.FilterNode;
+import cz.matfyz.querying.core.querytree.JoinNode;
+import cz.matfyz.querying.core.querytree.MinusNode;
+import cz.matfyz.querying.core.querytree.OptionalNode;
+import cz.matfyz.querying.core.querytree.PatternNode;
+import cz.matfyz.querying.core.querytree.QueryVisitor;
+import cz.matfyz.querying.core.querytree.UnionNode;
+import cz.matfyz.querying.exception.QueryTreeException;
 import cz.matfyz.querying.parsing.StringValue;
 import cz.matfyz.querying.parsing.ValueNode;
 import cz.matfyz.querying.parsing.WhereTriple;
@@ -14,26 +25,59 @@ import cz.matfyz.querying.parsing.WhereTriple;
 import java.util.Stack;
 
 /**
- * This class translates a query part to a query for a specific database.
+ * This class translates a query tree to a query for a specific database.
+ * The provided tree has to have `database`, meaning it can be fully resolved withing the given database system.
  */
-public class QueryPartTranslator {
+public class QueryTranslator implements QueryVisitor {
 
     private static final String PATH_SEPARATOR = "/";
 
-    private final QueryPart queryPart;
-    private final AbstractQueryWrapper wrapper;
+    private final DatabaseNode databaseNode;
+    private AbstractQueryWrapper wrapper;
 
-    public QueryPartTranslator(QueryPart queryPart) {
-        this.queryPart = queryPart;
-        this.wrapper = queryPart.database().control.getQueryWrapper();
+    public QueryTranslator(DatabaseNode databaseNode) {
+        this.databaseNode = databaseNode;
     }
 
-    public void run() {
-        queryPart.kinds().forEach(this::processKind);
-        queryPart.joinCandidates().forEach(this::processJoinCandidate);
-        // TODO
-        // queryPart.valueStatements().forEach(this::processValueStatement);
-        // queryPart.filterStatements().forEach(this::processFilterStatement);
+    public QueryStatement run() {
+        this.wrapper = databaseNode.database.control.getQueryWrapper();
+        databaseNode.child.accept(this);
+
+        return this.wrapper.buildStatement();
+    }
+
+    public void visit(DatabaseNode node) {
+        throw QueryTreeException.multipleDatabases(databaseNode.database, node.database);
+    }
+
+    public void visit(PatternNode node) {
+        node.kinds.forEach(this::processKind);
+        node.joinCandidates.forEach(this::processJoinCandidate);
+    }
+
+    public void visit(FilterNode node) {
+        if (node.filter instanceof ValueFilter valueFilter) {
+            // TODO
+        }
+        else if (node.filter instanceof ConditionFilter conditionFilter) {
+            // TODO
+        }
+    }
+
+    public void visit(JoinNode node) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void visit(MinusNode node) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void visit(OptionalNode node) {
+        throw new UnsupportedOperationException();
+    }
+
+    public void visit(UnionNode node) {
+        throw new UnsupportedOperationException();
     }
 
     private static record StackItem(WhereTriple triple, String path) {}
@@ -79,14 +123,6 @@ public class QueryPartTranslator {
             wrapper.addOptionalJoinOrPostpone(candidate.from(), candidate.to(), candidate.match());
         else
             wrapper.addJoin(candidate.from(), candidate.to(), candidate.match());
-    }
-
-    private void processValueStatement(Object value) {
-
-    }
-
-    private void processFilterStatement(Object filter) {
-
     }
 
     private static enum OperandType {

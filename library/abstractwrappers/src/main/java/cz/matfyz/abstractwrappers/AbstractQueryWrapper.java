@@ -38,7 +38,7 @@ public interface AbstractQueryWrapper {
 
     }
 
-    static record QueryStatement(
+    public static record QueryStatement(
         String stringContent,
         Map<VariableIdentifier, List<String>> nameMap
     ) {}

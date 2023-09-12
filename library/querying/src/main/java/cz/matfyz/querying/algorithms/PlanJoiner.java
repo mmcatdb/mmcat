@@ -11,8 +11,8 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
-import cz.matfyz.querying.core.Pattern;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
+import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -33,20 +33,24 @@ import java.util.stream.Stream;
  */
 public class PlanJoiner {
 
-    private final Pattern pattern;
-    // private final Clause rootClause;
+    public static QueryNode run(Set<Kind> allKinds, SchemaCategory schema) {
+        return new PlanJoiner(allKinds, schema).run();
+    }
 
-    public PlanJoiner(Pattern pattern) {
-        this.pattern = pattern;
+    private final Set<Kind> allKinds;
+    private final SchemaCategory schema;
+
+    private PlanJoiner(Set<Kind> allKinds, SchemaCategory schema) {
+        this.allKinds = allKinds;
+        this.schema = schema;
     }
     
-    public QueryNode run() {
-        if (pattern.kinds.size() == 1) {
-            final var patternNode = new PatternNode(pattern.kinds, pattern.schema, List.of());
-            final var database = pattern.kinds.stream().findFirst().get().database;
-            patternNode.setDatabase(database);
+    private QueryNode run() {
+        if (allKinds.size() == 1) {
+            final var patternNode = new PatternNode(allKinds, schema, List.of());
+            final var database = allKinds.stream().findFirst().get().database;
 
-            return patternNode;
+            return new DatabaseNode(patternNode, database);
         }
         
         // TODO there might be some joining needed for OPTIONAL joins?
@@ -55,7 +59,7 @@ public class PlanJoiner {
         // TODO ignoring OPTIONAL and MINUS for now ...
         
         
-        final Coloring coloring = Coloring.create(pattern.schema, pattern.kinds);
+        final Coloring coloring = Coloring.create(schema, allKinds);
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
         final List<JoinGroup> filteredGroups = filterJoinGroups(candidateGroups);
@@ -113,7 +117,7 @@ public class PlanJoiner {
         if (firstId.signatures().size() != 1)
             return null;
         
-        final SchemaObject rootIdObject = coloring.schema.getEdge(firstId.signatures().first().getLast()).to();
+        final SchemaObject rootIdObject = schema.getEdge(firstId.signatures().first().getLast()).to();
         if (!idObject.equals(rootIdObject))
             return null;
 
@@ -256,15 +260,14 @@ public class PlanJoiner {
             return queryPart.kinds;
         }
 
-        public PatternNode toQueryNode(SchemaCategory schema) {
+        public DatabaseNode toQueryNode(SchemaCategory schema) {
             // TODO schema
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
             final var patternNode = new PatternNode(queryPart.kinds, schema, queryPart.joinCandidates);
             final var database = queryPart.kinds.stream().findFirst().get().database;
-            patternNode.setDatabase(database);
 
-            return patternNode;
+            return new DatabaseNode(patternNode, database);
         }
     }
 
@@ -276,7 +279,7 @@ public class PlanJoiner {
     private QueryNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates) {
         final JoinTreeNode joinTree = computeJoinTree(queryParts, candidates);
         // The schema category is not splitted - it stays as is for all sub-patterns
-        return joinTree.toQueryNode(pattern.schema);
+        return joinTree.toQueryNode(schema);
     }
 
     private JoinTreeNode computeJoinTree(List<QueryPart> queryParts, List<JoinCandidate> candidates) {
@@ -317,7 +320,7 @@ public class PlanJoiner {
 
     private static class Coloring {
 
-        public final SchemaCategory schema;
+        private final SchemaCategory schema;
         private final Map<Key, Set<Kind>> objectColors;
         private final Map<Signature, Set<Kind>> morphismColors;
 
