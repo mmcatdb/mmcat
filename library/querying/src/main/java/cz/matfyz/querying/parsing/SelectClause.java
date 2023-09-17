@@ -4,16 +4,12 @@ import cz.matfyz.querying.exception.GeneralException;
 
 import java.util.List;
 
-public class SelectClause extends ParserNode {
-
-    @Override SelectClause asSelectClause() {
-        return this;
-    }
+public class SelectClause implements ParserNode {
 
     public final List<SelectTriple> triples;
     public final List<Variable> variables;
     
-    public SelectClause(List<SelectTriple> triples, List<Variable> variables) {
+    SelectClause(List<SelectTriple> triples, List<Variable> variables) {
         this.triples = triples;
         this.variables = variables;
     }

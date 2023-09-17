@@ -4,62 +4,49 @@ import cz.matfyz.querying.exception.ParsingException;
 
 import java.io.Serializable;
 
-public abstract class ParserNode implements Serializable {
+public interface ParserNode extends Serializable {
 
-    Query asQuery() {
-        throw ParsingException.wrongNode(Query.class, this);
-    }
-
-    SelectClause asSelectClause() {
-        throw ParsingException.wrongNode(SelectClause.class, this);
-    }
-
-    GroupGraphPattern asGroupGraphPattern() {
-        throw ParsingException.wrongNode(GroupGraphPattern.class, this);
-    }
-
-    WhereClause asWhereClause() {
-        throw ParsingException.wrongNode(WhereClause.class, this);
-    }
-
-    Filter asFilter() {
+    default Filter asFilter() {
         throw ParsingException.wrongNode(Filter.class, this);
     }
 
-    Variable asVariable() {
-        throw ParsingException.wrongNode(Variable.class, this);
+    default Term asTerm() {
+        throw ParsingException.wrongNode(Term.class, this);
     }
 
-    CommonTriplesList asCommonTriplesList() {
-        throw ParsingException.wrongNode(CommonTriplesList.class, this);
+    public interface Filter extends ParserNode {
+
+        default ConditionFilter asConditionFilter() {
+            throw ParsingException.wrongNode(ConditionFilter.class, this);
+        }
+
+        default ValueFilter asValueFilter() {
+            throw ParsingException.wrongNode(ValueFilter.class, this);
+        }
+
     }
 
-    SelectTriplesList asSelectTriplesList() {
-        throw ParsingException.wrongNode(SelectTriplesList.class, this);
-    }
+    /**
+     * This interface represents either a variable (?variable), a literal ("literal") or an aggregation (SUM(?variable)).
+     */
+    public interface Term extends ParserNode {
 
-    WhereTriplesList asWhereTriplesList() {
-        throw ParsingException.wrongNode(WhereTriplesList.class, this);
-    }
+        @Override default Term asTerm() {
+            return this;
+        }
 
-    Values asValues() {
-        throw ParsingException.wrongNode(Values.class, this);
-    }
+        default StringValue asStringValue() {
+            throw ParsingException.wrongNode(StringValue.class, this);
+        }
 
-    MorphismsList asMorphisms() {
-        throw ParsingException.wrongNode(MorphismsList.class, this);
-    }
+        default Variable asVariable() {
+            throw ParsingException.wrongNode(Variable.class, this);
+        }
 
-    ObjectsList asObjectsList() {
-        throw ParsingException.wrongNode(ObjectsList.class, this);
-    }
+        default Aggregation asAggregation() {
+            throw ParsingException.wrongNode(Aggregation.class, this);
+        }
 
-    StringValue asStringValue() {
-        throw ParsingException.wrongNode(StringValue.class, this);
-    }
-
-    ValueNode asValueNode() {
-        throw ParsingException.wrongNode(ValueNode.class, this);
     }
 
 }

@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core.querytree;
 
-import cz.matfyz.querying.core.filter.Filter;
+import cz.matfyz.querying.parsing.ParserNode.Filter;
 
 public class FilterNode extends QueryNode {
 

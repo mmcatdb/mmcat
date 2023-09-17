@@ -4,11 +4,7 @@ import java.util.List;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class WhereClause extends ParserNode {
-
-    @Override WhereClause asWhereClause() {
-        return this;
-    }
+public class WhereClause implements ParserNode {
 
     public static enum Type {
         Where,
@@ -22,7 +18,7 @@ public class WhereClause extends ParserNode {
     public final GroupGraphPattern pattern;
     public final List<WhereClause> nestedClauses;
 
-    public WhereClause(Type type, GroupGraphPattern pattern, List<WhereClause> nestedClauses) {
+    WhereClause(Type type, GroupGraphPattern pattern, List<WhereClause> nestedClauses) {
         this.type = type;
         this.pattern = pattern;
         this.nestedClauses = nestedClauses;

@@ -1,15 +1,11 @@
 package cz.matfyz.querying.parsing;
 
-public class Query extends ParserNode {
-
-    @Override Query asQuery() {
-        return this;
-    }
+public class Query implements ParserNode {
 
     public final SelectClause select;
     public final WhereClause where;
 
-    public Query(SelectClause select, WhereClause where) {
+    Query(SelectClause select, WhereClause where) {
         this.select = select;
         this.where = where;
     }

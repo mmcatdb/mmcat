@@ -2,12 +2,11 @@ package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.MinusNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.RootNode;
 import cz.matfyz.querying.exception.QueryTreeException;
-import cz.matfyz.querying.parsing.Filter;
-import cz.matfyz.querying.parsing.Values;
 import cz.matfyz.querying.parsing.WhereClause;
 
 import java.util.List;
@@ -50,11 +49,11 @@ public class QueryTreeBuilder {
 
         QueryNode currentNode = PlanJoiner.run(selectedPlan, extracted.schema());
 
-        for (final var filter : clause.pattern.filters)
-            currentNode = processFilter(filter, currentNode);
+        for (final var filter : clause.pattern.conditionFilters)
+            currentNode = new FilterNode(childNode, filter);
 
-        for (final var values : clause.pattern.values)
-            currentNode = processValues(values, currentNode);
+        for (final var values : clause.pattern.valueFilters)
+            currentNode = new FilterNode(childNode, values);
         
         for (final var nestedClause : clause.nestedClauses)
             currentNode = processClause(nestedClause, currentNode);
@@ -65,14 +64,6 @@ public class QueryTreeBuilder {
             case Optional -> new MinusNode(childNode, currentNode);
             case Union -> new MinusNode(childNode, currentNode);
         };
-    }
-
-    private QueryNode processFilter(Filter filter, QueryNode childNode) {
-
-    }
-
-    private QueryNode processValues(Values values, QueryNode childNode) {
-        
     }
 
 }

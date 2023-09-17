@@ -1,22 +1,15 @@
 package cz.matfyz.querying.parsing;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
+import cz.matfyz.querying.parsing.ParserNode.Term;
 
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Variable extends ParserNode implements ValueNode {
+public class Variable implements Term {
 
-    @Override Variable asVariable() {
+    @Override public Variable asVariable() {
         return this;
-    }
-
-    @Override ValueNode asValueNode() {
-        return this;
-    }
-
-    @Override public String name() {
-        return name;
     }
 
     public final String name;
@@ -34,10 +27,10 @@ public class Variable extends ParserNode implements ValueNode {
 
     @Override
     public String toString() {
-        return this.name;
+        return "?" + name;
     }
 
-    public static class VariableBuilder {
+    static class VariableBuilder {
 
         private int lastIdentifier = 0;
         private Map<String, VariableIdentifier> nameToIdentifier = new TreeMap<>();

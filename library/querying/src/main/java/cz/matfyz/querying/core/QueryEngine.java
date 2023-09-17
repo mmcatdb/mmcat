@@ -9,9 +9,9 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.InvalidPlanException;
-import cz.matfyz.querying.parsing.Filter;
+import cz.matfyz.querying.parsing.ConditionFilter;
 import cz.matfyz.querying.parsing.StringValue;
-import cz.matfyz.querying.parsing.Values;
+import cz.matfyz.querying.parsing.ValueFilter;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 
@@ -130,7 +130,7 @@ public class QueryEngine {
     }
 
     private void processFilters(QueryPart_old part, AbstractQueryWrapper_old queryWrapper) {
-        var filters = part.statements.stream().filter(Filter.class::isInstance).map(f -> (Filter) f).toList();
+        var filters = part.statements.stream().filter(ConditionFilter.class::isInstance).map(f -> (ConditionFilter) f).toList();
 
         for (var filter : filters) {
             if (!(filter.lhs instanceof Variable lhsVariable))
@@ -154,7 +154,7 @@ public class QueryEngine {
     }
 
     private void processValues(QueryPart_old part, AbstractQueryWrapper_old queryWrapper) {
-        var valuesFilters = part.statements.stream().filter(Values.class::isInstance).map(v -> (Values) v).toList();
+        var valuesFilters = part.statements.stream().filter(ValueFilter.class::isInstance).map(v -> (ValueFilter) v).toList();
         for (var values : valuesFilters) {
             queryWrapper.addValuesFilter(
                 values.variable.id,

@@ -207,7 +207,7 @@ public class QueryPlanner_old {
      */
     private void assignStatementsToParts(Query query, List<QueryPart_old> parts) {
         for (var part : parts) {
-            for (var filter : query.where.pattern.filters) {
+            for (var filter : query.where.pattern.conditionFilters) {
                 for (var tripleKind : part.triplesMapping) {
                     // Whenever we implement deferred statements, we will need to check whether a potential rhs variable/aggregation is in the same query part.
                     if (filter.lhs instanceof Variable variable && variable.equals(tripleKind.triple.object))
@@ -215,7 +215,7 @@ public class QueryPlanner_old {
                 }
             }
 
-            for (var values : query.where.pattern.values)
+            for (var values : query.where.pattern.valueFilters)
                 for (var tripleKind : part.triplesMapping)
                     if (values.variable.equals(tripleKind.triple.object))
                         part.statements.add(values);

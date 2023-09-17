@@ -2,7 +2,6 @@ package cz.matfyz.abstractwrappers.utils;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.FilterProperty;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 import cz.matfyz.abstractwrappers.database.Kind;

@@ -1,8 +1,8 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.querying.parsing.ValueNode;
 import cz.matfyz.querying.parsing.WhereTriple;
+import cz.matfyz.querying.parsing.ParserNode.Term;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public class KindTree {
         throw new UnsupportedOperationException();
     }
 
-    public List<WhereTriple> getOutgoingTriples(ValueNode object) {
+    public List<WhereTriple> getOutgoingTriples(Term object) {
         throw new UnsupportedOperationException();
     }
 

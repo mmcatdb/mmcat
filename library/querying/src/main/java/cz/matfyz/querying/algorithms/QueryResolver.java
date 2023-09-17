@@ -3,8 +3,6 @@ package cz.matfyz.querying.algorithms;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.instance.InstanceCategory;
-import cz.matfyz.querying.core.filter.ConditionFilter;
-import cz.matfyz.querying.core.filter.ValueFilter;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
@@ -15,6 +13,8 @@ import cz.matfyz.querying.core.querytree.RootNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.exception.QueryTreeException;
+import cz.matfyz.querying.parsing.ConditionFilter;
+import cz.matfyz.querying.parsing.ValueFilter;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 
 /**
@@ -56,10 +56,10 @@ public class QueryResolver implements QueryVisitor {
     }
 
     public void visit(FilterNode node) {
-        if (node.filter instanceof ValueFilter valueFilter) {
+        if (node.filter instanceof ConditionFilter conditionFilter) {
             // TODO
         }
-        else if (node.filter instanceof ConditionFilter conditionFilter) {
+        else if (node.filter instanceof ValueFilter valueFilter) {
             // TODO
         }
     }

@@ -5,8 +5,6 @@ import cz.matfyz.core.category.Signature;
 
 import java.util.List;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 public interface AbstractQueryWrapper {
 
     /**
@@ -64,36 +62,36 @@ public interface AbstractQueryWrapper {
         GreaterOrEqual,
     }
 
-    public static record Property(
-        Kind kind,
-        Signature path,
-        @Nullable Signature aggregationRoot
-    ) implements Comparable<Property> {
+    public enum AggregationOperator {
+        Count,
+        Sum,
+        Min,
+        Max,
+        Average,
+    }
 
-        @Override
-        public int compareTo(Property other) {
-            final int kindComparison = kind.compareTo(other.kind);
-            if (kindComparison != 0)
-                return kindComparison;
+    /**
+     * This class represents a queryable property. It's defined by the kind and a path from its root.
+     */
+    public static class Property {
+        public final Kind kind;
+        public final Signature path;
 
-            final int pathComparison = path.compareTo(other.path);
-            if (pathComparison != 0)
-                return pathComparison;
-
-            if (aggregationRoot == null)
-                return other.aggregationRoot == null ? 0 : -1;
-            
-            return other.aggregationRoot == null ? 1 : aggregationRoot.compareTo(other.aggregationRoot);
+        public Property(Kind kind, Signature path) {
+            this.kind = kind;
+            this.path = path;
         }
+    }
 
-        public static Property createSimple(Kind kind, Signature path) {
-            return new Property(kind, path, null);
+    public static class PropertyWithAggregation extends Property {
+        public final Signature aggregationRoot;
+        public final AggregationOperator aggregationOperator;
+
+        public PropertyWithAggregation(Kind kind, Signature path, Signature aggregationRoot, AggregationOperator aggregationOperator) {
+            super(kind, path);
+            this.aggregationRoot = aggregationRoot;
+            this.aggregationOperator = aggregationOperator;
         }
-
-        public static Property createAggregation(Kind kind, Signature path, Signature aggregationRoot) {
-            return new Property(kind, path, aggregationRoot);
-        }
-
     }
 
     public static record Constant(

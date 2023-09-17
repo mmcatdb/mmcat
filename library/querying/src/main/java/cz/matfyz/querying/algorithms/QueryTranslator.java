@@ -1,13 +1,15 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.PropertyWithAggregation;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.core.category.Signature;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.KindTree;
-import cz.matfyz.querying.core.filter.ConditionFilter;
-import cz.matfyz.querying.core.filter.ValueFilter;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
@@ -17,10 +19,15 @@ import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.exception.QueryTreeException;
+import cz.matfyz.querying.parsing.Aggregation;
+import cz.matfyz.querying.parsing.ConditionFilter;
 import cz.matfyz.querying.parsing.StringValue;
-import cz.matfyz.querying.parsing.ValueNode;
+import cz.matfyz.querying.parsing.ValueFilter;
+import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.WhereTriple;
+import cz.matfyz.querying.parsing.ParserNode.Term;
 
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -28,8 +35,6 @@ import java.util.Stack;
  * The provided tree has to have `database`, meaning it can be fully resolved withing the given database system.
  */
 public class QueryTranslator implements QueryVisitor {
-
-    private static final String PATH_SEPARATOR = "/";
 
     private final DatabaseNode databaseNode;
     private AbstractQueryWrapper wrapper;
@@ -42,7 +47,7 @@ public class QueryTranslator implements QueryVisitor {
         this.wrapper = databaseNode.database.control.getQueryWrapper();
         databaseNode.child.accept(this);
 
-        return this.wrapper.buildStatement();
+        return this.wrapper.createDSLStatement();
     }
 
     public void visit(DatabaseNode node) {
@@ -55,11 +60,14 @@ public class QueryTranslator implements QueryVisitor {
     }
 
     public void visit(FilterNode node) {
-        if (node.filter instanceof ValueFilter valueFilter) {
-            // TODO
+        if (node.filter instanceof ConditionFilter conditionFilter) {
+            final var left = createProperty(conditionFilter.lhs);
+            final var right = createProperty(conditionFilter.rhs);
+            wrapper.addFilter(left, right, conditionFilter.operator);
         }
-        else if (node.filter instanceof ConditionFilter conditionFilter) {
-            // TODO
+        else if (node.filter instanceof ValueFilter valueFilter) {
+            final var property = createProperty(valueFilter.variable);
+            wrapper.addFilter(property, new Constant(valueFilter.allowedValues), ComparisonOperator.Equal);
         }
     }
 
@@ -79,70 +87,63 @@ public class QueryTranslator implements QueryVisitor {
         throw new UnsupportedOperationException();
     }
 
-    private static record StackItem(WhereTriple triple, String path) {}
+    private static record StackItem(WhereTriple triple, Signature path) {}
 
     private void processKind(Kind kind) {
-        wrapper.pushKind(kind);
-
-        final var kindTree = new KindTree(); // TODO
+        // TODO
+        final var kindTree = new KindTree();
 
         final Stack<StackItem> stack = new Stack<>();
-        stack.add(new StackItem(kindTree.rootTriple(), ""));
+        stack.add(new StackItem(kindTree.rootTriple(), Signature.createEmpty()));
         while (!stack.isEmpty())
             processTopOfStack(stack.pop(), stack, kindTree);
-
-        wrapper.popKind();
     }
 
     private void processTopOfStack(StackItem item, Stack<StackItem> stack, KindTree kindTree) {
-        final ValueNode object = item.triple.object;
-        final String path = item.path + PATH_SEPARATOR + object.name();
+        final Term object = item.triple.object;
+        final Signature path = item.path.concatenate(item.triple.signature);
 
         final var childTriples = kindTree.getOutgoingTriples(object);
         if (!childTriples.isEmpty()) {
             childTriples.forEach(c -> stack.add(new StackItem(c, path)));
+            return;
         }
-        else if (object instanceof StringValue constantObject) {
-            processOrPostponeFiltering(
-                new Operand(OperandType.Variable, kindTree.kind(), item.triple, path, null),
-                new Operand(OperandType.Constant, null, null, constantObject.value, null),
-                ComparisonOperator.Equal,
-                PostponedOperation.Filtering
-            );
-        }
-        else {
-            wrapper.addProjection(path, kindTree.isOptional(item.triple));
-        }
+
+        // TODO
+        final Property subject = new Property(null, null);
+
+        if (object instanceof StringValue constantObject)
+            wrapper.addFilter(subject, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
+        else
+            wrapper.addProjection(subject, kindTree.isOptional(item.triple));
     }
 
     private void processJoinCandidate(JoinCandidate candidate) {
-        wrapper.addJoin(candidate.from(), candidate.to(), candidate.recursion(), candidate.isOptional());
+        // TODO
+        final Property from = createProperty(null);
+        // TODO
+        final Property to = createProperty(null);
+        wrapper.addJoin(from, to, candidate.recursion(), candidate.isOptional());
     }
 
-    private static enum OperandType {
-        Variable,
-        Constant,
-        Aggregation,
+    private Property createProperty(Term term) {
+        if (term instanceof Variable variable) {
+            // TODO
+            return new Property(null, null);
+        }
+
+        if (term instanceof Aggregation aggregation) {
+            final var property = createProperty(aggregation.variable);
+            final var root = findAggregationRoot(property.kind, property.path);
+
+            return new PropertyWithAggregation(property.kind, property.path, root, aggregation.operator);
+        }
+
+        throw new UnsupportedOperationException();
     }
 
-    private static record Operand(
-        OperandType type,
-        Kind kind,
-        WhereTriple triple,
-        String path,
-        Object aggregationRoot
-    ) {}
-
-    private void processOrPostponeFiltering(Operand lhs, Operand rhs, ComparisonOperator operator, PostponedOperation postponedOperation) {
-        if (lhs.aggregationRoot == null) {
-            wrapper.addFilterOrPostpone(lhs.kind, lhs.path, rhs.kind, rhs.path, operator, postponedOperation);
-        }
-        else if (rhs.aggregationRoot == null) {
-            wrapper.addFilterOrPostpone(lhs.kind, lhs.path, rhs.kind, rhs.path, operator, postponedOperation, lhs.aggregationRoot);
-        }
-        else {
-            wrapper.addFilterOrPostpone(lhs.kind, lhs.path, rhs.kind, rhs.path, operator, postponedOperation, lhs.aggregationRoot, rhs.aggregationRoot);
-        }
+    private Signature findAggregationRoot(Kind kind, Signature path) {
+        // TODO
     }
 
 }
