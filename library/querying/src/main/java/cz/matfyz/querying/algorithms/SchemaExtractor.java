@@ -6,7 +6,7 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.core.VariableContext;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.WhereTriple;
 
@@ -19,16 +19,17 @@ import java.util.Queue;
  */
 public class SchemaExtractor {
 
-
-    public static Result run(SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
-        return new SchemaExtractor(schema, kinds, pattern).run();
+    public static Result run(QueryContext context, SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
+        return new SchemaExtractor(context, schema, kinds, pattern).run();
     }
 
+    private final QueryContext context;
     private final SchemaCategory schema;
     private final List<Kind> kinds;
     private final List<WhereTriple> pattern;
 
-    private SchemaExtractor(SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
+    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
+        this.context = context;
         this.schema = schema;
         this.kinds = kinds;
         this.pattern = pattern;
@@ -36,14 +37,14 @@ public class SchemaExtractor {
 
     public static record Result(
         SchemaCategory schema,
-        List<Kind> kinds,
-        VariableContext context
+        List<Kind> kinds
     ) {}
 
     private Result run() {
         createNewSchema();
+        updateContext();
 
-        return new Result(newSchema, createNewMappings(), createContext());
+        return new Result(newSchema, createNewMappings());
     }
 
     private SchemaCategory newSchema;
@@ -102,17 +103,13 @@ public class SchemaExtractor {
         return new ComplexProperty(path.name(), path.signature(), path.isAuxiliary(), newSubpaths);
     }
 
-    private VariableContext createContext() {
-        final VariableContext context = new VariableContext();
-
+    private void updateContext() {
         pattern.forEach(triple -> {
             final var morphism = newSchema.getMorphism(triple.signature);
             context.defineVariable(triple.subject, morphism.dom());
             if (triple.object instanceof Variable variableObject)
                 context.defineVariable(variableObject, morphism.cod());
         });
-
-        return context;
     }
 
 }

@@ -2,6 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AggregationOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 import cz.matfyz.querying.parsing.Variable.VariableBuilder;
@@ -26,21 +27,30 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return nextResult == null ? aggregate : nextResult;
     }
 
+    private QueryContext queryContext;
+    private Stack<VariableBuilder> variableBuilders = new Stack<>();
+
     @Override
     public Query visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
+        queryContext = new QueryContext();
+
         final SelectClause selectClause = visitSelectClause(ctx.selectClause());
         final WhereClause whereClause = visitWhereClause(ctx.whereClause());
 
-        return new Query(selectClause, whereClause);
+        return new Query(selectClause, whereClause, queryContext);
     }
 
     @Override
     public SelectClause visitSelectClause(QuerycatParser.SelectClauseContext ctx) {
+        variableBuilders.push(new VariableBuilder());
+
         final var graphTriples = ctx.selectGraphPattern().selectTriples();
         final List<SelectTriple> triples = graphTriples == null
             ? List.of()
             : visitSelectTriples(graphTriples).triples;
         
+        variableBuilders.pop();
+
         return new SelectClause(triples, List.of());
     }
 
@@ -53,8 +63,6 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         // TODO nested clauses
         return new WhereClause(Type.Where, pattern, List.of());
     }
-
-    private Stack<VariableBuilder> variableBuilders = new Stack<>();
 
     @Override
     public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
@@ -91,6 +99,8 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
             sameSubjectTriples.stream().flatMap(commonTriple -> WhereTriple.fromCommonTriple(commonTriple, variableBuilders.peek()).stream()),
             moreTriples.stream()
         ).toList();
+
+        allTriples.forEach(queryContext::addTriple);
 
         return new WhereTriplesList(allTriples);
     }

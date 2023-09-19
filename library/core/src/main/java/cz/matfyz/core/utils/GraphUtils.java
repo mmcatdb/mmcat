@@ -45,7 +45,7 @@ public class GraphUtils {
             
             if (aComponent == null) {
                 if (bComponent == null) {
-                    bComponent = new Component<>(new TreeSet<>(), new ArrayList<>());
+                    bComponent = new Component<N, E>(new TreeSet<>(), new ArrayList<>());
                     bComponent.nodes.add(b);
                     components.put(b, bComponent);
                 }

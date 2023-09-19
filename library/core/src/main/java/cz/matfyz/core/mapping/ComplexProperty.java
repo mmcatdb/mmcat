@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A complex value in the access path tree. Its context is a signature of a morphism (or undefined in case of an auxiliary property)
@@ -128,26 +129,28 @@ public class ComplexProperty extends AccessPath {
      * @param signature
      * @return the closest subpath with given signature (or null if none such exists).
      */
+    @Nullable
     public AccessPath getSubpathBySignature(Signature signature) {
         /*
         if (this.signature.equals(signature))
             return this;
         */
+        // TODO - the signature can't be null
         // If M = null, a leaf L with L.value = epsion is returned.
-        if (signature == null) {
-            final var directSubpath = getDirectSubpath(Signature.createEmpty());
-            if (directSubpath instanceof SimpleProperty simpleProperty)
-                return simpleProperty;
+        // if (signature == null) {
+        //     final var directSubpath = getDirectSubpath(Signature.createEmpty());
+        //     if (directSubpath instanceof SimpleProperty simpleProperty)
+        //         return simpleProperty;
             
-            for (AccessPath subpath : subpaths())
-                if (subpath instanceof ComplexProperty complexProperty) {
-                    AccessPath result = complexProperty.getSubpathBySignature(null);
-                    if (result != null)
-                        return result;
-                }
+        //     for (AccessPath subpath : subpaths())
+        //         if (subpath instanceof ComplexProperty complexProperty) {
+        //             AccessPath result = complexProperty.getSubpathBySignature(null);
+        //             if (result != null)
+        //                 return result;
+        //         }
     
-            return null;
-        }
+        //     return null;
+        // }
         
         // If this is an auxiliary property, we must find if all of the descendats of this property have M in their contexts or values.
         // If so, this is returned even if this context is null.
@@ -190,7 +193,7 @@ public class ComplexProperty extends AccessPath {
     }
 
     /**
-     * Find the path to the given signature in and return the properties along the way.
+     * Find the path to the given signature and return the properties along the way.
      * If the signature isn't found, null is returned.
      */
     protected List<AccessPath> getPropertyPath(Signature signature) {

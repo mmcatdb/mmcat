@@ -148,13 +148,15 @@ public class QueryPlanner {
         }
 
         private int computePathCost(AccessPath path) {
-            int min = colors.get(path.signature()).size();
+            final var pathColors = colors.get(path.signature());
+            // The root property has empty signature, which is definitely not going to be found.
+            int min = pathColors != null ? pathColors.size() : Integer.MAX_VALUE;
 
             if (path instanceof ComplexProperty complex)
                 for (final var subpath : complex.subpaths())
                     min = Math.min(min, computePathCost(subpath));
 
-            return min;
+            return min != Integer.MAX_VALUE ? min : 0;
         }
 
         private static record KindWithCost(Kind kind, int cost) {}

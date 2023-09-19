@@ -1,17 +1,16 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.Projection;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
-import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
 
@@ -26,7 +25,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     @Override
     protected Map<ComparisonOperator, String> defineComparisonOperators() {
-        var output = new TreeMap<ComparisonOperator, String>();
+        final var output = new TreeMap<ComparisonOperator, String>();
         output.put(ComparisonOperator.Equal, "=");
         output.put(ComparisonOperator.NotEqual, "<>");
         output.put(ComparisonOperator.Less, "<");
@@ -37,146 +36,177 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     @Override
+    protected Map<AggregationOperator, String> defineAggregationOperators() {
+        final var output = new TreeMap<AggregationOperator, String>();
+        output.put(AggregationOperator.Count, "COUNT");
+        output.put(AggregationOperator.Sum, "SUM");
+        output.put(AggregationOperator.Min, "MIN");
+        output.put(AggregationOperator.Max, "MAX");
+        output.put(AggregationOperator.Average, "AVG");
+        return output;
+    }
+
+    private StringBuilder builder;
+
+    @Override
     public QueryStatement createDSLStatement() {
-        final QueryStatement select = buildSelect();
-        final String query = select.stringContent() + "\n" + buildFrom() + "\n" + buildWhere();
+        builder = new StringBuilder();
 
-        return new QueryStatement(query);
+        addSelect();
+        addFrom();
+        addWhere();
+
+        return new QueryStatement(builder.toString());
     }
 
-    private QueryStatement buildSelect() {
-        var variableSelections = projections.values().stream().map(this::getVariableAlias).toList();
-        var variableNameMap = new TreeMap<VariableIdentifier, List<String>>();
-        projections.values().forEach(p -> variableNameMap.put(p.variableId, List.of(getVariableName(p))));
-            
-        var select = "SELECT " + String.join(", ", variableSelections);
-        return new QueryStatement(select, variableNameMap);
+    private void addSelect() {
+        final String projectionsString = projections.stream().map(projection -> getPropertyName(projection.property())).collect(Collectors.joining(", "));
+        builder
+            .append("SELECT ")
+            .append(projectionsString)
+            .append("\n");
     }
 
-    private String getVariableAlias(Projection projection) {
-        return getVariableSelection(projection) + " AS " + getVariableName(projection);
-    }
+    private void addFrom() {
+        builder.append("FROM ");
 
-    private String getVariableSelection(Projection projection) {
-        return escapeKindName(projection.kind.mapping.kindName()) + "." + getPropertyName(projection.propertyPath);
-    }
-
-    private String getVariableName(Projection projection) {
-        // return kinds.get(projection.kind) + "_" + getPropertyName(projection.propertyPath);
-        return projection.kind.mapping.kindName() + "_" + getPropertyName(projection.propertyPath);
-    }
-
-    private String escapeKindName(String name) {
-        return "\"" + name + "\"";
-    }
-
-    private String getPropertyName(List<AccessPath> path) {
-        if (path.get(path.size() - 1).name() instanceof StaticName staticName)
-            return staticName.getStringName();
-
-        throw QueryException.message("Property name is dynamic.");
-    }
-
-    private String buildFrom() {
-        if (!joins.isEmpty())
-            return "FROM " + buildJoins();
+        if (!joins.isEmpty()) {
+            addJoins();
+            return;
+        }
         
         // final String firstKind = kinds.values().stream().findFirst().orElseThrow(() -> QueryException.message("No tables are selected in FROM clause."));
-        final String firstKind = projections.values().stream().findFirst()
-            .orElseThrow(() -> QueryException.message("No tables are selected in FROM clause."))
-            .kind.mapping.kindName();
-
-        return "FROM " +  escapeKindName(firstKind);
+        if (projections.size() == 0)
+            throw QueryException.message("No tables are selected in FROM clause.");
+        
+        final String kindName = projections.get(0).property().kind.mapping.kindName();
+        builder
+            .append(escapeName(kindName))
+            .append("\n");
     }
 
-    private String buildJoins() {
-        final var joinedKinds = new TreeSet<String>();
+    private void addJoins() {
+        final var joinedKinds = new TreeSet<Kind>();
 
-        final String fromKind = joins.get(0).lhsKind;
+        final Kind fromKind = joins.get(0).from();
         joinedKinds.add(fromKind);
 
-        var output = escapeKindName(fromKind);
+        builder
+            .append(escapeName(fromKind.mapping.kindName()))
+            .append("\n");
         
         for (final var join : joins) {
-            String newKind;
-            if (!joinedKinds.contains(join.rhsKind))
-                newKind = join.rhsKind;
-            else if (!joinedKinds.contains(join.lhsKind))
-                newKind = join.lhsKind;
+            Kind newKind;
+            if (!joinedKinds.contains(join.to()))
+                newKind = join.to();
+            else if (!joinedKinds.contains(join.from()))
+                newKind = join.from();
             else
                 continue;
 
             joinedKinds.add(newKind);
 
-            final var joinConditions = join.joinProperties.stream().map(property -> {
-                final String lhsProjection = escapeKindName(join.lhsKind) + "." + getPropertyName(property.lhsList());
-                final String rhsProjection = escapeKindName(join.rhsKind) + "." + getPropertyName(property.rhsList());
-                
-                return lhsProjection + " = " + rhsProjection;
-            }).toList();
+            final String conditions = join.conditions().stream().map(condition -> {
+                final String fromProjection = getPropertyName(new Property(join.from(), condition.from()));
+                final String toProjection = getPropertyName(new Property(join.to(), condition.to()));
+                return fromProjection + " = " + toProjection;
+            })
+                .collect(Collectors.joining(" AND "));
 
-            final String allConditions = String.join(" AND ", joinConditions);
-            output += " JOIN " + escapeKindName(newKind) + " ON (" + allConditions + ")";
+            builder
+                .append(" JOIN ")
+                .append(escapeName(newKind.mapping.kindName()))
+                .append(" ON (")
+                .append(conditions)
+                .append(")\n");
         }
-            
-        return output;
     }
 
-    private String buildWhere() {
-        var filters = buildFilters();
-        var newValuesFilters = buildValues();
-        
-        var oneOrOther = filters.equals("") ? newValuesFilters : filters;
-        if (oneOrOther.equals(""))
-            return "";
+    private void addWhere() {
+        if (filters.isEmpty())
+            return;
 
-        var whereConditions = (!filters.equals("") && !newValuesFilters.equals(""))
-            ? filters + " AND " + newValuesFilters
-            : oneOrOther;
-        
-        return "WHERE " + whereConditions;
+        builder.append("WHERE ");
+        addFilter(filters.get(0));
+
+        filters.stream().skip(1).forEach(filter -> {
+            builder.append("\nAND ");
+            addFilter(filter);
+        });
     }
 
-    private String buildFilters() {
-        var filters = new ArrayList<String>();
+    private void addFilter(Filter filter) {
+        if (filter instanceof UnaryFilter unaryFilter)
+            addUnaryFilter(unaryFilter);
+        else if (filter instanceof BinaryFilter binaryFilter)
+            addBinaryFilter(binaryFilter);
 
-        for (var filter : constantFilters) {
-            // We can't use the variable name since in SQL, we cannot use an alias in the WHERE clause.
-            var projection = projections.get(filter.variableId);
-            var variableAlias = getVariableSelection(projection);
-
-            filters.add(variableAlias + " " + getOperatorValue(filter.operator) + " '" + filter.constant + "'");
-        }
-
-        for (var filter : variablesFilters) {
-            var lhsProjection = projections.get(filter.lhsVariableId);
-            var lhsVariableAlias = getVariableSelection(lhsProjection);
-
-            var rhsProjection = projections.get(filter.rhsVariableId);
-            var rhsVariableAlias = getVariableSelection(rhsProjection);
-
-            filters.add(lhsVariableAlias + " " + getOperatorValue(filter.operator) + " " + rhsVariableAlias);
-        }
-
-        return String.join(" AND ", filters);
+        builder.append("\n");
     }
 
-    private String buildValues() {
-        var newValuesFilters = new ArrayList<String>();
+    private void addUnaryFilter(UnaryFilter filter) {
+        builder.append(getPropertyName(filter.property()));
 
-        for (var values : valuesFilters) {
-            var projection = projections.get(values.variableId);
-            var variableAlias = getVariableSelection(projection);
+        final var values = filter.constant().values();
+        if (values.size() == 1) {
+            builder
+                .append(" ")
+                .append(getComparisonOperatorValue(filter.operator()))
+                .append(" '")
+                .append(values.get(0))
+                .append("'");
 
-            if (values.constants.isEmpty())
-                throw QueryException.message("VALUES clause for variable " + variableAlias + " has no allowed values.");
-
-            var sqlValueStrings = values.constants.stream().map(c -> "'" + c + "'").toList();
-            
-            newValuesFilters.add(variableAlias + " IN (" + String.join(", ", sqlValueStrings) + ")");
+            return;
         }
 
-        return String.join(" AND ", newValuesFilters);
+        if (filter.operator() != ComparisonOperator.Equal)
+            throw QueryException.message("Operator " + filter.operator() + " can't be used for multiple values.");
+
+        builder
+            .append(" IN (")
+            .append(values.get(0));
+
+        values.stream().skip(1).forEach(value -> builder.append(", ").append(value));
+
+        builder.append(")");
+    }
+
+    private void addBinaryFilter(BinaryFilter filter) {
+        builder
+            .append(getPropertyName(filter.property1()))
+            .append(getComparisonOperatorValue(filter.operator()))
+            .append(getPropertyName(filter.property2()));
+    }
+
+    private String escapeName(String name) {
+        return "\"" + name + "\"";
+    }
+
+    private String getPropertyName(Property property) {
+        return property instanceof PropertyWithAggregation aggregation
+            ? getAggregationName(aggregation)
+            : getPropertyNameWithoutAggregation(property);
+    }
+
+    private String getPropertyNameWithoutAggregation(Property property) {
+        return escapeName(property.kind.mapping.kindName()) + "." + escapeName(getRawAttributeName(property));
+    }
+
+    private String getRawAttributeName(Property property) {
+        // Direct subpath is ok since the postgresql mapping must be flat.
+        final var subpath = property.kind.mapping.accessPath().getDirectSubpath(property.path);
+        if (
+            subpath == null ||
+            !(subpath instanceof SimpleProperty simpleSubpath) ||
+            !(simpleSubpath.name() instanceof StaticName staticName)
+        )
+            throw QueryException.propertyNotFoundInMapping(property);
+
+        return staticName.getStringName();
+    }
+
+    private String getAggregationName(PropertyWithAggregation aggregation) {
+        return getAggregationOperatorValue(aggregation.aggregationOperator) + "(" + getPropertyNameWithoutAggregation(aggregation) + ")";
     }
 
 }

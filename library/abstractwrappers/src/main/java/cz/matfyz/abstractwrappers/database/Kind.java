@@ -39,4 +39,9 @@ public class Kind implements Comparable<Kind> {
         return newKind;
     }
 
+    @Override
+    public String toString() {
+        return "{ database: '" + database.identifier + "', kind: '" + mapping.kindName() + "' }";
+    }
+
 }

@@ -3,6 +3,7 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
 
+import java.io.Serializable;
 import java.util.List;
 
 public interface AbstractQueryWrapper {
@@ -73,7 +74,7 @@ public interface AbstractQueryWrapper {
     /**
      * This class represents a queryable property. It's defined by the kind and a path from its root.
      */
-    public static class Property {
+    public static class Property implements Serializable {
         public final Kind kind;
         public final Signature path;
 
@@ -103,14 +104,17 @@ public interface AbstractQueryWrapper {
      */
     void addProjection(Property property, boolean isOptional);
 
+    public static record JoinCondition(Signature from, Signature to) {}
+
     /**
      * Adds a join (or graph traversal).
-     * @param from Property from which we are joining.
-     * @param to Property to which we are joining.
+     * @param from Kind from which we are joining.
+     * @param to Kind to which we are joining.
+     * @param conditions List of paths from both kinds to the joining properties.
      * @param repetition If not 1, the join will be recursive.
      * @param isOptional If true, the join will be optional.
      */
-    void addJoin(Property from, Property to, int repetition, boolean isOptional);
+    void addJoin(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional);
 
     /**
      * Adds a filtering between two variables or aggregations. E.g.:

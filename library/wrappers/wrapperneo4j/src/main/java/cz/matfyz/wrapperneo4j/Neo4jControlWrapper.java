@@ -1,7 +1,6 @@
 package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;

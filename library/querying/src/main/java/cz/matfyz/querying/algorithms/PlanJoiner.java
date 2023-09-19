@@ -1,11 +1,14 @@
 package cz.matfyz.querying.algorithms;
 
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaGraph;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
@@ -27,6 +30,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * This class is responsible for joining multiple kinds from the same pattern plan and the same database together.
  * Then it optimizes the whole query by merging different pattern plans.
@@ -46,6 +51,10 @@ public class PlanJoiner {
     }
     
     private QueryNode run() {
+        if (allKinds.isEmpty()) {
+            // TODO what now?
+        }
+
         if (allKinds.size() == 1) {
             final var patternNode = new PatternNode(allKinds, schema, List.of());
             final var database = allKinds.stream().findFirst().get().database;
@@ -99,8 +108,18 @@ public class PlanJoiner {
         if (candidate2 != null)
             return candidate2;
 
+        final Signature signature1 = findPathFromRoot(kind1, object);
+        if (signature1 == null)
+            return null;
+
+        final Signature signature2 = findPathFromRoot(kind2, object);
+        if (signature2 == null)
+            return null;
+
+        final var condition = new JoinCondition(signature1, signature2);
+
         // TODO recursion
-        return new JoinCandidate(JoinType.Value, kind1, kind2, 0);
+        return new JoinCandidate(JoinType.Value, kind1, kind2, List.of(condition), 0);
     }
 
     /**
@@ -117,13 +136,31 @@ public class PlanJoiner {
         if (firstId.signatures().size() != 1)
             return null;
         
-        final SchemaObject rootIdObject = schema.getEdge(firstId.signatures().first().getLast()).to();
+        final BaseSignature fromSignature = firstId.signatures().first().getLast();
+        final SchemaObject rootIdObject = schema.getEdge(fromSignature).to();
         if (!idObject.equals(rootIdObject))
             return null;
 
+        final Signature toSignature = findPathFromRoot(refKind, idObject);
+        if (toSignature == null)
+            return null;
+
+        final var condition = new JoinCondition(fromSignature, toSignature);
+        
         // The idObject is in fact an identifier of the root of the idKind. We also know that both idKind and refKind contains the object. Therefore we can create the join candidate.
         // TODO recursion
-        return new JoinCandidate(JoinType.IdRef, idKind, refKind, 0);
+        return new JoinCandidate(JoinType.IdRef, idKind, refKind, List.of(condition), 0);
+    }
+
+    @Nullable
+    private Signature findPathFromRoot(Kind kind, SchemaObject object) {
+        // TODO - constructing schema graph each time is highly ineffective.
+        final var graph = new SchemaGraph(kind.mapping.category().allMorphisms());
+        final List<Signature> signatures = graph.findPath(kind.mapping.rootObject(), object);
+
+        return signatures == null
+            ? null
+            : Signature.concatenate(signatures);
     }
 
     private static record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {

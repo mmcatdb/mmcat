@@ -3,13 +3,14 @@ package cz.matfyz.querying.algorithms;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.MinusNode;
 import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
-import cz.matfyz.querying.core.querytree.RootNode;
+import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.exception.QueryTreeException;
@@ -23,22 +24,29 @@ import cz.matfyz.transformations.processes.DatabaseToInstance;
  */
 public class QueryResolver implements QueryVisitor {
 
-    public static InstanceCategory run(RootNode rootNode) {
-        return new QueryResolver(rootNode).run();
+    public static InstanceCategory run(QueryContext context, QueryNode rootNode) {
+        return new QueryResolver(context, rootNode).run();
     }
 
-    private final RootNode rootNode;
+    private final QueryContext context;
+    private final QueryNode rootNode;
 
-    private QueryResolver(RootNode rootNode) {
+    private QueryResolver(QueryContext context, QueryNode rootNode) {
+        this.context = context;
         this.rootNode = rootNode;
     }
 
     private InstanceCategory run() {
         rootNode.accept(this);
+
+        // TODO
+        return lastInstance;
     }
 
+    private InstanceCategory lastInstance; // TODO
+
     public void visit(DatabaseNode node) {
-        final var translator = new QueryTranslator(node);
+        final var translator = new QueryTranslator(context, node);
         final QueryStatement query = translator.run();
 
         final var databaseToInstance = new DatabaseToInstance();
@@ -49,6 +57,8 @@ public class QueryResolver implements QueryVisitor {
             PullQuery.fromString(query.stringContent())
         );
         final var instanceCategory = databaseToInstance.run();
+
+        lastInstance = instanceCategory;
     }
 
     public void visit(PatternNode node) {

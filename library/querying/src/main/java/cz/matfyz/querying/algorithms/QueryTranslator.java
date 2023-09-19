@@ -8,8 +8,10 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.querying.core.JoinCandidate;
-import cz.matfyz.querying.core.KindTree;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
@@ -24,7 +26,6 @@ import cz.matfyz.querying.parsing.ConditionFilter;
 import cz.matfyz.querying.parsing.StringValue;
 import cz.matfyz.querying.parsing.ValueFilter;
 import cz.matfyz.querying.parsing.Variable;
-import cz.matfyz.querying.parsing.WhereTriple;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 
 import java.util.List;
@@ -36,10 +37,16 @@ import java.util.Stack;
  */
 public class QueryTranslator implements QueryVisitor {
 
+    public static QueryStatement run(QueryContext context, DatabaseNode databaseNode) {
+        return new QueryTranslator(context, databaseNode).run();
+    }
+
+    private final QueryContext context;
     private final DatabaseNode databaseNode;
     private AbstractQueryWrapper wrapper;
 
-    public QueryTranslator(DatabaseNode databaseNode) {
+    public QueryTranslator(QueryContext context, DatabaseNode databaseNode) {
+        this.context = context;
         this.databaseNode = databaseNode;
     }
 
@@ -87,43 +94,39 @@ public class QueryTranslator implements QueryVisitor {
         throw new UnsupportedOperationException();
     }
 
-    private static record StackItem(WhereTriple triple, Signature path) {}
+    private static record StackItem(AccessPath property, Signature path) {}
 
     private void processKind(Kind kind) {
-        // TODO
-        final var kindTree = new KindTree();
-
         final Stack<StackItem> stack = new Stack<>();
-        stack.add(new StackItem(kindTree.rootTriple(), Signature.createEmpty()));
+        stack.add(new StackItem(kind.mapping.accessPath(), Signature.createEmpty()));
         while (!stack.isEmpty())
-            processTopOfStack(stack.pop(), stack, kindTree);
+            processTopOfStack(kind, stack.pop(), stack);
     }
 
-    private void processTopOfStack(StackItem item, Stack<StackItem> stack, KindTree kindTree) {
-        final Term object = item.triple.object;
-        final Signature path = item.path.concatenate(item.triple.signature);
-
-        final var childTriples = kindTree.getOutgoingTriples(object);
-        if (!childTriples.isEmpty()) {
-            childTriples.forEach(c -> stack.add(new StackItem(c, path)));
+    private void processTopOfStack(Kind kind, StackItem item, Stack<StackItem> stack) {
+        final Signature path = item.path.concatenate(item.property.signature());
+        
+        if (item.property instanceof ComplexProperty complexProperty) {
+            complexProperty.subpaths().forEach(childProperty -> stack.add(new StackItem(childProperty, path)));
             return;
         }
-
-        // TODO
-        final Property subject = new Property(null, null);
+        
+        final Term object = context.getTriple(item.property.signature().getLast()).object;
+        final Property objectProperty = new Property(kind, path);
 
         if (object instanceof StringValue constantObject)
-            wrapper.addFilter(subject, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
+            wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
         else
-            wrapper.addProjection(subject, kindTree.isOptional(item.triple));
+            // TODO isOptional is not supported yet.
+            wrapper.addProjection(objectProperty, false);
     }
 
     private void processJoinCandidate(JoinCandidate candidate) {
-        // TODO
-        final Property from = createProperty(null);
-        // TODO
-        final Property to = createProperty(null);
-        wrapper.addJoin(from, to, candidate.recursion(), candidate.isOptional());
+        // // TODO
+        // final Property from = createProperty(null);
+        // // TODO
+        // final Property to = createProperty(null);
+        wrapper.addJoin(candidate.from(), candidate.to(), candidate.joinProperties(), candidate.recursion(), candidate.isOptional());
     }
 
     private Property createProperty(Term term) {
@@ -144,6 +147,7 @@ public class QueryTranslator implements QueryVisitor {
 
     private Signature findAggregationRoot(Kind kind, Signature path) {
         // TODO
+        throw new UnsupportedOperationException();
     }
 
 }

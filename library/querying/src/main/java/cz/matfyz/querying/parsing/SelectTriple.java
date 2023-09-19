@@ -18,4 +18,9 @@ public class SelectTriple implements Statement {
         return new SelectTriple(common.subject, common.predicate, common.object);
     }
 
+    @Override
+    public String toString() {
+        return subject.toString() + " " + name + " " + object.toString();
+    }
+
 }
