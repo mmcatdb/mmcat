@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * This is the pattern part of a query part (GroupNode).
+ * This is the pattern part of a query part.
  * It contains triples and other data that are used by other elements of the query part (i.e., by filters).
+ * Instances of this class (and this class only) are leaves in the query tree.
  */
 public class PatternNode extends QueryNode {
     

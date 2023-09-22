@@ -1,17 +1,22 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.querying.core.QueryContext;
+import cz.matfyz.querying.core.patterntree.PatternObject;
+import cz.matfyz.querying.core.patterntree.PatternTree;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.WhereTriple;
+import cz.matfyz.querying.parsing.ParserNode.Term;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -37,16 +42,17 @@ public class SchemaExtractor {
 
     public static record Result(
         SchemaCategory schema,
-        List<Kind> kinds
+        List<PatternTree> patterns
     ) {}
 
     private Result run() {
         createNewSchema();
         updateContext();
 
-        return new Result(newSchema, createNewMappings());
+        return new Result(newSchema, createPatternTrees());
     }
 
+    // The schema category of all objects and morphisms that are reachable from the pattern plus those that are needed to identify the objects.
     private SchemaCategory newSchema;
     private Queue<SchemaMorphism> morphismQueue;
 
@@ -81,35 +87,47 @@ public class SchemaExtractor {
             .forEach(base -> morphismQueue.add(schema.getMorphism(base)));
     }
 
-    private List<Kind> createNewMappings() {
-        return kinds.stream()
-            .filter(kind -> newSchema.hasObject(kind.mapping.rootObject().key()))
-            .map(kind -> {
-                final var newAccessPath = purgeComplexProperty(kind.mapping.accessPath());
-                final var newMapping = new Mapping(newSchema, kind.mapping.rootObject().key(), kind.mapping.kindName(), newAccessPath, kind.mapping.primaryKey());
-                
-                return kind.updateMapping(newMapping);
-            }).toList();
-    }
-
-    private ComplexProperty purgeComplexProperty(ComplexProperty path) {
-        final var newSubpaths = path.subpaths().stream()
-            .filter(subpath -> newSchema.hasMorphism(subpath.signature()))
-            .map(subpath -> subpath instanceof ComplexProperty complex
-                ? purgeComplexProperty(complex)
-                : subpath // Simple subpaths can be simply reused.
-            ).toList();
-
-        return new ComplexProperty(path.name(), path.signature(), path.isAuxiliary(), newSubpaths);
-    }
+    private Map<BaseSignature, WhereTriple> signatureToTriple;
+    private Map<Key, Term> keyToTerm;
 
     private void updateContext() {
         pattern.forEach(triple -> {
             final var morphism = newSchema.getMorphism(triple.signature);
+            signatureToTriple.put(triple.signature, triple);
+
             context.defineVariable(triple.subject, morphism.dom());
             if (triple.object instanceof Variable variableObject)
                 context.defineVariable(variableObject, morphism.cod());
+
+            keyToTerm.put(morphism.dom().key(), triple.subject);
+            keyToTerm.put(morphism.cod().key(), triple.object);
         });
+    }
+
+
+    private List<PatternTree> createPatternTrees() {
+        return kinds.stream()
+            .filter(kind -> newSchema.hasObject(kind.mapping.rootObject().key()))
+            .map(kind -> {
+                final var rootObject = kind.mapping.rootObject();
+                final var rootNode = PatternObject.createRoot(rootObject, keyToTerm.get(rootObject.key()));
+                processComplexProperty(rootNode, kind.mapping.accessPath());
+
+                return new PatternTree(kind, rootNode);
+            }).toList();
+    }
+
+    private void processComplexProperty(PatternObject node, ComplexProperty path) {
+        path.subpaths().stream()
+            .filter(subpath -> newSchema.hasMorphism(subpath.signature()))
+            .forEach(subpath -> {
+                if (!(subpath.signature() instanceof BaseSignature baseSignature))
+                    return;
+
+                final var childNode = node.createChild(schema.getEdge(baseSignature), signatureToTriple.get(baseSignature));
+                if (subpath instanceof ComplexProperty complex)
+                    processComplexProperty(childNode, complex);
+            });
     }
 
 }

@@ -43,7 +43,7 @@ public class QueryResolver implements QueryVisitor {
         return lastInstance;
     }
 
-    private InstanceCategory lastInstance; // TODO
+    private InstanceCategory lastInstance; // TODO - return ResultNode instead
 
     public void visit(DatabaseNode node) {
         final var translator = new QueryTranslator(context, node);
