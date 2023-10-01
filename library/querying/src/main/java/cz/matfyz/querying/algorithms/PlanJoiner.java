@@ -2,19 +2,16 @@ package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.database.Database;
-import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaGraph;
-import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.core.utils.GraphUtils;
+import cz.matfyz.querying.core.ObjectColoring;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
+import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
@@ -22,9 +19,7 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.exception.JoinException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -38,14 +33,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class PlanJoiner {
 
-    public static QueryNode run(Set<Kind> allKinds, SchemaCategory schema) {
+    public static QueryNode run(Set<KindPattern> allKinds, SchemaCategory schema) {
         return new PlanJoiner(allKinds, schema).run();
     }
 
-    private final Set<Kind> allKinds;
+    private final Set<KindPattern> allKinds;
     private final SchemaCategory schema;
 
-    private PlanJoiner(Set<Kind> allKinds, SchemaCategory schema) {
+    private PlanJoiner(Set<KindPattern> allKinds, SchemaCategory schema) {
         this.allKinds = allKinds;
         this.schema = schema;
     }
@@ -57,7 +52,7 @@ public class PlanJoiner {
 
         if (allKinds.size() == 1) {
             final var patternNode = new PatternNode(allKinds, schema, List.of());
-            final var database = allKinds.stream().findFirst().get().database;
+            final var database = allKinds.stream().findFirst().get().kind.database;
 
             return new DatabaseNode(patternNode, database);
         }
@@ -68,7 +63,7 @@ public class PlanJoiner {
         // TODO ignoring OPTIONAL and MINUS for now ...
         
         
-        final Coloring coloring = Coloring.create(schema, allKinds);
+        final ObjectColoring coloring = ObjectColoring.create(allKinds);
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
         final List<JoinGroup> filteredGroups = filterJoinGroups(candidateGroups);
@@ -82,11 +77,11 @@ public class PlanJoiner {
         return splitLeaf(queryParts, candidatesBetweenParts);
     }
 
-    private List<JoinCandidate> createJoinCandidates(Coloring coloring) {
+    private List<JoinCandidate> createJoinCandidates(ObjectColoring coloring) {
         final var output = new ArrayList<JoinCandidate>();
         for (final SchemaObject object : coloring.selectMulticolorObjects()) {
             // The set of all objects that have two or more colors.
-            final var kinds = coloring.getColors(object).stream().toArray(Kind[]::new);
+            final var kinds = coloring.getColors(object).stream().toArray(KindPattern[]::new);
             // We try each pair of colors.
             for (int i = 0; i < kinds.length; i++)
                 for (int j = i + 1; j < kinds.length; j++) {
@@ -99,7 +94,7 @@ public class PlanJoiner {
         return output;
     }
 
-    private JoinCandidate tryCreateCandidate(SchemaObject object, Kind kind1, Kind kind2, Coloring coloring) {
+    private JoinCandidate tryCreateCandidate(SchemaObject object, KindPattern kind1, KindPattern kind2, ObjectColoring coloring) {
         final var candidate1 = tryCreateIdRefCandidate(object, kind1, kind2, coloring);
         if (candidate1 != null)
             return candidate1;
@@ -125,9 +120,9 @@ public class PlanJoiner {
     /**
      * This object matches the id-ref join pattern. This means that an object (rootObject) is identified by another object (idObject). The first kind (idKind) has A as a root object and B as a normal property. The second kind (refKind) has the idObject.
      */
-    private JoinCandidate tryCreateIdRefCandidate(SchemaObject idObject, Kind idKind, Kind refKind, Coloring coloring) {
+    private JoinCandidate tryCreateIdRefCandidate(SchemaObject idObject, KindPattern idKind, KindPattern refKind, ObjectColoring coloring) {
         // First, check if the idObject is an identifier of the root of the idKind.
-        final SchemaObject rootObject = idKind.mapping.rootObject();
+        final SchemaObject rootObject = idKind.root.schemaObject;
         if (!rootObject.ids().isSignatures())
             return null;
         // TODO currently, we are using only the first id for joining.
@@ -153,20 +148,17 @@ public class PlanJoiner {
     }
 
     @Nullable
-    private Signature findPathFromRoot(Kind kind, SchemaObject object) {
-        // TODO - constructing schema graph each time is highly ineffective.
-        final var graph = new SchemaGraph(kind.mapping.category().allMorphisms());
-        final List<Signature> signatures = graph.findPath(kind.mapping.rootObject(), object);
-
-        return signatures == null
-            ? null
-            : Signature.concatenate(signatures);
+    private Signature findPathFromRoot(KindPattern kind, SchemaObject object) {
+        final var patternObject = kind.getPatternObject(object);
+        return patternObject != null
+            ? patternObject.computePathFromRoot()
+            : null;
     }
 
     private static record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
         public static DatabasePair create(JoinCandidate candidate) {
-            final var a = candidate.from().database;
-            final var b = candidate.to().database;
+            final var a = candidate.from().kind.database;
+            final var b = candidate.to().kind.database;
             final boolean comparison = a.compareTo(b) > 0;
 
             return new DatabasePair(comparison ? a : b, comparison ? b : a);
@@ -225,20 +217,20 @@ public class PlanJoiner {
             .flatMap(g -> mergeNeighbors(g.candidates, candidatesBetweenParts).stream()).toList();
     }
 
-    public record QueryPart(Set<Kind> kinds, List<JoinCandidate> joinCandidates) {}
+    public record QueryPart(Set<KindPattern> kinds, List<JoinCandidate> joinCandidates) {}
 
     /**
      * Merges kinds from a single database to a minimal number of query parts.
      */
     private List<QueryPart> mergeNeighbors(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
         // All of the candidates have to have the same database.
-        final Database database = candidates.get(0).from().database;
+        final Database database = candidates.get(0).from().kind.database;
         // If the database supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
         if (database.control.getQueryWrapper().isJoinSupported())
             return GraphUtils.findComponents(candidates).stream().map(c -> new QueryPart(c.nodes(), c.edges())).toList();
         
         // Othervise, we have to create custom query part for each kind.
-        final var kinds = new TreeSet<Kind>();
+        final var kinds = new TreeSet<KindPattern>();
         candidates.forEach(c -> {
             kinds.add(c.from());
             kinds.add(c.to());
@@ -250,7 +242,7 @@ public class PlanJoiner {
     }
 
     private static interface JoinTreeNode {
-        Set<Kind> kinds();
+        Set<KindPattern> kinds();
         QueryNode toQueryNode(SchemaCategory schema);
     }
 
@@ -270,7 +262,7 @@ public class PlanJoiner {
     
     // }
     
-    private static record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<Kind> kinds) implements JoinTreeNode {
+    private static record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<KindPattern> kinds) implements JoinTreeNode {
         public JoinNode toQueryNode(SchemaCategory schema) {
             // First, we try to move operations and filters down the tree.
             // final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
@@ -293,7 +285,7 @@ public class PlanJoiner {
     }
 
     private static record JoinTreeLeaf(QueryPart queryPart) implements JoinTreeNode {
-        public Set<Kind> kinds() {
+        public Set<KindPattern> kinds() {
             return queryPart.kinds;
         }
 
@@ -302,7 +294,7 @@ public class PlanJoiner {
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
             final var patternNode = new PatternNode(queryPart.kinds, schema, queryPart.joinCandidates);
-            final var database = queryPart.kinds.stream().findFirst().get().database;
+            final var database = queryPart.kinds.stream().findFirst().get().kind.database;
 
             return new DatabaseNode(patternNode, database);
         }
@@ -353,82 +345,6 @@ public class PlanJoiner {
     
     private void optimizeJoinPlan() {
         throw new UnsupportedOperationException();
-    }
-
-    private static class Coloring {
-
-        private final SchemaCategory schema;
-        private final Map<Key, Set<Kind>> objectColors;
-        private final Map<Signature, Set<Kind>> morphismColors;
-
-        private Coloring(SchemaCategory schema, Map<Key, Set<Kind>> objectColors, Map<Signature, Set<Kind>> morphismColors) {
-            this.schema = schema;
-            this.objectColors = objectColors;
-            this.morphismColors = morphismColors;
-        }
-
-        public static Coloring create(SchemaCategory schema, Collection<Kind> kinds) {
-            final var coloring = new Coloring(schema, new TreeMap<>(), new TreeMap<>());
-            
-            for (final var kind : kinds)
-                coloring.colorObjectsAndMorphisms(kind, kind.mapping.accessPath());
-
-            return coloring;
-        }
-
-        private void colorObjectsAndMorphisms(Kind kind, ComplexProperty path) {
-            for (final var subpath : path.subpaths()) {
-                // TODO splitting might not work there?
-                subpath.signature().toBases().forEach(base -> {
-                    final var edge = schema.getEdge(base);
-                    morphismColors
-                        .computeIfAbsent(edge.morphism().signature(), x -> new TreeSet<>())
-                        .add(kind);
-
-                    objectColors
-                        .computeIfAbsent(edge.from().key(), x -> new TreeSet<>())
-                        .add(kind);
-
-                    objectColors
-                        .computeIfAbsent(edge.to().key(), x -> new TreeSet<>())
-                        .add(kind);
-                });
-
-                if (!(subpath instanceof ComplexProperty complexSubpath))
-                    continue;
-
-                colorObjectsAndMorphisms(kind, complexSubpath);
-            }
-        }
-
-        /**
-         * Select all objects that have more than one color.
-         */
-        public Set<SchemaObject> selectMulticolorObjects() {
-            return Set.of(
-                objectColors.keySet().stream().filter(key -> objectColors.get(key).size() > 1)
-                    .map(schema::getObject).toArray(SchemaObject[]::new)
-            );
-        }
-
-        /**
-         * The same but for morphisms.
-         */
-        public Set<SchemaMorphism> selectMorphisms() {
-            return Set.of(
-                morphismColors.keySet().stream().filter(signature -> morphismColors.get(signature).size() > 1)
-                    .map(schema::getMorphism).toArray(SchemaMorphism[]::new)
-            );
-        }
-
-        public Set<Kind> getColors(SchemaObject object) {
-            return objectColors.get(object);
-        }
-
-        public Set<Kind> getColors(SchemaMorphism morphism) {
-            return morphismColors.get(morphism);
-        }
-
     }
 
 }

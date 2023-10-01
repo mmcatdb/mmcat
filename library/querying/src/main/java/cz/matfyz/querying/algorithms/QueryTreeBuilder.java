@@ -3,6 +3,7 @@ package cz.matfyz.querying.algorithms;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryContext;
+import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.MinusNode;
 import cz.matfyz.querying.core.querytree.OptionalNode;
@@ -42,9 +43,9 @@ public class QueryTreeBuilder {
 
     private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
         final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause.pattern.triples);
-        final List<Set<Kind>> plans = QueryPlanner.run(extracted.schema(), extracted.kinds());
+        final List<Set<KindPattern>> plans = QueryPlanner.run(extracted.schema(), extracted.kindPatterns());
         // TODO better selection?
-        final Set<Kind> selectedPlan = plans.get(0);
+        final Set<KindPattern> selectedPlan = plans.get(0);
 
         QueryNode currentNode = PlanJoiner.run(selectedPlan, extracted.schema());
 

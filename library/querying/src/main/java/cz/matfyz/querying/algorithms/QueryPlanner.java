@@ -1,18 +1,14 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.querying.core.MorphismColoring;
+import cz.matfyz.querying.core.patterntree.KindPattern;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -20,36 +16,41 @@ import java.util.TreeSet;
  */
 public class QueryPlanner {
 
-    public static List<Set<Kind>> run(SchemaCategory schema, List<Kind> allKinds) {
-        return new QueryPlanner(schema, allKinds).run();
+    /**
+     * @param schema The queried schema category.
+     * @param kindPatterns All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
+     * @return
+     */
+    public static List<Set<KindPattern>> run(SchemaCategory schema, List<KindPattern> kindPatterns) {
+        return new QueryPlanner(schema, kindPatterns).run();
     }
     
     private final SchemaCategory schema;
-    private final List<Kind> allKinds;
+    private final List<KindPattern> kindPatterns;
 
-    private QueryPlanner(SchemaCategory schema, List<Kind> allKinds) {
+    private QueryPlanner(SchemaCategory schema, List<KindPattern> kindPatterns) {
         this.schema = schema;
-        this.allKinds = allKinds;
+        this.kindPatterns = kindPatterns;
     }
 
-    private List<Set<Kind>> run() {
+    private List<Set<KindPattern>> run() {
         createQueryPlans();
 
         return plans;
     }
     
     private record StackItem(
-        Set<Kind> selected,
-        List<Kind> rest,
-        Coloring coloring
+        Set<KindPattern> selected,
+        List<KindPattern> rest,
+        MorphismColoring coloring
     ) {}
 
-    private List<Set<Kind>> plans = new ArrayList<>();
+    private List<Set<KindPattern>> plans = new ArrayList<>();
     private Stack<StackItem> stack = new Stack<>();
 
     private void createQueryPlans() {
-        final Coloring initialColoring = Coloring.create(schema, allKinds);
-        final List<Kind> initialSortedKinds = initialColoring.sortKinds(allKinds);
+        final MorphismColoring initialColoring = MorphismColoring.create(kindPatterns);
+        final List<KindPattern> initialSortedKinds = initialColoring.sortKinds(kindPatterns);
 
         stack.push(new StackItem(new TreeSet<>(), new LinkedList<>(initialSortedKinds), initialColoring));
 
@@ -63,8 +64,8 @@ public class QueryPlanner {
             return;
         }
 
-        for (final Kind kind : touchFirst(item.rest, item.coloring)) {
-            final List<Kind> restWithoutKind = item.rest.stream().filter(k -> !k.equals(kind)).toList();
+        for (final KindPattern kind : touchFirst(item.rest, item.coloring)) {
+            final List<KindPattern> restWithoutKind = item.rest.stream().filter(k -> !k.equals(kind)).toList();
 
             final var coloringWithoutKind = item.coloring.removeKind(kind);
             final var sortedRestKinds = coloringWithoutKind.sortKinds(restWithoutKind);
@@ -78,9 +79,9 @@ public class QueryPlanner {
     /**
      * Returns all kinds from the given queue with the minimal price.
      */
-    private List<Kind> touchFirst(List<Kind> kindQueue, Coloring coloring) {
+    private List<KindPattern> touchFirst(List<KindPattern> kindQueue, MorphismColoring coloring) {
         final int lowestCost = coloring.getKindCost(kindQueue.get(0));
-        final List<Kind> output = new ArrayList<>();
+        final List<KindPattern> output = new ArrayList<>();
 
         for (final var kind : kindQueue) {
             if (coloring.getKindCost(kind) != lowestCost)
@@ -90,106 +91,6 @@ public class QueryPlanner {
         }
 
         return output;
-    }
-
-    private static Set<Signature> getAllMorphismsInKind(Kind kind) {
-        final Set<Signature> output = new TreeSet<>();
-        addAllMorphismsInPath(kind.mapping.accessPath(), output);
-
-        return output;
-    }
-
-    private static void addAllMorphismsInPath(AccessPath path, Set<Signature> output) {
-        output.add(path.signature());
-        if (path instanceof ComplexProperty complex)
-            complex.subpaths().forEach(subpath -> addAllMorphismsInPath(subpath, output));
-    }
-
-    private static class Coloring {
-
-        private final SchemaCategory schema;
-        private final Map<Signature, Set<Kind>> colors;
-
-        private Coloring(SchemaCategory schema, Map<Signature, Set<Kind>> colors) {
-            this.schema = schema;
-            this.colors = colors;
-        }
-
-        public static Coloring create(SchemaCategory schema, List<Kind> kinds) {
-            final var coloring = new Coloring(schema, new TreeMap<>());
-            
-            for (final var kind : kinds)
-                coloring.colorMorphisms(kind, kind.mapping.accessPath());
-
-            return coloring;
-        }
-
-        private void colorMorphisms(Kind kind, ComplexProperty path) {
-            for (final var subpath : path.subpaths()) {
-                // TODO splitting might not work there?
-                subpath.signature().toBases().forEach(base -> {
-                    final var edge = schema.getEdge(base);
-                    colors
-                        .computeIfAbsent(edge.morphism().signature(), x -> new TreeSet<>())
-                        .add(kind);
-                });
-
-                if (!(subpath instanceof ComplexProperty complexSubpath))
-                    continue;
-
-                colorMorphisms(kind, complexSubpath);
-            }
-        }
-
-        private Map<Kind, Integer> kindCosts = new TreeMap<>();
-
-        public int getKindCost(Kind kind) {
-            return kindCosts.computeIfAbsent(kind, k -> computePathCost(k.mapping.accessPath()));
-        }
-
-        private int computePathCost(AccessPath path) {
-            final var pathColors = colors.get(path.signature());
-            // The root property has empty signature, which is definitely not going to be found.
-            int min = pathColors != null ? pathColors.size() : Integer.MAX_VALUE;
-
-            if (path instanceof ComplexProperty complex)
-                for (final var subpath : complex.subpaths())
-                    min = Math.min(min, computePathCost(subpath));
-
-            return min != Integer.MAX_VALUE ? min : 0;
-        }
-
-        private static record KindWithCost(Kind kind, int cost) {}
-
-        /**
-         * Sorts given kinds based on the coloring.
-         * Also removes the zero-cost kinds because they aren't needed anymore.
-         */
-        public List<Kind> sortKinds(List<Kind> kinds) {
-            return kinds.stream()
-                .map(kind -> new KindWithCost(kind, getKindCost(kind)))
-                .filter(kindWithCost -> kindWithCost.cost > 0)
-                .sorted((a, b) -> a.cost - b.cost)
-                .map(KindWithCost::kind)
-                .toList();
-        }
-
-        /**
-         * Creates a new coloring (the current one stays unchanged).
-         * For each morphism in the given kind, we zero the cost of the morphism in all the other kinds.
-         * This basically means that we just remove all colors of the morphism.
-         */
-        public Coloring removeKind(Kind kind) {
-            final Set<Signature> removedMorphisms = getAllMorphismsInKind(kind);
-            final var newColors = new TreeMap<Signature, Set<Kind>>();
-            colors.forEach((signature, set) -> {
-                if (!removedMorphisms.contains(signature))
-                    newColors.put(signature, new TreeSet<>(set));
-            });
-
-            return new Coloring(schema, newColors);
-        }
-
     }
 
 }

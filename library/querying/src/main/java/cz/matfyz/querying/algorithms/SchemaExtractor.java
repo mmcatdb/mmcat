@@ -9,7 +9,7 @@ import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternObject;
-import cz.matfyz.querying.core.patterntree.PatternTree;
+import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.WhereTriple;
 import cz.matfyz.querying.parsing.ParserNode.Term;
@@ -18,13 +18,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.TreeMap;
 
 /**
  * This class extract a subset of schema category based on the query pattern. It also modifies mappings by discarding unnecessary objects.
  */
 public class SchemaExtractor {
 
-    public static Result run(QueryContext context, SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
+    public static ExtractorResult run(QueryContext context, SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
         return new SchemaExtractor(context, schema, kinds, pattern).run();
     }
 
@@ -40,16 +41,16 @@ public class SchemaExtractor {
         this.pattern = pattern;
     }
 
-    public static record Result(
+    public static record ExtractorResult(
         SchemaCategory schema,
-        List<PatternTree> patterns
+        List<KindPattern> kindPatterns
     ) {}
 
-    private Result run() {
+    private ExtractorResult run() {
         createNewSchema();
         updateContext();
 
-        return new Result(newSchema, createPatternTrees());
+        return new ExtractorResult(newSchema, createKindPatterns());
     }
 
     // The schema category of all objects and morphisms that are reachable from the pattern plus those that are needed to identify the objects.
@@ -87,8 +88,9 @@ public class SchemaExtractor {
             .forEach(base -> morphismQueue.add(schema.getMorphism(base)));
     }
 
-    private Map<BaseSignature, WhereTriple> signatureToTriple;
-    private Map<Key, Term> keyToTerm;
+    // TODO the whole context probably isn't needed anymore
+    private Map<BaseSignature, WhereTriple> signatureToTriple = new TreeMap<>();
+    private Map<Key, Term> keyToTerm = new TreeMap<>();
 
     private void updateContext() {
         pattern.forEach(triple -> {
@@ -104,8 +106,7 @@ public class SchemaExtractor {
         });
     }
 
-
-    private List<PatternTree> createPatternTrees() {
+    private List<KindPattern> createKindPatterns() {
         return kinds.stream()
             .filter(kind -> newSchema.hasObject(kind.mapping.rootObject().key()))
             .map(kind -> {
@@ -113,7 +114,7 @@ public class SchemaExtractor {
                 final var rootNode = PatternObject.createRoot(rootObject, keyToTerm.get(rootObject.key()));
                 processComplexProperty(rootNode, kind.mapping.accessPath());
 
-                return new PatternTree(kind, rootNode);
+                return new KindPattern(kind, rootNode);
             }).toList();
     }
 

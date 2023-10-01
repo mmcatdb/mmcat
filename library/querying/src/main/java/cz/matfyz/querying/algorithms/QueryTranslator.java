@@ -8,10 +8,10 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.QueryContext;
+import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
@@ -94,27 +94,25 @@ public class QueryTranslator implements QueryVisitor {
         throw new UnsupportedOperationException();
     }
 
-    private static record StackItem(AccessPath property, Signature path) {}
+    private static record StackItem(PatternObject object, Signature path) {}
 
-    private void processKind(Kind kind) {
+    private void processKind(KindPattern kind) {
         final Stack<StackItem> stack = new Stack<>();
-        stack.add(new StackItem(kind.mapping.accessPath(), Signature.createEmpty()));
+        stack.add(new StackItem(kind.root, Signature.createEmpty()));
         while (!stack.isEmpty())
             processTopOfStack(kind, stack.pop(), stack);
     }
 
-    private void processTopOfStack(Kind kind, StackItem item, Stack<StackItem> stack) {
-        final Signature path = item.path.concatenate(item.property.signature());
-        
-        if (item.property instanceof ComplexProperty complexProperty) {
-            complexProperty.subpaths().forEach(childProperty -> stack.add(new StackItem(childProperty, path)));
+    private void processTopOfStack(KindPattern kind, StackItem item, Stack<StackItem> stack) {
+        if (!item.object.isTerminal()) {
+            item.object.children().forEach(child -> stack.add(new StackItem(child, item.path.concatenate(child.signatureFromParent()))));
             return;
         }
         
-        final Term object = context.getTriple(item.property.signature().getLast()).object;
-        final Property objectProperty = new Property(kind, path);
+        final Term term = item.object.term;
+        final Property objectProperty = new Property(kind.kind, item.path);
 
-        if (object instanceof StringValue constantObject)
+        if (term instanceof StringValue constantObject)
             wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
         else
             // TODO isOptional is not supported yet.
@@ -126,7 +124,7 @@ public class QueryTranslator implements QueryVisitor {
         // final Property from = createProperty(null);
         // // TODO
         // final Property to = createProperty(null);
-        wrapper.addJoin(candidate.from(), candidate.to(), candidate.joinProperties(), candidate.recursion(), candidate.isOptional());
+        wrapper.addJoin(candidate.from().kind, candidate.to().kind, candidate.joinProperties(), candidate.recursion(), candidate.isOptional());
     }
 
     private Property createProperty(Term term) {

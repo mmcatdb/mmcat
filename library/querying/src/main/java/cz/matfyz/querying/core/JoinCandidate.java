@@ -1,18 +1,18 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
-import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.utils.GraphUtils.Edge;
+import cz.matfyz.querying.core.patterntree.KindPattern;
 
 import java.util.List;
 
 public record JoinCandidate(
     JoinType type,
-    Kind from,
-    Kind to,
+    KindPattern from,
+    KindPattern to,
     List<JoinCondition> joinProperties,
     int recursion // Some DBs allow to recursively join the same kind.
-) implements Edge<Kind> {
+) implements Edge<KindPattern> {
 
     public enum JoinType {
         IdRef,
