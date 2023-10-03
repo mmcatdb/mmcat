@@ -1,7 +1,7 @@
 ---
 header:
   - name: Application
-    ref: http://nosql.ms.mff.cuni.cz/mmcat/
+    ref: https://demo.mmcatdb.com
     icon: mdi_application_outline
     external: true
   - name: GitHub

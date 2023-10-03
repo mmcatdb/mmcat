@@ -12,4 +12,4 @@ geekdocBreadcrumb: false
 <br />
 {{< button size="large" relref="gettingStarted/introduction.md" >}}Read Motivation{{< /button >}}
 <br />
-{{< button size="large" href="http://nosql.ms.mff.cuni.cz/mmcat/" >}}Try Demo{{< /button >}}
+{{< button size="large" href="https://demo.mmcatdb.com" >}}Try Demo{{< /button >}}

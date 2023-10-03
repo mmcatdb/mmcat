@@ -8,7 +8,7 @@ The framework is based on selected theoretical concepts. It is impossible to uti
 
 ### Usage
 
-The framework currently consists of a frontend application, a backend application a few java libraries. Please start by reading the [User Guide](../userGuide/overview.md). Then you should try the demo of the [Application](http://nosql.ms.mff.cuni.cz/mmcat/).
+The framework currently consists of a frontend application, a backend application a few java libraries. Please start by reading the [User Guide](../userGuide/overview.md). Then you should try the demo of the [Application](https://demo.mmcatdb.com).
 
 ### Development
 
