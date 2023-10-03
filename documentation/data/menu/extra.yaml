@@ -4,7 +4,7 @@ header:
     ref: http://nosql.ms.mff.cuni.cz/mmcat/
     icon: mdi_application_outline
     external: true
-  - name: GitLab
-    ref: https://gitlab.mff.cuni.cz/contosp/evolution-management
-    icon: gdoc_gitlab
+  - name: GitHub
+    ref: https://github.com/mmcatdb/mmcat
+    icon: gdoc_github
     external: true

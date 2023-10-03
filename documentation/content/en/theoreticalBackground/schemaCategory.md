@@ -4,7 +4,7 @@ math: true
 weight: 20
 ---
 
-Any application needs a way to represent some sort of data. A conceptual schema is a high-level model of the data from the application's point of view. It hides the technical details of physically storing the data from the application and allows us to concentrate on the concepts that are important for the domain we are working on. In the MM-evocat framework this model is represented by a *schema category*. A similar structure capable of holding concrete data is called *instance category*.
+Any application needs a way to represent some sort of data. A conceptual schema is a high-level model of the data from the application's point of view. It hides the technical details of physically storing the data from the application and allows us to concentrate on the concepts that are important for the domain we are working on. In the mmcat framework this model is represented by a *schema category*. A similar structure capable of holding concrete data is called *instance category*.
 
 On the other hand, a logical model describes how the data should be organized to tables (for a relational model), documents (for a document model) and so on. It generally does not depend on any specific database engine. However, it might be affected by the possibilities of the target type of database systems.
 

@@ -1,5 +1,5 @@
 ---
-title: "MM-evocat"
+title: "mmcat"
 geekdocNav: false
 geekdocAlign: center
 geekdocAnchor: false

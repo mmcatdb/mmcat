@@ -4,7 +4,7 @@ math: true
 weight: 0
 ---
 
-MM-evocat is a framework for modelling multi-model data. It is based on category theory which is abstract enough to contain all currently used data models. The necessary theoretical background is described in the article[^article]. The brief summary of the most important concepts is [here](categoryTheory.md).
+Mmcat is a framework for modelling multi-model data. It is based on category theory which is abstract enough to contain all currently used data models. The necessary theoretical background is described in the article[^article]. The brief summary of the most important concepts is [here](categoryTheory.md).
 
 The generality of the theory allows us to create a category which describe multiple logical models from different databases at once. Thus, we are able to model any combination of different logical schemas with one category. This object is called [schema category](schemaCategory.md).
 
