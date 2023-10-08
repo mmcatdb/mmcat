@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * @author jachym.bartik
  */
@@ -31,7 +33,8 @@ public class FromObjectIsaSearch {
     private final Deque<InstanceMorphism> queue = new LinkedList<>();
     private final List<InstanceMorphism> outputCandidates = new ArrayList<>();
 
-    public InstanceMorphism process() {
+    @Nullable
+    public InstanceMorphism tryProcess() {
         addObjectMorphismsToQueue(object, Signature.createEmpty());
 
         while (!queue.isEmpty())

@@ -40,8 +40,8 @@ public class TextProcessor extends TypeProcessorBase implements TypeProcessor {
 
         final var valueString = literal.getLexicalForm();
 
-        final var attributeToLanguage = finder.findDirectFromObject(attributeObject, ATTRIBUTE_TO_LANGUAGE);
-        final var attributeToValue = finder.findDirectFromObject(attributeObject, ATTRIBUTE_TO_VALUE);
+        final var attributeToLanguage = finder.tryFindDirectFromObject(attributeObject, ATTRIBUTE_TO_LANGUAGE);
+        final var attributeToValue = finder.tryFindDirectFromObject(attributeObject, ATTRIBUTE_TO_VALUE);
         if (attributeToLanguage == null || attributeToValue == null)
             return null;
 
