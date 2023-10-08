@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 
@@ -50,6 +51,7 @@ public abstract class BaseQueryWrapper {
     
     protected List<Projection> projections = new ArrayList<>();
     
+    // TODO there should be some check if the projection isn't already defined. Probably by its variable? Or by the corresponding schema object?
     public void addProjection(Property property, boolean isOptional) {
         projections.add(new Projection(property, isOptional));
     }

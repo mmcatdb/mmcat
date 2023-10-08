@@ -11,6 +11,6 @@ public abstract class QueryNode {
         this.parent = parent;
     }
 
-    public abstract void accept(QueryVisitor visitor);
+    public abstract <T> T accept(QueryVisitor<T> visitor);
 
 }

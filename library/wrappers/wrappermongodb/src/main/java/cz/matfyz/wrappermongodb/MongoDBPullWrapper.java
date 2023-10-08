@@ -1,7 +1,9 @@
 package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -207,4 +209,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
         return output.toString();
     }
+
+    @Override
+    public QueryResult executeQuery(QueryStatement statement) {
+
+    }
+    
 }

@@ -1,6 +1,7 @@
 package cz.matfyz.abstractwrappers.queryresult;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -24,7 +25,7 @@ public class ResultList implements ResultNode {
             return this;
         }
 
-        public TableBuilder addColumns(List<String> names) {
+        public TableBuilder addColumns(Collection<String> names) {
             columns.addAll(names);
 
             return this;

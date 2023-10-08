@@ -1,7 +1,10 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.queryresult.QueryResult;
+import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -96,6 +99,42 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
                 return output.toString();
             }
+        }
+    }
+
+    @Override
+    public QueryResult executeQuery(QueryStatement query) {
+        // TODO get the columns somehow!
+        final var columns = query.structure().children.values().stream().map(child -> child.name).toList();
+
+        try (
+            Connection connection = provider.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query.stringContent());
+        ) {
+            LOGGER.info("Execute PostgreSQL query:\n{}", statement);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                final var builder = new ResultList.TableBuilder();
+                builder.addColumns(columns);
+                
+                while (resultSet.next()) {
+                    final var values = columns.stream().map(column -> {
+                        try {
+                            return resultSet.getString(column);
+                        }
+                        catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).toList();
+
+                    builder.addRow(values);
+                }
+                
+                return new QueryResult(builder.build(), null);
+            }
+        }
+        catch (Exception e) {
+            throw new PullForestException(e);
         }
     }
 

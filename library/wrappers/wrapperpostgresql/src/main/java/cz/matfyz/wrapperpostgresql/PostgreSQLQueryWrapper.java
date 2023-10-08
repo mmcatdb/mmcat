@@ -56,7 +56,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         addFrom();
         addWhere();
 
-        return new QueryStatement(builder.toString());
+        return new QueryStatement(builder.toString(), createStructure());
     }
 
     private void addSelect() {
@@ -207,6 +207,14 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     private String getAggregationName(PropertyWithAggregation aggregation) {
         return getAggregationOperatorValue(aggregation.aggregationOperator) + "(" + getPropertyNameWithoutAggregation(aggregation) + ")";
+    }
+
+    
+    private QueryStructure createStructure() {
+        final var root = new QueryStructure(null, null);
+        projections.forEach(p -> root.addChild(new QueryStructure(getPropertyName(p.property()), p.property().findSchemaObject())));
+
+        return root;
     }
 
 }

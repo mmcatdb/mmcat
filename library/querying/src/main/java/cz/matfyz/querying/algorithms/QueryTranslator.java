@@ -35,7 +35,7 @@ import java.util.Stack;
  * This class translates a query tree to a query for a specific database.
  * The provided tree has to have `database`, meaning it can be fully resolved withing the given database system.
  */
-public class QueryTranslator implements QueryVisitor {
+public class QueryTranslator implements QueryVisitor<Void> {
 
     public static QueryStatement run(QueryContext context, DatabaseNode databaseNode) {
         return new QueryTranslator(context, databaseNode).run();
@@ -57,16 +57,18 @@ public class QueryTranslator implements QueryVisitor {
         return this.wrapper.createDSLStatement();
     }
 
-    public void visit(DatabaseNode node) {
+    public Void visit(DatabaseNode node) {
         throw QueryTreeException.multipleDatabases(databaseNode.database, node.database);
     }
 
-    public void visit(PatternNode node) {
+    public Void visit(PatternNode node) {
         node.kinds.forEach(this::processKind);
         node.joinCandidates.forEach(this::processJoinCandidate);
+
+        return null;
     }
 
-    public void visit(FilterNode node) {
+    public Void visit(FilterNode node) {
         if (node.filter instanceof ConditionFilter conditionFilter) {
             final var left = createProperty(conditionFilter.lhs);
             final var right = createProperty(conditionFilter.rhs);
@@ -76,21 +78,23 @@ public class QueryTranslator implements QueryVisitor {
             final var property = createProperty(valueFilter.variable);
             wrapper.addFilter(property, new Constant(valueFilter.allowedValues), ComparisonOperator.Equal);
         }
+
+        return null;
     }
 
-    public void visit(JoinNode node) {
+    public Void visit(JoinNode node) {
         throw new UnsupportedOperationException();
     }
 
-    public void visit(MinusNode node) {
+    public Void visit(MinusNode node) {
         throw new UnsupportedOperationException();
     }
 
-    public void visit(OptionalNode node) {
+    public Void visit(OptionalNode node) {
         throw new UnsupportedOperationException();
     }
 
-    public void visit(UnionNode node) {
+    public Void visit(UnionNode node) {
         throw new UnsupportedOperationException();
     }
 

@@ -1,13 +1,14 @@
 package cz.matfyz.querying.core.querytree;
 
-public interface QueryVisitor {
+public interface QueryVisitor<T> {
     
-    void visit(DatabaseNode node);
-    void visit(FilterNode node);
-    void visit(JoinNode node);
-    void visit(MinusNode node);
-    void visit(OptionalNode node);
-    void visit(PatternNode node);
-    void visit(UnionNode node);
+    T visit(DatabaseNode node);
+    T visit(FilterNode node);
+    T visit(JoinNode node);
+    T visit(MinusNode node);
+    T visit(OptionalNode node);
+    T visit(PatternNode node);
+    T visit(UnionNode node);
 
 }
+

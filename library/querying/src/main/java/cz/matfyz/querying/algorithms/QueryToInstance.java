@@ -3,6 +3,7 @@ package cz.matfyz.querying.algorithms;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.other.JsonDMLWrapper;
+import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -36,7 +37,7 @@ public class QueryToInstance {
     public Result algorithm() {
         final Query query = QueryParser.run(queryString);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
-        final InstanceCategory whereInstance = QueryResolver.run(query.context, queryTree);
+        final QueryResult whereInstance = QueryResolver.run(query.context, queryTree);
 
         final List<String> jsonResults = createJsonResults(query, whereInstance);
 

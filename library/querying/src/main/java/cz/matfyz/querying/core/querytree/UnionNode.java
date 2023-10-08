@@ -13,8 +13,8 @@ public class UnionNode extends QueryNode {
     }
 
     @Override
-    public void accept(QueryVisitor visitor) {
-        visitor.visit(this);
+    public <T> T accept(QueryVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
 }

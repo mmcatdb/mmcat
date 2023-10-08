@@ -1,8 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.utils.PullQuery;
-import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
@@ -16,15 +15,14 @@ import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.exception.QueryTreeException;
 import cz.matfyz.querying.parsing.ConditionFilter;
 import cz.matfyz.querying.parsing.ValueFilter;
-import cz.matfyz.transformations.processes.DatabaseToInstance;
 
 /**
  * This class translates a query tree to a query for a specific database.
  * The provided tree has to have `database`, meaning it can be fully resolved withing the given database system.
  */
-public class QueryResolver implements QueryVisitor {
+public class QueryResolver implements QueryVisitor<QueryResult> {
 
-    public static InstanceCategory run(QueryContext context, QueryNode rootNode) {
+    public static QueryResult run(QueryContext context, QueryNode rootNode) {
         return new QueryResolver(context, rootNode).run();
     }
 
@@ -36,36 +34,23 @@ public class QueryResolver implements QueryVisitor {
         this.rootNode = rootNode;
     }
 
-    private InstanceCategory run() {
-        rootNode.accept(this);
-
-        // TODO
-        return lastInstance;
+    private QueryResult run() {
+        return rootNode.accept(this);
     }
 
-    private InstanceCategory lastInstance; // TODO - return ResultNode instead
-
-    public void visit(DatabaseNode node) {
+    public QueryResult visit(DatabaseNode node) {
         final var translator = new QueryTranslator(context, node);
         final QueryStatement query = translator.run();
+        final var pullWrapper = node.database.control.getPullWrapper();
 
-        final var databaseToInstance = new DatabaseToInstance();
-        databaseToInstance.input(
-            null, // TODO part.compiled.mapping,
-            null,
-            node.database.control.getPullWrapper(),
-            PullQuery.fromString(query.stringContent())
-        );
-        final var instanceCategory = databaseToInstance.run();
-
-        lastInstance = instanceCategory;
+        return pullWrapper.executeQuery(query);
     }
 
-    public void visit(PatternNode node) {
+    public QueryResult visit(PatternNode node) {
         throw QueryTreeException.unsupportedOutsideDatabase(node);
     }
 
-    public void visit(FilterNode node) {
+    public QueryResult visit(FilterNode node) {
         if (node.filter instanceof ConditionFilter conditionFilter) {
             // TODO
         }
@@ -74,19 +59,19 @@ public class QueryResolver implements QueryVisitor {
         }
     }
 
-    public void visit(JoinNode node) {
+    public QueryResult visit(JoinNode node) {
         throw new UnsupportedOperationException();
     }
 
-    public void visit(MinusNode node) {
+    public QueryResult visit(MinusNode node) {
         throw new UnsupportedOperationException();
     }
 
-    public void visit(OptionalNode node) {
+    public QueryResult visit(OptionalNode node) {
         throw new UnsupportedOperationException();
     }
 
-    public void visit(UnionNode node) {
+    public QueryResult visit(UnionNode node) {
         throw new UnsupportedOperationException();
     }
 

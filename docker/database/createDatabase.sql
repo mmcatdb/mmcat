@@ -36,7 +36,7 @@ CREATE TABLE data_source (
 INSERT INTO data_source (json_value)
 VALUES
     ('{
-        "url": "https://demo.mm-evocat.com/data-sources/test2.jsonld",
+        "url": "https://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld",
         "label": "Czech business registry",
         "type": "JsonLdStore"
     }');

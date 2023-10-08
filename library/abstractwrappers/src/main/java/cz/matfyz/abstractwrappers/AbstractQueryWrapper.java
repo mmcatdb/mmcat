@@ -2,9 +2,14 @@ package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.schema.SchemaObject;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractQueryWrapper {
 
@@ -82,6 +87,12 @@ public interface AbstractQueryWrapper {
             this.kind = kind;
             this.path = path;
         }
+
+        public SchemaObject findSchemaObject() {
+            return path.isEmpty()
+                ? kind.mapping.rootObject()
+                : kind.mapping.category().getEdge(path.getLast()).to();
+        }
     }
 
     public static class PropertyWithAggregation extends Property {
@@ -132,10 +143,32 @@ public interface AbstractQueryWrapper {
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
 
-    public static record QueryStatement(String stringContent) {}
+    public static class QueryStructure {
+    
+        // If null, this is the root of the tree.
+        @Nullable
+        public final String name;
+        // Same.
+        @Nullable
+        public final SchemaObject object;
+        public final Map<String, QueryStructure> children = new TreeMap<>();
+
+        public QueryStructure(@Nullable String name, @Nullable SchemaObject object) {
+            this.name = name;
+            this.object = object;
+        }
+
+        public void addChild(QueryStructure child) {
+            this.children.put(name, child);
+        }
+
+    }
+
+    public static record QueryStatement(String stringContent, QueryStructure structure) {}
 
     /**
      * Builds a DSL statement based on the information obtained by calling the wrapper methods.
      */
     QueryStatement createDSLStatement();
+
 }
