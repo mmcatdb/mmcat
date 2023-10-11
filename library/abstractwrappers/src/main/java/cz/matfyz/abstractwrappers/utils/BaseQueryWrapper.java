@@ -1,21 +1,16 @@
 package cz.matfyz.abstractwrappers.utils;
 
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AggregationOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ConstantFilter;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Join;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinedProperty;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Projection;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ValuesFilter;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariablesFilter;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.KindInstance;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,66 +20,66 @@ public abstract class BaseQueryWrapper {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseQueryWrapper.class);
 
-    protected Map<KindInstance, String> kinds = new TreeMap<>();
-    protected Map<VariableIdentifier, Projection> projections = new TreeMap<>();
-    protected List<ConstantFilter> constantFilters = new ArrayList<>();
-    protected List<VariablesFilter> variablesFilters = new ArrayList<>();
-    protected List<ValuesFilter> valuesFilters = new ArrayList<>();
-    protected List<Join> joins = new ArrayList<>();
-
     protected abstract Map<ComparisonOperator, String> defineComparisonOperators();
 
-    private final Map<ComparisonOperator, String> operators = defineComparisonOperators();
+    private final Map<ComparisonOperator, String> comparisonOperators = defineComparisonOperators();
 
-    protected String getOperatorValue(ComparisonOperator operator) {
-        var value = operators.get(operator);
+    protected String getComparisonOperatorValue(ComparisonOperator operator) {
+        var value = comparisonOperators.get(operator);
         if (value == null)
             throw QueryException.unsupportedOperator(operator);
             
         return value;
     }
 
-    // public void defineKind(KindInstance kind, String kindName) {
-    //     // LOGGER.info("[define kind] {}", kindName);
-    //     kinds.put(kind, kindName);
-    // }
+    protected abstract Map<AggregationOperator, String> defineAggregationOperators();
 
-    public void addProjection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId) {
-        // LOGGER.info("[add projection]\n{}\n{}\n{}", propertyPath, kind, variableId);
-        projections.put(variableId, new Projection(propertyPath, kind, variableId));
+    private final Map<AggregationOperator, String> aggregationOperators = defineAggregationOperators();
+
+    protected String getAggregationOperatorValue(AggregationOperator operator) {
+        var value = aggregationOperators.get(operator);
+        if (value == null)
+            throw QueryException.unsupportedOperator(operator);
+            
+        return value;
     }
 
-    public void addConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant) {
-        // LOGGER.info("[add constant filter]\n{}\n{}\n{}", variableId, operator, constant);
-        constantFilters.add(new ConstantFilter(variableId, operator, constant));
+    // Projections
+    
+    protected record Projection(Property property, String identifier, boolean isOptional) {}
+    
+    protected List<Projection> projections = new ArrayList<>();
+    
+    // TODO there should be some check if the projection isn't already defined. Probably by its variable? Or by the corresponding schema object?
+    public void addProjection(Property property, String identifier, boolean isOptional) {
+        projections.add(new Projection(property, identifier, isOptional));
     }
 
-    public void addVariablesFilter(VariableIdentifier lhsVariableId, ComparisonOperator operator, VariableIdentifier rhsVariableId) {
-        // LOGGER.info("[add variables filter]\n{}\n{}\n{}", lhsVariableId, operator, rhsVariableId);
-        variablesFilters.add(new VariablesFilter(lhsVariableId, operator, rhsVariableId));
+    // Joins
+
+    protected record Join(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional) {}
+    
+    protected List<Join> joins = new ArrayList<>();
+
+    public void addJoin(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional) {
+        joins.add(new Join(from, to, conditions, repetition, isOptional));
     }
 
-    public void addValuesFilter(VariableIdentifier variableId, List<String> constants) {
-        // LOGGER.info("[add values filter]\n{}\n{}", variableId, constants);
-        valuesFilters.add(new ValuesFilter(variableId, constants));
+    // Filters
+
+    protected interface Filter {}
+
+    protected record UnaryFilter(Property property, Constant constant, ComparisonOperator operator) implements Filter {}
+    protected record BinaryFilter(Property property1, Property property2, ComparisonOperator operator) implements Filter {}
+
+    protected List<Filter> filters = new ArrayList<>();
+    
+    public void addFilter(Property property1, Constant constant, ComparisonOperator operator) {
+        filters.add(new UnaryFilter(property1, constant, operator));
     }
 
-    // public void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind) {
-    public void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind) {
-        LOGGER.info("[add join]\n{}\n{}\n{}", lhsKind, joinProperties, rhsKind);
-        for (final var join : joins) {
-            if (lhsKind.equals(join.lhsKind) && rhsKind.equals(join.rhsKind)) {
-                LOGGER.info("Duplicate join found.");
-                return;
-            }
-
-            if (lhsKind.equals(join.rhsKind) && rhsKind.equals(join.lhsKind)) {
-                LOGGER.info("Duplicate reverse join found.");
-                return;
-            }
-        }
-
-        joins.add(new Join(lhsKind, joinProperties, rhsKind));
+    public void addFilter(Property property1, Property property2, ComparisonOperator operator) {
+        filters.add(new BinaryFilter(property1, property2, operator));
     }
     
 }

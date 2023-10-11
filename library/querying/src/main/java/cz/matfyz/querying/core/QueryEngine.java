@@ -1,7 +1,7 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinedProperty;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper_old.JoinedProperty;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -9,9 +9,9 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.InvalidPlanException;
-import cz.matfyz.querying.parsing.Filter;
+import cz.matfyz.querying.parsing.ConditionFilter;
 import cz.matfyz.querying.parsing.StringValue;
-import cz.matfyz.querying.parsing.Values;
+import cz.matfyz.querying.parsing.ValueFilter;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 
@@ -22,14 +22,13 @@ import java.util.Map;
 /**
  * Query engine class which is responsible for the translation of query parts into native queries, and the subsequent execution of those query parts.
  */
+@Deprecated
 public class QueryEngine {
 
     private final SchemaCategory schemaCategory;
-    private final List<KindDefinition> allKinds;
 
-    public QueryEngine(SchemaCategory schemaCategory, List<KindDefinition> allKinds) {
+    public QueryEngine(SchemaCategory schemaCategory) {
         this.schemaCategory = schemaCategory;
-        this.allKinds = allKinds;
     }
 
     /**
@@ -44,15 +43,14 @@ public class QueryEngine {
     /**
      * Compile the native database query and corresponding mapping for a single query part.
      */
-    private void compileQueryPart(QueryPart part) {
+    private void compileQueryPart(QueryPart_old part) {
         var variableTypes = Utils.getVariableTypesFromPart(part, schemaCategory);
         var mappingBuilder = new MappingBuilder();
 
         var kindsInPart = Utils.getKindsFromPart(part);
         // There is one common wrapper for all kinds in the part.
-        // TODO hack
-        var controlWrapper = allKinds.stream().filter(k -> k.databaseId == kindsInPart.get(0).databaseId).findFirst().get().wrapper;
-        var queryWrapper = controlWrapper.getQueryWrapper();
+        var controlWrapper = kindsInPart.get(0).database.control;
+        var queryWrapper = controlWrapper.getQueryWrapper_old();
 
         // for (var kind : kindsInPart)
         //     queryWrapper.defineKind(kind, kind.mapping.kindName());
@@ -68,7 +66,7 @@ public class QueryEngine {
         part.compiled = new QueryPartCompiled(statement.stringContent(), mapping, controlWrapper);
     }
 
-    private void processProjectionTriples(QueryPart part, Map<String, SchemaObject> variableTypes, MappingBuilder mappingBuilder, AbstractQueryWrapper queryWrapper) {
+    private void processProjectionTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, MappingBuilder mappingBuilder, AbstractQueryWrapper_old queryWrapper) {
         for (var tripleKind : part.triplesMapping) {
             var object = tripleKind.triple.object;
 
@@ -92,7 +90,7 @@ public class QueryEngine {
         }
     }
 
-    private void processJoinTriples(QueryPart part, Map<String, SchemaObject> variableTypes, AbstractQueryWrapper queryWrapper) {
+    private void processJoinTriples(QueryPart_old part, Map<String, SchemaObject> variableTypes, AbstractQueryWrapper_old queryWrapper) {
         for (var tripleKindA : part.triplesMapping) {
             for (var tripleKindB : part.triplesMapping) {
                 if (!tripleKindA.triple.object.equals(tripleKindB.triple.subject) && !tripleKindA.triple.subject.equals(tripleKindB.triple.subject))
@@ -131,8 +129,8 @@ public class QueryEngine {
         }
     }
 
-    private void processFilters(QueryPart part, AbstractQueryWrapper queryWrapper) {
-        var filters = part.statements.stream().filter(Filter.class::isInstance).map(f -> (Filter) f).toList();
+    private void processFilters(QueryPart_old part, AbstractQueryWrapper_old queryWrapper) {
+        var filters = part.statements.stream().filter(ConditionFilter.class::isInstance).map(f -> (ConditionFilter) f).toList();
 
         for (var filter : filters) {
             if (!(filter.lhs instanceof Variable lhsVariable))
@@ -155,8 +153,8 @@ public class QueryEngine {
         }
     }
 
-    private void processValues(QueryPart part, AbstractQueryWrapper queryWrapper) {
-        var valuesFilters = part.statements.stream().filter(Values.class::isInstance).map(v -> (Values) v).toList();
+    private void processValues(QueryPart_old part, AbstractQueryWrapper_old queryWrapper) {
+        var valuesFilters = part.statements.stream().filter(ValueFilter.class::isInstance).map(v -> (ValueFilter) v).toList();
         for (var values : valuesFilters) {
             queryWrapper.addValuesFilter(
                 values.variable.id,

@@ -1,6 +1,7 @@
 package cz.matfyz.tests.database;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.mapping.TestMapping;
@@ -25,14 +26,16 @@ public class TestDatabase<TWrapper extends AbstractControlWrapper> {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestDatabase.class);
 
     private static int lastId = 0;
-    
+
+    public final DatabaseType type;
     public final String id;
     public final TWrapper wrapper;
     public final List<Mapping> mappings = new ArrayList<>();
     public final SchemaCategory schema;
     private final String setupFileName;
 
-    private TestDatabase(TWrapper wrapper, SchemaCategory schema, String setupFileName) {
+    private TestDatabase(DatabaseType type, TWrapper wrapper, SchemaCategory schema, String setupFileName) {
+        this.type = type;
         this.id = "" + lastId++;
         this.wrapper = wrapper;
         this.schema = schema;
@@ -40,15 +43,15 @@ public class TestDatabase<TWrapper extends AbstractControlWrapper> {
     }
 
     public static TestDatabase<PostgreSQLControlWrapper> createPostgreSQL(PostgreSQLProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(new PostgreSQLControlWrapper(provider), schema, "setupPostgresql.sql");
+        return new TestDatabase<>(DatabaseType.postgresql, new PostgreSQLControlWrapper(provider), schema, "setupPostgresql.sql");
     }
 
     public static TestDatabase<MongoDBControlWrapper> createMongoDB(MongoDBProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(new MongoDBControlWrapper(provider), schema, "setupMongodb.js");
+        return new TestDatabase<>(DatabaseType.mongodb, new MongoDBControlWrapper(provider), schema, "setupMongodb.js");
     }
 
     public static TestDatabase<Neo4jControlWrapper> createNeo4j(Neo4jProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(new Neo4jControlWrapper(provider), schema, "setupNeo4j.cypher");
+        return new TestDatabase<>(DatabaseType.neo4j, new Neo4jControlWrapper(provider), schema, "setupNeo4j.cypher");
     }
 
     public TestDatabase<TWrapper> addMapping(TestMapping testMapping) {

@@ -25,7 +25,7 @@ public class IntegrationTests {
     
     static final String JSON_LD_FILE_NAME = "test2.jsonld";
     //static final String JSON_LD_FILE_NAME = "test1.jsonld";
-    static final String JSON_LD_URL = "https://demo.mm-evocat.com/data-sources/test2.jsonld";
+    static final String JSON_LD_URL = "https://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld";
     //static final String JSON_LD_URL = "http://localhost/data-sources/test1.jsonld";
 
     @Test

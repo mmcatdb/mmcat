@@ -188,6 +188,11 @@ public class AsyncJobService {
             output.append(result.statementsAsString() + "\n");
 
             // TODO - find a better way how to execute the changes (currently its too likely to fail)
+
+            // TODO - verzovat databáze - tj. vytvořit vždy novou databázi (v rámci stejného engine)
+            //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
+            //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
+
             if (server.executeModels()) {
                 LOGGER.info("Start executing models ...");
                 control.execute(result.statements());

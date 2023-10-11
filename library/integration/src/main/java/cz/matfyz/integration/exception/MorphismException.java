@@ -18,10 +18,6 @@ public class MorphismException extends IntegrationException {
         super("morphism." + name, data, null);
     }
 
-    public static MorphismException notFound(String pimIri) {
-        return new MorphismException("notFound", new MorphismData(pimIri, null));
-    }
-
     public static MorphismException multipleFound(Key object) {
         return new MorphismException("multipleFound", new MorphismData(null, object));
     }

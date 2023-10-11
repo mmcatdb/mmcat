@@ -55,7 +55,6 @@ public class SchemaCategory implements Category {
             return baseMorphism;
         }
 
-
         final SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
         if (morphism != null)
             return morphism;
@@ -72,11 +71,11 @@ public class SchemaCategory implements Category {
             return direction ? morphism.signature() : morphism.signature().dual();
         }
 
-        public SchemaObject dom() {
+        public SchemaObject from() {
             return direction ? morphism.dom() : morphism.cod();
         }
 
-        public SchemaObject cod() {
+        public SchemaObject to() {
             return direction ? morphism.cod() : morphism.dom();
         }
 
@@ -98,6 +97,14 @@ public class SchemaCategory implements Category {
 
     public Collection<SchemaMorphism> allMorphisms() {
         return morphismContext.getAllUniqueObjects();
+    }
+
+    public boolean hasObject(Key key) {
+        return objectContext.getUniqueObject(key) != null;
+    }
+
+    public boolean hasMorphism(Signature signature) {
+        return morphismContext.getUniqueObject(signature) != null;
     }
 
     private SchemaMorphism createCompositeMorphism(Signature signature) {

@@ -51,7 +51,7 @@ export enum PropertyType {
     Complex = 'Complex'
 }
 
-export class Neighbour {
+export class Neighbor {
     constructor(
         readonly edge: Edge,
         readonly node: Node,
@@ -77,7 +77,7 @@ export class Node {
     private tags: Set<NodeTag> = new Set();
     availablePathData?: MorphismData;
 
-    private _neighbours = new ComparableMap<Signature, string, Neighbour>(signature => signature.value);
+    private _neighbors = new ComparableMap<Signature, string, Neighbor>(signature => signature.value);
 
     private constructor(
         public schemaObject: SchemaObject,
@@ -152,7 +152,7 @@ export class Node {
         });
     }
 
-    addNeighbour(edge: Edge, direction: boolean): void {
+    addNeighbor(edge: Edge, direction: boolean): void {
         const thisNode = direction ? edge.domainNode : edge.codomainNode;
         if (!thisNode.equals(this))
             throw new Error(`Cannot add edge with signature: ${edge.schemaMorphism.signature} and direction: ${direction} to node with key: ${this.schemaObject.key}`);
@@ -162,17 +162,17 @@ export class Node {
         const edgeSignature = edge.schemaMorphism.signature;
         const signature = direction ? edgeSignature : edgeSignature.dual();
 
-        const neighbour = new Neighbour(edge, node, signature);
-        this._neighbours.set(signature, neighbour);
+        const neighbor = new Neighbor(edge, node, signature);
+        this._neighbors.set(signature, neighbor);
     }
 
-    removeNeighbour(node: Node): void {
-        [ ...this._neighbours.values() ]
-            .filter(neighbour => neighbour.node.equals(node))
-            .forEach(neighbour => this._neighbours.delete(neighbour.signature));
+    removeNeighbor(node: Node): void {
+        [ ...this._neighbors.values() ]
+            .filter(neighbor => neighbor.node.equals(node))
+            .forEach(neighbor => this._neighbors.delete(neighbor.signature));
     }
 
-    getNeighbourNode(signature: Signature): Node | undefined {
+    getNeighborNode(signature: Signature): Node | undefined {
         if (signature.isEmpty)
             return this;
 
@@ -180,15 +180,15 @@ export class Node {
         if (!split)
             return undefined;
 
-        const neighbour = this._neighbours.get(split.first);
-        if (!neighbour)
+        const neighbor = this._neighbors.get(split.first);
+        if (!neighbor)
             return undefined;
 
-        return split.rest.isEmpty ? neighbour.node : neighbour.node.getNeighbourNode(split.rest);
+        return split.rest.isEmpty ? neighbor.node : neighbor.node.getNeighborNode(split.rest);
     }
 
-    get neighbours(): Neighbour[] {
-        return [ ...this._neighbours.values() ];
+    get neighbors(): Neighbor[] {
+        return [ ...this._neighbors.values() ];
     }
 
     get determinedPropertyType(): PropertyType | null {

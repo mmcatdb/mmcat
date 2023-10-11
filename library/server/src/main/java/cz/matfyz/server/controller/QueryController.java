@@ -1,8 +1,9 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.abstractwrappers.database.Database;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.algorithms.QueryToInstance;
-import cz.matfyz.querying.core.KindDefinition;
+import cz.matfyz.querying.algorithms.QueryToInstance_old;
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.builder.SchemaCategoryContext;
 import cz.matfyz.server.entity.Id;
@@ -58,23 +59,26 @@ public class QueryController {
 
         final var kinds = defineKinds(categoryWrapper.id, category);
 
-        final var queryToInstance = new QueryToInstance();
+        final var queryToInstance = new QueryToInstance_old();
         queryToInstance.input(category, data.queryString, null, kinds);
         final var result = queryToInstance.algorithm();
 
         return new QueryResult(result.jsonValues());
     }
 
-    private List<KindDefinition> defineKinds(Id categoryId, SchemaCategory category) {
+    private List<Kind> defineKinds(Id categoryId, SchemaCategory category) {
         return logicalModelService.findAll(categoryId).stream()
             .flatMap(logicalModel -> {
-                final var database = databaseService.find(logicalModel.databaseId);
+                final var databaseEntity = databaseService.find(logicalModel.databaseId);
+                final var builder = new Database.Builder();
                 
-                return mappingService.findAll(logicalModel.id).stream().map(mappingWrapper -> {
+                mappingService.findAll(logicalModel.id).forEach(mappingWrapper -> {
                     final var mapping = MappingBuilder.build(category, mappingWrapper);
-
-                    return new KindDefinition(mapping, logicalModel.databaseId.toString(), wrapperService.getControlWrapper(database));
+                    builder.mapping(mapping);
                 });
+
+                final var database = builder.build(databaseEntity.type, wrapperService.getControlWrapper(databaseEntity), databaseEntity.id.toString());
+                return database.kinds.stream();
             }).toList();
     }
 

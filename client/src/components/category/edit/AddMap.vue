@@ -70,10 +70,10 @@ function save() {
 
         evocat.editObject({
             ...mapObject.toDefinition(),
-            ids: ObjectIds.createCrossProduct(
-                [ mapToKey.signature, mapToNode1.signature ],
-                [ keyObjectIds, node1.schemaObject.ids ],
-            ),
+            ids: ObjectIds.createCrossProduct([
+                { signature: mapToKey.signature, ids: keyObjectIds },
+                { signature: mapToNode1.signature, ids: node1.schemaObject.ids },
+            ]),
         }, mapObject);
     });
 

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import org.springframework.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author jachym.bartik

@@ -1,19 +1,22 @@
 package cz.matfyz.querying.parsing;
 
-public class StringValue extends QueryNode implements ValueNode {
+import cz.matfyz.querying.parsing.ParserNode.Term;
 
-    @Override StringValue asStringValue() {
-        return this;
-    }
+public class StringValue implements Term {
 
-    @Override ValueNode asValueNode() {
+    @Override public StringValue asStringValue() {
         return this;
     }
 
     public final String value;
 
-    public StringValue(String value) {
+    StringValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "s_" + value;
     }
 
     @Override

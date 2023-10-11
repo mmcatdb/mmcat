@@ -3,6 +3,7 @@ package cz.matfyz.querying.core;
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.core.mapping.Mapping;
 
+@Deprecated
 public class QueryPartCompiled {
 
     public final String query;

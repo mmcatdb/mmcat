@@ -1,5 +1,6 @@
 package cz.matfyz.server.entity.database;
 
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 
@@ -8,6 +9,6 @@ import cz.matfyz.server.entity.Id;
  */
 public record DatabaseInfo(
     Id id,
-    Database.Type type,
+    DatabaseType type,
     String label
 ) implements IEntity {}

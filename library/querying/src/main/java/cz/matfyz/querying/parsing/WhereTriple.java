@@ -4,6 +4,8 @@ import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ParsingException;
+import cz.matfyz.querying.parsing.ParserNode.Term;
+import cz.matfyz.querying.parsing.Variable.VariableBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,21 +14,21 @@ public class WhereTriple implements Statement {
 
     public final Variable subject;
     public final BaseSignature signature;
-    public final ValueNode object;
+    public final Term object;
     
-    public WhereTriple(Variable subject, BaseSignature signature, ValueNode object) {
+    WhereTriple(Variable subject, BaseSignature signature, Term object) {
         this.subject = subject;
         this.signature = signature;
         this.object = object;
     }
 
-    static List<WhereTriple> fromCommonTriple(CommonTriple common) {
+    static List<WhereTriple> fromCommonTriple(CommonTriple common, VariableBuilder builder) {
         try {
             final var bases = Arrays.stream(common.predicate.split("/"))
                 .map(base -> Signature.createBase(Integer.parseInt(base)))
                 .toList();
 
-            return createSplit(common.subject, bases, common.object);
+            return createSplit(common.subject, bases, common.object, builder);
         }
         catch (NumberFormatException e) {
             throw ParsingException.signature(common.predicate);
@@ -36,7 +38,7 @@ public class WhereTriple implements Statement {
     /**
      * For each compound morphism (A) -x/y-> (B), split it by inserting intermediate internal variables in such a way that each triple contains a base morphism only.
      */
-    private static List<WhereTriple> createSplit(Variable subject, List<BaseSignature> bases, ValueNode object) {
+    private static List<WhereTriple> createSplit(Variable subject, List<BaseSignature> bases, Term object, VariableBuilder builder) {
         var splitTriples = bases.stream().map(base -> {
             var editableTriple = new EditableWhereTriple();
             editableTriple.signature = base;
@@ -47,7 +49,7 @@ public class WhereTriple implements Statement {
         splitTriples.get(splitTriples.size() - 1).object = object;
 
         for (int i = 0; i < splitTriples.size() - 1; i++) {
-            Variable newVariable = Variable.generated();
+            Variable newVariable = builder.generated();
             splitTriples.get(i).object = newVariable;
             splitTriples.get(i + 1).subject = newVariable;
         }
@@ -58,7 +60,7 @@ public class WhereTriple implements Statement {
     private static class EditableWhereTriple {
         Variable subject;
         BaseSignature signature;
-        ValueNode object;
+        Term object;
 
         /**
          * For each triple with a base dual morphism, reverse its direction so that we have a non-dual morphism.

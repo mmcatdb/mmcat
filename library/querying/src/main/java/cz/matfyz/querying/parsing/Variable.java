@@ -1,33 +1,30 @@
 package cz.matfyz.querying.parsing;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
+import cz.matfyz.querying.parsing.ParserNode.Term;
 
-import java.util.UUID;
+import java.util.Map;
+import java.util.TreeMap;
 
-public class Variable extends QueryNode implements ValueNode {
+public class Variable implements Term {
 
-    @Override Variable asVariable() {
-        return this;
-    }
-
-    @Override ValueNode asValueNode() {
+    @Override public Variable asVariable() {
         return this;
     }
 
     public final String name;
+    // TODO the variable should be identified by the name
+    @Deprecated
     public final VariableIdentifier id;
     
-    private Variable(String name) {
+    private Variable(String name, VariableIdentifier id) {
         this.name = name;
         this.id = new VariableIdentifier(name);
     }
 
-    public static Variable fromName(String name) {
-        return new Variable(name);
-    }
-
-    public static Variable generated() {
-        return new Variable(UUID.randomUUID().toString());
+    @Override
+    public String getIdentifier() {
+        return "v_" + name;
     }
 
     @Override
@@ -37,7 +34,33 @@ public class Variable extends QueryNode implements ValueNode {
 
     @Override
     public String toString() {
-        return this.name;
+        return "?" + name;
+    }
+
+    static class VariableBuilder {
+
+        private int lastIdentifier = 0;
+        private Map<String, VariableIdentifier> nameToIdentifier = new TreeMap<>();
+        
+        private VariableIdentifier generateIdentifier() {
+            return new VariableIdentifier("" + lastIdentifier++);
+        }
+
+        public Variable fromName(String name) {
+            final var identifier = nameToIdentifier.computeIfAbsent(name, x -> generateIdentifier());
+            return new Variable(name, identifier);
+        }
+
+        private int lastGeneratedNameId = 0;
+
+        private String generateName() {
+            return "#var" + lastGeneratedNameId++;
+        }
+
+        public Variable generated() {
+            return new Variable(generateName(), generateIdentifier());
+        }
+
     }
 
 }

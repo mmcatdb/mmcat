@@ -2,7 +2,7 @@ import type { DatabaseConfiguration } from '../database';
 import type { Signature } from '../identifiers';
 import { Cardinality, type Max, type Min } from '../schema';
 import type { Edge } from './Edge';
-import { type Node, AvailabilityStatus, Neighbour } from './Node';
+import { type Node, AvailabilityStatus, Neighbor } from './Node';
 
 export type MorphismData = {
     signature: Signature;
@@ -51,42 +51,42 @@ export class PathMarker {
         this.filterFunctions = Array.isArray(filter.function) ? filter.function : [ filter.function ];
     }
 
-    getTraversableNeighbours(sourceNode: Node, previousSegment?: PathSegment): PathSegment[] {
-        let neighbours = sourceNode.neighbours
-            .map(neighbour => createPathSegment(sourceNode, neighbour, previousSegment))
+    getTraversableNeighbors(sourceNode: Node, previousSegment?: PathSegment): PathSegment[] {
+        let neighbors = sourceNode.neighbors
+            .map(neighbor => createPathSegment(sourceNode, neighbor, previousSegment))
             .filter(segment => !segment.targetNode.equals(this.rootNode));
 
         // The edges around the root node are clickable so we have to check if they are valid.
         // First we mark all as invalid.
         if (!previousSegment)
-            neighbours.forEach(neighbour => neighbour.edge.setTraversible(neighbour.direction, false));
+            neighbors.forEach(neighbor => neighbor.edge.setTraversible(neighbor.direction, false));
 
         if (previousSegment)
-            neighbours = filterBackwardPaths(neighbours, previousSegment.fullMorphism);
+            neighbors = filterBackwardPaths(neighbors, previousSegment.fullMorphism);
 
         for (const filterFunction of this.filterFunctions)
-            neighbours = neighbours.filter(filterFunction);
+            neighbors = neighbors.filter(filterFunction);
 
         // Then we validate those that survive the filters.
         if (!previousSegment)
-            neighbours.forEach(neighbour => neighbour.edge.setTraversible(neighbour.direction, true));
+            neighbors.forEach(neighbor => neighbor.edge.setTraversible(neighbor.direction, true));
 
         // We have to check that we are not going back to the same node.
         // It's permitted, but the user has to specifically require it.
-        // To do so, the user has to choose the node as CertainlyAvailable, i.e. as a direct neighbour.
+        // To do so, the user has to choose the node as CertainlyAvailable, i.e. as a direct neighbor.
         // However, this is not required for the leaves because for them there is no other option than to go back.
-        if (previousSegment && neighbours.length > 1)
-            neighbours = neighbours.filter(entry => !entry.targetNode.equals(sourceNode));
+        if (previousSegment && neighbors.length > 1)
+            neighbors = neighbors.filter(entry => !entry.targetNode.equals(sourceNode));
 
-        return neighbours;
+        return neighbors;
     }
 
-    processNeighbour(neighbour: PathSegment): void {
-        const continueAdding = markNeighbour(neighbour);
+    processNeighbor(neighbor: PathSegment): void {
+        const continueAdding = markNeighbor(neighbor);
         if (!continueAdding)
             return;
 
-        const addition = this.getTraversableNeighbours(neighbour.targetNode, neighbour);
+        const addition = this.getTraversableNeighbors(neighbor.targetNode, neighbor);
         this.stack.push(...addition);
     }
 
@@ -115,38 +115,38 @@ export class PathMarker {
             this.rootNode.select({ type: SelectionType.Root, level: 0 });
         */
 
-        // For the direct neighbours of the root the queue is needed.
-        const queue = this.getTraversableNeighbours(this.rootNode);
-        const allProcessedNeighbours: PathSegment[] = [];
+        // For the direct neighbors of the root the queue is needed.
+        const queue = this.getTraversableNeighbors(this.rootNode);
+        const allProcessedNeighbors: PathSegment[] = [];
 
-        let directNeighbour = queue.shift();
-        while (directNeighbour) {
-            allProcessedNeighbours.push(directNeighbour);
-            this.processNeighbour(directNeighbour);
-            directNeighbour = queue.shift();
+        let directNeighbor = queue.shift();
+        while (directNeighbor) {
+            allProcessedNeighbors.push(directNeighbor);
+            this.processNeighbor(directNeighbor);
+            directNeighbor = queue.shift();
         }
 
-        let indirectNeighbour = this.stack.pop();
-        while (indirectNeighbour) {
-            allProcessedNeighbours.push(indirectNeighbour);
-            this.processNeighbour(indirectNeighbour);
-            indirectNeighbour = this.stack.pop();
+        let indirectNeighbor = this.stack.pop();
+        while (indirectNeighbor) {
+            allProcessedNeighbors.push(indirectNeighbor);
+            this.processNeighbor(indirectNeighbor);
+            indirectNeighbor = this.stack.pop();
         }
     }
 }
 
-function createPathSegment(sourceNode: Node, neighbour: Neighbour, previousSegment?: PathSegment): PathSegment {
-    const direction = neighbour.direction;
-    const edge = neighbour.edge;
+function createPathSegment(sourceNode: Node, neighbor: Neighbor, previousSegment?: PathSegment): PathSegment {
+    const direction = neighbor.direction;
+    const edge = neighbor.edge;
 
     const morphismData: MorphismData = {
-        signature: neighbour.signature,
+        signature: neighbor.signature,
         min: direction ? edge.schemaMorphism.min : Cardinality.Zero,
         max: direction ? Cardinality.One : Cardinality.Star,
     };
 
     return {
-        targetNode: neighbour.node,
+        targetNode: neighbor.node,
         sourceNode,
         edge,
         direction,
@@ -165,39 +165,39 @@ export function createDefaultFilter(configuration: DatabaseConfiguration): Filte
 }
 
 // The path backwards is not allowed unless this node is the current root (i.e. entry morphism is empty)
-function filterBackwardPaths(neighbours: PathSegment[], entryMorphism: MorphismData): PathSegment[] {
+function filterBackwardPaths(neighbors: PathSegment[], entryMorphism: MorphismData): PathSegment[] {
     const entryBase = entryMorphism.signature.getLastBase();
 
-    return neighbours.filter(neighbour => {
-        const base = neighbour.fullMorphism.signature.getLastBase();
+    return neighbors.filter(neighbor => {
+        const base = neighbor.fullMorphism.signature.getLastBase();
         return !(base && entryBase && base.last.isBaseAndDualOf(entryBase.last));
     });
 }
 
-function markNeighbour(neighbour: PathSegment): boolean {
+function markNeighbor(neighbor: PathSegment): boolean {
     // If the previous node was the root node, this node is definitely available so we mark it this way.
     // Unless there are multiple morphisms between the root node and this one. If that's the case, we have to process it normally.
-    if (!neighbour.previousSegment) {
-        const status = neighbour.targetNode.availabilityStatus === AvailabilityStatus.Default ? AvailabilityStatus.CertainlyAvailable : AvailabilityStatus.Ambiguous;
-        neighbour.targetNode.setAvailabilityStatus(status);
-        neighbour.targetNode.availablePathData = neighbour.fullMorphism;
+    if (!neighbor.previousSegment) {
+        const status = neighbor.targetNode.availabilityStatus === AvailabilityStatus.Default ? AvailabilityStatus.CertainlyAvailable : AvailabilityStatus.Ambiguous;
+        neighbor.targetNode.setAvailabilityStatus(status);
+        neighbor.targetNode.availablePathData = neighbor.fullMorphism;
 
         return true;
     }
 
     // If the node hasn't been traversed yet, it becomes available.
     // Unless it's previous node has been found ambigous - then this node is also ambiguous.
-    if (neighbour.targetNode.availabilityStatus === AvailabilityStatus.Default) {
-        if (neighbour.sourceNode?.availabilityStatus === AvailabilityStatus.Ambiguous) {
-            neighbour.targetNode.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
+    if (neighbor.targetNode.availabilityStatus === AvailabilityStatus.Default) {
+        if (neighbor.sourceNode?.availabilityStatus === AvailabilityStatus.Ambiguous) {
+            neighbor.targetNode.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
         }
         else {
-            neighbour.targetNode.setAvailabilityStatus(AvailabilityStatus.Available);
-            neighbour.targetNode.availablePathData = neighbour.fullMorphism;
+            neighbor.targetNode.setAvailabilityStatus(AvailabilityStatus.Available);
+            neighbor.targetNode.availablePathData = neighbor.fullMorphism;
 
-            // If the previous neighbour is found to be ambiguous, this one is also ambiguous.
-            if (neighbour.previousSegment)
-                neighbour.previousSegment.dependentSegments.push(neighbour);
+            // If the previous neighbor is found to be ambiguous, this one is also ambiguous.
+            if (neighbor.previousSegment)
+                neighbor.previousSegment.dependentSegments.push(neighbor);
         }
 
         return true;
@@ -205,31 +205,31 @@ function markNeighbour(neighbour: PathSegment): boolean {
 
     // Already traversed path detected. This means we have marked all potentially ambiguous nodes.
     // If the node is in the Ambiguous state, it means we have already processed all its ambiguous paths
-    if (neighbour.targetNode.availabilityStatus !== AvailabilityStatus.Ambiguous)
-        processAmbiguousPath(neighbour);
+    if (neighbor.targetNode.availabilityStatus !== AvailabilityStatus.Ambiguous)
+        processAmbiguousPath(neighbor);
 
     return false;
 }
 
-function processAmbiguousPath(lastNeighbour: PathSegment): void {
-    let currentNeighbour = lastNeighbour.previousSegment;
+function processAmbiguousPath(lastNeighbor: PathSegment): void {
+    let currentNeighbor = lastNeighbor.previousSegment;
 
     while (
-        currentNeighbour &&
-        !currentNeighbour.targetNode.equals(lastNeighbour.targetNode) &&
-        currentNeighbour.targetNode.availabilityStatus !== AvailabilityStatus.CertainlyAvailable
+        currentNeighbor &&
+        !currentNeighbor.targetNode.equals(lastNeighbor.targetNode) &&
+        currentNeighbor.targetNode.availabilityStatus !== AvailabilityStatus.CertainlyAvailable
     ) {
-        currentNeighbour.targetNode.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
-        processAmbiguousDependentSegments(currentNeighbour);
-        currentNeighbour = currentNeighbour.previousSegment;
+        currentNeighbor.targetNode.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
+        processAmbiguousDependentSegments(currentNeighbor);
+        currentNeighbor = currentNeighbor.previousSegment;
     }
 }
 
 function processAmbiguousDependentSegments(neigbour: PathSegment): void {
-    neigbour.dependentSegments.forEach(dependentNeighbour => {
-        if (dependentNeighbour.targetNode.availabilityStatus !== AvailabilityStatus.Ambiguous) {
-            dependentNeighbour.targetNode.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
-            processAmbiguousDependentSegments(dependentNeighbour);
+    neigbour.dependentSegments.forEach(dependentNeighbor => {
+        if (dependentNeighbor.targetNode.availabilityStatus !== AvailabilityStatus.Ambiguous) {
+            dependentNeighbor.targetNode.setAvailabilityStatus(AvailabilityStatus.Ambiguous);
+            processAmbiguousDependentSegments(dependentNeighbor);
         }
     });
 }

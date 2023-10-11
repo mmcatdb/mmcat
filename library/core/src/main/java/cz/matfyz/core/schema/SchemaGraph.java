@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * @author pavel.koupil, jachymb.bartik
  */
@@ -50,6 +52,7 @@ public class SchemaGraph {
     /**
      * If either object cannot be found or there is no path, null is returned.
      */
+    @Nullable
     public List<Signature> findPath(SchemaObject sourceObject, SchemaObject targetObject) {
         final var source = nodes.get(sourceObject);
         final var target = nodes.get(targetObject);

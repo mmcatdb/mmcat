@@ -13,7 +13,7 @@ public abstract class QueryParser {
     /**
      * Given a MMQL query in the form of a `queryString`, parse the query into the internal representation.
      */
-    public static Query parse(String queryString) {
+    public static Query run(String queryString) {
         var inputStream = CharStreams.fromString(queryString);
         var lexer = new QuerycatLexer(inputStream);
         var stream = new CommonTokenStream(lexer);

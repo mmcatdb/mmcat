@@ -39,10 +39,10 @@ export class ObjectIds {
         return new ObjectIds(type);
     }
 
-    static createCrossProduct(signatures: Signature[], ids: ObjectIds[]): ObjectIds {
+    static createCrossProduct(elements: { signature: Signature, ids: ObjectIds }[]): ObjectIds {
         let signatureIds = [ new SignatureId([]) ];
-        for (let i = 0; i < signatures.length; i++)
-            signatureIds = ObjectIds.combineCrossProductIds(signatureIds, signatures[i], ids[i]);
+        for (let i = 0; i < elements.length; i++)
+            signatureIds = ObjectIds.combineCrossProductIds(signatureIds, elements[i].signature, elements[i].ids);
 
         return ObjectIds.createSignatures(signatureIds);
     }

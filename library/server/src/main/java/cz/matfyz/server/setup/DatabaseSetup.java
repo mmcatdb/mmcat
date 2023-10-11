@@ -1,6 +1,6 @@
 package cz.matfyz.server.setup;
 
-import cz.matfyz.server.entity.database.Database.Type;
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.server.configuration.SetupProperties;
 import cz.matfyz.server.entity.database.Database;
 import cz.matfyz.server.entity.database.DatabaseInit;
@@ -46,7 +46,7 @@ public class DatabaseSetup {
             properties.password()
         );
 
-        return new DatabaseInit("PostgreSQL - example", mapper.valueToTree(settings), Type.postgresql);
+        return new DatabaseInit("PostgreSQL - example", mapper.valueToTree(settings), DatabaseType.postgresql);
     }
 
     private DatabaseInit createMongoDB() {
@@ -59,7 +59,7 @@ public class DatabaseSetup {
             properties.password()
         );
 
-        return new DatabaseInit("MongoDB - example", mapper.valueToTree(settings), Type.mongodb);
+        return new DatabaseInit("MongoDB - example", mapper.valueToTree(settings), DatabaseType.mongodb);
     }
 
     private DatabaseInit createNeo4j() {
@@ -71,7 +71,7 @@ public class DatabaseSetup {
             properties.password()
         );
 
-        return new DatabaseInit("Neo4j - example", mapper.valueToTree(settings), Type.neo4j);
+        return new DatabaseInit("Neo4j - example", mapper.valueToTree(settings), DatabaseType.neo4j);
     }
 
 }

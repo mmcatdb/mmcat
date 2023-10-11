@@ -1,6 +1,8 @@
 package cz.matfyz.core.mapping;
 
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.schema.SchemaCategory;
 
 import java.io.IOException;
 import java.util.List;
@@ -57,6 +59,8 @@ public abstract class AccessPath {
      * If the signature isn't found, null is returned.
      */
     protected abstract List<AccessPath> getPropertyPathInternal(Signature signature);
+
+    public abstract AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
     
     @Override
     public boolean equals(Object object) {

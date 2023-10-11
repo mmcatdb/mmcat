@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 /**
- * @author pavel.koupil
+ * @author jachym.bartik
  */
 public interface AbstractControlWrapper {
 
@@ -23,6 +23,9 @@ public interface AbstractControlWrapper {
     AbstractPullWrapper getPullWrapper();
 
     AbstractPathWrapper getPathWrapper();
+
+    @Deprecated
+    AbstractQueryWrapper_old getQueryWrapper_old();
 
     AbstractQueryWrapper getQueryWrapper();
 

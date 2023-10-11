@@ -1,7 +1,10 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.queryresult.QueryResult;
+import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -15,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +100,36 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
                 return output.toString();
             }
+        }
+    }
+
+    @Override
+    public QueryResult executeQuery(QueryStatement query) {
+        final var columns = query.structure().children.values().stream().map(child -> child.name).toList();
+
+        try (
+            Connection connection = provider.getConnection();
+            PreparedStatement statement = connection.prepareStatement(query.stringContent());
+        ) {
+            LOGGER.info("Execute PostgreSQL query:\n{}", statement);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                final var builder = new ResultList.TableBuilder();
+                builder.addColumns(columns);
+                
+                while (resultSet.next()) {
+                    final var values = new ArrayList<String>();
+                    for (final var column : columns)
+                        values.add(resultSet.getString(column));
+
+                    builder.addRow(values);
+                }
+                
+                return new QueryResult(builder.build(), null);
+            }
+        }
+        catch (Exception e) {
+            throw new PullForestException(e);
         }
     }
 

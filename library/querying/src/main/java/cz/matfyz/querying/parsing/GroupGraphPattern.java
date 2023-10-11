@@ -2,20 +2,16 @@ package cz.matfyz.querying.parsing;
 
 import java.util.List;
 
-class GroupGraphPattern extends QueryNode {
-
-    @Override GroupGraphPattern asGroupGraphPattern() {
-        return this;
-    }
+public class GroupGraphPattern implements ParserNode {
 
     public final List<WhereTriple> triples;
-    public final List<Filter> filters;
-    public final List<Values> values;
+    public final List<ConditionFilter> conditionFilters;
+    public final List<ValueFilter> valueFilters;
 
-    public GroupGraphPattern(List<WhereTriple> triples, List<Filter> filters, List<Values> values) {
+    GroupGraphPattern(List<WhereTriple> triples, List<ConditionFilter> conditionFilters, List<ValueFilter> valueFilters) {
         this.triples = triples;
-        this.filters = filters;
-        this.values = values;
+        this.conditionFilters = conditionFilters;
+        this.valueFilters = valueFilters;
     }
 
 }

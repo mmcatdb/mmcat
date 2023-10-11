@@ -1,5 +1,6 @@
 package cz.matfyz.server.entity.database;
 
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.utils.Utils;
@@ -18,15 +19,9 @@ public class Database extends Entity {
     
     public static final String PASSWORD_FIELD_NAME = "password";
 
-    public Type type;
+    public DatabaseType type;
     public String label;
     public ObjectNode settings;
-
-    public enum Type {
-        mongodb,
-        postgresql,
-        neo4j
-    }
 
     @JsonCreator
     public Database(@JsonProperty("id") Id id) {

@@ -1,27 +1,48 @@
 package cz.matfyz.abstractwrappers;
 
-import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.KindInstance;
+import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.schema.SchemaObject;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractQueryWrapper {
 
     /**
-     * Defines whether non-optional (inner) joins are supported.
+     * Determines whether non-optional (inner) joins are supported.
      */
     boolean isJoinSupported();
 
     /**
-     * Defines whether optional (left outer) joins are supported.
+     * Determines whether optional (left outer) joins are supported.
      */
     boolean isOptionalJoinSupported();
 
     /**
-     * Defines whether it is possible to filter on properties which are not in an object's ids.
+     * Determines whether recursive queries or their equivalents (e.g., recursive graph traversals) are supported.
      */
-    boolean isNonIdFilterSupported();
+    boolean isRecursiveJoinSupported();
+
+    /**
+     * Determines whether filtering of values of a specific property is supported in general.
+     */
+    boolean isFilteringSupported();
+
+    /**
+     * Determines whether filtering of values of a specific property is supported if the property is not part of the identifier (key) of a specific kind.
+     */
+    boolean IsFilteringNotIndexedSupported();
+
+    /**
+     * Determines whether the aggregation functions are supported.
+     */
+    boolean isAggregationSupported();
+
 
     public static class VariableIdentifier implements Comparable<VariableIdentifier> {
 
@@ -38,125 +59,118 @@ public interface AbstractQueryWrapper {
 
     }
 
-    static record QueryStatement(
-        String stringContent,
-        Map<VariableIdentifier, List<String>> nameMap
-    ) {}
+    public enum ComparisonOperator {
+        Equal,
+        NotEqual,
+        Less,
+        LessOrEqual,
+        Greater,
+        GreaterOrEqual,
+    }
 
-    /**
-     * Build the native query using this wrapper, returning a tuple `(native_query, variable_name_map)` where `native_query` is the compiled native database query,
-     * and `variable_name_map` maps variable identifiers to final name paths within the native query result.
-     */
-    QueryStatement buildStatement();
-
-    // void defineKind(KindInstance kind, String kindName);
-
-    void addProjection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId);
-
-    void addConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant);
-
-    void addVariablesFilter(VariableIdentifier lhsVariableId, ComparisonOperator operator, VariableIdentifier rhsVariableId);
-
-    void addValuesFilter(VariableIdentifier variableId, List<String> constants);
-
-    // void addJoin(KindInstance lhsKind, List<JoinedProperty> joinProperties, KindInstance rhsKind);
-    void addJoin(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind);
-    
-    enum ComparisonOperator {
-        EQUALS,
-        NOT_EQUALS,
-        LESS_THAN,
-        LESS_THAN_EQUALS,
-        GREATER_THAN,
-        GREATER_THAN_EQUALS,
+    public enum AggregationOperator {
+        Count,
+        Sum,
+        Min,
+        Max,
+        Average,
     }
 
     /**
-     * Base class for all operations which can be stored by the wrapper.
+     * This class represents a queryable property. It's defined by the kind and a path from its root.
      */
-    interface Operation {
+    public static class Property implements Serializable {
+        public final Kind kind;
+        public final Signature path;
 
-    }
-
-    /**
-     * Operation corresponding to projection of a property, as defined by graph patterns in MMQL.
-     */
-    public static class Projection implements Operation {
-        public final List<AccessPath> propertyPath;
-        public final KindInstance kind;
-        public final VariableIdentifier variableId;
-        
-        public Projection(List<AccessPath> propertyPath, KindInstance kind, VariableIdentifier variableId) {
-            this.propertyPath = propertyPath;
+        public Property(Kind kind, Signature path) {
             this.kind = kind;
-            this.variableId = variableId;
+            this.path = path;
+        }
+
+        public SchemaObject findSchemaObject() {
+            return path.isEmpty()
+                ? kind.mapping.rootObject()
+                : kind.mapping.category().getEdge(path.getLast()).to();
         }
     }
 
-    /**
-     * Operation corresponding to a MMQL `FILTER` statement of the form `FILTER(?var op constant).
-     */
-    public static class ConstantFilter implements Operation {
-        public final VariableIdentifier variableId;
-        public final ComparisonOperator operator;
-        public final String constant;
+    public static class PropertyWithAggregation extends Property {
+        public final Signature aggregationRoot;
+        public final AggregationOperator aggregationOperator;
 
-        public ConstantFilter(VariableIdentifier variableId, ComparisonOperator operator, String constant) {
-            this.variableId = variableId;
-            this.operator = operator;
-            this.constant = constant;
+        public PropertyWithAggregation(Kind kind, Signature path, Signature aggregationRoot, AggregationOperator aggregationOperator) {
+            super(kind, path);
+            this.aggregationRoot = aggregationRoot;
+            this.aggregationOperator = aggregationOperator;
         }
     }
 
-    /**
-     * Operation corresponding to a MMQL `FILTER` statement of the form `FILTER(?var1 op ?var2)`.
-     */
-    public static class VariablesFilter implements Operation {
-        public final VariableIdentifier lhsVariableId;
-        public final ComparisonOperator operator;
-        public final VariableIdentifier rhsVariableId;
-        
-        public VariablesFilter(VariableIdentifier lhsVariableId, ComparisonOperator operator, VariableIdentifier rhsVariableId) {
-            this.lhsVariableId = lhsVariableId;
-            this.operator = operator;
-            this.rhsVariableId = rhsVariableId;
-        }
-    }
-
-    /**
-     * Operation corresponding to a MMQL `VALUES` statement of the form `VALUES ?var {constant1, constant2}`.
-     */
-    public static class ValuesFilter implements Operation {
-        public final VariableIdentifier variableId;
-        public final List<String> constants;
-
-        public ValuesFilter(VariableIdentifier variableId, List<String> constants) {
-            this.variableId = variableId;
-            this.constants = constants;
-        }
-    }
-
-    // type JoinProperties = List<Tuple<List<AccessPath>, List<AccessPath>>>
-    public static record JoinedProperty(
-        List<AccessPath> lhsList,
-        List<AccessPath> rhsList
+    public static record Constant(
+        List<String> values
     ) {}
 
     /**
-     * Operation corresponding to an inner join between the two specified kinds on the specified properties.
-     * The `join_properties` contains a list of tuples, each of which contains a property path from the left kind, meaning that this property should be inner joined on equality to the corresponding property from the right kind.
+     * Adds a projection to attribute hierarchicalPath which can eventually be optional (isOptional).
      */
-    public static class Join implements Operation {
-        // public final KindInstance lhsKind;
-        public final String lhsKind;
-        public final List<JoinedProperty> joinProperties;
-        // public final KindInstance rhsKind;
-        public final String rhsKind;
+    void addProjection(Property property, String identifier, boolean isOptional);
 
-        public Join(String lhsKind, List<JoinedProperty> joinProperties, String rhsKind) {
-            this.lhsKind = lhsKind;
-            this.joinProperties = joinProperties;
-            this.rhsKind = rhsKind;
+    public static record JoinCondition(Signature from, Signature to) {}
+
+    /**
+     * Adds a join (or graph traversal).
+     * @param from Kind from which we are joining.
+     * @param to Kind to which we are joining.
+     * @param conditions List of paths from both kinds to the joining properties.
+     * @param repetition If not 1, the join will be recursive.
+     * @param isOptional If true, the join will be optional.
+     */
+    void addJoin(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional);
+
+    /**
+     * Adds a filtering between two variables or aggregations. E.g.:
+     * FILTER(?price > ?minimalPrice),
+     * FILTER(SUM(?price) > ?minimalTotal),
+     * FILTER(?minimalTotal < SUM(?price)),
+     * FILTER(SUM(?price1) < SUM(?price2)).
+     */
+    void addFilter(Property left, Property right, ComparisonOperator operator);
+
+    /**
+     * Adds a filtering between one variables or aggregation and one constant. E.g.:
+     * FILTER(?price > 42),
+     * FILTER(SUM(?price) > 69).
+     */
+    void addFilter(Property left, Constant right, ComparisonOperator operator);
+
+    public static class QueryStructure {
+    
+        // If null, this is the root of the tree.
+        @Nullable
+        public final String name;
+        // Same.
+        @Nullable
+        public final SchemaObject object;
+        public final boolean isArray;
+        public final Map<String, QueryStructure> children = new TreeMap<>();
+
+        public QueryStructure(@Nullable String name, @Nullable SchemaObject object, boolean isArray) {
+            this.name = name;
+            this.object = object;
+            this.isArray = isArray;
         }
+
+        public void addChild(QueryStructure child) {
+            this.children.put(child.name, child);
+        }
+
     }
+
+    public static record QueryStatement(String stringContent, QueryStructure structure) {}
+
+    /**
+     * Builds a DSL statement based on the information obtained by calling the wrapper methods.
+     */
+    QueryStatement createDSLStatement();
+
 }

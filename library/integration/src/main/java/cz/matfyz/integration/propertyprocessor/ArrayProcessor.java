@@ -36,11 +36,11 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
     public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
         LOGGER.warn("[Array]: {}", statement);
 
-        final var elementToDom = finder.findBaseByPimIri(statement.getPredicate().getURI() + DOM_TO_ELEMENT_SUFFIX);
-        if (!elementToDom.schemaMorphism.hasTag(Tag.role))
+        final var elementToDom = finder.tryFindBaseByPimIri(statement.getPredicate().getURI() + DOM_TO_ELEMENT_SUFFIX);
+        if (elementToDom == null || !elementToDom.schemaMorphism.hasTag(Tag.role))
             return false;
 
-        final var resourceToDom = finder.findFromObjectToObject(resourceObject, elementToDom.cod());
+        final var resourceToDom = finder.tryFindFromObjectToObject(resourceObject, elementToDom.cod());
         if (resourceToDom == null)
             return false;
 
@@ -50,13 +50,13 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
         if (!element.schemaObject.pimIri.equals(ELEMENT))
             return false;
 
-        final var elementToCod = finder.findDirectFromObject(element, ELEMENT_TO_COD);
+        final var elementToCod = finder.tryFindDirectFromObject(element, ELEMENT_TO_COD);
         if (elementToCod == null)
             return false;
         if (!elementToCod.schemaMorphism.hasTag(Tag.role))
             return false;
 
-        final var elementToIndex = finder.findDirectFromObject(element, ELEMENT_TO_INDEX);
+        final var elementToIndex = finder.tryFindDirectFromObject(element, ELEMENT_TO_INDEX);
         if (elementToIndex == null)
             return false;
         final var index = elementToIndex.cod();

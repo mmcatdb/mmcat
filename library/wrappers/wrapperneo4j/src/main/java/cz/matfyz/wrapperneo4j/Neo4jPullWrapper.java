@@ -1,7 +1,9 @@
 package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -241,6 +243,12 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         output.append("]");
 
         return output.toString();
+    }
+
+    @Override
+    public QueryResult executeQuery(QueryStatement statement) {
+        // TODO
+        throw new UnsupportedOperationException();
     }
 
 }

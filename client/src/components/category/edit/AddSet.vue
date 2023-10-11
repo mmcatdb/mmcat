@@ -58,10 +58,10 @@ function save() {
 
         evocat.editObject({
             ...setObject.toDefinition(),
-            ids: ObjectIds.createCrossProduct(
-                [ setToNode1.signature, setToNode2.signature ],
-                [ node1.schemaObject.ids, node2.schemaObject.ids ],
-            ),
+            ids: ObjectIds.createCrossProduct([
+                { signature: setToNode1.signature, ids: node1.schemaObject.ids },
+                { signature: setToNode2.signature, ids: node2.schemaObject.ids },
+            ]),
         }, setObject);
     });
 
