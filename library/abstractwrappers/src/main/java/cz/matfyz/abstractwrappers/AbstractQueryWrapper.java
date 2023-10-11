@@ -43,22 +43,6 @@ public interface AbstractQueryWrapper {
      */
     boolean isAggregationSupported();
 
-
-    public static class VariableIdentifier implements Comparable<VariableIdentifier> {
-
-        private String value;
-
-        public VariableIdentifier(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public int compareTo(VariableIdentifier other) {
-            return value.compareTo(other.value);
-        }
-
-    }
-
     public enum ComparisonOperator {
         Equal,
         NotEqual,

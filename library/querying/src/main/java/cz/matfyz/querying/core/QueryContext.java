@@ -1,6 +1,5 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.querying.parsing.Variable;
@@ -13,6 +12,8 @@ import java.util.TreeMap;
  * This class collects and provides global information about the query.
  */
 public class QueryContext {
+
+    // TODO this class is not needed now - decide if it should be removed or not
 
     // Parsing
 
@@ -30,16 +31,16 @@ public class QueryContext {
 
     // Extracting
 
-    private final Map<VariableIdentifier, SchemaObject> objects = new TreeMap<>();
+    private final Map<String, SchemaObject> objects = new TreeMap<>();
 
     public QueryContext defineVariable(Variable variable, SchemaObject object) {
-        objects.put(variable.id, object);
+        objects.put(variable.getIdentifier(), object);
 
         return this;
     }
 
     public SchemaObject getObject(Variable variable) {
-        return objects.get(variable.id);
+        return objects.get(variable.getIdentifier());
     }
 
 }

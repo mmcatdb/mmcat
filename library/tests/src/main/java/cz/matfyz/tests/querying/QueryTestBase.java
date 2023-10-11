@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.querying.algorithms.QueryToInstance_old;
+import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.tests.database.TestDatabase;
 
 import java.util.ArrayList;
@@ -61,8 +61,8 @@ public class QueryTestBase {
     public void run() {
         final var kinds = defineKinds();
 
-        final var queryToInstance = new QueryToInstance_old();
-        queryToInstance.input(schema, queryString, null, kinds);
+        final var queryToInstance = new QueryToInstance();
+        queryToInstance.input(schema, queryString, kinds);
 
         final var result = queryToInstance.algorithm();
         LOGGER.info("\n{}", result.jsonValues());

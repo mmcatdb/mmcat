@@ -90,12 +90,6 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
     }
 
     @Override
-    @Deprecated
-    public MongoDBQueryWrapper_old getQueryWrapper_old() {
-        return new MongoDBQueryWrapper_old();
-    }
-
-    @Override
     public MongoDBQueryWrapper getQueryWrapper() {
         return new MongoDBQueryWrapper();
     }

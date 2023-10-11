@@ -1,10 +1,6 @@
 package cz.matfyz.querying.parsing;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.VariableIdentifier;
 import cz.matfyz.querying.parsing.ParserNode.Term;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 public class Variable implements Term {
 
@@ -13,13 +9,9 @@ public class Variable implements Term {
     }
 
     public final String name;
-    // TODO the variable should be identified by the name
-    @Deprecated
-    public final VariableIdentifier id;
     
-    private Variable(String name, VariableIdentifier id) {
+    private Variable(String name) {
         this.name = name;
-        this.id = new VariableIdentifier(name);
     }
 
     @Override
@@ -39,26 +31,18 @@ public class Variable implements Term {
 
     static class VariableBuilder {
 
-        private int lastIdentifier = 0;
-        private Map<String, VariableIdentifier> nameToIdentifier = new TreeMap<>();
-        
-        private VariableIdentifier generateIdentifier() {
-            return new VariableIdentifier("" + lastIdentifier++);
+        public Variable fromName(String name) {
+            return new Variable(name);
         }
 
-        public Variable fromName(String name) {
-            final var identifier = nameToIdentifier.computeIfAbsent(name, x -> generateIdentifier());
-            return new Variable(name, identifier);
+        public Variable generated() {
+            return new Variable(generateName());
         }
 
         private int lastGeneratedNameId = 0;
 
         private String generateName() {
             return "#var" + lastGeneratedNameId++;
-        }
-
-        public Variable generated() {
-            return new Variable(generateName(), generateIdentifier());
         }
 
     }

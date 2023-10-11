@@ -44,9 +44,6 @@ public class LogicalModelController {
         return logicalModel;
     }
 
-    /**
-     * @deprecated
-     */
     @Deprecated
     @GetMapping("/schema-categories/{categoryId}/logical-models")
     public List<LogicalModelDetail> getAllLogicalModelsInCategory(@PathVariable Id categoryId) {

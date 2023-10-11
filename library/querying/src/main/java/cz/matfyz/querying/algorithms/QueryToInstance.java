@@ -48,7 +48,7 @@ public class QueryToInstance {
     }
 
     private List<String> createJsonResults(Query query, ResultList data) {
-        // final var projector = new QueryMappingProjector();
+        // final var projector = new QueryProjector();
         // final var projectionMapping = projector.project(query, whereInstance);
 
         // final var dmlTransformation = new DMLAlgorithm();

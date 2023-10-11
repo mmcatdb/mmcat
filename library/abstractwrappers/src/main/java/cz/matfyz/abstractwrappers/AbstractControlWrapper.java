@@ -24,9 +24,6 @@ public interface AbstractControlWrapper {
 
     AbstractPathWrapper getPathWrapper();
 
-    @Deprecated
-    AbstractQueryWrapper_old getQueryWrapper_old();
-
     AbstractQueryWrapper getQueryWrapper();
 
 }

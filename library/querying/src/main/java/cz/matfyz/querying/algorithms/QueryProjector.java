@@ -9,25 +9,28 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.core.schema.SchemaGraph;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.core.Utils;
+import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ProjectionException;
 import cz.matfyz.querying.parsing.Query;
 import cz.matfyz.querying.parsing.SelectTriple;
 import cz.matfyz.querying.parsing.StringValue;
 import cz.matfyz.querying.parsing.Variable;
+import cz.matfyz.querying.parsing.WhereTriple;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * This class creates a mapping that corresponds to the SELECT part of the query. It should be then used in the DML algorithm to project the query results to a readable format like JSON. Aggregation functions and simillar are not supported yet. However, it should be easy to add them - we just need to add new properties that represent their results and compute them. Then we just use add them to the mapping and project them as usual.
  */
-public class QueryMappingProjector {
+public class QueryProjector {
 
     private Query query;
     private InstanceCategory whereInstance;
@@ -39,9 +42,43 @@ public class QueryMappingProjector {
     public Mapping project(Query query, InstanceCategory whereInstance) {
         this.query = query;
         this.whereInstance = whereInstance;
-        this.variableTypes = Utils.getVariableTypesFromQuery(query, whereInstance.schema);
+        this.variableTypes = getVariableTypesFromQuery(query, whereInstance.schema);
 
         return createMapping();
+    }
+
+    /**
+     * Get the set of variables from the query, along with the corresponding schema object for each variable.
+     */
+    private static Map<String, SchemaObject> getVariableTypesFromQuery(Query query, SchemaCategory schemaCategory) {
+        return getVariableTypes(query.where.pattern.triples, schemaCategory);
+    }
+
+    /**
+     * Get the set of variables from the provided set of triples, along with the corresponding schema object for each variable.
+     */
+    private static Map<String, SchemaObject> getVariableTypes(List<WhereTriple> triples, SchemaCategory schemaCategory) {
+        final var variableTypes = new TreeMap<String, SchemaObject>();
+
+        for (final var triple : triples) {
+            final var edge = schemaCategory.getEdge(triple.signature);
+            final var subjectType = edge.from();
+            final var objectType = edge.to();
+
+            if (!variableTypes.containsKey(triple.subject.name))
+                variableTypes.put(triple.subject.name, subjectType);
+            else if (!variableTypes.get(triple.subject.name).equals(subjectType))
+                throw GeneralException.message("Variable " + triple.subject.name + " has conflicting types");
+
+            if (triple.object instanceof Variable variable) {
+                if (!variableTypes.containsKey(variable.name))
+                    variableTypes.put(variable.name, objectType);
+                else if (!variableTypes.get(variable.name).equals(objectType))
+                    throw GeneralException.message("Variable " + variable.name + " has conflicting types");
+            }
+        }
+
+        return variableTypes;
     }
 
     private Signature.Generator signatureGenerator;
