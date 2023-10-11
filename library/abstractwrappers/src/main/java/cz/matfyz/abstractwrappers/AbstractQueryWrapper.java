@@ -161,7 +161,7 @@ public interface AbstractQueryWrapper {
         }
 
         public void addChild(QueryStructure child) {
-            this.children.put(name, child);
+            this.children.put(child.name, child);
         }
 
     }

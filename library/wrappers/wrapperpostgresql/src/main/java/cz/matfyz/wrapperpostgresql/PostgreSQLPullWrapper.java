@@ -18,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,14 +118,9 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                 builder.addColumns(columns);
                 
                 while (resultSet.next()) {
-                    final var values = columns.stream().map(column -> {
-                        try {
-                            return resultSet.getString(column);
-                        }
-                        catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).toList();
+                    final var values = new ArrayList<String>();
+                    for (final var column : columns)
+                        values.add(resultSet.getString(column));
 
                     builder.addRow(values);
                 }

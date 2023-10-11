@@ -11,6 +11,9 @@ import java.util.stream.Collectors;
 
 public class ResultList implements ResultNode {
 
+    // TODO nad některými sloupci vytvořit stromy pro rychlejší joinování
+        // - resp. vytvořit je, když jsou potřeba, a pak je nějak udržovat
+
     public final List<? extends ResultNode> children;
 
     public ResultList(List<? extends ResultNode> children) {

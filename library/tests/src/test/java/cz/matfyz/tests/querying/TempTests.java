@@ -35,6 +35,7 @@ public class TempTests {
         final var output = QueryResolver.run(query.context, queryTree);
 
         LOGGER.info("OK");
+        LOGGER.info("\n" + output.data);
     }
 
     private static final String queryString = """

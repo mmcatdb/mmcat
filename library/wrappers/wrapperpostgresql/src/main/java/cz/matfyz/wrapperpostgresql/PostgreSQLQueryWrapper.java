@@ -60,7 +60,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private void addSelect() {
-        final String projectionsString = projections.stream().map(projection -> getPropertyName(projection.property())).collect(Collectors.joining(", "));
+        final String projectionsString = projections.stream().map(this::getProjection).collect(Collectors.joining(", "));
         builder
             .append("SELECT ")
             .append(projectionsString)
@@ -182,10 +182,19 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         return "\"" + name + "\"";
     }
 
+
+    private String getProjection(Projection projection) {
+        return getPropertyName(projection.property()) + " AS " + escapeName(getPropertyAlias(projection.property()));
+    }
+
     private String getPropertyName(Property property) {
         return property instanceof PropertyWithAggregation aggregation
             ? getAggregationName(aggregation)
             : getPropertyNameWithoutAggregation(property);
+    }
+
+    private String getPropertyAlias(Property property) {
+        return property.kind.mapping.kindName() + "." + getRawAttributeName(property);
     }
 
     private String getPropertyNameWithoutAggregation(Property property) {
@@ -212,7 +221,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     
     private QueryStructure createStructure() {
         final var root = new QueryStructure(null, null, false);
-        projections.forEach(p -> root.addChild(new QueryStructure(getPropertyName(p.property()), p.property().findSchemaObject(), false)));
+        projections.forEach(p -> root.addChild(new QueryStructure(getPropertyAlias(p.property()), p.property().findSchemaObject(), false)));
 
         return root;
     }
