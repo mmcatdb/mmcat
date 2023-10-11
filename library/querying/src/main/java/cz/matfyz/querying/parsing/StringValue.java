@@ -15,6 +15,11 @@ public class StringValue implements Term {
     }
 
     @Override
+    public String getIdentifier() {
+        return "s_" + value;
+    }
+
+    @Override
     public boolean equals(Object other) {
         return other instanceof StringValue wrapper && wrapper.value.equals(value);
     }

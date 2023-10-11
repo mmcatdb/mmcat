@@ -35,6 +35,8 @@ public interface ParserNode extends Serializable {
             return this;
         }
 
+        String getIdentifier();
+
         default StringValue asStringValue() {
             throw ParsingException.wrongNode(StringValue.class, this);
         }

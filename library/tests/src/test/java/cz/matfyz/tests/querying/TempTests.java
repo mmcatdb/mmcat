@@ -16,6 +16,9 @@ import cz.matfyz.tests.database.TestDatabase;
 import java.util.List;
 import java.util.TreeMap;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +61,8 @@ public class TempTests {
         ).toList();
     }
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     @Test
     public void resultToStringTest() {
         final var builder = new ResultList.TableBuilder();
@@ -74,6 +79,10 @@ public class TempTests {
         final var rootArray = new ResultList(List.of(root));
 
         LOGGER.info("\n" + rootArray.toString());
+
+        assertDoesNotThrow(() -> {
+            LOGGER.info("\n" + mapper.writeValueAsString(rootArray));
+        });
     }
 
 }

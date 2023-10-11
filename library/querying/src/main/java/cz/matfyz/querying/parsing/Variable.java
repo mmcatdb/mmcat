@@ -13,11 +13,18 @@ public class Variable implements Term {
     }
 
     public final String name;
+    // TODO the variable should be identified by the name
+    @Deprecated
     public final VariableIdentifier id;
     
     private Variable(String name, VariableIdentifier id) {
         this.name = name;
         this.id = new VariableIdentifier(name);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "v_" + name;
     }
 
     @Override

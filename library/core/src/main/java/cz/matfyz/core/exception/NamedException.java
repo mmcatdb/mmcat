@@ -64,7 +64,7 @@ public abstract class NamedException extends RuntimeException {
         @Override
         public void serialize(NamedException exception, JsonGenerator generator, SerializerProvider provider) throws IOException {
             final var serializedException = exception.toSerializedException();
-            generator.writeObject(serializedException);
+            generator.writePOJO(serializedException);
         }
 
     }

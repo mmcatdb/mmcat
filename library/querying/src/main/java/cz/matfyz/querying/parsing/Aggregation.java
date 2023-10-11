@@ -20,6 +20,11 @@ public class Aggregation implements Term {
     }
 
     @Override
+    public String getIdentifier() {
+        return "a_" + operator + "_" + variable.name;
+    }
+
+    @Override
     public boolean equals(Object other) {
         return other instanceof Aggregation aggregation && variable.equals(aggregation.variable) && operator == aggregation.operator;
     }

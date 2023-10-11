@@ -184,17 +184,13 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
 
     private String getProjection(Projection projection) {
-        return getPropertyName(projection.property()) + " AS " + escapeName(getPropertyAlias(projection.property()));
+        return getPropertyName(projection.property()) + " AS " + escapeName(projection.identifier());
     }
 
     private String getPropertyName(Property property) {
         return property instanceof PropertyWithAggregation aggregation
             ? getAggregationName(aggregation)
             : getPropertyNameWithoutAggregation(property);
-    }
-
-    private String getPropertyAlias(Property property) {
-        return property.kind.mapping.kindName() + "." + getRawAttributeName(property);
     }
 
     private String getPropertyNameWithoutAggregation(Property property) {
@@ -221,7 +217,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     
     private QueryStructure createStructure() {
         final var root = new QueryStructure(null, null, false);
-        projections.forEach(p -> root.addChild(new QueryStructure(getPropertyAlias(p.property()), p.property().findSchemaObject(), false)));
+        projections.forEach(p -> root.addChild(new QueryStructure(p.identifier(), p.property().findSchemaObject(), false)));
 
         return root;
     }

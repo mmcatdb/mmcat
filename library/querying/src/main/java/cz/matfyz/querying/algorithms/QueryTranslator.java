@@ -120,7 +120,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
             wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
         else
             // TODO isOptional is not supported yet.
-            wrapper.addProjection(objectProperty, false);
+            wrapper.addProjection(objectProperty, term.getIdentifier(), false);
     }
 
     private void processJoinCandidate(JoinCandidate candidate) {

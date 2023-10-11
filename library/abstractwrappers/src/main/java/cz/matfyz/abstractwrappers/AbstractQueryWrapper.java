@@ -113,7 +113,7 @@ public interface AbstractQueryWrapper {
     /**
      * Adds a projection to attribute hierarchicalPath which can eventually be optional (isOptional).
      */
-    void addProjection(Property property, boolean isOptional);
+    void addProjection(Property property, String identifier, boolean isOptional);
 
     public static record JoinCondition(Signature from, Signature to) {}
 

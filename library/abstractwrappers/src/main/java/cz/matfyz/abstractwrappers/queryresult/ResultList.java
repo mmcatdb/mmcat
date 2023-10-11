@@ -2,6 +2,7 @@ package cz.matfyz.abstractwrappers.queryresult;
 
 import cz.matfyz.core.utils.IndentedStringBuilder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,6 +10,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+@JsonSerialize(using = ResultList.Serializer.class)
 public class ResultList implements ResultNode {
 
     // TODO nad některými sloupci vytvořit stromy pro rychlejší joinování
@@ -50,6 +57,26 @@ public class ResultList implements ResultNode {
         }
 
         return builder.toString();
+    }
+
+    public static class Serializer extends StdSerializer<ResultList> {
+
+        public Serializer() {
+            this(null);
+        }
+
+        public Serializer(Class<ResultList> t) {
+            super(t);
+        }
+
+        @Override
+        public void serialize(ResultList resultList, JsonGenerator generator, SerializerProvider provider) throws IOException {
+            generator.writeStartArray();
+            for (final var child : resultList.children)
+                generator.writeObject(child);
+            generator.writeEndArray();
+        }
+
     }
 
     public static class TableBuilder {

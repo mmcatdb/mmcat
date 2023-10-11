@@ -110,7 +110,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         public void serialize(SignatureId signatureId, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
             for (final var signature : signatureId.signatures)
-                generator.writeObject(signature);
+                generator.writePOJO(signature);
 
             generator.writeEndArray();
         }

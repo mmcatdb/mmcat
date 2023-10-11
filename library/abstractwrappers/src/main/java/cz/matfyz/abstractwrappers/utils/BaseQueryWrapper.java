@@ -46,18 +46,18 @@ public abstract class BaseQueryWrapper {
 
     // Projections
     
-    protected record Projection(Property property, boolean isOptional) {}
+    protected record Projection(Property property, String identifier, boolean isOptional) {}
     
     protected List<Projection> projections = new ArrayList<>();
     
     // TODO there should be some check if the projection isn't already defined. Probably by its variable? Or by the corresponding schema object?
-    public void addProjection(Property property, boolean isOptional) {
-        projections.add(new Projection(property, isOptional));
+    public void addProjection(Property property, String identifier, boolean isOptional) {
+        projections.add(new Projection(property, identifier, isOptional));
     }
 
     // Joins
 
-    protected record  Join(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional) {}
+    protected record Join(Kind from, Kind to, List<JoinCondition> conditions, int repetition, boolean isOptional) {}
     
     protected List<Join> joins = new ArrayList<>();
 
