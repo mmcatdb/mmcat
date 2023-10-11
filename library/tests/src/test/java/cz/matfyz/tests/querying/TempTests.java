@@ -2,6 +2,9 @@ package cz.matfyz.tests.querying;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.queryresult.ResultList;
+import cz.matfyz.abstractwrappers.queryresult.ResultMap;
+import cz.matfyz.abstractwrappers.queryresult.ResultNode;
 import cz.matfyz.querying.algorithms.QueryResolver;
 import cz.matfyz.querying.algorithms.QueryTreeBuilder;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -11,6 +14,7 @@ import cz.matfyz.tests.database.BasicDatabases;
 import cz.matfyz.tests.database.TestDatabase;
 
 import java.util.List;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -52,4 +56,23 @@ public class TempTests {
             }
         ).toList();
     }
+
+    @Test
+    public void resultToStringTest() {
+        final var builder = new ResultList.TableBuilder();
+
+        builder.addColumns(List.of("colum1", "column2", "column3"));
+        builder.addRow(List.of("a1", "a2", "a3"));
+        builder.addRow(List.of("b1", "b2", "b3"));
+        builder.addRow(List.of("c1", "c2", "c3"));
+
+        final var rootMap = new TreeMap<String, ResultNode>();
+        rootMap.put("x", builder.build());
+        final var root = new ResultMap(rootMap);
+
+        final var rootArray = new ResultList(List.of(root));
+
+        LOGGER.info("\n" + rootArray.toString());
+    }
+
 }

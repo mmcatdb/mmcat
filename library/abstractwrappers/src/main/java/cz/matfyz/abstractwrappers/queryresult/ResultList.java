@@ -1,10 +1,13 @@
 package cz.matfyz.abstractwrappers.queryresult;
 
+import cz.matfyz.core.utils.IndentedStringBuilder;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class ResultList implements ResultNode {
 
@@ -12,6 +15,38 @@ public class ResultList implements ResultNode {
 
     public ResultList(List<? extends ResultNode> children) {
         this.children = children;
+    }
+
+    @Override
+    public String toString() {
+        final var isMultilined = children.stream().anyMatch(child -> !(child instanceof ResultLeaf));
+        final var builder = new StringBuilder();
+
+        if (isMultilined) {
+            builder.append("[\n");
+            
+            final var nestedBuilder = new IndentedStringBuilder(1);
+            for (final var child : children) {
+                nestedBuilder
+                    .append(child)
+                    .append(",\n");
+            }
+
+            builder
+                .append(nestedBuilder)
+                .append("\n]");
+        }
+        else {
+            builder.append("[ ");
+            final String childStrings = children.stream()
+                .map(child -> child.toString())
+                .collect(Collectors.joining(", "));
+            builder
+                .append(childStrings)
+                .append(" ]");
+        }
+
+        return builder.toString();
     }
 
     public static class TableBuilder {

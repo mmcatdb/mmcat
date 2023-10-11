@@ -4,6 +4,8 @@ import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.other.JsonDMLWrapper;
 import cz.matfyz.abstractwrappers.queryresult.QueryResult;
+import cz.matfyz.abstractwrappers.queryresult.ResultList;
+import cz.matfyz.abstractwrappers.queryresult.ResultNode;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -30,28 +32,32 @@ public class QueryToInstance {
     }
 
     public static record Result(
-        InstanceCategory instanceCategory,
+        ResultList data,
+        Object statistics,
         List<String> jsonValues
     ) {}
 
     public Result algorithm() {
         final Query query = QueryParser.run(queryString);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
-        final QueryResult whereInstance = QueryResolver.run(query.context, queryTree);
+        final QueryResult queryResult = QueryResolver.run(query.context, queryTree);
 
-        final List<String> jsonResults = createJsonResults(query, whereInstance);
+        final List<String> jsonResults = createJsonResults(query, queryResult.data);
 
-        return new Result(whereInstance, jsonResults);
+        return new Result(queryResult.data, queryResult.statistics, jsonResults);
     }
 
-    private List<String> createJsonResults(Query query, InstanceCategory whereInstance) {
-        final var projector = new QueryMappingProjector();
-        final var projectionMapping = projector.project(query, whereInstance);
+    private List<String> createJsonResults(Query query, ResultList data) {
+        // final var projector = new QueryMappingProjector();
+        // final var projectionMapping = projector.project(query, whereInstance);
 
-        final var dmlTransformation = new DMLAlgorithm();
-        dmlTransformation.input(projectionMapping, whereInstance, new JsonDMLWrapper());
+        // final var dmlTransformation = new DMLAlgorithm();
+        // dmlTransformation.input(projectionMapping, whereInstance, new JsonDMLWrapper());
 
-        return dmlTransformation.algorithm().stream().map(AbstractStatement::getContent).toList();
+        // return dmlTransformation.algorithm().stream().map(AbstractStatement::getContent).toList();
+
+        // TODO
+        return data.children.stream().map(node -> node.toString()).toList();
     }
     
 }

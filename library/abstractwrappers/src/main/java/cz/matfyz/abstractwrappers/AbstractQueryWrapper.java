@@ -151,11 +151,13 @@ public interface AbstractQueryWrapper {
         // Same.
         @Nullable
         public final SchemaObject object;
+        public final boolean isArray;
         public final Map<String, QueryStructure> children = new TreeMap<>();
 
-        public QueryStructure(@Nullable String name, @Nullable SchemaObject object) {
+        public QueryStructure(@Nullable String name, @Nullable SchemaObject object, boolean isArray) {
             this.name = name;
             this.object = object;
+            this.isArray = isArray;
         }
 
         public void addChild(QueryStructure child) {

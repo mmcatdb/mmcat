@@ -5,21 +5,27 @@ package cz.matfyz.core.utils;
  */
 public class IndentedStringBuilder {
     
-    private final String indentationString;
+    private final int indentationLevel;
+    private final String indentationStringPerLevel;
     private final StringBuilder builder = new StringBuilder();
-    
-    public IndentedStringBuilder(String indentationString) {
-        this.indentationString = indentationString;
+
+    public IndentedStringBuilder(int indentationLevel, String indentationStringPerLevel) {
+        this.indentationLevel = indentationLevel;
+        this.indentationStringPerLevel = indentationStringPerLevel;
     }
     
-    public IndentedStringBuilder(int indentationDepth) {
-        this(getTabIndentationString(indentationDepth));
+    public IndentedStringBuilder(int indentationLevel) {
+        this(indentationLevel, "    ");
     }
     
-    private static String getTabIndentationString(int depth) {
+    public IndentedStringBuilder createNested() {
+        return new IndentedStringBuilder(indentationLevel + 1, indentationStringPerLevel);
+    }
+
+    private static String computeTabIndentationString(int level, String string) {
         String is = "";
-        for (int i = 0; i < depth; i++)
-            is += "    ";
+        for (int i = 0; i < level; i++)
+            is += string;
         return is;
     }
     
@@ -41,10 +47,15 @@ public class IndentedStringBuilder {
     @Override
     public String toString() {
         String builderString = builder.toString();
-        
-        var innerBuilder = new StringBuilder();
-        for (String line : builderString.lines().toList())
-            innerBuilder.append(indentationString).append(line).append("\n");
+
+        final String indentationString = computeTabIndentationString(indentationLevel, indentationStringPerLevel);
+        final var innerBuilder = new StringBuilder();
+
+        final var lines = builderString.lines().toList();
+        innerBuilder.append(indentationString).append(lines.get(0));
+
+        for (int i = 1; i < lines.size(); i++)
+            innerBuilder.append("\n").append(indentationString).append(lines.get(i));
         
         return innerBuilder.toString();
     }

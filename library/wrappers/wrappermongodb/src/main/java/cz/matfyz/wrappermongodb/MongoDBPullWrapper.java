@@ -2,8 +2,13 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.queryresult.QueryResult;
+import cz.matfyz.abstractwrappers.queryresult.ResultLeaf;
+import cz.matfyz.abstractwrappers.queryresult.ResultList;
+import cz.matfyz.abstractwrappers.queryresult.ResultMap;
+import cz.matfyz.abstractwrappers.queryresult.ResultNode;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -20,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,25 +90,21 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     @Override
     public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
         try {
-            return innerPullForest(path, query);
+            final var forest = new ForestOfRecords();
+            final var iterator = getDocumentIterator(query);
+            
+            while (iterator.hasNext()) {
+                final Document document = iterator.next();
+                final var rootRecord = new RootRecord();
+                getDataFromDocument(rootRecord, document, path);
+                forest.addRecord(rootRecord);
+            }
+            
+            return forest;
         }
         catch (Exception e) {
             throw new PullForestException(e);
         }
-    }
-
-    private ForestOfRecords innerPullForest(ComplexProperty path, PullQuery query) {
-        var forest = new ForestOfRecords();
-        var iterator = getDocumentIterator(query);
-        
-        while (iterator.hasNext()) {
-            Document document = iterator.next();
-            var rootRecord = new RootRecord();
-            getDataFromDocument(rootRecord, document, path);
-            forest.addRecord(rootRecord);
-        }
-        
-        return forest;
     }
 
     private void getDataFromDocument(ComplexRecord parentRecord, Document document, ComplexProperty path) {
@@ -212,7 +214,66 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     @Override
     public QueryResult executeQuery(QueryStatement statement) {
+        try {
+            final var output = new ArrayList<ResultMap>();
+            final var iterator = getDocumentIteratorFromString(statement.stringContent());
+            
+            while (iterator.hasNext()) {
+                final Document document = iterator.next();
+                output.add(getResultFromDocument(document, statement.structure()));
+            }
+            
+            final var dataResult = new ResultList(output);
+            
+            return new QueryResult(dataResult, null);
+        }
+        catch (Exception e) {
+            throw new PullForestException(e);
+        }
+    }
 
+    private ResultMap getResultFromDocument(Document document, QueryStructure structure) {
+        final var output = new TreeMap<String, ResultNode>();
+        
+        for (final var child : structure.children.values())
+            output.put(child.name, getResultFromChild(document, child));
+
+        return new ResultMap(output);
+    }
+
+    private ResultNode getResultFromChild(Document document, QueryStructure child) {
+        if (child.children.isEmpty()) {
+            // This child is a leaf - it's value has to be either a string or an array of strings.
+            if (child.isArray) {
+                final List<ResultLeaf> childList = ((ArrayList<String>) document.get(child.name))
+                    .stream()
+                    .map(childString -> new ResultLeaf(childString))
+                    .toList();
+                
+                return new ResultList(childList);
+            }
+            else {
+                final var childString = document.get(child.name, String.class);
+
+                return new ResultLeaf(childString);
+            }
+        }
+        else {
+            if (child.isArray) {
+                // An array of arrays is not supported yet.
+                final List<ResultMap> childList = ((ArrayList<Document>) document.get(child.name))
+                    .stream()
+                    .map(childDocument -> getResultFromDocument(childDocument, child))
+                    .toList();
+                
+                return new ResultList(childList);
+            }
+            else {
+                final var childDocument = document.get(child.name, Document.class);
+
+                return getResultFromDocument(childDocument, child);
+            }
+        }
     }
     
 }

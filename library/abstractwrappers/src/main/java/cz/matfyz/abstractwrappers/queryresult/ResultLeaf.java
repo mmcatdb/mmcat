@@ -7,5 +7,10 @@ public class ResultLeaf implements ResultNode {
     public ResultLeaf(String value) {
         this.value = value;
     }
-    
+
+    @Override
+    public String toString() {
+        return "\"" + value + "\"";
+    }
+
 }

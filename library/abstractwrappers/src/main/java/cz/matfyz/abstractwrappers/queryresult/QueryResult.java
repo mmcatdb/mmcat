@@ -6,10 +6,10 @@ package cz.matfyz.abstractwrappers.queryresult;
  */
 public class QueryResult {
 
-    public final ResultNode data;
+    public final ResultList data;
     public final Object statistics;
 
-    public QueryResult(ResultNode data, Object statistics) {
+    public QueryResult(ResultList data, Object statistics) {
         this.data = data;
         this.statistics = statistics;
     }

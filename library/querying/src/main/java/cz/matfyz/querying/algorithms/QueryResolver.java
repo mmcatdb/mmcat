@@ -53,10 +53,14 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
     public QueryResult visit(FilterNode node) {
         if (node.filter instanceof ConditionFilter conditionFilter) {
             // TODO
+            throw new UnsupportedOperationException();
         }
         else if (node.filter instanceof ValueFilter valueFilter) {
             // TODO
+            throw new UnsupportedOperationException();
         }
+
+        throw new UnsupportedOperationException();
     }
 
     public QueryResult visit(JoinNode node) {
