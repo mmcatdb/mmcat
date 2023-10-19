@@ -46,9 +46,8 @@ public class PlanJoiner {
     }
     
     private QueryNode run() {
-        if (allKinds.isEmpty()) {
-            // TODO what now?
-        }
+        if (allKinds.isEmpty())
+            throw JoinException.noKinds();
 
         if (allKinds.size() == 1) {
             final var patternNode = new PatternNode(allKinds, schema, List.of());

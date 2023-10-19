@@ -16,6 +16,10 @@ public interface ParserNode extends Serializable {
 
     public interface Filter extends ParserNode {
 
+        @Override default Filter asFilter() {
+            return this;
+        }
+
         default ConditionFilter asConditionFilter() {
             throw ParsingException.wrongNode(ConditionFilter.class, this);
         }

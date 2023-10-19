@@ -120,14 +120,21 @@ public class SchemaExtractor {
 
     private void processComplexProperty(PatternObject node, ComplexProperty path) {
         path.subpaths().stream()
-            .filter(subpath -> newSchema.hasMorphism(subpath.signature()))
             .forEach(subpath -> {
-                if (!(subpath.signature() instanceof BaseSignature baseSignature))
-                    return;
+                // TODO - is this going to work? Because it might not be possible to browse a database with composed signatures only.
+                // if (!(subpath.signature() instanceof BaseSignature baseSignature))
+                //     return;
 
-                final var childNode = node.createChild(schema.getEdge(baseSignature), signatureToTriple.get(baseSignature));
+                var currentNode = node;
+                for (final var baseSignature : subpath.signature().toBases()) {
+                    if (!newSchema.hasMorphism(baseSignature))
+                        return;
+
+                    currentNode = currentNode.createChild(schema.getEdge(baseSignature), signatureToTriple.get(baseSignature));
+                }
+
                 if (subpath instanceof ComplexProperty complex)
-                    processComplexProperty(childNode, complex);
+                    processComplexProperty(currentNode, complex);
             });
     }
 

@@ -35,9 +35,9 @@ public class QueryTests {
             """)
             .expected("""
                 [{
-                    "number": "o_100"
+                    "v_number": "o_100"
                 }, {
-                    "number": "o_200"
+                    "v_number": "o_200"
                 }]
             """)
             .run();

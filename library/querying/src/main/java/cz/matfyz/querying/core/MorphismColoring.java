@@ -54,17 +54,23 @@ public class MorphismColoring {
         return kindCosts.computeIfAbsent(kindPattern, k -> computePatternCost(kindPattern.root));
     }
 
+    /**
+     * Finds the lowest number of colors assigned to any of the morphisms in the mapping.
+     * If all morphisms have zero colors, 0 is returned.
+     */
     private int computePatternCost(PatternObject object) {
         int min = Integer.MAX_VALUE;
         if (object.signatureFromParent() != null) {
             final var objectColors = morphismToColors.get(object.signatureFromParent());
-            min = objectColors.size();
+            // TODO maybe just return 0?
+            if (objectColors != null)
+                min = objectColors.size();
         }
 
         for (final var child : object.children())
             min = Math.min(min, computePatternCost(child));
 
-        return min != Integer.MAX_VALUE ? min : 0;
+        return min == Integer.MAX_VALUE ? 0 : min;
     }
 
     private static record KindWithCost(KindPattern kind, int cost) {}
@@ -76,7 +82,7 @@ public class MorphismColoring {
     public List<KindPattern> sortKinds(List<KindPattern> kindPatterns) {
         return kindPatterns.stream()
             .map(kindPattern -> new KindWithCost(kindPattern, getKindCost(kindPattern)))
-            .filter(kindWithCost -> kindWithCost.cost > 0)
+            .filter(kindWithCost -> kindWithCost.cost != 0)
             .sorted((a, b) -> a.cost - b.cost)
             .map(KindWithCost::kind)
             .toList();

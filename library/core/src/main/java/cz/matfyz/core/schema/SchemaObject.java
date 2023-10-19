@@ -5,6 +5,8 @@ import cz.matfyz.core.identification.Identified;
 
 import java.util.Objects;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * @author pavel.koupil, jachymb.bartik
  */
@@ -15,7 +17,9 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
     private final String label;
     private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
     private final SignatureId superId; // Should be a union of all ids (super key).
+    @Nullable
     public final String iri;
+    @Nullable
     public final String pimIri;
 
     public SchemaObject(Key key, String label, ObjectIds ids, SignatureId superId, String iri, String pimIri) {

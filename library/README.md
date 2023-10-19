@@ -1,11 +1,11 @@
 # MM-cat library
 
 A multi-model data modeling and evolution framework based on category theory. It consists of the following modules:
-- [Core](./library/core) defines classes needed by other modules.
-- [Transformations](./library/transformations/README.md) contains algorithms for transforming data from logical to conceptual model (and back).
-- [Wrappers](./library/wrappers/README.md) provides funcionalities specific for different databases.
-- [Evolution](./library/evolution/README.md) includes algorithms for the evolution of both the conceptual and the logical models.
-- [Server](./library/server/README.md) provides an API which exposes the functionality of the other modules. It also contains a job scheduler for the transformation algorithms.
+- [Core](./core/README.md) defines classes needed by other modules.
+- [Transformations](./transformations/README.md) contains algorithms for transforming data from logical to conceptual model (and back).
+- [Wrappers](./wrappers/README.md) provides funcionalities specific for different databases.
+- [Evolution](./evolution/README.md) includes algorithms for the evolution of both the conceptual and the logical models.
+- [Server](./server/README.md) provides an API which exposes the functionality of the other modules. It also contains a job scheduler for the transformation algorithms.
 
 ## Requirements
 
@@ -18,4 +18,4 @@ A multi-model data modeling and evolution framework based on category theory. It
 ```bash
 mvn clean install -DskipTests
 ```
-- Then see the [Server](./library/server/README.md) package.
+- Then see the [Server](./server/README.md) package.

@@ -11,6 +11,10 @@ public class JoinException extends QueryingException {
         super("join." + name, data, cause);
     }
 
+    public static JoinException noKinds() {
+        return new JoinException("noKinds", null, null);
+    }
+
     public static JoinException impossible() {
         return new JoinException("impossible", null, null);
     }
