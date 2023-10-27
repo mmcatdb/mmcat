@@ -29,8 +29,13 @@ jobs:
     runs-on: ubuntu-latest
     container: byteflair/ssh-rsync
     environment: prod
+
     steps:
       - uses: actions/download-artifact@v3
         with:
           name: build
-      - run: sshpass -p "$FTP_PASSWORD" rsync -e 'ssh -p 42222 -o StrictHostKeyChecking=no' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
+      - run: sshpass -e rsync -e 'ssh -p 42222 -o StrictHostKeyChecking=no' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
+        env:
+          SSHPASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
