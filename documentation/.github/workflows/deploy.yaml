@@ -35,7 +35,6 @@ jobs:
         with:
           name: build
           path: public
-      - run: ls -la
       - run: sshpass -e rsync -e 'ssh -p 42222 -o StrictHostKeyChecking=no' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
         env:
           SSHPASS: ${{ secrets.FTP_PASSWORD }}

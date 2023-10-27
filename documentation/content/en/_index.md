@@ -1,5 +1,5 @@
 ---
-title: "mmcat"
+title: "MM-cat"
 geekdocNav: false
 geekdocAlign: center
 geekdocAnchor: false
