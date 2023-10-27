@@ -1,0 +1,34 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # container: klakegg/hugo:latest
+    container: registry.gitlab.com/gitlab-ci-utils/docker-hugo:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: hugo --cleanDestinationDir
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: public
+
+  deploy:
+    runs-on: ubuntu-latest
+    container: byteflair/ssh-rsync
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+      - run: sshpass -p "$FTP_PASSWORD" rsync -e 'ssh -p 42222 -o StrictHostKeyChecking=no' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
