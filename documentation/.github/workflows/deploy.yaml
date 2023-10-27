@@ -14,8 +14,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # container: klakegg/hugo:latest
     container: registry.gitlab.com/gitlab-ci-utils/docker-hugo:latest
+    environment: prod
     steps:
       - uses: actions/checkout@v4
       - run: hugo --cleanDestinationDir
@@ -28,6 +28,7 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     container: byteflair/ssh-rsync
+    environment: prod
     steps:
       - uses: actions/download-artifact@v3
         with:
