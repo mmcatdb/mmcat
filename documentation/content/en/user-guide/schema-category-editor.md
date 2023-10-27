@@ -38,7 +38,7 @@ An object can have multiple ids. The ids do not have to share types.
 
 ### Simple
 
-A set with exactly one element. You can create it simply by [specifying a signature](createSignature.md). The corresponding morphism must have cardinalities:
+A set with exactly one element. You can create it simply by [specifying a signature](create-signature.md). The corresponding morphism must have cardinalities:
 - Object to Property - `1..1`, so there is exactly one identifier for any object.
 - Property to Object - `0..1` or `1..1`, so there is at most one object for any identifier.
 

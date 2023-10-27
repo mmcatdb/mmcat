@@ -13,7 +13,7 @@ There are several buttons in the navigation menu on the left side.
 
 ### Schema Category
 
-[There](schemaCategoryEditor.md) is a tool for creating and editing the conceptual schema.
+[There](schema-category-editor.md) is a tool for creating and editing the conceptual schema.
 
 ### Mappings
 
@@ -29,7 +29,7 @@ A job is a selected data transformation process that is executed on the server. 
 
 ### Instance Category
 
-[There](./instanceCategory.md) you can browse the instance category, which is created automatically when you run any job that imports data from a database.
+[There](./instance-category.md) you can browse the instance category, which is created automatically when you run any job that imports data from a database.
 
 ### Models
 

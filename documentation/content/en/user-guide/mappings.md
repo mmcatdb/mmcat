@@ -3,13 +3,13 @@ title: "Mappings"
 weight: 30
 ---
 
-Here you can find all mappings that can be used in import or export jobs. They are displayed with their access path in the JSON-like structure described [here](../theoreticalBackground/mapping.md#representation).
+Here you can find all mappings that can be used in import or export jobs. They are displayed with their access path in the JSON-like structure described [here](../theoretical-background/mapping.md#representation).
 
 ## Create
 
 First click on the `Create new` button. Then select the database from the select box and the root object from the nodes in the graph. Both values can not be changed after you click on the `Confirm` button.
 
-The displayed graph is described [here](schemaCategoryEditor.md#display).
+The displayed graph is described [here](schema-category-editor.md#display).
 
 Now you can change the name of the mapping or the name of the kind (i.e. document, table, ...). You can also add properties to the path.
 
@@ -17,7 +17,7 @@ Now you can change the name of the mapping or the name of the kind (i.e. documen
 
 The access path of the mapping is displayed on the right. To add a subproperty to any existing property or to the root property, click on the plus button.
 
-First, you have to [select the signature](createSignature.md) of the property. The default value of the signature is the null signature which corresponds to the auxiliary property.
+First, you have to [select the signature](create-signature.md) of the property. The default value of the signature is the null signature which corresponds to the auxiliary property.
 
 If the type of the property can not be determined from the current information, you will be asked to specify it. There are multiple rules:
 - Some databases (e.g. PostgreSQL) do not allow creating complex properties.
