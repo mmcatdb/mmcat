@@ -8,7 +8,7 @@ export type QueryInput = {
 };
 
 export type QueryResult = {
-    jsonValues: string[];
+    rows: string[];
 };
 
 const queries = {

@@ -7,6 +7,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
+import cz.matfyz.core.schema.SchemaObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,16 @@ public abstract class BaseQueryWrapper {
             throw QueryException.unsupportedOperator(operator);
             
         return value;
+    }
+
+    // Root
+
+    protected SchemaObject rootObject;
+    protected String rootIdentifier;
+
+    public void defineRoot(SchemaObject object, String identifier) {
+        this.rootObject = object;
+        this.rootIdentifier = identifier;
     }
 
     // Projections

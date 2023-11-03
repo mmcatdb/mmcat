@@ -101,6 +101,8 @@ public class QueryTranslator implements QueryVisitor<Void> {
     private static record StackItem(PatternObject object, Signature path) {}
 
     private void processKind(KindPattern kind) {
+        wrapper.defineRoot(kind.root.schemaObject, kind.root.term.getIdentifier());
+
         final Stack<StackItem> stack = new Stack<>();
         stack.add(new StackItem(kind.root, Signature.createEmpty()));
         while (!stack.isEmpty())
@@ -114,7 +116,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
         }
         
         final Term term = item.object.term;
-        final Property objectProperty = new Property(kind.kind, item.path);
+        final var objectProperty = new Property(kind.kind, item.path);
 
         if (term instanceof StringValue constantObject)
             wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);

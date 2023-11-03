@@ -1,17 +1,19 @@
 package cz.matfyz.abstractwrappers.queryresult;
 
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
+
 /**
- * This class represents the result of a query. It contains (a) data and (b) some statistics about the query.
+ * This class represents the result of a selection part of a query. It contains (a) data and (b) structure of the data.
  * Because we need to support all possible database systems, the data is represented as a tree.
  */
 public class QueryResult {
 
     public final ResultList data;
-    public final Object statistics;
+    public final QueryStructure structure;
 
-    public QueryResult(ResultList data, Object statistics) {
+    public QueryResult(ResultList data, QueryStructure structure) {
         this.data = data;
-        this.statistics = statistics;
+        this.structure = structure;
     }
 
 }

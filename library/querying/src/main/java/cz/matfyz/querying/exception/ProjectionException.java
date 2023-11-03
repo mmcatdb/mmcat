@@ -14,8 +14,8 @@ public class ProjectionException extends QueryingException {
         super("projection." + name, data, null);
     }
 
-    public static ProjectionException notTree() {
-        return new ProjectionException("notTree", null);
+    public static ProjectionException notSingleComponent() {
+        return new ProjectionException("notSingleComponent", null);
     }
 
     private record NotSingleRootData(
@@ -31,7 +31,7 @@ public class ProjectionException extends QueryingException {
         SchemaObject target
     ) implements Serializable {}
 
-    public static ProjectionException PathNotFound(SchemaObject source, SchemaObject target) {
+    public static ProjectionException pathNotFound(SchemaObject source, SchemaObject target) {
         return new ProjectionException("pathNotFound", new PathNotFoundData(source, target));
     }
 

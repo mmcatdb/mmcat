@@ -4,11 +4,11 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.abstractwrappers.queryresult.ResultLeaf;
 import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.abstractwrappers.queryresult.ResultMap;
 import cz.matfyz.abstractwrappers.queryresult.ResultNode;
+import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -213,19 +213,19 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     @Override
-    public QueryResult executeQuery(QueryStatement statement) {
+    public QueryResult executeQuery(QueryStatement query) {
         try {
             final var output = new ArrayList<ResultMap>();
-            final var iterator = getDocumentIteratorFromString(statement.stringContent());
+            final var iterator = getDocumentIteratorFromString(query.stringContent());
             
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
-                output.add(getResultFromDocument(document, statement.structure()));
+                output.add(getResultFromDocument(document, query.structure()));
             }
             
             final var dataResult = new ResultList(output);
             
-            return new QueryResult(dataResult, null);
+            return new QueryResult(dataResult, query.structure());
         }
         catch (Exception e) {
             throw new PullForestException(e);

@@ -30,7 +30,7 @@ async function executeQuery() {
 
     const response = await queries.execute({}, { categoryId, queryString: query });
     const result = response.status
-        ? response.data.jsonValues.join(',\n')
+        ? response.data.rows.join(',\n')
         : 'Error :(';
 
     queryResult.value = result;

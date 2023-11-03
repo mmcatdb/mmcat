@@ -51,7 +51,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         
         variableBuilders.pop();
 
-        return new SelectClause(triples, List.of());
+        return new SelectClause(triples);
     }
 
     @Override

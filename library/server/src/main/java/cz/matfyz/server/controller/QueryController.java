@@ -2,6 +2,7 @@ package cz.matfyz.server.controller;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.server.builder.MappingBuilder;
@@ -48,7 +49,7 @@ public class QueryController {
     ) {}
 
     public static record QueryResult(
-        List<String> jsonValues
+        List<String> rows
     ) {}
 
     @PostMapping("/execute")
@@ -61,9 +62,9 @@ public class QueryController {
 
         final var queryToInstance = new QueryToInstance();
         queryToInstance.input(category, data.queryString, kinds);
-        final var result = queryToInstance.algorithm();
+        final ResultList result = queryToInstance.algorithm();
 
-        return new QueryResult(result.jsonValues());
+        return new QueryResult(result.toJsonArray());
     }
 
     private List<Kind> defineKinds(Id categoryId, SchemaCategory category) {

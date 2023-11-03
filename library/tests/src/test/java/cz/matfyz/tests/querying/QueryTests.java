@@ -35,9 +35,9 @@ public class QueryTests {
             """)
             .expected("""
                 [{
-                    "v_number": "o_100"
+                    "number": "o_100"
                 }, {
-                    "v_number": "o_200"
+                    "number": "o_200"
                 }]
             """)
             .run();
@@ -197,21 +197,21 @@ public class QueryTests {
             """)
             .expected("""
                 [{
-                    "price": "125",
                     "id": "123",
-                    "label": "Clean Code"
+                    "label": "Clean Code",
+                    "price": "125"
                 }, {
-                    "price": "299",
-                    "id": "457",
-                    "label": "The Art of War"
-                }, {
-                    "price": "350",
-                    "id": "734",
-                    "label": "Animal Farm"
-                }, {
-                    "price": "199",
                     "id": "765",
-                    "label": "The Lord of the Rings"
+                    "label": "The Lord of the Rings",
+                    "price": "199"
+                }, {
+                    "id": "457",
+                    "label": "The Art of War",
+                    "price": "299"
+                }, {
+                    "id": "734",
+                    "label": "Animal Farm",
+                    "price": "350"
                 }]
             """)
             .run();

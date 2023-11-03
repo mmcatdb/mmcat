@@ -33,13 +33,22 @@ public interface ParserNode extends Serializable {
     /**
      * This interface represents either a variable (?variable), a literal ("literal") or an aggregation (SUM(?variable)).
      */
-    public interface Term extends ParserNode {
+    public interface Term extends ParserNode, Comparable<Term> {
 
         @Override default Term asTerm() {
             return this;
         }
 
         String getIdentifier();
+
+        default boolean equals(Term other) {
+            return getIdentifier().equals(other.getIdentifier());
+        }
+
+        @Override
+        default int compareTo(Term other) {
+            return getIdentifier().compareTo(other.getIdentifier());
+        }
 
         default StringValue asStringValue() {
             throw ParsingException.wrongNode(StringValue.class, this);

@@ -21,10 +21,14 @@ public class ResultList implements ResultNode {
     // TODO nad některými sloupci vytvořit stromy pro rychlejší joinování
         // - resp. vytvořit je, když jsou potřeba, a pak je nějak udržovat
 
-    public final List<? extends ResultNode> children;
+    private final List<? extends ResultNode> children;
 
     public ResultList(List<? extends ResultNode> children) {
         this.children = children;
+    }
+
+    public Collection<? extends ResultNode> children() {
+        return this.children;
     }
 
     @Override
@@ -59,6 +63,10 @@ public class ResultList implements ResultNode {
         return builder.toString();
     }
 
+    public List<String> toJsonArray() {
+        return children.stream().map(node -> node.toString()).toList();
+    }
+
     public static class Serializer extends StdSerializer<ResultList> {
 
         public Serializer() {
@@ -75,6 +83,20 @@ public class ResultList implements ResultNode {
             for (final var child : resultList.children)
                 generator.writeObject(child);
             generator.writeEndArray();
+        }
+
+    }
+
+    public static class Builder<T extends ResultNode> implements NodeBuilder {
+
+        private List<T> children = new ArrayList<>();
+
+        public void add(T node) {
+            children.add(node);
+        }
+
+        public ResultList build() {
+            return new ResultList(children);
         }
 
     }

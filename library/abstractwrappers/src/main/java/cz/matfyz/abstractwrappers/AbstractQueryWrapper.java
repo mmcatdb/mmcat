@@ -3,8 +3,11 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.utils.GraphUtils.Tree;
+import cz.matfyz.core.utils.LineStringBuilder;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -95,6 +98,11 @@ public interface AbstractQueryWrapper {
     ) {}
 
     /**
+     * Defines the name of the root QueryStructure.
+     */
+    void defineRoot(SchemaObject object, String identifier);
+
+    /**
      * Adds a projection to attribute hierarchicalPath which can eventually be optional (isOptional).
      */
     void addProjection(Property property, String identifier, boolean isOptional);
@@ -127,18 +135,20 @@ public interface AbstractQueryWrapper {
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
 
-    public static class QueryStructure {
+    public static class QueryStructure implements Tree<QueryStructure> {
     
-        // If null, this is the root of the tree.
-        @Nullable
         public final String name;
-        // Same.
+        // TODO find out if the object is needed
         @Nullable
         public final SchemaObject object;
         public final boolean isArray;
         public final Map<String, QueryStructure> children = new TreeMap<>();
 
-        public QueryStructure(@Nullable String name, @Nullable SchemaObject object, boolean isArray) {
+        // If null, this is the root of the tree.
+        @Nullable
+        private QueryStructure parent;
+
+        public QueryStructure(String name, SchemaObject object, boolean isArray) {
             this.name = name;
             this.object = object;
             this.isArray = isArray;
@@ -146,8 +156,44 @@ public interface AbstractQueryWrapper {
 
         public void addChild(QueryStructure child) {
             this.children.put(child.name, child);
+            child.parent = this;
         }
 
+        @Nullable
+        public QueryStructure parent() {
+            return parent;
+        }
+
+        @Override
+        public Collection<QueryStructure> children() {
+            return this.children.values();
+        }
+
+        private void print(LineStringBuilder builder) {
+            builder.append(name);
+            if (isArray)
+                builder.append("[]");
+
+            if (!children.isEmpty())
+                builder.append(":");
+
+            builder
+                .down()
+                .nextLine();
+
+            children.values().forEach(child -> {
+                child.print(builder);
+                builder.nextLine();
+            });
+            builder.up();
+        }
+
+        @Override
+        public String toString() {
+            final var builder = new LineStringBuilder(0, "    ");
+            print(builder);
+            return builder.toString();
+        }
     }
 
     public static record QueryStatement(String stringContent, QueryStructure structure) {}

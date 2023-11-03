@@ -6,6 +6,7 @@ public class SelectTriple implements Statement {
 
     public final Variable subject;
     public final String name;
+    // This has to be either Variable or Aggregation.
     public final Term object;
     
     SelectTriple(Variable subject, String name, Term object) {

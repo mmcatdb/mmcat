@@ -4,6 +4,7 @@ import cz.matfyz.core.utils.IndentedStringBuilder;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -14,10 +15,14 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = ResultMap.Serializer.class)
 public class ResultMap implements ResultNode {
 
-    public final Map<String, ResultNode> children;
+    private final Map<String, ResultNode> children;
 
     public ResultMap(Map<String, ResultNode> children) {
         this.children = children;
+    }
+
+    public Map<String, ResultNode> children() {
+        return children;
     }
 
     @Override
@@ -69,6 +74,20 @@ public class ResultMap implements ResultNode {
             for (final var child : resultMap.children.entrySet())
                 generator.writePOJOField(child.getKey(), child.getValue());
             generator.writeEndObject();
+        }
+
+    }
+
+    public static class Builder implements NodeBuilder {
+
+        private Map<String, ResultNode> children = new TreeMap<>();
+
+        public void put(String key, ResultNode node) {
+            children.put(key, node);
+        }
+
+        public ResultMap build() {
+            return new ResultMap(children);
         }
 
     }

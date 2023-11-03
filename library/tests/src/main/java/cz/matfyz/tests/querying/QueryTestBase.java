@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.tests.database.TestDatabase;
@@ -64,10 +65,11 @@ public class QueryTestBase {
         final var queryToInstance = new QueryToInstance();
         queryToInstance.input(schema, queryString, kinds);
 
-        final var result = queryToInstance.algorithm();
-        LOGGER.info("\n{}", result.jsonValues());
+        final ResultList result = queryToInstance.algorithm();
+        final var jsonResults = result.toJsonArray();
+        LOGGER.info("\n{}", jsonResults);
         
-        final JsonNode jsonResult = parseJsonResult(result.jsonValues());
+        final JsonNode jsonResult = parseJsonResult(jsonResults);
         final JsonNode expectedResult = parseExpectedResult(expectedJson);        
         assertEquals(expectedResult, jsonResult);
     }
