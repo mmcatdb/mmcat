@@ -31,7 +31,7 @@ public class QueryToInstance {
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
         final QueryResult selection = QueryResolver.run(query.context, queryTree);
         
-        return QueryProjector.run(query.context, query.select, selection);
+        return QueryProjector.run(query.context, query.select, selection).data;
     }
     
 }

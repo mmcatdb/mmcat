@@ -1,5 +1,7 @@
 package cz.matfyz.core.utils;
 
+import java.util.Stack;
+
 /**
  * @author jachymb.bartik
  */
@@ -7,7 +9,7 @@ public class LineStringBuilder {
     
     private int indentationLevel;
     private final String indentationStringPerLevel;
-    private final StringBuilder builder = new StringBuilder();
+    private final Stack<String> stack = new Stack<>();
 
     public LineStringBuilder(int indentationLevel, String indentationStringPerLevel) {
         this.indentationLevel = indentationLevel;
@@ -36,29 +38,66 @@ public class LineStringBuilder {
     }
 
     public LineStringBuilder nextLine() {
-        builder
-            .append("\n")
-            .append(computeTabIndentationString(indentationLevel, indentationStringPerLevel));
+        stack.push("\n" + computeTabIndentationString(indentationLevel, indentationStringPerLevel));
         return this;
     }
     
     public LineStringBuilder append(String str) {
-        builder.append(str);
+        stack.push(str);
         return this;
     }
     
     public LineStringBuilder append(int i) {
-        builder.append(i);
+        stack.push("" + i);
         return this;
     }
     
     public LineStringBuilder append(Object obj) {
-        builder.append(obj);
+        stack.push(obj.toString());
+        return this;
+    }
+
+    public LineStringBuilder remove() {
+        stack.pop();
+        return this;
+    }
+
+    public LineStringBuilder remove(int i) {
+        while (i > 0) {
+            stack.pop();
+            i--;
+        }
         return this;
     }
     
     @Override
     public String toString() {
-        return builder.toString();
+        final StringBuilder builder = new StringBuilder();
+        
+        stack.stream().forEach(builder::append);
+        final String fullString = builder.toString();
+
+        // So that in the output, there are no whitespaces at the beginning of an empty line. This would make it much harder for string comparison.
+        final StringBuilder trimmedBuilder = new StringBuilder();
+        final var split = fullString.split("\n", -1);
+        for (int i = 0; i < split.length - 1; i++)
+            trimmedBuilder.append(trimRight(split[i])).append("\n");
+        
+        if (split.length > 0)
+            trimmedBuilder.append(trimRight(split[split.length - 1]));
+        
+        return trimmedBuilder.toString();
     }
+
+    private String trimRight(String input) {
+        if (input.length() == 0)
+            return input;
+
+        int i = input.length() - 1;
+        while (i >= 0 && Character.isWhitespace(input.charAt(i)))
+            i--;
+
+        return input.substring(0, i + 1);
+    }
+    
 }

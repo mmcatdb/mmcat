@@ -27,7 +27,7 @@ public class ResultList implements ResultNode {
         this.children = children;
     }
 
-    public Collection<? extends ResultNode> children() {
+    public List<? extends ResultNode> children() {
         return this.children;
     }
 
@@ -91,8 +91,9 @@ public class ResultList implements ResultNode {
 
         private List<T> children = new ArrayList<>();
 
-        public void add(T node) {
+        public Builder<T> add(T node) {
             children.add(node);
+            return this;
         }
 
         public ResultList build() {

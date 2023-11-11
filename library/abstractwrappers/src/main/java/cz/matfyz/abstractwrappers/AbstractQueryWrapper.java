@@ -139,8 +139,6 @@ public interface AbstractQueryWrapper {
     
         public final String name;
         // TODO find out if the object is needed
-        @Nullable
-        public final SchemaObject object;
         public final boolean isArray;
         public final Map<String, QueryStructure> children = new TreeMap<>();
 
@@ -148,15 +146,18 @@ public interface AbstractQueryWrapper {
         @Nullable
         private QueryStructure parent;
 
-        public QueryStructure(String name, SchemaObject object, boolean isArray) {
+        public QueryStructure(String name, boolean isArray) {
             this.name = name;
-            this.object = object;
             this.isArray = isArray;
         }
 
-        public void addChild(QueryStructure child) {
+        /**
+         * Adds the child and returns it back.
+         */
+        public QueryStructure addChild(QueryStructure child) {
             this.children.put(child.name, child);
             child.parent = this;
+            return child;
         }
 
         @Nullable

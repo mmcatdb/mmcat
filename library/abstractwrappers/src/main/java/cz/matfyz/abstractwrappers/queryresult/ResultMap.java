@@ -82,8 +82,9 @@ public class ResultMap implements ResultNode {
 
         private Map<String, ResultNode> children = new TreeMap<>();
 
-        public void put(String key, ResultNode node) {
+        public Builder put(String key, ResultNode node) {
             children.put(key, node);
+            return this;
         }
 
         public ResultMap build() {

@@ -216,8 +216,8 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     
     private QueryStructure createStructure() {
-        final var root = new QueryStructure(rootIdentifier, rootObject, true);
-        projections.forEach(p -> root.addChild(new QueryStructure(p.identifier(), p.property().findSchemaObject(), false)));
+        final var root = new QueryStructure(rootIdentifier, true);
+        projections.forEach(p -> root.addChild(new QueryStructure(p.identifier(), false)));
 
         return root;
     }
