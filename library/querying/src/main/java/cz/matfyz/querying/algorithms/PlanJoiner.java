@@ -8,6 +8,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.core.utils.GraphUtils;
+import cz.matfyz.core.utils.GraphUtils.Component;
 import cz.matfyz.querying.core.ObjectColoring;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
@@ -17,6 +18,8 @@ import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.exception.JoinException;
+import cz.matfyz.querying.parsing.GroupGraphPattern.TermTree;
+import cz.matfyz.querying.parsing.ParserNode.Term;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,16 +36,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class PlanJoiner {
 
-    public static QueryNode run(Set<KindPattern> allKinds, SchemaCategory schema) {
-        return new PlanJoiner(allKinds, schema).run();
+    public static QueryNode run(Set<KindPattern> allKinds, SchemaCategory schema, TermTree allTerms) {
+        return new PlanJoiner(allKinds, schema, allTerms).run();
     }
 
     private final Set<KindPattern> allKinds;
     private final SchemaCategory schema;
+    private final TermTree allTerms;
 
-    private PlanJoiner(Set<KindPattern> allKinds, SchemaCategory schema) {
+    private PlanJoiner(Set<KindPattern> allKinds, SchemaCategory schema, TermTree allTerms) {
         this.allKinds = allKinds;
         this.schema = schema;
+        this.allTerms = allTerms;
     }
     
     private QueryNode run() {
@@ -50,7 +55,7 @@ public class PlanJoiner {
             throw JoinException.noKinds();
 
         if (allKinds.size() == 1) {
-            final var patternNode = new PatternNode(allKinds, schema, List.of());
+            final var patternNode = new PatternNode(allKinds, schema, List.of(), allKinds.stream().findFirst().get().root.term);
             final var database = allKinds.stream().findFirst().get().kind.database;
 
             return new DatabaseNode(patternNode, database);
@@ -112,12 +117,12 @@ public class PlanJoiner {
 
         final var condition = new JoinCondition(signature1, signature2);
 
-        // TODO recursion
-        return new JoinCandidate(JoinType.Value, kind1, kind2, List.of(condition), 0);
+        // TODO recursion, isOptional
+        return new JoinCandidate(JoinType.Value, kind1, kind2, List.of(condition), 0, false);
     }
 
     /**
-     * This object matches the id-ref join pattern. This means that an object (rootObject) is identified by another object (idObject). The first kind (idKind) has A as a root object and B as a normal property. The second kind (refKind) has the idObject.
+     * This function matches the id-ref join pattern. This means that an object (rootObject) is identified by another object (idObject). The first kind (idKind) has rootObject as a root object and idObject as a normal property. The second kind (refKind) has the idObject as a normal property.
      */
     private JoinCandidate tryCreateIdRefCandidate(SchemaObject idObject, KindPattern idKind, KindPattern refKind, ObjectColoring coloring) {
         // First, check if the idObject is an identifier of the root of the idKind.
@@ -142,8 +147,8 @@ public class PlanJoiner {
         final var condition = new JoinCondition(fromSignature, toSignature);
         
         // The idObject is in fact an identifier of the root of the idKind. We also know that both idKind and refKind contains the object. Therefore we can create the join candidate.
-        // TODO recursion
-        return new JoinCandidate(JoinType.IdRef, idKind, refKind, List.of(condition), 0);
+        // TODO recursion, isOptional
+        return new JoinCandidate(JoinType.IdRef, idKind, refKind, List.of(condition), 0, false);
     }
 
     @Nullable
@@ -183,7 +188,10 @@ public class PlanJoiner {
      */
     private List<JoinGroup> groupJoinCandidates(List<JoinCandidate> candidates) {
         final var output = new TreeMap<DatabasePair, List<JoinCandidate>>();
-        candidates.forEach(c -> output.computeIfAbsent(DatabasePair.create(c), p -> new ArrayList<>()));
+        candidates.forEach(c -> output
+            .computeIfAbsent(DatabasePair.create(c), p -> new ArrayList<>())
+            .add(c)
+        );
 
         return output.entrySet().stream()
             .map(e -> new JoinGroup(e.getKey(), e.getValue()))
@@ -216,17 +224,22 @@ public class PlanJoiner {
             .flatMap(g -> mergeNeighbors(g.candidates, candidatesBetweenParts).stream()).toList();
     }
 
-    public record QueryPart(Set<KindPattern> kinds, List<JoinCandidate> joinCandidates) {}
+    /** A query part is a part of query that can be executed at once in a single database. */
+    public record QueryPart(Set<KindPattern> kinds, List<JoinCandidate> joinCandidates, Term rootTerm) {}
 
     /**
      * Merges kinds from a single database to a minimal number of query parts.
      */
     private List<QueryPart> mergeNeighbors(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
+        if (candidates.isEmpty())
+            // TODO error?
+            return List.of();
+            
         // All of the candidates have to have the same database.
         final Database database = candidates.get(0).from().kind.database;
         // If the database supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
         if (database.control.getQueryWrapper().isJoinSupported())
-            return GraphUtils.findComponents(candidates).stream().map(c -> new QueryPart(c.nodes(), c.edges())).toList();
+            return GraphUtils.findComponents(candidates).stream().map(this::createQueryPart).toList();
         
         // Othervise, we have to create custom query part for each kind.
         final var kinds = new TreeSet<KindPattern>();
@@ -237,7 +250,32 @@ public class PlanJoiner {
         // Also, all candidates will join different parts so we add them to the `between parts` category.
         candidatesBetweenParts.addAll(candidates);
 
-        return kinds.stream().map(kind -> new QueryPart(Set.of(kind), List.of())).toList();
+        return kinds.stream().map(kind -> new QueryPart(Set.of(kind), List.of(), kind.root.term)).toList();
+    }
+
+    private QueryPart createQueryPart(Component<KindPattern, JoinCandidate> component) {
+        final var kinds = component.nodes();
+        final var joinCandidates = component.edges();
+
+        final var rootKinds = GraphUtils.findRoots(component);
+        if (rootKinds.size() != 1)
+            throw new UnsupportedOperationException("Multiple root kinds in join");
+
+        // This algorithm is based on the idea that the root term of the query part should be a common subroot to all terms in all kinds in the query part.
+        // We only have to consider root terms of all kinds.
+        // Of course, the root term has to be original. Therefore, we have to continue through it's parentes until we find such.
+        final var rootTermTrees = kinds.stream()
+            .map(k -> k.root.term)
+            .map(term -> GraphUtils.findBFS(allTerms, t -> t.term.equals(term)))
+            .toList();
+        
+        var partRoot = GraphUtils.findSubroot(allTerms, rootTermTrees);
+        while (!partRoot.term.isOriginal())
+            partRoot = partRoot.parent;
+
+        // final var rootTerm = rootKinds.stream().findFirst().get().root.term;
+
+        return new QueryPart(kinds, joinCandidates, partRoot.term);
     }
 
     private static interface JoinTreeNode {
@@ -292,7 +330,7 @@ public class PlanJoiner {
             // TODO schema
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
-            final var patternNode = new PatternNode(queryPart.kinds, schema, queryPart.joinCandidates);
+            final var patternNode = new PatternNode(queryPart.kinds, schema, queryPart.joinCandidates, queryPart.rootTerm);
             final var database = queryPart.kinds.stream().findFirst().get().kind.database;
 
             return new DatabaseNode(patternNode, database);

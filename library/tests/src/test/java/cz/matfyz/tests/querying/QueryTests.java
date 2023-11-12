@@ -34,11 +34,11 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }
@@ -56,11 +56,11 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }
@@ -78,11 +78,11 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "has_number": "o_100"
                 }, {
                     "has_number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }
@@ -103,11 +103,11 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
-                }]
+                } ]
             """)
             .run();
     }
@@ -125,11 +125,11 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "tags": [ "123", "456", "789" ]
                 }, {
                     "tags": [ "123", "String456", "String789" ]
-                }]
+                } ]
             """)
             .run();
     }
@@ -149,9 +149,9 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "number": "o_100"
-                }]
+                } ]
             """)
             .run();
     }
@@ -172,9 +172,9 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "number": "o_100"
-                }]
+                } ]
             """)
             .run();
     }
@@ -196,7 +196,7 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "id": "123",
                     "label": "Clean Code",
                     "price": "125"
@@ -212,7 +212,7 @@ public class QueryTests {
                     "id": "734",
                     "label": "Animal Farm",
                     "price": "350"
-                }]
+                } ]
             """)
             .run();
     }
@@ -236,7 +236,7 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "number": "o_100",
                     "id": "123"
                 }, {
@@ -248,7 +248,7 @@ public class QueryTests {
                 }, {
                     "number": "o_200",
                     "id": "734"
-                }]
+                } ]
             """)
             .run();
     }
@@ -268,7 +268,7 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "quantity": "1",
                     "label": "Clean Code"
                 }, {
@@ -280,7 +280,7 @@ public class QueryTests {
                 }, {
                     "quantity": "3",
                     "label": "Animal Farm"
-                }]
+                } ]
             """)
             .run();
     }
@@ -304,7 +304,7 @@ public class QueryTests {
                 }
             """)
             .expected("""
-                [{
+                [ {
                     "quantity": "1",
                     "street": "hodnotaA"
                 }, {
@@ -316,7 +316,7 @@ public class QueryTests {
                 }, {
                     "quantity": "3",
                     "street": "hodnotaA2"
-                }]
+                } ]
             """)
             .run();
     }

@@ -86,6 +86,8 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private void addJoins() {
+        // TODO add support for optional joins
+
         final var joinedKinds = new TreeSet<Kind>();
 
         final Kind fromKind = joins.get(0).from();
@@ -213,7 +215,6 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     private String getAggregationName(PropertyWithAggregation aggregation) {
         return getAggregationOperatorValue(aggregation.aggregationOperator) + "(" + getPropertyNameWithoutAggregation(aggregation) + ")";
     }
-
     
     private QueryStructure createStructure() {
         final var root = new QueryStructure(rootIdentifier, true);

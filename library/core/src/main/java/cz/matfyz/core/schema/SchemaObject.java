@@ -77,7 +77,7 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
 
     @Override
     public String toString() {
-        return "SchemaObject TODO";
+        return "SO: " + key;
     }
     
 }

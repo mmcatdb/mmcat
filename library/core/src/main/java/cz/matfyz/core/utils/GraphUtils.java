@@ -102,7 +102,7 @@ public abstract class GraphUtils {
 
     }
 
-    public interface Tree<T extends Tree<T>> {
+    public interface Tree<T extends Tree<T>> extends Comparable<T> {
 
         @Nullable T parent();
 
@@ -192,6 +192,117 @@ public abstract class GraphUtils {
         }
 
         return null;
+    }
+
+    public static <T extends Tree<T>> T findSubroot(T root, Collection<T> nodes) {
+        return new TreeSubrootFinder<T>(root).findSubroot(nodes);
+    }
+
+    private static class TreeSubrootFinder<T extends Tree<T>> {
+
+        private Map<T, Integer> depths = new TreeMap<>();
+
+        public TreeSubrootFinder(T root) {
+            fillDepths(root, 0);
+        }
+
+        private void fillDepths(T node, int currentDepth) {
+            depths.put(node, currentDepth);
+
+            for (final var child : node.children())
+                fillDepths(child, currentDepth + 1);
+        }
+
+        public T findSubroot(Collection<T> nodes) {
+            int maximalDepth = Integer.MAX_VALUE;
+            for (final var node : nodes)
+                maximalDepth = Math.min(maximalDepth, depths.get(node));
+
+            Set<T> nodesAtCurrentDepth = new TreeSet<>();
+            for (var node : nodes) {
+                for (int i = depths.get(node); i > maximalDepth; i--)
+                    node = node.parent();
+
+                nodesAtCurrentDepth.add(node);
+            }
+
+            while (nodesAtCurrentDepth.size() > 1) {
+                final var parents = nodesAtCurrentDepth.stream().map(node -> node.parent()).toList();
+                nodesAtCurrentDepth = new TreeSet<>(parents);
+            }
+
+            return nodesAtCurrentDepth.stream().findFirst().get();
+        }
+
+    }
+
+    @Nullable
+    public static <T extends Tree<T>, P extends Comparable<P>, E extends Edge<P>> T treeFromEdges(Collection<E> edges, TreeBuilder<P, T> builder) {
+        final var map = new TreeMap<P, EditableTree<P>>();
+
+        for (final var edge : edges) {
+            final var from = map.computeIfAbsent(edge.from(), EditableTree::new);
+            final var to = map.computeIfAbsent(edge.to(), EditableTree::new);
+
+            from.children.add(to);
+            to.parent = from;
+        }
+
+        final var roots = map.values().stream().filter(node -> node.parent == null).toList();
+        if (roots.size() != 1)
+            return null;
+
+        final var editableRoot = roots.get(0);
+        final var root = builder.createRoot(editableRoot.payload);
+        addChildren(editableRoot, root, builder);
+
+        return root;
+    }
+
+    private static <T extends Tree<T>, P extends Comparable<P>, E extends Edge<P>> void addChildren(EditableTree<P> parent, T parentTree, TreeBuilder<P, T> builder) {
+        for (final var child : parent.children) {
+            final var childTree = builder.createChild(parentTree, child.payload);
+            addChildren(child, childTree, builder);
+        }
+    }
+
+    private static class EditableTree<P extends Comparable<P>> implements Tree<EditableTree<P>> {
+
+        @Nullable
+        public EditableTree<P> parent;
+
+        public List<EditableTree<P>> children = new ArrayList<>();
+
+        private final P payload;
+
+        public EditableTree(P payload) {
+            this.payload = payload;
+        }
+
+        @Override
+        public int compareTo(EditableTree<P> other) {
+            return payload.compareTo(other.payload);
+        }
+
+        @Override
+        @Nullable
+        public EditableTree<P> parent() {
+            return parent;
+        }
+
+        @Override
+        public Collection<EditableTree<P>> children() {
+            return children();
+        }
+
+    }
+
+    public interface TreeBuilder<P, T extends Tree<T>> {
+
+        T createRoot(P payload);
+
+        T createChild(T parent, P payload);
+
     }
 
 }

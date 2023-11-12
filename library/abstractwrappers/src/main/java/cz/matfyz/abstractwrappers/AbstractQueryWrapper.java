@@ -100,7 +100,7 @@ public interface AbstractQueryWrapper {
     /**
      * Defines the name of the root QueryStructure.
      */
-    void defineRoot(SchemaObject object, String identifier);
+    void defineRoot(String identifier);
 
     /**
      * Adds a projection to attribute hierarchicalPath which can eventually be optional (isOptional).
@@ -194,6 +194,11 @@ public interface AbstractQueryWrapper {
             final var builder = new LineStringBuilder(0, "    ");
             print(builder);
             return builder.toString();
+        }
+
+        @Override
+        public int compareTo(QueryStructure other) {
+            return name.compareTo(other.name);
         }
     }
 

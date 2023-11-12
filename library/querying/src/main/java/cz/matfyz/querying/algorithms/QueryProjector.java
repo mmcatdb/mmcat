@@ -14,7 +14,6 @@ import cz.matfyz.core.utils.GraphUtils.TreePath;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.exception.ProjectionException;
 import cz.matfyz.querying.parsing.Aggregation;
-import cz.matfyz.querying.parsing.Query;
 import cz.matfyz.querying.parsing.SelectClause;
 import cz.matfyz.querying.parsing.SelectTriple;
 import cz.matfyz.querying.parsing.Variable;
@@ -137,12 +136,12 @@ public class QueryProjector {
 
             // TODO proper exception
             if (rootInSelection == null)
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Root not found in the selection structure.");
 
-                final var root = new TransformationRoot();
-                TransformationStep current = root;
-                
-                current = current
+            final var root = new TransformationRoot();
+            TransformationStep current = root;
+            
+            current = current
                 .addChild(new CreateList<ResultMap>())
                 .addChild(new TraverseList());
                 
@@ -224,6 +223,9 @@ public class QueryProjector {
 
                 final var parentInSelection = GraphUtils.findDFS(inputStructure, (s) -> s.name.equals(structure.inputName));
                 final var childInSelection = GraphUtils.findDFS(inputStructure, (s) -> s.name.equals(childStructure.inputName));
+                if (childInSelection == null)
+                    throw new UnsupportedOperationException("Term " + childStructure.inputName + " not found in the selection structure.");
+
                 final var path = GraphUtils.findPath(parentInSelection, childInSelection);
                 
                 childStructure.isArray = isPathArray(path);

@@ -62,6 +62,8 @@ public class QueryTranslator implements QueryVisitor<Void> {
     }
 
     public Void visit(PatternNode node) {
+        wrapper.defineRoot(node.rootTerm.getIdentifier());
+
         node.kinds.forEach(this::processKind);
         node.joinCandidates.forEach(this::processJoinCandidate);
 
@@ -101,7 +103,8 @@ public class QueryTranslator implements QueryVisitor<Void> {
     private static record StackItem(PatternObject object, Signature path) {}
 
     private void processKind(KindPattern kind) {
-        wrapper.defineRoot(kind.root.schemaObject, kind.root.term.getIdentifier());
+        // TODO this is weird, because it's happening for each kind - meaning that the last one overrides all the previous ones
+        // wrapper.defineRoot(kind.root.schemaObject, kind.root.term.getIdentifier());
 
         final Stack<StackItem> stack = new Stack<>();
         stack.add(new StackItem(kind.root, Signature.createEmpty()));
@@ -116,6 +119,9 @@ public class QueryTranslator implements QueryVisitor<Void> {
         }
         
         final Term term = item.object.term;
+        if (term == null)
+            return;
+
         final var objectProperty = new Property(kind.kind, item.path);
 
         if (term instanceof StringValue constantObject)

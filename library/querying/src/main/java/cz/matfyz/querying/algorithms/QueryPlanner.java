@@ -1,11 +1,9 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.MorphismColoring;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
@@ -17,20 +15,17 @@ import java.util.TreeSet;
 public class QueryPlanner {
 
     /**
-     * @param schema The queried schema category.
-     * @param kindPatterns All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
+     * @param allKinds All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
      * @return
      */
-    public static List<Set<KindPattern>> run(SchemaCategory schema, List<KindPattern> kindPatterns) {
-        return new QueryPlanner(schema, kindPatterns).run();
+    public static List<Set<KindPattern>> run(List<KindPattern> allKinds) {
+        return new QueryPlanner(allKinds).run();
     }
     
-    private final SchemaCategory schema;
-    private final List<KindPattern> kindPatterns;
+    private final List<KindPattern> allKinds;
 
-    private QueryPlanner(SchemaCategory schema, List<KindPattern> kindPatterns) {
-        this.schema = schema;
-        this.kindPatterns = kindPatterns;
+    private QueryPlanner(List<KindPattern> allKinds) {
+        this.allKinds = allKinds;
     }
 
     private List<Set<KindPattern>> run() {
@@ -39,8 +34,11 @@ public class QueryPlanner {
         return plans;
     }
     
+    /** The goal of the algorithm is to move some kinds from the rest list to the selected set. The selected set will then become a new plan. */
     private record StackItem(
+        /** These kinds are already part of a plan. */
         Set<KindPattern> selected,
+        /** These kinds are yet to be processed. */
         List<KindPattern> rest,
         MorphismColoring coloring
     ) {}
@@ -49,10 +47,10 @@ public class QueryPlanner {
     private Stack<StackItem> stack = new Stack<>();
 
     private void createQueryPlans() {
-        final MorphismColoring initialColoring = MorphismColoring.create(kindPatterns);
-        final List<KindPattern> initialSortedKinds = initialColoring.sortKinds(kindPatterns);
+        final MorphismColoring initialColoring = MorphismColoring.create(allKinds);
+        final List<KindPattern> initialSortedKinds = initialColoring.sortKinds(allKinds);
 
-        stack.push(new StackItem(new TreeSet<>(), new LinkedList<>(initialSortedKinds), initialColoring));
+        stack.push(new StackItem(new TreeSet<>(), initialSortedKinds, initialColoring));
 
         while (!stack.isEmpty())
             processStackItem(stack.pop());
@@ -64,7 +62,7 @@ public class QueryPlanner {
             return;
         }
 
-        for (final KindPattern kind : touchFirst(item.rest, item.coloring)) {
+        for (final KindPattern kind : getKindsWithMinimalPrice(item.rest, item.coloring)) {
             final List<KindPattern> restWithoutKind = item.rest.stream().filter(k -> !k.equals(kind)).toList();
 
             final var coloringWithoutKind = item.coloring.removeKind(kind);
@@ -79,7 +77,7 @@ public class QueryPlanner {
     /**
      * Returns all kinds from the given queue with the minimal price.
      */
-    private List<KindPattern> touchFirst(List<KindPattern> kindQueue, MorphismColoring coloring) {
+    private List<KindPattern> getKindsWithMinimalPrice(List<KindPattern> kindQueue, MorphismColoring coloring) {
         final int lowestCost = coloring.getKindCost(kindQueue.get(0));
         final List<KindPattern> output = new ArrayList<>();
 

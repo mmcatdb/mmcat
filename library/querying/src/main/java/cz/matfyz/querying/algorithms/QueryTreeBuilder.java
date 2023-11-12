@@ -43,11 +43,11 @@ public class QueryTreeBuilder {
 
     private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
         final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause.pattern.triples);
-        final List<Set<KindPattern>> plans = QueryPlanner.run(extracted.schema(), extracted.kindPatterns());
+        final List<Set<KindPattern>> plans = QueryPlanner.run(extracted.kindPatterns());
         // TODO better selection?
         final Set<KindPattern> selectedPlan = plans.get(0);
 
-        QueryNode currentNode = PlanJoiner.run(selectedPlan, extracted.schema());
+        QueryNode currentNode = PlanJoiner.run(selectedPlan, extracted.schema(), clause.pattern.termTree);
 
         for (final var filter : clause.pattern.conditionFilters)
             currentNode = new FilterNode(currentNode, filter);

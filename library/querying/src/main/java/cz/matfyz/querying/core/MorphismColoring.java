@@ -13,16 +13,16 @@ import java.util.TreeSet;
 
 public class MorphismColoring {
 
-    // Set of all kinds that use given morphism.
+    /** Set of all kinds that use given morphism. */
     private final Map<BaseSignature, Set<KindPattern>> morphismToColors;
-    // Set of all morphisms in given kind pattern.
-    private final Map<KindPattern, Set<BaseSignature>> colorToMorphism;
+    /** Set of all morphisms in given kind pattern. */
+    private final Map<KindPattern, Set<BaseSignature>> colorToMorphisms;
 
     // private final Map<Key, Set<KindPattern> a;
 
-    private MorphismColoring(Map<BaseSignature, Set<KindPattern>> colors, Map<KindPattern, Set<BaseSignature>> morphisms) {
-        this.morphismToColors = colors;
-        this.colorToMorphism = morphisms;
+    private MorphismColoring(Map<BaseSignature, Set<KindPattern>> morphismToColors, Map<KindPattern, Set<BaseSignature>> colorToMorphisms) {
+        this.morphismToColors = morphismToColors;
+        this.colorToMorphisms = colorToMorphisms;
     }
 
     public static MorphismColoring create(Collection<KindPattern> kindPatterns) {
@@ -40,7 +40,7 @@ public class MorphismColoring {
                 .computeIfAbsent(child.signatureFromParent(), x -> new TreeSet<>())
                 .add(kind);
 
-            colorToMorphism
+            colorToMorphisms
                 .computeIfAbsent(kind, x -> new TreeSet<>())
                 .add(child.signatureFromParent());
             
@@ -55,22 +55,27 @@ public class MorphismColoring {
     }
 
     /**
-     * Finds the lowest number of colors assigned to any of the morphisms in the mapping.
+     * Finds the lowest number of colors assigned to any of the morphisms (with at least one color) in the mapping.
      * If all morphisms have zero colors, 0 is returned.
      */
     private int computePatternCost(PatternObject object) {
+        final int min = computePatternCostRecursive(object);
+
+        return min == Integer.MAX_VALUE ? 0 : min;
+    }
+
+    private int computePatternCostRecursive(PatternObject object) {
         int min = Integer.MAX_VALUE;
         if (object.signatureFromParent() != null) {
             final var objectColors = morphismToColors.get(object.signatureFromParent());
-            // TODO maybe just return 0?
             if (objectColors != null)
                 min = objectColors.size();
         }
 
         for (final var child : object.children())
-            min = Math.min(min, computePatternCost(child));
-
-        return min == Integer.MAX_VALUE ? 0 : min;
+            min = Math.min(min, computePatternCostRecursive(child));
+        
+        return min;
     }
 
     private static record KindWithCost(KindPattern kind, int cost) {}
@@ -94,14 +99,17 @@ public class MorphismColoring {
      * This basically means that we just remove all colors of the morphism.
      */
     public MorphismColoring removeKind(KindPattern kind) {
-        final Set<BaseSignature> removedMorphisms = colorToMorphism.get(kind);
+        final Set<BaseSignature> removedMorphisms = colorToMorphisms.get(kind);
         final var newColors = new TreeMap<BaseSignature, Set<KindPattern>>();
         morphismToColors.forEach((signature, set) -> {
             if (!removedMorphisms.contains(signature))
                 newColors.put(signature, new TreeSet<>(set));
         });
 
-        return new MorphismColoring(newColors, colorToMorphism);
+        final var newMorphisms = new TreeMap<>(colorToMorphisms);
+        newMorphisms.remove(kind);
+
+        return new MorphismColoring(newColors, newMorphisms);
     }
 
 }

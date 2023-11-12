@@ -2,6 +2,7 @@ package cz.matfyz.querying.parsing;
 
 import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.utils.GraphUtils.Edge;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ParsingException;
 import cz.matfyz.querying.parsing.ParserNode.Term;
@@ -10,7 +11,7 @@ import cz.matfyz.querying.parsing.Variable.VariableBuilder;
 import java.util.Arrays;
 import java.util.List;
 
-public class WhereTriple implements Statement {
+public class WhereTriple implements Statement, Edge<Term> {
 
     public final Variable subject;
     public final BaseSignature signature;
@@ -20,6 +21,16 @@ public class WhereTriple implements Statement {
         this.subject = subject;
         this.signature = signature;
         this.object = object;
+    }
+
+    @Override
+    public Term from() {
+        return subject;
+    }
+
+    @Override
+    public Term to() {
+        return object;
     }
 
     static List<WhereTriple> fromCommonTriple(CommonTriple common, VariableBuilder builder) {

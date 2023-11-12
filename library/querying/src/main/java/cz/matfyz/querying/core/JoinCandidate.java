@@ -11,7 +11,8 @@ public record JoinCandidate(
     KindPattern from,
     KindPattern to,
     List<JoinCondition> joinProperties,
-    int recursion // Some DBs allow to recursively join the same kind.
+    int recursion, // Some DBs allow to recursively join the same kind.
+    boolean isOptional
 ) implements Edge<KindPattern> {
 
     public enum JoinType {
@@ -21,14 +22,6 @@ public record JoinCandidate(
 
     public boolean isRecursive() {
         return recursion > 0;
-    }
-
-    public boolean isOptional() {
-        throw new UnsupportedOperationException();
-    }
-
-    public Object match() {
-        throw new UnsupportedOperationException();
     }
 
 }

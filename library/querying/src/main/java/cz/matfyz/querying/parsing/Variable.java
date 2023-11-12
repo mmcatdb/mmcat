@@ -9,14 +9,21 @@ public class Variable implements Term {
     }
 
     public final String name;
+    private final boolean isOriginal;
     
-    private Variable(String name) {
+    private Variable(String name, boolean isOriginal) {
         this.name = name;
+        this.isOriginal = isOriginal;
     }
 
     @Override
     public String getIdentifier() {
         return "v_" + name;
+    }
+
+    @Override
+    public boolean isOriginal() {
+        return isOriginal;
     }
 
     @Override
@@ -32,11 +39,11 @@ public class Variable implements Term {
     static class VariableBuilder {
 
         public Variable fromName(String name) {
-            return new Variable(name);
+            return new Variable(name, true);
         }
 
         public Variable generated() {
-            return new Variable(generateName());
+            return new Variable(generateName(), false);
         }
 
         private int lastGeneratedNameId = 0;

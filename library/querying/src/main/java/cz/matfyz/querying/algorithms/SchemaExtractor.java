@@ -126,7 +126,7 @@ public class SchemaExtractor {
                 //     return;
 
                 var currentNode = node;
-                for (final var baseSignature : subpath.signature().toBases()) {
+                for (final BaseSignature baseSignature : subpath.signature().toBases()) {
                     if (!newSchema.hasMorphism(baseSignature))
                         return;
 
