@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# psql postgresql://${EXAMPLE_USERNAME}:${EXAMPLE_PASSWORD}@localhost:${EXAMPLE_PORT}/${EXAMPLE_DATABASE} -f src/main/resources/createExample.sql
+# psql postgresql://${EXAMPLE_USERNAME}:${EXAMPLE_PASSWORD}@localhost:${EXAMPLE_PORT}/${EXAMPLE_DATABASE} -f src/main/resources/setupPostgresql.sql
 
 psql --username postgres << EOSQL
 SET ROLE postgres;
@@ -10,5 +10,5 @@ CREATE DATABASE "test" OWNER "${EXAMPLE_USERNAME}";
 
 \c "${EXAMPLE_DATABASE}";
 SET ROLE "${EXAMPLE_USERNAME}";
-\i createExample.sql;
+\i setupPostgresql.sql;
 EOSQL

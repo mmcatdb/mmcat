@@ -31,11 +31,14 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
 
     @Override
     protected Map<AggregationOperator, String> defineAggregationOperators() {
-        throw new UnsupportedOperationException();
+        // TODO fix
+        return new TreeMap<>();
     }
 
     public QueryStatement createDSLStatement() {
         throw new UnsupportedOperationException();
     }
+
+    
 
 }

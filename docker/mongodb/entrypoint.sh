@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# mongo --username ${EXAMPLE_USERNAME} --password ${EXAMPLE_PASSWORD} --authenticationDatabase admin localhost:27017/example src/main/resources/createExample.js
+# mongo --username ${EXAMPLE_USERNAME} --password ${EXAMPLE_PASSWORD} --authenticationDatabase admin localhost:27017/example src/main/resources/setupMongodb.js
 
 mongosh << EOSQL
 use admin;
@@ -14,5 +14,5 @@ db.createUser({
 });
 db.auth("${EXAMPLE_USERNAME}", "${EXAMPLE_PASSWORD}");
 use ${EXAMPLE_DATABASE};
-load('createExample.js');
+load('setupMongodb.js');
 EOSQL
