@@ -36,9 +36,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     }
 
     public QueryStatement createDSLStatement() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("MongoDBQueryWrapper.createDSLStatement not implemented.");
     }
-
-    
 
 }

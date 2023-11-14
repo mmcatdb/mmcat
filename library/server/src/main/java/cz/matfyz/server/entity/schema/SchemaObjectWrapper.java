@@ -5,7 +5,6 @@ import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.server.builder.SchemaCategoryContext;
-import cz.matfyz.server.utils.Position;
 
 /**
  * @author jachym.bartik
@@ -55,6 +54,11 @@ public record SchemaObjectWrapper(
         }
 
     }
+
+    public record Position(
+        double x,
+        double y
+    ) {}
 
     public record Metadata(
         Position position

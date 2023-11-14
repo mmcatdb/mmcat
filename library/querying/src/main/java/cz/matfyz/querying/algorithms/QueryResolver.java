@@ -53,30 +53,30 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
     public QueryResult visit(FilterNode node) {
         if (node.filter instanceof ConditionFilter conditionFilter) {
             // TODO
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("QueryResolver.visit(ConditionFilter) not implemented.");
         }
         else if (node.filter instanceof ValueFilter valueFilter) {
             // TODO
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("QueryResolver.visit(ValueFilter) not implemented.");
         }
 
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryResolver.visit(FilterNode) not implemented.");
     }
 
     public QueryResult visit(JoinNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryResolver.visit(JoinNode) not implemented.");
     }
 
     public QueryResult visit(MinusNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryResolver.visit(MinusNode) not implemented.");
     }
 
     public QueryResult visit(OptionalNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryResolver.visit(OptionalNode) not implemented.");
     }
 
     public QueryResult visit(UnionNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryResolver.visit(UnionNode) not implemented.");
     }
 
 }

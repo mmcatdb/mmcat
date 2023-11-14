@@ -51,7 +51,7 @@ public class Mapping implements Comparable<Mapping> {
     }
 
     public Mapping clone() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Mapping.clone not implemented");
     }
 
     public SchemaCategory category() {

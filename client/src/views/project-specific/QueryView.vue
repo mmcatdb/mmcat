@@ -5,10 +5,16 @@ import { useSchemaCategoryId } from '@/utils/injects';
 import { computed, ref } from 'vue';
 
 const queryString = ref(`SELECT {
-    ?customer has ?id .
+    ?product
+        id ?id ;
+        label ?label ;
+        price ?price .
 }
 WHERE {
-    ?customer 1 ?id .
+    ?product
+        15 ?id ;
+        16 ?label ;
+        17 ?price .
 }`);
 
 type QueryLog = {
@@ -29,9 +35,10 @@ async function executeQuery() {
     queryResult.value = undefined;
 
     const response = await queries.execute({}, { categoryId, queryString: query });
+    console.log(response);
     const result = response.status
         ? response.data.rows.join(',\n')
-        : 'Error :(';
+        : 'Error :(\nname: ' + response.error.name + '\ndata:\n' + response.error.data;
 
     queryResult.value = result;
     logs.value.push({ query, result, id: lastQueryId++ });

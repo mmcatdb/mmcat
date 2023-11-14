@@ -13,7 +13,7 @@ export type QueryResult = {
 
 const queries = {
     execute: POST<Empty, QueryResult, QueryInput>(
-        () => `/execute`,
+        () => `/queries/execute`,
     ),
 };
 

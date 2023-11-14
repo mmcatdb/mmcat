@@ -15,7 +15,7 @@ import cz.matfyz.server.entity.evolution.VersionedSMO;
 import cz.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
-import cz.matfyz.server.utils.Position;
+import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import cz.matfyz.tests.schema.BasicSchema;
 
 import java.util.ArrayList;

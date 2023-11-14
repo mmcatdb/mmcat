@@ -164,6 +164,6 @@ public class DummyPullWrapper implements AbstractPullWrapper {
     @Override
     public QueryResult executeQuery(QueryStatement statement) {
         // TODO
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("DummyPullWrapper.executeQuery not implemented.");
     }
 }

@@ -31,12 +31,12 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
 
     @Override
     protected Map<AggregationOperator, String> defineAggregationOperators() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Neo4jQueryWrapper.defineAggregationOperators not implemented.");
     }
 
     @Override
     public QueryStatement createDSLStatement() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Neo4jQueryWrapper.createDSLStatement not implemented.");
     }
 
 }

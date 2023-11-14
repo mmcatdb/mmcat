@@ -19,7 +19,7 @@ public class Neo4jPathWrapper implements AbstractPathWrapper {
 
     @Override
     public boolean check() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Neo4jPathWrapper.check not implemented.");
     }
 
     // CHECKSTYLE:OFF

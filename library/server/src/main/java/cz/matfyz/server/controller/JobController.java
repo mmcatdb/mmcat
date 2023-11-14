@@ -100,8 +100,8 @@ public class JobController {
             final var logicalModel = dataSourceService.find(jsonLdToCategoryPayload.dataSourceId());
             return new JobDetail(job, new JsonLdToCategoryPayload.Detail(logicalModel));
         }
-
-        throw new UnsupportedOperationException();
+        
+        throw new UnsupportedOperationException("Unsupported job type: " + job.payload.getClass().getSimpleName() + ".");
     }
 
 }

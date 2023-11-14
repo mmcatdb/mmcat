@@ -123,7 +123,7 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
 
     @Override
     public Neo4jQueryWrapper getQueryWrapper() {
-        throw new UnsupportedOperationException();
+        return new Neo4jQueryWrapper();
     }
 
 }

@@ -4,7 +4,7 @@ import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.utils.Position;
+import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 
 import java.util.Map;
 import java.util.TreeMap;

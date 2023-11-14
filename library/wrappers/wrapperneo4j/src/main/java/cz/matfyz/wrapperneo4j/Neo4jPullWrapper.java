@@ -248,7 +248,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
     @Override
     public QueryResult executeQuery(QueryStatement statement) {
         // TODO
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
     }
 
 }

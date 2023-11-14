@@ -85,19 +85,19 @@ public class QueryTranslator implements QueryVisitor<Void> {
     }
 
     public Void visit(JoinNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryTranslator.visit(JoinNode) not implemented.");
     }
 
     public Void visit(MinusNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryTranslator.visit(MinusNode) not implemented.");
     }
 
     public Void visit(OptionalNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryTranslator.visit(OptionalNode) not implemented.");
     }
 
     public Void visit(UnionNode node) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryTranslator.visit(UnionNode) not implemented.");
     }
 
     private static record StackItem(PatternObject object, Signature path) {}
@@ -152,12 +152,12 @@ public class QueryTranslator implements QueryVisitor<Void> {
             return new PropertyWithAggregation(property.kind, property.path, root, aggregation.operator);
         }
 
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Can't create property from term: " + term.getClass().getSimpleName() + ".");
     }
 
     private Signature findAggregationRoot(Kind kind, Signature path) {
         // TODO
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("QueryTranslator.findAggregationRoot not implemented.");
     }
 
 }

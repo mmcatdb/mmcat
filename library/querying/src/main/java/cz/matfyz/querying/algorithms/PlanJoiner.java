@@ -381,7 +381,7 @@ public class PlanJoiner {
     }
     
     private void optimizeJoinPlan() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("PlanJoiner.optimizeJoinPlan not implemented");
     }
 
 }
