@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import TextArea from '@/components/input/TextArea.vue';
-import queries from '@/utils/api/routes/queries';
-import { useSchemaCategoryId } from '@/utils/injects';
 import { computed, ref } from 'vue';
+import TextArea from '@/components/input/TextArea.vue';
+import { useSchemaCategoryId } from '@/utils/injects';
+import API from '@/utils/api';
+import SaveQueryButton from '@/components/query/SaveQueryButton.vue';
 
 const queryString = ref(`SELECT {
     ?product
-        id ?id ;
-        label ?label ;
-        price ?price .
+        productId ?id ;
+        name ?label ;
+        totalPrice ?price .
 }
 WHERE {
     ?product
@@ -34,8 +35,7 @@ async function executeQuery() {
     const query = queryString.value;
     queryResult.value = undefined;
 
-    const response = await queries.execute({}, { categoryId, queryString: query });
-    console.log(response);
+    const response = await API.queries.execute({}, { categoryId, queryString: query });
     const result = response.status
         ? response.data.rows.join(',\n')
         : 'Error :(\nname: ' + response.error.name + '\ndata:\n' + response.error.data;
@@ -67,6 +67,10 @@ const displayedLogs = computed(() => logs.value.length > 1 ? logs.value.slice(0,
         >
             Execute
         </button>
+        <SaveQueryButton
+            v-if="queryResult !== undefined"
+            :content="queryString"
+        />
         <template v-if="displayedLogs">
             <h2 class="mt-4">
                 Previous queries

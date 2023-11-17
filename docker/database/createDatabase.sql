@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS query_version;
+DROP TABLE IF EXISTS query;
 DROP TABLE IF EXISTS job;
 DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS logical_model;
@@ -71,6 +73,18 @@ CREATE TABLE job (
         -- součástí log4j je nastavení kam se to dá ukládat, resp. do libovolné kombinace uložišť
             -- např. prometheus, zabbix, kibana - monitorování stavu aplikace
 
+);
+
+CREATE TABLE query (
+    id UUID PRIMARY KEY,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    json_value JSONB NOT NULL
+);
+
+CREATE TABLE query_version (
+    id UUID PRIMARY KEY,
+    query_id UUID NOT NULL REFERENCES query,
+    json_value JSONB NOT NULL
 );
 
 -- INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value)

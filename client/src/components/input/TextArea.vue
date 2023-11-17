@@ -5,6 +5,7 @@ type TextAreaProps = {
     modelValue?: string;
     minRows?: number;
     class?: string;
+    readonly?: boolean;
 };
 
 const props = withDefaults(defineProps<TextAreaProps>(), {
@@ -61,6 +62,7 @@ function resize() {
         spellcheck="false"
         class="textarea-dark"
         :class="props.class"
+        :readonly="props.readonly"
         @input="handleInput"
     />
 </template>

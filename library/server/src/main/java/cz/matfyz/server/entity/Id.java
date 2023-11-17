@@ -1,6 +1,7 @@
 package cz.matfyz.server.entity;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -22,6 +23,10 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
 
     public Id(String value) {
         this.value = value != null ? value : "";
+    }
+
+    public static Id createNewUUID() {
+        return new Id(UUID.randomUUID().toString());
     }
     
     @Override

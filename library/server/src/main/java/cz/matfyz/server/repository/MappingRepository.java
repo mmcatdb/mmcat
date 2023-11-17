@@ -110,11 +110,11 @@ public class MappingRepository {
 
             while (resultSet.next()) {
                 Id foundId = getId(resultSet, "id");
-                String jsonValue = resultSet.getString("kindName");
+                String kindName = resultSet.getString("kindName");
                 Version version = new Version(resultSet.getString("version"));
                 Version categoryVersion = new Version(resultSet.getString("categoryVersion"));
 
-                output.add(new MappingInfo(foundId, jsonValue, version, categoryVersion));
+                output.add(new MappingInfo(foundId, kindName, version, categoryVersion));
             }
         });
     }

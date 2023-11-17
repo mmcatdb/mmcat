@@ -26,6 +26,7 @@ const links = [
     defineLink('instanceCategory', 'Instance Category'),
     defineLink('models', 'Models'),
     defineLink('query', 'Querying'),
+    defineLink('queries', 'Queries'),
 ];
 </script>
 

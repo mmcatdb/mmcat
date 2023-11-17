@@ -68,7 +68,7 @@ async function fetchJobs() {
         </div>
         <ResourceLoader
             :loading-function="fetchJobs"
-            :refresh-period="1000000"
+            :refresh-period="2000"
         />
     </div>
 </template>

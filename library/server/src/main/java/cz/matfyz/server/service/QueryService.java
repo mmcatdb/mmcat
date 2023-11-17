@@ -7,7 +7,14 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.builder.SchemaCategoryContext;
+import cz.matfyz.server.controller.QueryController.QueryInit;
+import cz.matfyz.server.controller.QueryController.QueryVersionInit;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.query.Query;
+import cz.matfyz.server.entity.query.QueryVersion;
+import cz.matfyz.server.repository.QueryRepository;
+import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
+import cz.matfyz.server.repository.SchemaCategoryRepository;
 
 import java.util.List;
 
@@ -21,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class QueryService {
 
     @Autowired
-    private SchemaCategoryService schemaCategoryService;
+    private QueryRepository repository;
 
     @Autowired
     private LogicalModelService logicalModelService;
@@ -35,8 +42,11 @@ public class QueryService {
     @Autowired
     private MappingService mappingService;
 
+    @Autowired
+    private SchemaCategoryRepository categoryRepository;
+
     public ResultList executeQuery(Id categoryId, String queryString) {
-        final var categoryWrapper = schemaCategoryService.find(categoryId);
+        final var categoryWrapper = categoryRepository.find(categoryId);
         final var context = new SchemaCategoryContext();
         final var category = categoryWrapper.toSchemaCategory(context);
 
@@ -62,6 +72,32 @@ public class QueryService {
                 final var database = builder.build(databaseEntity.type, wrapperService.getControlWrapper(databaseEntity), databaseEntity.id.toString());
                 return database.kinds.stream();
             }).toList();
+    }
+
+    public QueryWithVersion createQuery(QueryInit init) {
+        final var categoryInfo = categoryRepository.findInfo(init.categoryId());
+
+        final var query = Query.createNew(init.categoryId(), init.label());
+        final var version = QueryVersion.createNew(query.id, categoryInfo.version, init.content());
+
+        repository.save(query);
+        repository.save(version);
+
+        return new QueryWithVersion(query, version);
+    }
+
+    public boolean delete(Id id) {
+        return
+            repository.deleteQueryVersionsByQuery(id) &&
+            repository.deleteQuery(id);
+    }
+
+    public QueryVersion createQueryVersion(Id queryId, QueryVersionInit init) {
+        final var version = QueryVersion.createNew(queryId, init.version(), init.content());
+
+        repository.save(version);
+
+        return version;
     }
 
 }

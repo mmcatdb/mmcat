@@ -7,11 +7,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collection;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.lang.Nullable;
 
 /**
  * @author jachym.bartik
@@ -41,6 +43,15 @@ public abstract class Utils {
         catch (NumberFormatException e) {
             statement.setInt(position, 0);
         }
+    }
+
+    public static void setUuid(PreparedStatement statement, int position, @Nullable Id id) throws SQLException {
+        if (id == null) {
+            statement.setNull(position, Types.OTHER);
+            return;
+        }
+
+        statement.setObject(position, UUID.fromString(id.toString()));
     }
 
     private static final ObjectMapper mapper = new ObjectMapper();
