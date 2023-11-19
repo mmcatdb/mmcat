@@ -23,6 +23,9 @@ watch(() => props.modelValue, (newValue?: string) => {
         return;
 
     innerValue.value = newValue;
+    history.length = 0;
+    history.push(newValue);
+    reverseHistory.length = 0;
     resize();
 });
 
@@ -31,9 +34,59 @@ function handleInput(event: Event) {
     if (newValue === innerValue.value)
         return;
 
+    innerHandleInput(newValue);
+    history.push(newValue);
+    reverseHistory.length = 0;
+}
+
+function innerHandleInput(newValue: string | undefined) {
     innerValue.value = newValue;
     emit('update:modelValue', innerValue.value);
     resize();
+}
+
+const history = [ props.modelValue ];
+const reverseHistory: string[] = [];
+
+const TAB_KEY_VALUE = '    ';
+
+function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Tab') {
+        event.preventDefault();
+        const target = event.target as HTMLTextAreaElement;
+
+        const startIndex = target.selectionStart;
+        const endIndex = target.selectionEnd;
+
+        const stringBefore = target.value.substring(0, startIndex);
+
+        const lastNewLineIndex = stringBefore.lastIndexOf('\n');
+        const lenghtToAdd = TAB_KEY_VALUE.length - (startIndex - lastNewLineIndex - 1) % TAB_KEY_VALUE.length;
+        const stringToAdd = TAB_KEY_VALUE.substring(0, lenghtToAdd);
+
+        target.value = target.value.substring(0, startIndex) + stringToAdd + target.value.substring(endIndex);
+        target.selectionStart = target.selectionEnd = startIndex + lenghtToAdd;
+    }
+    else if (event.key === 'z' && event.ctrlKey) {
+        event.preventDefault();
+        if (history.length <= 1)
+            return;
+
+        const currentValue = history.pop();
+        const newValue = history[history.length - 1];
+
+        innerHandleInput(newValue);
+        reverseHistory.push(currentValue as string);
+    }
+    else if (event.key === 'y' && event.ctrlKey) {
+        event.preventDefault();
+        const newValue = reverseHistory.pop();
+        if (newValue === undefined)
+            return;
+
+        innerHandleInput(newValue);
+        history.push(newValue);
+    }
 }
 
 onMounted(() => resize());
@@ -64,5 +117,6 @@ function resize() {
         :class="props.class"
         :readonly="props.readonly"
         @input="handleInput"
+        @keydown="handleKeyDown"
     />
 </template>

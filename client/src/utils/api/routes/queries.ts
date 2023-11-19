@@ -28,8 +28,8 @@ const queries = {
     createQuery: POST<Empty, QueryWithVersionFromServer, QueryInit>(
         () => `/queries`,
     ),
-    deleteQuery: DELETE<{ id: StringLike }, void>(
-        u => `/queries/${u.id}`,
+    deleteQuery: DELETE<{ queryId: StringLike }, void>(
+        u => `/queries/${u.queryId}`,
     ),
     createQueryVersion: POST<{ queryId: StringLike }, QueryVersionFromServer, QueryVersionInit>(
         u => `/queries/${u.queryId}/versions`,

@@ -12,7 +12,7 @@ const props = defineProps<SaveQueryButtonProps>();
 const categoryInfo = useSchemaCategoryInfo();
 
 const emit = defineEmits<{
-    (e: 'createQuery', query: QueryWithVersion): void;
+    (e: 'saveQuery', query: QueryWithVersion): void;
 }>();
 
 enum State { Default, Label, Fetching }
@@ -35,13 +35,18 @@ async function finishSaving() {
     state.value = State.Default;
     if (result.status) {
         const query = queryWithVersionFromServer(result.data);
-        emit('createQuery', query);
+        emit('saveQuery', query);
     }
+}
+
+function cancelSaving() {
+    state.value = State.Default;
+    label.value = '';
 }
 </script>
 
 <template>
-    <div class="save-query-button">
+    <div class="d-flex align-items-center gap-3">
         <template v-if="state === State.Default">
             <button @click="() => state = State.Label">
                 Save
@@ -53,27 +58,25 @@ async function finishSaving() {
                 :disabled="state === State.Fetching"
                 type="text"
                 class="label-input"
+                placeholder="Query label"
             />
             <button
-                :disabled="state === State.Fetching"
+                :disabled="state === State.Fetching || label === ''"
                 @click="finishSaving"
             >
-                Finish
+                Save
+            </button>
+            <button
+                :disabled="state === State.Fetching"
+                @click="cancelSaving"
+            >
+                Cancel
             </button>
         </template>
     </div>
 </template>
 
 <style scoped>
-.save-query-button {
-    padding: 12px;
-    border: 1px solid var(--color-primary);
-    min-width: 284px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
 .label-input {
     flex-grow: 1;
 }

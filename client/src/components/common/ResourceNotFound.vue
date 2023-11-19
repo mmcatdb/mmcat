@@ -1,6 +1,6 @@
 <script setup lang="ts">
 type ResourceNotFoundProps = {
-    reloadable?: boolean;
+    notReloadable?: boolean;
 };
 
 const props = defineProps<ResourceNotFoundProps>();
@@ -12,7 +12,7 @@ const emit = defineEmits([ 'reload' ]);
     <p>
         Resource not found.
         <button
-            v-if="props.reloadable"
+            v-if="!props.notReloadable"
             class="reload-button"
             @click="() => emit('reload')"
         >

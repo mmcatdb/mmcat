@@ -47,26 +47,27 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
 <template>
     <div>
         <h1 class="mb-3">
-            Queries
+            Saved Queries
         </h1>
-        <template v-if="queries">
-            <div class="row">
-                <div class="col-6 d-flex flex-column gap-3">
+        <div class="row">
+            <div class="col-6 d-flex flex-column gap-4">
+                <template v-if="queries">
                     <QueryDisplay
                         v-for="query in queries"
                         :key="query.query.id"
                         :version="query.version"
                         @create-query-version="updateQuery"
+                        @delete-query="() => queries = queries?.filter(q => q.query.id !== query.query.id)"
                     />
-                </div>
-                <div class="col-6">
-                    <div class="responsive-evocat-display">
-                        <EvocatDisplay @evocat-created="evocatCreated" />
-                    </div>
+                </template>
+                <ResourceLoader :loading-function="fetchQueries" />
+            </div>
+            <div class="col-6">
+                <div class="responsive-evocat-display">
+                    <EvocatDisplay @evocat-created="evocatCreated" />
                 </div>
             </div>
-        </template>
-        <ResourceLoader :loading-function="fetchQueries" />
+        </div>
     </div>
 </template>
 

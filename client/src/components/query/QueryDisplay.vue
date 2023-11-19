@@ -6,9 +6,14 @@ import { useSchemaCategoryInfo } from '@/utils/injects';
 import { computed, ref } from 'vue';
 import API from '@/utils/api';
 import OpenCloseToggle from '@/components/common/OpenCloseToggle.vue';
+import type { QueryResult } from '@/utils/api/routes/queries';
+import type { Result } from '@/types/api/result';
+import QueryResultDisplay from './QueryResultDisplay.vue';
 
 type QueryDisplayProps = {
     version: QueryVersion;
+    defaultIsOpened?: boolean;
+    defaultResult?: Result<QueryResult>;
 };
 
 const props = defineProps<QueryDisplayProps>();
@@ -16,6 +21,7 @@ const categoryInfo = useSchemaCategoryInfo();
 
 const emit = defineEmits<{
     (e: 'createQueryVersion', version: QueryVersion): void;
+    (e: 'deleteQuery'): void;
 }>();
 
 enum State { Display, Editing, Fetching }
@@ -44,22 +50,21 @@ async function saveChanges() {
     emit('createQueryVersion', newVersion);
 }
 
-const queryResult = ref<string>();
-const isError = ref(false);
+const isOpened = ref(props.defaultIsOpened);
+
+const queryResult = ref(props.defaultResult);
 const isExecuting = ref(false);
-const isOpened = ref(false);
 
-async function execute() {
-    queryResult.value = undefined;
+async function executeQuery() {
+    isExecuting.value = true;
+    queryResult.value = await API.queries.execute({}, { categoryId: categoryInfo.value.id, queryString: content.value });
+    isExecuting.value = false;
+}
 
-    const response = await API.queries.execute({}, { categoryId: categoryInfo.value.id, queryString: content.value });
-    const result = response.status
-        ? response.data.rows.join(',\n')
-        : 'Error :(\nname: ' + response.error.name + '\ndata:\n' + response.error.data;
-
-    isError.value = !response.status;
-
-    queryResult.value = result;
+async function deleteQuery() {
+    const result = await API.queries.deleteQuery({ queryId: props.version.query.id });
+    if (result.status)
+        emit('deleteQuery');
 }
 </script>
 
@@ -104,7 +109,16 @@ async function execute() {
                             </button>
                         </template>
                     </template>
-                    <button @click="execute">
+                    <button
+                        :disabled="isExecuting"
+                        @click="deleteQuery"
+                    >
+                        Delete
+                    </button>
+                    <button
+                        :disabled="isExecuting"
+                        @click="executeQuery"
+                    >
                         Execute
                     </button>
                 </template>
@@ -117,12 +131,9 @@ async function execute() {
                 class="w-100"
                 :disabled="state !== State.Editing"
             />
-            <TextArea
-                v-if="queryResult !== undefined"
-                v-model="queryResult"
-                class="w-100"
-                :class="{ 'text-danger': isError }"
-                readonly
+            <QueryResultDisplay
+                :result="queryResult"
+                :is-executing="isExecuting"
             />
         </template>
     </div>

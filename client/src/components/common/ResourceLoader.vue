@@ -5,7 +5,7 @@ const LOADING_WAIT_TIME_IN_MILLISECONDS = 400;
 
 type ResourceLoaderProps = {
     loadingFunction: () => Promise<boolean>;
-    noReloads?: boolean;
+    notReloadable?: boolean;
     refreshPeriod?: number;
 };
 
@@ -74,7 +74,7 @@ const stateTexts = {
             {{ stateTexts[state] }}
         </span>
         <button
-            v-if="!props.noReloads"
+            v-if="!props.notReloadable"
             class="reload-button"
             :class="{ hidden: state !== State.NotFound && state !== State.Reloading }"
             :disabled="state === State.Reloading"
