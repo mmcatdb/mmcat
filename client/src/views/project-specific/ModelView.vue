@@ -4,7 +4,7 @@ import { Model } from '@/types/model';
 import API from '@/utils/api';
 
 import ModelDisplay from '@/components/ModelDisplay.vue';
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import { useRoute } from 'vue-router';
 
 const model = ref<Model>();

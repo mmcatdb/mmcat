@@ -2,7 +2,7 @@
 import { Job, JobState, JobType } from '@/types/job';
 import API from '@/utils/api';
 import { computed, ref } from 'vue';
-import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 

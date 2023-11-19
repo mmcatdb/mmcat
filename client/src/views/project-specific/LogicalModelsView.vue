@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { LogicalModelInfo } from '@/types/logicalModel';
 import API from '@/utils/api';
 
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import { DatabaseInfo } from '@/types/database';
 import { useRouter } from 'vue-router';

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DataSource } from '@/types/dataSource';
-import CleverRouterLink from '@/components/CleverRouterLink.vue';
-import IriDisplay from '../IriDisplay.vue';
+import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import IriDisplay from '@/components/common/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import type { Id } from '@/types/id';

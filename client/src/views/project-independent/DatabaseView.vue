@@ -2,7 +2,7 @@
 import API from '@/utils/api';
 import type { Database } from '@/types/database';
 
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatabaseDisplay from '@/components/database/DatabaseDisplay.vue';
 import DatabaseEditor from '@/components/database/DatabaseEditor.vue';
 import { ref } from 'vue';

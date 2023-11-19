@@ -2,7 +2,7 @@
 import type { Mapping } from '@/types/mapping';
 import ParentPropertyDisplay from './display/ParentPropertyDisplay.vue';
 import Divider from '@/components/layout/Divider.vue';
-import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureIdDisplay from '../category/SignatureIdDisplay.vue';

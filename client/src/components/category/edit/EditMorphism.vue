@@ -2,7 +2,7 @@
 import { Edge, SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { computed, onUnmounted, ref, shallowRef, watch } from 'vue';
 import MinimumInput from './MinimumInput.vue';
-import IriDisplay from '@/components/IriDisplay.vue';
+import IriDisplay from '@/components/common/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';

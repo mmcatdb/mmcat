@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import { InstanceObject } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';

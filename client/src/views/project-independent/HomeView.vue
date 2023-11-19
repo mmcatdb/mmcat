@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import { SchemaCategoryInfo } from '@/types/schema';
 import API from '@/utils/api';
-import CleverRouterLink from '@/components/CleverRouterLink.vue';
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import rawAPI from '@/utils/api/rawAPI';

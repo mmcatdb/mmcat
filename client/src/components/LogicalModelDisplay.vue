@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {  } from 'vue';
 import type { LogicalModelInfo } from '@/types/logicalModel';
-import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import type { DatabaseInfo } from '@/types/database';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';

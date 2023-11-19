@@ -98,7 +98,6 @@ function createGraph(): Graph {
 .graph-display {
     display: flex;
     flex-direction: column;
-    margin-right: 16px;
 }
 
 .category-command-panel {

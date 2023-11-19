@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { LogicalModel } from '@/types/logicalModel';
 
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import API from '@/utils/api';

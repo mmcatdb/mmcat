@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Cardinality, type Min } from '@/types/schema';
-import RadioInput from '@/components/RadioInput.vue';
+import RadioInput from '@/components/input/RadioInput.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { ref, watch } from 'vue';
 

@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { Job } from '@/types/job';
 import API from '@/utils/api';
 
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 import { useRoute, useRouter } from 'vue-router';
 

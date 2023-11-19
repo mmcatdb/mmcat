@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Database } from '@/types/database';
-import CleverRouterLink from '@/components/CleverRouterLink.vue';
+import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import type { Id } from '@/types/id';

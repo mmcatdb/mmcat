@@ -2,7 +2,7 @@
 import API from '@/utils/api';
 import type { DataSource } from '@/types/dataSource';
 
-import ResourceLoader from '@/components/ResourceLoader.vue';
+import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import DataSourceEditor from '@/components/dataSource/DataSourceEditor.vue';
 import { ref } from 'vue';

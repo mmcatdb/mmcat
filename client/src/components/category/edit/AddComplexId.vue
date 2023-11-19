@@ -6,7 +6,7 @@ import { SequenceSignature } from '@/types/accessPath/graph';
 import { Cardinality } from '@/types/schema';
 import SignatureIdDisplay from '../SignatureIdDisplay.vue';
 import SignatureInput from '../../accessPath/input/SignatureInput.vue';
-import ButtonIcon from '@/components/ButtonIcon.vue';
+import ButtonIcon from '@/components/common/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';

@@ -5,6 +5,7 @@ import VersionDisplay from '../VersionDisplay.vue';
 import { useSchemaCategoryInfo } from '@/utils/injects';
 import { computed, ref } from 'vue';
 import API from '@/utils/api';
+import OpenCloseToggle from '@/components/common/OpenCloseToggle.vue';
 
 type QueryDisplayProps = {
     version: QueryVersion;
@@ -44,7 +45,9 @@ async function saveChanges() {
 }
 
 const queryResult = ref<string>();
+const isError = ref(false);
 const isExecuting = ref(false);
+const isOpened = ref(false);
 
 async function execute() {
     queryResult.value = undefined;
@@ -54,70 +57,73 @@ async function execute() {
         ? response.data.rows.join(',\n')
         : 'Error :(\nname: ' + response.error.name + '\ndata:\n' + response.error.data;
 
+    isError.value = !response.status;
+
     queryResult.value = result;
 }
 </script>
 
 <template>
-    <div class="query-display">
-        <h2>{{ props.version.query.label }}</h2>
-        <TextArea
-            v-model="content"
-            class="query-console"
-            :disabled="state !== State.Editing"
-        />
-        <div class="d-flex align-items-center gap-3">
-            <span>
-                Version:
-                <VersionDisplay
-                    :version-id="version.version"
-                    :error="isVersionOld"
-                />
-            </span>
-            <template v-if="isVersionOld">
-                <template v-if="state === State.Display">
-                    <button
-                        :disabled="isExecuting"
-                        @click="() => state = State.Editing"
-                    >
-                        Update
+    <div class="p-3 border border-1 border-primary d-flex flex-column gap-3">
+        <div class="d-flex align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-baseline gap-3">
+                <h3 class="m-0">
+                    {{ props.version.query.label }}
+                </h3>
+                <span>
+                    v.
+                    <VersionDisplay
+                        :version-id="version.version"
+                        :error="isVersionOld"
+                    />
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <template v-if="isOpened">
+                    <template v-if="isVersionOld">
+                        <template v-if="state === State.Display">
+                            <button
+                                :disabled="isExecuting"
+                                @click="() => state = State.Editing"
+                            >
+                                Update
+                            </button>
+                        </template>
+                        <template v-else>
+                            <button
+                                :disabled="state === State.Fetching || isExecuting"
+                                @click="saveChanges"
+                            >
+                                Save
+                            </button>
+                            <button
+                                :disabled="state === State.Fetching || isExecuting"
+                                @click="cancelEditing"
+                            >
+                                Cancel
+                            </button>
+                        </template>
+                    </template>
+                    <button @click="execute">
+                        Execute
                     </button>
                 </template>
-                <template v-else>
-                    <button
-                        :disabled="state === State.Fetching || isExecuting"
-                        @click="saveChanges"
-                    >
-                        Save
-                    </button>
-                    <button
-                        :disabled="state === State.Fetching || isExecuting"
-                        @click="cancelEditing"
-                    >
-                        Cancel
-                    </button>
-                </template>
-            </template>
-            <button @click="execute">
-                Execute
-            </button>
+                <OpenCloseToggle v-model="isOpened" />
+            </div>
         </div>
-        <TextArea
-            v-if="queryResult !== undefined"
-            v-model="queryResult"
-            class="query-console"
-            readonly
-        />
+        <template v-if="isOpened">
+            <TextArea
+                v-model="content"
+                class="w-100"
+                :disabled="state !== State.Editing"
+            />
+            <TextArea
+                v-if="queryResult !== undefined"
+                v-model="queryResult"
+                class="w-100"
+                :class="{ 'text-danger': isError }"
+                readonly
+            />
+        </template>
     </div>
 </template>
-
-<style scoped>
-.query-display {
-    padding: 12px;
-    border: 1px solid var(--color-primary);
-}
-
-.query-console {
-    min-width: 600px;
-}
-</style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ObjectIds } from '@/types/identifiers';
 import IconMinusSquare from '@/components/icons/IconMinusSquare.vue';
-import ButtonIcon from '@/components/ButtonIcon.vue';
+import ButtonIcon from '@/components/common/ButtonIcon.vue';
 import SignatureIdDisplay from './SignatureIdDisplay.vue';
 
 type ObjectIdsDisplayProps = {

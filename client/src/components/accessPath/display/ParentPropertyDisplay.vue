@@ -3,7 +3,7 @@ import { GraphSimpleProperty, GraphComplexProperty, type GraphParentProperty, Gr
 import { SimpleProperty, ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import { computed, ref } from 'vue';
 import SimplePropertyDisplay from './SimplePropertyDisplay.vue';
-import ButtonIcon from '@/components/ButtonIcon.vue';
+import ButtonIcon from '@/components/common/ButtonIcon.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import SignatureDisplay from '@/components/category/SignatureDisplay.vue';
 
