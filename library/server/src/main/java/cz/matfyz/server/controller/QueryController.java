@@ -84,7 +84,7 @@ public class QueryController {
 
     @DeleteMapping("/queries/{queryId}")
     public void deleteQuery(@PathVariable Id queryId) {
-        boolean result = service.delete(queryId);
+        boolean result = service.deleteQueryWithVersions(queryId);
         if (!result)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }

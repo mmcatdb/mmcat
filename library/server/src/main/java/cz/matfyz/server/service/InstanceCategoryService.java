@@ -10,7 +10,7 @@ import cz.matfyz.server.utils.UserStore;
 
 import java.util.List;
 import java.util.Map.Entry;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 

@@ -3,10 +3,11 @@ package cz.matfyz.server.service;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.Model;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.utils.UserStore;
 
 import java.util.List;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 
@@ -27,8 +28,8 @@ public class ModelService {
         return store.getModel(jobId);
     }
 
-    public Model createNew(UserStore store, Job job, String jobLabel, String commands) {
-        var model = new Model(job.id, job.categoryId, jobLabel, commands);
+    public Model createNew(UserStore store, Job job, Run run, String jobLabel, String commands) {
+        var model = new Model(job.id, run.categoryId, jobLabel, commands);
         store.addModel(model);
 
         return model;

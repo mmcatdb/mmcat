@@ -86,18 +86,18 @@ public class QueryService {
         return new QueryWithVersion(query, version);
     }
 
-    public boolean delete(Id id) {
-        return
-            repository.deleteQueryVersionsByQuery(id) &&
-            repository.deleteQuery(id);
-    }
-
     public QueryVersion createQueryVersion(Id queryId, QueryVersionInit init) {
         final var version = QueryVersion.createNew(queryId, init.version(), init.content());
 
         repository.save(version);
 
         return version;
+    }
+
+    public boolean deleteQueryWithVersions(Id id) {
+        return
+            repository.deleteQueryVersionsByQuery(id) &&
+            repository.deleteQuery(id);
     }
 
 }

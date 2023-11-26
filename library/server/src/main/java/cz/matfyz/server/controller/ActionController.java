@@ -1,0 +1,128 @@
+package cz.matfyz.server.controller;
+
+import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.logicalmodel.LogicalModelInfo;
+import cz.matfyz.server.entity.action.Action;
+import cz.matfyz.server.entity.action.ActionPayload;
+import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
+import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
+import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
+import cz.matfyz.server.entity.datasource.DataSource;
+import cz.matfyz.server.service.ActionService;
+import cz.matfyz.server.service.DataSourceService;
+import cz.matfyz.server.service.LogicalModelService;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
+/**
+ * @author jachym.bartik
+ */
+@RestController
+public class ActionController {
+
+    @Autowired
+    private ActionService service;
+
+    @Autowired
+    private LogicalModelService logicalModelService;
+
+    @Autowired
+    private DataSourceService dataSourceService;
+
+    @GetMapping("/schema-categories/{categoryId}/actions")
+    public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {
+        final var actions = service.findAllInCategory(categoryId);
+
+        return actions.stream().map(this::actionToDetail).toList();
+    }
+
+    @GetMapping("/actions/{id}")
+    public ActionDetail getAction(@PathVariable Id id) {
+        return actionToDetail(service.find(id));
+    }
+
+    public record ActionInit(
+        Id categoryId,
+        String label,
+        ActionPayload payload
+    ) {}
+
+    @PostMapping("/actions")
+    public ActionDetail createAction(@RequestBody ActionInit actionInit) {
+        return actionToDetail(service.create(actionInit));
+    }
+
+    @DeleteMapping("/actions/{id}")
+    public void deleteAction(@PathVariable Id id) {
+        boolean result = service.delete(id);
+        if (!result)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    private ActionDetail actionToDetail(Action action) {
+        return new ActionDetail(action, actionPayloadToDetail(action.payload));
+    }
+
+    // TODO extremely unefficient - load all models and data sources at once.
+    // TODO switch to pattern matching when available.
+    ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
+        if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
+            final var logicalModel = logicalModelService.find(modelToCategoryPayload.logicalModelId()).toInfo();
+            return new ModelToCategoryPayloadDetail(logicalModel);
+        }
+        if (payload instanceof CategoryToModelPayload categoryToModelPayload) {
+            final var logicalModel = logicalModelService.find(categoryToModelPayload.logicalModelId()).toInfo();
+            return new CategoryToModelPayloadDetail(logicalModel);
+        }
+        if (payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload) {
+            final var dataSource = dataSourceService.find(jsonLdToCategoryPayload.dataSourceId());
+            return new JsonLdToCategoryPayloadDetail(dataSource);
+        }
+        
+        throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
+    }
+
+    static record ActionDetail(
+        Id id,
+        Id categoryId,
+        String label,
+        ActionPayloadDetail payload
+    ) {
+        ActionDetail(Action action, ActionPayloadDetail payload) {
+            this(action.id, action.categoryId, action.label, payload);
+        }
+    }
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+    @JsonSubTypes({
+        @JsonSubTypes.Type(value = CategoryToModelPayloadDetail.class, name = "CategoryToModel"),
+        @JsonSubTypes.Type(value = ModelToCategoryPayloadDetail.class, name = "ModelToCategory"),
+        @JsonSubTypes.Type(value = JsonLdToCategoryPayloadDetail.class, name = "JsonLdToCategory"),
+    })
+    interface ActionPayloadDetail {}
+
+    static record CategoryToModelPayloadDetail(
+        LogicalModelInfo logicalModel
+    ) implements ActionPayloadDetail {}
+
+    static record ModelToCategoryPayloadDetail(
+        LogicalModelInfo logicalModel
+    ) implements ActionPayloadDetail {}
+
+    static record JsonLdToCategoryPayloadDetail(
+        DataSource dataSource
+    ) implements ActionPayloadDetail {}
+
+}

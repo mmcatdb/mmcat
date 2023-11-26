@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { JOB_TYPES, JobType, type JobPayloadInit } from '@/types/job';
 import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
@@ -8,16 +7,19 @@ import type { Id } from '@/types/id';
 import { DataSource } from '@/types/dataSource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
 
-const emit = defineEmits([ 'newJob' ]);
+const emit = defineEmits<{
+    (e: 'newAction', action: Action): void;
+}>();
 
 const logicalModels = ref<LogicalModel[]>();
 const dataSources = ref<DataSource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
 const dataSourceId = ref<Id>();
-const jobName = ref<string>('');
-const jobType = ref(JOB_TYPES[0].value);
+const actionName = ref<string>('');
+const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
 
 const categoryId = useSchemaCategoryId();
@@ -35,45 +37,45 @@ onMounted(async () => {
 });
 
 const dataValid = computed(() => {
-    if (!jobName.value)
+    if (!actionName.value)
         return false;
 
-    return jobType.value === JobType.JsonLdToCategory
+    return actionType.value === ActionType.JsonLdToCategory
         ? !!dataSourceId.value
         : !!logicalModelId.value;
 });
 
-async function createJob() {
+async function createAction() {
     fetching.value = true;
 
-    const payload = jobType.value === JobType.JsonLdToCategory ? {
-        type: JobType.JsonLdToCategory,
+    const payload = actionType.value === ActionType.JsonLdToCategory ? {
+        type: ActionType.JsonLdToCategory,
         dataSourceId: dataSourceId.value,
     } : {
-        type: jobType.value,
+        type: actionType.value,
         logicalModelId: logicalModelId.value,
     };
 
-    const result = await API.jobs.createNewJob({}, {
+    const result = await API.actions.createAction({}, {
         categoryId,
-        label: jobName.value,
-        payload: payload as JobPayloadInit,
+        label: actionName.value,
+        payload: payload as ActionPayloadInit,
     });
     if (result.status)
-        emit('newJob', result.data);
+        emit('newAction', Action.fromServer(result.data));
 
     fetching.value = false;
 }
 </script>
 
 <template>
-    <div class="newJob">
-        <h2>Create a new job</h2>
+    <div class="newAction">
+        <h2>Create a new action</h2>
         <ValueContainer>
             <ValueRow label="Type:">
-                <select v-model="jobType">
+                <select v-model="actionType">
                     <option
-                        v-for="availableType in JOB_TYPES"
+                        v-for="availableType in ACTION_TYPES"
                         :key="availableType.value"
                         :value="availableType.value"
                     >
@@ -82,10 +84,10 @@ async function createJob() {
                 </select>
             </ValueRow>
             <ValueRow label="Label:">
-                <input v-model="jobName" />
+                <input v-model="actionName" />
             </ValueRow>
             <ValueRow
-                v-if="jobType === JobType.JsonLdToCategory"
+                v-if="actionType === ActionType.JsonLdToCategory"
                 label="Data source:"
             >
                 <select v-model="dataSourceId">
@@ -112,21 +114,21 @@ async function createJob() {
                     </option>
                 </select>
             </ValueRow>
-            <ValueRow>&nbsp;</ValueRow><!-- To make the NewJob tile look the same as the JobDisplay tile. -->
+            <ValueRow>&nbsp;</ValueRow><!-- To make the NewAction tile look the same as the ActionDisplay tile. -->
         </ValueContainer>
         <div class="button-row">
             <button
                 :disabled="(fetching || !dataValid)"
-                @click="createJob"
+                @click="createAction"
             >
-                Create job
+                Create action
             </button>
         </div>
     </div>
 </template>
 
 <style scoped>
-.newJob {
+.newAction {
     padding: 12px;
     border: 1px solid var(--color-primary);
     margin-right: 16px;

@@ -59,6 +59,11 @@ function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
                         @create-query-version="updateQuery"
                         @delete-query="() => queries = queries?.filter(q => q.query.id !== query.query.id)"
                     />
+                    <div v-if="queries.length === 0">
+                        You have no saved queries yet. Go to <RouterLink :to="{ name: 'query' }">
+                            Querying
+                        </RouterLink> to add some!
+                    </div>
                 </template>
                 <ResourceLoader :loading-function="fetchQueries" />
             </div>

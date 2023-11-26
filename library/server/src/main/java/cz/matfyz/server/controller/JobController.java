@@ -1,29 +1,24 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
+import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
-import cz.matfyz.server.entity.job.JobDetail;
-import cz.matfyz.server.entity.job.JobInit;
-import cz.matfyz.server.entity.job.payload.CategoryToModelPayload;
-import cz.matfyz.server.entity.job.payload.JsonLdToCategoryPayload;
-import cz.matfyz.server.entity.job.payload.ModelToCategoryPayload;
-import cz.matfyz.server.service.DataSourceService;
+import cz.matfyz.server.repository.ActionRepository;
+import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.service.JobService;
-import cz.matfyz.server.service.LogicalModelService;
-import cz.matfyz.server.utils.UserStore;
 
+import java.io.Serializable;
 import java.util.List;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
+import com.mongodb.lang.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * @author jachym.bartik
@@ -32,76 +27,72 @@ import org.springframework.web.server.ResponseStatusException;
 public class JobController {
 
     @Autowired
+    private JobRepository repository;
+
+    @Autowired
     private JobService service;
 
     @Autowired
-    private LogicalModelService logicalModelService;
+    private ActionRepository actionRepository;
 
     @Autowired
-    private DataSourceService dataSourceService;
+    private ActionController actionController;
 
     @GetMapping("/schema-categories/{categoryId}/jobs")
     public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId) {
-        final var jobs = service.findAllInCategory(categoryId);
+        final var jobs = repository.findAllInCategory(categoryId);
 
         return jobs.stream().map(this::jobToJobDetail).toList();
     }
 
     @GetMapping("/jobs/{id}")
     public JobDetail getJob(@PathVariable Id id) {
-        return jobToJobDetail(service.find(id));
+        return jobToJobDetail(repository.find(id));
     }
 
-    @PostMapping("/jobs")
-    public JobDetail createNewJob(@RequestBody JobInit jobInit) {
-        return jobToJobDetail(service.createNew(new Job.Builder().fromInit(jobInit)));
+    @PostMapping("/actions/{actionId}/jobs")
+    public JobDetail createRun(@PathVariable Id actionId) {
+        final var action = actionRepository.find(actionId);
+
+        return jobToJobDetail(service.createRun(action));
     }
 
-    @PostMapping("/jobs/{id}/start")
-    public JobDetail startJob(@PathVariable Id id, HttpSession session) {
-        final var job = service.find(id);
-    
-        final var store = UserStore.fromSession(session);
-        final var startedJob = service.start(job, store);
-        if (startedJob == null)
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Job " + id + " could not be started.");
+    @PostMapping("/jobs/{id}/restart")
+    public JobDetail createRestartedJob(@PathVariable Id id, HttpSession session) {
+        final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(startedJob);
-    }
-
-    @DeleteMapping("/jobs/{id}")
-    public void deleteJob(@PathVariable Id id) {
-        boolean result = service.delete(id);
-        if (!result)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return jobToJobDetail(service.createRestartedJob(jobWithRun));
     }
 
     @PostMapping("/jobs/{id}/cancel")
     public JobDetail cancelJob(@PathVariable Id id, HttpSession session) {
-        final var job = service.find(id);
+        final var jobWithRun = repository.find(id);
 
-        final var canceledJob = service.cancel(job);
-        if (canceledJob == null)
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Job " + id + " could not be canceled.");
-
-        return jobToJobDetail(canceledJob);
+        return jobToJobDetail(service.cancel(jobWithRun));
     }
 
-    private JobDetail jobToJobDetail(Job job) {        
-        if (job.payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
-            final var logicalModel = logicalModelService.find(modelToCategoryPayload.logicalModelId()).toInfo();
-            return new JobDetail(job, new ModelToCategoryPayload.Detail(logicalModel));
+    private JobDetail jobToJobDetail(JobWithRun job) {        
+        final var payload = actionController.actionPayloadToDetail(job.job().payload);
+
+        return JobDetail.create(job, payload);
+    }
+
+    private static record JobDetail(
+        Id id,
+        Id categoryId,
+        Id runId,
+        @Nullable Id actionId,
+        String label,
+        Job.State state,
+        ActionPayloadDetail payload,
+        @Nullable Serializable data
+    ) implements IEntity {
+        public static JobDetail create(JobWithRun jobWithRun, ActionPayloadDetail payload) {
+            final var job = jobWithRun.job();
+            final var run = jobWithRun.run();
+
+            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.state, payload, job.data);
         }
-        else if (job.payload instanceof CategoryToModelPayload categoryToModelPayload) {
-            final var logicalModel = logicalModelService.find(categoryToModelPayload.logicalModelId()).toInfo();
-            return new JobDetail(job, new CategoryToModelPayload.Detail(logicalModel));
-        }
-        else if (job.payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload) {
-            final var logicalModel = dataSourceService.find(jsonLdToCategoryPayload.dataSourceId());
-            return new JobDetail(job, new JsonLdToCategoryPayload.Detail(logicalModel));
-        }
-        
-        throw new UnsupportedOperationException("Unsupported job type: " + job.payload.getClass().getSimpleName() + ".");
     }
 
 }

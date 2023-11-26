@@ -2,6 +2,16 @@ import type { RouteRecordRaw } from 'vue-router';
 
 export const projectSpecificRoutes: RouteRecordRaw[] = [
     {
+        path: 'actions',
+        name: 'actions',
+        component: () => import('@/views/project-specific/ActionsView.vue'),
+    },
+    {
+        path: 'actions/:id',
+        name: 'action',
+        component: () => import('@/views/project-specific/ActionView.vue'),
+    },
+    {
         path: 'jobs',
         name: 'jobs',
         component: () => import('@/views/project-specific/JobsView.vue'),

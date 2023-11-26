@@ -22,6 +22,7 @@ const links = [
     defineLink('logicalModels', 'Logical Models'),
     defineLink('databasesInCategory', 'Databases'),
     defineLink('dataSourcesInCategory', 'Data sources'),
+    defineLink('actions', 'Actions'),
     defineLink('jobs', 'Jobs'),
     defineLink('instanceCategory', 'Instance Category'),
     defineLink('models', 'Models'),

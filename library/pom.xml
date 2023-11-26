@@ -19,15 +19,15 @@
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <!-- This generates metadata for reflection on method parameters. This is crucial for, e.g., the @PathVariable annotation when getting the name of the parameter automatically. -->
+        <maven.compiler.parameters>true</maven.compiler.parameters>
         <slf4j.version>1.7.32</slf4j.version>
-        <log4j.version>2.17.2</log4j.version>
+        <log4j.version>2.21.0</log4j.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <junit.platform.version>1.8.1</junit.platform.version>
         <jackson.version>2.15.2</jackson.version>
         <jena.version>4.6.1</jena.version>
-        <spring.version>2.6.3</spring.version>
+        <spring.version>3.2.0</spring.version>
     </properties>
     
     <dependencies>
@@ -57,4 +57,15 @@
             <version>${jackson.version}</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

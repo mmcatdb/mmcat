@@ -9,7 +9,7 @@ A multi-model data modeling and evolution framework based on category theory. It
 
 ## Requirements
 
-- Java 17 (JDK)
+- Java 21 (JDK)
 - Apache Maven 3.8
 
 ## Installation & configuration

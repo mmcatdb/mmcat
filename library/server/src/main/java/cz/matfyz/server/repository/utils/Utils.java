@@ -30,14 +30,24 @@ public abstract class Utils {
         return new Id(resultSet.getString(columnName));
     }
 
-    public static void setId(PreparedStatement statement, int position, Id id) throws SQLException {
-        //statement.setString(position, id.value);
+    public static @Nullable Id getIdOrNull(ResultSet resultSet, String columnName) throws SQLException {
+        final var idString = resultSet.getString(columnName);
+        return idString == null ? null : new Id(idString);
+    }
+
+    public static void setId(PreparedStatement statement, int position, @Nullable Id id) throws SQLException {
+        if (id != null && id.isUuid()) {
+            setUuid(statement, position, id);
+            return;
+        }
+        
         try {
             if (id == null) {
                 statement.setNull(position, Types.INTEGER);
                 return;
             }
-
+            
+            //statement.setString(position, id.value);
             statement.setInt(position, Integer.parseInt(id.toString()));
         }
         catch (NumberFormatException e) {
@@ -45,7 +55,7 @@ public abstract class Utils {
         }
     }
 
-    public static void setUuid(PreparedStatement statement, int position, @Nullable Id id) throws SQLException {
+    private static void setUuid(PreparedStatement statement, int position, Id id) throws SQLException {
         if (id == null) {
             statement.setNull(position, Types.OTHER);
             return;

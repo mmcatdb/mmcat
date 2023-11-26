@@ -5,7 +5,7 @@ import API from '@/utils/api';
 
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 const job = ref<Job>();
 
@@ -19,12 +19,6 @@ async function fetchJob() {
     job.value = Job.fromServer(result.data);
     return true;
 }
-
-const router = useRouter();
-
-function deleteJob() {
-    router.push({ name: 'jobs' });
-}
 </script>
 
 <template>
@@ -35,7 +29,6 @@ function deleteJob() {
     >
         <JobDisplay
             :job="job"
-            @delete-job="deleteJob"
             @update-job="newJob => job = newJob"
         />
     </div>

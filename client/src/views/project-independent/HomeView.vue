@@ -48,11 +48,9 @@ async function resetDatabase() {
     <p>
         A multi-model data modeling framework based on category theory.
     </p>
-    <!--
     <Button :onclick="resetDatabase">
         Reset database
     </Button>
-    -->
     <br />
     <p>
         Detailed instructions on how to use this tool can be found <a :href="DOCUMENTATION_URL">here</a>.

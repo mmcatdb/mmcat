@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Job, JobState, JobType } from '@/types/job';
-import API from '@/utils/api';
 import { computed, ref } from 'vue';
+import API from '@/utils/api';
+import { Job, JobState } from '@/types/job';
+import { ActionType } from '@/types/action';
 import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
@@ -13,7 +14,6 @@ type JobDisplayProps = {
 const props = defineProps<JobDisplayProps>();
 
 const emit = defineEmits<{
-    (e: 'deleteJob'): void;
     (e: 'updateJob', job: Job): void;
 }>();
 
@@ -34,26 +34,6 @@ const jobStateClass = computed(() => {
     }
 });
 
-async function startJob() {
-    fetching.value = true;
-
-    const result = await API.jobs.startJob({ id: props.job.id });
-    if (result.status)
-        emit('updateJob', Job.fromServer(result.data));
-
-    fetching.value = false;
-}
-
-async function deleteJob() {
-    fetching.value = true;
-
-    const result = await API.jobs.deleteJob({ id: props.job.id });
-    if (result.status)
-        emit('deleteJob');
-
-    fetching.value = false;
-}
-
 async function cancelJob() {
     fetching.value = true;
 
@@ -67,7 +47,7 @@ async function cancelJob() {
 async function restartJob() {
     fetching.value = true;
 
-    const result = await API.jobs.startJob({ id: props.job.id });
+    const result = await API.jobs.createRestartedJob({ id: props.job.id });
     if (result.status)
         emit('updateJob', Job.fromServer(result.data));
 
@@ -88,7 +68,7 @@ async function restartJob() {
                 {{ job.payload.type }}
             </ValueRow>
             <ValueRow
-                v-if="job.payload.type === JobType.JsonLdToCategory"
+                v-if="job.payload.type === ActionType.JsonLdToCategory"
                 label="Data source:"
             >
                 <RouterLink :to="{ name: 'dataSource', params: { id: job.payload.dataSource.id }, query: { categoryId: job.categoryId } }">
@@ -120,23 +100,6 @@ async function restartJob() {
         </ValueContainer>
         <div class="button-row">
             <button
-                v-if="job.state === JobState.Ready"
-                :disabled="fetching"
-                class="success"
-                @click="startJob"
-            >
-                Start
-            </button>
-            <button
-                v-if="job.state !== JobState.Running"
-                :disabled="fetching"
-                class="error"
-                @click="deleteJob"
-            >
-                Delete
-            </button>
-            <button
-                v-if="job.state === JobState.Failed || job.state === JobState.Canceled"
                 :disabled="fetching"
                 class="info"
                 @click="restartJob"
@@ -144,7 +107,7 @@ async function restartJob() {
                 Restart
             </button>
             <button
-                v-if="job.state === JobState.Running"
+                v-if="job.state === JobState.Ready"
                 :disabled="fetching"
                 class="warning"
                 @click="cancelJob"

@@ -22,7 +22,7 @@ public class ServerProperties {
         return origin;
     }
 
-    public Boolean executeModels() {
+    public boolean executeModels() {
         return executeModels;
     }
 

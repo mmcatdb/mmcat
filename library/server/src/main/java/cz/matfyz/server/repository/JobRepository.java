@@ -3,12 +3,15 @@ package cz.matfyz.server.repository;
 import static cz.matfyz.server.repository.utils.Utils.getId;
 import static cz.matfyz.server.repository.utils.Utils.setId;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
-import cz.matfyz.server.repository.utils.Utils;
 
-import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,84 +26,113 @@ public class JobRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public List<Job> findAllInCategory(Id categoryId) {
+    public static record JobWithRun(Job job, Run run) {}
+
+    private static JobWithRun jobWithRunFromResultSet(ResultSet resultSet, Id jobId, Id categoryId) throws SQLException, JsonProcessingException {
+        final Id runId = getId(resultSet, "run.id");
+        final Id actionId = getId(resultSet, "run.action_id");
+        final String jsonValue = resultSet.getString("job.json_value");
+
+        return new JobWithRun(
+            Job.fromJsonValue(jobId, runId, jsonValue),
+            Run.fromDatabase(runId, categoryId, actionId)
+        );
+    }
+
+    public List<JobWithRun> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
-            var statement = connection.prepareStatement("""
-                SELECT *
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    job.id as "job.id",
+                    job.json_value as "job.json_value",
+                    run.id as "run.id",
+                    run.action_id as "run.action_id"
                 FROM job
-                WHERE schema_category_id = ?
+                JOIN run ON run.id = job.run_id
+                WHERE run.schema_category_id = ?
                 ORDER BY job.id;
                 """);
             setId(statement, 1, categoryId);
-            var resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Id id = getId(resultSet, "id");
-                String jsonValue = resultSet.getString("json_value");
-                output.add(new Job.Builder().fromJsonValue(id, categoryId, jsonValue));
+                final Id jobId = getId(resultSet, "job.id");
+                output.add(jobWithRunFromResultSet(resultSet, jobId, categoryId));
             }
         });
     }
 
-    public Job find(Id id) {
-        return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("""
-                SELECT *
+    public List<Id> findAllReadyIds() {
+        return db.getMultiple((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT job.id as "job.id"
                 FROM job
+                WHERE job.json_value->>'state' = ?
+                ORDER BY job.id;
+                """);
+            statement.setString(1, Job.State.Ready.name());
+            final var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                final Id jobId = getId(resultSet, "job.id");
+                output.add(jobId);
+            }
+        });
+    }
+
+    public JobWithRun find(Id jobId) {
+        return db.get((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    job.json_value as "job.json_value",
+                    run.id as "run.id",
+                    run.schema_category_id as "run.schema_category_id",
+                    run.action_id as "run.action_id"
+                FROM job
+                JOIN run ON run.id = job.run_id
                 WHERE job.id = ?;
                 """);
-            setId(statement, 1, id);
-            var resultSet = statement.executeQuery();
+            setId(statement, 1, jobId);
+            final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                Id categoryId = getId(resultSet, "schema_category_id");
-                String jsonValue = resultSet.getString("json_value");
-                output.set(new Job.Builder().fromJsonValue(id, categoryId, jsonValue));
+                final Id categoryId = getId(resultSet, "run.schema_category_id");
+                output.set(jobWithRunFromResultSet(resultSet, jobId, categoryId));
             }
         });
     }
 
-    public Id add(Job job) {
-        return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("INSERT INTO job (schema_category_id, json_value) VALUES (?, ?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            setId(statement, 1, job.categoryId);
-            statement.setString(2, Utils.toJson(job));
+    public boolean save(Job job) {
+        return db.getBoolean((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                INSERT INTO job (id, run_id, json_value)
+                VALUES (?, ?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    run_id = EXCLUDED.run_id,
+                    json_value = EXCLUDED.json_value;
+                """);
+            setId(statement, 1, job.id);
+            setId(statement, 2, job.runId);
+            statement.setString(3, job.toJsonValue());
 
-            int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0)
-                return;
-
-            var generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next())
-                output.set(getId(generatedKeys, "id"));
+            output.set(statement.executeUpdate() != 0);
         });
     }
 
-    public boolean updateJsonValue(Job job) {
+    public boolean save(Run run) {
         return db.getBoolean((connection, output) -> {
-            var statement = connection.prepareStatement("""
-                UPDATE job
-                SET json_value = ?::jsonb
-                WHERE id = ?;
+            final var statement = connection.prepareStatement("""
+                INSERT INTO run (id, schema_category_id, action_id)
+                VALUES (?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET
+                    schema_category_id = EXCLUDED.schema_category_id,
+                    action_id = EXCLUDED.action_id;
                 """);
-            statement.setString(1, Utils.toJson(job));
-            setId(statement, 2, job.id);
+            setId(statement, 1, run.id);
+            setId(statement, 2, run.categoryId);
+            setId(statement, 3, run.actionId);
 
-            int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
-        });
-    }
-
-    public boolean delete(Id id) {
-        return db.getBoolean((connection, output) -> {
-            var statement = connection.prepareStatement("""
-                DELETE FROM job
-                WHERE id = ?;
-                """);
-            setId(statement, 1, id);
-
-            int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            output.set(statement.executeUpdate() != 0);
         });
     }
 

@@ -1,6 +1,8 @@
 DROP TABLE IF EXISTS query_version;
 DROP TABLE IF EXISTS query;
 DROP TABLE IF EXISTS job;
+DROP TABLE IF EXISTS run;
+DROP TABLE IF EXISTS action;
 DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS logical_model;
 DROP TABLE IF EXISTS data_source;
@@ -64,15 +66,22 @@ CREATE TABLE mapping (
 --      a) Sometimes we want to show only the label of the mapping, so we use the kindName for it without the necessity to access whole access path.
 --      b) Some display components on the frontent use only the access path, so the information should be there.
 
-CREATE TABLE job (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE action (
+    id UUID PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
-    -- přidat typ jobu, vstup, výstup, vše serializované v jsonu
-        -- podobně jako ukládání logování
-        -- součástí log4j je nastavení kam se to dá ukládat, resp. do libovolné kombinace uložišť
-            -- např. prometheus, zabbix, kibana - monitorování stavu aplikace
+);
 
+CREATE TABLE run (
+    id UUID PRIMARY KEY,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    action_id UUID REFERENCES action
+);
+
+CREATE TABLE job (
+    id UUID PRIMARY KEY,
+    run_id UUID NOT NULL REFERENCES run,
+    json_value JSONB NOT NULL
 );
 
 CREATE TABLE query (

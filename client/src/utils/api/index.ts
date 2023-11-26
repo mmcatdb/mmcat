@@ -1,3 +1,4 @@
+import actions from './routes/actions';
 import databases from './routes/databases';
 import dataSources from './routes/dataSource';
 import instances from './routes/instances';
@@ -9,6 +10,7 @@ import queries from './routes/queries';
 import schemas from './routes/schemas';
 
 const API = {
+    actions,
     databases,
     dataSources,
     instances,

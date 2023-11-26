@@ -2,7 +2,6 @@ package cz.matfyz.server.repository;
 
 import static cz.matfyz.server.repository.utils.Utils.getId;
 import static cz.matfyz.server.repository.utils.Utils.setId;
-import static cz.matfyz.server.repository.utils.Utils.setUuid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -109,13 +108,13 @@ public class QueryRepository {
     public boolean save(Query query) {
         return db.getBoolean((connection, output) -> {
             final var statement = connection.prepareStatement("""
-            INSERT INTO query (id, schema_category_id, json_value)
-            VALUES (?, ?, ?::jsonb)
-            ON CONFLICT (id) DO UPDATE SET
-                schema_category_id = EXCLUDED.schema_category_id,
-                json_value = EXCLUDED.json_value;
-            """);
-            setUuid(statement, 1, query.id);
+                INSERT INTO query (id, schema_category_id, json_value)
+                VALUES (?, ?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    schema_category_id = EXCLUDED.schema_category_id,
+                    json_value = EXCLUDED.json_value;
+                """);
+            setId(statement, 1, query.id);
             setId(statement, 2, query.categoryId);
             statement.setString(3, query.toJsonValue());
 
@@ -126,14 +125,14 @@ public class QueryRepository {
     public boolean save(QueryVersion version) {
         return db.getBoolean((connection, output) -> {
             final var statement = connection.prepareStatement("""
-            INSERT INTO query_version (id, query_id, json_value)
-            VALUES (?, ?, ?::jsonb)
-            ON CONFLICT (id) DO UPDATE SET
-                query_id = EXCLUDED.query_id,
-                json_value = EXCLUDED.json_value;
-            """);
-            setUuid(statement, 1, version.id);
-            setUuid(statement, 2, version.queryId);
+                INSERT INTO query_version (id, query_id, json_value)
+                VALUES (?, ?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    query_id = EXCLUDED.query_id,
+                    json_value = EXCLUDED.json_value;
+                """);
+            setId(statement, 1, version.id);
+            setId(statement, 2, version.queryId);
             statement.setString(3, version.toJsonValue());
 
             output.set(statement.executeUpdate() != 0);
@@ -143,10 +142,10 @@ public class QueryRepository {
     public boolean deleteQuery(Id id) {
         return db.getBoolean((connection, output) -> {
             final var statement = connection.prepareStatement("""
-            DELETE FROM query
-            WHERE id = ?;
-            """);
-            setUuid(statement, 1, id);
+                DELETE FROM query
+                WHERE id = ?;
+                """);
+            setId(statement, 1, id);
 
             final int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);
@@ -156,10 +155,10 @@ public class QueryRepository {
     public boolean deleteQueryVersionsByQuery(Id queryId) {
         return db.getBoolean((connection, output) -> {
             final var statement = connection.prepareStatement("""
-            DELETE FROM query_version
-            WHERE query_id = ?;
-            """);
-            setUuid(statement, 1, queryId);
+                DELETE FROM query_version
+                WHERE query_id = ?;
+                """);
+            setId(statement, 1, queryId);
 
             final int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);
@@ -169,10 +168,10 @@ public class QueryRepository {
     public boolean deleteQueryVersion(Id id) {
         return db.getBoolean((connection, output) -> {
             final var statement = connection.prepareStatement("""
-            DELETE FROM query_version
-            WHERE id = ?;
-            """);
-            setUuid(statement, 1, id);
+                DELETE FROM query_version
+                WHERE id = ?;
+                """);
+            setId(statement, 1, id);
 
             final int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);
