@@ -6,7 +6,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class WhereClause implements ParserNode {
 
-    public static enum Type {
+    public enum Type {
         Where,
         Optional,
         Minus,

@@ -5,6 +5,7 @@ import static cz.matfyz.server.repository.utils.Utils.setId;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
@@ -26,7 +27,12 @@ public class QueryRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public static record QueryWithVersion(Query query, QueryVersion version) {}
+    public static record QueryWithVersion(Query query, QueryVersion version) implements Comparable<QueryWithVersion> {
+        @Override
+        public int compareTo(QueryWithVersion other) {
+            return query.id.compareTo(other.query.id);
+        }
+    }
 
     private static QueryWithVersion queryWithVersionFromResultSet(ResultSet resultSet, Id queryId, Id categoryId) throws SQLException, JsonProcessingException {
         final String queryJsonValue = resultSet.getString("query_json_value");
@@ -53,6 +59,32 @@ public class QueryRepository {
                 ORDER BY query.id, query_version.json_value::json->>'version' DESC
                 """);
             setId(statement, 1, categoryId);
+            final var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                final var queryId = getId(resultSet, "query_id");
+                output.add(queryWithVersionFromResultSet(resultSet, queryId, categoryId));
+            }
+        });
+    }
+
+    public List<QueryWithVersion> findAllInCategoryWithVersion(Id categoryId, Version version) {
+        return db.getMultiple((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    query.id AS query_id,
+                    query.json_value AS query_json_value,
+                    query_version.id AS version_id,
+                    query_version.json_value AS version_json_value
+                FROM query
+                JOIN query_version ON query_version.query_id = query.id
+                WHERE
+                    query.schema_category_id = ? AND
+                    query_version.json_value->>'version' = ?
+                ORDER BY query.id DESC
+                """);
+            setId(statement, 1, categoryId);
+            statement.setString(2, version.toString());
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {

@@ -130,7 +130,7 @@ public class JobRepository {
                 """);
             setId(statement, 1, run.id);
             setId(statement, 2, run.categoryId);
-            setId(statement, 3, run.actionId);
+            setId(statement, 3, run.actionId, true);
 
             output.set(statement.executeUpdate() != 0);
         });

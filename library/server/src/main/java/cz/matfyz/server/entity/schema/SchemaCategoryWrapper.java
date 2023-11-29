@@ -2,7 +2,7 @@ package cz.matfyz.server.entity.schema;
 
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.Version;
-import cz.matfyz.server.builder.SchemaCategoryContext;
+import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.utils.Utils;
 
@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author jachym.bartik
@@ -44,7 +45,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         );
     }
 
-    public static SchemaCategoryWrapper fromSchemaCategory(SchemaCategory category, SchemaCategoryContext context) {
+    public static SchemaCategoryWrapper fromSchemaCategory(SchemaCategory category, MetadataContext context) {
         final var morphisms = category.allMorphisms().stream().map(SchemaMorphismWrapper::fromSchemaMorphism).toArray(SchemaMorphismWrapper[]::new);
         final var objects = category.allObjects().stream()
             .map(object -> SchemaObjectWrapper.fromSchemaObject(object, context))
@@ -59,17 +60,25 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         );
     }
 
-    public SchemaCategory toSchemaCategory(SchemaCategoryContext context) {
-        context.setId(id);
-        context.setVersion(version);
+    public SchemaCategory toSchemaCategory() {
+        return toSchemaCategory(null);
+    }
+
+    public SchemaCategory toSchemaCategory(@Nullable MetadataContext context) {
+        if (context != null) {
+            context.setId(id);
+            context.setVersion(version);
+        }
 
         final var category = new SchemaCategory(label);
 
         for (final var objectWrapper : objects)
             category.addObject(objectWrapper.toSchemaObject(context));
 
-        for (final var morphismWrapper : morphisms)
-            category.addMorphism(morphismWrapper.toSchemaMorphism(context));
+        for (final var morphismWrapper : morphisms) {
+            final var disconnectedMorphism = morphismWrapper.toDisconnectedSchemaMorphism();
+            category.addMorphism(disconnectedMorphism.toSchemaMorphism(category::getObject));
+        }
 
         return category;
     }

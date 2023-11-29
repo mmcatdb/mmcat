@@ -125,13 +125,13 @@ public class SchemaCategory implements Category {
         return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min);
     }
 
-    public static class Editor {
+    public abstract static class Editor {
 
-        protected UniqueContext<SchemaObject, Key> getObjectContext(SchemaCategory category) {
+        protected static UniqueContext<SchemaObject, Key> getObjectContext(SchemaCategory category) {
             return category.objectContext;
         }
 
-        protected UniqueContext<SchemaMorphism, Signature> getMorphismContext(SchemaCategory category) {
+        protected static UniqueContext<SchemaMorphism, Signature> getMorphismContext(SchemaCategory category) {
             return category.morphismContext;
         }
 

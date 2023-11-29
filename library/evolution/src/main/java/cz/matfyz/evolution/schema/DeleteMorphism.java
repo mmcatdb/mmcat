@@ -1,20 +1,28 @@
 package cz.matfyz.evolution.schema;
 
-import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism.DisconnectedSchemaMorphism;
 
 public class DeleteMorphism extends SchemaCategory.Editor implements SchemaModificationOperation {
 
-    public final Signature signature;
+    // The dom and cod of the morphism are probably null because they have not been created yet during the creation of this operation.
+    public final DisconnectedSchemaMorphism morphism;
 
-    public DeleteMorphism(Signature signature) {
-        this.signature = signature;
+    public DeleteMorphism(DisconnectedSchemaMorphism morphism) {
+        this.morphism = morphism;
     }
 
     @Override
-    public void apply(SchemaCategory category) {
-        final var morphisms = getMorphismContext(category);
-        morphisms.deleteUniqueObject(signature);
+    public void up(SchemaCategory category) {
+        getMorphismContext(category).deleteUniqueObject(morphism.signature());
+    }
+
+    @Override
+    public void down(SchemaCategory category) {
+        final var objects = getObjectContext(category);
+        final var morphismWithObjects = morphism.toSchemaMorphism(objects::getUniqueObject);
+
+        getMorphismContext(category).createUniqueObject(morphismWithObjects);
     }
 
 }

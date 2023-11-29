@@ -12,7 +12,6 @@ import cz.matfyz.tests.mapping.TestMapping;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.evolution.Version;
-import cz.matfyz.server.builder.SchemaCategoryContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ public class MappingSetup {
 
     public List<MappingInfo> createMappings(List<LogicalModel> models, SchemaCategoryWrapper schemaWrapper) {
         version = schemaWrapper.version;
-        final var schema = schemaWrapper.toSchemaCategory(new SchemaCategoryContext());
+        final var schema = schemaWrapper.toSchemaCategory();
 
         addMapping(models.get(0), PostgreSQL.order(schema));
         addMapping(models.get(0), PostgreSQL.product(schema));

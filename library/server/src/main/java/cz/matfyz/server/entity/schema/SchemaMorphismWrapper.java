@@ -5,7 +5,7 @@ import cz.matfyz.core.category.Morphism.Tag;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.server.builder.SchemaCategoryContext;
+import cz.matfyz.core.schema.SchemaMorphism.DisconnectedSchemaMorphism;
 
 import java.util.Set;
 
@@ -22,8 +22,7 @@ public record SchemaMorphismWrapper(
     Min min,
     String iri,
     String pimIri,
-    @Nullable
-    Set<Tag> tags
+    @Nullable Set<Tag> tags
 ) {
 
     public static SchemaMorphismWrapper fromSchemaMorphism(SchemaMorphism morphism) {
@@ -39,18 +38,17 @@ public record SchemaMorphismWrapper(
         );
     }
 
-    public SchemaMorphism toSchemaMorphism(SchemaCategoryContext context) {
-        return new SchemaMorphism.Builder()
-            .label(this.label)
-            .iri(this.iri)
-            .pimIri(this.pimIri)
-            .tags(this.tags != null ? this.tags : Set.of())
-            .fromArguments(
-                signature,
-                context.getObject(domKey),
-                context.getObject(codKey),
-                min
-            );
+    public DisconnectedSchemaMorphism toDisconnectedSchemaMorphism() {
+        return new DisconnectedSchemaMorphism(
+            signature,
+            label,
+            domKey,
+            codKey,
+            min,
+            iri,
+            pimIri,
+            tags
+        );
     }
     
 }

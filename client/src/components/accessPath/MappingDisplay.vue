@@ -7,7 +7,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureIdDisplay from '../category/SignatureIdDisplay.vue';
 import { useSchemaCategoryInfo } from '@/utils/injects';
-import VersionDisplay from '../VersionDisplay.vue';
+import VersionDisplay from '@/components/VersionDisplay.vue';
 
 type MappingDisplayProps = {
     mapping: Mapping;

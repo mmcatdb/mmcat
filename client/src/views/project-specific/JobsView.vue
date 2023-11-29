@@ -35,10 +35,12 @@ async function fetchJobs() {
 
 <template>
     <div>
-        <h1>Jobs</h1>
+        <h1 class="mb-3">
+            Jobs
+        </h1>
         <div
             v-if="jobs"
-            class="jobs"
+            class="d-flex flex-column gap-3"
         >
             <div
                 v-for="job in jobs"
@@ -56,10 +58,3 @@ async function fetchJobs() {
         />
     </div>
 </template>
-
-<style scoped>
-.jobs {
-    display: flex;
-    flex-wrap: wrap;
-}
-</style>

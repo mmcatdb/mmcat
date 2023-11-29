@@ -1,7 +1,10 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.server.builder.SchemaCategoryContext;
+import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
@@ -23,6 +26,9 @@ public class SchemaCategoryService {
 
     @Autowired
     private SchemaCategoryRepository repository;
+
+    @Autowired
+    private JobService jobService;
 
     public List<SchemaCategoryInfo> findAllInfos() {
         return repository.findAllInfos();
@@ -47,27 +53,34 @@ public class SchemaCategoryService {
     }
 
     public SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
-        final var wrapper = repository.find(id);
+        final SchemaCategoryWrapper wrapper = repository.find(id);
         final var update = SchemaUpdate.fromInit(updateInit, id);
 
         if (!update.prevVersion.equals(wrapper.version))
             return null;
 
-        final var context = new SchemaCategoryContext();
-        final var evolutionUpdate = update.toEvolution(context);
-        final var originalCategory = wrapper.toSchemaCategory(context);
+        final MetadataContext context = new MetadataContext();
+        final SchemaCategoryUpdate evolutionUpdate = update.toEvolution();
+        final SchemaCategory category = wrapper.toSchemaCategory(context);
+        evolutionUpdate.up(category);
+
+        // The metadata is not versioned.
+        // However, without it, the schema category can't be restored to it's previous version.
+        // So, we might need to keep all metadata somewhere. Maybe event version it ...
         updateInit.metadata().forEach(m -> context.setPosition(m.key(), m.position()));
+        context.setVersion(update.nextVersion);
 
-        final var newCategory = evolutionUpdate.apply(originalCategory);
-
-        final var nextVersion = context.getVersion().generateNext();
-        context.setVersion(nextVersion);
-        update.nextVersion = nextVersion;
-
-        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(newCategory, context);
+        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
 
         if (!repository.update(newWrapper, update))
             return null;
+
+        jobService.createRun(
+            id,
+            null,
+            "Update queries to v. " + update.nextVersion,
+            new UpdateSchemaPayload(update.prevVersion, update.nextVersion)
+        );
 
         return newWrapper;
     }
@@ -75,7 +88,7 @@ public class SchemaCategoryService {
     public boolean updateMetadata(Id id, List<MetadataUpdate> metadataUpdates) {
         final var wrapper = repository.find(id);
 
-        final var context = new SchemaCategoryContext();
+        final var context = new MetadataContext();
         final var category = wrapper.toSchemaCategory(context);
         metadataUpdates.forEach(m -> context.setPosition(m.key(), m.position()));
 

@@ -27,6 +27,7 @@ export type QueryVersionFromServer = {
     queryId: Id;
     version: VersionId;
     content: string;
+    errors: QueryUpdateError[];
 };
 
 export class QueryVersion implements Entity {
@@ -35,6 +36,7 @@ export class QueryVersion implements Entity {
         readonly query: Query,
         readonly version: VersionId,
         readonly content: string,
+        readonly errors: QueryUpdateError[],
     ) {}
 
     static fromServer(input: QueryVersionFromServer, query: Query): QueryVersion {
@@ -43,16 +45,18 @@ export class QueryVersion implements Entity {
             query,
             input.version,
             input.content,
+            input.errors,
         );
     }
 }
 
-export type QueryVersionInit = {
+export type QueryVersionUpdate = {
     version: VersionId;
     content: string;
+    errors: QueryUpdateError[];
 };
 
-export type QueryInit = QueryVersionInit & {
+export type QueryInit = Omit<QueryVersionUpdate, 'errors'> & {
     categoryId: Id;
     label: string;
 };
@@ -79,3 +83,16 @@ export type QueryWithVersionsFromServer = {
     versions: QueryVersionFromServer[];
 };
 
+// Evolution
+
+export enum ErrorType {
+    ParseError = 'ParseError',
+    UpdateWarning = 'UpdateWarning',
+    UpdateError = 'UpdateError',
+}
+
+export type QueryUpdateError = {
+    type: ErrorType;
+    message: string;
+    data: unknown;
+};

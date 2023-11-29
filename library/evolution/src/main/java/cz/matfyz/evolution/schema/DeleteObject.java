@@ -1,37 +1,26 @@
 package cz.matfyz.evolution.schema;
 
-import cz.matfyz.core.category.Morphism;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.evolution.exception.DependencyException;
-
-import java.util.List;
+import cz.matfyz.core.schema.SchemaObject;
 
 public class DeleteObject extends SchemaCategory.Editor implements SchemaModificationOperation {
 
-    public final Key key;
+    public final SchemaObject object;
 
-    public DeleteObject(Key key) {
-        this.key = key;
+    public DeleteObject(SchemaObject object) {
+        this.object = object;
     }
 
     @Override
-    public void apply(SchemaCategory category) {
-        final var objects = getObjectContext(category);
-        final var objectToDelete = objects.getUniqueObject(key);
+    public void up(SchemaCategory category) {
+        CreateObject.assertObjectIsSingle(category, object);
 
-        // Check if there aren't any dependent morphisms
-        final var morphisms = getMorphismContext(category);
-        final List<Signature> signaturesOfDependentMorphisms = morphisms.getAllUniqueObjects().stream()
-            .filter(morphism -> morphism.dom().equals(objectToDelete) || morphism.cod().equals(objectToDelete))
-            .map(Morphism::signature)
-            .toList();
+        getObjectContext(category).deleteUniqueObject(object);
+    }
 
-        if (!signaturesOfDependentMorphisms.isEmpty())
-            throw DependencyException.objectOnMorphisms(key, signaturesOfDependentMorphisms);
-
-        objects.deleteUniqueObject(objectToDelete);
+    @Override
+    public void down(SchemaCategory category) {
+        getObjectContext(category).createUniqueObject(object);
     }
 
 }

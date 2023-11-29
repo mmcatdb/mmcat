@@ -10,6 +10,7 @@ import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.service.JobService;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import jakarta.servlet.http.HttpSession;
 
@@ -83,6 +84,7 @@ public class JobController {
         Id runId,
         @Nullable Id actionId,
         String label,
+        Date createdAt,
         Job.State state,
         ActionPayloadDetail payload,
         @Nullable Serializable data
@@ -91,7 +93,7 @@ public class JobController {
             final var job = jobWithRun.job();
             final var run = jobWithRun.run();
 
-            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.state, payload, job.data);
+            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.createdAt, job.state, payload, job.data);
         }
     }
 

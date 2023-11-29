@@ -1,6 +1,7 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.evolution.Version;
+import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
@@ -89,14 +90,15 @@ public class QueryController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    public static record QueryVersionInit(
+    public static record QueryVersionUpdate(
         Version version,
-        String content
+        String content,
+        List<QueryUpdateError> errors
     ) {}
 
-    @PostMapping("/queries/{queryId}/versions")
-    public QueryVersion createQueryVersion(@PathVariable Id queryId, @RequestBody QueryVersionInit init) {
-        return service.createQueryVersion(queryId, init);
+    @PostMapping("/query-versions/{versionId}")
+    public QueryVersion updateQueryVersion(@PathVariable Id versionId, @RequestBody QueryVersionUpdate update) {
+        return service.updateQueryVersion(versionId, update);
     }
 
 }

@@ -27,6 +27,7 @@ const emit = defineEmits<{
 enum State { Display, Editing, Fetching }
 
 const content = ref(props.version.content);
+const errors = ref(props.version.errors);
 const state = ref(State.Display);
 
 const isVersionOld = computed(() => props.version.version !== categoryInfo.value.versionId);
@@ -38,9 +39,10 @@ function cancelEditing() {
 
 async function saveChanges() {
     state.value = State.Fetching;
-    const result = await API.queries.createQueryVersion({ queryId: props.version.query.id }, {
+    const result = await API.queries.updateQueryVersion({ versionId: props.version.id }, {
         version: categoryInfo.value.versionId,
         content: content.value,
+        errors: errors.value,
     });
     state.value = State.Display;
     if (!result.status)

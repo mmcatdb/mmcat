@@ -6,9 +6,8 @@ import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.server.builder.MappingBuilder;
-import cz.matfyz.server.builder.SchemaCategoryContext;
 import cz.matfyz.server.controller.QueryController.QueryInit;
-import cz.matfyz.server.controller.QueryController.QueryVersionInit;
+import cz.matfyz.server.controller.QueryController.QueryVersionUpdate;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
@@ -47,8 +46,7 @@ public class QueryService {
 
     public ResultList executeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
-        final var context = new SchemaCategoryContext();
-        final var category = categoryWrapper.toSchemaCategory(context);
+        final var category = categoryWrapper.toSchemaCategory();
 
         final var kinds = defineKinds(categoryWrapper.id, category);
 
@@ -78,7 +76,7 @@ public class QueryService {
         final var categoryInfo = categoryRepository.findInfo(init.categoryId());
 
         final var query = Query.createNew(init.categoryId(), init.label());
-        final var version = QueryVersion.createNew(query.id, categoryInfo.version, init.content());
+        final var version = QueryVersion.createNew(query.id, categoryInfo.version, init.content(), List.of());
 
         repository.save(query);
         repository.save(version);
@@ -86,8 +84,22 @@ public class QueryService {
         return new QueryWithVersion(query, version);
     }
 
-    public QueryVersion createQueryVersion(Id queryId, QueryVersionInit init) {
-        final var version = QueryVersion.createNew(queryId, init.version(), init.content());
+    public QueryVersion createQueryVersion(Id queryId, QueryVersionUpdate update) {
+        final var version = QueryVersion.createNew(queryId, update.version(), update.content(), update.errors());
+        version.version = update.version();
+        version.content = update.content();
+        version.errors = update.errors();
+
+        repository.save(version);
+
+        return version;
+    }
+
+    public QueryVersion updateQueryVersion(Id versionId, QueryVersionUpdate update) {
+        final var version = repository.find(versionId).version();
+        version.version = update.version();
+        version.content = update.content();
+        version.errors = update.errors();
 
         repository.save(version);
 

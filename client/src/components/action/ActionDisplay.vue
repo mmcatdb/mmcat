@@ -5,6 +5,7 @@ import { Action, ActionType } from '@/types/action';
 import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import VersionDisplay from '@/components/VersionDisplay.vue';
 
 type ActionDisplayProps = {
     action: Action;
@@ -61,12 +62,18 @@ async function deleteAction() {
                 </RouterLink>
             </ValueRow>
             <ValueRow
-                v-else
+                v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
                 label="Logical model:"
             >
                 <RouterLink :to="{ name: 'logicalModel', params: { id: action.payload.logicalModel.id } }">
                     {{ action.payload.logicalModel.label }}
                 </RouterLink>
+            </ValueRow>
+            <ValueRow
+                v-else
+                label="Versions:"
+            >
+                <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
             </ValueRow>
             <!--
                 <ValueRow label="State:">

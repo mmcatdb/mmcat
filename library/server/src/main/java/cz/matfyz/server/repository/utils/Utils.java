@@ -35,33 +35,26 @@ public abstract class Utils {
         return idString == null ? null : new Id(idString);
     }
 
-    public static void setId(PreparedStatement statement, int position, @Nullable Id id) throws SQLException {
-        if (id != null && id.isUuid()) {
-            setUuid(statement, position, id);
+    public static void setId(PreparedStatement statement, int position, @Nullable Id id, boolean isUuid) throws SQLException {
+        if (id == null)
+            statement.setNull(position, isUuid ? Types.OTHER : Types.INTEGER);
+        else
+            setId(statement, position, id);
+    }
+
+    public static void setId(PreparedStatement statement, int position, Id id) throws SQLException {
+        if (id.isUuid()) {
+            statement.setObject(position, UUID.fromString(id.toString()));
             return;
         }
         
         try {
-            if (id == null) {
-                statement.setNull(position, Types.INTEGER);
-                return;
-            }
-            
             //statement.setString(position, id.value);
             statement.setInt(position, Integer.parseInt(id.toString()));
         }
         catch (NumberFormatException e) {
             statement.setInt(position, 0);
         }
-    }
-
-    private static void setUuid(PreparedStatement statement, int position, Id id) throws SQLException {
-        if (id == null) {
-            statement.setNull(position, Types.OTHER);
-            return;
-        }
-
-        statement.setObject(position, UUID.fromString(id.toString()));
     }
 
     private static final ObjectMapper mapper = new ObjectMapper();

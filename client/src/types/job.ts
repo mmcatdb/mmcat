@@ -1,4 +1,4 @@
-import { type ActionPayload, actionPayloadFromServer, type ActionPayloadFromServer, type ActionPayloadInit } from './action';
+import { type ActionPayload, actionPayloadFromServer, type ActionPayloadFromServer } from './action';
 import type { Entity, Id } from './id';
 
 export type JobFromServer = {
@@ -9,6 +9,7 @@ export type JobFromServer = {
     state: JobState;
     payload: ActionPayloadFromServer;
     data: JobError | null;
+    createdAt: string;
 };
 
 export class Job implements Entity {
@@ -19,7 +20,8 @@ export class Job implements Entity {
         public readonly label: string,
         public state: JobState,
         public readonly payload: ActionPayload,
-        public readonly data?: JobError,
+        public readonly data: JobError | undefined,
+        public readonly createdAt: Date,
     ) {}
 
     static fromServer(input: JobFromServer): Job {
@@ -31,6 +33,7 @@ export class Job implements Entity {
             input.state,
             actionPayloadFromServer(input.payload),
             input.data ?? undefined,
+            new Date(input.createdAt),
         );
     }
 

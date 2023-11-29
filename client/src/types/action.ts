@@ -1,5 +1,5 @@
 import { DataSource, type DataSourceFromServer } from './dataSource';
-import type { Entity, Id } from './id';
+import type { Entity, Id, VersionId } from './id';
 import { LogicalModelInfo, type LogicalModelInfoFromServer } from './logicalModel';
 
 export type ActionFromServer = {
@@ -37,7 +37,8 @@ export type ActionInit = {
 export enum ActionType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel',
-    JsonLdToCategory = 'JsonLdToCategory'
+    JsonLdToCategory = 'JsonLdToCategory',
+    UpdateSchema = 'UpdateSchema',
 }
 
 export const ACTION_TYPES = [
@@ -62,7 +63,9 @@ interface ActionPayloadType<TType extends ActionType = ActionType> {
 export type ActionPayload =
     | ModelToCategoryPayload
     | CategoryToModelPayload
-    | JsonLdToCategoryPayload;
+    | JsonLdToCategoryPayload
+    | UpdateSchemaPayload
+    ;
 
 export type ActionPayloadFromServer<T extends ActionType = ActionType> = {
     type: T;
@@ -76,6 +79,8 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
         return CategoryToModelPayload.fromServer(input as CategoryToModelPayloadFromServer);
     case ActionType.JsonLdToCategory:
         return JsonLdToCategoryPayload.fromServer(input as JsonLdToCategoryPayloadFromServer);
+    case ActionType.UpdateSchema:
+        return UpdateSchemaPayload.fromServer(input as UpdateSchemaPayloadFromServer);
     }
 }
 
@@ -134,9 +139,31 @@ class JsonLdToCategoryPayload implements ActionPayloadType<ActionType.JsonLdToCa
         readonly dataSource: DataSource,
     ) {}
 
-    static fromServer(input: JsonLdToCategoryPayloadFromServer): JsonLdToCategoryPayloadFromServer {
+    static fromServer(input: JsonLdToCategoryPayloadFromServer): JsonLdToCategoryPayload {
         return new JsonLdToCategoryPayload(
             DataSource.fromServer(input.dataSource),
         );
     }
 }
+
+type UpdateSchemaPayloadFromServer = ActionPayloadFromServer<ActionType.UpdateSchema> & {
+    prevVersion: VersionId;
+    nextVersion: VersionId;
+};
+
+class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> {
+    readonly type = ActionType.UpdateSchema;
+
+    private constructor(
+        readonly prevVersion: VersionId,
+        readonly nextVersion: VersionId,
+    ) {}
+
+    static fromServer(input: UpdateSchemaPayloadFromServer): UpdateSchemaPayload {
+        return new UpdateSchemaPayload(
+            input.prevVersion,
+            input.nextVersion,
+        );
+    }
+}
+

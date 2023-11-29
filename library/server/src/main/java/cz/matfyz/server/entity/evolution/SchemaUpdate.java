@@ -1,7 +1,7 @@
 package cz.matfyz.server.entity.evolution;
 
 import cz.matfyz.evolution.Version;
-import cz.matfyz.server.builder.SchemaCategoryContext;
+import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.utils.Utils;
@@ -19,7 +19,7 @@ public class SchemaUpdate extends Entity {
 
     public final Id categoryId;
     public final Version prevVersion;
-    public Version nextVersion;
+    public final Version nextVersion;
     public final List<VersionedSMO> operations;
 
     private SchemaUpdate(Id id, Id categoryId, Version prevVersion, Version nextVersion, List<VersionedSMO> operations) {
@@ -35,15 +35,15 @@ public class SchemaUpdate extends Entity {
             null,
             categoryId,
             init.prevVersion(),
-            null,
+            init.prevVersion().generateNext(),
             init.operations()
         );
     }
 
-    public cz.matfyz.evolution.schema.SchemaCategoryUpdate toEvolution(SchemaCategoryContext context) {
-        return new cz.matfyz.evolution.schema.SchemaCategoryUpdate(
+    public SchemaCategoryUpdate toEvolution() {
+        return new SchemaCategoryUpdate(
             prevVersion,
-            operations.stream().map(operation -> operation.smo().toEvolution(context)).toList()
+            operations.stream().map(operation -> operation.smo().toEvolution()).toList()
         );
     }
 

@@ -12,11 +12,11 @@ import java.util.Set;
  */
 public class SchemaMorphism implements Morphism, Identified<Signature> {
     
-    private Signature signature;
+    private  final Signature signature;
     public final String label;
     private SchemaObject dom;
     private SchemaObject cod;
-    private Min min;
+    private final Min min;
 
     public final String iri;
     public final String pimIri;
@@ -122,6 +122,36 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         public Builder tags(Set<Tag> tags) {
             this.tags = tags;
             return this;
+        }
+
+    }
+
+    public static record DisconnectedSchemaMorphism(
+        Signature signature,
+        String label,
+        Key domKey,
+        Key codKey,
+        Min min,
+        String iri,
+        String pimIri,
+        Set<Tag> tags
+    ) {
+
+        public interface SchemaObjectProvider {
+            SchemaObject getObject(Key key);
+        }
+
+        public SchemaMorphism toSchemaMorphism(SchemaObjectProvider provider) {
+            return toSchemaMorphism(provider.getObject(codKey), provider.getObject(domKey));
+        }
+
+        public SchemaMorphism toSchemaMorphism(SchemaObject dom, SchemaObject cod) {
+            return new SchemaMorphism.Builder()
+                .label(this.label)
+                .iri(this.iri)
+                .pimIri(this.pimIri)
+                .tags(this.tags != null ? this.tags : Set.of())
+                .fromArguments(signature, dom, cod, min);
         }
 
     }

@@ -1,16 +1,18 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInfo;
+import cz.matfyz.server.repository.DataSourceRepository;
+import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
+import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.service.ActionService;
-import cz.matfyz.server.service.DataSourceService;
-import cz.matfyz.server.service.LogicalModelService;
 
 import java.util.List;
 
@@ -36,10 +38,10 @@ public class ActionController {
     private ActionService service;
 
     @Autowired
-    private LogicalModelService logicalModelService;
+    private LogicalModelRepository logicalModelRepository;
 
     @Autowired
-    private DataSourceService dataSourceService;
+    private DataSourceRepository dataSourceRepository;
 
     @GetMapping("/schema-categories/{categoryId}/actions")
     public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {
@@ -79,16 +81,19 @@ public class ActionController {
     // TODO switch to pattern matching when available.
     ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
         if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
-            final var logicalModel = logicalModelService.find(modelToCategoryPayload.logicalModelId()).toInfo();
+            final var logicalModel = logicalModelRepository.find(modelToCategoryPayload.logicalModelId()).toInfo();
             return new ModelToCategoryPayloadDetail(logicalModel);
         }
         if (payload instanceof CategoryToModelPayload categoryToModelPayload) {
-            final var logicalModel = logicalModelService.find(categoryToModelPayload.logicalModelId()).toInfo();
+            final var logicalModel = logicalModelRepository.find(categoryToModelPayload.logicalModelId()).toInfo();
             return new CategoryToModelPayloadDetail(logicalModel);
         }
         if (payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload) {
-            final var dataSource = dataSourceService.find(jsonLdToCategoryPayload.dataSourceId());
+            final var dataSource = dataSourceRepository.find(jsonLdToCategoryPayload.dataSourceId());
             return new JsonLdToCategoryPayloadDetail(dataSource);
+        }
+        if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
+            return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
         
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
@@ -110,6 +115,7 @@ public class ActionController {
         @JsonSubTypes.Type(value = CategoryToModelPayloadDetail.class, name = "CategoryToModel"),
         @JsonSubTypes.Type(value = ModelToCategoryPayloadDetail.class, name = "ModelToCategory"),
         @JsonSubTypes.Type(value = JsonLdToCategoryPayloadDetail.class, name = "JsonLdToCategory"),
+        @JsonSubTypes.Type(value = UpdateSchemaPayloadDetail.class, name = "UpdateSchema"),
     })
     interface ActionPayloadDetail {}
 
@@ -123,6 +129,11 @@ public class ActionController {
 
     static record JsonLdToCategoryPayloadDetail(
         DataSource dataSource
+    ) implements ActionPayloadDetail {}
+
+    static record UpdateSchemaPayloadDetail(
+        Version prevVersion,
+        Version nextVersion
     ) implements ActionPayloadDetail {}
 
 }

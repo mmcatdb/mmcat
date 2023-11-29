@@ -36,8 +36,7 @@ public class Job extends Entity {
     /** The job contains all information needed to execute it. */
     public final ActionPayload payload;
     public State state;
-    @Nullable
-    public Serializable data;
+    public @Nullable Serializable data;
     public final Date createdAt;
 
     private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state, Serializable data) {

@@ -1,7 +1,6 @@
 package cz.matfyz.server.entity.evolution;
 
 import cz.matfyz.core.schema.Key;
-import cz.matfyz.server.builder.SchemaCategoryContext;
 import cz.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
 
@@ -23,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public interface SchemaModificationOperation {
 
-    public cz.matfyz.evolution.schema.SchemaModificationOperation toEvolution(SchemaCategoryContext context);
+    public cz.matfyz.evolution.schema.SchemaModificationOperation toEvolution();
 
     public static record CreateObject(
         Key key,
@@ -31,8 +30,10 @@ public interface SchemaModificationOperation {
     ) implements SchemaModificationOperation {
 
         @Override
-        public cz.matfyz.evolution.schema.CreateObject toEvolution(SchemaCategoryContext context) {
-            return new cz.matfyz.evolution.schema.CreateObject(object.toSchemaObject(key, context));
+        public cz.matfyz.evolution.schema.CreateObject toEvolution() {
+            return new cz.matfyz.evolution.schema.CreateObject(
+                object.toSchemaObject(key)
+            );
         }
 
     }
@@ -43,8 +44,10 @@ public interface SchemaModificationOperation {
     ) implements SchemaModificationOperation {
 
         @Override
-        public cz.matfyz.evolution.schema.DeleteObject toEvolution(SchemaCategoryContext context) {
-            return new cz.matfyz.evolution.schema.DeleteObject(key);
+        public cz.matfyz.evolution.schema.DeleteObject toEvolution() {
+            return new cz.matfyz.evolution.schema.DeleteObject(
+                object.toSchemaObject(key)
+            );
         }
 
     }
@@ -56,8 +59,11 @@ public interface SchemaModificationOperation {
     ) implements SchemaModificationOperation {
 
         @Override
-        public cz.matfyz.evolution.schema.EditObject toEvolution(SchemaCategoryContext context) {
-            return new cz.matfyz.evolution.schema.EditObject(newObject.toSchemaObject(key, context));
+        public cz.matfyz.evolution.schema.EditObject toEvolution() {
+            return new cz.matfyz.evolution.schema.EditObject(
+                newObject.toSchemaObject(key),
+                oldObject.toSchemaObject(key)
+            );
         }
 
     }
@@ -67,11 +73,9 @@ public interface SchemaModificationOperation {
     ) implements SchemaModificationOperation {
 
         @Override
-        public cz.matfyz.evolution.schema.CreateMorphism toEvolution(SchemaCategoryContext context) {
+        public cz.matfyz.evolution.schema.CreateMorphism toEvolution() {
             return new cz.matfyz.evolution.schema.CreateMorphism(
-                morphism.toSchemaMorphism(context),
-                morphism.domKey(),
-                morphism.codKey()
+                morphism.toDisconnectedSchemaMorphism()
             );
         }
 
@@ -82,9 +86,9 @@ public interface SchemaModificationOperation {
     ) implements SchemaModificationOperation {
 
         @Override
-        public cz.matfyz.evolution.schema.DeleteMorphism toEvolution(SchemaCategoryContext context) {
+        public cz.matfyz.evolution.schema.DeleteMorphism toEvolution() {
             return new cz.matfyz.evolution.schema.DeleteMorphism(
-                morphism.signature()
+                morphism.toDisconnectedSchemaMorphism()
             );
         }
         
@@ -96,11 +100,10 @@ public interface SchemaModificationOperation {
     ) implements SchemaModificationOperation {
 
         @Override
-        public cz.matfyz.evolution.schema.EditMorphism toEvolution(SchemaCategoryContext context) {
+        public cz.matfyz.evolution.schema.EditMorphism toEvolution() {
             return new cz.matfyz.evolution.schema.EditMorphism(
-                newMorphism.toSchemaMorphism(context),
-                newMorphism.domKey(),
-                newMorphism.codKey()
+                newMorphism.toDisconnectedSchemaMorphism(),
+                oldMorphism.toDisconnectedSchemaMorphism()
             );
         }
 
@@ -111,7 +114,7 @@ public interface SchemaModificationOperation {
     ) implements SchemaModificationOperation {
 
         @Override
-        public cz.matfyz.evolution.schema.Composite toEvolution(SchemaCategoryContext context) {
+        public cz.matfyz.evolution.schema.Composite toEvolution() {
             return new cz.matfyz.evolution.schema.Composite(
                 name
             );

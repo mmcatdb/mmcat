@@ -4,14 +4,19 @@ import cz.matfyz.core.schema.SchemaCategory;
 
 public class Composite extends SchemaCategory.Editor implements SchemaModificationOperation {
 
-    final String name;
+    public final String name;
 
     public Composite(String name) {
         this.name = name;
     }
 
     @Override
-    public void apply(SchemaCategory category) {
+    public void up(SchemaCategory category) {
+        /* This function is intentionally empty. */
+    }
+
+    @Override
+    public void down(SchemaCategory category) {
         /* This function is intentionally empty. */
     }
 
