@@ -1,4 +1,4 @@
-package cz.matfyz.server.setup;
+package cz.matfyz.server.example.basic;
 
 import cz.matfyz.server.entity.database.Database;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;

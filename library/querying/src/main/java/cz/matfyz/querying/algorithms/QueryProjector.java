@@ -261,7 +261,7 @@ public class QueryProjector {
      * 
      * This system is designed to transform the data as fast as possible. We only have to create the steps once and then we can apply them to any amount of data.
      */
-    public static abstract class TransformationStep {
+    public abstract static class TransformationStep {
         private final List<TransformationStep> children = new ArrayList<>();
 
         /**

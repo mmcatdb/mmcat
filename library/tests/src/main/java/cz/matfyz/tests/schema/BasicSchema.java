@@ -2,6 +2,7 @@ package cz.matfyz.tests.schema;
 
 import cz.matfyz.core.category.Morphism.Min;
 import cz.matfyz.core.category.Morphism.Tag;
+import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.ObjectIds;
@@ -9,7 +10,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 
 public class BasicSchema {
 
-    public static final String schemaLabel = "basicSchema";
+    public static final String schemaLabel = "Basic Schema";
 
     // Keys
 
@@ -46,47 +47,47 @@ public class BasicSchema {
 
     // Signatures
 
-    public static final Signature orderToNumber = Signature.createBase(1);
-    public static final Signature tagToOrder = Signature.createBase(2);
+    public static final BaseSignature orderToNumber = Signature.createBase(1);
+    public static final BaseSignature tagToOrder = Signature.createBase(2);
 
-    public static final Signature orderToCustomer = Signature.createBase(3);
-    public static final Signature customerToName = Signature.createBase(4);
-    public static final Signature friendToCustomerA = Signature.createBase(5);
-    public static final Signature friendToCustomerB = Signature.createBase(6);
-    public static final Signature friendToSince = Signature.createBase(7);
+    public static final BaseSignature orderToCustomer = Signature.createBase(3);
+    public static final BaseSignature customerToName = Signature.createBase(4);
+    public static final BaseSignature friendToCustomerA = Signature.createBase(5);
+    public static final BaseSignature friendToCustomerB = Signature.createBase(6);
+    public static final BaseSignature friendToSince = Signature.createBase(7);
 
     public static final Signature orderToName = orderToCustomer.concatenate(customerToName);
     public static final Signature friendToNameA = friendToCustomerA.concatenate(customerToName);
     public static final Signature friendToNameB = friendToCustomerB.concatenate(customerToName);
 
-    public static final Signature orderToAddress = Signature.createBase(8);
-    public static final Signature addressToStreet = Signature.createBase(9);
-    public static final Signature addressToCity = Signature.createBase(10);
-    public static final Signature addressToZip = Signature.createBase(11);
+    public static final BaseSignature orderToAddress = Signature.createBase(8);
+    public static final BaseSignature addressToStreet = Signature.createBase(9);
+    public static final BaseSignature addressToCity = Signature.createBase(10);
+    public static final BaseSignature addressToZip = Signature.createBase(11);
 
-    public static final Signature itemToOrder = Signature.createBase(12);
-    public static final Signature itemToProduct = Signature.createBase(13);
-    public static final Signature itemToQuantity = Signature.createBase(14);
-    public static final Signature productToId = Signature.createBase(15);
-    public static final Signature productToLabel = Signature.createBase(16);
-    public static final Signature productToPrice = Signature.createBase(17);
+    public static final BaseSignature itemToOrder = Signature.createBase(12);
+    public static final BaseSignature itemToProduct = Signature.createBase(13);
+    public static final BaseSignature itemToQuantity = Signature.createBase(14);
+    public static final BaseSignature productToId = Signature.createBase(15);
+    public static final BaseSignature productToLabel = Signature.createBase(16);
+    public static final BaseSignature productToPrice = Signature.createBase(17);
 
     public static final Signature itemToNumber = itemToOrder.concatenate(orderToNumber);
     public static final Signature itemToId = itemToProduct.concatenate(productToId);
     public static final Signature itemToLabel = itemToProduct.concatenate(productToLabel);
     public static final Signature itemToPrice = itemToProduct.concatenate(productToPrice);
 
-    public static final Signature contactToOrder = Signature.createBase(18);
-    public static final Signature contactToValue = Signature.createBase(19);
-    public static final Signature contactToType = Signature.createBase(20);
+    public static final BaseSignature contactToOrder = Signature.createBase(18);
+    public static final BaseSignature contactToValue = Signature.createBase(19);
+    public static final BaseSignature contactToType = Signature.createBase(20);
 
     public static final Signature contactToNumber = contactToOrder.concatenate(orderToNumber);
 
-    public static final Signature noteToOrder = Signature.createBase(21);
-    public static final Signature noteToLocale = Signature.createBase(22);
-    public static final Signature noteToData = Signature.createBase(23);
-    public static final Signature dataToSubject = Signature.createBase(24);
-    public static final Signature dataToContent = Signature.createBase(25);
+    public static final BaseSignature noteToOrder = Signature.createBase(21);
+    public static final BaseSignature noteToLocale = Signature.createBase(22);
+    public static final BaseSignature noteToData = Signature.createBase(23);
+    public static final BaseSignature dataToSubject = Signature.createBase(24);
+    public static final BaseSignature dataToContent = Signature.createBase(25);
 
     public static final Signature noteToNumber = noteToOrder.concatenate(orderToNumber);
     

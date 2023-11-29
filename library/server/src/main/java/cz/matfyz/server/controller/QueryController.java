@@ -11,7 +11,6 @@ import cz.matfyz.server.service.QueryService;
 
 import java.util.List;
 
-import com.mongodb.lang.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;

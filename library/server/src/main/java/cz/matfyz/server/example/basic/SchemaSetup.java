@@ -1,4 +1,4 @@
-package cz.matfyz.server.setup;
+package cz.matfyz.server.example.basic;
 
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
@@ -42,7 +42,7 @@ public class SchemaSetup {
         // Order
 
         addObject(BasicSchema.order, 0, 0);
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.number, 0, -1);
             addMorphism(BasicSchema.orderToNumber);
         });
@@ -55,7 +55,7 @@ public class SchemaSetup {
 
         addObject(BasicSchema.customer, -2, 0);
         addMorphism(BasicSchema.orderToCustomer);
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.name, -2, -1);
             addMorphism(BasicSchema.customerToName);
         });
@@ -66,7 +66,7 @@ public class SchemaSetup {
         addMorphism(BasicSchema.friendToCustomerB);
         addIds(BasicSchema.friend);
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.since, -3, -1);
             addMorphism(BasicSchema.friendToSince);
         });
@@ -76,17 +76,17 @@ public class SchemaSetup {
         addObject(BasicSchema.address, -2, 1);
         addMorphism(BasicSchema.orderToAddress);
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.street, -3, 1);
             addMorphism(BasicSchema.addressToStreet);
         });
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.city, -3, 2);
             addMorphism(BasicSchema.addressToCity);
         });
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.zip, -2, 2);
             addMorphism(BasicSchema.addressToZip);
         });
@@ -94,32 +94,32 @@ public class SchemaSetup {
         // Item - Product
 
         addObject(BasicSchema.product, 2, 1);
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.id, 1, 2);
             addMorphism(BasicSchema.productToId);
         });
         addIds(BasicSchema.product);
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.label, 2, 2);
             addMorphism(BasicSchema.productToLabel);
         });
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.price, 3, 2);
             addMorphism(BasicSchema.productToPrice);
         });
 
         // Item
 
-        addComposite("addSet", () -> {
+        addComposite(ADD_SET, () -> {
             addObject(BasicSchema.item, 1, 1);
             addMorphism(BasicSchema.itemToOrder);
             addMorphism(BasicSchema.itemToProduct);
             addIds(BasicSchema.item);
         });
         
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.quantity, 1, 0);
             addMorphism(BasicSchema.itemToQuantity);
         });
@@ -128,7 +128,7 @@ public class SchemaSetup {
 
         addObject(BasicSchema.value, 0, 2);
 
-        addComposite("addMap", () -> {
+        addComposite(ADD_MAP, () -> {
             addObject(BasicSchema.type, -1, 2);
             addObject(BasicSchema.contact, 0, 1);
             addMorphism(BasicSchema.contactToType);
@@ -141,19 +141,19 @@ public class SchemaSetup {
 
         addObject(BasicSchema.data, 2, -1);
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.subject, 3, -1);
             addMorphism(BasicSchema.dataToSubject);
         });
 
-        addComposite("addProperty", () -> {
+        addComposite(ADD_PROPERTY, () -> {
             addObject(BasicSchema.content, 3, 0);
             addMorphism(BasicSchema.dataToContent);
         });
 
         // Note
 
-        addComposite("addMap", () -> {
+        addComposite(ADD_MAP, () -> {
             addObject(BasicSchema.locale, 2, 0);
             addObject(BasicSchema.note, 1, -1);
             addMorphism(BasicSchema.noteToLocale);
@@ -223,6 +223,10 @@ public class SchemaSetup {
         counter.prevLevel();
         operations.add(new VersionedSMO(counter.next(), new Composite(name)));
     }
+
+    private static final String ADD_PROPERTY = "addProperty";
+    private static final String ADD_SET = "addSet";
+    private static final String ADD_MAP = "addMap";
 
     private class VersionCounter {
 

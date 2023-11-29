@@ -115,7 +115,7 @@ public abstract class GraphUtils {
         List<T> sourceToRoot,
         // Root is the first element, target is the last.
         List<T> rootToTarget
-    ) {};
+    ) {}
 
     public static <T extends Tree<T>> TreePath<T> findPath(T source, T target) {
         return new TreePathFinder<T>().findPath(source, target);

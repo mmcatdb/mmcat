@@ -43,11 +43,11 @@ public class TestDatabase<TWrapper extends AbstractControlWrapper> {
     }
 
     public static TestDatabase<PostgreSQLControlWrapper> createPostgreSQL(PostgreSQLProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(DatabaseType.postgresql, new PostgreSQLControlWrapper(provider), schema, "setupPostgresql.sql");
+        return new TestDatabase<>(DatabaseType.postgresql, new PostgreSQLControlWrapper(provider), schema, "setupPostgresqlBasic.sql");
     }
 
     public static TestDatabase<MongoDBControlWrapper> createMongoDB(MongoDBProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(DatabaseType.mongodb, new MongoDBControlWrapper(provider), schema, "setupMongodb.js");
+        return new TestDatabase<>(DatabaseType.mongodb, new MongoDBControlWrapper(provider), schema, "setupMongodbBasic.js");
     }
 
     public static TestDatabase<Neo4jControlWrapper> createNeo4j(Neo4jProvider provider, SchemaCategory schema) {

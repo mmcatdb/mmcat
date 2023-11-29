@@ -1,4 +1,4 @@
-package cz.matfyz.server.setup;
+package cz.matfyz.server.example.basic;
 
 import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.server.configuration.SetupProperties;

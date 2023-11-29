@@ -32,10 +32,7 @@ public class LineStringBuilder {
     }
 
     private static String computeTabIndentationString(int level, String string) {
-        String is = "";
-        for (int i = 0; i < level; i++)
-            is += string;
-        return is;
+        return string.repeat(level);
     }
 
     public LineStringBuilder nextLine() {

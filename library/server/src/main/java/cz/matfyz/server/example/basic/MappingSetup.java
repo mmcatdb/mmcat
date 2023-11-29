@@ -1,4 +1,4 @@
-package cz.matfyz.server.setup;
+package cz.matfyz.server.example.basic;
 
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.mapping.MappingInfo;

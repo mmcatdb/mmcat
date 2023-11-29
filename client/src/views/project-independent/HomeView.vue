@@ -13,6 +13,13 @@ const DOCUMENTATION_URL = import.meta.env.VITE_DOCUMENTATION_URL;
 const avaliableCategories = ref<SchemaCategoryInfo[]>();
 const newCategoryLabel = ref('');
 
+const EXAMPLE_SCHEMAS = [
+    'basic',
+    'query-evolution',
+] as const;
+
+type ExampleSchema = typeof EXAMPLE_SCHEMAS[number];
+
 async function fetchCategories() {
     const result = await API.schemas.getAllCategoryInfos({});
     if (!result.status)
@@ -38,8 +45,8 @@ async function confirmNewCategory() {
     newCategoryLabel.value = '';
 }
 
-async function resetDatabase() {
-    rawAPI.POST('/reset-database');
+async function addExampleSchema(name: ExampleSchema) {
+    rawAPI.POST(`/example-schema/${name}`);
 }
 </script>
 
@@ -48,9 +55,6 @@ async function resetDatabase() {
     <p>
         A multi-model data modeling framework based on category theory.
     </p>
-    <Button :onclick="resetDatabase">
-        Reset database
-    </Button>
     <br />
     <p>
         Detailed instructions on how to use this tool can be found <a :href="DOCUMENTATION_URL">here</a>.
@@ -95,6 +99,20 @@ async function resetDatabase() {
             </div>
         </div>
     </div>
+    <template v-if="EXAMPLE_SCHEMAS.length > 0">
+        <h2 class="mt-3">
+            Add example schema category
+        </h2>
+        <div class="d-flex gap-3 py-2">
+            <Button
+                v-for="schema in EXAMPLE_SCHEMAS"
+                :key="schema"
+                :onclick="() => addExampleSchema(schema)"
+            >
+                {{ schema }}
+            </Button>
+        </div>
+    </template>
 </template>
 
 <style>

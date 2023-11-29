@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 /**
  * @author jachymb.bartik
  */
-public class DDLAlgorithmTests {
+class DDLAlgorithmTests {
 
     private static final SchemaCategory schema = BasicSchema.newSchemaCategory();
 
     @Test
-    public void basicTest() {
+    void basicTest() {
         new DDLAlgorithmTestBase(PostgreSQL.order(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -33,7 +33,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void structureTest() {
+    void structureTest() {
         new DDLAlgorithmTestBase(MongoDB.address(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -57,7 +57,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void simpleArrayTest() {
+    void simpleArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.tag(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -78,7 +78,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void complexArrayTest() {
+    void complexArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -109,7 +109,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void mapTest() {
+    void mapTest() {
         new DDLAlgorithmTestBase(MongoDB.contact(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -133,7 +133,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void syntheticPropertyTest() {
+    void syntheticPropertyTest() {
         new DDLAlgorithmTestBase(MongoDB.customer(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -154,7 +154,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void missingSimpleTest() {
+    void missingSimpleTest() {
         new DDLAlgorithmTestBase(MongoDB.address(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -178,7 +178,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void missingComplexTest() {
+    void missingComplexTest() {
         new DDLAlgorithmTestBase(MongoDB.address(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -200,7 +200,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void emptyArrayTest() {
+    void emptyArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -223,7 +223,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void complexMapTest() {
+    void complexMapTest() {
         new DDLAlgorithmTestBase(MongoDB.note(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -249,7 +249,7 @@ public class DDLAlgorithmTests {
     }
 
     @Test
-    public void missingArrayTest() {
+    void missingArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -282,7 +282,7 @@ public class DDLAlgorithmTests {
     // TODO see MTC
 
     // @Test
-    // public void selfIdentifierTest() {
+    // void selfIdentifierTest() {
     //     final var data = new TestData();
     //     final var schemaV3 = data.createDefaultV3SchemaCategory();
 

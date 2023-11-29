@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProjectionTests {
+class ProjectionTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionTests.class);
 
     @Test
-    public void onlyRootList() {
+    void onlyRootList() {
         new ProjectionTestBase()
             .input(
                 new QueryStructure("A[]", true)
@@ -38,7 +38,7 @@ public class ProjectionTests {
     }
 
     @Test
-    public void listWithMap() {
+    void listWithMap() {
         final var output = new TransformingQueryStructure("A[]", "A[]");
         output.children.add(new TransformingQueryStructure("B", "B"));
 
@@ -69,7 +69,7 @@ public class ProjectionTests {
     }
 
     @Test
-    public void rename() {
+    void rename() {
         final var output = new TransformingQueryStructure("A[]", "C[]");
         output.children.add(new TransformingQueryStructure("B", "D"));
         
@@ -100,7 +100,7 @@ public class ProjectionTests {
     }
 
     @Test
-    public void renameNestedLists() {
+    void renameNestedLists() {
         final var output = new TransformingQueryStructure("A[]", "E[]");
         final var b = new TransformingQueryStructure("B[]", "F[]");
         output.children.add(b);
@@ -175,7 +175,7 @@ public class ProjectionTests {
     }
 
     @Test
-    public void newRoot() {
+    void newRoot() {
         final var output = new TransformingQueryStructure("C", "C[]");
         output.children.add(new TransformingQueryStructure("D", "D"));
         output.children.add(new TransformingQueryStructure("E", "E"));
@@ -246,7 +246,7 @@ public class ProjectionTests {
     }
 
     @Test
-    public void newRootWithList() {
+    void newRootWithList() {
         final var output = new TransformingQueryStructure("C", "C[]");
         output.children.add(new TransformingQueryStructure("F", "F[]"));
 
@@ -297,7 +297,7 @@ public class ProjectionTests {
     }
 
     @Test
-    public void shortenList() {
+    void shortenList() {
         final var output = new TransformingQueryStructure("A[]", "A[]");
         final var b = new TransformingQueryStructure("B[]", "B[]");
         output.children.add(b);
@@ -368,7 +368,7 @@ public class ProjectionTests {
     }
 
     @Test
-    public void shortenListFromRoot() {
+    void shortenListFromRoot() {
         final var output = new TransformingQueryStructure("A[]", "A[]");
         output.children.add(new TransformingQueryStructure("D", "D[]"));
 
