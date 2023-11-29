@@ -2,10 +2,11 @@ package cz.matfyz.core.schema;
 
 import cz.matfyz.core.category.Signature;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +77,7 @@ public class SchemaGraph {
      */
     public boolean findIsDirectedTrees() {
         final var copy = copy();
-        final var queue = new LinkedList<>(copy.nodes.values());
+        final var queue = new ArrayDeque<>(copy.nodes.values());
         final var deletedNodes = new TreeSet<Node>();
 
         while (!queue.isEmpty()) {
@@ -92,7 +93,7 @@ public class SchemaGraph {
             deletedNodes.add(node);
             node.edges.forEach(edge -> {
                 edge.target.edges.remove(edge);
-                queue.push(edge.target);
+                queue.addFirst(edge.target);
             });
         }
 
@@ -121,13 +122,13 @@ public class SchemaGraph {
      */
     public Set<Node> findComponent(Node node) {
         final var output = new TreeSet<>(List.of(node));
-        final var notVisited = new LinkedList<>(List.of(node));
+        final var notVisited = new ArrayDeque<>(List.of(node));
         while (!notVisited.isEmpty()) {
             final var visitedNode = notVisited.poll();
             visitedNode.edges.forEach(edge -> {
                 var otherNode = edge.otherNode(visitedNode);
                 if (!output.contains(otherNode))
-                    notVisited.push(otherNode);
+                    notVisited.addFirst(otherNode);
                 output.add(otherNode);
             });
         }
@@ -200,11 +201,11 @@ public class SchemaGraph {
 
         private record Path(Node lastNode, Edge lastEdge, Path rest) {}
 
-        private LinkedList<Path> pathQueue;
+        private Deque<Path> pathQueue;
         private Set<Node> visited;
 
-        List<Signature> run() {
-            pathQueue = new LinkedList<Path>();
+        @Nullable List<Signature> run() {
+            pathQueue = new ArrayDeque<>();
             visited = new TreeSet<>();
             visitNode(new Path(source, null, null));
 

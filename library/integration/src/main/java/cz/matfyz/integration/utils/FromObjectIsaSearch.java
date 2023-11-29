@@ -7,9 +7,9 @@ import cz.matfyz.core.instance.InstanceMorphism;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.integration.exception.MorphismException;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -30,7 +30,7 @@ public class FromObjectIsaSearch {
         this.findFunction = findFunction;
     }
 
-    private final Deque<InstanceMorphism> queue = new LinkedList<>();
+    private final Deque<InstanceMorphism> queue = new ArrayDeque<>();
     private final List<InstanceMorphism> outputCandidates = new ArrayList<>();
 
     @Nullable

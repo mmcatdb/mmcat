@@ -3,6 +3,8 @@ package cz.matfyz.evolution.querying;
 import java.io.Serializable;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class QueryUpdateResult {
 
     public final String nextContent;
@@ -16,7 +18,7 @@ public class QueryUpdateResult {
     public static record QueryUpdateError(
         ErrorType type,
         String message,
-        Serializable data
+        @Nullable Serializable data
     ) {}
 
     public enum ErrorType {

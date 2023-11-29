@@ -76,7 +76,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         }
         
         // final String firstKind = kinds.values().stream().findFirst().orElseThrow(() -> QueryException.message("No tables are selected in FROM clause."));
-        if (projections.size() == 0)
+        if (projections.isEmpty())
             throw QueryException.message("No tables are selected in FROM clause.");
         
         final String kindName = projections.get(0).property().kind.mapping.kindName();

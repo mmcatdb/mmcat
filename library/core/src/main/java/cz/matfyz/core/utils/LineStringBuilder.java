@@ -1,6 +1,7 @@
 package cz.matfyz.core.utils;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 /**
  * @author jachymb.bartik
@@ -9,7 +10,7 @@ public class LineStringBuilder {
     
     private int indentationLevel;
     private final String indentationStringPerLevel;
-    private final Stack<String> stack = new Stack<>();
+    private final Deque<String> stack = new ArrayDeque<>();
 
     public LineStringBuilder(int indentationLevel, String indentationStringPerLevel) {
         this.indentationLevel = indentationLevel;
@@ -74,7 +75,7 @@ public class LineStringBuilder {
     public String toString() {
         final StringBuilder builder = new StringBuilder();
         
-        stack.stream().forEach(builder::append);
+        stack.descendingIterator().forEachRemaining(builder::append);
         final String fullString = builder.toString();
 
         // So that in the output, there are no whitespaces at the beginning of an empty line. This would make it much harder for string comparison.

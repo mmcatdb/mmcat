@@ -14,7 +14,7 @@ import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.WhereTriple;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -61,7 +61,7 @@ public class SchemaExtractor {
         newSchema = new SchemaCategory(schema.label);
         // The triples already contain only base signatures.
         final var morphismsToAdd = pattern.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
-        morphismQueue = new LinkedList<>(morphismsToAdd);
+        morphismQueue = new ArrayDeque<>(morphismsToAdd);
 
         // We have to use queue because the morphisms need to add objects which need to add their ids which consist of objects and morphisms ... so we have to break the chain somewhere.
         while (!morphismQueue.isEmpty())

@@ -17,7 +17,7 @@ public class DDLAlgorithmTests {
     @Test
     public void basicTest() {
         new DDLAlgorithmTestBase(PostgreSQL.order(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
             })
@@ -35,7 +35,7 @@ public class DDLAlgorithmTests {
     @Test
     public void structureTest() {
         new DDLAlgorithmTestBase(MongoDB.address(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addAddress(builder, 0, "0", "hodnotaA", "hodnotaB", "hodnotaC");
@@ -59,7 +59,7 @@ public class DDLAlgorithmTests {
     @Test
     public void simpleArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.tag(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addTag(builder, 0, new String[]{ "123", "456", "789" });
@@ -80,7 +80,7 @@ public class DDLAlgorithmTests {
     @Test
     public void complexArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 PostgreSQL.addProduct(builder, "123", "Clean Code", "125");
@@ -111,7 +111,7 @@ public class DDLAlgorithmTests {
     @Test
     public void mapTest() {
         new DDLAlgorithmTestBase(MongoDB.contact(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addContact(builder, 0, "email", "anna@seznam.cz");
@@ -135,7 +135,7 @@ public class DDLAlgorithmTests {
     @Test
     public void syntheticPropertyTest() {
         new DDLAlgorithmTestBase(MongoDB.customer(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addCustomer(builder, 0, "1");
@@ -156,7 +156,7 @@ public class DDLAlgorithmTests {
     @Test
     public void missingSimpleTest() {
         new DDLAlgorithmTestBase(MongoDB.address(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addAddress(builder, 0, "0", "hodnotaA", null, "hodnotaC");
@@ -180,7 +180,7 @@ public class DDLAlgorithmTests {
     @Test
     public void missingComplexTest() {
         new DDLAlgorithmTestBase(MongoDB.address(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
             })
@@ -202,7 +202,7 @@ public class DDLAlgorithmTests {
     @Test
     public void emptyArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
             })
@@ -225,7 +225,7 @@ public class DDLAlgorithmTests {
     @Test
     public void complexMapTest() {
         new DDLAlgorithmTestBase(MongoDB.note(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addNote(builder, 0, "cs-CZ", "0", "subject 1", "content cz");
@@ -251,7 +251,7 @@ public class DDLAlgorithmTests {
     @Test
     public void missingArrayTest() {
         new DDLAlgorithmTestBase(MongoDB.item(schema))
-            .instance((builder) -> {
+            .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 PostgreSQL.addProduct(builder, "123", null, "125");

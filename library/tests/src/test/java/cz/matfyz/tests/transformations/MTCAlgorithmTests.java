@@ -31,7 +31,7 @@ public class MTCAlgorithmTests {
                     "number": "o_200"
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
             })
@@ -58,7 +58,7 @@ public class MTCAlgorithmTests {
                     }
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addAddress(builder, 0, "0", "hodnotaA", "hodnotaB", "hodnotaC");
@@ -87,7 +87,7 @@ public class MTCAlgorithmTests {
                     ]
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addTag(builder, 0, new String[]{ "123", "456", "789" });
@@ -138,7 +138,7 @@ public class MTCAlgorithmTests {
                     ]
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 PostgreSQL.addProduct(builder, "123", "Clean Code", "125");
@@ -171,7 +171,7 @@ public class MTCAlgorithmTests {
                     }
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addContact(builder, 0, "email", "anna@seznam.cz");
@@ -198,7 +198,7 @@ public class MTCAlgorithmTests {
                     }
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addCustomer(builder, 0, "1");
@@ -226,7 +226,7 @@ public class MTCAlgorithmTests {
                     }
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addAddress(builder, 0, "0", "hodnotaA", null, "hodnotaC");
@@ -246,7 +246,7 @@ public class MTCAlgorithmTests {
                     "number": "o_200"
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
             })
@@ -265,7 +265,7 @@ public class MTCAlgorithmTests {
                     "items": []
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
             })
@@ -302,7 +302,7 @@ public class MTCAlgorithmTests {
                     }
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 MongoDB.addNote(builder, 0, "cs-CZ", "0", "subject 1", "content cz");
@@ -351,7 +351,7 @@ public class MTCAlgorithmTests {
                     ]
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 PostgreSQL.addProduct(builder, "123", null, "125");
@@ -414,7 +414,7 @@ public class MTCAlgorithmTests {
                     "quantity": 3
                 }]
             """)
-            .expected((builder) -> {
+            .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
                 PostgreSQL.addProduct(builder, "123", "Clean Code", "125");

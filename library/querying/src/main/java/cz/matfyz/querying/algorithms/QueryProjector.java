@@ -19,9 +19,10 @@ import cz.matfyz.querying.parsing.SelectTriple;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 public class QueryProjector {
 
@@ -132,11 +133,11 @@ public class QueryProjector {
         }
 
         private TransformationRoot run() {
-            final QueryStructure rootInSelection = GraphUtils.findDFS(inputStructure, (s) -> outputStructure.inputName.equals(s.name));
+            final QueryStructure rootInSelection = GraphUtils.findDFS(inputStructure, s -> outputStructure.inputName.equals(s.name));
 
             // TODO proper exception
             if (rootInSelection == null)
-                throw new UnsupportedOperationException("Root not found in the selection structure.");
+                throw new UnsupportedOperationException("Root not found in the selection structure.\n" + inputStructure + "\n" + outputStructure.toQueryStructure());
 
             final var root = new TransformationRoot();
             TransformationStep current = root;
@@ -221,8 +222,8 @@ public class QueryProjector {
             structure.children.forEach(childStructure -> {
                 var current = mapStep.addChild(new WriteToMap(childStructure.outputName));
 
-                final var parentInSelection = GraphUtils.findDFS(inputStructure, (s) -> s.name.equals(structure.inputName));
-                final var childInSelection = GraphUtils.findDFS(inputStructure, (s) -> s.name.equals(childStructure.inputName));
+                final var parentInSelection = GraphUtils.findDFS(inputStructure, s -> s.name.equals(structure.inputName));
+                final var childInSelection = GraphUtils.findDFS(inputStructure, s -> s.name.equals(childStructure.inputName));
                 if (childInSelection == null)
                     throw new UnsupportedOperationException("Term " + childStructure.inputName + " not found in the selection structure.");
 
@@ -240,9 +241,9 @@ public class QueryProjector {
     }
 
     public static class TransformationContext {
-        public final Stack<ResultNode> inputs = new Stack<>();
-        public final Stack<ResultNode> outputs = new Stack<>();
-        public final Stack<NodeBuilder> builders = new Stack<>();
+        public final Deque<ResultNode> inputs = new ArrayDeque<>();
+        public final Deque<ResultNode> outputs = new ArrayDeque<>();
+        public final Deque<NodeBuilder> builders = new ArrayDeque<>();
 
         public TransformationContext(ResultNode input) {
             inputs.push(input);

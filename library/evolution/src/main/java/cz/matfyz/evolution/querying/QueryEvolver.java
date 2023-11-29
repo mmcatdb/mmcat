@@ -3,6 +3,8 @@ package cz.matfyz.evolution.querying;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.evolution.querying.QueryUpdateResult.ErrorType;
+import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
 
 import java.util.List;
 
@@ -29,7 +31,9 @@ public class QueryEvolver {
     }
 
     private QueryUpdateResult innerRun(String prevContent) throws Exception {
-        return new QueryUpdateResult(prevContent, List.of());
+        return new QueryUpdateResult(prevContent, List.of(
+            new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null)
+        ));
     }
 
 }

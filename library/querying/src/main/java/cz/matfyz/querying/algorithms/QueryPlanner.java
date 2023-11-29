@@ -3,10 +3,11 @@ package cz.matfyz.querying.algorithms;
 import cz.matfyz.querying.core.MorphismColoring;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeSet;
 
 /**
@@ -44,7 +45,7 @@ public class QueryPlanner {
     ) {}
 
     private List<Set<KindPattern>> plans = new ArrayList<>();
-    private Stack<StackItem> stack = new Stack<>();
+    private Deque<StackItem> stack = new ArrayDeque<>();
 
     private void createQueryPlans() {
         final MorphismColoring initialColoring = MorphismColoring.create(allKinds);

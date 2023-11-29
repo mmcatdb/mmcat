@@ -14,9 +14,9 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.transformations.exception.InvalidStateException;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +45,7 @@ public class DMLAlgorithm {
     public List<AbstractStatement> algorithm() {
         InstanceObject instanceObject = category.getObject(mapping.rootObject());
         Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
-        Deque<DMLStackTriple> masterStack = new LinkedList<>();
+        Deque<DMLStackTriple> masterStack = new ArrayDeque<>();
         List<AbstractStatement> output = new ArrayList<>();
 
         for (DomainRow domainRow : domainRows) {

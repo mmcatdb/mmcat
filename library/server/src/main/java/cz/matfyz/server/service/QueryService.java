@@ -96,7 +96,7 @@ public class QueryService {
     }
 
     public QueryVersion updateQueryVersion(Id versionId, QueryVersionUpdate update) {
-        final var version = repository.find(versionId).version();
+        final var version = repository.findVersion(versionId);
         version.version = update.version();
         version.content = update.content();
         version.errors = update.errors();

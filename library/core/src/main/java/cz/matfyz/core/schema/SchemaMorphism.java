@@ -142,7 +142,7 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         }
 
         public SchemaMorphism toSchemaMorphism(SchemaObjectProvider provider) {
-            return toSchemaMorphism(provider.getObject(codKey), provider.getObject(domKey));
+            return toSchemaMorphism(provider.getObject(domKey), provider.getObject(codKey));
         }
 
         public SchemaMorphism toSchemaMorphism(SchemaObject dom, SchemaObject cod) {

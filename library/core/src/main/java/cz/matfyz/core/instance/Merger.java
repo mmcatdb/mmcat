@@ -3,7 +3,7 @@ package cz.matfyz.core.instance;
 import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.matfyz.core.instance.InstanceObject.ReferenceToRow;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -25,8 +25,8 @@ class Merger {
     private final Queue<ReferenceJob> referenceJobs;
 
     public Merger() {
-        this.jobs = new LinkedList<>();
-        this.referenceJobs = new LinkedList<>();
+        this.jobs = new ArrayDeque<>();
+        this.referenceJobs = new ArrayDeque<>();
     }
 
     private void processQueues() {

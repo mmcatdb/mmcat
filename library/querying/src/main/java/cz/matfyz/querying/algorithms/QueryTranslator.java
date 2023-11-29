@@ -28,8 +28,9 @@ import cz.matfyz.querying.parsing.ValueFilter;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 /**
  * This class translates a query tree to a query for a specific database.
@@ -106,15 +107,15 @@ public class QueryTranslator implements QueryVisitor<Void> {
         // TODO this is weird, because it's happening for each kind - meaning that the last one overrides all the previous ones
         // wrapper.defineRoot(kind.root.schemaObject, kind.root.term.getIdentifier());
 
-        final Stack<StackItem> stack = new Stack<>();
-        stack.add(new StackItem(kind.root, Signature.createEmpty()));
+        final Deque<StackItem> stack = new ArrayDeque<>();
+        stack.push(new StackItem(kind.root, Signature.createEmpty()));
         while (!stack.isEmpty())
             processTopOfStack(kind, stack.pop(), stack);
     }
 
-    private void processTopOfStack(KindPattern kind, StackItem item, Stack<StackItem> stack) {
+    private void processTopOfStack(KindPattern kind, StackItem item, Deque<StackItem> stack) {
         if (!item.object.isTerminal()) {
-            item.object.children().forEach(child -> stack.add(new StackItem(child, item.path.concatenate(child.signatureFromParent()))));
+            item.object.children().forEach(child -> stack.push(new StackItem(child, item.path.concatenate(child.signatureFromParent()))));
             return;
         }
         

@@ -62,7 +62,8 @@ public class DataSourceRepository {
                     data_source.json_value as json_value
                 FROM data_source
                 JOIN job on job.json_value->'payload'->>'dataSourceId' = data_source.id::text
-                WHERE job.schema_category_id = ?
+                JOIN run on job.run_id = run.id
+                WHERE run.schema_category_id = ?
                 ORDER BY data_source.id;
                 """);
             setId(statement, 1, categoryId);

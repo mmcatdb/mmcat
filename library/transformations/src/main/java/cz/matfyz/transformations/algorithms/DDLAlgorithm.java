@@ -15,8 +15,8 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -44,7 +44,7 @@ public class DDLAlgorithm {
         wrapper.setKindName(mapping.kindName());
         
         if (!wrapper.isSchemaLess()) {
-            Deque<StackElement> masterStack = new LinkedList<>();
+            Deque<StackElement> masterStack = new ArrayDeque<>();
             addSubpathsToStack(masterStack, mapping.accessPath(), Set.of(AbstractDDLWrapper.EMPTY_NAME));
 
             while (!masterStack.isEmpty())
@@ -56,7 +56,7 @@ public class DDLAlgorithm {
 
     private void addSubpathsToStack(Deque<StackElement> masterStack, ComplexProperty path, Set<String> names) {
         for (AccessPath subpath : path.subpaths())
-            masterStack.add(new StackElement(names, subpath));
+            masterStack.push(new StackElement(names, subpath));
     }
     
     private void processTopOfStack(Deque<StackElement> masterStack) {

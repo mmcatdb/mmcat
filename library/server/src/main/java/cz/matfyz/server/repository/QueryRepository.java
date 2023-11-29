@@ -117,6 +117,26 @@ public class QueryRepository {
         });
     }
 
+    public QueryVersion findVersion(Id versionId) {
+        return db.get((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    query_version.query_id AS query_id,
+                    query_version.json_value AS json_value
+                FROM query_version
+                WHERE query_version.id = ?
+                """);
+            setId(statement, 1, versionId);
+            final var resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                final var queryId = getId(resultSet, "query_id");
+                final var jsonValue = resultSet.getString("json_value");
+                output.set(QueryVersion.fromJsonValue(versionId, queryId, jsonValue));
+            }
+        });
+    }
+
     public List<QueryVersion> findAllVersionsByQuery(Id queryId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
@@ -191,19 +211,6 @@ public class QueryRepository {
                 WHERE query_id = ?;
                 """);
             setId(statement, 1, queryId);
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
-        });
-    }
-
-    public boolean deleteQueryVersion(Id id) {
-        return db.getBoolean((connection, output) -> {
-            final var statement = connection.prepareStatement("""
-                DELETE FROM query_version
-                WHERE id = ?;
-                """);
-            setId(statement, 1, id);
 
             final int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);

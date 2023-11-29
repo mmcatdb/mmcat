@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { QueryVersion } from '@/types/query';
+import { ErrorType, QueryVersion } from '@/types/query';
 import TextArea from '@/components/input/TextArea.vue';
 import VersionDisplay from '../VersionDisplay.vue';
 import { useSchemaCategoryInfo } from '@/utils/injects';
@@ -9,6 +9,8 @@ import OpenCloseToggle from '@/components/common/OpenCloseToggle.vue';
 import type { QueryResult } from '@/utils/api/routes/queries';
 import type { Result } from '@/types/api/result';
 import QueryResultDisplay from './QueryResultDisplay.vue';
+import QueryUpdateErrorDisplay from './QueryUpdateErrorDisplay.vue';
+import QueryUpdateErrorBadge from './QueryUpdateErrorBadge.vue';
 
 type QueryDisplayProps = {
     version: QueryVersion;
@@ -24,27 +26,27 @@ const emit = defineEmits<{
     (e: 'deleteQuery'): void;
 }>();
 
-enum State { Display, Editing, Fetching }
-
 const content = ref(props.version.content);
 const errors = ref(props.version.errors);
-const state = ref(State.Display);
+const uniqueErrors = computed(() => {
+    const output = new Map<ErrorType, number>();
+    for (const error of errors.value)
+        output.set(error.type, (output.get(error.type) ?? 0) + 1);
+    return [ ...output.entries() ].map(([ type, count ]) => ({ type, count }));
+});
 
 const isVersionOld = computed(() => props.version.version !== categoryInfo.value.versionId);
 
-function cancelEditing() {
-    state.value = State.Display;
-    content.value = props.version.content;
-}
+const isFetching = ref(false);
 
 async function saveChanges() {
-    state.value = State.Fetching;
+    isFetching.value = true;
     const result = await API.queries.updateQueryVersion({ versionId: props.version.id }, {
         version: categoryInfo.value.versionId,
         content: content.value,
         errors: errors.value,
     });
-    state.value = State.Display;
+    isFetching.value = false;
     if (!result.status)
         return;
 
@@ -53,6 +55,7 @@ async function saveChanges() {
 }
 
 const isOpened = ref(props.defaultIsOpened);
+const isChanged = computed(() => content.value !== props.version.content || errors.value.length !== props.version.errors.length);
 
 const queryResult = ref(props.defaultResult);
 const isExecuting = ref(false);
@@ -75,7 +78,7 @@ async function deleteQuery() {
         <div class="d-flex align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-baseline gap-3">
                 <h3 class="m-0">
-                    {{ props.version.query.label }}
+                    {{ props.version.query.label }}{{ isChanged ? '*' : '' }}
                 </h3>
                 <span>
                     v.
@@ -87,30 +90,14 @@ async function deleteQuery() {
             </div>
             <div class="d-flex align-items-center gap-3">
                 <template v-if="isOpened">
-                    <template v-if="isVersionOld">
-                        <template v-if="state === State.Display">
-                            <button
-                                :disabled="isExecuting"
-                                @click="() => state = State.Editing"
-                            >
-                                Update
-                            </button>
-                        </template>
-                        <template v-else>
-                            <button
-                                :disabled="state === State.Fetching || isExecuting"
-                                @click="saveChanges"
-                            >
-                                Save
-                            </button>
-                            <button
-                                :disabled="state === State.Fetching || isExecuting"
-                                @click="cancelEditing"
-                            >
-                                Cancel
-                            </button>
-                        </template>
-                    </template>
+                    <button
+                        v-if="isChanged"
+                        :disabled="isExecuting || isFetching"
+                        class="primary"
+                        @click="saveChanges"
+                    >
+                        Save
+                    </button>
                     <button
                         :disabled="isExecuting"
                         @click="deleteQuery"
@@ -124,14 +111,27 @@ async function deleteQuery() {
                         Execute
                     </button>
                 </template>
+                <template v-else>
+                    <QueryUpdateErrorBadge
+                        v-for="error in uniqueErrors"
+                        :key="error.type"
+                        :type="error.type"
+                        :count="error.count"
+                    />
+                </template>
                 <OpenCloseToggle v-model="isOpened" />
             </div>
         </div>
         <template v-if="isOpened">
+            <QueryUpdateErrorDisplay
+                v-for="(error, index) in errors"
+                :key="index"
+                :error="error"
+                @delete-error="errors = errors.filter((_, i) => i !== index)"
+            />
             <TextArea
                 v-model="content"
                 class="w-100"
-                :disabled="state !== State.Editing"
             />
             <QueryResultDisplay
                 :result="queryResult"

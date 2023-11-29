@@ -1,16 +1,16 @@
 package cz.matfyz.core.utils;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -33,11 +33,11 @@ public abstract class GraphUtils {
         public int compareTo(Component<N, E> other) {
             return id - other.id;
         }
-    };
+    }
 
     public static <N extends Comparable<N>, E extends Edge<N>> Collection<Component<N, E>> findComponents(Collection<E> edges) {
         final var finder = new ComponentFinder<N, E>();
-        edges.forEach(e -> finder.addEdge(e));
+        edges.forEach(finder::addEdge);
 
         return finder.getComponents();
     }
@@ -161,14 +161,14 @@ public abstract class GraphUtils {
     }
 
     @Nullable
-    public static <T extends Tree<T>> T findDFS(T tree, Function<T, Boolean> predicate) {
-        Stack<T> stack = new Stack<>();
+    public static <T extends Tree<T>> T findDFS(T tree, Predicate<T> predicate) {
+        Deque<T> stack = new ArrayDeque<>();
         stack.push(tree);
 
         while (!stack.isEmpty()) {
             final var current = stack.pop();
 
-            if (predicate.apply(current))
+            if (predicate.test(current))
                 return current;
 
             current.children().forEach(stack::push);
@@ -178,14 +178,14 @@ public abstract class GraphUtils {
     }
 
     @Nullable
-    public static <T extends Tree<T>> T findBFS(T tree, Function<T, Boolean> predicate) {
-        Queue<T> queue = new LinkedList<>();
+    public static <T extends Tree<T>> T findBFS(T tree, Predicate<T> predicate) {
+        Queue<T> queue = new ArrayDeque<>();
         queue.add(tree);
 
         while (!queue.isEmpty()) {
             final var current = queue.poll();
 
-            if (predicate.apply(current))
+            if (predicate.test(current))
                 return current;
 
             current.children().forEach(queue::add);
@@ -227,7 +227,7 @@ public abstract class GraphUtils {
             }
 
             while (nodesAtCurrentDepth.size() > 1) {
-                final var parents = nodesAtCurrentDepth.stream().map(node -> node.parent()).toList();
+                final var parents = nodesAtCurrentDepth.stream().map(Tree::parent).toList();
                 nodesAtCurrentDepth = new TreeSet<>(parents);
             }
 

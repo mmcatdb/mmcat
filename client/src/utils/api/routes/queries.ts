@@ -1,5 +1,5 @@
 import type { Empty, StringLike } from '@/types/api/routes';
-import { DELETE, GET, POST } from '../routeFunctions';
+import { DELETE, GET, POST, PUT } from '../routeFunctions';
 import type { Id } from '@/types/id';
 import type { QueryInit, QueryVersionFromServer, QueryVersionUpdate, QueryWithVersionFromServer, QueryWithVersionsFromServer } from '@/types/query';
 
@@ -31,7 +31,7 @@ const queries = {
     deleteQuery: DELETE<{ queryId: StringLike }, void>(
         u => `/queries/${u.queryId}`,
     ),
-    updateQueryVersion: POST<{ versionId: StringLike }, QueryVersionFromServer, QueryVersionUpdate>(
+    updateQueryVersion: PUT<{ versionId: StringLike }, QueryVersionFromServer, QueryVersionUpdate>(
         u => `/query-versions/${u.versionId}`,
     ),
 };

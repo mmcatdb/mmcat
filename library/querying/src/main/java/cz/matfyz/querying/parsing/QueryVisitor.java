@@ -10,10 +10,11 @@ import cz.matfyz.querying.parsing.WhereClause.Type;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatBaseVisitor;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatParser;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -28,7 +29,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     private QueryContext queryContext;
-    private Stack<VariableBuilder> variableBuilders = new Stack<>();
+    private Deque<VariableBuilder> variableBuilders = new ArrayDeque<>();
 
     @Override
     public Query visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
@@ -133,7 +134,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
             throw GeneralException.message("Variable expected in term " + ctx.varOrTerm().start);
 
         final Variable subject = visitVar_(variableNode);
-        final MorphismsList propertyList = visitPropertyListNotEmpty(ctx.propertyListNotEmpty());;
+        final MorphismsList propertyList = visitPropertyListNotEmpty(ctx.propertyListNotEmpty());
 
         final var triples = propertyList.morphisms.stream().map(m -> new CommonTriple(subject, m.morphism(), m.term())).toList();
 

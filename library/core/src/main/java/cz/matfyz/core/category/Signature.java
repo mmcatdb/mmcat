@@ -5,10 +5,11 @@ import cz.matfyz.core.utils.ArrayUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Deque;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -238,9 +239,9 @@ public class Signature implements Serializable, Comparable<Signature> {
     }
 
     public Signature traverseAlong(Signature path) {
-        final var output = new LinkedList<Integer>();
+        final Deque<Integer> output = new ArrayDeque<>();
         for (final var id : ids)
-            output.add(id);
+            output.addLast(id);
 
         for (final var pathId : path.ids) {
             if (output.isEmpty() || pathId != output.getFirst())

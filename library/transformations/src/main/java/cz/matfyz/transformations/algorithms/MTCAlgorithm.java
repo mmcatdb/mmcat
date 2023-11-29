@@ -18,10 +18,10 @@ import cz.matfyz.core.record.SimpleValueRecord;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class MTCAlgorithm {
     private Deque<StackTriple> createStackWithObject(SchemaObject object, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         InstanceObject instanceObject = category.getObject(object);
         SuperIdWithValues superId = fetchSuperId(object.superId(), rootRecord);
-        Deque<StackTriple> masterStack = new LinkedList<>();
+        Deque<StackTriple> masterStack = new ArrayDeque<>();
         
         DomainRow row = instanceObject.getOrCreateRow(superId);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
