@@ -86,7 +86,7 @@ public class Schema {
         return new Schema()
             .addCustomer()
             .addProduct()
-            .addOrder1()
+            .addOrders()
             .build();
     }
 
@@ -97,7 +97,7 @@ public class Schema {
         return new Schema()
             .addCustomer()
             .addProduct()
-            .addOrder2()
+            .addOrder()
             .addItem()
             .addOrdered()
             .build();
@@ -134,7 +134,7 @@ public class Schema {
         return this;
     }
 
-    private Schema addOrder1() {
+    private Schema addOrders() {
         builder.object(order, "Order", new ObjectIds(orderToOrderId, orderToProductId));
         builder.object(orderId, "oid", ObjectIds.createValue());
         builder.object(street, "street", ObjectIds.createValue());
@@ -156,7 +156,7 @@ public class Schema {
         return this;
     }
 
-    private Schema addOrder2() {
+    private Schema addOrder() {
         builder.object(order, "Order", new ObjectIds(orderToOrderId));
         builder.object(orderId, "oid", ObjectIds.createValue());
         builder.object(street, "street", ObjectIds.createValue());

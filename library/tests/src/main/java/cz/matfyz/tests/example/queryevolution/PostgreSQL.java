@@ -14,8 +14,8 @@ public abstract class PostgreSQL {
     public static final String knowsKind = "knows";
     public static final String productKind = "product";
 
-    public static final String order1Kind = "order1";
-    public static final String order2Kind = "order2";
+    public static final String ordersKind = "orders";
+    public static final String orderKind = "order";
     public static final String orderedKind = "ordered";
     public static final String itemKind = "item";
 
@@ -83,10 +83,10 @@ public abstract class PostgreSQL {
         builder.morphism(Schema.productToProductPrice, product, builder.valueObject(productPriceValue, Schema.productPrice));
     }
 
-    public static TestMapping order1(SchemaCategory schema) {
+    public static TestMapping orders(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,
-            order1Kind,
+            ordersKind,
             () -> ComplexProperty.createRoot(
                 new SimpleProperty("id", Schema.orderToCustomerId),
                 new SimpleProperty("pid", Schema.orderToProductId),
@@ -100,7 +100,7 @@ public abstract class PostgreSQL {
         );
     }
 
-    public static void addOrder1(InstanceBuilder builder, int customerIndex, int productIndex, String orderIdValue, String orderPriceValue, String quantityValue, String streetValue, String cityValue, String postCodeValue) {
+    public static void addOrders(InstanceBuilder builder, int customerIndex, int productIndex, String orderIdValue, String orderPriceValue, String quantityValue, String streetValue, String cityValue, String postCodeValue) {
         final var customer = builder.getRow(Schema.customer, customerIndex);
         final var product = builder.getRow(Schema.product, productIndex);
 
@@ -119,10 +119,10 @@ public abstract class PostgreSQL {
         builder.morphism(Schema.orderToPostCode, order, builder.valueObject(postCodeValue, Schema.postCode));
     }
 
-    public static TestMapping order2(SchemaCategory schema) {
+    public static TestMapping order(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,
-            order2Kind,
+            orderKind,
             () -> ComplexProperty.createRoot(
                 new SimpleProperty("oid", Schema.orderToOrderId),
                 new SimpleProperty("street", Schema.orderToStreet),
@@ -132,7 +132,7 @@ public abstract class PostgreSQL {
         );
     }
 
-    public static void addOrder2(InstanceBuilder builder, String orderIdValue, String streetValue, String cityValue, String postCodeValue) {
+    public static void addOrder(InstanceBuilder builder, String orderIdValue, String streetValue, String cityValue, String postCodeValue) {
         final var order = builder.value(Schema.orderToOrderId, orderIdValue).object(Schema.order);
         
         builder.morphism(Schema.orderToStreet, order, builder.valueObject(streetValue, Schema.street));

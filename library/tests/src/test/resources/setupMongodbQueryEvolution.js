@@ -1,6 +1,6 @@
 db.dropDatabase();
 
-db.order1.insertMany([
+db.orders.insertMany([
     {
         _id: '2023001', 
         customer: {
@@ -30,7 +30,7 @@ db.order1.insertMany([
     },  
 ]);
 
-db.order2.insertMany([
+db.order.insertMany([
     {
         _id: '2023001', 
         customer: { id: '1', name: 'Mary', surname: 'Smith' },

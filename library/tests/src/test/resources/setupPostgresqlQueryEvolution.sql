@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS "ordered";
 DROP TABLE IF EXISTS "items";
-DROP TABLE IF EXISTS "order2";
-DROP TABLE IF EXISTS "order1";
+DROP TABLE IF EXISTS "order";
+DROP TABLE IF EXISTS "orders";
 DROP TABLE IF EXISTS "knows";
 DROP TABLE IF EXISTS "customer";
 DROP TABLE IF EXISTS "product";
@@ -37,7 +37,7 @@ VALUES
     ('1', '2'),
     ('1', '3');
 
-CREATE TABLE "order1"(
+CREATE TABLE "orders"(
     "id" TEXT REFERENCES "customer",
     "pid" TEXT REFERENCES "product",
     "oid" TEXT,
@@ -48,26 +48,26 @@ CREATE TABLE "order1"(
     "postCode" TEXT,
     PRIMARY KEY ("pid", "oid")
 );
-INSERT INTO "order1" ("id", "pid", "oid", "price", "quantity", "street", "city", "postCode")
+INSERT INTO "orders" ("id", "pid", "oid", "price", "quantity", "street", "city", "postCode")
 VALUES
     ('1', 'P5', '2023001', '350', '1', 'Ke Karlovu', 'Prague', '110 00'),
     ('1', 'P7', '2023001', '250', '1', 'Ke Karlovu', 'Prague', '110 00'),
     ('2', 'P7', '2023002', '275', '2', 'Technická', 'Prague', '162 00');
 
-CREATE TABLE "order2"(
+CREATE TABLE "order"(
     "oid" TEXT PRIMARY KEY,
     "street" TEXT,
     "city" TEXT,
     "postCode" TEXT
 );
-INSERT INTO "order2" ("oid", "street", "city", "postCode")
+INSERT INTO "order" ("oid", "street", "city", "postCode")
 VALUES
     ('2023001', 'Ke Karlovu', 'Prague', '110 00'),
     ('2023002', 'Technická', 'Prague', '162 00');
 
 CREATE TABLE "items"(
     "pid" TEXT REFERENCES "product",
-    "oid" TEXT REFERENCES "order2",
+    "oid" TEXT REFERENCES "order",
     "price" TEXT,
     "quantity" TEXT,
     PRIMARY KEY ("pid", "oid")
@@ -80,7 +80,7 @@ VALUES
 
 CREATE TABLE "ordered"(
     "id" TEXT REFERENCES "customer",
-    "oid" TEXT REFERENCES "order2",
+    "oid" TEXT REFERENCES "order",
     PRIMARY KEY ("id", "oid")
 );
 INSERT INTO "ordered" ("id", "oid")
