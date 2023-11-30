@@ -46,7 +46,8 @@ async function confirmNewCategory() {
 }
 
 async function addExampleSchema(name: ExampleSchema) {
-    rawAPI.POST(`/example-schema/${name}`);
+    await rawAPI.POST(`/example-schema/${name}`);
+    fetchCategories();
 }
 </script>
 
@@ -104,13 +105,13 @@ async function addExampleSchema(name: ExampleSchema) {
             Add example schema category
         </h2>
         <div class="d-flex gap-3 py-2">
-            <Button
+            <button
                 v-for="schema in EXAMPLE_SCHEMAS"
                 :key="schema"
                 :onclick="() => addExampleSchema(schema)"
             >
                 {{ schema }}
-            </Button>
+            </button>
         </div>
     </template>
 </template>

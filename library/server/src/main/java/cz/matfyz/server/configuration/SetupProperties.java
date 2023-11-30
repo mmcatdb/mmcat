@@ -14,9 +14,11 @@ public class SetupProperties {
     private String postgresqlPort;
     private String mongodbPort;
     private String neo4jPort;
-    private String database;
     private String username;
     private String password;
+
+    private String basicDatabase;
+    private String queryEvolutionDatabase;
 
     public Boolean isInDocker() {
         return isInDocker;
@@ -66,12 +68,20 @@ public class SetupProperties {
         this.password = password;
     }
 
-    public String database() {
-        return database;
+    public String basicDatabase() {
+        return basicDatabase;
     }
 
-    public void setDatabase(String database) {
-        this.database = database;
+    public void setBasicDatabase(String basicDatabase) {
+        this.basicDatabase = basicDatabase;
+    }
+
+    public String queryEvolutionDatabase() {
+        return queryEvolutionDatabase;
+    }
+
+    public void setQueryEvolutionDatabase(String queryEvolutionDatabase) {
+        this.queryEvolutionDatabase = queryEvolutionDatabase;
     }
 
 }

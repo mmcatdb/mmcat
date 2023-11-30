@@ -3,9 +3,9 @@ package cz.matfyz.tests.transformations;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.database.BasicDatabases;
-import cz.matfyz.tests.database.TestDatabase;
-import cz.matfyz.tests.mapping.PostgreSQL;
+import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.PostgreSQL;
+import cz.matfyz.tests.example.common.TestDatabase;
 import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +20,7 @@ public class PostgreSQLTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLTests.class);
 
-    private static final BasicDatabases databases = new BasicDatabases();
+    private static final Databases databases = new Databases();
     private static final SchemaCategory schema = databases.schema;
     private static final TestDatabase<PostgreSQLControlWrapper> database = databases.postgreSQL();
 

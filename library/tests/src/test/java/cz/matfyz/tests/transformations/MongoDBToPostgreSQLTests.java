@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.database.BasicDatabases;
-import cz.matfyz.tests.mapping.PostgreSQL;
+import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.PostgreSQL;
 import cz.matfyz.wrapperpostgresql.PostgreSQLDDLWrapper;
 import cz.matfyz.wrapperpostgresql.PostgreSQLDMLWrapper;
 
@@ -23,7 +23,7 @@ public class MongoDBToPostgreSQLTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToPostgreSQLTests.class);
 
-    private static final BasicDatabases databases = new BasicDatabases();
+    private static final Databases databases = new Databases();
     private static final SchemaCategory schema = databases.schema;
 
     @BeforeAll

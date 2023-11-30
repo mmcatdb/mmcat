@@ -43,7 +43,7 @@ export class Edge {
     }
 
     private constructor(
-        public schemaMorphism: SchemaMorphism,
+        readonly schemaMorphism: SchemaMorphism,
         readonly domainNode: Node,
         readonly codomainNode: Node,
     ) {}
@@ -69,19 +69,6 @@ export class Edge {
 
         this.domainNode.removeNeighbor(this.codomainNode);
         this.codomainNode.removeNeighbor(this.domainNode);
-    }
-
-    update(schemaMorphism: SchemaMorphism) {
-        this.schemaMorphism = schemaMorphism;
-        this.edge.data('source', this.schemaMorphism.domKey.value);
-        this.edge.data('target', this.schemaMorphism.codKey.value);
-        this.edge.data('label', this.schemaMorphism.label);
-
-        if (!this.edge.inside()) {
-            this.edge.restore();
-            this.domainNode.addNeighbor(this, true);
-            this.codomainNode.addNeighbor(this, false);
-        }
     }
 
     get label(): string {
@@ -119,10 +106,12 @@ export class Edge {
     }
 }
 
+let lastEdgeId = 0;
+
 function createEdgeDefinition(morphism: SchemaMorphism, edge: Edge, classes = ''): ElementDefinition {
     return {
         data: {
-            id: 'm' + morphism.signature.value,
+            id: 'm' + lastEdgeId++,
             source: morphism.domKey.value,
             target: morphism.codKey.value,
             label: edge.label,

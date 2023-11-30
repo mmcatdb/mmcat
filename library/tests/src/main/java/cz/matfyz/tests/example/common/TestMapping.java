@@ -1,4 +1,4 @@
-package cz.matfyz.tests.mapping;
+package cz.matfyz.tests.example.common;
 
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
@@ -10,11 +10,11 @@ import java.util.Collection;
 
 public class TestMapping {
 
-    interface AccessPathCreator {
+    public interface AccessPathCreator {
         ComplexProperty create();
     }
 
-    interface PrimaryKeyCreator {
+    public interface PrimaryKeyCreator {
         Collection<Signature> create(SchemaCategory schema, Key rootKey);
     }
 
@@ -55,43 +55,5 @@ public class TestMapping {
 
         return mapping;
     }
-
-    // protected Collection<Signature> createPrimaryKey() {
-    //     return Mapping.defaultPrimaryKey(schema.getObject(rootKey));
-    // }
-
-    // private SchemaCategory schema;
-    // private Key rootKey;
-    // private String kindName;
-
-    // protected TestMapping(SchemaCategory schema, Key rootKey, String kindName) {
-    //     this.schema = schema;
-    //     this.rootKey = rootKey;
-    //     this.kindName = kindName;
-    // }
-    
-    // private ComplexProperty accessPath;
-
-    // public ComplexProperty accessPath() {
-    //     if (accessPath == null)
-    //         accessPath = createAccessPath();
-
-    //     return accessPath;
-    // }
-
-    // protected abstract ComplexProperty createAccessPath();
-
-    // private Mapping mapping;
-
-    // public Mapping mapping() {
-    //     if (mapping == null)
-    //         mapping = new Mapping(schema, rootKey, kindName, accessPath(), createPrimaryKey());
-
-    //     return mapping;
-    // }
-
-    // protected Collection<Signature> createPrimaryKey() {
-    //     return Mapping.defaultPrimaryKey(schema.getObject(rootKey));
-    // }
 
 }

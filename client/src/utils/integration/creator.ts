@@ -91,7 +91,7 @@ function createObjectIds(object: ImportedObject, schemaObject: SchemaObject, gra
         return undefined;
     }
 
-    const node = graph.getNode(schemaObject);
+    const node = graph.getNode(schemaObject.key);
     if (!node) {
         console.log(`Node not found for object ${schemaObject.label}`);
         return undefined;

@@ -8,7 +8,7 @@ import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
-import cz.matfyz.tests.database.TestDatabase;
+import cz.matfyz.tests.example.common.TestDatabase;
 
 import java.util.ArrayList;
 import java.util.List;

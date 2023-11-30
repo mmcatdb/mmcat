@@ -10,24 +10,35 @@ import java.util.Properties;
 /**
  * @author jachymb.bartik
  */
-public abstract class Config {
-    
+public class Config {
+
+    private final String prefix;
+
+    public Config() {
+        this.prefix = "";
+    }
+
+    public Config(String namespace) {
+        this.prefix = namespace + ".";
+    }
+
+    public static final Config GLOBAL = new Config();
+
     private static Properties properties;
 
-    private Config() {}
-
-    public static String get(String key) {
+    public String get(String key) {
         if (properties == null)
             loadProperties();
 
-        String property = properties.getProperty(key);
+        String prefixedKey = prefix + key;
+        String property = properties.getProperty(prefixedKey);
         if (property == null)
-            throw ConfigurationException.keyNotFound(key);
+            throw ConfigurationException.keyNotFound(prefixedKey);
 
         return property;
     }
 
-    public static boolean getBool(String key) {
+    public boolean getBool(String key) {
         return Boolean.parseBoolean(get(key));
     }
 

@@ -85,8 +85,8 @@ function deleteNonSignatureId() {
             <ValueRow label="Label:">
                 <input
                     v-model="label"
-                    :disabled="!isNew"
                 />
+                <!--  :disabled="!isNew"  -->
             </ValueRow>
             <ValueRow label="Iri:">
                 <IriDisplay
@@ -132,10 +132,10 @@ function deleteNonSignatureId() {
         </div>
         <div class="button-row">
             <button
-                v-if="isNew"
                 :disabled="!label || !changed || addingId"
                 @click="save"
             >
+                <!-- v-if="isNew" -->
                 Confirm
             </button>
             <button

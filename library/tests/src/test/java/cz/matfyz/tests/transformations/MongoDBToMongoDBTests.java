@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.database.BasicDatabases;
-import cz.matfyz.tests.database.TestDatabase;
-import cz.matfyz.tests.mapping.MongoDB;
+import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.MongoDB;
+import cz.matfyz.tests.example.common.TestDatabase;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBDDLWrapper;
 import cz.matfyz.wrappermongodb.MongoDBDMLWrapper;
@@ -25,7 +25,7 @@ public class MongoDBToMongoDBTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToMongoDBTests.class);
 
-    private static final BasicDatabases databases = new BasicDatabases();
+    private static final Databases databases = new Databases();
     private static final SchemaCategory schema = databases.schema;
     private static final TestDatabase<MongoDBControlWrapper> database = databases.mongoDB();
 

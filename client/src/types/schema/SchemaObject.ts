@@ -173,13 +173,14 @@ export class VersionedSchemaObject {
     }
 
     get position(): ComparablePosition {
-        const currentPosition = this._graph?.getNodeByKey(this.key)?.cytoscapeIdAndPosition.position;
+        const currentPosition = this._graph?.getNode(this.key)?.cytoscapeIdAndPosition.position;
         // The fallback option this._position represents the original position the object has if it isn't in any graph.
         return currentPosition ? ComparablePosition.fromPosition(currentPosition) : this._position;
     }
 
     private updateGraph(graph: Graph) {
-        const currentNode = graph.getNodeByKey(this.key);
+        // TODO Candice be replaced by delete + create?
+        const currentNode = graph.getNode(this.key);
         if (!currentNode) {
             if (this._current)
                 graph.createNode(this._current, this._position, [ ...this.logicalModels.values() ]);

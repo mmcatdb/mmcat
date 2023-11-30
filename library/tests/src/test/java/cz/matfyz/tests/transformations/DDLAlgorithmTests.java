@@ -1,9 +1,9 @@
 package cz.matfyz.tests.transformations;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.mapping.MongoDB;
-import cz.matfyz.tests.mapping.PostgreSQL;
-import cz.matfyz.tests.schema.BasicSchema;
+import cz.matfyz.tests.example.basic.Schema;
+import cz.matfyz.tests.example.basic.MongoDB;
+import cz.matfyz.tests.example.basic.PostgreSQL;
 
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
  */
 class DDLAlgorithmTests {
 
-    private static final SchemaCategory schema = BasicSchema.newSchemaCategory();
+    private static final SchemaCategory schema = Schema.newSchemaCategory();
 
     @Test
     void basicTest() {

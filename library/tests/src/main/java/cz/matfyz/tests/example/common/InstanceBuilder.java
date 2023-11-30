@@ -1,4 +1,4 @@
-package cz.matfyz.tests.instance;
+package cz.matfyz.tests.example.common;
 
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.instance.DomainRow;
@@ -21,10 +21,6 @@ public class InstanceBuilder {
 
     private final InstanceCategory instance;
     
-    // public InstanceBuilder(InstanceCategory instance) {
-    //     this.instance = instance;
-    // }
-
     public InstanceBuilder(SchemaCategory schema) {
         this.instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
     }

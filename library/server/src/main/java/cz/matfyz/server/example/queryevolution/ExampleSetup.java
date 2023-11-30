@@ -10,47 +10,50 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.service.LogicalModelService;
 import cz.matfyz.server.service.SchemaCategoryService;
-import cz.matfyz.tests.schema.BasicSchema;
+import cz.matfyz.tests.example.queryevolution.Schema;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("queryEvolutionExampleSetup")
 public class ExampleSetup {
 
-    // @Autowired
-    // DatabaseSetup databaseSetup;
+    @Autowired
+    @Qualifier("queryEvolutionDatabaseSetup")
+    private DatabaseSetup databaseSetup;
 
-    // @Autowired
-    // MappingSetup mappingSetup;
+    @Autowired
+    @Qualifier("queryEvolutionMappingSetup")
+    private MappingSetup mappingSetup;
 
     public void setup() {
-        // final SchemaCategoryWrapper schema = createSchemaCategory();
-        // final List<Database> databases = databaseSetup.createDatabases();
-        // final List<LogicalModel> logicalModels = createLogicalModels(databases, schema);
-        // final List<MappingInfo> mappings = mappingSetup.createMappings(logicalModels, schema);
+        final SchemaCategoryWrapper schema = createSchemaCategory();
+        final List<Database> databases = databaseSetup.createDatabases();
+        final List<LogicalModel> logicalModels = createLogicalModels(databases, schema);
+        final List<MappingInfo> mappings = mappingSetup.createMappings(logicalModels, schema);
 
         // // TODO jobs
     }
 
-    // @Autowired
-    // SchemaCategoryService schemaService;
+    @Autowired
+    private SchemaCategoryService schemaService;
 
-    // private SchemaCategoryWrapper createSchemaCategory() {
-    //     final SchemaCategoryInit schemaInit = new SchemaCategoryInit(BasicSchema.schemaLabel);
-    //     final SchemaCategoryInfo schemaInfo = schemaService.createNewInfo(schemaInit);
+    private SchemaCategoryWrapper createSchemaCategory() {
+        final SchemaCategoryInit schemaInit = new SchemaCategoryInit(Schema.schemaLabel);
+        final SchemaCategoryInfo schemaInfo = schemaService.createNewInfo(schemaInit);
 
-    //     final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate();
-    //     return schemaService.update(schemaInfo.id, schemaUpdate);
-    // }
+        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate();
+        return schemaService.update(schemaInfo.id, schemaUpdate);
+    }
 
-    // @Autowired
-    // LogicalModelService logicalModelService;
+    @Autowired
+    private LogicalModelService logicalModelService;
 
-    // private List<LogicalModel> createLogicalModels(List<Database> databases, SchemaCategoryWrapper schema) {
-    //     return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schema.id, database.label))).toList();
-    // }
+    private List<LogicalModel> createLogicalModels(List<Database> databases, SchemaCategoryWrapper schema) {
+        return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schema.id, database.label))).toList();
+    }
 
 }

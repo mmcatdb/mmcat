@@ -28,7 +28,7 @@ function onCanvasTapHandler() {
 }
 
 function objectClicked(object: SchemaObject) {
-    const newNode = evocat.value?.graph?.getNode(object);
+    const newNode = evocat.value?.graph?.getNode(object.key);
     if (newNode)
         selectNode(newNode);
 }
@@ -48,7 +48,7 @@ function selectNode(node: Node) {
 }
 
 function edgeClicked(morphism: SchemaMorphism) {
-    const newEdge = evocat.value?.graph?.getEdge(morphism);
+    const newEdge = evocat.value?.graph?.getEdge(morphism.signature);
     if (newEdge)
         selectEdge(newEdge);
 }

@@ -201,7 +201,7 @@ export class Evocat {
     }
 
     deleteMorphism(morphism: SchemaMorphism) {
-        // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
+        // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (only if the cardinality changed).
         const operation = DeleteMorphism.create(morphism);
         this.commitOperation(operation);
     }

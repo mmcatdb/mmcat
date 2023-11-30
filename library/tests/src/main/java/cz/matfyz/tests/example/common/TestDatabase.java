@@ -1,16 +1,9 @@
-package cz.matfyz.tests.database;
+package cz.matfyz.tests.example.common;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.mapping.TestMapping;
-import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
-import cz.matfyz.wrappermongodb.MongoDBProvider;
-import cz.matfyz.wrapperneo4j.Neo4jControlWrapper;
-import cz.matfyz.wrapperneo4j.Neo4jProvider;
-import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
-import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -34,24 +27,12 @@ public class TestDatabase<TWrapper extends AbstractControlWrapper> {
     public final SchemaCategory schema;
     private final String setupFileName;
 
-    private TestDatabase(DatabaseType type, TWrapper wrapper, SchemaCategory schema, String setupFileName) {
+    public TestDatabase(DatabaseType type, TWrapper wrapper, SchemaCategory schema, String setupFileName) {
         this.type = type;
         this.id = "" + lastId++;
         this.wrapper = wrapper;
         this.schema = schema;
         this.setupFileName = setupFileName;
-    }
-
-    public static TestDatabase<PostgreSQLControlWrapper> createPostgreSQL(PostgreSQLProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(DatabaseType.postgresql, new PostgreSQLControlWrapper(provider), schema, "setupPostgresqlBasic.sql");
-    }
-
-    public static TestDatabase<MongoDBControlWrapper> createMongoDB(MongoDBProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(DatabaseType.mongodb, new MongoDBControlWrapper(provider), schema, "setupMongodbBasic.js");
-    }
-
-    public static TestDatabase<Neo4jControlWrapper> createNeo4j(Neo4jProvider provider, SchemaCategory schema) {
-        return new TestDatabase<>(DatabaseType.neo4j, new Neo4jControlWrapper(provider), schema, "setupNeo4j.cypher");
     }
 
     public TestDatabase<TWrapper> addMapping(TestMapping testMapping) {

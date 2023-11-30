@@ -76,6 +76,7 @@ export class Node {
     private node!: NodeSingular;
     private tags: Set<NodeTag> = new Set();
     availablePathData?: MorphismData;
+    isFixed = false;
 
     private _neighbors = new ComparableMap<Signature, string, Neighbor>(signature => signature.value);
 

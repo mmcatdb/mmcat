@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.database.BasicDatabases;
-import cz.matfyz.tests.database.TestDatabase;
-import cz.matfyz.tests.mapping.Neo4j;
+import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.Neo4j;
+import cz.matfyz.tests.example.common.TestDatabase;
 import cz.matfyz.wrapperneo4j.Neo4jControlWrapper;
 import cz.matfyz.wrapperneo4j.Neo4jStatement;
 
@@ -27,7 +27,7 @@ public class Neo4jTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jTests.class);
 
-    private static final BasicDatabases databases = new BasicDatabases();
+    private static final Databases databases = new Databases();
     private static final SchemaCategory schema = databases.schema;
     private static final TestDatabase<Neo4jControlWrapper> database = databases.neo4j();
 

@@ -4,16 +4,15 @@ import type { ComparablePosition, SchemaMorphism, SchemaObject } from '../schema
 import { Edge } from './Edge';
 import { Node, type Group } from './Node';
 import type { Key, Signature } from '../identifiers';
+import { ComparableMap } from '@/utils/ComparableMap';
 
 export type TemporaryEdge = {
     delete: () => void;
 };
 
 export class Graph {
-    private nodes: Node[] = [];
-    private edges: Edge[] = [];
-    // How many nodes have fixed positions.
-    private fixedNodes = 0;
+    private readonly nodes: ComparableMap<Key, number, Node> = new ComparableMap(key => key.value);
+    private readonly edges: ComparableMap<Signature, string, Edge> = new ComparableMap(signature => signature.value);
     private eventListener: GraphEventListener;
 
     constructor(
@@ -25,9 +24,8 @@ export class Graph {
     public resetElements(): void {
         this.cytoscape.elements().remove();
 
-        this.nodes = [];
-        this.edges = [];
-        this.fixedNodes = 0;
+        this.nodes.clear();
+        this.edges.clear();
         this.groups = [];
     }
 
@@ -70,40 +68,40 @@ export class Graph {
     createNode(object: SchemaObject, position: ComparablePosition, logicalModels: LogicalModel[]): Node {
         const groups = logicalModels.map(logicalModel => this.getGroupOrAddIt(logicalModel));
         const node = Node.create(this.cytoscape, object, position, groups);
-        this.nodes.push(node);
+        this.nodes.set(object.key, node);
 
         return node;
     }
 
     deleteNode(object: SchemaObject) {
-        const node = this.getNode(object);
+        const node = this.nodes.get(object.key);
         if (!node)
             return;
 
         node.remove();
-        this.nodes = this.nodes.filter(n => !n.equals(node));
+        this.nodes.delete(object.key);
 
         // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
-        // However, the no group placeholder has to be removed.
+        // However, the no-group placeholder has to be removed.
     }
 
     createEdge(morphism: SchemaMorphism): Edge {
-        const dom = this.nodes.find(node => node.schemaObject.key.equals(morphism.domKey)) as Node;
-        const cod = this.nodes.find(node => node.schemaObject.key.equals(morphism.codKey)) as Node;
+        const dom = this.nodes.get(morphism.domKey) as Node;
+        const cod = this.nodes.get(morphism.codKey) as Node;
 
         const edge = Edge.create(this.cytoscape, morphism, dom, cod);
-        this.edges.push(edge);
+        this.edges.set(morphism.signature, edge);
 
         return edge;
     }
 
-    deleteEdge(morphism: SchemaMorphism) {
-        const edge = this.getEdge(morphism);
+    deleteEdge(signature: Signature) {
+        const edge = this.getEdge(signature);
         if (!edge)
             return;
 
         edge.remove();
-        this.edges = this.edges.filter(e => !e.equals(edge));
+        this.edges.delete(signature);
     }
 
     _lastTemporaryEdgeId = 0;
@@ -136,7 +134,7 @@ export class Graph {
             //name: 'cola',
             name: 'fcose',
             animate: false,
-            fixedNodeConstraint: this.nodes.slice(0, this.fixedNodes).map(node => node.cytoscapeIdAndPosition),
+            fixedNodeConstraint: [ ...this.nodes.values() ].filter(node => node.isFixed).map(node => node.cytoscapeIdAndPosition),
             //randomize: false,
             //quality: 'proof',
             nodeDimensionsIncludeLabels: true,
@@ -147,11 +145,11 @@ export class Graph {
     }
 
     fixLayout() {
-        this.fixedNodes = this.nodes.length;
+        this.nodes.forEach(node => node.isFixed = true);
     }
 
     resetLayout() {
-        this.fixedNodes = 0;
+        this.nodes.forEach(node => node.isFixed = false);
 
         // A necessary workaround for the bug with nodes without placeholders. More below.
         // Also, both parts of the workaround DO HAVE to be outside the layout function. Otherwise it causes a particularly hard to find bug (when the layout function is called from AddObject, then a new morphism is added in AddMorphism and then this function is called).
@@ -164,20 +162,12 @@ export class Graph {
         this.nodes.forEach(node => node.refreshGroupPlaceholders());
     }
 
-    getNode(object: SchemaObject): Node | undefined {
-        return this.nodes.find(node => node.schemaObject.equals(object));
+    getNode(key: Key): Node | undefined {
+        return this.nodes.get(key);
     }
 
-    getNodeByKey(key: Key): Node | undefined {
-        return this.nodes.find(node => node.schemaObject.key.equals(key));
-    }
-
-    getEdge(morphism: SchemaMorphism): Edge | undefined {
-        return this.edges.find(edge => edge.schemaMorphism.equals(morphism));
-    }
-
-    getEdgeBySignature(signature: Signature): Edge | undefined {
-        return this.edges.find(edge => edge.schemaMorphism.signature.equals(signature));
+    getEdge(signature: Signature): Edge | undefined {
+        return this.edges.get(signature);
     }
 }
 

@@ -10,8 +10,8 @@ import cz.matfyz.querying.algorithms.QueryTreeBuilder;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.parsing.Query;
 import cz.matfyz.querying.parsing.QueryParser;
-import cz.matfyz.tests.database.BasicDatabases;
-import cz.matfyz.tests.database.TestDatabase;
+import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.common.TestDatabase;
 
 import java.util.List;
 import java.util.TreeMap;
@@ -28,7 +28,7 @@ public class TempTests {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
-    private static final BasicDatabases databases = new BasicDatabases();
+    private static final Databases databases = new Databases();
     private static final List<Kind> kinds = defineKinds(List.of(databases.postgreSQL()));
 
     @Test

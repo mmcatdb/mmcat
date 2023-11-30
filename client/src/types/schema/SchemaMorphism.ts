@@ -154,17 +154,9 @@ export class VersionedSchemaMorphism {
     }
 
     private updateGraph(graph: Graph) {
-        const currentEdge = graph.getEdgeBySignature(this.signature);
-        if (!currentEdge) {
-            if (this._current)
-                graph.createEdge(this._current);
-
-            return;
-        }
-
-        if (!this._current)
-            currentEdge.remove();
-        else
-            currentEdge.update(this._current);
+        console.log('UPDATE');
+        graph.deleteEdge(this.signature);
+        if (this._current)
+            graph.createEdge(this._current);
     }
 }

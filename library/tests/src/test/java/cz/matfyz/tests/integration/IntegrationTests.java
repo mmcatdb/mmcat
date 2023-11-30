@@ -7,7 +7,7 @@ import cz.matfyz.core.utils.io.FileInputStreamProvider;
 import cz.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.matfyz.integration.algorithms.JsonLdToRDF;
 import cz.matfyz.integration.algorithms.RDFToInstance;
-import cz.matfyz.tests.schema.IntegrationSchema;
+import cz.matfyz.tests.example.integration.Schema;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
@@ -57,7 +57,7 @@ public class IntegrationTests {
         final var jsonToRDF = new JsonLdToRDF();
         jsonToRDF.input(new FileInputStreamProvider(JSON_LD_FILE_NAME));
 
-        final var schemaCategory = IntegrationSchema.newSchemaCategory();
+        final var schemaCategory = Schema.newSchemaCategory();
         final var instanceCategory = new InstanceCategoryBuilder().setSchemaCategory(schemaCategory).build();
 
         assertDoesNotThrow(() -> {

@@ -3,9 +3,9 @@ package cz.matfyz.tests.transformations;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.database.BasicDatabases;
-import cz.matfyz.tests.database.TestDatabase;
-import cz.matfyz.tests.mapping.MongoDB;
+import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.MongoDB;
+import cz.matfyz.tests.example.common.TestDatabase;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -21,7 +21,7 @@ public class MongoDBTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBTests.class);
 
-    private static final BasicDatabases databases = new BasicDatabases();
+    private static final Databases databases = new Databases();
     private static final SchemaCategory schema = databases.schema;
     private static final TestDatabase<MongoDBControlWrapper> database = databases.mongoDB();
 

@@ -10,9 +10,9 @@ import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.instance.InstanceBuilder;
-import cz.matfyz.tests.instance.InstanceBuilder.InstanceAdder;
-import cz.matfyz.tests.mapping.TestMapping;
+import cz.matfyz.tests.example.common.InstanceBuilder;
+import cz.matfyz.tests.example.common.TestMapping;
+import cz.matfyz.tests.example.common.InstanceBuilder.InstanceAdder;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;
 import cz.matfyz.wrapperdummy.DummyPullWrapper;
 

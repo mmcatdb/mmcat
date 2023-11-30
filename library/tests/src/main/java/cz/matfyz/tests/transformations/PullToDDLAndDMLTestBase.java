@@ -8,7 +8,7 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.record.ForestOfRecords;
-import cz.matfyz.tests.mapping.TestMapping;
+import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.transformations.algorithms.DDLAlgorithm;
 import cz.matfyz.transformations.algorithms.DMLAlgorithm;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;

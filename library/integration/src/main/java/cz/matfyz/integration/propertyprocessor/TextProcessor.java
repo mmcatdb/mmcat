@@ -13,7 +13,7 @@ import org.apache.jena.rdf.model.RDFNode;
  */
 public class TextProcessor extends TypeProcessorBase implements TypeProcessor {
 
-    private static final String TEXT_IRI_PREFIX = Config.get("integration.iriPrefix") + "text/";
+    private static final String TEXT_IRI_PREFIX = Config.GLOBAL.get("integration.iriPrefix") + "text/";
 
     //private static final String LANGUAGE = TEXT_IRI_PREFIX + "language";
     private static final String ATTRIBUTE_TO_LANGUAGE = TEXT_IRI_PREFIX + "attribute-to-language";

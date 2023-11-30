@@ -1,7 +1,7 @@
 package cz.matfyz.tests.transformations;
 
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.tests.mapping.TestMapping;
+import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.transformations.algorithms.ICAlgorithm;
 import cz.matfyz.wrapperdummy.DummyICWrapper;
 

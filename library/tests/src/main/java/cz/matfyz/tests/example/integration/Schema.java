@@ -1,8 +1,9 @@
-package cz.matfyz.tests.schema;
+package cz.matfyz.tests.example.integration;
 
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.tests.example.common.SchemaBuilder;
 
-public class IntegrationSchema {
+public class Schema {
 
     public static final String schemaLabel = "integrationSchema";
 
@@ -14,7 +15,7 @@ public class IntegrationSchema {
     // Signatures
 
     
-    public IntegrationSchema() {
+    public Schema() {
 
     }
 
@@ -26,7 +27,7 @@ public class IntegrationSchema {
      * Create new full schema category.
      */
     public static SchemaCategory newSchemaCategory() {
-        return new IntegrationSchema()
+        return new Schema()
             .build();
     }
 

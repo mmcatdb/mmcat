@@ -29,7 +29,7 @@ public class RDFToInstance {
 
     static final String RDF_TYPE_IRI = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
-    static final String CLASS_TO_ISA_IRI = Config.get("integration.iriPrefix") + "class-to-isa";
+    static final String CLASS_TO_ISA_IRI = Config.GLOBAL.get("integration.iriPrefix") + "class-to-isa";
 
     private Dataset dataset;
     private InstanceCategory category;

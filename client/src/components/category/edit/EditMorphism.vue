@@ -59,7 +59,7 @@ function save() {
     if (!node1 || !node2)
         return;
 
-    // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (if only the cardinality changed).
+    // TODO The morphism must be removed from all the ids where it's used. Or these ids must be at least revalidated (only if the cardinality changed).
 
     const old = props.edge.schemaMorphism;
     const update = {
@@ -124,28 +124,28 @@ function switchNodes() {
             </ValueRow>
             <MinimumInput
                 v-model="min"
-                :disabled="!isNew"
             />
+            <!--  :disabled="!isNew"  -->
         </ValueContainer>
         <NodeInput
             v-model="nodes"
             :count="2"
             :type="SelectionType.Selected"
-            :disabled="!isNew"
         />
+        <!--  :disabled="!isNew"  -->
         <div class="button-row">
             <button
-                v-if="isNew"
                 :disabled="!nodesSelected || !changed"
                 @click="save"
             >
+                <!--  v-if="isNew"  -->
                 Confirm
             </button>
             <button
-                v-if="isNew"
                 :disabled="!nodesSelected"
                 @click="switchNodes"
             >
+                <!--  v-if="isNew"  -->
                 Switch
             </button>
             <button @click="cancel">

@@ -1,4 +1,4 @@
-package cz.matfyz.tests.schema;
+package cz.matfyz.tests.example.common;
 
 import cz.matfyz.core.category.Morphism.Min;
 import cz.matfyz.core.category.Morphism.Tag;

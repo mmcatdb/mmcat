@@ -1,7 +1,7 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.tests.database.BasicDatabases;
-import cz.matfyz.tests.mapping.MongoDB;
+import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.MongoDB;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,7 +13,7 @@ public class QueryTests {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
-    private static final BasicDatabases databases = new BasicDatabases();
+    private static final Databases databases = new Databases();
 
     @BeforeAll
     public static void setup() {

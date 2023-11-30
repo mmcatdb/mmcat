@@ -20,7 +20,7 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArrayProcessor.class);
 
-    private static final String ARRAY_IRI_PREFIX = Config.get("integration.iriPrefix") + "array/";
+    private static final String ARRAY_IRI_PREFIX = Config.GLOBAL.get("integration.iriPrefix") + "array/";
 
     private static final String DOM_TO_ELEMENT_SUFFIX = "/_array";
     private static final String ELEMENT = ARRAY_IRI_PREFIX + "element";

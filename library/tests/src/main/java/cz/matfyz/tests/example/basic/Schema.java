@@ -1,4 +1,4 @@
-package cz.matfyz.tests.schema;
+package cz.matfyz.tests.example.basic;
 
 import cz.matfyz.core.category.Morphism.Min;
 import cz.matfyz.core.category.Morphism.Tag;
@@ -7,8 +7,9 @@ import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.tests.example.common.SchemaBuilder;
 
-public class BasicSchema {
+public class Schema {
 
     public static final String schemaLabel = "Basic Schema";
 
@@ -91,7 +92,7 @@ public class BasicSchema {
 
     public static final Signature noteToNumber = noteToOrder.concatenate(orderToNumber);
     
-    public BasicSchema() {
+    public Schema() {
         this.addOrder();
     }
 
@@ -103,7 +104,7 @@ public class BasicSchema {
      * Create new full schema category.
      */
     public static SchemaCategory newSchemaCategory() {
-        return new BasicSchema()
+        return new Schema()
             .addCustomer()
             .addAddress()
             .addItem()
@@ -115,7 +116,7 @@ public class BasicSchema {
     private final SchemaBuilder builder = new SchemaBuilder();
 
     // This one is mandatory.
-    private BasicSchema addOrder() {
+    private Schema addOrder() {
         builder.object(order, "order", new ObjectIds(orderToNumber));
         builder.object(number, "number", ObjectIds.createValue());
         builder.object(tag, "tag", ObjectIds.createValue());
@@ -126,7 +127,7 @@ public class BasicSchema {
         return this;
     }
 
-    public BasicSchema addCustomer() {
+    public Schema addCustomer() {
         builder.object(customer, "customer", new ObjectIds(customerToName));
         builder.object(name, "name", ObjectIds.createValue());
         builder.object(friend, "friend", new ObjectIds(friendToCustomerA, friendToCustomerB));
@@ -141,7 +142,7 @@ public class BasicSchema {
         return this;
     }
 
-    public BasicSchema addAddress() {
+    public Schema addAddress() {
         builder.object(address, "address", ObjectIds.createGenerated());
         builder.object(street, "street", ObjectIds.createValue());
         builder.object(city, "city", ObjectIds.createValue());
@@ -155,7 +156,7 @@ public class BasicSchema {
         return this;
     }
 
-    public BasicSchema addItem() {
+    public Schema addItem() {
         builder.object(item, "item", new ObjectIds(itemToNumber, itemToId));
         builder.object(product, "product", new ObjectIds(productToId));
         builder.object(quantity, "quantity", ObjectIds.createValue());
@@ -173,7 +174,7 @@ public class BasicSchema {
         return this;
     }
 
-    public BasicSchema addContact() {
+    public Schema addContact() {
         builder.object(contact, "contact", new ObjectIds(contactToNumber, contactToType, contactToValue));
         builder.object(type, "type", ObjectIds.createValue());
         builder.object(value, "value", ObjectIds.createValue());
@@ -185,7 +186,7 @@ public class BasicSchema {
         return this;
     }
 
-    public BasicSchema addNote() {
+    public Schema addNote() {
         builder.object(note, "note", new ObjectIds(noteToNumber, noteToLocale));
         builder.object(locale, "locale", ObjectIds.createValue());
         builder.object(data, "data", ObjectIds.createGenerated());

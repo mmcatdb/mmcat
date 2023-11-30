@@ -10,21 +10,24 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.service.LogicalModelService;
 import cz.matfyz.server.service.SchemaCategoryService;
-import cz.matfyz.tests.schema.BasicSchema;
+import cz.matfyz.tests.example.basic.Schema;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("basicExampleSetup")
 public class ExampleSetup {
 
     @Autowired
-    DatabaseSetup databaseSetup;
+    @Qualifier("basicDatabaseSetup")
+    private DatabaseSetup databaseSetup;
 
     @Autowired
-    MappingSetup mappingSetup;
+    @Qualifier("basicMappingSetup")
+    private MappingSetup mappingSetup;
 
     public void setup() {
         final SchemaCategoryWrapper schema = createSchemaCategory();
@@ -36,10 +39,10 @@ public class ExampleSetup {
     }
 
     @Autowired
-    SchemaCategoryService schemaService;
+    private SchemaCategoryService schemaService;
 
     private SchemaCategoryWrapper createSchemaCategory() {
-        final SchemaCategoryInit schemaInit = new SchemaCategoryInit(BasicSchema.schemaLabel);
+        final SchemaCategoryInit schemaInit = new SchemaCategoryInit(Schema.schemaLabel);
         final SchemaCategoryInfo schemaInfo = schemaService.createNewInfo(schemaInit);
 
         final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate();
@@ -47,7 +50,7 @@ public class ExampleSetup {
     }
 
     @Autowired
-    LogicalModelService logicalModelService;
+    private LogicalModelService logicalModelService;
 
     private List<LogicalModel> createLogicalModels(List<Database> databases, SchemaCategoryWrapper schema) {
         return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schema.id, database.label))).toList();

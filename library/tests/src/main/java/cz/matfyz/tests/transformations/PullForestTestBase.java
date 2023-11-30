@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.tests.mapping.TestMapping;
+import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.wrapperdummy.DummyPullWrapper;
 
 import org.slf4j.Logger;
