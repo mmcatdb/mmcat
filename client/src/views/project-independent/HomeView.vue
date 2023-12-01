@@ -15,7 +15,10 @@ const newCategoryLabel = ref('');
 
 const EXAMPLE_SCHEMAS = [
     'basic',
-    'query-evolution',
+    'query-evolution-1',
+    'query-evolution-2',
+    'query-evolution-3',
+    'query-evolution-4',
 ] as const;
 
 type ExampleSchema = typeof EXAMPLE_SCHEMAS[number];

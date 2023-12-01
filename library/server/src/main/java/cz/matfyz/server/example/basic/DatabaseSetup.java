@@ -1,7 +1,7 @@
 package cz.matfyz.server.example.basic;
 
 import cz.matfyz.server.configuration.SetupProperties;
-import cz.matfyz.server.entity.database.Database;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.entity.database.DatabaseInit;
 import cz.matfyz.server.example.common.DatabaseSettings;
 import cz.matfyz.server.service.DatabaseService;
@@ -24,7 +24,7 @@ class DatabaseSetup {
         this.databaseService = databaseService;
     }
 
-    List<Database> createDatabases() {
+    List<DatabaseEntity> createDatabases() {
         final List<DatabaseInit> inits = new ArrayList<>();
 
         inits.add(settings.createPostgreSQL("PostgreSQL - Basic"));

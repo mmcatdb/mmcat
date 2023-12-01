@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import TextArea from '@/components/input/TextArea.vue';
 import { useSchemaCategoryInfo } from '@/utils/injects';
-import { computed, ref } from 'vue';
+import { ref, shallowRef } from 'vue';
 import API from '@/utils/api';
 import SaveQueryButton from '@/components/query/SaveQueryButton.vue';
 import QueryResultDisplay from './QueryResultDisplay.vue';
 import type { Result } from '@/types/api/result';
 import type { QueryResult } from '@/utils/api/routes/queries';
 import OpenCloseToggle from '../common/OpenCloseToggle.vue';
-import type { QueryWithVersion } from '@/types/query';
+import { QueryDescription, type QueryWithVersion } from '@/types/query';
 import QueryDisplay from './QueryDisplay.vue';
+import QueryDescriptionDisplay from './QueryDescriptionDisplay.vue';
 
 const DEFAULT_QUERY_STRING = `SELECT {
     ?product
@@ -44,16 +45,23 @@ const categoryInfo = useSchemaCategoryInfo();
 
 const content = ref(props.initialData?.content ?? DEFAULT_QUERY_STRING);
 
-const queryResult = ref(props.initialData?.result);
-const isError = computed(() => queryResult.value?.status === false);
+const queryError = ref(props.initialData?.result?.status === false ? props.initialData?.result.error : undefined);
+const queryResult = ref(props.initialData?.result?.status ? props.initialData?.result.data : undefined);
 const isExecuting = ref(false);
 
-async function execute() {
+async function executeQuery() {
     const contentValue = content.value;
     isExecuting.value = true;
-    queryResult.value = await API.queries.execute({}, { categoryId: categoryInfo.value.id, queryString: contentValue });
+    const result = await API.queries.execute({}, { categoryId: categoryInfo.value.id, queryString: contentValue });
     isExecuting.value = false;
-    emit('executeQuery', contentValue, queryResult.value);
+    if (result.status) {
+        queryError.value = undefined;
+        queryResult.value = result.data;
+    }
+    else {
+        queryError.value = result.error;
+    }
+    emit('executeQuery', contentValue, result);
 }
 
 const isOpened = ref(!props.initialData);
@@ -63,6 +71,21 @@ const savedQuery = ref<QueryWithVersion>();
 function querySaved(query: QueryWithVersion) {
     savedQuery.value = query;
 }
+
+const queryDescription = shallowRef<QueryDescription>();
+
+async function describeQuery() {
+    isExecuting.value = true;
+    const result = await API.queries.describe({}, { categoryId: categoryInfo.value.id, queryString: content.value });
+    isExecuting.value = false;
+    if (result.status) {
+        queryError.value = undefined;
+        queryDescription.value = QueryDescription.fromServer(result.data);
+    }
+    else {
+        queryError.value = result.error;
+    }
+}
 </script>
 
 <template>
@@ -71,6 +94,7 @@ function querySaved(query: QueryWithVersion) {
             :version="savedQuery.version"
             default-is-opened
             :default-result="queryResult"
+            :default-error="queryError"
         />
     </template>
     <template v-else>
@@ -79,7 +103,7 @@ function querySaved(query: QueryWithVersion) {
                 <div class="d-flex align-items-center justify-content-between gap-3">
                     <h3
                         class="m-0"
-                        :class="{ 'text-danger': isError}"
+                        :class="{ 'text-danger': !!queryError}"
                     >
                         #{{ initialData.id }}
                     </h3>
@@ -87,9 +111,15 @@ function querySaved(query: QueryWithVersion) {
                         <template v-if="isOpened">
                             <button
                                 :disabled="isExecuting"
-                                @click="execute"
+                                @click="executeQuery"
                             >
                                 {{ initialData && queryResult ? 'Re-execute' : 'Execute' }}
+                            </button>
+                            <button
+                                :disabled="isExecuting"
+                                @click="describeQuery"
+                            >
+                                Describe
                             </button>
                             <SaveQueryButton
                                 :content="content"
@@ -109,16 +139,35 @@ function querySaved(query: QueryWithVersion) {
                     <div class="d-flex align-items-center gap-3">
                         <button
                             :disabled="isExecuting"
-                            @click="execute"
+                            @click="executeQuery"
                         >
                             {{ initialData && queryResult ? 'Re-execute' : 'Execute' }}
                         </button>
+                        <button
+                            :disabled="isExecuting"
+                            @click="describeQuery"
+                        >
+                            Describe
+                        </button>
                     </div>
                 </template>
-                <QueryResultDisplay
-                    :result="queryResult"
+                <QueryErrorDisplay
+                    v-if="queryError"
+                    :error="queryError"
                     :is-executing="isExecuting"
                 />
+                <template v-else>
+                    <QueryResultDisplay
+                        v-if="queryResult"
+                        :result="queryResult"
+                        :is-executing="isExecuting"
+                    />
+                    <QueryDescriptionDisplay
+                        v-if="queryDescription"
+                        :description="queryDescription"
+                        :is-executing="isExecuting"
+                    />
+                </template>
             </template>
         </div>
     </template>

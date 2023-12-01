@@ -1,8 +1,10 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.database.DatabaseInfo;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.repository.QueryRepository;
@@ -48,6 +50,20 @@ public class QueryController {
         final var result = service.executeQuery(data.categoryId, data.queryString);
 
         return new QueryResult(result.toJsonArray());
+    }
+
+    public static record QueryDescription(
+        List<QueryPartDescription> parts
+    ) {}
+
+    public static record QueryPartDescription(
+        DatabaseInfo database,
+        QueryStatement query
+    ) {}
+
+    @PostMapping("/queries/describe")
+    public QueryDescription describeQuery(@RequestBody QueryInput data) {
+        return service.describeQuery(data.categoryId, data.queryString);
     }
 
     @GetMapping("/schema-categories/{categoryId}/queries")

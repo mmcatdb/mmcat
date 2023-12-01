@@ -1,23 +1,23 @@
 package cz.matfyz.server.example.basic;
 
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
+import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.example.common.SchemaBase;
 import cz.matfyz.tests.example.basic.Schema;
 
 class SchemaSetup extends SchemaBase {
 
-    private SchemaSetup() {
-        super(Schema.newSchemaCategory());
+    private SchemaSetup(SchemaCategoryWrapper wrapper, String lastUpdateVersion) {
+        super(wrapper, lastUpdateVersion, Schema.newSchemaCategory());
     }
 
-    static SchemaUpdateInit createNewUpdate() {
-        return new SchemaSetup().innerCreateNewUpdate();
+    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, String lastUpdateVersion) {
+        return new SchemaSetup(wrapper, lastUpdateVersion).innerCreateNewUpdate();
     }
 
     @Override
     protected void createOperations() {
         // Order
-
         addObject(Schema.order, 0, 0);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.number, 0, -1);
@@ -29,7 +29,6 @@ class SchemaSetup extends SchemaBase {
         addMorphism(Schema.tagToOrder);
 
         // Customer
-
         addObject(Schema.customer, -2, 0);
         addMorphism(Schema.orderToCustomer);
         addComposite(ADD_PROPERTY, () -> {
@@ -49,7 +48,6 @@ class SchemaSetup extends SchemaBase {
         });
 
         // Address
-
         addObject(Schema.address, -2, 1);
         addMorphism(Schema.orderToAddress);
 
@@ -69,7 +67,6 @@ class SchemaSetup extends SchemaBase {
         });
 
         // Item - Product
-
         addObject(Schema.product, 2, 1);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.id, 1, 2);
@@ -88,7 +85,6 @@ class SchemaSetup extends SchemaBase {
         });
 
         // Item
-
         addComposite(ADD_SET, () -> {
             addObject(Schema.item, 1, 1);
             addMorphism(Schema.itemToOrder);
@@ -102,7 +98,6 @@ class SchemaSetup extends SchemaBase {
         });
 
         // Contact
-
         addObject(Schema.value, 0, 2);
 
         addComposite(ADD_MAP, () -> {
@@ -115,7 +110,6 @@ class SchemaSetup extends SchemaBase {
         });
 
         // Note - Data
-
         addObject(Schema.data, 2, -1);
 
         addComposite(ADD_PROPERTY, () -> {
@@ -129,7 +123,6 @@ class SchemaSetup extends SchemaBase {
         });
 
         // Note
-
         addComposite(ADD_MAP, () -> {
             addObject(Schema.locale, 2, 0);
             addObject(Schema.note, 1, -1);

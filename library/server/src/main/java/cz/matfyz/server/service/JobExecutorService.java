@@ -21,7 +21,7 @@ import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
-import cz.matfyz.server.entity.database.Database;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
@@ -68,7 +68,7 @@ public class JobExecutorService {
     private DataSourceService dataSourceService;
 
     @Autowired
-    private SchemaCategoryService categoryService;
+    private SchemaCategoryService schemaService;
 
     @Autowired
     private WrapperService wrapperService;
@@ -136,7 +136,7 @@ public class JobExecutorService {
 
     private void modelToCategoryAlgorithm(Run run, ModelToCategoryPayload payload) {
         final LogicalModel logicalModel = logicalModelService.find(payload.logicalModelId());
-        final Database database = databaseService.find(logicalModel.databaseId);
+        final DatabaseEntity database = databaseService.find(logicalModel.databaseId);
 
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
@@ -157,7 +157,7 @@ public class JobExecutorService {
         InstanceCategory instance = null;
 
         final LogicalModel logicalModel = logicalModelService.find(payload.logicalModelId());
-        final Database database = databaseService.find(logicalModel.databaseId);
+        final DatabaseEntity database = databaseService.find(logicalModel.databaseId);
         final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
             .map(wrapper -> createMapping(wrapper, run.categoryId))
             .toList();
@@ -202,7 +202,7 @@ public class JobExecutorService {
         final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
         final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);
 
-        final SchemaCategoryWrapper schemaWrapper = categoryService.find(run.categoryId);
+        final SchemaCategoryWrapper schemaWrapper = schemaService.find(run.categoryId);
         final SchemaCategory schema = schemaWrapper.toSchemaCategory();
 
         final var newInstance = new JsonLdToCategory().input(schema, instance, inputStreamProvider).run();
@@ -210,7 +210,7 @@ public class JobExecutorService {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper, Id categoryId) {
-        final var categoryWrapper = categoryService.find(categoryId);
+        final var categoryWrapper = schemaService.find(categoryId);
 
         return new MappingBuilder()
             .setMappingWrapper(mappingWrapper)
@@ -238,8 +238,8 @@ public class JobExecutorService {
     }
 
     private QueryEvolver createQueryEvolver(Id categoryId, Version prevVersion, Version nextVersion) {
-        final SchemaCategoryWrapper wrapper = categoryService.find(categoryId);
-        final List<SchemaCategoryUpdate> updates = categoryService
+        final SchemaCategoryWrapper wrapper = schemaService.find(categoryId);
+        final List<SchemaCategoryUpdate> updates = schemaService
             .findAllUpdates(categoryId).stream()
             .map(SchemaUpdate::toEvolution).toList();
 

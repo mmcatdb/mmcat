@@ -1,21 +1,23 @@
 <script setup lang="ts">
-import { ErrorType, QueryVersion } from '@/types/query';
+import { ErrorType, QueryDescription, QueryVersion } from '@/types/query';
 import TextArea from '@/components/input/TextArea.vue';
 import VersionDisplay from '../VersionDisplay.vue';
 import { useSchemaCategoryInfo } from '@/utils/injects';
-import { computed, ref } from 'vue';
+import { computed, ref, shallowRef } from 'vue';
 import API from '@/utils/api';
 import OpenCloseToggle from '@/components/common/OpenCloseToggle.vue';
 import type { QueryResult } from '@/utils/api/routes/queries';
-import type { Result } from '@/types/api/result';
 import QueryResultDisplay from './QueryResultDisplay.vue';
 import QueryUpdateErrorDisplay from './QueryUpdateErrorDisplay.vue';
 import QueryUpdateErrorBadge from './QueryUpdateErrorBadge.vue';
+import QueryDescriptionDisplay from './QueryDescriptionDisplay.vue';
+import QueryErrorDisplay from './QueryErrorDisplay.vue';
 
 type QueryDisplayProps = {
     version: QueryVersion;
     defaultIsOpened?: boolean;
-    defaultResult?: Result<QueryResult>;
+    defaultResult?: QueryResult;
+    defaultError?: any;
 };
 
 const props = defineProps<QueryDisplayProps>();
@@ -57,13 +59,40 @@ async function saveChanges() {
 const isOpened = ref(props.defaultIsOpened);
 const isChanged = computed(() => content.value !== props.version.content || errors.value.length !== props.version.errors.length);
 
+const queryError = ref(props.defaultError);
 const queryResult = ref(props.defaultResult);
 const isExecuting = ref(false);
 
+// TODO Extremely ugly code (also duplicated in NewQueryDisplay). Refactor.
+// Probably create one variable for "queryState" or something.
+
 async function executeQuery() {
     isExecuting.value = true;
-    queryResult.value = await API.queries.execute({}, { categoryId: categoryInfo.value.id, queryString: content.value });
+    // queryResult.value = await API.queries.execute({}, { categoryId: categoryInfo.value.id, queryString: content.value });
+    const result = await API.queries.execute({}, { categoryId: categoryInfo.value.id, queryString: content.value });
     isExecuting.value = false;
+    if (result.status) {
+        queryError.value = undefined;
+        queryResult.value = result.data;
+    }
+    else {
+        queryError.value = result.error;
+    }
+}
+
+const queryDescription = shallowRef<QueryDescription>();
+
+async function describeQuery() {
+    isExecuting.value = true;
+    const result = await API.queries.describe({}, { categoryId: categoryInfo.value.id, queryString: content.value });
+    isExecuting.value = false;
+    if (result.status) {
+        queryError.value = undefined;
+        queryDescription.value = QueryDescription.fromServer(result.data);
+    }
+    else {
+        queryError.value = result.error;
+    }
 }
 
 async function deleteQuery() {
@@ -110,6 +139,12 @@ async function deleteQuery() {
                     >
                         Execute
                     </button>
+                    <button
+                        :disabled="isExecuting"
+                        @click="describeQuery"
+                    >
+                        Describe
+                    </button>
                 </template>
                 <template v-else>
                     <QueryUpdateErrorBadge
@@ -133,10 +168,23 @@ async function deleteQuery() {
                 v-model="content"
                 class="w-100"
             />
-            <QueryResultDisplay
-                :result="queryResult"
+            <QueryErrorDisplay
+                v-if="queryError"
+                :error="queryError"
                 :is-executing="isExecuting"
             />
+            <template v-else>
+                <QueryResultDisplay
+                    v-if="queryResult"
+                    :result="queryResult"
+                    :is-executing="isExecuting"
+                />
+                <QueryDescriptionDisplay
+                    v-if="queryDescription"
+                    :description="queryDescription"
+                    :is-executing="isExecuting"
+                />
+            </template>
         </template>
     </div>
 </template>

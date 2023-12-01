@@ -29,13 +29,14 @@ watch(() => props.modelValue, (newValue: (Node | undefined)[]) => {
 const listener = graph.listen();
 
 onMounted(() => {
+    innerValue.value.forEach((node, index) => node?.select({ type: props.type, level: index }));
     if (!props.disabled)
         listener.onNode('tap', onNodeTapHandler);
 });
 
 onUnmounted(() => {
-    listener.close();
     innerValue.value.forEach(node => node?.unselect());
+    listener.close();
 });
 
 function getNextAvailableIndex(): number {

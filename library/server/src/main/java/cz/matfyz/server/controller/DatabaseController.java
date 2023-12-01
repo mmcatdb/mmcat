@@ -1,7 +1,8 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.Database;
+import cz.matfyz.server.entity.database.DatabaseEntity;
+import cz.matfyz.server.entity.database.DatabaseInfo;
 import cz.matfyz.server.entity.database.DatabaseInit;
 import cz.matfyz.server.entity.database.DatabaseUpdate;
 import cz.matfyz.server.entity.database.DatabaseWithConfiguration;
@@ -37,15 +38,15 @@ public class DatabaseController {
     }
 
     @GetMapping("/databases")
-    public List<Database> getAllDatabases(@RequestParam Optional<Id> categoryId) {
+    public List<DatabaseEntity> getAllDatabases(@RequestParam Optional<Id> categoryId) {
         var databases = categoryId.isPresent() ? service.findAllInCategory(categoryId.get()) : service.findAll();
-        databases.forEach(Database::hidePassword);
+        databases.forEach(DatabaseEntity::hidePassword);
         return databases;
     }
 
     @GetMapping("/databases/{id}")
-    public Database getDatabase(@PathVariable Id id) {
-        Database database = service.find(id);
+    public DatabaseEntity getDatabase(@PathVariable Id id) {
+        DatabaseEntity database = service.find(id);
         if (database == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         
@@ -54,27 +55,25 @@ public class DatabaseController {
     }
 
     @PostMapping("/databases")
-    public Database createDatabase(@RequestBody DatabaseInit data) {
-        Database database = service.createNew(data);
+    public DatabaseInfo createDatabase(@RequestBody DatabaseInit data) {
+        DatabaseEntity database = service.createNew(data);
         if (database == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        database.hidePassword();
-        return database;
+        return database.toInfo();
     }
 
     @PutMapping("/databases/{id}")
-    public Database updateDatabase(@PathVariable Id id, @RequestBody DatabaseUpdate update) {
+    public DatabaseInfo updateDatabase(@PathVariable Id id, @RequestBody DatabaseUpdate update) {
         if (!update.hasPassword()) {
             var originalDatabase = service.find(id);
             update.setPasswordFrom(originalDatabase);
         }
-        Database database = service.update(id, update);
+        DatabaseEntity database = service.update(id, update);
         if (database == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        database.hidePassword();
-        return database;
+        return database.toInfo();
     }
 
     @DeleteMapping("/databases/{id}")

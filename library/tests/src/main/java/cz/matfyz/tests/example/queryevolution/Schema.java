@@ -80,27 +80,21 @@ public class Schema {
     }
 
     /**
-     * Create new full schema category (version 1).
+     * Create new full schema category.
      */
-    public static SchemaCategory newSchemaCategory1() {
-        return new Schema()
+    public static SchemaCategory newSchemaCategory(int version) {
+        final var builder = new Schema()
             .addCustomer()
             .addProduct()
-            .addOrders()
-            .build();
-    }
+            .addOrders();
 
-    /**
-     * Create new full schema category (version 2).
-     */
-    public static SchemaCategory newSchemaCategory2() {
-        return new Schema()
-            .addCustomer()
-            .addProduct()
-            .addOrder()
-            .addItem()
-            .addOrdered()
-            .build();
+        if (version > 1) {
+            builder
+                .addItem()
+                .addOrdered();
+        }
+        
+        return builder.build();
     }
 
     private final SchemaBuilder builder = new SchemaBuilder();

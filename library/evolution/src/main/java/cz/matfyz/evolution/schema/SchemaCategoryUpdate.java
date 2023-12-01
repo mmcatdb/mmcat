@@ -29,7 +29,7 @@ public class SchemaCategoryUpdate {
     }
 
     public SchemaCategory down(SchemaCategory category) {
-        for (final var operation : operations)
+        for (final var operation : operations.reversed())
             operation.down(category);
 
         return category;

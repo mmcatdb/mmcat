@@ -1,23 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import TextArea from '@/components/input/TextArea.vue';
-import type { QueryResult } from '@/utils/api/routes/queries';
 
 type QueryResultDisplayProps = {
-    result: QueryResult;
+    error: any;
     isExecuting?: boolean;
 };
 
 const props = defineProps<QueryResultDisplayProps>();
 
-const text = computed(() => props.result?.rows.join(',\n') ?? '');
+const text = computed(() => 'Error :(\nname: ' + props.error.name + '\ndata:\n' + props.error.data);
 </script>
 
 <template>
     <TextArea
-        v-if="result"
         v-model="text"
-        class="w-100"
+        class="w-100 text-danger"
         :class="{ 'opacity-25': isExecuting }"
         readonly
         :disabled="isExecuting"

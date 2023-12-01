@@ -1,23 +1,34 @@
 package cz.matfyz.server.example.queryevolution;
 
+import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
+import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.example.common.SchemaBase;
 import cz.matfyz.tests.example.queryevolution.Schema;
 
 class SchemaSetup extends SchemaBase {
 
-    private SchemaSetup() {
-        super(Schema.newSchemaCategory1());
+    private final int version;
+
+    private SchemaSetup(SchemaCategoryWrapper wrapper, String lastUpdateVersion, int version) {
+        super(wrapper, lastUpdateVersion, Schema.newSchemaCategory(version));
+        this.version = version;
     }
 
-    static SchemaUpdateInit createNewUpdate() {
-        return new SchemaSetup().innerCreateNewUpdate();
+    static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, String lastUpdateVersion, int version) {
+        return new SchemaSetup(wrapper, lastUpdateVersion, version).innerCreateNewUpdate();
     }
 
     @Override
     protected void createOperations() {
-        // Customer
+        if (version == 1)
+            firstVersion();
+        else
+            secondVersion();
+    }
 
+    private void firstVersion() {
+        // Customer
         addObject(Schema.customer, -2, 0);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.customerId, -3, -1);
@@ -41,7 +52,6 @@ class SchemaSetup extends SchemaBase {
         addIds(Schema.knows);
 
         // Product
-
         addObject(Schema.product, 2, 0);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.productId, 3, -1);
@@ -60,7 +70,6 @@ class SchemaSetup extends SchemaBase {
         });
 
         // Order
-
         addObject(Schema.order, 0, 0);
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.orderId, -1, -1);
@@ -95,6 +104,31 @@ class SchemaSetup extends SchemaBase {
 
         addMorphism(Schema.orderToCustomer);
         addMorphism(Schema.orderToProduct);
+    }
+
+    private void secondVersion() {
+        addComposite("group", () -> {
+            editIds(Schema.order, new ObjectIds(Schema.orderToOrderId));
+            addObject(Schema.item, 0, 0);
+            addMorphism(Schema.itemToOrder);
+            editMorphism(Schema.orderToProduct, Schema.item, null);
+            addIds(Schema.item);
+            editMorphism(Schema.orderToOrderPrice, Schema.item, null);
+            editMorphism(Schema.orderToQuantity, Schema.item, null);
+        });
+
+        moveObject(Schema.order, 0, -1);
+        moveObject(Schema.orderId, -1, -2);
+        moveObject(Schema.street, -0.5, -3);
+        moveObject(Schema.city, 0.5, -3);
+        moveObject(Schema.postCode, 1, -2);
+
+        addComposite("group", () -> {
+            addObject(Schema.ordered, -2, -1);
+            addMorphism(Schema.orderedToOrder);
+            editMorphism(Schema.orderToCustomer, Schema.ordered, null);
+            addIds(Schema.ordered);
+        });
     }
 
 }

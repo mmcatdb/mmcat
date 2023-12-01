@@ -61,11 +61,9 @@ public class QueryTestBase {
 
     public void run() {
         final var kinds = defineKinds();
-
-        final var queryToInstance = new QueryToInstance();
-        queryToInstance.input(schema, queryString, kinds);
-
-        final ResultList result = queryToInstance.run();
+        final var queryToInstance = new QueryToInstance(schema, queryString, kinds);
+        
+        final ResultList result = queryToInstance.execute();
         final var jsonResults = result.toJsonArray();
         LOGGER.info("\n{}", jsonResults);
         

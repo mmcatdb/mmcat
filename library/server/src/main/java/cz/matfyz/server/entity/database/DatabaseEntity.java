@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 /**
  * @author jachym.bartik
  */
-public class Database extends Entity {
+public class DatabaseEntity extends Entity {
     
     public static final String PASSWORD_FIELD_NAME = "password";
 
@@ -24,18 +24,18 @@ public class Database extends Entity {
     public ObjectNode settings;
 
     @JsonCreator
-    public Database(@JsonProperty("id") Id id) {
+    public DatabaseEntity(@JsonProperty("id") Id id) {
         super(id);
     }
 
-    public Database(Id id, DatabaseInit data) {
+    public DatabaseEntity(Id id, DatabaseInit data) {
         super(id);
         this.type = data.type;
         this.label = data.label;
         this.settings = data.settings;
     }
 
-    public Database(Id id, Database database) {
+    public DatabaseEntity(Id id, DatabaseEntity database) {
         this(id, database.toDatabaseInit());
     }
 
@@ -53,9 +53,9 @@ public class Database extends Entity {
 
     private static final ObjectReader dataJsonReader = new ObjectMapper().readerFor(DatabaseInit.class);
 
-    public static Database fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
+    public static DatabaseEntity fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
         DatabaseInit data = dataJsonReader.readValue(jsonValue);
-        return new Database(id, data);
+        return new DatabaseEntity(id, data);
     }
 
     private DatabaseInit toDatabaseInit() {

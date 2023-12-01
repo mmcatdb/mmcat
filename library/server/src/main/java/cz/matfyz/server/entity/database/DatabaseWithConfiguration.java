@@ -13,7 +13,7 @@ public class DatabaseWithConfiguration {
     public final String label;
     public final DatabaseConfiguration configuration;
 
-    public DatabaseWithConfiguration(Database database, DatabaseConfiguration configuration) {
+    public DatabaseWithConfiguration(DatabaseEntity database, DatabaseConfiguration configuration) {
         this.id = database.id;
         this.type = database.type;
         this.label = database.label;

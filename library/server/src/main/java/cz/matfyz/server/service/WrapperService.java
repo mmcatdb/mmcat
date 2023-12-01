@@ -2,7 +2,7 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.Database;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.exception.DatabaseException;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class WrapperService {
 
-    public AbstractControlWrapper getControlWrapper(Database database) {
+    public AbstractControlWrapper getControlWrapper(DatabaseEntity database) {
         try {
             return switch (database.type) {
                 case mongodb -> getMongoDBControlWrapper(database);
@@ -45,7 +45,7 @@ public class WrapperService {
 
     private Map<Id, MongoDBProvider> mongoDBCache = new TreeMap<>();
 
-    private MongoDBControlWrapper getMongoDBControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private MongoDBControlWrapper getMongoDBControlWrapper(DatabaseEntity database) throws IllegalArgumentException, JsonProcessingException {
         if (!mongoDBCache.containsKey(database.id))
             mongoDBCache.put(database.id, createMongoDBProvider(database));
 
@@ -55,7 +55,7 @@ public class WrapperService {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private static MongoDBProvider createMongoDBProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private static MongoDBProvider createMongoDBProvider(DatabaseEntity database) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(database.settings, MongoDBSettings.class);
 
         return new MongoDBProvider(settings);
@@ -65,7 +65,7 @@ public class WrapperService {
 
     private Map<Id, PostgreSQLProvider> postgreSQLCache = new TreeMap<>();
 
-    private PostgreSQLControlWrapper getPostgreSQLControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private PostgreSQLControlWrapper getPostgreSQLControlWrapper(DatabaseEntity database) throws IllegalArgumentException, JsonProcessingException {
         if (!postgreSQLCache.containsKey(database.id))
             postgreSQLCache.put(database.id, createPostgreSQLProvider(database));
 
@@ -73,7 +73,7 @@ public class WrapperService {
         return new PostgreSQLControlWrapper(provider);
     }
 
-    private static PostgreSQLProvider createPostgreSQLProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private static PostgreSQLProvider createPostgreSQLProvider(DatabaseEntity database) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(database.settings, PostgreSQLSettings.class);
 
         return new PostgreSQLProvider(settings);
@@ -83,7 +83,7 @@ public class WrapperService {
 
     private Map<Id, Neo4jProvider> neo4jCache = new TreeMap<>();
 
-    private Neo4jControlWrapper getNeo4jControlWrapper(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private Neo4jControlWrapper getNeo4jControlWrapper(DatabaseEntity database) throws IllegalArgumentException, JsonProcessingException {
         if (!neo4jCache.containsKey(database.id))
             neo4jCache.put(database.id, createNeo4jProvider(database));
 
@@ -91,7 +91,7 @@ public class WrapperService {
         return new Neo4jControlWrapper(provider);
     }
 
-    private static Neo4jProvider createNeo4jProvider(Database database) throws IllegalArgumentException, JsonProcessingException {
+    private static Neo4jProvider createNeo4jProvider(DatabaseEntity database) throws IllegalArgumentException, JsonProcessingException {
         final var settings = mapper.treeToValue(database.settings, Neo4jSettings.class);
 
         return new Neo4jProvider(settings);

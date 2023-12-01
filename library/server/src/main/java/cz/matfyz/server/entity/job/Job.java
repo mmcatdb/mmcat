@@ -59,7 +59,6 @@ public class Job extends Entity {
             State.Ready,
             null
         );
-
     }
 
     private static record JsonValue(

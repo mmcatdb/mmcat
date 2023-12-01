@@ -1,7 +1,7 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { DELETE, GET, POST, PUT } from '../routeFunctions';
 import type { Id } from '@/types/id';
-import type { QueryInit, QueryVersionFromServer, QueryVersionUpdate, QueryWithVersionFromServer, QueryWithVersionsFromServer } from '@/types/query';
+import type { QueryDescriptionFromServer, QueryInit, QueryVersionFromServer, QueryVersionUpdate, QueryWithVersionFromServer, QueryWithVersionsFromServer } from '@/types/query';
 
 export type QueryInput = {
     categoryId: Id;
@@ -15,6 +15,9 @@ export type QueryResult = {
 const queries = {
     execute: POST<Empty, QueryResult, QueryInput>(
         () => `/queries/execute`,
+    ),
+    describe: POST<Empty, QueryDescriptionFromServer, QueryInput>(
+        () => `/queries/describe`,
     ),
     getQueriesInCategory: GET<{ categoryId: StringLike }, QueryWithVersionFromServer[]>(
         u => `/schema-categories/${u.categoryId}/queries`,

@@ -13,7 +13,7 @@ import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdProvider;
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.Database;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.service.DatabaseService;
 import cz.matfyz.server.service.LogicalModelService;
@@ -113,7 +113,7 @@ class ServerApplicationTests {
         var mappingWrapper = mappingService.find(mappingId);
         var mapping = createMapping(mappingWrapper);
 
-        Database database = databaseService.find(databaseId);
+        DatabaseEntity database = databaseService.find(databaseId);
         AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
 
         var newInstance = new DatabaseToInstance()
@@ -134,7 +134,7 @@ class ServerApplicationTests {
         var mappingWrapper = mappingService.find(mappingId);
         var mapping = createMapping(mappingWrapper);
 
-        Database database = databaseService.find(databaseId);
+        DatabaseEntity database = databaseService.find(databaseId);
         final var control = wrapperService.getControlWrapper(database);
         AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
         AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();

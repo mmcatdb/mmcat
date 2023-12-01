@@ -1,7 +1,7 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.Database;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.entity.database.DatabaseConfiguration;
 import cz.matfyz.server.entity.database.DatabaseInit;
 import cz.matfyz.server.entity.database.DatabaseUpdate;
@@ -26,25 +26,25 @@ public class DatabaseService {
     @Autowired
     private WrapperService wrapperService;
 
-    public Database find(Id databaseId) {
+    public DatabaseEntity find(Id databaseId) {
         return repository.find(databaseId);
     }
     
-    public List<Database> findAll() {
+    public List<DatabaseEntity> findAll() {
         return repository.findAll();
     }
 
-    public List<Database> findAllInCategory(Id categoryId) {
+    public List<DatabaseEntity> findAllInCategory(Id categoryId) {
         return repository.findAllInCategory(categoryId);
     }
 
-    public Database createNew(DatabaseInit data) {
-        var database = new Database(null, data);
+    public DatabaseEntity createNew(DatabaseInit data) {
+        var database = new DatabaseEntity(null, data);
         return repository.save(database);
     }
 
-    public Database update(Id databaseId, DatabaseUpdate data) {
-        Database database = repository.find(databaseId);
+    public DatabaseEntity update(Id databaseId, DatabaseUpdate data) {
+        DatabaseEntity database = repository.find(databaseId);
         if (database == null)
             return null;
         

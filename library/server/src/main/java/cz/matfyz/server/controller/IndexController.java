@@ -32,7 +32,10 @@ public class IndexController {
     public void addExampleSchema(@PathVariable String name) {
         switch (name) {
             case "basic" -> basicExampleSetup.setup();
-            case "query-evolution" -> queryEvolutionExampleSetup.setup();
+            case "query-evolution-1" -> queryEvolutionExampleSetup.setup(1);
+            case "query-evolution-2" -> queryEvolutionExampleSetup.setup(2);
+            case "query-evolution-3" -> queryEvolutionExampleSetup.setup(3);
+            case "query-evolution-4" -> queryEvolutionExampleSetup.setup(4);
             default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }

@@ -160,9 +160,6 @@ function onEdgeTapHandler(edge: Edge) {
             setStateToDefault();
             return;
         }
-        else {
-            state.value.edge.unselect();
-        }
     }
 
     state.value = { type: State.EditMorphism, edge };

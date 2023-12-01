@@ -15,6 +15,7 @@ import cz.matfyz.server.repository.SchemaCategoryRepository;
 
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +53,7 @@ public class SchemaCategoryService {
         return repository.find(id);
     }
 
-    public SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
+    public @Nullable SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);
         final var update = SchemaUpdate.fromInit(updateInit, id);
 
@@ -66,7 +67,7 @@ public class SchemaCategoryService {
 
         // The metadata is not versioned.
         // However, without it, the schema category can't be restored to it's previous version.
-        // So, we might need to keep all metadata somewhere. Maybe event version it ...
+        // So, we might need to keep all metadata somewhere. Maybe even version it ...
         updateInit.metadata().forEach(m -> context.setPosition(m.key(), m.position()));
         context.setVersion(update.nextVersion);
 

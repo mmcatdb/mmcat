@@ -1,3 +1,4 @@
+import { DatabaseInfo, type DatabaseInfoFromServer } from './database';
 import type { Entity, Id, VersionId } from './id';
 
 export type QueryFromServer = {
@@ -95,4 +96,54 @@ export type QueryUpdateError = {
     type: ErrorType;
     message: string;
     data: unknown;
+};
+
+export type QueryDescriptionFromServer = {
+    parts: QueryPartDescriptionFromServer[];
+};
+
+type QueryPartDescriptionFromServer = {
+    database: DatabaseInfoFromServer;
+    query: QueryStatement;
+};
+
+export class QueryDescription {
+    private constructor(
+        readonly parts: QueryPartDescription[],
+    ) {}
+
+    static fromServer(input: QueryDescriptionFromServer): QueryDescription {
+        return new QueryDescription(
+            input.parts.map(QueryPartDescription.fromServer),
+        );
+    }
+}
+
+export class QueryPartDescription {
+    private constructor(
+        readonly database: DatabaseInfo,
+        readonly query: QueryStatement,
+    ) {}
+
+    static fromServer(input: QueryPartDescriptionFromServer): QueryPartDescription {
+        return new QueryPartDescription(
+            DatabaseInfo.fromServer(input.database),
+            input.query,
+        );
+    }
+}
+
+// TODO also parse fromServer because the map is returned as object from server.
+export type QueryStatement = {
+    stringContent: string;
+    // TODO it is there but it is not valid (yet) - there migth be problems with translating cyclic structures to json (the parent field).
+    // queryStructure: QueryStructure;
+};
+
+type QueryStructure = {
+    name: string;
+    isArray: boolean;
+    children: Map<string, QueryStructure>;
+    /** If null, this is the root of the tree. */
+    parent?: QueryStructure;
 };

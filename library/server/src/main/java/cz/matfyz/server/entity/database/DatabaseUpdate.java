@@ -22,11 +22,11 @@ public class DatabaseUpdate {
     }
 
     public boolean hasPassword() {
-        return this.settings.has(Database.PASSWORD_FIELD_NAME);
+        return this.settings.has(DatabaseEntity.PASSWORD_FIELD_NAME);
     }
 
-    public void setPasswordFrom(Database database) {
-        this.settings.set(Database.PASSWORD_FIELD_NAME, database.settings.get(Database.PASSWORD_FIELD_NAME));
+    public void setPasswordFrom(DatabaseEntity database) {
+        this.settings.set(DatabaseEntity.PASSWORD_FIELD_NAME, database.settings.get(DatabaseEntity.PASSWORD_FIELD_NAME));
     }
 
 }

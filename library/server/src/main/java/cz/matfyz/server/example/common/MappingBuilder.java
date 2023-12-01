@@ -19,7 +19,7 @@ public class MappingBuilder {
     private final List<LogicalModel> models;
     private final SchemaCategory schema;
     private final Version version;
-    private List<MappingInit> output = new ArrayList<>();
+    private List<MappingInit> inits = new ArrayList<>();
 
     public MappingBuilder(List<LogicalModel> models, SchemaCategoryWrapper wrapper) {
         this.models = models;
@@ -27,12 +27,12 @@ public class MappingBuilder {
         version = wrapper.version;
     }
 
-    public MappingBuilder add(int index, Function<SchemaCategory, TestMapping> creator) {
-        return add(models.get(index), creator);
+    public MappingBuilder add(int index, Function<SchemaCategory, TestMapping> initCreator) {
+        return add(models.get(index), initCreator);
     }
 
-    public MappingBuilder add(LogicalModel model, Function<SchemaCategory, TestMapping> creator) {
-        final Mapping mapping = creator.apply(schema).mapping();
+    public MappingBuilder add(LogicalModel model, Function<SchemaCategory, TestMapping> initCreator) {
+        final Mapping mapping = initCreator.apply(schema).mapping();
         final var init = new MappingInit(
             model.id,
             mapping.rootObject().key(),
@@ -41,13 +41,13 @@ public class MappingBuilder {
             mapping.accessPath(),
             version
         );
-        output.add(init);
+        inits.add(init);
 
         return this;
     }
 
-    public List<MappingInfo> build(Function<MappingInit, MappingInfo> function) {
-        return output.stream().map(function).toList();
+    public List<MappingInfo> build(Function<MappingInit, MappingInfo> mappingCreator) {
+        return inits.stream().map(mappingCreator).toList();
     }
 
 }

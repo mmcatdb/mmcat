@@ -4,7 +4,7 @@ import static cz.matfyz.server.repository.utils.Utils.getId;
 import static cz.matfyz.server.repository.utils.Utils.setId;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.Database;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
@@ -22,7 +22,7 @@ public class DatabaseRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public Database find(Id id) {
+    public DatabaseEntity find(Id id) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM database_for_mapping WHERE id = ?;");
             setId(statement, 1, id);
@@ -30,12 +30,12 @@ public class DatabaseRepository {
 
             if (resultSet.next()) {
                 String jsonValue = resultSet.getString("json_value");
-                output.set(Database.fromJsonValue(id, jsonValue));
+                output.set(DatabaseEntity.fromJsonValue(id, jsonValue));
             }
         });
     }
 
-    public List<Database> findAll() {
+    public List<DatabaseEntity> findAll() {
         return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("SELECT * FROM database_for_mapping ORDER BY id;");
             var resultSet = statement.executeQuery();
@@ -43,12 +43,12 @@ public class DatabaseRepository {
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(Database.fromJsonValue(id, jsonValue));
+                output.add(DatabaseEntity.fromJsonValue(id, jsonValue));
             }
         });
     }
 
-    public List<Database> findAllInCategory(Id categoryId) {
+    public List<DatabaseEntity> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                     SELECT
@@ -65,16 +65,16 @@ public class DatabaseRepository {
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(Database.fromJsonValue(id, jsonValue));
+                output.add(DatabaseEntity.fromJsonValue(id, jsonValue));
             }
         });
     }
 
-    public Database save(Database database) {
+    public DatabaseEntity save(DatabaseEntity database) {
         return database.id == null ? create(database) : update(database);
     }
 
-    private Database create(Database database) {
+    private DatabaseEntity create(DatabaseEntity database) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("INSERT INTO database_for_mapping (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, database.toJsonValue());
@@ -86,12 +86,12 @@ public class DatabaseRepository {
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 Id id = getId(generatedKeys, "id");
-                output.set(new Database(id, database));
+                output.set(new DatabaseEntity(id, database));
             }
         });
     }
 
-    private Database update(Database database) {
+    private DatabaseEntity update(DatabaseEntity database) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("UPDATE database_for_mapping SET json_value = ?::jsonb WHERE id = ?;");
             statement.setString(1, database.toJsonValue());
@@ -101,7 +101,7 @@ public class DatabaseRepository {
             if (affectedRows == 0)
                 return;
 
-            output.set(new Database(database.id, database));
+            output.set(new DatabaseEntity(database.id, database));
         });
     }
 

@@ -154,7 +154,6 @@ export class VersionedSchemaMorphism {
     }
 
     private updateGraph(graph: Graph) {
-        console.log('UPDATE');
         graph.deleteEdge(this.signature);
         if (this._current)
             graph.createEdge(this._current);

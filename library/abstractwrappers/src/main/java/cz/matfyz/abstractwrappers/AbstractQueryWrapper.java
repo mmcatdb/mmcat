@@ -135,6 +135,7 @@ public interface AbstractQueryWrapper {
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
 
+    // TODO add to json conversion for FE. Also, probably move to a separate file.
     public static class QueryStructure implements Tree<QueryStructure> {
     
         public final String name;
@@ -142,7 +143,7 @@ public interface AbstractQueryWrapper {
         public final boolean isArray;
         public final Map<String, QueryStructure> children = new TreeMap<>();
 
-        // If null, this is the root of the tree.
+        /** If null, this is the root of the tree. */
         @Nullable
         private QueryStructure parent;
 
