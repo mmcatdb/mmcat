@@ -19,6 +19,16 @@ const emit = defineEmits<{
 
 const fetching = ref(false);
 
+async function startJob() {
+    fetching.value = true;
+
+    const result = await API.jobs.startJob({ id: props.job.id });
+    if (result.status)
+        emit('updateJob', Job.fromServer(result.data));
+
+    fetching.value = false;
+}
+
 async function cancelJob() {
     fetching.value = true;
 
@@ -90,20 +100,28 @@ async function restartJob() {
         </div>
         <div class="d-flex gap-3 align-self-center">
             <button
+                v-if="job.state === JobState.Paused"
+                :disabled="fetching"
+                class="success"
+                @click="startJob"
+            >
+                Start
+            </button>
+            <button
+                v-if="job.state === JobState.Paused || job.state === JobState.Ready"
+                :disabled="fetching"
+                class="warning"
+                @click="cancelJob"
+            >
+                Cancel
+            </button>
+            <button
                 v-if="job.state === JobState.Finished || job.state === JobState.Failed || job.state === JobState.Canceled"
                 :disabled="fetching"
                 class="info"
                 @click="restartJob"
             >
                 Restart
-            </button>
-            <button
-                v-if="job.state === JobState.Ready"
-                :disabled="fetching"
-                class="warning"
-                @click="cancelJob"
-            >
-                Cancel
             </button>
         </div>
     </div>

@@ -4,6 +4,7 @@ import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.Job.State;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
@@ -65,11 +66,25 @@ public class JobController {
         return jobToJobDetail(service.createRestartedJob(jobWithRun));
     }
 
+    @PostMapping("/jobs/{id}/pause")
+    public JobDetail pauseJob(@PathVariable Id id, HttpSession session) {
+        final var jobWithRun = repository.find(id);
+
+        return jobToJobDetail(service.transition(jobWithRun, State.Paused));
+    }
+
+    @PostMapping("/jobs/{id}/start")
+    public JobDetail startJob(@PathVariable Id id, HttpSession session) {
+        final var jobWithRun = repository.find(id);
+
+        return jobToJobDetail(service.transition(jobWithRun, State.Ready));
+    }
+
     @PostMapping("/jobs/{id}/cancel")
     public JobDetail cancelJob(@PathVariable Id id, HttpSession session) {
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.cancel(jobWithRun));
+        return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
     }
 
     private JobDetail jobToJobDetail(JobWithRun job) {        

@@ -8,6 +8,7 @@ type JobDisplayProps = {
 defineProps<JobDisplayProps>();
 
 const states: Record<JobState, { label: string, bg: string, color: string }> = {
+    [JobState.Paused]: { label: 'Paused', bg: 'warning', color: 'white' },
     [JobState.Ready]: { label: 'Waiting', bg: 'secondary', color: 'white' },
     [JobState.Running]: { label: 'Running', bg: 'info', color: 'white' },
     [JobState.Failed]: { label: 'Failed', bg: 'danger', color: 'white' },

@@ -25,7 +25,7 @@ async function fetchJob() {
     <h1>Job</h1>
     <div
         v-if="job"
-        class="job"
+        class="d-flex flex-column"
     >
         <JobDisplay
             :job="job"
@@ -34,9 +34,3 @@ async function fetchJob() {
     </div>
     <ResourceLoader :loading-function="fetchJob" />
 </template>
-
-<style scoped>
-.job {
-    display: flex;
-}
-</style>

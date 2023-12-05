@@ -15,6 +15,9 @@ const jobs = {
     createRestartedJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/restart`,
     ),
+    startJob: POST<{ id: StringLike }, JobFromServer>(
+        u => `/jobs/${u.id}/start`,
+    ),
     cancelJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/cancel`,
     ),

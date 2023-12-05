@@ -27,8 +27,8 @@ class DatabaseSetup {
     List<DatabaseEntity> createDatabases() {
         final List<DatabaseInit> inits = new ArrayList<>();
 
-        inits.add(settings.createPostgreSQL("PostgreSQL - Query Evolution"));
-        inits.add(settings.createMongoDB("MongoDB - Query Evolution"));
+        inits.add(settings.createPostgreSQL("PostgreSQL"));
+        inits.add(settings.createMongoDB("MongoDB"));
         
         return inits.stream().map(databaseService::createNew).toList();
     }

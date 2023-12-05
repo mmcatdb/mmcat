@@ -19,7 +19,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class Job extends Entity {
 
     public enum State {
-        /** The job can be started now. */
+        /** The job can be started/resumed. */
+        Paused,
+        /** The job will soon be started automatically. */
         Ready,
         /** The job is currently being processed. */
         Running,
@@ -49,14 +51,14 @@ public class Job extends Entity {
         this.data = data;
     }
 
-    public static Job createNew(Id runId, String label, ActionPayload payload) {
+    public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually) {
         return new Job(
             Id.createNewUUID(),
             runId,
             label,
             new Date(),
             payload,
-            State.Ready,
+            isStartedManually ? State.Paused : State.Ready,
             null
         );
     }

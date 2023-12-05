@@ -43,6 +43,7 @@ export class Job implements Entity {
 }
 
 export enum JobState {
+    Paused = 'Paused',
     Ready = 'Ready',
     Running = 'Running',
     Finished = 'Finished',

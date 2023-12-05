@@ -12,7 +12,8 @@ import { QueryDescription, type QueryWithVersion } from '@/types/query';
 import QueryDisplay from './QueryDisplay.vue';
 import QueryDescriptionDisplay from './QueryDescriptionDisplay.vue';
 
-const DEFAULT_QUERY_STRING = `SELECT {
+/* Example:
+SELECT {
     ?product
         productId ?id ;
         name ?label ;
@@ -23,7 +24,10 @@ WHERE {
         15 ?id ;
         16 ?label ;
         17 ?price .
-}`;
+}
+*/
+
+const DEFAULT_QUERY_STRING = '';
 
 export type QueryLog = {
     id: number;
