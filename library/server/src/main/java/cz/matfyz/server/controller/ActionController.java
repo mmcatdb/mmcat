@@ -1,8 +1,8 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.evolution.Version;
+import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelInfo;
 import cz.matfyz.server.repository.DataSourceRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.entity.action.Action;
@@ -81,12 +81,14 @@ public class ActionController {
     // TODO switch to pattern matching when available.
     ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
         if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
-            final var logicalModel = logicalModelRepository.find(modelToCategoryPayload.logicalModelId()).toInfo();
-            return new ModelToCategoryPayloadDetail(logicalModel);
+            final var model = logicalModelRepository.find(modelToCategoryPayload.logicalModelId());
+            final var info = LogicalModelInfo.fromEntities(model);
+            return new ModelToCategoryPayloadDetail(info);
         }
         if (payload instanceof CategoryToModelPayload categoryToModelPayload) {
-            final var logicalModel = logicalModelRepository.find(categoryToModelPayload.logicalModelId()).toInfo();
-            return new CategoryToModelPayloadDetail(logicalModel);
+            final var model = logicalModelRepository.find(categoryToModelPayload.logicalModelId());
+            final var info = LogicalModelInfo.fromEntities(model);
+            return new CategoryToModelPayloadDetail(info);
         }
         if (payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload) {
             final var dataSource = dataSourceRepository.find(jsonLdToCategoryPayload.dataSourceId());

@@ -3,11 +3,16 @@ package cz.matfyz.server.repository;
 import static cz.matfyz.server.repository.utils.Utils.getId;
 import static cz.matfyz.server.repository.utils.Utils.setId;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
@@ -23,35 +28,63 @@ public class LogicalModelRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public List<LogicalModel> findAllInCategory(Id categoryId) {
+    public static record LogicalModelWithDatabase(
+        LogicalModel logicalModel,
+        DatabaseEntity database
+    ) {}
+
+    private static LogicalModelWithDatabase modelFromResultSet(ResultSet resultSet, Id modelId, Id categoryId) throws SQLException, JsonProcessingException {
+        final String modelJsonValue = resultSet.getString("logical_model.json_value");
+        final Id databaseId = getId(resultSet, "database.id");
+        final String databaseJsonValue = resultSet.getString("database.json_value");
+
+        return new LogicalModelWithDatabase(
+            LogicalModel.fromJsonValue(modelId, categoryId, databaseId, modelJsonValue),
+            DatabaseEntity.fromJsonValue(databaseId, databaseJsonValue)
+        );
+    }
+
+    public List<LogicalModelWithDatabase> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM logical_model WHERE schema_category_id = ? ORDER BY id;");
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    logical_model.id as "logical_model.id",
+                    logical_model.json_value as "logical_model.json_value",
+                    database_for_mapping.id as "database.id",
+                    database_for_mapping.json_value as "database.json_value"
+                FROM logical_model
+                JOIN database_for_mapping ON database_for_mapping.id = logical_model.database_id
+                WHERE logical_model.schema_category_id = ?
+                ORDER BY logical_model.id;
+                """);
             setId(statement, 1, categoryId);
-            var resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Id foundId = getId(resultSet, "id");
-                Id databaseId = getId(resultSet, "database_id");
-                String jsonValue = resultSet.getString("json_value");
-
-                output.add(LogicalModel.fromJsonValue(foundId, categoryId, databaseId, jsonValue));
+                final Id modelId = getId(resultSet, "logical_model.id");
+                output.add(modelFromResultSet(resultSet, modelId, categoryId));
             }
         });
     }
 
-    public LogicalModel find(Id id) {
+    public LogicalModelWithDatabase find(Id id) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM logical_model WHERE id = ?;");
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    logical_model.schema_category_id as "logical_model.schema_category_id",
+                    logical_model.json_value as "logical_model.json_value",
+                    database_for_mapping.id as "database.id",
+                    database_for_mapping.json_value as "database.json_value"
+                FROM logical_model
+                JOIN database_for_mapping ON database_for_mapping.id = logical_model.database_id
+                WHERE logical_model.id = ?;
+                """);
             setId(statement, 1, id);
-            var resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                Id foundId = getId(resultSet, "id");
-                Id categoryId = getId(resultSet, "schema_category_id");
-                Id databaseId = getId(resultSet, "database_id");
-                String jsonValue = resultSet.getString("json_value");
-
-                output.set(LogicalModel.fromJsonValue(foundId, categoryId, databaseId, jsonValue));
+                final Id categoryId = getId(resultSet, "logical_model.schema_category_id");
+                output.set(modelFromResultSet(resultSet, id, categoryId));
             }
         },
         "Logical model with id: %s not found.", id);
@@ -59,7 +92,7 @@ public class LogicalModelRepository {
 
     public Id add(LogicalModelInit init) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("""
+            final var statement = connection.prepareStatement("""
                 INSERT INTO logical_model (schema_category_id, database_id, json_value)
                 VALUES (?, ?, ?::jsonb);
                 """,
@@ -69,11 +102,11 @@ public class LogicalModelRepository {
             setId(statement, 2, init.databaseId());
             statement.setString(3, init.toJsonValue());
 
-            int affectedRows = statement.executeUpdate();
+            final int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
                 return;
 
-            var generatedKeys = statement.getGeneratedKeys();
+            final var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
                 output.set(getId(generatedKeys, "id"));
         });

@@ -5,28 +5,19 @@ import API from '@/utils/api';
 
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
-import { DatabaseInfo } from '@/types/database';
 import { useRouter } from 'vue-router';
 import { useSchemaCategoryId } from '@/utils/injects';
 
-type LogicalModelDatabase = {
-    logicalModel: LogicalModelInfo;
-    database: DatabaseInfo;
-};
-
-const infos = ref<LogicalModelDatabase[]>();
+const infos = ref<LogicalModelInfo[]>();
 
 const categoryId = useSchemaCategoryId();
 
 async function fetchModels() {
-    const result = await API.logicalModels.getAllLogicalModelDatabaseInfosInCategory({ categoryId });
+    const result = await API.logicalModels.getAllLogicalModelInfosInCategory({ categoryId });
     if (!result.status)
         return false;
 
-    infos.value = result.data.map(info => ({
-        logicalModel: LogicalModelInfo.fromServer(info.logicalModel),
-        database: DatabaseInfo.fromServer(info.database),
-    }));
+    infos.value = result.data.map(LogicalModelInfo.fromServer);
 
     return true;
 }
@@ -51,11 +42,10 @@ function createNew() {
             <div class="logical-models">
                 <div
                     v-for="info in infos"
-                    :key="info.logicalModel.id"
+                    :key="info.id"
                 >
                     <LogicalModelDisplay
-                        :logical-model="info.logicalModel"
-                        :database="info.database"
+                        :logical-model="info"
                     />
                 </div>
             </div>

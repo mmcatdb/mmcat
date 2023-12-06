@@ -1,17 +1,11 @@
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Core, ElementDefinition, NodeSingular } from 'cytoscape';
-import type { Signature } from '../identifiers';
+import type { Key, Signature } from '../identifiers';
 import type { ComparablePosition, SchemaObject } from '../schema';
 import { DirectedEdge, type Edge } from './Edge';
 import { PathMarker, type MorphismData, type Filter } from './PathMarker';
-import type { LogicalModelInfo } from '../logicalModel';
-
-export type Group = {
-    id: number;
-    logicalModel: LogicalModelInfo;
-    node: NodeSingular;
-};
-
+import { groupHighlightColorToClass } from '@/components/category/defaultGraphStyle';
+import type { Group } from './Graph';
 
 export enum NodeTag {
     Root = 'tag-root'
@@ -82,20 +76,12 @@ export class Node {
 
     private constructor(
         public schemaObject: SchemaObject,
-        private groupPlaceholders: { group: Group, node: NodeSingular }[],
-        private noGroupPlaceholder?: NodeSingular,
+        readonly highlights: NodeHighlights,
     ) {}
 
     static create(cytoscape: Core, object: SchemaObject, position: ComparablePosition, groups: Group[]): Node {
-        const groupPlaceholders = groups.map(group => ({
-            group,
-            node: cytoscape.add(createGroupPlaceholderDefinition(object, position, group.id)),
-        }));
-        const noGroupPlaceholder = groupPlaceholders.length > 0
-            ? undefined
-            : cytoscape.add(createNoGroupDefinition(object, position));
-
-        const node = new Node(object, groupPlaceholders, noGroupPlaceholder);
+        const highlights = new NodeHighlights(cytoscape, groups, object.key, position);
+        const node = new Node(object, highlights);
         const classes = (object.isNew ? 'new' : '') + ' ' + (!object.ids ? 'no-ids' : '');
         const nodeDefinition = createNodeDefinition(object, position, node, classes);
         const cytoscapeNode = cytoscape.add(nodeDefinition);
@@ -110,12 +96,7 @@ export class Node {
     }
 
     remove() {
-        this.noGroupPlaceholder?.remove();
-        this.groupPlaceholders.forEach(placeholder => {
-            placeholder.node.remove();
-            if (placeholder.group.node.children().length === 0)
-                placeholder.group.node.remove();
-        });
+        this.highlights.remove();
         this.node.remove();
     }
 
@@ -130,12 +111,7 @@ export class Node {
 
         if (!this.node.inside()) {
             this.node.restore();
-            this.noGroupPlaceholder?.restore();
-            this.groupPlaceholders.forEach(placeholder => {
-                if (!placeholder.group.node.inside())
-                    placeholder.group.node.restore();
-                placeholder.node.restore();
-            });
+            this.highlights.restore();
         }
     }
 
@@ -147,10 +123,7 @@ export class Node {
     }
 
     refreshGroupPlaceholders() {
-        this.groupPlaceholders.forEach(placeholder => {
-            placeholder.node.remove();
-            placeholder.node.restore();
-        });
+        this.highlights.refresh();
     }
 
     addNeighbor(edge: Edge, direction: boolean): void {
@@ -208,9 +181,9 @@ export class Node {
 
     get label(): string {
         return this.schemaObject.label + (
-            this._selectionStatus.type === SelectionType.Selected ?
-                ` (${this._selectionStatus.level + 1})` :
-                ''
+            this._selectionStatus.type === SelectionType.Selected
+                ? ` (${this._selectionStatus.level + 1})`
+                : ''
         );
     }
 
@@ -277,24 +250,77 @@ function createNodeDefinition(object: SchemaObject, position: ComparablePosition
     };
 }
 
-function createGroupPlaceholderDefinition(object: SchemaObject, position: ComparablePosition, groupId: number): ElementDefinition {
+type GroupPlaceholder = {
+    group: Group;
+    node: NodeSingular;
+    state: 'root' | 'property' | undefined;
+};
+
+class NodeHighlights {
+    private readonly placeholders: Map<string, GroupPlaceholder> = new Map();
+
+    public constructor(
+        private readonly cytoscape: Core,
+        groups: Group[],
+        key: Key,
+        position: ComparablePosition,
+    ) {
+        groups.forEach(group => {
+            this.placeholders.set(group.id, {
+                group,
+                node: this.cytoscape.add(createGroupPlaceholderDefinition(key, position, group.id)),
+                state: undefined,
+            });
+        });
+    }
+
+    select(groupId: string, type: 'root' | 'property', value: boolean) {
+        const placeholder = this.placeholders.get(groupId);
+        if (!placeholder)
+            return;
+
+        if (placeholder.state !== undefined)
+            placeholder.node.removeClass(groupHighlightColorToClass(placeholder.group.id, placeholder.state));
+
+        placeholder.state = value ? type : undefined;
+        if (placeholder.state !== undefined)
+            placeholder.node.addClass(groupHighlightColorToClass(placeholder.group.id, placeholder.state));
+
+        // We have to hide all other so that the selected one is visible.
+        this.placeholders.forEach(p => p.node.toggleClass('group-placeholder-hidden', !value || p.group.id !== groupId));
+    }
+
+    remove() {
+        this.placeholders.forEach(placeholder => {
+            placeholder.node.remove();
+            if (placeholder.group.node.children().length === 0)
+                placeholder.group.node.remove();
+        });
+    }
+
+    restore() {
+        this.placeholders.forEach(placeholder => {
+            if (!placeholder.group.node.inside())
+                placeholder.group.node.restore();
+            placeholder.node.restore();
+        });
+    }
+
+    refresh() {
+        this.placeholders.forEach(placeholder => {
+            placeholder.node.remove();
+            placeholder.node.restore();
+        });
+    }
+}
+
+function createGroupPlaceholderDefinition(key: Key, position: ComparablePosition, groupId: string): ElementDefinition {
     return {
         data: {
-            id: groupId + '_' + object.key.value,
+            id: groupId + '_' + key.value,
             parent: 'group_' + groupId,
         },
         position: position,
-        classes: 'group-placeholder',
-    };
-}
-
-
-function createNoGroupDefinition(object: SchemaObject, position: ComparablePosition): ElementDefinition {
-    return {
-        data: {
-            id: 'no-group_' + object.key.value,
-        },
-        position: position,
-        classes: 'no-group',
+        classes: 'group-placeholder group-placeholder-hidden',
     };
 }

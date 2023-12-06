@@ -38,9 +38,6 @@ public class QueryService {
     private LogicalModelService logicalModelService;
 
     @Autowired
-    private DatabaseService databaseService;
-
-    @Autowired
     private WrapperService wrapperService;
 
     @Autowired
@@ -82,12 +79,12 @@ public class QueryService {
 
         final var kinds = logicalModelService
             .findAll(categoryId).stream()
-            .flatMap(logicalModel -> {
-                final var databaseEntity = databaseService.find(logicalModel.databaseId);
+            .flatMap(model -> {
+                final DatabaseEntity databaseEntity = model.database();
                 databases.put(databaseEntity.id, databaseEntity);
 
                 final var builder = new Database.Builder();
-                mappingService.findAll(logicalModel.id).forEach(mappingWrapper -> {
+                mappingService.findAll(model.logicalModel().id).forEach(mappingWrapper -> {
                     final var mapping = MappingBuilder.build(category, mappingWrapper);
                     builder.mapping(mapping);
                 });

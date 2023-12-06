@@ -1,11 +1,13 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.database.DatabaseInfo;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelDetail;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelInfo;
+import cz.matfyz.server.entity.database.DatabaseWithConfiguration;
+import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
-import cz.matfyz.server.service.DatabaseService;
+import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatabase;
 import cz.matfyz.server.service.LogicalModelService;
 
 import java.util.List;
@@ -31,8 +33,23 @@ public class LogicalModelController {
     @Autowired
     private LogicalModelService service;
 
-    @Autowired
-    private DatabaseService databaseService;
+    public static record LogicalModelDetail(
+        Id id,
+        Id categoryId,
+        DatabaseWithConfiguration database,
+        String label,
+        List<MappingWrapper> mappings
+    ) implements IEntity {
+        public static LogicalModelDetail fromEntities(LogicalModel model, DatabaseWithConfiguration database, List<MappingWrapper> mappings) {
+            return new LogicalModelDetail(
+                model.id,
+                model.categoryId,
+                database,
+                model.label,
+                mappings
+            );
+        }
+    }
 
     @GetMapping("/logical-models/{id}")
     public LogicalModelDetail getLogicalModel(@PathVariable Id id) {
@@ -50,29 +67,28 @@ public class LogicalModelController {
         return service.findAllFull(categoryId);
     }
 
-    @PostMapping("/logical-models")
-    public LogicalModelInfo createNewLogicalModel(@RequestBody LogicalModelInit init) {
-        return service.createNew(init).toInfo();
+    public static record LogicalModelInfo(
+        Id id,
+        String label,
+        DatabaseInfo database
+    ) {
+        public static LogicalModelInfo fromEntities(LogicalModelWithDatabase modelWithDatabase) {
+            return new LogicalModelInfo(
+                modelWithDatabase.logicalModel().id,
+                modelWithDatabase.logicalModel().label,
+                modelWithDatabase.database().toInfo()
+            );
+        }
     }
 
-    private record LogicalModelDatabaseInfo(
-        LogicalModelInfo logicalModel,
-        DatabaseInfo database
-    ) {}
+    @PostMapping("/logical-models")
+    public LogicalModelInfo createNewLogicalModel(@RequestBody LogicalModelInit init) {
+        return LogicalModelInfo.fromEntities(service.createNew(init));
+    }
 
     @GetMapping("/schema-categories/{categoryId}/logical-model-infos")
-    public List<LogicalModelDatabaseInfo> getAllLogicalModelDatabaseInfosInCategory(@PathVariable Id categoryId) {
-        var databases = databaseService.findAll();
-
-
-        return service.findAll(categoryId).stream().map(logicalModel -> {
-            var database = databases.stream().filter(d -> d.id.equals(logicalModel.databaseId)).findFirst();
-
-            return new LogicalModelDatabaseInfo(
-                logicalModel.toInfo(),
-                database.isPresent() ? database.get().toInfo() : null
-            );
-        }).toList();
+    public List<LogicalModelInfo> getAllLogicalModelInfosInCategory(@PathVariable Id categoryId) {
+        return service.findAll(categoryId).stream().map(LogicalModelInfo::fromEntities).toList();
     }
 
 }

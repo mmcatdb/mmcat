@@ -26,10 +26,6 @@ public class LogicalModel extends Entity {
         this.label = label;
     }
 
-    public LogicalModelInfo toInfo() {
-        return new LogicalModelInfo(id, label);
-    }
-
     private static final List<String> idPropertyNames = List.of("id", "categoryId", "databaseId");
 
     public String toJsonValue() throws JsonProcessingException {

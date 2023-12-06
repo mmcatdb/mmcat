@@ -1,10 +1,7 @@
-import { ComparableSet } from '@/utils/ComparableSet';
 import type { Iri } from '@/types/integration';
 import type { Position } from 'cytoscape';
 import { Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer } from '../identifiers';
 import { ComparablePosition } from './Position';
-import type { LogicalModel } from '../logicalModel';
-import type { Id } from '../id';
 import { SchemaCategoryInvalidError } from './Error';
 import type { Optional } from '@/utils/common';
 import type { Graph } from '../categoryGraph';
@@ -183,7 +180,7 @@ export class VersionedSchemaObject {
         const currentNode = graph.getNode(this.key);
         if (!currentNode) {
             if (this._current)
-                graph.createNode(this._current, this._position, [ ...this.logicalModels.values() ]);
+                graph.createNode(this._current, this._position, [ ...this.groupIds.values() ]);
 
             return;
         }
@@ -194,9 +191,9 @@ export class VersionedSchemaObject {
             currentNode.update(this._current);
     }
 
-    private logicalModels: ComparableSet<LogicalModel, Id> = new ComparableSet(model => model.id);
+    private readonly groupIds: Set<string> = new Set();
 
-    addLogicalModel(model: LogicalModel) {
-        this.logicalModels.add(model);
+    addGroup(id: string) {
+        this.groupIds.add(id);
     }
 }

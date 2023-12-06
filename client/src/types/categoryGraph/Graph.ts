@@ -1,10 +1,11 @@
 import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from 'cytoscape';
-import type { LogicalModel } from '../logicalModel';
-import type { ComparablePosition, SchemaMorphism, SchemaObject } from '../schema';
+import type { ComparablePosition, GroupData, SchemaMorphism, SchemaObject } from '../schema';
 import { Edge } from './Edge';
-import { Node, type Group } from './Node';
+import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/utils/ComparableMap';
+import type { Id } from '../id';
+import { shallowRef } from 'vue';
 
 export type TemporaryEdge = {
     delete: () => void;
@@ -13,20 +14,22 @@ export type TemporaryEdge = {
 export class Graph {
     private readonly nodes: ComparableMap<Key, number, Node> = new ComparableMap(key => key.value);
     private readonly edges: ComparableMap<Signature, string, Edge> = new ComparableMap(signature => signature.value);
-    private eventListener: GraphEventListener;
+    private readonly eventListener: GraphEventListener;
+    public readonly highlights: GraphHighlights;
 
     constructor(
         private readonly cytoscape: Core,
     ) {
         this.eventListener = new GraphEventListener(cytoscape);
+        this.highlights = new GraphHighlights({ nodes: this.nodes, edges: this.edges, cytoscape });
     }
 
-    public resetElements(): void {
+    public resetElements(groupsData: GroupData[]): void {
         this.cytoscape.elements().remove();
-
         this.nodes.clear();
         this.edges.clear();
-        this.groups = [];
+
+        this.highlights.reset(groupsData);
     }
 
     public batch(callback: () => void): void {
@@ -41,33 +44,9 @@ export class Graph {
         this.nodes.forEach(node => node.resetAvailabilityStatus());
     }
 
-    groups: Group[] = [];
-
-    getGroupOrAddIt(logicalModel: LogicalModel): Group {
-        const results = this.groups.filter(group => group.logicalModel.id === logicalModel.id);
-        if (results[0])
-            return results[0];
-
-        const id = this.groups.length + 1;
-        const newGroup = {
-            id,
-            logicalModel,
-            node: this.cytoscape.add({
-                data: {
-                    id: 'group_' + id,
-                    label: logicalModel.label,
-                },
-                classes: 'group ' + 'group-' + id,
-            }),
-        };
-
-        this.groups.push(newGroup);
-        return newGroup;
-    }
-
-    createNode(object: SchemaObject, position: ComparablePosition, logicalModels: LogicalModel[]): Node {
-        const groups = logicalModels.map(logicalModel => this.getGroupOrAddIt(logicalModel));
-        const node = Node.create(this.cytoscape, object, position, groups);
+    createNode(object: SchemaObject, position: ComparablePosition, groupIds: string[]): Node {
+        const nodeGroups = groupIds.map(groupId => this.highlights.getOrCreateGroup(groupId));
+        const node = Node.create(this.cytoscape, object, position, nodeGroups);
         this.nodes.set(object.key, node);
 
         return node;
@@ -82,7 +61,7 @@ export class Graph {
         this.nodes.delete(object.key);
 
         // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
-        // However, the no-group placeholder has to be removed.
+        // TODO might not be true anymore.
     }
 
     createEdge(morphism: SchemaMorphism): Edge {
@@ -148,18 +127,18 @@ export class Graph {
         this.nodes.forEach(node => node.isFixed = true);
     }
 
+    /** Workaround for some cytoscape BS. */
     resetLayout() {
         this.nodes.forEach(node => node.isFixed = false);
 
         // A necessary workaround for the bug with nodes without placeholders. More below.
         // Also, both parts of the workaround DO HAVE to be outside the layout function. Otherwise it causes a particularly hard to find bug (when the layout function is called from AddObject, then a new morphism is added in AddMorphism and then this function is called).
-        this.groups.forEach(group => group.node.remove());
+        this.highlights.resetLayout(false);
 
         this.layout();
 
         // A continuation of the workaround.
-        this.groups.forEach(group => group.node.restore());
-        this.nodes.forEach(node => node.refreshGroupPlaceholders());
+        this.highlights.resetLayout(true);
     }
 
     getNode(key: Key): Node | undefined {
@@ -259,7 +238,6 @@ class ListenerSession {
         return this.createEventHandler(event, innerHandler, 'edge');
     }
 
-
     onCanvas(event: string, handler: CanvasEventFunction): number {
         const innerHandler = (event: EventObject) => {
             if (event.target === this.cytoscape)
@@ -271,5 +249,153 @@ class ListenerSession {
 
     off(handlerId: number) {
         this.removeEventHandler(handlerId);
+    }
+}
+
+type GraphControl = {
+    nodes: ComparableMap<Key, number, Node>;
+    edges: ComparableMap<Signature, string, Edge>;
+    cytoscape: Core;
+};
+
+export type Group = GroupData & {
+    node: NodeSingular;
+};
+
+export type GraphHighlightState = {
+    groupId: string;
+    mappingId?: Id;
+} | undefined;
+
+class GraphHighlights {
+    private readonly _groups: Map<string, Group> = new Map();
+    /** Reactive accessor */
+    readonly groups = shallowRef<Group[]>([]);
+    private availableGroups: GroupData[] = [];
+
+    constructor(
+        private readonly control: GraphControl,
+    ) {
+        control.cytoscape.on('tap', 'node', (event: EventObject) => {
+            const node = (event.target as NodeSingular).data('schemaData') as Node;
+            this.clickNode(node);
+        });
+    }
+
+    reset(availableGroups: GroupData[]) {
+        this.availableGroups = availableGroups;
+        this._groups.clear();
+        this.groups.value = [];
+    }
+
+    // API
+
+    getOrCreateGroup(groupId: string): Group {
+        const group = this._groups.get(groupId);
+        if (group)
+            return group;
+
+        const groupData = this.availableGroups.find(group => group.id === groupId);
+        if (!groupData)
+            throw new Error('Group not found: ' + groupId);
+
+        const id = groupData.id;
+
+        const newGroup = {
+            ...groupData,
+            node: this.control.cytoscape.add({
+                data: {
+                    id: 'group_' + id,
+                    label: groupData.logicalModel.label,
+                },
+                classes: 'group ' + 'group-' + id,
+            }),
+        };
+
+        this._groups.set(groupId, newGroup);
+        this.groups.value = [ ...this._groups.values() ];
+
+        return newGroup;
+    }
+
+    clickGroup(groupId: string): GraphHighlightState {
+        if (this.state?.groupId === groupId)
+            this.setState(undefined);
+        else
+            this.setState({ groupId });
+
+        return this.state;
+    }
+
+    clickNode(node: Node): GraphHighlightState {
+        if (!this.state)
+            return;
+
+        const mapping = this._groups.get(this.state.groupId)?.mappings.find(mapping => mapping.root.key.equals(node.schemaObject.key));
+        if (!mapping)
+            // The node is not a root of any mapping in the current active group.
+            return;
+
+        if (this.state.mappingId === mapping.mapping.id)
+            // Deactivate the current mapping.
+            this.setState({ groupId: this.state.groupId });
+        else
+            // Activate a new mapping.
+            this.setState({ groupId: this.state.groupId, mappingId: mapping.mapping.id });
+    }
+
+    // Inner state logic
+
+    private state: GraphHighlightState = undefined;
+
+    private setState(newState: GraphHighlightState) {
+        this.toggleState(this.state, false);
+        this.toggleState(newState, true);
+        this.state = newState;
+    }
+
+    private toggleState(state: GraphHighlightState, value: boolean) {
+        if (!state)
+            return;
+
+        if (!state.mappingId) {
+            this.toggleGroup(state.groupId, value);
+            return;
+        }
+
+        this.toggleMapping(state.groupId, state.mappingId, value);
+    }
+
+    private toggleGroup(groupId: string, value: boolean) {
+        const group = this._groups.get(groupId);
+        if (!group)
+            return;
+
+        group.mappings.forEach(mapping => {
+            if (!mapping.root)
+                return;
+
+            this.control.nodes.get(mapping.root.key)?.highlights.select(group.id, 'root', value);
+        });
+    }
+
+    private toggleMapping(groupId: string, mappingId: Id, value: boolean) {
+        const mapping = this._groups.get(groupId)?.mappings.find(mapping => mapping.mapping.id === mappingId);
+        if (!mapping)
+            return;
+
+        this.control.nodes.get(mapping.root.key)?.highlights.select(groupId, 'root', value);
+        mapping.properties.forEach(property => this.control.nodes.get(property.key)?.highlights.select(groupId, 'property', value));
+    }
+
+    /** Workaround for some cytoscape BS. */
+    resetLayout(isFirst: boolean) {
+        if (isFirst) {
+            this._groups.forEach(group => group.node.remove());
+        }
+        else {
+            this._groups.forEach(group => group.node.restore());
+            this.control.nodes.forEach(node => node.refreshGroupPlaceholders());
+        }
     }
 }

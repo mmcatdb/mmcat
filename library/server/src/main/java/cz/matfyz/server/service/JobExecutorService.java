@@ -26,7 +26,6 @@ import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
-import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
@@ -135,9 +134,7 @@ public class JobExecutorService {
     }
 
     private void modelToCategoryAlgorithm(Run run, ModelToCategoryPayload payload) {
-        final LogicalModel logicalModel = logicalModelService.find(payload.logicalModelId());
-        final DatabaseEntity database = databaseService.find(logicalModel.databaseId);
-
+        final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
@@ -156,8 +153,7 @@ public class JobExecutorService {
         // final InstanceCategory instance = store.getCategory(run.categoryId);
         InstanceCategory instance = null;
 
-        final LogicalModel logicalModel = logicalModelService.find(payload.logicalModelId());
-        final DatabaseEntity database = databaseService.find(logicalModel.databaseId);
+        final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
         final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
             .map(wrapper -> createMapping(wrapper, run.categoryId))
             .toList();

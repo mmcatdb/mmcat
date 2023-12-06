@@ -2,14 +2,12 @@
 import {  } from 'vue';
 import type { LogicalModelInfo } from '@/types/logicalModel';
 import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
-import type { DatabaseInfo } from '@/types/database';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useRoute } from 'vue-router';
 
 type LogicalModelDisplayProps = {
     logicalModel: LogicalModelInfo;
-    database?: DatabaseInfo;
 };
 
 defineProps<LogicalModelDisplayProps>();
@@ -27,11 +25,10 @@ const route = useRoute();
                 {{ logicalModel.id }}
             </ValueRow>
             <ValueRow
-                v-if="database"
                 label="Database:"
             >
-                <RouterLink :to="{ name: 'database', params: { id: database.id }, query: { categoryId: route.params.categoryId } }">
-                    {{ database.label }}
+                <RouterLink :to="{ name: 'database', params: { id: logicalModel.database.id }, query: { categoryId: route.params.categoryId } }">
+                    {{ logicalModel.database.label }}
                 </RouterLink>
             </ValueRow>
         </ValueContainer>

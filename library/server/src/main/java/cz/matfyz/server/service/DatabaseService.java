@@ -64,9 +64,12 @@ public class DatabaseService {
     }
 
     public List<DatabaseWithConfiguration> findAllDatabasesWithConfiguration() {
-        return findAll().stream().map(database -> {
-            var configuration = new DatabaseConfiguration(wrapperService.getControlWrapper(database).getPathWrapper());
-            return new DatabaseWithConfiguration(database, configuration);
-        }).toList();
+        return findAll().stream().map(this::getDatabaseConfiguration).toList();
+    }
+
+    public DatabaseWithConfiguration getDatabaseConfiguration(DatabaseEntity database) {
+        final var configuration = new DatabaseConfiguration(wrapperService.getControlWrapper(database).getPathWrapper());
+
+        return new DatabaseWithConfiguration(database, configuration);
     }
 }

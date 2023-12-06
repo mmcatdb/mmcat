@@ -15,7 +15,6 @@ import cz.matfyz.tests.example.basic.Schema;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -56,7 +55,7 @@ public class ExampleSetup {
     private LogicalModelService logicalModelService;
 
     private List<LogicalModel> createLogicalModels(List<DatabaseEntity> databases, Id schemaId) {
-        return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schemaId, database.label))).toList();
+        return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schemaId, database.label)).logicalModel()).toList();
     }
 
 }

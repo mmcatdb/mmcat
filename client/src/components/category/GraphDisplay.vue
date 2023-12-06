@@ -3,8 +3,8 @@ import { onMounted, shallowRef } from 'vue';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import layoutUtilities from 'cytoscape-layout-utilities';
-import { Graph } from '@/types/categoryGraph';
-import { style } from './defaultGraphStyle';
+import { Graph, type GraphHighlightState } from '@/types/categoryGraph';
+import { style, groupColors } from './defaultGraphStyle';
 
 cytoscape.use(fcose);
 cytoscape.use(layoutUtilities);
@@ -41,6 +41,8 @@ function getContainer(): HTMLElement | undefined {
     return container;
 }
 
+// const selectedGroups = shallowRef<Record<string, boolean>>({});
+
 function createGraph(): Graph {
     const container = getContainer();
     if (!container)
@@ -58,15 +60,21 @@ function createGraph(): Graph {
 
     return new Graph(cytoscapeInstance);
 }
+
+const highlightState = shallowRef<GraphHighlightState>();
+
+function toggleGroup(groupId: string) {
+    highlightState.value = graph.value?.highlights.clickGroup(groupId);
+}
 </script>
 
 <template>
-    <div class="graph-display">
+    <div class="d-flex flex-column">
         <div
             id="cytoscape"
         />
         <template v-if="graph">
-            <div class="category-command-panel button-panel">
+            <div class="category-command-panel p-2 d-flex gap-2">
                 <button
                     :disabled="fetching"
                     @click="() => emit('updatePositions')"
@@ -83,6 +91,23 @@ function createGraph(): Graph {
                 >
                     Reset layout
                 </button>
+                <div class="flex-grow-1" />
+                <div class="d-flex gap-3 pe-2">
+                    <label
+
+                        v-for="group in graph.highlights.groups.value"
+                        :key="group.id"
+                        :style="{ color: groupColors.root[group.id] }"
+                        class="d-flex align-items-center gap-1 fw-semibold clickable"
+                    >
+                        <input
+                            :checked="group.id === highlightState?.groupId"
+                            type="checkbox"
+                            @input="() => toggleGroup(group.id)"
+                        />
+                        {{ group.logicalModel.database.label }}
+                    </label>
+                </div>
             </div>
         </template>
     </div>
@@ -95,13 +120,7 @@ function createGraph(): Graph {
     background-color: var(--color-background-canvas);
 }
 
-.graph-display {
-    display: flex;
-    flex-direction: column;
-}
-
 .category-command-panel {
-    padding: 8px 8px;
     background-color: var(--color-background-dark);
 }
 </style>

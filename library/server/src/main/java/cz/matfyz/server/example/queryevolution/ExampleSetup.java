@@ -74,7 +74,7 @@ public class ExampleSetup {
     private LogicalModelService logicalModelService;
 
     private List<LogicalModel> createLogicalModels(List<DatabaseEntity> databases, Id schemaId) {
-        return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schemaId, database.label))).toList();
+        return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schemaId, database.label)).logicalModel()).toList();
     }
 
 }

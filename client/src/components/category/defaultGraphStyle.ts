@@ -1,3 +1,70 @@
+type GroupDefinition = {
+    id: string;
+    background: string;
+    color: string;
+};
+
+const groupDefinitions: GroupDefinition[] = [
+    {
+        id: 'postgresql-0',
+        background: '#e1d5e7',
+        color: '#9673a6',
+    },
+    {
+        id: 'mongodb-0',
+        background: '#d5e8d4',
+        color: '#82b366',
+    },
+    {
+        id: 'neo4j-0',
+        background: '#dae8fc',
+        color: '#6c8ebf',
+    },
+    {
+        id: 'postgresql-1',
+        background: '#b89cc6',
+        color: '#795789',
+    },
+    {
+        id: 'mongodb-1',
+        background: '#9cc99a',
+        color: '#66964a',
+    },
+    {
+        id: 'neo4j-1',
+        background: '#83b1f4',
+        color: '#486fa6',
+    },
+];
+
+export function groupHighlightColorToClass(id: string, type: 'root' | 'property'): string {
+    return id + '-' + type;
+}
+
+export const groupColors = groupDefinitionsToColors(groupDefinitions);
+
+function groupDefinitionsToColors(groups: GroupDefinition[]) {
+    const root: Record<string, string> = {};
+    groups.forEach(group => root[group.id] = group.color);
+
+    const property: Record<string, string> = {};
+    groups.forEach(group => property[group.id] = group.background);
+
+    return { root, property };
+}
+
+function groupDefinitionsToStyle(groups: GroupDefinition[]): cytoscape.Stylesheet[] {
+    return groups.map((group, index) => ({
+        selector: '.group-' + group.id,
+        style: {
+            'background-color': group.background,
+            'color': group.color,
+            'border-color': group.color,
+            'padding-right': ((index + 2) * 4) + 'px',
+        },
+    }));
+}
+
 export const style: cytoscape.Stylesheet[] = [
     {
         selector: 'node',
@@ -104,9 +171,18 @@ export const style: cytoscape.Stylesheet[] = [
     {
         selector: '.group-placeholder',
         style: {
-            events: 'no',
-            opacity: 0,
             label: '',
+            events: 'no',
+            width: '44px',
+            height: '44px',
+            'z-compound-depth': 'bottom',
+            'border-width': '0px',
+        },
+    },
+    {
+        selector: '.group-placeholder-hidden',
+        style: {
+            opacity: 0,
         },
     },
     {
@@ -116,55 +192,26 @@ export const style: cytoscape.Stylesheet[] = [
             events: 'no',
             'shape': 'round-rectangle',
             'border-style': 'dashed',
+            'border-width': '2px',
+            'font-weight': 'bold',
             'background-opacity': 0.01,
         },
     },
-    {
-        selector: '.group-1',
+    ...groupDefinitionsToStyle(groupDefinitions),
+    ...Object.entries(groupColors.root).map(([ id, color ]) => ({
+        selector: '.' + groupHighlightColorToClass(id, 'root'),
         style: {
-            'background-color': 'green',
-            'color': 'green',
-            'border-color': 'green',
-            'padding-right': '8px',
+            'background-color': color,
+            'border-width': '1px',
+            'border-color': 'black',
         },
-    },
-    {
-        selector: '.group-2',
+    })),
+    ...Object.entries(groupColors.property).map(([ id, color ]) => ({
+        selector: '.' + groupHighlightColorToClass(id, 'property'),
         style: {
-            'background-color': 'red',
-            'color': 'red',
-            'border-color': 'red',
-            'padding-right': '12px',
+            'background-color': color,
+            'border-width': '1px',
+            'border-color': groupColors.root[id],
         },
-    },
-    {
-        selector: '.group-3',
-        style: {
-            'background-color': 'blue',
-            'color': 'blue',
-            'border-color': 'blue',
-            'padding-right': '16px',
-        },
-    },
-    {
-        selector: '.group-4',
-        style: {
-            'background-color': 'orange',
-            'color': 'orange',
-            'border-color': 'orange',
-            'padding-right': '20px',
-        },
-    },
-    {
-        selector: '.no-group',
-        style: {
-            label: '',
-            events: 'no',
-            opacity: 0.2,
-            'background-color': 'red',
-            width: '60px',
-            height: '60px',
-            'z-compound-depth': 'bottom',
-        },
-    },
+    })),
 ];

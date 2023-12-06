@@ -36,6 +36,7 @@
 
     --color-heading: var(--vt-c-text-light-1);
     --color-text: var(--vt-c-text-light-1);
+    --color-text-inverse: var(--vt-c-text-dark-2);
 
     --section-gap: 160px;
 
@@ -49,6 +50,8 @@
     --color-background-dark: #BDBDBD;
     --color-background-canvas: #E0E0E0;
     --color-background-disabled: #9E9E9E;
+
+    --color-background-text-area: #E0E0E0;
     
     --color-text-disabled: #484848;
 
@@ -75,6 +78,7 @@
         --color-background-soft: var(--vt-c-black-soft);
         --color-background-mute: var(--vt-c-black-mute);
         --color-background-dark: #040404;
+        --color-background-text-area: #484848;
         --color-background-canvas: var(--vt-c-white-soft);
         --color-background-disabled: var(--vt-c-gray);
 
@@ -83,6 +87,7 @@
 
         --color-heading: var(--vt-c-text-dark-1);
         --color-text: var(--vt-c-text-dark-2);
+        --color-text-inverse: var(--vt-c-text-light-1);
         --color-text-disabled: #484848;
     }
 }
@@ -105,6 +110,10 @@
 
 .color-secondary {
     --color-text: var(--color-secondary);
+}
+
+.color-inverse {
+    --color-text: var(--color-text-inverse);
 }
 
 *,

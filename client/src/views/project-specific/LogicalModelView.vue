@@ -35,7 +35,6 @@ function createNewMapping() {
             <div class="logical-model">
                 <LogicalModelDisplay
                     :logical-model="logicalModel"
-                    :database="logicalModel.database"
                 />
             </div>
             <h2>Mappings</h2>

@@ -8,6 +8,9 @@ import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition,
 import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
 import { ComparableMap } from '@/utils/ComparableMap';
+import type { Mapping } from '../mapping';
+import type { Type } from '../database';
+import { ComparableSet } from '@/utils/ComparableSet';
 
 export type SchemaCategoryFromServer = {
     id: Id;
@@ -22,6 +25,8 @@ export class SchemaCategory implements Entity {
 
     private keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     private signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
+
+    private readonly groups: GroupData[];
 
     private constructor(
         readonly id: Id,
@@ -50,17 +55,13 @@ export class SchemaCategory implements Entity {
             versionedMorphism.current = morphism;
         });
 
-        const rawObjects = objects.map(object => object.current).filter((o): o is SchemaObject => !!o);
-
-        logicalModels.forEach(logicalModel => {
-            logicalModel.mappings.forEach(mapping => {
-                const pathObjects = getObjectsFromPath(mapping.accessPath, rawObjects, morphisms);
-
-                const rootObject = objects.find(object => object.key.equals(mapping.rootObjectKey));
-                if (rootObject?.current)
-                    pathObjects.push(rootObject.current);
-
-                pathObjects.forEach(object => this.getObject(object.key)?.addLogicalModel(logicalModel));
+        this.groups = createGroups(logicalModels, objects, morphisms);
+        this.groups.forEach(group => {
+            group.mappings.forEach(mapping => {
+                mapping.properties.forEach(property => {
+                    property.addGroup(group.id);
+                });
+                mapping.root.addGroup(group.id);
             });
         });
     }
@@ -147,7 +148,7 @@ export class SchemaCategory implements Entity {
             return;
         }
 
-        newGraph.resetElements();
+        newGraph.resetElements(this.groups);
         newGraph.batch(() => {
             this.objects.forEach(object => object.graph = newGraph);
             this.morphisms.forEach(morphism => morphism.graph = newGraph);
@@ -158,39 +159,6 @@ export class SchemaCategory implements Entity {
         newGraph.layout();
         newGraph.center();
     }
-}
-
-function getObjectsFromPath(path: ParentProperty, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject[] {
-    const output: SchemaObject[] = [];
-
-    path.subpaths.forEach(subpath => {
-        const subpathObject = findObjectFromSignature(subpath.signature, objects, morphisms);
-        if (subpathObject)
-            output.push(subpathObject);
-
-        if (subpath.name instanceof DynamicName) {
-            const nameObject = findObjectFromSignature(subpath.name.signature, objects, morphisms);
-            if (nameObject)
-                output.push(nameObject);
-        }
-
-        if (subpath instanceof ComplexProperty)
-            output.push(...getObjectsFromPath(subpath, objects, morphisms));
-    });
-
-    return output;
-}
-
-function findObjectFromSignature(signature: Signature, objects: SchemaObject[], morphisms: SchemaMorphism[]): SchemaObject | undefined {
-    const base = signature.getLastBase();
-    if (!base)
-        return undefined;
-
-    const morphism = morphisms.find(morphism => morphism.signature.equals(base.last));
-    if (!morphism)
-        return undefined;
-
-    return objects.find(object => object.key.equals(morphism.codKey));
 }
 
 export type SchemaCategoryInfoFromServer = {
@@ -218,3 +186,103 @@ export class SchemaCategoryInfo implements Entity {
 export type SchemaCategoryInit = {
     label: string;
 };
+
+export type GroupMapping = {
+    mapping: Mapping;
+    properties: VersionedSchemaObject[];
+    root: VersionedSchemaObject;
+    groupId: string;
+};
+
+export type GroupData = {
+    id: string;
+    logicalModel: LogicalModel;
+    mappings: GroupMapping[];
+};
+
+type Context = {
+    objects: ComparableMap<Key, number, SchemaObject>;
+    morphisms: ComparableMap<Signature, string, SchemaMorphism>;
+};
+
+function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObject[], morphisms: SchemaMorphism[]): GroupData[] {
+    const context: Context = {
+        objects: new ComparableMap(key => key.value),
+        morphisms: new ComparableMap(signature => signature.value),
+    };
+
+    objects
+        .map(object => object.current)
+        .filter((o): o is SchemaObject => !!o)
+        .forEach(object => context.objects.set(object.key, object));
+
+    morphisms.forEach(morphism => context.morphisms.set(morphism.signature, morphism));
+
+    const typeIndices = new Map<Type, number>();
+
+    return logicalModels.map(logicalModel => {
+        const nextIndex = typeIndices.get(logicalModel.database.type) ?? 0;
+        typeIndices.set(logicalModel.database.type, nextIndex + 1);
+        const id = logicalModel.database.type + '-' + nextIndex;
+
+        const mappings: GroupMapping[] = [];
+
+        logicalModel.mappings.forEach(mapping => {
+            const root = objects.find(object => object.key.equals(mapping.rootObjectKey));
+            const properties = [ ...getObjectsFromPath(mapping.accessPath, context).values() ]
+                .map(object => objects.find(o => o.key.equals(object.key)))
+                .filter((object): object is VersionedSchemaObject => !!object);
+
+            if (!root) {
+                console.error('Root object not found for mapping', mapping);
+                return;
+            }
+
+            mappings.push({ mapping, properties, root, groupId: id });
+        });
+
+        return {
+            id,
+            logicalModel,
+            mappings,
+        };
+    });
+}
+
+function getObjectsFromPath(path: ParentProperty, context: Context): ComparableSet<SchemaObject, number> {
+    const output: ComparableSet<SchemaObject, number> = new ComparableSet(object => object.key.value);
+
+    path.subpaths.forEach(subpath => {
+        findObjectsFromSignature(subpath.signature, context).forEach(object => output.add(object));
+
+        if (subpath.name instanceof DynamicName)
+            findObjectsFromSignature(subpath.name.signature, context).forEach(object => output.add(object));
+
+        if (subpath instanceof ComplexProperty)
+            getObjectsFromPath(subpath, context).forEach(object => output.add(object));
+    });
+
+    return output;
+}
+
+/** Finds all objects on the signature path except for the first one. */
+function findObjectsFromSignature(signature: Signature, context: Context): SchemaObject[] {
+    const output: SchemaObject[] = [];
+
+    signature.toBases().forEach(rawBase => {
+        const object = findObjectFromBaseSignature(rawBase, context);
+        if (object)
+            output.push(object);
+    });
+
+    return output;
+}
+
+function findObjectFromBaseSignature(rawBase: Signature, context: Context): SchemaObject | undefined {
+    const base = rawBase.isBaseDual ? rawBase.dual() : rawBase;
+    const morphism = context.morphisms.get(base);
+    if (!morphism)
+        return;
+
+    return context.objects.get(rawBase.isBaseDual ? morphism.domKey : morphism.codKey);
+}
