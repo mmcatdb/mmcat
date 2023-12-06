@@ -29,7 +29,7 @@ public class DatabaseProvider {
         if (postgreSQLProvider == null) {
             postgreSQLProvider = new PostgreSQLProvider(new PostgreSQLSettings(
                 CONFIG.getBool("isInDocker") ? "mmcat-postgresql" : "localhost",
-                CONFIG.get("postgresqlPort"),
+                CONFIG.getBool("isInDocker") ? "5432" : "3204",
                 CONFIG.get("database"),
                 CONFIG.get("username"),
                 CONFIG.get("password")
@@ -52,7 +52,7 @@ public class DatabaseProvider {
         if (mongoDBProvider == null) {
             mongoDBProvider = new MongoDBProvider(new MongoDBSettings(
                 CONFIG.getBool("isInDocker") ? "mmcat-mongodb" : "localhost",
-                CONFIG.get("mongodbPort"),
+                CONFIG.getBool("isInDocker") ? "27017" : "3205",
                 "admin",
                 CONFIG.get("database"),
                 CONFIG.get("username"),
@@ -76,7 +76,7 @@ public class DatabaseProvider {
         if (neo4jProvider == null) {
             neo4jProvider = new Neo4jProvider(new Neo4jSettings(
                 CONFIG.getBool("isInDocker") ? "mmcat-neo4j" : "localhost",
-                CONFIG.get("neo4jPort"),
+                CONFIG.getBool("isInDocker") ? "7687" : "3206",
                 "neo4j",
                 "neo4j",
                 CONFIG.get("password")

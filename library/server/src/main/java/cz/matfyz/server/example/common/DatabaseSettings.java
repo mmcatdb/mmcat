@@ -24,7 +24,7 @@ public class DatabaseSettings {
     public DatabaseInit createPostgreSQL(String label) {
         final var settings = new PostgreSQLSettings(
             properties.isInDocker() ? "mmcat-postgresql" : "localhost",
-            properties.postgresqlPort(),
+            properties.isInDocker() ? "5432" : "3204",
             database,
             properties.username(),
             properties.password()
@@ -36,7 +36,7 @@ public class DatabaseSettings {
     public DatabaseInit createMongoDB(String label) {
         final var settings = new MongoDBSettings(
             properties.isInDocker() ? "mmcat-mongodb" : "localhost",
-            properties.mongodbPort(),
+            properties.isInDocker() ? "27017" : "3205",
             "admin",
             database,
             properties.username(),
@@ -49,7 +49,7 @@ public class DatabaseSettings {
     public DatabaseInit createNeo4j(String label) {
         final var settings = new Neo4jSettings(
             properties.isInDocker() ? "mmcat-neo4j" : "localhost",
-            properties.neo4jPort(),
+            properties.isInDocker() ? "7687" : "3206",
             "neo4j",
             "neo4j",
             properties.password()

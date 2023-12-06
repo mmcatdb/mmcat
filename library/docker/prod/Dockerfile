@@ -8,7 +8,8 @@ ARG serverPort
 ARG serverOrigin
 ARG databasePassword
 
-RUN echo -e "\n\
+# We use /bin/echo because docker uses sh instead of bash where echo -e is not supported.
+RUN /bin/echo -e "\n\
 server.port=${serverPort}\n\
 server.origin=${serverOrigin}\n\
 database.host=mmcat-database\n\
