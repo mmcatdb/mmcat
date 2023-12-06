@@ -208,7 +208,6 @@ input[type=radio] {
 }
 
 .textarea-dark {
-    @extend .color-inverse;
     background-color: var(--color-background-text-area);
     font-family: Consolas, monospace;
     font-size: 15px;

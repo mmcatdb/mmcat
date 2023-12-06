@@ -36,7 +36,6 @@
 
     --color-heading: var(--vt-c-text-light-1);
     --color-text: var(--vt-c-text-light-1);
-    --color-text-inverse: var(--vt-c-text-dark-2);
 
     --section-gap: 160px;
 
@@ -78,7 +77,7 @@
         --color-background-soft: var(--vt-c-black-soft);
         --color-background-mute: var(--vt-c-black-mute);
         --color-background-dark: #040404;
-        --color-background-text-area: #484848;
+        --color-background-text-area: var(--color-background-dark);
         --color-background-canvas: var(--vt-c-white-soft);
         --color-background-disabled: var(--vt-c-gray);
 
@@ -87,7 +86,6 @@
 
         --color-heading: var(--vt-c-text-dark-1);
         --color-text: var(--vt-c-text-dark-2);
-        --color-text-inverse: var(--vt-c-text-light-1);
         --color-text-disabled: #484848;
     }
 }
@@ -110,10 +108,6 @@
 
 .color-secondary {
     --color-text: var(--color-secondary);
-}
-
-.color-inverse {
-    --color-text: var(--color-text-inverse);
 }
 
 *,
@@ -160,10 +154,12 @@ body, button {
     color: var(--color-warning);
 }
 
-/* To remove the small space under the text area. */
 textarea {
+    /* To remove the small space under the text area. */
     vertical-align: top;
     resize: none !important;
+    /* Fix the color for the dark mode. */
+    color: var(--color-text);
 }
 
 .number-input {
