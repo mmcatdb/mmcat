@@ -98,8 +98,8 @@ function resize() {
 
     const clone = textArea.value.cloneNode() as HTMLTextAreaElement;
     document.body.appendChild(clone);
-    clone.style.width = textArea.value.offsetWidth + 'px';
-    clone.style.height = '0px';
+    // We have to use the !important flag because there might be some classes (like w-100) that override the dimensions.
+    clone.style.cssText = `width: ${textArea.value.offsetWidth}px !important; height: 0px !important;`;
     const trueHeight = clone.scrollHeight + 2; // Add 2 pixels for the borders.
     const newHeight = trueHeight > minHeight ? trueHeight : minHeight;
     clone.remove();
