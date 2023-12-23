@@ -137,7 +137,7 @@ public class InstanceObject implements CategoricalObject {
 
     public DomainRow getRow(SuperIdWithValues superId) {
         for (var id : superId.findAllIds(ids()).foundIds()) {
-            var row = getRowById(id);
+            final var row = getRowById(id);
             if (row != null)
                 return row;
         }

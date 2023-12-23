@@ -8,6 +8,7 @@ import cz.matfyz.core.instance.MappingRow;
 import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SimpleBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +38,13 @@ public class InstanceBuilder {
         return this;
     }
 
+    public DomainRow object(SimpleBuilder.Object object) {
+        return object(object.key());
+    }
+
     public DomainRow object(Key key) {
-        var instanceObject = instance.getObject(key);
-        SuperIdWithValues superId = superIdBuilder.build();
+        final var instanceObject = instance.getObject(key);
+        final SuperIdWithValues superId = superIdBuilder.build();
 
         var row = instanceObject.getRow(superId);
         if (row == null)
@@ -48,6 +53,11 @@ public class InstanceBuilder {
         createdRows.computeIfAbsent(key, k -> new ArrayList<>()).add(row);
 
         return row;
+    }
+
+
+    public DomainRow valueObject(String value, SimpleBuilder.Object object) {
+        return valueObject(value, object.key());
     }
 
     public DomainRow valueObject(String value, Key key) {
