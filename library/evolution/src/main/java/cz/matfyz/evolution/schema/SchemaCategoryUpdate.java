@@ -5,6 +5,8 @@ import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class SchemaCategoryUpdate {
 

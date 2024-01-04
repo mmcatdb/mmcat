@@ -46,7 +46,10 @@ public class SchemaCategoryController {
 
     @GetMapping("/schema-categories/{id}/info")
     public SchemaCategoryInfo getCategoryInfo(@PathVariable Id id) {
-        SchemaCategoryInfo schema = service.findInfo(id);
+    	SchemaCategoryInfo schema;
+    	
+    	
+    	schema = service.findInfo(id);
 
         if (schema == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

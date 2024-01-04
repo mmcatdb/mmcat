@@ -1,6 +1,11 @@
 package cz.matfyz.server.service;
 
+import cz.matfyz.core.identification.MapUniqueContext;
+import cz.matfyz.core.identification.UniqueContext;
+import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.entity.Id;
@@ -10,8 +15,10 @@ import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
+import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 
 import java.util.List;
 
@@ -100,5 +107,41 @@ public class SchemaCategoryService {
     
     public List<SchemaUpdate> findAllUpdates(Id id) {
         return repository.findAllUpdates(id);
+    }
+    
+    /* Serializovani nove kategorie do wrapperu.
+     * Pozice u vsech objektu nastaveny na (0,0), potom se na klientu resetuje layout, 
+     * cimz se spocitaji nejake vhodne pozice.
+     */
+    public SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
+    	 // Metadata has id, version, positions
+    	MetadataContext context = new MetadataContext();
+    	
+    	/*
+    	 * Need to create a special id, under which you load this category - 
+    	**/
+    	Id id = new Id("schm_from_rsd"); //now hard coded special id 
+    	context.setId(id);
+    	
+    	Version version = Version.generateInitial(); // can I use this?
+    	context.setVersion(version);
+    	
+    	Position initialPosition = new Position(0.0, 0.0);
+    	
+    	for (SchemaObject so : category.allObjects()) {
+    		Key key = so.key();
+    		context.setPosition(key, initialPosition);
+    	}  	
+	    	
+    	SchemaCategoryWrapper wrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
+    	 
+    	// no adding to repository?
+    	repository.add(wrapper);
+    	    	
+    	return wrapper;
+    }
+    
+    public SchemaCategoryInfo createInfoFromCategory(SchemaCategoryWrapper wrapper) {
+    	return new SchemaCategoryInfo(wrapper.id, null, wrapper.version);
     }
 }
