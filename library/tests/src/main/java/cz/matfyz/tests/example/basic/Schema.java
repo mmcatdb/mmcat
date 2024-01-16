@@ -195,13 +195,13 @@ public class Schema {
         builder.object(locale, "locale", ObjectIds.createValue());
         builder.object(data, "data", ObjectIds.createGenerated());
         builder.object(subject, "subject", ObjectIds.createValue());
-        // builder.object(content, "content", ObjectIds.createValue());
+        builder.object(content.key(), "content", ObjectIds.createValue());
 
         builder.morphism(noteToOrder, note, order, Min.ONE);
         builder.morphism(noteToLocale, note, locale, Min.ONE, Tag.key);
         builder.morphism(noteToData, note, data, Min.ONE);
         builder.morphism(dataToSubject, data, subject, Min.ONE);
-        // builder.morphism(dataToContent, data, content, Min.ONE);
+        builder.morphism(dataToContent, data, content.key(), Min.ONE);
 
         return this;
     }
