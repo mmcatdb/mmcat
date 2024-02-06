@@ -3,8 +3,9 @@ package cz.matfyz.wrapperdummy;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.querycontent.QueryContent;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.queryresult.QueryResult;
-import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -16,9 +17,6 @@ import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -34,32 +32,23 @@ import org.json.JSONObject;
 public class DummyPullWrapper implements AbstractPullWrapper {
 
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
+    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+        if (!(query instanceof StringQuery stringQuery))
+            throw PullForestException.invalidQuery(this, query);
+
         try {
-            return innerPullForest(path, query);
+            return innerPullForest(path, stringQuery);
         }
         catch (Exception e) {
-            throw new PullForestException(e);
+            throw PullForestException.innerException(e);
         }
     }
 
-    private String getJsonString(PullQuery query) throws IOException {
-        if (query.hasStringContent())
-            return query.getStringContent();
-
-        String resourceFileName = query.getKindName();
-        return Files.readString(Path.of(resourceFileName));
-    }
-
-    private ForestOfRecords innerPullForest(ComplexProperty path, PullQuery query) throws IOException, JSONException {
-        var json = new JSONArray(getJsonString(query));
+    private ForestOfRecords innerPullForest(ComplexProperty path, StringQuery query) throws JSONException {
+        var json = new JSONArray(query.content);
         var forest = new ForestOfRecords();
         
-        int offset = query.hasOffset() ? query.getOffset() : 0;
-        for (int i = offset; i < json.length(); i++) {
-            if (query.hasLimit() && i >= query.getLimit())
-                break;
-
+        for (int i = 0; i < json.length(); i++) {
             JSONObject object = json.getJSONObject(i);
             var rootRecord = new RootRecord();
 

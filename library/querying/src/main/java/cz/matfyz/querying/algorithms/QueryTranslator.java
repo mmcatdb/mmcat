@@ -101,7 +101,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
         throw new UnsupportedOperationException("QueryTranslator.visit(UnionNode) not implemented.");
     }
 
-    private static record StackItem(PatternObject object, Signature path) {}
+    private record StackItem(PatternObject object, Signature path) {}
 
     private void processKind(KindPattern kind) {
         // TODO this is weird, because it's happening for each kind - meaning that the last one overrides all the previous ones

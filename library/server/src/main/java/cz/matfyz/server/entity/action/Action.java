@@ -33,7 +33,7 @@ public class Action extends Entity {
         );
     }
 
-    private static record JsonValue(
+    private record JsonValue(
         String label,
         ActionPayload payload
     ) {}

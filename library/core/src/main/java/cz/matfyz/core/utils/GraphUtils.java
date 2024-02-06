@@ -24,7 +24,7 @@ public abstract class GraphUtils {
         N to();
     }
 
-    public static record Component<N extends Comparable<N>, E extends Edge<N>>(
+    public record Component<N extends Comparable<N>, E extends Edge<N>>(
         int id,
         Set<N> nodes,
         List<E> edges
@@ -110,7 +110,7 @@ public abstract class GraphUtils {
 
     }
 
-    public static record TreePath<T extends Tree<T>>(
+    public record TreePath<T extends Tree<T>>(
         // Source is the first element, root is the last.
         List<T> sourceToRoot,
         // Root is the first element, target is the last.

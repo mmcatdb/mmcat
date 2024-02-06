@@ -15,7 +15,7 @@ public class QueryUpdateResult {
         this.errors = errors;
     }
 
-    public static record QueryUpdateError(
+    public record QueryUpdateError(
         ErrorType type,
         String message,
         @Nullable Serializable data

@@ -8,7 +8,7 @@ public record QueryDescription(
     List<QueryPartDescription> parts
 ) {
     
-    public static record QueryPartDescription(
+    public record QueryPartDescription(
         String databaseIdentifier,
         QueryStatement query
     ) {}

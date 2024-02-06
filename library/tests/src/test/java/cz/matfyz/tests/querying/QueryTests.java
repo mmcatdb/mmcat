@@ -66,6 +66,29 @@ public class QueryTests {
     }
 
     @Test
+    public void nestedMongoDB() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.mongoDB())
+            .query("""
+                SELECT {
+                    ?order street ?street .
+                }
+                WHERE {
+                    ?order 8 ?address .
+                    ?address 9 ?street .
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
     public void alias() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())

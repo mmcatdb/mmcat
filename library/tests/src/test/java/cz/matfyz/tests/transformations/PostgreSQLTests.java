@@ -33,7 +33,7 @@ public class PostgreSQLTests {
     public void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = database.wrapper.getPullWrapper();
-            var dbContent = inputWrapper.readTableAsStringForTests("SELECT * FROM \"order\";");
+            var dbContent = inputWrapper.readTableAsStringForTests(PostgreSQL.orderKind);
             LOGGER.debug("DB content:\n" + dbContent);
         });
     }

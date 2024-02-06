@@ -3,7 +3,8 @@ package cz.matfyz.tests.transformations;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.matfyz.abstractwrappers.utils.PullQuery;
+import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.wrapperdummy.DummyPullWrapper;
@@ -35,10 +36,10 @@ public class PullForestTestBase {
     }
 
     public void run() {            
-        var forest = wrapper.pullForest(mapping.accessPath(), PullQuery.fromKindName(mapping.kindName()));
+        var forest = wrapper.pullForest(mapping.accessPath(), new KindNameQuery(mapping.kindName()));
         LOGGER.debug("Pulled forest:\n" + forest);
 
-        var expectedForest = new DummyPullWrapper().pullForest(mapping.accessPath(), PullQuery.fromString(expected));
+        var expectedForest = new DummyPullWrapper().pullForest(mapping.accessPath(), new StringQuery(expected));
         LOGGER.debug("Expected forest:\n" + expectedForest);
         
         assertEquals(expectedForest.toString(), forest.toString());

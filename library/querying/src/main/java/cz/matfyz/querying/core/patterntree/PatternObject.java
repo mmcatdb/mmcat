@@ -82,7 +82,7 @@ public class PatternObject {
         return children.isEmpty();
     }
 
-    private static record EdgeData(
+    private record EdgeData(
         SchemaEdge schemaEdge,
         // The triple might be oriendted differently than the schema edge - because all triples have to have positive signature, however edges allow duals.
         WhereTriple triple,

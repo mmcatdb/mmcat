@@ -1,7 +1,7 @@
 package cz.matfyz.transformations.processes;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.matfyz.abstractwrappers.utils.PullQuery;
+import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
@@ -21,7 +21,7 @@ public class DatabaseToInstance {
     private Mapping mapping;
     private InstanceCategory currentInstance;
     private AbstractPullWrapper pullWrapper;
-    private PullQuery query = null;
+    private KindNameQuery query = null;
 
     public DatabaseToInstance input(Mapping mapping, InstanceCategory currentInstance, AbstractPullWrapper pullWrapper) {
         this.mapping = mapping;
@@ -31,7 +31,7 @@ public class DatabaseToInstance {
         return this;
     }
 
-    public DatabaseToInstance input(Mapping mapping, InstanceCategory currentInstance, AbstractPullWrapper pullWrapper, PullQuery query) {
+    public DatabaseToInstance input(Mapping mapping, InstanceCategory currentInstance, AbstractPullWrapper pullWrapper, KindNameQuery query) {
         this.query = query;
 
         return this.input(mapping, currentInstance, pullWrapper);
@@ -52,7 +52,7 @@ public class DatabaseToInstance {
     private InstanceCategory innerRun() throws Exception {
         Statistics.start(Interval.DATABASE_TO_INSTANCE);
 
-        var finalQuery = query != null ? query : PullQuery.fromKindName(mapping.kindName());
+        var finalQuery = query != null ? query : new KindNameQuery(mapping.kindName());
 
         ForestOfRecords forest = pullWrapper.pullForest(mapping.accessPath(), finalQuery);
 

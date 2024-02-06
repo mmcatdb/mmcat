@@ -84,7 +84,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new GroupGraphPattern(triples, filters, values);
     }
 
-    private static record WhereTriplesList(List<WhereTriple> triples) implements ParserNode {}
+    private record WhereTriplesList(List<WhereTriple> triples) implements ParserNode {}
 
     @Override
     public WhereTriplesList visitTriplesBlock(QuerycatParser.TriplesBlockContext ctx) {
@@ -106,7 +106,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new WhereTriplesList(allTriples);
     }
 
-    private static record SelectTriplesList(List<SelectTriple> triples) implements ParserNode {}
+    private record SelectTriplesList(List<SelectTriple> triples) implements ParserNode {}
 
     @Override
     public SelectTriplesList visitSelectTriples(QuerycatParser.SelectTriplesContext ctx) {
@@ -125,7 +125,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new SelectTriplesList(allTriples);
     }
 
-    private static record CommonTriplesList(List<CommonTriple> triples) implements ParserNode {}
+    private record CommonTriplesList(List<CommonTriple> triples) implements ParserNode {}
 
     @Override
     public CommonTriplesList visitTriplesSameSubject(QuerycatParser.TriplesSameSubjectContext ctx) {
@@ -141,9 +141,9 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new CommonTriplesList(triples);
     }
 
-    private static record MorphismsList(List<MorphismWithTerm> morphisms) implements ParserNode {}
+    private record MorphismsList(List<MorphismWithTerm> morphisms) implements ParserNode {}
 
-    private static record MorphismWithTerm(String morphism, Term term) {}
+    private record MorphismWithTerm(String morphism, Term term) {}
 
     @Override
     public MorphismsList visitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx) {
@@ -169,7 +169,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new StringValue(ctx.getText());
     }
     
-    private static record ObjectsList(List<Term> objects) implements ParserNode {}
+    private record ObjectsList(List<Term> objects) implements ParserNode {}
 
     @Override
     public ObjectsList visitObjectList(QuerycatParser.ObjectListContext ctx) {

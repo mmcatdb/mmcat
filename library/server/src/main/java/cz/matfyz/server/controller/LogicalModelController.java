@@ -33,7 +33,7 @@ public class LogicalModelController {
     @Autowired
     private LogicalModelService service;
 
-    public static record LogicalModelDetail(
+    public record LogicalModelDetail(
         Id id,
         Id categoryId,
         DatabaseWithConfiguration database,
@@ -67,7 +67,7 @@ public class LogicalModelController {
         return service.findAllFull(categoryId);
     }
 
-    public static record LogicalModelInfo(
+    public record LogicalModelInfo(
         Id id,
         String label,
         DatabaseInfo database

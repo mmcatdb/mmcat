@@ -28,7 +28,7 @@ public class LogicalModelRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public static record LogicalModelWithDatabase(
+    public record LogicalModelWithDatabase(
         LogicalModel logicalModel,
         DatabaseEntity database
     ) {}

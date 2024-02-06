@@ -4,12 +4,13 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
+import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
+import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.queryresult.ResultLeaf;
 import cz.matfyz.abstractwrappers.queryresult.ResultList;
 import cz.matfyz.abstractwrappers.queryresult.ResultMap;
 import cz.matfyz.abstractwrappers.queryresult.ResultNode;
 import cz.matfyz.abstractwrappers.queryresult.QueryResult;
-import cz.matfyz.abstractwrappers.utils.PullQuery;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -27,13 +28,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import org.bson.Document;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 /**
  * @author jachymb.bartik
@@ -46,53 +44,33 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         this.provider = provider;
     }
 
-    private Iterator<Document> getDocumentIterator(PullQuery query) {
-        if (query.hasStringContent())
-            return getDocumentIteratorFromString(query.getStringContent());
+    private MongoCursor<Document> getDocumentIterator(QueryContent query) {
+        if (query instanceof KindNameQuery kindNameQuery)
+            return getDocumentIteratorFromKindName(kindNameQuery);
 
-        String kindName = query.getKindName();
-        var database = provider.getDatabase();
-        var find = database.getCollection(kindName).find();
+        if (query instanceof MongoDBQuery mongoQuery)
+            return provider.getDatabase().getCollection(mongoQuery.collection).aggregate(mongoQuery.pipeline).iterator();
 
+        throw PullForestException.invalidQuery(this, query);
+    }
+
+    private MongoCursor<Document> getDocumentIteratorFromKindName(KindNameQuery query) {
+        var find = provider.getDatabase().getCollection(query.kindName).find();
         if (query.hasOffset())
             find = find.skip(query.getOffset());
-        
         if (query.hasLimit())
             find = find.limit(query.getLimit());
 
         return find.iterator();
     }
 
-    private Iterator<Document> getDocumentIteratorFromString(String query) {
-        Pattern pattern = Pattern.compile("db\\.(.*)\\.aggregate\\((.*)\\)");
-        Matcher matcher = pattern.matcher(query);
-        matcher.find();
-        String collection = matcher.group(1);
-        String aggregationCommands = matcher.group(2).replace("\\\\\"", "\"");
-
-        // TODO this is seriously bad. It would be much better to use some kind of structured query object instead.
-        try {
-            var jsonArray = new JSONArray(aggregationCommands);
-            List<Document> pipeline = new ArrayList<>();
-            for (int i = 0; i < jsonArray.length(); i++) {
-                Object item = jsonArray.get(i);
-                Document document = Document.parse(item.toString());
-                pipeline.add(document);
-            }
-
-            return provider.getDatabase().getCollection(collection).aggregate(pipeline).iterator();
-        }
-        catch (JSONException e) {
-            throw new PullForestException(e);
-        }
-    }
-
     @Override
-    public ForestOfRecords pullForest(ComplexProperty path, PullQuery query) throws PullForestException {
-        try {
-            final var forest = new ForestOfRecords();
+    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+        final var forest = new ForestOfRecords();
+
+        try (
             final var iterator = getDocumentIterator(query);
-            
+        ) {
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
                 final var rootRecord = new RootRecord();
@@ -103,7 +81,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return forest;
         }
         catch (Exception e) {
-            throw new PullForestException(e);
+            throw PullForestException.innerException(e);
         }
     }
 
@@ -199,9 +177,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         return staticName.toRecordName();
     }
 
-    public String readCollectionAsStringForTests(String selectAll) {
+    public String readCollectionAsStringForTests(String kindName) {
         var database = provider.getDatabase();
-        String kindName = selectAll.substring("database.getCollection(\"".length(), selectAll.length() - "\");".length());
         MongoCollection<Document> collection = database.getCollection(kindName);
         Iterator<Document> iterator = collection.find().iterator();
         
@@ -214,10 +191,11 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     @Override
     public QueryResult executeQuery(QueryStatement query) {
-        try {
-            final var output = new ArrayList<ResultMap>();
-            final var iterator = getDocumentIteratorFromString(query.stringContent());
-            
+        final var output = new ArrayList<ResultMap>();
+
+        try (
+            final var iterator = getDocumentIterator(query.content());
+        ) {
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
                 output.add(getResultFromDocument(document, query.structure()));
@@ -228,7 +206,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return new QueryResult(dataResult, query.structure());
         }
         catch (Exception e) {
-            throw new PullForestException(e);
+            throw PullForestException.innerException(e);
         }
     }
 

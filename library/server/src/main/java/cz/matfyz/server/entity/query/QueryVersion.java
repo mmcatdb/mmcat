@@ -41,7 +41,7 @@ public class QueryVersion extends Entity {
         );
     }
 
-    private static record JsonValue(
+    private record JsonValue(
         Version version,
         String content,
         List<QueryUpdateError> errors

@@ -36,7 +36,18 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     }
 
     public QueryStatement createDSLStatement() {
-        throw new UnsupportedOperationException("MongoDBQueryWrapper.createDSLStatement not implemented.");
+        final String collectionName = projections.getFirst().property().kind.mapping.kindName();
+        final var content = MongoDBQuery.findAll(collectionName);
+
+        final var root = new QueryStructure(rootIdentifier, true);
+        // projections.forEach();
+
+        return new QueryStatement(content, root);
+    }
+
+    private void addProjectionToStructure(QueryStructure structure, Projection projection) {
+        // projection.
+        
     }
 
 }

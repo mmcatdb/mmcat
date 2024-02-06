@@ -126,7 +126,7 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
 
     }
 
-    public static record DisconnectedSchemaMorphism(
+    public record DisconnectedSchemaMorphism(
         Signature signature,
         String label,
         Key domKey,

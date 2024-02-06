@@ -47,10 +47,11 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
     // @Override
     public void execute(Path path) {
         try {
-            String commandString = "mongosh " + provider.settings.getConnectionString() + " " + path.toString();
+            // Unfortunatelly, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
+            String[] command = { "mongosh", provider.settings.getConnectionString(), path.toString() };
 
             Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(commandString);
+            Process process = runtime.exec(command);
             process.waitFor();
 
             BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));

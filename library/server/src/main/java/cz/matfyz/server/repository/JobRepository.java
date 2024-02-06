@@ -26,7 +26,7 @@ public class JobRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public static record JobWithRun(Job job, Run run) {}
+    public record JobWithRun(Job job, Run run) {}
 
     private static JobWithRun jobWithRunFromResultSet(ResultSet resultSet, Id jobId, Id categoryId) throws SQLException, JsonProcessingException {
         final Id runId = getId(resultSet, "run.id");

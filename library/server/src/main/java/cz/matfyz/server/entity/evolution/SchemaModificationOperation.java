@@ -24,7 +24,7 @@ public interface SchemaModificationOperation {
 
     public cz.matfyz.evolution.schema.SchemaModificationOperation toEvolution();
 
-    public static record CreateObject(
+    public record CreateObject(
         Key key,
         SchemaObjectWrapper.Data object
     ) implements SchemaModificationOperation {
@@ -38,7 +38,7 @@ public interface SchemaModificationOperation {
 
     }
 
-    public static record DeleteObject(
+    public record DeleteObject(
         Key key,
         SchemaObjectWrapper.Data object
     ) implements SchemaModificationOperation {
@@ -52,7 +52,7 @@ public interface SchemaModificationOperation {
 
     }
 
-    public static record EditObject(
+    public record EditObject(
         Key key,
         SchemaObjectWrapper.Data newObject,
         SchemaObjectWrapper.Data oldObject
@@ -68,7 +68,7 @@ public interface SchemaModificationOperation {
 
     }
 
-    public static record CreateMorphism(
+    public record CreateMorphism(
         SchemaMorphismWrapper morphism
     ) implements SchemaModificationOperation {
 
@@ -81,7 +81,7 @@ public interface SchemaModificationOperation {
 
     }
 
-    public static record DeleteMorphism(
+    public record DeleteMorphism(
         SchemaMorphismWrapper morphism
     ) implements SchemaModificationOperation {
 
@@ -94,7 +94,7 @@ public interface SchemaModificationOperation {
         
     }
 
-    public static record EditMorphism(
+    public record EditMorphism(
         SchemaMorphismWrapper newMorphism,
         SchemaMorphismWrapper oldMorphism
     ) implements SchemaModificationOperation {
@@ -109,7 +109,7 @@ public interface SchemaModificationOperation {
 
     }
 
-    public static record Composite(
+    public record Composite(
         String name
     ) implements SchemaModificationOperation {
 

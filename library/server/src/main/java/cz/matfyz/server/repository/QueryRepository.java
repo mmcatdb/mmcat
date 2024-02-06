@@ -27,7 +27,7 @@ public class QueryRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public static record QueryWithVersion(Query query, QueryVersion version) implements Comparable<QueryWithVersion> {
+    public record QueryWithVersion(Query query, QueryVersion version) implements Comparable<QueryWithVersion> {
         @Override
         public int compareTo(QueryWithVersion other) {
             return query.id.compareTo(other.query.id);

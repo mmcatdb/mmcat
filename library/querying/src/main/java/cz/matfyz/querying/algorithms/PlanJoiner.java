@@ -159,7 +159,7 @@ public class PlanJoiner {
             : null;
     }
 
-    private static record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
+    private record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
         public static DatabasePair create(JoinCandidate candidate) {
             final var a = candidate.from().kind.database;
             final var b = candidate.to().kind.database;
@@ -179,7 +179,7 @@ public class PlanJoiner {
         }
     }
 
-    private static record JoinGroup(DatabasePair databases, List<JoinCandidate> candidates) {}
+    private record JoinGroup(DatabasePair databases, List<JoinCandidate> candidates) {}
 
     /**
      * Groups the join candidates by the database pairs of their two kinds.
@@ -287,7 +287,7 @@ public class PlanJoiner {
     
     //     Set<Kind> kinds();
     
-    //     public static record SplitResult<T extends HasKinds>(List<T> included, List<T> rest) {}
+    //     public record SplitResult<T extends HasKinds>(List<T> included, List<T> rest) {}
     
     //     public static <T extends HasKinds> SplitResult<T> splitByKinds(List<T> all, Set<Kind> kinds) {
     //         final var included = new ArrayList<T>();
@@ -299,7 +299,7 @@ public class PlanJoiner {
     
     // }
     
-    private static record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<KindPattern> kinds) implements JoinTreeNode {
+    private record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<KindPattern> kinds) implements JoinTreeNode {
         public JoinNode toQueryNode(SchemaCategory schema) {
             // First, we try to move operations and filters down the tree.
             // final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
@@ -321,7 +321,7 @@ public class PlanJoiner {
         }
     }
 
-    private static record JoinTreeLeaf(QueryPart queryPart) implements JoinTreeNode {
+    private record JoinTreeLeaf(QueryPart queryPart) implements JoinTreeNode {
         public Set<KindPattern> kinds() {
             return queryPart.kinds;
         }

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * This class is responsible for the creation of query plans for a given pattern. The pattern is represented by the extracted schema category.
+ * This class is responsible for creating query plans for a given pattern. The pattern is represented by the extracted schema category.
  */
 public class QueryPlanner {
 
@@ -35,7 +35,9 @@ public class QueryPlanner {
         return plans;
     }
     
-    /** The goal of the algorithm is to move some kinds from the rest list to the selected set. The selected set will then become a new plan. */
+    /**
+     * The goal of the algorithm is to move some kinds from the rest list to the selected set. The selected set will then become a new plan.
+     */
     private record StackItem(
         /** These kinds are already part of a plan. */
         Set<KindPattern> selected,

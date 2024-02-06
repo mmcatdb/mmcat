@@ -69,7 +69,7 @@ public class QueryService {
         return new QueryDescription(parts);
     }
 
-    private static record KindsAndDatabases(
+    private record KindsAndDatabases(
         List<Kind> kinds,
         Map<Id, DatabaseEntity> databases
     ) {}

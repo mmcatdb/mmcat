@@ -4,7 +4,7 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.matfyz.abstractwrappers.utils.PullQuery;
+import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.utils.Statistics;
@@ -117,7 +117,7 @@ class ServerApplicationTests {
         AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
 
         var newInstance = new DatabaseToInstance()
-            .input(mapping, instance, pullWrapper, PullQuery.withLimit(records).fromKindName(mapping.kindName()))
+            .input(mapping, instance, pullWrapper, new KindNameQuery(mapping.kindName(), records, null))
             .run();
 
         message += "#" + mapping.kindName()

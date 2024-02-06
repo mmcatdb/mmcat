@@ -93,7 +93,7 @@ public class JobController {
         return JobDetail.create(job, payload);
     }
 
-    private static record JobDetail(
+    private record JobDetail(
         Id id,
         Id categoryId,
         Id runId,

@@ -18,8 +18,6 @@ public class MorphismColoring {
     /** Set of all morphisms in given kind pattern. */
     private final Map<KindPattern, Set<BaseSignature>> colorToMorphisms;
 
-    // private final Map<Key, Set<KindPattern> a;
-
     private MorphismColoring(Map<BaseSignature, Set<KindPattern>> morphismToColors, Map<KindPattern, Set<BaseSignature>> colorToMorphisms) {
         this.morphismToColors = morphismToColors;
         this.colorToMorphisms = colorToMorphisms;
@@ -78,7 +76,7 @@ public class MorphismColoring {
         return min;
     }
 
-    private static record KindWithCost(KindPattern kind, int cost) {}
+    private record KindWithCost(KindPattern kind, int cost) {}
 
     /**
      * Sorts given kinds based on the coloring.

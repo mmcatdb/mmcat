@@ -25,7 +25,7 @@ public class JsonDMLConstructor {
         return root.object.toString(4);
     }
 
-    public static record PropertyValue(String name, String value) {}
+    public record PropertyValue(String name, String value) {}
 
     public void addProperty(PropertyValue property) throws Exception {
         List<Key> keys = createKeys(property.name());

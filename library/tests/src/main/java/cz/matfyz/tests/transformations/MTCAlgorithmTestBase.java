@@ -2,7 +2,7 @@ package cz.matfyz.tests.transformations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import cz.matfyz.abstractwrappers.utils.PullQuery;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategoryBuilder;
@@ -54,7 +54,7 @@ public class MTCAlgorithmTestBase {
         for (final MappingWithRecords kind : kinds) {
             ForestOfRecords forest;
             try {
-                forest = new DummyPullWrapper().pullForest(kind.mapping.accessPath(), PullQuery.fromString(kind.records));
+                forest = new DummyPullWrapper().pullForest(kind.mapping.accessPath(), new StringQuery(kind.records));
             }
             catch (Exception e) {
                 Assertions.fail(e.getMessage());

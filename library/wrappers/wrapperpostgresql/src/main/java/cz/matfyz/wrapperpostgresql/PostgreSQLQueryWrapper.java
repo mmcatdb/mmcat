@@ -3,6 +3,7 @@ package cz.matfyz.wrapperpostgresql;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
@@ -56,7 +57,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         addFrom();
         addWhere();
 
-        return new QueryStatement(builder.toString(), createStructure());
+        return new QueryStatement(new StringQuery(builder.toString()), createStructure());
     }
 
     private void addSelect() {
@@ -79,7 +80,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         if (projections.isEmpty())
             throw QueryException.message("No tables are selected in FROM clause.");
         
-        final String kindName = projections.get(0).property().kind.mapping.kindName();
+        final String kindName = projections.getFirst().property().kind.mapping.kindName();
         builder
             .append(escapeName(kindName))
             .append("\n");

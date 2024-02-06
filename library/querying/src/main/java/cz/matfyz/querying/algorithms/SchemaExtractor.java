@@ -41,7 +41,7 @@ public class SchemaExtractor {
         this.pattern = pattern;
     }
 
-    public static record ExtractorResult(
+    public record ExtractorResult(
         SchemaCategory schema,
         List<KindPattern> kindPatterns
     ) {}

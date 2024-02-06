@@ -28,17 +28,6 @@ public class Kind implements Comparable<Kind> {
         return object instanceof Kind other && compareTo(other) == 0;
     }
 
-    /*
-     * Creates a new kind with the given mapping and replaces the old one in the database.
-     */
-    public Kind updateMapping(Mapping mapping) {
-        final var newKind = new Kind(mapping, database);
-        final int oldIndex = database.kinds.indexOf(this);
-        database.kinds.set(oldIndex, newKind);
-
-        return newKind;
-    }
-
     @Override
     public String toString() {
         return "{ database: '" + database.identifier + "', kind: '" + mapping.kindName() + "' }";

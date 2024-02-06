@@ -1,6 +1,7 @@
 package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils.Tree;
@@ -93,7 +94,7 @@ public interface AbstractQueryWrapper {
         }
     }
 
-    public static record Constant(
+    public record Constant(
         List<String> values
     ) {}
 
@@ -107,7 +108,7 @@ public interface AbstractQueryWrapper {
      */
     void addProjection(Property property, String identifier, boolean isOptional);
 
-    public static record JoinCondition(Signature from, Signature to) {}
+    public record JoinCondition(Signature from, Signature to) {}
 
     /**
      * Adds a join (or graph traversal).
@@ -203,7 +204,7 @@ public interface AbstractQueryWrapper {
         }
     }
 
-    public static record QueryStatement(String stringContent, QueryStructure structure) {}
+    public record QueryStatement(QueryContent content, QueryStructure structure) {}
 
     /**
      * Builds a DSL statement based on the information obtained by calling the wrapper methods.

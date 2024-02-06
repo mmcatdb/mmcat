@@ -63,6 +63,7 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
             String script = Files.readString(path);
             // Split the queries by the ; character, followed by any number of whitespaces and newline.
             final var statements = Stream.of(script.split(";\\s*\n"))
+                .map(String::strip)
                 .filter(s -> !s.isBlank())
                 .map(s -> (AbstractStatement) new Neo4jStatement(s))
                 .toList();

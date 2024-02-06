@@ -48,7 +48,7 @@ public class Schema {
     public static final Key locale = new Key(22);
     public static final Key data = new Key(23);
     public static final Key subject = new Key(24);
-    public static final SimpleBuilder.Object content = builder2.object("content");
+    public static final SimpleBuilder.Object content = builder2.object("content", 25);
 
     // Signatures
 

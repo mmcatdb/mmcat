@@ -69,7 +69,7 @@ public class SimpleBuilder {
         return object;
     }
 
-    public static record Morphism(
+    public record Morphism(
         Signature signature,
         String label,
         Object dom,
