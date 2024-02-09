@@ -27,7 +27,7 @@ mvn spring-boot:run
 mvn clean package
 ```
 
-- You can then run the application by:
+- You can then run the application by (I think it should be server-1.0-SNAPSHOT-app.jar):
 
 ```bash
 java -jar target/server-1.0-SNAPSHOT.jar

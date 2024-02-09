@@ -8,11 +8,13 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.matfyz.server.service.SchemaCategoryService;
+import cz.matfyz.core.schema.SchemaCategory;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -91,6 +93,16 @@ public class SchemaCategoryController {
     public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataUpdate> metadataUpdates) {
         if (!service.updateMetadata(id, metadataUpdates))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+    
+    /*
+     * Method for receiving the SchemaCategoryWrapper which came from mminfer
+     * Probs should get rid of the return value, and only have void
+     * */
+    @PostMapping("/schema-categories/store")
+    public ResponseEntity<String> storeSchemaCategoryWrapper(@RequestBody SchemaCategoryWrapper wrapper) {
+    	service.createNewInfo(wrapper);    
+    	return ResponseEntity.ok("Got your request, lady! 8)");
     }
 
 }

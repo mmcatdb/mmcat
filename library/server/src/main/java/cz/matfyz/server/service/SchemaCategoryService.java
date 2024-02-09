@@ -51,6 +51,18 @@ public class SchemaCategoryService {
 
         return generatedId == null ? null : new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version);
     }
+    
+    /*
+     * Created for the case when I receive SchemaCategoryWrapper from mminfer
+     * Be aware of the label in creating SchemaCategoryInit
+     * */
+    public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {        
+        final Id generatedId = repository.add(wrapper);
+        System.out.println("This is the generated ID: " + generatedId);
+        System.out.println("All saved :)");
+
+        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "new_label", wrapper.version);
+    }
 
     public SchemaCategoryInfo findInfo(Id id) {
         return repository.findInfo(new Id("" + id));
@@ -109,39 +121,4 @@ public class SchemaCategoryService {
         return repository.findAllUpdates(id);
     }
     
-    /* Serializovani nove kategorie do wrapperu.
-     * Pozice u vsech objektu nastaveny na (0,0), potom se na klientu resetuje layout, 
-     * cimz se spocitaji nejake vhodne pozice.
-     */
-    public SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-    	 // Metadata has id, version, positions
-    	MetadataContext context = new MetadataContext();
-    	
-    	/*
-    	 * Need to create a special id, under which you load this category - 
-    	**/
-    	Id id = new Id("schm_from_rsd"); //now hard coded special id 
-    	context.setId(id);
-    	
-    	Version version = Version.generateInitial(); // can I use this?
-    	context.setVersion(version);
-    	
-    	Position initialPosition = new Position(0.0, 0.0);
-    	
-    	for (SchemaObject so : category.allObjects()) {
-    		Key key = so.key();
-    		context.setPosition(key, initialPosition);
-    	}  	
-	    	
-    	SchemaCategoryWrapper wrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
-    	 
-    	// no adding to repository?
-    	repository.add(wrapper);
-    	    	
-    	return wrapper;
-    }
-    
-    public SchemaCategoryInfo createInfoFromCategory(SchemaCategoryWrapper wrapper) {
-    	return new SchemaCategoryInfo(wrapper.id, null, wrapper.version);
-    }
 }
