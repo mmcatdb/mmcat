@@ -80,28 +80,23 @@ public class InstanceMorphism implements Morphism {
         return mappings;
     }
 
-    @Override
-    public InstanceObject dom() {
+    @Override public InstanceObject dom() {
         return dom;
     }
 
-    @Override
-    public InstanceObject cod() {
+    @Override public InstanceObject cod() {
         return cod;
     }
 
-    @Override
-    public Signature signature() {
+    @Override public Signature signature() {
         return schemaMorphism.signature();
     }
 
-    @Override
-    public Min min() {
+    @Override public Min min() {
         return schemaMorphism.min();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         var builder = new StringBuilder();
 
         builder.append("\tSignature: ").append(signature())
@@ -119,8 +114,7 @@ public class InstanceMorphism implements Morphism {
     }
     
     // TODO maybe there is no reason to override this method
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         if (this == object)
             return true;
 

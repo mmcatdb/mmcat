@@ -23,16 +23,14 @@ import java.util.stream.Stream;
  */
 public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
-    @Override
-    protected ParserNode aggregateResult(ParserNode aggregate, ParserNode nextResult) {
+    @Override protected ParserNode aggregateResult(ParserNode aggregate, ParserNode nextResult) {
         return nextResult == null ? aggregate : nextResult;
     }
 
     private QueryContext queryContext;
     private Deque<VariableBuilder> variableBuilders = new ArrayDeque<>();
 
-    @Override
-    public Query visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
+    @Override public Query visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
         queryContext = new QueryContext();
 
         final SelectClause selectClause = visitSelectClause(ctx.selectClause());
@@ -41,8 +39,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new Query(selectClause, whereClause, queryContext);
     }
 
-    @Override
-    public SelectClause visitSelectClause(QuerycatParser.SelectClauseContext ctx) {
+    @Override public SelectClause visitSelectClause(QuerycatParser.SelectClauseContext ctx) {
         variableBuilders.push(new VariableBuilder());
 
         final var graphTriples = ctx.selectGraphPattern().selectTriples();
@@ -55,8 +52,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new SelectClause(triples);
     }
 
-    @Override
-    public WhereClause visitWhereClause(QuerycatParser.WhereClauseContext ctx) {
+    @Override public WhereClause visitWhereClause(QuerycatParser.WhereClauseContext ctx) {
         // TODO if the pattern is null (or empty? - basically just nested UNION), use the first group's pattern instead.
         // The antlr file probably needs an update tho ...
         final var pattern = visitGroupGraphPattern(ctx.groupGraphPattern());
@@ -65,8 +61,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new WhereClause(Type.Where, pattern, List.of());
     }
 
-    @Override
-    public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
+    @Override public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
         variableBuilders.push(new VariableBuilder());
 
         final var triples = ctx.triplesBlock().stream()
@@ -86,8 +81,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     private record WhereTriplesList(List<WhereTriple> triples) implements ParserNode {}
 
-    @Override
-    public WhereTriplesList visitTriplesBlock(QuerycatParser.TriplesBlockContext ctx) {
+    @Override public WhereTriplesList visitTriplesBlock(QuerycatParser.TriplesBlockContext ctx) {
         // Almost identical to select triples, but this is necessary as the grammar definition for these constructs is slightly different.
         final var sameSubjectTriples = visitTriplesSameSubject(ctx.triplesSameSubject()).triples;
 
@@ -108,8 +102,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     private record SelectTriplesList(List<SelectTriple> triples) implements ParserNode {}
 
-    @Override
-    public SelectTriplesList visitSelectTriples(QuerycatParser.SelectTriplesContext ctx) {
+    @Override public SelectTriplesList visitSelectTriples(QuerycatParser.SelectTriplesContext ctx) {
         final var sameSubjectTriples = visitTriplesSameSubject(ctx.triplesSameSubject()).triples;
 
         final var moreTriplesNode = ctx.selectTriples();
@@ -127,8 +120,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     private record CommonTriplesList(List<CommonTriple> triples) implements ParserNode {}
 
-    @Override
-    public CommonTriplesList visitTriplesSameSubject(QuerycatParser.TriplesSameSubjectContext ctx) {
+    @Override public CommonTriplesList visitTriplesSameSubject(QuerycatParser.TriplesSameSubjectContext ctx) {
         var variableNode = ctx.varOrTerm().var_();
         if (variableNode == null)
             throw GeneralException.message("Variable expected in term " + ctx.varOrTerm().start);
@@ -145,8 +137,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     private record MorphismWithTerm(String morphism, Term term) {}
 
-    @Override
-    public MorphismsList visitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx) {
+    @Override public MorphismsList visitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx) {
         final var verbNodes = ctx.verb();
         final var objectNodes = ctx.objectList();
 
@@ -163,16 +154,14 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new MorphismsList(morphismsAndObjects);
     }
 
-    @Override
-    public StringValue visitSchemaMorphismOrPath(QuerycatParser.SchemaMorphismOrPathContext ctx) {
+    @Override public StringValue visitSchemaMorphismOrPath(QuerycatParser.SchemaMorphismOrPathContext ctx) {
         // Should we do the compound morphism parsing here?
         return new StringValue(ctx.getText());
     }
     
     private record ObjectsList(List<Term> objects) implements ParserNode {}
 
-    @Override
-    public ObjectsList visitObjectList(QuerycatParser.ObjectListContext ctx) {
+    @Override public ObjectsList visitObjectList(QuerycatParser.ObjectListContext ctx) {
         final var objects = ctx.object_().stream()
             .map(objectCtx -> visitObject_(objectCtx).asTerm())
             .toList();
@@ -180,8 +169,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new ObjectsList(objects);
     }
 
-    @Override
-    public Variable visitVar_(QuerycatParser.Var_Context ctx) {
+    @Override public Variable visitVar_(QuerycatParser.Var_Context ctx) {
         final var variableNameNode = ctx.VAR1() != null ? ctx.VAR1() : ctx.VAR2();
         final var variableName = variableNameNode.getSymbol().getText().substring(1);
 
@@ -196,14 +184,12 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         return new Aggregation(operator, variable, isDistinct);
     }
 
-    @Override
-    public StringValue visitString_(QuerycatParser.String_Context ctx) {
+    @Override public StringValue visitString_(QuerycatParser.String_Context ctx) {
         // This regexp removes all " and ' characters from both the start and the end of the visited string.
         return new StringValue(ctx.getText().replaceAll("(^[\"']+)|([\"']+$)", ""));
     }
 
-    @Override
-    public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {
+    @Override public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {
         final var children = ctx.children;
 
         if (children.size() == 1)
@@ -220,8 +206,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         throw GeneralException.message("You done goofed");
     }
 
-    @Override
-    public ValueFilter visitDataBlock(QuerycatParser.DataBlockContext ctx) {
+    @Override public ValueFilter visitDataBlock(QuerycatParser.DataBlockContext ctx) {
         final var variable = visitVar_(ctx.var_());
         final var allowedValues = ctx.dataBlockValue().stream()
             .map(v -> visit(v).asTerm().asStringValue().value)

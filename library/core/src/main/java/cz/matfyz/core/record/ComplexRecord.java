@@ -2,7 +2,7 @@ package cz.matfyz.core.record;
 
 import cz.matfyz.core.category.BaseSignature;
 import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.utils.IndentedStringBuilder;
+import cz.matfyz.core.utils.printable.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.TreeMap;
  * The value of this record are its children.
  * @author jachymb.bartik
  */
-public class ComplexRecord extends DataRecord implements IComplexRecord {
+public class ComplexRecord extends DataRecord implements IComplexRecord, Printable {
 
     //private final List<DataRecord> children = new ArrayList<>();
     //private final Map<Signature, Set<DataRecord>> children = new TreeMap<>();
@@ -157,8 +157,7 @@ public class ComplexRecord extends DataRecord implements IComplexRecord {
     }
     
     /*
-    @Override
-    Set<DataRecord> records() {
+    @Override Set<DataRecord> records() {
         Set output = Set.of(this);
         children.values().forEach(set -> output.addAll(set));
         
@@ -166,59 +165,48 @@ public class ComplexRecord extends DataRecord implements IComplexRecord {
     }
     */
     
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("{\n");
-        
-        var childrenBuilder = new IndentedStringBuilder(1);
+    @Override public void printTo(Printer printer) {
+        printer.append("{").down().nextLine();
         
         for (SimpleRecord<?> value : values.values())
-            childrenBuilder.append(value).append(",\n");
+            printer.append(value).append(",").nextLine();
         
         for (SimpleValueRecord<?> dynamicNameValue : dynamicNameValues)
-            childrenBuilder.append(dynamicNameValue).append(",\n");
+            printer.append(dynamicNameValue).append(",").nextLine();
 
         for (List<ComplexRecord> list : children.values()) {
             ComplexRecord firstItem = list.get(0);
             
             if (list.size() > 1) {
-                childrenBuilder.append(firstItem.name).append(": ");
-                childrenBuilder.append("[\n");
-            
-                var innerBuilder = new IndentedStringBuilder(1);
-                innerBuilder.append(firstItem);
-                for (int i = 1; i < list.size(); i++)
-                    innerBuilder.append(",\n").append(list.get(i));
+                printer.append(firstItem.name).append(": ");
+                printer.append("[").down().nextLine();
+                printer.append(firstItem);
 
-                childrenBuilder.append(innerBuilder);
-                if (list.size() > 1)
-                    childrenBuilder.append("]");
+                for (int i = 1; i < list.size(); i++)
+                    printer.append(",").nextLine().append(list.get(i));
+
+                printer.up().nextLine().append("]");
             }
             // Normal complex property
             else {
-                childrenBuilder.append(firstItem.name).append(": ").append(firstItem);
+                printer.append(firstItem.name).append(": ").append(firstItem);
             }
             
-            childrenBuilder.append(",\n");
+            printer.append(",").nextLine();
         }
 
         for (ComplexRecord dynamicNameChild : dynamicNameChildren) {
-            childrenBuilder.append(dynamicNameChild.name).append(": ").append(dynamicNameChild).append(",\n");
+            printer.append(dynamicNameChild.name).append(": ").append(dynamicNameChild).append(",").nextLine();
         }
 
-        String childrenResult = childrenBuilder.toString();
-        if (childrenResult.length() > 0)
-            childrenResult = childrenResult.substring(0, childrenResult.length() - 2);
-        
-        builder.append(childrenResult);
-        builder.append("\n}");
-        
-        return builder.toString();
+        printer.remove().up().nextLine().append("}");
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public String toString() {
+        return Printer.print(this);
+    }
+
+    @Override public boolean equals(Object object) {
         if (object == this)
             return true;
 

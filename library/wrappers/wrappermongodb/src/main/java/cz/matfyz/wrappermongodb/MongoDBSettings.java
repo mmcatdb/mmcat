@@ -41,15 +41,15 @@ public class MongoDBSettings {
 
         if (username != null)
             builder
-                .append(username)
-                .append(":");
-
+                .append(username);
+                
         if (password != null)
             builder
-                .append(password)
-                .append("@");
-
+                .append(":")
+                .append(password);
+                
         builder
+            .append("@")
             .append(host)
             .append(":")
             .append(port)

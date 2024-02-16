@@ -266,8 +266,7 @@ public class InstanceObject implements CategoricalObject {
         return output;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
         builder.append("\tKey: ").append(key());
@@ -282,8 +281,7 @@ public class InstanceObject implements CategoricalObject {
         return builder.toString();
     }
     
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof InstanceObject instanceObject && schemaObject.equals(instanceObject.schemaObject);
     }
     
@@ -310,8 +308,7 @@ public class InstanceObject implements CategoricalObject {
             this.signatureInOther = signatureInOther;
         }
 
-        @Override
-        public boolean equals(Object object) {
+        @Override public boolean equals(Object object) {
             if (this == object)
                 return true;
             
@@ -321,8 +318,7 @@ public class InstanceObject implements CategoricalObject {
                 && signatureInOther.equals(reference.signatureInOther);
         }
 
-        @Override
-        public int compareTo(ReferenceToRow reference) {
+        @Override public int compareTo(ReferenceToRow reference) {
             if (this == reference)
                 return 0;
             

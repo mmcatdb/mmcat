@@ -17,8 +17,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
-    @Override
-    protected Map<ComparisonOperator, String> defineComparisonOperators() {
+    @Override protected Map<ComparisonOperator, String> defineComparisonOperators() {
         final var output = new TreeMap<ComparisonOperator, String>();
         output.put(ComparisonOperator.Equal, "=");
         output.put(ComparisonOperator.NotEqual, "<>");
@@ -29,13 +28,11 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
         return output;
     }
 
-    @Override
-    protected Map<AggregationOperator, String> defineAggregationOperators() {
+    @Override protected Map<AggregationOperator, String> defineAggregationOperators() {
         throw new UnsupportedOperationException("Neo4jQueryWrapper.defineAggregationOperators not implemented.");
     }
 
-    @Override
-    public QueryStatement createDSLStatement() {
+    @Override public QueryStatement createDSLStatement() {
         throw new UnsupportedOperationException("Neo4jQueryWrapper.createDSLStatement not implemented.");
     }
 

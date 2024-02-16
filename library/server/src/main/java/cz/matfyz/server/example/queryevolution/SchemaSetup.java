@@ -19,8 +19,7 @@ class SchemaSetup extends SchemaBase {
         return new SchemaSetup(wrapper, lastUpdateVersion, version).innerCreateNewUpdate();
     }
 
-    @Override
-    protected void createOperations() {
+    @Override protected void createOperations() {
         if (version == 1)
             firstVersion();
         else

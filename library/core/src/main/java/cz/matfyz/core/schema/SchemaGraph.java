@@ -154,8 +154,7 @@ public class SchemaGraph {
             this.object = object;
         }
 
-        @Override
-        public int compareTo(Node other) {
+        @Override public int compareTo(Node other) {
             return object.compareTo(other.object);
         }
     }
@@ -184,8 +183,7 @@ public class SchemaGraph {
             return node == source ? target : source;
         }
 
-        @Override
-        public int compareTo(Edge other) {
+        @Override public int compareTo(Edge other) {
             return morphism.compareTo(other.morphism);
         }
     }

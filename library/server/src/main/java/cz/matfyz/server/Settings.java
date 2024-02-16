@@ -20,8 +20,7 @@ class Settings implements WebMvcConfigurer {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            @Override public void addCorsMappings(CorsRegistry registry) {
                 registry
                     .addMapping("/**")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")

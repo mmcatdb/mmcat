@@ -31,36 +31,30 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
         this.pimIri = pimIri;
     }
 
-    @Override
-    public Key identifier() {
+    @Override public Key identifier() {
         return key;
     }
 
-    @Override
-    public Key key() {
+    @Override public Key key() {
         return key;
     }
 
-    @Override
-    public String label() {
+    @Override public String label() {
         return label;
     }
 
-    @Override
-    public SignatureId superId() {
+    @Override public SignatureId superId() {
         return superId;
     }
 
     /**
      * Immutable.
      */
-    @Override
-    public ObjectIds ids() {
+    @Override public ObjectIds ids() {
         return ids;
     }
 
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         return obj instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
     }
 
@@ -68,15 +62,13 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
      * Auto-generated, constants doesn't have any special meaning.
      * @return
      */
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         int hash = 7;
         hash = 79 * hash + Objects.hashCode(this.key);
         return hash;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "SO: " + key;
     }
     

@@ -17,7 +17,7 @@ import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
-import cz.matfyz.querying.exception.JoinException;
+import cz.matfyz.querying.exception.JoiningException;
 import cz.matfyz.querying.parsing.GroupGraphPattern.TermTree;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 
@@ -52,7 +52,7 @@ public class PlanJoiner {
     
     private QueryNode run() {
         if (allKinds.isEmpty())
-            throw JoinException.noKinds();
+            throw JoiningException.noKinds();
 
         if (allKinds.size() == 1) {
             final var patternNode = new PatternNode(allKinds, schema, List.of(), allKinds.stream().findFirst().get().root.term);
@@ -168,8 +168,7 @@ public class PlanJoiner {
             return new DatabasePair(comparison ? a : b, comparison ? b : a);
         }
 
-        @Override
-        public int compareTo(DatabasePair other) {
+        @Override public int compareTo(DatabasePair other) {
             final int firstComparison = first.compareTo(other.first);
             return firstComparison != 0 ? firstComparison : second.compareTo(other.second);
         }
@@ -375,7 +374,7 @@ public class PlanJoiner {
 
         // Now, there should be only one join node. If not, the query is invalid.
         if (nodes.size() != 1)
-            throw JoinException.impossible();
+            throw JoiningException.impossible();
 
         return nodes.get(0);
     }

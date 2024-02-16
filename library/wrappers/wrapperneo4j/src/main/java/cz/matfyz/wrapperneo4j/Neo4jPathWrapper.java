@@ -12,13 +12,11 @@ public class Neo4jPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();
     
-    @Override
-    public void addProperty(String hierarchy) {
+    @Override public void addProperty(String hierarchy) {
         properties.add(hierarchy);
     }
 
-    @Override
-    public boolean check() {
+    @Override public boolean check() {
         throw new UnsupportedOperationException("Neo4jPathWrapper.check not implemented.");
     }
 

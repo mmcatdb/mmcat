@@ -34,8 +34,7 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
         this.provider = provider;
     }
 
-    @Override
-    public void execute(Collection<AbstractStatement> statements) {
+    @Override public void execute(Collection<AbstractStatement> statements) {
         try (
             final Session session = provider.getSession();
         ) {
@@ -57,8 +56,7 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
      * The point of this method is that the neo4j driver doesn't allow to run whole script at one. So we have to split it manually.
      * This is of course not ideal since we don't want to parse the whole thing. But close enough.
      */
-    @Override
-    public void execute(Path path) {
+    @Override public void execute(Path path) {
         try {
             String script = Files.readString(path);
             // Split the queries by the ; character, followed by any number of whitespaces and newline.
@@ -97,33 +95,27 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     // BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     // LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
 
-    @Override
-    public Neo4jDDLWrapper getDDLWrapper() {
+    @Override public Neo4jDDLWrapper getDDLWrapper() {
         return new Neo4jDDLWrapper();
     }
 
-    @Override
-    public Neo4jICWrapper getICWrapper() {
+    @Override public Neo4jICWrapper getICWrapper() {
         return new Neo4jICWrapper();
     }
 
-    @Override
-    public Neo4jDMLWrapper getDMLWrapper() {
+    @Override public Neo4jDMLWrapper getDMLWrapper() {
         return new Neo4jDMLWrapper();
     }
 
-    @Override
-    public Neo4jPullWrapper getPullWrapper() {
+    @Override public Neo4jPullWrapper getPullWrapper() {
         return new Neo4jPullWrapper(provider);
     }
 
-    @Override
-    public Neo4jPathWrapper getPathWrapper() {
+    @Override public Neo4jPathWrapper getPathWrapper() {
         return new Neo4jPathWrapper();
     }
 
-    @Override
-    public Neo4jQueryWrapper getQueryWrapper() {
+    @Override public Neo4jQueryWrapper getQueryWrapper() {
         return new Neo4jQueryWrapper();
     }
 

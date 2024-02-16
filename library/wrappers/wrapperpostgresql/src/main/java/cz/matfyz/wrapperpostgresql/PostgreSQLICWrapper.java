@@ -16,24 +16,20 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
 
     private final List<Constraint> constraints = new ArrayList<>();
     
-    @Override
-    public void appendIdentifier(String kindName, IdentifierStructure identifier) {
+    @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {
         constraints.add(new IdentifierConstraint(kindName, identifier.properties()));
     }
 
-    @Override
-    public void appendReference(String referencingKindName, String referencedKindName, Set<ComparablePair<String, String>> attributePairs) {
+    @Override public void appendReference(String referencingKindName, String referencedKindName, Set<ComparablePair<String, String>> attributePairs) {
         constraints.add(new ReferenceConstraint(referencingKindName, referencedKindName, attributePairs));
     }
 
-    @Override
-    public PostgreSQLStatement createICStatement() {
+    @Override public PostgreSQLStatement createICStatement() {
         String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::addCommand).toList()) + "\n";
         return new PostgreSQLStatement(content);
     }
 
-    @Override
-    public PostgreSQLStatement createICRemoveStatement() {
+    @Override public PostgreSQLStatement createICRemoveStatement() {
         String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::dropCommand).toList()) + "\n";
         return new PostgreSQLStatement(content);
     }
@@ -62,15 +58,13 @@ class IdentifierConstraint implements Constraint {
         return "#" + kindName + "_PRIMARY_KEY";
     }
 
-    @Override
-    public String addCommand() {
+    @Override public String addCommand() {
         return "ALTER TABLE \"" + kindName + "\""
             + "\nADD CONSTRAINT \"" + getName() + "\""
             + "\nPRIMARY KEY (\"" + String.join("\", \"", properties) + "\")" + ";";
     }
 
-    @Override
-    public String dropCommand() {
+    @Override public String dropCommand() {
         return "\nALTER TABLE \"" + kindName + "\""
             + "\nDROP CONSTRAINT \"" + getName() + "\";";
     }
@@ -95,16 +89,14 @@ class ReferenceConstraint implements Constraint {
         return "#" + referencingKindName + "_REFERENCES_" + referencedKindName;
     }
 
-    @Override
-    public String addCommand() {
+    @Override public String addCommand() {
         return "ALTER TABLE \"" + referencingKindName + "\""
             + "\nADD CONSTRAINT \"" + getName() + "\""
             + "\nFOREIGN KEY (\"" + String.join("\", \"", referencingAttributes) + "\")"
             + "\nREFERENCES \"" + referencedKindName + "\" (\"" + String.join("\", \"", referencedAttributes) + "\");";
     }
     
-    @Override
-    public String dropCommand() {
+    @Override public String dropCommand() {
         return "ALTER TABLE \"" + referencingKindName + "\""
             + "\nDROP CONSTRAINT \"" + getName() + "\";";
     }

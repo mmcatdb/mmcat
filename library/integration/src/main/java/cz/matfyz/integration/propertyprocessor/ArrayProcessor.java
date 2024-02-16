@@ -32,8 +32,7 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
         super(category);
     }
 
-    @Override
-    public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
+    @Override public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
         LOGGER.warn("[Array]: {}", statement);
 
         final var elementToDom = finder.tryFindBaseByPimIri(statement.getPredicate().getURI() + DOM_TO_ELEMENT_SUFFIX);

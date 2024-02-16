@@ -4,7 +4,7 @@ import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.utils.IndentedStringBuilder;
+import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -187,8 +187,7 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override
-    protected boolean hasSignature(Signature signature) {
+    @Override protected boolean hasSignature(Signature signature) {
         return this.signature.equals(signature);
     }
 
@@ -206,8 +205,7 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override
-    protected List<AccessPath> getPropertyPathInternal(Signature signature) {
+    @Override protected List<AccessPath> getPropertyPathInternal(Signature signature) {
         if (this.signature.contains(signature))
             return new ArrayList<>(List.of(this));
         
@@ -222,8 +220,7 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override
-    public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
         if (morphism.dom().key().equals(key))
             return this;
@@ -249,25 +246,23 @@ public class ComplexProperty extends AccessPath {
         
         return new ComplexProperty(name, signature, isAuxiliary, newSubpaths);
     }
-    
-    @Override
-    public String toString() {
-        final var subpathBuilder = new IndentedStringBuilder(1);
-        
-        if (!subpaths.isEmpty())
-            subpathBuilder.append(subpaths.get(0));
-        for (int i = 1; i < subpaths.size(); i++)
-            subpathBuilder.append(",\n").append(subpaths.get(i));
-        subpathBuilder.append("\n");
-        
-        StringBuilder builder = new StringBuilder();
-        builder.append(name).append(": ");
+
+    @Override public void printTo(Printer printer) {
+        printer.append(name).append(": ");
         if (!isAuxiliary())
-            builder.append(signature).append(" ");
+            printer.append(signature).append(" ");
         
-        builder.append("{\n").append(subpathBuilder).append("}");
-        
-        return builder.toString();
+        printer.append("{").down().nextLine();
+
+        for (int i = 0; i < subpaths.size(); i++)
+            printer.append(subpaths.get(i)).append(",").nextLine();
+
+        printer.remove().up().nextLine()
+            .append("}");
+    }
+
+    @Override public String toString() {
+        return Printer.print(this);
     }
     
     /**
@@ -306,8 +301,7 @@ public class ComplexProperty extends AccessPath {
             super(t);
         }
 
-        @Override
-        public void serialize(ComplexProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(ComplexProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
@@ -337,8 +331,7 @@ public class ComplexProperty extends AccessPath {
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
         private static final ObjectReader subpathsJsonReader = new ObjectMapper().readerFor(AccessPath[].class);
     
-        @Override
-        public ComplexProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public ComplexProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Name name = nameJsonReader.readValue(node.get("name"));

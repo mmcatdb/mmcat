@@ -1,4 +1,4 @@
-import { IntendedStringBuilder } from '@/utils/string';
+import { IndentedStringBuilder } from '@/utils/string';
 import { Signature, StaticName } from '@/types/identifiers';
 import { subpathFromFromServer, type ChildProperty } from './compositeTypes';
 import type { RootPropertyFromServer } from '../serverTypes';
@@ -34,7 +34,7 @@ export class RootProperty {
     }
 
     toString(level = 0): string {
-        const builder = new IntendedStringBuilder(level);
+        const builder = new IndentedStringBuilder(level);
 
         builder.appendIntendedLine(this.name + ': ');
         builder.append('{\n');

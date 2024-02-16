@@ -1,6 +1,6 @@
-package cz.matfyz.abstractwrappers.queryresult;
+package cz.matfyz.core.querying.queryresult;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
+import cz.matfyz.core.querying.QueryStructure;
 
 /**
  * This class represents the result of a selection part of a query. It contains (a) data and (b) structure of the data.

@@ -20,19 +20,16 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
     
-    @Override
-    public void setKindName(String name) {
+    @Override public void setKindName(String name) {
         kindName = name;
     }
 
-    @Override
-    public void append(String name, Object value) {
+    @Override public void append(String name, Object value) {
         String stringValue = value == null ? null : value.toString();
         propertyValues.add(new PropertyValue(name, stringValue));
     }
 
-    @Override
-    public MongoDBCommandStatement createDMLStatement() {
+    @Override public MongoDBCommandStatement createDMLStatement() {
         var constructor = new JsonDMLConstructor();
 
         String content = "";
@@ -59,8 +56,7 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
     }
     */
 
-    @Override
-    public void clear() {
+    @Override public void clear() {
         kindName = null;
         propertyValues = new ArrayList<>();
     }

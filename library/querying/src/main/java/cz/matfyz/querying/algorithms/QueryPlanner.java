@@ -1,5 +1,6 @@
 package cz.matfyz.querying.algorithms;
 
+import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.MorphismColoring;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 
@@ -10,10 +11,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class is responsible for creating query plans for a given pattern. The pattern is represented by the extracted schema category.
  */
 public class QueryPlanner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueryPlanner.class);
 
     /**
      * @param allKinds All the kinds that are used in this query pattern. Each with the part of the pattern that is mapped to it.
@@ -44,7 +50,20 @@ public class QueryPlanner {
         /** These kinds are yet to be processed. */
         List<KindPattern> rest,
         MorphismColoring coloring
-    ) {}
+    ) implements Printable {
+        @Override public void printTo(Printer printer) {
+            printer
+                .append("{").down().nextLine()
+                .append("selected: ").append(selected).nextLine()
+                .append("rest: ").append(rest).nextLine()
+                .append("coloring: ").append(coloring).up().nextLine()
+                .append("}");
+        }
+
+        @Override public String toString() {
+            return Printer.print(this);
+        }
+    }
 
     private List<Set<KindPattern>> plans = new ArrayList<>();
     private Deque<StackItem> stack = new ArrayDeque<>();
@@ -60,12 +79,15 @@ public class QueryPlanner {
     }
 
     private void processStackItem(StackItem item) {
+        LOGGER.debug("Process item: \n{}", item);
         if (item.rest.isEmpty()) {
             plans.add(item.selected);
+            LOGGER.debug("Build plan: {}", item.selected);
             return;
         }
 
         for (final KindPattern kind : getKindsWithMinimalPrice(item.rest, item.coloring)) {
+            LOGGER.debug("Kind: {}, price: {}", kind, item.coloring.getKindCost(kind));
             final List<KindPattern> restWithoutKind = item.rest.stream().filter(k -> !k.equals(kind)).toList();
 
             final var coloringWithoutKind = item.coloring.removeKind(kind);

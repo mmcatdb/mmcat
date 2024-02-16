@@ -6,11 +6,11 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
@@ -60,8 +60,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return output;
     }
 
-    @Override
-    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+    @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         try {
             return innerPullForest(path, query);
         }
@@ -244,8 +243,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         return output.toString();
     }
 
-    @Override
-    public QueryResult executeQuery(QueryStatement statement) {
+    @Override public QueryResult executeQuery(QueryStatement statement) {
         // TODO
         throw new UnsupportedOperationException("Neo4jPullWrapper.executeQuery not implemented.");
     }

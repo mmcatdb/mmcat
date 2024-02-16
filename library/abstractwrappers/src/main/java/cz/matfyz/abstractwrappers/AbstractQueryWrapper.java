@@ -3,17 +3,11 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.utils.GraphUtils.Tree;
-import cz.matfyz.core.utils.LineStringBuilder;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface AbstractQueryWrapper {
 
@@ -135,74 +129,6 @@ public interface AbstractQueryWrapper {
      * FILTER(SUM(?price) > 69).
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
-
-    // TODO add to json conversion for FE. Also, probably move to a separate file.
-    public static class QueryStructure implements Tree<QueryStructure> {
-    
-        public final String name;
-        // TODO find out if the object is needed
-        public final boolean isArray;
-        public final Map<String, QueryStructure> children = new TreeMap<>();
-
-        /** If null, this is the root of the tree. */
-        @Nullable
-        private QueryStructure parent;
-
-        public QueryStructure(String name, boolean isArray) {
-            this.name = name;
-            this.isArray = isArray;
-        }
-
-        /**
-         * Adds the child and returns it back.
-         */
-        public QueryStructure addChild(QueryStructure child) {
-            this.children.put(child.name, child);
-            child.parent = this;
-            return child;
-        }
-
-        @Nullable
-        public QueryStructure parent() {
-            return parent;
-        }
-
-        @Override
-        public Collection<QueryStructure> children() {
-            return this.children.values();
-        }
-
-        private void print(LineStringBuilder builder) {
-            builder.append(name);
-            if (isArray)
-                builder.append("[]");
-
-            if (!children.isEmpty())
-                builder.append(":");
-
-            builder
-                .down()
-                .nextLine();
-
-            children.values().forEach(child -> {
-                child.print(builder);
-                builder.nextLine();
-            });
-            builder.up();
-        }
-
-        @Override
-        public String toString() {
-            final var builder = new LineStringBuilder(0, "    ");
-            print(builder);
-            return builder.toString();
-        }
-
-        @Override
-        public int compareTo(QueryStructure other) {
-            return name.compareTo(other.name);
-        }
-    }
 
     public record QueryStatement(QueryContent content, QueryStructure structure) {}
 

@@ -30,15 +30,13 @@ public abstract class SimpleRecord<T> extends DataRecord {
     }
     
     /*
-    @Override
-    public Set<DataRecord> records() {
+    @Override public Set<DataRecord> records() {
         return Set.of(this);
     }
     */
     
     /*
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("(Name: \"").append(name)
             .append("\",\tValue: \"").append(value).append("\")\n");

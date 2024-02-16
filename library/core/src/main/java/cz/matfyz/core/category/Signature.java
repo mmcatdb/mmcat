@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * This class represents a signature of a morphism. It can be empty, base or composite.
@@ -104,6 +105,25 @@ public class Signature implements Serializable, Comparable<Signature> {
         return createComposite(ArrayUtils.concatenate(signatureIds));
     }
 
+    public boolean hasPrefix(Signature other) {
+        if (ids.length < other.ids.length)
+            return false;
+
+        for (int i = 0; i < other.ids.length; i++)
+            if (ids[i] != other.ids[i])
+                return false;
+
+        return true;
+    }
+
+    public @Nullable Signature cutPrefix(Signature other) {
+        if (!hasPrefix(other))
+            return Signature.createEmpty();
+
+        final var newIds = Arrays.copyOfRange(ids, other.ids.length, ids.length);
+        return createComposite(newIds);
+    }
+
     public boolean contains(Signature other) {
         if (other.ids.length == 0)
             return true;
@@ -155,8 +175,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     private static final String SEPARATOR = ".";
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         if (isEmpty())
             return "EMPTY";
 
@@ -182,8 +201,7 @@ public class Signature implements Serializable, Comparable<Signature> {
         }
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof Signature signature && compareTo(signature) == 0;
     }
 
@@ -191,15 +209,13 @@ public class Signature implements Serializable, Comparable<Signature> {
      * Auto-generated, constants doesn't have any special meaning.
      * @return
      */
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         int hash = 7;
         hash = 83 * hash + Arrays.hashCode(this.ids);
         return hash;
     }
     
-    @Override
-    public int compareTo(Signature signature) {
+    @Override public int compareTo(Signature signature) {
         if (this == signature)
             return 0;
 
@@ -263,8 +279,7 @@ public class Signature implements Serializable, Comparable<Signature> {
             super(t);
         }
 
-        @Override
-        public void serialize(Signature signature, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(Signature signature, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(signature.toString());
         }
 
@@ -280,8 +295,7 @@ public class Signature implements Serializable, Comparable<Signature> {
             super(vc);
         }
 
-        @Override
-        public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public Signature deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             return Signature.fromString(node.asText());

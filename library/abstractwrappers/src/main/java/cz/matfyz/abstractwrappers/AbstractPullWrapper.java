@@ -3,8 +3,8 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
 
 /**

@@ -63,8 +63,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         return this.signatures.size() == 1 && this.signatures.first().isEmpty();
     }
 
-    @Override
-    public int compareTo(SignatureId id) {
+    @Override public int compareTo(SignatureId id) {
         int sizeResult = signatures.size() - id.signatures.size();
         if (sizeResult != 0)
             return sizeResult;
@@ -80,13 +79,11 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         return 0;
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof SignatureId id && compareTo(id) == 0;
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
         builder.append("(");
@@ -106,8 +103,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
             super(t);
         }
 
-        @Override
-        public void serialize(SignatureId signatureId, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(SignatureId signatureId, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
             for (final var signature : signatureId.signatures)
                 generator.writePOJO(signature);
@@ -129,8 +125,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
 
         private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
 
-        @Override
-        public SignatureId deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public SignatureId deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Signature[] signatures = signaturesJsonReader.readValue(node);

@@ -38,13 +38,11 @@ public class DynamicName extends Name {
         return new DynamicRecordName(dynamicNameValue, signature);
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return signature.toString();
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof DynamicName dynamicName && signature.equals(dynamicName.signature);
     }
 
@@ -58,8 +56,7 @@ public class DynamicName extends Name {
             super(t);
         }
 
-        @Override
-        public void serialize(DynamicName name, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(DynamicName name, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writePOJOField("signature", name.signature);
             generator.writeEndObject();
@@ -79,8 +76,7 @@ public class DynamicName extends Name {
     
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
     
-        @Override
-        public DynamicName deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public DynamicName deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Signature signature = signatureJsonReader.readValue(node.get("signature"));

@@ -43,25 +43,25 @@ public class DMLAlgorithmTests {
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addAddress(builder, 0, "0", "hodnotaA", "hodnotaB", "hodnotaC");
-                MongoDB.addAddress(builder, 1, "1", "hodnotaA2", "hodnotaB2", "hodnotaC2");
+                MongoDB.addAddress(builder, 0, "0", "Ke Karlovu 2027/3", "Praha 2", "121 16");
+                MongoDB.addAddress(builder, 1, "1", "Malostranské nám. 2/25", "Praha 1", "118 00");
             })
             .expected("""
                 [{
-                    "name": "order",
+                    "name": "address",
                     "values": [
                         "append(number, o_100)",
-                        "append(address/street, hodnotaA)",
-                        "append(address/city, hodnotaB)",
-                        "append(address/zip, hodnotaC)"
+                        "append(address/street, Ke Karlovu 2027/3)",
+                        "append(address/city, Praha 2)",
+                        "append(address/zip, 121 16)"
                     ]
                 }, {
-                    "name": "order",
+                    "name": "address",
                     "values": [
                         "append(number, o_200)",
-                        "append(address/street, hodnotaA2)",
-                        "append(address/city, hodnotaB2)",
-                        "append(address/zip, hodnotaC2)"
+                        "append(address/street, Malostranské nám. 2/25)",
+                        "append(address/city, Praha 1)",
+                        "append(address/zip, 118 00)"
                     ]
                 }]
             """)
@@ -79,7 +79,7 @@ public class DMLAlgorithmTests {
             })
             .expected("""
                 [{
-                    "name": "order",
+                    "name": "tag",
                     "values": [
                         "append(number, o_100)",
                         "append(tags[0], 123)",
@@ -87,7 +87,7 @@ public class DMLAlgorithmTests {
                         "append(tags[2], 789)"
                     ]
                 }, {
-                    "name": "order",
+                    "name": "tag",
                     "values": [
                         "append(number, o_200)",
                         "append(tags[0], 123)",
@@ -160,14 +160,14 @@ public class DMLAlgorithmTests {
             })
             .expected("""
                 [{
-                    "name": "order",
+                    "name": "contact",
                     "values": [
                         "append(number, o_100)",
                         "append(contact/email, anna@seznam.cz)",
                         "append(contact/cellphone, +420777123456)"
                     ]
                 }, {
-                    "name": "order",
+                    "name": "contact",
                     "values": [
                         "append(number, o_200)",
                         "append(contact/skype, skype123)",
@@ -189,13 +189,13 @@ public class DMLAlgorithmTests {
             })
             .expected("""
                 [{
-                    "name": "order",
+                    "name": "customer",
                     "values": [
                         "append(customer/number, o_100)",
                         "append(customer/name, 1)"
                     ]
                 }, {
-                    "name": "order",
+                    "name": "customer",
                     "values": [
                         "append(customer/number, o_200)",
                         "append(customer/name, 1)"
@@ -211,23 +211,23 @@ public class DMLAlgorithmTests {
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addAddress(builder, 0, "0", "hodnotaA", null, "hodnotaC");
-                MongoDB.addAddress(builder, 1, "1", "hodnotaA2", null, "hodnotaC2");
+                MongoDB.addAddress(builder, 0, "0", "Ke Karlovu 2027/3", null, "121 16");
+                MongoDB.addAddress(builder, 1, "1", "Malostranské nám. 2/25", null, "118 00");
             })
             .expected("""
                 [{
-                    "name": "order",
+                    "name": "address",
                     "values": [
                         "append(number, o_100)",
-                        "append(address/street, hodnotaA)",
-                        "append(address/zip, hodnotaC)"
+                        "append(address/street, Ke Karlovu 2027/3)",
+                        "append(address/zip, 121 16)"
                     ]
                 }, {
-                    "name": "order",
+                    "name": "address",
                     "values": [
                         "append(number, o_200)",
-                        "append(address/street, hodnotaA2)",
-                        "append(address/zip, hodnotaC2)"
+                        "append(address/street, Malostranské nám. 2/25)",
+                        "append(address/zip, 118 00)"
                     ]
                 }]
             """)
@@ -243,12 +243,12 @@ public class DMLAlgorithmTests {
             })
             .expected("""
                 [{
-                    "name": "order",
+                    "name": "address",
                     "values": [
                         "append(number, o_100)"
                     ]
                 }, {
-                    "name": "order",
+                    "name": "address",
                     "values": [
                         "append(number, o_200)"
                     ]
@@ -295,7 +295,7 @@ public class DMLAlgorithmTests {
             })
             .expected("""
                 [{
-                    "name": "order",
+                    "name": "note",
                     "values": [
                         "append(number, o_100)",
                         "append(note/cs-CZ/subject, subject 1)",
@@ -304,7 +304,7 @@ public class DMLAlgorithmTests {
                         "append(note/en-US/content, content en)"
                     ]
                 }, {
-                    "name": "order",
+                    "name": "note",
                     "values": [
                         "append(number, o_200)",
                         "append(note/cs-CZ/subject, subject cz)",

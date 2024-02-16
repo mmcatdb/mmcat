@@ -100,8 +100,7 @@ public class MorphismFinder {
         String pimIri
     ) implements Comparable<ObjectIriTuple> {
 
-        @Override
-        public int compareTo(ObjectIriTuple tuple) {
+        @Override public int compareTo(ObjectIriTuple tuple) {
             int objectResult = object.compareTo(tuple.object);
             if (objectResult != 0)
                 return objectResult;

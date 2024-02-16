@@ -4,6 +4,7 @@ import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
+import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,31 +42,28 @@ public class SimpleProperty extends AccessPath {
         this(new DynamicName(name), signature);
     }
     
-    @Override
-    protected boolean hasSignature(Signature signature) {
+    @Override protected boolean hasSignature(Signature signature) {
         return this.signature.equals(signature);
     }
 
-    @Override
-    protected List<AccessPath> getPropertyPathInternal(Signature signature) {
+    @Override protected List<AccessPath> getPropertyPathInternal(Signature signature) {
         return this.signature.contains(signature)
             ? new ArrayList<>(List.of(this))
             : null;
     }
 
-    @Override
-    public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
 
         return morphism.dom().key().equals(key) ? this : null;
     }
     
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(name).append(": ").append(signature);
-        
-        return builder.toString();
+    @Override public void printTo(Printer printer) {
+        printer.append(name).append(": ").append(signature);
+    }
+
+    @Override public String toString() {
+        return Printer.print(this);
     }
     
     public static class Serializer extends StdSerializer<SimpleProperty> {
@@ -78,8 +76,7 @@ public class SimpleProperty extends AccessPath {
             super(t);
         }
 
-        @Override
-        public void serialize(SimpleProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(SimpleProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
@@ -101,8 +98,7 @@ public class SimpleProperty extends AccessPath {
         private static final ObjectReader nameJsonReader = new ObjectMapper().readerFor(Name.class);
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
     
-        @Override
-        public SimpleProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public SimpleProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Name name = nameJsonReader.readValue(node.get("name"));

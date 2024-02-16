@@ -188,8 +188,7 @@ public class DMLAlgorithm {
             this.isSimple = false;
         }
 
-        @Override
-        public String toString() {
+        @Override public String toString() {
             return isSimple
                 ? "[simple] " + name + " \"" + simpleValue + "\" "
                 : "[complex] " + complexValue;

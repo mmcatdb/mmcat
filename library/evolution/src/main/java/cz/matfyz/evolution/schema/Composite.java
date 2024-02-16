@@ -10,13 +10,11 @@ public class Composite extends SchemaCategory.Editor implements SchemaModificati
         this.name = name;
     }
 
-    @Override
-    public void up(SchemaCategory category) {
+    @Override public void up(SchemaCategory category) {
         /* This function is intentionally empty. */
     }
 
-    @Override
-    public void down(SchemaCategory category) {
+    @Override public void down(SchemaCategory category) {
         /* This function is intentionally empty. */
     }
 

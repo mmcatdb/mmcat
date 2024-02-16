@@ -104,8 +104,7 @@ public class ObjectIds implements Serializable {
         return new SignatureId(allSignatures);
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         if (type == Type.Value)
             return "_VALUE";
 
@@ -133,8 +132,7 @@ public class ObjectIds implements Serializable {
             super(t);
         }
 
-        @Override
-        public void serialize(ObjectIds ids, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(ObjectIds ids, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writeStringField("type", ids.type.name());
 
@@ -163,8 +161,7 @@ public class ObjectIds implements Serializable {
 
         private static final ObjectReader signatureIdsJsonReader = new ObjectMapper().readerFor(SignatureId[].class);
 
-        @Override
-        public ObjectIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public ObjectIds deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Type type = Type.valueOf(node.get("type").asText());

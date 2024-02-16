@@ -30,23 +30,19 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
         return new Id(UUID.randomUUID().toString());
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return value;
     }
 
-    @Override
-    public char charAt(int index) {
+    @Override public char charAt(int index) {
         return value.charAt(index);
     }
 
-    @Override
-    public int length() {
+    @Override public int length() {
         return value.length();
     }
 
-    @Override
-    public CharSequence subSequence(int beginIndex, int endIndex) {
+    @Override public CharSequence subSequence(int beginIndex, int endIndex) {
         return value.subSequence(beginIndex, endIndex);
     }
 
@@ -60,13 +56,11 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
         return value.compareTo(another.value);
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof Id another && another != null && value.equals(another.value);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return value.hashCode();
     }
 
@@ -80,8 +74,7 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
             super(t);
         }
     
-        @Override
-        public void serialize(Id id, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(Id id, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(id.value);
         }
     
@@ -97,8 +90,7 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
             super(vc);
         }
     
-        @Override
-        public Id deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public Id deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
     
             return new Id(node.asText());

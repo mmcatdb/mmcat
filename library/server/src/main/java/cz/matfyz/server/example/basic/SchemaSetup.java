@@ -15,8 +15,7 @@ class SchemaSetup extends SchemaBase {
         return new SchemaSetup(wrapper, lastUpdateVersion).innerCreateNewUpdate();
     }
 
-    @Override
-    protected void createOperations() {
+    @Override protected void createOperations() {
         // Order
         addObject(Schema.order, 0, 0);
         addComposite(ADD_PROPERTY, () -> {

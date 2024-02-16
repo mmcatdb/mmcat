@@ -29,8 +29,7 @@ public abstract class GraphUtils {
         Set<N> nodes,
         List<E> edges
     ) implements Comparable<Component<N, E>> {
-        @Override
-        public int compareTo(Component<N, E> other) {
+        @Override public int compareTo(Component<N, E> other) {
             return id - other.id;
         }
     }
@@ -279,19 +278,16 @@ public abstract class GraphUtils {
             this.payload = payload;
         }
 
-        @Override
-        public int compareTo(EditableTree<P> other) {
+        @Override public int compareTo(EditableTree<P> other) {
             return payload.compareTo(other.payload);
         }
 
-        @Override
-        @Nullable
+        @Override @Nullable
         public EditableTree<P> parent() {
             return parent;
         }
 
-        @Override
-        public Collection<EditableTree<P>> children() {
+        @Override public Collection<EditableTree<P>> children() {
             return children();
         }
 

@@ -59,16 +59,16 @@ public class MongoDBTests {
                 [{
                     "number": "o_100",
                     "address": {
-                        "street": "hodnotaA",
-                        "city": "hodnotaB",
-                        "zip": "hodnotaC"
+                        "street": "Ke Karlovu 2027/3",
+                        "city": "Praha 2",
+                        "zip": "121 16"
                     }
                 }, {
                     "number": "o_200",
                     "address": {
-                        "street": "hodnotaA2",
-                        "city": "hodnotaB2",
-                        "zip": "hodnotaC2"
+                        "street": "Malostranské nám. 2/25",
+                        "city": "Praha 1",
+                        "zip": "118 00"
                     }
                 }]
             """)

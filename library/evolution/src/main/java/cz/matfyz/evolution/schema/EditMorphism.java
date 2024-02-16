@@ -14,13 +14,11 @@ public class EditMorphism extends SchemaCategory.Editor implements SchemaModific
         this.oldMorphism = oldMorphism;
     }
 
-    @Override
-    public void up(SchemaCategory category) {
+    @Override public void up(SchemaCategory category) {
         replaceMorphism(category, newMorphism);
     }
 
-    @Override
-    public void down(SchemaCategory category) {
+    @Override public void down(SchemaCategory category) {
         replaceMorphism(category, oldMorphism);
     }
 

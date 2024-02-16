@@ -18,26 +18,22 @@ public class DummyDMLWrapper implements AbstractDMLWrapper {
         return structures;
     }
     
-    @Override
-    public void setKindName(String name) {
+    @Override public void setKindName(String name) {
         //methods.add("setKindName(" + name + ")");
         structure = new DMLTestStructure(name);
     }
 
-    @Override
-    public void append(String name, Object value) {
+    @Override public void append(String name, Object value) {
         //methods.add("append(" + name + ", " + value + ")");
         structure.add("append(" + name + ", " + value + ")");
     }
 
-    @Override
-    public void clear() {
+    @Override public void clear() {
         //methods.add("clear()");
         structure = null;
     }
 
-    @Override
-    public DummyStatement createDMLStatement() {
+    @Override public DummyStatement createDMLStatement() {
         //methods.add("createDMLStatement()");
         structures.add(structure);
         return new DummyStatement("");

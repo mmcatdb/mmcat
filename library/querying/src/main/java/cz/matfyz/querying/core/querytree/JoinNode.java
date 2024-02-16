@@ -17,8 +17,7 @@ public class JoinNode extends QueryNode {
         toChild.setParent(this);
     }
 
-    @Override
-    public <T> T accept(QueryVisitor<T> visitor) {
+    @Override public <T> T accept(QueryVisitor<T> visitor) {
         return visitor.visit(this);
     }
 

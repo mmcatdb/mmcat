@@ -1,20 +1,20 @@
-export class IntendedStringBuilder {
+export class IndentedStringBuilder {
     private intendationString: string;
     private lines: string[] = [];
 
     public constructor(input?: string | number) {
-        this.intendationString = input === undefined ? '' : typeof input === 'string' ? input : IntendedStringBuilder.getTabIntendationString(input);
+        this.intendationString = input === undefined ? '' : typeof input === 'string' ? input : IndentedStringBuilder.getTabIntendationString(input);
     }
 
     public static getTabIntendationString(depth: number): string {
         return [ ...Array(depth) ].map(() => '    ').join();
     }
 
-    public appendIntended(string: string): IntendedStringBuilder {
+    public appendIntended(string: string): IndentedStringBuilder {
         return this.append(string, true);
     }
 
-    public append(string: string, intended = false): IntendedStringBuilder {
+    public append(string: string, intended = false): IndentedStringBuilder {
         if (string === '')
             return this;
 
@@ -26,11 +26,11 @@ export class IntendedStringBuilder {
         return this;
     }
 
-    public appendIntendedLine(line = ''): IntendedStringBuilder {
+    public appendIntendedLine(line = ''): IndentedStringBuilder {
         return this.appendLine(line, true);
     }
 
-    public appendLine(line = '', intended = false): IntendedStringBuilder {
+    public appendLine(line = '', intended = false): IndentedStringBuilder {
         this.lines.push((intended ? this.intendationString : '') + line);
 
         return this;

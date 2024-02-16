@@ -3,101 +3,130 @@ db.dropDatabase();
 db.order.insertMany([
     {
         number: "o_100",
+    },
+    {
+        number: "o_200",
+    },
+]);
+
+db.address.insertMany([
+    {
+        number: "o_100",
         address: {
-            street: "hodnotaA",
-            city: "hodnotaB",
-            zip: "hodnotaC"
+            street: "Ke Karlovu 2027/3",
+            city: "Praha 2",
+            zip: "121 16",
         },
-        tags: [
-            "123",
-            "456",
-            "789"
-        ],
-        note: {
-            'en-US': {
-                subject: "subject 1",
-                content: "content en"
-            },
-            'cs-CZ': {
-                subject: "subject 1",
-                content: "content cz"
-            },
-        }
     },
     {
         number: "o_200",
         address: {
-            street: "hodnotaA2",
-            city: "hodnotaB2",
-            zip: "hodnotaC2"
+            street: "Malostranské nám. 2/25",
+            city: "Praha 1",
+            zip: "118 00",
         },
+    },
+]);
+
+db.tag.insertMany([
+    {
+        number: "o_100",
+        tags: [
+            "123",
+            "456",
+            "789",
+        ],
+    },
+    {
+        number: "o_200",
         tags: [
             "123",
             "String456",
-            "String789"
+            "String789",
         ],
-        note: {
-            'cs-CZ': {
-                subject: "subject cz",
-                content: "content 1"
-            },
-            'en-GB': {
-                subject: "subject gb",
-                content: "content 2"
-            }
-        }
-    }
+    },
 ]);
 
 db.orderItem.insertMany([
     {
         number: "o_100",
         items: [
-            {
-                id: "123",
-                label: "Clean Code",
-                price: "125",
-                quantity: "1"
-            }
-        ]
+            { id: "123", label: "Clean Code", price: "125", quantity: "1" },
+        ],
     },
     {
         number: "o_100",
         items: [
-            {
-                id: "765",
-                label: "The Lord of the Rings",
-                price: "199",
-                quantity: "2"
-            }
-        ]
+            { id: "765", label: "The Lord of the Rings", price: "199", quantity: "2" },
+        ],
     },
     {
         number: "o_200",
         items: [
-            {
-                id: "457",
-                label: "The Art of War",
-                price: "299",
-                quantity: "7"
-            },
-            {
-                id: "734",
-                label: "Animal Farm",
-                price: "350",
-                quantity: "3"
-            }
-        ]
-    }
+            { id: "457", label: "The Art of War", price: "299", quantity: "7" },
+            { id: "734", label: "Animal Farm", price: "350", quantity: "3" },
+        ],
+    },
 ]);
 
 db.orderItemEmpty.insertMany([
     {
         number: "o_100",
-        items: null
+        items: null,
     },
     {
         number: "o_200",
-        items: []
-    }
+        items: [],
+    },
+]);
+
+db.contact.insertMany([
+    {
+        number: "o_100",
+        contact: {
+            "phone": "123456789",
+            "email": "alice@mmcatdb.com",
+        },
+    },
+    {
+        number: "o_200",
+        contact: {
+            "email": "bob@mmcatdb.com",
+            "github": "https://github.com/mmcatdb",
+        },
+    },
+]);
+
+db.customer.insertMany([
+    {
+        number: "o_100",
+        customer: {
+            name: "Alice",
+            number: "c_100",
+        },
+    },
+    {
+        number: "o_200",
+        customer: {
+            name: "Bob",
+            number: "c_200",
+        },
+    },
+]);
+
+db.note.insertMany([
+    {
+        number: "o_100",
+        note: {
+            'en-US': { subject: "subject 1", content: "content en" },
+            'cs-CZ': { subject: "subject 1", content: "content cz" },
+        },
+    },
+    {
+        number: "o_200",
+        note: {
+            'cs-CZ': { subject: "subject cz", content: "content 1" },
+            'en-GB': { subject: "subject gb", content: "content 2" },
+        },
+    },
 ]);

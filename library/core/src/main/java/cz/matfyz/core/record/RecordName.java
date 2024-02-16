@@ -18,8 +18,7 @@ public abstract class RecordName implements Serializable {
     }
     
     /*
-    @Override
-    public int compareTo(RecordName name) {
+    @Override public int compareTo(RecordName name) {
         return value.compareTo(name.value);
     }
     */

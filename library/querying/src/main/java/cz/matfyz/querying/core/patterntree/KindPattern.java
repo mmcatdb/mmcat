@@ -30,13 +30,16 @@ public class KindPattern implements Comparable<KindPattern> {
         patternObject.children().forEach(this::addObject);
     }
 
-    @Override
-    public int compareTo(KindPattern other) {
+    @Override public int compareTo(KindPattern other) {
         return this.kind.compareTo(other.kind);
     }
 
     public PatternObject getPatternObject(SchemaObject object) {
         return objectToPatternObject.get(object);
+    }
+
+    @Override public String toString() {
+        return kind.toString();
     }
 
 }

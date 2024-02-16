@@ -29,8 +29,7 @@ public interface SchemaModificationOperation {
         SchemaObjectWrapper.Data object
     ) implements SchemaModificationOperation {
 
-        @Override
-        public cz.matfyz.evolution.schema.CreateObject toEvolution() {
+        @Override public cz.matfyz.evolution.schema.CreateObject toEvolution() {
             return new cz.matfyz.evolution.schema.CreateObject(
                 object.toSchemaObject(key)
             );
@@ -43,8 +42,7 @@ public interface SchemaModificationOperation {
         SchemaObjectWrapper.Data object
     ) implements SchemaModificationOperation {
 
-        @Override
-        public cz.matfyz.evolution.schema.DeleteObject toEvolution() {
+        @Override public cz.matfyz.evolution.schema.DeleteObject toEvolution() {
             return new cz.matfyz.evolution.schema.DeleteObject(
                 object.toSchemaObject(key)
             );
@@ -58,8 +56,7 @@ public interface SchemaModificationOperation {
         SchemaObjectWrapper.Data oldObject
     ) implements SchemaModificationOperation {
 
-        @Override
-        public cz.matfyz.evolution.schema.EditObject toEvolution() {
+        @Override public cz.matfyz.evolution.schema.EditObject toEvolution() {
             return new cz.matfyz.evolution.schema.EditObject(
                 newObject.toSchemaObject(key),
                 oldObject.toSchemaObject(key)
@@ -72,8 +69,7 @@ public interface SchemaModificationOperation {
         SchemaMorphismWrapper morphism
     ) implements SchemaModificationOperation {
 
-        @Override
-        public cz.matfyz.evolution.schema.CreateMorphism toEvolution() {
+        @Override public cz.matfyz.evolution.schema.CreateMorphism toEvolution() {
             return new cz.matfyz.evolution.schema.CreateMorphism(
                 morphism.toDisconnectedSchemaMorphism()
             );
@@ -85,8 +81,7 @@ public interface SchemaModificationOperation {
         SchemaMorphismWrapper morphism
     ) implements SchemaModificationOperation {
 
-        @Override
-        public cz.matfyz.evolution.schema.DeleteMorphism toEvolution() {
+        @Override public cz.matfyz.evolution.schema.DeleteMorphism toEvolution() {
             return new cz.matfyz.evolution.schema.DeleteMorphism(
                 morphism.toDisconnectedSchemaMorphism()
             );
@@ -99,8 +94,7 @@ public interface SchemaModificationOperation {
         SchemaMorphismWrapper oldMorphism
     ) implements SchemaModificationOperation {
 
-        @Override
-        public cz.matfyz.evolution.schema.EditMorphism toEvolution() {
+        @Override public cz.matfyz.evolution.schema.EditMorphism toEvolution() {
             return new cz.matfyz.evolution.schema.EditMorphism(
                 newMorphism.toDisconnectedSchemaMorphism(),
                 oldMorphism.toDisconnectedSchemaMorphism()
@@ -113,8 +107,7 @@ public interface SchemaModificationOperation {
         String name
     ) implements SchemaModificationOperation {
 
-        @Override
-        public cz.matfyz.evolution.schema.Composite toEvolution() {
+        @Override public cz.matfyz.evolution.schema.Composite toEvolution() {
             return new cz.matfyz.evolution.schema.Composite(
                 name
             );

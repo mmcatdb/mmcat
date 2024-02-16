@@ -21,16 +21,14 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     private String toNodeLabel = null;
     private List<PropertyValue> toNodeValues = new ArrayList<>();
     
-    @Override
-    public void setKindName(String name) {
+    @Override public void setKindName(String name) {
         if (!nameIsValid(name))
             throw InvalidNameException.kind(name);
 
         kindName = name;
     }
 
-    @Override
-    public void append(String name, Object value) {
+    @Override public void append(String name, Object value) {
         final String stringValue = value == null ? null : value.toString();
 
         final var split = name.split(AbstractDDLWrapper.PATH_SEPARATOR);
@@ -67,8 +65,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
         return name.matches("^[\\w.]+$");
     }
 
-    @Override
-    public Neo4jStatement createDMLStatement() {
+    @Override public Neo4jStatement createDMLStatement() {
         if (kindName == null)
             throw InvalidNameException.kind(null);
 
@@ -129,8 +126,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
             : "'" + input.replace("'", "\\'") + "'";
     }
 
-    @Override
-    public void clear() {
+    @Override public void clear() {
         kindName = null;
         propertyValues = new ArrayList<>();
         fromNodeLabel = null;

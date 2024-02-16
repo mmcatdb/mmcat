@@ -6,12 +6,12 @@ import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RootRecord;
 
@@ -61,8 +61,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         return command;
     }
 
-    @Override
-    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+    @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         try (
             Connection connection = provider.getConnection();
             PreparedStatement statement = prepareStatement(connection, query);
@@ -111,8 +110,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
         }
     }
 
-    @Override
-    public QueryResult executeQuery(QueryStatement query) {
+    @Override public QueryResult executeQuery(QueryStatement query) {
         final var columns = query.structure().children.values().stream().map(child -> child.name).toList();
 
         try (

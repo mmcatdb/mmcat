@@ -23,8 +23,7 @@ public class IdentifierStructure {
         return properties.isEmpty();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return String.join(", ", properties);
     }
     

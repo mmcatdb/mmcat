@@ -20,8 +20,7 @@ public class SimpleArrayRecord<T> extends SimpleRecord<T> {
         return values;
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(name).append(": [");
         if (!values.isEmpty())

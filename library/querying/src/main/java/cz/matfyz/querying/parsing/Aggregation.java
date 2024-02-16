@@ -19,18 +19,15 @@ public class Aggregation implements Term {
         this.isDistinct = isDistinct;
     }
 
-    @Override
-    public String getIdentifier() {
+    @Override public String getIdentifier() {
         return "a_" + operator + "_" + variable.name;
     }
 
-    @Override
-    public boolean equals(Object other) {
+    @Override public boolean equals(Object other) {
         return other instanceof Aggregation aggregation && variable.equals(aggregation.variable) && operator == aggregation.operator;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return operator.toString() + "(" + variable.toString() + ")";
     }
 

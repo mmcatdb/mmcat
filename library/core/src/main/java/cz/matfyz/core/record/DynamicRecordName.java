@@ -18,15 +18,13 @@ public class DynamicRecordName extends RecordName {
         this.signature = signature;
     }
     
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof DynamicRecordName dynamicName
             && value.equals(dynamicName.value)
             && signature.equals(dynamicName.signature);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "\"" + value + "\"";
     }
 }

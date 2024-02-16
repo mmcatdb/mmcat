@@ -1,6 +1,7 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.core.category.BaseSignature;
+import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 
@@ -11,7 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class MorphismColoring {
+public class MorphismColoring implements Printable {
 
     /** Set of all kinds that use given morphism. */
     private final Map<BaseSignature, Set<KindPattern>> morphismToColors;
@@ -108,6 +109,19 @@ public class MorphismColoring {
         newMorphisms.remove(kind);
 
         return new MorphismColoring(newColors, newMorphisms);
+    }
+
+    @Override public void printTo(Printer printer) {
+        printer.append("{").down().nextLine();
+
+        for (final var entry : morphismToColors.entrySet())
+            printer.append(entry.getKey()).append(": ").append(entry.getValue()).append(",").nextLine();
+
+        printer.remove().up().nextLine().append("}");
+    }
+
+    @Override public String toString() {
+        return Printer.print(this);
     }
 
 }

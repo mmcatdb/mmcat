@@ -45,18 +45,15 @@ public class GroupGraphPattern implements ParserNode {
             return child;
         }
 
-        @Override
-        public @Nullable TermTree parent() {
+        @Override public @Nullable TermTree parent() {
             return parent;
         }
 
-        @Override
-        public List<TermTree> children() {
+        @Override public List<TermTree> children() {
             return children;
         }
 
-        @Override
-        public int compareTo(TermTree other) {
+        @Override public int compareTo(TermTree other) {
             return term.compareTo(other.term);
         }
 
@@ -64,13 +61,11 @@ public class GroupGraphPattern implements ParserNode {
 
     private static class TermTreeBuilder implements TreeBuilder<Term, TermTree> {
 
-        @Override
-        public TermTree createRoot(Term payload) {
+        @Override public TermTree createRoot(Term payload) {
             return new TermTree(payload, null);
         }
 
-        @Override
-        public TermTree createChild(TermTree parent, Term payload) {
+        @Override public TermTree createChild(TermTree parent, Term payload) {
             return parent.createChild(payload);
         }
 

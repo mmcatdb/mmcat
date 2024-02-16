@@ -29,8 +29,7 @@ public class PatternNode extends QueryNode {
         this.rootTerm = rootTerm;
     }
 
-    @Override
-    public <T> T accept(QueryVisitor<T> visitor) {
+    @Override public <T> T accept(QueryVisitor<T> visitor) {
         return visitor.visit(this);
     }
 

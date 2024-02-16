@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
+import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.tests.example.common.TestDatabase;
@@ -75,7 +75,7 @@ public class QueryTestBase {
     private List<Kind> defineKinds() {
         return databases.stream().flatMap(testDatabase -> {
             final var builder = new Database.Builder();
-            testDatabase.mappings.forEach(mapping -> builder.mapping(mapping));
+            testDatabase.mappings.forEach(builder::mapping);
             final var database = builder.build(testDatabase.type, testDatabase.wrapper, testDatabase.id);
 
             return database.kinds.stream();

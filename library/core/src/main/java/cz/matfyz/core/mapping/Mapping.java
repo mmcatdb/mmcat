@@ -88,16 +88,14 @@ public class Mapping implements Comparable<Mapping> {
         return primaryKey;
     }
 
-    @Override
-    public boolean equals(Object other) {
+    @Override public boolean equals(Object other) {
         if (this == other)
             return true;
         
         return other instanceof Mapping otherMapping && compareTo(otherMapping) == 0;
     }
 
-    @Override
-    public int compareTo(Mapping other) {
+    @Override public int compareTo(Mapping other) {
         // This guarantees uniqueness in one logical model, however mappings between different logical models are never compared.
         return kindName.compareTo(other.kindName);
     }
@@ -129,8 +127,7 @@ public class Mapping implements Comparable<Mapping> {
         private static final ObjectReader rootPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
         private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
     
-        @Override
-        public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final var category = (SchemaCategory) context.getAttribute("category");

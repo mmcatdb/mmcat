@@ -1,4 +1,4 @@
-import { IntendedStringBuilder } from '@/utils/string';
+import { IndentedStringBuilder } from '@/utils/string';
 import { nameFromServer, Signature, type Name } from '@/types/identifiers';
 import type { ParentProperty } from './compositeTypes';
 import type { SimplePropertyFromServer } from '../serverTypes';
@@ -27,7 +27,7 @@ export class SimpleProperty {
     }
 
     toString(level = 0): string {
-        return (level === 0 ? '' : IntendedStringBuilder.getTabIntendationString(level))
+        return (level === 0 ? '' : IndentedStringBuilder.getTabIntendationString(level))
             + `${this.name}: ${this._signature}`;
     }
 

@@ -16,23 +16,19 @@ public class Variable implements Term {
         this.isOriginal = isOriginal;
     }
 
-    @Override
-    public String getIdentifier() {
+    @Override public String getIdentifier() {
         return "v_" + name;
     }
 
-    @Override
-    public boolean isOriginal() {
+    @Override public boolean isOriginal() {
         return isOriginal;
     }
 
-    @Override
-    public boolean equals(Object other) {
+    @Override public boolean equals(Object other) {
         return other instanceof Variable variable && variable.name.equals(name);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return "?" + name;
     }
 

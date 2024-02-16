@@ -33,8 +33,7 @@ public interface Morphism extends Comparable<Morphism> {
 
     public abstract Min min();
 
-    @Override
-    public default int compareTo(Morphism morphism) {
+    @Override public default int compareTo(Morphism morphism) {
         return signature().compareTo(morphism.signature());
     }
 

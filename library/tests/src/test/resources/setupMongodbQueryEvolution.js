@@ -18,15 +18,15 @@ db.orders.insertMany([
         items: [
           { pid: 'P5', title: 'Sourcery', quantity: '1', price: '350', currentPrice: '350' },
           { pid: 'P7', title: 'Pyramids', quantity: '1', price: '250', currentPrice: '275' },
-        ]
+        ],
     },
     {
         _id: '2023002', 
         customer: { id: '2', name: 'John', surname: 'Newlin' },
         street: 'Technická', city: 'Prague', postCode: '162 00',
         items: [
-          { pid: 'P7', title: 'Pyramids', quantity: '1', price: '275', currentPrice: '275' }
-        ]
+          { pid: 'P7', title: 'Pyramids', quantity: '1', price: '275', currentPrice: '275' },
+        ],
     },  
 ]);
 

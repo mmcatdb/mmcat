@@ -5,6 +5,8 @@ import cz.matfyz.core.mapping.Mapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * This class represents a database. It's identified by an identifier (which doesn't have to be anything specific - it's there just for the Comparable interface).
@@ -22,22 +24,21 @@ public class Database implements Comparable<Database> {
     public final DatabaseType type;
     public final AbstractControlWrapper control;
     public final String identifier;
-    public final List<Kind> kinds;
+    // The set ensures there is at most one mapping for each kindName in the database.
+    public final Set<Kind> kinds;
 
-    private Database(DatabaseType type, AbstractControlWrapper control, String identifier, List<Kind> kinds) {
+    private Database(DatabaseType type, AbstractControlWrapper control, String identifier, Set<Kind> kinds) {
         this.type = type;
         this.control = control;
         this.identifier = identifier;
         this.kinds = kinds;
     }
 
-    @Override
-    public int compareTo(Database other) {
+    @Override public int compareTo(Database other) {
         return identifier.compareTo(other.identifier);
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof Database other && compareTo(other) == 0;
     }
 
@@ -52,7 +53,7 @@ public class Database implements Comparable<Database> {
         }
 
         public Database build(DatabaseType type, AbstractControlWrapper control, String identifier) {
-            final var database = new Database(type, control, identifier, new ArrayList<>());
+            final var database = new Database(type, control, identifier, new TreeSet<>());
             mappings.forEach(m -> database.kinds.add(new Kind(m, database)));
 
             return database;

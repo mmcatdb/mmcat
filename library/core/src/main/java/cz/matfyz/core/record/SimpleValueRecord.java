@@ -18,8 +18,7 @@ public class SimpleValueRecord<T> extends SimpleRecord<T> {
         return value;
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(name).append(": \"").append(value).append("\"");
         

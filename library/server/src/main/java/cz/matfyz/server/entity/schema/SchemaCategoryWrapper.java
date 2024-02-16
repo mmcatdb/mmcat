@@ -112,8 +112,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         private static final ObjectReader objectsJsonReader = new ObjectMapper().readerFor(SchemaObjectWrapper[].class);
         private static final ObjectReader morphismsJsonReader = new ObjectMapper().readerFor(SchemaMorphismWrapper[].class);
     
-        @Override
-        public SchemaCategoryWrapper deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public SchemaCategoryWrapper deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final var idFromContext = (Id) context.getAttribute("id");

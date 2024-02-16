@@ -2,9 +2,9 @@ package cz.matfyz.tests.querying;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
-import cz.matfyz.abstractwrappers.queryresult.ResultMap;
-import cz.matfyz.abstractwrappers.queryresult.ResultNode;
+import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.queryresult.ResultMap;
+import cz.matfyz.core.querying.queryresult.ResultNode;
 import cz.matfyz.querying.algorithms.QueryResolver;
 import cz.matfyz.querying.algorithms.QueryTreeBuilder;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TempTests {
+class TempTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
@@ -32,7 +32,7 @@ public class TempTests {
     private static final List<Kind> kinds = defineKinds(List.of(databases.postgreSQL()));
 
     @Test
-    public void test() {
+    void test() {
         final Query query = QueryParser.run(queryString);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, databases.schema, kinds, query.where);
         final var output = QueryResolver.run(query.context, queryTree);
@@ -51,20 +51,21 @@ public class TempTests {
     """;
 
     private static List<Kind> defineKinds(List<TestDatabase<?>> testDatabases) {
-        return testDatabases.stream().flatMap(testDatabase -> {
+        return testDatabases.stream()
+            .flatMap(testDatabase -> {
                 final var builder = new Database.Builder();
-                testDatabase.mappings.stream().forEach(mapping -> builder.mapping(mapping));
+                testDatabase.mappings.stream().forEach(builder::mapping);
                 final var database = builder.build(testDatabase.type, testDatabase.wrapper, testDatabase.id);
 
                 return database.kinds.stream();
-            }
-        ).toList();
+            })
+            .toList();
     }
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void resultToStringTest() {
+    void resultToStringTest() {
         final var builder = new ResultList.TableBuilder();
 
         builder.addColumns(List.of("colum1", "column2", "column3"));

@@ -29,18 +29,15 @@ public class Key implements Serializable, Comparable<Key> {
         this.value = value;
     }
 
-    @Override
-    public int compareTo(Key key) {
+    @Override public int compareTo(Key key) {
         return value - key.value;
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return value + "";
     }
     
-    @Override
-    public boolean equals(Object obj) {
+    @Override public boolean equals(Object obj) {
         return obj instanceof Key key && compareTo(key) == 0;
     }
 
@@ -48,8 +45,7 @@ public class Key implements Serializable, Comparable<Key> {
      * Auto-generated, constants doesn't have any special meaning.
      * @return
      */
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         int hash = 7;
         hash = 29 * hash + this.value;
         return hash;
@@ -65,8 +61,7 @@ public class Key implements Serializable, Comparable<Key> {
             super(t);
         }
 
-        @Override
-        public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(Key key, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writeNumberField("value", key.value);
             generator.writeEndObject();

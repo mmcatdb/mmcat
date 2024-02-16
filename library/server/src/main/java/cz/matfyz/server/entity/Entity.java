@@ -13,8 +13,7 @@ public class Entity implements Identified<Id> {
         this.id = id;
     }
 
-    @Override
-    public Id identifier() {
+    @Override public Id identifier() {
         return id;
     }
 

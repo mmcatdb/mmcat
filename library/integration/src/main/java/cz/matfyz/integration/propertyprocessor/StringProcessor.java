@@ -18,8 +18,7 @@ public class StringProcessor extends TypeProcessorBase implements TypeProcessor 
         super(category);
     }
 
-    @Override
-    public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject) {
+    @Override public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject) {
         if (!attributeObject.ids().isValue())
             return null;
 

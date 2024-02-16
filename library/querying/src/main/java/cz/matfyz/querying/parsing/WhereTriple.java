@@ -23,13 +23,11 @@ public class WhereTriple implements Statement, Edge<Term> {
         this.object = object;
     }
 
-    @Override
-    public Term from() {
+    @Override public Term from() {
         return subject;
     }
 
-    @Override
-    public Term to() {
+    @Override public Term to() {
         return object;
     }
 
@@ -88,8 +86,7 @@ public class WhereTriple implements Statement, Edge<Term> {
         }
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return subject.toString() + " " + signature.toString() + " " + object.toString();
     }
 

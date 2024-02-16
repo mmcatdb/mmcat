@@ -41,13 +41,11 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         this.tags = Set.of(tags.toArray(Tag[]::new));
     }
 
-    @Override
-    public SchemaObject dom() {
+    @Override public SchemaObject dom() {
         return dom;
     }
 
-    @Override
-    public SchemaObject cod() {
+    @Override public SchemaObject cod() {
         return cod;
     }
 
@@ -61,8 +59,7 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
             this.cod = object;
     }
 
-    @Override
-    public Min min() {
+    @Override public Min min() {
         return min;
     }
 
@@ -74,13 +71,11 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         return signature instanceof BaseSignature;
     }
 
-    @Override
-    public Signature signature() {
+    @Override public Signature signature() {
         return signature;
     }
 
-    @Override
-    public Signature identifier() {
+    @Override public Signature identifier() {
         return signature;
     }
 

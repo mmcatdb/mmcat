@@ -181,6 +181,9 @@ public class MTCAlgorithm {
 
             final var parentToChild = category.getPath(child.signature());
             stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
+            final var a = stack.peek().toString();
+            System.out.println(a);
+            final var b = stack.peek().toString();
         }
     }
 

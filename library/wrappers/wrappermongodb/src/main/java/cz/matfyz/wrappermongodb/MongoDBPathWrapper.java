@@ -12,13 +12,11 @@ public class MongoDBPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();
     
-    @Override
-    public void addProperty(String hierarchy) {
+    @Override public void addProperty(String hierarchy) {
         properties.add(hierarchy);
     }
 
-    @Override
-    public boolean check() {
+    @Override public boolean check() {
         return properties.stream().anyMatch(property -> "_id".equals(property.substring(property.indexOf('/') + 1)));
     }
 

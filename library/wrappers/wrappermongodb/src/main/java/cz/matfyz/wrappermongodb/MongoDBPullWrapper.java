@@ -2,21 +2,21 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
 import cz.matfyz.abstractwrappers.exception.PullForestException;
 import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
-import cz.matfyz.abstractwrappers.queryresult.ResultLeaf;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
-import cz.matfyz.abstractwrappers.queryresult.ResultMap;
-import cz.matfyz.abstractwrappers.queryresult.ResultNode;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.querying.QueryStructure;
+import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.querying.queryresult.ResultLeaf;
+import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.queryresult.ResultMap;
+import cz.matfyz.core.querying.queryresult.ResultNode;
 import cz.matfyz.core.record.ComplexRecord;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
@@ -64,8 +64,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         return find.iterator();
     }
 
-    @Override
-    public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+    @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         final var forest = new ForestOfRecords();
 
         try (
@@ -189,8 +188,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         return output.toString();
     }
 
-    @Override
-    public QueryResult executeQuery(QueryStatement query) {
+    @Override public QueryResult executeQuery(QueryStatement query) {
         final var output = new ArrayList<ResultMap>();
 
         try (

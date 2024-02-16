@@ -1,6 +1,6 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
+import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.querying.algorithms.QueryProjector.TransformingQueryStructure;
 
 import org.junit.jupiter.api.Test;

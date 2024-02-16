@@ -17,16 +17,14 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
     private List<PropertyValue> propertyValues = new ArrayList<>();
     
-    @Override
-    public void setKindName(String name) {
+    @Override public void setKindName(String name) {
         if (!nameIsValid(name))
             throw InvalidNameException.kind(name);
 
         kindName = name;
     }
 
-    @Override
-    public void append(String name, Object value) {
+    @Override public void append(String name, Object value) {
         if (!nameIsValid(name))
             throw InvalidNameException.property(name);
 
@@ -38,8 +36,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
         return name.matches("^[\\w.]+$");
     }
 
-    @Override
-    public PostgreSQLStatement createDMLStatement() {
+    @Override public PostgreSQLStatement createDMLStatement() {
         if (kindName == null)
             throw InvalidNameException.kind(null);
 
@@ -56,8 +53,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
             : "'" + input.replace("'", "''") + "'";
     }
 
-    @Override
-    public void clear() {
+    @Override public void clear() {
         kindName = null;
         propertyValues = new ArrayList<>();
     }

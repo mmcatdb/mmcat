@@ -177,8 +177,7 @@ public class InstanceCategory implements Category {
         }
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
         builder.append("Keys: ");
@@ -207,8 +206,7 @@ public class InstanceCategory implements Category {
         return builder.toString();
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof InstanceCategory category
             && objects.equals(category.objects)
             && morphisms.equals(category.morphisms);

@@ -80,8 +80,7 @@ public class DataSource extends Entity {
             super(vc);
         }
 
-        @Override
-        public DataSource deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public DataSource deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final var id = (Id) context.getAttribute("id");

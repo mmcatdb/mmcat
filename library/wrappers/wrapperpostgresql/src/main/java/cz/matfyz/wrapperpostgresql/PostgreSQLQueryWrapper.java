@@ -7,6 +7,7 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.querying.QueryStructure;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -24,8 +25,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
-    @Override
-    protected Map<ComparisonOperator, String> defineComparisonOperators() {
+    @Override protected Map<ComparisonOperator, String> defineComparisonOperators() {
         final var output = new TreeMap<ComparisonOperator, String>();
         output.put(ComparisonOperator.Equal, "=");
         output.put(ComparisonOperator.NotEqual, "<>");
@@ -36,8 +36,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         return output;
     }
 
-    @Override
-    protected Map<AggregationOperator, String> defineAggregationOperators() {
+    @Override protected Map<AggregationOperator, String> defineAggregationOperators() {
         final var output = new TreeMap<AggregationOperator, String>();
         output.put(AggregationOperator.Count, "COUNT");
         output.put(AggregationOperator.Sum, "SUM");
@@ -49,8 +48,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     private StringBuilder builder;
 
-    @Override
-    public QueryStatement createDSLStatement() {
+    @Override public QueryStatement createDSLStatement() {
         builder = new StringBuilder();
 
         addSelect();

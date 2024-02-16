@@ -32,8 +32,7 @@ public abstract class Name implements Serializable {
         private static final ObjectReader staticNameJsonReader = new ObjectMapper().readerFor(StaticName.class);
         private static final ObjectReader dynamicNameJsonReader = new ObjectMapper().readerFor(DynamicName.class);
     
-        @Override
-        public Name deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public Name deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             return node.has("signature")

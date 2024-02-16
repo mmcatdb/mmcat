@@ -45,24 +45,24 @@ public class MTCAlgorithmTests {
                 [{
                     "number": "o_100",
                     "address": {
-                        "street": "hodnotaA",
-                        "city": "hodnotaB",
-                        "zip": "hodnotaC"
+                        "street": "Ke Karlovu 2027/3",
+                        "city": "Praha 2",
+                        "zip": "121 16"
                     }
                 }, {
                     "number": "o_200",
                     "address": {
-                        "street": "hodnotaA2",
-                        "city": "hodnotaB2",
-                        "zip": "hodnotaC2"
+                        "street": "Malostranské nám. 2/25",
+                        "city": "Praha 1",
+                        "zip": "118 00"
                     }
                 }]
             """)
             .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addAddress(builder, 0, "0", "hodnotaA", "hodnotaB", "hodnotaC");
-                MongoDB.addAddress(builder, 1, "1", "hodnotaA2", "hodnotaB2", "hodnotaC2");
+                MongoDB.addAddress(builder, 0, "0", "Ke Karlovu 2027/3", "Praha 2", "121 16");
+                MongoDB.addAddress(builder, 1, "1", "Malostranské nám. 2/25", "Praha 1", "118 00");
             })
             .run();
     }
@@ -214,23 +214,23 @@ public class MTCAlgorithmTests {
                 [{
                     "number": "o_100",
                     "address": {
-                        "street": "hodnotaA",
+                        "street": "Ke Karlovu 2027/3",
                         "city": null,
-                        "zip": "hodnotaC"
+                        "zip": "121 16"
                     }
                 }, {
                     "number": "o_200",
                     "address": {
-                        "street": "hodnotaA2",
-                        "zip": "hodnotaC2"
+                        "street": "Malostranské nám. 2/25",
+                        "zip": "118 00"
                     }
                 }]
             """)
             .expected(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addAddress(builder, 0, "0", "hodnotaA", null, "hodnotaC");
-                MongoDB.addAddress(builder, 1, "1", "hodnotaA2", null, "hodnotaC2");
+                MongoDB.addAddress(builder, 0, "0", "Ke Karlovu 2027/3", null, "121 16");
+                MongoDB.addAddress(builder, 1, "1", "Malostranské nám. 2/25", null, "118 00");
             })
             .run();
     }

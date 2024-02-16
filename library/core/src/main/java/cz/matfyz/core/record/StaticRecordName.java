@@ -14,8 +14,7 @@ public class StaticRecordName extends RecordName {
         this.type = type;
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof StaticRecordName staticName
             && value.equals(staticName.value)
             && type.equals(staticName.type);
@@ -26,8 +25,7 @@ public class StaticRecordName extends RecordName {
      * @return
      */
     /*
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         int hash = 5;
         hash = 29 * hash + Objects.hashCode(this.value);
         hash = 17 * hash + Objects.hashCode(this.type);
@@ -35,8 +33,7 @@ public class StaticRecordName extends RecordName {
     }
     */
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return switch (type) {
             case STATIC -> value;
             case ANONYMOUS -> "_";

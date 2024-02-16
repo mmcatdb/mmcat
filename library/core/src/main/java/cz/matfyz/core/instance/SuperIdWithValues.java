@@ -159,23 +159,20 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
 
     }
     
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         if (!(object instanceof SuperIdWithValues idWithValues))
             return false;
 
         return Objects.equals(this.tuples, idWithValues.tuples);
     }
     
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         int hash = 3;
         hash = 83 * hash + Objects.hashCode(this.tuples);
         return hash;
     }
     
-    @Override
-    public int compareTo(SuperIdWithValues idWithValues) {
+    @Override public int compareTo(SuperIdWithValues idWithValues) {
         int idCompareResult = id().compareTo(idWithValues.id());
         if (idCompareResult != 0)
             return idCompareResult;
@@ -189,8 +186,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         return 0;
     }
     
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
         
         builder.append("{");
@@ -218,8 +214,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
             super(t);
         }
 
-        @Override
-        public void serialize(SuperIdWithValues superId, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(SuperIdWithValues superId, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
             for (final var entry : superId.tuples.entrySet()) {
                 generator.writeStartObject();

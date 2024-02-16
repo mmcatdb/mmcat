@@ -13,8 +13,7 @@ public class MinusNode extends QueryNode {
         minusChild.setParent(this);
     }
 
-    @Override
-    public <T> T accept(QueryVisitor<T> visitor) {
+    @Override public <T> T accept(QueryVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
