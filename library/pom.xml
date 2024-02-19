@@ -15,6 +15,7 @@
         <module>integration</module>
         <module>querying</module>
         <module>tests</module>
+        <module>inference</module>
     </modules>
     
     <properties>
