@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+        <groupId>cz.matfyz</groupId>
+        <artifactId>mmcat</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+	<!-- <groupId>com.mycompany</groupId> -->
+	<artifactId>inference</artifactId>
+	<!-- <version>1.0-SNAPSHOT</version> -->
+	<packaging>jar</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<!--	<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target> -->	
+		<maven.compiler.source>21</maven.compiler.source> 
+		<maven.compiler.target>21</maven.compiler.target> 
+		<spark.version>3.5.0 </spark.version>
+		<spring.boot.version>3.2.1</spring.boot.version>
+		<mongodb.version>3.12.10</mongodb.version>
+		<mongodb.spark.version>3.0.2</mongodb.spark.version>
+		<junit.version>4.13.2</junit.version>
+		<junit.jupiter.version>5.10.1</junit.jupiter.version>
+		<maven.compiler.plugin.version>3.12.1</maven.compiler.plugin.version>
+		<maven.jar.plugin.version>3.3.0</maven.jar.plugin.version>
+		<java.version>21</java.version>
+		<jackson.version>2.15.2</jackson.version>
+		<exec.mainClass>cz.cuni.matfyz.mminfer.MMInferOneInAll</exec.mainClass>
+		
+	</properties>    
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-to-slf4j</artifactId>
+					</exclusion>    
+			</exclusions>			
+			<version>${spring.boot.version}</version>
+		</dependency> 
+		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_2.12</artifactId>		
+			<version>${spark.version}</version>
+			<!-- <scope>provided</scope> -->
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_2.12</artifactId>
+			<version>${spark.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.9</version>
+		</dependency> 
+		<!--https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver--> 
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>${mongodb.version}</version>
+		</dependency>
+		<!--https://mvnrepository.com/artifact/org.mongodb.spark/mongo-spark-connector--> 
+		<dependency>
+			<groupId>org.mongodb.spark</groupId>
+			<artifactId>mongo-spark-connector_2.12</artifactId>
+			<version>${mongodb.spark.version}</version>
+			<scope>compile</scope>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>			
+			<groupId>${project.groupId}</groupId>
+			<artifactId>core</artifactId>
+			<version>${project.version}</version> 
+		 <!--	<scope>compile</scope> -->
+		</dependency>
+		<dependency>			
+			<groupId>${project.groupId}</groupId>
+			<artifactId>server</artifactId>
+			<version>${project.version}</version> 
+		 <!--	<scope>compile</scope> --> 
+		</dependency>  
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+	</dependencies>	
+	
+	<build>
+		<plugins>			
+			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>				
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin> 
+			<plugin> 
+				<!-- Build an executable JAR -->
+		 		<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.3.0</version> 
+				<configuration>
+					<archive>
+						<manifest> 
+							<!--<addClasspath>true</addClasspath>-->
+							<!--<classpathPrefix>lib/</classpathPrefix>-->
+							<mainClass>cz.cuni.matfyz.mminfer.MMInferOneInAll</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin> 
+<!--	        <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-jar-plugin</artifactId>
+	            <version>${maven.jar.plugin.version}</version>
+				<configuration>
+						<archive>
+							<manifest> 							
+								<mainClass>cz.cuni.matfyz.mminfer.MMInferOneInAll</mainClass>
+							</manifest>
+						</archive>
+				</configuration>	            
+	        </plugin> -->
+			<!--						<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>cz.cuni.matfyz.mminfer.Application</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>-->
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>${spring.boot.version}</version>
+				
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<skip>false</skip>
+				<!-- 	If I were to use this add ins, make sure to have double - instead of single in front of each add in
+					<jvmArguments>
+						-add-opens java.base/java.lang=ALL-UNNAMED
+	                    -add-opens java.base/java.lang.invoke=ALL-UNNAMED
+	                    -add-opens java.base/java.lang.reflect=ALL-UNNAMED
+	                    -add-opens java.base/java.io=ALL-UNNAMED
+	                    -add-opens java.base/java.net=ALL-UNNAMED
+	                    -add-opens java.base/java.nio=ALL-UNNAMED
+	                    -add-opens java.base/java.util=ALL-UNNAMED
+	                    -add-opens java.base/java.util.concurrent=ALL-UNNAMED
+	                    -add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED
+	                    -add-opens java.base/sun.nio.ch=ALL-UNNAMED
+	                    -add-opens java.base/sun.nio.cs=ALL-UNNAMED
+	                    -add-opens java.base/sun.security.action=ALL-UNNAMED
+	                    -add-opens java.base/sun.util.calendar=ALL-UNNAMED
+	                    -add-opens java.security.jgss/sun.security.krb5=ALL-UNNAMED
+					</jvmArguments> -->
+				</configuration>
+			</plugin> 
+		</plugins>
+	</build>
+</project>
