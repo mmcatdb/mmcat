@@ -16,19 +16,17 @@
 		<maven.compiler.target>1.8</maven.compiler.target> -->	
 		<maven.compiler.source>21</maven.compiler.source> 
 		<maven.compiler.target>21</maven.compiler.target> 
-		<spark.version>3.5.0 </spark.version>
 		<spring.boot.version>3.2.1</spring.boot.version>
 		<mongodb.version>3.12.10</mongodb.version>
-		<mongodb.spark.version>3.0.2</mongodb.spark.version>
 		<junit.version>4.13.2</junit.version>
 		<junit.jupiter.version>5.10.1</junit.jupiter.version>
 		<maven.compiler.plugin.version>3.12.1</maven.compiler.plugin.version>
 		<maven.jar.plugin.version>3.3.0</maven.jar.plugin.version>
 		<java.version>21</java.version>
 		<jackson.version>2.15.2</jackson.version>
-		<exec.mainClass>cz.matfyz.inference.MMInferOneInAll</exec.mainClass>
-		
+		<exec.mainClass>cz.matfyz.inference.MMInferOneInAll</exec.mainClass>		
 	</properties>    
+	
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
 		<dependency>
@@ -42,19 +40,6 @@
 			</exclusions>			
 			<version>${spring.boot.version}</version>
 		</dependency> 
-		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql -->
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-sql_2.12</artifactId>		
-			<version>${spark.version}</version>
-			<!-- <scope>provided</scope> -->
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.12</artifactId>
-			<version>${spark.version}</version>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -66,14 +51,6 @@
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 			<version>${mongodb.version}</version>
-		</dependency>
-		<!--https://mvnrepository.com/artifact/org.mongodb.spark/mongo-spark-connector--> 
-		<dependency>
-			<groupId>org.mongodb.spark</groupId>
-			<artifactId>mongo-spark-connector_2.12</artifactId>
-			<version>${mongodb.spark.version}</version>
-			<scope>compile</scope>
-			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -89,16 +66,9 @@
 		</dependency>
 		<dependency>			
 			<groupId>${project.groupId}</groupId>
-			<artifactId>core</artifactId>
+			<artifactId>wrappermongodb</artifactId>
 			<version>${project.version}</version> 
-		 <!--	<scope>compile</scope> -->
 		</dependency>
-		<dependency>			
-			<groupId>${project.groupId}</groupId>
-			<artifactId>server</artifactId>
-			<version>${project.version}</version> 
-		 <!--	<scope>compile</scope> --> 
-		</dependency>  
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>

@@ -11,9 +11,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+//import org.springframework.http.HttpEntity;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.client.RestTemplate;
 
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -21,22 +21,23 @@ import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.evolution.Version;
+//import cz.matfyz.evolution.Version;
 import cz.matfyz.inference.algorithms.rba.Finalize;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
-import cz.matfyz.inference.model.RecordSchemaDescription;
 import cz.matfyz.inference.schemaconversion.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
-import cz.matfyz.inference.wrappers.AbstractWrapper;
-import cz.matfyz.inference.wrappers.MongoDBSchemaLessWrapper;
+import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
+/*
 import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
-
+*/
 /**
  *
  * @author pavel.koupil
@@ -56,7 +57,7 @@ public class MMInferOneInAll {
 
 		RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
 
-		AbstractWrapper wrapper = new MongoDBSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
+		AbstractInferenceWrapper wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
 		AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
 		Finalize finalize = null;
 		long start = System.currentTimeMillis();
@@ -94,7 +95,7 @@ public class MMInferOneInAll {
 		
 		
 		// *Create SchemaCategoryWrapper from SchemaCategory*
-    	MetadataContext context = new MetadataContext();
+/*   	MetadataContext context = new MetadataContext();
     	
     	//Create a special id, under which you later load this category  
     	Id id = new Id("schm_from_rsd"); //now hard coded special id 
@@ -110,7 +111,7 @@ public class MMInferOneInAll {
     		context.setPosition(key, initialPosition);
     	}  	
 	    	
-    	SchemaCategoryWrapper scw = SchemaCategoryWrapper.fromSchemaCategory(sc, context);
+    	SchemaCategoryWrapper scw = SchemaCategoryWrapper.fromSchemaCategory(sc, context); */
     	//System.out.println("This is the SchemaCategoryWrapper: " + scw);
     	System.out.println("It all went well");
     	

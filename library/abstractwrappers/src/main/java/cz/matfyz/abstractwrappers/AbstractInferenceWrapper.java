@@ -2,20 +2,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package cz.matfyz.inference.wrappers;
+package cz.matfyz.abstractwrappers;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 
-import cz.matfyz.inference.model.RawProperty;
-import cz.matfyz.inference.model.RecordSchemaDescription;
-import cz.matfyz.inference.model.Share;
+import cz.matfyz.core.rsd.RawProperty;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
+import cz.matfyz.core.rsd.Share;
 
 /**
  *
  * @author pavel.koupil
  */
-public abstract class AbstractWrapper {
+public abstract class AbstractInferenceWrapper {
 
 	public String kindName;
 

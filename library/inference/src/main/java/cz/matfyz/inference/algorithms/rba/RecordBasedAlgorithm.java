@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
-import cz.matfyz.inference.model.RecordSchemaDescription;
-import cz.matfyz.inference.wrappers.AbstractWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 /**
  *
@@ -22,7 +22,7 @@ public class RecordBasedAlgorithm {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RecordBasedAlgorithm.class);
 
-	public RecordSchemaDescription process(AbstractWrapper wrapper, AbstractRSDsReductionFunction merge, Finalize finalize) {
+	public RecordSchemaDescription process(AbstractInferenceWrapper wrapper, AbstractRSDsReductionFunction merge, Finalize finalize) {
 		wrapper.buildSession();
 		wrapper.initiateContext();
 

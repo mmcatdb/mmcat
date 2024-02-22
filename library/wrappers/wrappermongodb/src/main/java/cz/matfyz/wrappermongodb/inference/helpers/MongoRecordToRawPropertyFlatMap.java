@@ -1,12 +1,12 @@
-package cz.matfyz.inference.wrappers.helpers;
+package cz.matfyz.wrappermongodb.inference.helpers;
 
 //import cz.cuni.matfyz.mminfer.persister.model.RecordSchemaDescription;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.matfyz.inference.model.RawProperty;
-import cz.matfyz.inference.model.RecordSchemaDescription;
+import cz.matfyz.core.rsd.RawProperty;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 import java.util.*;
 

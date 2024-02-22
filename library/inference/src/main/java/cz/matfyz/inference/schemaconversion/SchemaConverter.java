@@ -14,10 +14,6 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SignatureId;
-import cz.matfyz.inference.model.Char;
-import cz.matfyz.inference.model.RecordSchemaDescription;
-import cz.matfyz.inference.model.Share;
-import cz.matfyz.inference.model.Type;
 import cz.matfyz.core.schema.ObjectIds;
 
 import cz.matfyz.core.mapping.Mapping;
@@ -25,6 +21,10 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.rsd.Char;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
+import cz.matfyz.core.rsd.Share;
+import cz.matfyz.core.rsd.Type;
 
 
 /**

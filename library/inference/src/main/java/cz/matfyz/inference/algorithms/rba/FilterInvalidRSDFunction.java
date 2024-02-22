@@ -7,7 +7,7 @@ package cz.matfyz.inference.algorithms.rba;
 import java.io.Serializable;
 import org.apache.spark.api.java.function.Function;
 
-import cz.matfyz.inference.model.RecordSchemaDescription;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 import scala.Tuple2;
 
 /**

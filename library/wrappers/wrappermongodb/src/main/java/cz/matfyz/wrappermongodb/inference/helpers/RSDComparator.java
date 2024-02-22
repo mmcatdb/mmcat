@@ -1,9 +1,9 @@
-package cz.matfyz.inference.wrappers.helpers;
+package cz.matfyz.wrappermongodb.inference.helpers;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-import cz.matfyz.inference.model.RecordSchemaDescription;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 /**
  *

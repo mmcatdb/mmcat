@@ -2,21 +2,22 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package cz.matfyz.inference.wrappers;
+package cz.matfyz.wrappermongodb;
 
 import com.mongodb.spark.MongoSpark;
 import com.mongodb.spark.config.ReadConfig;
 import com.mongodb.spark.rdd.api.java.JavaMongoRDD;
 
-import cz.matfyz.inference.model.RawProperty;
-import cz.matfyz.inference.model.RecordSchemaDescription;
-import cz.matfyz.inference.model.Share;
-import cz.matfyz.inference.wrappers.functions.MongoRawPropertyPairFunction;
-import cz.matfyz.inference.wrappers.functions.MongoRecordToDataRawPropertyFlatMapFunction;
-import cz.matfyz.inference.wrappers.functions.MongoRecordToFullRawPropertyFlatMapFunction;
-import cz.matfyz.inference.wrappers.functions.MongoRecordToPairFunction;
-import cz.matfyz.inference.wrappers.functions.MongoRecordToRSDMapFunction;
-import cz.matfyz.inference.wrappers.functions.MongoRecordToSchemaRawPropertyFlatMapFunction;
+import cz.matfyz.wrappermongodb.inference.functions.MongoRawPropertyPairFunction;
+import cz.matfyz.wrappermongodb.inference.functions.MongoRecordToDataRawPropertyFlatMapFunction;
+import cz.matfyz.wrappermongodb.inference.functions.MongoRecordToFullRawPropertyFlatMapFunction;
+import cz.matfyz.wrappermongodb.inference.functions.MongoRecordToPairFunction;
+import cz.matfyz.wrappermongodb.inference.functions.MongoRecordToRSDMapFunction;
+import cz.matfyz.wrappermongodb.inference.functions.MongoRecordToSchemaRawPropertyFlatMapFunction;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
+import cz.matfyz.core.rsd.RawProperty;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
+import cz.matfyz.core.rsd.Share;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +31,7 @@ import org.bson.Document;
  *
  * @author pavel.koupil
  */
-public class MongoDBSchemaLessWrapper extends AbstractWrapper {
+public class MongoDBInferenceSchemaLessWrapper extends AbstractInferenceWrapper {
 
 	private SparkSession sparkSession;
 	private JavaSparkContext context;
@@ -42,7 +43,7 @@ public class MongoDBSchemaLessWrapper extends AbstractWrapper {
 
 	private final String checkpointDir;
 
-	public MongoDBSchemaLessWrapper(String sparkMaster, String appName, String uri, String databaseName, String collectionName, String checkpointDir) {
+	public MongoDBInferenceSchemaLessWrapper(String sparkMaster, String appName, String uri, String databaseName, String collectionName, String checkpointDir) {
 		this.sparkMaster = sparkMaster;
 		this.appName = appName;
 		this.uri = uri;

@@ -7,8 +7,8 @@ package cz.matfyz.inference.algorithms.rba;
 //import cz.cuni.matfyz.mminfer.persister.model.RecordSchemaDescription;
 import java.util.List;
 
-import cz.matfyz.inference.model.ProcessedProperty;
-import cz.matfyz.inference.model.RecordSchemaDescription;
+import cz.matfyz.core.rsd.ProcessedProperty;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 /**
  *

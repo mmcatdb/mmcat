@@ -7,8 +7,8 @@ package cz.matfyz.inference.algorithms.rba.functions;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.matfyz.inference.model.Char;
-import cz.matfyz.inference.model.RecordSchemaDescription;
+import cz.matfyz.core.rsd.Char;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 /**
  *
