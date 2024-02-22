@@ -21,6 +21,7 @@ import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
+import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
@@ -129,8 +130,18 @@ public class JobExecutorService {
             jsonLdToCategoryAlgorithm(run, jsonLdToCategoryPayload);
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
+        else if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload)
+        	RSDToCategoryAlgorithm(run, rsdToCategoryPayload);
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
+    }
+    
+    private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+    	final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
+    	
+    	// run mminferall
+    	// get sc and save it in SchemaCategoryService
+    	// get mapping in Mapping Service? (do I need to add a method) and save it
     }
 
     private void modelToCategoryAlgorithm(Run run, ModelToCategoryPayload payload) {

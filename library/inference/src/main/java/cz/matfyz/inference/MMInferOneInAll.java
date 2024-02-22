@@ -49,7 +49,6 @@ public class MMInferOneInAll {
 	public static void main(String[] args) throws IOException {
 //		String sparkMaster = "localhost";
 		String appName = "JSON Schema Inference, Record Based Algorithm";
-//		String uri = "localhost:27017";
 		String uri = "localhost:3205";
 		String databaseName = args[1];
 		String collectionName = args[2];
@@ -63,21 +62,21 @@ public class MMInferOneInAll {
 		long start = System.currentTimeMillis();
 		RecordSchemaDescription rsd = rba.process(wrapper, merge, finalize);
 		long end = System.currentTimeMillis();
-		System.out.print("RESULT: ");
-		System.out.println(rsd);
-		System.out.println("RESULT_TIME TOTAL: " + (end - start) + "ms");
+//		System.out.print("RESULT: ");
+//		System.out.println(rsd);
+//		System.out.println("RESULT_TIME TOTAL: " + (end - start) + "ms");
 		
 		
 		SchemaConverter scon = new SchemaConverter(rsd);
 		scon.convertToSchemaCategory();
 		SchemaCategory sc = scon.sc;
 		
-		System.out.println("MY_DEBUG: -------------");
-		System.out.println("MY_DEBUG: SchemaCategory");
+//		System.out.println("MY_DEBUG: -------------");
+//		System.out.println("MY_DEBUG: SchemaCategory");
 		
-		Collection<SchemaObject> objs = sc.allObjects();		
-		System.out.println("MY_DEBUG objects in category: ");
-		
+//		Collection<SchemaObject> objs = sc.allObjects();		
+//		System.out.println("MY_DEBUG objects in category: ");
+/*		
 		for (SchemaObject obj: objs) {
 			  System.out.println("MY_DEBUG object name: " + obj.label());
 			}
@@ -89,11 +88,11 @@ public class MMInferOneInAll {
 		for (SchemaMorphism morph: morphs) {
 			  System.out.println("MY_DEBUG morphism rel: " + morph.dom().label() + " -> " + morph.cod().label() + " and the label is: " + morph.label);
 			}
-		
+*/		
 		Mapping mapping = scon.createMapping(sc, "Bussiness");
-		System.out.println("MY_DEBUG mapping:" + mapping);
+//		System.out.println("MY_DEBUG mapping:" + mapping);
 		
-		/*
+		
 		// *Create SchemaCategoryWrapper from SchemaCategory*
     	MetadataContext context = new MetadataContext();
     	
@@ -112,9 +111,10 @@ public class MMInferOneInAll {
     	}  	
 	    	
     	SchemaCategoryWrapper scw = SchemaCategoryWrapper.fromSchemaCategory(sc, context);
-    	System.out.println("This is the SchemaCategoryWrapper: " + scw);
+    	//System.out.println("This is the SchemaCategoryWrapper: " + scw);
+    	System.out.println("It all went well");
     	
-		
+		/*
 		// *Serialize wrapper to a json* (make sure to use jackson)
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonPayload = mapper.writeValueAsString(scw);
