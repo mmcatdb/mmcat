@@ -53,11 +53,13 @@ public class SchemaConverter {
 	 * Helper method for converting to Schema Category
 	 * @return SchemaCategory object representing RSD
 	 */
-	public void convertToSchemaCategory() {
+	public CategoryMappingPair convertToSchemaCategoryAndMapping() {
 		AccessTreeNode currentNode = new AccessTreeNode(null, null, null);
 		convertToSchemafromRSD(this.sc, this.rsd, this.rootKey, 1, currentNode);
 		addIndexObjecttoArr(this.sc);
-		root.printTree("");
+		//root.printTree("");
+		Mapping mapping = createMapping(this.sc, "RSD_to_SC"); //What will this label be?
+		return new CategoryMappingPair(this.sc, mapping);
 	}
 	
 	/**

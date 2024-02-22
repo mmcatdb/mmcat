@@ -28,7 +28,7 @@ import cz.matfyz.inference.algorithms.rba.Finalize;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
-import cz.matfyz.inference.schemaconversion.AccessTreeNode;
+import cz.matfyz.inference.schemaconversion.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
 import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
@@ -69,30 +69,30 @@ public class MMInferOneInAll {
 		
 		
 		SchemaConverter scon = new SchemaConverter(rsd);
-		scon.convertToSchemaCategory();
-		SchemaCategory sc = scon.sc;
+		
+		CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
+		
+//		System.out.println(cmp.schemaCat());
+	
 		
 //		System.out.println("MY_DEBUG: -------------");
 //		System.out.println("MY_DEBUG: SchemaCategory");
 		
-//		Collection<SchemaObject> objs = sc.allObjects();		
-//		System.out.println("MY_DEBUG objects in category: ");
-/*		
+/*		Collection<SchemaObject> objs = cmp.schemaCat().allObjects();		
+		System.out.println("MY_DEBUG objects in category: ");
+		
 		for (SchemaObject obj: objs) {
 			  System.out.println("MY_DEBUG object name: " + obj.label());
 			}
 	
 		System.out.println("MY_DEBUG: -------------");
-		Collection<SchemaMorphism> morphs = sc.allMorphisms();
+		Collection<SchemaMorphism> morphs = cmp.schemaCat().allMorphisms();
 		System.out.println("MY_DEBUG morphisms in category: ");
 		
 		for (SchemaMorphism morph: morphs) {
 			  System.out.println("MY_DEBUG morphism rel: " + morph.dom().label() + " -> " + morph.cod().label() + " and the label is: " + morph.label);
 			}
-*/		
-		Mapping mapping = scon.createMapping(sc, "Bussiness");
-//		System.out.println("MY_DEBUG mapping:" + mapping);
-		
+		*/	
 		
 		// *Create SchemaCategoryWrapper from SchemaCategory*
 /*   	MetadataContext context = new MetadataContext();
