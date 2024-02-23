@@ -7,12 +7,12 @@ import cz.matfyz.core.utils.printable.*;
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class DMLStackTriple implements Printable{
-    
+public class DMLStackTriple implements Printable {
+
     public final DomainRow pid;
     public final String name;
     public final ComplexProperty t;
-    
+
     public DMLStackTriple(DomainRow pid, String name, ComplexProperty t) {
         this.pid = pid;
         this.name = name;
@@ -25,12 +25,12 @@ public class DMLStackTriple implements Printable{
         printer.append("pid: ").append(pid).append(",").nextLine();
         printer.append("name: ").append(name).append(",").nextLine();
         printer.append("t: ").append(t).append(",");
-        
+
         printer.up().nextLine().append(">");
     }
-    
+
     @Override public String toString() {
         return Printer.print(this);
     }
-    
+
 }

@@ -72,5 +72,5 @@ public class DatabaseToInstance {
 
         return instance;
     }
-    
+
 }

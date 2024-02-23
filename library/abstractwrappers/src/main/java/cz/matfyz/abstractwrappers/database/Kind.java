@@ -11,9 +11,9 @@ public class Kind implements Comparable<Kind> {
     /**
      * There has to be at most one mapping for each king name in a given database.
      * If not, many algorithms will broke.
-     * 
+     *
      * E.g., there is an algorithm for determining which kinds to join for a query. If we allowed multiple mappings for a single kind, we would have to use some other identifier (e.g., ID) to distinguish between them. However, the algorithm might then decide to join different mappings (i.e., with different IDs) for the same kind (one kindName). In that case, the joining would be much more complicated, because we can't join a kind with itself. We would need to merge the mappings of the kind together.
-     * 
+     *
      * But we could achieve that (and probably much more efficiently) by merging the mappings together before the algorithm starts. But then there is no point in allowing the "splitted" mappings in the first place.
      */
     public final Mapping mapping;

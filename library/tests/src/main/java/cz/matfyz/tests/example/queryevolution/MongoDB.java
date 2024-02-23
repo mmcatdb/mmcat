@@ -11,7 +11,7 @@ public abstract class MongoDB {
 
     public static final String ordersKind = "orders";
     public static final String orderKind = "order";
-    
+
     public static TestMapping orders(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,

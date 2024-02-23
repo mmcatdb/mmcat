@@ -35,7 +35,7 @@ public class ResultList implements ResultNode {
 
         if (isMultilined) {
             printer.append("[").down().nextLine();
-            
+
             for (final var child : children)
                 printer.append(child).append(",").nextLine();
 
@@ -48,7 +48,7 @@ public class ResultList implements ResultNode {
 
             if (!children.isEmpty())
                 printer.remove();
-                
+
             printer.append("]");
         }
     }
@@ -120,12 +120,12 @@ public class ResultList implements ResultNode {
 
         public ResultList build() {
             final List<ResultMap> children = new ArrayList<>();
-            
+
             for (final List<String> row : rows) {
                 final Map<String, ResultNode> map = new TreeMap<>();
                 if (row.size() != columns.size())
                     throw new IllegalArgumentException("Row size does not match column size");
-                
+
                 for (int i = 0; i < columns.size(); i++)
                     map.put(columns.get(i), new ResultLeaf(row.get(i)));
 
@@ -136,5 +136,5 @@ public class ResultList implements ResultNode {
         }
 
     }
-    
+
 }

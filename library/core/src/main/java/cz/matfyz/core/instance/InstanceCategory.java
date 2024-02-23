@@ -30,11 +30,11 @@ public class InstanceCategory implements Category {
         this.objects = objects;
         this.morphisms = morphisms;
     }
-    
+
     public Map<Key, InstanceObject> objects() {
         return objects;
     }
-    
+
     public Map<Signature, InstanceMorphism> morphisms() {
         return morphisms;
     }
@@ -43,7 +43,7 @@ public class InstanceCategory implements Category {
     public void deleteMorphism(InstanceMorphism morphism) {
         morphisms.remove(morphism.signature());
     }
-    
+
     public InstanceObject getObject(Key key) {
         return objects.get(key);
     }
@@ -106,14 +106,14 @@ public class InstanceCategory implements Category {
                 morphism.createMapping(codomainRow, domainRow);
         }
     }
-    
+
     public InstanceEdge getEdge(BaseSignature base) {
         return new InstanceEdge(
             getMorphism(base.isDual() ? base.dual() : base),
             !base.isDual()
         );
     }
-        
+
     public record InstancePath(
         List<InstanceEdge> edges,
         Signature signature
@@ -142,14 +142,14 @@ public class InstanceCategory implements Category {
             return Min.ONE;
         }
     }
-        
+
     public InstancePath getPath(Signature signature) {
         final var list = new ArrayList<InstanceEdge>();
         signature.toBases().stream().map(this::getEdge).forEach(list::add);
-        
+
         return new InstancePath(list, signature);
     }
-    
+
     public void createReferences() {
         for (var object : objects.values())
             for (var signature : object.superId().signatures())
@@ -176,7 +176,7 @@ public class InstanceCategory implements Category {
             currentTarget.addReferenceToRow(signatureInTarget, pathFromTarget, signature);
         }
     }
-    
+
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
@@ -184,7 +184,7 @@ public class InstanceCategory implements Category {
         for (Key key : objects.keySet())
             builder.append(key).append(", ");
         builder.append("\n\n");
-        
+
 
         builder.append("Objects (showing only non-empty):\n");
         for (InstanceObject object : objects.values())
@@ -196,7 +196,7 @@ public class InstanceCategory implements Category {
         for (Signature signature : morphisms.keySet())
             builder.append(signature).append(", ");
         builder.append("\n\n");
-        
+
         builder.append("Morphisms (showing only non-empty):\n");
         for (InstanceMorphism morphism : morphisms.values())
             if (!morphism.isEmpty())

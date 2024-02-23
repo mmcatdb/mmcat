@@ -29,7 +29,7 @@ public abstract class Statistics {
         final var startTime = starts.get(interval);
         if (startTime == null)
             return null;
-        
+
         final var difference = endTime - startTime;
 
         final var current = times.get(interval);
@@ -95,11 +95,11 @@ public abstract class Statistics {
 
         return value + " ns";
     }
-    
+
     public static void logInfo(Interval interval) {
         LOGGER.info("{}\t({})", getInfo(interval), interval);
     }
-    
+
     public static void logInfo(Counter counter) {
         LOGGER.info("{}\t({})", getInfo(counter), counter);
     }

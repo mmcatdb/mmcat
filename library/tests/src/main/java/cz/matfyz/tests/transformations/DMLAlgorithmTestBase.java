@@ -48,10 +48,10 @@ public class DMLAlgorithmTestBase {
     private List<DMLTestStructure> buildExpectedResult() throws Exception {
         var json = new JSONArray(expectedString);
         var structures = new ArrayList<DMLTestStructure>();
-        
+
         for (int i = 0; i < json.length(); i++)
             structures.add(new DMLTestStructure(json.getJSONObject(i)));
-        
+
         return structures;
     }
 
@@ -91,7 +91,7 @@ public class DMLAlgorithmTestBase {
             }
         }
     }
-    
+
     private record FailMessage(
         List<DMLTestStructure> expected,
         List<DMLTestStructure> actual,
@@ -108,7 +108,7 @@ public class DMLAlgorithmTestBase {
                 + "\n" + actual
                 + "\n";
         }
-        
+
     }
 
 }

@@ -39,5 +39,5 @@ public class StringProcessor extends TypeProcessorBase implements TypeProcessor 
         final var valueSuperId = SuperIdWithValues.fromEmptySignature(resource.getURI());
         return attribuObject.getOrCreateRow(valueSuperId);
     }
-    
+
 }

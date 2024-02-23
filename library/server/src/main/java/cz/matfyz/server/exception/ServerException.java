@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 public abstract class ServerException extends NamedException {
-    
+
     protected ServerException(String name, Serializable data, Throwable cause) {
         super("server." + name, data, cause);
     }

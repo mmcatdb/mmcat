@@ -37,5 +37,5 @@ public class JsonLdToRDF {
         return dataset;
 
     }
-    
+
 }

@@ -80,7 +80,7 @@ public class JobExecutorService {
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
-    
+
     // This method will be executed 2 seconds after the previous execution finished.
     @Scheduled(fixedDelay = 2000)
     public void executeAllJobs() {
@@ -100,7 +100,7 @@ public class JobExecutorService {
         }
 
         LOGGER.info("Job { id: {}, name: '{}' } started.", job.id, job.label);
-        
+
         try {
             processJobByType(run, job);
             LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
@@ -110,7 +110,7 @@ public class JobExecutorService {
         }
         catch (Exception e) {
             final NamedException finalException = e instanceof NamedException namedException ? namedException : new OtherException(e);
-            
+
             LOGGER.error(String.format("Job { id: %s, name: '%s' } failed.", job.id, job.label), finalException);
             job.state = Job.State.Failed;
             job.data = finalException.toSerializedException();
@@ -159,7 +159,7 @@ public class JobExecutorService {
             .toList();
 
         final AbstractControlWrapper control = wrapperService.getControlWrapper(database);
-        
+
         final var output = new StringBuilder();
         for (final Mapping mapping : mappings) {
             final var result = new InstanceToDatabase()
@@ -187,10 +187,10 @@ public class JobExecutorService {
                 LOGGER.info("... models executed.");
             }
         }
-        
+
         // modelService.createNew(store, job, run, job.label, output.toString());
     }
-    
+
     private void jsonLdToCategoryAlgorithm(Run run, JsonLdToCategoryPayload payload) {
         // final InstanceCategory instance = store.getCategory(run.categoryId);
         final InstanceCategory instance = null;

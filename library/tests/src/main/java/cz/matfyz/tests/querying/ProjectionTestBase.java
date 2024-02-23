@@ -24,7 +24,7 @@ public class ProjectionTestBase {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionTestBase.class);
-    
+
     private QueryStructure input;
 
     public ProjectionTestBase input(QueryStructure input) {

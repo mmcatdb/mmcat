@@ -50,7 +50,7 @@ public class DMLTestStructure {
 
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
-        
+
         builder.append(name).append(": {\n");
         for (String value : values)
             builder.append("    ").append(value).append("\n");

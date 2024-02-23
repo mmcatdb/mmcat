@@ -23,21 +23,21 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = DynamicName.Serializer.class)
 @JsonDeserialize(using = DynamicName.Deserializer.class)
 public class DynamicName extends Name {
-    
+
     private final Signature signature;
 
     public Signature signature() {
         return signature;
     }
-    
+
     public DynamicName(Signature signature) {
         this.signature = signature;
     }
-    
+
     public DynamicRecordName toRecordName(String dynamicNameValue) {
         return new DynamicRecordName(dynamicNameValue, signature);
     }
-    
+
     @Override public String toString() {
         return signature.toString();
     }
@@ -69,13 +69,13 @@ public class DynamicName extends Name {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
-    
+
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
-    
+
         @Override public DynamicName deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 

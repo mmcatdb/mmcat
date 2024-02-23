@@ -46,7 +46,7 @@ public class PostgreSQLTests {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
-                }]        
+                }]
             """)
             .run();
     }
@@ -71,7 +71,7 @@ public class PostgreSQLTests {
                     "id": "734",
                     "label": "Animal Farm",
                     "price": "350"
-                }]       
+                }]
             """)
             .run();
     }

@@ -39,7 +39,7 @@ import org.bson.Document;
 public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private MongoDBProvider provider;
-    
+
     public MongoDBPullWrapper(MongoDBProvider provider) {
         this.provider = provider;
     }
@@ -68,7 +68,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         final var forest = new ForestOfRecords();
 
         try (
-            final var iterator = getDocumentIterator(query);
+            var iterator = getDocumentIterator(query);
         ) {
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
@@ -76,7 +76,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                 getDataFromDocument(rootRecord, document, path);
                 forest.addRecord(rootRecord);
             }
-            
+
             return forest;
         }
         catch (Exception e) {
@@ -86,46 +86,46 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private void getDataFromDocument(ComplexRecord parentRecord, Document document, ComplexProperty path) {
         boolean hasSubpathWithDynamicName = false;
-        
+
         for (AccessPath subpath : path.subpaths()) {
             if (subpath.name() instanceof StaticName staticName)
                 getFieldFromObjectForSubpath(parentRecord, document, staticName.getStringName(), subpath);
             else
                 hasSubpathWithDynamicName = true;
         }
-        
+
         if (hasSubpathWithDynamicName)
             getDataFromDynamicFieldsOfObject(parentRecord, document, path);
     }
-    
+
     private void getDataFromDynamicFieldsOfObject(ComplexRecord parentRecord, Document document, ComplexProperty path) {
         // First we find all names that belong to the subpaths with non-dynamic names and also the subpath with the dynamic name.
         AccessPath subpathWithDynamicName = null;
         Set<String> otherSubpathNames = new TreeSet<>();
-        
+
         for (AccessPath subpath : path.subpaths()) {
             if (subpath.name() instanceof StaticName staticName)
                 otherSubpathNames.add(staticName.getStringName());
             else
                 subpathWithDynamicName = subpath;
         }
-        
+
         // For all keys in the object where the key is not a known static name do ...
         for (String key : document.keySet()) {
             if (!otherSubpathNames.contains(key))
                 getFieldFromObjectForSubpath(parentRecord, document, key, subpathWithDynamicName);
         }
     }
-    
+
     private void getFieldFromObjectForSubpath(ComplexRecord parentRecord, Document document, String key, AccessPath subpath) {
         // TODO Check for the null values if necessary.
         /*
         if (document.isNull(key)) // Returns if the value is null or if the value doesn't exist.
             return;
         */
-        
+
         var value = document.get(key);
-        
+
         if (subpath instanceof ComplexProperty complexSubpath)
             getFieldFromObjectForComplexSubpath(parentRecord, key, value, complexSubpath);
         else if (subpath instanceof SimpleProperty simpleSubpath)
@@ -145,10 +145,10 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     private void getFieldFromObjectForSimpleSubpath(ComplexRecord parentRecord, String key, Object value, SimpleProperty simpleSubpath) {
         if (value instanceof ArrayList<?> simpleArray) {
             var values = new ArrayList<String>();
-            
+
             for (int i = 0; i < simpleArray.size(); i++)
                 values.add(simpleArray.get(i).toString());
-            
+
             parentRecord.addSimpleArrayRecord(toRecordName(simpleSubpath.name(), key), simpleSubpath.signature(), values);
         }
         else {
@@ -156,7 +156,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             parentRecord.addSimpleValueRecord(recordName, simpleSubpath.signature(), value.toString());
         }
     }
-    
+
     private void addComplexValueToRecord(ComplexRecord parentRecord, Document value, String key, ComplexProperty complexProperty) {
         // If the path is an auxiliary property, we skip it and move all it's childrens' values to the parent node.
         // We do so by passing the parent record instead of creating a new one.
@@ -171,7 +171,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     private RecordName toRecordName(Name name, String valueIfDynamic) {
         if (name instanceof DynamicName dynamicName)
             return dynamicName.toRecordName(valueIfDynamic);
-        
+
         var staticName = (StaticName) name;
         return staticName.toRecordName();
     }
@@ -180,7 +180,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         var database = provider.getDatabase();
         MongoCollection<Document> collection = database.getCollection(kindName);
         Iterator<Document> iterator = collection.find().iterator();
-        
+
         var output = new StringBuilder();
         while (iterator.hasNext())
             output.append(iterator.next().toString());
@@ -192,15 +192,15 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         final var output = new ArrayList<ResultMap>();
 
         try (
-            final var iterator = getDocumentIterator(query.content());
+            var iterator = getDocumentIterator(query.content());
         ) {
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
                 output.add(getResultFromDocument(document, query.structure()));
             }
-            
+
             final var dataResult = new ResultList(output);
-            
+
             return new QueryResult(dataResult, query.structure());
         }
         catch (Exception e) {
@@ -210,7 +210,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private ResultMap getResultFromDocument(Document document, QueryStructure structure) {
         final var output = new TreeMap<String, ResultNode>();
-        
+
         for (final var child : structure.children.values())
             output.put(child.name, getResultFromChild(document, child));
 
@@ -225,7 +225,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                     .stream()
                     .map(childString -> new ResultLeaf(childString))
                     .toList();
-                
+
                 return new ResultList(childList);
             }
             else {
@@ -241,7 +241,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
                     .stream()
                     .map(childDocument -> getResultFromDocument(childDocument, child))
                     .toList();
-                
+
                 return new ResultList(childList);
             }
             else {
@@ -251,5 +251,5 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             }
         }
     }
-    
+
 }

@@ -49,11 +49,11 @@ public class JsonLdToCategory {
 
         final var jsonToRDF = new JsonLdToRDF();
         jsonToRDF.input(inputStreamProvider);
-        
+
         Statistics.start(Interval.JSON_LD_TO_RDF);
         final var dataset = jsonToRDF.algorithm();
         Statistics.end(Interval.JSON_LD_TO_RDF);
-        
+
         final var rdfToInstance = new RDFToInstance();
         rdfToInstance.input(dataset, instance);
 

@@ -25,13 +25,13 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 public abstract class AccessPath implements Printable {
 
     protected final Signature signature;
-    
+
     public Signature signature() {
         return signature;
     }
 
     protected final Name name;
-    
+
     public Name name() {
         return name;
     }
@@ -46,7 +46,7 @@ public abstract class AccessPath implements Printable {
     public boolean isRequired() {
         return isRequired;
     }
-    
+
     protected AccessPath(Name name, Signature signature) {
         this.name = name;
         this.signature = signature;
@@ -62,27 +62,27 @@ public abstract class AccessPath implements Printable {
     protected abstract List<AccessPath> getPropertyPathInternal(Signature signature);
 
     public abstract AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
-    
+
     @Override public boolean equals(Object object) {
         return object instanceof AccessPath path && name.equals(path.name);
     }
-    
+
     public static class Deserializer extends StdDeserializer<AccessPath> {
 
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
 
         private static final ObjectReader simplePropertyJsonReader = new ObjectMapper().readerFor(SimpleProperty.class);
         private static final ObjectReader complexPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
-    
+
         @Override public AccessPath deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-    
+
             return node.has("subpaths")
                 ? complexPropertyJsonReader.readValue(node)
                 : simplePropertyJsonReader.readValue(node);

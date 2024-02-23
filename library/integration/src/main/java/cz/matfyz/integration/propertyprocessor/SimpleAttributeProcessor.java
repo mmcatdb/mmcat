@@ -28,5 +28,5 @@ public class SimpleAttributeProcessor extends PropertyProcessorBase implements P
 
         return true;
     }
-    
+
 }

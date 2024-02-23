@@ -12,7 +12,7 @@ public class Aggregation implements Term {
     public final AggregationOperator operator;
     public final Variable variable;
     public final boolean isDistinct;
-    
+
     Aggregation(AggregationOperator operator, Variable variable, boolean isDistinct) {
         this.operator = operator;
         this.variable = variable;

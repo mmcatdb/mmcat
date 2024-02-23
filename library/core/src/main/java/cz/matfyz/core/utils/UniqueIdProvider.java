@@ -11,7 +11,7 @@ public class UniqueIdProvider {
     private static int lastId = LAST_ID_DEFAULT;
 
     private UniqueIdProvider() {}
-    
+
     public static String getNext() {
         lastId++;
         return "" + lastId;

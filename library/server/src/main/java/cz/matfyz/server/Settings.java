@@ -29,5 +29,5 @@ class Settings implements WebMvcConfigurer {
             }
         };
     }
-    
+
 }

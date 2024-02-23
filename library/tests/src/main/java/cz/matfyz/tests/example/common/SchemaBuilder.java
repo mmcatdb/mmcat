@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 public class SchemaBuilder {
-    
+
     private final List<ObjectDefinition> objects = new ArrayList<>();
     private final List<MorphismDefinition> morphisms = new ArrayList<>();
 

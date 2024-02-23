@@ -29,7 +29,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
     public boolean hasSignature(Signature signature) {
         return tuples.containsKey(signature);
     }
-    
+
     public Set<Signature> signatures() {
         return tuples.keySet();
     }
@@ -37,9 +37,9 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
     public String getValue(Signature signature) {
         return tuples.get(signature);
     }
-    
+
     private SignatureId cachedId;
-    
+
     public SignatureId id() {
         if (cachedId == null)
             cachedId = new SignatureId(tuples.keySet());
@@ -119,7 +119,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         var builder = new Builder();
         for (var id : ids)
             builder.add(id);
-        
+
         return builder.build();
     }
 
@@ -147,7 +147,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         public Builder add(SuperIdWithValues idWithValues) {
             for (var tuple : idWithValues.tuples.entrySet())
                 map.put(tuple.getKey(), tuple.getValue());
-                
+
             return this;
         }
 
@@ -158,37 +158,37 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         }
 
     }
-    
+
     @Override public boolean equals(Object object) {
         if (!(object instanceof SuperIdWithValues idWithValues))
             return false;
 
         return Objects.equals(this.tuples, idWithValues.tuples);
     }
-    
+
     @Override public int hashCode() {
         int hash = 3;
         hash = 83 * hash + Objects.hashCode(this.tuples);
         return hash;
     }
-    
+
     @Override public int compareTo(SuperIdWithValues idWithValues) {
         int idCompareResult = id().compareTo(idWithValues.id());
         if (idCompareResult != 0)
             return idCompareResult;
-        
+
         for (Signature signature : signatures()) {
             int signatureCompareResult = tuples.get(signature).compareTo(idWithValues.tuples.get(signature));
             if (signatureCompareResult != 0)
                 return signatureCompareResult;
         }
-        
+
         return 0;
     }
-    
+
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
-        
+
         builder.append("{");
         boolean notFirst = false;
         for (var entry : tuples.entrySet()) {
@@ -196,11 +196,11 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
                 builder.append(", ");
             else
                 notFirst = true;
-            
+
             builder.append("(").append(entry.getKey()).append(": \"").append(entry.getValue()).append("\")");
         }
         builder.append("}");
-            
+
         return builder.toString();
     }
 

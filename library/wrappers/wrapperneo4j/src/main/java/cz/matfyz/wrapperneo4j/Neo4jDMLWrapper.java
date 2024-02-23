@@ -13,14 +13,14 @@ import java.util.List;
 public class Neo4jDMLWrapper implements AbstractDMLWrapper {
 
     private record PropertyValue(String name, String value) {}
-    
+
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
     private String fromNodeLabel = null;
     private List<PropertyValue> fromNodeValues = new ArrayList<>();
     private String toNodeLabel = null;
     private List<PropertyValue> toNodeValues = new ArrayList<>();
-    
+
     @Override public void setKindName(String name) {
         if (!nameIsValid(name))
             throw InvalidNameException.kind(name);
@@ -103,7 +103,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     private static String propertiesToString(List<PropertyValue> properties) {
         final var output = new StringBuilder();
         output.append("{");
-        
+
         for (final var property : properties)
             output
             .append(" ")
@@ -111,15 +111,15 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
             .append(": ")
             .append(escapeString(property.value))
             .append(",");
-        
+
         if (!properties.isEmpty()) // Remove the last comma
             output.deleteCharAt(output.length() - 1);
-        
+
         output.append(" }");
 
         return output.toString();
     }
-    
+
     private static String escapeString(String input) {
         return input == null
             ? "null"

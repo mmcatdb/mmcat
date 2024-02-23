@@ -12,7 +12,7 @@ public class InvalidNameException extends WrapperException {
         String value,
         boolean isNull
     ) implements Serializable {}
-    
+
     protected InvalidNameException(String type, String value) {
         super("invalidName", new InvalidNameData(type, value == null ? "" : value, value == null), null);
     }

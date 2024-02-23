@@ -28,7 +28,7 @@ public class QueryPlanner {
     public static List<Set<KindPattern>> run(List<KindPattern> allKinds) {
         return new QueryPlanner(allKinds).run();
     }
-    
+
     private final List<KindPattern> allKinds;
 
     private QueryPlanner(List<KindPattern> allKinds) {
@@ -40,7 +40,7 @@ public class QueryPlanner {
 
         return plans;
     }
-    
+
     /**
      * The goal of the algorithm is to move some kinds from the rest list to the selected set. The selected set will then become a new plan.
      */

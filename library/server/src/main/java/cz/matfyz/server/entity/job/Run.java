@@ -19,7 +19,7 @@ public class Run extends Entity {
         this.categoryId = categoryId;
         this.actionId = actionId;
     }
-    
+
     public static Run createNew(Id categoryId, @Nullable Id actionId) {
         return new Run(
             Id.createNewUUID(),
@@ -27,7 +27,7 @@ public class Run extends Entity {
             actionId
         );
     }
-        
+
     public static Run fromDatabase(Id id, Id categoryId, @Nullable Id actionId) {
         return new Run(
             id,
@@ -35,5 +35,5 @@ public class Run extends Entity {
             actionId
         );
     }
-        
+
 }

@@ -14,7 +14,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
     private final List<Property> properties = new ArrayList<>();
-    
+
     @Override public void setKindName(String name) {
         kindName = name;
     }
@@ -28,7 +28,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
             String command = "\"" + name + "\" TEXT" + (required ? " NOT NULL" : "");
             properties.add(new Property(name, command));
         });
-        
+
         return true;
     }
 
@@ -37,7 +37,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
             String command = "\"" + name + "\" TEXT[]" + (required ? " NOT NULL" : "");
             properties.add(new Property(name, command));
         });
-        
+
         return true;
     }
 
@@ -59,7 +59,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
             %s
             );
             """, kindName, commands);
-        
+
         return new PostgreSQLStatement(content);
     }
 

@@ -6,9 +6,9 @@ import cz.matfyz.core.mapping.StaticName.Type;
  * @author jachym.bartik
  */
 public class StaticRecordName extends RecordName {
-    
+
     private final Type type;
-    
+
     public StaticRecordName(String value, Type type) {
         super(value);
         this.type = type;
@@ -32,7 +32,7 @@ public class StaticRecordName extends RecordName {
         return hash;
     }
     */
-    
+
     @Override public String toString() {
         return switch (type) {
             case STATIC -> value;

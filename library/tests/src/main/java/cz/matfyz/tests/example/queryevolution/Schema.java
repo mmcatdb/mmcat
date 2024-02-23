@@ -12,9 +12,9 @@ public class Schema {
 
     public static final String schemaLabel = "Query Evolution Schema";
 
-    
+
     // Keys
-    
+
     // Version 1
     public static final Key customer = new Key(1);
     public static final Key customerId = new Key(2);
@@ -38,7 +38,7 @@ public class Schema {
     public static final Key ordered = new Key(18);
 
     // Signatures
-    
+
     // Version 1
     public static final BaseSignature customerToCustomerId = Signature.createBase(1);
     public static final BaseSignature customerToName = Signature.createBase(2);
@@ -56,10 +56,10 @@ public class Schema {
     public static final BaseSignature productToProductId = Signature.createBase(14);
     public static final BaseSignature productToTitle = Signature.createBase(15);
     public static final BaseSignature productToProductPrice = Signature.createBase(16);
-    
+
     public static final Signature orderToCustomerId = orderToCustomer.concatenate(customerToCustomerId);
     public static final Signature orderToProductId = orderToProduct.concatenate(productToProductId);
-    
+
     // Version 2
     public static final BaseSignature itemToOrderPrice = Signature.createBase(10);
     public static final BaseSignature itemToQuantity = Signature.createBase(11);
@@ -93,7 +93,7 @@ public class Schema {
                 .addItem()
                 .addOrdered();
         }
-        
+
         return builder.build();
     }
 

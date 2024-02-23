@@ -17,19 +17,19 @@ public class ArrayUtils {
         int length = 0;
         for (T[] array : arrays)
             length += array.length;
-        
+
         @SuppressWarnings("unchecked")
         final T[] output = (T[]) new Object[length];
-        
+
         int startIndex = 0;
         for (T[] array : arrays) {
             System.arraycopy(array, 0, output, startIndex, array.length);
             startIndex += array.length;
         }
-        
+
         return output;
     }
-    
+
     /**
      * Why java, why you have to be like this?
      * @param arrays The arrays we want to concatenate
@@ -43,20 +43,20 @@ public class ArrayUtils {
         int length = 0;
         for (int[] array : arrays)
             length += array.length;
-        
+
         final int[] output = new int[length];
-        
+
         int startIndex = 0;
         for (int[] array : arrays) {
             System.arraycopy(array, 0, output, startIndex, array.length);
             startIndex += array.length;
         }
-        
+
         return output;
     }
 
     /**
-     * 
+     *
      * @param <T> Comparable type
      * @param source Sorted objects
      * @param filter Also sorted objects
@@ -67,31 +67,33 @@ public class ArrayUtils {
 
         final var sourceIterator = source.iterator();
         final var filterIterator = filter.iterator();
-        
+
         T sourceObject = sourceIterator.hasNext() ? sourceIterator.next() : null;
         T filterObject = filterIterator.hasNext() ? filterIterator.next() : null;
-        
+
         while (sourceObject != null && filterObject != null) {
             final var comparison = sourceObject.compareTo(filterObject);
 
             if (comparison < 0) {
                 output.add(sourceObject);
                 sourceObject = sourceIterator.hasNext() ? sourceIterator.next() : null;
-            } else if (comparison > 0) {
+            }
+            else if (comparison > 0) {
                 filterObject = filterIterator.hasNext() ? filterIterator.next() : null;
-            } else {
+            }
+            else {
                 sourceObject = sourceIterator.hasNext() ? sourceIterator.next() : null;
                 filterObject = filterIterator.hasNext() ? filterIterator.next() : null;
             }
         }
-        
+
         if (sourceObject != null) {
             output.add(sourceObject);
-            
+
             while (sourceIterator.hasNext())
                output.add(sourceIterator.next());
         }
-        
+
         return output;
     }
 
@@ -100,10 +102,10 @@ public class ArrayUtils {
         for (final T object : source) {
             if (predicate.test(object))
                 return index;
-            
+
             index++;
         }
-        
+
         return -1;
     }
 

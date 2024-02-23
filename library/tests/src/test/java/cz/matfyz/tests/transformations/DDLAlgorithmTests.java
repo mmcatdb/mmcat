@@ -243,7 +243,7 @@ class DDLAlgorithmTests {
                     "addComplexProperty([ note/cs-CZ, note/en-GB, note/en-US ], true)",
                     "addSimpleProperty([ note/cs-CZ/subject, note/en-GB/subject, note/en-US/subject ], true)",
                     "addSimpleProperty([ note/cs-CZ/content, note/en-GB/content, note/en-US/content ], true)"
-                ]                
+                ]
             """)
             .run();
     }

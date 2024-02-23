@@ -29,12 +29,12 @@ import org.slf4j.LoggerFactory;
  * @author jachymb.bartik
  */
 public class PostgreSQLPullWrapper implements AbstractPullWrapper {
-    
+
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLPullWrapper.class);
 
     private PostgreSQLProvider provider;
-    
+
     public PostgreSQLPullWrapper(PostgreSQLProvider provider) {
         this.provider = provider;
     }
@@ -70,10 +70,10 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 ForestOfRecords forest = new ForestOfRecords();
-                
+
                 while (resultSet.next()) {
                     var rootRecord = new RootRecord();
-                    
+
                     for (AccessPath subpath : path.subpaths()) {
                         if (subpath instanceof SimpleProperty simpleProperty && simpleProperty.name() instanceof StaticName staticName) {
                             String name = staticName.getStringName();
@@ -81,10 +81,10 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
                             rootRecord.addSimpleValueRecord(staticName.toRecordName(), simpleProperty.signature(), value);
                         }
                     }
-                            
+
                     forest.addRecord(rootRecord);
                 }
-                
+
                 return forest;
             }
         }
@@ -122,7 +122,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
             try (ResultSet resultSet = statement.executeQuery()) {
                 final var builder = new ResultList.TableBuilder();
                 builder.addColumns(columns);
-                
+
                 while (resultSet.next()) {
                     final var values = new ArrayList<String>();
                     for (final var column : columns)
@@ -130,7 +130,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
 
                     builder.addRow(values);
                 }
-                
+
                 return new QueryResult(builder.build(), query.structure());
             }
         }

@@ -90,7 +90,7 @@ class SchemaSetup extends SchemaBase {
             addMorphism(Schema.itemToProduct);
             addIds(Schema.item);
         });
-        
+
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.quantity, 1, 0);
             addMorphism(Schema.itemToQuantity);

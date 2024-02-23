@@ -29,14 +29,14 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
     static final String TO_NODE_PROPERTY_PREFIX = "_to.";
 
     private Neo4jProvider provider;
-    
+
     public Neo4jControlWrapper(Neo4jProvider provider) {
         this.provider = provider;
     }
 
     @Override public void execute(Collection<AbstractStatement> statements) {
         try (
-            final Session session = provider.getSession();
+            Session session = provider.getSession();
         ) {
             // TODO transactions?
             for (final var statement : statements) {

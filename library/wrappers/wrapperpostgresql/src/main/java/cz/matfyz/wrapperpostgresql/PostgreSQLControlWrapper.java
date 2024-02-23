@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author jachymb.bartik
  */
 public class PostgreSQLControlWrapper implements AbstractControlWrapper {
-    
+
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLControlWrapper.class);
 
@@ -83,7 +83,7 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     //     .append(" -f ")
     //     .append(path.toString())
     //     .toString();
-    
+
     // LOGGER.info("Executing: " + beforePasswordString + "********" + afterPasswordString);
 
     // String commandString = beforePasswordString + PostgreSQL.PASSWORD + afterPasswordString;

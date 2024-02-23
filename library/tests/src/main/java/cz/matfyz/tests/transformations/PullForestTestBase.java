@@ -35,13 +35,13 @@ public class PullForestTestBase {
         return this;
     }
 
-    public void run() {            
+    public void run() {
         var forest = wrapper.pullForest(mapping.accessPath(), new KindNameQuery(mapping.kindName()));
         LOGGER.debug("Pulled forest:\n" + forest);
 
         var expectedForest = new DummyPullWrapper().pullForest(mapping.accessPath(), new StringQuery(expected));
         LOGGER.debug("Expected forest:\n" + expectedForest);
-        
+
         assertEquals(expectedForest.toString(), forest.toString());
     }
 

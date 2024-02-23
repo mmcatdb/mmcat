@@ -29,7 +29,7 @@ public class ParserTests {
             LOGGER.info("Parsed result:\n{}", query);
         });
     }
-    
+
     private static final String[] examples = {
         """
         SELECT {
@@ -59,10 +59,10 @@ public class ParserTests {
                 11 ?status ;
                 12/14 ?itemId ;
                 9 ?customer .
-        
+
             ?customer 2 ?name ;
                 4/7 ?city .
-        
+
             FILTER(?name = "Alice")
             VALUES ?status {"completed" "shipped"}
         }
@@ -91,7 +91,7 @@ public class ParserTests {
                 2 ?name ;
                 3 ?surname ;
                 4 ?address .
-        
+
             ?address 5 ?addressId ;
                 6 ?street ;
                 7 ?city ;

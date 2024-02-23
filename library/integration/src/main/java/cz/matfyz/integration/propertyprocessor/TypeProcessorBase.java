@@ -10,7 +10,7 @@ public class TypeProcessorBase {
 
     protected final InstanceCategory category;
     protected final MorphismFinder finder;
-    
+
     protected TypeProcessorBase(InstanceCategory category) {
         this.category = category;
         this.finder = new MorphismFinder(category);

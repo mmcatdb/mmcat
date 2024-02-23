@@ -16,7 +16,7 @@ public class DependencyException extends EvolutionException {
         Object entity,
         Object dependencies
     ) implements Serializable {}
-    
+
     protected DependencyException(String type, Object entity, Object dependencies) {
         super("dependency", new DependencyData(type, entity, dependencies), null);
     }

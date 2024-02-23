@@ -13,7 +13,7 @@ public class Neo4jQueryWrapper extends BaseQueryWrapper implements AbstractQuery
     @Override public boolean isOptionalJoinSupported() { return true; }
     @Override public boolean isRecursiveJoinSupported() { return true; }
     @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean IsFilteringNotIndexedSupported() { return true; }
+    @Override public boolean isFilteringNotIndexedSupported() { return true; }
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 

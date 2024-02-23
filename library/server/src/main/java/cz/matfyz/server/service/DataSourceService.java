@@ -24,7 +24,7 @@ public class DataSourceService {
     public DataSource find(Id dataSourceId) {
         return repository.find(dataSourceId);
     }
-    
+
     public List<DataSource> findAll() {
         return repository.findAll();
     }
@@ -42,7 +42,7 @@ public class DataSourceService {
         DataSource dataSource = repository.find(dataSourceId);
         if (dataSource == null)
             return null;
-        
+
         dataSource.updateFrom(update);
         return repository.save(dataSource);
     }

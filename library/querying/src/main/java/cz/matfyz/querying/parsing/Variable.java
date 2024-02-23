@@ -10,7 +10,7 @@ public class Variable implements Term {
 
     public final String name;
     private final boolean isOriginal;
-    
+
     private Variable(String name, boolean isOriginal) {
         this.name = name;
         this.isOriginal = isOriginal;

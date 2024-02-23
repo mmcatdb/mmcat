@@ -30,9 +30,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = SignatureId.Serializer.class)
 @JsonDeserialize(using = SignatureId.Deserializer.class)
 public class SignatureId implements Serializable, Comparable<SignatureId> {
-    
+
     private final SortedSet<Signature> signatures;
-    
+
     // TODO make immutable
     public SortedSet<Signature> signatures() {
         return signatures;
@@ -41,20 +41,20 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
     public SignatureId(Set<Signature> signatures) {
         this(new TreeSet<>(signatures));
     }
-    
+
     // There must be at least one signature
     public SignatureId(Signature... signatures) {
         this(new TreeSet<>(List.of(signatures)));
     }
-    
+
     public static SignatureId createEmpty() {
         return new SignatureId(Signature.createEmpty());
     }
-    
+
     private SignatureId(SortedSet<Signature> signatures) {
         this.signatures = signatures;
     }
-    
+
     public boolean hasSignature(Signature signature) {
         return this.signatures.contains(signature);
     }
@@ -67,22 +67,22 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         int sizeResult = signatures.size() - id.signatures.size();
         if (sizeResult != 0)
             return sizeResult;
-        
+
         Iterator<Signature> iterator = id.signatures.iterator();
-        
+
         for (Signature signature : signatures) {
             int signatureResult = signature.compareTo(iterator.next());
             if (signatureResult != 0)
                 return signatureResult;
         }
-        
+
         return 0;
     }
 
     @Override public boolean equals(Object object) {
         return object instanceof SignatureId id && compareTo(id) == 0;
     }
-    
+
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
@@ -118,7 +118,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
@@ -129,7 +129,7 @@ public class SignatureId implements Serializable, Comparable<SignatureId> {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Signature[] signatures = signaturesJsonReader.readValue(node);
-            
+
             return new SignatureId(signatures);
         }
 

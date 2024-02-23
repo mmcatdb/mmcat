@@ -33,7 +33,7 @@ public abstract class PostgreSQL {
 
     public static void addCustomer(InstanceBuilder builder, String customerIdValue, String nameValue, String surnameValue) {
         final var customer = builder.value(Schema.customerToCustomerId, customerIdValue).object(Schema.customer);
-        
+
         builder.morphism(Schema.customerToCustomerId, customer, builder.valueObject(customerIdValue, Schema.customerId));
         builder.morphism(Schema.customerToName, customer, builder.valueObject(nameValue, Schema.name));
         builder.morphism(Schema.customerToSurname, customer, builder.valueObject(surnameValue, Schema.surname));
@@ -58,7 +58,7 @@ public abstract class PostgreSQL {
             .value(Schema.knowsToCustomerA, customerA.superId.getValue(Schema.customerToCustomerId))
             .value(Schema.knowsToCustomerB, customerB.superId.getValue(Schema.customerToCustomerId))
             .object(Schema.knows);
-        
+
         builder.morphism(Schema.knowsToCustomerA, knows, customerA);
         builder.morphism(Schema.knowsToCustomerB, knows, customerB);
     }
@@ -77,7 +77,7 @@ public abstract class PostgreSQL {
 
     public static void addProduct(InstanceBuilder builder, String productIdValue, String titleValue, String productPriceValue) {
         final var product = builder.value(Schema.productToProductId, productIdValue).object(Schema.product);
-        
+
         builder.morphism(Schema.productToProductId, product, builder.valueObject(productIdValue, Schema.productId));
         builder.morphism(Schema.productToTitle, product, builder.valueObject(titleValue, Schema.title));
         builder.morphism(Schema.productToProductPrice, product, builder.valueObject(productPriceValue, Schema.productPrice));
@@ -108,7 +108,7 @@ public abstract class PostgreSQL {
             .value(Schema.orderToOrderId, orderIdValue)
             .value(Schema.orderToProductId, product.superId.getValue(Schema.productToProductId))
             .object(Schema.order);
-        
+
         builder.morphism(Schema.orderToCustomer, order, customer);
         builder.morphism(Schema.orderToProduct, order, product);
 
@@ -134,7 +134,7 @@ public abstract class PostgreSQL {
 
     public static void addOrder(InstanceBuilder builder, String orderIdValue, String streetValue, String cityValue, String postCodeValue) {
         final var order = builder.value(Schema.orderToOrderId, orderIdValue).object(Schema.order);
-        
+
         builder.morphism(Schema.orderToStreet, order, builder.valueObject(streetValue, Schema.street));
         builder.morphism(Schema.orderToCity, order, builder.valueObject(cityValue, Schema.city));
         builder.morphism(Schema.orderToPostCode, order, builder.valueObject(postCodeValue, Schema.postCode));

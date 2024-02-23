@@ -54,7 +54,7 @@ public class InstanceToDatabase {
         String statementsAsString,
         Collection<AbstractStatement> statements
     ) {}
-    
+
     public InstanceToDatabaseResult run() {
         try {
             return innerRun();
@@ -79,7 +79,7 @@ public class InstanceToDatabase {
 
         final var icTransformation = new ICAlgorithm();
         icTransformation.input(mapping, allMappings, icWrapper);
-        
+
         final var dmlTransformation = new DMLAlgorithm();
         dmlTransformation.input(mapping, instance, dmlWrapper);
 

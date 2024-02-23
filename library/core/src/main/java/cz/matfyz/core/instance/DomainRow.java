@@ -116,7 +116,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
             final var nextSet = new TreeSet<DomainRow>();
             for (final var row : currentSet)
                 nextSet.addAll(row.getCodomainForEdge(edge));
-                
+
             currentSet = nextSet;
         }
 
@@ -142,7 +142,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
 
         return IterableUtils.compareTwoIterables(technicalIds, row.technicalIds);
     }
-    
+
     @Override public String toString() {
         var builder = new StringBuilder();
         builder.append(superId.toString());
@@ -160,7 +160,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
 
         return builder.toString();
     }
-    
+
     // TODO change equals and compareTo to do == first
     @Override public boolean equals(Object object) {
         return object instanceof DomainRow row && superId.equals(row.superId);
@@ -185,5 +185,5 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
         }
 
     }
-    
+
 }

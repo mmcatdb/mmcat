@@ -9,7 +9,7 @@ import java.util.List;
 public class BaseSignature extends Signature {
 
     private final int id;
-    
+
     public BaseSignature(int id) {
         super(new int[] { id });
         this.id = id;
@@ -34,11 +34,11 @@ public class BaseSignature extends Signature {
     @Override public BaseSignature getFirst() {
         return this;
     }
-    
+
     @Override public BaseSignature dual() {
         return createBase(-id);
     }
-    
+
     @Override public Type getType() {
         return Type.BASE;
     }

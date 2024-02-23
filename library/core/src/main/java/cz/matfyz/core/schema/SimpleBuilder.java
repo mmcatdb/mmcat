@@ -80,16 +80,16 @@ public class SimpleBuilder {
         public Key domKey() {
             return dom.key();
         }
-        
+
         public Key codKey() {
             return cod.key();
         }
     }
-        
+
     private SequenceGenerator signatureGenerator;
     private Map<Signature, Morphism> morphismsBySignature = new TreeMap<>();
     private Map<String, Morphism> morphismsByLabel = new TreeMap<>();
-    
+
     private Min nextMin = Min.ONE;
     public SimpleBuilder min(Min nextMin) {
         this.nextMin = nextMin;
@@ -117,7 +117,7 @@ public class SimpleBuilder {
 
         this.nextMin = Min.ONE;
         this.nextTags = Set.of();
-        
+
         return morphism;
     }
 

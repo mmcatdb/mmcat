@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class MappingBuilder {
-    
+
     private final List<LogicalModel> models;
     private final SchemaCategory schema;
     private final Version version;

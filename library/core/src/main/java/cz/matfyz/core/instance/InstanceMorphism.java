@@ -62,7 +62,7 @@ public class InstanceMorphism implements Morphism {
 
         // TODO shouldn't there be a merge?
     }
-    
+
     // TODO potentially dangerous function, left for testing purposes.
     public void addMapping(MappingRow mapping) {
         mappings.add(mapping);
@@ -103,16 +103,16 @@ public class InstanceMorphism implements Morphism {
             .append("\tDom: ").append(dom.key())
             .append("\tCod: ").append(cod.key())
             .append("\n");
-        
+
         builder.append("\tValues:\n");
         //for (Set<ActiveMappingRow> set : mappings.values())
         //    for (ActiveMappingRow row : set)
         for (MappingRow row : allMappings())
             builder.append("\t\t").append(row).append("\n");
-        
+
         return builder.toString();
     }
-    
+
     // TODO maybe there is no reason to override this method
     @Override public boolean equals(Object object) {
         if (this == object)

@@ -50,7 +50,7 @@ public class Config {
     private static Properties getProperties(String fileName, Properties defaultProperties) {
         try {
             final Properties output = new Properties(defaultProperties);
-            
+
             final var url = ClassLoader.getSystemResource(fileName);
             // If the file can't be found that's fine, provided we already have default properties.
             if (url == null && defaultProperties != null)
@@ -60,7 +60,7 @@ public class Config {
             final var configFile = new File(pathToFile);
 
             try (
-                final var reader = new FileReader(configFile);
+                var reader = new FileReader(configFile);
             ) {
                 output.load(reader);
                 return output;

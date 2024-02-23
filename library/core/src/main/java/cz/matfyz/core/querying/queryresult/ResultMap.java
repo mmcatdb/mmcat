@@ -29,7 +29,7 @@ public class ResultMap implements ResultNode {
 
         if (isMultilined) {
             printer.append("{").down().nextLine();
-            
+
             for (final var child : children.entrySet()) {
                 printer
                     .append("\"").append(child.getKey()).append("\": ")
@@ -47,7 +47,7 @@ public class ResultMap implements ResultNode {
                     .append(child.getValue())
                     .append(", ");
             }
-            
+
             if (!children.isEmpty())
                 printer.remove();
 

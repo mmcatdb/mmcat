@@ -87,7 +87,7 @@ public class JobController {
         return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
     }
 
-    private JobDetail jobToJobDetail(JobWithRun job) {        
+    private JobDetail jobToJobDetail(JobWithRun job) {
         final var payload = actionController.actionPayloadToDetail(job.job().payload);
 
         return JobDetail.create(job, payload);

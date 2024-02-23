@@ -102,7 +102,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
@@ -111,19 +111,19 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         private static final ObjectReader versionJsonReader = new ObjectMapper().readerFor(Version.class);
         private static final ObjectReader objectsJsonReader = new ObjectMapper().readerFor(SchemaObjectWrapper[].class);
         private static final ObjectReader morphismsJsonReader = new ObjectMapper().readerFor(SchemaMorphismWrapper[].class);
-    
+
         @Override public SchemaCategoryWrapper deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final var idFromContext = (Id) context.getAttribute("id");
             final Id id = idFromContext != null ? idFromContext : idJsonReader.readValue(node.get("id"));
-            
+
             final var label = node.get("label").asText();
             final Version version = versionJsonReader.readValue(node.get("version"));
 
             final SchemaObjectWrapper[] objects = objectsJsonReader.readValue(node.get("objects"));
             final SchemaMorphismWrapper[] morphisms = morphismsJsonReader.readValue(node.get("morphisms"));
-                        
+
             return new SchemaCategoryWrapper(id, label, version, objects, morphisms);
         }
 

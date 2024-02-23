@@ -26,5 +26,5 @@ public class IdentifierStructure {
     @Override public String toString() {
         return String.join(", ", properties);
     }
-    
+
 }

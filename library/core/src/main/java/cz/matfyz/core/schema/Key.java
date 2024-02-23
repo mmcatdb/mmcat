@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 public class Key implements Serializable, Comparable<Key> {
 
     private final int value;
-    
+
     public int getValue() {
         return value;
     }
@@ -32,11 +32,11 @@ public class Key implements Serializable, Comparable<Key> {
     @Override public int compareTo(Key key) {
         return value - key.value;
     }
-    
+
     @Override public String toString() {
         return value + "";
     }
-    
+
     @Override public boolean equals(Object obj) {
         return obj instanceof Key key && compareTo(key) == 0;
     }
@@ -83,5 +83,5 @@ public class Key implements Serializable, Comparable<Key> {
         }
 
     }
-    
+
 }

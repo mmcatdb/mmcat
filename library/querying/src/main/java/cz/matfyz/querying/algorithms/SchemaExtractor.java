@@ -51,7 +51,7 @@ public class SchemaExtractor {
      * They already contain only base signatures without duals.
      */
     private List<SchemaMorphism> patternMorphisms;
-    
+
     private ExtractorResult run() {
         patternMorphisms = pattern.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
 

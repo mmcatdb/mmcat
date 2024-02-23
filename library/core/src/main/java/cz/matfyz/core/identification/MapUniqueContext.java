@@ -8,7 +8,7 @@ import java.util.TreeMap;
  * @author jachymb.bartik
  */
 public class MapUniqueContext<O extends Identified<I>, I extends Comparable<I>> implements UniqueContext<O, I> {
-    
+
     private final Map<I, O> uniqueObjects;
 
     public MapUniqueContext() {
@@ -24,7 +24,7 @@ public class MapUniqueContext<O extends Identified<I>, I extends Comparable<I>> 
     @Override public O createUniqueObject(O object) {
         if (!uniqueObjects.containsKey(object.identifier()))
             uniqueObjects.put(object.identifier(), object);
-        
+
         return uniqueObjects.get(object.identifier());
     }
 

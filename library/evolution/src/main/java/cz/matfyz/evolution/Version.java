@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = Version.Serializer.class)
 @JsonDeserialize(using = Version.Deserializer.class)
 public class Version implements java.io.Serializable, java.lang.Comparable<Version>, java.lang.CharSequence {
-    
+
     private final String value;
     private final int integerValue;
 
@@ -46,7 +46,7 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
     public static Version generateInitial() {
         return new Version(0);
     }
-    
+
     @Override public String toString() {
         return value;
     }
@@ -76,19 +76,19 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
     }
 
     public static class Serializer extends StdSerializer<Version> {
-    
+
         public Serializer() {
             this(null);
         }
-      
+
         public Serializer(Class<Version> t) {
             super(t);
         }
-    
+
         @Override public void serialize(Version id, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(id.value);
         }
-    
+
     }
 
     public static class Deserializer extends StdDeserializer<Version> {
@@ -96,14 +96,14 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
-    
+
         @Override public Version deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-    
+
             return new Version(node.asText());
         }
 

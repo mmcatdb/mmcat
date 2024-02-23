@@ -39,19 +39,19 @@ public class QueryProjector {
         this.selectClause = selectClause;
         this.selection = selection;
     }
-    
+
     private QueryResult run() {
         final TransformingQueryStructure projectionStructure = computeProjectionStructure();
         final TransformationRoot transformation = QueryStructureTransformer.run(selection.structure, projectionStructure);
         final var transformationContext = new TransformationContext(selection.data);
-        
+
         transformation.apply(transformationContext);
 
         final ResultList data = (ResultList) transformationContext.getOutput();
 
         return new QueryResult(data, projectionStructure.toQueryStructure());
     }
-    
+
     private TransformingQueryStructure computeProjectionStructure() {
         final var rootVariable = findRootVariable();
         final var projectionStructure = new TransformingQueryStructure(rootVariable.getIdentifier(), rootVariable.getIdentifier());
@@ -141,11 +141,11 @@ public class QueryProjector {
 
             final var root = new TransformationRoot();
             TransformationStep current = root;
-            
+
             current = current
                 .addChild(new CreateList<ResultMap>())
                 .addChild(new TraverseList());
-                
+
             final var path = GraphUtils.findPath(inputStructure, rootInSelection);
             current = addPathSteps(current, path);
             current = current.addChild(new WriteToList<ResultMap>());
@@ -228,7 +228,7 @@ public class QueryProjector {
                     throw new UnsupportedOperationException("Term " + childStructure.inputName + " not found in the selection structure.");
 
                 final var path = GraphUtils.findPath(parentInSelection, childInSelection);
-                
+
                 childStructure.isArray = isPathArray(path);
                 current = createListIfNeeded(current, childStructure);
                 current = addPathSteps(current, path);
@@ -258,7 +258,7 @@ public class QueryProjector {
      * This class represents one basic step in transforming a query result (ResultNode) to another one (with different QueryStructure).
      * It can be either a traverse (to a parent, a map or a list), a creation of a leaf, a creation of a map or a list, or a write to a map or a list.
      * The steps usually have children which are also traversed. Some steps spawn multiple new "branches" which are traversed one by one. Therefore, the whole transformation can be obtained by simply appliing the first step to the root node.
-     * 
+     *
      * This system is designed to transform the data as fast as possible. We only have to create the steps once and then we can apply them to any amount of data.
      */
     public abstract static class TransformationStep implements Printable {
@@ -330,7 +330,7 @@ public class QueryProjector {
     private static class TraverseMap extends TransformationStep {
         private final String key;
 
-        public TraverseMap(String key) {
+        TraverseMap(String key) {
             this.key = key;
         }
 
@@ -399,7 +399,7 @@ public class QueryProjector {
     private static class WriteToMap extends TransformationStep {
         private final String key;
 
-        public WriteToMap(String key) {
+        WriteToMap(String key) {
             this.key = key;
         }
 

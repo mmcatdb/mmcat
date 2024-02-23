@@ -26,7 +26,7 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
     static final String TYPE = "mongodb";
 
     private MongoDBProvider provider;
-    
+
     public MongoDBControlWrapper(MongoDBProvider provider) {
         this.provider = provider;
     }

@@ -11,7 +11,7 @@ import java.util.Set;
 public class Neo4jDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
-    
+
     @Override public void setKindName(String name) {
         kindName = name;
     }
@@ -39,4 +39,5 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
     @Override public Neo4jStatement createDDLStatement() {
         return Neo4jStatement.createEmpty();
     }
+
 }

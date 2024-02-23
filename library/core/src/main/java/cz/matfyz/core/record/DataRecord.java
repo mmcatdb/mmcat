@@ -7,17 +7,17 @@ import java.io.Serializable;
  * @author jachymb.bartik
  */
 public abstract class DataRecord implements Serializable {
-    
+
     protected final RecordName name;
-    
+
     protected DataRecord(RecordName name) {
         this.name = name;
     }
-    
+
     public RecordName name() {
         return this.name;
     }
-    
+
     // Iterate through all simple properties of this tree
     // public abstract Set<DataRecord> records();
 }

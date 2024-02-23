@@ -47,7 +47,7 @@ public class MTCAlgorithmTestBase {
         return this;
     }
 
-    public void run() {          
+    public void run() {
         final SchemaCategory schema = kinds.get(0).mapping.category();
         InstanceCategory instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
 

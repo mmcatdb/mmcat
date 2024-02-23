@@ -95,7 +95,7 @@ public class Schema {
     public static final BaseSignature dataToContent = Signature.createBase(25);
 
     public static final Signature noteToNumber = noteToOrder.concatenate(orderToNumber);
-    
+
     public Schema() {
         this.addOrder();
     }

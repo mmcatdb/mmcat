@@ -66,7 +66,7 @@ public class SchemaCategoryRepository {
                 """);
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
-            
+
             if (resultSet.next()) {
                 var label = resultSet.getString("label");
                 var version = new Version(resultSet.getString("version"));
@@ -80,7 +80,7 @@ public class SchemaCategoryRepository {
             var statement = connection.prepareStatement("SELECT * FROM schema_category WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
-            
+
             if (resultSet.next()) {
                 var jsonValue = resultSet.getString("json_value");
                 output.set(SchemaCategoryWrapper.fromJsonValue(id, jsonValue));

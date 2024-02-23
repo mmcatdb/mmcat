@@ -10,12 +10,12 @@ import cz.matfyz.core.utils.printable.*;
  * @author pavel.koupil, jachym.bartik
  */
 public class StackTriple implements Printable {
-    
+
     public final InstancePath parentToChild;
     public final DomainRow parentRow;
     public final AccessPath childAccessPath;
     public final IComplexRecord parentRecord;
-    
+
     public StackTriple(DomainRow parentRow, InstancePath parentToChild, AccessPath childAccessPath, IComplexRecord parentRecord) {
         this.parentRow = parentRow;
         this.parentToChild = parentToChild;
@@ -33,10 +33,10 @@ public class StackTriple implements Printable {
             .append(childAccessPath)
             .up().nextLine().append("}").append(",").nextLine();
         printer.append("record: ").append(parentRecord).append(",");
-        
+
         printer.up().nextLine().append(">");
     }
-    
+
     @Override public String toString() {
         return Printer.print(this);
     }

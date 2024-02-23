@@ -18,18 +18,18 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
 
     //private final List<DataRecord> children = new ArrayList<>();
     //private final Map<Signature, Set<DataRecord>> children = new TreeMap<>();
-    
+
     private final Map<Signature, List<ComplexRecord>> children = new TreeMap<>();
     private final List<ComplexRecord> dynamicNameChildren = new ArrayList<>();
     private Signature dynamicNameSignature;
     private final Map<Signature, SimpleRecord<?>> values = new TreeMap<>();
     private final List<SimpleValueRecord<?>> dynamicNameValues = new ArrayList<>();
     //private SimpleValueRecord<?> firstDynamicValue = null;
-    
+
     protected ComplexRecord(RecordName name) {
         super(name);
     }
-    
+
     /*
     public Map<Signature, List<ComplexRecord>> children() {
         return children;
@@ -45,11 +45,11 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
         //return signature.equals(dynamicSignature) ? dynamicChildren : children.get(signature);
         return children.get(signature);
     }
-    
+
     public boolean hasDynamicNameChildren() {
         return !dynamicNameChildren.isEmpty();
     }
-    
+
     public List<? extends IComplexRecord> getDynamicNameChildren() {
         return dynamicNameChildren;
     }
@@ -98,11 +98,11 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
     public boolean hasDynamicNameValues() {
         return !dynamicNameValues.isEmpty();
     }
-    
+
     public List<SimpleValueRecord<?>> getDynamicNameValues() {
         return dynamicNameValues;
     }
-    
+
     public boolean containsDynamicNameValue(Signature signature) {
         if (!hasDynamicNameValues())
             return false;
@@ -111,10 +111,10 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
         return signature.equals(firstDynamicNameValue.signature)
             || firstDynamicNameValue.name() instanceof DynamicRecordName dynamicName && signature.equals(dynamicName.signature());
     }
-    
+
     public ComplexRecord addComplexRecord(RecordName name, Signature signature) {
         ComplexRecord complexRecord = new ComplexRecord(name);
-        
+
         if (complexRecord.name instanceof StaticRecordName) {
             List<ComplexRecord> childSet = children.computeIfAbsent(signature, x -> new ArrayList<>());
             childSet.add(complexRecord);
@@ -123,17 +123,17 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
             dynamicNameChildren.add(complexRecord);
             dynamicNameSignature = signature;
         }
-        
+
         return complexRecord;
     }
-    
+
     public <T> SimpleArrayRecord<T> addSimpleArrayRecord(RecordName name, Signature signature, List<T> values) {
         var simpleArrayRecord = new SimpleArrayRecord<>(name, signature, values);
         this.values.put(signature, simpleArrayRecord);
-        
+
         return simpleArrayRecord;
     }
-    
+
     public <T> SimpleValueRecord<T> addSimpleValueRecord(RecordName name, Signature signature, T value) {
         var simpleValueRecord = new SimpleValueRecord<>(name, signature, value);
 
@@ -148,35 +148,35 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
                 assert signature.equals(firstDynamicValue.signature()) : "Trying to add a dynamic name with different value signature";
             }
             */
-            
+
             dynamicNameValues.add(simpleValueRecord);
         }
 
-        
+
         return simpleValueRecord;
     }
-    
+
     /*
     @Override Set<DataRecord> records() {
         Set output = Set.of(this);
         children.values().forEach(set -> output.addAll(set));
-        
+
         return output;
     }
     */
-    
+
     @Override public void printTo(Printer printer) {
         printer.append("{").down().nextLine();
-        
+
         for (SimpleRecord<?> value : values.values())
             printer.append(value).append(",").nextLine();
-        
+
         for (SimpleValueRecord<?> dynamicNameValue : dynamicNameValues)
             printer.append(dynamicNameValue).append(",").nextLine();
 
         for (List<ComplexRecord> list : children.values()) {
             ComplexRecord firstItem = list.get(0);
-            
+
             if (list.size() > 1) {
                 printer.append(firstItem.name).append(": ");
                 printer.append("[").down().nextLine();
@@ -191,7 +191,7 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
             else {
                 printer.append(firstItem.name).append(": ").append(firstItem);
             }
-            
+
             printer.append(",").nextLine();
         }
 

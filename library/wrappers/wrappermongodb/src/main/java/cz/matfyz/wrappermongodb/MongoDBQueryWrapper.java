@@ -21,7 +21,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
     @Override public boolean isOptionalJoinSupported() { return false; }
     @Override public boolean isRecursiveJoinSupported() { return false; }
     @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean IsFilteringNotIndexedSupported() { return true; }
+    @Override public boolean isFilteringNotIndexedSupported() { return true; }
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
@@ -47,18 +47,18 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         final String collectionName = mapping.kindName();
         final var content = MongoDBQuery.findAll(collectionName);
 
-        final var root = new QueryStructure(rootIdentifier, true);
-
+        final var queryStructure = createStructure();
+        System.out.println(queryStructure);
         // projections.forEach();
 
         // TODO got one projection "v_street" with path "8.9"
 
-        return new QueryStatement(content, root);
+        return new QueryStatement(content, queryStructure);
     }
 
     private void addProjectionToStructure(QueryStructure structure, Projection projection) {
         // projection.
-        
+
     }
 
     /** The `path` field replaces the `property.path` of the `projection`.  */
@@ -84,7 +84,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
                 continue;
 
             if (newProjections.size() == 1) {
-                
+
             }
 
         }
@@ -105,7 +105,5 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
 
         return output;
     }
-
-
 
 }

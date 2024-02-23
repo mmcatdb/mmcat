@@ -24,7 +24,7 @@ class Merger {
     private final Queue<MergeRowsJob> jobs;
     private final Queue<ReferenceJob> referenceJobs;
 
-    public Merger() {
+    Merger() {
         this.jobs = new ArrayDeque<>();
         this.referenceJobs = new ArrayDeque<>();
     }
@@ -53,7 +53,7 @@ class Merger {
 
     /**
      * Merges the row and then iterativelly merges rows from other instance objects that might be affected.
-     * 
+     *
      * @param superId The super id must contain at least one id.
      */
     public DomainRow merge(SuperIdWithValues superId, InstanceObject instanceObject) {
@@ -154,7 +154,7 @@ class Merger {
         Set<String> technicalIds;
         InstanceObject instanceObject;
 
-        public MergeRowsJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
+        MergeRowsJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
             this.merger = merger;
             this.superId = superId;
             this.technicalIds = technicalIds;
@@ -163,12 +163,12 @@ class Merger {
 
         public void process() {
             Set<DomainRow> originalRows = new TreeSet<>();
-            
+
             // Iteratively get all rows that are identified by the superId (while expanding the superId).
             // Also get all technical ids.
             var superIdOfTechnicalRows = instanceObject.findTechnicalSuperId(technicalIds, originalRows);
             superId = SuperIdWithValues.merge(superId, superIdOfTechnicalRows);
-    
+
             var result = instanceObject.findMaximalSuperId(superId, originalRows);
             var maximalSuperId = result.superId();
             var maximalTechnicalId = InstanceObject.mergeTechnicalIds(originalRows);
@@ -179,7 +179,7 @@ class Merger {
             // Create new Row that contains the unified superId and put it to all possible ids.
             // This also deletes the old ones.
             var newRow = instanceObject.createRow(maximalSuperId, maximalTechnicalId, result.foundIds());
-    
+
             // Get all morphisms from and to the original rows and put the new one instead of them.
             // Detect all morphisms that have maximal cardinality ONE and merge their rows. This can cause a chain reaction.
             // This steps is done by combining the rows' superIds and then calling merge.
@@ -213,7 +213,7 @@ class Merger {
 
                     for (var mappingRow : entry.getValue()) {
                         rowSet.add(mappingRow.codomainRow());
-                        
+
                         // Remove old mappings from their rows.
                         morphism.removeMapping(mappingRow);
                     }
@@ -226,7 +226,7 @@ class Merger {
         private static void createNewMappingsForMorphism(InstanceMorphism morphism, Set<DomainRow> codomainRows, DomainRow newRow, Merger merger) {
             for (var codomainRow : codomainRows)
                 morphism.createMapping(newRow, codomainRow);
-    
+
             // If there are multiple rows but the morphism allows at most one, they have to be merged as well. We do so by creating new merge job.
             /* Commented out because morphisms from v3 cannot be arrays
             if (!morphism.isArray() && codomainRows.size() > 1)
@@ -251,7 +251,7 @@ class Merger {
         Set<String> technicalIds; // The rows have to have at least some values in superId but it does not have to be a valid id ...
         InstanceObject instanceObject;
 
-        public ReferenceJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
+        ReferenceJob(Merger merger, SuperIdWithValues superId, Set<String> technicalIds, InstanceObject instanceObject) {
             this.merger = merger;
             this.superId = superId;
             this.technicalIds = technicalIds;

@@ -97,7 +97,7 @@ public class ActionController {
         if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
-        
+
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
     }
 

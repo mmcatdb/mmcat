@@ -10,13 +10,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public interface ResultNode extends Printable {
 
-    public static interface NodeBuilder {
+    interface NodeBuilder {
 
         ResultNode build();
 
     }
 
-    public static class JsonBuilder {
+    class JsonBuilder {
+
+        private JsonBuilder() {}
 
         private static ObjectMapper mapper = new ObjectMapper();
 

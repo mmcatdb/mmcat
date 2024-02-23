@@ -29,7 +29,7 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
     public static Id createNewUUID() {
         return new Id(UUID.randomUUID().toString());
     }
-    
+
     @Override public String toString() {
         return value;
     }
@@ -65,19 +65,19 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
     }
 
     public static class Serializer extends StdSerializer<Id> {
-    
+
         public Serializer() {
             this(null);
         }
-      
+
         public Serializer(Class<Id> t) {
             super(t);
         }
-    
+
         @Override public void serialize(Id id, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(id.value);
         }
-    
+
     }
 
     public static class Deserializer extends StdDeserializer<Id> {
@@ -85,17 +85,17 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
-    
+
         @Override public Id deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-    
+
             return new Id(node.asText());
         }
 
     }
-    
+
 }

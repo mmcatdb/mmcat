@@ -26,7 +26,7 @@ public class MorphismColoring implements Printable {
 
     public static MorphismColoring create(Collection<KindPattern> kindPatterns) {
         final var coloring = new MorphismColoring(new TreeMap<>(), new TreeMap<>());
-        
+
         for (final var kindPattern : kindPatterns)
             coloring.colorMorphisms(kindPattern, kindPattern.root);
 
@@ -42,7 +42,7 @@ public class MorphismColoring implements Printable {
             colorToMorphisms
                 .computeIfAbsent(kind, x -> new TreeSet<>())
                 .add(child.signatureFromParent());
-            
+
             colorMorphisms(kind, child);
         }
     }
@@ -73,7 +73,7 @@ public class MorphismColoring implements Printable {
 
         for (final var child : object.children())
             min = Math.min(min, computePatternCostRecursive(child));
-        
+
         return min;
     }
 

@@ -55,7 +55,7 @@ public class MongoDBToPostgreSQLTests {
 
         final AccessPath parsedPath = mapper.readerFor(AccessPath.class).readValue(jsonString);
         LOGGER.trace(parsedPath.toString());
-        
+
         assertEquals(path.toString(), parsedPath.toString());
     }
 }

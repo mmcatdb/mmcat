@@ -11,7 +11,7 @@ import java.util.Set;
  * @author pavel.koupil, jachym.bartik
  */
 public class SchemaMorphism implements Morphism, Identified<Signature> {
-    
+
     private  final Signature signature;
     public final String label;
     private SchemaObject dom;

@@ -160,7 +160,7 @@ class ServerApplicationTests {
             .setMappingWrapper(mappingWrapper)
             .setCategoryWrapper(categoryWrapper)
             .build();
-        
+
         return mapping;
     }
 

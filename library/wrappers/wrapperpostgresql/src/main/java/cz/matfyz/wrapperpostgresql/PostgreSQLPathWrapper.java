@@ -11,7 +11,7 @@ import java.util.List;
 public class PostgreSQLPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();
-    
+
     @Override public void addProperty(String hierarchy) {
         this.properties.add(hierarchy);
     }

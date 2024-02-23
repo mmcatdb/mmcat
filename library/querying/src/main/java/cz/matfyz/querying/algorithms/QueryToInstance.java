@@ -68,5 +68,5 @@ public class QueryToInstance {
 
         return QueryDescriptor.run(query.context, queryTree);
     }
-    
+
 }

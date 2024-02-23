@@ -3,21 +3,21 @@ package cz.matfyz.core.utils.printable;
 public interface Printer {
 
     Printer down();
-    
+
     Printer up();
-    
+
     Printer nextLine();
-    
+
     Printer append(Printable printable);
-    
+
     Printer append(String str);
-    
+
     Printer append(int i);
-    
+
     Printer append(Object obj);
-    
+
     Printer remove();
-    
+
     Printer remove(int i);
 
     /**

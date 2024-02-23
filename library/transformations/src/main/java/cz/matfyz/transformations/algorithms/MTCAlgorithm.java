@@ -31,19 +31,19 @@ import org.slf4j.LoggerFactory;
  * @author pavel.koupil, jachym.bartik
  */
 public class MTCAlgorithm {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MTCAlgorithm.class);
 
     private ForestOfRecords forest;
     private Mapping mapping;
     private InstanceCategory category;
-    
+
     public void input(Mapping mapping, InstanceCategory category, ForestOfRecords forest) {
         this.forest = forest;
         this.mapping = mapping;
         this.category = category;
     }
-    
+
     public void algorithm() {
         LOGGER.debug("Model To Category algorithm");
         final ComplexProperty rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
@@ -64,32 +64,32 @@ public class MTCAlgorithm {
         while (!masterStack.isEmpty())
             processTopOfStack(masterStack);
     }
-    
+
     private Deque<StackTriple> createStackWithObject(SchemaObject object, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         InstanceObject instanceObject = category.getObject(object);
         SuperIdWithValues superId = fetchSuperId(object.superId(), rootRecord);
         Deque<StackTriple> masterStack = new ArrayDeque<>();
-        
+
         DomainRow row = instanceObject.getOrCreateRow(superId);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
-        
+
         return masterStack;
     }
-    
+
     private void processTopOfStack(Deque<StackTriple> masterStack) {
         //LOGGER.debug("Process Top of Stack:\n{}", masterStack);
-        
+
         StackTriple triple = masterStack.pop();
         final var superIds = SuperIdsFetcher.fetch(triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
         InstanceObject childInstance = triple.parentToChild.cod();
-        
+
         for (final var superId : superIds) {
             DomainRow childRow = childInstance.getOrCreateRow(superId.superId());
             childRow = addRelation(triple.parentToChild, triple.parentRow, childRow, triple.parentRecord);
 
             //childInstance.merge(childRow);
-            
+
             addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, superId.childRecord());
         }
     }
@@ -97,7 +97,7 @@ public class MTCAlgorithm {
     // Fetch id-with-values for given root record.
     private static SuperIdWithValues fetchSuperId(SignatureId superId, RootRecord rootRecord) {
         var builder = new SuperIdWithValues.Builder();
-        
+
         for (Signature signature : superId.signatures()) {
             /*
             Object value = rootRecord.values().get(signature).getValue();
@@ -110,7 +110,7 @@ public class MTCAlgorithm {
             // else
             //     throw InvalidStateException.simpleRecordIsNotValue(simpleRecord);
         }
-        
+
         return builder.build();
     }
 
@@ -123,10 +123,10 @@ public class MTCAlgorithm {
 
         for (final var edge : path.edges()) {
             var instanceObject = edge.cod();
-            
+
             parentToCurrent = parentToCurrent.concatenate(currentToChild.getFirst());
             currentToChild = currentToChild.cutFirst();
-            
+
             // If we are not at the end of the morphisms, we have to create (or get, if it exists) a new row.
             //if (!instanceObject.equals(morphism.cod())) {
             final var superId = fetchSuperIdForTechnicalRow(instanceObject, parentRow, parentToCurrent.dual(), childRow, currentToChild, childRecord);
@@ -157,7 +157,7 @@ public class MTCAlgorithm {
                 builder.add(signature, parentRow.getValue(signatureInFirstRow));
                 continue;
             }
-            
+
             var signatureInLastRow = signature.traverseAlong(pathToChild);
             if (childRow.hasSignature(signatureInLastRow))
                 builder.add(signature, childRow.getValue(signatureInLastRow));
@@ -195,14 +195,14 @@ public class MTCAlgorithm {
      */
     private static Collection<Child> children(ComplexProperty complexProperty) {
         final List<Child> output = new ArrayList<>();
-        
+
         for (AccessPath subpath : complexProperty.subpaths()) {
             if (subpath.name() instanceof DynamicName dynamicName)
                 output.add(new Child(dynamicName.signature(), ComplexProperty.createEmpty()));
 
             output.add(new Child(subpath.signature(), subpath));
         }
-        
+
         return output;
     }
 }

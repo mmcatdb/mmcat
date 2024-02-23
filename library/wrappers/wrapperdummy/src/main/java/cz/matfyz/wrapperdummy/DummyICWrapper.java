@@ -18,7 +18,7 @@ public class DummyICWrapper implements AbstractICWrapper {
     public List<String> methods() {
         return methods;
     }
-    
+
     @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {
         methods.add("appendIdentifier(" + kindName + ", [ " + identifier + " ])");
     }

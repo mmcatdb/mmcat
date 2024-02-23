@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public interface SchemaModificationOperation {
 
-    public cz.matfyz.evolution.schema.SchemaModificationOperation toEvolution();
+    cz.matfyz.evolution.schema.SchemaModificationOperation toEvolution();
 
     public record CreateObject(
         Key key,
@@ -86,7 +86,7 @@ public interface SchemaModificationOperation {
                 morphism.toDisconnectedSchemaMorphism()
             );
         }
-        
+
     }
 
     public record EditMorphism(

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties("server")
 public class ServerProperties {
-    
+
     private Integer port;
     private String origin;
     private Boolean executeModels;

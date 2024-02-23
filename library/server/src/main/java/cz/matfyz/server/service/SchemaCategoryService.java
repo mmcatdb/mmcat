@@ -38,7 +38,7 @@ public class SchemaCategoryService {
     public SchemaCategoryInfo createNewInfo(SchemaCategoryInit init) {
         if (init.label() == null)
             return null;
-        
+
         final var newWrapper = SchemaCategoryWrapper.createNew(init.label());
         final Id generatedId = repository.add(newWrapper);
 
@@ -97,7 +97,7 @@ public class SchemaCategoryService {
 
         return repository.updateMetadata(newWrapper);
     }
-    
+
     public List<SchemaUpdate> findAllUpdates(Id id) {
         return repository.findAllUpdates(id);
     }

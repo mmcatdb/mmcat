@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 public class MTCAlgorithmTests {
 
     private static final SchemaCategory schema = Schema.newSchemaCategory();
-    
+
     @BeforeEach
     public void setUp() {
         UniqueIdProvider.reset();
@@ -393,7 +393,7 @@ public class MTCAlgorithmTests {
                     "id": "734",
                     "label": "Animal Farm",
                     "price": "350"
-                }]    
+                }]
             """)
             .mappingWithRecords(PostgreSQL.item(schema), """
                 [{
@@ -452,5 +452,5 @@ public class MTCAlgorithmTests {
     //     "number": "o_200",
     //     "id": "#o_200"
     // }]
-    
+
 }

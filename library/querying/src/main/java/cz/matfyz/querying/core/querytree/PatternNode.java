@@ -14,7 +14,7 @@ import java.util.Set;
  * Instances of this class (and this class only) are leaves in the query tree.
  */
 public class PatternNode extends QueryNode {
-    
+
     /** All kinds used in this pattern. */
     public final Set<KindPattern> kinds;
     public final SchemaCategory schema;

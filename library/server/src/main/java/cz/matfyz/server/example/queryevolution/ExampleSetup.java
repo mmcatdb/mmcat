@@ -42,7 +42,7 @@ public class ExampleSetup {
 
         if (version > 1)
             schema = updateSchemaCategory(schema);
-        
+
         final List<LogicalModel> logicalModels = createLogicalModels(databases, schema.id);
         final List<MappingInfo> mappings = mappingSetup.createMappings(logicalModels, schema, version);
 

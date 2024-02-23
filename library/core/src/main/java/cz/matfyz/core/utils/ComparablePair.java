@@ -6,7 +6,7 @@ package cz.matfyz.core.utils;
  * @param <U>
  */
 public class ComparablePair<T extends Comparable<T>, U extends Comparable<U>> implements Comparable<ComparablePair<T, U>> {
-    
+
     private final T value1;
     private final U value2;
 

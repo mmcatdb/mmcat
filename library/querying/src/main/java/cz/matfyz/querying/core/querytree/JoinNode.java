@@ -3,7 +3,7 @@ package cz.matfyz.querying.core.querytree;
 import cz.matfyz.querying.core.JoinCandidate;
 
 public class JoinNode extends QueryNode {
-    
+
     public final QueryNode fromChild;
     public final QueryNode toChild;
     public final JoinCandidate candidate;

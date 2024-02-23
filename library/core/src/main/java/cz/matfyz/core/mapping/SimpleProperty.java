@@ -33,15 +33,15 @@ public class SimpleProperty extends AccessPath {
     public SimpleProperty(Name name, Signature signature) {
         super(name, signature);
     }
-    
+
     public SimpleProperty(String name, Signature signature) {
         this(new StaticName(name), signature);
     }
-    
+
     public SimpleProperty(Signature name, Signature signature) {
         this(new DynamicName(name), signature);
     }
-    
+
     @Override protected boolean hasSignature(Signature signature) {
         return this.signature.equals(signature);
     }
@@ -57,7 +57,7 @@ public class SimpleProperty extends AccessPath {
 
         return morphism.dom().key().equals(key) ? this : null;
     }
-    
+
     @Override public void printTo(Printer printer) {
         printer.append(name).append(": ").append(signature);
     }
@@ -65,7 +65,7 @@ public class SimpleProperty extends AccessPath {
     @Override public String toString() {
         return Printer.print(this);
     }
-    
+
     public static class Serializer extends StdSerializer<SimpleProperty> {
 
         public Serializer() {
@@ -90,14 +90,14 @@ public class SimpleProperty extends AccessPath {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
 
         private static final ObjectReader nameJsonReader = new ObjectMapper().readerFor(Name.class);
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
-    
+
         @Override public SimpleProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 

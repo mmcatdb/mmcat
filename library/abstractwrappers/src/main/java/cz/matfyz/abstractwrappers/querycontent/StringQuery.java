@@ -10,5 +10,5 @@ public class StringQuery implements QueryContent {
     public StringQuery(String content) {
         this.content = content;
     }
-    
+
 }

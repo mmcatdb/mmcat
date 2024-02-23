@@ -17,7 +17,7 @@ public class DummyDMLWrapper implements AbstractDMLWrapper {
     public List<DMLTestStructure> structures() {
         return structures;
     }
-    
+
     @Override public void setKindName(String name) {
         //methods.add("setKindName(" + name + ")");
         structure = new DMLTestStructure(name);

@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,7 +60,7 @@ public abstract class GraphUtils {
 
             final var aComponent = components.get(a);
             var bComponent = components.get(b);
-            
+
             if (aComponent == null) {
                 if (bComponent == null) {
                     bComponent = new Component<N, E>(nextId++, new TreeSet<>(), new ArrayList<>());
@@ -201,7 +202,7 @@ public abstract class GraphUtils {
 
         private Map<T, Integer> depths = new TreeMap<>();
 
-        public TreeSubrootFinder(T root) {
+        TreeSubrootFinder(T root) {
             fillDepths(root, 0);
         }
 
@@ -274,7 +275,7 @@ public abstract class GraphUtils {
 
         private final P payload;
 
-        public EditableTree(P payload) {
+        EditableTree(P payload) {
             this.payload = payload;
         }
 
@@ -299,6 +300,17 @@ public abstract class GraphUtils {
 
         T createChild(T parent, P payload);
 
+    }
+
+    public static <T> void forEachDFS(T tree, Function<T, Collection<T>> callback) {
+        Deque<T> stack = new ArrayDeque<>();
+        stack.push(tree);
+
+        while (!stack.isEmpty()) {
+            final var current = stack.pop();
+            final var children = callback.apply(current);
+            children.forEach(stack::push);
+        }
     }
 
 }

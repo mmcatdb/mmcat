@@ -9,6 +9,8 @@ import cz.matfyz.core.schema.SchemaObject;
 import java.io.Serializable;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public interface AbstractQueryWrapper {
 
     /**
@@ -34,14 +36,14 @@ public interface AbstractQueryWrapper {
     /**
      * Determines whether filtering of values of a specific property is supported if the property is not part of the identifier (key) of a specific kind.
      */
-    boolean IsFilteringNotIndexedSupported();
+    boolean isFilteringNotIndexedSupported();
 
     /**
      * Determines whether the aggregation functions are supported.
      */
     boolean isAggregationSupported();
 
-    public enum ComparisonOperator {
+    enum ComparisonOperator {
         Equal,
         NotEqual,
         Less,
@@ -50,7 +52,7 @@ public interface AbstractQueryWrapper {
         GreaterOrEqual,
     }
 
-    public enum AggregationOperator {
+    enum AggregationOperator {
         Count,
         Sum,
         Min,
@@ -59,36 +61,52 @@ public interface AbstractQueryWrapper {
     }
 
     /**
-     * This class represents a queryable property. It's defined by the kind and a path from its root.
+     * A queryable property. It's defined by the kind and a path from its root.
+     *  - If the `parent` property is null, the path is relative to the root of the kind.
+     *  - Otherwise, the path is relative to the parent property.
      */
-    public static class Property implements Serializable {
+    class Property implements Comparable<Property>, Serializable {
         public final Kind kind;
+        public final @Nullable Property parent;
         public final Signature path;
+        public final SchemaObject schemaObject;
 
-        public Property(Kind kind, Signature path) {
+        public Property(Kind kind, Signature path, @Nullable Property parent) {
             this.kind = kind;
             this.path = path;
+            this.parent = parent;
+            this.schemaObject = findSchemaObject();
         }
 
-        public SchemaObject findSchemaObject() {
-            return path.isEmpty()
+        private SchemaObject findSchemaObject() {
+            if (!path.isEmpty())
+                return kind.mapping.category().getEdge(path.getLast()).to();
+
+            return parent == null
                 ? kind.mapping.rootObject()
-                : kind.mapping.category().getEdge(path.getLast()).to();
+                : parent.schemaObject;
+        }
+
+        @Override public int compareTo(Property other) {
+            final int kindComparison = kind.compareTo(other.kind);
+            return kindComparison != 0
+                ? kindComparison
+                : schemaObject.compareTo(other.schemaObject);
         }
     }
 
-    public static class PropertyWithAggregation extends Property {
+    class PropertyWithAggregation extends Property {
         public final Signature aggregationRoot;
         public final AggregationOperator aggregationOperator;
 
-        public PropertyWithAggregation(Kind kind, Signature path, Signature aggregationRoot, AggregationOperator aggregationOperator) {
-            super(kind, path);
+        public PropertyWithAggregation(Kind kind, Signature path, @Nullable Property parent, Signature aggregationRoot, AggregationOperator aggregationOperator) {
+            super(kind, path, parent);
             this.aggregationRoot = aggregationRoot;
             this.aggregationOperator = aggregationOperator;
         }
     }
 
-    public record Constant(
+    record Constant(
         List<String> values
     ) {}
 
@@ -102,7 +120,7 @@ public interface AbstractQueryWrapper {
      */
     void addProjection(Property property, String identifier, boolean isOptional);
 
-    public record JoinCondition(Signature from, Signature to) {}
+    record JoinCondition(Signature from, Signature to) {}
 
     /**
      * Adds a join (or graph traversal).
@@ -130,7 +148,7 @@ public interface AbstractQueryWrapper {
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
 
-    public record QueryStatement(QueryContent content, QueryStructure structure) {}
+    record QueryStatement(QueryContent content, QueryStructure structure) {}
 
     /**
      * Builds a DSL statement based on the information obtained by calling the wrapper methods.

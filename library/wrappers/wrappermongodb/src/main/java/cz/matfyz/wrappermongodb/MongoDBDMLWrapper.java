@@ -19,7 +19,7 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
-    
+
     @Override public void setKindName(String name) {
         kindName = name;
     }
@@ -49,7 +49,7 @@ public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
         return new MongoDBCommandStatement(content, command);
     }
-    
+
     /*
     private String escapeString(String input) {
         return "\"" + input.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";

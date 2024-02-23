@@ -8,7 +8,7 @@ public class UnionNode extends QueryNode {
 
     public UnionNode(List<QueryNode> children) {
         this.children = children;
-        
+
         children.forEach(c -> setParent(this));
     }
 

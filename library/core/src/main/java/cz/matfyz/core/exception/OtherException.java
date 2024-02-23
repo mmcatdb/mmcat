@@ -5,7 +5,7 @@ package cz.matfyz.core.exception;
  * @author jachymb.bartik
  */
 public class OtherException extends NamedException {
-    
+
     public OtherException(Exception exception) {
         super("other", exception.getMessage(), exception);
     }

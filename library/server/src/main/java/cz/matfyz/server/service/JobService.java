@@ -60,7 +60,7 @@ public class JobService {
         final State prevState = job.state;
         if (!allowedTransitions.containsKey(newState) || !allowedTransitions.get(newState).contains(prevState))
             throw InvalidTransitionException.job(job.id, prevState, newState);
-        
+
         job.state = newState;
         repository.save(job);
 

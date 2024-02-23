@@ -25,7 +25,7 @@ public abstract class MongoDB {
     public static TestMapping order(SchemaCategory schema) {
         return PostgreSQL.order(schema);
     }
-    
+
     public static TestMapping address(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,

@@ -42,12 +42,12 @@ public class MongoDBSettings {
         if (username != null)
             builder
                 .append(username);
-                
+
         if (password != null)
             builder
                 .append(":")
                 .append(password);
-                
+
         builder
             .append("@")
             .append(host)

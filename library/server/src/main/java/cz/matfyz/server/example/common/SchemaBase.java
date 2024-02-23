@@ -45,14 +45,14 @@ public abstract class SchemaBase {
 
     protected SchemaUpdateInit innerCreateNewUpdate() {
         createOperations();
-        
+
         return new SchemaUpdateInit(wrapper.version, operations, metadata);
     }
 
     protected abstract void createOperations();
-    
+
     private List<VersionedSMO> operations = new ArrayList<>();
-    
+
     private Map<Key, SchemaObjectWrapper.Data> wrapperCache = new TreeMap<>();
 
     private SchemaObjectWrapper.Data getObjectData(Key key) {
@@ -60,9 +60,9 @@ public abstract class SchemaBase {
             ? wrapperCache.get(key)
             : Stream.of(wrapper.objects).filter(object -> object.key().equals(key)).findFirst().get().data();
     }
-    
+
     private List<MetadataUpdate> metadata = new ArrayList<>();
-    
+
     protected void moveObject(Key key, double x, double y) {
         metadata.add(new MetadataUpdate(key, new Position(x * POSITION_UNIT, y * POSITION_UNIT)));
     }
@@ -76,7 +76,7 @@ public abstract class SchemaBase {
         final SignatureId superId = ids != null
             ? ids.generateDefaultSuperId()
             : new SignatureId();
-        
+
         final var data = new SchemaObjectWrapper.Data(object.label(), ids, superId, object.iri, object.pimIri);
         wrapperCache.put(key, data);
 
@@ -179,7 +179,7 @@ public abstract class SchemaBase {
         void nextLevel() {
             levelIds.add(0);
         }
-    
+
         void prevLevel() {
             levelIds.remove(last());
         }

@@ -47,7 +47,7 @@ public abstract class Utils {
             statement.setObject(position, UUID.fromString(id.toString()));
             return;
         }
-        
+
         try {
             //statement.setString(position, id.value);
             statement.setInt(position, Integer.parseInt(id.toString()));

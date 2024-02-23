@@ -8,7 +8,7 @@ import cz.matfyz.wrapperneo4j.Neo4jControlWrapper;
 import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 
 public class Databases {
-    
+
     public final SchemaCategory schema = Schema.newSchemaCategory();
 
     private static final DatabaseProvider databaseProvider = new DatabaseProvider("tests");

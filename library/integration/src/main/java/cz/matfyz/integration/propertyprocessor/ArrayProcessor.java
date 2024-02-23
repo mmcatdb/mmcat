@@ -66,10 +66,10 @@ public class ArrayProcessor extends PropertyProcessorBase implements PropertyPro
         final var newElementSuperId = SuperIdWithValues.fromEmptySignature(UniqueIdProvider.getNext());
 
         final var elementRow = elementToDom.dom().getOrCreateRow(newElementSuperId);
-        
+
         final var codRow = createTypeRow(statement.getObject(), elementToCod.cod());
         InstanceObject.connectRowWithBaseMorphism(codRow, elementRow, elementToCod);
-        
+
         final var indexValue = domRow.getMappingsToForMorphism(elementToDom).size() - 1; // We index from zero.
         InstanceObject.getOrCreateRowWithBaseMorphism(SuperIdWithValues.fromEmptySignature("" + indexValue), elementRow, elementToIndex);
 

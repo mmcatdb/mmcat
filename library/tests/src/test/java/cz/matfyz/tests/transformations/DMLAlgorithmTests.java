@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 public class DMLAlgorithmTests {
 
     private static final SchemaCategory schema = Schema.newSchemaCategory();
-    
+
     @Test
     public void basicTest() {
         new DMLAlgorithmTestBase(PostgreSQL.order(schema))
@@ -390,5 +390,5 @@ public class DMLAlgorithmTests {
     //         "append(number, o_200)"
     //     ]
     // }]
-    
+
 }

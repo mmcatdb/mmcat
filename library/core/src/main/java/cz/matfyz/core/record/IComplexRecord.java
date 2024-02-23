@@ -11,25 +11,26 @@ import java.util.List;
  */
 public interface IComplexRecord {
 
-    public RecordName name();
+    RecordName name();
 
-    public boolean hasComplexRecords(Signature signature);
+    boolean hasComplexRecords(Signature signature);
 
-    public List<? extends IComplexRecord> getComplexRecords(Signature signature);
-    
-    public boolean hasDynamicNameChildren();
-    
-    public List<? extends IComplexRecord> getDynamicNameChildren();
+    List<? extends IComplexRecord> getComplexRecords(Signature signature);
 
-    public Signature dynamicNameSignature();
+    boolean hasDynamicNameChildren();
 
-    public boolean hasSimpleRecord(Signature signature);
+    List<? extends IComplexRecord> getDynamicNameChildren();
 
-    public SimpleRecord<?> getSimpleRecord(Signature signature);
+    Signature dynamicNameSignature();
 
-    public boolean hasDynamicNameValues();
-    
-    public List<SimpleValueRecord<?>> getDynamicNameValues();
-    
-    public boolean containsDynamicNameValue(Signature signature);
+    boolean hasSimpleRecord(Signature signature);
+
+    SimpleRecord<?> getSimpleRecord(Signature signature);
+
+    boolean hasDynamicNameValues();
+
+    List<SimpleValueRecord<?>> getDynamicNameValues();
+
+    boolean containsDynamicNameValue(Signature signature);
+
 }

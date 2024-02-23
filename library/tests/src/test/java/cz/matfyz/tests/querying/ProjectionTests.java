@@ -72,7 +72,7 @@ class ProjectionTests {
     void rename() {
         final var output = new TransformingQueryStructure("A[]", "C[]");
         output.children.add(new TransformingQueryStructure("B", "D"));
-        
+
         new ProjectionTestBase()
             .input(
                 new QueryStructure("A[]", true)
@@ -107,7 +107,7 @@ class ProjectionTests {
         final var c = new TransformingQueryStructure("C[]", "G[]");
         b.children.add(c);
         c.children.add(new TransformingQueryStructure("D", "H"));
-        
+
         new ProjectionTestBase()
             .input(
                 new QueryStructure("A[]", true)

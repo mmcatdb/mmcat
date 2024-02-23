@@ -29,7 +29,7 @@ public class Query extends Entity {
             label
         );
     }
-    
+
     private record JsonValue(
         String label
     ) {}

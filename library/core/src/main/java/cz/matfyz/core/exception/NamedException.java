@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
  */
 @JsonSerialize(using = NamedException.Serializer.class)
 public abstract class NamedException extends RuntimeException {
-    
+
     private final String name;
     protected final Serializable data;
 

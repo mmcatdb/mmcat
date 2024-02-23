@@ -97,5 +97,5 @@ public class Job extends Entity {
             data
         ));
     }
-    
+
 }

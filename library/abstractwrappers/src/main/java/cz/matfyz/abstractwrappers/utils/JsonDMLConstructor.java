@@ -83,7 +83,7 @@ public class JsonDMLConstructor {
         }
         else {
             path.remove(0);
-    
+
             JsonNode child = create(path, value);
             output.put(key, child);
         }
@@ -92,7 +92,7 @@ public class JsonDMLConstructor {
     }
 
     private static class Key {
-    
+
         boolean isName;
         String name;
         int index;
@@ -109,7 +109,7 @@ public class JsonDMLConstructor {
 
     }
 
-    private static interface JsonNode {
+    private interface JsonNode {
 
         Object toObject();
 
@@ -123,7 +123,7 @@ public class JsonDMLConstructor {
 
     }
 
-    private static interface JsonNodeBase {
+    private interface JsonNodeBase {
 
         static JsonNode fromObject(Object object) {
             if (object instanceof JSONObject jsonObject)

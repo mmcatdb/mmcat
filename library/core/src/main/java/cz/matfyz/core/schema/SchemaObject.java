@@ -12,7 +12,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class SchemaObject implements CategoricalObject, Identified<Key> {
     //private static final Logger LOGGER = LoggerFactory.getLogger(SchemaObject.class);
-    
+
     private final Key key; // Identifies the object, in the paper it's a number >= 100
     private final String label;
     private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
@@ -71,5 +71,5 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
     @Override public String toString() {
         return "SO: " + key;
     }
-    
+
 }

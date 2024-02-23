@@ -60,5 +60,5 @@ public class UserStore implements Serializable {
     public Collection<Model> getAllModels() {
         return models.values();
     }
-    
+
 }

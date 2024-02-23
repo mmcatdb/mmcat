@@ -18,15 +18,15 @@ public class MappingRow implements Serializable, Comparable<MappingRow> {
 
     private final DomainRow domainRow;
     private final DomainRow codomainRow;
-    
+
     public DomainRow domainRow() {
         return domainRow;
     }
-    
+
     public DomainRow codomainRow() {
         return codomainRow;
     }
-    
+
     public MappingRow(DomainRow domainRow, DomainRow codomainRow) {
         this.domainRow = domainRow;
         this.codomainRow = codomainRow;
@@ -38,15 +38,15 @@ public class MappingRow implements Serializable, Comparable<MappingRow> {
         int domainCompareResult = domainRow.compareTo(row.domainRow);
         return domainCompareResult != 0 ? domainCompareResult : codomainRow.compareTo(row.codomainRow);
     }
-    
+
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
         builder.append(domainRow).append(" -> ").append(codomainRow);
-        
+
         return builder.toString();
     }
-    
+
     @Override public boolean equals(Object object) {
         return object instanceof MappingRow row && domainRow.equals(row.domainRow) && codomainRow.equals(row.codomainRow);
     }
@@ -69,5 +69,5 @@ public class MappingRow implements Serializable, Comparable<MappingRow> {
         }
 
     }
-    
+
 }

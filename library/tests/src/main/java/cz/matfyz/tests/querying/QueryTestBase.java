@@ -26,7 +26,7 @@ public class QueryTestBase {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTestBase.class);
-    
+
     private final SchemaCategory schema;
 
     public QueryTestBase(SchemaCategory schema) {
@@ -62,13 +62,13 @@ public class QueryTestBase {
     public void run() {
         final var kinds = defineKinds();
         final var queryToInstance = new QueryToInstance(schema, queryString, kinds);
-        
+
         final ResultList result = queryToInstance.execute();
         final var jsonResults = result.toJsonArray();
         LOGGER.info("\n{}", jsonResults);
-        
+
         final JsonNode jsonResult = parseJsonResult(jsonResults);
-        final JsonNode expectedResult = parseExpectedResult(expectedJson);        
+        final JsonNode expectedResult = parseExpectedResult(expectedJson);
         assertEquals(expectedResult, jsonResult);
     }
 

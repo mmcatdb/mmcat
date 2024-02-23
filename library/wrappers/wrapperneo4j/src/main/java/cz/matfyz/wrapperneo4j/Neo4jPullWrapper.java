@@ -25,7 +25,7 @@ import org.neo4j.driver.Value;
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     private Neo4jProvider provider;
-    
+
     public Neo4jPullWrapper(Neo4jProvider provider) {
         this.provider = provider;
     }
@@ -90,7 +90,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
         if (foundSubpath.isEmpty())
             return null;
-        
+
         return foundSubpath.get() instanceof ComplexProperty complexSubpath
             ? complexSubpath
             : null;
@@ -103,7 +103,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         final var forest = new ForestOfRecords();
 
         try (
-            final Session session = provider.getSession();
+            Session session = provider.getSession();
         ) {
             session
                 .executeRead(tx -> {
@@ -115,7 +115,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
                         .map(result -> {
                             final var rootRecord = new RootRecord();
                             addValuePropertiesToRecord(result.get("relationship"), path, rootRecord);
-                            
+
                             final var fromNodeRecord = rootRecord.addComplexRecord(fromNodeRecordName, fromNodeSubpath.signature());
                             addValuePropertiesToRecord(result.get("from_node"), fromNodeSubpath, fromNodeRecord);
 
@@ -136,7 +136,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         final var forest = new ForestOfRecords();
 
         try (
-            final Session session = provider.getSession();
+            Session session = provider.getSession();
         ) {
             session
                 .executeRead(tx -> {
@@ -174,7 +174,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     public String readNodeAsStringForTests(String kindName) {
         try (
-            final Session session = provider.getSession();
+            Session session = provider.getSession();
         ) {
             /*
             final var results = session.executeRead(tx -> {
@@ -217,7 +217,7 @@ public class Neo4jPullWrapper implements AbstractPullWrapper {
         output
             .append(node.asNode().elementId().split(":")[2])
             .append(": (\n");
-            
+
         for (final var label : node.asNode().labels())
             output.append("    :").append(label).append("\n");
 

@@ -15,10 +15,10 @@ import cz.matfyz.wrapperpostgresql.PostgreSQLSettings;
 
 public class DatabaseProvider {
 
-    private final Config CONFIG;
+    private final Config config;
 
     public DatabaseProvider(String namespace) {
-        this.CONFIG = new Config(namespace);
+        this.config = new Config(namespace);
     }
 
     // PostgreSQL
@@ -28,11 +28,11 @@ public class DatabaseProvider {
     public PostgreSQLProvider getPostgreSQLProvider() {
         if (postgreSQLProvider == null) {
             postgreSQLProvider = new PostgreSQLProvider(new PostgreSQLSettings(
-                CONFIG.getBool("isInDocker") ? "mmcat-postgresql" : "localhost",
-                CONFIG.getBool("isInDocker") ? "5432" : "3204",
-                CONFIG.get("database"),
-                CONFIG.get("username"),
-                CONFIG.get("password")
+                config.getBool("isInDocker") ? "mmcat-postgresql" : "localhost",
+                config.getBool("isInDocker") ? "5432" : "3204",
+                config.get("database"),
+                config.get("username"),
+                config.get("password")
             ));
         }
 
@@ -51,12 +51,12 @@ public class DatabaseProvider {
     public MongoDBProvider getMongoDBProvider() {
         if (mongoDBProvider == null) {
             mongoDBProvider = new MongoDBProvider(new MongoDBSettings(
-                CONFIG.getBool("isInDocker") ? "mmcat-mongodb" : "localhost",
-                CONFIG.getBool("isInDocker") ? "27017" : "3205",
+                config.getBool("isInDocker") ? "mmcat-mongodb" : "localhost",
+                config.getBool("isInDocker") ? "27017" : "3205",
                 "admin",
-                CONFIG.get("database"),
-                CONFIG.get("username"),
-                CONFIG.get("password")
+                config.get("database"),
+                config.get("username"),
+                config.get("password")
             ));
         }
 
@@ -75,11 +75,11 @@ public class DatabaseProvider {
     public Neo4jProvider getNeo4jProvider() {
         if (neo4jProvider == null) {
             neo4jProvider = new Neo4jProvider(new Neo4jSettings(
-                CONFIG.getBool("isInDocker") ? "mmcat-neo4j" : "localhost",
-                CONFIG.getBool("isInDocker") ? "7687" : "3206",
+                config.getBool("isInDocker") ? "mmcat-neo4j" : "localhost",
+                config.getBool("isInDocker") ? "7687" : "3206",
                 "neo4j",
                 "neo4j",
-                CONFIG.get("password")
+                config.get("password")
             ));
         }
 

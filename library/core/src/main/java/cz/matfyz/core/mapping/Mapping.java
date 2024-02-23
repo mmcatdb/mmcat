@@ -25,11 +25,11 @@ public class Mapping implements Comparable<Mapping> {
 
     private final SchemaCategory category;
     private final SchemaObject rootObject;
-    
+
     private String kindName;
     private ComplexProperty accessPath;
     private Collection<Signature> primaryKey;
-    
+
     public Mapping(SchemaCategory category, Key rootKey, String kindName, ComplexProperty accessPath, Collection<Signature> primaryKey) {
         this.category = category;
         this.rootObject = category.getObject(rootKey);
@@ -57,11 +57,11 @@ public class Mapping implements Comparable<Mapping> {
     public SchemaCategory category() {
         return category;
     }
-    
+
     public SchemaObject rootObject() {
         return rootObject;
     }
-    
+
     public ComplexProperty accessPath() {
         return accessPath;
     }
@@ -91,7 +91,7 @@ public class Mapping implements Comparable<Mapping> {
     @Override public boolean equals(Object other) {
         if (this == other)
             return true;
-        
+
         return other instanceof Mapping otherMapping && compareTo(otherMapping) == 0;
     }
 
@@ -118,7 +118,7 @@ public class Mapping implements Comparable<Mapping> {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
@@ -126,7 +126,7 @@ public class Mapping implements Comparable<Mapping> {
         private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
         private static final ObjectReader rootPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
         private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
-    
+
         @Override public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
@@ -136,7 +136,7 @@ public class Mapping implements Comparable<Mapping> {
             final var kindName = node.get("kindName").asText();
             final List<Signature> primaryKey = List.of(signaturesJsonReader.readValue(node.get("primaryKey")));
             final ComplexProperty accessPath = rootPropertyJsonReader.readValue(node.get("accessPath"));
-    
+
             return new Mapping(
                 category,
                 rootObjectKey,

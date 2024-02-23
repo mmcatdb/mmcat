@@ -70,7 +70,7 @@ public class RDFToInstance {
             processProperty(statement, object, row);
         });
     }
-    
+
     private String getTypeIri(Resource resource) {
         final var rdfTypeProperty = resource.getModel().getProperty(RDF_TYPE_IRI);
         final var typeStatement = resource.getProperty(rdfTypeProperty);

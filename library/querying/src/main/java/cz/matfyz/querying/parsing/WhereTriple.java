@@ -16,7 +16,7 @@ public class WhereTriple implements Statement, Edge<Term> {
     public final Variable subject;
     public final BaseSignature signature;
     public final Term object;
-    
+
     WhereTriple(Variable subject, BaseSignature signature, Term object) {
         this.subject = subject;
         this.signature = signature;
@@ -53,7 +53,7 @@ public class WhereTriple implements Statement, Edge<Term> {
             editableTriple.signature = base;
             return editableTriple;
         }).toList();
-            
+
         splitTriples.get(0).subject = subject;
         splitTriples.get(splitTriples.size() - 1).object = object;
 

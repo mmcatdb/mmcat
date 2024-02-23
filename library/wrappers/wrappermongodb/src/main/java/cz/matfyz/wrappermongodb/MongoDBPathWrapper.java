@@ -11,7 +11,7 @@ import java.util.List;
 public class MongoDBPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();
-    
+
     @Override public void addProperty(String hierarchy) {
         properties.add(hierarchy);
     }

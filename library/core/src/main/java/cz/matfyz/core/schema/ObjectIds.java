@@ -35,10 +35,10 @@ public class ObjectIds implements Serializable {
         Value, // Its a simple string value.
         Generated // Its a simple string value that has to be automatically generated.
     }
-    
+
     private final Type type;
     private final SortedSet<SignatureId> signatureIds;
-    
+
     // TODO disable this method eventually and fix all other methods that rely on it.
     // The reason is that this whole object was introduced because we want to behave differently to the different types of ids - so there ain't be no function that unifies them back together.
     public SortedSet<SignatureId> toSignatureIds() {
@@ -48,7 +48,7 @@ public class ObjectIds implements Serializable {
     public ObjectIds(Set<SignatureId> signatureIds) {
         this(new TreeSet<>(signatureIds));
     }
-    
+
     public ObjectIds(Collection<SignatureId> signatureIds) {
         this(new TreeSet<>(signatureIds));
     }
@@ -61,7 +61,7 @@ public class ObjectIds implements Serializable {
     public ObjectIds(Signature... signatures) {
         this(new TreeSet<>(List.of(new SignatureId(signatures))));
     }
-    
+
     public static ObjectIds createValue() {
         return new ObjectIds(Type.Value);
     }
@@ -69,14 +69,14 @@ public class ObjectIds implements Serializable {
     public static ObjectIds createGenerated() {
         return new ObjectIds(Type.Generated);
     }
-    
+
     private ObjectIds(SortedSet<SignatureId> signatures) {
         this.signatureIds = signatures;
         this.type = Type.Signatures;
     }
 
     private ObjectIds(Type type) {
-        assert(type != Type.Signatures);
+        assert type != Type.Signatures;
 
         this.signatureIds = null;
         this.type = type;
@@ -97,13 +97,13 @@ public class ObjectIds implements Serializable {
     public SignatureId generateDefaultSuperId() {
         if (type != Type.Signatures)
             return SignatureId.createEmpty();
-        
+
         final var allSignatures = new TreeSet<Signature>();
         signatureIds.forEach(id -> allSignatures.addAll(id.signatures()));
 
         return new SignatureId(allSignatures);
     }
-    
+
     @Override public String toString() {
         if (type == Type.Value)
             return "_VALUE";
@@ -143,7 +143,7 @@ public class ObjectIds implements Serializable {
 
                 generator.writeEndArray();
             }
-            
+
             generator.writeEndObject();
         }
 
@@ -154,7 +154,7 @@ public class ObjectIds implements Serializable {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }

@@ -40,7 +40,7 @@ public class SchemaCategoryController {
         var newInfo = service.createNewInfo(init);
         if (newInfo == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        
+
         return newInfo;
     }
 
@@ -50,7 +50,7 @@ public class SchemaCategoryController {
 
         if (schema == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
+
         return schema;
     }
 
@@ -60,7 +60,7 @@ public class SchemaCategoryController {
 
         if (schema == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
+
         return schema;
     }
 

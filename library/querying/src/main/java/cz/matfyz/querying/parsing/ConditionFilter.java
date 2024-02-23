@@ -12,7 +12,7 @@ public class ConditionFilter implements Filter, Statement {
     public final Term lhs;
     public final ComparisonOperator operator;
     public final Term rhs;
-    
+
     ConditionFilter(Term lhs, ComparisonOperator operator, Term rhs) {
         this.lhs = lhs;
         this.operator = operator;

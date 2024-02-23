@@ -43,7 +43,7 @@ public class InstanceObject implements CategoricalObject {
             domain.put(entry.getKey(), newRowsWithSameId);
         });
 
-        domainByTechnicalIds.clear(); 
+        domainByTechnicalIds.clear();
         domainByTechnicalIds.putAll(source.domainByTechnicalIds);
     }
 
@@ -69,7 +69,7 @@ public class InstanceObject implements CategoricalObject {
     public boolean isEmpty() {
         return domain.isEmpty() && domainByTechnicalIds.isEmpty();
     }
-    
+
     // TODO rozlišit id od superId
     public DomainRow getRowById(SuperIdWithValues id) {
         Map<SuperIdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
@@ -122,7 +122,7 @@ public class InstanceObject implements CategoricalObject {
             ? Set.of(generateTechnicalId())
             : Set.of();
         var ids = superId.findAllIds(ids()).foundIds();
-        
+
         return createRow(superId, technicalIds, ids);
     }
 
@@ -177,7 +177,7 @@ public class InstanceObject implements CategoricalObject {
         lastTechnicalId++;
         return "#" + lastTechnicalId;
     }
-    
+
     public SortedSet<DomainRow> allRowsToSet() {
         var output = new TreeSet<DomainRow>();
 
@@ -225,7 +225,7 @@ public class InstanceObject implements CategoricalObject {
             final var result = superId.findAllSignatureIds(notFoundIds);
             foundIds.addAll(result.foundIds());
             notFoundIds = result.notFoundIds();
-            
+
             final var foundRows = findNewRows(foundIds, outOriginalRows);
             if (foundRows.isEmpty())
                 break; // We have not found anything new.
@@ -241,7 +241,7 @@ public class InstanceObject implements CategoricalObject {
 
         for (var row : rows)
             builder.add(row.superId);
-        
+
         return builder.build();
     }
 
@@ -258,7 +258,7 @@ public class InstanceObject implements CategoricalObject {
             var row = getRowById(id);
             if (row == null || outOriginalRows.contains(row))
                 continue;
-            
+
             outOriginalRows.add(row);
             output.add(row);
         }
@@ -277,14 +277,14 @@ public class InstanceObject implements CategoricalObject {
         builder.append("\tValues:\n");
         for (final DomainRow row : allRowsToSet())
             builder.append("\t\t").append(row).append("\n");
-        
+
         return builder.toString();
     }
-    
+
     @Override public boolean equals(Object object) {
         return object instanceof InstanceObject instanceObject && schemaObject.equals(instanceObject.schemaObject);
     }
-    
+
     private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
 
     public void addReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
@@ -311,7 +311,7 @@ public class InstanceObject implements CategoricalObject {
         @Override public boolean equals(Object object) {
             if (this == object)
                 return true;
-            
+
             return object instanceof ReferenceToRow reference
                 && signatureInThis.equals(reference.signatureInThis)
                 && path.equals(reference.path)
@@ -321,15 +321,15 @@ public class InstanceObject implements CategoricalObject {
         @Override public int compareTo(ReferenceToRow reference) {
             if (this == reference)
                 return 0;
-            
+
             var x1 = signatureInThis.compareTo(reference.signatureInThis);
             if (x1 != 0)
                 return x1;
-            
+
             var x2 = path.signature().compareTo(reference.path.signature());
             if (x2 != 0)
                 return x2;
-            
+
             return signatureInOther.compareTo(reference.signatureInOther);
         }
 

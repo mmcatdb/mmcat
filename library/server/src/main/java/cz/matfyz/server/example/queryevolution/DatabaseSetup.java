@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Component("queryEvolutionDatabaseSetup")
 class DatabaseSetup {
-    
+
     private final DatabaseSettings settings;
     private final DatabaseService databaseService;
 
@@ -29,7 +29,7 @@ class DatabaseSetup {
 
         inits.add(settings.createPostgreSQL("PostgreSQL"));
         inits.add(settings.createMongoDB("MongoDB"));
-        
+
         return inits.stream().map(databaseService::createNew).toList();
     }
 

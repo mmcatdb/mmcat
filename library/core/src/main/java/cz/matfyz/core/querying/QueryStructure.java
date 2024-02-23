@@ -11,7 +11,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 // TODO add to json conversion for FE. Also, probably move to a separate file.
 public class QueryStructure implements Tree<QueryStructure>, Printable {
-    
+
     public final String name;
     // TODO find out if the object is needed
     public final boolean isArray;
@@ -60,7 +60,7 @@ public class QueryStructure implements Tree<QueryStructure>, Printable {
             child.printTo(printer);
             printer.nextLine();
         });
-        printer.up();
+        printer.remove().up();
     }
 
     @Override public String toString() {

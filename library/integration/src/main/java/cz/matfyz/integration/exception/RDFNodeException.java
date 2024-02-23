@@ -6,7 +6,7 @@ import org.apache.jena.graph.Node;
  * @author jachymb.bartik
  */
 public class RDFNodeException extends IntegrationException {
-    
+
     protected RDFNodeException(String name, Node node) {
         super("object." + name, node.toString(), null);
     }

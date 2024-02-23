@@ -22,7 +22,7 @@ public class SchemaGraph {
 
     private final Map<SchemaObject, Node> nodes = new TreeMap<>();
     private final Set<Edge> edges = new TreeSet<>();
-    
+
     /**
      * Creates a graph from all given morphisms (objects are automatically defined by the morphisms).
      */
@@ -149,7 +149,7 @@ public class SchemaGraph {
     private static class Node implements Comparable<Node> {
         final SchemaObject object;
         final Set<Edge> edges = new TreeSet<>();
-        
+
         Node(SchemaObject object) {
             this.object = object;
         }
@@ -244,5 +244,5 @@ public class SchemaGraph {
         }
 
     }
-   
+
 }

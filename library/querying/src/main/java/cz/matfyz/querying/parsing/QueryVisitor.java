@@ -46,7 +46,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         final List<SelectTriple> triples = graphTriples == null
             ? List.of()
             : visitSelectTriples(graphTriples).triples;
-        
+
         variableBuilders.pop();
 
         return new SelectClause(triples);
@@ -75,7 +75,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
             .toList();
 
         variableBuilders.pop();
-        
+
         return new GroupGraphPattern(triples, filters, values);
     }
 
@@ -158,7 +158,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         // Should we do the compound morphism parsing here?
         return new StringValue(ctx.getText());
     }
-    
+
     private record ObjectsList(List<Term> objects) implements ParserNode {}
 
     @Override public ObjectsList visitObjectList(QuerycatParser.ObjectListContext ctx) {

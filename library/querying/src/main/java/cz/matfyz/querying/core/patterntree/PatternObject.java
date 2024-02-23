@@ -21,8 +21,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * On one hand, the the PT is a "subset" of AP, meaning that nodes from QP that aren't part of AP are not included.
  * On the other hand, it can contain more nodes. More specifically, AP can contain composite signatures while PT can't. Therefore, each edge from AP with a composite signature is mapped to multiple edges in PT.
  */
-public class PatternObject implements Printable {
-    
+public class PatternObject implements Comparable<PatternObject>, Printable {
+
     public final SchemaObject schemaObject;
     /**
      * If the term is null, the object is not part of the query pattern. It is, however, still part of the kind.
@@ -67,6 +67,17 @@ public class PatternObject implements Printable {
 
     public Collection<PatternObject> children() {
         return children.values();
+    }
+
+    public @Nullable PatternObject parent() {
+        return edgeFromParent != null
+            ? edgeFromParent.from
+            : null;
+    }
+
+    public boolean isChildOfArray() {
+        return edgeFromParent != null
+            && edgeFromParent.schemaEdge.isArray();
     }
 
     @Nullable
@@ -116,6 +127,10 @@ public class PatternObject implements Printable {
 
     @Override public String toString() {
         return Printer.print(this);
+    }
+
+    @Override public int compareTo(PatternObject other) {
+        return schemaObject.compareTo(other.schemaObject);
     }
 
 }

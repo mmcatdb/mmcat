@@ -12,11 +12,11 @@ import java.util.List;
 public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;
-    
+
     private record PropertyValue(String name, String value) {}
 
     private List<PropertyValue> propertyValues = new ArrayList<>();
-    
+
     @Override public void setKindName(String name) {
         if (!nameIsValid(name))
             throw InvalidNameException.kind(name);
@@ -42,11 +42,11 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
         List<String> escapedNames = propertyValues.stream().map(propertyValue -> '"' + propertyValue.name + '"').toList();
         List<String> escapedValues = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
-        
+
         String content = String.format("INSERT INTO \"%s\" (%s)\nVALUES (%s);", kindName, String.join(", ", escapedNames), String.join(", ", escapedValues));
         return new PostgreSQLStatement(content);
     }
-    
+
     private String escapeString(String input) {
         return input == null
             ? "NULL"

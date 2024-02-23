@@ -11,7 +11,7 @@ import java.util.Set;
  * @author jachymb.bartik
  */
 public class Neo4jICWrapper implements AbstractICWrapper {
-    
+
     @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {
         // Intentionally empty
     }
@@ -27,4 +27,5 @@ public class Neo4jICWrapper implements AbstractICWrapper {
     @Override public AbstractStatement createICRemoveStatement() {
         return Neo4jStatement.createEmpty();
     }
+
 }

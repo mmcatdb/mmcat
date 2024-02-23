@@ -41,7 +41,7 @@ public class DMLAlgorithm {
         this.category = instance;
         this.wrapper = wrapper;
     }
-    
+
     public List<AbstractStatement> algorithm() {
         InstanceObject instanceObject = category.getObject(mapping.rootObject());
         Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
@@ -107,7 +107,7 @@ public class DMLAlgorithm {
                     // Self-identifier.
                     if (!(subpath.name() instanceof StaticName staticName))
                         continue; // This should not happen.
-                    
+
                     String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
                     output.add(new NameValuePair(name, row.getValue(Signature.createEmpty())));
 
@@ -172,7 +172,7 @@ public class DMLAlgorithm {
         public final ComplexProperty subpath;
         public final boolean isSimple;
 
-        public NameValuePair(String name, String simpleValue) {
+        NameValuePair(String name, String simpleValue) {
             this.name = name;
             this.simpleValue = simpleValue;
             this.complexValue = null;
@@ -180,7 +180,7 @@ public class DMLAlgorithm {
             this.isSimple = true;
         }
 
-        public NameValuePair(String name, DomainRow complexValue, ComplexProperty subpath) {
+        NameValuePair(String name, DomainRow complexValue, ComplexProperty subpath) {
             this.name = name;
             this.simpleValue = null;
             this.complexValue = complexValue;

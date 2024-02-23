@@ -9,7 +9,7 @@ import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
 import java.util.List;
 
 public class QueryEvolver {
-    
+
     private SchemaCategory prevCategory;
     private SchemaCategory nextCategory;
 
