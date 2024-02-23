@@ -9,4 +9,4 @@ application.properties
 /bin/
 .classpath
 .project
-.settings/
+.settings
