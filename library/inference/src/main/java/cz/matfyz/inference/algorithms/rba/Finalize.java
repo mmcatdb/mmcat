@@ -16,10 +16,10 @@ import cz.matfyz.core.rsd.RecordSchemaDescription;
  */
 public interface Finalize {
 
-	public void add(ProcessedProperty data);
+    public void add(ProcessedProperty data);
 
-	public void add(List<ProcessedProperty> data);
+    public void add(List<ProcessedProperty> data);
 
-	public RecordSchemaDescription process();
+    public RecordSchemaDescription process();
 
 }

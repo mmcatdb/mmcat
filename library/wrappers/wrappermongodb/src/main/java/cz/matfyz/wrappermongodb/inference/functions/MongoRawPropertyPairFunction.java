@@ -16,9 +16,9 @@ import scala.Tuple2;
  */
 public class MongoRawPropertyPairFunction implements PairFunction<RawProperty, RawProperty, Share> {
 
-	@Override
-	public Tuple2<RawProperty, Share> call(RawProperty t) {
-		return new Tuple2<>(t, new Share(t.getCount(), t.getFirst()));
-	}
+    @Override
+    public Tuple2<RawProperty, Share> call(RawProperty t) {
+        return new Tuple2<>(t, new Share(t.getCount(), t.getFirst()));
+    }
 
 }

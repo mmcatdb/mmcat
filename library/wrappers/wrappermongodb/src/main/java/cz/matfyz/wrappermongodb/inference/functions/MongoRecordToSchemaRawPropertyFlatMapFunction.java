@@ -19,16 +19,16 @@ import cz.matfyz.wrappermongodb.inference.helpers.MongoRecordToRawPropertyFlatMa
  */
 public class MongoRecordToSchemaRawPropertyFlatMapFunction implements FlatMapFunction<Document, RawProperty>, Serializable {
 
-	String collectionName;
+    String collectionName;
 
-	public MongoRecordToSchemaRawPropertyFlatMapFunction(String collectionName) {
-		this.collectionName = collectionName;
-	}
+    public MongoRecordToSchemaRawPropertyFlatMapFunction(String collectionName) {
+        this.collectionName = collectionName;
+    }
 
-	@Override
-	public Iterator<RawProperty> call(Document t) {
-		return MongoRecordToRawPropertyFlatMap.INSTANCE.process(collectionName, t, true, false);
-	}
+    @Override
+    public Iterator<RawProperty> call(Document t) {
+        return MongoRecordToRawPropertyFlatMap.INSTANCE.process(collectionName, t, true, false);
+    }
 
 
 }

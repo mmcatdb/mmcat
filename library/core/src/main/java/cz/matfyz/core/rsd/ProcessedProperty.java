@@ -9,5 +9,5 @@ package cz.matfyz.core.rsd;
  * @author pavel.koupil
  */
 public class ProcessedProperty {
-	
+    
 }

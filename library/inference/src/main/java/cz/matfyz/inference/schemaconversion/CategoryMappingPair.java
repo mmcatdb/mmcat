@@ -10,8 +10,8 @@ import cz.matfyz.core.mapping.Mapping;
  */
 public record CategoryMappingPair(SchemaCategory schemaCat, Mapping mapping) {
 
-	public CategoryMappingPair(SchemaCategory schemaCat, Mapping mapping) {
-		this.schemaCat = schemaCat;
-		this.mapping = mapping;
-	}
+    public CategoryMappingPair(SchemaCategory schemaCat, Mapping mapping) {
+        this.schemaCat = schemaCat;
+        this.mapping = mapping;
+    }
 }

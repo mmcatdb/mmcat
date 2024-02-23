@@ -16,13 +16,13 @@ import scala.Tuple2;
  */
 public class FilterInvalidRSDFunction implements Function<RecordSchemaDescription, Boolean>, Serializable {
 
-	public FilterInvalidRSDFunction() {
-		super();
-	}
+    public FilterInvalidRSDFunction() {
+        super();
+    }
 
-	@Override
-	public Boolean call(RecordSchemaDescription t1) throws Exception {
-		return true;
-	}
+    @Override
+    public Boolean call(RecordSchemaDescription t1) throws Exception {
+        return true;
+    }
 
 }

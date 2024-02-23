@@ -11,9 +11,9 @@ import cz.matfyz.core.category.Signature;
  * 
  */
 public class AccessTreeNode{
-	
-	public enum State {S, C;} // S - simple property, C - complex property
-	
+    
+    public enum State {S, C;} // S - simple property, C - complex property
+    
     public State state;
     public String name;
     public Signature sig;
@@ -50,9 +50,9 @@ public class AccessTreeNode{
             return this;
         }
         for (AccessTreeNode child : this.children) {
-        	if (child.findNodeWithName(targetName) != null) {
-        		return child;
-        	}           
+            if (child.findNodeWithName(targetName) != null) {
+                return child;
+            }           
         }
         return null;
     }

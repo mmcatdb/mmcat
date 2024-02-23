@@ -10,14 +10,14 @@ package cz.matfyz.core.rsd;
  */
 public abstract class Type {
 
-	public static final int UNKNOWN = 0;
-	public static final int OBJECT = (int) Math.pow(2, 0); // 1
-	public static final int STRING = (int) Math.pow(2, 1); // 2
-	public static final int BOOLEAN = (int) Math.pow(2, 2); // 4
-	public static final int NUMBER = (int) Math.pow(2, 3); // 8
-	public static final int ARRAY = (int) Math.pow(2, 4); // 16
-	public static final int MAP = (int) Math.pow(2, 5); // 32
-	public static final int DATE = (int) Math.pow(2, 6); //64
+    public static final int UNKNOWN = 0;
+    public static final int OBJECT = (int) Math.pow(2, 0); // 1
+    public static final int STRING = (int) Math.pow(2, 1); // 2
+    public static final int BOOLEAN = (int) Math.pow(2, 2); // 4
+    public static final int NUMBER = (int) Math.pow(2, 3); // 8
+    public static final int ARRAY = (int) Math.pow(2, 4); // 16
+    public static final int MAP = (int) Math.pow(2, 5); // 32
+    public static final int DATE = (int) Math.pow(2, 6); //64
 
 }
 

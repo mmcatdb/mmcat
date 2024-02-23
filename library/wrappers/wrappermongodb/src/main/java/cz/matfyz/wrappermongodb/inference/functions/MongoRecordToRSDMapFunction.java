@@ -18,10 +18,10 @@ import cz.matfyz.wrappermongodb.inference.helpers.MapMongoDocument;
  */
 public class MongoRecordToRSDMapFunction implements Function<Document, RecordSchemaDescription>, Serializable {
 
-	@Override
-	public RecordSchemaDescription call(Document t1) {
-		return MapMongoDocument.INSTANCE.process(t1);
-	}
+    @Override
+    public RecordSchemaDescription call(Document t1) {
+        return MapMongoDocument.INSTANCE.process(t1);
+    }
 
 
 }

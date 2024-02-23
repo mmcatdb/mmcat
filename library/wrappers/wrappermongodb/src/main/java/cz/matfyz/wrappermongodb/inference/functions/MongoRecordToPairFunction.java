@@ -20,10 +20,10 @@ import scala.Tuple2;
  */
 public class MongoRecordToPairFunction implements PairFunction<Document, String, RecordSchemaDescription>, Serializable {
 
-	@Override
-	public Tuple2<String, RecordSchemaDescription> call(Document t) throws Exception {
-		//TODO má sa plniť anonymným názvom?
-		return new Tuple2<>("_", MapMongoDocument.INSTANCE.process(t));
-	}
+    @Override
+    public Tuple2<String, RecordSchemaDescription> call(Document t) throws Exception {
+        //TODO má sa plniť anonymným názvom?
+        return new Tuple2<>("_", MapMongoDocument.INSTANCE.process(t));
+    }
 
 }

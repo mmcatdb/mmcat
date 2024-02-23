@@ -48,10 +48,10 @@ public class SchemaCategoryController {
 
     @GetMapping("/schema-categories/{id}/info")
     public SchemaCategoryInfo getCategoryInfo(@PathVariable Id id) {
-    	SchemaCategoryInfo schema;
-    	
-    	
-    	schema = service.findInfo(id);
+        SchemaCategoryInfo schema;
+        
+        
+        schema = service.findInfo(id);
 
         if (schema == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -101,8 +101,8 @@ public class SchemaCategoryController {
      * */
     @PostMapping("/schema-categories/store")
     public ResponseEntity<String> storeSchemaCategoryWrapper(@RequestBody SchemaCategoryWrapper wrapper) {
-    	service.createNewInfo(wrapper);    
-    	return ResponseEntity.ok("Got your request, lady! 8)");
+        service.createNewInfo(wrapper);    
+        return ResponseEntity.ok("Got your request, lady! 8)");
     }
 
 }
