@@ -6,15 +6,15 @@ import java.util.Collection;
  * @author jachymb.bartik
  */
 public interface UniqueContext<O extends Identified<I>, I extends Comparable<I>> {
-    
-    public O createUniqueObject(O object);
 
-    public void deleteUniqueObject(I id);
+    O createUniqueObject(O object);
 
-    public void deleteUniqueObject(O object);
+    void deleteUniqueObject(I id);
 
-    public O getUniqueObject(I id);
+    void deleteUniqueObject(O object);
 
-    public Collection<O> getAllUniqueObjects();
+    O getUniqueObject(I id);
+
+    Collection<O> getAllUniqueObjects();
 
 }

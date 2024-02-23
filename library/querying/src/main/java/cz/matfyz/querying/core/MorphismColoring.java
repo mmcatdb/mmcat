@@ -1,6 +1,7 @@
 package cz.matfyz.querying.core;
 
 import cz.matfyz.core.category.BaseSignature;
+import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 
@@ -11,14 +12,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class MorphismColoring {
+public class MorphismColoring implements Printable {
 
     /** Set of all kinds that use given morphism. */
     private final Map<BaseSignature, Set<KindPattern>> morphismToColors;
     /** Set of all morphisms in given kind pattern. */
     private final Map<KindPattern, Set<BaseSignature>> colorToMorphisms;
-
-    // private final Map<Key, Set<KindPattern> a;
 
     private MorphismColoring(Map<BaseSignature, Set<KindPattern>> morphismToColors, Map<KindPattern, Set<BaseSignature>> colorToMorphisms) {
         this.morphismToColors = morphismToColors;
@@ -27,7 +26,7 @@ public class MorphismColoring {
 
     public static MorphismColoring create(Collection<KindPattern> kindPatterns) {
         final var coloring = new MorphismColoring(new TreeMap<>(), new TreeMap<>());
-        
+
         for (final var kindPattern : kindPatterns)
             coloring.colorMorphisms(kindPattern, kindPattern.root);
 
@@ -43,7 +42,7 @@ public class MorphismColoring {
             colorToMorphisms
                 .computeIfAbsent(kind, x -> new TreeSet<>())
                 .add(child.signatureFromParent());
-            
+
             colorMorphisms(kind, child);
         }
     }
@@ -74,11 +73,11 @@ public class MorphismColoring {
 
         for (final var child : object.children())
             min = Math.min(min, computePatternCostRecursive(child));
-        
+
         return min;
     }
 
-    private static record KindWithCost(KindPattern kind, int cost) {}
+    private record KindWithCost(KindPattern kind, int cost) {}
 
     /**
      * Sorts given kinds based on the coloring.
@@ -110,6 +109,19 @@ public class MorphismColoring {
         newMorphisms.remove(kind);
 
         return new MorphismColoring(newColors, newMorphisms);
+    }
+
+    @Override public void printTo(Printer printer) {
+        printer.append("{").down().nextLine();
+
+        for (final var entry : morphismToColors.entrySet())
+            printer.append(entry.getKey()).append(": ").append(entry.getValue()).append(",").nextLine();
+
+        printer.remove().up().nextLine().append("}");
+    }
+
+    @Override public String toString() {
+        return Printer.print(this);
     }
 
 }

@@ -10,18 +10,17 @@ import java.util.List;
 public class SimpleArrayRecord<T> extends SimpleRecord<T> {
 
     private final List<T> values;
-    
+
     SimpleArrayRecord(RecordName name, Signature signature, List<T> values) {
         super(name, signature);
         this.values = values;
     }
-    
+
     public List<T> getValues() {
         return values;
     }
-    
-    @Override
-    public String toString() {
+
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(name).append(": [");
         if (!values.isEmpty())
@@ -29,7 +28,7 @@ public class SimpleArrayRecord<T> extends SimpleRecord<T> {
         for (int i = 1; i < values.size(); i++)
             builder.append(", \"").append(values.get(i)).append("\"");
         builder.append("]");
-        
+
         return builder.toString();
     }
 }

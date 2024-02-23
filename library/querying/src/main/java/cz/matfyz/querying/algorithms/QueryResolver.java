@@ -1,7 +1,8 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
+import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.querying.algorithms.translator.QueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;

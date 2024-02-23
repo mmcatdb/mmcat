@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class QueryBuilder {
-    
+
     private final List<QueryInit> inits = new ArrayList<>();
     private final Id schemaId;
 

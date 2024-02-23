@@ -16,5 +16,5 @@ public class DummyStatement implements AbstractStatement {
     public String getContent() {
         return this.content;
     }
-    
+
 }

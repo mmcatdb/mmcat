@@ -22,7 +22,7 @@ public class IntegrationTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
-    
+
     static final String JSON_LD_FILE_NAME = "test2.jsonld";
     //static final String JSON_LD_FILE_NAME = "test1.jsonld";
     static final String JSON_LD_URL = "https://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld";

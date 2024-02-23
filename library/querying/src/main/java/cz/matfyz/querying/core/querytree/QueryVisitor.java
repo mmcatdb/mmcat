@@ -1,7 +1,7 @@
 package cz.matfyz.querying.core.querytree;
 
 public interface QueryVisitor<T> {
-    
+
     T visit(DatabaseNode node);
     T visit(FilterNode node);
     T visit(JoinNode node);

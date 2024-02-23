@@ -38,12 +38,12 @@ class DDLAlgorithmTests {
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addAddress(builder, 0, "0", "hodnotaA", "hodnotaB", "hodnotaC");
-                MongoDB.addAddress(builder, 1, "1", "hodnotaA2", "hodnotaB2", "hodnotaC2");
+                MongoDB.addAddress(builder, 0, "0", "Ke Karlovu 2027/3", "Praha 2", "121 16");
+                MongoDB.addAddress(builder, 1, "1", "Malostranské nám. 2/25", "Praha 1", "118 00");
             })
             .expected("""
                 [
-                    "setKindName(order)",
+                    "setKindName(address)",
                     "isSchemaLess()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
@@ -67,7 +67,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
-                    "setKindName(order)",
+                    "setKindName(tag)",
                     "isSchemaLess()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
@@ -121,7 +121,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
-                    "setKindName(order)",
+                    "setKindName(contact)",
                     "isSchemaLess()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
@@ -143,7 +143,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
-                    "setKindName(order)",
+                    "setKindName(customer)",
                     "isSchemaLess()",
                     "createDDLStatement()",
                     "addSimpleProperty([ customer/number ], true)",
@@ -159,12 +159,12 @@ class DDLAlgorithmTests {
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
                 PostgreSQL.addOrder(builder, "o_200");
-                MongoDB.addAddress(builder, 0, "0", "hodnotaA", null, "hodnotaC");
-                MongoDB.addAddress(builder, 1, "1", "hodnotaA2", null, "hodnotaC2");
+                MongoDB.addAddress(builder, 0, "0", "Ke Karlovu 2027/3", null, "121 16");
+                MongoDB.addAddress(builder, 1, "1", "Malostranské nám. 2/25", null, "118 00");
             })
             .expected("""
                 [
-                    "setKindName(order)",
+                    "setKindName(address)",
                     "isSchemaLess()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
@@ -186,7 +186,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
-                    "setKindName(order)",
+                    "setKindName(address)",
                     "isSchemaLess()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
@@ -235,7 +235,7 @@ class DDLAlgorithmTests {
             })
             .expected("""
                 [
-                    "setKindName(order)",
+                    "setKindName(note)",
                     "isSchemaLess()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
@@ -243,7 +243,7 @@ class DDLAlgorithmTests {
                     "addComplexProperty([ note/cs-CZ, note/en-GB, note/en-US ], true)",
                     "addSimpleProperty([ note/cs-CZ/subject, note/en-GB/subject, note/en-US/subject ], true)",
                     "addSimpleProperty([ note/cs-CZ/content, note/en-GB/content, note/en-US/content ], true)"
-                ]                
+                ]
             """)
             .run();
     }

@@ -11,6 +11,7 @@ import cz.matfyz.wrapperdummy.DummyDMLWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.json.JSONArray;
 import org.junit.jupiter.api.Assertions;
@@ -26,10 +27,10 @@ public class DMLAlgorithmTestBase {
         this.mapping = testMapping.mapping();
     }
 
-    private String expected;
+    private String expectedString;
 
     public DMLAlgorithmTestBase expected(String expected) {
-        this.expected = expected;
+        this.expectedString = expected;
 
         return this;
     }
@@ -45,52 +46,69 @@ public class DMLAlgorithmTestBase {
     }
 
     private List<DMLTestStructure> buildExpectedResult() throws Exception {
-        var json = new JSONArray(expected);
+        var json = new JSONArray(expectedString);
         var structures = new ArrayList<DMLTestStructure>();
-        
+
         for (int i = 0; i < json.length(); i++)
             structures.add(new DMLTestStructure(json.getJSONObject(i)));
-        
+
         return structures;
     }
 
     public void run() {
-        List<DMLTestStructure> expectedResult;
+        List<DMLTestStructure> expected;
         try {
-            expectedResult = buildExpectedResult();
+            expected = buildExpectedResult();
         }
         catch (Exception e) {
             Assertions.fail("Exception thrown when loading test data.");
             return;
         }
 
-        var wrapper = new DummyDMLWrapper();
-        var transformation = new DMLAlgorithm();
+        final var wrapper = new DummyDMLWrapper();
+        final var transformation = new DMLAlgorithm();
         transformation.input(mapping, inputInstance, wrapper);
         transformation.algorithm();
 
-        List<DMLTestStructure> result = wrapper.structures();
+        final List<DMLTestStructure> actual = wrapper.structures();
 
-        System.out.println(result);
-        Assertions.assertTrue(resultsEquals(expectedResult, result), "Test objects differ from the expected objects.");
+        assertResults(expected, actual);
     }
 
-    private static boolean resultsEquals(List<DMLTestStructure> result1, List<DMLTestStructure> result2) {
-        if (result1.size() != result2.size())
-            return false;
+    private static void assertResults(List<DMLTestStructure> expected, List<DMLTestStructure> actual) {
+        Assertions.assertEquals(
+            expected.size(),
+            actual.size(),
+            new FailMessage(expected, actual, "Sizes aren't equal.\nexpected: " + expected.size() + "\nactual: " + actual.size())
+        );
 
-        for (var structure1 : result1) {
-            boolean equals = false;
-            for (var structure2 : result2)
-                if (structure1.equals(structure2)) {
-                    equals = true;
-                    break;
-                }
+        for (final DMLTestStructure expectedStructure : expected) {
+            final boolean match = actual.stream().anyMatch(actualStructure -> actualStructure.equals(expectedStructure));
+            if (!match) {
+                Assertions.fail(new FailMessage(expected, actual,
+                "Expected structure not found in the actual result. Structure:\n" + expectedStructure.toString()
+                ));
+            }
+        }
+    }
 
-            if (!equals)
-                return false;
+    private record FailMessage(
+        List<DMLTestStructure> expected,
+        List<DMLTestStructure> actual,
+        String message
+    ) implements Supplier<String> {
+
+        private static final String SEPARATOR = "################";
+
+        public String get() {
+            return message
+                + "\n\n" + SEPARATOR + " expected: " + SEPARATOR
+                + "\n" + expected
+                + "\n\n" + SEPARATOR + " actual: " + SEPARATOR
+                + "\n" + actual
+                + "\n";
         }
 
-        return true;
     }
+
 }

@@ -29,7 +29,7 @@ public class DatabaseService {
     public DatabaseEntity find(Id databaseId) {
         return repository.find(databaseId);
     }
-    
+
     public List<DatabaseEntity> findAll() {
         return repository.findAll();
     }
@@ -47,7 +47,7 @@ public class DatabaseService {
         DatabaseEntity database = repository.find(databaseId);
         if (database == null)
             return null;
-        
+
         database.updateFrom(data);
         return repository.save(database);
     }

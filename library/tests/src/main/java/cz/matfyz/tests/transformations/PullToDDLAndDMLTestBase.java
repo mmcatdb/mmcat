@@ -3,7 +3,7 @@ package cz.matfyz.tests.transformations;
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
-import cz.matfyz.abstractwrappers.utils.PullQuery;
+import cz.matfyz.abstractwrappers.querycontent.KindNameQuery;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.mapping.Mapping;
@@ -41,7 +41,7 @@ public class PullToDDLAndDMLTestBase {
 
         ForestOfRecords forest;
         try {
-            forest = pullWrapper.pullForest(mapping.accessPath(), PullQuery.fromKindName(mapping.kindName()));
+            forest = pullWrapper.pullForest(mapping.accessPath(), new KindNameQuery(mapping.kindName()));
         }
         catch (Exception e) {
             Assertions.fail("Exception thrown when building forest.", e);
@@ -49,13 +49,13 @@ public class PullToDDLAndDMLTestBase {
         }
 
         LOGGER.trace("Pulled Forest Of Records:\n" + forest);
-        
+
         var transformation = new MTCAlgorithm();
         transformation.input(mapping, instance, forest);
         transformation.algorithm();
 
         LOGGER.trace("Created Instance Category:\n" + instance);
-        
+
         var ddlAlgorithm = new DDLAlgorithm();
         ddlAlgorithm.input(mapping, instance, ddlWrapper);
         var ddlStatement = ddlAlgorithm.algorithm();

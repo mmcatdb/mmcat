@@ -1,5 +1,5 @@
 import { DynamicName, nameFromServer, Signature, StaticName, type Name } from '@/types/identifiers';
-import { IntendedStringBuilder } from '@/utils/string';
+import { IndentedStringBuilder } from '@/utils/string';
 import type { ComplexPropertyFromServer } from '../serverTypes';
 import { subpathFromFromServer, type ChildProperty, type ParentProperty } from './compositeTypes';
 
@@ -36,7 +36,7 @@ export class ComplexProperty {
     }
 
     toString(level = 0): string {
-        const builder = new IntendedStringBuilder(level);
+        const builder = new IndentedStringBuilder(level);
 
         builder.appendIntendedLine(this.name + ': ');
         if (!this.isAuxiliary)

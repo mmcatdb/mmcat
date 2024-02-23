@@ -16,8 +16,7 @@ public class SimpleAttributeProcessor extends PropertyProcessorBase implements P
         super(category);
     }
 
-    @Override
-    public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
+    @Override public boolean tryProcessProperty(Statement statement, InstanceObject resourceObject, DomainRow resourceRow) {
         final var resourceToProperty = finder.tryFindFromObject(resourceObject, statement.getPredicate().getURI());
         if (resourceToProperty == null)
             return false;
@@ -29,5 +28,5 @@ public class SimpleAttributeProcessor extends PropertyProcessorBase implements P
 
         return true;
     }
-    
+
 }

@@ -9,6 +9,7 @@ import cz.matfyz.querying.core.querytree.MinusNode;
 import cz.matfyz.querying.core.querytree.OptionalNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.UnionNode;
+import cz.matfyz.querying.exception.PlanningException;
 import cz.matfyz.querying.parsing.WhereClause;
 
 import java.util.List;
@@ -44,6 +45,9 @@ public class QueryTreeBuilder {
     private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
         final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause.pattern.triples);
         final List<Set<KindPattern>> plans = QueryPlanner.run(extracted.kindPatterns());
+        if (plans.isEmpty())
+            throw PlanningException.noPlans();
+
         // TODO better selection?
         final Set<KindPattern> selectedPlan = plans.get(0);
 
@@ -54,7 +58,7 @@ public class QueryTreeBuilder {
 
         for (final var values : clause.pattern.valueFilters)
             currentNode = new FilterNode(currentNode, values);
-        
+
         for (final var nestedClause : clause.nestedClauses)
             currentNode = processClause(nestedClause, currentNode);
 

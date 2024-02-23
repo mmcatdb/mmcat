@@ -1,4 +1,6 @@
-package cz.matfyz.abstractwrappers.queryresult;
+package cz.matfyz.core.querying.queryresult;
+
+import cz.matfyz.core.utils.printable.*;
 
 import java.util.ArrayList;
 
@@ -6,15 +8,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public interface ResultNode {
+public interface ResultNode extends Printable {
 
-    public static interface NodeBuilder {
+    interface NodeBuilder {
 
         ResultNode build();
 
     }
 
-    public static class JsonBuilder {
+    class JsonBuilder {
+
+        private JsonBuilder() {}
 
         private static ObjectMapper mapper = new ObjectMapper();
 

@@ -7,11 +7,15 @@ import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SimpleBuilder;
+import cz.matfyz.core.schema.SimpleBuilder.Object;
 import cz.matfyz.tests.example.common.SchemaBuilder;
 
 public class Schema {
 
     public static final String schemaLabel = "Basic Schema";
+
+    private static final SimpleBuilder builder2 = new SimpleBuilder(schemaLabel);
 
     // Keys
 
@@ -44,7 +48,7 @@ public class Schema {
     public static final Key locale = new Key(22);
     public static final Key data = new Key(23);
     public static final Key subject = new Key(24);
-    public static final Key content = new Key(25);
+    public static final SimpleBuilder.Object content = builder2.object("content", 25);
 
     // Signatures
 
@@ -91,7 +95,7 @@ public class Schema {
     public static final BaseSignature dataToContent = Signature.createBase(25);
 
     public static final Signature noteToNumber = noteToOrder.concatenate(orderToNumber);
-    
+
     public Schema() {
         this.addOrder();
     }
@@ -191,13 +195,13 @@ public class Schema {
         builder.object(locale, "locale", ObjectIds.createValue());
         builder.object(data, "data", ObjectIds.createGenerated());
         builder.object(subject, "subject", ObjectIds.createValue());
-        builder.object(content, "content", ObjectIds.createValue());
+        builder.object(content.key(), "content", ObjectIds.createValue());
 
         builder.morphism(noteToOrder, note, order, Min.ONE);
         builder.morphism(noteToLocale, note, locale, Min.ONE, Tag.key);
         builder.morphism(noteToData, note, data, Min.ONE);
         builder.morphism(dataToSubject, data, subject, Min.ONE);
-        builder.morphism(dataToContent, data, content, Min.ONE);
+        builder.morphism(dataToContent, data, content.key(), Min.ONE);
 
         return this;
     }

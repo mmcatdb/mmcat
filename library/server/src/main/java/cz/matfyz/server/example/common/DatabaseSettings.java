@@ -18,7 +18,7 @@ public class DatabaseSettings {
         this.properties = properties;
         this.database = database;
     }
-    
+
     private ObjectMapper mapper = new ObjectMapper();
 
     public DatabaseInit createPostgreSQL(String label) {

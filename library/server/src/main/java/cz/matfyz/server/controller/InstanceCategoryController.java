@@ -41,7 +41,7 @@ public class InstanceCategoryController {
 
         if (object == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
+
         return new InstanceObjectWrapper(object);
     }
 
@@ -58,7 +58,7 @@ public class InstanceCategoryController {
 
         if (morphism == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
+
         return new InstanceMorphismWrapper(morphism);
     }
 

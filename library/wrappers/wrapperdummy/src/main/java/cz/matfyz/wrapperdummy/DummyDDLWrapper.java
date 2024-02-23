@@ -17,43 +17,36 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
         return methods;
     }
 
-    @Override
-    public void setKindName(String name) {
+    @Override public void setKindName(String name) {
         methods.add("setKindName(" + name + ")");
     }
 
-    @Override
-    public boolean isSchemaLess() {
+    @Override public boolean isSchemaLess() {
         methods.add("isSchemaLess()");
         return false;
     }
 
-    @Override
-    public boolean addSimpleProperty(Set<String> names, boolean required) {
+    @Override public boolean addSimpleProperty(Set<String> names, boolean required) {
         methods.add("addSimpleProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 
-    @Override
-    public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
         methods.add("addSimpleArrayProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 
-    @Override
-    public boolean addComplexProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexProperty(Set<String> names, boolean required) {
         methods.add("addComplexProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 
-    @Override
-    public boolean addComplexArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) {
         methods.add("addComplexArrayProperty(" + setToString(names) + ", " + required + ")");
         return true;
     }
 
-    @Override
-    public DummyStatement createDDLStatement() {
+    @Override public DummyStatement createDDLStatement() {
         methods.add("createDDLStatement()");
         return new DummyStatement("");
     }

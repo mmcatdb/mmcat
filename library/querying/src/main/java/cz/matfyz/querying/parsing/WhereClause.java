@@ -23,5 +23,5 @@ public class WhereClause implements ParserNode {
         this.pattern = pattern;
         this.nestedClauses = nestedClauses;
     }
-    
+
 }

@@ -41,16 +41,26 @@ public class SchemaExtractor {
         this.pattern = pattern;
     }
 
-    public static record ExtractorResult(
+    public record ExtractorResult(
         SchemaCategory schema,
         List<KindPattern> kindPatterns
     ) {}
 
+    /**
+     * List of all morphisms that appear directly in the pattern.
+     * They already contain only base signatures without duals.
+     */
+    private List<SchemaMorphism> patternMorphisms;
+
     private ExtractorResult run() {
+        patternMorphisms = pattern.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
+
         createNewSchema();
         updateContext();
+        final var patterns = createKindPatterns();
+        // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the QueryPlanner shouldn't be able to create any plan.
 
-        return new ExtractorResult(newSchema, createKindPatterns());
+        return new ExtractorResult(newSchema, patterns);
     }
 
     // The schema category of all objects and morphisms that are reachable from the pattern plus those that are needed to identify the objects.
@@ -59,9 +69,7 @@ public class SchemaExtractor {
 
     private void createNewSchema() {
         newSchema = new SchemaCategory(schema.label);
-        // The triples already contain only base signatures.
-        final var morphismsToAdd = pattern.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
-        morphismQueue = new ArrayDeque<>(morphismsToAdd);
+        morphismQueue = new ArrayDeque<>(patternMorphisms);
 
         // We have to use queue because the morphisms need to add objects which need to add their ids which consist of objects and morphisms ... so we have to break the chain somewhere.
         while (!morphismQueue.isEmpty())
@@ -69,6 +77,7 @@ public class SchemaExtractor {
     }
 
     private void addMorphism(SchemaMorphism morphism) {
+        // There are no duals in the queue on the start and we are not adding them during the process. So this is safe.
         if (newSchema.hasMorphism(morphism.signature()))
             return;
 
@@ -85,6 +94,7 @@ public class SchemaExtractor {
         object.ids().toSignatureIds()
             .stream().flatMap(id -> id.signatures().stream())
             .flatMap(signature -> signature.toBases().stream())
+            // We don't have to worry about duals here because ids can't contain them (ids have to have cardinality at most 1).
             .forEach(base -> morphismQueue.add(schema.getMorphism(base)));
     }
 
@@ -127,10 +137,11 @@ public class SchemaExtractor {
 
                 var currentNode = node;
                 for (final BaseSignature baseSignature : subpath.signature().toBases()) {
-                    if (!newSchema.hasMorphism(baseSignature))
+                    final var nonDualSignature = baseSignature.toNonDual();
+                    if (!newSchema.hasMorphism(nonDualSignature))
                         return;
 
-                    currentNode = currentNode.createChild(schema.getEdge(baseSignature), signatureToTriple.get(baseSignature));
+                    currentNode = currentNode.getOrCreateChild(schema.getEdge(baseSignature), signatureToTriple.get(nonDualSignature));
                 }
 
                 if (subpath instanceof ComplexProperty complex)

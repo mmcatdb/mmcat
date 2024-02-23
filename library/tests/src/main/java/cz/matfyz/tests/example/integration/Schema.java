@@ -14,7 +14,7 @@ public class Schema {
 
     // Signatures
 
-    
+
     public Schema() {
 
     }
@@ -33,5 +33,5 @@ public class Schema {
 
     private final SchemaBuilder builder = new SchemaBuilder();
 
-    
+
 }

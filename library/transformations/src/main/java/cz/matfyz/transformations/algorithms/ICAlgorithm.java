@@ -23,27 +23,27 @@ import java.util.TreeSet;
  * @author jachymb.bartik
  */
 public class ICAlgorithm {
-    
+
     private Mapping mapping;
     private Map<SchemaObject, Mapping> mappingsByObjects;
     private AbstractICWrapper wrapper;
 
     private Map<String, Set<ComparablePair<String, String>>> referencesForAllKinds = new TreeMap<>();
-    
+
     public void input(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
         this.mapping = mapping;
         this.wrapper = wrapper;
         this.mappingsByObjects = new TreeMap<>();
         allMappings.forEach(m -> mappingsByObjects.put(m.rootObject(), m));
     }
-    
+
     public AbstractStatement algorithm() {
         // Primary key constraint
         IdentifierStructure identifierStructure = collectNames(mapping.accessPath(), mapping.primaryKey());
         // If there are no signatures, we can't create the primary key.
         if (!identifierStructure.isEmpty())
             wrapper.appendIdentifier(mapping.kindName(), identifierStructure);
-        
+
         // Reference keys constraints
         processPath(mapping.accessPath(), mapping, Signature.createEmpty());
         referencesForAllKinds.forEach((referencedKindName, references) -> wrapper.appendReference(mapping.kindName(), referencedKindName, references));
@@ -91,7 +91,7 @@ public class ICAlgorithm {
                 // This quality can't be achieved by dynamic names so they aren't supported here.
                 throw InvalidStateException.nameIsNotStatic(subpath.name());
         }
-        
+
         return new IdentifierStructure(output);
     }
 
@@ -159,7 +159,7 @@ public class ICAlgorithm {
         processAllSubpaths(property, pathMapping, Signature.createEmpty());
     }
     */
-    
+
     private void processAllSubpaths(ComplexProperty complexProperty, Mapping lastMapping, Signature signatureFromLastMapping) {
         complexProperty.subpaths().forEach(subpath -> processPath(subpath, lastMapping, signatureFromLastMapping));
     }

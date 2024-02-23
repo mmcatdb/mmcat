@@ -33,7 +33,7 @@ public class PostgreSQLTests {
     public void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = database.wrapper.getPullWrapper();
-            var dbContent = inputWrapper.readTableAsStringForTests("SELECT * FROM \"order\";");
+            var dbContent = inputWrapper.readTableAsStringForTests(PostgreSQL.orderKind);
             LOGGER.debug("DB content:\n" + dbContent);
         });
     }
@@ -46,7 +46,7 @@ public class PostgreSQLTests {
                     "number": "o_100"
                 }, {
                     "number": "o_200"
-                }]        
+                }]
             """)
             .run();
     }
@@ -71,7 +71,7 @@ public class PostgreSQLTests {
                     "id": "734",
                     "label": "Animal Farm",
                     "price": "350"
-                }]       
+                }]
             """)
             .run();
     }

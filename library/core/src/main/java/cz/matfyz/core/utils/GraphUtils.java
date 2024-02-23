@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -24,13 +25,12 @@ public abstract class GraphUtils {
         N to();
     }
 
-    public static record Component<N extends Comparable<N>, E extends Edge<N>>(
+    public record Component<N extends Comparable<N>, E extends Edge<N>>(
         int id,
         Set<N> nodes,
         List<E> edges
     ) implements Comparable<Component<N, E>> {
-        @Override
-        public int compareTo(Component<N, E> other) {
+        @Override public int compareTo(Component<N, E> other) {
             return id - other.id;
         }
     }
@@ -60,7 +60,7 @@ public abstract class GraphUtils {
 
             final var aComponent = components.get(a);
             var bComponent = components.get(b);
-            
+
             if (aComponent == null) {
                 if (bComponent == null) {
                     bComponent = new Component<N, E>(nextId++, new TreeSet<>(), new ArrayList<>());
@@ -110,7 +110,7 @@ public abstract class GraphUtils {
 
     }
 
-    public static record TreePath<T extends Tree<T>>(
+    public record TreePath<T extends Tree<T>>(
         // Source is the first element, root is the last.
         List<T> sourceToRoot,
         // Root is the first element, target is the last.
@@ -202,7 +202,7 @@ public abstract class GraphUtils {
 
         private Map<T, Integer> depths = new TreeMap<>();
 
-        public TreeSubrootFinder(T root) {
+        TreeSubrootFinder(T root) {
             fillDepths(root, 0);
         }
 
@@ -275,23 +275,20 @@ public abstract class GraphUtils {
 
         private final P payload;
 
-        public EditableTree(P payload) {
+        EditableTree(P payload) {
             this.payload = payload;
         }
 
-        @Override
-        public int compareTo(EditableTree<P> other) {
+        @Override public int compareTo(EditableTree<P> other) {
             return payload.compareTo(other.payload);
         }
 
-        @Override
-        @Nullable
+        @Override @Nullable
         public EditableTree<P> parent() {
             return parent;
         }
 
-        @Override
-        public Collection<EditableTree<P>> children() {
+        @Override public Collection<EditableTree<P>> children() {
             return children();
         }
 
@@ -303,6 +300,17 @@ public abstract class GraphUtils {
 
         T createChild(T parent, P payload);
 
+    }
+
+    public static <T> void forEachDFS(T tree, Function<T, Collection<T>> callback) {
+        Deque<T> stack = new ArrayDeque<>();
+        stack.push(tree);
+
+        while (!stack.isEmpty()) {
+            final var current = stack.pop();
+            final var children = callback.apply(current);
+            children.forEach(stack::push);
+        }
     }
 
 }

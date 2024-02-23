@@ -1,6 +1,6 @@
-package cz.matfyz.abstractwrappers.queryresult;
+package cz.matfyz.core.querying.queryresult;
 
-import cz.matfyz.core.utils.IndentedStringBuilder;
+import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -31,36 +30,31 @@ public class ResultList implements ResultNode {
         return this.children;
     }
 
-    @Override
-    public String toString() {
+    @Override public void printTo(Printer printer) {
         final var isMultilined = children.stream().anyMatch(child -> !(child instanceof ResultLeaf));
-        final var builder = new StringBuilder();
 
         if (isMultilined) {
-            builder.append("[\n");
-            
-            final var nestedBuilder = new IndentedStringBuilder(1);
-            for (final var child : children) {
-                nestedBuilder
-                    .append(child)
-                    .append(",\n");
-            }
+            printer.append("[").down().nextLine();
 
-            builder
-                .append(nestedBuilder)
-                .append("\n]");
+            for (final var child : children)
+                printer.append(child).append(",").nextLine();
+
+            printer.remove().up().nextLine().append("]");
         }
         else {
-            builder.append("[ ");
-            final String childStrings = children.stream()
-                .map(child -> child.toString())
-                .collect(Collectors.joining(", "));
-            builder
-                .append(childStrings)
-                .append(" ]");
-        }
+            printer.append("[ ");
+            for (final var child : children)
+                printer.append(child).append(", ");
 
-        return builder.toString();
+            if (!children.isEmpty())
+                printer.remove();
+
+            printer.append("]");
+        }
+    }
+
+    @Override public String toString() {
+        return Printer.print(this);
     }
 
     public List<String> toJsonArray() {
@@ -77,8 +71,7 @@ public class ResultList implements ResultNode {
             super(t);
         }
 
-        @Override
-        public void serialize(ResultList resultList, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(ResultList resultList, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartArray();
             for (final var child : resultList.children)
                 generator.writeObject(child);
@@ -127,12 +120,12 @@ public class ResultList implements ResultNode {
 
         public ResultList build() {
             final List<ResultMap> children = new ArrayList<>();
-            
+
             for (final List<String> row : rows) {
                 final Map<String, ResultNode> map = new TreeMap<>();
                 if (row.size() != columns.size())
                     throw new IllegalArgumentException("Row size does not match column size");
-                
+
                 for (int i = 0; i < columns.size(); i++)
                     map.put(columns.get(i), new ResultLeaf(row.get(i)));
 
@@ -143,5 +136,5 @@ public class ResultList implements ResultNode {
         }
 
     }
-    
+
 }

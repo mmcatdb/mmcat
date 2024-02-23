@@ -38,7 +38,7 @@ public class MorphismFinder {
 
         if (matchingMorphisms.size() > 1)
             throw MorphismException.multipleDirectFound(pimIri, object.key());
-        
+
         final var result = matchingMorphisms.size() == 1 ? matchingMorphisms.get(0) : null;
         fromDirectObjectCache.put(tuple, result);
 
@@ -61,7 +61,7 @@ public class MorphismFinder {
 
         if (matchingMorphisms.size() > 1)
             throw MorphismException.multipleDirectFound(pimIri, object.key());
-        
+
         final var result = matchingMorphisms.size() == 1 ? matchingMorphisms.get(0) : null;
         toDirectObjectCache.put(tuple, result);
 
@@ -100,8 +100,7 @@ public class MorphismFinder {
         String pimIri
     ) implements Comparable<ObjectIriTuple> {
 
-        @Override
-        public int compareTo(ObjectIriTuple tuple) {
+        @Override public int compareTo(ObjectIriTuple tuple) {
             int objectResult = object.compareTo(tuple.object);
             if (objectResult != 0)
                 return objectResult;

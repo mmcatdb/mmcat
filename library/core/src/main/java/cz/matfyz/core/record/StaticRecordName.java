@@ -6,16 +6,15 @@ import cz.matfyz.core.mapping.StaticName.Type;
  * @author jachym.bartik
  */
 public class StaticRecordName extends RecordName {
-    
+
     private final Type type;
-    
+
     public StaticRecordName(String value, Type type) {
         super(value);
         this.type = type;
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof StaticRecordName staticName
             && value.equals(staticName.value)
             && type.equals(staticName.type);
@@ -26,17 +25,15 @@ public class StaticRecordName extends RecordName {
      * @return
      */
     /*
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         int hash = 5;
         hash = 29 * hash + Objects.hashCode(this.value);
         hash = 17 * hash + Objects.hashCode(this.type);
         return hash;
     }
     */
-    
-    @Override
-    public String toString() {
+
+    @Override public String toString() {
         return switch (type) {
             case STATIC -> value;
             case ANONYMOUS -> "_";

@@ -31,8 +31,7 @@ public class DMLTestStructure {
             add(array.getString(i));
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         if (object instanceof DMLTestStructure structure) {
             if (!name.equals(structure.name))
                 return false;
@@ -49,10 +48,9 @@ public class DMLTestStructure {
         return false;
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         StringBuilder builder = new StringBuilder();
-        
+
         builder.append(name).append(": {\n");
         for (String value : values)
             builder.append("    ").append(value).append("\n");

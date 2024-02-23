@@ -6,7 +6,7 @@ package cz.matfyz.core.utils;
  * @param <U>
  */
 public class ComparablePair<T extends Comparable<T>, U extends Comparable<U>> implements Comparable<ComparablePair<T, U>> {
-    
+
     private final T value1;
     private final U value2;
 
@@ -23,8 +23,7 @@ public class ComparablePair<T extends Comparable<T>, U extends Comparable<U>> im
         this.value2 = value2;
     }
 
-    @Override
-    public int compareTo(ComparablePair<T, U> object) {
+    @Override public int compareTo(ComparablePair<T, U> object) {
         int firstResult = value1.compareTo(object.value1);
         return firstResult != 0 ? firstResult : value2.compareTo(value2);
     }

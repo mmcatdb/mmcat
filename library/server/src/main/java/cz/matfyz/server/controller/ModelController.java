@@ -35,7 +35,7 @@ public class ModelController {
 
         if (model == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
+
         return model;
     }
 

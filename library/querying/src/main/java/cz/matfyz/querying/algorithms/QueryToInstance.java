@@ -1,10 +1,10 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
+import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryDescription;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -68,5 +68,5 @@ public class QueryToInstance {
 
         return QueryDescriptor.run(query.context, queryTree);
     }
-    
+
 }

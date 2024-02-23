@@ -18,8 +18,7 @@ public class StringProcessor extends TypeProcessorBase implements TypeProcessor 
         super(category);
     }
 
-    @Override
-    public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject) {
+    @Override public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject) {
         if (!attributeObject.ids().isValue())
             return null;
 
@@ -40,5 +39,5 @@ public class StringProcessor extends TypeProcessorBase implements TypeProcessor 
         final var valueSuperId = SuperIdWithValues.fromEmptySignature(resource.getURI());
         return attribuObject.getOrCreateRow(valueSuperId);
     }
-    
+
 }

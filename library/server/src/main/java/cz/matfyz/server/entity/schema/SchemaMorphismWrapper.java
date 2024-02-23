@@ -50,5 +50,5 @@ public record SchemaMorphismWrapper(
             tags
         );
     }
-    
+
 }

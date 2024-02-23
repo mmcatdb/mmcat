@@ -63,7 +63,7 @@ public class Job extends Entity {
         );
     }
 
-    private static record JsonValue(
+    private record JsonValue(
         String label,
         Date createdAt,
         ActionPayload payload,
@@ -97,5 +97,5 @@ public class Job extends Entity {
             data
         ));
     }
-    
+
 }

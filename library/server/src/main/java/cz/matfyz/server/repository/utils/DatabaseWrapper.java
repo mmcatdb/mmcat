@@ -34,7 +34,7 @@ public class DatabaseWrapper {
     private DatabaseProperties properties;
 
     private DatabaseWrapper() {}
-    
+
     public Connection getConnection() {
         try {
             return getConnectionProvider().getConnection();
@@ -44,7 +44,7 @@ public class DatabaseWrapper {
             throw RepositoryException.createConnection(e);
         }
     }
-    
+
     private PostgreSQLProvider connectionProvider;
 
     private PostgreSQLProvider getConnectionProvider() {
@@ -100,7 +100,7 @@ public class DatabaseWrapper {
 
     private <T> T resolveDatabaseFunction(DatabaseFunction<T> function) {
         try (
-            final Connection connection = getConnection();
+            Connection connection = getConnection();
         ) {
             return function.execute(connection);
         }
@@ -116,7 +116,7 @@ public class DatabaseWrapper {
 
     public void execute(String ...statements) {
         try (
-            final Connection connection = getConnection()
+            Connection connection = getConnection()
         ) {
             connection.setAutoCommit(false);
 

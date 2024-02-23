@@ -6,9 +6,9 @@ import java.io.Serializable;
  * @author jachym.bartik
  */
 public abstract class RecordName implements Serializable {
-    
+
     protected final String value;
-    
+
     public String value() {
         return value;
     }
@@ -16,10 +16,9 @@ public abstract class RecordName implements Serializable {
     protected RecordName(String value) {
         this.value = value;
     }
-    
+
     /*
-    @Override
-    public int compareTo(RecordName name) {
+    @Override public int compareTo(RecordName name) {
         return value.compareTo(name.value);
     }
     */

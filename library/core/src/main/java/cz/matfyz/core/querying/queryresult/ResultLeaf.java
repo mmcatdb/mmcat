@@ -1,4 +1,6 @@
-package cz.matfyz.abstractwrappers.queryresult;
+package cz.matfyz.core.querying.queryresult;
+
+import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 
@@ -16,9 +18,12 @@ public class ResultLeaf implements ResultNode {
         this.value = value;
     }
 
-    @Override
-    public String toString() {
-        return "\"" + value + "\"";
+    @Override public void printTo(Printer printer) {
+        printer.append("\"" + value + "\"");
+    }
+
+    @Override public String toString() {
+        return Printer.print(this);
     }
 
     public static class Serializer extends StdSerializer<ResultLeaf> {
@@ -31,8 +36,7 @@ public class ResultLeaf implements ResultNode {
             super(t);
         }
 
-        @Override
-        public void serialize(ResultLeaf resultMap, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(ResultLeaf resultMap, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(resultMap.value);
         }
 

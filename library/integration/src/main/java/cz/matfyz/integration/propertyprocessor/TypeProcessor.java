@@ -9,7 +9,7 @@ import org.apache.jena.rdf.model.RDFNode;
  * @author jachym.bartik
  */
 public interface TypeProcessor {
-    
-    public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject);
+
+    DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject);
 
 }

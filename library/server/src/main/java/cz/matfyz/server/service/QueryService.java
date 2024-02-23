@@ -2,7 +2,7 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
+import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.server.builder.MappingBuilder;
@@ -69,7 +69,7 @@ public class QueryService {
         return new QueryDescription(parts);
     }
 
-    private static record KindsAndDatabases(
+    private record KindsAndDatabases(
         List<Kind> kinds,
         Map<Id, DatabaseEntity> databases
     ) {}

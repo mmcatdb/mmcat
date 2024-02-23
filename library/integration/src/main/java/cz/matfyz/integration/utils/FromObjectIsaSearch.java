@@ -23,7 +23,7 @@ public class FromObjectIsaSearch {
     private final InstanceCategory category;
     private final InstanceObject object;
     private final Function<InstanceMorphism, Boolean> findFunction;
-    
+
     public FromObjectIsaSearch(InstanceCategory category, InstanceObject object, Function<InstanceMorphism, Boolean> findFunction) {
         this.category = category;
         this.object = object;
@@ -42,7 +42,7 @@ public class FromObjectIsaSearch {
 
         if (outputCandidates.size() > 1)
             throw MorphismException.multipleFound(object.key());
-        
+
         return outputCandidates.size() == 1 ? outputCandidates.get(0) : null;
     }
 

@@ -23,12 +23,12 @@ public class FileInputStreamProvider implements InputStreamProvider {
             final var fileUrl = ClassLoader.getSystemResource(fileName);
             Path pathToDataFile = Paths.get(fileUrl.toURI()).toAbsolutePath();
             File dataFile = pathToDataFile.toFile();
-    
+
             return new FileInputStream(dataFile);
         }
         catch (Exception e) {
             throw new IOException("Cannot read from local file " + fileName + ".", e.getCause());
         }
     }
-    
+
 }

@@ -31,16 +31,16 @@ public class MongoDBTests {
     }
 
     @Test
-    public void readFromDB_DoesNotThrow() {
+    void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = database.wrapper.getPullWrapper();
-            var dbContent = inputWrapper.readCollectionAsStringForTests("database.getCollection(\"basic_order\");");
+            var dbContent = inputWrapper.readCollectionAsStringForTests(MongoDB.orderKind);
             LOGGER.trace("DB content:\n" + dbContent);
         });
     }
 
     @Test
-    public void getForestForBasicTest() throws Exception {
+    void getForestForBasicTest() throws Exception {
         new PullForestTestBase(MongoDB.order(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -53,22 +53,22 @@ public class MongoDBTests {
     }
 
     @Test
-    public void getForestForStructureTest() throws Exception {
+    void getForestForStructureTest() throws Exception {
         new PullForestTestBase(MongoDB.address(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100",
                     "address": {
-                        "street": "hodnotaA",
-                        "city": "hodnotaB",
-                        "zip": "hodnotaC"
+                        "street": "Ke Karlovu 2027/3",
+                        "city": "Praha 2",
+                        "zip": "121 16"
                     }
                 }, {
                     "number": "o_200",
                     "address": {
-                        "street": "hodnotaA2",
-                        "city": "hodnotaB2",
-                        "zip": "hodnotaC2"
+                        "street": "Malostranské nám. 2/25",
+                        "city": "Praha 1",
+                        "zip": "118 00"
                     }
                 }]
             """)
@@ -76,7 +76,7 @@ public class MongoDBTests {
     }
 
     @Test
-    public void getForestForSimpleArrayTest() throws Exception {
+    void getForestForSimpleArrayTest() throws Exception {
         new PullForestTestBase(MongoDB.tag(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -99,7 +99,7 @@ public class MongoDBTests {
     }
 
     @Test
-    public void getForestForComplexArrayTest() throws Exception {
+    void getForestForComplexArrayTest() throws Exception {
         new PullForestTestBase(MongoDB.item(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -144,7 +144,7 @@ public class MongoDBTests {
     }
 
     @Test
-    public void getForestForEmptyArrayTest() throws Exception {
+    void getForestForEmptyArrayTest() throws Exception {
         new PullForestTestBase(MongoDB.itemEmpty(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -159,7 +159,7 @@ public class MongoDBTests {
     }
 
     @Test
-    public void getForestForComplexMapTest() throws Exception {
+    void getForestForComplexMapTest() throws Exception {
         new PullForestTestBase(MongoDB.note(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{

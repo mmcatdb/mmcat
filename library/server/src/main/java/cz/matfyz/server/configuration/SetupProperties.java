@@ -20,7 +20,7 @@ public class SetupProperties {
     public Boolean isInDocker() {
         return isInDocker;
     }
-    
+
     public void setIsInDocker(Boolean isInDocker) {
         this.isInDocker = isInDocker;
     }

@@ -11,15 +11,13 @@ public class DeleteObject extends SchemaCategory.Editor implements SchemaModific
         this.object = object;
     }
 
-    @Override
-    public void up(SchemaCategory category) {
+    @Override public void up(SchemaCategory category) {
         CreateObject.assertObjectIsSingle(category, object);
 
         getObjectContext(category).deleteUniqueObject(object);
     }
 
-    @Override
-    public void down(SchemaCategory category) {
+    @Override public void down(SchemaCategory category) {
         getObjectContext(category).createUniqueObject(object);
     }
 

@@ -24,8 +24,7 @@ public class TextProcessor extends TypeProcessorBase implements TypeProcessor {
         super(category);
     }
 
-    @Override
-    public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject) {
+    @Override public DomainRow tryCreateTypeRow(RDFNode statementObject, InstanceObject attributeObject) {
         // TODO check if the object ids include only language and value
         if (!attributeObject.ids().isSignatures())
             return null;

@@ -11,14 +11,12 @@ import java.util.List;
 public class PostgreSQLPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();
-    
-    @Override
-    public void addProperty(String hierarchy) {
+
+    @Override public void addProperty(String hierarchy) {
         this.properties.add(hierarchy);
     }
 
-    @Override
-    public boolean check() {
+    @Override public boolean check() {
         throw new UnsupportedOperationException("PostgreSQLPathWrapper.check not implemented.");
     }
 

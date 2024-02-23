@@ -62,7 +62,7 @@ public class InstanceMorphism implements Morphism {
 
         // TODO shouldn't there be a merge?
     }
-    
+
     // TODO potentially dangerous function, left for testing purposes.
     public void addMapping(MappingRow mapping) {
         mappings.add(mapping);
@@ -80,47 +80,41 @@ public class InstanceMorphism implements Morphism {
         return mappings;
     }
 
-    @Override
-    public InstanceObject dom() {
+    @Override public InstanceObject dom() {
         return dom;
     }
 
-    @Override
-    public InstanceObject cod() {
+    @Override public InstanceObject cod() {
         return cod;
     }
 
-    @Override
-    public Signature signature() {
+    @Override public Signature signature() {
         return schemaMorphism.signature();
     }
 
-    @Override
-    public Min min() {
+    @Override public Min min() {
         return schemaMorphism.min();
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         var builder = new StringBuilder();
 
         builder.append("\tSignature: ").append(signature())
             .append("\tDom: ").append(dom.key())
             .append("\tCod: ").append(cod.key())
             .append("\n");
-        
+
         builder.append("\tValues:\n");
         //for (Set<ActiveMappingRow> set : mappings.values())
         //    for (ActiveMappingRow row : set)
         for (MappingRow row : allMappings())
             builder.append("\t\t").append(row).append("\n");
-        
+
         return builder.toString();
     }
-    
+
     // TODO maybe there is no reason to override this method
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         if (this == object)
             return true;
 

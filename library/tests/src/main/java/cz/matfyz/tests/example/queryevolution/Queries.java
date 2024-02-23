@@ -8,22 +8,22 @@ public abstract class Queries {
         SELECT {
             _:knows friend ?friendA ;
                 friend ?friendB .
-        
+
             ?friendA name ?friendAName ;
                 surname ?friendASurname .
-        
+
             ?friendB name ?friendBName ;
                 surname ?friendBSurname .
         }
         WHERE {
             ?friendA -4/5 ?friendB .
-        
+
             ?friendA 2 ?friendAName ;
                 3 ?friendASurname .
-        
+
             ?friendB 2 ?friendBName ;
                 3 ?friendBSurname .
-                
+
             FILTER(?friendA < ?friendB)
         }
         """;

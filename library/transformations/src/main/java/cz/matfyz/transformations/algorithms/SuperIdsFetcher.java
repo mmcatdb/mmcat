@@ -151,7 +151,7 @@ public class SuperIdsFetcher {
             output.add(new FetchedSuperId(builder.build(), childRecord));
         }
     }
-    
+
     private void processStaticComplexRecord(IComplexRecord childRecord) {
         var builder = new SuperIdWithValues.Builder();
         addStaticNameSignaturesToBuilder(builder, childObject.superId().signatures(), childRecord);

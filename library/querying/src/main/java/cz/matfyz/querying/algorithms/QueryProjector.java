@@ -1,18 +1,18 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
-import cz.matfyz.abstractwrappers.queryresult.QueryResult;
-import cz.matfyz.abstractwrappers.queryresult.ResultLeaf;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
-import cz.matfyz.abstractwrappers.queryresult.ResultMap;
-import cz.matfyz.abstractwrappers.queryresult.ResultNode;
-import cz.matfyz.abstractwrappers.queryresult.ResultNode.NodeBuilder;
+import cz.matfyz.core.querying.QueryStructure;
+import cz.matfyz.core.querying.queryresult.QueryResult;
+import cz.matfyz.core.querying.queryresult.ResultLeaf;
+import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.queryresult.ResultMap;
+import cz.matfyz.core.querying.queryresult.ResultNode;
+import cz.matfyz.core.querying.queryresult.ResultNode.NodeBuilder;
 import cz.matfyz.core.utils.GraphUtils;
-import cz.matfyz.core.utils.LineStringBuilder;
+import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.core.utils.GraphUtils.Edge;
 import cz.matfyz.core.utils.GraphUtils.TreePath;
 import cz.matfyz.querying.core.QueryContext;
-import cz.matfyz.querying.exception.ProjectionException;
+import cz.matfyz.querying.exception.ProjectingException;
 import cz.matfyz.querying.parsing.Aggregation;
 import cz.matfyz.querying.parsing.SelectClause;
 import cz.matfyz.querying.parsing.SelectTriple;
@@ -39,19 +39,19 @@ public class QueryProjector {
         this.selectClause = selectClause;
         this.selection = selection;
     }
-    
+
     private QueryResult run() {
         final TransformingQueryStructure projectionStructure = computeProjectionStructure();
         final TransformationRoot transformation = QueryStructureTransformer.run(selection.structure, projectionStructure);
         final var transformationContext = new TransformationContext(selection.data);
-        
+
         transformation.apply(transformationContext);
 
         final ResultList data = (ResultList) transformationContext.getOutput();
 
         return new QueryResult(data, projectionStructure.toQueryStructure());
     }
-    
+
     private TransformingQueryStructure computeProjectionStructure() {
         final var rootVariable = findRootVariable();
         final var projectionStructure = new TransformingQueryStructure(rootVariable.getIdentifier(), rootVariable.getIdentifier());
@@ -66,7 +66,7 @@ public class QueryProjector {
         final var edges = selectClause.triples.stream().map(t -> new ProjectionEdge(t.subject, t.object, t)).toList();
         final var components = GraphUtils.findComponents(edges);
         if (components.size() != 1)
-            throw ProjectionException.notSingleComponent();
+            throw ProjectingException.notSingleComponent();
 
         final var roots = GraphUtils.findRoots(components.iterator().next());
         if (roots.size() != 1) {
@@ -80,7 +80,7 @@ public class QueryProjector {
                     throw new UnsupportedOperationException("Unsupported node type: " + node.getClass().getName());
             }).toList();
 
-            throw ProjectionException.notSingleRoot(objects);
+            throw ProjectingException.notSingleRoot(objects);
         }
 
         return roots.iterator().next().asVariable();
@@ -141,11 +141,11 @@ public class QueryProjector {
 
             final var root = new TransformationRoot();
             TransformationStep current = root;
-            
+
             current = current
                 .addChild(new CreateList<ResultMap>())
                 .addChild(new TraverseList());
-                
+
             final var path = GraphUtils.findPath(inputStructure, rootInSelection);
             current = addPathSteps(current, path);
             current = current.addChild(new WriteToList<ResultMap>());
@@ -228,7 +228,7 @@ public class QueryProjector {
                     throw new UnsupportedOperationException("Term " + childStructure.inputName + " not found in the selection structure.");
 
                 final var path = GraphUtils.findPath(parentInSelection, childInSelection);
-                
+
                 childStructure.isArray = isPathArray(path);
                 current = createListIfNeeded(current, childStructure);
                 current = addPathSteps(current, path);
@@ -258,10 +258,10 @@ public class QueryProjector {
      * This class represents one basic step in transforming a query result (ResultNode) to another one (with different QueryStructure).
      * It can be either a traverse (to a parent, a map or a list), a creation of a leaf, a creation of a map or a list, or a write to a map or a list.
      * The steps usually have children which are also traversed. Some steps spawn multiple new "branches" which are traversed one by one. Therefore, the whole transformation can be obtained by simply appliing the first step to the root node.
-     * 
+     *
      * This system is designed to transform the data as fast as possible. We only have to create the steps once and then we can apply them to any amount of data.
      */
-    public abstract static class TransformationStep {
+    public abstract static class TransformationStep implements Printable {
         private final List<TransformationStep> children = new ArrayList<>();
 
         /**
@@ -281,91 +281,74 @@ public class QueryProjector {
             children.forEach(child -> child.apply(context));
         }
 
-        @Override
-        public String toString() {
-            final var builder = new LineStringBuilder(0, "    ");
-            print(builder);
-            return builder.toString();
+        @Override public String toString() {
+            return Printer.print(this);
         }
 
-        abstract void print(LineStringBuilder builder);
-
-        protected void printChildren(LineStringBuilder builder) {
+        protected void printChildren(Printer printer) {
             if (children.isEmpty()) {
-                builder.nextLine();
+                printer.nextLine();
                 return;
             }
 
             if (children.size() == 1) {
-                builder.nextLine().append("    ");
-                children.get(0).print(builder);
+                printer.nextLine().append("    ").append(children.get(0));
                 return;
             }
 
-            builder.append(":").down().nextLine();
-            children.forEach(child -> {
-                builder.append("--- ");
-                child.print(builder);
-                builder.nextLine();
-            });
-            builder.remove();
-            builder.up();
+            printer.append(":").down().nextLine();
+            children.forEach(child -> printer.append("--- ").append(child).nextLine());
+            printer.remove();
+            printer.up();
         }
     }
 
     public static class TransformationRoot extends TransformationStep {
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             applyChildren(context);
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("root");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("root");
+            printChildren(printer);
         }
     }
 
     private static class TraverseParent extends TransformationStep {
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             final var lastContext = context.inputs.pop();
             applyChildren(context);
             context.inputs.push(lastContext);
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("T.up");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("T.up");
+            printChildren(printer);
         }
     }
 
     private static class TraverseMap extends TransformationStep {
         private final String key;
 
-        public TraverseMap(String key) {
+        TraverseMap(String key) {
             this.key = key;
         }
 
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             final var currentMap = (ResultMap) context.inputs.peek();
             context.inputs.push(currentMap.children().get(key));
             applyChildren(context);
             context.inputs.pop();
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("T.map(").append(key).append(")");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("T.map(").append(key).append(")");
+            printChildren(printer);
         }
     }
 
     private static class TraverseList extends TransformationStep {
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             final var currentList = (ResultList) context.inputs.peek();
             currentList.children().forEach(childContext -> {
                 context.inputs.push(childContext);
@@ -374,26 +357,23 @@ public class QueryProjector {
             });
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("T.list");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("T.list");
+            printChildren(printer);
         }
     }
 
     private static class CreateLeaf extends TransformationStep {
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             final var inputLeaf = (ResultLeaf) context.inputs.peek();
             final var outputLeaf = new ResultLeaf(inputLeaf.value);
             context.outputs.push(outputLeaf);
             // applyChildren(context);
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("C.leaf");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("C.leaf");
+            printChildren(printer);
         }
     }
 
@@ -402,8 +382,7 @@ public class QueryProjector {
     //           -> WriteToMap with k2 -> TraverseMap with k2 -> ... possible other traverses ... -> ... children that creates the new map items
     //           -> ... the same with other keys ...
     private static class CreateMap extends TransformationStep {
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             final var builder = new ResultMap.Builder();
             context.builders.push(builder);
             applyChildren(context);
@@ -411,40 +390,36 @@ public class QueryProjector {
             context.outputs.push(builder.build());
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("C.map");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("C.map");
+            printChildren(printer);
         }
     }
 
     private static class WriteToMap extends TransformationStep {
         private final String key;
 
-        public WriteToMap(String key) {
+        WriteToMap(String key) {
             this.key = key;
         }
 
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             applyChildren(context);
             final ResultNode outputNode = context.outputs.pop();
             final var builder = (ResultMap.Builder) context.builders.peek();
             builder.put(key, outputNode);
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("W.map(").append(key).append(")");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("W.map(").append(key).append(")");
+            printChildren(printer);
         }
     }
 
     // The expected structure is this:
     // CreateList -> TraverseList -> ... possible other traverses ... -> WriteToList -> ... children that creates the new list items.
     private static class CreateList<T extends ResultNode> extends TransformationStep {
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             final var builder = new ResultList.Builder<T>();
             context.builders.push(builder);
             applyChildren(context);
@@ -452,26 +427,23 @@ public class QueryProjector {
             context.outputs.push(builder.build());
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("C.list");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("C.list");
+            printChildren(printer);
         }
     }
 
     private static class WriteToList<T extends ResultNode> extends TransformationStep {
-        @Override
-        public void apply(TransformationContext context) {
+        @Override public void apply(TransformationContext context) {
             applyChildren(context);
             final var outputNode = (T) context.outputs.pop();
             final var builder = (ResultList.Builder<T>) context.builders.peek();
             builder.add(outputNode);
         }
 
-        @Override
-        protected void print(LineStringBuilder builder) {
-            builder.append("W.list");
-            printChildren(builder);
+        @Override public void printTo(Printer printer) {
+            printer.append("W.list");
+            printChildren(printer);
         }
     }
 

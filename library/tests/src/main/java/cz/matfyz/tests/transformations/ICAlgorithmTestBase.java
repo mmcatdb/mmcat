@@ -46,10 +46,10 @@ public class ICAlgorithmTestBase {
     private List<String> buildExpectedResult() throws Exception {
         var json = new JSONArray(expected);
         var lines = new ArrayList<String>();
-        
+
         for (int i = 0; i < json.length(); i++)
             lines.add(json.getString(i));
-        
+
         return lines;
     }
 

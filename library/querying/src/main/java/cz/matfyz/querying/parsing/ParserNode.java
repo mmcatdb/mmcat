@@ -50,8 +50,7 @@ public interface ParserNode extends Serializable {
             return getIdentifier().equals(other.getIdentifier());
         }
 
-        @Override
-        default int compareTo(Term other) {
+        @Override default int compareTo(Term other) {
             return getIdentifier().compareTo(other.getIdentifier());
         }
 

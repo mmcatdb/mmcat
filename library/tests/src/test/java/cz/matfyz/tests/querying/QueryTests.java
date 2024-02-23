@@ -66,6 +66,33 @@ public class QueryTests {
     }
 
     @Test
+    public void nestedMongoDB() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.mongoDB())
+            .query("""
+                SELECT {
+                    ?order street ?street ;
+                        city ?city .
+                    ?order address ?address .
+                    ?address as ?street .
+                }
+                WHERE {
+                    ?order 8 ?address .
+                    ?address 9 ?street ;
+                        10 ?city .
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100"
+                }, {
+                    "number": "o_200"
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
     public void alias() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
@@ -217,6 +244,52 @@ public class QueryTests {
             .run();
     }
 
+    @Test
+    public void multipleCompositeProperties() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.mongoDB())
+            .query("""
+                SELECT {
+                    ?order item ?item .
+                    ?item quantity ?quantity ;
+                        id ?id ;
+                        label ?label ;
+                        price ?price .
+                }
+                WHERE {
+                    ?order -12 ?item .
+                    ?item 14 ?quantity ;
+                        13/15 ?id ;
+                        13/16 ?label ;
+                        13/17 ?price .
+                }
+            """)
+            .expected("""
+                [ {
+                    "quantity": "1",
+                    "id": "123",
+                    "label": "Clean Code",
+                    "price": "125"
+                }, {
+                    "quantity": "2",
+                    "id": "765",
+                    "label": "The Lord of the Rings",
+                    "price": "199"
+                }, {
+                    "quantity": "7",
+                    "id": "457",
+                    "label": "The Art of War",
+                    "price": "299"
+                }, {
+                    "quantity": "3",
+                    "id": "734",
+                    "label": "Animal Farm",
+                    "price": "350"
+                } ]
+            """)
+            .run();
+    }
+
     /**
      * The mapping "order_item" already contains all necessary information so the other mappings shouldn't be used.
      * This needs to be checked manually.
@@ -306,16 +379,16 @@ public class QueryTests {
             .expected("""
                 [ {
                     "quantity": "1",
-                    "street": "hodnotaA"
+                    "street": "Ke Karlovu 2027/3"
                 }, {
                     "quantity": "2",
-                    "street": "hodnotaA"
+                    "street": "Ke Karlovu 2027/3"
                 }, {
                     "quantity": "7",
-                    "street": "hodnotaA2"
+                    "street": "Malostranské nám. 2/25"
                 }, {
                     "quantity": "3",
-                    "street": "hodnotaA2"
+                    "street": "Malostranské nám. 2/25"
                 } ]
             """)
             .run();

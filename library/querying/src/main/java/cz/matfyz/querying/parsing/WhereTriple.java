@@ -16,20 +16,18 @@ public class WhereTriple implements Statement, Edge<Term> {
     public final Variable subject;
     public final BaseSignature signature;
     public final Term object;
-    
+
     WhereTriple(Variable subject, BaseSignature signature, Term object) {
         this.subject = subject;
         this.signature = signature;
         this.object = object;
     }
 
-    @Override
-    public Term from() {
+    @Override public Term from() {
         return subject;
     }
 
-    @Override
-    public Term to() {
+    @Override public Term to() {
         return object;
     }
 
@@ -55,7 +53,7 @@ public class WhereTriple implements Statement, Edge<Term> {
             editableTriple.signature = base;
             return editableTriple;
         }).toList();
-            
+
         splitTriples.get(0).subject = subject;
         splitTriples.get(splitTriples.size() - 1).object = object;
 
@@ -88,8 +86,7 @@ public class WhereTriple implements Statement, Edge<Term> {
         }
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
         return subject.toString() + " " + signature.toString() + " " + object.toString();
     }
 

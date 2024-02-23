@@ -24,5 +24,5 @@ public class MongoDBCommandStatement implements AbstractStatement {
     public BsonDocument getCommand() {
         return this.command;
     }
-    
+
 }

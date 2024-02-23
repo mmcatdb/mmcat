@@ -26,13 +26,12 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
     static final String TYPE = "mongodb";
 
     private MongoDBProvider provider;
-    
+
     public MongoDBControlWrapper(MongoDBProvider provider) {
         this.provider = provider;
     }
 
-    @Override
-    public void execute(Collection<AbstractStatement> statements) {
+    @Override public void execute(Collection<AbstractStatement> statements) {
         for (final var statement : statements) {
             try {
                 if (statement instanceof MongoDBCommandStatement commandStatement)
@@ -44,13 +43,13 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
         }
     }
 
-    // @Override
-    public void execute(Path path) {
+    @Override public void execute(Path path) {
         try {
-            String commandString = "mongosh " + provider.settings.getConnectionString() + " " + path.toString();
+            // Unfortunatelly, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
+            String[] command = { "mongosh", provider.settings.getConnectionString(), path.toString() };
 
             Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(commandString);
+            Process process = runtime.exec(command);
             process.waitFor();
 
             BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -64,33 +63,27 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
         }
     }
 
-    @Override
-    public MongoDBDDLWrapper getDDLWrapper() {
+    @Override public MongoDBDDLWrapper getDDLWrapper() {
         return new MongoDBDDLWrapper();
     }
 
-    @Override
-    public MongoDBICWrapper getICWrapper() {
+    @Override public MongoDBICWrapper getICWrapper() {
         return new MongoDBICWrapper();
     }
 
-    @Override
-    public MongoDBDMLWrapper getDMLWrapper() {
+    @Override public MongoDBDMLWrapper getDMLWrapper() {
         return new MongoDBDMLWrapper();
     }
 
-    @Override
-    public MongoDBPullWrapper getPullWrapper() {
+    @Override public MongoDBPullWrapper getPullWrapper() {
         return new MongoDBPullWrapper(provider);
     }
 
-    @Override
-    public MongoDBPathWrapper getPathWrapper() {
+    @Override public MongoDBPathWrapper getPathWrapper() {
         return new MongoDBPathWrapper();
     }
 
-    @Override
-    public MongoDBQueryWrapper getQueryWrapper() {
+    @Override public MongoDBQueryWrapper getQueryWrapper() {
         return new MongoDBQueryWrapper();
     }
 

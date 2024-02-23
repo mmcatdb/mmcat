@@ -22,7 +22,7 @@ public class SchemaGraph {
 
     private final Map<SchemaObject, Node> nodes = new TreeMap<>();
     private final Set<Edge> edges = new TreeSet<>();
-    
+
     /**
      * Creates a graph from all given morphisms (objects are automatically defined by the morphisms).
      */
@@ -149,13 +149,12 @@ public class SchemaGraph {
     private static class Node implements Comparable<Node> {
         final SchemaObject object;
         final Set<Edge> edges = new TreeSet<>();
-        
+
         Node(SchemaObject object) {
             this.object = object;
         }
 
-        @Override
-        public int compareTo(Node other) {
+        @Override public int compareTo(Node other) {
             return object.compareTo(other.object);
         }
     }
@@ -184,8 +183,7 @@ public class SchemaGraph {
             return node == source ? target : source;
         }
 
-        @Override
-        public int compareTo(Edge other) {
+        @Override public int compareTo(Edge other) {
             return morphism.compareTo(other.morphism);
         }
     }
@@ -246,5 +244,5 @@ public class SchemaGraph {
         }
 
     }
-   
+
 }

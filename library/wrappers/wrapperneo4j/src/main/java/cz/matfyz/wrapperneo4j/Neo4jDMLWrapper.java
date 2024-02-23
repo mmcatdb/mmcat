@@ -13,24 +13,22 @@ import java.util.List;
 public class Neo4jDMLWrapper implements AbstractDMLWrapper {
 
     private record PropertyValue(String name, String value) {}
-    
+
     private String kindName = null;
     private List<PropertyValue> propertyValues = new ArrayList<>();
     private String fromNodeLabel = null;
     private List<PropertyValue> fromNodeValues = new ArrayList<>();
     private String toNodeLabel = null;
     private List<PropertyValue> toNodeValues = new ArrayList<>();
-    
-    @Override
-    public void setKindName(String name) {
+
+    @Override public void setKindName(String name) {
         if (!nameIsValid(name))
             throw InvalidNameException.kind(name);
 
         kindName = name;
     }
 
-    @Override
-    public void append(String name, Object value) {
+    @Override public void append(String name, Object value) {
         final String stringValue = value == null ? null : value.toString();
 
         final var split = name.split(AbstractDDLWrapper.PATH_SEPARATOR);
@@ -67,8 +65,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
         return name.matches("^[\\w.]+$");
     }
 
-    @Override
-    public Neo4jStatement createDMLStatement() {
+    @Override public Neo4jStatement createDMLStatement() {
         if (kindName == null)
             throw InvalidNameException.kind(null);
 
@@ -106,7 +103,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
     private static String propertiesToString(List<PropertyValue> properties) {
         final var output = new StringBuilder();
         output.append("{");
-        
+
         for (final var property : properties)
             output
             .append(" ")
@@ -114,23 +111,22 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
             .append(": ")
             .append(escapeString(property.value))
             .append(",");
-        
+
         if (!properties.isEmpty()) // Remove the last comma
             output.deleteCharAt(output.length() - 1);
-        
+
         output.append(" }");
 
         return output.toString();
     }
-    
+
     private static String escapeString(String input) {
         return input == null
             ? "null"
             : "'" + input.replace("'", "\\'") + "'";
     }
 
-    @Override
-    public void clear() {
+    @Override public void clear() {
         kindName = null;
         propertyValues = new ArrayList<>();
         fromNodeLabel = null;

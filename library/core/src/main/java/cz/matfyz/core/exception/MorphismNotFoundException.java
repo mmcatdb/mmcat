@@ -7,7 +7,7 @@ import cz.matfyz.core.category.Signature;
  * @author jachymb.bartik
  */
 public class MorphismNotFoundException extends CoreException {
-    
+
     private MorphismNotFoundException(String name, Signature signature) {
         super("morphismNotFound." + name, signature, null);
     }

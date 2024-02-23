@@ -21,7 +21,7 @@ public class ObjectColoring {
 
     public static ObjectColoring create(Collection<KindPattern> kinds) {
         final var coloring = new ObjectColoring(new TreeMap<>());
-        
+
         for (final var kind : kinds)
             coloring.colorObjects(kind, kind.root);
 

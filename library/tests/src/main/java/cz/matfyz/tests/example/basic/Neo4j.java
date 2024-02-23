@@ -11,7 +11,7 @@ public abstract class Neo4j {
 
     public static final String orderKind = "Order";
     public static final String itemKind = "ITEM";
-    
+
     public static TestMapping order(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,

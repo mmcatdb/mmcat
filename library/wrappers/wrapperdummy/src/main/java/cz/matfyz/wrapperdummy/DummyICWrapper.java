@@ -18,25 +18,21 @@ public class DummyICWrapper implements AbstractICWrapper {
     public List<String> methods() {
         return methods;
     }
-    
-    @Override
-    public void appendIdentifier(String kindName, IdentifierStructure identifier) {
+
+    @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {
         methods.add("appendIdentifier(" + kindName + ", [ " + identifier + " ])");
     }
 
-    @Override
-    public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
+    @Override public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
         methods.add("appendReference(" + kindName + ", " + kindName2 + ", " +  attributePairsToString(attributePairs) + ")");
     }
 
-    @Override
-    public DummyStatement createICRemoveStatement() {
+    @Override public DummyStatement createICRemoveStatement() {
         methods.add("createICRemoveStatement()");
         return new DummyStatement("");
     }
 
-    @Override
-    public DummyStatement createICStatement() {
+    @Override public DummyStatement createICStatement() {
         methods.add("createICStatement()");
 
         return new DummyStatement("");

@@ -2,6 +2,7 @@ package cz.matfyz.wrappermongodb;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author jachymb.bartik
@@ -14,10 +15,10 @@ public class MongoDBSettings {
     private String port;
     private String authenticationDatabase;
     private String database;
-    private String username;
-    private String password;
+    @Nullable private String username;
+    @Nullable private String password;
 
-    public MongoDBSettings(String host, String port, String authenticationDatabase, String database, String username, String password) {
+    public MongoDBSettings(String host, String port, String authenticationDatabase, String database, @Nullable String username, @Nullable String password) {
         this.host = host;
         this.port = port;
         this.authenticationDatabase = authenticationDatabase;
@@ -35,11 +36,19 @@ public class MongoDBSettings {
     }
 
     private String createConnectionStringFromCredentials() {
-        return new StringBuilder()
-            .append("mongodb://")
-            .append(username)
-            .append(":")
-            .append(password)
+        final var builder = new StringBuilder()
+            .append("mongodb://");
+
+        if (username != null)
+            builder
+                .append(username);
+
+        if (password != null)
+            builder
+                .append(":")
+                .append(password);
+
+        builder
             .append("@")
             .append(host)
             .append(":")
@@ -47,8 +56,9 @@ public class MongoDBSettings {
             .append("/")
             .append(database)
             .append("?authSource=")
-            .append(authenticationDatabase)
-            .toString();
+            .append(authenticationDatabase);
+
+        return builder.toString();
     }
 
     // For JSON mapping

@@ -35,7 +35,7 @@ public class DataSource extends Entity {
     public void updateFrom(DataSourceUpdate update) {
         if (update.url() != null)
             this.url = update.url();
-        
+
         if (update.label() != null)
             this.label = update.label();
     }
@@ -75,13 +75,12 @@ public class DataSource extends Entity {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
 
-        @Override
-        public DataSource deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+        @Override public DataSource deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final var id = (Id) context.getAttribute("id");
@@ -96,5 +95,5 @@ public class DataSource extends Entity {
         }
 
     }
-    
+
 }

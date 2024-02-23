@@ -55,5 +55,5 @@ public class TestDatabase<TWrapper extends AbstractControlWrapper> {
             throw new RuntimeException(e);
         }
     }
-    
+
 }

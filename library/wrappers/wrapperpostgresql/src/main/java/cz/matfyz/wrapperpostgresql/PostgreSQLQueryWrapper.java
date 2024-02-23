@@ -3,6 +3,7 @@ package cz.matfyz.wrapperpostgresql;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
+import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
@@ -19,12 +20,11 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     @Override public boolean isOptionalJoinSupported() { return true; }
     @Override public boolean isRecursiveJoinSupported() { return true; }
     @Override public boolean isFilteringSupported() { return true; }
-    @Override public boolean IsFilteringNotIndexedSupported() { return true; }
+    @Override public boolean isFilteringNotIndexedSupported() { return true; }
     @Override public boolean isAggregationSupported() { return true; }
     // CHECKSTYLE:ON
 
-    @Override
-    protected Map<ComparisonOperator, String> defineComparisonOperators() {
+    @Override protected Map<ComparisonOperator, String> defineComparisonOperators() {
         final var output = new TreeMap<ComparisonOperator, String>();
         output.put(ComparisonOperator.Equal, "=");
         output.put(ComparisonOperator.NotEqual, "<>");
@@ -35,8 +35,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         return output;
     }
 
-    @Override
-    protected Map<AggregationOperator, String> defineAggregationOperators() {
+    @Override protected Map<AggregationOperator, String> defineAggregationOperators() {
         final var output = new TreeMap<AggregationOperator, String>();
         output.put(AggregationOperator.Count, "COUNT");
         output.put(AggregationOperator.Sum, "SUM");
@@ -48,15 +47,14 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     private StringBuilder builder;
 
-    @Override
-    public QueryStatement createDSLStatement() {
+    @Override public QueryStatement createDSLStatement() {
         builder = new StringBuilder();
 
         addSelect();
         addFrom();
         addWhere();
 
-        return new QueryStatement(builder.toString(), createStructure());
+        return new QueryStatement(new StringQuery(builder.toString()), createStructure());
     }
 
     private void addSelect() {
@@ -74,12 +72,12 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             addJoins();
             return;
         }
-        
+
         // final String firstKind = kinds.values().stream().findFirst().orElseThrow(() -> QueryException.message("No tables are selected in FROM clause."));
         if (projections.isEmpty())
             throw QueryException.message("No tables are selected in FROM clause.");
-        
-        final String kindName = projections.get(0).property().kind.mapping.kindName();
+
+        final String kindName = projections.getFirst().property().kind.mapping.kindName();
         builder
             .append(escapeName(kindName))
             .append("\n");
@@ -96,7 +94,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         builder
             .append(escapeName(fromKind.mapping.kindName()))
             .append("\n");
-        
+
         for (final var join : joins) {
             Kind newKind;
             if (!joinedKinds.contains(join.to()))
@@ -109,8 +107,9 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
             joinedKinds.add(newKind);
 
             final String conditions = join.conditions().stream().map(condition -> {
-                final String fromProjection = getPropertyName(new Property(join.from(), condition.from()));
-                final String toProjection = getPropertyName(new Property(join.to(), condition.to()));
+                // TODO there shouldn't be a null for the schema object key ...
+                final String fromProjection = getPropertyName(new Property(join.from(), condition.from(), null));
+                final String toProjection = getPropertyName(new Property(join.to(), condition.to(), null));
                 return fromProjection + " = " + toProjection;
             })
                 .collect(Collectors.joining(" AND "));
@@ -214,13 +213,6 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
     private String getAggregationName(PropertyWithAggregation aggregation) {
         return getAggregationOperatorValue(aggregation.aggregationOperator) + "(" + getPropertyNameWithoutAggregation(aggregation) + ")";
-    }
-    
-    private QueryStructure createStructure() {
-        final var root = new QueryStructure(rootIdentifier, true);
-        projections.forEach(p -> root.addChild(new QueryStructure(p.identifier(), false)));
-
-        return root;
     }
 
 }

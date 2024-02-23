@@ -49,7 +49,7 @@ public class DatabaseController {
         DatabaseEntity database = service.find(id);
         if (database == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
+
         database.hidePassword();
         return database;
     }

@@ -116,7 +116,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
             final var nextSet = new TreeSet<DomainRow>();
             for (final var row : currentSet)
                 nextSet.addAll(row.getCodomainForEdge(edge));
-                
+
             currentSet = nextSet;
         }
 
@@ -131,8 +131,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
         return pendingSignatures.stream().map(signature -> new SignatureWithValue(signature, getValue(signature))).toList();
     }
 
-    @Override
-    public int compareTo(DomainRow row) {
+    @Override public int compareTo(DomainRow row) {
         final var superIdComparison = superId.compareTo(row.superId);
         if (superIdComparison != 0)
             return superIdComparison;
@@ -143,9 +142,8 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
 
         return IterableUtils.compareTwoIterables(technicalIds, row.technicalIds);
     }
-    
-    @Override
-    public String toString() {
+
+    @Override public String toString() {
         var builder = new StringBuilder();
         builder.append(superId.toString());
         if (!technicalIds.isEmpty()) {
@@ -162,10 +160,9 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
 
         return builder.toString();
     }
-    
+
     // TODO change equals and compareTo to do == first
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof DomainRow row && superId.equals(row.superId);
     }
 
@@ -179,8 +176,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
             super(t);
         }
 
-        @Override
-        public void serialize(DomainRow row, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(DomainRow row, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writePOJOField("superId", row.superId);
             generator.writeFieldName("technicalIds");
@@ -189,5 +185,5 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
         }
 
     }
-    
+
 }

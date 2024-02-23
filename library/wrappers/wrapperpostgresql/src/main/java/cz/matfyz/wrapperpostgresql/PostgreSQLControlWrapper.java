@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author jachymb.bartik
  */
 public class PostgreSQLControlWrapper implements AbstractControlWrapper {
-    
+
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLControlWrapper.class);
 
@@ -31,8 +31,7 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
         this.provider = provider;
     }
 
-    @Override
-    public void execute(Collection<AbstractStatement> statements) {
+    @Override public void execute(Collection<AbstractStatement> statements) {
         try (
             Connection connection = provider.getConnection();
         ) {
@@ -51,11 +50,13 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
         }
     }
 
-    @Override
-    public void execute(Path path) {
+    @Override public void execute(Path path) {
         try {
             String script = Files.readString(path);
-            final var statements = splitScript(script)
+            // Split the queries by the ; character, followed by any number of whitespaces and newline.
+            final var statements = Stream.of(script.split(";\\s*\n"))
+                .map(String::strip)
+                .filter(s -> !s.isBlank())
                 .map(s -> (AbstractStatement) new PostgreSQLStatement(s))
                 .toList();
 
@@ -64,12 +65,6 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
         catch (IOException e) {
             throw new ExecuteException(e, path);
         }
-    }
-
-    public static Stream<String> splitScript(String script) {
-        return Stream.of(script.split(";\\s*\n"))
-            .map(s -> s.trim())
-            .filter(s -> !s.isBlank());
     }
 
     // String beforePasswordString = new StringBuilder()
@@ -88,7 +83,7 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     //     .append(" -f ")
     //     .append(path.toString())
     //     .toString();
-    
+
     // LOGGER.info("Executing: " + beforePasswordString + "********" + afterPasswordString);
 
     // String commandString = beforePasswordString + PostgreSQL.PASSWORD + afterPasswordString;
@@ -101,33 +96,27 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
     // LOGGER.info(info);
 
 
-    @Override
-    public PostgreSQLDDLWrapper getDDLWrapper() {
+    @Override public PostgreSQLDDLWrapper getDDLWrapper() {
         return new PostgreSQLDDLWrapper();
     }
 
-    @Override
-    public PostgreSQLICWrapper getICWrapper() {
+    @Override public PostgreSQLICWrapper getICWrapper() {
         return new PostgreSQLICWrapper();
     }
 
-    @Override
-    public PostgreSQLDMLWrapper getDMLWrapper() {
+    @Override public PostgreSQLDMLWrapper getDMLWrapper() {
         return new PostgreSQLDMLWrapper();
     }
 
-    @Override
-    public PostgreSQLPullWrapper getPullWrapper() {
+    @Override public PostgreSQLPullWrapper getPullWrapper() {
         return new PostgreSQLPullWrapper(provider);
     }
 
-    @Override
-    public PostgreSQLPathWrapper getPathWrapper() {
+    @Override public PostgreSQLPathWrapper getPathWrapper() {
         return new PostgreSQLPathWrapper();
     }
 
-    @Override
-    public PostgreSQLQueryWrapper getQueryWrapper() {
+    @Override public PostgreSQLQueryWrapper getQueryWrapper() {
         return new PostgreSQLQueryWrapper();
     }
 

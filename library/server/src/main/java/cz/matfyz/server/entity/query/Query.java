@@ -29,8 +29,8 @@ public class Query extends Entity {
             label
         );
     }
-    
-    private static record JsonValue(
+
+    private record JsonValue(
         String label
     ) {}
 

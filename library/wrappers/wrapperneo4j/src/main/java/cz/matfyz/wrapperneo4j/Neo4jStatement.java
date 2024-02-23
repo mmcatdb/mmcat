@@ -16,7 +16,7 @@ public class Neo4jStatement implements AbstractStatement {
     public String getContent() {
         return this.content;
     }
-    
+
     private static final Neo4jStatement empty = new Neo4jStatement("");
 
     public static Neo4jStatement createEmpty() {

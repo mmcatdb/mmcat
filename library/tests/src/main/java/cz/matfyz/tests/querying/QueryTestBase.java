@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
+import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.tests.example.common.TestDatabase;
@@ -26,7 +26,7 @@ public class QueryTestBase {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTestBase.class);
-    
+
     private final SchemaCategory schema;
 
     public QueryTestBase(SchemaCategory schema) {
@@ -62,20 +62,20 @@ public class QueryTestBase {
     public void run() {
         final var kinds = defineKinds();
         final var queryToInstance = new QueryToInstance(schema, queryString, kinds);
-        
+
         final ResultList result = queryToInstance.execute();
         final var jsonResults = result.toJsonArray();
         LOGGER.info("\n{}", jsonResults);
-        
+
         final JsonNode jsonResult = parseJsonResult(jsonResults);
-        final JsonNode expectedResult = parseExpectedResult(expectedJson);        
+        final JsonNode expectedResult = parseExpectedResult(expectedJson);
         assertEquals(expectedResult, jsonResult);
     }
 
     private List<Kind> defineKinds() {
         return databases.stream().flatMap(testDatabase -> {
             final var builder = new Database.Builder();
-            testDatabase.mappings.forEach(mapping -> builder.mapping(mapping));
+            testDatabase.mappings.forEach(builder::mapping);
             final var database = builder.build(testDatabase.type, testDatabase.wrapper, testDatabase.id);
 
             return database.kinds.stream();

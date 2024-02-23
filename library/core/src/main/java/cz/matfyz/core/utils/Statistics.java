@@ -1,5 +1,7 @@
 package cz.matfyz.core.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -10,7 +12,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class Statistics {
+public abstract class Statistics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Statistics.class);
 
@@ -22,14 +24,16 @@ public class Statistics {
     }
 
     public static Long end(Interval interval) {
-        var endTime = System.nanoTime();
+        final var endTime = System.nanoTime();
 
-        var startTime = starts.get(interval);
+        final var startTime = starts.get(interval);
         if (startTime == null)
             return null;
-        
-        var difference = endTime - startTime;
-        times.put(interval, difference);
+
+        final var difference = endTime - startTime;
+
+        final var current = times.get(interval);
+        times.put(interval, (current != null ? current : 0) + difference);
         starts.put(interval, null);
 
         return difference;
@@ -62,7 +66,7 @@ public class Statistics {
     public static String getInfo(Interval interval) {
         var value = times.get(interval);
 
-        return (value == null ? "Null" : (value / 1000000 + " ms"));
+        return value == null ? "Null" : printNanoseconds(value);
     }
 
     public static String getInfo(Counter counter) {
@@ -71,19 +75,31 @@ public class Statistics {
     }
 
     private static String printLargeInt(long value) {
-        if (value > 1000000000)
+        if (value > 10000000000L)
             return value / 1000000000 + "G";
-        if (value > 1000000)
+        if (value > 10000000L)
             return value / 1000000 + "M";
-        if (value > 1000)
+        if (value > 10000L)
             return value / 1000 + "k";
+
         return value + "";
     }
-    
+
+    private static String printNanoseconds(long value) {
+        if (value > 10000000000L)
+            return value / 1000000000 + " s";
+        if (value > 10000000L)
+            return value / 1000000 + " ms";
+        if (value > 10000L)
+            return value / 1000 + " μs";
+
+        return value + " ns";
+    }
+
     public static void logInfo(Interval interval) {
         LOGGER.info("{}\t({})", getInfo(interval), interval);
     }
-    
+
     public static void logInfo(Counter counter) {
         LOGGER.info("{}\t({})", getInfo(counter), counter);
     }
@@ -97,7 +113,9 @@ public class Statistics {
         MOVE,
         IMPORT_JOIN_MOVE,
         JSON_LD_TO_RDF,
-        RDF_TO_INSTANCE
+        RDF_TO_INSTANCE,
+        PREPARE,
+        PROCESS,
     }
 
     private static Map<Counter, Long> counters = generateCounters();
@@ -109,8 +127,6 @@ public class Statistics {
 
         return value;
     }
-
-
 
     public static void set(Counter counter, long value) {
         counters.put(counter, value);
@@ -130,6 +146,60 @@ public class Statistics {
             map.put(counter, 0L);
 
         return map;
+    }
+
+    public abstract static class Aggregator {
+
+        private Aggregator() {}
+
+        private static final List<Map<Interval, Long>> runs = new ArrayList<>();
+        private static final Map<Interval, Long> currentRun = new TreeMap<>();
+
+        public static void collectBatch() {
+            times.keySet().forEach(interval -> {
+                final var value = times.get(interval);
+                final var currentRaw = currentRun.get(interval);
+                final var current = currentRaw != null ? currentRaw : 0L;
+
+                currentRun.put(interval, current + value);
+            });
+            Statistics.reset();
+        }
+
+        public static void collectRun() {
+            runs.add(new TreeMap<>(currentRun));
+            currentRun.clear();
+            Statistics.reset();
+        }
+
+        public static void reset() {
+            runs.clear();
+            currentRun.clear();
+            Statistics.reset();
+        }
+
+        public static String getInfo(Interval interval) {
+            long count = runs.stream().filter(r -> r.containsKey(interval)).count();
+            long total = runs.stream().filter(r -> r.containsKey(interval)).mapToLong(r -> r.get(interval)).sum();
+
+            final var values = runs.stream().map(r -> {
+                final var value = r.get(interval);
+                return value == null ? "Null" : printNanoseconds(value);
+            }).toList();
+
+            return String.format("- interval: %s\n- count: %s\n- total: %s\n- average: %s\n- values: [ %s ]",
+                interval,
+                count,
+                printNanoseconds(total),
+                count != 0 ? printNanoseconds(total / count) : "NaN",
+                String.join(", ", values)
+            );
+        }
+
+        public static void logInfo(Interval interval) {
+            LOGGER.info("\n{}", getInfo(interval));
+        }
+
     }
 
 }

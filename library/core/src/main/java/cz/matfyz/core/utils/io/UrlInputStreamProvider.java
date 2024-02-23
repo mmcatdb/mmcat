@@ -19,5 +19,5 @@ public class UrlInputStreamProvider implements InputStreamProvider {
         final var fileUrl = new URL(url);
         return fileUrl.openStream();
     }
-    
+
 }

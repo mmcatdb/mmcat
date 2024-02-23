@@ -14,17 +14,17 @@ import java.util.List;
 import java.util.Set;
 
 public class SchemaBuilder {
-    
+
     private final List<ObjectDefinition> objects = new ArrayList<>();
     private final List<MorphismDefinition> morphisms = new ArrayList<>();
 
-    private static record ObjectDefinition(Key key, String name, ObjectIds ids) {}
+    private record ObjectDefinition(Key key, String name, ObjectIds ids) {}
 
     public void object(Key key, String name, ObjectIds ids) {
         this.objects.add(new ObjectDefinition(key, name, ids));
     }
 
-    private static record MorphismDefinition(Signature signature, Key dom, Key cod, Min min, Tag tag) {}
+    private record MorphismDefinition(Signature signature, Key dom, Key cod, Min min, Tag tag) {}
 
 
     public void morphism(Signature signature, Key dom, Key cod, Min min, Tag tag) {

@@ -10,9 +10,9 @@ import java.util.Set;
  */
 public interface AbstractDDLWrapper {
 
-    static final String PATH_SEPARATOR = "/";
-    static final String EMPTY_NAME = StaticName.createAnonymous().getStringName();
-    static final String INDENTATION = "    ";
+    String PATH_SEPARATOR = "/";
+    String EMPTY_NAME = StaticName.createAnonymous().getStringName();
+    String INDENTATION = "    ";
 
     void setKindName(String name);
 

@@ -13,10 +13,10 @@ public class ValueFilter implements Filter, Statement {
     // TODO why this can't be an aggregation?
     public final Variable variable;
     public final List<String> allowedValues;
-    
+
     ValueFilter(Variable variable, List<String> allowedValues) {
         this.variable = variable;
         this.allowedValues = allowedValues;
     }
-    
+
 }

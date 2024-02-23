@@ -16,5 +16,5 @@ public class PostgreSQLStatement implements AbstractStatement {
     public String getContent() {
         return this.content;
     }
-    
+
 }

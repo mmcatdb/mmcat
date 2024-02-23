@@ -14,17 +14,22 @@ public abstract class MongoDB {
     private MongoDB() {}
 
     public static final String orderKind = "order";
+    public static final String addressKind = "address";
+    public static final String tagKind = "tag";
     public static final String itemKind = "orderItem";
     public static final String itemEmptyKind = "orderItemEmpty";
+    public static final String contactKind = "contact";
+    public static final String customerKind = "customer";
+    public static final String noteKind = "note";
 
     public static TestMapping order(SchemaCategory schema) {
         return PostgreSQL.order(schema);
     }
-    
+
     public static TestMapping address(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,
-            orderKind,
+            addressKind,
             () -> ComplexProperty.createRoot(
                 new SimpleProperty("number", Schema.orderToNumber),
                 ComplexProperty.create("address", Schema.orderToAddress,
@@ -56,7 +61,7 @@ public abstract class MongoDB {
     public static TestMapping tag(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,
-            orderKind,
+            tagKind,
             () -> ComplexProperty.createRoot(
                 new SimpleProperty("number", Schema.orderToNumber),
                 new SimpleProperty("tags", Schema.tagToOrder.dual())
@@ -117,7 +122,7 @@ public abstract class MongoDB {
     public static TestMapping contact(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,
-            orderKind,
+            contactKind,
             () -> ComplexProperty.createRoot(
                 new SimpleProperty("number", Schema.orderToNumber),
                 ComplexProperty.create("contact", Schema.contactToOrder.dual(),
@@ -149,7 +154,7 @@ public abstract class MongoDB {
     public static TestMapping customer(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,
-            orderKind,
+            customerKind,
             () -> ComplexProperty.createRoot(
                 ComplexProperty.createAuxiliary(new StaticName("customer"),
                     new SimpleProperty("name", Schema.orderToName),
@@ -173,7 +178,7 @@ public abstract class MongoDB {
     public static TestMapping note(SchemaCategory schema) {
         return new TestMapping(schema,
             Schema.order,
-            orderKind,
+            noteKind,
             () -> ComplexProperty.createRoot(
                 new SimpleProperty("number", Schema.orderToNumber),
                 ComplexProperty.create("note", Schema.noteToOrder.dual(),

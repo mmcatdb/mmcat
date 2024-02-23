@@ -62,5 +62,5 @@ public interface AbstractPathWrapper {
      * Although some DDL statements might still exist (e.g., create collection in MongoDB).
      */
     boolean isSchemaLess();
-    
+
 }

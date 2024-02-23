@@ -97,11 +97,11 @@ public class ActionController {
         if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
-        
+
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
     }
 
-    static record ActionDetail(
+    record ActionDetail(
         Id id,
         Id categoryId,
         String label,
@@ -121,19 +121,19 @@ public class ActionController {
     })
     interface ActionPayloadDetail {}
 
-    static record CategoryToModelPayloadDetail(
+    record CategoryToModelPayloadDetail(
         LogicalModelInfo logicalModel
     ) implements ActionPayloadDetail {}
 
-    static record ModelToCategoryPayloadDetail(
+    record ModelToCategoryPayloadDetail(
         LogicalModelInfo logicalModel
     ) implements ActionPayloadDetail {}
 
-    static record JsonLdToCategoryPayloadDetail(
+    record JsonLdToCategoryPayloadDetail(
         DataSource dataSource
     ) implements ActionPayloadDetail {}
 
-    static record UpdateSchemaPayloadDetail(
+    record UpdateSchemaPayloadDetail(
         Version prevVersion,
         Version nextVersion
     ) implements ActionPayloadDetail {}

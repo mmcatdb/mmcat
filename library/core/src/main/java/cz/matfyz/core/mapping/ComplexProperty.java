@@ -4,7 +4,7 @@ import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.utils.IndentedStringBuilder;
+import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class ComplexProperty extends AccessPath {
 
     private final boolean isAuxiliary;
-    
+
     public boolean isAuxiliary() {
         return isAuxiliary;
     }
@@ -48,7 +48,7 @@ public class ComplexProperty extends AccessPath {
 
     private final ArrayList<AccessPath> subpaths;
     private final Map<Signature, AccessPath> subpathsMap;
-    
+
     public List<AccessPath> subpaths() {
         return subpaths;
     }
@@ -62,11 +62,11 @@ public class ComplexProperty extends AccessPath {
 
         return optional.isPresent() ? optional.get() : null;
     }
-    
+
     // TODO property is auxiliary if and only if its signature is EMPTY.
     public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, List<AccessPath> subpaths) {
         super(name, signature);
-        
+
         this.isAuxiliary = isAuxiliary;
         this.subpathsMap = new TreeMap<>();
         subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
@@ -76,11 +76,11 @@ public class ComplexProperty extends AccessPath {
     public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
         this(name, signature, isAuxiliary, Arrays.asList(subpaths));
     }
-    
+
     public ComplexProperty(String name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
         this(new StaticName(name), signature, isAuxiliary, Arrays.asList(subpaths));
     }
-    
+
     public ComplexProperty(Signature name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
         this(new DynamicName(name), signature, isAuxiliary, Arrays.asList(subpaths));
     }
@@ -97,7 +97,7 @@ public class ComplexProperty extends AccessPath {
     public static ComplexProperty create(Signature name, Signature signature, AccessPath... subpaths) {
         return create(new DynamicName(name), signature, subpaths);
     }
-    
+
     public static ComplexProperty createEmpty() {
         return new ComplexProperty(null, Signature.createEmpty(), true, Collections.<AccessPath>emptyList());
     }
@@ -117,7 +117,7 @@ public class ComplexProperty extends AccessPath {
     public static ComplexProperty createRoot(AccessPath... subpaths) {
         return createAuxiliary(StaticName.createAnonymous(), subpaths);
     }
-    
+
     /**
      * Given a signature M, this function finds such a direct subpath S of this path that for each of the leaves L of S holds:
      *      - L.context == M, or
@@ -141,17 +141,17 @@ public class ComplexProperty extends AccessPath {
         //     final var directSubpath = getDirectSubpath(Signature.createEmpty());
         //     if (directSubpath instanceof SimpleProperty simpleProperty)
         //         return simpleProperty;
-            
+
         //     for (AccessPath subpath : subpaths())
         //         if (subpath instanceof ComplexProperty complexProperty) {
         //             AccessPath result = complexProperty.getSubpathBySignature(null);
         //             if (result != null)
         //                 return result;
         //         }
-    
+
         //     return null;
         // }
-        
+
         // If this is an auxiliary property, we must find if all of the descendats of this property have M in their contexts or values.
         // If so, this is returned even if this context is null.
         // This doesn't make sense - each subpath has different signature
@@ -167,28 +167,27 @@ public class ComplexProperty extends AccessPath {
                     break;
                 }
             }
-            
+
             if (returnThis)
                 return this;
         }
          */
-    
+
         final var directSubpath = getDirectSubpath(signature);
         if (directSubpath != null)
             return directSubpath;
-        
+
         for (AccessPath subpath : subpaths())
             if (subpath instanceof ComplexProperty complexProperty) {
                 AccessPath result = complexProperty.getSubpathBySignature(signature);
                 if (result != null)
                     return result;
             }
-        
+
         return null;
     }
 
-    @Override
-    protected boolean hasSignature(Signature signature) {
+    @Override protected boolean hasSignature(Signature signature) {
         return this.signature.equals(signature);
     }
 
@@ -206,11 +205,10 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override
-    protected List<AccessPath> getPropertyPathInternal(Signature signature) {
+    @Override protected List<AccessPath> getPropertyPathInternal(Signature signature) {
         if (this.signature.contains(signature))
             return new ArrayList<>(List.of(this));
-        
+
         for (var subpath : subpaths) {
             var path = subpath.getPropertyPathInternal(signature);
             if (path != null) {
@@ -222,8 +220,7 @@ public class ComplexProperty extends AccessPath {
         return null;
     }
 
-    @Override
-    public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
+    @Override public AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema) {
         final SchemaMorphism morphism = schema.getMorphism(signature);
         if (morphism.dom().key().equals(key))
             return this;
@@ -236,7 +233,7 @@ public class ComplexProperty extends AccessPath {
 
         return null;
     }
-    
+
     /**
      * Creates a copy of this access path and links it to all its subpaths except the one given subpath.
      * @param subpath
@@ -244,32 +241,30 @@ public class ComplexProperty extends AccessPath {
      */
     public ComplexProperty minusSubpath(AccessPath subpath) {
         assert subpaths.stream().anyMatch(path -> path.equals(subpath)) : "Subpath not found in accessPath in minusSubtree";
-        
+
         final List<AccessPath> newSubpaths = subpaths.stream().filter(path -> path.equals(subpath)).toList();
-        
+
         return new ComplexProperty(name, signature, isAuxiliary, newSubpaths);
     }
-    
-    @Override
-    public String toString() {
-        final var subpathBuilder = new IndentedStringBuilder(1);
-        
-        if (!subpaths.isEmpty())
-            subpathBuilder.append(subpaths.get(0));
-        for (int i = 1; i < subpaths.size(); i++)
-            subpathBuilder.append(",\n").append(subpaths.get(i));
-        subpathBuilder.append("\n");
-        
-        StringBuilder builder = new StringBuilder();
-        builder.append(name).append(": ");
+
+    @Override public void printTo(Printer printer) {
+        printer.append(name).append(": ");
         if (!isAuxiliary())
-            builder.append(signature).append(" ");
-        
-        builder.append("{\n").append(subpathBuilder).append("}");
-        
-        return builder.toString();
+            printer.append(signature).append(" ");
+
+        printer.append("{").down().nextLine();
+
+        for (int i = 0; i < subpaths.size(); i++)
+            printer.append(subpaths.get(i)).append(",").nextLine();
+
+        printer.remove().up().nextLine()
+            .append("}");
     }
-    
+
+    @Override public String toString() {
+        return Printer.print(this);
+    }
+
     /**
      * Properties from given synthetic nodes are moved to their parent paths
      * @return
@@ -278,7 +273,7 @@ public class ComplexProperty extends AccessPath {
         List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();
         return new ComplexProperty(name, signature, isAuxiliary, newSubpaths);
     }
-    
+
     private List<AccessPath> getContentWithoutAuxiliaryNodes() {
         List<AccessPath> newSubpaths = new ArrayList<>();
         for (AccessPath path : subpaths()) {
@@ -292,7 +287,7 @@ public class ComplexProperty extends AccessPath {
                     newSubpaths.add(complexProperty.copyWithoutAuxiliaryNodes());
             }
         }
-        
+
         return newSubpaths;
     }
 
@@ -306,8 +301,7 @@ public class ComplexProperty extends AccessPath {
             super(t);
         }
 
-        @Override
-        public void serialize(ComplexProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
+        @Override public void serialize(ComplexProperty property, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
@@ -317,7 +311,7 @@ public class ComplexProperty extends AccessPath {
             for (final var subpath : property.subpaths)
                 generator.writePOJO(subpath);
             generator.writeEndArray();
-            
+
             generator.writeEndObject();
         }
 
@@ -328,7 +322,7 @@ public class ComplexProperty extends AccessPath {
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
@@ -336,9 +330,8 @@ public class ComplexProperty extends AccessPath {
         private static final ObjectReader nameJsonReader = new ObjectMapper().readerFor(Name.class);
         private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
         private static final ObjectReader subpathsJsonReader = new ObjectMapper().readerFor(AccessPath[].class);
-    
-        @Override
-        public ComplexProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+
+        @Override public ComplexProperty deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
             final Name name = nameJsonReader.readValue(node.get("name"));

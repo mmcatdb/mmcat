@@ -47,7 +47,7 @@ public abstract class PostgreSQL {
 
     public static void addProduct(InstanceBuilder builder, @Nullable String idValue, @Nullable String labelValue, @Nullable String priceValue) {
         final var product = builder.value(Schema.productToId, idValue).object(Schema.product);
-        
+
         if (idValue != null)
             builder.morphism(Schema.productToId, product, builder.valueObject(idValue, Schema.id));
 

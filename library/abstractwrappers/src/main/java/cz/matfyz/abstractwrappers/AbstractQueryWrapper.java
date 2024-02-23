@@ -1,16 +1,13 @@
 package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.utils.GraphUtils.Tree;
-import cz.matfyz.core.utils.LineStringBuilder;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -39,14 +36,14 @@ public interface AbstractQueryWrapper {
     /**
      * Determines whether filtering of values of a specific property is supported if the property is not part of the identifier (key) of a specific kind.
      */
-    boolean IsFilteringNotIndexedSupported();
+    boolean isFilteringNotIndexedSupported();
 
     /**
      * Determines whether the aggregation functions are supported.
      */
     boolean isAggregationSupported();
 
-    public enum ComparisonOperator {
+    enum ComparisonOperator {
         Equal,
         NotEqual,
         Less,
@@ -55,7 +52,7 @@ public interface AbstractQueryWrapper {
         GreaterOrEqual,
     }
 
-    public enum AggregationOperator {
+    enum AggregationOperator {
         Count,
         Sum,
         Min,
@@ -64,36 +61,52 @@ public interface AbstractQueryWrapper {
     }
 
     /**
-     * This class represents a queryable property. It's defined by the kind and a path from its root.
+     * A queryable property. It's defined by the kind and a path from its root.
+     *  - If the `parent` property is null, the path is relative to the root of the kind.
+     *  - Otherwise, the path is relative to the parent property.
      */
-    public static class Property implements Serializable {
+    class Property implements Comparable<Property>, Serializable {
         public final Kind kind;
+        public final @Nullable Property parent;
         public final Signature path;
+        public final SchemaObject schemaObject;
 
-        public Property(Kind kind, Signature path) {
+        public Property(Kind kind, Signature path, @Nullable Property parent) {
             this.kind = kind;
             this.path = path;
+            this.parent = parent;
+            this.schemaObject = findSchemaObject();
         }
 
-        public SchemaObject findSchemaObject() {
-            return path.isEmpty()
+        private SchemaObject findSchemaObject() {
+            if (!path.isEmpty())
+                return kind.mapping.category().getEdge(path.getLast()).to();
+
+            return parent == null
                 ? kind.mapping.rootObject()
-                : kind.mapping.category().getEdge(path.getLast()).to();
+                : parent.schemaObject;
+        }
+
+        @Override public int compareTo(Property other) {
+            final int kindComparison = kind.compareTo(other.kind);
+            return kindComparison != 0
+                ? kindComparison
+                : schemaObject.compareTo(other.schemaObject);
         }
     }
 
-    public static class PropertyWithAggregation extends Property {
+    class PropertyWithAggregation extends Property {
         public final Signature aggregationRoot;
         public final AggregationOperator aggregationOperator;
 
-        public PropertyWithAggregation(Kind kind, Signature path, Signature aggregationRoot, AggregationOperator aggregationOperator) {
-            super(kind, path);
+        public PropertyWithAggregation(Kind kind, Signature path, @Nullable Property parent, Signature aggregationRoot, AggregationOperator aggregationOperator) {
+            super(kind, path, parent);
             this.aggregationRoot = aggregationRoot;
             this.aggregationOperator = aggregationOperator;
         }
     }
 
-    public static record Constant(
+    record Constant(
         List<String> values
     ) {}
 
@@ -107,7 +120,7 @@ public interface AbstractQueryWrapper {
      */
     void addProjection(Property property, String identifier, boolean isOptional);
 
-    public static record JoinCondition(Signature from, Signature to) {}
+    record JoinCondition(Signature from, Signature to) {}
 
     /**
      * Adds a join (or graph traversal).
@@ -135,75 +148,7 @@ public interface AbstractQueryWrapper {
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
 
-    // TODO add to json conversion for FE. Also, probably move to a separate file.
-    public static class QueryStructure implements Tree<QueryStructure> {
-    
-        public final String name;
-        // TODO find out if the object is needed
-        public final boolean isArray;
-        public final Map<String, QueryStructure> children = new TreeMap<>();
-
-        /** If null, this is the root of the tree. */
-        @Nullable
-        private QueryStructure parent;
-
-        public QueryStructure(String name, boolean isArray) {
-            this.name = name;
-            this.isArray = isArray;
-        }
-
-        /**
-         * Adds the child and returns it back.
-         */
-        public QueryStructure addChild(QueryStructure child) {
-            this.children.put(child.name, child);
-            child.parent = this;
-            return child;
-        }
-
-        @Nullable
-        public QueryStructure parent() {
-            return parent;
-        }
-
-        @Override
-        public Collection<QueryStructure> children() {
-            return this.children.values();
-        }
-
-        private void print(LineStringBuilder builder) {
-            builder.append(name);
-            if (isArray)
-                builder.append("[]");
-
-            if (!children.isEmpty())
-                builder.append(":");
-
-            builder
-                .down()
-                .nextLine();
-
-            children.values().forEach(child -> {
-                child.print(builder);
-                builder.nextLine();
-            });
-            builder.up();
-        }
-
-        @Override
-        public String toString() {
-            final var builder = new LineStringBuilder(0, "    ");
-            print(builder);
-            return builder.toString();
-        }
-
-        @Override
-        public int compareTo(QueryStructure other) {
-            return name.compareTo(other.name);
-        }
-    }
-
-    public static record QueryStatement(String stringContent, QueryStructure structure) {}
+    record QueryStatement(QueryContent content, QueryStructure structure) {}
 
     /**
      * Builds a DSL statement based on the information obtained by calling the wrapper methods.

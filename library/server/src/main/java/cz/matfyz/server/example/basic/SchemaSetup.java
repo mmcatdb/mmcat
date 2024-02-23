@@ -15,8 +15,7 @@ class SchemaSetup extends SchemaBase {
         return new SchemaSetup(wrapper, lastUpdateVersion).innerCreateNewUpdate();
     }
 
-    @Override
-    protected void createOperations() {
+    @Override protected void createOperations() {
         // Order
         addObject(Schema.order, 0, 0);
         addComposite(ADD_PROPERTY, () -> {
@@ -91,7 +90,7 @@ class SchemaSetup extends SchemaBase {
             addMorphism(Schema.itemToProduct);
             addIds(Schema.item);
         });
-        
+
         addComposite(ADD_PROPERTY, () -> {
             addObject(Schema.quantity, 1, 0);
             addMorphism(Schema.itemToQuantity);
@@ -118,7 +117,7 @@ class SchemaSetup extends SchemaBase {
         });
 
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.content, 3, 0);
+            addObject(Schema.content.key(), 3, 0);
             addMorphism(Schema.dataToContent);
         });
 

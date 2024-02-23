@@ -40,7 +40,7 @@ public class Neo4jTests {
     public void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = database.wrapper.getPullWrapper();
-            var dbContent = inputWrapper.readAllAsStringForTests();
+            var dbContent = inputWrapper.readNodeAsStringForTests(Neo4j.orderKind);
             LOGGER.debug("DB content:\n" + dbContent);
         });
     }

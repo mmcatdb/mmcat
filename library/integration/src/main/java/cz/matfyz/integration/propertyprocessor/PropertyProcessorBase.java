@@ -18,7 +18,7 @@ public class PropertyProcessorBase {
 
     protected final InstanceCategory category;
     protected final MorphismFinder finder;
-    
+
     protected PropertyProcessorBase(InstanceCategory category) {
         this.category = category;
         this.finder = new MorphismFinder(category);
@@ -45,5 +45,5 @@ public class PropertyProcessorBase {
 
         throw RDFNodeException.unprocessable(statementObject.asNode());
     }
-    
+
 }

@@ -22,5 +22,5 @@ public class DatabaseInit extends DatabaseUpdate {
         super(label, settings);
         this.type = type;
     }
-    
+
 }

@@ -37,7 +37,7 @@ public class TestMapping {
     public TestMapping(SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator) {
         this(schema, rootKey, kindName, pathCreator, defaultKeyCreator);
     }
-    
+
     private ComplexProperty accessPath;
 
     public ComplexProperty accessPath() {

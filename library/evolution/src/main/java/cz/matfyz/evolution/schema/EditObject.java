@@ -13,13 +13,11 @@ public class EditObject extends SchemaCategory.Editor implements SchemaModificat
         this.oldObject = oldObject;
     }
 
-    @Override
-    public void up(SchemaCategory category) {
+    @Override public void up(SchemaCategory category) {
         replaceObject(category, newObject);
     }
 
-    @Override
-    public void down(SchemaCategory category) {
+    @Override public void down(SchemaCategory category) {
         replaceObject(category, oldObject);
     }
 

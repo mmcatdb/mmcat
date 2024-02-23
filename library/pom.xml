@@ -17,7 +17,7 @@
         <module>querying</module>
         <module>tests</module>
     </modules>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- This generates metadata for reflection on method parameters. This is crucial for, e.g., the @PathVariable annotation when getting the name of the parameter automatically. -->
@@ -30,7 +30,7 @@
         <jena.version>4.6.1</jena.version>
         <spring.version>3.2.0</spring.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -64,10 +64,17 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.10.1</version>
                 <configuration>
-                    <!--<release>17</release> -->
                     <release>21</release>
-                </configuration> 
-            </plugin> 
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <failOnViolation>false</failOnViolation>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

@@ -8,6 +8,7 @@ import cz.matfyz.core.instance.MappingRow;
 import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SimpleBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.TreeMap;
 public class InstanceBuilder {
 
     private final InstanceCategory instance;
-    
+
     public InstanceBuilder(SchemaCategory schema) {
         this.instance = new InstanceCategoryBuilder().setSchemaCategory(schema).build();
     }
@@ -28,18 +29,22 @@ public class InstanceBuilder {
     public InstanceCategory build() {
         return this.instance;
     }
-    
+
     private final SuperIdWithValues.Builder superIdBuilder = new SuperIdWithValues.Builder();
-    
+
     public InstanceBuilder value(Signature signature, String value) {
         superIdBuilder.add(signature, value);
-        
+
         return this;
     }
 
+    public DomainRow object(SimpleBuilder.Object object) {
+        return object(object.key());
+    }
+
     public DomainRow object(Key key) {
-        var instanceObject = instance.getObject(key);
-        SuperIdWithValues superId = superIdBuilder.build();
+        final var instanceObject = instance.getObject(key);
+        final SuperIdWithValues superId = superIdBuilder.build();
 
         var row = instanceObject.getRow(superId);
         if (row == null)
@@ -50,14 +55,19 @@ public class InstanceBuilder {
         return row;
     }
 
+
+    public DomainRow valueObject(String value, SimpleBuilder.Object object) {
+        return valueObject(value, object.key());
+    }
+
     public DomainRow valueObject(String value, Key key) {
         return value(Signature.createEmpty(), value).object(key);
     }
-    
+
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {
         var row = new MappingRow(domainRow, codomainRow);
         instance.getMorphism(signature).addMapping(row);
-        
+
         return row;
     }
 
@@ -78,5 +88,5 @@ public class InstanceBuilder {
     public interface InstanceAdder {
         void add(InstanceBuilder builder);
     }
-    
+
 }

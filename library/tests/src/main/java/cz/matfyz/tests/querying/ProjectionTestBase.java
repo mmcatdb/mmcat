@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStructure;
-import cz.matfyz.abstractwrappers.queryresult.ResultList;
-import cz.matfyz.abstractwrappers.queryresult.ResultLeaf;
-import cz.matfyz.abstractwrappers.queryresult.ResultMap;
-import cz.matfyz.abstractwrappers.queryresult.ResultNode;
+import cz.matfyz.core.querying.QueryStructure;
+import cz.matfyz.core.querying.queryresult.ResultLeaf;
+import cz.matfyz.core.querying.queryresult.ResultList;
+import cz.matfyz.core.querying.queryresult.ResultMap;
+import cz.matfyz.core.querying.queryresult.ResultNode;
 import cz.matfyz.querying.algorithms.QueryProjector.QueryStructureTransformer;
 import cz.matfyz.querying.algorithms.QueryProjector.TransformationContext;
 import cz.matfyz.querying.algorithms.QueryProjector.TransformationRoot;
@@ -24,7 +24,7 @@ public class ProjectionTestBase {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(ProjectionTestBase.class);
-    
+
     private QueryStructure input;
 
     public ProjectionTestBase input(QueryStructure input) {

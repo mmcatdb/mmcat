@@ -36,12 +36,12 @@ public class QueryController {
     @Autowired
     private QueryRepository repository;
 
-    public static record QueryInput(
+    public record QueryInput(
         Id categoryId,
         String queryString
     ) {}
 
-    public static record QueryResult(
+    public record QueryResult(
         List<String> rows
     ) {}
 
@@ -52,11 +52,11 @@ public class QueryController {
         return new QueryResult(result.toJsonArray());
     }
 
-    public static record QueryDescription(
+    public record QueryDescription(
         List<QueryPartDescription> parts
     ) {}
 
-    public static record QueryPartDescription(
+    public record QueryPartDescription(
         DatabaseInfo database,
         QueryStatement query
     ) {}
@@ -76,7 +76,7 @@ public class QueryController {
         return repository.find(queryId);
     }
 
-    private static record QueryWithVersions(
+    private record QueryWithVersions(
         Query query,
         List<QueryVersion> versions
     ) {}
@@ -89,7 +89,7 @@ public class QueryController {
         return new QueryWithVersions(queryWithVersion.query(), versions);
     }
 
-    public static record QueryInit(
+    public record QueryInit(
         Id categoryId,
         String label,
         String content
@@ -107,7 +107,7 @@ public class QueryController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    public static record QueryVersionUpdate(
+    public record QueryVersionUpdate(
         Version version,
         String content,
         List<QueryUpdateError> errors

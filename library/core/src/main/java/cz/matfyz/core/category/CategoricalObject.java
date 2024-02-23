@@ -9,20 +9,19 @@ import cz.matfyz.core.schema.SignatureId;
  */
 public interface CategoricalObject extends Comparable<CategoricalObject> {
 
-    public Key key();
+    Key key();
 
-    public String label();
+    String label();
 
-    public SignatureId superId();
+    SignatureId superId();
 
     /**
      * Immutable.
      */
-    public ObjectIds ids();
+    ObjectIds ids();
 
-    @Override
-    public default int compareTo(CategoricalObject categoricalObject) {
+    @Override default int compareTo(CategoricalObject categoricalObject) {
         return key().compareTo(categoricalObject.key());
     }
-    
+
 }

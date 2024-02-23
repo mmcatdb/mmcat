@@ -3,6 +3,7 @@ package cz.matfyz.core.mapping;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,16 +22,16 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
  * @author pavel.koupil, jachym.bartik
  */
 @JsonDeserialize(using = AccessPath.Deserializer.class)
-public abstract class AccessPath {
+public abstract class AccessPath implements Printable {
 
     protected final Signature signature;
-    
+
     public Signature signature() {
         return signature;
     }
 
     protected final Name name;
-    
+
     public Name name() {
         return name;
     }
@@ -45,7 +46,7 @@ public abstract class AccessPath {
     public boolean isRequired() {
         return isRequired;
     }
-    
+
     protected AccessPath(Name name, Signature signature) {
         this.name = name;
         this.signature = signature;
@@ -61,29 +62,27 @@ public abstract class AccessPath {
     protected abstract List<AccessPath> getPropertyPathInternal(Signature signature);
 
     public abstract AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
-    
-    @Override
-    public boolean equals(Object object) {
+
+    @Override public boolean equals(Object object) {
         return object instanceof AccessPath path && name.equals(path.name);
     }
-    
+
     public static class Deserializer extends StdDeserializer<AccessPath> {
 
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
 
         private static final ObjectReader simplePropertyJsonReader = new ObjectMapper().readerFor(SimpleProperty.class);
         private static final ObjectReader complexPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
-    
-        @Override
-        public AccessPath deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+
+        @Override public AccessPath deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-    
+
             return node.has("subpaths")
                 ? complexPropertyJsonReader.readValue(node)
                 : simplePropertyJsonReader.readValue(node);

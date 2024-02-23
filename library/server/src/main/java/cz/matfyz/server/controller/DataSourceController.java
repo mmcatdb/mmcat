@@ -40,7 +40,7 @@ public class DataSourceController {
         DataSource dataSource = service.find(id);
         if (dataSource == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        
+
         return dataSource;
     }
 

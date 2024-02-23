@@ -12,21 +12,19 @@ import java.util.List;
 public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;
-    
+
     private record PropertyValue(String name, String value) {}
 
     private List<PropertyValue> propertyValues = new ArrayList<>();
-    
-    @Override
-    public void setKindName(String name) {
+
+    @Override public void setKindName(String name) {
         if (!nameIsValid(name))
             throw InvalidNameException.kind(name);
 
         kindName = name;
     }
 
-    @Override
-    public void append(String name, Object value) {
+    @Override public void append(String name, Object value) {
         if (!nameIsValid(name))
             throw InvalidNameException.property(name);
 
@@ -38,26 +36,24 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
         return name.matches("^[\\w.]+$");
     }
 
-    @Override
-    public PostgreSQLStatement createDMLStatement() {
+    @Override public PostgreSQLStatement createDMLStatement() {
         if (kindName == null)
             throw InvalidNameException.kind(null);
 
         List<String> escapedNames = propertyValues.stream().map(propertyValue -> '"' + propertyValue.name + '"').toList();
         List<String> escapedValues = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
-        
+
         String content = String.format("INSERT INTO \"%s\" (%s)\nVALUES (%s);", kindName, String.join(", ", escapedNames), String.join(", ", escapedValues));
         return new PostgreSQLStatement(content);
     }
-    
+
     private String escapeString(String input) {
         return input == null
             ? "NULL"
             : "'" + input.replace("'", "''") + "'";
     }
 
-    @Override
-    public void clear() {
+    @Override public void clear() {
         kindName = null;
         propertyValues = new ArrayList<>();
     }

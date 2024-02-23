@@ -14,7 +14,7 @@ import java.util.Collection;
  * @author pavel.koupil, jachymb.bartik
  */
 public class SchemaCategory implements Category {
-    
+
     public final String label;
 
     public SchemaCategory(String label) {
@@ -39,7 +39,7 @@ public class SchemaCategory implements Category {
     public SchemaObject getObject(Key key) {
         return objectContext.getUniqueObject(key);
     }
-    
+
     public SchemaMorphism getMorphism(Signature signature) {
         if (signature.isEmpty())
             throw MorphismNotFoundException.signatureIsEmpty();
@@ -83,7 +83,7 @@ public class SchemaCategory implements Category {
             return !direction;
         }
     }
-    
+
     public SchemaEdge getEdge(BaseSignature base) {
         return new SchemaEdge(
             getMorphism(base.isDual() ? base.dual() : base),

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * @author jachym.bartik
  */
 public class DatabaseEntity extends Entity {
-    
+
     public static final String PASSWORD_FIELD_NAME = "password";
 
     public DatabaseType type;
@@ -46,7 +46,7 @@ public class DatabaseEntity extends Entity {
     public void updateFrom(DatabaseUpdate data) {
         if (data.label != null)
             this.label = data.label;
-        
+
         if (data.settings != null)
             this.settings = data.settings;
     }
@@ -69,5 +69,5 @@ public class DatabaseEntity extends Entity {
     public DatabaseInfo toInfo() {
         return new DatabaseInfo(id, type, label);
     }
-    
+
 }

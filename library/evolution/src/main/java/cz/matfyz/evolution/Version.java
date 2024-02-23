@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = Version.Serializer.class)
 @JsonDeserialize(using = Version.Deserializer.class)
 public class Version implements java.io.Serializable, java.lang.Comparable<Version>, java.lang.CharSequence {
-    
+
     private final String value;
     private final int integerValue;
 
@@ -46,24 +46,20 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
     public static Version generateInitial() {
         return new Version(0);
     }
-    
-    @Override
-    public String toString() {
+
+    @Override public String toString() {
         return value;
     }
 
-    @Override
-    public char charAt(int index) {
+    @Override public char charAt(int index) {
         return value.charAt(index);
     }
 
-    @Override
-    public int length() {
+    @Override public int length() {
         return value.length();
     }
 
-    @Override
-    public CharSequence subSequence(int beginIndex, int endIndex) {
+    @Override public CharSequence subSequence(int beginIndex, int endIndex) {
         return value.subSequence(beginIndex, endIndex);
     }
 
@@ -71,31 +67,28 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         return value.compareTo(another.value);
     }
 
-    @Override
-    public boolean equals(Object object) {
+    @Override public boolean equals(Object object) {
         return object instanceof Version another && another != null && value.equals(another.value);
     }
 
-    @Override
-    public int hashCode() {
+    @Override public int hashCode() {
         return value.hashCode();
     }
 
     public static class Serializer extends StdSerializer<Version> {
-    
+
         public Serializer() {
             this(null);
         }
-      
+
         public Serializer(Class<Version> t) {
             super(t);
         }
-    
-        @Override
-        public void serialize(Version id, JsonGenerator generator, SerializerProvider provider) throws IOException {
+
+        @Override public void serialize(Version id, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeString(id.value);
         }
-    
+
     }
 
     public static class Deserializer extends StdDeserializer<Version> {
@@ -103,15 +96,14 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         public Deserializer() {
             this(null);
         }
-    
+
         public Deserializer(Class<?> vc) {
             super(vc);
         }
-    
-        @Override
-        public Version deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+
+        @Override public Version deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-    
+
             return new Version(node.asText());
         }
 

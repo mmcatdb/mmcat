@@ -11,7 +11,7 @@ import java.util.TreeMap;
 public abstract class Common {
 
     private Common() {}
-    
+
     /**
      * A common method for all enums since they can't have another base class.
      * @param <T> type of the enum

@@ -17,7 +17,7 @@ import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
-import cz.matfyz.querying.exception.JoinException;
+import cz.matfyz.querying.exception.JoiningException;
 import cz.matfyz.querying.parsing.GroupGraphPattern.TermTree;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 
@@ -49,10 +49,10 @@ public class PlanJoiner {
         this.schema = schema;
         this.allTerms = allTerms;
     }
-    
+
     private QueryNode run() {
         if (allKinds.isEmpty())
-            throw JoinException.noKinds();
+            throw JoiningException.noKinds();
 
         if (allKinds.size() == 1) {
             final var patternNode = new PatternNode(allKinds, schema, List.of(), allKinds.stream().findFirst().get().root.term);
@@ -60,13 +60,13 @@ public class PlanJoiner {
 
             return new DatabaseNode(patternNode, database);
         }
-        
+
         // TODO there might be some joining needed for OPTIONAL joins?
-        
+
         // final var newOperations = group.operations.stream().map(this::processOperation).toList();
         // TODO ignoring OPTIONAL and MINUS for now ...
-        
-        
+
+
         final ObjectColoring coloring = ObjectColoring.create(allKinds);
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
@@ -94,7 +94,7 @@ public class PlanJoiner {
                         output.add(candidate);
                 }
         }
-        
+
         return output;
     }
 
@@ -134,7 +134,7 @@ public class PlanJoiner {
         // TODO currently, we are accepting only signature ids with exactly one signature.
         if (firstId.signatures().size() != 1)
             return null;
-        
+
         final BaseSignature fromSignature = firstId.signatures().first().getLast();
         final SchemaObject rootIdObject = schema.getEdge(fromSignature).to();
         if (!idObject.equals(rootIdObject))
@@ -145,7 +145,7 @@ public class PlanJoiner {
             return null;
 
         final var condition = new JoinCondition(fromSignature, toSignature);
-        
+
         // The idObject is in fact an identifier of the root of the idKind. We also know that both idKind and refKind contains the object. Therefore we can create the join candidate.
         // TODO recursion, isOptional
         return new JoinCandidate(JoinType.IdRef, idKind, refKind, List.of(condition), 0, false);
@@ -159,7 +159,7 @@ public class PlanJoiner {
             : null;
     }
 
-    private static record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
+    private record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
         public static DatabasePair create(JoinCandidate candidate) {
             final var a = candidate.from().kind.database;
             final var b = candidate.to().kind.database;
@@ -168,8 +168,7 @@ public class PlanJoiner {
             return new DatabasePair(comparison ? a : b, comparison ? b : a);
         }
 
-        @Override
-        public int compareTo(DatabasePair other) {
+        @Override public int compareTo(DatabasePair other) {
             final int firstComparison = first.compareTo(other.first);
             return firstComparison != 0 ? firstComparison : second.compareTo(other.second);
         }
@@ -179,7 +178,7 @@ public class PlanJoiner {
         }
     }
 
-    private static record JoinGroup(DatabasePair databases, List<JoinCandidate> candidates) {}
+    private record JoinGroup(DatabasePair databases, List<JoinCandidate> candidates) {}
 
     /**
      * Groups the join candidates by the database pairs of their two kinds.
@@ -217,7 +216,7 @@ public class PlanJoiner {
         groups.stream()
             .filter(g -> !g.databases.isSameDatabase())
             .forEach(g -> candidatesBetweenParts.addAll(g.candidates));
-        
+
         // Then we find all candidates that join kinds from the same db and merge them.
         return groups.stream()
             .filter(g -> g.databases.isSameDatabase())
@@ -234,13 +233,13 @@ public class PlanJoiner {
         if (candidates.isEmpty())
             // TODO error?
             return List.of();
-            
+
         // All of the candidates have to have the same database.
         final Database database = candidates.get(0).from().kind.database;
         // If the database supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
         if (database.control.getQueryWrapper().isJoinSupported())
             return GraphUtils.findComponents(candidates).stream().map(this::createQueryPart).toList();
-        
+
         // Othervise, we have to create custom query part for each kind.
         final var kinds = new TreeSet<KindPattern>();
         candidates.forEach(c -> {
@@ -268,7 +267,7 @@ public class PlanJoiner {
             .map(k -> k.root.term)
             .map(term -> GraphUtils.findBFS(allTerms, t -> t.term.equals(term)))
             .toList();
-        
+
         var partRoot = GraphUtils.findSubroot(allTerms, rootTermTrees);
         while (!partRoot.term.isOriginal())
             partRoot = partRoot.parent;
@@ -278,40 +277,40 @@ public class PlanJoiner {
         return new QueryPart(kinds, joinCandidates, partRoot.term);
     }
 
-    private static interface JoinTreeNode {
+    private interface JoinTreeNode {
         Set<KindPattern> kinds();
         QueryNode toQueryNode(SchemaCategory schema);
     }
 
     // public interface HasKinds {
-    
+
     //     Set<Kind> kinds();
-    
-    //     public static record SplitResult<T extends HasKinds>(List<T> included, List<T> rest) {}
-    
+
+    //     public record SplitResult<T extends HasKinds>(List<T> included, List<T> rest) {}
+
     //     public static <T extends HasKinds> SplitResult<T> splitByKinds(List<T> all, Set<Kind> kinds) {
     //         final var included = new ArrayList<T>();
     //         final var rest = new ArrayList<T>();
     //         all.forEach(item -> (kinds.containsAll(item.kinds()) ? included : rest).add(item));
-    
+
     //         return new SplitResult<>(included, rest);
     //     }
-    
+
     // }
-    
-    private static record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<KindPattern> kinds) implements JoinTreeNode {
+
+    private record JoinTreeInner(JoinTreeNode from, JoinTreeNode to, JoinCandidate candidate, Set<KindPattern> kinds) implements JoinTreeNode {
         public JoinNode toQueryNode(SchemaCategory schema) {
             // First, we try to move operations and filters down the tree.
             // final var fromOperations = HasKinds.splitByKinds(operations, from.kinds());
             // final var fromFilters = HasKinds.splitByKinds(filters, from.kinds());
-            
+
             // Then we try to do the same with the other branch of the tree.
             // final var toOperations = HasKinds.splitByKinds(fromOperations.rest(), to.kinds());
             // final var toFilters = HasKinds.splitByKinds(fromFilters.rest(), to.kinds());
             // We can construct the joined group.
             // final var toGroup = to().toQueryNode();
-        
-            
+
+
             // Finally, we add the joined group as a join operation to the first group.
             // final var join = new JoinNode(toGroup, candidate);
             // final var newFromOperations = fromOperations.included();
@@ -321,7 +320,7 @@ public class PlanJoiner {
         }
     }
 
-    private static record JoinTreeLeaf(QueryPart queryPart) implements JoinTreeNode {
+    private record JoinTreeLeaf(QueryPart queryPart) implements JoinTreeNode {
         public Set<KindPattern> kinds() {
             return queryPart.kinds;
         }
@@ -375,11 +374,11 @@ public class PlanJoiner {
 
         // Now, there should be only one join node. If not, the query is invalid.
         if (nodes.size() != 1)
-            throw JoinException.impossible();
+            throw JoiningException.impossible();
 
         return nodes.get(0);
     }
-    
+
     private void optimizeJoinPlan() {
         throw new UnsupportedOperationException("PlanJoiner.optimizeJoinPlan not implemented");
     }

@@ -7,7 +7,7 @@ import java.io.Serializable;
  * @author jachymb.bartik
  */
 public class ConfigurationException extends NamedException {
-    
+
     private ConfigurationException(String name, Serializable data, Exception exception) {
         super("configuration." + name, data, exception);
     }
