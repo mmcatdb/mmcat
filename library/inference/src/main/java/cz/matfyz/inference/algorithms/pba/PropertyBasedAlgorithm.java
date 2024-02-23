@@ -9,5 +9,5 @@ package cz.matfyz.inference.algorithms.pba;
  * @author pavel.koupil
  */
 public class PropertyBasedAlgorithm {
-    
+
 }

@@ -14,9 +14,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <!--    <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target> -->    
-        <maven.compiler.source>21</maven.compiler.source> 
-        <maven.compiler.target>21</maven.compiler.target> 
+        <maven.compiler.target>1.8</maven.compiler.target> -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <spring.boot.version>3.2.0</spring.boot.version>
         <spark.version>3.5.0 </spark.version>
         <mongodb.version>3.12.10</mongodb.version>
@@ -26,9 +26,9 @@
         <maven.jar.plugin.version>3.3.0</maven.jar.plugin.version>
         <java.version>21</java.version>
     <!--    <jackson.version>2.15.2</jackson.version> -->
-        <exec.mainClass>cz.matfyz.inference.MMInferOneInAll</exec.mainClass>        
-    </properties>    
-    
+        <exec.mainClass>cz.matfyz.inference.MMInferOneInAll</exec.mainClass>
+    </properties>
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
         <dependency>
@@ -38,10 +38,10 @@
                     <exclusion>
                         <groupId>org.apache.logging.log4j</groupId>
                         <artifactId>log4j-to-slf4j</artifactId>
-                    </exclusion>    
-            </exclusions>            
+                    </exclusion>
+            </exclusions>
             <version>${spring.boot.version}</version>
-        </dependency> 
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
 <!--        <dependency>
@@ -49,7 +49,7 @@
             <artifactId>slf4j-api</artifactId>
             <version>2.0.9</version>
         </dependency> -->
-        <!--https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver--> 
+        <!--https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver-->
 <!--        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
@@ -67,25 +67,25 @@
             <version>${junit.jupiter.version}</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>            
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>wrappermongodb</artifactId>
-            <version>${project.version}</version> 
+            <version>${project.version}</version>
         </dependency>
 <!--        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency> -->
-    </dependencies>    
-    
+    </dependencies>
+
     <build>
-        <plugins>            
+        <plugins>
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
 <!--            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>                
+                <version>3.10.1</version>
                 <configuration> -->
             <!--        <source>${java.version}</source>
                     <target>${java.version}</target> -->
@@ -96,7 +96,7 @@
                 <!-- Build an executable JAR -->
 <!--                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version> 
+                <version>3.3.0</version>
                 <configuration>
                     <archive>
                         <manifest> -->
@@ -113,11 +113,11 @@
                 <version>${maven.jar.plugin.version}</version>
                 <configuration>
                         <archive>
-                            <manifest>                             
+                            <manifest>
                                 <mainClass>cz.cuni.matfyz.mminfer.MMInferOneInAll</mainClass>
                             </manifest>
                         </archive>
-                </configuration>                
+                </configuration>
             </plugin> -->
             <!--                        <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -146,7 +146,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
-                
+
                 <executions>
                     <execution>
                         <goals>
@@ -174,7 +174,7 @@
                         -add-opens java.security.jgss/sun.security.krb5=ALL-UNNAMED
                     </jvmArguments> -->
         <!--        </configuration>
-            </plugin> --> 
+            </plugin> -->
         </plugins>
     </build>
 </project>

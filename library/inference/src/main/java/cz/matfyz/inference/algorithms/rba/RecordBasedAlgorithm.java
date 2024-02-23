@@ -36,7 +36,7 @@ public class RecordBasedAlgorithm {
             JavaRDD<RecordSchemaDescription> allRSDs = wrapper.loadRSDs();
             System.out.println("RESULT_TIME OF MAPPIND AFTER: " + (System.currentTimeMillis() - start) + "ms");
 
-            // PAK FILTER EMPTY VALUE 
+            // PAK FILTER EMPTY VALUE
             // TOHLE JE REDUCE FAZE
             JavaRDD<RecordSchemaDescription> rsds = allRSDs.filter(new FilterInvalidRSDFunction());    // odstrani se prazdne nebo nevalidni RSDs
             System.out.println("RESULT_TIME OF FILTERING AFTER: " + (System.currentTimeMillis() - start) + "ms");

@@ -152,7 +152,7 @@ public class JobExecutorService {
     private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects) {
         int gridSize = (int) Math.ceil(Math.sqrt(objects.size()));
         double distance = 100; //distance between nodes on the grid
-        
+
         Map<Key, Position> positions = new HashMap<>();
         int i = 0;
         for (SchemaObject object: objects) {
@@ -165,49 +165,49 @@ public class JobExecutorService {
         }
         return positions;
     }
-    
+
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-        //Akorát k tomu potřebujete vytvořit souřadnice objektů v grafu, nicméně na to by mělo jít najít nějaký layoutovací algoritmus 
+        //Akorát k tomu potřebujete vytvořit souřadnice objektů v grafu, nicméně na to by mělo jít najít nějaký layoutovací algoritmus
         MetadataContext context = new MetadataContext();
-        
-        //Create a special id, under which you later load this category ?? 
-        Id id = new Id("schm_from_rsd"); //now hard coded special id 
+
+        //Create a special id, under which you later load this category ??
+        Id id = new Id("schm_from_rsd"); //now hard coded special id
         context.setId(id);
-        
+
         Version version = Version.generateInitial(); // can I use this?
         context.setVersion(version);
-        
+
         //maybe get rid of this second loop? and do all in one
         Map<Key, Position> positions = layoutObjects(category.allObjects());
-        
+
         for (Map.Entry<Key, Position> entry: positions.entrySet()) {
             Key key = entry.getKey();
             Position position = entry.getValue();
             context.setPosition(key, position);
-        }      
-            
-        SchemaCategoryWrapper wrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context); 
-        
+        }
+
+        SchemaCategoryWrapper wrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
+
         return wrapper;
     }
-    
+
     private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
         final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
         String url = dataSource.url;
-        
+
         //Assuming the url is in the MongoDB format
         String uri = url.substring(0, url.lastIndexOf("/"));
         String dbNameAndCollection = url.substring(url.lastIndexOf("/") + 1);
         String[] parts = dbNameAndCollection.split("\\.");
-         
+
         String databaseName = parts[0];
-        String collectionName = parts[1]; 
+        String collectionName = parts[1];
 
         final CategoryMappingPair categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, collectionName).run();
-        
+
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
         schemaService.createNewInfo(wrapper);
-        
+
         mappingService.createNew(categoryMappingPair.mapping());
     }
 

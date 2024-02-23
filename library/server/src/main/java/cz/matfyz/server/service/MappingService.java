@@ -45,7 +45,7 @@ public class MappingService {
             init.categoryVersion()
         );
     }
-    
+
     /**
      * Created for the case when I receive Mapping from mminfer
      * @param mapping
@@ -54,17 +54,17 @@ public class MappingService {
     public MappingInfo createNew(Mapping mapping) {
         // probs need to obtain MappingInit first, because that's what you can save in MappingRepo
         Signature[] primaryKeyArray = mapping.primaryKey().toArray(new Signature[0]);
-        
+
         MappingInit init = new MappingInit(
                 null, //Id logicalModelId
                 mapping.rootObject().key(),
                 primaryKeyArray,
-                mapping.kindName(), 
+                mapping.kindName(),
                 mapping.accessPath(),
                 null); //Version categoryVersion (probs could use Version.generateInitial())
-        
+
         Id generatedId = repository.add(init);
-        
+
         if (generatedId != null) {
             return new MappingInfo(
                 generatedId,
@@ -72,7 +72,10 @@ public class MappingService {
                 init.version(),
                 init.categoryVersion()
             );
-        } else { return null; }
-       
+        }
+        else {
+            return null;
+        }
     }
+    
 }

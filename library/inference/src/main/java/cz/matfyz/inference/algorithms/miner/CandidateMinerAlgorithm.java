@@ -9,5 +9,5 @@ package cz.matfyz.inference.algorithms.miner;
  * @author pavel.koupil
  */
 public class CandidateMinerAlgorithm {
-    
+
 }

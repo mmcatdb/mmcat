@@ -49,8 +49,8 @@ public class SchemaCategoryController {
     @GetMapping("/schema-categories/{id}/info")
     public SchemaCategoryInfo getCategoryInfo(@PathVariable Id id) {
         SchemaCategoryInfo schema;
-        
-        
+
+
         schema = service.findInfo(id);
 
         if (schema == null)
@@ -94,14 +94,14 @@ public class SchemaCategoryController {
         if (!service.updateMetadata(id, metadataUpdates))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
-    
+
     /*
      * Method for receiving the SchemaCategoryWrapper which came from mminfer
      * Probs should get rid of the return value, and only have void
      * */
     @PostMapping("/schema-categories/store")
     public ResponseEntity<String> storeSchemaCategoryWrapper(@RequestBody SchemaCategoryWrapper wrapper) {
-        service.createNewInfo(wrapper);    
+        service.createNewInfo(wrapper);
         return ResponseEntity.ok("Got your request, lady! 8)");
     }
 

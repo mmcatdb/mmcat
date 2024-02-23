@@ -51,13 +51,13 @@ public class SchemaCategoryService {
 
         return generatedId == null ? null : new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version);
     }
-    
+
     /*
      * Created for the case when I receive SchemaCategoryWrapper from mminfer
      * Be aware of the label in creating SchemaCategoryInit
      * Maybe now, I will have to accept SK not SKWrapper! and make the contentext here!
      * */
-    public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {        
+    public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {
         final Id generatedId = repository.add(wrapper);
         System.out.println("This is the generated ID: " + generatedId);
         System.out.println("All saved :)");
@@ -121,5 +121,5 @@ public class SchemaCategoryService {
     public List<SchemaUpdate> findAllUpdates(Id id) {
         return repository.findAllUpdates(id);
     }
-    
+
 }

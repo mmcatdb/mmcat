@@ -31,24 +31,24 @@ import cz.matfyz.core.rsd.Type;
  * Class for conversion from RSD to Schema Category
  */
 public class SchemaConverter {
-    
+
     /**
      * To label the morphisms
      */
     private enum Label {
         IDENTIFIER, RELATIONAL;
     }
-    
-    
+
+
     private final RecordSchemaDescription rsd;
     public SchemaCategory sc = new SchemaCategory("Schema from RSD");
     public AccessTreeNode root;
     public Key rootKey = new Key(0);
-    
+
     public SchemaConverter(RecordSchemaDescription rsd) {
         this.rsd = rsd;
-    } 
-    
+    }
+
     /**
      * Helper method for converting to Schema Category
      * @return SchemaCategory object representing RSD
@@ -61,7 +61,7 @@ public class SchemaConverter {
         Mapping mapping = createMapping(this.sc, "RSD_to_SC"); //What will this label be?
         return new CategoryMappingPair(this.sc, mapping);
     }
-    
+
     /**
      * This kinda ugly, could be improved on!!
      * Recursive method for converting RSD to Schema Category
@@ -71,27 +71,27 @@ public class SchemaConverter {
      * @param i int for keeping track of the RSD's children
      */
     public void convertToSchemafromRSD(SchemaCategory sc, RecordSchemaDescription rsdp, Key keyp, int i, AccessTreeNode currentNode) {
-        SchemaObject so;        
+        SchemaObject so;
         if (sc.allObjects().isEmpty()) { //adding the root
             Signature s = Signature.createBase(1);
-            
+
             Set<Signature> ss = new HashSet<>();
             ss.add(s);
-            
+
             ObjectIds objectIds = new ObjectIds(s);
-            
+
             SignatureId sId = new SignatureId(ss);
             so = new SchemaObject(keyp, rsdp.getName(), objectIds, sId, null, null);
             sc.addObject(so);
-            
+
             this.root = new AccessTreeNode(AccessTreeNode.State.C, rsdp.getName(), s);
             currentNode = this.root;
-        }    
+        }
         else {
             so = this.sc.getObject(keyp);
         }
-        
-        if (!rsdp.getChildren().isEmpty()) { 
+
+        if (!rsdp.getChildren().isEmpty()) {
             currentNode = root.findNodeWithName(so.label());
             if (currentNode != null){
                 currentNode.state = AccessTreeNode.State.C;
@@ -100,48 +100,48 @@ public class SchemaConverter {
             for (RecordSchemaDescription rsdch: rsdp.getChildren()) {
                 // Add child object
                 Key keych = createChildKey(keyp, i);
-                
+
                 // Add morphism
                 Signature sig = createChildSignature(keyp, keych);
                 Min min = findMin(rsdp, rsdch);
-                
+
                 Set<Signature> sigSet = new HashSet<>();
                 sigSet.add(sig);
-                
+
                 ObjectIds objectIds = new ObjectIds(sig);
-                
+
                 SignatureId superId = new SignatureId(sigSet);
                 SchemaObject soch = new SchemaObject(keych, rsdch.getName(), objectIds, superId, null, null);
                 sc.addObject(soch);
-                
+
                 AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.S, soch.label(), sig);
                 currentNode.addChild(child);
-                
+
                 SchemaObject dom = so;
                 SchemaObject cod = soch;
-                
+
                 boolean isArrayp = isTypeArray(rsdp);
                 boolean isArraych = isTypeArray(rsdch);
-                
-                if (isArraych) { // child is an array 
+
+                if (isArraych) { // child is an array
                     dom = soch;
                     cod = so;
                 }
-                
+
                 SchemaMorphism.Builder smb = createBuilder(rsdch, isArrayp, isArraych);
                 SchemaMorphism sm = smb.fromArguments(sig, dom, cod, min);
                 sc.addMorphism(sm);
-                
-                i++;                
+
+                i++;
                 convertToSchemafromRSD(sc, rsdch, keych, i, child);
             }
-        }        
-    }    
-    
+        }
+    }
+
     /**
      * Helper method for creating the child key
      * @param keyParent
-     * @param i 
+     * @param i
      * @return Child's key
      */
     private Key createChildKey(Key keyp, int i) {
@@ -150,7 +150,7 @@ public class SchemaConverter {
         Key keych = new Key(keyvalch);
         return keych;
     }
-    
+
     /**
      * Helper method for creating signature for the parent-child morphism
      * @param keyParent
@@ -162,7 +162,7 @@ public class SchemaConverter {
         Signature sig = Signature.createBase(sigval);
         return sig;
     }
-    
+
     /**
      * Finding the cardinality between rsds
      * @param rsdp
@@ -174,7 +174,7 @@ public class SchemaConverter {
         Share sharech = rsdch.getShare();
 
         Min min = Min.ONE;
-        
+
         if (sharep.getTotal() == sharech.getTotal() && sharep.getFirst() == sharech.getFirst()) {
             min = Min.ONE;
         } else if (sharep.getTotal() > sharech.getTotal() && sharep.getFirst() > sharech.getFirst()) {
@@ -184,33 +184,33 @@ public class SchemaConverter {
                 min = Min.ONE;
             } else if (sharep.getFirst() == sharech.getFirst()) {
                 min = Min.ZERO;
-            }          
-        }                
-        return min;    
+            }
+        }
+        return min;
     }
-    
+
     private boolean isTypeArray(RecordSchemaDescription rsd) {
         //if the parent is an array, then switch dom and cod
         if ((rsd.getTypes() & Type.ARRAY) != 0) {
             return true;
         }
         return false;
-    }    
-    
+    }
+
     /**
      * Get the Schema Morphism Builder with the right label.
      * For now we label 2 types of morphisms: identification & relational.
-     * A morphism is labeled as identification if its codomain is an identificator 
+     * A morphism is labeled as identification if its codomain is an identificator
      * And it is labeled as relational if its domain is an array type
      * @return
      */
     private SchemaMorphism.Builder createBuilder(RecordSchemaDescription rsdch, boolean isArrayp, boolean isArraych) {
         SchemaMorphism.Builder smb = new SchemaMorphism.Builder();
-        
+
         if (isArraych || isArrayp) { // meaning the parent is an array (works for now, might not work later!)
             smb = smb.label(Label.RELATIONAL.name());
         }
-        else { 
+        else {
             // the values for Char are TRUE, FALSE and UNKNOWN
             if (rsdch.getUnique() == Char.TRUE) {
                 smb = smb.label(Label.IDENTIFIER.name());
@@ -219,7 +219,7 @@ public class SchemaConverter {
         // can a relational morphism be also identification? (now I assume that not)
         return smb;
     }
-    
+
     /**
      * For each array object add an extra child named "_index".
      * This is done once the whole Schema Category gets created.
@@ -234,17 +234,17 @@ public class SchemaConverter {
                 Key keych = createChildKey(keyp, 0); // probs could just put zero here, but have to check later!!
                 SchemaObject soch = new SchemaObject(keych, "_index", null, null, null, null);
                 sc.addObject(soch);
-                
+
                 SchemaMorphism.Builder smb = new SchemaMorphism.Builder();
                 Signature sig = createChildSignature(keyp, keych);
                 SchemaMorphism sm = smb.fromArguments(sig, sop, soch, Min.ZERO); // also look at if this min is right
-                sc.addMorphism(sm);                    
+                sc.addMorphism(sm);
             }
         }
         return sc;
     }
-    
-    // should I refactor? Make a separate class for this? Something that woudl have fields for both 
+
+    // should I refactor? Make a separate class for this? Something that woudl have fields for both
     // the SK and the mapping? - ONCE the logic for this is done, then do it!!
     /**
      * Method for creating Mapping for the SchemaCategory
@@ -252,7 +252,7 @@ public class SchemaConverter {
     public Mapping createMapping(SchemaCategory sc, String kindName) {
         final var rootObject = sc.getObject(this.rootKey);
         //System.out.println("MY_DEBUG root object: " + rootObject);
-        ComplexProperty accessPath = buildComplexPropertyFromNode(this.root);    
+        ComplexProperty accessPath = buildComplexPropertyFromNode(this.root);
         return Mapping.create(sc, this.rootKey, kindName, accessPath);
     }
 
@@ -277,7 +277,7 @@ public class SchemaConverter {
         } else {
             return ComplexProperty.create(node.getName(), node.getSig(), subpaths.toArray(new AccessPath[0]));
         }
-    }        
+    }
 
 }
 

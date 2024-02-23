@@ -6,14 +6,14 @@ import java.util.List;
 import cz.matfyz.core.category.Signature;
 
 /**
- * Class to hold info about properties in SchemaCat, so that an access path can be 
+ * Class to hold info about properties in SchemaCat, so that an access path can be
  * later constructed.
- * 
+ *
  */
 public class AccessTreeNode{
-    
+
     public enum State {S, C;} // S - simple property, C - complex property
-    
+
     public State state;
     public String name;
     public Signature sig;
@@ -44,7 +44,7 @@ public class AccessTreeNode{
     public Signature getSig() {
         return sig;
     }
-    
+
     public AccessTreeNode findNodeWithName(String targetName) {
         if (this.name.equals(targetName)) {
             return this;
@@ -52,11 +52,11 @@ public class AccessTreeNode{
         for (AccessTreeNode child : this.children) {
             if (child.findNodeWithName(targetName) != null) {
                 return child;
-            }           
+            }
         }
         return null;
     }
-    
+
     public void printTree(String prefix) {
         System.out.println(prefix + "Name: " + this.name + ", State: " + this.state + ", Signature: " + (this.sig != null ? this.sig.toString() : "None"));
         for (AccessTreeNode child : this.children) {
