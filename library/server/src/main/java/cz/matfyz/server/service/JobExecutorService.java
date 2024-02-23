@@ -7,14 +7,19 @@ import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.matfyz.inference.MMInferOneInAll;
+import cz.matfyz.inference.schemaconversion.CategoryMappingPair;
 import cz.matfyz.integration.processes.JsonLdToCategory;
 import cz.matfyz.server.builder.MappingBuilder;
+import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.configuration.ServerProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
@@ -30,13 +35,17 @@ import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,13 +144,71 @@ public class JobExecutorService {
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
+    /**
+     * Layout algo using grid layout
+     * @param objects
+     * @return
+     */
+    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects) {
+    	int gridSize = (int) Math.ceil(Math.sqrt(objects.size()));
+    	double distance = 100; //distance between nodes on the grid
+    	
+    	Map<Key, Position> positions = new HashMap<>();
+    	int i = 0;
+    	for (SchemaObject object: objects) {
+    		int row = i / gridSize;
+    		int col = i % gridSize;
+    		double x = col * distance;
+    		double y = row * distance;
+    		positions.put(object.key(), new Position(x, y));
+    		i++;
+    	}
+    	return positions;
+    }
+    
+    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
+        //Akorát k tomu potřebujete vytvořit souřadnice objektů v grafu, nicméně na to by mělo jít najít nějaký layoutovací algoritmus 
+        MetadataContext context = new MetadataContext();
+    	
+    	//Create a special id, under which you later load this category ?? 
+    	Id id = new Id("schm_from_rsd"); //now hard coded special id 
+    	context.setId(id);
+    	
+    	Version version = Version.generateInitial(); // can I use this?
+    	context.setVersion(version);
+    	
+    	//maybe get rid of this second loop? and do all in one
+    	Map<Key, Position> positions = layoutObjects(category.allObjects());
+    	
+    	for (Map.Entry<Key, Position> entry: positions.entrySet()) {
+    		Key key = entry.getKey();
+    		Position position = entry.getValue();
+    		context.setPosition(key, position);
+    	}  	
+	    	
+    	SchemaCategoryWrapper wrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context); 
+    	
+    	return wrapper;
+    }
     
     private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
     	final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
+    	String url = dataSource.url;
     	
-    	// run mminferall
-    	// get sc and save it in SchemaCategoryService
-    	// get mapping in Mapping Service? (do I need to add a method) and save it
+    	//Assuming the url is in the MongoDB format
+		String uri = url.substring(0, url.lastIndexOf("/"));
+		String dbNameAndCollection = url.substring(url.lastIndexOf("/") + 1);
+		String[] parts = dbNameAndCollection.split("\\.");
+		 
+		String databaseName = parts[0];
+		String collectionName = parts[1]; 
+
+        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, collectionName).run();
+        
+        SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+        schemaService.createNewInfo(wrapper);
+        
+        mappingService.createNew(categoryMappingPair.mapping());
     }
 
     private void modelToCategoryAlgorithm(Run run, ModelToCategoryPayload payload) {

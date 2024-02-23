@@ -11,11 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import org.springframework.http.HttpEntity;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.client.RestTemplate;
 
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -23,6 +19,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.exception.OtherException;
 //import cz.matfyz.evolution.Version;
 import cz.matfyz.inference.algorithms.rba.Finalize;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
@@ -32,12 +29,7 @@ import cz.matfyz.inference.schemaconversion.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
 import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-/*
-import cz.matfyz.server.builder.MetadataContext;
-import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
-*/
+
 /**
  *
  * @author pavel.koupil
@@ -46,15 +38,39 @@ public class MMInferOneInAll {
 
 	public static final String PROPERTY_SPARK_MASTER = "baazizi.sparkMaster";
 	private static final String sparkMaster = System.getProperty(PROPERTY_SPARK_MASTER, "local[*]");
-
-	public static void main(String[] args) throws IOException {
+	public static  String appName;
+	public static String uri;
+	public static String databaseName;
+	public static String collectionName;
+	
+	public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName) {
+		this.appName = appName;
+		this.uri = uri;
+		this.databaseName = databaseName;
+		this.collectionName = collectionName;
+		
+		return this;
+	}
+	
+	public CategoryMappingPair run() {
+		try {
+			return innerRun();
+		}
+		catch (Exception e) { 
+			throw new OtherException(e);
+		}
+	}
+	public static CategoryMappingPair innerRun() throws IOException {
 //		String sparkMaster = "localhost";
-		String appName = "JSON Schema Inference, Record Based Algorithm";
+		
+/*		String appName = "JSON Schema Inference, Record Based Algorithm";
 		String uri = "localhost:3205";
 		String databaseName = args[1];
 		String collectionName = args[2];
-		String checkpointDir = args[0];
-
+		String checkpointDir = args[0]; */
+		
+		String checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
+		
 		RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
 
 		AbstractInferenceWrapper wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
@@ -63,17 +79,18 @@ public class MMInferOneInAll {
 		long start = System.currentTimeMillis();
 		RecordSchemaDescription rsd = rba.process(wrapper, merge, finalize);
 		long end = System.currentTimeMillis();
-//		System.out.print("RESULT: ");
-//		System.out.println(rsd);
-//		System.out.println("RESULT_TIME TOTAL: " + (end - start) + "ms");
-		
 		
 		SchemaConverter scon = new SchemaConverter(rsd);
 		
 		CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
 		
-//		System.out.println(cmp.schemaCat());
-	
+		return cmp;
+		
+//		System.out.print("RESULT: ");
+//		System.out.println(rsd);
+//		System.out.println("RESULT_TIME TOTAL: " + (end - start) + "ms");
+		
+//		System.out.println(cmp.schemaCat());	
 		
 //		System.out.println("MY_DEBUG: -------------");
 //		System.out.println("MY_DEBUG: SchemaCategory");
@@ -94,27 +111,6 @@ public class MMInferOneInAll {
 			}
 		*/	
 		
-		// *Create SchemaCategoryWrapper from SchemaCategory*
-/*   	MetadataContext context = new MetadataContext();
-    	
-    	//Create a special id, under which you later load this category  
-    	Id id = new Id("schm_from_rsd"); //now hard coded special id 
-    	context.setId(id);
-    	
-    	Version version = Version.generateInitial(); // can I use this?
-    	context.setVersion(version);
-    	
-    	Position initialPosition = new Position(0.0, 0.0);
-    	
-    	for (SchemaObject so : sc.allObjects()) {
-    		Key key = so.key();
-    		context.setPosition(key, initialPosition);
-    	}  	
-	    	
-    	SchemaCategoryWrapper scw = SchemaCategoryWrapper.fromSchemaCategory(sc, context); */
-    	//System.out.println("This is the SchemaCategoryWrapper: " + scw);
-    	System.out.println("It all went well");
-    	
 		/*
 		// *Serialize wrapper to a json* (make sure to use jackson)
 		ObjectMapper mapper = new ObjectMapper();

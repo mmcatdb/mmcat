@@ -7,23 +7,25 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 	<!-- <groupId>com.mycompany</groupId> -->
+	<packaging>jar</packaging>
 	<artifactId>inference</artifactId>
 	<!-- <version>1.0-SNAPSHOT</version> -->
-	<packaging>jar</packaging>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<!--	<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target> -->	
 		<maven.compiler.source>21</maven.compiler.source> 
 		<maven.compiler.target>21</maven.compiler.target> 
-		<spring.boot.version>3.2.1</spring.boot.version>
+		<spring.boot.version>3.2.0</spring.boot.version>
+		<spark.version>3.5.0 </spark.version>
 		<mongodb.version>3.12.10</mongodb.version>
 		<junit.version>4.13.2</junit.version>
-		<junit.jupiter.version>5.10.1</junit.jupiter.version>
+	<!--	<junit.jupiter.version>5.10.1</junit.jupiter.version> -->
 		<maven.compiler.plugin.version>3.12.1</maven.compiler.plugin.version>
 		<maven.jar.plugin.version>3.3.0</maven.jar.plugin.version>
 		<java.version>21</java.version>
-		<jackson.version>2.15.2</jackson.version>
+	<!--	<jackson.version>2.15.2</jackson.version> -->
 		<exec.mainClass>cz.matfyz.inference.MMInferOneInAll</exec.mainClass>		
 	</properties>    
 	
@@ -40,18 +42,19 @@
 			</exclusions>			
 			<version>${spring.boot.version}</version>
 		</dependency> 
+
 		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-		<dependency>
+<!--		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.9</version>
-		</dependency> 
+		</dependency> -->
 		<!--https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver--> 
-		<dependency>
+<!--		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
 			<version>${mongodb.version}</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -69,40 +72,41 @@
 			<artifactId>wrappermongodb</artifactId>
 			<version>${project.version}</version> 
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.version}</version>
-		</dependency>
+		</dependency> -->
 	</dependencies>	
 	
 	<build>
 		<plugins>			
 			<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
-			<plugin>
+<!--			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>				
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+				<version>3.10.1</version>				
+				<configuration> -->
+			<!--		<source>${java.version}</source>
+					<target>${java.version}</target> -->
+<!--					<release>${java.version}</release>
 				</configuration>
-			</plugin> 
-			<plugin> 
+			</plugin> -->
+<!--			<plugin> -->
 				<!-- Build an executable JAR -->
-		 		<groupId>org.apache.maven.plugins</groupId>
+<!--		 		<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.3.0</version> 
 				<configuration>
 					<archive>
-						<manifest> 
+						<manifest> -->
 							<!--<addClasspath>true</addClasspath>-->
 							<!--<classpathPrefix>lib/</classpathPrefix>-->
-							<mainClass>cz.matfyz.inference.MMInferOneInAll</mainClass>
+<!--							<mainClass>cz.matfyz.inference.MMInferOneInAll</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
-			</plugin> 
+			</plugin> -->
 <!--	        <plugin>
 	            <groupId>org.apache.maven.plugins</groupId>
 	            <artifactId>maven-jar-plugin</artifactId>
@@ -138,7 +142,7 @@
 					</execution>
 				</executions>
 			</plugin>-->
-			<plugin>
+<!--			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<version>${spring.boot.version}</version>
@@ -151,7 +155,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<skip>false</skip>
+					<skip>false</skip> -->
 				<!-- 	If I were to use this add ins, make sure to have double - instead of single in front of each add in
 					<jvmArguments>
 						-add-opens java.base/java.lang=ALL-UNNAMED
@@ -169,8 +173,8 @@
 	                    -add-opens java.base/sun.util.calendar=ALL-UNNAMED
 	                    -add-opens java.security.jgss/sun.security.krb5=ALL-UNNAMED
 					</jvmArguments> -->
-				</configuration>
-			</plugin> 
+		<!--		</configuration>
+			</plugin> --> 
 		</plugins>
 	</build>
 </project>

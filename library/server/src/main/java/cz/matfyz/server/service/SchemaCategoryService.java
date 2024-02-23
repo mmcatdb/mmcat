@@ -55,6 +55,7 @@ public class SchemaCategoryService {
     /*
      * Created for the case when I receive SchemaCategoryWrapper from mminfer
      * Be aware of the label in creating SchemaCategoryInit
+     * Maybe now, I will have to accept SK not SKWrapper! and make the contentext here!
      * */
     public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {        
         final Id generatedId = repository.add(wrapper);
