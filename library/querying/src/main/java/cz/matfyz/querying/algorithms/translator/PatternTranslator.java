@@ -72,11 +72,6 @@ class PatternTranslator {
         }
 
         final Term term = item.object.term;
-        // This might be wrong, because we might need all of the kind's objects? Because we might need them for joins?
-        // It should be possible to create a new term for each object.
-        if (term == null)
-            return;
-
         final var objectProperty = new Property(kind.kind, item.pathFromParent, item.preservedParent);
 
         if (term instanceof StringValue constantObject)
@@ -107,12 +102,11 @@ class PatternTranslator {
     }
 
     /**
-     * Finds all nodes that should be preserved in the property tree. Root is ommited because it's always preserved. The leaves as well (unless they don't have term). So only the child nodes of array edges with multiple preserved leaves are preserved.
+     * Finds all nodes that should be preserved in the property tree. Root is ommited because it's always preserved. The leaves as well. So only the child nodes of array edges with multiple preserved leaves are preserved.
+     * Also finds all nodes specified as variables by the user - these should be preserved by default.
      */
     private Set<PatternObject> findPreservedObjects(PatternObject root) {
-        final Set<PatternObject> relevantObjects = findRelevantObjects(root);
-
-        // We start in the root. Whenever we find an object with multiple relevant children, we add the last child of an array edge to the output.
+        // We start in the root. Whenever we find an object with multiple children, we add the last child of an array edge to the output.
         final Set<PatternObject> output = new TreeSet<>();
         final var rootObject = new PreservedStackObject(root, null);
 
@@ -120,60 +114,20 @@ class PatternTranslator {
             final var object = stackObject.object;
             final var lastChildOfArray = object.isChildOfArray() ? object : stackObject.lastChildOfArray;
 
-            final var relevantChildren = object.children().stream()
-                .filter(relevantObjects::contains)
-                .map(child -> new PreservedStackObject(child, lastChildOfArray))
-                .toList();
-
-            // If the object has multiple relevant children, we add the last child of an array edge to the output (if it isn't null ofc).
-            if (relevantChildren.size() > 1 && lastChildOfArray != null)
+            // All original objects are added.
+            if (object.term.isOriginal())
+                output.add(object);
+                
+            // If the object has multiple children, the last child of array has to be preserved (if it isn't null ofc).
+            if (object.children().size() > 1 && lastChildOfArray != null)
                 output.add(lastChildOfArray);
 
-            return relevantChildren;
+            return object.children().stream()
+                .map(child -> new PreservedStackObject(child, lastChildOfArray))
+                .toList();
         });
 
         return output;
-    }
-
-    /**
-     * Finds all nodes that are to be used in the property tree. I.e., both the preserved nodes and nodes with terms.
-     */
-    private  Set<PatternObject> findRelevantObjects(PatternObject root) {
-        final Set<PatternObject> output = new TreeSet<>();
-        // A stack of nodes we need to check whether we can remove them. Originally, its the leaves of the tree.
-        final Deque<PatternObject> objectsToCheck = new ArrayDeque<>();
-
-        GraphUtils.forEachDFS(root, object -> {
-            output.add(object);
-            if (object.isTerminal())
-                objectsToCheck.push(object);
-
-            return object.children();
-        });
-
-        // Now we start with the leaves and recursively delete them if they don't have terms.
-        while (!objectsToCheck.isEmpty()) {
-            final var object = objectsToCheck.pop();
-            if (isObjectRelevant(object, output))
-                continue;
-
-            // If the object isn't relevant, we remove it and (later) check its parent.
-            output.remove(object);
-            final var parent = object.parent();
-            if (parent != null)
-                objectsToCheck.push(parent);
-        }
-
-        return output;
-    }
-
-    private boolean isObjectRelevant(PatternObject object, Set<PatternObject> currentRelevantObjects) {
-        // If the object is terminal and has no term, it's not relevant.
-        if (object.isTerminal())
-            return object.term != null;
-
-        // A non-terminal object is relevant if it still has at least one relevant child.
-        return object.children().stream().anyMatch(currentRelevantObjects::contains);
     }
 
     private record PreservedStackObject(PatternObject object, @Nullable PatternObject lastChildOfArray) {}

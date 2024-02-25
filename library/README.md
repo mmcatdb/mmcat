@@ -19,3 +19,9 @@ A multi-model data modeling and evolution framework based on category theory. It
 mvn clean install -DskipTests
 ```
 - Then see the [Server](./server/README.md) package.
+
+## Checkstyle
+
+```bash
+mvn checkstyle:check
+```

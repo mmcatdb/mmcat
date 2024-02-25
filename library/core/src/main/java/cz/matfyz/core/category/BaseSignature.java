@@ -48,7 +48,7 @@ public class BaseSignature extends Signature {
     }
 
     public BaseSignature toNonDual() {
-        return isDual() ? createBase(-id) : this;
+        return isDual() ? dual() : this;
     }
 
     @Override public String toString() {

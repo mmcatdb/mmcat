@@ -7,9 +7,11 @@ import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.patterntree.KindPattern;
+import cz.matfyz.querying.parsing.GroupGraphPattern;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.WhereTriple;
 import cz.matfyz.querying.parsing.ParserNode.Term;
@@ -25,16 +27,16 @@ import java.util.TreeMap;
  */
 public class SchemaExtractor {
 
-    public static ExtractorResult run(QueryContext context, SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
+    public static ExtractorResult run(QueryContext context, SchemaCategory schema, List<Kind> kinds, GroupGraphPattern pattern) {
         return new SchemaExtractor(context, schema, kinds, pattern).run();
     }
 
     private final QueryContext context;
     private final SchemaCategory schema;
     private final List<Kind> kinds;
-    private final List<WhereTriple> pattern;
+    private final GroupGraphPattern pattern;
 
-    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Kind> kinds, List<WhereTriple> pattern) {
+    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Kind> kinds, GroupGraphPattern pattern) {
         this.context = context;
         this.schema = schema;
         this.kinds = kinds;
@@ -53,7 +55,7 @@ public class SchemaExtractor {
     private List<SchemaMorphism> patternMorphisms;
 
     private ExtractorResult run() {
-        patternMorphisms = pattern.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
+        patternMorphisms = pattern.triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
 
         createNewSchema();
         updateContext();
@@ -77,7 +79,7 @@ public class SchemaExtractor {
     }
 
     private void addMorphism(SchemaMorphism morphism) {
-        // There are no duals in the queue on the start and we are not adding them during the process. So this is safe.
+        // There are no duals in the queue on the start and we aren't adding them during the process. So this is safe.
         if (newSchema.hasMorphism(morphism.signature()))
             return;
 
@@ -98,12 +100,11 @@ public class SchemaExtractor {
             .forEach(base -> morphismQueue.add(schema.getMorphism(base)));
     }
 
-    // TODO the whole context probably isn't needed anymore
     private Map<BaseSignature, WhereTriple> signatureToTriple = new TreeMap<>();
     private Map<Key, Term> keyToTerm = new TreeMap<>();
 
     private void updateContext() {
-        pattern.forEach(triple -> {
+        pattern.triples.forEach(triple -> {
             final var morphism = newSchema.getMorphism(triple.signature);
             signatureToTriple.put(triple.signature, triple);
 
@@ -137,16 +138,29 @@ public class SchemaExtractor {
 
                 var currentNode = node;
                 for (final BaseSignature baseSignature : subpath.signature().toBases()) {
-                    final var nonDualSignature = baseSignature.toNonDual();
-                    if (!newSchema.hasMorphism(nonDualSignature))
+                    if (!newSchema.hasEdge(baseSignature))
                         return;
 
-                    currentNode = currentNode.getOrCreateChild(schema.getEdge(baseSignature), signatureToTriple.get(nonDualSignature));
+                    final SchemaEdge edge = schema.getEdge(baseSignature);
+                    final Term childTerm = getOrCreateCodTermForEdge(edge);
+
+                    currentNode = currentNode.getOrCreateChild(edge, childTerm);
                 }
+                // If the subpath is an auxiliary property, the signature split leads to an empty list. Therefore, it's automatically skipped and we continue with its children.
 
                 if (subpath instanceof ComplexProperty complex)
                     processComplexProperty(currentNode, complex);
             });
+    }
+
+    /**
+     * Gets the term for the codomain object of the edge. If it's missing, a new variable is created.
+     * The only valid reason for it to be missing is that the object was added during the extraction because it's an identifier of some other object.
+     * The created variable is a variable only - no triple is created for it.
+     */
+    private Term getOrCreateCodTermForEdge(SchemaEdge edge) {
+        final var codKey = edge.to().key();
+        return keyToTerm.computeIfAbsent(codKey, key -> pattern.variableBuilder.generated());
     }
 
 }

@@ -113,7 +113,7 @@ public abstract class BaseQueryWrapper {
         Map<Property, QueryStructure> propertyToStructure,
         QueryStructure root
     ) {
-        if (property == null)
+        if (property == null || property.path.isEmpty())
             return root;
 
         final var found = propertyToStructure.get(property);

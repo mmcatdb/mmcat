@@ -9,13 +9,12 @@ import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-// TODO add to json conversion for FE. Also, probably move to a separate file.
+// TODO add to json conversion for FE.
 public class QueryStructure implements Tree<QueryStructure>, Printable {
 
     public final String name;
-    // TODO find out if the object is needed
     public final boolean isArray;
-    public final Map<String, QueryStructure> children = new TreeMap<>();
+    private final Map<String, QueryStructure> children = new TreeMap<>();
 
     /** If null, this is the root of the tree. */
     @Nullable

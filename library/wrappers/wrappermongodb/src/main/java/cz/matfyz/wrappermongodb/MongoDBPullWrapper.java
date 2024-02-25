@@ -211,14 +211,14 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     private ResultMap getResultFromDocument(Document document, QueryStructure structure) {
         final var output = new TreeMap<String, ResultNode>();
 
-        for (final var child : structure.children.values())
+        for (final var child : structure.children())
             output.put(child.name, getResultFromChild(document, child));
 
         return new ResultMap(output);
     }
 
     private ResultNode getResultFromChild(Document document, QueryStructure child) {
-        if (child.children.isEmpty()) {
+        if (child.children().isEmpty()) {
             // This child is a leaf - it's value has to be either a string or an array of strings.
             if (child.isArray) {
                 final List<ResultLeaf> childList = ((ArrayList<String>) document.get(child.name))
