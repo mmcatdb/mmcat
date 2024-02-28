@@ -394,4 +394,41 @@ public class QueryTests {
             .run();
     }
 
+    /**
+     * The variables ?order and ?product are not needed. However, the query result should be the same as if the user used composite morphisms instead.
+     */
+    @Test
+    public void unnecessaryVariables() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.postgreSQL())
+            .query("""
+                SELECT {
+                    ?item number ?number ;
+                        id ?id .
+                }
+                WHERE {
+                    ?item 12 ?order .
+                    ?order 1 ?number .
+                    ?item 13 ?product .
+                    ?product 15 ?id .
+                }
+            """)
+            .expected("""
+                [ {
+                    "number": "o_100",
+                    "id": "123"
+                }, {
+                    "number": "o_100",
+                    "id": "765"
+                }, {
+                    "number": "o_200",
+                    "id": "457"
+                }, {
+                    "number": "o_200",
+                    "id": "734"
+                } ]
+            """)
+            .run();
+    }
+
 }

@@ -62,7 +62,8 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     @Override public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
-        variableBuilders.push(new VariableBuilder());
+        final var variableBuilder = new VariableBuilder();
+        variableBuilders.push(variableBuilder);
 
         final var triples = ctx.triplesBlock().stream()
             .flatMap(tb -> visitTriplesBlock(tb).triples.stream())
@@ -76,7 +77,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
         variableBuilders.pop();
 
-        return new GroupGraphPattern(triples, filters, values);
+        return new GroupGraphPattern(triples, filters, values, variableBuilder);
     }
 
     private record WhereTriplesList(List<WhereTriple> triples) implements ParserNode {}

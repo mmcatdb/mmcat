@@ -32,7 +32,7 @@ public class Variable implements Term {
         return "?" + name;
     }
 
-    static class VariableBuilder {
+    public static class VariableBuilder {
 
         public Variable fromName(String name) {
             return new Variable(name, true);

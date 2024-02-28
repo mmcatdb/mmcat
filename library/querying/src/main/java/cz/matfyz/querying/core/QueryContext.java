@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * This class collects and provides global information about the query.
+ * This class collects and provides global information about the whole query.
  */
 public class QueryContext {
 

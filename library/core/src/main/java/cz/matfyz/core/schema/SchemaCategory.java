@@ -63,8 +63,12 @@ public class SchemaCategory implements Category {
         return morphismContext.createUniqueObject(newMorphism);
     }
 
+    /**
+     * This class represents a directed edge in the schema category. Essentially, it's either a morphism or a dual of a such.
+     */
     public record SchemaEdge(
         SchemaMorphism morphism,
+        /** True if the edge corresponds to the morphism. False if it corresponds to its dual. */
         boolean direction
     ) {
         public Signature signature() {
@@ -86,7 +90,7 @@ public class SchemaCategory implements Category {
 
     public SchemaEdge getEdge(BaseSignature base) {
         return new SchemaEdge(
-            getMorphism(base.isDual() ? base.dual() : base),
+            getMorphism(base.toNonDual()),
             !base.isDual()
         );
     }
@@ -105,6 +109,10 @@ public class SchemaCategory implements Category {
 
     public boolean hasMorphism(Signature signature) {
         return morphismContext.getUniqueObject(signature) != null;
+    }
+
+    public boolean hasEdge(BaseSignature base) {
+        return hasMorphism(base.toNonDual());
     }
 
     private SchemaMorphism createCompositeMorphism(Signature signature) {

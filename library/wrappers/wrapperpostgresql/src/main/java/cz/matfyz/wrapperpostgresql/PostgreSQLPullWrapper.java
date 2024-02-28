@@ -111,7 +111,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public QueryResult executeQuery(QueryStatement query) {
-        final var columns = query.structure().children.values().stream().map(child -> child.name).toList();
+        final var columns = query.structure().children().stream().map(child -> child.name).toList();
 
         try (
             Connection connection = provider.getConnection();

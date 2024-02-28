@@ -43,7 +43,7 @@ public class QueryTreeBuilder {
     }
 
     private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
-        final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause.pattern.triples);
+        final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause.pattern);
         final List<Set<KindPattern>> plans = QueryPlanner.run(extracted.kindPatterns());
         if (plans.isEmpty())
             throw PlanningException.noPlans();

@@ -41,7 +41,7 @@ public interface ParserNode extends Serializable {
 
         String getIdentifier();
 
-        /** If the term was included in the original query, or if it was generated during splitting of morphisms. */
+        /** If the term was included in the original query. If not, it was generated during the splitting of morphisms. */
         default boolean isOriginal() {
             return true;
         }
