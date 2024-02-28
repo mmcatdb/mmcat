@@ -58,7 +58,7 @@ public class ResultList implements ResultNode {
     }
 
     public List<String> toJsonArray() {
-        return children.stream().map(node -> node.toString()).toList();
+        return children.stream().map(Object::toString).toList();
     }
 
     public static class Serializer extends StdSerializer<ResultList> {

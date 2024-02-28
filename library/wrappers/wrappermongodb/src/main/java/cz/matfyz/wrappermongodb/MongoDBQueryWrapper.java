@@ -2,17 +2,21 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
-import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.querying.QueryStructure;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import com.mongodb.client.model.Aggregates;
+import org.bson.BsonDocument;
+import org.bson.BsonString;
+import org.bson.conversions.Bson;
 
 public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQueryWrapper {
 
@@ -45,65 +49,65 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         // Mongo doesn't allow joins so there is only one mapping.
         final Mapping mapping = projections.getFirst().property().kind.mapping;
         final String collectionName = mapping.kindName();
-        final var content = MongoDBQuery.findAll(collectionName);
+        final Bson projection = createProjections();
+        final var pipeline = List.of(
+            Aggregates.project(projection)
+        );
+        System.out.println(projection);
 
-        final var queryStructure = createStructure();
-        System.out.println(queryStructure);
-        // projections.forEach();
+        final var content = new MongoDBQuery(collectionName, pipeline);
 
-        // TODO got one projection "v_street" with path "8.9"
-
-        return new QueryStatement(content, queryStructure);
+        return new QueryStatement(content, rootStructure);
     }
 
-    private void addProjectionToStructure(QueryStructure structure, Projection projection) {
-        // projection.
-
-    }
-
-    /** The `path` field replaces the `property.path` of the `projection`.  */
-    private record FixedProjection(Projection projection, Signature path) {}
-
-    /**
-     * This functions get all projections (or at least those that are relevant for this part of the access path). Then it recursively transforms them to the query structure.
-     * The projections are leaves, the final structure is a tree.
-     */
-    private void addPathToStructure(QueryStructure parentStructure, ComplexProperty parentPath, List<FixedProjection> projections) {
-        // if (!(accessPath instanceof ComplexProperty complexPath)) {
-
-        //     final var simplePath = (SimpleProperty) accessPath;
-        //     parentStructure.addChild(new QueryStructure(p.identifier(), false))
-        //     return;
-        //     // TODO
-        // }
-
-        for (final var child : parentPath.subpaths()) {
-            final var newProjections = traverseProjections(projections, child.signature());
-
-            if (newProjections.isEmpty())
-                continue;
-
-            if (newProjections.size() == 1) {
-
-            }
-
-        }
-    }
-
-    /**
-     * Remove the `signature` from the start of the `path` of each projection. If the `signature` is not a prefix of the `path`, the projection is removed.
-     */
-    private List<FixedProjection> traverseProjections(List<FixedProjection> projections, Signature signature) {
-        final List<FixedProjection> output = new ArrayList<>();
-        for (final var projection : projections) {
-            final Signature newPath = projection.path.cutPrefix(signature);
-            if (newPath == null)
-                continue;
-
-            output.add(new FixedProjection(projection.projection, newPath));
-        }
+    private final Bson createProjections() {
+        final var output = new BsonDocument();
+        for (final var projection : projections)
+            createProjection(output, projection);
 
         return output;
+    }
+
+    private void createProjection(BsonDocument root, Projection projection) {
+        final var path = getParentPath(projection.structure());
+        BsonDocument current = root;
+
+        for (final var step : path) {
+            if (current.containsKey(step.name)) {
+                current = current.getDocument(step.name);
+            }
+            else {
+                final var child = new BsonDocument();
+                current.put(step.name, child);
+                current = child;
+            }
+        }
+
+        final List<AccessPath> accessPaths = projection.property().findFullAccessPath();
+        if (accessPaths == null)
+            throw new UnsupportedOperationException("Access path not found");
+
+        final String pathString = accessPaths.stream().map(accessPath -> {
+            if (!(accessPath.name() instanceof StaticName staticName))
+                throw new UnsupportedOperationException("Only static names are supported.");
+
+            return staticName.getStringName();
+        }).collect(Collectors.joining("."));
+
+        current.put(projection.structure().name, new BsonString("$" + pathString));
+    }
+
+    /** Returns the path from the root (not included) of the structure all the way to the input structure (also not included). */
+    private List<QueryStructure> getParentPath(QueryStructure structure) {
+        List<QueryStructure> path = new ArrayList<>();
+        while (structure.parent() != null) {
+            path.add(structure.parent());
+            structure = structure.parent();
+        }
+        if (!path.isEmpty())
+            path.removeLast();
+
+        return path.reversed();
     }
 
 }

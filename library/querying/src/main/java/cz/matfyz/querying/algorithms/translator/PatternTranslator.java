@@ -5,6 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.patterntree.KindPattern;
@@ -16,7 +17,9 @@ import cz.matfyz.querying.parsing.StringValue;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,10 +37,12 @@ class PatternTranslator {
     }
 
     private void run(PatternNode pattern) {
-        wrapper.defineRoot(pattern.rootTerm.getIdentifier());
-
+        rootStructure = new QueryStructure(pattern.rootTerm.getIdentifier(), true);
+        
         pattern.kinds.forEach(this::processKind);
         pattern.joinCandidates.forEach(this::processJoinCandidate);
+
+        wrapper.setStructure(rootStructure);
     }
 
     private record StackItem(
@@ -53,9 +58,6 @@ class PatternTranslator {
     private Deque<StackItem> stack;
 
     private void processKind(KindPattern kind) {
-        // TODO this is weird, because it's happening for each kind - meaning that the last one overrides all the previous ones
-        // wrapper.defineRoot(kind.root.schemaObject, kind.root.term.getIdentifier());
-
         this.kind = kind;
         preservedObjects = findPreservedObjects(kind.root);
         stack = new ArrayDeque<>();
@@ -72,23 +74,29 @@ class PatternTranslator {
         }
 
         final Term term = item.object.term;
-        final var objectProperty = new Property(kind.kind, item.pathFromParent, item.preservedParent);
+        final var objectProperty = createProperty(item);
 
         if (term instanceof StringValue constantObject)
             wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
-        else
+        else {
             // TODO isOptional is not supported yet.
-            wrapper.addProjection(objectProperty, term.getIdentifier(), false);
+            final var structure = findOrCreateStructure(objectProperty);
+            wrapper.addProjection(objectProperty, structure, false);
+        }
     }
 
     private void processInnerItem(StackItem item) {
-        var preservedParent = item.preservedParent;
-        var pathFromParent = item.pathFromParent;
+        Property preservedParent;
+        Signature pathFromParent;
 
         final var isNewParent = preservedObjects.contains(item.object);
         if (isNewParent) {
-            preservedParent = new Property(kind.kind, pathFromParent, preservedParent);
+            preservedParent = createProperty(item);
             pathFromParent = Signature.createEmpty();
+        }
+        else {
+            preservedParent = item.preservedParent;
+            pathFromParent = item.pathFromParent;
         }
 
         for (final var child : item.object.children()) {
@@ -99,6 +107,39 @@ class PatternTranslator {
             );
             stack.push(childItem);
         }
+    }
+
+    private Property createProperty(StackItem item) {
+        final var property = new Property(kind.kind, item.pathFromParent, item.preservedParent);
+        propertyToTerm.put(property, item.object.term);
+
+        return property;
+    }
+
+    private QueryStructure rootStructure;
+    private final Map<Property, Term> propertyToTerm = new TreeMap<>();
+    private final Map<Property, QueryStructure> propertyToStructure = new TreeMap<>();
+
+    private QueryStructure findOrCreateStructure(@Nullable Property property) {
+        if (property == null)
+            return rootStructure;
+
+        if (property.path.isEmpty())
+            return findOrCreateStructure(property.parent);
+
+        final var found = propertyToStructure.get(property);
+        if (found != null)
+            return found;
+
+        final var isArray = property.path.hasDual();
+        final String identifier = propertyToTerm.get(property).getIdentifier();
+        final var structure = new QueryStructure(identifier, isArray);
+        propertyToStructure.put(property, structure);
+
+        final var parent = findOrCreateStructure(property.parent);
+        parent.addChild(structure);
+
+        return structure;
     }
 
     /**

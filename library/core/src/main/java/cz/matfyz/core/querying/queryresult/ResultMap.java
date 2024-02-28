@@ -37,6 +37,9 @@ public class ResultMap implements ResultNode {
                     .append(",").nextLine();
             }
 
+            if (!children.isEmpty())
+                printer.remove();
+
             printer.remove().up().nextLine().append("}");
         }
         else {
@@ -49,7 +52,7 @@ public class ResultMap implements ResultNode {
             }
 
             if (!children.isEmpty())
-                printer.remove();
+                printer.remove().append(" ");
 
             printer.append("}");
         }

@@ -74,7 +74,8 @@ public class QueryTests {
                     ?order street ?street ;
                         city ?city .
                     ?order address ?address .
-                    ?address as ?street .
+                    ?address street ?street ;
+                        city ?city .
                 }
                 WHERE {
                     ?order 8 ?address .
@@ -84,9 +85,19 @@ public class QueryTests {
             """)
             .expected("""
                 [ {
-                    "number": "o_100"
+                    "street": "Ke Karlovu 2027/3",
+                    "city": "Praha 2",
+                    "address": {
+                        "street": "Ke Karlovu 2027/3",
+                        "city": "Praha 2"
+                    }
                 }, {
-                    "number": "o_200"
+                    "street": "Malostranské nám. 2/25",
+                    "city": "Praha 1",
+                    "address": {
+                        "street": "Malostranské nám. 2/25",
+                        "city": "Praha 1"
+                    }
                 } ]
             """)
             .run();

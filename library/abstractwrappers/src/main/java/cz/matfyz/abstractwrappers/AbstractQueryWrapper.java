@@ -3,6 +3,7 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.schema.SchemaObject;
 
@@ -93,6 +94,17 @@ public interface AbstractQueryWrapper {
                 ? kindComparison
                 : schemaObject.compareTo(other.schemaObject);
         }
+
+        private Signature findFullPath() {
+            if (parent == null)
+                return path;
+
+            return parent.findFullPath().concatenate(path);
+        }
+
+        public List<AccessPath> findFullAccessPath() {
+            return kind.mapping.getPropertyPath(findFullPath());
+        }
     }
 
     class PropertyWithAggregation extends Property {
@@ -106,19 +118,12 @@ public interface AbstractQueryWrapper {
         }
     }
 
-    record Constant(
-        List<String> values
-    ) {}
+    record Constant(List<String> values) {}
 
     /**
-     * Defines the name of the root QueryStructure.
+     * Adds a projection to attribute which can eventually be optional (isOptional).
      */
-    void defineRoot(String identifier);
-
-    /**
-     * Adds a projection to attribute hierarchicalPath which can eventually be optional (isOptional).
-     */
-    void addProjection(Property property, String identifier, boolean isOptional);
+    void addProjection(Property property, QueryStructure structure, boolean isOptional);
 
     record JoinCondition(Signature from, Signature to) {}
 
@@ -147,6 +152,8 @@ public interface AbstractQueryWrapper {
      * FILTER(SUM(?price) > 69).
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
+
+    void setStructure(QueryStructure structure);
 
     record QueryStatement(QueryContent content, QueryStructure structure) {}
 

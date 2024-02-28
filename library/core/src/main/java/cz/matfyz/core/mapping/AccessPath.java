@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Common ancestor for the access path tree. It can be a {@link ComplexProperty} or a {@link SimpleProperty}.
@@ -59,7 +60,7 @@ public abstract class AccessPath implements Printable {
      * The list is "reversed", meaning that the last subpath is first and the root property is last.
      * If the signature isn't found, null is returned.
      */
-    protected abstract List<AccessPath> getPropertyPathInternal(Signature signature);
+    protected abstract @Nullable List<AccessPath> getPropertyPathInternal(Signature signature);
 
     public abstract AccessPath tryGetSubpathForObject(Key key, SchemaCategory schema);
 

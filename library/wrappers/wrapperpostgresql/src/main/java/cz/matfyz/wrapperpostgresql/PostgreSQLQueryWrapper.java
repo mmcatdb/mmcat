@@ -7,6 +7,7 @@ import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.querying.QueryStructure;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -54,7 +55,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         addFrom();
         addWhere();
 
-        return new QueryStatement(new StringQuery(builder.toString()), createStructure());
+        return new QueryStatement(new StringQuery(builder.toString()), rootStructure);
     }
 
     private void addSelect() {
@@ -185,7 +186,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
 
 
     private String getProjection(Projection projection) {
-        return getPropertyName(projection.property()) + " AS " + escapeName(projection.identifier());
+        return getPropertyName(projection.property()) + " AS " + escapeName(projection.structure().name);
     }
 
     private String getPropertyName(Property property) {

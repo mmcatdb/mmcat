@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author pavel.koupil, jachym.bartik
@@ -67,10 +68,10 @@ public class Mapping implements Comparable<Mapping> {
     }
 
     /**
-     * Find the path to the given signature in and return the properties along the way (without the root property).
+     * Finds the path with the given signature and returns the properties along the way (without the root property).
      * If the signature isn't found, null is returned.
      */
-    public List<AccessPath> getPropertyPath(Signature signature) {
+    public @Nullable List<AccessPath> getPropertyPath(Signature signature) {
         final var fullPath = this.accessPath.getPropertyPath(signature);
         if (fullPath == null)
             return null;
