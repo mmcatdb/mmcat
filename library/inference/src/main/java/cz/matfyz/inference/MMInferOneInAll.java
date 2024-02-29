@@ -61,14 +61,6 @@ public class MMInferOneInAll {
         }
     }
     public static CategoryMappingPair innerRun() throws IOException {
-//        String sparkMaster = "localhost";
-
-/*        String appName = "JSON Schema Inference, Record Based Algorithm";
-        String uri = "localhost:3205";
-        String databaseName = args[1];
-        String collectionName = args[2];
-        String checkpointDir = args[0]; */
-
         String checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
 
         RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
@@ -144,4 +136,32 @@ public class MMInferOneInAll {
         }
         */
     }
+    public static CategoryMappingPair main(String[] args) throws IOException {
+      String sparkMaster = "localhost";
+      String appName = "JSON Schema Inference, Record Based Algorithm";
+      String uri = "localhost:3205";
+      String databaseName = args[1];
+      String collectionName = args[2];
+      String checkpointDir = args[0]; 
+
+      //String checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
+
+      RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
+
+      AbstractInferenceWrapper wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
+      AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
+      Finalize finalize = null;
+      long start = System.currentTimeMillis();
+      RecordSchemaDescription rsd = rba.process(wrapper, merge, finalize);
+      long end = System.currentTimeMillis();
+
+      SchemaConverter scon = new SchemaConverter(rsd);
+
+      CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
+      System.out.println("It all went good");
+      return cmp;
+
+
+  }
+
 }

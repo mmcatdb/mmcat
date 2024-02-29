@@ -4,6 +4,7 @@
  */
 package cz.matfyz.abstractwrappers;
 
+
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 
@@ -15,6 +16,7 @@ import cz.matfyz.core.rsd.Share;
  *
  * @author pavel.koupil
  */
+
 public abstract class AbstractInferenceWrapper {
 
     public String kindName;

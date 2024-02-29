@@ -87,7 +87,7 @@ async function createAction() {
                 <input v-model="actionName" />
             </ValueRow>
             <ValueRow
-                v-if="actionType === ActionType.JsonLdToCategory"
+                v-if="actionType === ActionType.JsonLdToCategory || actionType === ActionType.RSDToCategory"
                 label="Data source:"
             >
                 <select v-model="dataSourceId">

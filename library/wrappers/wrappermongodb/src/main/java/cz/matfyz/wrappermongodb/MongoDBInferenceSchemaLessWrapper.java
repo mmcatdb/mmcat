@@ -31,6 +31,7 @@ import org.bson.Document;
  *
  * @author pavel.koupil
  */
+
 public class MongoDBInferenceSchemaLessWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;

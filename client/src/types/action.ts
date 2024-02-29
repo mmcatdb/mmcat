@@ -39,6 +39,7 @@ export enum ActionType {
     CategoryToModel = 'CategoryToModel',
     JsonLdToCategory = 'JsonLdToCategory',
     UpdateSchema = 'UpdateSchema',
+    RSDToCategory = 'RSDToCategory'
 }
 
 export const ACTION_TYPES = [
@@ -54,6 +55,10 @@ export const ACTION_TYPES = [
         label: 'Import data', // TODO
         value: ActionType.JsonLdToCategory,
     },
+    {
+        label: 'RSD to Category',
+        value: ActionType.RSDToCategory,
+    },
 ];
 
 interface ActionPayloadType<TType extends ActionType = ActionType> {
@@ -65,6 +70,7 @@ export type ActionPayload =
     | CategoryToModelPayload
     | JsonLdToCategoryPayload
     | UpdateSchemaPayload
+    | RSDToCategoryPayload
     ;
 
 export type ActionPayloadFromServer<T extends ActionType = ActionType> = {
@@ -81,6 +87,8 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
         return JsonLdToCategoryPayload.fromServer(input as JsonLdToCategoryPayloadFromServer);
     case ActionType.UpdateSchema:
         return UpdateSchemaPayload.fromServer(input as UpdateSchemaPayloadFromServer);
+    case ActionType.RSDToCategory:
+        return RSDToCategoryPayload.fromServer(input as RSDToCategoryPayloadFromServer);
     }
 }
 
@@ -88,7 +96,7 @@ export type ActionPayloadInit = {
     type: ActionType.ModelToCategory | ActionType.CategoryToModel;
     logicalModelId: Id;
 } | {
-    type: ActionType.JsonLdToCategory;
+    type: ActionType.JsonLdToCategory | ActionType.RSDToCategory;
     dataSourceId: Id;
 };
 
@@ -163,6 +171,24 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
         return new UpdateSchemaPayload(
             input.prevVersion,
             input.nextVersion,
+        );
+    }
+}
+
+type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
+    dataSource: DataSourceFromServer;
+};
+
+class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
+    readonly type = ActionType.RSDToCategory;
+
+    private constructor(
+        readonly dataSource: DataSource,
+    ) {}
+
+    static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
+        return new RSDToCategoryPayload(
+            DataSource.fromServer(input.dataSource),
         );
     }
 }

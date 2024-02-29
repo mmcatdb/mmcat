@@ -10,7 +10,7 @@
         <module>core</module>
         <module>transformations</module>
         <module>wrappers</module>
-        <module>inference</module>
+        <module>inference</module> 
         <module>server</module>
         <module>evolution</module>
         <module>integration</module>
@@ -28,7 +28,7 @@
         <junit.platform.version>1.8.1</junit.platform.version>
         <jackson.version>2.15.2</jackson.version>
         <jena.version>4.6.1</jena.version>
-        <spring.version>3.2.0</spring.version>
+        <spring.version>3.2.1</spring.version>
     </properties>
 
     <dependencies>
