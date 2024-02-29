@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A simple value node in the access path tree. Its context is undefined (null).
@@ -46,8 +47,8 @@ public class SimpleProperty extends AccessPath {
         return this.signature.equals(signature);
     }
 
-    @Override protected List<AccessPath> getPropertyPathInternal(Signature signature) {
-        return this.signature.contains(signature)
+    @Override protected @Nullable List<AccessPath> getPropertyPathInternal(Signature signature) {
+        return signature.isEmpty()
             ? new ArrayList<>(List.of(this))
             : null;
     }

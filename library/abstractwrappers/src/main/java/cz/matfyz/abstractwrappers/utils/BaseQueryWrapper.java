@@ -12,9 +12,7 @@ import cz.matfyz.core.querying.QueryStructure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,23 +45,18 @@ public abstract class BaseQueryWrapper {
         return value;
     }
 
-    // Root
-
-    protected String rootIdentifier;
-
-    public void defineRoot(String identifier) {
-        this.rootIdentifier = identifier;
-    }
-
     // Projections
 
-    protected record Projection(Property property, String identifier, boolean isOptional) {}
+    /**
+     * @param structure A leaf in a query structure tree. Used to determine where to put the projection in the final result.
+     */
+    protected record Projection(Property property, QueryStructure structure, boolean isOptional) {}
 
     protected List<Projection> projections = new ArrayList<>();
 
     // TODO there should be some check if the projection isn't already defined. Probably by its variable? Or by the corresponding schema object?
-    public void addProjection(Property property, String identifier, boolean isOptional) {
-        projections.add(new Projection(property, identifier, isOptional));
+    public void addProjection(Property property, QueryStructure structure, boolean isOptional) {
+        projections.add(new Projection(property, structure, isOptional));
     }
 
     // Joins
@@ -93,41 +86,12 @@ public abstract class BaseQueryWrapper {
         filters.add(new BinaryFilter(property1, property2, operator));
     }
 
-    protected QueryStructure createStructure() {
-        final var root = new QueryStructure(rootIdentifier, true);
-        final Map<Property, QueryStructure> propertyToStructure = new TreeMap<>();
+    // Structure
 
-        for (final var projection : projections) {
-            final var isArray = projection.property.path.hasDual();
-            final var structure = new QueryStructure(projection.identifier, isArray);
+    protected QueryStructure rootStructure;
 
-            final var parent = findOrCreateStructureForInnerProperty(projection.property.parent, propertyToStructure, root);
-            parent.addChild(structure);
-        }
-
-        return root;
-    }
-
-    private QueryStructure findOrCreateStructureForInnerProperty(
-        @Nullable Property property,
-        Map<Property, QueryStructure> propertyToStructure,
-        QueryStructure root
-    ) {
-        if (property == null || property.path.isEmpty())
-            return root;
-
-        final var found = propertyToStructure.get(property);
-        if (found != null)
-            return found;
-
-        final var isArray = property.path.hasDual();
-        final var structure = new QueryStructure("TODO", isArray);
-        propertyToStructure.put(property, structure);
-
-        final var parent = findOrCreateStructureForInnerProperty(property.parent, propertyToStructure, root);
-        parent.addChild(structure);
-
-        return structure;
+    public void setStructure(QueryStructure structure) {
+        this.rootStructure = structure;
     }
 
 }

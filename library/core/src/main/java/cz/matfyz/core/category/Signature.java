@@ -118,7 +118,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
     public @Nullable Signature cutPrefix(Signature other) {
         if (!hasPrefix(other))
-            return Signature.createEmpty();
+            return null;
 
         final var newIds = Arrays.copyOfRange(ids, other.ids.length, ids.length);
         return createComposite(newIds);

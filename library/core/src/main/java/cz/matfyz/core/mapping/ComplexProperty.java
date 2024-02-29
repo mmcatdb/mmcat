@@ -192,29 +192,33 @@ public class ComplexProperty extends AccessPath {
     }
 
     /**
-     * Find the path to the given signature and return the properties along the way.
+     * Finds the path with the given signature and returns the properties along the way.
      * If the signature isn't found, null is returned.
      */
-    protected List<AccessPath> getPropertyPath(Signature signature) {
+    protected @Nullable List<AccessPath> getPropertyPath(Signature signature) {
         var path = this.getPropertyPathInternal(signature);
-        if (path != null) {
-            Collections.reverse(path);
-            return path;
-        }
+        if (path == null)
+            return null;
 
-        return null;
+        Collections.reverse(path);
+        return path;
     }
 
-    @Override protected List<AccessPath> getPropertyPathInternal(Signature signature) {
-        if (this.signature.contains(signature))
+    @Override protected @Nullable List<AccessPath> getPropertyPathInternal(Signature signature) {
+        if (signature.isEmpty())
             return new ArrayList<>(List.of(this));
-
+            
         for (var subpath : subpaths) {
-            var path = subpath.getPropertyPathInternal(signature);
-            if (path != null) {
-                path.add(this);
-                return path;
-            }
+            final var subSignature = signature.cutPrefix(subpath.signature);
+            if (subSignature == null)
+                continue;
+
+            final var output = subpath.getPropertyPathInternal(subSignature);
+            if (output == null)
+                continue;
+
+            output.add(this);
+            return output;
         }
 
         return null;
