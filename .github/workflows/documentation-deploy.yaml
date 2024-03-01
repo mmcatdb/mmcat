@@ -1,4 +1,4 @@
-name: deploy
+name: documentation-deploy
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: deploy
+  group: documentation-deploy
   cancel-in-progress: false
 
 jobs:
