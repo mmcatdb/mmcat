@@ -46,4 +46,4 @@ jobs:
         env:
           SSHPASS: ${{ secrets.FTP_PASSWORD }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_HOST: ${{ vars.FTP_HOST }}
