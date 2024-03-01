@@ -16,4 +16,4 @@ If you are interested in the development of the framework, its codebase is hoste
 
 ### Documentation
 
-This documentation was created by [Hugo](https://gohugo.io/) with the [Geekdocs](https://geekdocs.de/) theme. Its codebase is on [GitLab](https://gitlab.mff.cuni.cz/bartikj3/mmcat-docs/).
+This documentation was created by [Hugo](https://gohugo.io/) with the [Geekdocs](https://geekdocs.de/) theme. Its codebase is on [GitHub](https://github.com/mmcatdb/mmcat).
