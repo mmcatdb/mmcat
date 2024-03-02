@@ -3,7 +3,9 @@ package cz.matfyz.core.querying;
 import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.core.utils.printable.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -32,6 +34,23 @@ public class QueryStructure implements Tree<QueryStructure>, Printable {
         this.children.put(child.name, child);
         child.parent = this;
         return child;
+    }
+
+    /**
+     * Returns the path from the root (not included) of the structure tree all the way to this instance (also not included).
+     */
+    public List<QueryStructure> getParentPath() {
+        final List<QueryStructure> path = new ArrayList<>();
+        QueryStructure current = this;
+
+        while (current.parent() != null) {
+            path.add(current.parent());
+            current = current.parent();
+        }
+        if (!path.isEmpty())
+            path.removeLast();
+
+        return path.reversed();
     }
 
     @Nullable

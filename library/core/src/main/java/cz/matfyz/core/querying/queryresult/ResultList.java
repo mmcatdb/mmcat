@@ -39,6 +39,9 @@ public class ResultList implements ResultNode {
             for (final var child : children)
                 printer.append(child).append(",").nextLine();
 
+            if (!children.isEmpty())
+                printer.remove();
+
             printer.remove().up().nextLine().append("]");
         }
         else {

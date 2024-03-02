@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueryTests {
+class QueryTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
@@ -16,13 +16,13 @@ public class QueryTests {
     private static final Databases databases = new Databases();
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         databases.postgreSQL().setup();
         databases.mongoDB().setup();
     }
 
     @Test
-    public void basicPostgreSQL() {
+    void basicPostgreSQL() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -44,7 +44,7 @@ public class QueryTests {
     }
 
     @Test
-    public void basicMongoDB() {
+    void basicMongoDB() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.mongoDB())
             .query("""
@@ -66,7 +66,7 @@ public class QueryTests {
     }
 
     @Test
-    public void nestedMongoDB() {
+    void nestedMongoDB() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.mongoDB())
             .query("""
@@ -103,8 +103,109 @@ public class QueryTests {
             .run();
     }
 
+    /**
+     * Contrary to the previous test, the nesting path contains an array. This enforces us to use the $map operator in MongoDB.
+     */
     @Test
-    public void alias() {
+    void nestedMongoDBWithArray() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.mongoDB())
+            .query("""
+                SELECT {
+                    ?order items ?item .
+                    ?item id ?id ;
+                        label ?label .
+                }
+                WHERE {
+                    ?order -12 ?item .
+                    ?item 13/15 ?id ;
+                        13/16 ?label .
+                }
+            """)
+            .expected("""
+                [ {
+                    "items": [
+                        { "id": "123", "label": "Clean Code" }
+                    ]
+                }, {
+                    "items": [
+                        { "id": "765", "label": "The Lord of the Rings" }
+                    ]
+                }, {
+                    "items": [
+                        { "id": "457", "label": "The Art of War" },
+                        { "id": "734", "label": "Animal Farm" }
+                    ]
+                } ]
+            """)
+            .run();
+    }
+
+    // TODO add double nested object array.
+
+    /**
+     * The arrays are flatten (if it's possible) exept for the top-level array. I.e., if there are multiple orders in the database, we are still going to get an array of orders. However, the properties of the orders are going to be flatten.
+     * In this case, the flattening happens in the database itself.
+     */
+    @Test
+    void flattenArrayInSelection() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.mongoDB())
+            .query("""
+                SELECT {
+                    ?order id ?id .
+                }
+                WHERE {
+                    ?order -12/13/15 ?id .
+                }
+            """)
+            .expected("""
+                [ {
+                    "id": [ "123" ]
+                }, {
+                    "id": [ "765" ]
+                }, {
+                    "id": [ "457", "734" ]
+                } ]
+            """)
+            .run();
+    }
+
+    /**
+     * The database returns the data in the full form. The flattening then happens in the projection.
+     */
+    @Test
+    void flattenArrayInProjection() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.mongoDB())
+            .query("""
+                SELECT {
+                    ?order id ?id ;
+                        label ?label .
+                }
+                WHERE {
+                    ?order -12 ?item .
+                    ?item 13/15 ?id ;
+                        13/16 ?label .
+                }
+            """)
+            .expected("""
+                [ {
+                    "id": [ "123" ],
+                    "label": [ "Clean Code" ]
+                }, {
+                    "id": [ "765" ],
+                    "label": [ "The Lord of the Rings" ]
+                }, {
+                    "id": [ "457", "734" ],
+                    "label": [ "The Art of War", "Animal Farm" ]
+                } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void alias() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -129,7 +230,7 @@ public class QueryTests {
      * This test fails because the planning algorithm isn't able to find patterns in the mapping graph. Instead it just tries first available path from the root and if none is available, it simply fails.
      */
     @Test
-    public void dualSignature() {
+    void dualSignature() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -151,7 +252,7 @@ public class QueryTests {
     }
 
     @Test
-    public void multipleElements() {
+    void multipleElements() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.mongoDB())
             .query("""
@@ -173,7 +274,7 @@ public class QueryTests {
     }
 
     @Test
-    public void filter() {
+    void filter() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -195,7 +296,7 @@ public class QueryTests {
     }
 
     @Test
-    public void multipleFilters() {
+    void multipleFilters() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -218,7 +319,7 @@ public class QueryTests {
     }
 
     @Test
-    public void multipleProperties() {
+    void multipleProperties() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -256,12 +357,12 @@ public class QueryTests {
     }
 
     @Test
-    public void multipleCompositeProperties() {
+    void multipleCompositeProperties() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.mongoDB())
             .query("""
                 SELECT {
-                    ?order item ?item .
+                    ?order items ?item .
                     ?item quantity ?quantity ;
                         id ?id ;
                         label ?label ;
@@ -277,26 +378,45 @@ public class QueryTests {
             """)
             .expected("""
                 [ {
-                    "quantity": "1",
-                    "id": "123",
-                    "label": "Clean Code",
-                    "price": "125"
+                    "items": [
+                        { "quantity": "1", "id": "123", "label": "Clean Code", "price": "125" }
+                    ]
                 }, {
-                    "quantity": "2",
-                    "id": "765",
-                    "label": "The Lord of the Rings",
-                    "price": "199"
+                    "items": [
+                        { "quantity": "2", "id": "765", "label": "The Lord of the Rings", "price": "199" }
+                    ]
                 }, {
-                    "quantity": "7",
-                    "id": "457",
-                    "label": "The Art of War",
-                    "price": "299"
-                }, {
-                    "quantity": "3",
-                    "id": "734",
-                    "label": "Animal Farm",
-                    "price": "350"
+                    "items": [
+                        { "quantity": "7", "id": "457", "label": "The Art of War", "price": "299" },
+                        { "quantity": "3", "id": "734", "label": "Animal Farm", "price": "350" }
+                    ]
                 } ]
+            """)
+            .run();
+    }
+
+    @Test
+    void differentProjectionRoot() {
+        new QueryTestBase(databases.schema)
+            .addDatabase(databases.mongoDB())
+            .query("""
+                SELECT {
+                    ?item quantity ?quantity ;
+                        id ?id ;
+                }
+                WHERE {
+                    ?order -12 ?item .
+                    ?item 14 ?quantity ;
+                        13/15 ?id ;
+                }
+            """)
+            .expected("""
+                [
+                    { "quantity": "1", "id": "123" },
+                    { "quantity": "2", "id": "765" },
+                    { "quantity": "7", "id": "457" },
+                    { "quantity": "3", "id": "734" }
+                ]
             """)
             .run();
     }
@@ -306,7 +426,7 @@ public class QueryTests {
      * This needs to be checked manually.
      */
     @Test
-    public void notNeededJoin() {
+    void notNeededJoin() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -338,7 +458,7 @@ public class QueryTests {
     }
 
     @Test
-    public void oneDatabaseJoin() {
+    void oneDatabaseJoin() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
@@ -370,7 +490,7 @@ public class QueryTests {
     }
 
     @Test
-    public void multipleDatabasesJoin() {
+    void multipleDatabasesJoin() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .addDatabase(
@@ -409,7 +529,7 @@ public class QueryTests {
      * The variables ?order and ?product are not needed. However, the query result should be the same as if the user used composite morphisms instead.
      */
     @Test
-    public void unnecessaryVariables() {
+    void unnecessaryVariables() {
         new QueryTestBase(databases.schema)
             .addDatabase(databases.postgreSQL())
             .query("""
