@@ -3,7 +3,7 @@ title: "Frontend Application"
 weight: 30
 ---
 
-The application is located in the `example-ui` package. It is based on the [Vue 3](https://vuejs.org/) framework with [Vite](https://vitejs.dev/), TypeScript and Options API.
+The application is located in the `example-ui` package. It is based on the [Vue 3](https://vuejs.org/) framework with [Vite](https://vitejs.dev/), TypeScript and Composition API.
 
 ## Architecture
 

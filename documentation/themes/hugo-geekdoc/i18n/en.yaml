@@ -60,8 +60,7 @@
 
 - id: footer_build_with
   translation : >
-    Built with <a href="https://gohugo.io/" class="gdoc-footer__link">Hugo</a> and
-    <svg class="gdoc-icon gdoc_heart"><use xlink:href="#gdoc_heart"></use></svg>
+    Built with <a href="https://gohugo.io/" class="gdoc-footer__link">Hugo</a>
 - id: footer_legal_notice
   translation : Legal Notice
 - id: footer_privacy_policy
