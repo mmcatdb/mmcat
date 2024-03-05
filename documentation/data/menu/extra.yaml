@@ -1,0 +1,10 @@
+---
+header:
+  - name: Application
+    ref: https://demo.mmcatdb.com
+    icon: mdi_application_outline
+    external: true
+  - name: GitHub
+    ref: https://github.com/mmcatdb/mmcat
+    icon: gdoc_github
+    external: true

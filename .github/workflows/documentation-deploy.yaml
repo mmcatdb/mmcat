@@ -1,0 +1,49 @@
+name: documentation-deploy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'documentation/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: documentation-deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: registry.gitlab.com/gitlab-ci-utils/docker-hugo:latest
+    environment: prod
+    defaults:
+      run:
+        working-directory: ./documentation
+    steps:
+      - uses: actions/checkout@v4
+      - run: hugo --cleanDestinationDir
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: ./documentation/public
+
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    container: byteflair/ssh-rsync
+    environment: prod
+    defaults:
+      run:
+        working-directory: ./documentation
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: build
+          path: ./documentation/public
+      - run: sshpass -e rsync -e 'ssh -p 42222 -o StrictHostKeyChecking=no' --delete -r public/. $FTP_USERNAME@$FTP_HOST:/var/www/html/mmcat-docs
+        env:
+          SSHPASS: ${{ secrets.FTP_PASSWORD }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_HOST: ${{ vars.FTP_HOST }}

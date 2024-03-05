@@ -1,9 +1,11 @@
 package cz.matfyz.querying.algorithms.translator;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
+import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.utils.GraphUtils;
@@ -36,13 +38,15 @@ class PatternTranslator {
         this.wrapper = wrapper;
     }
 
+    private WrapperContext context;
+
     private void run(PatternNode pattern) {
-        rootStructure = new QueryStructure(pattern.rootTerm.getIdentifier(), true);
+        context = new WrapperContext(pattern.rootTerm);
         
         pattern.kinds.forEach(this::processKind);
         pattern.joinCandidates.forEach(this::processJoinCandidate);
 
-        wrapper.setStructure(rootStructure);
+        wrapper.setContext(context);
     }
 
     private record StackItem(
@@ -74,13 +78,13 @@ class PatternTranslator {
         }
 
         final Term term = item.object.term;
-        final var objectProperty = createProperty(item);
+        final var objectProperty = context.createProperty(kind.kind, item);
 
         if (term instanceof StringValue constantObject)
             wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
         else {
             // TODO isOptional is not supported yet.
-            final var structure = findOrCreateStructure(objectProperty);
+            final var structure = context.findOrCreateStructure(objectProperty);
             wrapper.addProjection(objectProperty, structure, false);
         }
     }
@@ -91,7 +95,7 @@ class PatternTranslator {
 
         final var isNewParent = preservedObjects.contains(item.object);
         if (isNewParent) {
-            preservedParent = createProperty(item);
+            preservedParent = context.createProperty(kind.kind, item);
             pathFromParent = Signature.createEmpty();
         }
         else {
@@ -109,38 +113,58 @@ class PatternTranslator {
         }
     }
 
-    private Property createProperty(StackItem item) {
-        final var property = new Property(kind.kind, item.pathFromParent, item.preservedParent);
-        propertyToTerm.put(property, item.object.term);
+    private static class WrapperContext implements AbstractWrapperContext {
 
-        return property;
-    }
+        private QueryStructure rootStructure;
 
-    private QueryStructure rootStructure;
-    private final Map<Property, Term> propertyToTerm = new TreeMap<>();
-    private final Map<Property, QueryStructure> propertyToStructure = new TreeMap<>();
+        WrapperContext(Term rootTerm) {
+            rootStructure = new QueryStructure(rootTerm.getIdentifier(), true);
+        }
 
-    private QueryStructure findOrCreateStructure(@Nullable Property property) {
-        if (property == null)
+        private final Map<Property, Term> propertyToTerm = new TreeMap<>();
+        private final Map<Property, QueryStructure> propertyToStructure = new TreeMap<>();
+        private final Map<QueryStructure, Property> structureToProperty = new TreeMap<>();
+
+        Property createProperty(Kind kind, StackItem item) {
+            final var property = new Property(kind, item.pathFromParent, item.preservedParent);
+            propertyToTerm.put(property, item.object.term);
+
+            return property;
+        }
+    
+        QueryStructure findOrCreateStructure(@Nullable Property property) {
+            if (property == null)
+                return rootStructure;
+    
+            if (property.path.isEmpty())
+                return findOrCreateStructure(property.parent);
+    
+            final var found = propertyToStructure.get(property);
+            if (found != null)
+                return found;
+    
+            final var isArray = property.path.hasDual();
+            final String identifier = propertyToTerm.get(property).getIdentifier();
+            final var structure = new QueryStructure(identifier, isArray);
+            propertyToStructure.put(property, structure);
+            structureToProperty.put(structure, property);
+    
+            final var parent = findOrCreateStructure(property.parent);
+            parent.addChild(structure);
+    
+            return structure;
+        }
+
+        @Override public QueryStructure rootStructure() {
             return rootStructure;
+        }
 
-        if (property.path.isEmpty())
-            return findOrCreateStructure(property.parent);
+        @Override public Property getProperty(QueryStructure structure) {
+            return structureToProperty.get(structure);
+        }
 
-        final var found = propertyToStructure.get(property);
-        if (found != null)
-            return found;
-
-        final var isArray = property.path.hasDual();
-        final String identifier = propertyToTerm.get(property).getIdentifier();
-        final var structure = new QueryStructure(identifier, isArray);
-        propertyToStructure.put(property, structure);
-
-        final var parent = findOrCreateStructure(property.parent);
-        parent.addChild(structure);
-
-        return structure;
     }
+
 
     /**
      * Finds all nodes that should be preserved in the property tree. Root is ommited because it's always preserved. The leaves as well. So only the child nodes of array edges with multiple preserved leaves are preserved.

@@ -1,5 +1,6 @@
 package cz.matfyz.abstractwrappers.utils;
 
+import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AbstractWrapperContext;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AggregationOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
@@ -48,7 +49,7 @@ public abstract class BaseQueryWrapper {
     // Projections
 
     /**
-     * @param structure A leaf in a query structure tree. Used to determine where to put the projection in the final result.
+     * @param structure A leaf in the query structure tree. Used to determine where to put the projection in the final result.
      */
     protected record Projection(Property property, QueryStructure structure, boolean isOptional) {}
 
@@ -88,10 +89,10 @@ public abstract class BaseQueryWrapper {
 
     // Structure
 
-    protected QueryStructure rootStructure;
+    protected AbstractWrapperContext context;
 
-    public void setStructure(QueryStructure structure) {
-        this.rootStructure = structure;
+    public void setContext(AbstractWrapperContext context) {
+        this.context = context;
     }
 
 }

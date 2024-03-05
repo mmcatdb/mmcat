@@ -3,7 +3,6 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.schema.SchemaObject;
 
@@ -95,16 +94,13 @@ public interface AbstractQueryWrapper {
                 : schemaObject.compareTo(other.schemaObject);
         }
 
-        private Signature findFullPath() {
+        public Signature findFullPath() {
             if (parent == null)
                 return path;
 
             return parent.findFullPath().concatenate(path);
         }
 
-        public List<AccessPath> findFullAccessPath() {
-            return kind.mapping.getPropertyPath(findFullPath());
-        }
     }
 
     class PropertyWithAggregation extends Property {
@@ -153,7 +149,19 @@ public interface AbstractQueryWrapper {
      */
     void addFilter(Property left, Constant right, ComparisonOperator operator);
 
-    void setStructure(QueryStructure structure);
+    public interface AbstractWrapperContext {
+        
+        QueryStructure rootStructure();
+
+        /** Finds a property for given structure except for the root structure (which has no corresponding property). */
+        Property getProperty(QueryStructure structure);
+
+    }
+
+    /**
+     * Enables advanced mapping between the query structure and the access path.
+     */
+    void setContext(AbstractWrapperContext structure);
 
     record QueryStatement(QueryContent content, QueryStructure structure) {}
 

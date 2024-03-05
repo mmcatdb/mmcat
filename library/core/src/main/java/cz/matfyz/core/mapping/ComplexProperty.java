@@ -29,7 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A complex value in the access path tree. Its context is a signature of a morphism (or undefined in case of an auxiliary property)
- * It has subpaths and it provides many methods needed in the algorithms described in the paper.
+ * It has subpaths and it provides many methods needed by the algorithms described in the paper.
  * @author jachymb.bartik
  */
 @JsonSerialize(using = ComplexProperty.Serializer.class)
@@ -192,15 +192,17 @@ public class ComplexProperty extends AccessPath {
     }
 
     /**
-     * Finds the path with the given signature and returns the properties along the way.
+     * Finds the path with the given signature and returns the properties along the way. This property itself isn't included.
      * If the signature isn't found, null is returned.
      */
-    protected @Nullable List<AccessPath> getPropertyPath(Signature signature) {
+    public @Nullable List<AccessPath> getPropertyPath(Signature signature) {
         var path = this.getPropertyPathInternal(signature);
         if (path == null)
             return null;
 
         Collections.reverse(path);
+        path.remove(0);
+        
         return path;
     }
 
