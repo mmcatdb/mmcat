@@ -54,7 +54,7 @@ async function deleteAction() {
                 {{ action.payload.type }}
             </ValueRow>
             <ValueRow
-                v-if="action.payload.type === ActionType.JsonLdToCategory"
+                v-if="action.payload.type === ActionType.JsonLdToCategory || action.payload.type ===ActionType.RSDToCategory"
                 label="Data source:"
             >
                 <RouterLink :to="{ name: 'dataSource', params: { id: action.payload.dataSource.id }, query: { categoryId: action.categoryId } }">
@@ -73,7 +73,7 @@ async function deleteAction() {
                 v-else
                 label="Versions:"
             >
-                <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
+              <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" /> 
             </ValueRow>
             <!--
                 <ValueRow label="State:">

@@ -46,6 +46,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -190,18 +192,25 @@ public class JobExecutorService {
 
         return wrapper;
     }
+    
 
     private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+        System.out.println("RSDToCategoryAlgorithm check!");
         final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
-        String url = dataSource.url;
+        String url = dataSource.url; // mongodb://localhost:3205/srutkova.yelpbusinesssample
+        System.out.println("url:" +  url);
 
         //Assuming the url is in the MongoDB format
-        String uri = url.substring(0, url.lastIndexOf("/"));
+        String uri = url.substring(10, url.lastIndexOf("/"));
         String dbNameAndCollection = url.substring(url.lastIndexOf("/") + 1);
         String[] parts = dbNameAndCollection.split("\\.");
 
         String databaseName = parts[0];
         String collectionName = parts[1];
+          
+        System.out.println("uri: " + uri);
+        System.out.println("databaseName: " + databaseName);
+        System.out.println("collectionName: " + collectionName);
 
         final CategoryMappingPair categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, collectionName).run();
 

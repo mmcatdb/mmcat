@@ -56,7 +56,7 @@ public class MappingService {
         Signature[] primaryKeyArray = mapping.primaryKey().toArray(new Signature[0]);
 
         MappingInit init = new MappingInit(
-                null, //Id logicalModelId
+                new Id("1"),//Id.createNewUUID(), //Id logicalModelId
                 mapping.rootObject().key(),
                 primaryKeyArray,
                 mapping.kindName(),
@@ -64,7 +64,7 @@ public class MappingService {
                 null); //Version categoryVersion (probs could use Version.generateInitial())
 
         Id generatedId = repository.add(init);
-
+        System.out.println("generatedId in MappingService: " + generatedId);
         if (generatedId != null) {
             return new MappingInfo(
                 generatedId,

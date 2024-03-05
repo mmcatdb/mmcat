@@ -11,6 +11,7 @@ import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
+import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.service.ActionService;
 
@@ -97,6 +98,10 @@ public class ActionController {
         if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
+        if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
+            final var dataSource = dataSourceRepository.find(rsdToCategoryPayload.dataSourceId());
+            return new RSDToCategoryPayloadDetail(dataSource);
+        }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
     }
@@ -118,6 +123,7 @@ public class ActionController {
         @JsonSubTypes.Type(value = ModelToCategoryPayloadDetail.class, name = "ModelToCategory"),
         @JsonSubTypes.Type(value = JsonLdToCategoryPayloadDetail.class, name = "JsonLdToCategory"),
         @JsonSubTypes.Type(value = UpdateSchemaPayloadDetail.class, name = "UpdateSchema"),
+        @JsonSubTypes.Type(value = RSDToCategoryPayloadDetail.class, name = "RSDToCategory"),
     })
     interface ActionPayloadDetail {}
 
@@ -136,6 +142,10 @@ public class ActionController {
     record UpdateSchemaPayloadDetail(
         Version prevVersion,
         Version nextVersion
+    ) implements ActionPayloadDetail {}
+    
+    record RSDToCategoryPayloadDetail(
+            DataSource dataSource
     ) implements ActionPayloadDetail {}
 
 }

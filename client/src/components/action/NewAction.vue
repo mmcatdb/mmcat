@@ -40,21 +40,35 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    return actionType.value === ActionType.JsonLdToCategory
+    return actionType.value === ActionType.JsonLdToCategory || actionType.value === ActionType.RSDToCategory
         ? !!dataSourceId.value
         : !!logicalModelId.value;
 });
 
 async function createAction() {
     fetching.value = true;
+    let payload;
 
+    if (actionType.value === ActionType.JsonLdToCategory || actionType.value === ActionType.RSDToCategory) {
+        payload = {
+            type: actionType.value,
+            dataSourceId: dataSourceId.value,
+        };
+    }  
+    else {
+        payload = {
+            type: actionType.value,
+            logicalModelId: logicalModelId.value,
+        };
+    } 
+    /*
     const payload = actionType.value === ActionType.JsonLdToCategory ? {
         type: ActionType.JsonLdToCategory,
         dataSourceId: dataSourceId.value,
     } : {
         type: actionType.value,
         logicalModelId: logicalModelId.value,
-    };
+    };*/
 
     const result = await API.actions.createAction({}, {
         categoryId,
@@ -63,6 +77,7 @@ async function createAction() {
     });
     if (result.status)
         emit('newAction', Action.fromServer(result.data));
+    //else {const a = "a"}
 
     fetching.value = false;
 }

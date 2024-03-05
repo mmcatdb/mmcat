@@ -102,7 +102,7 @@ public class SchemaCategoryController {
     @PostMapping("/schema-categories/store")
     public ResponseEntity<String> storeSchemaCategoryWrapper(@RequestBody SchemaCategoryWrapper wrapper) {
         service.createNewInfo(wrapper);
-        return ResponseEntity.ok("Got your request, lady! 8)");
+        return ResponseEntity.ok("Got your request");
     }
 
 }

@@ -59,11 +59,17 @@ public class SchemaCategoryService {
      * */
     public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {
         final Id generatedId = repository.add(wrapper);
-        System.out.println("This is the generated ID: " + generatedId);
-        System.out.println("All saved :)");
+        //System.out.println("This is the generated ID: " + generatedId);
 
         return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "new_label", wrapper.version);
     }
+ /*   
+    public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
+        final SchemaCategoryWrapper oldWrapper = repository.find(id);
+        
+        
+    
+    }*/
 
     public SchemaCategoryInfo findInfo(Id id) {
         return repository.findInfo(new Id("" + id));
@@ -72,6 +78,7 @@ public class SchemaCategoryService {
     public SchemaCategoryWrapper find(Id id) {
         return repository.find(id);
     }
+    
 
     public @Nullable SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);
