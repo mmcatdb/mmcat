@@ -41,12 +41,13 @@ public class SchemaConverter {
 
 
     private final RecordSchemaDescription rsd;
-    public SchemaCategory sc = new SchemaCategory("Schema from RSD");
+    public SchemaCategory sc;// = new SchemaCategory("Schema from RSD");
     public AccessTreeNode root;
     public Key rootKey = new Key(0);
 
-    public SchemaConverter(RecordSchemaDescription rsd) {
+    public SchemaConverter(RecordSchemaDescription rsd, String schemaCatName) {
         this.rsd = rsd;
+        this.sc = new SchemaCategory(schemaCatName);
     }
 
     /**

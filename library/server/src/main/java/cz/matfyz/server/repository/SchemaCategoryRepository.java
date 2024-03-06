@@ -114,7 +114,7 @@ public class SchemaCategoryRepository {
      * while creating the new (empty) info
      * @return
      */
-    public boolean save(SchemaCategoryWrapper wrapper, Id id) {
+    public boolean save(SchemaCategoryWrapper wrapper, Id id) {      
         return db.get((connection, output) -> {
         var statement = connection.prepareStatement("""
                 UPDATE schema_category

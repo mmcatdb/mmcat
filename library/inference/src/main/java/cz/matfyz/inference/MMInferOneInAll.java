@@ -42,12 +42,14 @@ public class MMInferOneInAll {
     public static String uri;
     public static String databaseName;
     public static String collectionName;
+    public static String schemaCatName;
 
-    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName) {
+    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName) {
         this.appName = appName;
         this.uri = uri;
         this.databaseName = databaseName;
         this.collectionName = collectionName;
+        this.schemaCatName = schemaCatName;
 
         return this;
     }
@@ -72,7 +74,7 @@ public class MMInferOneInAll {
         RecordSchemaDescription rsd = rba.process(wrapper, merge, finalize);
         long end = System.currentTimeMillis();
 
-        SchemaConverter scon = new SchemaConverter(rsd);
+        SchemaConverter scon = new SchemaConverter(rsd, schemaCatName);
 
         CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
 
@@ -155,7 +157,7 @@ public class MMInferOneInAll {
       RecordSchemaDescription rsd = rba.process(wrapper, merge, finalize);
       long end = System.currentTimeMillis();
 
-      SchemaConverter scon = new SchemaConverter(rsd);
+      SchemaConverter scon = new SchemaConverter(rsd, schemaCatName);
 
       CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
       System.out.println("It all went good");

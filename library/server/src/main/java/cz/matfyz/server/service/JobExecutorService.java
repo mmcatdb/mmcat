@@ -198,7 +198,7 @@ public class JobExecutorService {
         System.out.println("RSDToCategoryAlgorithm check!");
         final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
         String url = dataSource.url; // mongodb://localhost:3205/srutkova.yelpbusinesssample
-        System.out.println("url:" +  url);
+        //System.out.println("url:" +  url);
 
         //Assuming the url is in the MongoDB format
         String uri = url.substring(10, url.lastIndexOf("/"));
@@ -208,15 +208,17 @@ public class JobExecutorService {
         String databaseName = parts[0];
         String collectionName = parts[1];
           
-        System.out.println("uri: " + uri);
-        System.out.println("databaseName: " + databaseName);
-        System.out.println("collectionName: " + collectionName);
-
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, collectionName).run();
+        //System.out.println("uri: " + uri);
+        //System.out.println("databaseName: " + databaseName);
+        //System.out.println("collectionName: " + collectionName);
         
+        Id originalId = run.categoryId;
+        SchemaCategoryWrapper originalWrapper = schemaService.find(originalId);
+        String schemaCatName = originalWrapper.label;
+        
+        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, collectionName, schemaCatName).run();
           
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
-        Id originalId = run.categoryId;
         
         schemaService.overwriteInfo(wrapper, originalId);
         mappingService.createNew(categoryMappingPair.mapping());
