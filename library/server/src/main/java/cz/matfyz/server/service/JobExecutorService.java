@@ -8,6 +8,8 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaGraph;
+import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.core.utils.io.UrlInputStreamProvider;
@@ -46,8 +48,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+
+import java.awt.Dimension;
+import java.awt.geom.Point2D;
+import edu.uci.ics.jung.graph.Graph;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,25 +154,37 @@ public class JobExecutorService {
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
     /**
-     * Layout algo using grid layout
+     * Layout algo using JUNG library
      * @param objects
      * @return
      */
-    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects) {
-        int gridSize = (int) Math.ceil(Math.sqrt(objects.size()));
-        double distance = 100; //distance between nodes on the grid
+    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
+        // first create SchemaGraph - I decided not to, because there is no logic to access Nodes/Edges
+        // create JUNG graph        
+        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
+        
+        for (SchemaObject o : objects) {
+            graph.addVertex(o);
+        }
+        for (SchemaMorphism m : morphisms) {
+            graph.addEdge(m, m.dom(), m.cod());
+        }
+        
+        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
+        layout.setSize(new Dimension(600, 600));
+        
+        for (int i = 0; i < 1000; i ++) { // to initialize positions
+            layout.step();
+        }
 
         Map<Key, Position> positions = new HashMap<>();
-        int i = 0;
-        for (SchemaObject object: objects) {
-            int row = i / gridSize;
-            int col = i % gridSize;
-            double x = col * distance;
-            double y = row * distance;
-            positions.put(object.key(), new Position(x, y));
-            i++;
+        for (SchemaObject node : graph.getVertices()) {
+            double x = layout.getX(node);
+            double y = layout.getY(node);
+            positions.put(node.key(), new Position(x, y));
         }
-        return positions;
+        
+        return positions;        
     }
 
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
@@ -180,7 +199,7 @@ public class JobExecutorService {
         context.setVersion(version);
 
         //maybe get rid of this second loop? and do all in one
-        Map<Key, Position> positions = layoutObjects(category.allObjects());
+        Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());
 
         for (Map.Entry<Key, Position> entry: positions.entrySet()) {
             Key key = entry.getKey();
