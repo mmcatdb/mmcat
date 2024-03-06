@@ -63,13 +63,19 @@ public class SchemaCategoryService {
 
         return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "new_label", wrapper.version);
     }
- /*   
-    public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
-        final SchemaCategoryWrapper oldWrapper = repository.find(id);
-        
-        
     
-    }*/
+    /***
+     * Temporary workaround method for inference
+     * Overwrites the existing empty SchemaCategory
+     * @param wrapper
+     * @param id
+     * @return
+     */
+    public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
+        final boolean saved = repository.save(wrapper, id);
+        
+        return saved == false ? null : new SchemaCategoryInfo(id, "new_label", wrapper.version);      
+    }
 
     public SchemaCategoryInfo findInfo(Id id) {
         return repository.findInfo(new Id("" + id));

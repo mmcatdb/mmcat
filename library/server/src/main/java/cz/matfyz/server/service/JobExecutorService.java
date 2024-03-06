@@ -213,10 +213,12 @@ public class JobExecutorService {
         System.out.println("collectionName: " + collectionName);
 
         final CategoryMappingPair categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, collectionName).run();
-
+        
+          
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
-        schemaService.createNewInfo(wrapper);
-
+        Id originalId = run.categoryId;
+        
+        schemaService.overwriteInfo(wrapper, originalId);
         mappingService.createNew(categoryMappingPair.mapping());
     }
 
