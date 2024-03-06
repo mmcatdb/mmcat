@@ -7,4 +7,6 @@ Modern web applications usually include consepts like "organization", "user", an
 - Dynamically create and configure instances of various databases (PostgreSQL, MongoDB, Neo4j).
 - Manage the lifecycle of these instances (start, stop, delete, etc.).
 
+The module will consist both of a backend service and a user-friendly frontend GUI.
+
 **This project is currently available.**

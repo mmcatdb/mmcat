@@ -4,7 +4,7 @@ title: "Motivation"
 
 There are a lot of different database systems and each has different advantages and disadvantages. Although they might appear to be similar, there are no standards between them that would allow us to use them interchangeably. There also is not any universal way how to transform data from one system to another or how to query among data from more than one database model. Moreover, this lack of standardization makes any effort for a general evolution tool almost impossible.
 
-The multi-model databases partially solve this issue by allowing multiple different models (e.g. relational, document, key-value, graph, ...) to coexist within one database engine. There are multiple ways how to combine these models, for example:
+The multi-model databases partially solve this issue by allowing various models (e.g. relational, document, key-value, graph, ...) to coexist within one database engine. There are multiple ways how to combine these models, for example:
 - one model can be embedded in another,
 - the entities from one model can reference the entities from another,
 - the same data can be stored in multiple models, i.e. redundant.
