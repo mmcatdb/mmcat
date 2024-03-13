@@ -214,29 +214,44 @@ public class JobExecutorService {
     
 
     private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
-        System.out.println("RSDToCategoryAlgorithm check!");
-        final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
-        String url = dataSource.url; // mongodb://localhost:3205/srutkova.yelpbusinesssample
-        //System.out.println("url:" +  url);
-
-        //Assuming the url is in the MongoDB format
-        String uri = url.substring(10, url.lastIndexOf("/"));
-        String dbNameAndCollection = url.substring(url.lastIndexOf("/") + 1);
-        String[] parts = dbNameAndCollection.split("\\.");
-
-        String databaseName = parts[0];
-        String collectionName = parts[1];
-          
-        //System.out.println("uri: " + uri);
-        //System.out.println("databaseName: " + databaseName);
-        //System.out.println("collectionName: " + collectionName);
-        
         Id originalId = run.categoryId;
         SchemaCategoryWrapper originalWrapper = schemaService.find(originalId);
         String schemaCatName = originalWrapper.label;
         
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, collectionName, schemaCatName).run();
+        final CategoryMappingPair categoryMappingPair;
+        if (payload.databaseId()!= null){
+            final DatabaseEntity databaseEntity = logicalModelService.find(payload.databaseId()).database();
+            System.out.println("trying out databases");
+            String databaseName = databaseEntity.settings.get("database").asText();
+            String port = databaseEntity.settings.get("port").asText();
+            String host = databaseEntity.settings.get("host").asText();
+            //String uri = "localhost:3205";
+            String uri = host + ":" + port;
+            System.out.println("DatabaseName: " + databaseName);
+            System.out.println("Port: " + port);
+            System.out.println("Host: " + host);
+            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, true).run();
+        }
+        else {
+            final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
+            String url = dataSource.url; // mongodb://localhost:3205/srutkova.yelpbusinesssample
+            
+
+            //Assuming the url is in the MongoDB format
+            String uri = url.substring(10, url.lastIndexOf("/"));
+            String dbNameAndCollection = url.substring(url.lastIndexOf("/") + 1);
+            String[] parts = dbNameAndCollection.split("\\.");
+
+            String databaseName = parts[0];
+            String collectionName = parts[1];
+            
+            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, false).run();
+        }
           
+        //System.out.println("uri: " + uri);
+        //System.out.println("databaseName: " + databaseName);
+        //System.out.println("collectionName: " + collectionName);
+                
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
         
         schemaService.overwriteInfo(wrapper, originalId);

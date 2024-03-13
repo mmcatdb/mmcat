@@ -43,13 +43,15 @@ public class MMInferOneInAll {
     public static String databaseName;
     public static String collectionName;
     public static String schemaCatName;
+    public static boolean dataFromDB;
 
-    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName) {
+    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName, boolean dataFromDB) {
         this.appName = appName;
         this.uri = uri;
         this.databaseName = databaseName;
         this.collectionName = collectionName;
         this.schemaCatName = schemaCatName;
+        this.dataFromDB = dataFromDB;        
 
         return this;
     }
@@ -66,8 +68,14 @@ public class MMInferOneInAll {
         String checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
 
         RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
-
-        AbstractInferenceWrapper wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
+        // might have to move this, but I need to add logic, on whether I am using data from db or straight from file
+        AbstractInferenceWrapper wrapper;
+        if (dataFromDB) {
+            wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
+        }
+        else {wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);}
+        //wrapper = new JSONorCSVWrapper()
+        
         AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
         Finalize finalize = null;
         long start = System.currentTimeMillis();
@@ -147,6 +155,7 @@ public class MMInferOneInAll {
       String checkpointDir = args[0]; 
 
       //String checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
+
 
       RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
 

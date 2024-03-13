@@ -1,6 +1,7 @@
 import { DataSource, type DataSourceFromServer } from './dataSource';
 import type { Entity, Id, VersionId } from './id';
-import { LogicalModelInfo, type LogicalModelInfoFromServer } from './logicalModel';
+import { LogicalModelInfo, type LogicalModelFromServer, type LogicalModelInfoFromServer } from './logicalModel';
+import {  DatabaseInfo, type DatabaseInfoFromServer } from './database';
 
 export type ActionFromServer = {
     id: Id;
@@ -96,8 +97,12 @@ export type ActionPayloadInit = {
     type: ActionType.ModelToCategory | ActionType.CategoryToModel;
     logicalModelId: Id;
 } | {
-    type: ActionType.JsonLdToCategory | ActionType.RSDToCategory;
+    type: ActionType.JsonLdToCategory;
     dataSourceId: Id;
+} | {
+    type: ActionType.RSDToCategory;
+    dataSourceId?: Id; //these are now optional
+    databaseId?: Id;
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
@@ -176,20 +181,26 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
 }
 
 type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
-    dataSource: DataSourceFromServer;
+    dataSource?: DataSourceFromServer;
+    database?: DatabaseInfoFromServer;
 };
 
 class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
     readonly type = ActionType.RSDToCategory;
 
     private constructor(
-        readonly dataSource: DataSource,
-    ) {}
+        readonly dataSource?: DataSource,
+        readonly database?: DatabaseInfo,
+    ) {
+        if (dataSource && database) 
+            throw new Error("RSDToCategoryPayload can only have one source of data: either 'Data Source' or 'Logical Model'");
+        
+    }
 
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
-        return new RSDToCategoryPayload(
-            DataSource.fromServer(input.dataSource),
-        );
+        const dataSource = input.dataSource ? DataSource.fromServer(input.dataSource) : undefined;
+        const database = input.database ? DatabaseInfo.fromServer(input.database) : undefined;
+        return new RSDToCategoryPayload(dataSource, database);
     }
 }
 

@@ -54,7 +54,23 @@ async function deleteAction() {
                 {{ action.payload.type }}
             </ValueRow>
             <ValueRow
-                v-if="action.payload.type === ActionType.JsonLdToCategory || action.payload.type ===ActionType.RSDToCategory"
+                v-if="action.payload.type === ActionType.RSDToCategory && action.payload.dataSource"
+                label="Data source:"
+            >
+                <RouterLink :to="{ name: 'dataSource', params: {id: action.payload.dataSource.id }, query: { categoryId: action.categoryId } }">
+                    {{ action.payload.dataSource.label }}
+                </RouterLink> 
+            </ValueRow>
+            <ValueRow
+                v-else-if="action.payload.type === ActionType.RSDToCategory && action.payload.database"
+                label="Database:"
+            >
+                <RouterLink :to="{ name: 'database', params: { id: action.payload.database.id } }">
+                    {{ action.payload.database.label }}
+                </RouterLink>
+            </ValueRow> 
+            <ValueRow
+                v-else-if="action.payload.type === ActionType.JsonLdToCategory"
                 label="Data source:"
             >
                 <RouterLink :to="{ name: 'dataSource', params: { id: action.payload.dataSource.id }, query: { categoryId: action.categoryId } }">
@@ -70,7 +86,7 @@ async function deleteAction() {
                 </RouterLink>
             </ValueRow>
             <ValueRow
-                v-else
+                v-else-if="action.payload.type === ActionType.UpdateSchema"
                 label="Versions:"
             >
               <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" /> 

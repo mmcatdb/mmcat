@@ -5,6 +5,7 @@ import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
 import { DataSource } from '@/types/dataSource';
+import { DatabaseInfo } from '@/types/database';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
@@ -15,9 +16,11 @@ const emit = defineEmits<{
 
 const logicalModels = ref<LogicalModel[]>();
 const dataSources = ref<DataSource[]>();
+const databases = ref<DatabaseInfo[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
 const dataSourceId = ref<Id>();
+const databaseId = ref<Id>();
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
@@ -33,6 +36,10 @@ onMounted(async () => {
     if (dataSourceResult.status)
         dataSources.value = dataSourceResult.data.map(DataSource.fromServer);
 
+    const databaseResult = await API.databases.getAllDatabaseInfos({});
+    if (databaseResult.status)
+        databases.value = databaseResult.data.map(DatabaseInfo.fromServer);
+
     fetched.value = true;
 });
 
@@ -40,21 +47,31 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    return actionType.value === ActionType.JsonLdToCategory || actionType.value === ActionType.RSDToCategory
-        ? !!dataSourceId.value
-        : !!logicalModelId.value;
+    if (actionType.value === ActionType.JsonLdToCategory) 
+        return !!dataSourceId.value;
+    else if (actionType.value === ActionType.RSDToCategory) 
+        return !!dataSourceId.value || !!databaseId.value;
+    else return !!logicalModelId.value;
+    
 });
 
 async function createAction() {
     fetching.value = true;
     let payload;
 
-    if (actionType.value === ActionType.JsonLdToCategory || actionType.value === ActionType.RSDToCategory) {
+    if (actionType.value === ActionType.JsonLdToCategory ) {
         payload = {
             type: actionType.value,
             dataSourceId: dataSourceId.value,
         };
     }  
+    else if (actionType.value === ActionType.RSDToCategory) {
+        payload = {
+            type: actionType.value,
+            dataSourceId: dataSourceId.value || null,
+            databaseId: databaseId.value || null,
+        };
+    }
     else {
         payload = {
             type: actionType.value,
@@ -102,7 +119,7 @@ async function createAction() {
                 <input v-model="actionName" />
             </ValueRow>
             <ValueRow
-                v-if="actionType === ActionType.JsonLdToCategory || actionType === ActionType.RSDToCategory"
+                v-if="actionType === ActionType.JsonLdToCategory"
                 label="Data source:"
             >
                 <select v-model="dataSourceId">
@@ -116,7 +133,36 @@ async function createAction() {
                 </select>
             </ValueRow>
             <ValueRow
-                v-else
+                v-if="actionType === ActionType.RSDToCategory"
+                label="Data source (select either data sources or database):"
+            >    
+                <select v-model="dataSourceId">
+                    <option
+                        v-for="dataSource in dataSources"
+                        :key="dataSource.id"
+                        :value="dataSource.id"
+                    >
+                        {{ dataSource.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow
+                v-if="actionType === ActionType.RSDToCategory"
+                label="Database (select either data sources or database):"
+            >    
+                <select v-model="databaseId">
+
+                    <option
+                        v-for="database in databases"
+                        :key="database.id"
+                        :value="database.id"
+                    >
+                        {{ database.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow
+                v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"
                 label="Logical model:"
             >
                 <select v-model="logicalModelId">

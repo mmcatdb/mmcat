@@ -1,10 +1,12 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.evolution.Version;
+import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.DataSourceRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.DatabaseRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
@@ -16,6 +18,7 @@ import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -43,6 +46,9 @@ public class ActionController {
 
     @Autowired
     private DataSourceRepository dataSourceRepository;
+    
+    @Autowired
+    private DatabaseRepository databaseRepository;
 
     @GetMapping("/schema-categories/{categoryId}/actions")
     public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {
@@ -99,8 +105,16 @@ public class ActionController {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
         if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
-            final var dataSource = dataSourceRepository.find(rsdToCategoryPayload.dataSourceId());
-            return new RSDToCategoryPayloadDetail(dataSource);
+            DataSource dataSource = null;
+            DatabaseEntity database = null;
+            if (rsdToCategoryPayload.dataSourceId() != null ){
+                dataSource = dataSourceRepository.find(rsdToCategoryPayload.dataSourceId());
+            }
+            else {
+                database = databaseRepository.find(rsdToCategoryPayload.databaseId());
+            }
+            
+            return new RSDToCategoryPayloadDetail(dataSource, database);
         }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
@@ -145,7 +159,8 @@ public class ActionController {
     ) implements ActionPayloadDetail {}
     
     record RSDToCategoryPayloadDetail(
-            DataSource dataSource
+            DataSource dataSource,
+            DatabaseEntity database
     ) implements ActionPayloadDetail {}
 
 }
