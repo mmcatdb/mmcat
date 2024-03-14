@@ -15,6 +15,7 @@
         <module>wrappercassandra</module>
         <module>wrapperriak</module>
         <module>wrapperdummy</module>
+        <module>wrapperjson</module>
     </modules>
     <dependencies>
     </dependencies>

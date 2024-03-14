@@ -1,7 +1,7 @@
 import type { Entity, Id } from '../id';
 
 export enum Type {
-    JsonLdStore = 'JsonLdStore'
+    JsonLdStore = 'JsonLdStore',
 }
 
 export const DATA_SOURCE_TYPES: { type: Type, label: string }[] = [

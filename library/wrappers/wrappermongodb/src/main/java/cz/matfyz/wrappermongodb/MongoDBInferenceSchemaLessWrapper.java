@@ -78,6 +78,7 @@ public class MongoDBInferenceSchemaLessWrapper extends AbstractInferenceWrapper 
 
     @Override
     public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
+        //System.out.println("Using loadProperties()");
         JavaMongoRDD<Document> records = loadRecords();
         if (loadSchema && loadData) {
             return records
@@ -99,17 +100,20 @@ public class MongoDBInferenceSchemaLessWrapper extends AbstractInferenceWrapper 
 
     @Override
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
+        //System.out.println("Using loadRSDs()");
         JavaMongoRDD<Document> records = loadRecords();
         return records.map(new MongoRecordToRSDMapFunction());
     }
 
     @Override
     public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
+        //System.out.println("Using loadRSDPairs()");
         JavaMongoRDD<Document> records = loadRecords();
         return records.mapToPair(new MongoRecordToPairFunction());
     }
 
     private JavaMongoRDD<Document> loadRecords() {
+        //System.out.println("Using loadRecords()");
         JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
         newContext.setLogLevel("ERROR");
         newContext.setCheckpointDir(checkpointDir);
