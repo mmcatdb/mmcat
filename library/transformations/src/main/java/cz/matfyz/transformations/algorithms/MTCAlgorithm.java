@@ -1,6 +1,6 @@
 package cz.matfyz.transformations.algorithms;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
@@ -181,9 +181,6 @@ public class MTCAlgorithm {
 
             final var parentToChild = category.getPath(child.signature());
             stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
-            final var a = stack.peek().toString();
-            System.out.println(a);
-            final var b = stack.peek().toString();
         }
     }
 

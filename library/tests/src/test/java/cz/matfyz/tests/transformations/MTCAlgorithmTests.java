@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Test;
 /**
  * @author jachymb.bartik
  */
-public class MTCAlgorithmTests {
+class MTCAlgorithmTests {
 
     private static final SchemaCategory schema = Schema.newSchemaCategory();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         UniqueIdProvider.reset();
     }
 
     @Test
-    public void basicTest() {
+    void basicTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(PostgreSQL.order(schema), """
                 [{
@@ -39,7 +39,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void structureTest() {
+    void structureTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.address(schema), """
                 [{
@@ -68,7 +68,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void simpleArrayTest() {
+    void simpleArrayTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.tag(schema), """
                 [{
@@ -97,7 +97,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void complexArrayTest() {
+    void complexArrayTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.item(schema), """
                 [{
@@ -154,7 +154,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void mapTest() {
+    void mapTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.contact(schema), """
                 [{
@@ -183,7 +183,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void syntheticPropertyTest() {
+    void syntheticPropertyTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.customer(schema), """
                 [{
@@ -208,7 +208,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void missingSimpleTest() {
+    void missingSimpleTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.address(schema), """
                 [{
@@ -236,7 +236,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void missingComplexTest() {
+    void missingComplexTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.address(schema), """
                 [{
@@ -254,7 +254,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void emptyArrayTest() {
+    void emptyArrayTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.item(schema), """
                 [{
@@ -273,7 +273,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void complexMapTest() {
+    void complexMapTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.note(schema), """
                 [{
@@ -314,7 +314,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void missingArrayTest() {
+    void missingArrayTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(MongoDB.item(schema), """
                 [{
@@ -367,7 +367,7 @@ public class MTCAlgorithmTests {
     }
 
     @Test
-    public void multipleMappingsTest() {
+    void multipleMappingsTest() {
         new MTCAlgorithmTestBase()
             .mappingWithRecords(PostgreSQL.order(schema), """
                 [{
@@ -432,7 +432,7 @@ public class MTCAlgorithmTests {
     // TODO This test probably don't bring anything new as it just maps one value to another. However, an object with multiple identifiers from which one is an EMPTY signature, might be more interesting.
 
     // @Test
-    // public void selfIdentifierTest() {
+    // void selfIdentifierTest() {
     //     final var data = new TestData();
     //     final var schemaV3 = data.createDefaultV3SchemaCategory();
 

@@ -18,18 +18,18 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class IntegrationTests {
+class IntegrationTests {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTests.class);
 
     static final String JSON_LD_FILE_NAME = "test2.jsonld";
     //static final String JSON_LD_FILE_NAME = "test1.jsonld";
-    static final String JSON_LD_URL = "https://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld";
+    static final String JSON_LD_URL = "https://data.mmcatdb.com/test2.jsonld";
     //static final String JSON_LD_URL = "http://localhost/data-sources/test1.jsonld";
 
     @Test
-    public void jsonLdToRdfFromLocalFile_DoesNotThrow() {
+    void jsonLdToRdfFromLocalFile_DoesNotThrow() {
         final var jsonToRDF = new JsonLdToRDF();
         jsonToRDF.input(new FileInputStreamProvider(JSON_LD_FILE_NAME));
 
@@ -40,7 +40,7 @@ public class IntegrationTests {
     }
 
     @Test
-    public void jsonLdToRdfFromRemoteUrl_DoesNotThrow() {
+    void jsonLdToRdfFromRemoteUrl_DoesNotThrow() {
         final var jsonToRDF = new JsonLdToRDF();
         jsonToRDF.input(new UrlInputStreamProvider(JSON_LD_URL));
 
@@ -51,7 +51,7 @@ public class IntegrationTests {
     }
 
     @Test
-    public void RDFToInstance_DoesNotThrow() {
+    void RDFToInstance_DoesNotThrow() {
         final var rdfToInstance = new RDFToInstance();
 
         final var jsonToRDF = new JsonLdToRDF();

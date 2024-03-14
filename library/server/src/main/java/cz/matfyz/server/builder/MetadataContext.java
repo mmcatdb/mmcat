@@ -1,6 +1,6 @@
 package cz.matfyz.server.builder;
 
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;

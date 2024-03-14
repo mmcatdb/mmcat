@@ -7,7 +7,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.querytree.DatabaseNode;
 import cz.matfyz.querying.core.querytree.FilterNode;

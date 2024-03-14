@@ -2,8 +2,7 @@ package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
@@ -14,6 +13,7 @@ import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

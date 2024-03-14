@@ -1,6 +1,6 @@
 package cz.matfyz.server.entity.schema;
 
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;

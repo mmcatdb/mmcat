@@ -1,17 +1,14 @@
 package cz.matfyz.core.schema;
 
-import cz.matfyz.core.category.CategoricalObject;
-import cz.matfyz.core.identification.Identified;
-
-import java.util.Objects;
+import cz.matfyz.core.identifiers.Identified;
+import cz.matfyz.core.identifiers.Key;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaObject implements CategoricalObject, Identified<Key> {
-    //private static final Logger LOGGER = LoggerFactory.getLogger(SchemaObject.class);
+public class SchemaObject implements Identified<SchemaObject, Key> {
 
     private final Key key; // Identifies the object, in the paper it's a number >= 100
     private final String label;
@@ -31,42 +28,40 @@ public class SchemaObject implements CategoricalObject, Identified<Key> {
         this.pimIri = pimIri;
     }
 
-    @Override public Key identifier() {
+    public Key key() {
         return key;
     }
 
-    @Override public Key key() {
-        return key;
-    }
-
-    @Override public String label() {
+    public String label() {
         return label;
     }
 
-    @Override public SignatureId superId() {
+    public SignatureId superId() {
         return superId;
     }
 
     /**
      * Immutable.
      */
-    @Override public ObjectIds ids() {
+    public ObjectIds ids() {
         return ids;
     }
 
-    @Override public boolean equals(Object obj) {
-        return obj instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
+    // Identification
+
+    @Override public Key identifier() {
+        return key;
     }
 
-    /**
-     * Auto-generated, constants doesn't have any special meaning.
-     * @return
-     */
-    @Override public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.key);
-        return hash;
+    @Override public boolean equals(Object other) {
+        return other instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
     }
+
+    @Override public int hashCode() {
+        return key.hashCode();
+    }
+
+    // Identification
 
     @Override public String toString() {
         return "SO: " + key;

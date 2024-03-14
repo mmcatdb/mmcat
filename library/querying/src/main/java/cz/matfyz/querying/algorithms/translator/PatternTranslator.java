@@ -6,7 +6,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;

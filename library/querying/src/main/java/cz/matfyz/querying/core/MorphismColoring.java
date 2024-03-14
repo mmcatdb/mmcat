@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.core.category.BaseSignature;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.patterntree.PatternObject;

@@ -1,10 +1,11 @@
 package cz.matfyz.core.schema;
 
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.Morphism.Tag;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.utils.SequenceGenerator;
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
 
 import java.util.Map;
 import java.util.Set;

@@ -18,6 +18,4 @@ public abstract class DataRecord implements Serializable {
         return this.name;
     }
 
-    // Iterate through all simple properties of this tree
-    // public abstract Set<DataRecord> records();
 }

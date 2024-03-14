@@ -1,7 +1,7 @@
 package cz.matfyz.core.exception;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Signature;
 
 /**
  * @author jachymb.bartik

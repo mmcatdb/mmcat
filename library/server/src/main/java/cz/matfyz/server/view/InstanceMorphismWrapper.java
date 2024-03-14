@@ -1,9 +1,9 @@
 package cz.matfyz.server.view;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.InstanceMorphism;
 import cz.matfyz.core.instance.MappingRow;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SignatureId;
 
 import java.util.Set;

@@ -1,4 +1,4 @@
-package cz.matfyz.core.category;
+package cz.matfyz.core.identifiers;
 
 import java.util.List;
 

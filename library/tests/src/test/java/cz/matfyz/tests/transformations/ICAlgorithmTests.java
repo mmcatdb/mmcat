@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 /**
  * @author jachymb.bartik
  */
-public class ICAlgorithmTests {
+class ICAlgorithmTests {
 
     private static final SchemaCategory schema = Schema.newSchemaCategory();
 
     @Test
-    public void basicPrimaryKeyTest() {
+    void basicPrimaryKeyTest() {
         new ICAlgorithmTestBase()
             .primaryMapping(PostgreSQL.order(schema))
             .expected("""
@@ -27,7 +27,7 @@ public class ICAlgorithmTests {
     }
 
     @Test
-    public void complexPrimaryKeyTest() {
+    void complexPrimaryKeyTest() {
         new ICAlgorithmTestBase()
             .primaryMapping(PostgreSQL.item(schema))
             .expected("""
@@ -40,7 +40,7 @@ public class ICAlgorithmTests {
     }
 
     @Test
-    public void basicReferenceTest() {
+    void basicReferenceTest() {
         new ICAlgorithmTestBase()
             .primaryMapping(PostgreSQL.item(schema))
             .otherMappings(PostgreSQL.order(schema))
@@ -55,7 +55,7 @@ public class ICAlgorithmTests {
     }
 
     @Test
-    public void moreReferencesTest() {
+    void moreReferencesTest() {
         new ICAlgorithmTestBase()
             .primaryMapping(PostgreSQL.item(schema))
             .otherMappings(PostgreSQL.order(schema), PostgreSQL.product(schema))
@@ -74,7 +74,7 @@ public class ICAlgorithmTests {
     // TODO se MTC
 
     // @Test
-    // public void selfIdentifierTest() {
+    // void selfIdentifierTest() {
     //     schema = data.createDefaultV3SchemaCategory();
     //     mappings = new TreeMap<>();
 

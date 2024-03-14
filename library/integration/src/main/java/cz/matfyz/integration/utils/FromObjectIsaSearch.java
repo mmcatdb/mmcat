@@ -1,10 +1,10 @@
 package cz.matfyz.integration.utils;
 
-import cz.matfyz.core.category.Morphism.Tag;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceMorphism;
 import cz.matfyz.core.instance.InstanceObject;
+import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.integration.exception.MorphismException;
 
 import java.util.ArrayDeque;

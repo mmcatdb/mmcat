@@ -10,12 +10,12 @@ import org.junit.jupiter.api.Test;
 /**
  * @author jachymb.bartik
  */
-public class DMLAlgorithmTests {
+class DMLAlgorithmTests {
 
     private static final SchemaCategory schema = Schema.newSchemaCategory();
 
     @Test
-    public void basicTest() {
+    void basicTest() {
         new DMLAlgorithmTestBase(PostgreSQL.order(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -38,7 +38,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void structureTest() {
+    void structureTest() {
         new DMLAlgorithmTestBase(MongoDB.address(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -69,7 +69,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void simpleArrayTest() {
+    void simpleArrayTest() {
         new DMLAlgorithmTestBase(MongoDB.tag(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -101,7 +101,7 @@ public class DMLAlgorithmTests {
 
     // This isn't a comprehensive test because it doesn't check if the order is correct. However, to implement a complete test would be such an overkill.
     @Test
-    public void complexArrayTest() {
+    void complexArrayTest() {
         new DMLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -148,7 +148,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void mapTest() {
+    void mapTest() {
         new DMLAlgorithmTestBase(MongoDB.contact(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -179,7 +179,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void syntheticPropertyTest() {
+    void syntheticPropertyTest() {
         new DMLAlgorithmTestBase(MongoDB.customer(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -206,7 +206,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void missingSimpleTest() {
+    void missingSimpleTest() {
         new DMLAlgorithmTestBase(MongoDB.address(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -235,7 +235,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void missingComplexTest() {
+    void missingComplexTest() {
         new DMLAlgorithmTestBase(MongoDB.address(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -258,7 +258,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void emptyArrayTest() {
+    void emptyArrayTest() {
         new DMLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -283,7 +283,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void complexMapTest() {
+    void complexMapTest() {
         new DMLAlgorithmTestBase(MongoDB.note(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -318,7 +318,7 @@ public class DMLAlgorithmTests {
     }
 
     @Test
-    public void missingArrayTest() {
+    void missingArrayTest() {
         new DMLAlgorithmTestBase(MongoDB.item(schema))
             .instance(builder -> {
                 PostgreSQL.addOrder(builder, "o_100");
@@ -363,7 +363,7 @@ public class DMLAlgorithmTests {
     // TODO see MTC
 
     // @Test
-    // public void selfIdentifierTest() {
+    // void selfIdentifierTest() {
     //     final var data = new TestData();
     //     final var schemaV3 = data.createDefaultV3SchemaCategory();
 

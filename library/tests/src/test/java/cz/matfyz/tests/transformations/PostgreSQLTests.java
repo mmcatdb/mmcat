@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class PostgreSQLTests {
+class PostgreSQLTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLTests.class);
 
@@ -25,12 +25,12 @@ public class PostgreSQLTests {
     private static final TestDatabase<PostgreSQLControlWrapper> database = databases.postgreSQL();
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         database.setup();
     }
 
     @Test
-    public void readFromDB_DoesNotThrow() {
+    void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = database.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readTableAsStringForTests(PostgreSQL.orderKind);
@@ -39,7 +39,7 @@ public class PostgreSQLTests {
     }
 
     @Test
-    public void getForestForBasicTest() throws Exception {
+    void getForestForBasicTest() throws Exception {
         new PullForestTestBase(PostgreSQL.order(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -52,7 +52,7 @@ public class PostgreSQLTests {
     }
 
     @Test
-    public void getForestForStructureTest() throws Exception {
+    void getForestForStructureTest() throws Exception {
         new PullForestTestBase(PostgreSQL.product(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -78,22 +78,22 @@ public class PostgreSQLTests {
 
     /*
     @Test
-    public void getForestForSimpleArrayTest() throws Exception {
+    void getForestForSimpleArrayTest() throws Exception {
         pullForestTestAlgorithm("simple_array", "3SimpleArrayTest.json", new Tag(null));
     }
 
     @Test
-    public void getForestForComplexArrayTest() throws Exception {
+    void getForestForComplexArrayTest() throws Exception {
         pullForestTestAlgorithm("complex_array", "4ComplexArrayTest.json", new Item(null));
     }
 
     @Test
-    public void getForestForEmptyArrayTest() throws Exception {
+    void getForestForEmptyArrayTest() throws Exception {
         pullForestTestAlgorithm("empty_array", "9EmptyArrayTest.json", new Item(null));
     }
 
     @Test
-    public void getForestForComplexMapTest() throws Exception {
+    void getForestForComplexMapTest() throws Exception {
         pullForestTestAlgorithm("complex_map", "10ComplexMapTest.json", new Note(null));
     }
     */

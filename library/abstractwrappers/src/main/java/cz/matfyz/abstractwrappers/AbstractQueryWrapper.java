@@ -2,7 +2,7 @@ package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.abstractwrappers.database.Kind;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.schema.SchemaObject;
 

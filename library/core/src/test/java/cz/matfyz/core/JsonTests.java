@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.SimpleProperty;

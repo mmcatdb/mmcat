@@ -1,11 +1,11 @@
 package cz.matfyz.server.entity.schema;
 
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.Morphism.Tag;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaMorphism.DisconnectedSchemaMorphism;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.core.schema.SchemaMorphism.Tag;
 
 import java.util.Set;
 

@@ -1,11 +1,11 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.category.CategoricalObject;
-import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.exception.ObjectException;
+import cz.matfyz.core.identifiers.Identified;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SignatureId;
@@ -21,7 +21,7 @@ import java.util.TreeSet;
  * Each object from instance category is modeled as a set of tuples ({@link DomainRow}).
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceObject implements CategoricalObject {
+public class InstanceObject implements Identified<InstanceObject, Key> {
 
     public final SchemaObject schemaObject;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
@@ -265,7 +265,73 @@ public class InstanceObject implements CategoricalObject {
 
         return output;
     }
+    
+    private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
+    
+    public void addReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
+        var referencesForSignature = referencesToRows.computeIfAbsent(signatureInThis, x -> new TreeSet<>());
+        referencesForSignature.add(new ReferenceToRow(signatureInThis, path, signatureInOther));
+    }
+    
+    public Set<ReferenceToRow> getReferencesForSignature(Signature signatureInThis) {
+        return referencesToRows.get(signatureInThis);
+    }
+    
+    public static class ReferenceToRow implements Comparable<ReferenceToRow> {
+        
+        public final Signature signatureInThis;
+        public final InstancePath path;
+        public final Signature signatureInOther;
+        
+        public ReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
+            this.signatureInThis = signatureInThis;
+            this.path = path;
+            this.signatureInOther = signatureInOther;
+        }
+        
+        @Override public boolean equals(Object object) {
+            if (this == object)
+                return true;
+            
+            return object instanceof ReferenceToRow reference
+                && signatureInThis.equals(reference.signatureInThis)
+                && path.equals(reference.path)
+                && signatureInOther.equals(reference.signatureInOther);
+        }
+        
+        @Override public int compareTo(ReferenceToRow reference) {
+            if (this == reference)
+                return 0;
+            
+            final var x1 = signatureInThis.compareTo(reference.signatureInThis);
+            if (x1 != 0)
+                return x1;
+            
+            final var x2 = path.signature().compareTo(reference.path.signature());
+            if (x2 != 0)
+                return x2;
+            
+            return signatureInOther.compareTo(reference.signatureInOther);
+        }
+        
+    }
+    
+    // Identification
 
+    @Override public Key identifier() {
+        return schemaObject.key();
+    }
+
+    @Override public boolean equals(Object other) {
+        return other instanceof InstanceObject instanceObject && instanceObject.schemaObject.equals(schemaObject);
+    }
+
+    @Override public int hashCode() {
+        return schemaObject.hashCode();
+    }
+
+    // Identification
+    
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
@@ -280,59 +346,5 @@ public class InstanceObject implements CategoricalObject {
 
         return builder.toString();
     }
-
-    @Override public boolean equals(Object object) {
-        return object instanceof InstanceObject instanceObject && schemaObject.equals(instanceObject.schemaObject);
-    }
-
-    private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
-
-    public void addReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
-        var referencesForSignature = referencesToRows.computeIfAbsent(signatureInThis, x -> new TreeSet<>());
-        referencesForSignature.add(new ReferenceToRow(signatureInThis, path, signatureInOther));
-    }
-
-    public Set<ReferenceToRow> getReferencesForSignature(Signature signatureInThis) {
-        return referencesToRows.get(signatureInThis);
-    }
-
-    public static class ReferenceToRow implements Comparable<ReferenceToRow> {
-
-        public final Signature signatureInThis;
-        public final InstancePath path;
-        public final Signature signatureInOther;
-
-        public ReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
-            this.signatureInThis = signatureInThis;
-            this.path = path;
-            this.signatureInOther = signatureInOther;
-        }
-
-        @Override public boolean equals(Object object) {
-            if (this == object)
-                return true;
-
-            return object instanceof ReferenceToRow reference
-                && signatureInThis.equals(reference.signatureInThis)
-                && path.equals(reference.path)
-                && signatureInOther.equals(reference.signatureInOther);
-        }
-
-        @Override public int compareTo(ReferenceToRow reference) {
-            if (this == reference)
-                return 0;
-
-            var x1 = signatureInThis.compareTo(reference.signatureInThis);
-            if (x1 != 0)
-                return x1;
-
-            var x2 = path.signature().compareTo(reference.path.signature());
-            if (x2 != 0)
-                return x2;
-
-            return signatureInOther.compareTo(reference.signatureInOther);
-        }
-
-    }
-
+    
 }

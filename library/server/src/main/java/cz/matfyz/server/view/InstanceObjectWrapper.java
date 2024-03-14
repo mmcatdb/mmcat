@@ -1,8 +1,8 @@
 package cz.matfyz.server.view;
 
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceObject;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SignatureId;
 
 import java.util.List;

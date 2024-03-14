@@ -1,4 +1,4 @@
-package cz.matfyz.core.schema;
+package cz.matfyz.core.identifiers;
 
 import java.io.IOException;
 import java.io.Serializable;

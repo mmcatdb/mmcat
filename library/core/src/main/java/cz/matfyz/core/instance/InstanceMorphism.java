@@ -1,8 +1,9 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.category.Morphism;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Identified;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaMorphism;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 import java.util.List;
 import java.util.SortedSet;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceMorphism implements Morphism {
+public class InstanceMorphism implements Identified<InstanceMorphism, Signature> {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMorphism.class);
@@ -80,21 +81,37 @@ public class InstanceMorphism implements Morphism {
         return mappings;
     }
 
-    @Override public InstanceObject dom() {
+    public InstanceObject dom() {
         return dom;
     }
 
-    @Override public InstanceObject cod() {
+    public InstanceObject cod() {
         return cod;
     }
 
-    @Override public Signature signature() {
+    public Signature signature() {
         return schemaMorphism.signature();
     }
 
-    @Override public Min min() {
+    public Min min() {
         return schemaMorphism.min();
     }
+
+    // Identification
+
+    @Override public Signature identifier() {
+        return schemaMorphism.signature();
+    }
+
+    @Override public boolean equals(Object other) {
+        return other instanceof InstanceMorphism instanceMorphism && instanceMorphism.schemaMorphism.equals(schemaMorphism);
+    }
+
+    @Override public int hashCode() {
+        return schemaMorphism.hashCode();
+    }
+
+    // Identification
 
     @Override public String toString() {
         var builder = new StringBuilder();
@@ -111,14 +128,6 @@ public class InstanceMorphism implements Morphism {
             builder.append("\t\t").append(row).append("\n");
 
         return builder.toString();
-    }
-
-    // TODO maybe there is no reason to override this method
-    @Override public boolean equals(Object object) {
-        if (this == object)
-            return true;
-
-        return object instanceof InstanceMorphism instanceMorphism && dom.equals(instanceMorphism.dom) && cod.equals(instanceMorphism.cod);
     }
 
 }

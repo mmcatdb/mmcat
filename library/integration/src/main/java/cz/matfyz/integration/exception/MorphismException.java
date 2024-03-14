@@ -1,6 +1,6 @@
 package cz.matfyz.integration.exception;
 
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
 
 import java.io.Serializable;
 

@@ -1,13 +1,13 @@
 package cz.matfyz.tests.example.basic;
 
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.Morphism.Tag;
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SimpleBuilder;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.schema.SimpleBuilder.Object;
 import cz.matfyz.tests.example.common.SchemaBuilder;
 

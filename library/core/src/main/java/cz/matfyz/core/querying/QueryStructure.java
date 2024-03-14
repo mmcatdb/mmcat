@@ -1,6 +1,6 @@
 package cz.matfyz.core.querying;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.core.utils.printable.*;

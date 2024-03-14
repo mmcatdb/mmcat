@@ -1,12 +1,12 @@
 package cz.matfyz.tests.example.common;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.instance.MappingRow;
 import cz.matfyz.core.instance.SuperIdWithValues;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SimpleBuilder;
 

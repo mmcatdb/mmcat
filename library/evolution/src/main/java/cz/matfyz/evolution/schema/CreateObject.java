@@ -1,8 +1,8 @@
 package cz.matfyz.evolution.schema;
 
-import cz.matfyz.core.category.Morphism;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.evolution.exception.DependencyException;
 
@@ -33,7 +33,7 @@ public class CreateObject extends SchemaCategory.Editor implements SchemaModific
         final var morphisms = getMorphismContext(category);
         final List<Signature> signaturesOfDependentMorphisms = morphisms.getAllUniqueObjects().stream()
             .filter(morphism -> morphism.dom().equals(object) || morphism.cod().equals(object))
-            .map(Morphism::signature)
+            .map(SchemaMorphism::signature)
             .toList();
 
         if (!signaturesOfDependentMorphisms.isEmpty())

@@ -1,6 +1,6 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SignatureId;
 

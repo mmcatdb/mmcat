@@ -2,7 +2,7 @@ package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.IdentifierStructure;

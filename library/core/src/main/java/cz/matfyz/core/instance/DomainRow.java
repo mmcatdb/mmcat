@@ -1,6 +1,6 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.matfyz.core.utils.IterableUtils;

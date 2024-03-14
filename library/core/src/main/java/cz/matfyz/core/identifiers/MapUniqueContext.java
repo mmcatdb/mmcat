@@ -1,4 +1,4 @@
-package cz.matfyz.core.identification;
+package cz.matfyz.core.identifiers;
 
 import java.util.Collection;
 import java.util.Map;
@@ -7,9 +7,9 @@ import java.util.TreeMap;
 /**
  * @author jachymb.bartik
  */
-public class MapUniqueContext<O extends Identified<I>, I extends Comparable<I>> implements UniqueContext<O, I> {
+public class MapUniqueContext<O extends Identified<O, K>, K extends Comparable<K>> implements UniqueContext<O, K> {
 
-    private final Map<I, O> uniqueObjects;
+    private final Map<K, O> uniqueObjects;
 
     public MapUniqueContext() {
         uniqueObjects = new TreeMap<>();
@@ -28,7 +28,7 @@ public class MapUniqueContext<O extends Identified<I>, I extends Comparable<I>> 
         return uniqueObjects.get(object.identifier());
     }
 
-    @Override public void deleteUniqueObject(I id) {
+    @Override public void deleteUniqueObject(K id) {
         uniqueObjects.remove(id);
     }
 
@@ -36,7 +36,7 @@ public class MapUniqueContext<O extends Identified<I>, I extends Comparable<I>> 
         uniqueObjects.remove(object.identifier());
     }
 
-    @Override public O getUniqueObject(I id) {
+    @Override public O getUniqueObject(K id) {
         return uniqueObjects.get(id);
     }
 

@@ -1,10 +1,10 @@
 package cz.matfyz.integration.utils;
 
-import cz.matfyz.core.category.Morphism.Tag;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceMorphism;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
+import cz.matfyz.core.schema.SchemaMorphism.Tag;
 
 /**
  * @author jachym.bartik

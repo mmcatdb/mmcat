@@ -1,6 +1,6 @@
 package cz.matfyz.core.mapping;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 
 import java.util.Collection;
 import java.util.Set;

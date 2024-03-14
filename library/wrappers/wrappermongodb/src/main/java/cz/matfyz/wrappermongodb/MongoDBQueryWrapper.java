@@ -2,7 +2,7 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;

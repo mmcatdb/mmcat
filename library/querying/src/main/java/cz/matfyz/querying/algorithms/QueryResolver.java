@@ -3,7 +3,7 @@ package cz.matfyz.querying.algorithms;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.schema.SchemaObject;

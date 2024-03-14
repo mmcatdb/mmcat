@@ -1,18 +1,34 @@
 package cz.matfyz.core.schema;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Morphism;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.identification.Identified;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Identified;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 
 import java.util.Set;
 
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class SchemaMorphism implements Morphism, Identified<Signature> {
+public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
-    private  final Signature signature;
+    public enum Min {
+        ZERO,
+        ONE;
+
+        public static Min combine(Min min1, Min min2) {
+            return (min1 == Min.ONE || min2 == Min.ONE) ? Min.ONE : Min.ZERO;
+        }
+    }
+
+    public enum Tag {
+        isa,
+        role,
+        projection,
+        key,
+    }
+
+    private final Signature signature;
     public final String label;
     private SchemaObject dom;
     private SchemaObject cod;
@@ -26,10 +42,6 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         return tags.contains(tag);
     }
 
-    public static Min combineMin(Min min1, Min min2) {
-        return (min1 == Min.ONE && min2 == Min.ONE) ? Min.ONE : Min.ZERO;
-    }
-
     private SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, String label, String iri, String pimIri, Set<Tag> tags) {
         this.signature = signature;
         this.dom = dom;
@@ -41,11 +53,11 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         this.tags = Set.of(tags.toArray(Tag[]::new));
     }
 
-    @Override public SchemaObject dom() {
+    public SchemaObject dom() {
         return dom;
     }
 
-    @Override public SchemaObject cod() {
+    public SchemaObject cod() {
         return cod;
     }
 
@@ -59,7 +71,7 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
             this.cod = object;
     }
 
-    @Override public Min min() {
+    public Min min() {
         return min;
     }
 
@@ -71,13 +83,25 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         return signature instanceof BaseSignature;
     }
 
-    @Override public Signature signature() {
+    public Signature signature() {
         return signature;
     }
+
+    // Identification
 
     @Override public Signature identifier() {
         return signature;
     }
+
+    @Override public boolean equals(Object other) {
+        return other instanceof SchemaMorphism schemaMorphism && signature.equals(schemaMorphism.signature);
+    }
+
+    @Override public int hashCode() {
+        return signature.hashCode();
+    }
+
+    // Identification
 
     public static class Builder {
 

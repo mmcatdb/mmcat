@@ -1,7 +1,7 @@
 package cz.matfyz.querying.algorithms.queryresult;
 
 import cz.matfyz.abstractwrappers.exception.QueryException;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.querying.queryresult.*;
 import cz.matfyz.core.utils.GraphUtils;

@@ -1,7 +1,7 @@
 package cz.matfyz.querying.parsing;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.utils.GraphUtils.Edge;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ParsingException;

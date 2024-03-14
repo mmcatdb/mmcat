@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class MongoDBToMongoDBTests {
+class MongoDBToMongoDBTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToMongoDBTests.class);
 
@@ -35,7 +35,7 @@ public class MongoDBToMongoDBTests {
     }
 
     @Test
-    public void basicTest() {
+    void basicTest() {
         new PullToDDLAndDMLTestBase(
             database.wrapper.getPullWrapper(),
             new MongoDBDDLWrapper(),
@@ -48,7 +48,7 @@ public class MongoDBToMongoDBTests {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void jsonTest() throws Exception {
+    void jsonTest() throws Exception {
         final ComplexProperty path = MongoDB.order(schema).accessPath();
         LOGGER.trace(path.toString());
 
@@ -62,7 +62,7 @@ public class MongoDBToMongoDBTests {
     }
 
     @Test
-    public void complex_arrayTest() {
+    void complex_arrayTest() {
         new PullToDDLAndDMLTestBase(
             database.wrapper.getPullWrapper(),
             new MongoDBDDLWrapper(),

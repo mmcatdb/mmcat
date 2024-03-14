@@ -1,9 +1,9 @@
 package cz.matfyz.tests.example.common;
 
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.Morphism.Tag;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.core.schema.SchemaMorphism.Tag;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -25,7 +25,6 @@ public class SchemaBuilder {
     }
 
     private record MorphismDefinition(Signature signature, Key dom, Key cod, Min min, Tag tag) {}
-
 
     public void morphism(Signature signature, Key dom, Key cod, Min min, Tag tag) {
         this.morphisms.add(new MorphismDefinition(signature, dom, cod, min, tag));

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class MongoDBToPostgreSQLTests {
+class MongoDBToPostgreSQLTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToPostgreSQLTests.class);
 
@@ -27,13 +27,13 @@ public class MongoDBToPostgreSQLTests {
     private static final SchemaCategory schema = databases.schema;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         databases.mongoDB().setup();
         databases.postgreSQL().setup();
     }
 
     @Test
-    public void basicTest() {
+    void basicTest() {
         new PullToDDLAndDMLTestBase(
             databases.mongoDB().wrapper.getPullWrapper(),
             new PostgreSQLDDLWrapper(),
@@ -46,7 +46,7 @@ public class MongoDBToPostgreSQLTests {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void jsonTest() throws Exception {
+    void jsonTest() throws Exception {
         final ComplexProperty path = PostgreSQL.order(schema).accessPath();
         LOGGER.trace(path.toString());
 

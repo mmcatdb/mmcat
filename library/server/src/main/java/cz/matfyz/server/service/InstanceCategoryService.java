@@ -1,10 +1,10 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceMorphism;
 import cz.matfyz.core.instance.InstanceObject;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.utils.UserStore;
 

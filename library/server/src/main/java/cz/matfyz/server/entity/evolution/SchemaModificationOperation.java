@@ -1,6 +1,6 @@
 package cz.matfyz.server.entity.evolution;
 
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.server.entity.schema.SchemaMorphismWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
 

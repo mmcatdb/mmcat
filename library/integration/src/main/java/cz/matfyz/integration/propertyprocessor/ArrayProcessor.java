@@ -1,10 +1,10 @@
 package cz.matfyz.integration.propertyprocessor;
 
-import cz.matfyz.core.category.Morphism.Tag;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
+import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.utils.Config;
 import cz.matfyz.core.utils.UniqueIdProvider;
 import cz.matfyz.integration.utils.IsaMorphismCreator;

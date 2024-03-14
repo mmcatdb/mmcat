@@ -1,7 +1,7 @@
 package cz.matfyz.server.example.common;
 
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SignatureId;

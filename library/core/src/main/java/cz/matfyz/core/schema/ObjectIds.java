@@ -1,6 +1,6 @@
 package cz.matfyz.core.schema;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * TODO
  * @author jachymb.bartik
  */
 @JsonSerialize(using = ObjectIds.Serializer.class)
