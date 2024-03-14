@@ -3,12 +3,12 @@ package cz.matfyz.core.instance;
 import cz.matfyz.core.exception.ObjectException;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
-import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SignatureId;
 
 import java.util.Collection;
 import java.util.Map;
@@ -59,9 +59,6 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         return schemaObject.superId();
     }
 
-    /**
-     * Immutable.
-     */
     public ObjectIds ids() {
         return schemaObject.ids();
     }

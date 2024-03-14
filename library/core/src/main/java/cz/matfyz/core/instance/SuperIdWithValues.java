@@ -1,8 +1,8 @@
 package cz.matfyz.core.instance;
 
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.schema.ObjectIds;
-import cz.matfyz.core.schema.SignatureId;
+import cz.matfyz.core.identifiers.SignatureId;
 
 import java.io.IOException;
 import java.io.Serializable;

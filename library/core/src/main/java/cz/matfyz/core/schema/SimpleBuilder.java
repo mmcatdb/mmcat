@@ -2,7 +2,9 @@ package cz.matfyz.core.schema;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.utils.SequenceGenerator;
@@ -163,10 +165,7 @@ public class SimpleBuilder {
 
             final var dom = schema.getObject(m.domKey());
             final var cod = schema.getObject(m.codKey());
-            final var morphism = new SchemaMorphism.Builder()
-                .label(m.label)
-                .tags(m.tags)
-                .fromArguments(m.signature, dom, cod, m.min);
+            final var morphism = new SchemaMorphism(m.signature, m.label, m.min, m.tags, dom, cod);
 
             schema.addMorphism(morphism);
         });

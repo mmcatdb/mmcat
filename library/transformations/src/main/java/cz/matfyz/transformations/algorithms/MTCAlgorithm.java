@@ -1,6 +1,7 @@
 package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
@@ -16,7 +17,6 @@ import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.record.SimpleRecord;
 import cz.matfyz.core.record.SimpleValueRecord;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SignatureId;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

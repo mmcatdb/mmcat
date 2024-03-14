@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.core.schema.ObjectIds;
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.example.common.SchemaBase;

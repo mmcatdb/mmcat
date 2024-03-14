@@ -9,6 +9,7 @@ import cz.matfyz.core.identifiers.UniqueContext;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author pavel.koupil, jachymb.bartik
@@ -64,7 +65,7 @@ public class SchemaCategory {
     }
 
     /**
-     * This class represents a directed edge in the schema category. Essentially, it's either a morphism or a dual of such.
+     * This class represents a directed edge in the schema category. Essentially, it's either a base morphism or a dual of such.
      */
     public record SchemaEdge(
         SchemaMorphism morphism,
@@ -122,7 +123,11 @@ public class SchemaCategory {
             .anyMatch(base -> getEdge(base).to().key().equals(key));
     }
 
+    private int lastCompositeId = 0;
+
     private SchemaMorphism createCompositeMorphism(Signature signature) {
+        final String morphismLabel = "composite" + lastCompositeId++;
+
         final Signature[] bases = signature.toBases().toArray(Signature[]::new);
 
         final Signature lastSignature = bases[0];
@@ -137,7 +142,7 @@ public class SchemaCategory {
             min = Min.combine(min, lastMorphism.min());
         }
 
-        return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min);
+        return new SchemaMorphism(signature, morphismLabel, min, Set.of(), dom, cod);
     }
 
     public abstract static class Editor {

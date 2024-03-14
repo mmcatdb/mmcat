@@ -2,8 +2,8 @@ package cz.matfyz.tests.example.basic;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SimpleBuilder;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
@@ -184,7 +184,7 @@ public class Schema {
         builder.object(value, "value", ObjectIds.createValue());
 
         builder.morphism(contactToOrder, contact, order, Min.ONE);
-        builder.morphism(contactToType, contact, type, Min.ONE, Tag.key);
+        builder.morphism(contactToType, contact, type, Min.ONE);
         builder.morphism(contactToValue, contact, value, Min.ONE);
 
         return this;
@@ -198,7 +198,7 @@ public class Schema {
         builder.object(content.key(), "content", ObjectIds.createValue());
 
         builder.morphism(noteToOrder, note, order, Min.ONE);
-        builder.morphism(noteToLocale, note, locale, Min.ONE, Tag.key);
+        builder.morphism(noteToLocale, note, locale, Min.ONE);
         builder.morphism(noteToData, note, data, Min.ONE);
         builder.morphism(dataToSubject, data, subject, Min.ONE);
         builder.morphism(dataToContent, data, content.key(), Min.ONE);

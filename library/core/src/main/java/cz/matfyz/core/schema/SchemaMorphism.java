@@ -24,28 +24,48 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
     public enum Tag {
         isa,
         role,
-        projection,
-        key,
     }
 
+    /** A unique identifier of the morphism (within one schema category). */
     private final Signature signature;
+    /** A user-readable label. */
     public final String label;
-    private SchemaObject dom;
-    private SchemaObject cod;
+    /** Cardinality of the morphism - either 1..0 or 1..1. The cardinality in the opposite direction isn't defined. */
     private final Min min;
+    /** Some other qualities of the morphism (e.g., inheritance in the form of the ISA hierarchy). */
     private final Set<Tag> tags;
+    /** The domain object (i.e., the source of the arrow). */
+    private SchemaObject dom;
+    /** The codomain object (i.e., the target of the arrow). */
+    private SchemaObject cod;
 
-    public boolean hasTag(Tag tag) {
-        return tags.contains(tag);
-    }
-
-    private SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, String label, Set<Tag> tags) {
+    public SchemaMorphism(Signature signature, String label, Min min, Set<Tag> tags, SchemaObject dom, SchemaObject cod) {
         this.signature = signature;
         this.dom = dom;
         this.cod = cod;
         this.min = min;
         this.label = label;
         this.tags = Set.of(tags.toArray(Tag[]::new));
+    }
+
+    public Signature signature() {
+        return signature;
+    }
+
+    public boolean isBase() {
+        return signature instanceof BaseSignature;
+    }
+
+    public Min min() {
+        return min;
+    }
+
+    public Set<Tag> tags() {
+        return tags;
+    }
+
+    public boolean hasTag(Tag tag) {
+        return tags.contains(tag);
     }
 
     public SchemaObject dom() {
@@ -66,22 +86,6 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
             this.cod = object;
     }
 
-    public Min min() {
-        return min;
-    }
-
-    public Set<Tag> tags() {
-        return tags;
-    }
-
-    public boolean isBase() {
-        return signature instanceof BaseSignature;
-    }
-
-    public Signature signature() {
-        return signature;
-    }
-
     // Identification
 
     @Override public Signature identifier() {
@@ -97,35 +101,6 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
     }
 
     // Identification
-
-    public static class Builder {
-
-        private String label = "";
-        private Set<Tag> tags = Set.of();
-
-        public SchemaMorphism fromArguments(Signature signature, SchemaObject dom, SchemaObject cod, Min min) {
-            return new SchemaMorphism(
-                signature,
-                dom,
-                cod,
-                min,
-                this.label,
-                this.tags
-            );
-        }
-
-        public Builder label(String label) {
-            this.label = label;
-            return this;
-        }
-
-
-        public Builder tags(Set<Tag> tags) {
-            this.tags = tags;
-            return this;
-        }
-
-    }
 
     public record DisconnectedSchemaMorphism(
         Signature signature,
@@ -145,10 +120,9 @@ public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
         }
 
         public SchemaMorphism toSchemaMorphism(SchemaObject dom, SchemaObject cod) {
-            return new SchemaMorphism.Builder()
-                .label(this.label)
-                .tags(this.tags != null ? this.tags : Set.of())
-                .fromArguments(signature, dom, cod, min);
+            final Set<Tag> tags = this.tags != null ? this.tags : Set.of();
+
+            return new SchemaMorphism(signature, this.label, min, tags, dom, cod);
         }
 
     }

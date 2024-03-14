@@ -2,16 +2,22 @@ package cz.matfyz.core.schema;
 
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.SignatureId;
 
 /**
  * @author pavel.koupil, jachymb.bartik
  */
 public class SchemaObject implements Identified<SchemaObject, Key> {
 
-    private final Key key; // Identifies the object, in the paper it's a number >= 100
+    /** A unique identifier of the object (within one schema category). */
+    private final Key key;
+    /** A user-readable label. */
     private final String label;
-    private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
-    private final SignatureId superId; // Should be a union of all ids (super key).
+    /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key). */
+    private final ObjectIds ids;
+    /** A union of all ids (super key). */
+    private final SignatureId superId;
 
     public SchemaObject(Key key, String label, ObjectIds ids, SignatureId superId) {
         this.key = key;
@@ -32,9 +38,6 @@ public class SchemaObject implements Identified<SchemaObject, Key> {
         return superId;
     }
 
-    /**
-     * Immutable.
-     */
     public ObjectIds ids() {
         return ids;
     }

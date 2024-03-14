@@ -81,20 +81,20 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
         return mappings;
     }
 
-    public InstanceObject dom() {
-        return dom;
-    }
-
-    public InstanceObject cod() {
-        return cod;
-    }
-
     public Signature signature() {
         return schemaMorphism.signature();
     }
 
     public Min min() {
         return schemaMorphism.min();
+    }
+
+    public InstanceObject dom() {
+        return dom;
+    }
+
+    public InstanceObject cod() {
+        return cod;
     }
 
     // Identification

@@ -3,8 +3,8 @@ package cz.matfyz.tests.example.common;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -12,6 +12,8 @@ import cz.matfyz.core.schema.SchemaObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SchemaBuilder {
 
@@ -24,7 +26,7 @@ public class SchemaBuilder {
         this.objects.add(new ObjectDefinition(key, name, ids));
     }
 
-    private record MorphismDefinition(Signature signature, Key dom, Key cod, Min min, Tag tag) {}
+    private record MorphismDefinition(Signature signature, Key dom, Key cod, Min min, @Nullable Tag tag) {}
 
     public void morphism(Signature signature, Key dom, Key cod, Min min, Tag tag) {
         this.morphisms.add(new MorphismDefinition(signature, dom, cod, min, tag));
@@ -43,13 +45,11 @@ public class SchemaBuilder {
         });
 
         this.morphisms.forEach(m -> {
-            final var builder = new SchemaMorphism.Builder();
-            if (m.tag != null)
-                builder.tags(Set.of(m.tag));
-
+            final Set<Tag> tags = m.tag == null ? Set.of() : Set.of(m.tag);
             final var dom = schema.getObject(m.dom);
             final var cod = schema.getObject(m.cod);
-            final var morphism = builder.fromArguments(m.signature, dom, cod, m.min);
+            // TODO label
+            final var morphism = new SchemaMorphism(m.signature, "", m.min, tags, dom, cod);
             schema.addMorphism(morphism);
         });
 
