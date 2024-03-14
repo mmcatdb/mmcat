@@ -34,23 +34,19 @@ public record SchemaObjectWrapper(
     public record Data(
         String label,
         ObjectIds ids,
-        SignatureId superId,
-        String iri,
-        String pimIri
+        SignatureId superId
     ) {
 
         public static Data fromSchemaObject(SchemaObject object) {
             return new Data(
                 object.label(),
                 object.ids(),
-                object.superId(),
-                object.iri,
-                object.pimIri
+                object.superId()
             );
         }
 
         public SchemaObject toSchemaObject(Key key) {
-            return new SchemaObject(key, label, ids, superId, iri, pimIri);
+            return new SchemaObject(key, label, ids, superId);
         }
 
     }

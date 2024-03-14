@@ -14,14 +14,11 @@ const { evocat, graph } = $(useEvocat());
 const emit = defineEmits([ 'save', 'cancel' ]);
 
 const label = ref('');
-const iri = ref('');
-const pimIri = ref('');
 const nodes = shallowRef<(Node | undefined)[]>([]);
 const temporayEdge = ref<TemporaryEdge | null>(null);
 const min = ref<Min>(Cardinality.One);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
-const isIriAvailable = computed(() => evocat.schemaCategory.isIriAvailable(iri.value));
 
 watch(nodes, (newValue, oldValue) => {
     if (newValue[0] === oldValue[0] && newValue[1] === oldValue[1])
@@ -44,19 +41,11 @@ function save() {
     if (!node1 || !node2)
         return;
 
-    const iriDefinition = iri.value
-        ? {
-            iri: iri.value,
-            pimIri: pimIri.value,
-        }
-        : {};
-
     evocat.createMorphism({
         dom: node1.schemaObject,
         cod: node2.schemaObject,
         min: min.value,
         label: label.value,
-        ...iriDefinition,
     });
 
     temporayEdge.value?.delete();
@@ -85,12 +74,6 @@ function switchNodes() {
             <ValueRow label="Label?:">
                 <input v-model="label" />
             </ValueRow>
-            <ValueRow label="Iri?:">
-                <input v-model="iri" />
-            </ValueRow>
-            <ValueRow label="Pim Iri?:">
-                <input v-model="pimIri" />
-            </ValueRow>
             <MinimumInput
                 v-model="min"
             />
@@ -102,7 +85,7 @@ function switchNodes() {
         />
         <div class="button-row">
             <button
-                :disabled="!nodesSelected || !isIriAvailable"
+                :disabled="!nodesSelected"
                 @click="save"
             >
                 Confirm

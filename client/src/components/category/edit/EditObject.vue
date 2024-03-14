@@ -5,7 +5,6 @@ import ObjectIdsDisplay from '@/components/category/ObjectIdsDisplay.vue';
 import IconPlusSquare from '@/components/icons/IconPlusSquare.vue';
 import ButtonIcon from '@/components/common/ButtonIcon.vue';
 import IdInput from './IdInput.vue';
-import IriDisplay from '@/components/common/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useEvocat } from '@/utils/injects';
@@ -87,18 +86,6 @@ function deleteNonSignatureId() {
                     v-model="label"
                 />
                 <!--  :disabled="!isNew"  -->
-            </ValueRow>
-            <ValueRow label="Iri:">
-                <IriDisplay
-                    :iri="node.schemaObject.iri"
-                    :max-chars="36"
-                />
-            </ValueRow>
-            <ValueRow label="Pim Iri:">
-                <IriDisplay
-                    :iri="node.schemaObject.pimIri"
-                    :max-chars="36"
-                />
             </ValueRow>
             <ValueRow label="Key:">
                 {{ node.schemaObject.key.toString() }}

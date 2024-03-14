@@ -153,7 +153,7 @@ public class SimpleBuilder {
         final var schema = new SchemaCategory(schemaLabel);
 
         objectsByKey.values().forEach(o -> {
-            final var object = new SchemaObject(o.key, o.label, o.ids, o.superId, null, null);
+            final var object = new SchemaObject(o.key, o.label, o.ids, o.superId);
             schema.addObject(object);
         });
 

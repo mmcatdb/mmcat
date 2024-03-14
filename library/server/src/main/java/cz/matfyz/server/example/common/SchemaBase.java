@@ -77,7 +77,7 @@ public abstract class SchemaBase {
             ? ids.generateDefaultSuperId()
             : new SignatureId();
 
-        final var data = new SchemaObjectWrapper.Data(object.label(), ids, superId, object.iri, object.pimIri);
+        final var data = new SchemaObjectWrapper.Data(object.label(), ids, superId);
         wrapperCache.put(key, data);
 
         operations.add(new VersionedSMO(
@@ -91,7 +91,7 @@ public abstract class SchemaBase {
     protected void addIds(Key key) {
         final var object = schema.getObject(key);
         final var data = getObjectData(key);
-        final var newData = new SchemaObjectWrapper.Data(data.label(), object.ids(), object.superId(), data.iri(), data.pimIri());
+        final var newData = new SchemaObjectWrapper.Data(data.label(), object.ids(), object.superId());
         wrapperCache.put(key, newData);
 
         operations.add(new VersionedSMO(
@@ -102,7 +102,7 @@ public abstract class SchemaBase {
 
     protected void editIds(Key key, ObjectIds ids) {
         final var data = getObjectData(key);
-        final var newData = new SchemaObjectWrapper.Data(data.label(), ids, ids.generateDefaultSuperId(), data.iri(), data.pimIri());
+        final var newData = new SchemaObjectWrapper.Data(data.label(), ids, ids.generateDefaultSuperId());
         wrapperCache.put(key, newData);
 
         operations.add(new VersionedSMO(
@@ -128,8 +128,6 @@ public abstract class SchemaBase {
             newDom != null ? newDom : morphism.dom().key(),
             newCod != null ? newCod : morphism.cod().key(),
             morphism.min(),
-            morphism.iri,
-            morphism.pimIri,
             morphism.tags()
         );
 

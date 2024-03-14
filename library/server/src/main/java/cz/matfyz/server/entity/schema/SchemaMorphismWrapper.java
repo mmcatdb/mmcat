@@ -20,8 +20,6 @@ public record SchemaMorphismWrapper(
     Key domKey,
     Key codKey,
     Min min,
-    String iri,
-    String pimIri,
     @Nullable Set<Tag> tags
 ) {
 
@@ -32,8 +30,6 @@ public record SchemaMorphismWrapper(
             morphism.dom().key(),
             morphism.cod().key(),
             morphism.min(),
-            morphism.iri,
-            morphism.pimIri,
             morphism.tags()
         );
     }
@@ -45,8 +41,6 @@ public record SchemaMorphismWrapper(
             domKey,
             codKey,
             min,
-            iri,
-            pimIri,
             tags
         );
     }

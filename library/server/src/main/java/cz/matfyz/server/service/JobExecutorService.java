@@ -8,21 +8,17 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.ArrayUtils;
-import cz.matfyz.core.utils.io.UrlInputStreamProvider;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
-import cz.matfyz.integration.processes.JsonLdToCategory;
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.configuration.ServerProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
-import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.database.DatabaseEntity;
-import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
@@ -59,12 +55,6 @@ public class JobExecutorService {
 
     @Autowired
     private LogicalModelService logicalModelService;
-
-    @Autowired
-    private DatabaseService databaseService;
-
-    @Autowired
-    private DataSourceService dataSourceService;
 
     @Autowired
     private SchemaCategoryService schemaService;
@@ -125,8 +115,6 @@ public class JobExecutorService {
             categoryToModelAlgorithm(run, categoryToModelPayload);
         else if (job.payload instanceof ModelToCategoryPayload modelToCategoryPayload)
             modelToCategoryAlgorithm(run, modelToCategoryPayload);
-        else if (job.payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload)
-            jsonLdToCategoryAlgorithm(run, jsonLdToCategoryPayload);
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
 
@@ -189,20 +177,6 @@ public class JobExecutorService {
         }
 
         // modelService.createNew(store, job, run, job.label, output.toString());
-    }
-
-    private void jsonLdToCategoryAlgorithm(Run run, JsonLdToCategoryPayload payload) {
-        // final InstanceCategory instance = store.getCategory(run.categoryId);
-        final InstanceCategory instance = null;
-
-        final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
-        final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);
-
-        final SchemaCategoryWrapper schemaWrapper = schemaService.find(run.categoryId);
-        final SchemaCategory schema = schemaWrapper.toSchemaCategory();
-
-        final var newInstance = new JsonLdToCategory().input(schema, instance, inputStreamProvider).run();
-        // store.setInstance(run.categoryId, newInstance);
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper, Id categoryId) {

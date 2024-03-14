@@ -1,7 +1,5 @@
-import type { Iri } from '@/types/integration/';
 import { Key, Signature, type KeyFromServer, type SignatureFromServer } from '../identifiers';
 import type { SchemaObject } from './SchemaObject';
-import type { Optional } from '@/utils/common';
 import type { Graph } from '../categoryGraph';
 
 export type SchemaMorphismFromServer = {
@@ -10,8 +8,6 @@ export type SchemaMorphismFromServer = {
     domKey: KeyFromServer;
     codKey: KeyFromServer;
     min: Min;
-    iri?: Iri;
-    pimIri?: Iri;
     tags?: Tag[];
 };
 
@@ -37,8 +33,6 @@ export class SchemaMorphism {
         readonly min: Min,
         readonly label: string,
         readonly tags: Tag[],
-        readonly iri: Iri | undefined,
-        readonly pimIri: Iri | undefined,
         private _isNew: boolean,
     ) {}
 
@@ -50,17 +44,11 @@ export class SchemaMorphism {
             input.min,
             input.label ?? '',
             input.tags ? input.tags : [],
-            input.iri,
-            input.pimIri,
             false,
         );
     }
 
     static createNew(signature: Signature, def: MorphismDefinition): SchemaMorphism {
-        const [ iri, pimIri ] = 'iri' in def
-            ? [ def.iri, def.pimIri ]
-            : [ undefined, undefined ];
-
         return new SchemaMorphism(
             signature,
             def.dom.key,
@@ -68,8 +56,6 @@ export class SchemaMorphism {
             def.min,
             def.label ?? '',
             def.tags ?? [],
-            iri,
-            pimIri,
             true,
         );
     }
@@ -85,8 +71,6 @@ export class SchemaMorphism {
             codKey: this.codKey.toServer(),
             min: this.min,
             label: this.label,
-            iri: this.iri,
-            pimIri: this.pimIri,
             tags: this.tags,
         };
     }
@@ -101,7 +85,7 @@ export class SchemaMorphism {
 
     get sortBaseValue(): number {
         const baseValue = this.signature.baseValue;
-        return Math.abs(baseValue ? baseValue : 0);
+        return Math.abs(baseValue ?? 0);
     }
 
     equals(other: SchemaMorphism | null | undefined): boolean {
@@ -115,10 +99,7 @@ export type MorphismDefinition = {
     min: Min;
     label?: string;
     tags?: Tag[];
-} & Optional<{
-    iri: Iri;
-    pimIri: Iri;
-}>;
+};
 
 export class VersionedSchemaMorphism {
     private constructor(
