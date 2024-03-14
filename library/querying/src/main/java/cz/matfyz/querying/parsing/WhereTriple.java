@@ -6,7 +6,7 @@ import cz.matfyz.core.utils.GraphUtils.Edge;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.exception.ParsingException;
 import cz.matfyz.querying.parsing.ParserNode.Term;
-import cz.matfyz.querying.parsing.Variable.VariableBuilder;
+import cz.matfyz.querying.parsing.ParserNode.TermBuilder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +31,7 @@ public class WhereTriple implements Statement, Edge<Term> {
         return object;
     }
 
-    static List<WhereTriple> fromCommonTriple(CommonTriple common, VariableBuilder builder) {
+    static List<WhereTriple> fromCommonTriple(CommonTriple common, TermBuilder builder) {
         try {
             final var bases = Arrays.stream(common.predicate.split("/"))
                 .map(base -> Signature.createBase(Integer.parseInt(base)))
@@ -47,7 +47,7 @@ public class WhereTriple implements Statement, Edge<Term> {
     /**
      * For each compound morphism (A) -x/y-> (B), split it by inserting intermediate internal variables in such a way that each triple contains a base morphism only.
      */
-    private static List<WhereTriple> createSplit(Variable subject, List<BaseSignature> bases, Term object, VariableBuilder builder) {
+    private static List<WhereTriple> createSplit(Variable subject, List<BaseSignature> bases, Term object, TermBuilder builder) {
         var splitTriples = bases.stream().map(base -> {
             var editableTriple = new EditableWhereTriple();
             editableTriple.signature = base;
@@ -58,7 +58,7 @@ public class WhereTriple implements Statement, Edge<Term> {
         splitTriples.get(splitTriples.size() - 1).object = object;
 
         for (int i = 0; i < splitTriples.size() - 1; i++) {
-            Variable newVariable = builder.generated();
+            Variable newVariable = builder.generatedVariable();
             splitTriples.get(i).object = newVariable;
             splitTriples.get(i + 1).subject = newVariable;
         }

@@ -20,7 +20,7 @@ public class ResultList implements ResultNode {
     // TODO nad některými sloupci vytvořit stromy pro rychlejší joinování
         // - resp. vytvořit je, když jsou potřeba, a pak je nějak udržovat
 
-    private final List<? extends ResultNode> children;
+    private List<? extends ResultNode> children;
 
     public ResultList(List<? extends ResultNode> children) {
         this.children = children;
@@ -28,6 +28,24 @@ public class ResultList implements ResultNode {
 
     public List<? extends ResultNode> children() {
         return this.children;
+    }
+
+    /** The indices have to be in ascending order. */
+    public void removeChildren(List<Integer> sortedIndices) {
+        if (sortedIndices.isEmpty())
+            return;
+
+        final var newChildren = new ArrayList<ResultNode>();
+        int j = 0;
+
+        for (int i = 0; i < children.size(); i++) {
+            if (j < sortedIndices.size() && i == sortedIndices.get(j))
+                j++;
+            else
+                newChildren.add(children.get(i));
+        }
+
+        this.children = newChildren;
     }
 
     @Override public void printTo(Printer printer) {

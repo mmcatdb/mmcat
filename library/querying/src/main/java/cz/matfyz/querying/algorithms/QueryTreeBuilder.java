@@ -59,8 +59,10 @@ public class QueryTreeBuilder {
         for (final var values : clause.pattern.valueFilters)
             currentNode = new FilterNode(currentNode, values);
 
-        for (final var nestedClause : clause.nestedClauses)
-            currentNode = processClause(nestedClause, currentNode);
+        // TODO we are not dealing with the nested clauses now.
+        // Probably, each clause should have its own context.
+        // for (final var nestedClause : clause.nestedClauses)
+        //     currentNode = processClause(nestedClause, currentNode);
 
         return switch (clause.type) {
             case Where -> currentNode;

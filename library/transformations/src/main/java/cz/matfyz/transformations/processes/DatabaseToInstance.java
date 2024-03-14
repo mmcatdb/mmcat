@@ -62,11 +62,11 @@ public class DatabaseToInstance {
             ? currentInstance
             : new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
 
-        var transformation = new MTCAlgorithm();
-        transformation.input(mapping, instance, forest);
+        var tform = new MTCAlgorithm();
+        tform.input(mapping, instance, forest);
 
         Statistics.start(Interval.MTC_ALGORIGHM);
-        transformation.algorithm();
+        tform.algorithm();
         Statistics.end(Interval.MTC_ALGORIGHM);
         Statistics.end(Interval.DATABASE_TO_INSTANCE);
 

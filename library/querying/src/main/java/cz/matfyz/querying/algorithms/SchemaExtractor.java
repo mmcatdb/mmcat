@@ -12,7 +12,6 @@ import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.parsing.GroupGraphPattern;
-import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.WhereTriple;
 import cz.matfyz.querying.parsing.ParserNode.Term;
 
@@ -104,13 +103,14 @@ public class SchemaExtractor {
     private Map<Key, Term> keyToTerm = new TreeMap<>();
 
     private void updateContext() {
+        context.setSchema(newSchema);
+        
         pattern.triples.forEach(triple -> {
             final var morphism = newSchema.getMorphism(triple.signature);
             signatureToTriple.put(triple.signature, triple);
 
-            context.defineVariable(triple.subject, morphism.dom());
-            if (triple.object instanceof Variable variableObject)
-                context.defineVariable(variableObject, morphism.cod());
+            context.addTerm(triple.subject, morphism.dom());
+            context.addTerm(triple.object, morphism.cod());
 
             keyToTerm.put(morphism.dom().key(), triple.subject);
             keyToTerm.put(morphism.cod().key(), triple.object);
@@ -159,8 +159,15 @@ public class SchemaExtractor {
      * The created variable is a variable only - no triple is created for it.
      */
     private Term getOrCreateCodTermForEdge(SchemaEdge edge) {
-        final var codKey = edge.to().key();
-        return keyToTerm.computeIfAbsent(codKey, key -> pattern.variableBuilder.generated());
+        final Term foundTerm = keyToTerm.get(edge.to().key());
+        if (foundTerm != null)
+            return foundTerm;
+
+        final var newVariable = pattern.termBuilder.generatedVariable();
+        context.addTerm(newVariable, edge.to());
+        keyToTerm.put(edge.to().key(), newVariable);
+
+        return newVariable;
     }
 
 }

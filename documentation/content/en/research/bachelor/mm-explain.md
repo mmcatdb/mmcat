@@ -10,4 +10,6 @@ The goal of the project is to extend the MM-cat tool with the funkcionality of r
 - Other query operations (filtering, sorting, etc.).
 - How is translated into queries for specific database systems (PostgreSQL, MongoDB, Neo4j), the plans of these queries.
 
+The module will consist both of a backend service and a user-friendly frontend GUI.
+
 **This project is currently available.**

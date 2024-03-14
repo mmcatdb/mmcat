@@ -65,10 +65,10 @@ public class ICAlgorithmTestBase {
 
         final var wrapper = new DummyICWrapper();
 
-        final var transformation = new ICAlgorithm();
+        final var tform = new ICAlgorithm();
         otherMappings.add(mapping);
-        transformation.input(mapping, otherMappings, wrapper);
-        transformation.algorithm();
+        tform.input(mapping, otherMappings, wrapper);
+        tform.algorithm();
 
         final List<String> result = wrapper.methods();
 

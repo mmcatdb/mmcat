@@ -87,7 +87,7 @@ public abstract class BaseQueryWrapper {
         filters.add(new BinaryFilter(property1, property2, operator));
     }
 
-    // Structure
+    // Context
 
     protected AbstractWrapperContext context;
 

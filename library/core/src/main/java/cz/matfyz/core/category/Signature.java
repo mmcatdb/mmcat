@@ -110,7 +110,7 @@ public class Signature implements Serializable, Comparable<Signature> {
             return false;
 
         for (int i = 0; i < other.ids.length; i++)
-            if (ids[i] != other.ids[i])
+            if (other.ids[i] != ids[i])
                 return false;
 
         return true;
@@ -121,6 +121,26 @@ public class Signature implements Serializable, Comparable<Signature> {
             return null;
 
         final var newIds = Arrays.copyOfRange(ids, other.ids.length, ids.length);
+        return createComposite(newIds);
+    }
+
+    public boolean hasSuffix(Signature other) {
+        final int offset = ids.length - other.ids.length;
+        if (offset < 0)
+            return false;
+
+        for (int i = 0; i < other.ids.length; i++)
+            if (other.ids[i] != ids[i + offset])
+                return false;
+
+        return true;
+    }
+
+    public @Nullable Signature cutSuffix(Signature other) {
+        if (!hasSuffix(other))
+            return null;
+
+        final var newIds = Arrays.copyOfRange(ids, 0, ids.length - other.ids.length);
         return createComposite(newIds);
     }
 

@@ -16,7 +16,7 @@ public class KindPattern implements Comparable<KindPattern> {
     public final Kind kind;
     public final PatternObject root;
 
-    private final Map<SchemaObject, PatternObject> objectToPatternObject = new TreeMap<>();
+    private final Map<SchemaObject, PatternObject> schemaObjectToPatternObject = new TreeMap<>();
 
     public KindPattern(Kind kind, PatternObject root) {
         this.kind = kind;
@@ -26,7 +26,7 @@ public class KindPattern implements Comparable<KindPattern> {
     }
 
     private void addObject(PatternObject patternObject) {
-        objectToPatternObject.put(patternObject.schemaObject, patternObject);
+        schemaObjectToPatternObject.put(patternObject.schemaObject, patternObject);
         patternObject.children().forEach(this::addObject);
     }
 
@@ -35,7 +35,7 @@ public class KindPattern implements Comparable<KindPattern> {
     }
 
     public PatternObject getPatternObject(SchemaObject object) {
-        return objectToPatternObject.get(object);
+        return schemaObjectToPatternObject.get(object);
     }
 
     @Override public String toString() {

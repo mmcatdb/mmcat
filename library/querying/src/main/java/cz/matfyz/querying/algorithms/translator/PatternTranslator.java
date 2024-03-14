@@ -10,6 +10,7 @@ import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.querying.core.JoinCandidate;
+import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.querytree.PatternNode;
@@ -28,25 +29,27 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 class PatternTranslator {
 
-    public static void run(PatternNode pattern, AbstractQueryWrapper wrapper) {
-        new PatternTranslator(wrapper).run(pattern);
+    public static void run(QueryContext context, PatternNode pattern, AbstractQueryWrapper wrapper) {
+        new PatternTranslator(context, wrapper).run(pattern);
     }
 
+    private final QueryContext context;
     private final AbstractQueryWrapper wrapper;
 
-    private PatternTranslator(AbstractQueryWrapper wrapper) {
+    private PatternTranslator(QueryContext context, AbstractQueryWrapper wrapper) {
+        this.context = context;
         this.wrapper = wrapper;
     }
 
-    private WrapperContext context;
+    private WrapperContext wrapperContext;
 
     private void run(PatternNode pattern) {
-        context = new WrapperContext(pattern.rootTerm);
+        wrapperContext = new WrapperContext(context, pattern.rootTerm);
         
         pattern.kinds.forEach(this::processKind);
         pattern.joinCandidates.forEach(this::processJoinCandidate);
 
-        wrapper.setContext(context);
+        wrapper.setContext(wrapperContext);
     }
 
     private record StackItem(
@@ -78,13 +81,13 @@ class PatternTranslator {
         }
 
         final Term term = item.object.term;
-        final var objectProperty = context.createProperty(kind.kind, item);
+        final var objectProperty = wrapperContext.createProperty(kind.kind, item);
 
         if (term instanceof StringValue constantObject)
             wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
         else {
             // TODO isOptional is not supported yet.
-            final var structure = context.findOrCreateStructure(objectProperty);
+            final var structure = wrapperContext.findOrCreateStructure(objectProperty);
             wrapper.addProjection(objectProperty, structure, false);
         }
     }
@@ -95,7 +98,7 @@ class PatternTranslator {
 
         final var isNewParent = preservedObjects.contains(item.object);
         if (isNewParent) {
-            preservedParent = context.createProperty(kind.kind, item);
+            preservedParent = wrapperContext.createProperty(kind.kind, item);
             pathFromParent = Signature.createEmpty();
         }
         else {
@@ -115,10 +118,12 @@ class PatternTranslator {
 
     private static class WrapperContext implements AbstractWrapperContext {
 
+        private final QueryContext context;
         private QueryStructure rootStructure;
 
-        WrapperContext(Term rootTerm) {
-            rootStructure = new QueryStructure(rootTerm.getIdentifier(), true);
+        WrapperContext(QueryContext context, Term rootTerm) {
+            this.context = context;
+            rootStructure = new QueryStructure(rootTerm.getIdentifier(), true, context.getObject(rootTerm));
         }
 
         private final Map<Property, Term> propertyToTerm = new TreeMap<>();
@@ -144,13 +149,14 @@ class PatternTranslator {
                 return found;
     
             final var isArray = property.path.hasDual();
-            final String identifier = propertyToTerm.get(property).getIdentifier();
-            final var structure = new QueryStructure(identifier, isArray);
+            final Term term = propertyToTerm.get(property);
+            final var structure = new QueryStructure(term.getIdentifier(), isArray, context.getObject(term));
+
             propertyToStructure.put(property, structure);
             structureToProperty.put(structure, property);
     
             final var parent = findOrCreateStructure(property.parent);
-            parent.addChild(structure);
+            parent.addChild(structure, property.path);
     
             return structure;
         }

@@ -74,19 +74,19 @@ public class InstanceToDatabase {
             ? currentInstance
             : new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
 
-        final var ddlTransformation = new DDLAlgorithm();
-        ddlTransformation.input(mapping, instance, ddlWrapper);
+        final var ddlTform = new DDLAlgorithm();
+        ddlTform.input(mapping, instance, ddlWrapper);
 
-        final var icTransformation = new ICAlgorithm();
-        icTransformation.input(mapping, allMappings, icWrapper);
+        final var icTform = new ICAlgorithm();
+        icTform.input(mapping, allMappings, icWrapper);
 
-        final var dmlTransformation = new DMLAlgorithm();
-        dmlTransformation.input(mapping, instance, dmlWrapper);
+        final var dmlTform = new DMLAlgorithm();
+        dmlTform.input(mapping, instance, dmlWrapper);
 
         Statistics.start(Interval.CTM_ALGORIGHM);
-        final var ddlStatement = ddlTransformation.algorithm();
-        final var icStatement = icTransformation.algorithm();
-        final var dmlStatements = dmlTransformation.algorithm();
+        final var ddlStatement = ddlTform.algorithm();
+        final var icStatement = icTform.algorithm();
+        final var dmlStatements = dmlTform.algorithm();
         Statistics.end(Interval.CTM_ALGORIGHM);
 
         Statistics.set(Counter.CREATED_STATEMENTS, dmlStatements.size());

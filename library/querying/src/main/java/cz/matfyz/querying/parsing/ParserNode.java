@@ -32,6 +32,7 @@ public interface ParserNode extends Serializable {
 
     /**
      * This interface represents either a variable (?variable), a literal ("literal") or an aggregation (SUM(?variable)).
+     * Each term corresponds to a schema object. Therefore, they have to be distinguishable from each other terms so that we can map them unambiguously to the objects.
      */
     public interface Term extends ParserNode, Comparable<Term> {
 
@@ -64,6 +65,38 @@ public interface ParserNode extends Serializable {
 
         default Aggregation asAggregation() {
             throw ParsingException.wrongNode(Aggregation.class, this);
+        }
+
+    }
+
+    public static class TermBuilder {
+
+        // Variables
+
+        public Variable variable(String name) {
+            return new Variable(name, true);
+        }
+
+        public Variable generatedVariable() {
+            return new Variable(generateVariableName(), false);
+        }
+
+        private int lastVariableNameId = 0;
+
+        private String generateVariableName() {
+            return "#var" + lastVariableNameId++;
+        }
+
+        // String values
+
+        public StringValue stringValue(String value) {
+            return new StringValue(value, generateStringValueId());
+        }
+
+        private int lastStringValueId = 0;
+
+        private String generateStringValueId() {
+            return "#str_" + lastStringValueId++;
         }
 
     }

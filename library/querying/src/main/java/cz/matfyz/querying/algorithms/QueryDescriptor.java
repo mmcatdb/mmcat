@@ -42,8 +42,7 @@ public class QueryDescriptor implements QueryVisitor<QueryDescription> {
     }
 
     public QueryDescription visit(DatabaseNode node) {
-        final var translator = new QueryTranslator(context, node);
-        final QueryStatement query = translator.run();
+        final QueryStatement query = QueryTranslator.run(context, node);
 
         return new QueryDescription(List.of(new QueryPartDescription(node.database.identifier, query)));
     }

@@ -26,13 +26,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This class is responsible for joining multiple kinds from the same pattern plan and the same database together.
- * Then it optimizes the whole query by merging different pattern plans.
+ * This class is responsible for joining multiple kinds from the same pattern plan. The kinds might be from different databases.
  */
 public class PlanJoiner {
 
@@ -55,24 +55,25 @@ public class PlanJoiner {
             throw JoiningException.noKinds();
 
         if (allKinds.size() == 1) {
-            final var patternNode = new PatternNode(allKinds, schema, List.of(), allKinds.stream().findFirst().get().root.term);
-            final var database = allKinds.stream().findFirst().get().kind.database;
+            // If there is only one kind, there is nothing to join.
+            final var onlyKind = allKinds.stream().findFirst().get(); // NOSONAR
+            final var patternNode = new PatternNode(allKinds, schema, List.of(), onlyKind.root.term);
+            final var database = onlyKind.kind.database;
 
             return new DatabaseNode(patternNode, database);
         }
 
         // TODO there might be some joining needed for OPTIONAL joins?
 
-        // final var newOperations = group.operations.stream().map(this::processOperation).toList();
-        // TODO ignoring OPTIONAL and MINUS for now ...
-
-
         final ObjectColoring coloring = ObjectColoring.create(allKinds);
+        // First, we find all possible join candidates.
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
+        // Then we group them by their database pairs. Remind you, both databases in the pair can be the same.
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
-        final List<JoinGroup> filteredGroups = filterJoinGroups(candidateGroups);
+        // Remove the candidates that don't make sence or aren't necessary.
+        final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
 
-        final var candidatesBetweenParts = new ArrayList<JoinCandidate>();
+        final List<JoinCandidate> candidatesBetweenParts = new ArrayList<>();
         final List<QueryPart> queryParts = createQueryParts(filteredGroups, candidatesBetweenParts);
 
         // return splitLeaf(queryParts, candidatesBetweenParts, newOperations, group.filters);
@@ -81,6 +82,9 @@ public class PlanJoiner {
         return splitLeaf(queryParts, candidatesBetweenParts);
     }
 
+    /**
+     * Finds all possible join candidates between the kinds in the coloring. The databases of the kinds are not considered here.
+     */
     private List<JoinCandidate> createJoinCandidates(ObjectColoring coloring) {
         final var output = new ArrayList<JoinCandidate>();
         for (final SchemaObject object : coloring.selectMulticolorObjects()) {
@@ -159,6 +163,7 @@ public class PlanJoiner {
             : null;
     }
 
+    /** A pair of databases. Both can be the same database! */
     private record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
         public static DatabasePair create(JoinCandidate candidate) {
             final var a = candidate.from().kind.database;
@@ -178,13 +183,10 @@ public class PlanJoiner {
         }
     }
 
+    /** All candidates that have the same database pair. */
     private record JoinGroup(DatabasePair databases, List<JoinCandidate> candidates) {}
 
-    /**
-     * Groups the join candidates by the database pairs of their two kinds.
-     * @param candidates
-     * @return
-     */
+    /** Groups the join candidates by their database pair. */
     private List<JoinGroup> groupJoinCandidates(List<JoinCandidate> candidates) {
         final var output = new TreeMap<DatabasePair, List<JoinCandidate>>();
         candidates.forEach(c -> output
@@ -202,7 +204,7 @@ public class PlanJoiner {
      * If there are any id-ref joins, we select one of them and discard all others.
      * Otherwise, we keep all value-value joins.
      */
-    private List<JoinGroup> filterJoinGroups(List<JoinGroup> groups) {
+    private List<JoinGroup> filterJoinCandidates(List<JoinGroup> groups) {
         return groups.stream().map(g -> {
             final var idRefCandidate = g.candidates.stream().filter(c -> c.type() == JoinType.IdRef).findFirst();
             return idRefCandidate.isPresent()
@@ -212,24 +214,41 @@ public class PlanJoiner {
     }
 
     private List<QueryPart> createQueryParts(List<JoinGroup> groups, List<JoinCandidate> candidatesBetweenParts) {
-        // First, we find all candidates between different databases and add them to the `between parts` category.
+        final List<QueryPart> output = new ArrayList<>();
+
+        // First, we merge all kinds from a same database to a minimal number of query parts.
+        groups.stream()
+            .filter(g -> g.databases.isSameDatabase())
+            .forEach(g -> {
+                final var parts = mergeSameDatabaseCandidates(g.candidates, candidatesBetweenParts);
+                output.addAll(parts);
+            });
+
+        // These kinds are already covered by the query parts.
+        final Set<KindPattern> coveredKinds = new TreeSet<>();
+        output.forEach(p -> coveredKinds.addAll(p.kinds));
+            
+        // Now we add the candidates between different databases to the betweenParts output.
         groups.stream()
             .filter(g -> !g.databases.isSameDatabase())
             .forEach(g -> candidatesBetweenParts.addAll(g.candidates));
+        
+        // Lastly, we create a single-kind query part for all kinds that are not covered by the previously created query parts. Let's hope they are covered by the joins.
+        allKinds.stream()
+            .filter(k -> !coveredKinds.contains(k))
+            .forEach(k -> {
+                final var part = new QueryPart(Set.of(k), List.of(), k.root.term);
+                output.add(part);
+            });
 
-        // Then we find all candidates that join kinds from the same db and merge them.
-        return groups.stream()
-            .filter(g -> g.databases.isSameDatabase())
-            .flatMap(g -> mergeNeighbors(g.candidates, candidatesBetweenParts).stream()).toList();
+        return output;
     }
 
     /** A query part is a part of query that can be executed at once in a single database. */
     public record QueryPart(Set<KindPattern> kinds, List<JoinCandidate> joinCandidates, Term rootTerm) {}
 
-    /**
-     * Merges kinds from a single database to a minimal number of query parts.
-     */
-    private List<QueryPart> mergeNeighbors(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
+    /** Merges kinds from a single database to a minimal number of query parts. */
+    private List<QueryPart> mergeSameDatabaseCandidates(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
         if (candidates.isEmpty())
             // TODO error?
             return List.of();
@@ -337,7 +356,7 @@ public class PlanJoiner {
     }
 
     /**
-     * On the input, we get a list of query parts and a list of joins that can be used to connect kinds from different query parts (thus joining whole query parts together).
+     * On the input, we have a list of query parts and a list of joins that can be used to connect kinds from different query parts (thus joining whole query parts together).
      * We construct a tree of joins (inner nodes) and query parts (leaves).
      */
     // private QueryNode splitLeaf(List<QueryPart> queryParts, List<JoinCandidate> candidates, List<OperationNode> operations, List<FilterNode> filters) {
@@ -354,7 +373,9 @@ public class PlanJoiner {
             candidates.stream().filter(c -> c.type() == JoinType.Value)
         );
 
-        final List<JoinTreeNode> nodes = queryParts.stream().map(part -> (JoinTreeNode) new JoinTreeLeaf(part)).toList();
+        final List<JoinTreeNode> nodes = queryParts.stream()
+            .map(part -> (JoinTreeNode) new JoinTreeLeaf(part))
+            .collect(Collectors.toCollection(ArrayList::new));
 
         orderedCandidates.forEach(c -> {
             final var fromNode = nodes.stream().filter(n -> n.kinds().contains(c.from())).findFirst().get();

@@ -3,7 +3,7 @@ package cz.matfyz.core.exception;
 import java.io.Serializable;
 
 /**
- * A wrapper class for all exceptions other than ours (i.e., other than those that extend the NamedException).
+ * Some configuration files / keys are missing.
  * @author jachymb.bartik
  */
 public class ConfigurationException extends NamedException {
@@ -17,7 +17,7 @@ public class ConfigurationException extends NamedException {
     }
 
     public static ConfigurationException notAvailable(String file, Exception exception) {
-        return new ConfigurationException("notAvailable", null, exception);
+        return new ConfigurationException("notAvailable", file, exception);
     }
 
 }

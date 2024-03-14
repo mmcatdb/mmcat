@@ -11,7 +11,7 @@ public class Variable implements Term {
     public final String name;
     private final boolean isOriginal;
 
-    private Variable(String name, boolean isOriginal) {
+    Variable(String name, boolean isOriginal) {
         this.name = name;
         this.isOriginal = isOriginal;
     }
@@ -30,24 +30,6 @@ public class Variable implements Term {
 
     @Override public String toString() {
         return "?" + name;
-    }
-
-    public static class VariableBuilder {
-
-        public Variable fromName(String name) {
-            return new Variable(name, true);
-        }
-
-        public Variable generated() {
-            return new Variable(generateName(), false);
-        }
-
-        private int lastGeneratedNameId = 0;
-
-        private String generateName() {
-            return "#var" + lastGeneratedNameId++;
-        }
-
     }
 
 }
