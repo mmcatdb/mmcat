@@ -2,12 +2,22 @@ import type { Entity, Id } from '../id';
 
 export enum Type {
     JsonLdStore = 'JsonLdStore',
+    JsonFile = 'JsonFile',
+    CsvFile = 'CsvFile',
 }
 
 export const DATA_SOURCE_TYPES: { type: Type, label: string }[] = [
     {
         type: Type.JsonLdStore,
         label: 'JSON-LD store',
+    },
+    {
+        type: Type.JsonFile,
+        label: 'JSON File',
+    },
+    {
+        type: Type.CsvFile,
+        label: 'CSV File',
     },
 ];
 
