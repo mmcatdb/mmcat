@@ -61,9 +61,9 @@ public class MTCAlgorithmTestBase {
                 return;
             }
 
-            final var transformation = new MTCAlgorithm();
-            transformation.input(kind.mapping, instance, forest);
-            transformation.algorithm();
+            final var tform = new MTCAlgorithm();
+            tform.input(kind.mapping, instance, forest);
+            tform.algorithm();
         }
 
         final var builder = new InstanceBuilder(schema);

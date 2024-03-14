@@ -5,14 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import cz.matfyz.core.querying.QueryStructure;
-import cz.matfyz.core.querying.queryresult.ResultLeaf;
-import cz.matfyz.core.querying.queryresult.ResultList;
-import cz.matfyz.core.querying.queryresult.ResultMap;
-import cz.matfyz.core.querying.queryresult.ResultNode;
-import cz.matfyz.querying.algorithms.QueryProjector.QueryStructureTransformer;
-import cz.matfyz.querying.algorithms.QueryProjector.TransformationContext;
-import cz.matfyz.querying.algorithms.QueryProjector.TransformationRoot;
-import cz.matfyz.querying.algorithms.QueryProjector.TransformingQueryStructure;
+import cz.matfyz.core.querying.queryresult.*;
+import cz.matfyz.querying.algorithms.queryresult.*;
+import cz.matfyz.querying.algorithms.queryresult.TformStep.TformRoot;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,17 +27,17 @@ public class ProjectionTestBase {
         return this;
     }
 
-    private TransformingQueryStructure output;
+    private TformingQueryStructure output;
 
-    public ProjectionTestBase output(TransformingQueryStructure output) {
+    public ProjectionTestBase output(TformingQueryStructure output) {
         this.output = output;
         return this;
     }
 
-    private String expectedTransformation;
+    private String expectedTform;
 
-    public ProjectionTestBase expectedTransformation(String expectedTransformation) {
-        this.expectedTransformation = expectedTransformation;
+    public ProjectionTestBase expectedTform(String expectedTform) {
+        this.expectedTform = expectedTform;
         return this;
     }
 
@@ -64,14 +59,14 @@ public class ProjectionTestBase {
     private ResultList expectedData;
 
     public void run() {
-        final TransformationRoot actualTransformation = QueryStructureTransformer.run(input, output);
-        assertEquals(expectedTransformation, actualTransformation.toString());
+        final TformRoot actualTform = QueryStructureTformer.run(input, output);
+        assertEquals(expectedTform, actualTform.toString());
 
         assertDoesNotThrow(() -> data = (ResultList) ResultNode.JsonBuilder.fromJson(dataRaw));
         assertDoesNotThrow(() -> expectedData = (ResultList) ResultNode.JsonBuilder.fromJson(expectedDataRaw));
 
-        final var context = new TransformationContext(data);
-        actualTransformation.apply(context);
+        final var context = new TformContext(data);
+        actualTform.apply(context);
         final ResultList actualData = (ResultList) context.getOutput();
         compareNode(expectedData, actualData);
     }

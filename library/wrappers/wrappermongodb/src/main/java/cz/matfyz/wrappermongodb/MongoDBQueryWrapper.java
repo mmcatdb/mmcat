@@ -93,7 +93,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
             lastAccessPath = projection.property().kind.mapping.accessPath();
             final QueryStructure structure = projection.structure();
 
-            for (final QueryStructure step : structure.getParentPath()) {
+            for (final QueryStructure step : structure.getPathFromRoot()) {
                 traverseAccessPath(step);
                 traverseStructure(step);
             }

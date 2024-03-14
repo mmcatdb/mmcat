@@ -50,9 +50,9 @@ public class PullToDDLAndDMLTestBase {
 
         LOGGER.trace("Pulled Forest Of Records:\n" + forest);
 
-        var transformation = new MTCAlgorithm();
-        transformation.input(mapping, instance, forest);
-        transformation.algorithm();
+        var tform = new MTCAlgorithm();
+        tform.input(mapping, instance, forest);
+        tform.algorithm();
 
         LOGGER.trace("Created Instance Category:\n" + instance);
 

@@ -66,9 +66,9 @@ public class DMLAlgorithmTestBase {
         }
 
         final var wrapper = new DummyDMLWrapper();
-        final var transformation = new DMLAlgorithm();
-        transformation.input(mapping, inputInstance, wrapper);
-        transformation.algorithm();
+        final var tform = new DMLAlgorithm();
+        tform.input(mapping, inputInstance, wrapper);
+        tform.algorithm();
 
         final List<DMLTestStructure> actual = wrapper.structures();
 

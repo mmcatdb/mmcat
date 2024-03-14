@@ -3,7 +3,6 @@ package cz.matfyz.querying.parsing;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.core.utils.GraphUtils.TreeBuilder;
-import cz.matfyz.querying.parsing.Variable.VariableBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +17,18 @@ public class GroupGraphPattern implements ParserNode {
 
     public final TermTree termTree;
 
-    GroupGraphPattern(List<WhereTriple> triples, List<ConditionFilter> conditionFilters, List<ValueFilter> valueFilters, VariableBuilder variableBuilder) {
+    GroupGraphPattern(List<WhereTriple> triples, List<ConditionFilter> conditionFilters, List<ValueFilter> valueFilters, TermBuilder termBuilder) {
         this.triples = triples;
         this.conditionFilters = conditionFilters;
         this.valueFilters = valueFilters;
 
         this.termTree = GraphUtils.treeFromEdges(triples, new TermTreeBuilder());
 
-        this.variableBuilder = variableBuilder;
+        this.termBuilder = termBuilder;
     }
 
-    /** Used for adding new variables for the idenfiers of schema category objects. */
-    public final VariableBuilder variableBuilder;
+    /** Used for adding new terms for the idenfiers of schema category objects. */
+    public final TermBuilder termBuilder;
 
     public static class TermTree implements Tree<TermTree> {
 

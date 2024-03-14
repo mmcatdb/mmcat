@@ -64,7 +64,7 @@ public class SchemaCategory implements Category {
     }
 
     /**
-     * This class represents a directed edge in the schema category. Essentially, it's either a morphism or a dual of a such.
+     * This class represents a directed edge in the schema category. Essentially, it's either a morphism or a dual of such.
      */
     public record SchemaEdge(
         SchemaMorphism morphism,
@@ -113,6 +113,13 @@ public class SchemaCategory implements Category {
 
     public boolean hasEdge(BaseSignature base) {
         return hasMorphism(base.toNonDual());
+    }
+
+    /** Returns whether the object (corresponding to the given key) appears in any inner node of the (composite) morphism (corresponding to the given signature). */
+    public boolean morphismContainsObject(Signature signature, Key key) {
+        return signature
+            .cutLast().toBases().stream()
+            .anyMatch(base -> getEdge(base).to().key().equals(key));
     }
 
     private SchemaMorphism createCompositeMorphism(Signature signature) {

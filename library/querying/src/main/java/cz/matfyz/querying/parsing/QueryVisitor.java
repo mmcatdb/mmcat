@@ -5,7 +5,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.exception.GeneralException;
 import cz.matfyz.querying.parsing.ParserNode.Term;
-import cz.matfyz.querying.parsing.Variable.VariableBuilder;
+import cz.matfyz.querying.parsing.ParserNode.TermBuilder;
 import cz.matfyz.querying.parsing.WhereClause.Type;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatBaseVisitor;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatParser;
@@ -28,7 +28,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     private QueryContext queryContext;
-    private Deque<VariableBuilder> variableBuilders = new ArrayDeque<>();
+    private Deque<TermBuilder> termBuilders = new ArrayDeque<>();
 
     @Override public Query visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
         queryContext = new QueryContext();
@@ -40,14 +40,14 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     @Override public SelectClause visitSelectClause(QuerycatParser.SelectClauseContext ctx) {
-        variableBuilders.push(new VariableBuilder());
+        termBuilders.push(new TermBuilder());
 
         final var graphTriples = ctx.selectGraphPattern().selectTriples();
         final List<SelectTriple> triples = graphTriples == null
             ? List.of()
             : visitSelectTriples(graphTriples).triples;
 
-        variableBuilders.pop();
+        termBuilders.pop();
 
         return new SelectClause(triples);
     }
@@ -62,8 +62,8 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     @Override public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
-        final var variableBuilder = new VariableBuilder();
-        variableBuilders.push(variableBuilder);
+        final var variableBuilder = new TermBuilder();
+        termBuilders.push(variableBuilder);
 
         final var triples = ctx.triplesBlock().stream()
             .flatMap(tb -> visitTriplesBlock(tb).triples.stream())
@@ -75,7 +75,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
             .map(v -> visit(v).asFilter().asValueFilter())
             .toList();
 
-        variableBuilders.pop();
+        termBuilders.pop();
 
         return new GroupGraphPattern(triples, filters, values, variableBuilder);
     }
@@ -92,7 +92,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
             : visitTriplesBlock(moreTriplesNode).triples;
 
         final var allTriples = Stream.concat(
-            sameSubjectTriples.stream().flatMap(commonTriple -> WhereTriple.fromCommonTriple(commonTriple, variableBuilders.peek()).stream()),
+            sameSubjectTriples.stream().flatMap(commonTriple -> WhereTriple.fromCommonTriple(commonTriple, termBuilders.peek()).stream()),
             moreTriples.stream()
         ).toList();
 
@@ -157,7 +157,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     @Override public StringValue visitSchemaMorphismOrPath(QuerycatParser.SchemaMorphismOrPathContext ctx) {
         // Should we do the compound morphism parsing here?
-        return new StringValue(ctx.getText());
+        return termBuilders.peek().stringValue(ctx.getText());
     }
 
     private record ObjectsList(List<Term> objects) implements ParserNode {}
@@ -174,7 +174,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         final var variableNameNode = ctx.VAR1() != null ? ctx.VAR1() : ctx.VAR2();
         final var variableName = variableNameNode.getSymbol().getText().substring(1);
 
-        return variableBuilders.peek().fromName(variableName);
+        return termBuilders.peek().variable(variableName);
     }
 
     public Aggregation visitAggregation(QuerycatParser.AggregationTermContext ctx) {
@@ -187,7 +187,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     @Override public StringValue visitString_(QuerycatParser.String_Context ctx) {
         // This regexp removes all " and ' characters from both the start and the end of the visited string.
-        return new StringValue(ctx.getText().replaceAll("(^[\"']+)|([\"']+$)", ""));
+        return termBuilders.peek().stringValue(ctx.getText().replaceAll("(^[\"']+)|([\"']+$)", ""));
     }
 
     @Override public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {

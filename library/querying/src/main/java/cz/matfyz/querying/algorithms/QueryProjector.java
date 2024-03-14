@@ -1,16 +1,13 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.core.querying.queryresult.QueryResult;
-import cz.matfyz.core.querying.queryresult.ResultLeaf;
 import cz.matfyz.core.querying.queryresult.ResultList;
-import cz.matfyz.core.querying.queryresult.ResultMap;
-import cz.matfyz.core.querying.queryresult.ResultNode;
-import cz.matfyz.core.querying.queryresult.ResultNode.NodeBuilder;
 import cz.matfyz.core.utils.GraphUtils;
-import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.core.utils.GraphUtils.Edge;
-import cz.matfyz.core.utils.GraphUtils.TreePath;
+import cz.matfyz.querying.algorithms.queryresult.QueryStructureTformer;
+import cz.matfyz.querying.algorithms.queryresult.TformContext;
+import cz.matfyz.querying.algorithms.queryresult.TformingQueryStructure;
+import cz.matfyz.querying.algorithms.queryresult.TformStep.TformRoot;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.exception.ProjectingException;
 import cz.matfyz.querying.parsing.Aggregation;
@@ -18,11 +15,6 @@ import cz.matfyz.querying.parsing.SelectClause;
 import cz.matfyz.querying.parsing.SelectTriple;
 import cz.matfyz.querying.parsing.Variable;
 import cz.matfyz.querying.parsing.ParserNode.Term;
-
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
 
 public class QueryProjector {
 
@@ -41,20 +33,20 @@ public class QueryProjector {
     }
 
     private QueryResult run() {
-        final TransformingQueryStructure projectionStructure = computeProjectionStructure();
-        final TransformationRoot transformation = QueryStructureTransformer.run(selection.structure, projectionStructure);
-        final var transformationContext = new TransformationContext(selection.data);
+        final TformingQueryStructure projectionStructure = computeProjectionStructure();
+        final TformRoot tform = QueryStructureTformer.run(selection.structure, projectionStructure);
+        final var tformContext = new TformContext(selection.data);
 
-        transformation.apply(transformationContext);
+        tform.apply(tformContext);
 
-        final ResultList data = (ResultList) transformationContext.getOutput();
+        final ResultList data = (ResultList) tformContext.getOutput();
 
         return new QueryResult(data, projectionStructure.toQueryStructure());
     }
 
-    private TransformingQueryStructure computeProjectionStructure() {
+    private TformingQueryStructure computeProjectionStructure() {
         final var rootVariable = findRootVariable();
-        final var projectionStructure = new TransformingQueryStructure(rootVariable.getIdentifier(), rootVariable.getIdentifier());
+        final var projectionStructure = new TformingQueryStructure(rootVariable.getIdentifier(), rootVariable.getIdentifier(), context.getObject(rootVariable));
         addChildrenToStructure(rootVariable, projectionStructure);
 
         return projectionStructure;
@@ -86,365 +78,15 @@ public class QueryProjector {
         return roots.iterator().next().asVariable();
     }
 
-    private void addChildrenToStructure(Variable parentVariable, TransformingQueryStructure parentStructure) {
+    private void addChildrenToStructure(Variable parentVariable, TformingQueryStructure parentStructure) {
         selectClause.triples.stream().filter(t -> t.subject.equals(parentVariable)).forEach(t -> {
             // We don't know (yet) if the structure is supposed to be an array. We fill figure it out later during the transformation.
             // Like we can find out now, but that would require doing the whole tree search again.
-            final var childStructure = new TransformingQueryStructure(t.object.getIdentifier(), t.name);
+            final var childStructure = new TformingQueryStructure(t.object.getIdentifier(), t.name, context.getObject(t.object));
             parentStructure.children.add(childStructure);
             if (t.object instanceof Variable childVariable)
                 addChildrenToStructure(childVariable, childStructure);
         });
-    }
-
-    public static class TransformingQueryStructure {
-
-        public final String inputName;
-        public final String outputName;
-        public final List<TransformingQueryStructure> children = new ArrayList<>();
-        /** This is supposed to be determined later during the transformation. */
-        public boolean isArray = false;
-
-        public TransformingQueryStructure(String inputName, String outputName) {
-            this.inputName = inputName;
-            this.outputName = outputName;
-        }
-
-        public QueryStructure toQueryStructure() {
-            final var output = new QueryStructure(outputName, isArray);
-            children.forEach(child -> output.addChild(child.toQueryStructure()));
-
-            return output;
-        }
-    }
-
-    public static class QueryStructureTransformer {
-
-        public static TransformationRoot run(QueryStructure inputStructure, TransformingQueryStructure outputStructure) {
-            return new QueryStructureTransformer(inputStructure, outputStructure).run();
-        }
-
-        private final QueryStructure inputStructure;
-        private final TransformingQueryStructure outputStructure;
-
-        private QueryStructureTransformer(QueryStructure inputStructure, TransformingQueryStructure outputStructure) {
-            this.inputStructure = inputStructure;
-            this.outputStructure = outputStructure;
-        }
-
-        private TransformationRoot run() {
-            final QueryStructure rootInSelection = GraphUtils.findDFS(inputStructure, s -> outputStructure.inputName.equals(s.name));
-
-            // TODO proper exception
-            if (rootInSelection == null)
-                throw new UnsupportedOperationException("Root not found in the selection structure.\n" + inputStructure + "\n" + outputStructure.toQueryStructure());
-
-            final var root = new TransformationRoot();
-            TransformationStep current = root;
-
-            current = current
-                .addChild(new CreateList<ResultMap>())
-                .addChild(new TraverseList());
-
-            final var path = GraphUtils.findPath(inputStructure, rootInSelection);
-            current = addPathSteps(current, path);
-            current = current.addChild(new WriteToList<ResultMap>());
-
-            addChildTransformation(current, outputStructure);
-
-            return root;
-        }
-
-        /**
-         * Both source and target have to be in the selection structure.
-         */
-        private TransformationStep addPathSteps(TransformationStep current, TreePath<QueryStructure> path) {
-            // We ignore the last element because we don't want to travel from it.
-            for (int i = 0; i < path.sourceToRoot().size() - 1; i++) {
-                current = current.addChild(new TraverseParent());
-                if (path.sourceToRoot().get(i).isArray)
-                    current = current.addChild(new TraverseParent());
-            }
-
-            // For each element, we travel to it. Therefore we skip the root element - we are already there, no need to travel.
-            // for (int i = 1; i < path.rootToTarget().size() - 1; i++) {
-            for (int i = 1; i < path.rootToTarget().size(); i++) {
-                final var structure = path.rootToTarget().get(i);
-                current = current.addChild(new TraverseMap(structure.name));
-                if (structure.isArray)
-                    current = current.addChild(new TraverseList());
-            }
-
-            return current;
-        }
-
-        private boolean isPathArray(TreePath<QueryStructure> path) {
-            for (int i = 1; i < path.rootToTarget().size(); i++)
-                if (path.rootToTarget().get(i).isArray)
-                    return true;
-
-            return false;
-        }
-
-        // Let A, B, ... be a QueryStructure, the [] symbol mens it has isArray = true and the -> symbol means its children. Then:
-        //  - A[] -> B? : CreateList<ResultMap>, then CreateMap
-        //  - A   -> B? : CreateMap
-        //  - A[]       : CreateList<ResultLeaf>, then CreateLeaf
-        //  - A         : CreateLeaf
-        // The list of lists is not supported.
-        private void addChildTransformation(TransformationStep current, TransformingQueryStructure childStructure) {
-            if (childStructure.children.isEmpty())
-                current.addChild(new CreateLeaf());
-            else
-                createMap(current, childStructure);
-        }
-
-        private TransformationStep createListIfNeeded(TransformationStep parentStep, TransformingQueryStructure structure) {
-            if (!structure.isArray)
-                return parentStep;
-
-            return structure.children.isEmpty()
-                ? parentStep.addChild(new CreateList<ResultLeaf>())
-                : parentStep.addChild(new CreateList<ResultMap>());
-        }
-
-        private TransformationStep writeToListIfNeeded(TransformationStep parentStep, TransformingQueryStructure structure) {
-            if (!structure.isArray)
-                return parentStep;
-
-            return structure.children.isEmpty()
-                ? parentStep.addChild(new WriteToList<ResultLeaf>())
-                : parentStep.addChild(new WriteToList<ResultMap>());
-        }
-
-        private void createMap(TransformationStep parentStep, TransformingQueryStructure structure) {
-            final var mapStep = parentStep.addChild(new CreateMap());
-            structure.children.forEach(childStructure -> {
-                var current = mapStep.addChild(new WriteToMap(childStructure.outputName));
-
-                final var parentInSelection = GraphUtils.findDFS(inputStructure, s -> s.name.equals(structure.inputName));
-                final var childInSelection = GraphUtils.findDFS(inputStructure, s -> s.name.equals(childStructure.inputName));
-                if (childInSelection == null)
-                    throw new UnsupportedOperationException("Term " + childStructure.inputName + " not found in the selection structure.");
-
-                final var path = GraphUtils.findPath(parentInSelection, childInSelection);
-
-                childStructure.isArray = isPathArray(path);
-                current = createListIfNeeded(current, childStructure);
-                current = addPathSteps(current, path);
-                current = writeToListIfNeeded(current, childStructure);
-
-                addChildTransformation(current, childStructure);
-            });
-        }
-
-    }
-
-    public static class TransformationContext {
-        public final Deque<ResultNode> inputs = new ArrayDeque<>();
-        public final Deque<ResultNode> outputs = new ArrayDeque<>();
-        public final Deque<NodeBuilder> builders = new ArrayDeque<>();
-
-        public TransformationContext(ResultNode input) {
-            inputs.push(input);
-        }
-
-        public ResultNode getOutput() {
-            return outputs.pop();
-        }
-    }
-
-    /**
-     * This class represents one basic step in transforming a query result (ResultNode) to another one (with different QueryStructure).
-     * It can be either a traverse (to a parent, a map or a list), a creation of a leaf, a creation of a map or a list, or a write to a map or a list.
-     * The steps usually have children which are also traversed. Some steps spawn multiple new "branches" which are traversed one by one. Therefore, the whole transformation can be obtained by simply appliing the first step to the root node.
-     *
-     * This system is designed to transform the data as fast as possible. We only have to create the steps once and then we can apply them to any amount of data.
-     */
-    public abstract static class TransformationStep implements Printable {
-        private final List<TransformationStep> children = new ArrayList<>();
-
-        /**
-         * Adds a child to this step. Then returns the child.
-         * @param child A child step
-         * @return The child step
-         */
-        public TransformationStep addChild(TransformationStep child) {
-            children.add(child);
-
-            return child;
-        }
-
-        public abstract void apply(TransformationContext context);
-
-        protected void applyChildren(TransformationContext context) {
-            children.forEach(child -> child.apply(context));
-        }
-
-        @Override public String toString() {
-            return Printer.print(this);
-        }
-
-        protected void printChildren(Printer printer) {
-            if (children.isEmpty()) {
-                printer.nextLine();
-                return;
-            }
-
-            if (children.size() == 1) {
-                printer.nextLine().append("    ").append(children.get(0));
-                return;
-            }
-
-            printer.append(":").down().nextLine();
-            children.forEach(child -> printer.append("--- ").append(child).nextLine());
-            printer.remove();
-            printer.up();
-        }
-    }
-
-    public static class TransformationRoot extends TransformationStep {
-        @Override public void apply(TransformationContext context) {
-            applyChildren(context);
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("root");
-            printChildren(printer);
-        }
-    }
-
-    private static class TraverseParent extends TransformationStep {
-        @Override public void apply(TransformationContext context) {
-            final var lastContext = context.inputs.pop();
-            applyChildren(context);
-            context.inputs.push(lastContext);
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("T.up");
-            printChildren(printer);
-        }
-    }
-
-    private static class TraverseMap extends TransformationStep {
-        private final String key;
-
-        TraverseMap(String key) {
-            this.key = key;
-        }
-
-        @Override public void apply(TransformationContext context) {
-            final var currentMap = (ResultMap) context.inputs.peek();
-            context.inputs.push(currentMap.children().get(key));
-            applyChildren(context);
-            context.inputs.pop();
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("T.map(").append(key).append(")");
-            printChildren(printer);
-        }
-    }
-
-    private static class TraverseList extends TransformationStep {
-        @Override public void apply(TransformationContext context) {
-            final var currentList = (ResultList) context.inputs.peek();
-            currentList.children().forEach(childContext -> {
-                context.inputs.push(childContext);
-                applyChildren(context);
-                context.inputs.pop();
-            });
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("T.list");
-            printChildren(printer);
-        }
-    }
-
-    private static class CreateLeaf extends TransformationStep {
-        @Override public void apply(TransformationContext context) {
-            final var inputLeaf = (ResultLeaf) context.inputs.peek();
-            final var outputLeaf = new ResultLeaf(inputLeaf.value);
-            context.outputs.push(outputLeaf);
-            // applyChildren(context);
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("C.leaf");
-            printChildren(printer);
-        }
-    }
-
-    // The expected structure is this:
-    // CreateMap -> WriteToMap with k1 -> TraverseMap with k1 -> ... possible other traverses ... -> ... children that creates the new map items
-    //           -> WriteToMap with k2 -> TraverseMap with k2 -> ... possible other traverses ... -> ... children that creates the new map items
-    //           -> ... the same with other keys ...
-    private static class CreateMap extends TransformationStep {
-        @Override public void apply(TransformationContext context) {
-            final var builder = new ResultMap.Builder();
-            context.builders.push(builder);
-            applyChildren(context);
-            context.builders.pop();
-            context.outputs.push(builder.build());
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("C.map");
-            printChildren(printer);
-        }
-    }
-
-    private static class WriteToMap extends TransformationStep {
-        private final String key;
-
-        WriteToMap(String key) {
-            this.key = key;
-        }
-
-        @Override public void apply(TransformationContext context) {
-            applyChildren(context);
-            final ResultNode outputNode = context.outputs.pop();
-            final var builder = (ResultMap.Builder) context.builders.peek();
-            builder.put(key, outputNode);
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("W.map(").append(key).append(")");
-            printChildren(printer);
-        }
-    }
-
-    // The expected structure is this:
-    // CreateList -> TraverseList -> ... possible other traverses ... -> WriteToList -> ... children that creates the new list items.
-    private static class CreateList<T extends ResultNode> extends TransformationStep {
-        @Override public void apply(TransformationContext context) {
-            final var builder = new ResultList.Builder<T>();
-            context.builders.push(builder);
-            applyChildren(context);
-            context.builders.pop();
-            context.outputs.push(builder.build());
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("C.list");
-            printChildren(printer);
-        }
-    }
-
-    private static class WriteToList<T extends ResultNode> extends TransformationStep {
-        @Override public void apply(TransformationContext context) {
-            applyChildren(context);
-            final var outputNode = (T) context.outputs.pop();
-            final var builder = (ResultList.Builder<T>) context.builders.peek();
-            builder.add(outputNode);
-        }
-
-        @Override public void printTo(Printer printer) {
-            printer.append("W.list");
-            printChildren(printer);
-        }
     }
 
 }

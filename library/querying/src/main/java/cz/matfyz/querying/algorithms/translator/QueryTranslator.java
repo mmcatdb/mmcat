@@ -26,7 +26,7 @@ import cz.matfyz.querying.parsing.ParserNode.Term;
 
 /**
  * This class translates a query tree to a query for a specific database.
- * The provided tree has to have `database`, meaning it can be fully resolved withing the given database system.
+ * The provided tree has to have `database`, meaning it can be fully resolved within the given database system.
  */
 public class QueryTranslator implements QueryVisitor<Void> {
 
@@ -43,7 +43,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
         this.databaseNode = databaseNode;
     }
 
-    public QueryStatement run() {
+    private QueryStatement run() {
         this.wrapper = databaseNode.database.control.getQueryWrapper();
         databaseNode.child.accept(this);
 
@@ -55,7 +55,7 @@ public class QueryTranslator implements QueryVisitor<Void> {
     }
 
     public Void visit(PatternNode node) {
-        PatternTranslator.run(node, wrapper);
+        PatternTranslator.run(context, node, wrapper);
         return null;
     }
 
