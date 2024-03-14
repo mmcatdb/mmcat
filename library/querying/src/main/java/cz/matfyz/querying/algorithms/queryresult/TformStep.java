@@ -263,8 +263,8 @@ public abstract class TformStep implements Printable {
 
     /**
      * There are two modes:
-     *  - keys: merge all keys from the source map (input) to the target map (from index).
-     *  - self: merge the whole source map (input) to the target map (from index).
+     *  - keys: merge all keys from the source map (from index) to the target map (from input).
+     *  - self: merge the whole source map (from index) to the target map (from input).
      */
     static class MergeToMap extends TformStep {
         private final Map<String, ResultMap> index;
@@ -291,9 +291,14 @@ public abstract class TformStep implements Printable {
         }
 
         @Override public void apply(TformContext context) {
-            final var sourceMap = (ResultMap) context.inputs.peek();
-            final var identifierLeaf = (ResultLeaf) traversePath(sourceMap, pathToIdentifier);
-            final var targetMap = (ResultMap) index.get(identifierLeaf.value);
+            final var targetMap = (ResultMap) context.inputs.peek();
+            final var identifierLeaf = (ResultLeaf) traversePath(targetMap, pathToIdentifier);
+            final var sourceMap = (ResultMap) index.get(identifierLeaf.value);
+
+            if (sourceMap == null) {
+                context.removers.peek().getRemoved();
+                return;
+            }
 
             if (selfKey != null) {
                 targetMap.children().put(selfKey, sourceMap);

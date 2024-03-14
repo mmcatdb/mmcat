@@ -43,12 +43,11 @@ public class QueryStructureMerger {
     public record MergeTform(TformRoot sourceTform, TformRoot targetTform, QueryStructure newStructure) {
 
         public QueryResult apply(ResultList source, ResultList target) {
-            // First, load the index and delete the old identifiers.
-            final var targetContext = new TformContext(target);
-            targetTform.apply(targetContext);
-
-            // Then, merge the source structure to the target structure. We don't need the result of this one.
+            // First create the index.
             sourceTform.apply(new TformContext(source));
+            
+            // Then then merge the source to the target and remove the target identifiers.
+            targetTform.apply(new TformContext(target));
 
             return new QueryResult(target, newStructure);
         }
@@ -60,32 +59,30 @@ public class QueryStructureMerger {
         final var sourceToMatch = GraphUtils.findPath(sourceRoot, sourceMatch).rootToTarget();
         final var targetToMatch = GraphUtils.findPath(targetProperty, targetMatch).rootToTarget();
 
-        final var targetTform = new TformRoot();
-        TformStep current = targetTform;
+        final var sourceTform = new TformRoot();
+        TformStep current = sourceTform;
 
-        // First, we traverse to the target property and create an index over it.
+        // First, we iterate over the source property and create an index over it.
+        current = current.addChild(new TraverseList());
+        final Map<String, ResultMap> index = new TreeMap<>();
+        final List<String> sourceToMatchKeys = fromRootPathToKeys(sourceToMatch);
+        current.addChild(new WriteToIndex<ResultMap>(index, sourceToMatchKeys));
+
+        // Then, we iterate over the target property.
+        final var targetTform = new TformRoot();
+        current = targetTform;
         current = current.addChild(new TraverseList());
         current = QueryStructureTformer.addPathSteps(current, rootToTarget);
 
-        final Map<String, ResultMap> index = new TreeMap<>();
+        // We merge the source from the index to the target ...
         final List<String> targetToMatchKeys = fromRootPathToKeys(targetToMatch);
-        current.addChild(new WriteToIndex<ResultMap>(index, targetToMatchKeys));
+        current.addChild(MergeToMap.self(index, targetToMatchKeys, sourceRoot.name));
 
-        // Then we delete the target identifier.
+        // ... and delete the target match.
         final List<String> deleteKeys = findDeleteKeys(targetToMatch);
-
         for (int i = 0; i < deleteKeys.size() - 1; i++)
             current = current.addChild(new TraverseMap(deleteKeys.get(i)));
-
         current.addChild(new RemoveFromMap(deleteKeys.get(deleteKeys.size() - 1)));
-        
-        // Lasly, we match and merge the source structure to the target structure.
-        final var sourceTform = new TformRoot();
-        current = sourceTform;
-        current = current.addChild(new TraverseList());
-
-        final List<String> sourceToMatchKeys = fromRootPathToKeys(sourceToMatch);
-        current.addChild(MergeToMap.self(index, sourceToMatchKeys, sourceRoot.name));
 
         final var newStructure = createNewStructure(targetProperty, targetToMatch, sourceToMatch, deleteKeys);
         
