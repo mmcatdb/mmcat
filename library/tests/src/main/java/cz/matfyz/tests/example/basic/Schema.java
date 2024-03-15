@@ -1,209 +1,115 @@
 package cz.matfyz.tests.example.basic;
 
-import cz.matfyz.core.identifiers.BaseSignature;
-import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SimpleBuilder;
+import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
-import cz.matfyz.core.schema.SimpleBuilder.Object;
-import cz.matfyz.tests.example.common.SchemaBuilder;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 
-public class Schema {
+public abstract class Schema {
 
     public static final String schemaLabel = "Basic Schema";
 
-    private static final SimpleBuilder builder2 = new SimpleBuilder(schemaLabel);
+    private static final SchemaBuilder builder = new SchemaBuilder(schemaLabel);
 
     // Keys
 
-    public static final Key order = new Key(1);
-    public static final Key number = new Key(2);
-    public static final Key tag = new Key(3);
+    public static final BuilderObject order =       builder.object("order", 1);
+    public static final BuilderObject number =      builder.object("number", 2);
+    public static final BuilderObject tag =         builder.object("tag", 3);
 
-    public static final Key customer = new Key(4);
-    public static final Key name = new Key(5);
-    public static final Key friend = new Key(6);
-    public static final Key since = new Key(7);
+    public static final BuilderObject customer =    builder.object("customer", 4);
+    public static final BuilderObject name =        builder.object("name", 5);
+    public static final BuilderObject friend =      builder.object("friend", 6);
+    public static final BuilderObject since =       builder.object("since", 7);
 
-    public static final Key address = new Key(8);
-    public static final Key street = new Key(9);
-    public static final Key city = new Key(10);
-    public static final Key zip = new Key(11);
+    public static final BuilderObject address =     builder.generatedIds().object("address", 8);
+    public static final BuilderObject street =      builder.object("street", 9);
+    public static final BuilderObject city =        builder.object("city", 10);
+    public static final BuilderObject zip =         builder.object("zip", 11);
 
-    public static final Key item = new Key(12);
-    public static final Key product = new Key(13);
-    public static final Key quantity = new Key(14);
-    public static final Key id = new Key(15);
-    public static final Key label = new Key(16);
-    public static final Key price = new Key(17);
+    public static final BuilderObject item =        builder.object("item", 12);
+    public static final BuilderObject product =     builder.object("product", 13);
+    public static final BuilderObject quantity =    builder.object("quantity", 14);
+    public static final BuilderObject id =          builder.object("id", 15);
+    public static final BuilderObject label =       builder.object("label", 16);
+    public static final BuilderObject price =       builder.object("price", 17);
 
-    public static final Key contact = new Key(18);
-    public static final Key value = new Key(19);
-    public static final Key type = new Key(20);
+    public static final BuilderObject contact =     builder.object("contact", 18);
+    public static final BuilderObject value =       builder.object("value", 19);
+    public static final BuilderObject type =        builder.object("type", 20);
 
-    public static final Key note = new Key(21);
-    public static final Key locale = new Key(22);
-    public static final Key data = new Key(23);
-    public static final Key subject = new Key(24);
-    public static final SimpleBuilder.Object content = builder2.object("content", 25);
+    public static final BuilderObject note =        builder.object("note", 21);
+    public static final BuilderObject locale =      builder.object("locale", 22);
+    public static final BuilderObject data =        builder.generatedIds().object("data", 23);
+    public static final BuilderObject subject =     builder.object("subject", 24);
+    public static final BuilderObject content =     builder.object("content", 25);
 
-    // Signatures
+    // Morphisms
 
-    public static final BaseSignature orderToNumber = Signature.createBase(1);
-    public static final BaseSignature tagToOrder = Signature.createBase(2);
+    public static final BuilderMorphism orderToNumber =     builder.morphism(order, number, 1);
+    public static final BuilderMorphism tagToOrder =        builder.morphism(tag, order, 2);
 
-    public static final BaseSignature orderToCustomer = Signature.createBase(3);
-    public static final BaseSignature customerToName = Signature.createBase(4);
-    public static final BaseSignature friendToCustomerA = Signature.createBase(5);
-    public static final BaseSignature friendToCustomerB = Signature.createBase(6);
-    public static final BaseSignature friendToSince = Signature.createBase(7);
+    public static final BuilderMorphism orderToCustomer =   builder.morphism(order, customer, 3);
+    public static final BuilderMorphism customerToName =    builder.morphism(customer, name, 4);
+    public static final BuilderMorphism friendToCustomerA = builder.label("friend-->customerA").morphism(friend, customer, 5);
+    public static final BuilderMorphism friendToCustomerB = builder.label("friend-->customerB").morphism(friend, customer, 6);
+    public static final BuilderMorphism friendToSince =     builder.morphism(friend, since, 7);
 
-    public static final Signature orderToName = orderToCustomer.concatenate(customerToName);
-    public static final Signature friendToNameA = friendToCustomerA.concatenate(customerToName);
-    public static final Signature friendToNameB = friendToCustomerB.concatenate(customerToName);
+    public static final BuilderMorphism orderToName =       builder.composite(orderToCustomer, customerToName);
+    public static final BuilderMorphism friendToNameA =     builder.composite(friendToCustomerA, customerToName);
+    public static final BuilderMorphism friendToNameB =     builder.composite(friendToCustomerB, customerToName);
 
-    public static final BaseSignature orderToAddress = Signature.createBase(8);
-    public static final BaseSignature addressToStreet = Signature.createBase(9);
-    public static final BaseSignature addressToCity = Signature.createBase(10);
-    public static final BaseSignature addressToZip = Signature.createBase(11);
+    public static final BuilderMorphism orderToAddress =    builder.morphism(order, address, 8);
+    public static final BuilderMorphism addressToStreet =   builder.morphism(address, street, 9);
+    public static final BuilderMorphism addressToCity =     builder.morphism(address, city, 10);
+    public static final BuilderMorphism addressToZip =      builder.morphism(address, zip, 11);
 
-    public static final BaseSignature itemToOrder = Signature.createBase(12);
-    public static final BaseSignature itemToProduct = Signature.createBase(13);
-    public static final BaseSignature itemToQuantity = Signature.createBase(14);
-    public static final BaseSignature productToId = Signature.createBase(15);
-    public static final BaseSignature productToLabel = Signature.createBase(16);
-    public static final BaseSignature productToPrice = Signature.createBase(17);
+    public static final BuilderMorphism itemToOrder =       builder.tags(Tag.role).morphism(item, order, 12);
+    public static final BuilderMorphism itemToProduct =     builder.tags(Tag.role).morphism(item, product, 13);
+    public static final BuilderMorphism itemToQuantity =    builder.morphism(item, quantity, 14);
+    public static final BuilderMorphism productToId =       builder.morphism(product, id, 15);
+    public static final BuilderMorphism productToLabel =    builder.min(Min.ZERO).morphism(product, label, 16);
+    public static final BuilderMorphism productToPrice =    builder.min(Min.ZERO).morphism(product, price, 17);
 
-    public static final Signature itemToNumber = itemToOrder.concatenate(orderToNumber);
-    public static final Signature itemToId = itemToProduct.concatenate(productToId);
-    public static final Signature itemToLabel = itemToProduct.concatenate(productToLabel);
-    public static final Signature itemToPrice = itemToProduct.concatenate(productToPrice);
+    public static final BuilderMorphism itemToNumber =      builder.composite(itemToOrder, orderToNumber);
+    public static final BuilderMorphism itemToId =          builder.composite(itemToProduct, productToId);
+    public static final BuilderMorphism itemToLabel =       builder.composite(itemToProduct, productToLabel);
+    public static final BuilderMorphism itemToPrice =       builder.composite(itemToProduct, productToPrice);
 
-    public static final BaseSignature contactToOrder = Signature.createBase(18);
-    public static final BaseSignature contactToValue = Signature.createBase(19);
-    public static final BaseSignature contactToType = Signature.createBase(20);
+    public static final BuilderMorphism contactToOrder =    builder.morphism(contact, order, 18);
+    public static final BuilderMorphism contactToValue =    builder.morphism(contact, value, 19);
+    public static final BuilderMorphism contactToType =     builder.morphism(contact, type, 20);
 
-    public static final Signature contactToNumber = contactToOrder.concatenate(orderToNumber);
+    public static final BuilderMorphism contactToNumber =   builder.composite(contactToOrder, orderToNumber);
 
-    public static final BaseSignature noteToOrder = Signature.createBase(21);
-    public static final BaseSignature noteToLocale = Signature.createBase(22);
-    public static final BaseSignature noteToData = Signature.createBase(23);
-    public static final BaseSignature dataToSubject = Signature.createBase(24);
-    public static final BaseSignature dataToContent = Signature.createBase(25);
+    public static final BuilderMorphism noteToOrder =       builder.morphism(note, order, 21);
+    public static final BuilderMorphism noteToLocale =      builder.morphism(note, locale, 22);
+    public static final BuilderMorphism noteToData =        builder.morphism(note, data, 23);
+    public static final BuilderMorphism dataToSubject =     builder.morphism(data, subject, 24);
+    public static final BuilderMorphism dataToContent =     builder.morphism(data, content, 25);
 
-    public static final Signature noteToNumber = noteToOrder.concatenate(orderToNumber);
+    public static final BuilderMorphism noteToNumber =      builder.composite(noteToOrder, orderToNumber);
 
-    public Schema() {
-        this.addOrder();
-    }
+    // Ids
 
-    public SchemaCategory build() {
-        return builder.build(schemaLabel);
-    }
+    private static final SchemaBuilder ids = builder
+        .ids(order, orderToNumber)
+        .ids(customer, customerToName)
+        .ids(friend, friendToCustomerA, friendToCustomerB)
+        .ids(item, itemToNumber, itemToId)
+        .ids(product, productToId)
+        .ids(contact, contactToNumber, contactToType, contactToValue)
+        .ids(note, noteToNumber, noteToLocale);
 
     /**
      * Create new full schema category.
      */
     public static SchemaCategory newSchemaCategory() {
-        return new Schema()
-            .addCustomer()
-            .addAddress()
-            .addItem()
-            .addContact()
-            .addNote()
-            .build();
+        return builder.build();
     }
 
-    private final SchemaBuilder builder = new SchemaBuilder();
-
-    // This one is mandatory.
-    private Schema addOrder() {
-        builder.object(order, "order", new ObjectIds(orderToNumber));
-        builder.object(number, "number", ObjectIds.createValue());
-        builder.object(tag, "tag", ObjectIds.createValue());
-
-        builder.morphism(orderToNumber, order, number, Min.ONE);
-        builder.morphism(tagToOrder, tag, order, Min.ONE);
-
-        return this;
-    }
-
-    public Schema addCustomer() {
-        builder.object(customer, "customer", new ObjectIds(customerToName));
-        builder.object(name, "name", ObjectIds.createValue());
-        builder.object(friend, "friend", new ObjectIds(friendToCustomerA, friendToCustomerB));
-        builder.object(since, "since", ObjectIds.createValue());
-
-        builder.morphism(orderToCustomer, order, customer, Min.ONE);
-        builder.morphism(customerToName, customer, name, Min.ONE);
-        builder.morphism(friendToCustomerA, friend, customer, Min.ONE);
-        builder.morphism(friendToCustomerB, friend, customer, Min.ONE);
-        builder.morphism(friendToSince, friend, since, Min.ONE);
-
-        return this;
-    }
-
-    public Schema addAddress() {
-        builder.object(address, "address", ObjectIds.createGenerated());
-        builder.object(street, "street", ObjectIds.createValue());
-        builder.object(city, "city", ObjectIds.createValue());
-        builder.object(zip, "zip", ObjectIds.createValue());
-
-        builder.morphism(orderToAddress, order, address, Min.ONE);
-        builder.morphism(addressToStreet, address, street, Min.ONE);
-        builder.morphism(addressToCity, address, city, Min.ONE);
-        builder.morphism(addressToZip, address, zip, Min.ONE);
-
-        return this;
-    }
-
-    public Schema addItem() {
-        builder.object(item, "item", new ObjectIds(itemToNumber, itemToId));
-        builder.object(product, "product", new ObjectIds(productToId));
-        builder.object(quantity, "quantity", ObjectIds.createValue());
-        builder.object(id, "id", ObjectIds.createValue());
-        builder.object(label, "label", ObjectIds.createValue());
-        builder.object(price, "price", ObjectIds.createValue());
-
-        builder.morphism(itemToOrder, item, order, Min.ONE, Tag.role);
-        builder.morphism(itemToProduct, item, product, Min.ONE, Tag.role);
-        builder.morphism(itemToQuantity, item, quantity, Min.ONE);
-        builder.morphism(productToId, product, id, Min.ONE);
-        builder.morphism(productToLabel, product, label, Min.ZERO);
-        builder.morphism(productToPrice, product, price, Min.ZERO);
-
-        return this;
-    }
-
-    public Schema addContact() {
-        builder.object(contact, "contact", new ObjectIds(contactToNumber, contactToType, contactToValue));
-        builder.object(type, "type", ObjectIds.createValue());
-        builder.object(value, "value", ObjectIds.createValue());
-
-        builder.morphism(contactToOrder, contact, order, Min.ONE);
-        builder.morphism(contactToType, contact, type, Min.ONE);
-        builder.morphism(contactToValue, contact, value, Min.ONE);
-
-        return this;
-    }
-
-    public Schema addNote() {
-        builder.object(note, "note", new ObjectIds(noteToNumber, noteToLocale));
-        builder.object(locale, "locale", ObjectIds.createValue());
-        builder.object(data, "data", ObjectIds.createGenerated());
-        builder.object(subject, "subject", ObjectIds.createValue());
-        builder.object(content.key(), "content", ObjectIds.createValue());
-
-        builder.morphism(noteToOrder, note, order, Min.ONE);
-        builder.morphism(noteToLocale, note, locale, Min.ONE);
-        builder.morphism(noteToData, note, data, Min.ONE);
-        builder.morphism(dataToSubject, data, subject, Min.ONE);
-        builder.morphism(dataToContent, data, content.key(), Min.ONE);
-
-        return this;
-    }
+    private Schema() {}
 
 }

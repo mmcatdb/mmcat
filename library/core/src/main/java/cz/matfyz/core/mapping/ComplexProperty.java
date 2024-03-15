@@ -4,6 +4,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
@@ -72,19 +73,6 @@ public class ComplexProperty extends AccessPath {
         subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
         this.subpaths = new ArrayList<>(this.subpathsMap.values());
     }
-    /*
-    public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
-        this(name, signature, isAuxiliary, Arrays.asList(subpaths));
-    }
-
-    public ComplexProperty(String name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
-        this(new StaticName(name), signature, isAuxiliary, Arrays.asList(subpaths));
-    }
-
-    public ComplexProperty(Signature name, Signature signature, boolean isAuxiliary, AccessPath... subpaths) {
-        this(new DynamicName(name), signature, isAuxiliary, Arrays.asList(subpaths));
-    }
-     */
 
     private static ComplexProperty create(Name name, Signature signature, AccessPath... subpaths) {
         return new ComplexProperty(name, signature, false, Arrays.asList(subpaths));
@@ -94,10 +82,19 @@ public class ComplexProperty extends AccessPath {
         return create(new StaticName(name), signature, subpaths);
     }
 
+    public static ComplexProperty create(String name, BuilderMorphism morphism, AccessPath... subpaths) {
+        return create(new StaticName(name), morphism.signature(), subpaths);
+    }
+
     public static ComplexProperty create(Signature name, Signature signature, AccessPath... subpaths) {
         return create(new DynamicName(name), signature, subpaths);
     }
 
+    public static ComplexProperty create(BuilderMorphism name, BuilderMorphism morphism, AccessPath... subpaths) {
+        return create(new DynamicName(name.signature()), morphism.signature(), subpaths);
+    }
+
+    /** A very specific thing for the MTC algorithm. Fix when possible. */
     public static ComplexProperty createEmpty() {
         return new ComplexProperty(null, Signature.createEmpty(), true, Collections.<AccessPath>emptyList());
     }
@@ -107,11 +104,7 @@ public class ComplexProperty extends AccessPath {
     }
 
     public static ComplexProperty createAuxiliary(Name name, AccessPath... subpaths) {
-        return createAuxiliary(name, Arrays.asList(subpaths));
-    }
-
-    public static ComplexProperty createRoot(List<AccessPath> subpaths) {
-        return createAuxiliary(StaticName.createAnonymous(), subpaths);
+        return new ComplexProperty(name, Signature.createEmpty(), true, Arrays.asList(subpaths));
     }
 
     public static ComplexProperty createRoot(AccessPath... subpaths) {

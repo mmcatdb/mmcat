@@ -77,8 +77,6 @@ public class MTCAlgorithm {
     }
 
     private void processTopOfStack(Deque<StackTriple> masterStack) {
-        //LOGGER.debug("Process Top of Stack:\n{}", masterStack);
-
         StackTriple triple = masterStack.pop();
         final var superIds = SuperIdsFetcher.fetch(triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
@@ -171,7 +169,6 @@ public class MTCAlgorithm {
     private record Child(Signature signature, AccessPath property) {}
 
     private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, IComplexRecord complexRecord) {
-        //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
         if (!(path instanceof ComplexProperty complexPath))
             return;
 
@@ -202,4 +199,5 @@ public class MTCAlgorithm {
 
         return output;
     }
+
 }

@@ -117,7 +117,7 @@ class SchemaSetup extends SchemaBase {
         });
 
         addComposite(ADD_PROPERTY, () -> {
-            addObject(Schema.content.key(), 3, 0);
+            addObject(Schema.content, 3, 0);
             addMorphism(Schema.dataToContent);
         });
 

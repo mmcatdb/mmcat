@@ -4,6 +4,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = SimpleProperty.Deserializer.class)
 public class SimpleProperty extends AccessPath {
 
-    public SimpleProperty(Name name, Signature signature) {
+    private SimpleProperty(Name name, Signature signature) {
         super(name, signature);
     }
 
@@ -39,8 +40,16 @@ public class SimpleProperty extends AccessPath {
         this(new StaticName(name), signature);
     }
 
+    public SimpleProperty(String name, BuilderMorphism morphism) {
+        this(new StaticName(name), morphism.signature());
+    }
+
     public SimpleProperty(Signature name, Signature signature) {
         this(new DynamicName(name), signature);
+    }
+
+    public SimpleProperty(BuilderMorphism name, BuilderMorphism morphism) {
+        this(new DynamicName(name.signature()), morphism.signature());
     }
 
     @Override protected boolean hasSignature(Signature signature) {

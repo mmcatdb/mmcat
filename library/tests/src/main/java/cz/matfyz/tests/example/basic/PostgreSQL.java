@@ -72,10 +72,10 @@ public abstract class PostgreSQL {
 
     public static void addItem(InstanceBuilder builder, int orderIndex, int productIndex, String quantityValue) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        final var numberValue = order.superId.getValue(Schema.orderToNumber);
+        final var numberValue = order.superId.getValue(Schema.orderToNumber.signature());
 
         final var product = builder.getRow(Schema.product, productIndex);
-        final var idValue = product.superId.getValue(Schema.productToId);
+        final var idValue = product.superId.getValue(Schema.productToId.signature());
 
         final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).object(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);

@@ -8,7 +8,8 @@ import cz.matfyz.core.instance.InstanceCategoryBuilder;
 import cz.matfyz.core.instance.MappingRow;
 import cz.matfyz.core.instance.SuperIdWithValues;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SimpleBuilder;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +39,8 @@ public class InstanceBuilder {
         return this;
     }
 
-    public DomainRow object(SimpleBuilder.Object object) {
-        return object(object.key());
+    public InstanceBuilder value(BuilderMorphism morphism, String value) {
+        return value(morphism.signature(), value);
     }
 
     public DomainRow object(Key key) {
@@ -55,8 +56,11 @@ public class InstanceBuilder {
         return row;
     }
 
+    public DomainRow object(BuilderObject object) {
+        return object(object.key());
+    }
 
-    public DomainRow valueObject(String value, SimpleBuilder.Object object) {
+    public DomainRow valueObject(String value, BuilderObject object) {
         return valueObject(value, object.key());
     }
 
@@ -67,8 +71,16 @@ public class InstanceBuilder {
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {
         var row = new MappingRow(domainRow, codomainRow);
         instance.getMorphism(signature).addMapping(row);
-
+        
         return row;
+    }
+
+    public MappingRow morphism(BuilderMorphism morphism, DomainRow domainRow, DomainRow codomainRow) {
+        return morphism(morphism.signature(), domainRow, codomainRow);
+    }
+
+    public void morphism(BuilderMorphism morphism) {
+        morphism(morphism.signature());
     }
 
     public void morphism(Signature signature) {
@@ -77,12 +89,21 @@ public class InstanceBuilder {
 
     private Map<Key, List<DomainRow>> createdRows = new TreeMap<>();
 
+    
     public List<DomainRow> getRows(Key key) {
         return createdRows.get(key);
     }
 
+    public List<DomainRow> getRows(BuilderObject object) {
+        return getRows(object.key());
+    }
+
     public DomainRow getRow(Key key, int index) {
         return createdRows.get(key).get(index);
+    }
+
+    public DomainRow getRow(BuilderObject object, int index) {
+        return getRow(object.key(), index);
     }
 
     public interface InstanceAdder {

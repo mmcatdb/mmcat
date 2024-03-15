@@ -55,8 +55,8 @@ public abstract class PostgreSQL {
         final var customerB = builder.getRow(Schema.customer, customerBIndex);
 
         final var knows = builder
-            .value(Schema.knowsToCustomerA, customerA.superId.getValue(Schema.customerToCustomerId))
-            .value(Schema.knowsToCustomerB, customerB.superId.getValue(Schema.customerToCustomerId))
+            .value(Schema.knowsToCustomerA, customerA.superId.getValue(Schema.customerToCustomerId.signature()))
+            .value(Schema.knowsToCustomerB, customerB.superId.getValue(Schema.customerToCustomerId.signature()))
             .object(Schema.knows);
 
         builder.morphism(Schema.knowsToCustomerA, knows, customerA);
@@ -106,7 +106,7 @@ public abstract class PostgreSQL {
 
         final var order = builder
             .value(Schema.orderToOrderId, orderIdValue)
-            .value(Schema.orderToProductId, product.superId.getValue(Schema.productToProductId))
+            .value(Schema.orderToProductId, product.superId.getValue(Schema.productToProductId.signature()))
             .object(Schema.order);
 
         builder.morphism(Schema.orderToCustomer, order, customer);
@@ -158,8 +158,8 @@ public abstract class PostgreSQL {
         final var order = builder.getRow(Schema.order, orderIndex);
 
         final var item = builder
-            .value(Schema.itemToProductId, product.superId.getValue(Schema.productToProductId))
-            .value(Schema.itemToOrderId, order.superId.getValue(Schema.orderToOrderId))
+            .value(Schema.itemToProductId, product.superId.getValue(Schema.productToProductId.signature()))
+            .value(Schema.itemToOrderId, order.superId.getValue(Schema.orderToOrderId.signature()))
             .object(Schema.item);
 
         builder.morphism(Schema.itemToProduct, item, product);
@@ -185,8 +185,8 @@ public abstract class PostgreSQL {
         final var order = builder.getRow(Schema.order, orderIndex);
 
         final var ordered = builder
-            .value(Schema.orderedToCustomerId, customer.superId.getValue(Schema.customerToCustomerId))
-            .value(Schema.orderedToOrderId, order.superId.getValue(Schema.orderToOrderId))
+            .value(Schema.orderedToCustomerId, customer.superId.getValue(Schema.customerToCustomerId.signature()))
+            .value(Schema.orderedToOrderId, order.superId.getValue(Schema.orderToOrderId.signature()))
             .object(Schema.ordered);
 
         builder.morphism(Schema.orderedToCustomer, ordered, customer);

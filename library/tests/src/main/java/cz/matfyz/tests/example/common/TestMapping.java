@@ -5,6 +5,7 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 
 import java.util.Collection;
 
@@ -36,6 +37,10 @@ public class TestMapping {
 
     public TestMapping(SchemaCategory schema, Key rootKey, String kindName, AccessPathCreator pathCreator) {
         this(schema, rootKey, kindName, pathCreator, defaultKeyCreator);
+    }
+
+    public TestMapping(SchemaCategory schema, BuilderObject rootObject, String kindName, AccessPathCreator pathCreator) {
+        this(schema, rootObject.key(), kindName, pathCreator, defaultKeyCreator);
     }
 
     private ComplexProperty accessPath;
