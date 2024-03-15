@@ -178,19 +178,12 @@ public class Signature implements Serializable, Comparable<Signature> {
         return createComposite(array);
     }
 
-    public enum Type {
-        EMPTY,      // The corresponding morphism is an identity.
-        BASE,       // The length of the signature is exactly one (i.e. it's a signature of morphism between two neigbours in the schema category graph).
-        COMPOSITE,  // The signature consists of multiple (i.e. >= 2) base signatures.
-        //NULL        // There is no morphism corresponding to given signature. This means the access path's property accessible via this signature is an auxiliary property grouping one or more properties together.
-    }
-
-    public Type getType() {
-        return isEmpty() ? Type.EMPTY : Type.COMPOSITE;
-    }
-
     public boolean isEmpty() {
         return ids.length == 0;
+    }
+
+    public boolean isComposite() {
+        return ids.length > 1;
     }
 
     private static final String SEPARATOR = ".";

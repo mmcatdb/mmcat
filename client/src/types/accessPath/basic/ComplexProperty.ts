@@ -4,27 +4,21 @@ import type { ComplexPropertyFromServer } from '../serverTypes';
 import { subpathFromFromServer, type ChildProperty, type ParentProperty } from './compositeTypes';
 
 export class ComplexProperty {
-    name: Name;
-    _signature: Signature;
-    _isAuxiliary: boolean;
-    parent?: ParentProperty;
-    _subpaths: ChildProperty[];
-
-    private constructor(name: Name, signature: Signature, isAuxiliary: boolean, parent?: ParentProperty, subpaths: ChildProperty[] = []) {
-        this.name = name;
-        this._signature = signature;
-        this._isAuxiliary = isAuxiliary;
-        this.parent = parent;
-        this._subpaths = [ ...subpaths ];
-    }
+    private constructor(
+        readonly name: Name,
+        readonly _signature: Signature,
+        readonly parent: ParentProperty | undefined,
+        readonly _subpaths: ChildProperty[],
+    ) {}
 
     static copy(property: ComplexProperty): ComplexProperty {
         const name = property.name instanceof DynamicName ? DynamicName.copy(property.name) : StaticName.copy(property.name);
-        return new ComplexProperty(name, property.signature.copy(), property._isAuxiliary, property.parent, property.subpaths);
+
+        return new ComplexProperty(name, property.signature.copy(), property.parent, [ ...property.subpaths ]);
     }
 
     get isAuxiliary(): boolean {
-        return this._isAuxiliary;
+        return this._signature.isEmpty;
     }
 
     get signature(): Signature {
@@ -52,14 +46,15 @@ export class ComplexProperty {
     }
 
     static fromServer(input: ComplexPropertyFromServer, parent: ParentProperty): ComplexProperty {
+        const subpaths: ChildProperty[] = [];
         const property = new ComplexProperty(
             nameFromServer(input.name),
             Signature.fromServer(input.signature),
-            input.isAuxiliary,
             parent,
+            subpaths,
         );
 
-        property._subpaths = input.subpaths.map(subpath => subpathFromFromServer(subpath, property));
+        input.subpaths.map(subpath => subpathFromFromServer(subpath, property)).forEach(subpath => subpaths.push(subpath));
 
         return property;
     }
@@ -68,7 +63,6 @@ export class ComplexProperty {
         return {
             name: this.name.toServer(),
             signature: this._signature.toServer(),
-            isAuxiliary: this._isAuxiliary,
             subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }

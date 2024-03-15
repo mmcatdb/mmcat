@@ -4,12 +4,10 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.utils.printable.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -37,10 +35,22 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = ComplexProperty.Deserializer.class)
 public class ComplexProperty extends AccessPath {
 
-    private final boolean isAuxiliary;
+    public ComplexProperty(Name name, Signature signature, List<AccessPath> subpaths) {
+        super(name, signature);
 
+        this.subpathsMap = new TreeMap<>();
+        subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
+        this.subpaths = new ArrayList<>(this.subpathsMap.values());
+    }
+
+    /** A very specific thing for the MTC algorithm. */
+    public static ComplexProperty createEmpty() {
+        return new ComplexProperty(StaticName.createAnonymous(), Signature.createEmpty(), List.of());
+    }
+
+    /** The property is auxiliary if and only if its signature is empty. */
     public boolean isAuxiliary() {
-        return isAuxiliary;
+        return signature.isEmpty();
     }
 
     public boolean hasDynamicKeys() {
@@ -62,53 +72,6 @@ public class ComplexProperty extends AccessPath {
         final var optional = subpathsMap.values().stream().filter(subpath -> subpath.name.equals(name)).findAny();
 
         return optional.isPresent() ? optional.get() : null;
-    }
-
-    // TODO property is auxiliary if and only if its signature is EMPTY.
-    public ComplexProperty(Name name, Signature signature, boolean isAuxiliary, List<AccessPath> subpaths) {
-        super(name, signature);
-
-        this.isAuxiliary = isAuxiliary;
-        this.subpathsMap = new TreeMap<>();
-        subpaths.forEach(subpath -> this.subpathsMap.put(subpath.signature(), subpath));
-        this.subpaths = new ArrayList<>(this.subpathsMap.values());
-    }
-
-    private static ComplexProperty create(Name name, Signature signature, AccessPath... subpaths) {
-        return new ComplexProperty(name, signature, false, Arrays.asList(subpaths));
-    }
-
-    public static ComplexProperty create(String name, Signature signature, AccessPath... subpaths) {
-        return create(new StaticName(name), signature, subpaths);
-    }
-
-    public static ComplexProperty create(String name, BuilderMorphism morphism, AccessPath... subpaths) {
-        return create(new StaticName(name), morphism.signature(), subpaths);
-    }
-
-    public static ComplexProperty create(Signature name, Signature signature, AccessPath... subpaths) {
-        return create(new DynamicName(name), signature, subpaths);
-    }
-
-    public static ComplexProperty create(BuilderMorphism name, BuilderMorphism morphism, AccessPath... subpaths) {
-        return create(new DynamicName(name.signature()), morphism.signature(), subpaths);
-    }
-
-    /** A very specific thing for the MTC algorithm. Fix when possible. */
-    public static ComplexProperty createEmpty() {
-        return new ComplexProperty(null, Signature.createEmpty(), true, Collections.<AccessPath>emptyList());
-    }
-
-    public static ComplexProperty createAuxiliary(Name name, List<AccessPath> subpaths) {
-        return new ComplexProperty(name, Signature.createEmpty(), true, subpaths);
-    }
-
-    public static ComplexProperty createAuxiliary(Name name, AccessPath... subpaths) {
-        return new ComplexProperty(name, Signature.createEmpty(), true, Arrays.asList(subpaths));
-    }
-
-    public static ComplexProperty createRoot(AccessPath... subpaths) {
-        return createAuxiliary(StaticName.createAnonymous(), subpaths);
     }
 
     /**
@@ -243,7 +206,7 @@ public class ComplexProperty extends AccessPath {
 
         final List<AccessPath> newSubpaths = subpaths.stream().filter(path -> path.equals(subpath)).toList();
 
-        return new ComplexProperty(name, signature, isAuxiliary, newSubpaths);
+        return new ComplexProperty(name, signature, newSubpaths);
     }
 
     @Override public void printTo(Printer printer) {
@@ -270,7 +233,7 @@ public class ComplexProperty extends AccessPath {
      */
     public ComplexProperty copyWithoutAuxiliaryNodes() {
         List<AccessPath> newSubpaths = this.getContentWithoutAuxiliaryNodes();
-        return new ComplexProperty(name, signature, isAuxiliary, newSubpaths);
+        return new ComplexProperty(name, signature, newSubpaths);
     }
 
     private List<AccessPath> getContentWithoutAuxiliaryNodes() {
@@ -304,7 +267,6 @@ public class ComplexProperty extends AccessPath {
             generator.writeStartObject();
             generator.writePOJOField("name", property.name);
             generator.writePOJOField("signature", property.signature);
-            generator.writeBooleanField("isAuxiliary", property.isAuxiliary);
 
             generator.writeArrayFieldStart("subpaths");
             for (final var subpath : property.subpaths)
@@ -335,10 +297,9 @@ public class ComplexProperty extends AccessPath {
 
             final Name name = nameJsonReader.readValue(node.get("name"));
             final Signature signature = signatureJsonReader.readValue(node.get("signature"));
-            final var isAuxiliary = node.get("isAuxiliary").asBoolean();
             final AccessPath[] subpaths = subpathsJsonReader.readValue(node.get("subpaths"));
 
-            return new ComplexProperty(name, signature, isAuxiliary, List.of(subpaths));
+            return new ComplexProperty(name, signature, List.of(subpaths));
         }
 
     }

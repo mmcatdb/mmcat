@@ -7,14 +7,12 @@ import type { ComplexPropertyFromServer } from '../serverTypes';
 export class GraphComplexProperty {
     name: Name;
     _signature: SequenceSignature;
-    _isAuxiliary: boolean;
     parent: GraphParentProperty;
     _subpaths: GraphChildProperty[];
 
-    constructor(name: Name, signature: SequenceSignature, isAuxiliary: boolean, parent: GraphParentProperty, subpaths: GraphChildProperty[] = []) {
+    constructor(name: Name, signature: SequenceSignature, parent: GraphParentProperty, subpaths: GraphChildProperty[] = []) {
         this.name = name;
         this._signature = signature;
-        this._isAuxiliary = isAuxiliary;
         this.parent = parent;
         this._subpaths = [ ...subpaths ];
     }
@@ -43,7 +41,7 @@ export class GraphComplexProperty {
     }
 
     get isAuxiliary(): boolean {
-        return this._isAuxiliary;
+        return this._signature.isEmpty;
     }
 
     get signature(): SequenceSignature {
@@ -66,7 +64,6 @@ export class GraphComplexProperty {
         return {
             name: this.name.toServer(),
             signature: this._signature.toSignature().toServer(),
-            isAuxiliary: this._isAuxiliary,
             subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }

@@ -4,6 +4,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaBuilder;
 
 public class Schema {
@@ -59,6 +60,8 @@ public class Schema {
     public static final BuilderMorphism orderToCustomerId =     builder.composite(orderToCustomer, customerToCustomerId);
     public static final BuilderMorphism orderToProductId =      builder.composite(orderToProduct, productToProductId);
 
+    public static final Signature customerAToCustomerB = builder.concatenate(knowsToCustomerA.dual(), knowsToCustomerB);
+
     // Version 2
     public static final BuilderMorphism itemToOrderPrice =      builder.morphism(item, orderPrice, 10);
     public static final BuilderMorphism itemToQuantity =        builder.morphism(item, quantity, 11);
@@ -66,14 +69,18 @@ public class Schema {
     public static final BuilderMorphism itemToOrder =           builder.morphism(item, order, 17);
 
     public static final BuilderMorphism itemToProductId =       builder.composite(itemToProduct, productToProductId);
+    public static final BuilderMorphism itemToTitle =           builder.composite(itemToProduct, productToTitle);
+    public static final BuilderMorphism itemToProductPrice =    builder.composite(itemToProduct, productToProductPrice);
     public static final BuilderMorphism itemToOrderId =         builder.composite(itemToOrder, orderToOrderId);
 
     // The same key here is intentional - we want to replace the previous morphisms.
     public static final BuilderMorphism orderedToCustomer =     builder.morphism(ordered, customer, 12);
     public static final BuilderMorphism orderedToOrder =        builder.morphism(ordered, order, 18);
-
+    
     public static final BuilderMorphism orderedToCustomerId =   builder.composite(orderedToCustomer, customerToCustomerId);
     public static final BuilderMorphism orderedToOrderId =      builder.composite(orderedToOrder, orderToOrderId);
+
+    public static final Signature orderToCustomer2 = builder.concatenate(orderedToOrder.dual(), orderedToCustomer);
 
     // Ids
 

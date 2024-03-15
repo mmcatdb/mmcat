@@ -9,6 +9,7 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.utils.SequenceGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,8 @@ public class SchemaBuilder {
     public SchemaBuilder(String schemaLabel) {
         this.schemaLabel = schemaLabel;
     }
+
+    // Schema object
 
     public static class BuilderObject implements Comparable<BuilderObject> {
 
@@ -93,6 +96,8 @@ public class SchemaBuilder {
         return object;
     }
 
+    // Schema morphism
+
     public record BuilderMorphism(
         Signature signature,
         String label,
@@ -110,12 +115,12 @@ public class SchemaBuilder {
             return cod.key();
         }
 
-        public Signature dual() {
-            return signature.dual();
-        }
-
         @Override public int compareTo(BuilderMorphism other) {
             return signature.compareTo(other.signature);
+        }
+
+        public Signature dual() {
+            return signature.dual();
         }
 
     }
@@ -151,7 +156,7 @@ public class SchemaBuilder {
     }
 
     private BuilderMorphism morphism(BuilderObject dom, BuilderObject cod, BaseSignature signature) {
-        final String label = nextLabel != null ? nextLabel : createDefaultLabel(dom, cod, signature.isDual());
+        final String label = nextLabel != null ? nextLabel : createDefaultLabel(dom, cod);
         final var morphism = new BuilderMorphism(signature, label, dom, cod, nextMin, nextTags);
         morphismsBySignature.put(morphism.signature(), morphism);
         morphismsByLabel.put(morphism.label(), morphism);
@@ -163,10 +168,8 @@ public class SchemaBuilder {
         return morphism;
     }
 
-    private String createDefaultLabel(BuilderObject dom, BuilderObject cod, boolean isDual) {
-        return isDual
-            ? cod.label() + "<--" + dom.label()
-            : dom.label() + "-->" + cod.label();
+    private String createDefaultLabel(BuilderObject dom, BuilderObject cod) {
+        return dom.label() + "-->" + cod.label();
     }
 
     public BuilderMorphism composite(BuilderMorphism... morphisms) {
@@ -187,6 +190,29 @@ public class SchemaBuilder {
 
         return composite;
     }
+
+    // Convenience methods for creating composite signatures.
+        
+    public Signature dual(BuilderMorphism morphism) {
+        return morphism.signature().dual();
+    }
+
+    // This is just disgusting. But Java doesn't offer a better way to do this.
+    public Signature concatenate(Object... objects) {
+        final List<Signature> signatures = new ArrayList<>();
+        for (final Object object : objects) {
+            if (object instanceof Signature signature)
+                signatures.add(signature);
+            else if (object instanceof BuilderMorphism morphism)
+                signatures.add(morphism.signature());
+            else
+                throw new IllegalArgumentException("Only signatures and morphisms are allowed.");
+        }
+
+        return Signature.concatenate(signatures);
+    }
+
+    // Objects ids - they need to be defined them when the morphisms are already there.
 
     public SchemaBuilder ids(BuilderObject object, BuilderMorphism... morphisms) {
         final var id = new SignatureId(Stream.of(morphisms).map(m -> m.signature()).toArray(Signature[]::new));

@@ -39,10 +39,6 @@ public class BaseSignature extends Signature {
         return createBase(-id);
     }
 
-    @Override public Type getType() {
-        return Type.BASE;
-    }
-
     public boolean isDual() {
         return id < 0;
     }

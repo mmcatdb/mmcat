@@ -37,7 +37,7 @@ const typeIsDetermined = ref(false);
 function save() {
     const newProperty = type.value === PropertyType.Simple
         ? new GraphSimpleProperty(name.value, signature.value, props.parentProperty)
-        : new GraphComplexProperty(name.value, signature.value, isAuxiliary.value, props.parentProperty);
+        : new GraphComplexProperty(name.value, signature.value, props.parentProperty);
 
     props.parentProperty.updateOrAddSubpath(newProperty);
 
@@ -53,11 +53,12 @@ function cancel() {
 const isSelfIdentifier = computed(() => signature.value.isEmpty && signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
 
 const isSignatureValid = computed(() => {
-    // TODO property is auxiliary if and only if its signature is EMPTY.
     if (isAuxiliary.value)
         return signature.value.isEmpty;
+    
     if (signature.value.isEmpty)
-        return !signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures;
+        return false;
+
     if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 

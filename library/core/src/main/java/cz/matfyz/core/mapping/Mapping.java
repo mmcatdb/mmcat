@@ -86,19 +86,6 @@ public class Mapping implements Comparable<Mapping> {
         return kindName.compareTo(other.kindName);
     }
 
-    /*
-    private final List<Reference> references = new ArrayList<Reference>();
-
-    public List<Reference> references() {
-        return references;
-    }
-
-    public void setReferences(Iterable<Reference> references) {
-        this.references.clear();
-        references.forEach(this.references::add);
-    }
-    */
-
     public static class Deserializer extends StdDeserializer<Mapping> {
 
         public Deserializer() {

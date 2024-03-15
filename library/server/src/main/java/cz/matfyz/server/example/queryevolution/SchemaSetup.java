@@ -107,7 +107,7 @@ class SchemaSetup extends SchemaBase {
 
     private void secondVersion() {
         addComposite("group", () -> {
-            editIds(Schema.order, new ObjectIds(Schema.orderToOrderId));
+            editIds(Schema.order, new ObjectIds(Schema.orderToOrderId.signature()));
             addObject(Schema.item, 0, 0);
             addMorphism(Schema.itemToOrder);
             editMorphism(Schema.orderToProduct, Schema.item, null);

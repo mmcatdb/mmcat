@@ -4,6 +4,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 
@@ -12,7 +13,7 @@ import java.util.Collection;
 public class TestMapping {
 
     public interface AccessPathCreator {
-        ComplexProperty create();
+        ComplexProperty create(MappingBuilder builder);
     }
 
     public interface PrimaryKeyCreator {
@@ -47,7 +48,7 @@ public class TestMapping {
 
     public ComplexProperty accessPath() {
         if (accessPath == null)
-            accessPath = pathCreator.create();
+            accessPath = pathCreator.create(new MappingBuilder());
 
         return accessPath;
     }

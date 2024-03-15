@@ -53,7 +53,6 @@ export class GraphRootProperty {
         return {
             name: this.name.toServer(),
             signature: this._signature.toSignature().toServer(),
-            isAuxiliary: true,
             subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }

@@ -4,7 +4,6 @@ import cz.matfyz.core.exception.MorphismNotFoundException;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.Signature.Type;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -156,7 +155,7 @@ public class InstanceCategory {
     }
 
     private void createReferencesForSignature(Signature signature) {
-        if (signature.getType() != Type.COMPOSITE)
+        if (!signature.isComposite())
             return;
 
         var baseSignatures = signature.toBases();

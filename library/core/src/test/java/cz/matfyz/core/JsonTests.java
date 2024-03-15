@@ -6,9 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
-import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.mapping.StaticName;
 
 import java.io.IOException;
@@ -23,13 +22,13 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class JsonTests {
+class JsonTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonTests.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    public void signature() throws JsonProcessingException, IOException {
+    void signature() throws JsonProcessingException, IOException {
         final var empty = Signature.createEmpty();
         fullTest(empty);
 
@@ -48,7 +47,7 @@ public class JsonTests {
     }
 
     @Test
-    public void name() {
+    void name() {
         final var anonymous = StaticName.createAnonymous();
         fullTest(anonymous);
 
@@ -60,21 +59,23 @@ public class JsonTests {
     }
 
     @Test
-    public void accessPath() {
-        final var simple = new SimpleProperty("simple", Signature.createBase(1));
+    void accessPath() {
+        final var builder = new MappingBuilder();
+
+        final var simple = builder.simple("simple", Signature.createBase(1));
         fullTest(simple);
 
-        final var complex = ComplexProperty.create("complex", Signature.createBase(2),
+        final var complex = builder.complex("complex", Signature.createBase(2),
             simple,
-            new SimpleProperty("simple2", Signature.createBase(3))
+            builder.simple("simple2", Signature.createBase(3))
         );
         fullTest(complex);
 
-        final var path = ComplexProperty.createRoot(
+        final var path = builder.root(
             complex,
-            ComplexProperty.createAuxiliary(new StaticName("auxiliary")),
-            ComplexProperty.create("dynamic", Signature.createBase(4).concatenate(Signature.createBase(5)),
-                new SimpleProperty(Signature.createBase(6), Signature.createBase(7))
+            builder.auxiliary("auxiliary"),
+            builder.complex("dynamic", Signature.createBase(4).concatenate(Signature.createBase(5)),
+                builder.simple(Signature.createBase(6), Signature.createBase(7))
             )
         );
         fullTest(path);
@@ -86,7 +87,7 @@ public class JsonTests {
     ) implements Serializable {}
 
     @Test
-    public void namedException() {
+    void namedException() {
         final var simple = new TestException("simple", null, null);
         LOGGER.info(simple.toString());
         serializationTest(simple);

@@ -1,7 +1,5 @@
 package cz.matfyz.tests.example.queryevolution;
 
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
@@ -16,27 +14,27 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             ordersKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("_id", Schema.orderToOrderId),
-                new SimpleProperty("street", Schema.orderToStreet),
-                new SimpleProperty("city", Schema.orderToCity),
-                new SimpleProperty("postCode", Schema.orderToPostCode),
-                ComplexProperty.create("customer", Schema.orderedToOrder.dual().concatenate(Schema.orderedToCustomer.signature()),
-                    new SimpleProperty("id", Schema.customerToCustomerId),
-                    new SimpleProperty("name", Schema.customerToName),
-                    new SimpleProperty("surname", Schema.customerToSurname),
-                    ComplexProperty.create("knows", Schema.knowsToCustomerA.dual().concatenate(Schema.knowsToCustomerB.signature()),
-                        new SimpleProperty("id", Schema.customerToCustomerId),
-                        new SimpleProperty("name", Schema.customerToName),
-                        new SimpleProperty("surname", Schema.customerToSurname)
+            b -> b.root(
+                b.simple("_id", Schema.orderToOrderId),
+                b.simple("street", Schema.orderToStreet),
+                b.simple("city", Schema.orderToCity),
+                b.simple("postCode", Schema.orderToPostCode),
+                b.complex("customer", Schema.orderToCustomer2,
+                    b.simple("id", Schema.customerToCustomerId),
+                    b.simple("name", Schema.customerToName),
+                    b.simple("surname", Schema.customerToSurname),
+                    b.complex("knows", Schema.customerAToCustomerB,
+                        b.simple("id", Schema.customerToCustomerId),
+                        b.simple("name", Schema.customerToName),
+                        b.simple("surname", Schema.customerToSurname)
                     )
                 ),
-                ComplexProperty.create("items", Schema.itemToOrder.dual(),
-                new SimpleProperty("quantity", Schema.itemToQuantity),
-                new SimpleProperty("price", Schema.itemToOrderPrice),
-                    new SimpleProperty("pid", Schema.itemToProduct.signature().concatenate(Schema.productToProductId.signature())),
-                    new SimpleProperty("title", Schema.itemToProduct.signature().concatenate(Schema.productToTitle.signature())),
-                    new SimpleProperty("currentPrice", Schema.itemToProduct.signature().concatenate(Schema.productToProductPrice.signature()))
+                b.complex("items", Schema.itemToOrder.dual(),
+                b.simple("quantity", Schema.itemToQuantity),
+                b.simple("price", Schema.itemToOrderPrice),
+                    b.simple("pid", Schema.itemToProductId),
+                    b.simple("title", Schema.itemToTitle),
+                    b.simple("currentPrice", Schema.itemToProductPrice)
                 )
             )
         );
@@ -46,21 +44,21 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             orderKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("_id", Schema.orderToOrderId),
-                new SimpleProperty("street", Schema.orderToStreet),
-                new SimpleProperty("city", Schema.orderToCity),
-                new SimpleProperty("postCode", Schema.orderToPostCode),
-                ComplexProperty.create("customer", Schema.orderedToOrder.dual().concatenate(Schema.orderedToCustomer.signature()),
-                    new SimpleProperty("id", Schema.customerToCustomerId),
-                    new SimpleProperty("name", Schema.customerToName),
-                    new SimpleProperty("surname", Schema.customerToSurname)
+            b -> b.root(
+                b.simple("_id", Schema.orderToOrderId),
+                b.simple("street", Schema.orderToStreet),
+                b.simple("city", Schema.orderToCity),
+                b.simple("postCode", Schema.orderToPostCode),
+                b.complex("customer", Schema.orderToCustomer2,
+                    b.simple("id", Schema.customerToCustomerId),
+                    b.simple("name", Schema.customerToName),
+                    b.simple("surname", Schema.customerToSurname)
                 ),
-                ComplexProperty.create("items", Schema.itemToOrder.dual(),
-                new SimpleProperty("quantity", Schema.itemToQuantity),
-                new SimpleProperty("price", Schema.itemToOrderPrice),
-                    new SimpleProperty("pid", Schema.itemToProduct.signature().concatenate(Schema.productToProductId.signature())),
-                    new SimpleProperty("title", Schema.itemToProduct.signature().concatenate(Schema.productToTitle.signature()))
+                b.complex("items", Schema.itemToOrder.dual(),
+                b.simple("quantity", Schema.itemToQuantity),
+                b.simple("price", Schema.itemToOrderPrice),
+                    b.simple("pid", Schema.productToProductId),
+                    b.simple("title", Schema.productToTitle)
                 )
             )
         );

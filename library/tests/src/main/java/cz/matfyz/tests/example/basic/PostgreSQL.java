@@ -1,7 +1,5 @@
 package cz.matfyz.tests.example.basic;
 
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -20,8 +18,8 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.order,
             orderKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", Schema.orderToNumber)
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber)
             )
         );
     }
@@ -37,10 +35,10 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.product,
             productKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("id", Schema.productToId),
-                new SimpleProperty("label", Schema.productToLabel),
-                new SimpleProperty("price", Schema.productToPrice)
+            b -> b.root(
+                b.simple("id", Schema.productToId),
+                b.simple("label", Schema.productToLabel),
+                b.simple("price", Schema.productToPrice)
             )
         );
     }
@@ -62,10 +60,10 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.item,
             itemKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("order_number", Schema.itemToNumber),
-                new SimpleProperty("product_id", Schema.itemToId),
-                new SimpleProperty("quantity", Schema.itemToQuantity)
+            b -> b.root(
+                b.simple("order_number", Schema.itemToNumber),
+                b.simple("product_id", Schema.itemToId),
+                b.simple("quantity", Schema.itemToQuantity)
             )
         );
     }
