@@ -1,8 +1,8 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.matfyz.abstractwrappers.AbstractICWrapper.AttributePair;
 import cz.matfyz.core.mapping.IdentifierStructure;
-import cz.matfyz.core.utils.ComparablePair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,8 +20,8 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
         constraints.add(new IdentifierConstraint(kindName, identifier.properties()));
     }
 
-    @Override public void appendReference(String referencingKindName, String referencedKindName, Set<ComparablePair<String, String>> attributePairs) {
-        constraints.add(new ReferenceConstraint(referencingKindName, referencedKindName, attributePairs));
+    @Override public void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs) {
+        constraints.add(new ReferenceConstraint(referencingKind, referencedKind, attributePairs));
     }
 
     @Override public PostgreSQLStatement createICStatement() {
@@ -73,31 +73,31 @@ class IdentifierConstraint implements Constraint {
 
 class ReferenceConstraint implements Constraint {
 
-    private String referencingKindName;
-    private String referencedKindName;
+    private String referencingKind;
+    private String referencedKind;
     private List<String> referencingAttributes;
     private List<String> referencedAttributes;
 
-    ReferenceConstraint(String referencingKindName, String referencedKindName, Set<ComparablePair<String, String>> attributePairs) {
-        this.referencingKindName = referencingKindName;
-        this.referencedKindName = referencedKindName;
-        this.referencingAttributes = attributePairs.stream().map(ComparablePair::getValue1).toList();
-        this.referencedAttributes = attributePairs.stream().map(ComparablePair::getValue2).toList();
+    ReferenceConstraint(String referencingKind, String referencedKind, Set<AttributePair> attributePairs) {
+        this.referencingKind = referencingKind;
+        this.referencedKind = referencedKind;
+        this.referencingAttributes = attributePairs.stream().map(AttributePair::referencing).toList();
+        this.referencedAttributes = attributePairs.stream().map(AttributePair::referenced).toList();
     }
 
     private String getName() {
-        return "#" + referencingKindName + "_REFERENCES_" + referencedKindName;
+        return "#" + referencingKind + "_REFERENCES_" + referencedKind;
     }
 
     @Override public String addCommand() {
-        return "ALTER TABLE \"" + referencingKindName + "\""
+        return "ALTER TABLE \"" + referencingKind + "\""
             + "\nADD CONSTRAINT \"" + getName() + "\""
             + "\nFOREIGN KEY (\"" + String.join("\", \"", referencingAttributes) + "\")"
-            + "\nREFERENCES \"" + referencedKindName + "\" (\"" + String.join("\", \"", referencedAttributes) + "\");";
+            + "\nREFERENCES \"" + referencedKind + "\" (\"" + String.join("\", \"", referencedAttributes) + "\");";
     }
 
     @Override public String dropCommand() {
-        return "ALTER TABLE \"" + referencingKindName + "\""
+        return "ALTER TABLE \"" + referencingKind + "\""
             + "\nDROP CONSTRAINT \"" + getName() + "\";";
     }
 

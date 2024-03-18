@@ -3,7 +3,6 @@ import { RouterLink } from 'vue-router';
 import TopBar from '@/components/layout/TopBar.vue';
 import LeftBar from '@/components/layout/LeftBar.vue';
 import Content from '@/components/layout/Content.vue';
-import BackToAtlasLink from '@/components/integration/BackToAtlasLink.vue';
 </script>
 
 <template>
@@ -16,9 +15,7 @@ import BackToAtlasLink from '@/components/integration/BackToAtlasLink.vue';
                 MM-cat
             </RouterLink>
         </template>
-        <template #center>
-            <BackToAtlasLink />
-        </template>
+        <template #center />
     </TopBar>
     <LeftBar />
     <Content />

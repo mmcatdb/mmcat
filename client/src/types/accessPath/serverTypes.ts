@@ -8,7 +8,6 @@ export type SimplePropertyFromServer = {
 export type ComplexPropertyFromServer = {
     name: NameFromServer;
     signature: SignatureFromServer;
-    isAuxiliary: boolean;
     subpaths: ChildPropertyFromServer[];
 };
 

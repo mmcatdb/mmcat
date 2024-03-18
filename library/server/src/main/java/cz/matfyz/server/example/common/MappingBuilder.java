@@ -5,7 +5,7 @@ import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.tests.example.common.TestMapping;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.Version;

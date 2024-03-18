@@ -1,4 +1,4 @@
-package cz.matfyz.core.category;
+package cz.matfyz.core.identifiers;
 
 import java.util.List;
 
@@ -37,10 +37,6 @@ public class BaseSignature extends Signature {
 
     @Override public BaseSignature dual() {
         return createBase(-id);
-    }
-
-    @Override public Type getType() {
-        return Type.BASE;
     }
 
     public boolean isDual() {

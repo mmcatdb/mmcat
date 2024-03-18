@@ -1,5 +1,7 @@
 import type { Entity, Id } from '../id';
 
+export type Iri = string;
+
 export enum Type {
     JsonLdStore = 'JsonLdStore',
     JsonFile = 'JsonFile',

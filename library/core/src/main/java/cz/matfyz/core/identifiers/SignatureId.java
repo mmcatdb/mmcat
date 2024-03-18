@@ -1,6 +1,4 @@
-package cz.matfyz.core.schema;
-
-import cz.matfyz.core.category.Signature;
+package cz.matfyz.core.identifiers;
 
 import java.io.IOException;
 import java.io.Serializable;

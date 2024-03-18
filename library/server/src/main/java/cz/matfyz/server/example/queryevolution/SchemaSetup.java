@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.core.schema.ObjectIds;
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.example.common.SchemaBase;
@@ -107,7 +107,7 @@ class SchemaSetup extends SchemaBase {
 
     private void secondVersion() {
         addComposite("group", () -> {
-            editIds(Schema.order, new ObjectIds(Schema.orderToOrderId));
+            editIds(Schema.order, new ObjectIds(Schema.orderToOrderId.signature()));
             addObject(Schema.item, 0, 0);
             addMorphism(Schema.itemToOrder);
             editMorphism(Schema.orderToProduct, Schema.item, null);

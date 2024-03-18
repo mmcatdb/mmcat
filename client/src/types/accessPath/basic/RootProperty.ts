@@ -51,7 +51,6 @@ export class RootProperty {
         return {
             name: this.name.toServer(),
             signature: this._signature.toServer(),
-            isAuxiliary: true,
             subpaths: this._subpaths.map(subpath => subpath.toServer()),
         };
     }

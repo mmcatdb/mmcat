@@ -1,191 +1,109 @@
 package cz.matfyz.tests.example.queryevolution;
 
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
-import cz.matfyz.core.schema.ObjectIds;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.common.SchemaBuilder;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.schema.SchemaBuilder;
 
 public class Schema {
 
     public static final String schemaLabel = "Query Evolution Schema";
 
+    private static final SchemaBuilder builder = new SchemaBuilder(schemaLabel);
 
     // Keys
 
     // Version 1
-    public static final Key customer = new Key(1);
-    public static final Key customerId = new Key(2);
-    public static final Key name = new Key(3);
-    public static final Key surname = new Key(4);
-    public static final Key knows = new Key(5);
-    public static final Key order = new Key(6);
-    public static final Key orderId = new Key(7);
-    public static final Key street = new Key(8);
-    public static final Key city = new Key(9);
-    public static final Key postCode = new Key(10);
-    public static final Key orderPrice = new Key(11);
-    public static final Key quantity = new Key(12);
-    public static final Key product = new Key(13);
-    public static final Key productId = new Key(14);
-    public static final Key title = new Key(15);
-    public static final Key productPrice = new Key(16);
+    public static final BuilderObject customer =        builder.object("Customer", 1);
+    public static final BuilderObject customerId =      builder.object("id", 2);
+    public static final BuilderObject name =            builder.object("name", 3);
+    public static final BuilderObject surname =         builder.object("surname", 4);
+    public static final BuilderObject knows =           builder.object("knows", 5);
+    public static final BuilderObject order =           builder.object("Order", 6);
+    public static final BuilderObject orderId =         builder.object("oid", 7);
+    public static final BuilderObject street =          builder.object("street", 8);
+    public static final BuilderObject city =            builder.object("city", 9);
+    public static final BuilderObject postCode =        builder.object("postCode", 10);
+    public static final BuilderObject orderPrice =      builder.object("price", 11);
+    public static final BuilderObject quantity =        builder.object("quantity", 12);
+    public static final BuilderObject product =         builder.object("Product", 13);
+    public static final BuilderObject productId =       builder.object("pid", 14);
+    public static final BuilderObject title =           builder.object("title", 15);
+    public static final BuilderObject productPrice =    builder.object("price", 16);
 
     // Version 2
-    public static final Key item = new Key(17);
-    public static final Key ordered = new Key(18);
+    public static final BuilderObject item =            builder.object("Item", 17);
+    public static final BuilderObject ordered =         builder.object("Ordered", 18);
 
     // Signatures
 
     // Version 1
-    public static final BaseSignature customerToCustomerId = Signature.createBase(1);
-    public static final BaseSignature customerToName = Signature.createBase(2);
-    public static final BaseSignature customerToSurname = Signature.createBase(3);
-    public static final BaseSignature knowsToCustomerA = Signature.createBase(4);
-    public static final BaseSignature knowsToCustomerB = Signature.createBase(5);
-    public static final BaseSignature orderToOrderId = Signature.createBase(6);
-    public static final BaseSignature orderToStreet = Signature.createBase(7);
-    public static final BaseSignature orderToCity = Signature.createBase(8);
-    public static final BaseSignature orderToPostCode = Signature.createBase(9);
-    public static final BaseSignature orderToOrderPrice = Signature.createBase(10);
-    public static final BaseSignature orderToQuantity = Signature.createBase(11);
-    public static final BaseSignature orderToCustomer = Signature.createBase(12);
-    public static final BaseSignature orderToProduct = Signature.createBase(13);
-    public static final BaseSignature productToProductId = Signature.createBase(14);
-    public static final BaseSignature productToTitle = Signature.createBase(15);
-    public static final BaseSignature productToProductPrice = Signature.createBase(16);
+    public static final BuilderMorphism customerToCustomerId =  builder.morphism(customer, customerId, 1);
+    public static final BuilderMorphism customerToName =        builder.morphism(customer, name, 2);
+    public static final BuilderMorphism customerToSurname =     builder.morphism(customer, surname, 3);
+    public static final BuilderMorphism knowsToCustomerA =      builder.label("knows-->customerA").morphism(knows, customer, 4);
+    public static final BuilderMorphism knowsToCustomerB =      builder.label("knows-->customerB").morphism(knows, customer, 5);
+    public static final BuilderMorphism orderToOrderId =        builder.morphism(order, orderId, 6);
+    public static final BuilderMorphism orderToStreet =         builder.morphism(order, street, 7);
+    public static final BuilderMorphism orderToCity =           builder.morphism(order, city, 8);
+    public static final BuilderMorphism orderToPostCode =       builder.morphism(order, postCode, 9);
+    public static final BuilderMorphism orderToOrderPrice =     builder.morphism(order, orderPrice, 10);
+    public static final BuilderMorphism orderToQuantity =       builder.morphism(order, quantity, 11);
+    public static final BuilderMorphism orderToCustomer =       builder.morphism(order, customer, 12);
+    public static final BuilderMorphism orderToProduct =        builder.morphism(order, product, 13);
+    public static final BuilderMorphism productToProductId =    builder.morphism(product, productId, 14);
+    public static final BuilderMorphism productToTitle =        builder.min(Min.ZERO).morphism(product, title, 15);
+    public static final BuilderMorphism productToProductPrice = builder.min(Min.ZERO).morphism(product, productPrice, 16);
 
-    public static final Signature orderToCustomerId = orderToCustomer.concatenate(customerToCustomerId);
-    public static final Signature orderToProductId = orderToProduct.concatenate(productToProductId);
+    public static final BuilderMorphism orderToCustomerId =     builder.composite(orderToCustomer, customerToCustomerId);
+    public static final BuilderMorphism orderToProductId =      builder.composite(orderToProduct, productToProductId);
+
+    public static final Signature customerAToCustomerB = builder.concatenate(knowsToCustomerA.dual(), knowsToCustomerB);
 
     // Version 2
-    public static final BaseSignature itemToOrderPrice = Signature.createBase(10);
-    public static final BaseSignature itemToQuantity = Signature.createBase(11);
-    public static final BaseSignature itemToProduct = Signature.createBase(13);
-    public static final BaseSignature itemToOrder = Signature.createBase(17);
+    public static final BuilderMorphism itemToOrderPrice =      builder.morphism(item, orderPrice, 10);
+    public static final BuilderMorphism itemToQuantity =        builder.morphism(item, quantity, 11);
+    public static final BuilderMorphism itemToProduct =         builder.morphism(item, product, 13);
+    public static final BuilderMorphism itemToOrder =           builder.morphism(item, order, 17);
 
-    public static final Signature itemToProductId = itemToProduct.concatenate(productToProductId);
-    public static final Signature itemToOrderId = itemToOrder.concatenate(orderToOrderId);
+    public static final BuilderMorphism itemToProductId =       builder.composite(itemToProduct, productToProductId);
+    public static final BuilderMorphism itemToTitle =           builder.composite(itemToProduct, productToTitle);
+    public static final BuilderMorphism itemToProductPrice =    builder.composite(itemToProduct, productToProductPrice);
+    public static final BuilderMorphism itemToOrderId =         builder.composite(itemToOrder, orderToOrderId);
 
-    public static final BaseSignature orderedToCustomer = Signature.createBase(12);
-    public static final BaseSignature orderedToOrder = Signature.createBase(18);
+    // The same key here is intentional - we want to replace the previous morphisms.
+    public static final BuilderMorphism orderedToCustomer =     builder.morphism(ordered, customer, 12);
+    public static final BuilderMorphism orderedToOrder =        builder.morphism(ordered, order, 18);
+    
+    public static final BuilderMorphism orderedToCustomerId =   builder.composite(orderedToCustomer, customerToCustomerId);
+    public static final BuilderMorphism orderedToOrderId =      builder.composite(orderedToOrder, orderToOrderId);
 
-    public static final Signature orderedToCustomerId = orderedToCustomer.concatenate(customerToCustomerId);
-    public static final Signature orderedToOrderId = orderedToOrder.concatenate(orderToOrderId);
+    public static final Signature orderToCustomer2 = builder.concatenate(orderedToOrder.dual(), orderedToCustomer);
 
-    public SchemaCategory build() {
-        return builder.build(schemaLabel);
-    }
+    // Ids
+
+    private static final SchemaBuilder ids = builder
+        .ids(customer, customerToCustomerId)
+        .ids(knows, knowsToCustomerA, knowsToCustomerB)
+        .ids(product, productToProductId)
+        .ids(order, orderToOrderId, orderToProductId)
+        .ids(item, itemToOrderId, itemToProductId)
+        .ids(ordered, orderedToOrderId, orderedToCustomerId);
 
     /**
      * Create new full schema category.
      */
     public static SchemaCategory newSchemaCategory(int version) {
-        final var builder = new Schema()
-            .addCustomer()
-            .addProduct()
-            .addOrders();
-
-        if (version > 1) {
-            builder
-                .addItem()
-                .addOrdered();
+        if (version < 1) {
+            builder.skip(
+                item,
+                ordered
+            );
         }
 
         return builder.build();
-    }
-
-    private final SchemaBuilder builder = new SchemaBuilder();
-
-    private Schema addCustomer() {
-        builder.object(customer, "Customer", new ObjectIds(customerToCustomerId));
-        builder.object(customerId, "id", ObjectIds.createValue());
-        builder.object(name, "name", ObjectIds.createValue());
-        builder.object(surname, "surname", ObjectIds.createValue());
-        builder.object(knows, "knows", new ObjectIds(knowsToCustomerA, knowsToCustomerB));
-
-        builder.morphism(customerToCustomerId, customer, customerId, Min.ONE);
-        builder.morphism(customerToName, customer, name, Min.ONE);
-        builder.morphism(customerToSurname, customer, surname, Min.ONE);
-        builder.morphism(knowsToCustomerA, knows, customer, Min.ONE);
-        builder.morphism(knowsToCustomerB, knows, customer, Min.ONE);
-
-        return this;
-    }
-
-    private Schema addProduct() {
-        builder.object(product, "Product", new ObjectIds(productToProductId));
-        builder.object(productId, "pid", ObjectIds.createValue());
-        builder.object(title, "title", ObjectIds.createValue());
-        builder.object(productPrice, "price", ObjectIds.createValue());
-
-        builder.morphism(productToProductId, product, productId, Min.ONE);
-        builder.morphism(productToTitle, product, title, Min.ZERO);
-        builder.morphism(productToProductPrice, product, productPrice, Min.ZERO);
-
-        return this;
-    }
-
-    private Schema addOrders() {
-        builder.object(order, "Order", new ObjectIds(orderToOrderId, orderToProductId));
-        builder.object(orderId, "oid", ObjectIds.createValue());
-        builder.object(street, "street", ObjectIds.createValue());
-        builder.object(city, "city", ObjectIds.createValue());
-        builder.object(postCode, "postCode", ObjectIds.createValue());
-        builder.object(orderPrice, "price", ObjectIds.createValue());
-        builder.object(quantity, "quantity", ObjectIds.createValue());
-
-        builder.morphism(orderToOrderId, order, orderId, Min.ONE);
-        builder.morphism(orderToStreet, order, street, Min.ONE);
-        builder.morphism(orderToCity, order, city, Min.ONE);
-        builder.morphism(orderToPostCode, order, postCode, Min.ONE);
-        builder.morphism(orderToOrderPrice, order, orderPrice, Min.ONE);
-        builder.morphism(orderToQuantity, order, quantity, Min.ONE);
-
-        builder.morphism(orderToCustomer, order, customer, Min.ONE);
-        builder.morphism(orderToProduct, order, product, Min.ONE);
-
-        return this;
-    }
-
-    private Schema addOrder() {
-        builder.object(order, "Order", new ObjectIds(orderToOrderId));
-        builder.object(orderId, "oid", ObjectIds.createValue());
-        builder.object(street, "street", ObjectIds.createValue());
-        builder.object(city, "city", ObjectIds.createValue());
-        builder.object(postCode, "postCode", ObjectIds.createValue());
-
-        builder.morphism(orderToOrderId, order, orderId, Min.ONE);
-        builder.morphism(orderToStreet, order, street, Min.ONE);
-        builder.morphism(orderToCity, order, city, Min.ONE);
-        builder.morphism(orderToPostCode, order, postCode, Min.ONE);
-
-        return this;
-    }
-
-    private Schema addItem() {
-        builder.object(item, "Item", new ObjectIds(itemToOrderId, itemToProductId));
-        builder.object(orderPrice, "price", ObjectIds.createValue());
-        builder.object(quantity, "quantity", ObjectIds.createValue());
-
-        builder.morphism(itemToOrderPrice, item, orderPrice, Min.ONE);
-        builder.morphism(itemToQuantity, item, quantity, Min.ONE);
-
-        builder.morphism(itemToOrder, item, order, Min.ONE);
-        builder.morphism(itemToProduct, item, product, Min.ONE);
-
-        return this;
-    }
-
-    private Schema addOrdered() {
-        builder.object(ordered, "Ordered", new ObjectIds(orderedToOrderId, orderedToCustomerId));
-
-        builder.morphism(orderedToOrder, ordered, order, Min.ONE);
-        builder.morphism(orderedToCustomer, ordered, customer, Min.ONE);
-
-        return this;
     }
 
 }

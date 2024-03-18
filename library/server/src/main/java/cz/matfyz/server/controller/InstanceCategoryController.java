@@ -1,7 +1,7 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.service.InstanceCategoryService;
 import cz.matfyz.server.view.InstanceMorphismWrapper;

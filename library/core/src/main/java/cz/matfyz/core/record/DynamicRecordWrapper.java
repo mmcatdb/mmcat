@@ -1,6 +1,6 @@
 package cz.matfyz.core.record;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 
 import java.util.ArrayList;
 import java.util.List;

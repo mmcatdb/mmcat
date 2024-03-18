@@ -1,17 +1,19 @@
 package cz.matfyz.tests.example.common;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 
 import java.util.Collection;
 
 public class TestMapping {
 
     public interface AccessPathCreator {
-        ComplexProperty create();
+        ComplexProperty create(MappingBuilder builder);
     }
 
     public interface PrimaryKeyCreator {
@@ -38,11 +40,15 @@ public class TestMapping {
         this(schema, rootKey, kindName, pathCreator, defaultKeyCreator);
     }
 
+    public TestMapping(SchemaCategory schema, BuilderObject rootObject, String kindName, AccessPathCreator pathCreator) {
+        this(schema, rootObject.key(), kindName, pathCreator, defaultKeyCreator);
+    }
+
     private ComplexProperty accessPath;
 
     public ComplexProperty accessPath() {
         if (accessPath == null)
-            accessPath = pathCreator.create();
+            accessPath = pathCreator.create(new MappingBuilder());
 
         return accessPath;
     }

@@ -1,7 +1,7 @@
 package cz.matfyz.core.mapping;
 
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 
@@ -85,19 +85,6 @@ public class Mapping implements Comparable<Mapping> {
         // This guarantees uniqueness in one logical model, however mappings between different logical models are never compared.
         return kindName.compareTo(other.kindName);
     }
-
-    /*
-    private final List<Reference> references = new ArrayList<Reference>();
-
-    public List<Reference> references() {
-        return references;
-    }
-
-    public void setReferences(Iterable<Reference> references) {
-        this.references.clear();
-        references.forEach(this.references::add);
-    }
-    */
 
     public static class Deserializer extends StdDeserializer<Mapping> {
 

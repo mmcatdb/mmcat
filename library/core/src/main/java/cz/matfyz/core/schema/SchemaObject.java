@@ -1,72 +1,62 @@
 package cz.matfyz.core.schema;
 
-import cz.matfyz.core.category.CategoricalObject;
-import cz.matfyz.core.identification.Identified;
-
-import java.util.Objects;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
+import cz.matfyz.core.identifiers.Identified;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.SignatureId;
 
 /**
  * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaObject implements CategoricalObject, Identified<Key> {
-    //private static final Logger LOGGER = LoggerFactory.getLogger(SchemaObject.class);
+public class SchemaObject implements Identified<SchemaObject, Key> {
 
-    private final Key key; // Identifies the object, in the paper it's a number >= 100
+    /** A unique identifier of the object (within one schema category). */
+    private final Key key;
+    /** A user-readable label. */
     private final String label;
-    private final ObjectIds ids; // Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key).
-    private final SignatureId superId; // Should be a union of all ids (super key).
-    @Nullable
-    public final String iri;
-    @Nullable
-    public final String pimIri;
+    /** Each id is a set of signatures so that the correspondig set of attributes can unambiguosly identify this object (candidate key). */
+    private final ObjectIds ids;
+    /** A union of all ids (super key). */
+    private final SignatureId superId;
 
-    public SchemaObject(Key key, String label, ObjectIds ids, SignatureId superId, String iri, String pimIri) {
+    public SchemaObject(Key key, String label, ObjectIds ids, SignatureId superId) {
         this.key = key;
         this.label = label;
         this.ids = ids;
         this.superId = superId;
-        this.iri = iri;
-        this.pimIri = pimIri;
     }
+
+    public Key key() {
+        return key;
+    }
+
+    public String label() {
+        return label;
+    }
+
+    public SignatureId superId() {
+        return superId;
+    }
+
+    public ObjectIds ids() {
+        return ids;
+    }
+
+    // Identification
 
     @Override public Key identifier() {
         return key;
     }
 
-    @Override public Key key() {
-        return key;
+    @Override public boolean equals(Object other) {
+        return other instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
     }
 
-    @Override public String label() {
-        return label;
-    }
-
-    @Override public SignatureId superId() {
-        return superId;
-    }
-
-    /**
-     * Immutable.
-     */
-    @Override public ObjectIds ids() {
-        return ids;
-    }
-
-    @Override public boolean equals(Object obj) {
-        return obj instanceof SchemaObject schemaObject && key.equals(schemaObject.key);
-    }
-
-    /**
-     * Auto-generated, constants doesn't have any special meaning.
-     * @return
-     */
     @Override public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.key);
-        return hash;
+        return key.hashCode();
     }
+
+    // Identification
 
     @Override public String toString() {
         return "SO: " + key;

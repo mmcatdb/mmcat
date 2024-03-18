@@ -2,11 +2,11 @@ package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
 import cz.matfyz.abstractwrappers.database.Database;
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.core.utils.GraphUtils;
 import cz.matfyz.core.utils.GraphUtils.Component;
 import cz.matfyz.querying.core.ObjectColoring;

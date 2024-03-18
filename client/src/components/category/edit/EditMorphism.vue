@@ -2,7 +2,6 @@
 import { Edge, SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
 import { computed, onUnmounted, ref, shallowRef, watch } from 'vue';
 import MinimumInput from './MinimumInput.vue';
-import IriDisplay from '@/components/common/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
@@ -68,8 +67,6 @@ function save() {
         min: min.value,
         label: label.value.trim(),
         tags: old.tags,
-        iri: old.iri,
-        pimIri: old.pimIri,
     };
     evocat.editMorphism(update, old);
 
@@ -106,18 +103,6 @@ function switchNodes() {
             </ValueRow>
             <ValueRow label="Label?:">
                 <input v-model="label" />
-            </ValueRow>
-            <ValueRow label="Iri:">
-                <IriDisplay
-                    :iri="edge.schemaMorphism.iri"
-                    :max-chars="36"
-                />
-            </ValueRow>
-            <ValueRow label="Pim Iri:">
-                <IriDisplay
-                    :iri="edge.schemaMorphism.pimIri"
-                    :max-chars="36"
-                />
             </ValueRow>
             <ValueRow label="Signature:">
                 {{ edge.schemaMorphism.signature }}

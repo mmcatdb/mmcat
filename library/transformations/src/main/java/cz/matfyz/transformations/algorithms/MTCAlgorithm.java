@@ -1,6 +1,7 @@
 package cz.matfyz.transformations.algorithms;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
@@ -16,7 +17,6 @@ import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.record.SimpleRecord;
 import cz.matfyz.core.record.SimpleValueRecord;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SignatureId;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -77,8 +77,6 @@ public class MTCAlgorithm {
     }
 
     private void processTopOfStack(Deque<StackTriple> masterStack) {
-        //LOGGER.debug("Process Top of Stack:\n{}", masterStack);
-
         StackTriple triple = masterStack.pop();
         final var superIds = SuperIdsFetcher.fetch(triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
@@ -171,7 +169,6 @@ public class MTCAlgorithm {
     private record Child(Signature signature, AccessPath property) {}
 
     private void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, DomainRow parentRow, IComplexRecord complexRecord) {
-        //private static void addPathChildrenToStack(Deque<StackTriple> stack, AccessPath path, ActiveDomainRow superId, IComplexRecord record) {
         if (!(path instanceof ComplexProperty complexPath))
             return;
 
@@ -181,9 +178,6 @@ public class MTCAlgorithm {
 
             final var parentToChild = category.getPath(child.signature());
             stack.push(new StackTriple(parentRow, parentToChild, child.property(), complexRecord));
-            final var a = stack.peek().toString();
-            System.out.println(a);
-            final var b = stack.peek().toString();
         }
     }
 
@@ -205,4 +199,5 @@ public class MTCAlgorithm {
 
         return output;
     }
+
 }

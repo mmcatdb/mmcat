@@ -1,7 +1,5 @@
 package cz.matfyz.tests.example.basic;
 
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -20,8 +18,8 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.order,
             orderKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", Schema.orderToNumber)
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber)
             )
         );
     }
@@ -37,10 +35,10 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.product,
             productKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("id", Schema.productToId),
-                new SimpleProperty("label", Schema.productToLabel),
-                new SimpleProperty("price", Schema.productToPrice)
+            b -> b.root(
+                b.simple("id", Schema.productToId),
+                b.simple("label", Schema.productToLabel),
+                b.simple("price", Schema.productToPrice)
             )
         );
     }
@@ -62,20 +60,20 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.item,
             itemKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("order_number", Schema.itemToNumber),
-                new SimpleProperty("product_id", Schema.itemToId),
-                new SimpleProperty("quantity", Schema.itemToQuantity)
+            b -> b.root(
+                b.simple("order_number", Schema.itemToNumber),
+                b.simple("product_id", Schema.itemToId),
+                b.simple("quantity", Schema.itemToQuantity)
             )
         );
     }
 
     public static void addItem(InstanceBuilder builder, int orderIndex, int productIndex, String quantityValue) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        final var numberValue = order.superId.getValue(Schema.orderToNumber);
+        final var numberValue = order.superId.getValue(Schema.orderToNumber.signature());
 
         final var product = builder.getRow(Schema.product, productIndex);
-        final var idValue = product.superId.getValue(Schema.productToId);
+        final var idValue = product.superId.getValue(Schema.productToId.signature());
 
         final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).object(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);

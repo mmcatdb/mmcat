@@ -11,11 +11,9 @@ import java.util.function.Consumer;
  */
 public class ForestOfRecords implements Iterable<RootRecord> {
 
-    // tady mas list recordu
     private final List<RootRecord> records = new ArrayList<>();
     // This map should map a categorical identifier (Name) of each property in given kind to the list of respective nodes in the forest.
     // However, this is not very useful because we need to find one value for one particular record instead.
-    // private final Map<Name, DataRecord> quickAccess = new TreeMap<>(); // Name = StaticName | AnonymousName | DerivedName
 
     @Override public Iterator<RootRecord> iterator() {
         return records.iterator();
@@ -31,7 +29,6 @@ public class ForestOfRecords implements Iterable<RootRecord> {
 
     public void addRecord(RootRecord rootRecord) {
         records.add(rootRecord);
-        //record.records().forEach(r -> quickAccess.put(r.getName(), r));
     }
 
     @Override public String toString() {

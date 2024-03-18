@@ -1,6 +1,4 @@
-package cz.matfyz.core.schema;
-
-import cz.matfyz.core.category.Signature;
+package cz.matfyz.core.identifiers;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -23,7 +21,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
- * TODO
  * @author jachymb.bartik
  */
 @JsonSerialize(using = ObjectIds.Serializer.class)
@@ -31,9 +28,12 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 public class ObjectIds implements Serializable {
 
     public enum Type {
-        Signatures, // Its a set of signatures.
-        Value, // Its a simple string value.
-        Generated // Its a simple string value that has to be automatically generated.
+        /** A set of signatures. */
+        Signatures,
+        /** A simple string value. */
+        Value,
+        /** A simple string value that should be generated automatically. */
+        Generated,
     }
 
     private final Type type;

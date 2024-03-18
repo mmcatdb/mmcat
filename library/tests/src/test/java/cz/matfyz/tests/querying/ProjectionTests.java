@@ -1,6 +1,6 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryStructure;
 import cz.matfyz.querying.algorithms.queryresult.TformingQueryStructure;
 

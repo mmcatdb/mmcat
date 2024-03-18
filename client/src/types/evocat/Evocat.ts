@@ -170,7 +170,7 @@ export class Evocat {
      * Creates a completely new schema object with key that has never been seen before.
      */
     createObject(def: ObjectDefinition): SchemaObject {
-        const versionedObject = this.schemaCategory.createObject(def);
+        const versionedObject = this.schemaCategory.createObject();
         const object = SchemaObject.createNew(versionedObject.key, def);
         const operation = CreateObject.create(object);
         this.commitOperation(operation);
@@ -192,7 +192,7 @@ export class Evocat {
     }
 
     createMorphism(def: MorphismDefinition): SchemaMorphism {
-        const versionedMorphism = this.schemaCategory.createMorphism(def);
+        const versionedMorphism = this.schemaCategory.createMorphism();
         const morphism = SchemaMorphism.createNew(versionedMorphism.signature, def);
         const operation = CreateMorphism.create(morphism);
         this.commitOperation(operation);

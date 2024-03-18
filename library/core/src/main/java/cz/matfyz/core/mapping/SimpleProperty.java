@@ -1,7 +1,7 @@
 package cz.matfyz.core.mapping;
 
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.utils.printable.*;
@@ -33,14 +33,6 @@ public class SimpleProperty extends AccessPath {
 
     public SimpleProperty(Name name, Signature signature) {
         super(name, signature);
-    }
-
-    public SimpleProperty(String name, Signature signature) {
-        this(new StaticName(name), signature);
-    }
-
-    public SimpleProperty(Signature name, Signature signature) {
-        this(new DynamicName(name), signature);
     }
 
     @Override protected boolean hasSignature(Signature signature) {

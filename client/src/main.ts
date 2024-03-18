@@ -4,7 +4,6 @@ import router from './router';
 import { startCapturingKeys } from './utils/keyboardInput';
 
 import '@/assets/components.scss';
-// import '@/assets/screenshot.scss';
 
 const app = createApp(App);
 

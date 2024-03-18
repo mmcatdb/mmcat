@@ -1,7 +1,5 @@
 package cz.matfyz.tests.example.queryevolution;
 
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -23,10 +21,10 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.customer,
             customerKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("id", Schema.customerToCustomerId),
-                new SimpleProperty("name", Schema.customerToName),
-                new SimpleProperty("surname", Schema.customerToSurname)
+            b -> b.root(
+                b.simple("id", Schema.customerToCustomerId),
+                b.simple("name", Schema.customerToName),
+                b.simple("surname", Schema.customerToSurname)
             )
         );
     }
@@ -43,9 +41,9 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.knows,
             knowsKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("id1", Schema.knowsToCustomerA),
-                new SimpleProperty("id2", Schema.knowsToCustomerB)
+            b -> b.root(
+                b.simple("id1", Schema.knowsToCustomerA),
+                b.simple("id2", Schema.knowsToCustomerB)
             )
         );
     }
@@ -55,8 +53,8 @@ public abstract class PostgreSQL {
         final var customerB = builder.getRow(Schema.customer, customerBIndex);
 
         final var knows = builder
-            .value(Schema.knowsToCustomerA, customerA.superId.getValue(Schema.customerToCustomerId))
-            .value(Schema.knowsToCustomerB, customerB.superId.getValue(Schema.customerToCustomerId))
+            .value(Schema.knowsToCustomerA, customerA.superId.getValue(Schema.customerToCustomerId.signature()))
+            .value(Schema.knowsToCustomerB, customerB.superId.getValue(Schema.customerToCustomerId.signature()))
             .object(Schema.knows);
 
         builder.morphism(Schema.knowsToCustomerA, knows, customerA);
@@ -67,10 +65,10 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.product,
             productKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("pid", Schema.productToProductId),
-                new SimpleProperty("title", Schema.productToTitle),
-                new SimpleProperty("price", Schema.productToProductPrice)
+            b -> b.root(
+                b.simple("pid", Schema.productToProductId),
+                b.simple("title", Schema.productToTitle),
+                b.simple("price", Schema.productToProductPrice)
             )
         );
     }
@@ -87,15 +85,15 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.order,
             ordersKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("id", Schema.orderToCustomerId),
-                new SimpleProperty("pid", Schema.orderToProductId),
-                new SimpleProperty("oid", Schema.orderToOrderId),
-                new SimpleProperty("price", Schema.orderToOrderPrice),
-                new SimpleProperty("quantity", Schema.orderToQuantity),
-                new SimpleProperty("street", Schema.orderToStreet),
-                new SimpleProperty("city", Schema.orderToCity),
-                new SimpleProperty("postCode", Schema.orderToPostCode)
+            b -> b.root(
+                b.simple("id", Schema.orderToCustomerId),
+                b.simple("pid", Schema.orderToProductId),
+                b.simple("oid", Schema.orderToOrderId),
+                b.simple("price", Schema.orderToOrderPrice),
+                b.simple("quantity", Schema.orderToQuantity),
+                b.simple("street", Schema.orderToStreet),
+                b.simple("city", Schema.orderToCity),
+                b.simple("postCode", Schema.orderToPostCode)
             )
         );
     }
@@ -106,7 +104,7 @@ public abstract class PostgreSQL {
 
         final var order = builder
             .value(Schema.orderToOrderId, orderIdValue)
-            .value(Schema.orderToProductId, product.superId.getValue(Schema.productToProductId))
+            .value(Schema.orderToProductId, product.superId.getValue(Schema.productToProductId.signature()))
             .object(Schema.order);
 
         builder.morphism(Schema.orderToCustomer, order, customer);
@@ -123,11 +121,11 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.order,
             orderKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("oid", Schema.orderToOrderId),
-                new SimpleProperty("street", Schema.orderToStreet),
-                new SimpleProperty("city", Schema.orderToCity),
-                new SimpleProperty("postCode", Schema.orderToPostCode)
+            b -> b.root(
+                b.simple("oid", Schema.orderToOrderId),
+                b.simple("street", Schema.orderToStreet),
+                b.simple("city", Schema.orderToCity),
+                b.simple("postCode", Schema.orderToPostCode)
             )
         );
     }
@@ -144,11 +142,11 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.item,
             itemKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("pid", Schema.itemToProductId),
-                new SimpleProperty("oid", Schema.itemToOrderId),
-                new SimpleProperty("price", Schema.itemToOrderPrice),
-                new SimpleProperty("quantity", Schema.itemToQuantity)
+            b -> b.root(
+                b.simple("pid", Schema.itemToProductId),
+                b.simple("oid", Schema.itemToOrderId),
+                b.simple("price", Schema.itemToOrderPrice),
+                b.simple("quantity", Schema.itemToQuantity)
             )
         );
     }
@@ -158,8 +156,8 @@ public abstract class PostgreSQL {
         final var order = builder.getRow(Schema.order, orderIndex);
 
         final var item = builder
-            .value(Schema.itemToProductId, product.superId.getValue(Schema.productToProductId))
-            .value(Schema.itemToOrderId, order.superId.getValue(Schema.orderToOrderId))
+            .value(Schema.itemToProductId, product.superId.getValue(Schema.productToProductId.signature()))
+            .value(Schema.itemToOrderId, order.superId.getValue(Schema.orderToOrderId.signature()))
             .object(Schema.item);
 
         builder.morphism(Schema.itemToProduct, item, product);
@@ -173,9 +171,9 @@ public abstract class PostgreSQL {
         return new TestMapping(schema,
             Schema.ordered,
             orderedKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("id", Schema.orderToCustomerId),
-                new SimpleProperty("oid", Schema.orderedToOrderId)
+            b -> b.root(
+                b.simple("id", Schema.orderToCustomerId),
+                b.simple("oid", Schema.orderedToOrderId)
             )
         );
     }
@@ -185,8 +183,8 @@ public abstract class PostgreSQL {
         final var order = builder.getRow(Schema.order, orderIndex);
 
         final var ordered = builder
-            .value(Schema.orderedToCustomerId, customer.superId.getValue(Schema.customerToCustomerId))
-            .value(Schema.orderedToOrderId, order.superId.getValue(Schema.orderToOrderId))
+            .value(Schema.orderedToCustomerId, customer.superId.getValue(Schema.customerToCustomerId.signature()))
+            .value(Schema.orderedToOrderId, order.superId.getValue(Schema.orderToOrderId.signature()))
             .object(Schema.ordered);
 
         builder.morphism(Schema.orderedToCustomer, ordered, customer);

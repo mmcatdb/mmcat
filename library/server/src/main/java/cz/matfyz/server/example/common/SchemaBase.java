@@ -1,10 +1,12 @@
 package cz.matfyz.server.example.common;
 
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.schema.Key;
-import cz.matfyz.core.schema.ObjectIds;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SignatureId;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
+import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 import cz.matfyz.server.entity.evolution.SchemaModificationOperation.Composite;
 import cz.matfyz.server.entity.evolution.SchemaModificationOperation.CreateMorphism;
 import cz.matfyz.server.entity.evolution.SchemaModificationOperation.CreateObject;
@@ -67,6 +69,10 @@ public abstract class SchemaBase {
         metadata.add(new MetadataUpdate(key, new Position(x * POSITION_UNIT, y * POSITION_UNIT)));
     }
 
+    protected void moveObject(BuilderObject object, double x, double y) {
+        moveObject(object.key(), x, y);
+    }
+
     protected void addObject(Key key, double x, double y) {
         final var object = schema.getObject(key);
         // Signature ids can't be defined yet because there are no morphisms. Even in the composite operations the ids are defined later.
@@ -77,7 +83,7 @@ public abstract class SchemaBase {
             ? ids.generateDefaultSuperId()
             : new SignatureId();
 
-        final var data = new SchemaObjectWrapper.Data(object.label(), ids, superId, object.iri, object.pimIri);
+        final var data = new SchemaObjectWrapper.Data(object.label(), ids, superId);
         wrapperCache.put(key, data);
 
         operations.add(new VersionedSMO(
@@ -88,10 +94,14 @@ public abstract class SchemaBase {
         moveObject(key, x, y);
     }
 
+    protected void addObject(BuilderObject object, double x, double y) {
+        addObject(object.key(), x, y);
+    }
+
     protected void addIds(Key key) {
         final var object = schema.getObject(key);
         final var data = getObjectData(key);
-        final var newData = new SchemaObjectWrapper.Data(data.label(), object.ids(), object.superId(), data.iri(), data.pimIri());
+        final var newData = new SchemaObjectWrapper.Data(data.label(), object.ids(), object.superId());
         wrapperCache.put(key, newData);
 
         operations.add(new VersionedSMO(
@@ -100,15 +110,23 @@ public abstract class SchemaBase {
         ));
     }
 
+    protected void addIds(BuilderObject object) {
+        addIds(object.key());
+    }
+
     protected void editIds(Key key, ObjectIds ids) {
         final var data = getObjectData(key);
-        final var newData = new SchemaObjectWrapper.Data(data.label(), ids, ids.generateDefaultSuperId(), data.iri(), data.pimIri());
+        final var newData = new SchemaObjectWrapper.Data(data.label(), ids, ids.generateDefaultSuperId());
         wrapperCache.put(key, newData);
 
         operations.add(new VersionedSMO(
             counter.next(),
             new EditObject(key, newData, data)
         ));
+    }
+
+    protected void editIds(BuilderObject object, ObjectIds ids) {
+        editIds(object.key(), ids);
     }
 
     protected void addMorphism(Signature signature) {
@@ -120,6 +138,10 @@ public abstract class SchemaBase {
         ));
     }
 
+    protected void addMorphism(BuilderMorphism morphism) {
+        addMorphism(morphism.signature());
+    }
+
     protected void editMorphism(Signature signature, @Nullable Key newDom, @Nullable Key newCod) {
         final var morphism = schema.getMorphism(signature);
         final var newWrapper = new SchemaMorphismWrapper(
@@ -128,8 +150,6 @@ public abstract class SchemaBase {
             newDom != null ? newDom : morphism.dom().key(),
             newCod != null ? newCod : morphism.cod().key(),
             morphism.min(),
-            morphism.iri,
-            morphism.pimIri,
             morphism.tags()
         );
 
@@ -137,6 +157,10 @@ public abstract class SchemaBase {
             counter.next(),
             new EditMorphism(newWrapper, SchemaMorphismWrapper.fromSchemaMorphism(morphism))
         ));
+    }
+
+    protected void editMorphism(BuilderMorphism morphism, @Nullable BuilderObject newDom, @Nullable BuilderObject newCod) {
+        editMorphism(morphism.signature(), newDom != null ? newDom.key() : null, newCod != null ? newCod.key() : null);
     }
 
     protected interface CompositeOperationContent {

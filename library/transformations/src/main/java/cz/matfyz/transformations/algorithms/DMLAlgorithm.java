@@ -3,7 +3,7 @@ package cz.matfyz.transformations.algorithms;
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.instance.InstanceObject;

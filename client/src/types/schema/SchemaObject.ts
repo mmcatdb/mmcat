@@ -1,17 +1,13 @@
-import type { Iri } from '@/types/integration';
 import type { Position } from 'cytoscape';
 import { Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer } from '../identifiers';
 import { ComparablePosition } from './Position';
 import { SchemaCategoryInvalidError } from './Error';
-import type { Optional } from '@/utils/common';
 import type { Graph } from '../categoryGraph';
 
 export type SchemaObjectDataFromServer = {
     label: string;
     ids?: ObjectIdsFromServer;
     superId: SignatureIdFromServer;
-    iri?: Iri;
-    pimIri?: Iri;
 };
 
 export type SchemaObjectMetadataFromServer = {
@@ -22,24 +18,17 @@ export class SchemaObject {
     private constructor(
         readonly key: Key,
         readonly label: string,
-        // readonly position: ComparablePosition,
         readonly ids: ObjectIds | undefined,
         readonly superId: SignatureId,
-        readonly iri: Iri | undefined,
-        readonly pimIri: Iri | undefined,
         private _isNew: boolean,
     ) {}
 
-    // static fromServer(key: Key, input: SchemaObjectDataFromServer): SchemaObject {
     static fromServer(key: KeyFromServer, input: SchemaObjectDataFromServer): SchemaObject {
         const object = new SchemaObject(
             Key.fromServer(key),
             input.label,
-            // ComparablePosition.fromPosition(input.position),
             input.ids ? ObjectIds.fromServer(input.ids) : undefined,
             SignatureId.fromServer(input.superId),
-            input.iri,
-            input.pimIri,
             false,
         );
 
@@ -47,18 +36,11 @@ export class SchemaObject {
     }
 
     static createNew(key: Key, def: ObjectDefinition): SchemaObject {
-        const [ iri, pimIri ] = 'iri' in def
-            ? [ def.iri, def.pimIri ]
-            : [ undefined, undefined ];
-
         const object = new SchemaObject(
             key,
             def.label,
-            // def.position?.copy() ?? ComparablePosition.createDefault(),
             def.ids,
             def.ids?.generateDefaultSuperId() ?? SignatureId.union([]),
-            iri,
-            pimIri,
             true,
         );
 
@@ -69,9 +51,6 @@ export class SchemaObject {
         return {
             label: this.label,
             ids: this.ids,
-            // position: this.position,
-            iri: this.iri,
-            pimIri: this.pimIri,
         };
     }
 
@@ -92,13 +71,9 @@ export class SchemaObject {
 
     toServer(): SchemaObjectDataFromServer {
         return {
-            // key: this.key.toServer(),
-            // position: this.position,
             label: this.label,
             ids: this.ids?.toServer(),
             superId: this.superId.toServer(),
-            iri: this.iri,
-            pimIri: this.pimIri,
         };
     }
 
@@ -110,11 +85,7 @@ export class SchemaObject {
 export type ObjectDefinition = {
     label: string;
     ids?: ObjectIds;
-    // position?: ComparablePosition;
-} & Optional<{
-    iri: Iri;
-    pimIri: Iri;
-}>;
+};
 
 export type SchemaObjectFromServer = {
     key: KeyFromServer;

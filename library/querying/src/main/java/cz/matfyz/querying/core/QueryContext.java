@@ -1,6 +1,6 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.core.category.BaseSignature;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.querying.parsing.WhereTriple;

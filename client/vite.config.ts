@@ -6,7 +6,7 @@ import { createHtmlPlugin } from 'vite-plugin-html';
 import ReactivityTransform from '@vue-macros/reactivity-transform/vite';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(({ mode }) => {
     // Explicitly load the env files because otherwise they would be loaded after the settings (because their location may depend on this settings).
     const env = loadEnv(mode, process.cwd(), '');
     const base = env.BASE_PATH || '/';
@@ -30,9 +30,6 @@ export default defineConfig(({ command, mode }) => {
         },
         base,
         server: {
-            cors: {
-                origin: env.VITE_DATASPECER_API_URL,
-            },
             port: env.VITE_DEV_SERVER_PORT,
         },
     };

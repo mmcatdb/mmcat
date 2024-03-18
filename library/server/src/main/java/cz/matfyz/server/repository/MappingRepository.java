@@ -3,9 +3,9 @@ package cz.matfyz.server.repository;
 import static cz.matfyz.server.repository.utils.Utils.getId;
 import static cz.matfyz.server.repository.utils.Utils.setId;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.schema.Key;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInfo;

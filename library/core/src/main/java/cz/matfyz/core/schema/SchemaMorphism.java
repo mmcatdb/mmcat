@@ -1,51 +1,78 @@
 package cz.matfyz.core.schema;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Morphism;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.identification.Identified;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Identified;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 
 import java.util.Set;
 
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class SchemaMorphism implements Morphism, Identified<Signature> {
+public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
-    private  final Signature signature;
+    public enum Min {
+        ZERO,
+        ONE;
+
+        public static Min combine(Min min1, Min min2) {
+            return (min1 == Min.ONE || min2 == Min.ONE) ? Min.ONE : Min.ZERO;
+        }
+    }
+
+    public enum Tag {
+        isa,
+        role,
+    }
+
+    /** A unique identifier of the morphism (within one schema category). */
+    private final Signature signature;
+    /** A user-readable label. */
     public final String label;
-    private SchemaObject dom;
-    private SchemaObject cod;
+    /** Cardinality of the morphism - either 1..0 or 1..1. The cardinality in the opposite direction isn't defined. */
     private final Min min;
-
-    public final String iri;
-    public final String pimIri;
+    /** Some other qualities of the morphism (e.g., inheritance in the form of the ISA hierarchy). */
     private final Set<Tag> tags;
+    /** The domain object (i.e., the source of the arrow). */
+    private SchemaObject dom;
+    /** The codomain object (i.e., the target of the arrow). */
+    private SchemaObject cod;
 
-    public boolean hasTag(Tag tag) {
-        return tags.contains(tag);
-    }
-
-    public static Min combineMin(Min min1, Min min2) {
-        return (min1 == Min.ONE && min2 == Min.ONE) ? Min.ONE : Min.ZERO;
-    }
-
-    private SchemaMorphism(Signature signature, SchemaObject dom, SchemaObject cod, Min min, String label, String iri, String pimIri, Set<Tag> tags) {
+    public SchemaMorphism(Signature signature, String label, Min min, Set<Tag> tags, SchemaObject dom, SchemaObject cod) {
         this.signature = signature;
         this.dom = dom;
         this.cod = cod;
         this.min = min;
         this.label = label;
-        this.iri = iri;
-        this.pimIri = pimIri;
         this.tags = Set.of(tags.toArray(Tag[]::new));
     }
 
-    @Override public SchemaObject dom() {
+    public Signature signature() {
+        return signature;
+    }
+
+    public boolean isBase() {
+        return signature instanceof BaseSignature;
+    }
+
+    public Min min() {
+        return min;
+    }
+
+    public Set<Tag> tags() {
+        return tags;
+    }
+
+    public boolean hasTag(Tag tag) {
+        return tags.contains(tag);
+    }
+
+    public SchemaObject dom() {
         return dom;
     }
 
-    @Override public SchemaObject cod() {
+    public SchemaObject cod() {
         return cod;
     }
 
@@ -59,67 +86,21 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
             this.cod = object;
     }
 
-    @Override public Min min() {
-        return min;
-    }
-
-    public Set<Tag> tags() {
-        return tags;
-    }
-
-    public boolean isBase() {
-        return signature instanceof BaseSignature;
-    }
-
-    @Override public Signature signature() {
-        return signature;
-    }
+    // Identification
 
     @Override public Signature identifier() {
         return signature;
     }
 
-    public static class Builder {
-
-        private String label = "";
-        private String iri = "";
-        private String pimIri = "";
-        private Set<Tag> tags = Set.of();
-
-        public SchemaMorphism fromArguments(Signature signature, SchemaObject dom, SchemaObject cod, Min min) {
-            return new SchemaMorphism(
-                signature,
-                dom,
-                cod,
-                min,
-                this.label,
-                this.iri,
-                this.pimIri,
-                this.tags
-            );
-        }
-
-        public Builder label(String label) {
-            this.label = label;
-            return this;
-        }
-
-        public Builder iri(String iri) {
-            this.iri = iri;
-            return this;
-        }
-
-        public Builder pimIri(String pimIri) {
-            this.pimIri = pimIri;
-            return this;
-        }
-
-        public Builder tags(Set<Tag> tags) {
-            this.tags = tags;
-            return this;
-        }
-
+    @Override public boolean equals(Object other) {
+        return other instanceof SchemaMorphism schemaMorphism && signature.equals(schemaMorphism.signature);
     }
+
+    @Override public int hashCode() {
+        return signature.hashCode();
+    }
+
+    // Identification
 
     public record DisconnectedSchemaMorphism(
         Signature signature,
@@ -127,8 +108,6 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         Key domKey,
         Key codKey,
         Min min,
-        String iri,
-        String pimIri,
         Set<Tag> tags
     ) {
 
@@ -141,12 +120,9 @@ public class SchemaMorphism implements Morphism, Identified<Signature> {
         }
 
         public SchemaMorphism toSchemaMorphism(SchemaObject dom, SchemaObject cod) {
-            return new SchemaMorphism.Builder()
-                .label(this.label)
-                .iri(this.iri)
-                .pimIri(this.pimIri)
-                .tags(this.tags != null ? this.tags : Set.of())
-                .fromArguments(signature, dom, cod, min);
+            final Set<Tag> tags = this.tags != null ? this.tags : Set.of();
+
+            return new SchemaMorphism(signature, this.label, min, tags, dom, cod);
         }
 
     }

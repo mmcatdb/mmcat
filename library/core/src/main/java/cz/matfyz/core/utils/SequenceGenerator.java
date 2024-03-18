@@ -21,9 +21,6 @@ public class SequenceGenerator {
     }
 
     public int next(int value) {
-        if (next == value)
-            throw new IllegalArgumentException("Can't generate sequence. Value " + value + " is already used.");
-
         used.add(value);
         return value;
     }

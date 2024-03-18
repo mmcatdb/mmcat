@@ -2,7 +2,8 @@ package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.abstractwrappers.AbstractICWrapper.AttributePair;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.IdentifierStructure;
@@ -10,7 +11,6 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.utils.ComparablePair;
 import cz.matfyz.transformations.exception.InvalidStateException;
 
 import java.util.Collection;
@@ -28,7 +28,7 @@ public class ICAlgorithm {
     private Map<SchemaObject, Mapping> mappingsByObjects;
     private AbstractICWrapper wrapper;
 
-    private Map<String, Set<ComparablePair<String, String>>> referencesForAllKinds = new TreeMap<>();
+    private Map<String, Set<AttributePair>> referencesForAllKinds = new TreeMap<>();
 
     public void input(Mapping mapping, Iterable<Mapping> allMappings, AbstractICWrapper wrapper) {
         this.mapping = mapping;
@@ -49,20 +49,6 @@ public class ICAlgorithm {
         referencesForAllKinds.forEach((referencedKindName, references) -> wrapper.appendReference(mapping.kindName(), referencedKindName, references));
 
         return wrapper.createICStatement();
-
-        /*
-        for (Reference reference : mapping.references()) {
-            // O
-            Map<Signature, String> referencingAttributes = collectSignatureNamePairs(mapping.accessPath(), reference.properties());
-            // n
-            Mapping referencedMapping = allMappings.get(reference.name());
-            // R
-            Map<Signature, String> referencedAttributes = collectSignatureNamePairs(referencedMapping.accessPath(), reference.properties());
-            // S
-            Set<ComparablePair<String, String>> referencingReferencedNames = makeReferences(referencingAttributes, referencedAttributes);
-            wrapper.appendReference(mapping.kindName(), referencedMapping.kindName(), referencingReferencedNames);
-        }
-        */
     }
 
     /**
@@ -136,59 +122,11 @@ public class ICAlgorithm {
             return;
 
         final var referencesForKind = referencesForAllKinds.computeIfAbsent(lastMapping.kindName(), x -> new TreeSet<>());
-        referencesForKind.add(new ComparablePair<>(referencingName.toString(), referencedName.toString()));
+        referencesForKind.add(new AttributePair(referencingName.toString(), referencedName.toString()));
     }
-
-    /*
-    private void processComplexSubpath(ComplexProperty property, Mapping lastMapping, Signature signatureFromLastMapping) {
-        if (property.isAuxiliary()) {
-            processAllSubpaths(property, lastMapping, signatureFromLastMapping);
-            return;
-        }
-
-        // There is a schema object corresponding to the property.
-        final var pathObject = mapping.category().getMorphism(property.signature()).cod();
-        final var pathMapping = mappingsByObjects.get(pathObject);
-        if (pathMapping == null) {
-            processAllSubpaths(property, lastMapping, signatureFromLastMapping);
-            return;
-        }
-
-        // There is a mapping corresponding to the object.
-        // We take the mapping as a new potential holder of the referenced properties and we start building new signature from it towards the simple properties in order to compare it with the primary keys of this mapping.
-        processAllSubpaths(property, pathMapping, Signature.createEmpty());
-    }
-    */
 
     private void processAllSubpaths(ComplexProperty complexProperty, Mapping lastMapping, Signature signatureFromLastMapping) {
         complexProperty.subpaths().forEach(subpath -> processPath(subpath, lastMapping, signatureFromLastMapping));
     }
-
-    /*
-    private Map<Signature, String> collectSignatureNamePairs(ComplexProperty path, Set<Signature> referenceProperties) {
-        var output = new TreeMap<Signature, String>();
-
-        for (Signature signature : referenceProperties) {
-            if (path.getSubpathBySignature(signature).name() instanceof StaticName staticName)
-                output.put(signature, staticName.getStringName());
-            else
-                throw new TransformationException();
-        }
-
-        return output;
-    }
-
-    private Set<ComparablePair<String, String>> makeReferences(Map<Signature, String> a, Map<Signature, String> b) {
-        var output = new TreeSet<ComparablePair<String, String>>();
-
-        for (var entry : a.entrySet()) {
-            String nameA = entry.getValue();
-            String nameB = b.get(entry.getKey());
-            output.add(new ComparablePair<>(nameA, nameB));
-        }
-
-        return output;
-    }
-    */
 
 }

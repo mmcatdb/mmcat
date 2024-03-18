@@ -1,7 +1,6 @@
 package cz.matfyz.abstractwrappers;
 
 import cz.matfyz.core.mapping.IdentifierStructure;
-import cz.matfyz.core.utils.ComparablePair;
 
 import java.util.Set;
 
@@ -12,7 +11,16 @@ public interface AbstractICWrapper {
 
     void appendIdentifier(String kindName, IdentifierStructure identifier);
 
-    void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs);
+    public record AttributePair(String referencing, String referenced) implements Comparable<AttributePair> {
+
+        @Override public int compareTo(AttributePair object) {
+            int firstResult = referencing.compareTo(object.referencing);
+            return firstResult != 0 ? firstResult : referenced.compareTo(object.referenced);
+        }
+
+    }
+
+    void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs);
 
     AbstractStatement createICStatement();
 

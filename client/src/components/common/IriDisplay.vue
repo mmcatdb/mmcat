@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Iri } from '@/types/integration';
+import type { Iri } from '@/types/dataSource';
 import { computed } from 'vue';
 
 type IriDisplayProps = {

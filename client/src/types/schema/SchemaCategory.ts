@@ -1,11 +1,10 @@
-import type { Iri } from '@/types/integration';
 import { UniqueIdProvider } from '@/utils/UniqueIdProvider';
 import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import type { Entity, Id, VersionId } from '../id';
 import { DynamicName, Key, Signature } from '../identifiers';
 import type { LogicalModel } from '../logicalModel';
-import { SchemaMorphism, type SchemaMorphismFromServer, type MorphismDefinition, VersionedSchemaMorphism } from './SchemaMorphism';
-import { SchemaObject, type ObjectDefinition, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
+import { SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
+import { SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Mapping } from '../mapping';
@@ -21,8 +20,6 @@ export type SchemaCategoryFromServer = {
 };
 
 export class SchemaCategory implements Entity {
-    private notAvailableIris: Set<Iri> = new Set;
-
     private keysProvider = new UniqueIdProvider<Key>({ function: key => key.value, inversion: value => Key.createNew(value) });
     private signatureProvider = new UniqueIdProvider<Signature>({ function: signature => signature.baseValue ?? 0, inversion: value => Signature.base(value) });
 
@@ -40,17 +37,11 @@ export class SchemaCategory implements Entity {
             if (!object.current)
                 return;
 
-            if (object.current.iri)
-                this.notAvailableIris.add(object.current.iri);
-
             this.objects.set(object.key, object);
             this.keysProvider.add(object.key);
         });
 
         morphisms.forEach(morphism => {
-            if (morphism.iri)
-                this.notAvailableIris.add(morphism.iri);
-
             const versionedMorphism = this.getMorphism(morphism.signature);
             versionedMorphism.current = morphism;
         });
@@ -82,10 +73,7 @@ export class SchemaCategory implements Entity {
     private objects = new ComparableMap<Key, number, VersionedSchemaObject>(key => key.value);
     private morphisms = new ComparableMap<Signature, string, VersionedSchemaMorphism>(signature => signature.value);
 
-    createObject(def: ObjectDefinition): VersionedSchemaObject {
-        if ('iri' in def)
-            this.notAvailableIris.add(def.iri);
-
+    createObject(): VersionedSchemaObject {
         const key = this.keysProvider.createAndAdd();
         return this.getObject(key);
     }
@@ -106,10 +94,7 @@ export class SchemaCategory implements Entity {
         return [ ...this.objects.values() ];
     }
 
-    createMorphism(def: MorphismDefinition): VersionedSchemaMorphism {
-        if ('iri' in def)
-            this.notAvailableIris.add(def.iri);
-
+    createMorphism(): VersionedSchemaMorphism {
         const signature = this.signatureProvider.createAndAdd();
         return this.getMorphism(signature);
     }
@@ -124,14 +109,6 @@ export class SchemaCategory implements Entity {
         }
 
         return morphism;
-    }
-
-    findObjectByIri(iri: Iri): SchemaObject | undefined {
-        return [ ...this.objects.values() ].map(object => object.current).find(object => object?.iri === iri);
-    }
-
-    isIriAvailable(iri: Iri): boolean {
-        return !this.notAvailableIris.has(iri);
     }
 
     private _graph?: Graph;

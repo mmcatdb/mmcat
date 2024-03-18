@@ -2,7 +2,6 @@ package cz.matfyz.wrapperdummy;
 
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.core.mapping.IdentifierStructure;
-import cz.matfyz.core.utils.ComparablePair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +22,8 @@ public class DummyICWrapper implements AbstractICWrapper {
         methods.add("appendIdentifier(" + kindName + ", [ " + identifier + " ])");
     }
 
-    @Override public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
-        methods.add("appendReference(" + kindName + ", " + kindName2 + ", " +  attributePairsToString(attributePairs) + ")");
+    @Override public void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs) {
+        methods.add("appendReference(" + referencingKind + ", " + referencedKind + ", " +  attributePairsToString(attributePairs) + ")");
     }
 
     @Override public DummyStatement createICRemoveStatement() {
@@ -38,7 +37,7 @@ public class DummyICWrapper implements AbstractICWrapper {
         return new DummyStatement("");
     }
 
-    private String attributePairsToString(Set<ComparablePair<String, String>> pairs) {
+    private String attributePairsToString(Set<AttributePair> pairs) {
         var builder = new StringBuilder();
 
         builder.append("[");
@@ -47,7 +46,7 @@ public class DummyICWrapper implements AbstractICWrapper {
             if (index > 0)
                 builder.append(",");
             index++;
-            builder.append(" ").append("(").append(pair.getValue1()).append(", ").append(pair.getValue2()).append(")");
+            builder.append(" ").append("(").append(pair.referencing()).append(", ").append(pair.referenced()).append(")");
         }
 
         if (index > 0)

@@ -1,19 +1,20 @@
 package cz.matfyz.core.schema;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Category;
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.Signature;
 import cz.matfyz.core.exception.MorphismNotFoundException;
-import cz.matfyz.core.identification.MapUniqueContext;
-import cz.matfyz.core.identification.UniqueContext;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.MapUniqueContext;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.identifiers.UniqueContext;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author pavel.koupil, jachymb.bartik
  */
-public class SchemaCategory implements Category {
+public class SchemaCategory {
 
     public final String label;
 
@@ -64,7 +65,7 @@ public class SchemaCategory implements Category {
     }
 
     /**
-     * This class represents a directed edge in the schema category. Essentially, it's either a morphism or a dual of such.
+     * This class represents a directed edge in the schema category. Essentially, it's either a base morphism or a dual of such.
      */
     public record SchemaEdge(
         SchemaMorphism morphism,
@@ -122,22 +123,26 @@ public class SchemaCategory implements Category {
             .anyMatch(base -> getEdge(base).to().key().equals(key));
     }
 
-    private SchemaMorphism createCompositeMorphism(Signature signature) {
-        Signature[] bases = signature.toBases().toArray(Signature[]::new);
+    private int lastCompositeId = 0;
 
-        Signature lastSignature = bases[0];
+    private SchemaMorphism createCompositeMorphism(Signature signature) {
+        final String morphismLabel = "composite" + lastCompositeId++;
+
+        final Signature[] bases = signature.toBases().toArray(Signature[]::new);
+
+        final Signature lastSignature = bases[0];
         SchemaMorphism lastMorphism = this.getMorphism(lastSignature);
-        SchemaObject dom = lastMorphism.dom();
+        final SchemaObject dom = lastMorphism.dom();
         SchemaObject cod = lastMorphism.cod();
         Min min = lastMorphism.min();
 
         for (final var base : bases) {
             lastMorphism = this.getMorphism(base);
             cod = lastMorphism.cod();
-            min = SchemaMorphism.combineMin(min, lastMorphism.min());
+            min = Min.combine(min, lastMorphism.min());
         }
 
-        return new SchemaMorphism.Builder().fromArguments(signature, dom, cod, min);
+        return new SchemaMorphism(signature, morphismLabel, min, Set.of(), dom, cod);
     }
 
     public abstract static class Editor {

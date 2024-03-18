@@ -49,7 +49,7 @@ function save() {
     const subpaths = !signatureChanged.value && !typeChanged.value && props.property instanceof GraphComplexProperty ? props.property.subpaths : [];
     const newProperty = type.value === PropertyType.Simple
         ? new GraphSimpleProperty(name.value, signature.value, props.property.parent)
-        : new GraphComplexProperty(name.value, signature.value, isAuxiliary.value, props.property.parent, subpaths);
+        : new GraphComplexProperty(name.value, signature.value, props.property.parent, subpaths);
 
     props.property.parent.updateOrAddSubpath(newProperty, props.property);
 
@@ -65,8 +65,10 @@ const isSelfIdentifier = computed(() => signature.value.isEmpty && !signature.va
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
         return signature.value.isEmpty;
+
     if (signature.value.isEmpty)
-        return !(signature.value.sequence.lastNode.schemaObject.idsChecked.isSignatures);
+        return false;
+
     if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 

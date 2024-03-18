@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class Neo4jTests {
+class Neo4jTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jTests.class);
 
@@ -32,12 +32,12 @@ public class Neo4jTests {
     private static final TestDatabase<Neo4jControlWrapper> database = databases.neo4j();
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         database.setup();
     }
 
     @Test
-    public void readFromDB_DoesNotThrow() {
+    void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
             var inputWrapper = database.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readNodeAsStringForTests(Neo4j.orderKind);
@@ -46,7 +46,7 @@ public class Neo4jTests {
     }
 
     @Test
-    public void getForestForNodeTest() throws Exception {
+    void getForestForNodeTest() throws Exception {
         new PullForestTestBase(Neo4j.order(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -61,7 +61,7 @@ public class Neo4jTests {
     }
 
     @Test
-    public void getForestForRelationshipTest() throws Exception {
+    void getForestForRelationshipTest() throws Exception {
         new PullForestTestBase(Neo4j.item(schema), database.wrapper.getPullWrapper())
             .expected("""
                 [{
@@ -106,7 +106,7 @@ public class Neo4jTests {
     }
 
     @Test
-    public void testOfWrite() {
+    void testOfWrite() {
         assertDoesNotThrow(() -> {
             database.wrapper.execute(List.of(
                 Neo4jStatement.createEmpty(),

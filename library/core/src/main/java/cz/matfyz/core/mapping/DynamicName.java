@@ -1,6 +1,6 @@
 package cz.matfyz.core.mapping;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.record.DynamicRecordName;
 
 import java.io.IOException;

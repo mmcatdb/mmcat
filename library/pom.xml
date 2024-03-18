@@ -13,7 +13,6 @@
         <module>inference</module> 
         <module>server</module>
         <module>evolution</module>
-        <module>integration</module>
         <module>querying</module>
         <module>tests</module>
     </modules>

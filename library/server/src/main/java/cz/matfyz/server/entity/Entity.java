@@ -1,11 +1,11 @@
 package cz.matfyz.server.entity;
 
-import cz.matfyz.core.identification.Identified;
+import cz.matfyz.core.identifiers.Identified;
 
 /**
  * @author jachym.bartik
  */
-public class Entity implements Identified<Id> {
+public class Entity implements Identified<Entity, Id> {
 
     public final Id id;
 
@@ -15,6 +15,10 @@ public class Entity implements Identified<Id> {
 
     @Override public Id identifier() {
         return id;
+    }
+
+    @Override public boolean equals(Object obj) {
+        return obj instanceof Entity entity && id.equals(entity.id);
     }
 
 }

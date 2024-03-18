@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ParserTests {
+class ParserTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParserTests.class);
 
@@ -22,7 +22,7 @@ public class ParserTests {
 
     @ParameterizedTest
     @MethodSource("parserArguments")
-    public void parserTest(String queryString) {
+    void parserTest(String queryString) {
         LOGGER.info("Parsing query:\n{}", queryString);
         Assertions.assertDoesNotThrow(() -> {
             Query query = QueryParser.run(queryString);

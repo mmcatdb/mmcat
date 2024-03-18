@@ -1,15 +1,13 @@
 package cz.matfyz.core.instance;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Category;
-import cz.matfyz.core.category.Morphism.Min;
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.category.Signature.Type;
 import cz.matfyz.core.exception.MorphismNotFoundException;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +16,7 @@ import java.util.Map;
 /**
  * @author pavel.koupil, jachym.bartik
  */
-public class InstanceCategory implements Category {
+public class InstanceCategory {
 
     // Evolution extension
     public final SchemaCategory schema;
@@ -157,7 +155,7 @@ public class InstanceCategory implements Category {
     }
 
     private void createReferencesForSignature(Signature signature) {
-        if (signature.getType() != Type.COMPOSITE)
+        if (!signature.isComposite())
             return;
 
         var baseSignatures = signature.toBases();

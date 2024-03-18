@@ -1,9 +1,9 @@
 package cz.matfyz.server.entity.schema;
 
-import cz.matfyz.core.schema.Key;
-import cz.matfyz.core.schema.ObjectIds;
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
+import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SignatureId;
 import cz.matfyz.server.builder.MetadataContext;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,23 +34,19 @@ public record SchemaObjectWrapper(
     public record Data(
         String label,
         ObjectIds ids,
-        SignatureId superId,
-        String iri,
-        String pimIri
+        SignatureId superId
     ) {
 
         public static Data fromSchemaObject(SchemaObject object) {
             return new Data(
                 object.label(),
                 object.ids(),
-                object.superId(),
-                object.iri,
-                object.pimIri
+                object.superId()
             );
         }
 
         public SchemaObject toSchemaObject(Key key) {
-            return new SchemaObject(key, label, ids, superId, iri, pimIri);
+            return new SchemaObject(key, label, ids, superId);
         }
 
     }

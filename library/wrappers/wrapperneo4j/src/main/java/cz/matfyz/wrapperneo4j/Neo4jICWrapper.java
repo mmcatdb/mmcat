@@ -3,7 +3,6 @@ package cz.matfyz.wrapperneo4j;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.core.mapping.IdentifierStructure;
-import cz.matfyz.core.utils.ComparablePair;
 
 import java.util.Set;
 
@@ -16,7 +15,7 @@ public class Neo4jICWrapper implements AbstractICWrapper {
         // Intentionally empty
     }
 
-    @Override public void appendReference(String kindName, String kindName2, Set<ComparablePair<String, String>> attributePairs) {
+    @Override public void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs) {
         // Intentionally empty
     }
 

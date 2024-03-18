@@ -1,8 +1,5 @@
 package cz.matfyz.tests.example.basic;
 
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.SimpleProperty;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
@@ -30,12 +27,12 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             addressKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", Schema.orderToNumber),
-                ComplexProperty.create("address", Schema.orderToAddress,
-                    new SimpleProperty("street", Schema.addressToStreet),
-                    new SimpleProperty("city", Schema.addressToCity),
-                    new SimpleProperty("zip", Schema.addressToZip)
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber),
+                b.complex("address", Schema.orderToAddress,
+                    b.simple("street", Schema.addressToStreet),
+                    b.simple("city", Schema.addressToCity),
+                    b.simple("zip", Schema.addressToZip)
                 )
             )
         );
@@ -62,9 +59,9 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             tagKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", Schema.orderToNumber),
-                new SimpleProperty("tags", Schema.tagToOrder.dual())
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber),
+                b.simple("tags", Schema.tagToOrder.dual())
             )
         );
     }
@@ -84,13 +81,13 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             kindName,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", Schema.orderToNumber),
-                ComplexProperty.create("items", Schema.itemToOrder.dual(),
-                    new SimpleProperty("id", Schema.itemToId),
-                    new SimpleProperty("label", Schema.itemToLabel),
-                    new SimpleProperty("price", Schema.itemToPrice),
-                    new SimpleProperty("quantity", Schema.itemToQuantity)
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber),
+                b.complex("items", Schema.itemToOrder.dual(),
+                    b.simple("id", Schema.itemToId),
+                    b.simple("label", Schema.itemToLabel),
+                    b.simple("price", Schema.itemToPrice),
+                    b.simple("quantity", Schema.itemToQuantity)
                 )
             )
         );
@@ -102,10 +99,10 @@ public abstract class MongoDB {
 
     public static void addItem(InstanceBuilder builder, int orderIndex, int productIndex, String quantityValue) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        final var numberValue = order.superId.getValue(Schema.orderToNumber);
+        final var numberValue = order.superId.getValue(Schema.orderToNumber.signature());
 
         final var product = builder.getRow(Schema.product, productIndex);
-        final var idValue = product.superId.getValue(Schema.productToId);
+        final var idValue = product.superId.getValue(Schema.productToId.signature());
 
         final var item = builder.value(Schema.itemToNumber, numberValue).value(Schema.itemToId, idValue).object(Schema.item);
         builder.morphism(Schema.itemToOrder, item, order);
@@ -123,10 +120,10 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             contactKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", Schema.orderToNumber),
-                ComplexProperty.create("contact", Schema.contactToOrder.dual(),
-                    new SimpleProperty(Schema.contactToType, Schema.contactToValue)
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber),
+                b.complex("contact", Schema.contactToOrder.dual(),
+                    b.simple(Schema.contactToType, Schema.contactToValue)
                 )
             )
         );
@@ -134,7 +131,7 @@ public abstract class MongoDB {
 
     public static void addContact(InstanceBuilder builder, int orderIndex, String typeValue, String valueValue) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        final var numberValue = order.superId.getValue(Schema.orderToNumber);
+        final var numberValue = order.superId.getValue(Schema.orderToNumber.signature());
 
         final var contact = builder
             .value(Schema.contactToNumber, numberValue)
@@ -155,10 +152,10 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             customerKind,
-            () -> ComplexProperty.createRoot(
-                ComplexProperty.createAuxiliary(new StaticName("customer"),
-                    new SimpleProperty("name", Schema.orderToName),
-                    new SimpleProperty("number", Schema.orderToNumber)
+            b -> b.root(
+                b.auxiliary("customer",
+                    b.simple("name", Schema.orderToName),
+                    b.simple("number", Schema.orderToNumber)
                 )
             )
         );
@@ -179,12 +176,12 @@ public abstract class MongoDB {
         return new TestMapping(schema,
             Schema.order,
             noteKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("number", Schema.orderToNumber),
-                ComplexProperty.create("note", Schema.noteToOrder.dual(),
-                    ComplexProperty.create(Schema.noteToLocale, Schema.noteToData,
-                        new SimpleProperty("subject", Schema.dataToSubject),
-                        new SimpleProperty("content", Schema.dataToContent)
+            b -> b.root(
+                b.simple("number", Schema.orderToNumber),
+                b.complex("note", Schema.noteToOrder.dual(),
+                    b.complex(Schema.noteToLocale, Schema.noteToData,
+                        b.simple("subject", Schema.dataToSubject),
+                        b.simple("content", Schema.dataToContent)
                     )
                 )
             )
@@ -193,7 +190,7 @@ public abstract class MongoDB {
 
     public static void addNote(InstanceBuilder builder, int orderIndex, String localeValue, String uniqueId, String subjectValue, String contentValue) {
         final var order = builder.getRow(Schema.order, orderIndex);
-        final var numberValue = order.superId.getValue(Schema.orderToNumber);
+        final var numberValue = order.superId.getValue(Schema.orderToNumber.signature());
 
         final var note = builder
             .value(Schema.noteToNumber, numberValue)

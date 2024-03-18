@@ -1,7 +1,5 @@
 package cz.matfyz.tests.example.basic;
 
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.TestMapping;
 
@@ -16,9 +14,9 @@ public abstract class Neo4j {
         return new TestMapping(schema,
             Schema.order,
             orderKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("customer", Schema.orderToName),
-                new SimpleProperty("number", Schema.orderToNumber)
+            b -> b.root(
+                b.simple("customer", Schema.orderToName),
+                b.simple("number", Schema.orderToNumber)
             )
         );
     }
@@ -27,14 +25,14 @@ public abstract class Neo4j {
         return new TestMapping(schema,
             Schema.item,
             itemKind,
-            () -> ComplexProperty.createRoot(
-                new SimpleProperty("quantity", Schema.itemToQuantity),
-                ComplexProperty.create("_from.Order", Schema.itemToOrder,
-                    new SimpleProperty("customer", Schema.orderToName)
+            b -> b.root(
+                b.simple("quantity", Schema.itemToQuantity),
+                b.complex("_from.Order", Schema.itemToOrder,
+                    b.simple("customer", Schema.orderToName)
                 ),
-                ComplexProperty.create("_to.Product", Schema.itemToProduct,
-                    new SimpleProperty("id", Schema.productToId),
-                    new SimpleProperty("label", Schema.productToLabel)
+                b.complex("_to.Product", Schema.itemToProduct,
+                    b.simple("id", Schema.productToId),
+                    b.simple("label", Schema.productToLabel)
                 )
             )
         );

@@ -6,7 +6,6 @@ import AddMorphism from './AddMorphism.vue';
 import AddComplexStructure from './AddComplexStructure.vue';
 import EditObject from './EditObject.vue';
 import EditMorphism from './EditMorphism.vue';
-import Integration from '../../integration/Integration.vue';
 import Divider from '@/components/layout/Divider.vue';
 import { isKeyPressed, Key } from '@/utils/keyboardInput';
 import EditGroup from './EditGroup.vue';
@@ -22,7 +21,6 @@ enum State {
     EditObject,
     EditMorphism,
     EditGroup,
-    Integration,
 }
 
 type GenericStateValue<State, Value> = { type: State } & Value;
@@ -34,8 +32,7 @@ type StateValue =
     GenericStateValue<State.AddComplexStructure, unknown> |
     GenericStateValue<State.EditObject, { node: Node }> |
     GenericStateValue<State.EditMorphism, { edge: Edge }> |
-    GenericStateValue<State.EditGroup, { nodes: Node[] }> |
-    GenericStateValue<State.Integration, unknown>;
+    GenericStateValue<State.EditGroup, { nodes: Node[] }>;
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
@@ -64,10 +61,6 @@ function addMorphismClicked() {
 
 function addComplexStructureClicked() {
     state.value = { type: State.AddComplexStructure };
-}
-
-function integrationClicked() {
-    state.value = { type: State.Integration };
 }
 
 function setStateToDefault() {
@@ -213,10 +206,6 @@ async function save() {
                 Split
             </button>
             <Divider />
-            <button @click="integrationClicked">
-                Integration
-            </button>
-            <Divider />
             <button @click="save">
                 Save
             </button>
@@ -253,12 +242,6 @@ async function save() {
                 ref="editedMorphism"
                 :key="state.edge.schemaMorphism.signature.value"
                 :edge="state.edge"
-                @save="setStateToDefault"
-                @cancel="setStateToDefault"
-            />
-        </template>
-        <template v-else-if="state.type === State.Integration">
-            <Integration
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />

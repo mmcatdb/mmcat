@@ -1,7 +1,7 @@
 package cz.matfyz.core.record;
 
-import cz.matfyz.core.category.BaseSignature;
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.BaseSignature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.utils.printable.*;
 
 import java.util.ArrayList;
@@ -16,33 +16,21 @@ import java.util.TreeMap;
  */
 public class ComplexRecord extends DataRecord implements IComplexRecord, Printable {
 
-    //private final List<DataRecord> children = new ArrayList<>();
-    //private final Map<Signature, Set<DataRecord>> children = new TreeMap<>();
-
     private final Map<Signature, List<ComplexRecord>> children = new TreeMap<>();
     private final List<ComplexRecord> dynamicNameChildren = new ArrayList<>();
     private Signature dynamicNameSignature;
     private final Map<Signature, SimpleRecord<?>> values = new TreeMap<>();
     private final List<SimpleValueRecord<?>> dynamicNameValues = new ArrayList<>();
-    //private SimpleValueRecord<?> firstDynamicValue = null;
 
     protected ComplexRecord(RecordName name) {
         super(name);
     }
 
-    /*
-    public Map<Signature, List<ComplexRecord>> children() {
-        return children;
-    }
-    */
-
     public boolean hasComplexRecords(Signature signature) {
-        //return children.containsKey(signature) || (signature.equals(dynamicSignature));
         return children.containsKey(signature);
     }
 
     public List<? extends IComplexRecord> getComplexRecords(Signature signature) {
-        //return signature.equals(dynamicSignature) ? dynamicChildren : children.get(signature);
         return children.get(signature);
     }
 
@@ -140,30 +128,11 @@ public class ComplexRecord extends DataRecord implements IComplexRecord, Printab
         if (name instanceof StaticRecordName)
             values.put(signature, simpleValueRecord);
         else if (name instanceof DynamicRecordName) {
-            /*
-            if (firstDynamicValue == null)
-                firstDynamicValue = record;
-            else {
-                assert firstDynamicValue.name() instanceof DynamicRecordName firstDynamicName && dynamicName.signature().equals(firstDynamicName.signature()) : "Trying to add a dynamic name with different name signature";
-                assert signature.equals(firstDynamicValue.signature()) : "Trying to add a dynamic name with different value signature";
-            }
-            */
-
             dynamicNameValues.add(simpleValueRecord);
         }
 
-
         return simpleValueRecord;
     }
-
-    /*
-    @Override Set<DataRecord> records() {
-        Set output = Set.of(this);
-        children.values().forEach(set -> output.addAll(set));
-
-        return output;
-    }
-    */
 
     @Override public void printTo(Printer printer) {
         printer.append("{").down().nextLine();
