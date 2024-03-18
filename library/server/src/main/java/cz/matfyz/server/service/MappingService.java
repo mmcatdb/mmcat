@@ -1,6 +1,6 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInfo;

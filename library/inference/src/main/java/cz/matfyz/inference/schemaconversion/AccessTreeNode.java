@@ -3,7 +3,7 @@ package cz.matfyz.inference.schemaconversion;
 import java.util.ArrayList;
 import java.util.List;
 
-import cz.matfyz.core.category.Signature;
+import cz.matfyz.core.identifiers.Signature;
 
 /**
  * Class to hold info about properties in SchemaCat, so that an access path can be

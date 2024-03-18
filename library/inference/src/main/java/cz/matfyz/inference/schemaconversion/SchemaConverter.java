@@ -1,26 +1,28 @@
 package cz.matfyz.inference.schemaconversion;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import cz.matfyz.core.category.Signature;
-import cz.matfyz.core.category.Morphism.Min;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
 
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SignatureId;
-import cz.matfyz.core.schema.ObjectIds;
+import cz.matfyz.core.identifiers.SignatureId;
+import cz.matfyz.core.identifiers.ObjectIds;
 
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
+import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.rsd.Char;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
@@ -82,7 +84,7 @@ public class SchemaConverter {
             ObjectIds objectIds = new ObjectIds(s);
 
             SignatureId sId = new SignatureId(ss);
-            so = new SchemaObject(keyp, rsdp.getName(), objectIds, sId, null, null);
+            so = new SchemaObject(keyp, rsdp.getName(), objectIds, sId);
             sc.addObject(so);
 
             this.root = new AccessTreeNode(AccessTreeNode.State.C, rsdp.getName(), s);
@@ -112,7 +114,7 @@ public class SchemaConverter {
                 ObjectIds objectIds = new ObjectIds(sig);
 
                 SignatureId superId = new SignatureId(sigSet);
-                SchemaObject soch = new SchemaObject(keych, rsdch.getName(), objectIds, superId, null, null);
+                SchemaObject soch = new SchemaObject(keych, rsdch.getName(), objectIds, superId);
                 sc.addObject(soch);
 
                 AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.S, soch.label(), sig);
@@ -129,8 +131,9 @@ public class SchemaConverter {
                     cod = so;
                 }
 
-                SchemaMorphism.Builder smb = createBuilder(rsdch, isArrayp, isArraych);
-                SchemaMorphism sm = smb.fromArguments(sig, dom, cod, min);
+                String label = createLabel(rsdch, isArrayp, isArraych);
+                Set<SchemaMorphism.Tag> tags = new HashSet<>(); //empty for now, because I dont know what to put there
+                SchemaMorphism sm = new SchemaMorphism(sig, label, min, tags, dom, cod);
                 sc.addMorphism(sm);
 
                 i++;
@@ -199,26 +202,25 @@ public class SchemaConverter {
     }
 
     /**
-     * Get the Schema Morphism Builder with the right label.
+     * Get the right label for the Schema Morphism.
      * For now we label 2 types of morphisms: identification & relational.
      * A morphism is labeled as identification if its codomain is an identificator
      * And it is labeled as relational if its domain is an array type
      * @return
      */
-    private SchemaMorphism.Builder createBuilder(RecordSchemaDescription rsdch, boolean isArrayp, boolean isArraych) {
-        SchemaMorphism.Builder smb = new SchemaMorphism.Builder();
+    private String createLabel(RecordSchemaDescription rsdch, boolean isArrayp, boolean isArraych) {
 
         if (isArraych || isArrayp) { // meaning the parent is an array (works for now, might not work later!)
-            smb = smb.label(Label.RELATIONAL.name());
+            return Label.RELATIONAL.name();
         }
         else {
             // the values for Char are TRUE, FALSE and UNKNOWN
             if (rsdch.getUnique() == Char.TRUE) {
-                smb = smb.label(Label.IDENTIFIER.name());
+                return Label.IDENTIFIER.name();
             }
         }
         // can a relational morphism be also identification? (now I assume that not)
-        return smb;
+        return null; //when there is no particular label
     }
 
     /**
@@ -233,12 +235,12 @@ public class SchemaConverter {
                 SchemaObject sop = s.dom();
                 Key keyp = sop.key();
                 Key keych = createChildKey(keyp, 0); // probs could just put zero here, but have to check later!!
-                SchemaObject soch = new SchemaObject(keych, "_index", null, null, null, null);
+                SchemaObject soch = new SchemaObject(keych, "_index", null, null);
                 sc.addObject(soch);
 
-                SchemaMorphism.Builder smb = new SchemaMorphism.Builder();
                 Signature sig = createChildSignature(keyp, keych);
-                SchemaMorphism sm = smb.fromArguments(sig, sop, soch, Min.ZERO); // also look at if this min is right
+                Set<SchemaMorphism.Tag> tags = new HashSet<>();
+                SchemaMorphism sm = new SchemaMorphism(sig, null, Min.ZERO, tags, sop, soch); //is this min right?
                 sc.addMorphism(sm);
             }
         }
@@ -268,15 +270,18 @@ public class SchemaConverter {
 
         for (AccessTreeNode child : node.getChildren()) {
             if (child.getState() == AccessTreeNode.State.S) {
-                subpaths.add(new SimpleProperty(child.getName(), child.getSig()));
+                subpaths.add(new SimpleProperty(new StaticName(child.getName()), child.getSig()));
             } else {
                 subpaths.add(buildComplexPropertyFromNode(child));
             }
         }
         if (node.getState() == AccessTreeNode.State.S) {
-            return ComplexProperty.createAuxiliary(new StaticName(node.getName()), subpaths);
+            //return ComplexProperty.createAuxiliary(new StaticName(node.getName()), subpaths);
+            return new ComplexProperty(new StaticName(node.getName()), node.getSig(), subpaths);
         } else {
-            return ComplexProperty.create(node.getName(), node.getSig(), subpaths.toArray(new AccessPath[0]));
+            //return ComplexProperty.create(node.getName(), node.getSig(), subpaths.toArray(new AccessPath[0]));
+            AccessPath[] subpathsArr = subpaths.toArray(new AccessPath[0]);
+            return new ComplexProperty(new StaticName(node.getName()), node.getSig(), new ArrayList<>(Arrays.asList(subpathsArr)));
         }
     }
 

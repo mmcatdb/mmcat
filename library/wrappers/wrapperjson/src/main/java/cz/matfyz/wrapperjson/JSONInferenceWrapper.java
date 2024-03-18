@@ -11,6 +11,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
+import org.bson.Document;
 
 
 public class JSONInferenceWrapper extends AbstractInferenceWrapper {
@@ -58,8 +59,9 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
     @Override
     // assuming that in the json file one line represent one object
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
-        JavaRDD<Document> jsonLines = context.textFile(filePath);
-        return jsonLines.map(new JSONObjectToRSDMapFunction());
+        JavaRDD<String> jsonLines = context.textFile(filePath);
+        JavaRDD<Document> jsonDocuments = jsonLines.map(Document::parse);
+        return jsonDocuments.map(new JSONRecordToRSDMapFunction());
     }
     
     private RecordSchemaDescription convertJsonToRSD(String line) {

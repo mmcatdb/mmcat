@@ -1,8 +1,8 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.core.identification.MapUniqueContext;
-import cz.matfyz.core.identification.UniqueContext;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.MapUniqueContext;
+import cz.matfyz.core.identifiers.UniqueContext;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.evolution.Version;

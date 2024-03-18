@@ -10,7 +10,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaGraph;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.Key;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
@@ -19,7 +19,7 @@ import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.CategoryMappingPair;
-import cz.matfyz.integration.processes.JsonLdToCategory;
+//import cz.matfyz.integration.processes.JsonLdToCategory;
 
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.builder.MetadataContext;
@@ -30,6 +30,7 @@ import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.database.DatabaseEntity;
+import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
@@ -37,6 +38,7 @@ import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
+import cz.matfyz.server.repository.DataSourceRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
@@ -89,6 +91,8 @@ public class JobExecutorService {
 
     @Autowired
     private QueryRepository queryRepository;
+    
+    private DataSourceService dataSourceService;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
