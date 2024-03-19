@@ -211,9 +211,10 @@ public class JobExecutorService {
     private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
         Id originalId = run.categoryId;
         SchemaCategoryWrapper originalWrapper = schemaService.find(originalId);
-        String schemaCatName = originalWrapper.label;
-        
+        String schemaCatName = originalWrapper.label;        
         final CategoryMappingPair categoryMappingPair;
+        String inputType;
+        
         if (payload.databaseId()!= null){
             System.out.println("JobExecutorService: using db.");
             final DatabaseEntity databaseEntity = logicalModelService.find(payload.databaseId()).database(); //probs here it should be from databaseService though!!!!
@@ -221,30 +222,23 @@ public class JobExecutorService {
             String port = databaseEntity.settings.get("port").asText();
             String host = databaseEntity.settings.get("host").asText();
             String uri = host + ":" + port;
+            inputType = "Database";
             /*
             System.out.println("DatabaseName: " + databaseName);
             System.out.println("Port: " + port);
             System.out.println("Host: " + host); */
-            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, null, true).run();
+            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, null, inputType).run();
+            
         }
         else {
             System.out.println("JobExecutorService: using data source.");
             final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
             final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);
-            System.out.println("data source: " + dataSource.label);
-
+            System.out.println("data source: " + dataSource.label);        
+            inputType = dataSource.type.name();
+            System.out.println("data source type: " + inputType);
             
-
-            //Assuming the url is in the MongoDB format
-            /*
-            String uri = url.substring(10, url.lastIndexOf("/"));
-            String dbNameAndCollection = url.substring(url.lastIndexOf("/") + 1);
-            String[] parts = dbNameAndCollection.split("\\.");
-
-            String databaseName = parts[0];
-            String collectionName = parts[1];*/
-            
-            categoryMappingPair = new MMInferOneInAll().input("appName", "", "", "yelpbusinesssample", schemaCatName, inputStreamProvider, false).run();
+            categoryMappingPair = new MMInferOneInAll().input("appName", "", "", "yelpbusinesssample", schemaCatName, inputStreamProvider, inputType).run();
         }
                 
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());

@@ -21,7 +21,6 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.exception.OtherException;
-//import cz.matfyz.evolution.Version;
 import cz.matfyz.inference.algorithms.rba.Finalize;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
@@ -29,6 +28,7 @@ import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunctio
 import cz.matfyz.inference.schemaconversion.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
 import cz.matfyz.wrapperjson.JSONInferenceWrapper;
+import cz.matfyz.wrappercsv.CSVInferenceWrapper;
 import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 
@@ -46,16 +46,16 @@ public class MMInferOneInAll {
     public static String collectionName;
     public static String schemaCatName;
     public static InputStreamProvider inputStreamProvider;
-    public static boolean dataFromDB;
+    public static String inputType;
 
-    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName, InputStreamProvider inputStreamProvider, boolean dataFromDB) {
+    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName, InputStreamProvider inputStreamProvider, String inputType) {
         this.appName = appName;
         this.uri = uri;
         this.databaseName = databaseName;
         this.collectionName = collectionName;
         this.schemaCatName = schemaCatName;
         this.inputStreamProvider = inputStreamProvider;
-        this.dataFromDB = dataFromDB;    
+        this.inputType = inputType;    
         return this;
     }
 
@@ -73,11 +73,19 @@ public class MMInferOneInAll {
         RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
         // might have to move this, but I need to add logic, on whether I am using data from db or straight from file
         AbstractInferenceWrapper wrapper;
-        if (dataFromDB) {
-            wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
-        }
-        else {
-            wrapper = new JSONInferenceWrapper(sparkMaster, appName, inputStreamProvider);
+        System.out.println("data source type in mminferAll: " + inputType);
+        switch(inputType) {
+            case "Database":
+                wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
+                break;
+            case "JsonFile":
+                wrapper = new JSONInferenceWrapper(sparkMaster, appName, inputStreamProvider);
+                break;
+            case "CsvFile":
+                wrapper = new CSVInferenceWrapper(sparkMaster, appName, inputStreamProvider);
+            default:
+                wrapper = null;
+                System.out.println("Forbidden input type used.");                
         }
         
         AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
