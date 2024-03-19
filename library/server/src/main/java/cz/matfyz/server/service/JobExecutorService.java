@@ -12,6 +12,7 @@ import cz.matfyz.core.schema.SchemaGraph;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.utils.ArrayUtils;
+import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
@@ -19,7 +20,6 @@ import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.CategoryMappingPair;
-//import cz.matfyz.integration.processes.JsonLdToCategory;
 
 import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.builder.MetadataContext;
@@ -38,7 +38,6 @@ import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
-import cz.matfyz.server.repository.DataSourceRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
@@ -92,6 +91,7 @@ public class JobExecutorService {
     @Autowired
     private QueryRepository queryRepository;
     
+    @Autowired
     private DataSourceService dataSourceService;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
@@ -215,37 +215,37 @@ public class JobExecutorService {
         
         final CategoryMappingPair categoryMappingPair;
         if (payload.databaseId()!= null){
-            final DatabaseEntity databaseEntity = logicalModelService.find(payload.databaseId()).database();
-            System.out.println("trying out databases");
+            System.out.println("JobExecutorService: using db.");
+            final DatabaseEntity databaseEntity = logicalModelService.find(payload.databaseId()).database(); //probs here it should be from databaseService though!!!!
             String databaseName = databaseEntity.settings.get("database").asText();
             String port = databaseEntity.settings.get("port").asText();
             String host = databaseEntity.settings.get("host").asText();
-            //String uri = "localhost:3205";
             String uri = host + ":" + port;
+            /*
             System.out.println("DatabaseName: " + databaseName);
             System.out.println("Port: " + port);
-            System.out.println("Host: " + host);
-            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, true).run();
+            System.out.println("Host: " + host); */
+            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, null, true).run();
         }
         else {
+            System.out.println("JobExecutorService: using data source.");
             final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
-            String url = dataSource.url; // mongodb://localhost:3205/srutkova.yelpbusinesssample
+            final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);
+            System.out.println("data source: " + dataSource.label);
+
             
 
             //Assuming the url is in the MongoDB format
+            /*
             String uri = url.substring(10, url.lastIndexOf("/"));
             String dbNameAndCollection = url.substring(url.lastIndexOf("/") + 1);
             String[] parts = dbNameAndCollection.split("\\.");
 
             String databaseName = parts[0];
-            String collectionName = parts[1];
+            String collectionName = parts[1];*/
             
-            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, false).run();
+            categoryMappingPair = new MMInferOneInAll().input("appName", "", "", "yelpbusinesssample", schemaCatName, inputStreamProvider, false).run();
         }
-          
-        //System.out.println("uri: " + uri);
-        //System.out.println("databaseName: " + databaseName);
-        //System.out.println("collectionName: " + collectionName);
                 
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
         

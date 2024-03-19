@@ -29,7 +29,9 @@ public class DataSource extends Entity {
     }
 
     public enum Type {
-        JsonLdStore
+        JsonLdStore,
+        JsonFile,
+        CsvFile
     }
 
     public void updateFrom(DataSourceUpdate update) {

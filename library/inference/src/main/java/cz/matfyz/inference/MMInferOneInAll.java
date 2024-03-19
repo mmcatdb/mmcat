@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.utils.InputStreamProvider;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
@@ -27,6 +28,7 @@ import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunctio
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
 import cz.matfyz.inference.schemaconversion.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
+import cz.matfyz.wrapperjson.JSONInferenceWrapper;
 import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 
@@ -43,16 +45,17 @@ public class MMInferOneInAll {
     public static String databaseName;
     public static String collectionName;
     public static String schemaCatName;
+    public static InputStreamProvider inputStreamProvider;
     public static boolean dataFromDB;
 
-    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName, boolean dataFromDB) {
+    public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName, InputStreamProvider inputStreamProvider, boolean dataFromDB) {
         this.appName = appName;
         this.uri = uri;
         this.databaseName = databaseName;
         this.collectionName = collectionName;
         this.schemaCatName = schemaCatName;
-        this.dataFromDB = dataFromDB;        
-
+        this.inputStreamProvider = inputStreamProvider;
+        this.dataFromDB = dataFromDB;    
         return this;
     }
 
@@ -73,8 +76,9 @@ public class MMInferOneInAll {
         if (dataFromDB) {
             wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
         }
-        else {wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);}
-        //wrapper = new JSONorCSVWrapper()
+        else {
+            wrapper = new JSONInferenceWrapper(sparkMaster, appName, inputStreamProvider);
+        }
         
         AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
         Finalize finalize = null;
