@@ -1,4 +1,4 @@
-package cz.matfyz.wrapperjson;
+package cz.matfyz.wrapperjson.inference.helpers;
 
 import org.bson.Document;
 import org.slf4j.Logger;

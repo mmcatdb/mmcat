@@ -5,13 +5,13 @@ import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
 import cz.matfyz.core.utils.InputStreamProvider;
+import cz.matfyz.wrappercsv.inference.functions.CSVRecordToRSDMapFunction;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +30,13 @@ public class CSVInferenceWrapper extends AbstractInferenceWrapper {
     private final String sparkMaster;
     private final String appName;
     private final InputStreamProvider inputStreamProvider;
-    private final String checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
+    private final String checkpointDir;
     
-    public CSVInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider) {
+    public CSVInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
         this.sparkMaster = sparkMaster;
         this.appName = appName;
-        this.inputStreamProvider = inputStreamProvider;     
+        this.inputStreamProvider = inputStreamProvider;  
+        this.checkpointDir = checkpointDir;
     }
     
     @Override
@@ -60,7 +61,6 @@ public class CSVInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     @Override
-    //dummy implemenatio, because I think I dont need it now
     public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
     }
@@ -83,18 +83,18 @@ public class CSVInferenceWrapper extends AbstractInferenceWrapper {
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                //System.out.println("json file line: " + line);
+                // Assuming the file only uses commas as delimiter and not in any other way!
                 String[] elements = line.split(",\\s*");
                 if (!firstLine) {
                     header = elements;
-                    //header = new ArrayList<>(Arrays.asList(elements));
-                    firstLine = true;                            
+                    firstLine = true;
                 }
                 else {
                     //assuming there is no data missing 
                     Map<String, String> lineMap = new HashMap<String, String>();
                     for (int i = 0; i < elements.length; i++) {
                         lineMap.put(header[i], elements[i]);
+                        //System.out.println("header: " + header[i] + " column valu: " + elements[i]);
                     }
                     lines.add(lineMap);
                 }             
@@ -108,7 +108,6 @@ public class CSVInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     @Override
-    //dummy implemenatio, because I think I dont need it now
     public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
 

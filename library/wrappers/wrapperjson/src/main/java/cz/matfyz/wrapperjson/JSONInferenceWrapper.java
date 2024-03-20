@@ -5,6 +5,7 @@ import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
 import cz.matfyz.core.utils.InputStreamProvider;
+import cz.matfyz.wrapperjson.inference.functions.JSONRecordToRSDMapFunction;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,19 +30,19 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
     private final String sparkMaster;
     private final String appName;
     private final InputStreamProvider inputStreamProvider;
-    private final String checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
+    private final String checkpointDir;
     
-    public JSONInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider) {
+    public JSONInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
         this.sparkMaster = sparkMaster;
         this.appName = appName;
         this.inputStreamProvider = inputStreamProvider;
-         
+        this.checkpointDir = checkpointDir; 
     }
     
     @Override
     public void buildSession() {
         sparkSession = SparkSession.builder().master(sparkMaster)
-                .appName(appName) // I probs need to add the file here?
+                .appName(appName) 
                 .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
@@ -60,7 +61,6 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     @Override
-    //dummy implemenatio, because I think I dont need it now
     public JavaPairRDD<RawProperty, Share> loadProperties(boolean loadSchema, boolean loadData) {
         return null;
     }
@@ -69,19 +69,16 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
     @Override
     // assuming that in the json file one line represent one object
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
-        //System.out.println("loadRSDs() method run");
         JavaRDD<Document> jsonDocuments = loadDocuments();
         return jsonDocuments.map(new JSONRecordToRSDMapFunction());
     }
     
     public JavaRDD<Document> loadDocuments() {
-        //System.out.println("loadDocuments() method run");
         List<String> lines = new ArrayList<>();
         try (InputStream inputStream = inputStreamProvider.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                //System.out.println("json file line: " + line);
                 lines.add(line);
             }
         } catch (IOException e) {
@@ -94,7 +91,6 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     @Override
-    //dummy implemenatio, because I think I dont need it now
     public JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs() {
         return null;
 

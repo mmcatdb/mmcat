@@ -1,10 +1,10 @@
-package cz.matfyz.wrappercsv;
+package cz.matfyz.wrappercsv.inference.helpers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.matfyz.core.rsd.*;
-import cz.matfyz.wrappercsv.MapCSVRecord;
+import cz.matfyz.wrappercsv.inference.helpers.MapCSVRecord;
 
 import java.util.*;
 

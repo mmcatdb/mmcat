@@ -1,4 +1,4 @@
-package cz.matfyz.wrapperjson;
+package cz.matfyz.wrapperjson.inference.helpers;
 
 //import cz.cuni.matfyz.mminfer.persister.model.RecordSchemaDescription;
 import org.bson.types.ObjectId;

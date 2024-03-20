@@ -1,4 +1,4 @@
-package cz.matfyz.wrappercsv;
+package cz.matfyz.wrappercsv.inference.functions;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.spark.api.java.function.Function;
 
 import cz.matfyz.core.rsd.*;
+import cz.matfyz.wrappercsv.inference.helpers.MapCSVDocument;
 
 public class CSVRecordToRSDMapFunction implements Function<Map<String, String>,RecordSchemaDescription>, Serializable{
 

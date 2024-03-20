@@ -93,6 +93,9 @@ public class JobExecutorService {
     
     @Autowired
     private DataSourceService dataSourceService;
+    
+    @Autowired
+    private DatabaseService databaseService;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
@@ -183,14 +186,12 @@ public class JobExecutorService {
     }
 
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-        //Akorát k tomu potřebujete vytvořit souřadnice objektů v grafu, nicméně na to by mělo jít najít nějaký layoutovací algoritmus
         MetadataContext context = new MetadataContext();
 
-        //Create a special id, under which you later load this category ??
         Id id = new Id("schm_from_rsd"); //now hard coded special id
         context.setId(id);
 
-        Version version = Version.generateInitial(); // can I use this?
+        Version version = Version.generateInitial(); 
         context.setVersion(version);
 
         //maybe get rid of this second loop? and do all in one
@@ -201,7 +202,6 @@ public class JobExecutorService {
             Position position = entry.getValue();
             context.setPosition(key, position);
         }
-
         SchemaCategoryWrapper wrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
 
         return wrapper;
@@ -216,29 +216,22 @@ public class JobExecutorService {
         String inputType;
         
         if (payload.databaseId()!= null){
-            System.out.println("JobExecutorService: using db.");
-            final DatabaseEntity databaseEntity = logicalModelService.find(payload.databaseId()).database(); //probs here it should be from databaseService though!!!!
+            final DatabaseEntity databaseEntity = databaseService.find(payload.databaseId()); 
             String databaseName = databaseEntity.settings.get("database").asText();
             String port = databaseEntity.settings.get("port").asText();
             String host = databaseEntity.settings.get("host").asText();
             String uri = host + ":" + port;
             inputType = "Database";
-            /*
-            System.out.println("DatabaseName: " + databaseName);
-            System.out.println("Port: " + port);
-            System.out.println("Host: " + host); */
+            
             categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, null, inputType).run();
             
         }
         else {
-            System.out.println("JobExecutorService: using data source.");
             final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
-            final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);
-            System.out.println("data source: " + dataSource.label);        
+            final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);        
             inputType = dataSource.type.name();
-            System.out.println("data source type: " + inputType);
-            
-            categoryMappingPair = new MMInferOneInAll().input("appName", "", "", "yelpbusinesssample", schemaCatName, inputStreamProvider, inputType).run();
+           
+            categoryMappingPair = new MMInferOneInAll().input("appName", null, null, null, schemaCatName, inputStreamProvider, inputType).run();
         }
                 
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());

@@ -1,11 +1,10 @@
-package cz.matfyz.wrappercsv;
+package cz.matfyz.wrappercsv.inference.helpers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.matfyz.core.rsd.*;
-import cz.matfyz.wrappercsv.MapCSVDocument;
-import cz.matfyz.wrappercsv.MapCSVRecord;
+import cz.matfyz.wrappercsv.inference.helpers.MapCSVDocument;
 
 import java.util.*;
 
@@ -27,7 +26,7 @@ public enum MapCSVDocument {
         List<RecordSchemaDescription> children = new ArrayList<>();
 
         t.forEach((key, value) -> children.add(MapCSVRecord.INSTANCE.process(key, value, true, true)));
-
+        
         Collections.sort(children);
 
         result.setChildren(children);
