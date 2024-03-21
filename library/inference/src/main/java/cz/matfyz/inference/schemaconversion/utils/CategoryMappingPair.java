@@ -1,4 +1,4 @@
-package cz.matfyz.inference.schemaconversion;
+package cz.matfyz.inference.schemaconversion.utils;
 
 import cz.matfyz.core.schema.SchemaCategory;
 

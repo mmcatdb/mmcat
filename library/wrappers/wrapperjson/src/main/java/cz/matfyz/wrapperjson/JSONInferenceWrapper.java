@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -74,6 +72,10 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
     }
     
     public JavaRDD<Document> loadDocuments() {
+        JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
+        newContext.setLogLevel("ERROR");
+        newContext.setCheckpointDir(checkpointDir);
+        
         List<String> lines = new ArrayList<>();
         try (InputStream inputStream = inputStreamProvider.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {

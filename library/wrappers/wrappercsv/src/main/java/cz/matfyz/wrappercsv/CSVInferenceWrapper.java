@@ -20,8 +20,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
-
-
 public class CSVInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
@@ -75,6 +73,10 @@ public class CSVInferenceWrapper extends AbstractInferenceWrapper {
     }
     
     public JavaRDD<Map<String, String>> loadDocuments() {
+        JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
+        newContext.setLogLevel("ERROR");
+        newContext.setCheckpointDir(checkpointDir);
+               
         List<Map<String, String>> lines = new ArrayList<>();
         boolean firstLine = false;
         String[] header = null;

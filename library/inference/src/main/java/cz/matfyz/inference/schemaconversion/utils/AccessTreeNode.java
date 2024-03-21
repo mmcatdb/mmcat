@@ -1,4 +1,4 @@
-package cz.matfyz.inference.schemaconversion;
+package cz.matfyz.inference.schemaconversion.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import cz.matfyz.core.identifiers.Signature;
  */
 public class AccessTreeNode{
 
-    public enum State {S, C;} // S - simple property, C - complex property
+    public enum State {Simple, Complex;} 
 
     public State state;
     public String name;
