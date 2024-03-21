@@ -2,6 +2,7 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
@@ -78,6 +79,8 @@ public class QueryService {
 
         final var kinds = logicalModelService
             .findAll(categoryId).stream()
+            // TODO enable neo4j when it's supported
+            .filter(model -> model.database().type != DatabaseType.neo4j)
             .flatMap(model -> {
                 final DatabaseEntity databaseEntity = model.database();
                 databases.put(databaseEntity.id, databaseEntity);
