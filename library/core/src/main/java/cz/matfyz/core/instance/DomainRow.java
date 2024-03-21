@@ -45,7 +45,7 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
     public final SuperIdWithValues superId;
     // All technical ids under which is this row known.
     public final Set<String> technicalIds;
-    private final Set<Signature> pendingReferences;
+    public final Set<Signature> pendingReferences;
     // Various ids that can be constructed from this row.
 
     // -1 means that the row is not yet serialized

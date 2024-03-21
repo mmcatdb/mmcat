@@ -3,9 +3,9 @@ package cz.matfyz.server.controller;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.instance.InstanceMorphismWrapper;
+import cz.matfyz.server.entity.instance.InstanceObjectWrapper;
 import cz.matfyz.server.service.InstanceCategoryService;
-import cz.matfyz.server.view.InstanceMorphismWrapper;
-import cz.matfyz.server.view.InstanceObjectWrapper;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -25,33 +25,33 @@ public class InstanceCategoryController {
     @Autowired
     private InstanceCategoryService service;
 
-    @GetMapping("/instances/{categoryId}/objects/{objectKey}")
-    public InstanceObjectWrapper getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {
-        final var key = new Key(objectKey);
+    // @GetMapping("/instances/{categoryId}/objects/{objectKey}")
+    // public InstanceObjectWrapper getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {
+    //     final var key = new Key(objectKey);
 
-        final var object = service.findObject(session, categoryId, key);
+    //     final var object = service.findObject(session, categoryId, key);
 
-        if (object == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    //     if (object == null)
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        return new InstanceObjectWrapper(object);
-    }
+    //     return new InstanceObjectWrapper(object);
+    // }
 
-    @GetMapping("/instances/{categoryId}/morphisms/{signatureString}")
-    public InstanceMorphismWrapper getInstanceMorphism(HttpSession session, @PathVariable Id categoryId, @PathVariable String signatureString) {
-        final var signature = Signature.fromString(signatureString);
-        if (signature == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    // @GetMapping("/instances/{categoryId}/morphisms/{signatureString}")
+    // public InstanceMorphismWrapper getInstanceMorphism(HttpSession session, @PathVariable Id categoryId, @PathVariable String signatureString) {
+    //     final var signature = Signature.fromString(signatureString);
+    //     if (signature == null)
+    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        if (signature.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    //     if (signature.isEmpty())
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        final var morphism = service.findMorphism(session, categoryId, signature);
+    //     final var morphism = service.findMorphism(session, categoryId, signature);
 
-        if (morphism == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    //     if (morphism == null)
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        return new InstanceMorphismWrapper(morphism);
-    }
+    //     return new InstanceMorphismWrapper(morphism);
+    // }
 
 }
