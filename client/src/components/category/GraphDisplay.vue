@@ -74,31 +74,33 @@ function toggleGroup(groupId: string) {
             id="cytoscape"
         />
         <template v-if="graph">
-            <div class="category-command-panel p-2 d-flex gap-2">
+            <div class="category-command-panel p-2 d-flex align-items-start gap-2">
                 <button
                     :disabled="fetching"
+                    class="text-nowrap"
                     @click="() => emit('updatePositions')"
                 >
                     Save positions
                 </button>
                 <button
+                    class="text-nowrap"
                     @click="graph?.center"
                 >
                     Center graph
                 </button>
                 <button
+                    class="text-nowrap"
                     @click="graph?.resetLayout()"
                 >
                     Reset layout
                 </button>
-                <div class="flex-grow-1" />
-                <div class="d-flex gap-3 pe-2">
+                <div class="d-flex gap-3 px-2 justify-content-end flex-grow-1 flex-wrap">
                     <label
 
                         v-for="group in graph.highlights.groups.value"
                         :key="group.id"
                         :style="{ color: groupColors.root[group.id] }"
-                        class="d-flex align-items-center gap-1 fw-semibold clickable"
+                        class="d-flex align-items-center gap-1 fw-semibold clickable text-nowrap"
                     >
                         <input
                             :checked="group.id === highlightState?.groupId"
@@ -121,6 +123,7 @@ function toggleGroup(groupId: string) {
 }
 
 .category-command-panel {
+    width: var(--schema-category-canvas-width);
     background-color: var(--color-background-dark);
 }
 </style>
