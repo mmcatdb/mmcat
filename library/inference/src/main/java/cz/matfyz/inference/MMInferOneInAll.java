@@ -4,11 +4,6 @@
 package cz.matfyz.inference;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,14 +39,14 @@ public class MMInferOneInAll {
     public static String checkpointDir;
 
     public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName, InputStreamProvider inputStreamProvider, String inputType) {
-        this.appName = appName;
-        this.uri = uri;
-        this.databaseName = databaseName;
-        this.collectionName = collectionName;
-        this.schemaCatName = schemaCatName;
-        this.inputStreamProvider = inputStreamProvider;
-        this.inputType = inputType;   
-        this.checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
+        MMInferOneInAll.appName = appName;
+        MMInferOneInAll.uri = uri;
+        MMInferOneInAll.databaseName = databaseName;
+        MMInferOneInAll.collectionName = collectionName;
+        MMInferOneInAll.schemaCatName = schemaCatName;
+        MMInferOneInAll.inputStreamProvider = inputStreamProvider;
+        MMInferOneInAll.inputType = inputType;   
+        MMInferOneInAll.checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
         return this;
     }
    
@@ -133,7 +128,6 @@ public class MMInferOneInAll {
       CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
       System.out.println("It all went good");
       return cmp;
-
   }
 
 }
