@@ -23,11 +23,11 @@ export class InstanceMorphism {
     }
 
     get showDomTechnicalIds(): boolean {
-        return !!this.mappings.find(mapping => mapping.domRow.technicalIds.size > 0);
+        return !!this.mappings.find(mapping => mapping.dom.technicalIds.size > 0);
     }
 
     get showCodTechnicalIds(): boolean {
-        return !!this.mappings.find(mapping => mapping.codRow.technicalIds.size > 0);
+        return !!this.mappings.find(mapping => mapping.cod.technicalIds.size > 0);
     }
 }
 
@@ -42,19 +42,19 @@ export type InstanceMorphismFromServer = {
 
 export class MappingRow {
     private constructor(
-        readonly domRow: DomainRow,
-        readonly codRow: DomainRow,
+        readonly dom: DomainRow,
+        readonly cod: DomainRow,
     ) {}
 
     static fromServer(input: MappingRowFromServer) {
         return new MappingRow(
-            DomainRow.fromServer(input.domRow),
-            DomainRow.fromServer(input.codRow),
+            DomainRow.fromServer(input.dom),
+            DomainRow.fromServer(input.cod),
         );
     }
 }
 
 export type MappingRowFromServer = {
-    domRow: DomainRowFromServer;
-    codRow: DomainRowFromServer;
+    dom: DomainRowFromServer;
+    cod: DomainRowFromServer;
 };

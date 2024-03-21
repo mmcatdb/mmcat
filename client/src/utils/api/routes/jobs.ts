@@ -1,6 +1,6 @@
 import type { StringLike } from '@/types/api/routes';
 import { GET, POST } from '../routeFunctions';
-import type { JobFromServer } from '@/types/job';
+import type { JobFromServer, SessionFromServer } from '@/types/job';
 
 const jobs = {
     getAllJobsInCategory: GET<{ categoryId: StringLike }, JobFromServer[]>(
@@ -20,6 +20,12 @@ const jobs = {
     ),
     cancelJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/cancel`,
+    ),
+    getAllSessionsInCategory: GET<{ categoryId: StringLike }, SessionFromServer[]>(
+        u => `/schema-categories/${u.categoryId}/sessions`,
+    ),
+    createSession: POST<{ categoryId: StringLike }, SessionFromServer>(
+        u => `/schema-categories/${u.categoryId}/sessions`,
     ),
 };
 

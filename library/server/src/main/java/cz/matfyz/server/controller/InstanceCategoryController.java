@@ -7,7 +7,6 @@ import cz.matfyz.server.service.InstanceCategoryService;
 import cz.matfyz.server.view.InstanceMorphismWrapper;
 import cz.matfyz.server.view.InstanceObjectWrapper;
 
-import java.util.List;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,6 @@ public class InstanceCategoryController {
 
     @Autowired
     private InstanceCategoryService service;
-
-    @GetMapping("/instances")
-    public List<String> getAllInstances(HttpSession session) {
-        var instances = service.findAll(session);
-
-        return instances.stream().map(entry -> entry.getKey() + ":\n" + entry.getValue().toString()).toList();
-    }
 
     @GetMapping("/instances/{categoryId}/objects/{objectKey}")
     public InstanceObjectWrapper getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {

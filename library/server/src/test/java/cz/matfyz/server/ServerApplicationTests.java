@@ -11,7 +11,6 @@ import cz.matfyz.core.utils.Statistics;
 import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdProvider;
-import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
@@ -154,14 +153,10 @@ class ServerApplicationTests {
 
     private Mapping createMapping(MappingWrapper mappingWrapper) {
         final var model = logicalModelService.find(mappingWrapper.logicalModelId());
-        var categoryWrapper = categoryService.find(model.logicalModel().categoryId);
+        final var categoryWrapper = categoryService.find(model.logicalModel().categoryId);
+        final var category = categoryWrapper.toSchemaCategory();
 
-        var mapping = new MappingBuilder()
-            .setMappingWrapper(mappingWrapper)
-            .setCategoryWrapper(categoryWrapper)
-            .build();
-
-        return mapping;
+        return mappingWrapper.toMapping(category);
     }
 
 }

@@ -55,3 +55,25 @@ type JobError = {
     name: string;
     data: unknown;
 };
+
+export type SessionFromServer = {
+    id: Id;
+    categoryId: Id;
+    createdAt: string;
+};
+
+export class Session implements Entity {
+    private constructor(
+        public readonly id: Id,
+        public readonly categoryId: Id,
+        public readonly createdAt: Date,
+    ) {}
+
+    static fromServer(input: SessionFromServer): Session {
+        return new Session(
+            input.id,
+            input.categoryId,
+            new Date(input.createdAt),
+        );
+    }
+}

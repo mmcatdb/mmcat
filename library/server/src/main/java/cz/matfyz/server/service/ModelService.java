@@ -1,7 +1,7 @@
 package cz.matfyz.server.service;
 
+import cz.matfyz.server.controller.ModelController.Model;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.Model;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.utils.UserStore;

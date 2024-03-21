@@ -77,7 +77,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         return domainByTechnicalIds.get(technicalId);
     }
 
-    private void setRow(DomainRow row, Collection<SuperIdWithValues> ids) {
+    void setRow(DomainRow row, Collection<SuperIdWithValues> ids) {
         for (var id : ids) {
             Map<SuperIdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
             if (rowsWithSameTypeId == null) {
@@ -343,5 +343,5 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
 
         return builder.toString();
     }
-    
+
 }

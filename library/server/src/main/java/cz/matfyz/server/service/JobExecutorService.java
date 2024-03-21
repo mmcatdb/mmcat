@@ -12,7 +12,6 @@ import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
-import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.configuration.ServerProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
@@ -112,7 +111,7 @@ public class JobExecutorService {
 
     private void processJobByType(Run run, Job job) {
         if (job.payload instanceof CategoryToModelPayload categoryToModelPayload)
-            categoryToModelAlgorithm(run, categoryToModelPayload);
+            categoryToModelAlgorithm(run, job, categoryToModelPayload);
         else if (job.payload instanceof ModelToCategoryPayload modelToCategoryPayload)
             modelToCategoryAlgorithm(run, modelToCategoryPayload);
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
@@ -127,23 +126,25 @@ public class JobExecutorService {
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
         // InstanceCategory instance = store.getCategory(run.categoryId);
+        final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
         InstanceCategory instance = null;
 
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
-            final Mapping mapping = createMapping(mappingWrapper, run.categoryId);
+            final Mapping mapping = mappingWrapper.toMapping(schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
         }
 
         // store.setInstance(run.categoryId, instance);
     }
 
-    private void categoryToModelAlgorithm(Run run, CategoryToModelPayload payload) {
+    private void categoryToModelAlgorithm(Run run, Job job, CategoryToModelPayload payload) {
+        final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
         // final InstanceCategory instance = store.getCategory(run.categoryId);
         InstanceCategory instance = null;
 
         final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
         final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
-            .map(wrapper -> createMapping(wrapper, run.categoryId))
+            .map(wrapper -> wrapper.toMapping(schema))
             .toList();
 
         final AbstractControlWrapper control = wrapperService.getControlWrapper(database);
@@ -176,16 +177,7 @@ public class JobExecutorService {
             }
         }
 
-        // modelService.createNew(store, job, run, job.label, output.toString());
-    }
-
-    private Mapping createMapping(MappingWrapper mappingWrapper, Id categoryId) {
-        final var categoryWrapper = schemaService.find(categoryId);
-
-        return new MappingBuilder()
-            .setMappingWrapper(mappingWrapper)
-            .setCategoryWrapper(categoryWrapper)
-            .build();
+        job.data = output.toString();
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {

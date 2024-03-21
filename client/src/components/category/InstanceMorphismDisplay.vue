@@ -76,25 +76,25 @@ async function fetchMorphism() {
                     :key="mappingIndex"
                 >
                     <td v-if="morphism.showDomTechnicalIds">
-                        {{ mapping.domRow.technicalIdsString }}
+                        {{ mapping.dom.technicalIdsString }}
                     </td>
                     <td
                         v-for="(column, columnIndex) in columns.dom"
                         :key="columnIndex"
                     >
-                        {{ mapping.domRow.superId.tuples.get(column.signature) }}
+                        {{ mapping.dom.superId.tuples.get(column.signature) }}
                     </td>
                     <td class="gap">
                         &lt;--&gt;
                     </td>
                     <td v-if="morphism.showCodTechnicalIds">
-                        {{ mapping.codRow.technicalIdsString }}
+                        {{ mapping.cod.technicalIdsString }}
                     </td>
                     <td
                         v-for="(column, columnIndex) in columns.cod"
                         :key="columnIndex"
                     >
-                        {{ mapping.codRow.superId.tuples.get(column.signature) }}
+                        {{ mapping.cod.superId.tuples.get(column.signature) }}
                     </td>
                 </tr>
             </table>

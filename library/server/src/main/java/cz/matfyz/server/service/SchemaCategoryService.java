@@ -42,7 +42,12 @@ public class SchemaCategoryService {
         final var newWrapper = SchemaCategoryWrapper.createNew(init.label());
         final Id generatedId = repository.add(newWrapper);
 
-        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version);
+        if (generatedId == null)
+            return null;
+
+        jobService.createSession(generatedId);
+
+        return new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version);
     }
 
     public SchemaCategoryInfo findInfo(Id id) {

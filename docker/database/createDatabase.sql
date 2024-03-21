@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS query_version;
 DROP TABLE IF EXISTS query;
 DROP TABLE IF EXISTS job;
 DROP TABLE IF EXISTS run;
+DROP TABLE IF EXISTS session;
 DROP TABLE IF EXISTS action;
 DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS logical_model;
@@ -70,6 +71,13 @@ CREATE TABLE action (
     id UUID PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
     json_value JSONB NOT NULL
+);
+
+CREATE TABLE session (
+    id UUID PRIMARY KEY,
+    schema_category_id INTEGER NOT NULL REFERENCES schema_category,
+    json_value JSONB NOT NULL,
+    instance_data JSONB DEFAULT NULL
 );
 
 CREATE TABLE run (

@@ -6,11 +6,13 @@ import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
+import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.entity.job.Job.State;
 import cz.matfyz.server.exception.InvalidTransitionException;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -55,13 +57,14 @@ public class JobService {
         return new JobWithRun(newJob, jobWithRun.run());
     }
 
-    public JobWithRun transition(JobWithRun jobWithRun, State newState) {
+    public JobWithRun transition(JobWithRun jobWithRun, State newState, @Nullable Id sessionId) {
         final var job = jobWithRun.job();
         final State prevState = job.state;
         if (!allowedTransitions.containsKey(newState) || !allowedTransitions.get(newState).contains(prevState))
             throw InvalidTransitionException.job(job.id, prevState, newState);
 
         job.state = newState;
+        job.sessionId = sessionId;
         repository.save(job);
 
         return new JobWithRun(job, jobWithRun.run());
@@ -76,6 +79,17 @@ public class JobService {
         output.put(State.Canceled, Set.of(State.Paused, State.Ready));
 
         return output;
+    }
+
+    public List<Session> findAllSessions(Id categoryId) {
+        return repository.findAllSessionsInCategory(categoryId);
+    }
+
+    public Session createSession(Id categoryId) {
+        final var session = Session.createNew(categoryId);
+        repository.save(session);
+
+        return session;
     }
 
 }

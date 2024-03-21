@@ -18,8 +18,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 public class SchemaBuilder {
 
     private String schemaLabel;
@@ -129,7 +127,8 @@ public class SchemaBuilder {
     private Map<Signature, BuilderMorphism> morphismsBySignature = new TreeMap<>();
     private Map<String, BuilderMorphism> morphismsByLabel = new TreeMap<>();
 
-    private @Nullable String nextLabel = null;
+    // By default, we don't want any label because that would be a mess in the graph view.
+    private String nextLabel = "";
     public SchemaBuilder label(String nextLabel) {
         this.nextLabel = nextLabel;
         return this;
@@ -156,20 +155,15 @@ public class SchemaBuilder {
     }
 
     private BuilderMorphism morphism(BuilderObject dom, BuilderObject cod, BaseSignature signature) {
-        final String label = nextLabel != null ? nextLabel : createDefaultLabel(dom, cod);
-        final var morphism = new BuilderMorphism(signature, label, dom, cod, nextMin, nextTags);
+        final var morphism = new BuilderMorphism(signature, nextLabel, dom, cod, nextMin, nextTags);
         morphismsBySignature.put(morphism.signature(), morphism);
         morphismsByLabel.put(morphism.label(), morphism);
 
-        nextLabel = null;
+        nextLabel = "";
         nextMin = Min.ONE;
         nextTags = Set.of();
 
         return morphism;
-    }
-
-    private String createDefaultLabel(BuilderObject dom, BuilderObject cod) {
-        return dom.label() + "-->" + cod.label();
     }
 
     public BuilderMorphism composite(BuilderMorphism... morphisms) {

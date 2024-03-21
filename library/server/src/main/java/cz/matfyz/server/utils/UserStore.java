@@ -1,14 +1,12 @@
 package cz.matfyz.server.utils;
 
 import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.server.controller.ModelController.Model;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.Model;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 import jakarta.servlet.http.HttpSession;
 
@@ -39,10 +37,6 @@ public class UserStore implements Serializable {
 
     public InstanceCategory getCategory(Id categoryId) {
         return instaces.get(categoryId);
-    }
-
-    public Set<Entry<Id, InstanceCategory>> getAllInstances() {
-        return instaces.entrySet();
     }
 
     public void setInstance(Id categoryId, InstanceCategory instance) {

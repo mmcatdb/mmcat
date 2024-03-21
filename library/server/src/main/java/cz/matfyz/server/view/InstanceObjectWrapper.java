@@ -15,6 +15,7 @@ public record InstanceObjectWrapper(
     SignatureId superId,
     List<DomainRow> rows
 ) {
+
     public InstanceObjectWrapper(InstanceObject object) {
         this(
             object.key(),
@@ -22,5 +23,5 @@ public record InstanceObjectWrapper(
             object.allRowsToSet().stream().toList()
         );
     }
-
+    
 }

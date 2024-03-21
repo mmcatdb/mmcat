@@ -14,14 +14,22 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * @author jachymb.bartik
  */
 @JsonSerialize(using = SuperIdWithValues.Serializer.class)
+@JsonDeserialize(using = SuperIdWithValues.Deserializer.class)
 public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithValues> {
 
     private final Map<Signature, String> tuples;
@@ -223,6 +231,35 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
                 generator.writeEndObject();
             }
             generator.writeEndArray();
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<SuperIdWithValues> {
+
+        public Deserializer() {
+            this(null);
+        }
+
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
+
+        @Override public SuperIdWithValues deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+            final Map<Signature, String> tuples = new TreeMap<>();
+            
+            final var iterator = node.elements();
+            while (iterator.hasNext()) {
+                final JsonNode object = iterator.next();
+                final Signature signature = signatureJsonReader.readValue(object.get("signature"));
+                final String value = object.get("value").asText();
+                tuples.put(signature, value);
+            }
+
+            return new SuperIdWithValues(tuples);
         }
 
     }

@@ -43,8 +43,8 @@ public class Schema {
     public static final BuilderMorphism customerToCustomerId =  builder.morphism(customer, customerId, 1);
     public static final BuilderMorphism customerToName =        builder.morphism(customer, name, 2);
     public static final BuilderMorphism customerToSurname =     builder.morphism(customer, surname, 3);
-    public static final BuilderMorphism knowsToCustomerA =      builder.label("knows-->customerA").morphism(knows, customer, 4);
-    public static final BuilderMorphism knowsToCustomerB =      builder.label("knows-->customerB").morphism(knows, customer, 5);
+    public static final BuilderMorphism knowsToCustomerA =      builder.morphism(knows, customer, 4);
+    public static final BuilderMorphism knowsToCustomerB =      builder.morphism(knows, customer, 5);
     public static final BuilderMorphism orderToOrderId =        builder.morphism(order, orderId, 6);
     public static final BuilderMorphism orderToStreet =         builder.morphism(order, street, 7);
     public static final BuilderMorphism orderToCity =           builder.morphism(order, city, 8);

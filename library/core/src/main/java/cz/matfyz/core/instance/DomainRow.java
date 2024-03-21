@@ -15,8 +15,15 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author jachym.bartik
  */
 @JsonSerialize(using = DomainRow.Serializer.class)
+@JsonDeserialize(using = DomainRow.Deserializer.class)
 public class DomainRow implements Serializable, Comparable<DomainRow> {
 
     @SuppressWarnings({ "java:s1068", "unused" })
@@ -40,10 +48,18 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
     private final Set<Signature> pendingReferences;
     // Various ids that can be constructed from this row.
 
+    // -1 means that the row is not yet serialized
+    public int serializationId;
+
     public DomainRow(SuperIdWithValues superId, Set<String> technicalIds, Set<Signature> pendingReferences) {
+        this(superId, technicalIds, pendingReferences, -1);
+    }
+
+    public DomainRow(SuperIdWithValues superId, Set<String> technicalIds, Set<Signature> pendingReferences, int serializationId) {
         this.superId = superId;
         this.technicalIds = technicalIds;
         this.pendingReferences = pendingReferences;
+        this.serializationId = serializationId;
     }
 
     public boolean hasSignature(Signature signature) {
@@ -178,10 +194,53 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
 
         @Override public void serialize(DomainRow row, JsonGenerator generator, SerializerProvider provider) throws IOException {
             generator.writeStartObject();
+
+            generator.writeNumberField("id", row.serializationId);
+
             generator.writePOJOField("superId", row.superId);
+
             generator.writeFieldName("technicalIds");
             generator.writeArray(row.technicalIds.stream().toArray(String[]::new), 0, row.technicalIds.size());
+
+            generator.writeFieldName("pendingReferences");
+            generator.writeStartArray();
+            for (final var signature : row.pendingReferences)
+                generator.writePOJO(signature);
+            generator.writeEndArray();
+
             generator.writeEndObject();
+        }
+
+    }
+
+    public static class Deserializer extends StdDeserializer<DomainRow> {
+
+        public Deserializer() {
+            this(null);
+        }
+
+        public Deserializer(Class<?> vc) {
+            super(vc);
+        }
+
+        private static final ObjectReader superIdJsonReader = new ObjectMapper().readerFor(SuperIdWithValues.class);
+        private static final ObjectReader stringsJsonReader = new ObjectMapper().readerFor(String[].class);
+        private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
+
+        @Override public DomainRow deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+            final JsonNode node = parser.getCodec().readTree(parser);
+
+            final int id = node.get("id").asInt();
+
+            final SuperIdWithValues superId = superIdJsonReader.readValue(node.get("superId"));
+
+            final String[] technicalIdsArray = stringsJsonReader.readValue(node.get("technicalIds"));
+            final Set<String> technicalIds = new TreeSet<>(List.of(technicalIdsArray));
+
+            final Signature[] pendingReferencesArray = signaturesJsonReader.readValue(node.get("pendingReferences"));
+            final Set<Signature> pendingReferences = new TreeSet<>(List.of(pendingReferencesArray));
+
+            return new DomainRow(superId, technicalIds, pendingReferences, id);
         }
 
     }

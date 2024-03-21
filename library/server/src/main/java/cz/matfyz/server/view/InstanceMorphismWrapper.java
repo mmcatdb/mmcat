@@ -19,6 +19,7 @@ public record InstanceMorphismWrapper(
     SignatureId codSuperId,
     Set<MappingRow> mappings
 ) {
+
     public InstanceMorphismWrapper(InstanceMorphism morphism) {
         this(
             morphism.signature(),
@@ -29,4 +30,5 @@ public record InstanceMorphismWrapper(
             morphism.allMappings()
         );
     }
+    
 }
