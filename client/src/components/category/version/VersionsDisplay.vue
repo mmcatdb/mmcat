@@ -95,7 +95,8 @@ const displayedVersions = computed(() => {
 <style scoped>
 .version-display {
     width: 48px;
-    line-height: 26px;
+    padding-top: 2px;
+    line-height: 24px;
     border: 1px solid var(--color-text);
     border-radius: 3px;
     position: relative;
