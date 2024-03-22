@@ -13,7 +13,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.springframework.lang.NonNull;
+import com.mongodb.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 @JsonSerialize(using = Id.Serializer.class)
 @JsonDeserialize(using = Id.Deserializer.class)
@@ -44,6 +45,14 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
 
     @Override public CharSequence subSequence(int beginIndex, int endIndex) {
         return value.subSequence(beginIndex, endIndex);
+    }
+
+    @Override public boolean isEmpty() {
+        return value.isEmpty();
+    }
+
+    public @Nullable Id toNullable() {
+        return value.isEmpty() ? null : this;
     }
 
     private static final Pattern UUID_REGEX = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");

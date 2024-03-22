@@ -105,19 +105,19 @@ class JsonTests {
         serializationTest(cause);
     }
 
-    private String serialize(Object object) throws IOException {
+    private static String serialize(Object object) throws IOException {
         return mapper.writeValueAsString(object);
     }
 
-    private Object deserialize(String json) throws IOException {
+    private static Object deserialize(String json) throws IOException {
         return mapper.readValue(json, Object.class);
     }
 
-    private class Output { String value = ""; }
+    private static class Output { String value = ""; }
 
     private static String WHITE_COLOR_CODE = "\u001b[1;37m";
 
-    private void fullTest(Object object) {
+    public static void fullTest(Object object) {
         final Output json = serializationTest(object);
 
         final Output secondJson = new Output();
@@ -127,7 +127,7 @@ class JsonTests {
         assertEquals(json.value, secondJson.value);
     }
 
-    private Output serializationTest(Object object) {
+    public static Output serializationTest(Object object) {
         final Output json = new Output();
         assertDoesNotThrow(() -> {
             json.value = serialize(object);

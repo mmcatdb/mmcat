@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * @author jachymb.bartik
  */
-public class SignatureTests {
+class SignatureTests {
 
     static Stream<Arguments> traverseThroughSucceedsArguments() {
         return Stream.of(
@@ -26,7 +26,7 @@ public class SignatureTests {
 
     @ParameterizedTest
     @MethodSource("traverseThroughSucceedsArguments")
-    public void traverseThroughSucceeds(String originalString, String pathString, String expectedString) {
+    void traverseThroughSucceeds(String originalString, String pathString, String expectedString) {
         final var original = Signature.fromString(originalString);
         final var path = Signature.fromString(pathString);
         final var expected = Signature.fromString(expectedString);
@@ -45,7 +45,7 @@ public class SignatureTests {
 
     @ParameterizedTest
     @MethodSource("traverseThroughFailsArguments")
-    public void traverseThroughFails(String originalString, String pathString) {
+    void traverseThroughFails(String originalString, String pathString) {
         final var original = Signature.fromString(originalString);
         final var path = Signature.fromString(pathString);
 
@@ -67,7 +67,7 @@ public class SignatureTests {
 
     @ParameterizedTest
     @MethodSource("traverseAlongSucceedsArguments")
-    public void traverseAlongSucceeds(String originalString, String pathString, String expectedString) {
+    void traverseAlongSucceeds(String originalString, String pathString, String expectedString) {
         final var original = Signature.fromString(originalString);
         final var path = Signature.fromString(pathString);
         final var expected = Signature.fromString(expectedString);

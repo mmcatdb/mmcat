@@ -3,11 +3,10 @@ package cz.matfyz.server.controller;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.instance.InstanceMorphismWrapper;
+import cz.matfyz.server.entity.instance.InstanceObjectWrapper;
 import cz.matfyz.server.service.InstanceCategoryService;
-import cz.matfyz.server.view.InstanceMorphismWrapper;
-import cz.matfyz.server.view.InstanceObjectWrapper;
 
-import java.util.List;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,40 +25,33 @@ public class InstanceCategoryController {
     @Autowired
     private InstanceCategoryService service;
 
-    @GetMapping("/instances")
-    public List<String> getAllInstances(HttpSession session) {
-        var instances = service.findAll(session);
+    // @GetMapping("/instances/{categoryId}/objects/{objectKey}")
+    // public InstanceObjectWrapper getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {
+    //     final var key = new Key(objectKey);
 
-        return instances.stream().map(entry -> entry.getKey() + ":\n" + entry.getValue().toString()).toList();
-    }
+    //     final var object = service.findObject(session, categoryId, key);
 
-    @GetMapping("/instances/{categoryId}/objects/{objectKey}")
-    public InstanceObjectWrapper getInstanceObject(HttpSession session, @PathVariable Id categoryId, @PathVariable Integer objectKey) {
-        final var key = new Key(objectKey);
+    //     if (object == null)
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        final var object = service.findObject(session, categoryId, key);
+    //     return new InstanceObjectWrapper(object);
+    // }
 
-        if (object == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    // @GetMapping("/instances/{categoryId}/morphisms/{signatureString}")
+    // public InstanceMorphismWrapper getInstanceMorphism(HttpSession session, @PathVariable Id categoryId, @PathVariable String signatureString) {
+    //     final var signature = Signature.fromString(signatureString);
+    //     if (signature == null)
+    //         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        return new InstanceObjectWrapper(object);
-    }
+    //     if (signature.isEmpty())
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-    @GetMapping("/instances/{categoryId}/morphisms/{signatureString}")
-    public InstanceMorphismWrapper getInstanceMorphism(HttpSession session, @PathVariable Id categoryId, @PathVariable String signatureString) {
-        final var signature = Signature.fromString(signatureString);
-        if (signature == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    //     final var morphism = service.findMorphism(session, categoryId, signature);
 
-        if (signature.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    //     if (morphism == null)
+    //         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
-        final var morphism = service.findMorphism(session, categoryId, signature);
-
-        if (morphism == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        return new InstanceMorphismWrapper(morphism);
-    }
+    //     return new InstanceMorphismWrapper(morphism);
+    // }
 
 }

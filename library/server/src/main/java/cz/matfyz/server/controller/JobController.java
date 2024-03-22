@@ -4,6 +4,7 @@ import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.entity.job.Job.State;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
@@ -13,10 +14,10 @@ import cz.matfyz.server.service.JobService;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import jakarta.servlet.http.HttpSession;
 
 import com.mongodb.lang.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,31 +61,31 @@ public class JobController {
     }
 
     @PostMapping("/jobs/{id}/restart")
-    public JobDetail createRestartedJob(@PathVariable Id id, HttpSession session) {
+    public JobDetail createRestartedJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
 
         return jobToJobDetail(service.createRestartedJob(jobWithRun));
     }
 
     @PostMapping("/jobs/{id}/pause")
-    public JobDetail pauseJob(@PathVariable Id id, HttpSession session) {
+    public JobDetail pauseJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Paused));
+        return jobToJobDetail(service.transition(jobWithRun, State.Paused, null));
     }
 
     @PostMapping("/jobs/{id}/start")
-    public JobDetail startJob(@PathVariable Id id, HttpSession session) {
+    public JobDetail startJob(@PathVariable Id id, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Ready));
+        return jobToJobDetail(service.transition(jobWithRun, State.Ready, sessionId.toNullable()));
     }
 
     @PostMapping("/jobs/{id}/cancel")
-    public JobDetail cancelJob(@PathVariable Id id, HttpSession session) {
+    public JobDetail cancelJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
+        return jobToJobDetail(service.transition(jobWithRun, State.Canceled, null));
     }
 
     private JobDetail jobToJobDetail(JobWithRun job) {
@@ -110,6 +111,16 @@ public class JobController {
 
             return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.createdAt, job.state, payload, job.data);
         }
+    }
+
+    @GetMapping("/schema-categories/{categoryId}/sessions")
+    public List<Session> getAllSessions(@PathVariable Id categoryId) {
+        return service.findAllSessions(categoryId);
+    }
+
+    @PostMapping("/schema-categories/{categoryId}/sessions")
+    public Session createSession(@PathVariable Id categoryId) {
+        return service.createSession(categoryId);
     }
 
 }

@@ -2,10 +2,10 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.database.Database;
 import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
-import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.controller.QueryController.QueryPartDescription;
 import cz.matfyz.server.controller.QueryController.QueryDescription;
 import cz.matfyz.server.controller.QueryController.QueryInit;
@@ -79,13 +79,15 @@ public class QueryService {
 
         final var kinds = logicalModelService
             .findAll(categoryId).stream()
+            // TODO enable neo4j when it's supported
+            .filter(model -> model.database().type != DatabaseType.neo4j)
             .flatMap(model -> {
                 final DatabaseEntity databaseEntity = model.database();
                 databases.put(databaseEntity.id, databaseEntity);
 
                 final var builder = new Database.Builder();
                 mappingService.findAll(model.logicalModel().id).forEach(mappingWrapper -> {
-                    final var mapping = MappingBuilder.build(category, mappingWrapper);
+                    final var mapping = mappingWrapper.toMapping(category);
                     builder.mapping(mapping);
                 });
                 final var database = builder.build(databaseEntity.type, wrapperService.getControlWrapper(databaseEntity), databaseEntity.id.toString());

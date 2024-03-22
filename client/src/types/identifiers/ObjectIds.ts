@@ -52,7 +52,7 @@ export class ObjectIds {
             ? ids._signatureIds.map(id => id.signatures)
             : [ [ Signature.empty ] ];
 
-        const concatenatedSignatureIds = newSignatureIds.map(signatureId => signatureId.map(signature.concatenate));
+        const concatenatedSignatureIds = newSignatureIds.map(signatureId => signatureId.map(s => signature.concatenate(s)));
 
         return current.flatMap(currentId => concatenatedSignatureIds.map(signatureId => new SignatureId([ ...currentId.signatures, ...signatureId ])));
     }

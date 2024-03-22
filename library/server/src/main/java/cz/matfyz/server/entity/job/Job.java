@@ -35,20 +35,20 @@ public class Job extends Entity {
 
     public final Id runId;
     public final String label;
+    public final Date createdAt;
     /** The job contains all information needed to execute it. */
     public final ActionPayload payload;
     public State state;
-    public @Nullable Serializable data;
-    public final Date createdAt;
+    public @Nullable Serializable data = null;
+    public @Nullable Id sessionId = null;
 
-    private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state, Serializable data) {
+    private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state) {
         super(id);
         this.runId = runId;
         this.label = label;
         this.createdAt = createdAt;
         this.payload = payload;
         this.state = state;
-        this.data = data;
     }
 
     public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually) {
@@ -58,8 +58,7 @@ public class Job extends Entity {
             label,
             new Date(),
             payload,
-            isStartedManually ? State.Paused : State.Ready,
-            null
+            isStartedManually ? State.Paused : State.Ready
         );
     }
 
@@ -68,7 +67,8 @@ public class Job extends Entity {
         Date createdAt,
         ActionPayload payload,
         State state,
-        @Nullable Serializable data
+        @Nullable Serializable data,
+        @Nullable Id sessionId
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
@@ -76,16 +76,18 @@ public class Job extends Entity {
 
     public static Job fromJsonValue(Id id, Id runId, String jsonValueString) throws JsonProcessingException {
         final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
-
-        return new Job(
+        final var job = new Job(
             id,
             runId,
             jsonValue.label,
             jsonValue.createdAt,
             jsonValue.payload,
-            jsonValue.state,
-            jsonValue.data
+            jsonValue.state
         );
+        job.data = jsonValue.data;
+        job.sessionId = jsonValue.sessionId;
+
+        return job;
     }
 
     public String toJsonValue() throws JsonProcessingException {
@@ -94,7 +96,8 @@ public class Job extends Entity {
             createdAt,
             payload,
             state,
-            data
+            data,
+            sessionId
         ));
     }
 

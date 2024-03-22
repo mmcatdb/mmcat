@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
+import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
@@ -131,6 +132,74 @@ public class JobRepository {
             setId(statement, 1, run.id);
             setId(statement, 2, run.categoryId);
             setId(statement, 3, run.actionId, true);
+
+            output.set(statement.executeUpdate() != 0);
+        });
+    }
+
+    public List<Session> findAllSessionsInCategory(Id categoryId) {
+        return db.getMultiple((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    id, schema_category_id, json_value
+                FROM session
+                WHERE schema_category_id = ?
+                ORDER BY session.id;
+                """);
+            setId(statement, 1, categoryId);
+            final var resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                final Id id = getId(resultSet, "id");
+                final String jsonValue = resultSet.getString("json_value");
+                output.add(Session.fromJsonValue(id, categoryId, jsonValue));
+            }
+        });
+    }
+
+    public boolean save(Session session) {
+        return db.getBoolean((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                INSERT INTO session (id, schema_category_id, json_value)
+                VALUES (?, ?, ?::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    schema_category_id = EXCLUDED.schema_category_id,
+                    json_value = EXCLUDED.json_value;
+                """);
+            setId(statement, 1, session.id);
+            setId(statement, 2, session.categoryId);
+            statement.setString(3, session.toJsonValue());
+
+            output.set(statement.executeUpdate() != 0);
+        });
+    }
+
+    public String findInstanceCategoryJson(Id sessionId) {
+        return db.get((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                SELECT
+                    instance_data
+                FROM session
+                WHERE id = ?;
+                """);
+            setId(statement, 1, sessionId);
+            final var resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                output.set(resultSet.getString("instance_data"));
+            }
+        });
+    }
+
+    public boolean saveInstanceCategoryJson(Id sessionId, String json) {
+        return db.getBoolean((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                UPDATE session
+                SET instance_data = ?
+                WHERE id = ?;
+                """);
+            statement.setString(1, json);
+            setId(statement, 2, sessionId);
 
             output.set(statement.executeUpdate() != 0);
         });

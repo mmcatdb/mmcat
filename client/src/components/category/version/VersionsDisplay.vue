@@ -73,17 +73,18 @@ const displayedVersions = computed(() => {
 </script>
 
 <template>
-    <div class="versions-display">
+    <div class="d-flex flex-wrap align-items-start row-gap-3 column-gap-2">
         <div
             v-for="version in (showAll ? allVersions : displayedVersions)"
             :key="version.id"
-            class="version-display monospace-font"
+            class="version-display monospace-font text-center"
             :class="{
                 active: version.id === currentVersion.id,
                 clickable: version.id !== currentVersion.id,
                 wrapper: version.isCompositeWrapper,
+                'show-all': showAll,
             }"
-            :style="{ top: `${8 * version.level}px` }"
+            :style="{ marginTop: `${8 * version.level}px` }"
             @click="() => version.id !== currentVersion.id && evocat.move(version)"
         >
             {{ showAll ? version.id : version.branchlessId }}
@@ -92,21 +93,17 @@ const displayedVersions = computed(() => {
 </template>
 
 <style scoped>
-.versions-display {
-    display: flex;
-    padding-left: 16px;
-    padding-bottom: 8px;
-    padding-top: 8px;
-    align-items: center;
-    overflow-x: auto;
-}
-
 .version-display {
-    padding: 2px 8px;
+    width: 48px;
+    padding-top: 2px;
+    line-height: 24px;
     border: 1px solid var(--color-text);
     border-radius: 3px;
-    margin-right: 8px;
     position: relative;
+}
+
+.version-display.show-all {
+    width: 64px;
 }
 
 .version-display.active {

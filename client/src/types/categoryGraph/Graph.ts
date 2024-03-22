@@ -264,7 +264,7 @@ export type Group = GroupData & {
 
 export type GraphHighlightState = {
     groupId: string;
-    mappingId?: Id;
+    mappingIds?: Id[];
 } | undefined;
 
 class GraphHighlights {
@@ -331,17 +331,17 @@ class GraphHighlights {
         if (!this.state)
             return;
 
-        const mapping = this._groups.get(this.state.groupId)?.mappings.find(mapping => mapping.root.key.equals(node.schemaObject.key));
-        if (!mapping)
+        const mappings = this._groups.get(this.state.groupId)?.mappings.filter(mapping => mapping.root.key.equals(node.schemaObject.key));
+        if (!mappings || mappings.length === 0)
             // The node is not a root of any mapping in the current active group.
             return;
 
-        if (this.state.mappingId === mapping.mapping.id)
+        if (this.state.mappingIds?.includes(mappings[0].mapping.id))
             // Deactivate the current mapping.
             this.setState({ groupId: this.state.groupId });
         else
             // Activate a new mapping.
-            this.setState({ groupId: this.state.groupId, mappingId: mapping.mapping.id });
+            this.setState({ groupId: this.state.groupId, mappingIds: mappings.map(m => m.mapping.id) });
     }
 
     // Inner state logic
@@ -358,18 +358,20 @@ class GraphHighlights {
         if (!state)
             return;
 
-        if (!state.mappingId) {
+        if (!state.mappingIds) {
             this.toggleGroup(state.groupId, value);
             return;
         }
 
-        this.toggleMapping(state.groupId, state.mappingId, value);
+        state.mappingIds.map(id => this.toggleMapping(state.groupId, id, value));
     }
 
     private toggleGroup(groupId: string, value: boolean) {
         const group = this._groups.get(groupId);
         if (!group)
             return;
+
+        console.log(group);
 
         group.mappings.forEach(mapping => {
             if (!mapping.root)

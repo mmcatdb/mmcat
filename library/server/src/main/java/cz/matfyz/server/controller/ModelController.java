@@ -1,10 +1,9 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.Model;
-import cz.matfyz.server.entity.ModelInfo;
 import cz.matfyz.server.service.ModelService;
 
+import java.io.Serializable;
 import java.util.List;
 import jakarta.servlet.http.HttpSession;
 
@@ -38,5 +37,21 @@ public class ModelController {
 
         return model;
     }
+
+    public record ModelInfo(
+        Id jobId,
+        String jobLabel
+    ) implements Serializable {
+        public ModelInfo(Model model) {
+            this(model.jobId(), model.jobLabel());
+        }
+    }
+
+    public record Model(
+        Id jobId,
+        Id categoryId,
+        String jobLabel,
+        String commands
+    ) implements Serializable {}
 
 }

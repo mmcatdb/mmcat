@@ -53,8 +53,8 @@ public abstract class Schema {
 
     public static final BuilderMorphism orderToCustomer =   builder.morphism(order, customer, 3);
     public static final BuilderMorphism customerToName =    builder.morphism(customer, name, 4);
-    public static final BuilderMorphism friendToCustomerA = builder.label("friend-->customerA").morphism(friend, customer, 5);
-    public static final BuilderMorphism friendToCustomerB = builder.label("friend-->customerB").morphism(friend, customer, 6);
+    public static final BuilderMorphism friendToCustomerA = builder.morphism(friend, customer, 5);
+    public static final BuilderMorphism friendToCustomerB = builder.morphism(friend, customer, 6);
     public static final BuilderMorphism friendToSince =     builder.morphism(friend, since, 7);
 
     public static final BuilderMorphism orderToName =       builder.composite(orderToCustomer, customerToName);

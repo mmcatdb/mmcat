@@ -11,6 +11,7 @@ import OpenCloseToggle from '../common/OpenCloseToggle.vue';
 import { QueryDescription, type QueryWithVersion } from '@/types/query';
 import QueryDisplay from './QueryDisplay.vue';
 import QueryDescriptionDisplay from './QueryDescriptionDisplay.vue';
+import QueryErrorDisplay from './QueryErrorDisplay.vue';
 
 /* Example:
 SELECT {

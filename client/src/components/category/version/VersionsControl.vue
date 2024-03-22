@@ -69,9 +69,9 @@ const showAll = ref(false);
 </script>
 
 <template>
-    <div class="versions-control">
+    <div class="versions-control p-3 ps-2 d-flex align-items-start gap-3">
         <div>
-            <div class="button-panel">
+            <div class="d-flex gap-2">
                 <button
                     class="button"
                     :disabled="!currentVersion.parent"
@@ -120,14 +120,7 @@ const showAll = ref(false);
 
 <style scoped>
 .versions-control {
-    display: flex;
-    padding: 8px;
-    align-items: start;
-}
-
-.button-panel {
-    display: flex;
-    max-height: 30px;
+    width: var(--schema-category-canvas-width);
 }
 
 .button {

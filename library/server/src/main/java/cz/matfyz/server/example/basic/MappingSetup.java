@@ -26,7 +26,10 @@ class MappingSetup {
             .add(0, PostgreSQL::product)
             .add(0, PostgreSQL::item)
             .add(1, MongoDB::address)
+            .add(1, MongoDB::tag)
             .add(1, MongoDB::contact)
+            .add(1, MongoDB::customer)
+            .add(1, MongoDB::note)
             .add(2, Neo4j::item)
             .build(mappingService::createNew);
     }

@@ -13,6 +13,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.common.InstanceBuilder;
 import cz.matfyz.tests.example.common.TestMapping;
 import cz.matfyz.tests.example.common.InstanceBuilder.InstanceAdder;
+import cz.matfyz.tests.utils.JsonTestBase;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;
 import cz.matfyz.wrapperdummy.DummyPullWrapper;
 
@@ -82,6 +83,8 @@ public class MTCAlgorithmTestBase {
 
             assertEquals(expectedString, string);
         }
+
+        new JsonTestBase(false).fullTest(instance);
     }
 
     private static String rowToMappingsString(DomainRow row, InstanceObject object) {
