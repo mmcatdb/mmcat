@@ -51,8 +51,8 @@ public class Job extends Entity {
         this.state = state;
     }
 
-    public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually) {
-        return new Job(
+    public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually, @Nullable Id sessionId) {
+        final var job = new Job(
             Id.createNewUUID(),
             runId,
             label,
@@ -60,6 +60,9 @@ public class Job extends Entity {
             payload,
             isStartedManually ? State.Paused : State.Ready
         );
+        job.sessionId = sessionId;
+        
+        return job;
     }
 
     private record JsonValue(

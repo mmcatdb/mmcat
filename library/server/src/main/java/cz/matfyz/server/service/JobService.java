@@ -3,7 +3,6 @@ package cz.matfyz.server.service;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
-import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.Session;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.mongodb.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +35,7 @@ public class JobService {
 
     public JobWithRun createRun(Id categoryId, @Nullable Id actionId, String label, ActionPayload payload) {
         final var run = Run.createNew(categoryId, actionId);
-        final var job = Job.createNew(run.id, label, payload, isJobStartedManually(payload));
+        final var job = Job.createNew(run.id, label, payload, isJobStartedManually(payload), null);
 
         repository.save(run);
         repository.save(job);
@@ -45,12 +44,13 @@ public class JobService {
     }
 
     private boolean isJobStartedManually(ActionPayload payload) {
-        return payload instanceof UpdateSchemaPayload;
+        // return payload instanceof UpdateSchemaPayload;
+        return true;
     }
 
-    public JobWithRun createRestartedJob(JobWithRun jobWithRun) {
+    public JobWithRun createRestartedJob(JobWithRun jobWithRun, @Nullable Id sessionId) {
         final var job = jobWithRun.job();
-        final var newJob = Job.createNew(job.runId, job.label, job.payload, false);
+        final var newJob = Job.createNew(job.runId, job.label, job.payload, false, sessionId);
 
         repository.save(newJob);
 

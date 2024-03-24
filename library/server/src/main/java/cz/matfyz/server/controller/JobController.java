@@ -15,7 +15,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import com.mongodb.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,10 +61,10 @@ public class JobController {
     }
 
     @PostMapping("/jobs/{id}/restart")
-    public JobDetail createRestartedJob(@PathVariable Id id) {
+    public JobDetail createRestartedJob(@PathVariable Id id, @CookieValue(name = "session", defaultValue = "") Id sessionId){
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.createRestartedJob(jobWithRun));
+        return jobToJobDetail(service.createRestartedJob(jobWithRun, sessionId.toNullable()));
     }
 
     @PostMapping("/jobs/{id}/pause")

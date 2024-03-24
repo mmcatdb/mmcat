@@ -5,8 +5,6 @@ import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.matfyz.core.utils.IterableUtils;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,17 +12,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +21,7 @@ import org.slf4j.LoggerFactory;
  * Each value is unique among all the values associated with the same signature.
  * @author jachym.bartik
  */
-@JsonSerialize(using = DomainRow.Serializer.class)
-@JsonDeserialize(using = DomainRow.Deserializer.class)
-public class DomainRow implements Serializable, Comparable<DomainRow> {
+public class DomainRow implements Comparable<DomainRow> {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(DomainRow.class);
@@ -180,69 +165,6 @@ public class DomainRow implements Serializable, Comparable<DomainRow> {
     // TODO change equals and compareTo to do == first
     @Override public boolean equals(Object object) {
         return object instanceof DomainRow row && superId.equals(row.superId);
-    }
-
-    public static class Serializer extends StdSerializer<DomainRow> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<DomainRow> t) {
-            super(t);
-        }
-
-        @Override public void serialize(DomainRow row, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-
-            generator.writeNumberField("id", row.serializationId);
-
-            generator.writePOJOField("superId", row.superId);
-
-            generator.writeFieldName("technicalIds");
-            generator.writeArray(row.technicalIds.stream().toArray(String[]::new), 0, row.technicalIds.size());
-
-            generator.writeFieldName("pendingReferences");
-            generator.writeStartArray();
-            for (final var signature : row.pendingReferences)
-                generator.writePOJO(signature);
-            generator.writeEndArray();
-
-            generator.writeEndObject();
-        }
-
-    }
-
-    public static class Deserializer extends StdDeserializer<DomainRow> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        private static final ObjectReader superIdJsonReader = new ObjectMapper().readerFor(SuperIdWithValues.class);
-        private static final ObjectReader stringsJsonReader = new ObjectMapper().readerFor(String[].class);
-        private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
-
-        @Override public DomainRow deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final int id = node.get("id").asInt();
-
-            final SuperIdWithValues superId = superIdJsonReader.readValue(node.get("superId"));
-
-            final String[] technicalIdsArray = stringsJsonReader.readValue(node.get("technicalIds"));
-            final Set<String> technicalIds = new TreeSet<>(List.of(technicalIdsArray));
-
-            final Signature[] pendingReferencesArray = signaturesJsonReader.readValue(node.get("pendingReferences"));
-            final Set<Signature> pendingReferences = new TreeSet<>(List.of(pendingReferencesArray));
-
-            return new DomainRow(superId, technicalIds, pendingReferences, id);
-        }
-
     }
 
 }

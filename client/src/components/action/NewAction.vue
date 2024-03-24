@@ -7,7 +7,7 @@ import type { Id } from '@/types/id';
 import { DataSource } from '@/types/dataSource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
+import { type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
 
 const emit = defineEmits<{
     (e: 'newAction', action: Action): void;
@@ -17,7 +17,6 @@ const logicalModels = ref<LogicalModel[]>();
 const dataSources = ref<DataSource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
-const dataSourceId = ref<Id>();
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
@@ -40,18 +39,13 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    return actionType.value === ActionType.JsonLdToCategory
-        ? !!dataSourceId.value
-        : !!logicalModelId.value;
+    return !!logicalModelId.value;
 });
 
 async function createAction() {
     fetching.value = true;
 
-    const payload = actionType.value === ActionType.JsonLdToCategory ? {
-        type: ActionType.JsonLdToCategory,
-        dataSourceId: dataSourceId.value,
-    } : {
+    const payload = {
         type: actionType.value,
         logicalModelId: logicalModelId.value,
     };
@@ -86,24 +80,7 @@ async function createAction() {
             <ValueRow label="Label:">
                 <input v-model="actionName" />
             </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.JsonLdToCategory"
-                label="Data source:"
-            >
-                <select v-model="dataSourceId">
-                    <option
-                        v-for="dataSource in dataSources"
-                        :key="dataSource.id"
-                        :value="dataSource.id"
-                    >
-                        {{ dataSource.label }}
-                    </option>
-                </select>
-            </ValueRow>
-            <ValueRow
-                v-else
-                label="Logical model:"
-            >
+            <ValueRow label="Logical model:">
                 <select v-model="logicalModelId">
                     <option
                         v-for="logicalModel in logicalModels"

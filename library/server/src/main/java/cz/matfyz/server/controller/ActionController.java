@@ -8,10 +8,8 @@ import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
-import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
-import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
@@ -90,10 +88,6 @@ public class ActionController {
             final var info = LogicalModelInfo.fromEntities(model);
             return new CategoryToModelPayloadDetail(info);
         }
-        if (payload instanceof JsonLdToCategoryPayload jsonLdToCategoryPayload) {
-            final var dataSource = dataSourceRepository.find(jsonLdToCategoryPayload.dataSourceId());
-            return new JsonLdToCategoryPayloadDetail(dataSource);
-        }
         if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
@@ -116,7 +110,6 @@ public class ActionController {
     @JsonSubTypes({
         @JsonSubTypes.Type(value = CategoryToModelPayloadDetail.class, name = "CategoryToModel"),
         @JsonSubTypes.Type(value = ModelToCategoryPayloadDetail.class, name = "ModelToCategory"),
-        @JsonSubTypes.Type(value = JsonLdToCategoryPayloadDetail.class, name = "JsonLdToCategory"),
         @JsonSubTypes.Type(value = UpdateSchemaPayloadDetail.class, name = "UpdateSchema"),
     })
     interface ActionPayloadDetail {}
@@ -127,10 +120,6 @@ public class ActionController {
 
     record ModelToCategoryPayloadDetail(
         LogicalModelInfo logicalModel
-    ) implements ActionPayloadDetail {}
-
-    record JsonLdToCategoryPayloadDetail(
-        DataSource dataSource
     ) implements ActionPayloadDetail {}
 
     record UpdateSchemaPayloadDetail(

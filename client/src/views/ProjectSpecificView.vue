@@ -44,6 +44,7 @@ onMounted(async () => {
 
     sessions.value = sessionsResult.data.map(Session.fromServer).sort((a, b) => +a.createdAt - +b.createdAt);
     currentSession.value = sessions.value[0];
+    document.cookie = `session=${currentSession.value.id}; path=/;`;
 });
 </script>
 

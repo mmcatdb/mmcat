@@ -1,14 +1,13 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.instance.InstanceMorphism;
-import cz.matfyz.core.instance.InstanceObject;
+import cz.matfyz.core.instance.InstanceCategory;
+import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.utils.UserStore;
+import cz.matfyz.server.entity.instance.InstanceCategoryWrapper;
+import cz.matfyz.server.repository.InstanceCategoryRepository;
 
-import jakarta.servlet.http.HttpSession;
-
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,18 +16,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class InstanceCategoryService {
 
-    public InstanceObject findObject(HttpSession session, Id categoryId, Key key) {
-        var store = UserStore.fromSession(session);
-        var category = store.getCategory(categoryId);
+    @Autowired
+    private InstanceCategoryRepository repository;
 
-        return category != null ? category.getObject(key) : null;
+    public @Nullable InstanceCategoryWrapper findCategory(Id sessionId) {
+        return repository.find(sessionId);
     }
 
-    public InstanceMorphism findMorphism(HttpSession session, Id categoryId, Signature signature) {
-        var store = UserStore.fromSession(session);
-        var category = store.getCategory(categoryId);
+    public @Nullable InstanceCategory loadCategory(Id sessionId, SchemaCategory schemaCategory) {
+        final var wrapper = repository.find(sessionId);
+        return wrapper != null ? wrapper.toInstanceCategory(schemaCategory) : null;
+    }
 
-        return category != null ? category.getMorphism(signature) : null;
+    public @Nullable InstanceCategoryWrapper saveCategory(Id sessionId, Id categoryId, InstanceCategory category) {
+        final var wrapper = InstanceCategoryWrapper.fromInstanceCategory(sessionId, categoryId, category);
+        return repository.save(wrapper) ? wrapper : null;
     }
 
 }
