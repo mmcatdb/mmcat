@@ -1,6 +1,7 @@
 package cz.matfyz.server.repository;
 
 import static cz.matfyz.server.repository.utils.Utils.getId;
+import static cz.matfyz.server.repository.utils.Utils.getIdOrNull;
 import static cz.matfyz.server.repository.utils.Utils.setId;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -31,29 +33,33 @@ public class JobRepository {
 
     private static JobWithRun jobWithRunFromResultSet(ResultSet resultSet, Id jobId, Id categoryId) throws SQLException, JsonProcessingException {
         final Id runId = getId(resultSet, "run.id");
-        final Id actionId = getId(resultSet, "run.action_id");
         final String jsonValue = resultSet.getString("job.json_value");
+        final @Nullable Id actionId = getIdOrNull(resultSet, "run.action_id");
+        final @Nullable Id sessionId = getIdOrNull(resultSet, "run.session_id");
 
         return new JobWithRun(
             Job.fromJsonValue(jobId, runId, jsonValue),
-            Run.fromDatabase(runId, categoryId, actionId)
+            Run.fromDatabase(runId, categoryId, actionId, sessionId)
         );
     }
 
-    public List<JobWithRun> findAllInCategory(Id categoryId) {
+    public List<JobWithRun> findAllInCategory(Id categoryId, Id sessionId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
                     job.id as "job.id",
                     job.json_value as "job.json_value",
                     run.id as "run.id",
-                    run.action_id as "run.action_id"
+                    run.action_id as "run.action_id",
+                    run.session_id as "run.session_id"
                 FROM job
                 JOIN run ON run.id = job.run_id
                 WHERE run.schema_category_id = ?
+                    AND (run.session_id = ? OR run.session_id IS NULL)
                 ORDER BY job.id;
                 """);
             setId(statement, 1, categoryId);
+            setId(statement, 2, sessionId);
             final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -88,7 +94,8 @@ public class JobRepository {
                     job.json_value as "job.json_value",
                     run.id as "run.id",
                     run.schema_category_id as "run.schema_category_id",
-                    run.action_id as "run.action_id"
+                    run.action_id as "run.action_id",
+                    run.session_id as "run.session_id"
                 FROM job
                 JOIN run ON run.id = job.run_id
                 WHERE job.id = ?;
@@ -123,15 +130,17 @@ public class JobRepository {
     public boolean save(Run run) {
         return db.getBoolean((connection, output) -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO run (id, schema_category_id, action_id)
-                VALUES (?, ?, ?)
+                INSERT INTO run (id, schema_category_id, action_id, session_id)
+                VALUES (?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE SET
                     schema_category_id = EXCLUDED.schema_category_id,
-                    action_id = EXCLUDED.action_id;
+                    action_id = EXCLUDED.action_id,
+                    session_id = EXCLUDED.session_id;
                 """);
             setId(statement, 1, run.id);
             setId(statement, 2, run.categoryId);
             setId(statement, 3, run.actionId, true);
+            setId(statement, 4, run.sessionId, true);
 
             output.set(statement.executeUpdate() != 0);
         });

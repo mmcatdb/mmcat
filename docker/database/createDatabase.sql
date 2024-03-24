@@ -83,7 +83,8 @@ CREATE TABLE session (
 CREATE TABLE run (
     id UUID PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
-    action_id UUID REFERENCES action
+    action_id UUID REFERENCES action,
+    session_id UUID REFERENCES session
 );
 
 CREATE TABLE job (
@@ -103,38 +104,3 @@ CREATE TABLE query_version (
     query_id UUID NOT NULL REFERENCES query,
     json_value JSONB NOT NULL
 );
-
--- INSERT INTO job (schema_category_id, logical_model_id, data_source_id, json_value)
--- VALUES
---     (1, '{"label": "Import Order", "state": "Ready", "payload: {
---         "type": "ModelToCategory",
---         "logicalModelId": 1
---     }}'),
---     (1, '{"label": "Export Order", "state": "Ready", "payload: {
---         "type": "CategoryToModel",
---         "logicalModelId": 1
---     }}'),
---     (1, '{"label": "Import Customer", "state": "Ready", "payload: {
---         "type": "ModelToCategory",
---         "logicalModelId": 2
---     }}'),
---     (1, '{"label": "Export Customer", "state": "Ready", "payload: {
---         "type": "CategoryToModel",
---         "logicalModelId": 2
---     }}'),
---     (1, '{"label": "Import Friend", "state": "Ready", "payload: {
---         "type": "ModelToCategory",
---         "logicalModelId": 3
---     }}'),
---     (1, '{"label": "Export Friend", "state": "Ready", "payload: {
---         "type": "CategoryToModel",
---         "logicalModelId": 3
---     }}'),
---     (2, '{"label": "Import from Postgres", "state": "Ready", "payload: {
---         "type": "ModelToCategory",
---         "logicalModelId": 4
---     }}'),
---     (2, '{"label": "Export to Mongo", "state": "Ready", "payload: {
---         "type": "CategoryToModel",
---         "logicalModelId": 5
---     }}');

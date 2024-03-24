@@ -81,9 +81,8 @@ public class SchemaCategoryService {
         if (!repository.update(newWrapper, update))
             return null;
 
-        jobService.createRun(
+        jobService.createSystemRun(
             id,
-            null,
             "Update queries to v. " + update.nextVersion,
             new UpdateSchemaPayload(update.prevVersion, update.nextVersion)
         );

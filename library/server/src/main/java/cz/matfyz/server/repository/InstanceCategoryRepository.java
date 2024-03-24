@@ -32,14 +32,9 @@ public class InstanceCategoryRepository {
             setId(statement, 1, sessionId);
             final var resultSet = statement.executeQuery();
 
-            System.out.println("HERE 1");
-            System.out.println(sessionId.toString());
-
             if (resultSet.next()) {
-                System.out.println("HERE 2");
                 final var instanceData = resultSet.getString("instance_data");
                 if (instanceData == null) {
-                    System.out.println("HERE 3");
                     output.set(null);
                     return;
                 }

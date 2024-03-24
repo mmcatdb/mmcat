@@ -122,15 +122,15 @@ public class JobExecutorService {
     }
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
-        if (job.sessionId == null)
-            throw SessionException.notFound(job.id);
+        if (run.sessionId == null)
+            throw SessionException.notFound(run.id);
 
         final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceService.loadCategory(job.sessionId, schema);
+        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
 
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
             final Mapping mapping = mappingWrapper.toMapping(schema);
@@ -138,15 +138,15 @@ public class JobExecutorService {
         }
 
         if (instance != null)
-            instanceService.saveCategory(job.sessionId, run.categoryId, instance);
+            instanceService.saveCategory(run.sessionId, run.categoryId, instance);
     }
 
     private void categoryToModelAlgorithm(Run run, Job job, CategoryToModelPayload payload) {
-        if (job.sessionId == null)
+        if (run.sessionId == null)
             throw SessionException.notFound(job.id);
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        @Nullable InstanceCategory instance = instanceService.loadCategory(job.sessionId, schema);
+        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
 
         final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
         final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()

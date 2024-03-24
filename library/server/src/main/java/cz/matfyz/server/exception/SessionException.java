@@ -13,12 +13,12 @@ public class SessionException extends ServerException {
         super("session." + name, null, null);
     }
 
-    private record JobData(
+    private record RunData(
         Id id
     ) implements Serializable {}
 
-    public static SessionException notFound(Id jobId) {
-        return new SessionException("notFound", new JobData(jobId));
+    public static SessionException notFound(Id runId) {
+        return new SessionException("notFound", new RunData(runId));
     }
 
 }

@@ -79,7 +79,7 @@ public record InstanceCategoryWrapper(
 
     static class WrapperContext {
         public final InstanceCategory category;
-        public final Map<Key, List<DomainRow>> idToRow = new TreeMap<>();
+        public final Map<Key, Map<Integer, DomainRow>> idToRow = new TreeMap<>();
         public final Map<Key, Map<DomainRow, Integer>> rowToId = new TreeMap<>();
 
         public WrapperContext(InstanceCategory category) {

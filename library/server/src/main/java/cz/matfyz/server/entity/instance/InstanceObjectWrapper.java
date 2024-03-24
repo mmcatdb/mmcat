@@ -51,7 +51,7 @@ public record InstanceObjectWrapper(
     public void toInstanceObject(WrapperContext context) {
         final InstanceObject object = context.category.getObject(key);
 
-        final List<DomainRow> idToRow = new ArrayList<>();
+        final Map<Integer, DomainRow> idToRow = new TreeMap<>();
         context.idToRow.put(key, idToRow);
 
         for (final DomainRowWrapper rowWrapper : rows) {
@@ -61,7 +61,7 @@ public record InstanceObjectWrapper(
                 new TreeSet<>(rowWrapper.pendingReferences)
             );
 
-            idToRow.set(rowWrapper.id, row);
+            idToRow.put(rowWrapper.id, row);
             final var ids = row.superId.findAllIds(object.ids()).foundIds();
             object.setRow(row, ids);
         }

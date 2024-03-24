@@ -40,7 +40,6 @@ public class Job extends Entity {
     public final ActionPayload payload;
     public State state;
     public @Nullable Serializable data = null;
-    public @Nullable Id sessionId = null;
 
     private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state) {
         super(id);
@@ -51,8 +50,8 @@ public class Job extends Entity {
         this.state = state;
     }
 
-    public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually, @Nullable Id sessionId) {
-        final var job = new Job(
+    public static Job createNew(Id runId, String label, ActionPayload payload, boolean isStartedManually) {
+        return new Job(
             Id.createNewUUID(),
             runId,
             label,
@@ -60,9 +59,6 @@ public class Job extends Entity {
             payload,
             isStartedManually ? State.Paused : State.Ready
         );
-        job.sessionId = sessionId;
-        
-        return job;
     }
 
     private record JsonValue(
@@ -70,8 +66,7 @@ public class Job extends Entity {
         Date createdAt,
         ActionPayload payload,
         State state,
-        @Nullable Serializable data,
-        @Nullable Id sessionId
+        @Nullable Serializable data
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
@@ -88,7 +83,6 @@ public class Job extends Entity {
             jsonValue.state
         );
         job.data = jsonValue.data;
-        job.sessionId = jsonValue.sessionId;
 
         return job;
     }
@@ -99,8 +93,7 @@ public class Job extends Entity {
             createdAt,
             payload,
             state,
-            data,
-            sessionId
+            data
         ));
     }
 
