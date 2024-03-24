@@ -8,12 +8,10 @@ export type Column = {
     isClickable: boolean;
 };
 
-type InstanceObjectHeaderProps = {
+defineProps<{
     showTechnicalIds: boolean;
     columns: Column[];
-};
-
-defineProps<InstanceObjectHeaderProps>();
+}>();
 
 const emit = defineEmits([ 'object:click' ]);
 

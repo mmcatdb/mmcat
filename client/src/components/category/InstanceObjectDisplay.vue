@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-
-import ResourceLoader from '@/components/common/ResourceLoader.vue';
-import { InstanceObject } from '@/types/instance/InstanceObject';
+import { computed } from 'vue';
+import type { InstanceObject } from '@/types/instance/InstanceObject';
 import type { Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import { useSchemaCategoryId } from '@/utils/injects';
-import API from '@/utils/api';
 import type { Column } from './InstanceObjectHeaderDisplay.vue';
 import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';
+
+const props = defineProps<{
+    node: Node;
+    object: InstanceObject;
+}>();
+
+const emit = defineEmits([ 'object:click' ]);
 
 function defineColumn(signature: Signature, node: Node): Column {
     return {
@@ -18,81 +21,42 @@ function defineColumn(signature: Signature, node: Node): Column {
     };
 }
 
-type FetchedInstanceObject = {
-    object: InstanceObject;
-    columns: Column[];
-    showTechnicalIds: boolean;
-};
-
-type InstanceObjectProps = {
-    node: Node;
-};
-
-const props = defineProps<InstanceObjectProps>();
-
-const emit = defineEmits([ 'object:click' ]);
-
-const fetchedInstanceObject = ref<FetchedInstanceObject>();
-
-const categoryId = useSchemaCategoryId();
-
-async function fetchObject() {
-    const result = await API.instances.getInstanceObject({ categoryId, objectKey: props.node.schemaObject.key.value });
-    if (!result.status || !('data' in result))
-        return false;
-
-    const object = InstanceObject.fromServer(result.data);
-    fetchedInstanceObject.value = {
-        object,
-        columns: object.superId.signatures.map(signature => defineColumn(signature, props.node)),
-        showTechnicalIds: !!object.rows.find(row => row.technicalIds.size > 0),
-    };
-
-    return true;
-}
+const showTechnicalIds = computed(() => !!props.object.rows.find(row => row.technicalIds.size > 0));
+const columns = props.object.schema.superId.signatures.map(signature => defineColumn(signature, props.node));
 </script>
 
 <template>
-    <div class="outer">
-        <template v-if="fetchedInstanceObject">
-            <table v-if="fetchedInstanceObject.object.rows.length > 0">
-                <tr>
-                    <InstanceObjectHeaderDisplay
-                        :show-technical-ids="fetchedInstanceObject.showTechnicalIds"
-                        :columns="fetchedInstanceObject.columns"
-                        @object:click="(object) => emit('object:click', object)"
-                    />
-                </tr>
-                <tr
-                    v-for="(row, rowIndex) in fetchedInstanceObject.object.rows"
-                    :key="rowIndex"
+    <div class="d-flex flex-column p-3">
+        <table v-if="object.rows.length > 0">
+            <tr>
+                <InstanceObjectHeaderDisplay
+                    :show-technical-ids="showTechnicalIds"
+                    :columns="columns"
+                    @object:click="(object) => emit('object:click', object)"
+                />
+            </tr>
+            <tr
+                v-for="(row, rowIndex) in object.rows"
+                :key="rowIndex"
+            >
+                <td v-if="showTechnicalIds">
+                    {{ row.technicalIdsString }}
+                </td>
+                <td
+                    v-for="(column, columnIndex) in columns"
+                    :key="columnIndex"
                 >
-                    <td v-if="fetchedInstanceObject.showTechnicalIds">
-                        {{ row.technicalIdsString }}
-                    </td>
-                    <td
-                        v-for="(column, columnIndex) in fetchedInstanceObject.columns"
-                        :key="columnIndex"
-                    >
-                        {{ row.superId.tuples.get(column.signature) }}
-                    </td>
-                </tr>
-            </table>
-            <span v-else>
-                Instance object is empty.
-            </span>
-        </template>
-        <ResourceLoader :loading-function="fetchObject" />
+                    {{ row.superId.tuples.get(column.signature) }}
+                </td>
+            </tr>
+        </table>
+        <span v-else>
+            Instance object is empty.
+        </span>
     </div>
 </template>
 
 <style scoped>
-.outer {
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-}
-
 tr {
     padding: 8px;
 }

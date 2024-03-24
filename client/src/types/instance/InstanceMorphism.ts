@@ -1,24 +1,45 @@
-import { Key, Signature, SignatureId, type KeyFromServer, type SignatureFromServer, type SignatureIdFromServer } from '../identifiers';
-import { DomainRow, type DomainRowFromServer } from './InstanceObject';
+import { Signature, type SignatureFromServer } from '../identifiers';
+import type { SchemaMorphism } from '../schema';
+import type { InstanceCategory } from './InstanceCategory';
+import type { DomainRow, InstanceObject } from './InstanceObject';
+
+export type InstanceMorphismFromServer = {
+    signature: SignatureFromServer;
+    mappings: MappingRowFromServer[];
+};
 
 export class InstanceMorphism {
     private constructor(
-        readonly signature: Signature,
-        readonly domKey: Key,
-        readonly codKey: Key,
-        readonly domSuperId: SignatureId,
-        readonly codSuperId: SignatureId,
+        readonly schema: SchemaMorphism,
+        readonly dom: InstanceObject,
+        readonly cod: InstanceObject,
         readonly mappings: MappingRow[],
     ) {}
 
-    static fromServer(input: InstanceMorphismFromServer): InstanceMorphism {
+    static fromServer(input: InstanceMorphismFromServer, instance: InstanceCategory): InstanceMorphism | undefined {
+        const signature = Signature.fromServer(input.signature);
+        const morphism = instance.schema.getMorphism(signature).current;
+        if (!morphism)
+            return;
+
+        const dom = instance.objects.get(morphism.domKey);
+        const cod = instance.objects.get(morphism.codKey);
+        if (!dom || !cod)
+            return;
+
+        const mappings: MappingRow[] = [];
+        input.mappings.forEach(mapping => {
+            const domRow = dom.idToRow.get(mapping.dom);
+            const codRow = cod.idToRow.get(mapping.cod);
+            if (domRow && codRow)
+                mappings.push(new MappingRow(domRow, codRow));
+        });
+        
         return new InstanceMorphism(
-            Signature.fromServer(input.signature),
-            Key.fromServer(input.domKey),
-            Key.fromServer(input.codKey),
-            SignatureId.fromServer(input.domSuperId),
-            SignatureId.fromServer(input.codSuperId),
-            input.mappings.map(MappingRow.fromServer),
+            morphism,
+            dom,
+            cod,
+            mappings,
         );
     }
 
@@ -31,30 +52,14 @@ export class InstanceMorphism {
     }
 }
 
-export type InstanceMorphismFromServer = {
-    signature: SignatureFromServer;
-    domKey: KeyFromServer;
-    codKey: KeyFromServer;
-    domSuperId: SignatureIdFromServer;
-    codSuperId: SignatureIdFromServer;
-    mappings: MappingRowFromServer[];
+export type MappingRowFromServer = {
+    dom: number;
+    cod: number;
 };
 
 export class MappingRow {
-    private constructor(
+    public constructor(
         readonly dom: DomainRow,
         readonly cod: DomainRow,
     ) {}
-
-    static fromServer(input: MappingRowFromServer) {
-        return new MappingRow(
-            DomainRow.fromServer(input.dom),
-            DomainRow.fromServer(input.cod),
-        );
-    }
 }
-
-export type MappingRowFromServer = {
-    dom: DomainRowFromServer;
-    cod: DomainRowFromServer;
-};

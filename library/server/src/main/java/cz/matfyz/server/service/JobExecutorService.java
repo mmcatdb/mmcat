@@ -99,7 +99,6 @@ public class JobExecutorService {
             processJobByType(run, job);
             LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
             job.state = Job.State.Finished;
-            job.data = null;
             repository.save(job);
         }
         catch (Exception e) {

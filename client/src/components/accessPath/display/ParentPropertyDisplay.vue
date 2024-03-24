@@ -57,7 +57,7 @@ function emitComplexClick(): void {
 
 
 <template>
-    <div class="outer">
+    <div class="d-flex flex-column">
         <div>
             <span
                 class="name-text"
@@ -74,14 +74,14 @@ function emitComplexClick(): void {
                 {
             </span>
         </div>
-        <div class="property-divide">
+        <div class="d-flex">
             <div class="filler">
                 <div
                     class="filler-line"
                     :class="{ highlighted }"
                 />
             </div>
-            <div class="inner">
+            <div class="d-flex flex-column">
                 <SimplePropertyDisplay
                     v-for="(subpath, index) in simpleSubpaths"
                     :key="subpath.name.toString()"
@@ -127,16 +127,6 @@ function emitComplexClick(): void {
 </template>
 
 <style scoped>
-.outer {
-    display: flex;
-    flex-direction: column;
-}
-
-.property-divide {
-    display: flex;
-    flex-direction: row;
-}
-
 .filler {
     width: 32px;
     padding-left: 3px;
@@ -148,11 +138,6 @@ function emitComplexClick(): void {
     width: 6px;
     height: 100%;
     border-radius: 3px;
-}
-
-.inner {
-    display: flex;
-    flex-direction: column;
 }
 
 .highlighted {

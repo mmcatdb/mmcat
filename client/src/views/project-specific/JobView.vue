@@ -29,6 +29,7 @@ async function fetchJob() {
     >
         <JobDisplay
             :job="job"
+            :is-show-detail="true"
             @update-job="newJob => job = newJob"
         />
     </div>

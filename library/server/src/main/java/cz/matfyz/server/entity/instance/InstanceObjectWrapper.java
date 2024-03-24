@@ -2,7 +2,6 @@ package cz.matfyz.server.entity.instance;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
@@ -19,7 +18,6 @@ import java.util.TreeSet;
  */
 public record InstanceObjectWrapper(
     Key key,
-    SignatureId superId,
     List<DomainRowWrapper> rows
 ) {
 
@@ -43,7 +41,6 @@ public record InstanceObjectWrapper(
 
         return new InstanceObjectWrapper(
             object.key(),
-            object.superId(),
             rows
         );
     }
