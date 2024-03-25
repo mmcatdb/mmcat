@@ -58,9 +58,12 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
     }
 
     private void addSelect() {
-        final String projectionsString = projections.stream().map(this::getProjection).collect(Collectors.joining(", "));
+        final String projectionsString = projections.stream()
+            .map(projection -> "    " + getProjection(projection))
+            .collect(Collectors.joining(",\n"));
+            
         builder
-            .append("SELECT ")
+            .append("SELECT\n")
             .append(projectionsString)
             .append("\n");
     }

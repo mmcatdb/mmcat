@@ -3,8 +3,10 @@ package cz.matfyz.wrappermongodb;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bson.conversions.Bson;
+import org.bson.json.JsonWriterSettings;
 
 // There are two types of mongodb quries - database commands and mongosh methods.
 // The commands are run by `db.runCommand({ ... })`. For example, `db.runCommand({ find: 'collection', filter: { ... }, ... })`. The output is always a document (usually containing an array of found documents).
@@ -34,6 +36,17 @@ public class MongoDBQuery implements QueryContent {
      */
     public static MongoDBQuery findAll(String collection) {
         return new MongoDBQuery(collection, List.of());
+    }
+
+    @Override public String toString() {
+        final JsonWriterSettings settings = JsonWriterSettings.builder()
+            .indent(true)
+            .indentCharacters("    ")
+            .build();
+
+        final String pipelineString = pipeline.stream().map(item -> item.toBsonDocument().toJson(settings)).collect(Collectors.joining(", "));
+
+        return "db." + collection + ".aggregate([ " + pipelineString + " ])";
     }
 
 }

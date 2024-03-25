@@ -58,8 +58,13 @@ public class QueryController {
 
     public record QueryPartDescription(
         DatabaseInfo database,
-        QueryStatement query
-    ) {}
+        String content,
+        String structure
+    ) {
+        public QueryPartDescription(DatabaseInfo database, QueryStatement query) {
+            this(database, query.content().toString(), query.structure().toString());
+        }
+    }
 
     @PostMapping("/queries/describe")
     public QueryDescription describeQuery(@RequestBody QueryInput data) {

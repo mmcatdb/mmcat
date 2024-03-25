@@ -42,3 +42,7 @@ input[type=number] {
     @extend .unselectable;
     cursor: default !important;
 }
+
+.pre-line {
+    white-space: pre-line !important;
+}
