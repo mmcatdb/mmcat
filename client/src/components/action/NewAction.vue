@@ -8,6 +8,7 @@ import { DataSource } from '@/types/dataSource';
 import { DatabaseInfo } from '@/types/database';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import RadioInput from '@/components/input/RadioInput.vue';
 import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
 
 const emit = defineEmits<{
@@ -24,6 +25,7 @@ const databaseId = ref<Id>();
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
+const selectedOption = ref('database'); 
 
 const categoryId = useSchemaCategoryId();
 
@@ -132,9 +134,28 @@ async function createAction() {
                     </option>
                 </select>
             </ValueRow>
+            <ValueRow 
+                v-if="actionType === ActionType.RSDToCategory" label="Select data input:">
+                <RadioInput
+                    :model-value="selectedOption"
+                    :value="'dataSource'"
+                    :disabled="false"
+                    @update:model-value="selectedOption = $event"
+                >
+                    Data Source
+                </RadioInput>
+                <RadioInput
+                    :model-value="selectedOption"
+                    :value="'database'"
+                    :disabled="false"
+                    @update:model-value="selectedOption = $event"
+                >
+                    Database
+                </RadioInput> 
+            </ValueRow>
             <ValueRow
-                v-if="actionType === ActionType.RSDToCategory"
-                label="Data source (select either data sources or database):"
+                v-if="actionType === ActionType.RSDToCategory && selectedOption === 'dataSource'"
+                label="Data source:"
             >    
                 <select v-model="dataSourceId">
                     <option
@@ -147,8 +168,8 @@ async function createAction() {
                 </select>
             </ValueRow>
             <ValueRow
-                v-if="actionType === ActionType.RSDToCategory"
-                label="Database (select either data sources or database):"
+                v-if="actionType === ActionType.RSDToCategory && selectedOption === 'database'"
+                label="Database:"
             >    
                 <select v-model="databaseId">
 
