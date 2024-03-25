@@ -92,6 +92,7 @@ export type ActionPayloadInit = {
     type: ActionType.RSDToCategory;
     dataSourceId?: Id; //these are now optional
     databaseId?: Id;
+    collectionName?: String;
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
@@ -154,6 +155,7 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
 type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
     dataSource?: DataSourceFromServer;
     database?: DatabaseInfoFromServer;
+    collectionName?: String;
 };
 
 class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
@@ -162,6 +164,7 @@ class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory
     private constructor(
         readonly dataSource?: DataSource,
         readonly database?: DatabaseInfo,
+        readonly collectionName?: String,
     ) {
         if (dataSource && database) 
             throw new Error("RSDToCategoryPayload can only have one source of data: either 'Data Source' or 'Logical Model'");
@@ -171,7 +174,8 @@ class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
         const dataSource = input.dataSource ? DataSource.fromServer(input.dataSource) : undefined;
         const database = input.database ? DatabaseInfo.fromServer(input.database) : undefined;
-        return new RSDToCategoryPayload(dataSource, database);
+        const collectionName = input.collectionName ? input.collectionName : undefined
+        return new RSDToCategoryPayload(dataSource, database, collectionName);
     }
 }
 

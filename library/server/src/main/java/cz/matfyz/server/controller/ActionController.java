@@ -103,14 +103,16 @@ public class ActionController {
         if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
             DataSource dataSource = null;
             DatabaseEntity database = null;
+            String collectionName = null;
             if (rsdToCategoryPayload.dataSourceId() != null ){
                 dataSource = dataSourceRepository.find(rsdToCategoryPayload.dataSourceId());
             }
             else {
                 database = databaseRepository.find(rsdToCategoryPayload.databaseId());
+                collectionName = rsdToCategoryPayload.collectionName();
             }
             
-            return new RSDToCategoryPayloadDetail(dataSource, database);
+            return new RSDToCategoryPayloadDetail(dataSource, database, collectionName);
         }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
@@ -151,7 +153,8 @@ public class ActionController {
     
     record RSDToCategoryPayloadDetail(
             DataSource dataSource,
-            DatabaseEntity database
+            DatabaseEntity database,
+            String collectionName
     ) implements ActionPayloadDetail {}
 
 }

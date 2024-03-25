@@ -75,6 +75,17 @@ async function restartJob() {
                     {{ job.createdAt.toLocaleString(undefined, { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }}
                 </div>
             </div>
+            <div class="col-4 d-flex align-items-center gap-3">
+                <div>
+                    <CleverRouterLink :to="{name: 'job', params: { id: job.id } }">
+                        <div class="fs-6 fw-bold">
+                            {{ job.label }}
+                        </div>
+                    </CleverRouterLink>
+                    <div class="text-secondary small">
+                        {{ job.id }}
+                    </div>
+                </div>
         </div>
         <div>
             {{ job.payload.type }}
@@ -100,12 +111,15 @@ async function restartJob() {
             </template>
         </div>
         <div class="flex-grow-1">
-            <template v-if="job.state === JobState.Failed && job.data">
-                Error: {{ job.data.name }}
-            </template>
+            <div
+                v-if="job.error"
+                class="text-danger"
+            >
+                Error: {{ job.error.name }}
+            </div>
             <template v-else>
-                &nbsp;
-                </template>
+            &nbsp;
+            </template>
             </div>
             <div class="d-flex gap-3 align-self-center">
                 <button

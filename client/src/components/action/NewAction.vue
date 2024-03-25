@@ -22,6 +22,7 @@ const fetched = ref(false);
 const logicalModelId = ref<Id>();
 const dataSourceId = ref<Id>();
 const databaseId = ref<Id>();
+const collectionName = ref('');
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
@@ -50,7 +51,7 @@ const dataValid = computed(() => {
         return false;
 
     if (actionType.value === ActionType.RSDToCategory) 
-        return !!dataSourceId.value || !!databaseId.value;
+        return !!dataSourceId.value || !!databaseId.value && !!collectionName.value;
     else return !!logicalModelId.value;
     
 });
@@ -64,6 +65,7 @@ async function createAction() {
             type: actionType.value,
             dataSourceId: dataSourceId.value || null,
             databaseId: databaseId.value || null,
+            collectionName: collectionName.value || null,
         };
     }
     else {
@@ -159,6 +161,14 @@ async function createAction() {
                         {{ database.label }}
                     </option>
                 </select>
+            </ValueRow>
+            <ValueRow
+                v-if="actionType === ActionType.RSDToCategory && selectedOption === 'database'"
+                label="Enter collection name:"
+            >    
+                <textarea v-model="collectionName" 
+                >
+                </textarea>    
             </ValueRow>
             <ValueRow
                 v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"

@@ -227,7 +227,7 @@ public class JobExecutorService {
             String uri = host + ":" + port;
             inputType = "Database";
             
-            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, "yelpbusinesssample", schemaCatName, null, inputType).run();
+            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, payload.collectionName(), schemaCatName, null, inputType).run();
             
         }
         else {

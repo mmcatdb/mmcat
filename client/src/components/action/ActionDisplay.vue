@@ -70,6 +70,12 @@ async function deleteAction() {
                 </RouterLink>
             </ValueRow> 
             <ValueRow
+                v-if="action.payload.type === ActionType.RSDToCategory && action.payload.database"
+                label="Collection Name:"
+            >
+                {{ action.payload.collectionName }}
+            </ValueRow> 
+            <ValueRow
                 v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
                 label="Logical model:"
             >
