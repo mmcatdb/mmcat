@@ -4,6 +4,10 @@ import cz.matfyz.core.schema.SchemaCategory;
 
 public class Composite extends SchemaCategory.Editor implements SchemaModificationOperation {
 
+    @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
     public final String name;
 
     public Composite(String name) {

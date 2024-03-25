@@ -14,11 +14,10 @@ public class WhereClause implements ParserNode {
     }
 
     public final Type type;
-    @Nullable
-    public final GroupGraphPattern pattern;
+    public final @Nullable GroupGraphPattern pattern;
     public final List<WhereClause> nestedClauses;
 
-    WhereClause(Type type, GroupGraphPattern pattern, List<WhereClause> nestedClauses) {
+    public WhereClause(Type type, GroupGraphPattern pattern, List<WhereClause> nestedClauses) {
         this.type = type;
         this.pattern = pattern;
         this.nestedClauses = nestedClauses;

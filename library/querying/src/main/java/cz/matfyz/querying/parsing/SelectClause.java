@@ -6,7 +6,7 @@ public class SelectClause implements ParserNode {
 
     public final List<SelectTriple> triples;
 
-    SelectClause(List<SelectTriple> triples) {
+    public SelectClause(List<SelectTriple> triples) {
         this.triples = triples;
     }
 

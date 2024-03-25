@@ -14,7 +14,7 @@ public class SchemaCategoryUpdate {
         return prevVersion;
     }
 
-    private final List<SchemaModificationOperation> operations;
+    public final List<SchemaModificationOperation> operations;
 
     public SchemaCategoryUpdate(Version prevVersion, List<SchemaModificationOperation> operations) {
         this.prevVersion = prevVersion;

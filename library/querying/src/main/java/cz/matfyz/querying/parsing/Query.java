@@ -8,7 +8,7 @@ public class Query implements ParserNode {
     public final WhereClause where;
     public final QueryContext context;
 
-    Query(SelectClause select, WhereClause where, QueryContext context) {
+    public Query(SelectClause select, WhereClause where, QueryContext context) {
         this.select = select;
         this.where = where;
         this.context = context;

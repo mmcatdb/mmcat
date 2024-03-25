@@ -11,4 +11,3 @@ public interface QueryVisitor<T> {
     T visit(UnionNode node);
 
 }
-

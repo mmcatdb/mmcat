@@ -215,7 +215,7 @@ public class JobExecutorService {
         SchemaCategoryUpdate.setToVersion(prevCategory, updates, wrapper.version, prevVersion);
         SchemaCategoryUpdate.setToVersion(nextCategory, updates, wrapper.version, nextVersion);
 
-        return new QueryEvolver(prevCategory, nextCategory);
+        return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
 }

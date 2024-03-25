@@ -33,7 +33,7 @@ class TempTests {
 
     @Test
     void test() {
-        final Query query = QueryParser.run(queryString);
+        final Query query = QueryParser.parse(queryString);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, databases.schema, kinds, query.where);
         final var output = QueryResolver.run(query.context, queryTree);
 

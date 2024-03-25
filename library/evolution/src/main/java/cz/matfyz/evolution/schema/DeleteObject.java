@@ -5,6 +5,10 @@ import cz.matfyz.core.schema.SchemaObject;
 
 public class DeleteObject extends SchemaCategory.Editor implements SchemaModificationOperation {
 
+    @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
     public final SchemaObject object;
 
     public DeleteObject(SchemaObject object) {

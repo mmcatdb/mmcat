@@ -17,7 +17,7 @@ public class GroupGraphPattern implements ParserNode {
 
     public final TermTree termTree;
 
-    GroupGraphPattern(List<WhereTriple> triples, List<ConditionFilter> conditionFilters, List<ValueFilter> valueFilters, TermBuilder termBuilder) {
+    public GroupGraphPattern(List<WhereTriple> triples, List<ConditionFilter> conditionFilters, List<ValueFilter> valueFilters, TermBuilder termBuilder) {
         this.triples = triples;
         this.conditionFilters = conditionFilters;
         this.valueFilters = valueFilters;
