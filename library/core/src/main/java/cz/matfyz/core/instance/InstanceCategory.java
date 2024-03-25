@@ -9,30 +9,13 @@ import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * @author pavel.koupil, jachym.bartik
  */
-@JsonSerialize(using = InstanceCategory.Serializer.class)
-@JsonDeserialize(using = InstanceCategory.Deserializer.class)
 public class InstanceCategory {
 
     // Evolution extension
@@ -225,136 +208,6 @@ public class InstanceCategory {
         return object instanceof InstanceCategory category
             && objects.equals(category.objects)
             && morphisms.equals(category.morphisms);
-    }
-
-    public static class Serializer extends StdSerializer<InstanceCategory> {
-
-        public Serializer() {
-            this(null);
-        }
-
-        public Serializer(Class<InstanceCategory> t) {
-            super(t);
-        }
-
-        @Override public void serialize(InstanceCategory category, JsonGenerator generator, SerializerProvider provider) throws IOException {
-            generator.writeStartObject();
-
-            generator.writeFieldName("objects");
-            generator.writeStartArray();
-            for (final InstanceObject object : category.objects.values())
-                writeObject(object, generator);
-            generator.writeEndArray();
-
-            generator.writeFieldName("morphisms");
-            generator.writeStartArray();
-            for (final InstanceMorphism morphism: category.morphisms.values())
-                writeMorphism(morphism, generator);
-            generator.writeEndArray();
-
-            generator.writeEndObject();
-        }
-        
-        private void writeObject(InstanceObject object, JsonGenerator generator) throws IOException {
-            generator.writeStartObject();
-            generator.writePOJOField("key", object.key());
-
-            generator.writeFieldName("rows");
-            final Set<DomainRow> rows = object.allRowsToSet();
-            int lastId = 0;
-            
-            generator.writeStartArray();
-            for (final var row : rows) {
-                row.serializationId = lastId++;
-                generator.writePOJO(row);
-            }
-            generator.writeEndArray();
-
-            generator.writeEndObject();
-        }
-
-        private void writeMorphism(InstanceMorphism morphism, JsonGenerator generator) throws IOException {
-            generator.writeStartObject();
-            generator.writePOJOField("signature", morphism.signature());
-
-            generator.writeFieldName("rows");
-            final Set<MappingRow> rows = morphism.allMappings();
-
-            generator.writeStartArray();
-            for (final var row : rows)
-                generator.writePOJO(row);
-            generator.writeEndArray();
-
-            generator.writeEndObject();
-        }
-
-    }
-
-    public static class Deserializer extends StdDeserializer<InstanceCategory> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        @Override public InstanceCategory deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final var schemaCategory = (SchemaCategory) context.getAttribute("schemaCategory");
-            final var instanceCategory = new InstanceCategoryBuilder().setSchemaCategory(schemaCategory).build();
-            
-            final var objectNodes = node.get("objects").elements();
-            while (objectNodes.hasNext())
-                readObject(objectNodes.next(), instanceCategory);
-
-            final var morphismNodes = node.get("morphisms").elements();
-            while (morphismNodes.hasNext())
-                readMorphism(morphismNodes.next(), instanceCategory);
-            
-            return instanceCategory;
-        }
-
-        private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
-        private static final ObjectReader domainRowJsonReader = new ObjectMapper().readerFor(DomainRow.class);
-
-        private void readObject(JsonNode node, InstanceCategory category) throws IOException {
-            final Key key = keyJsonReader.readValue(node.get("key"));
-            final var object = category.getObject(key);
-
-            final var iterator = node.get("rows").elements();
-            while (iterator.hasNext()) {
-                final JsonNode rowNode = iterator.next();
-                final DomainRow row = domainRowJsonReader.readValue(rowNode);
-                final var ids = row.superId.findAllIds(object.ids()).foundIds();
-                object.setRow(row, ids);
-            }
-        }
-
-        private static final ObjectReader signatureJsonReader = new ObjectMapper().readerFor(Signature.class);
-        private static final ObjectReader mappingRowJsonReader = new ObjectMapper().readerFor(MappingRow.class);
-
-        private void readMorphism(JsonNode node, InstanceCategory category) throws IOException {
-            final Signature signature = signatureJsonReader.readValue(node.get("signature"));
-            final var morphism = category.getMorphism(signature);
-
-            final Map<Integer, DomainRow> domRows = new TreeMap<>();
-            morphism.dom().allRowsToSet().forEach(row -> domRows.put(row.serializationId, row));
-            final Map<Integer, DomainRow> codRows = new TreeMap<>();
-            morphism.cod().allRowsToSet().forEach(row -> codRows.put(row.serializationId, row));
-
-            final var contextReader = mappingRowJsonReader.withAttribute("domRows", domRows).withAttribute("codRows", codRows);
-
-            final var iterator = node.get("rows").elements();
-            while (iterator.hasNext()) {
-                final JsonNode rowNode = iterator.next();
-                final MappingRow row = contextReader.readValue(rowNode);
-                morphism.addMapping(row);
-            }
-        }
-
     }
 
 }

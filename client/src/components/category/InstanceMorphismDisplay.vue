@@ -1,33 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { SchemaObject } from '@/types/schema';
-
-import ResourceLoader from '@/components/common/ResourceLoader.vue';
+import { computed } from 'vue';
 import type { Edge, Node } from '@/types/categoryGraph';
 import { Signature } from '@/types/identifiers/Signature';
-import { useSchemaCategoryId } from '@/utils/injects';
-import API from '@/utils/api';
-import { InstanceMorphism } from '@/types/instance';
-import InstanceObjectHeaderDisplay from './InstanceObjectHeaderDisplay.vue';
+import type { InstanceMorphism } from '@/types/instance';
+import InstanceObjectHeaderDisplay, { type Column } from './InstanceObjectHeaderDisplay.vue';
 
-type InstanceObjectProps = {
+const props = defineProps<{
     edge: Edge;
-};
-
-const props = defineProps<InstanceObjectProps>();
+    morphism: InstanceMorphism;
+}>();
 
 const emit = defineEmits([ 'object:click' ]);
 
-const morphism = ref<InstanceMorphism>();
-const columns = ref<Columns>();
+const columns = computed<Columns>(() => ({
+    dom: props.morphism.dom.schema.superId.signatures.map(signature => defineColumn(signature, props.edge.domainNode)),
+    cod: props.morphism.cod.schema.superId.signatures.map(signature => defineColumn(signature, props.edge.codomainNode)),
+}));
 
 type Columns = { dom: Column[], cod: Column[] };
-
-type Column = {
-    signature: Signature;
-    schemaObject: SchemaObject | undefined;
-    isClickable: boolean;
-};
 
 function defineColumn(signature: Signature, node: Node): Column {
     return {
@@ -36,83 +26,58 @@ function defineColumn(signature: Signature, node: Node): Column {
         isClickable: !signature.equals(Signature.empty),
     };
 }
-
-const categoryId = useSchemaCategoryId();
-
-async function fetchMorphism() {
-    const result = await API.instances.getInstanceMorphism({ categoryId, signature: props.edge.schemaMorphism.signature.value });
-    if (!result.status)
-        return false;
-
-    morphism.value = InstanceMorphism.fromServer(result.data);
-    columns.value = {
-        dom: morphism.value.domSuperId.signatures.map(signature => defineColumn(signature, props.edge.domainNode)),
-        cod: morphism.value.codSuperId.signatures.map(signature => defineColumn(signature, props.edge.codomainNode)),
-    };
-
-    return true;
-}
 </script>
 
 <template>
-    <div class="outer">
-        <template v-if="morphism && columns">
-            <table v-if="morphism.mappings.length > 0">
-                <tr>
-                    <InstanceObjectHeaderDisplay
-                        :show-technical-ids="morphism.showDomTechnicalIds"
-                        :columns="columns?.dom"
-                        @object:click="(object) => emit('object:click', object)"
-                    />
-                    <th class="gap" />
-                    <InstanceObjectHeaderDisplay
-                        :show-technical-ids="morphism.showCodTechnicalIds"
-                        :columns="columns?.cod"
-                        @object:click="(object) => emit('object:click', object)"
-                    />
-                </tr>
-                <tr
-                    v-for="(mapping, mappingIndex) in morphism.mappings"
-                    :key="mappingIndex"
+    <div class="d-flex flex-column p-3">
+        <table v-if="morphism.mappings.length > 0">
+            <tr>
+                <InstanceObjectHeaderDisplay
+                    :show-technical-ids="morphism.showDomTechnicalIds"
+                    :columns="columns?.dom"
+                    @object:click="(object) => emit('object:click', object)"
+                />
+                <th class="gap" />
+                <InstanceObjectHeaderDisplay
+                    :show-technical-ids="morphism.showCodTechnicalIds"
+                    :columns="columns?.cod"
+                    @object:click="(object) => emit('object:click', object)"
+                />
+            </tr>
+            <tr
+                v-for="(mapping, mappingIndex) in morphism.mappings"
+                :key="mappingIndex"
+            >
+                <td v-if="morphism.showDomTechnicalIds">
+                    {{ mapping.dom.technicalIdsString }}
+                </td>
+                <td
+                    v-for="(column, columnIndex) in columns.dom"
+                    :key="columnIndex"
                 >
-                    <td v-if="morphism.showDomTechnicalIds">
-                        {{ mapping.dom.technicalIdsString }}
-                    </td>
-                    <td
-                        v-for="(column, columnIndex) in columns.dom"
-                        :key="columnIndex"
-                    >
-                        {{ mapping.dom.superId.tuples.get(column.signature) }}
-                    </td>
-                    <td class="gap">
-                        &lt;--&gt;
-                    </td>
-                    <td v-if="morphism.showCodTechnicalIds">
-                        {{ mapping.cod.technicalIdsString }}
-                    </td>
-                    <td
-                        v-for="(column, columnIndex) in columns.cod"
-                        :key="columnIndex"
-                    >
-                        {{ mapping.cod.superId.tuples.get(column.signature) }}
-                    </td>
-                </tr>
-            </table>
-            <span v-else>
-                Instance object is empty.
-            </span>
-        </template>
-        <ResourceLoader :loading-function="fetchMorphism" />
+                    {{ mapping.dom.superId.tuples.get(column.signature) }}
+                </td>
+                <td class="gap">
+                    &lt;--&gt;
+                </td>
+                <td v-if="morphism.showCodTechnicalIds">
+                    {{ mapping.cod.technicalIdsString }}
+                </td>
+                <td
+                    v-for="(column, columnIndex) in columns.cod"
+                    :key="columnIndex"
+                >
+                    {{ mapping.cod.superId.tuples.get(column.signature) }}
+                </td>
+            </tr>
+        </table>
+        <span v-else>
+            Instance morphism is empty.
+        </span>
     </div>
 </template>
 
 <style scoped>
-.outer {
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-}
-
 tr {
     padding: 8px;
 }

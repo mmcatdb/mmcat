@@ -2,12 +2,12 @@
 import TextArea from '@/components/input/TextArea.vue';
 import type { QueryDescription } from '@/types/query';
 
-type QueryDescriptionDisplayProps = {
+const props = defineProps<{
     description: QueryDescription;
     isExecuting?: boolean;
-};
+}>();
 
-defineProps<QueryDescriptionDisplayProps>();
+console.log(props.description);
 </script>
 
 <template>
@@ -23,10 +23,17 @@ defineProps<QueryDescriptionDisplayProps>();
                 {{ part.database.label }}:
             </div>
             <TextArea
-                v-model="part.query.stringContent"
+                v-model="part.structure"
                 class="w-100"
                 readonly
-                :disabled="isExecuting"
+                disabled
+                :min-rows="1"
+            />
+            <TextArea
+                v-model="part.content"
+                class="w-100"
+                readonly
+                disabled
                 :min-rows="1"
             />
         </div>

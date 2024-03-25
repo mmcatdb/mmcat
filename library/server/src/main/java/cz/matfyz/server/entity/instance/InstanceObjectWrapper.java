@@ -2,7 +2,6 @@ package cz.matfyz.server.entity.instance;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.instance.InstanceObject;
 import cz.matfyz.core.instance.SuperIdWithValues;
@@ -19,7 +18,6 @@ import java.util.TreeSet;
  */
 public record InstanceObjectWrapper(
     Key key,
-    SignatureId superId,
     List<DomainRowWrapper> rows
 ) {
 
@@ -43,7 +41,6 @@ public record InstanceObjectWrapper(
 
         return new InstanceObjectWrapper(
             object.key(),
-            object.superId(),
             rows
         );
     }
@@ -51,7 +48,7 @@ public record InstanceObjectWrapper(
     public void toInstanceObject(WrapperContext context) {
         final InstanceObject object = context.category.getObject(key);
 
-        final List<DomainRow> idToRow = new ArrayList<>();
+        final Map<Integer, DomainRow> idToRow = new TreeMap<>();
         context.idToRow.put(key, idToRow);
 
         for (final DomainRowWrapper rowWrapper : rows) {
@@ -61,7 +58,7 @@ public record InstanceObjectWrapper(
                 new TreeSet<>(rowWrapper.pendingReferences)
             );
 
-            idToRow.set(rowWrapper.id, row);
+            idToRow.put(rowWrapper.id, row);
             final var ids = row.superId.findAllIds(object.ids()).foundIds();
             object.setRow(row, ids);
         }

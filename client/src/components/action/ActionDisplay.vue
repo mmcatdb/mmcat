@@ -70,14 +70,6 @@ async function deleteAction() {
                 </RouterLink>
             </ValueRow> 
             <ValueRow
-                v-else-if="action.payload.type === ActionType.JsonLdToCategory"
-                label="Data source:"
-            >
-                <RouterLink :to="{ name: 'dataSource', params: { id: action.payload.dataSource.id }, query: { categoryId: action.categoryId } }">
-                    {{ action.payload.dataSource.label }}
-                </RouterLink>
-            </ValueRow>
-            <ValueRow
                 v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
                 label="Logical model:"
             >

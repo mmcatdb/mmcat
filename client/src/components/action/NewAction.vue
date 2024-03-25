@@ -49,9 +49,7 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    if (actionType.value === ActionType.JsonLdToCategory) 
-        return !!dataSourceId.value;
-    else if (actionType.value === ActionType.RSDToCategory) 
+    if (actionType.value === ActionType.RSDToCategory) 
         return !!dataSourceId.value || !!databaseId.value;
     else return !!logicalModelId.value;
     
@@ -61,13 +59,7 @@ async function createAction() {
     fetching.value = true;
     let payload;
 
-    if (actionType.value === ActionType.JsonLdToCategory ) {
-        payload = {
-            type: actionType.value,
-            dataSourceId: dataSourceId.value,
-        };
-    }  
-    else if (actionType.value === ActionType.RSDToCategory) {
+    if (actionType.value === ActionType.RSDToCategory) {
         payload = {
             type: actionType.value,
             dataSourceId: dataSourceId.value || null,
@@ -119,20 +111,6 @@ async function createAction() {
             </ValueRow>
             <ValueRow label="Label:">
                 <input v-model="actionName" />
-            </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.JsonLdToCategory"
-                label="Data source:"
-            >
-                <select v-model="dataSourceId">
-                    <option
-                        v-for="dataSource in dataSources"
-                        :key="dataSource.id"
-                        :value="dataSource.id"
-                    >
-                        {{ dataSource.label }}
-                    </option>
-                </select>
             </ValueRow>
             <ValueRow 
                 v-if="actionType === ActionType.RSDToCategory" label="Select data input:">

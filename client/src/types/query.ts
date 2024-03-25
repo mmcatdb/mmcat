@@ -104,7 +104,8 @@ export type QueryDescriptionFromServer = {
 
 type QueryPartDescriptionFromServer = {
     database: DatabaseInfoFromServer;
-    query: QueryStatement;
+    content: string;
+    structure: string;
 };
 
 export class QueryDescription {
@@ -122,23 +123,18 @@ export class QueryDescription {
 export class QueryPartDescription {
     private constructor(
         readonly database: DatabaseInfo,
-        readonly query: QueryStatement,
+        readonly content: string,
+        readonly structure: string,
     ) {}
 
     static fromServer(input: QueryPartDescriptionFromServer): QueryPartDescription {
         return new QueryPartDescription(
             DatabaseInfo.fromServer(input.database),
-            input.query,
+            input.content,
+            input.structure,
         );
     }
 }
-
-// TODO also parse fromServer because the map is returned as object from server.
-export type QueryStatement = {
-    stringContent: string;
-    // TODO it is there but it is not valid (yet) - there migth be problems with translating cyclic structures to json (the parent field).
-    // queryStructure: QueryStructure;
-};
 
 type QueryStructure = {
     name: string;

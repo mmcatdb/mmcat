@@ -1,7 +1,7 @@
-import { DataSource, type DataSourceFromServer } from './dataSource';
 import type { Entity, Id, VersionId } from './id';
 import { LogicalModelInfo, type LogicalModelFromServer, type LogicalModelInfoFromServer } from './logicalModel';
 import {  DatabaseInfo, type DatabaseInfoFromServer } from './database';
+import {  DataSource, type DataSourceFromServer } from './dataSource';
 
 export type ActionFromServer = {
     id: Id;
@@ -38,7 +38,6 @@ export type ActionInit = {
 export enum ActionType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel',
-    JsonLdToCategory = 'JsonLdToCategory',
     UpdateSchema = 'UpdateSchema',
     RSDToCategory = 'RSDToCategory'
 }
@@ -53,10 +52,6 @@ export const ACTION_TYPES = [
         value: ActionType.CategoryToModel,
     },
     {
-        label: 'Import data', // TODO
-        value: ActionType.JsonLdToCategory,
-    },
-    {
         label: 'RSD to Category',
         value: ActionType.RSDToCategory,
     },
@@ -69,7 +64,6 @@ interface ActionPayloadType<TType extends ActionType = ActionType> {
 export type ActionPayload =
     | ModelToCategoryPayload
     | CategoryToModelPayload
-    | JsonLdToCategoryPayload
     | UpdateSchemaPayload
     | RSDToCategoryPayload
     ;
@@ -84,8 +78,6 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
         return ModelToCategoryPayload.fromServer(input as ModelToCategoryPayloadFromServer);
     case ActionType.CategoryToModel:
         return CategoryToModelPayload.fromServer(input as CategoryToModelPayloadFromServer);
-    case ActionType.JsonLdToCategory:
-        return JsonLdToCategoryPayload.fromServer(input as JsonLdToCategoryPayloadFromServer);
     case ActionType.UpdateSchema:
         return UpdateSchemaPayload.fromServer(input as UpdateSchemaPayloadFromServer);
     case ActionType.RSDToCategory:
@@ -96,9 +88,6 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
 export type ActionPayloadInit = {
     type: ActionType.ModelToCategory | ActionType.CategoryToModel;
     logicalModelId: Id;
-} | {
-    type: ActionType.JsonLdToCategory;
-    dataSourceId: Id;
 } | {
     type: ActionType.RSDToCategory;
     dataSourceId?: Id; //these are now optional
@@ -137,24 +126,6 @@ class CategoryToModelPayload implements ActionPayloadType<ActionType.CategoryToM
     static fromServer(input: CategoryToModelPayloadFromServer): CategoryToModelPayload {
         return new CategoryToModelPayload(
             LogicalModelInfo.fromServer(input.logicalModel),
-        );
-    }
-}
-
-type JsonLdToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.JsonLdToCategory> & {
-    dataSource: DataSourceFromServer;
-};
-
-class JsonLdToCategoryPayload implements ActionPayloadType<ActionType.JsonLdToCategory> {
-    readonly type = ActionType.JsonLdToCategory;
-
-    private constructor(
-        readonly dataSource: DataSource,
-    ) {}
-
-    static fromServer(input: JsonLdToCategoryPayloadFromServer): JsonLdToCategoryPayload {
-        return new JsonLdToCategoryPayload(
-            DataSource.fromServer(input.dataSource),
         );
     }
 }

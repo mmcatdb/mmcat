@@ -15,13 +15,15 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import com.mongodb.lang.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * @author jachym.bartik
@@ -42,8 +44,11 @@ public class JobController {
     private ActionController actionController;
 
     @GetMapping("/schema-categories/{categoryId}/jobs")
-    public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId) {
-        final var jobs = repository.findAllInCategory(categoryId);
+    public List<JobDetail> getAllJobsInCategory(@PathVariable Id categoryId, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
+        if (sessionId.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session ID is required.");
+
+        final var jobs = repository.findAllInCategory(categoryId, sessionId);
 
         return jobs.stream().map(this::jobToJobDetail).toList();
     }
@@ -54,14 +59,17 @@ public class JobController {
     }
 
     @PostMapping("/actions/{actionId}/jobs")
-    public JobDetail createRun(@PathVariable Id actionId) {
+    public JobDetail createRun(@PathVariable Id actionId, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
+        if (sessionId.isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session ID is required.");
+        
         final var action = actionRepository.find(actionId);
 
-        return jobToJobDetail(service.createRun(action));
+        return jobToJobDetail(service.createUserRun(action, sessionId));
     }
 
     @PostMapping("/jobs/{id}/restart")
-    public JobDetail createRestartedJob(@PathVariable Id id) {
+    public JobDetail createRestartedJob(@PathVariable Id id){
         final var jobWithRun = repository.find(id);
 
         return jobToJobDetail(service.createRestartedJob(jobWithRun));
@@ -71,21 +79,21 @@ public class JobController {
     public JobDetail pauseJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Paused, null));
+        return jobToJobDetail(service.transition(jobWithRun, State.Paused));
     }
 
     @PostMapping("/jobs/{id}/start")
-    public JobDetail startJob(@PathVariable Id id, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
+    public JobDetail startJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Ready, sessionId.toNullable()));
+        return jobToJobDetail(service.transition(jobWithRun, State.Ready));
     }
 
     @PostMapping("/jobs/{id}/cancel")
     public JobDetail cancelJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
 
-        return jobToJobDetail(service.transition(jobWithRun, State.Canceled, null));
+        return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
     }
 
     private JobDetail jobToJobDetail(JobWithRun job) {

@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public record InstanceCategoryWrapper(
-    Id categoryId,
     Id sessionId,
+    Id categoryId,
     List<InstanceObjectWrapper> objects,
     List<InstanceMorphismWrapper> morphisms
 ) {
@@ -40,12 +40,12 @@ public record InstanceCategoryWrapper(
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonData.class);
 
-    public static InstanceCategoryWrapper fromJsonValue(String jsonValue) throws JsonProcessingException {
+    public static InstanceCategoryWrapper fromJsonValue(Id sessionId, Id categoryId, String jsonValue) throws JsonProcessingException {
         final JsonData data = jsonValueReader.readValue(jsonValue);
-        return new InstanceCategoryWrapper(null, null, data.objects, data.morphisms);
+        return new InstanceCategoryWrapper(sessionId, categoryId, data.objects, data.morphisms);
     }
 
-    public static InstanceCategoryWrapper fromInstanceCategory(InstanceCategory instance, Id categoryId, Id sessionId) throws JsonProcessingException {
+    public static InstanceCategoryWrapper fromInstanceCategory(Id sessionId, Id categoryId, InstanceCategory instance) {
         final var context = new WrapperContext(instance);
 
         final List<InstanceObjectWrapper> objects = new ArrayList<>();
@@ -57,14 +57,14 @@ public record InstanceCategoryWrapper(
             morphisms.add(InstanceMorphismWrapper.fromInstanceMorphism(morphism, context));
 
         return new InstanceCategoryWrapper(
-            categoryId,
             sessionId,
+            categoryId,
             objects,
             morphisms
         );
     }
 
-    public InstanceCategory toInstanceCategory(String jsonData, SchemaCategory schemaCategory) {
+    public InstanceCategory toInstanceCategory(SchemaCategory schemaCategory) {
         final var category = new InstanceCategoryBuilder().setSchemaCategory(schemaCategory).build();
         final var context = new WrapperContext(category);
 
@@ -79,7 +79,7 @@ public record InstanceCategoryWrapper(
 
     static class WrapperContext {
         public final InstanceCategory category;
-        public final Map<Key, List<DomainRow>> idToRow = new TreeMap<>();
+        public final Map<Key, Map<Integer, DomainRow>> idToRow = new TreeMap<>();
         public final Map<Key, Map<DomainRow, Integer>> rowToId = new TreeMap<>();
 
         public WrapperContext(InstanceCategory category) {

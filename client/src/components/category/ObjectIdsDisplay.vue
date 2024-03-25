@@ -15,7 +15,7 @@ const emit = defineEmits([ 'deleteNonSignature', 'deleteSignature' ]);
 </script>
 
 <template>
-    <div class="outer">
+    <div class="d-flex flex-column">
         <template v-if="ids.isSignatures">
             <div
                 v-for="(signatureId, idIndex) in ids.signatureIds"
@@ -24,7 +24,7 @@ const emit = defineEmits([ 'deleteNonSignature', 'deleteSignature' ]);
                 <SignatureIdDisplay :signature-id="signatureId" />
                 <ButtonIcon
                     v-if="!disabled"
-                    class="delete-button button-icon-error"
+                    class="ms-2 button-icon-error"
                     @click="() => emit('deleteSignature', idIndex)"
                 >
                     <IconMinusSquare />
@@ -40,7 +40,7 @@ const emit = defineEmits([ 'deleteNonSignature', 'deleteSignature' ]);
                 </span>
                 <ButtonIcon
                     v-if="!disabled"
-                    class="delete-button button-icon-error"
+                    class="ms-2 button-icon-error"
                     @click="() => emit('deleteNonSignature')"
                 >
                     <IconMinusSquare />
@@ -49,14 +49,3 @@ const emit = defineEmits([ 'deleteNonSignature', 'deleteSignature' ]);
         </template>
     </div>
 </template>
-
-<style scoped>
-.outer {
-    display: flex;
-    flex-direction: column;
-}
-
-.delete-button {
-    margin-left: 8px;
-}
-</style>

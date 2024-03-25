@@ -1,7 +1,6 @@
 package cz.matfyz.server.entity.action;
 
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
-import cz.matfyz.server.entity.action.payload.JsonLdToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
@@ -18,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = CategoryToModelPayload.class, name = "CategoryToModel"),
     @JsonSubTypes.Type(value = ModelToCategoryPayload.class, name = "ModelToCategory"),
-    @JsonSubTypes.Type(value = JsonLdToCategoryPayload.class, name = "JsonLdToCategory"),
     @JsonSubTypes.Type(value = UpdateSchemaPayload.class, name = "UpdateSchema"),
     @JsonSubTypes.Type(value = RSDToCategoryPayload.class, name = "RSDToCategory")
 })

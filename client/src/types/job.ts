@@ -8,7 +8,7 @@ export type JobFromServer = {
     label: string;
     state: JobState;
     payload: ActionPayloadFromServer;
-    data: JobError | null;
+    data: JobError | unknown;
     createdAt: string;
 };
 
@@ -20,7 +20,8 @@ export class Job implements Entity {
         public readonly label: string,
         public state: JobState,
         public readonly payload: ActionPayload,
-        public readonly data: JobError | undefined,
+        public readonly error: JobError | undefined,
+        public readonly result: unknown | undefined,
         public readonly createdAt: Date,
     ) {}
 
@@ -32,7 +33,8 @@ export class Job implements Entity {
             input.label,
             input.state,
             actionPayloadFromServer(input.payload),
-            input.data ?? undefined,
+            input.state === JobState.Failed ? input.data as JobError : undefined,
+            input.state === JobState.Finished ? input.data : undefined,
             new Date(input.createdAt),
         );
     }

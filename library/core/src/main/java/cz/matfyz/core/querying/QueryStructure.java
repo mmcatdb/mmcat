@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 // TODO add to json conversion for FE.
@@ -19,10 +20,12 @@ public class QueryStructure implements Tree<QueryStructure>, Printable {
     public final String name;
     public final boolean isArray;
     /** Each query structure node corresponds to a schema object. Multiple structures might correspond to the same object. */
+    @JsonIgnore
     public final SchemaObject schemaObject;
     private final Map<String, QueryStructure> children = new TreeMap<>();
 
     /** If null, this is the root of the tree. */
+    @JsonIgnore
     @Nullable
     private QueryStructure parent;
     /** If null, this is the root of the tree. */

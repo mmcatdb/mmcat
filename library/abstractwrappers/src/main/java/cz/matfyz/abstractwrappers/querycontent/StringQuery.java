@@ -11,4 +11,8 @@ public class StringQuery implements QueryContent {
         this.content = content;
     }
 
+    @Override public String toString() {
+        return content;
+    }
+
 }

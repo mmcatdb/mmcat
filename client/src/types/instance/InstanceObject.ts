@@ -1,26 +1,45 @@
 import { ComparableMap } from '@/utils/ComparableMap';
-import { Key, Signature, SignatureId, type KeyFromServer, type SignatureFromServer, type SignatureIdFromServer } from '../identifiers';
+import { Signature, type KeyFromServer, type SignatureFromServer, Key } from '../identifiers';
+import type { SchemaCategory, SchemaObject } from '../schema';
+
+export type InstanceObjectFromServer = {
+    key: KeyFromServer;
+    rows: DomainRowFromServer[];
+};
 
 export class InstanceObject {
     private constructor(
-        readonly key: Key,
-        readonly superId: SignatureId,
+        readonly schema: SchemaObject,
         readonly rows: DomainRow[],
+        readonly idToRow: Map<number, DomainRow>,
     ) {}
 
-    static fromServer(input: InstanceObjectFromServer): InstanceObject {
+    static fromServer(input: InstanceObjectFromServer, schema: SchemaCategory): InstanceObject | undefined {
+        const key = Key.fromServer(input.key);
+        const object = schema.getObject(key).current;
+        if (!object)
+            return;
+
+        const idToRow = new Map<number, DomainRow>();
+        const rows = input.rows.map(inputRow => {
+            const row = DomainRow.fromServer(inputRow);
+            idToRow.set(inputRow.id, row);
+            return row;
+        });
+
         return new InstanceObject(
-            Key.fromServer(input.key),
-            SignatureId.fromServer(input.superId),
-            input.rows.map(DomainRow.fromServer),
+            object,
+            rows,
+            idToRow,
         );
     }
 }
 
-export type InstanceObjectFromServer = {
-    key: KeyFromServer;
-    superId: SignatureIdFromServer;
-    rows: DomainRowFromServer[];
+export type DomainRowFromServer = {
+    id: number;
+    superId: SuperIdWithValuesFromServer;
+    technicalIds: string[];
+    pendingReferences: Signature[];
 };
 
 export class DomainRow {
@@ -41,10 +60,12 @@ export class DomainRow {
     }
 }
 
-export type DomainRowFromServer = {
-    superId: SuperIdWithValuesFromServer;
-    technicalIds: string[];
+type SingatureValueTupleFromServer = {
+    signature: SignatureFromServer;
+    value: string;
 };
+
+type SuperIdWithValuesFromServer = SingatureValueTupleFromServer[];
 
 export class SuperIdWithValues {
     private constructor(
@@ -58,10 +79,3 @@ export class SuperIdWithValues {
         return new SuperIdWithValues(tuples);
     }
 }
-
-type SingatureValueTupleFromServer = {
-    signature: SignatureFromServer;
-    value: string;
-};
-
-export type SuperIdWithValuesFromServer = SingatureValueTupleFromServer[];

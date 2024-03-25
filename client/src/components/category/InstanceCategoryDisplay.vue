@@ -1,30 +1,57 @@
 <script setup lang="ts">
-import { ref, shallowRef } from 'vue';
+import { shallowRef } from 'vue';
 import { Edge, SelectionType, type Node, Graph } from '@/types/categoryGraph';
 import InstanceObjectDisplay from './InstanceObjectDisplay.vue';
-import type { SchemaMorphism, SchemaObject } from '@/types/schema';
+import type { SchemaCategory, SchemaObject } from '@/types/schema';
 import InstanceMorphismDisplay from './InstanceMorphismDisplay.vue';
 import type { Evocat } from '@/types/evocat/Evocat';
 import EvocatDisplay from './EvocatDisplay.vue';
+import { InstanceCategory, type InstanceMorphism, type InstanceObject } from '@/types/instance';
+import API from '@/utils/api';
 
 const evocat = shallowRef<Evocat>();
+const instance = shallowRef<InstanceCategory>();
+const error = shallowRef<unknown>();
 
-const selectedNode = ref<Node>();
-const selectedEdge = ref<Edge>();
+async function fetchInstance(schema: SchemaCategory) {
+    const result = await API.instances.getInstanceCategory({});
+    if (!result.status) {
+        error.value = result.error;
+        return;
+    }
+
+    instance.value = InstanceCategory.fromServer(result.data, schema);
+}
 
 function evocatCreated(context: { evocat: Evocat, graph: Graph }) {
     evocat.value = context.evocat;
     const listener = context.graph.listen();
     listener.onNode('tap', node => selectNode(node));
     listener.onEdge('tap', edge => selectEdge(edge));
-    listener.onCanvas('tap', onCanvasTapHandler);
+    listener.onCanvas('tap', unselect);
+
+    fetchInstance(context.evocat.schemaCategory);
 }
 
-function onCanvasTapHandler() {
-    selectedNode.value?.unselect();
-    selectedNode.value = undefined;
-    selectedEdge.value?.unselect();
-    selectedEdge.value = undefined;
+type Selected = {
+    type: 'node';
+    node: Node;
+    object: InstanceObject;
+} | {
+    type: 'edge';
+    edge: Edge;
+    morphism: InstanceMorphism;
+};
+
+const selected = shallowRef<Selected>();
+
+function unselect() {
+    if (selected.value?.type === 'node')
+        selected.value.node.unselect();
+    else if (selected.value?.type === 'edge')
+        selected.value.edge.unselect();
+
+    selected.value = undefined;
 }
 
 function objectClicked(object: SchemaObject) {
@@ -34,42 +61,34 @@ function objectClicked(object: SchemaObject) {
 }
 
 function selectNode(node: Node) {
-    selectedNode.value?.unselect();
-    selectedEdge.value?.unselect();
-    selectedEdge.value = undefined;
+    const isSameNode = selected.value?.type === 'node' && selected.value.node.equals(node);
+    unselect();
 
-    if (node.equals(selectedNode.value)) {
-        selectedNode.value = undefined;
+    if (isSameNode)
         return;
-    }
 
-    selectedNode.value = node;
-    selectedNode.value.select({ type: SelectionType.Root, level: 0 });
-}
+    const object = instance.value?.objects.get(node.schemaObject.key);
+    if (!object)
+        return;
 
-function edgeClicked(morphism: SchemaMorphism) {
-    const newEdge = evocat.value?.graph?.getEdge(morphism.signature);
-    if (newEdge)
-        selectEdge(newEdge);
-}
-
-function selectEdgeInner(edge: Edge) {
-    edge.domainNode.select({ type: SelectionType.Selected, level: 0 });
-    edge.codomainNode.select({ type: SelectionType.Selected, level: 1 });
+    selected.value = { type: 'node', node, object };
+    node.select({ type: SelectionType.Root, level: 0 });
 }
 
 function selectEdge(edge: Edge) {
-    selectedEdge.value?.unselect();
-    selectedNode.value?.unselect();
-    selectedNode.value = undefined;
+    const isSameEdge = selected.value?.type === 'edge' && selected.value.edge.equals(edge);
+    unselect();
 
-    if (edge.equals(selectedEdge.value)) {
-        selectedEdge.value = undefined;
+    if (isSameEdge)
         return;
-    }
 
-    selectedEdge.value = edge;
-    selectEdgeInner(edge);
+    const morphism = instance.value?.morphisms.get(edge.schemaMorphism.signature);
+    if (!morphism)
+        return;
+
+    selected.value = { type: 'edge', edge, morphism };
+    edge.domainNode.select({ type: SelectionType.Selected, level: 0 });
+    edge.codomainNode.select({ type: SelectionType.Selected, level: 1 });
 }
 </script>
 
@@ -77,16 +96,24 @@ function selectEdge(edge: Edge) {
     <div class="divide">
         <EvocatDisplay @evocat-created="evocatCreated" />
         <InstanceObjectDisplay
-            v-if="selectedNode"
-            :key="selectedNode.schemaObject.key.value"
-            :node="selectedNode"
+            v-if="selected?.type === 'node'"
+            :key="selected.node.schemaObject.key.value"
+            :node="selected.node"
+            :object="selected.object"
             @object:click="objectClicked"
         />
         <InstanceMorphismDisplay
-            v-if="selectedEdge"
-            :key="selectedEdge.schemaMorphism.signature.value"
-            :edge="selectedEdge"
+            v-if="selected?.type === 'edge'"
+            :key="selected.edge.schemaMorphism.signature.value"
+            :edge="selected.edge"
+            :morphism="selected.morphism"
             @object:click="objectClicked"
         />
+        <div
+            v-if="error"
+            class="text-danger"
+        >
+            Instance doens't exist yet.
+        </div>
     </div>
 </template>

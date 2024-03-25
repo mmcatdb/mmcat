@@ -51,7 +51,7 @@ function click() {
 </script>
 
 <template>
-    <div class="outer">
+    <div class="d-flex flex-column">
         <div
             v-for="row in iriRows"
             :key="row"
@@ -63,10 +63,3 @@ function click() {
         </div>
     </div>
 </template>
-
-<style scoped>
-.outer {
-    display: flex;
-    flex-direction: column;
-}
-</style>

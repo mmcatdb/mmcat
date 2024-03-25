@@ -11,6 +11,7 @@ const props = defineProps<VersionDisplayProps>();
 
 <template>
     <span
+        class="fw-semibold"
         :class="{ 'text-error': props.error }"
     >
         {{ props.versionId }}

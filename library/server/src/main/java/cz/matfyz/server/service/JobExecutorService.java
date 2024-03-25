@@ -38,6 +38,9 @@ import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
+
+import cz.matfyz.server.exception.SessionException;
+
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
@@ -56,6 +59,7 @@ import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import edu.uci.ics.jung.graph.Graph;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +85,9 @@ public class JobExecutorService {
 
     @Autowired
     private SchemaCategoryService schemaService;
+
+    @Autowired
+    private InstanceCategoryService instanceService;
 
     @Autowired
     private WrapperService wrapperService;
@@ -124,7 +131,6 @@ public class JobExecutorService {
             processJobByType(run, job);
             LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
             job.state = Job.State.Finished;
-            job.data = null;
             repository.save(job);
         }
         catch (Exception e) {
@@ -135,15 +141,13 @@ public class JobExecutorService {
             job.data = finalException.toSerializedException();
             repository.save(job);
         }
-
-        // tryStartNextJob(true);
     }
 
     private void processJobByType(Run run, Job job) {
         if (job.payload instanceof CategoryToModelPayload categoryToModelPayload)
             categoryToModelAlgorithm(run, job, categoryToModelPayload);
         else if (job.payload instanceof ModelToCategoryPayload modelToCategoryPayload)
-            modelToCategoryAlgorithm(run, modelToCategoryPayload);
+            modelToCategoryAlgorithm(run, job, modelToCategoryPayload);
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
         else if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload)
@@ -240,27 +244,32 @@ public class JobExecutorService {
         mappingService.createNew(categoryMappingPair.mapping());
     }
 
-    private void modelToCategoryAlgorithm(Run run, ModelToCategoryPayload payload) {
+    private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
+        if (run.sessionId == null)
+            throw SessionException.notFound(run.id);
+
         final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
         final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
-        // InstanceCategory instance = store.getCategory(run.categoryId);
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        InstanceCategory instance = null;
+        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
 
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
             final Mapping mapping = mappingWrapper.toMapping(schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
         }
 
-        // store.setInstance(run.categoryId, instance);
+        if (instance != null)
+            instanceService.saveCategory(run.sessionId, run.categoryId, instance);
     }
 
     private void categoryToModelAlgorithm(Run run, Job job, CategoryToModelPayload payload) {
+        if (run.sessionId == null)
+            throw SessionException.notFound(job.id);
+
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        // final InstanceCategory instance = store.getCategory(run.categoryId);
-        InstanceCategory instance = null;
+        @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
 
         final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
         final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
