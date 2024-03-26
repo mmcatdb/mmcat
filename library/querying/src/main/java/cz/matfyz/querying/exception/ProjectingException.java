@@ -1,6 +1,7 @@
 package cz.matfyz.querying.exception;
 
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.querying.parsing.Term;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,6 +17,10 @@ public class ProjectingException extends QueryingException {
 
     public static ProjectingException notSingleComponent() {
         return new ProjectingException("notSingleComponent", null);
+    }
+
+    public static ProjectingException notRootVariable(Term term) {
+        return new ProjectingException("notRootVariable", term.getIdentifier());
     }
 
     private record NotSingleRootData(

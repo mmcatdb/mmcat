@@ -14,8 +14,8 @@ import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.KindPattern;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.querytree.PatternNode;
-import cz.matfyz.querying.parsing.ParserNode.Term;
-import cz.matfyz.querying.parsing.StringValue;
+import cz.matfyz.querying.parsing.Term;
+import cz.matfyz.querying.parsing.Term.StringValue;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -84,7 +84,7 @@ class PatternTranslator {
         final var objectProperty = wrapperContext.createProperty(kind.kind, item);
 
         if (term instanceof StringValue constantObject)
-            wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value)), ComparisonOperator.Equal);
+            wrapper.addFilter(objectProperty, new Constant(List.of(constantObject.value())), ComparisonOperator.Equal);
         else {
             // TODO isOptional is not supported yet.
             final var structure = wrapperContext.findOrCreateStructure(objectProperty);

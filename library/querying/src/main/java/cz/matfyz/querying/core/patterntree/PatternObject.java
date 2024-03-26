@@ -5,7 +5,7 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.utils.printable.*;
 import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
-import cz.matfyz.querying.parsing.ParserNode.Term;
+import cz.matfyz.querying.parsing.Term;
 import cz.matfyz.querying.exception.GeneralException;
 
 import java.util.Collection;

@@ -14,18 +14,12 @@ import cz.matfyz.evolution.schema.EditMorphism;
 import cz.matfyz.evolution.schema.EditObject;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.evolution.schema.SchemaEvolutionVisitor;
-import cz.matfyz.querying.core.QueryContext;
-import cz.matfyz.querying.parsing.ConditionFilter;
-import cz.matfyz.querying.parsing.GroupGraphPattern;
+import cz.matfyz.querying.parsing.Filter.ConditionFilter;
 import cz.matfyz.querying.parsing.Query;
 import cz.matfyz.querying.parsing.QueryParser;
-import cz.matfyz.querying.parsing.SelectClause;
-import cz.matfyz.querying.parsing.SelectTriple;
-import cz.matfyz.querying.parsing.ValueFilter;
-import cz.matfyz.querying.parsing.WhereClause;
-import cz.matfyz.querying.parsing.WhereTriple;
-import cz.matfyz.querying.parsing.ParserNode.TermBuilder;
-import cz.matfyz.querying.parsing.WhereClause.Type;
+import cz.matfyz.querying.parsing.Filter.ValueFilter;
+import cz.matfyz.querying.parsing.SelectClause.SelectTriple;
+import cz.matfyz.querying.parsing.WhereClause.WhereTriple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,10 +57,9 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
     private QueryUpdateResult innerRun(String prevContent) throws Exception {
         final Query parsedQuery = QueryParser.parse(prevContent);
-        selectTriples = new ArrayList<>(parsedQuery.select.triples);
-        whereTriples = new ArrayList<>(parsedQuery.where.pattern.triples);
-        conditionFilters = new ArrayList<>(parsedQuery.where.pattern.conditionFilters);
-        valueFilters = new ArrayList<>(parsedQuery.where.pattern.valueFilters);
+        // selectTriples = new ArrayList<>(parsedQuery.select.triples);
+        conditionFilters = new ArrayList<>(parsedQuery.where.conditionFilters);
+        valueFilters = new ArrayList<>(parsedQuery.where.valueFilters);
 
         for (final var update : updates) {
             for (final var operation : update.operations) {
@@ -74,17 +67,19 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
             }
         }
 
-        final Query updatedQuery = new Query(
-            new SelectClause(selectTriples),
-            new WhereClause(
-                Type.Where,
-                new GroupGraphPattern(whereTriples, conditionFilters, valueFilters, new TermBuilder()),
-                List.of()
-            ),
-            new QueryContext()
-        );
+        // final Query updatedQuery = new Query(
+        //     new SelectClause(selectTriples),
+        //     new WhereClause(
+        //         Type.Where,
+        //         new GroupGraphPattern(whereTriples, conditionFilters, valueFilters, new Term.Builder()),
+        //         List.of()
+        //     ),
+        //     new QueryContext()
+        // );
 
-        final String newContent = QueryParser.write(updatedQuery);
+        // final String newContent = QueryParser.write(updatedQuery);
+
+        String newContent = prevContent;
 
         return new QueryUpdateResult(newContent, List.of(
             new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null)

@@ -43,7 +43,7 @@ public class QueryTreeBuilder {
     }
 
     private QueryNode processClause(WhereClause clause, @Nullable QueryNode childNode) {
-        final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause.pattern);
+        final var extracted = SchemaExtractor.run(context, originalSchema, allKinds, clause);
         final List<Set<KindPattern>> plans = QueryPlanner.run(extracted.kindPatterns());
         if (plans.isEmpty())
             throw PlanningException.noPlans();
@@ -51,12 +51,12 @@ public class QueryTreeBuilder {
         // TODO better selection?
         final Set<KindPattern> selectedPlan = plans.get(0);
 
-        QueryNode currentNode = PlanJoiner.run(selectedPlan, extracted.schema(), clause.pattern.termTree);
+        QueryNode currentNode = PlanJoiner.run(selectedPlan, extracted.schema(), clause.termTree);
 
-        for (final var filter : clause.pattern.conditionFilters)
+        for (final var filter : clause.conditionFilters)
             currentNode = new FilterNode(currentNode, filter);
 
-        for (final var values : clause.pattern.valueFilters)
+        for (final var values : clause.valueFilters)
             currentNode = new FilterNode(currentNode, values);
 
         // TODO we are not dealing with the nested clauses now.

@@ -1,10 +1,8 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.parsing.WhereTriple;
-import cz.matfyz.querying.parsing.ParserNode.Term;
+import cz.matfyz.querying.parsing.Term;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,20 +11,6 @@ import java.util.TreeMap;
  * This class collects and provides global information about the whole query.
  */
 public class QueryContext {
-
-    // Parsing
-
-    private final Map<BaseSignature, WhereTriple> triples = new TreeMap<>();
-
-    public QueryContext addTriple(WhereTriple triple) {
-        this.triples.put(triple.signature, triple);
-
-        return this;
-    }
-
-    public WhereTriple getTriple(BaseSignature signature) {
-        return triples.get(signature);
-    }
 
     // Extracting
     

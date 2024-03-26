@@ -22,8 +22,8 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.core.querytree.QueryVisitor;
 import cz.matfyz.querying.core.querytree.UnionNode;
 import cz.matfyz.querying.exception.QueryTreeException;
-import cz.matfyz.querying.parsing.ConditionFilter;
-import cz.matfyz.querying.parsing.ValueFilter;
+import cz.matfyz.querying.parsing.Filter.ConditionFilter;
+import cz.matfyz.querying.parsing.Filter.ValueFilter;
 
 import java.util.List;
 

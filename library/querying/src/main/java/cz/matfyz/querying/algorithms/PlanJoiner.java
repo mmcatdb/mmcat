@@ -18,8 +18,8 @@ import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.exception.JoiningException;
-import cz.matfyz.querying.parsing.GroupGraphPattern.TermTree;
-import cz.matfyz.querying.parsing.ParserNode.Term;
+import cz.matfyz.querying.parsing.Term;
+import cz.matfyz.querying.parsing.TermTree;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,18 +36,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class PlanJoiner {
 
-    public static QueryNode run(Set<KindPattern> allKinds, SchemaCategory schema, TermTree allTerms) {
-        return new PlanJoiner(allKinds, schema, allTerms).run();
+    public static QueryNode run(Set<KindPattern> allKinds, SchemaCategory schema, TermTree<BaseSignature> termTree) {
+        return new PlanJoiner(allKinds, schema, termTree).run();
     }
 
     private final Set<KindPattern> allKinds;
     private final SchemaCategory schema;
-    private final TermTree allTerms;
+    private final TermTree<BaseSignature> termTree;
 
-    private PlanJoiner(Set<KindPattern> allKinds, SchemaCategory schema, TermTree allTerms) {
+    private PlanJoiner(Set<KindPattern> allKinds, SchemaCategory schema, TermTree<BaseSignature> termTree) {
         this.allKinds = allKinds;
         this.schema = schema;
-        this.allTerms = allTerms;
+        this.termTree = termTree;
     }
 
     private QueryNode run() {
@@ -272,8 +272,8 @@ public class PlanJoiner {
     }
 
     private QueryPart createQueryPart(Component<KindPattern, JoinCandidate> component) {
-        final var kinds = component.nodes();
-        final var joinCandidates = component.edges();
+        final Set<KindPattern> kinds = component.nodes();
+        final List<JoinCandidate> joinCandidates = component.edges();
 
         final var rootKinds = GraphUtils.findRoots(component);
         if (rootKinds.size() != 1)
@@ -284,12 +284,12 @@ public class PlanJoiner {
         // Of course, the root term has to be original. Therefore, we have to continue through it's parentes until we find such.
         final var rootTermTrees = kinds.stream()
             .map(k -> k.root.term)
-            .map(term -> GraphUtils.findBFS(allTerms, t -> t.term.equals(term)))
+            .map(term -> GraphUtils.findBFS(termTree, t -> t.term.equals(term)))
             .toList();
 
-        var partRoot = GraphUtils.findSubroot(allTerms, rootTermTrees);
+        var partRoot = GraphUtils.findSubroot(termTree, rootTermTrees);
         while (!partRoot.term.isOriginal())
-            partRoot = partRoot.parent;
+            partRoot = partRoot.parent();
 
         // final var rootTerm = rootKinds.stream().findFirst().get().root.term;
 

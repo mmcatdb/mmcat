@@ -102,11 +102,15 @@ public abstract class GraphUtils {
 
     }
 
-    public interface Tree<T extends Tree<T>> extends Comparable<T> {
-
-        @Nullable T parent();
+    public interface TopDownTree<T extends TopDownTree<T>> {
 
         Collection<T> children();
+
+    }
+
+    public interface Tree<T extends Tree<T>> extends TopDownTree<T>, Comparable<T> {
+
+        @Nullable T parent();
 
     }
 
@@ -161,7 +165,7 @@ public abstract class GraphUtils {
     }
 
     @Nullable
-    public static <T extends Tree<T>> T findDFS(T tree, Predicate<T> predicate) {
+    public static <T extends TopDownTree<T>> T findDFS(T tree, Predicate<T> predicate) {
         Deque<T> stack = new ArrayDeque<>();
         stack.push(tree);
 
@@ -178,7 +182,7 @@ public abstract class GraphUtils {
     }
 
     @Nullable
-    public static <T extends Tree<T>> T findBFS(T tree, Predicate<T> predicate) {
+    public static <T extends TopDownTree<T>> T findBFS(T tree, Predicate<T> predicate) {
         Queue<T> queue = new ArrayDeque<>();
         queue.add(tree);
 
