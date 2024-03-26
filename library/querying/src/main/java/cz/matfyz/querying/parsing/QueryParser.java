@@ -30,14 +30,16 @@ public abstract class QueryParser {
 
         printer.append("SELECT {").down().nextLine();
 
-        // TODO
+        for (final var termTree : query.select.originalTermTrees)
+            printer.append(termTree).nextLine();
 
         printer
             .remove().up().nextLine()
             .append("}").nextLine()
             .append("WHERE {").down().nextLine();
 
-        // TODO
+        for (final var termTree : query.where.originalTermTrees)
+            printer.append(termTree).nextLine();
 
         printer.remove().up().nextLine().append("}");
 

@@ -563,5 +563,5 @@ class QueryTests {
     }
 
     // TODO - something breaks when one kind is in multiple mappings. The planning algorithm can't deal with it. Don't know why. Test it.
-    
+
 }

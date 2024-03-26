@@ -1,7 +1,9 @@
 package cz.matfyz.querying.parsing;
 
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.utils.GraphUtils.Tree;
 import cz.matfyz.querying.parsing.Term.Variable;
+import cz.matfyz.core.utils.printable.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +12,7 @@ import java.util.TreeMap;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class TermTree<TEdge> implements ParserNode, Tree<TermTree<TEdge>> {
+public class TermTree<TEdge> implements ParserNode, Tree<TermTree<TEdge>>, Printable {
     /** If this is root or inner node, this property has to be Variable. */
     public final Term term;
     public final List<TermTree<TEdge>> children = new ArrayList<>();
@@ -102,6 +104,46 @@ public class TermTree<TEdge> implements ParserNode, Tree<TermTree<TEdge>> {
 
         for (final TermTree<SEdge> child : termTree.children)
             addTriplesToList(child, termTree.term.asVariable(), triples, creator);
+    }
+
+    @Override public void printTo(Printer printer) {
+        if (edgeFromParent != null) {
+            final Object edgeString = edgeFromParent instanceof Signature signature
+                ? signature.toString(QueryVisitor.SIGNATURE_SEPARATOR)
+                : edgeFromParent;
+            printer.append(edgeString).append(" ");
+        }
+
+        printer.append(term);
+
+        if (children.isEmpty())
+            return;
+
+        if (children.size() > 1)
+            printer.down().nextLine();
+        else
+            printer.append(" ");
+
+        for (int i = 0; i < children.size() - 1; i++) {
+            final var child = children.get(i);
+            printer.append(child);
+            if (child.children.isEmpty())
+                printer.append(" ;");
+            printer.nextLine();
+        }
+
+        final var child = children.getLast();
+        printer.append(child);
+        if (child.children.isEmpty())
+            printer.append(" .");
+        printer.nextLine();
+        
+        if (children.size() > 1)
+            printer.remove().up();
+    }
+
+    @Override public String toString() {
+        return Printer.print(this);
     }
 
 }

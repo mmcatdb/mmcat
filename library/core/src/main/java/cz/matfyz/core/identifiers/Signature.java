@@ -189,6 +189,10 @@ public class Signature implements Serializable, Comparable<Signature> {
     private static final String SEPARATOR = ".";
 
     @Override public String toString() {
+        return toString(SEPARATOR);
+    }
+
+    public String toString(String separator) {
         if (isEmpty())
             return "EMPTY";
 
@@ -196,7 +200,7 @@ public class Signature implements Serializable, Comparable<Signature> {
 
         builder.append(ids[0]);
         for (int i = 1; i < ids.length; i++)
-            builder.append(SEPARATOR).append(ids[i]);
+            builder.append(separator).append(ids[i]);
 
         return builder.toString();
     }

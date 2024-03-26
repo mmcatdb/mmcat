@@ -28,7 +28,7 @@ async function fetchJobs() {
     if (!result.status)
         return false;
 
-    jobs.value = result.data.map(Job.fromServer);
+    jobs.value = result.data.map(Job.fromServer).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     return true;
 }
 </script>

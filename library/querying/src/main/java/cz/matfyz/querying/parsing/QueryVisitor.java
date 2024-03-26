@@ -31,6 +31,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
+    public static final String SIGNATURE_SEPARATOR = "/";
+
     @Override protected ParserNode aggregateResult(ParserNode aggregate, ParserNode nextResult) {
         return nextResult == null ? aggregate : nextResult;
     }
@@ -138,7 +140,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     private Signature parseSignature(String edge) {
         try {
-            final var bases = Arrays.stream(edge.split("/"))
+            final var bases = Arrays.stream(edge.split(SIGNATURE_SEPARATOR))
                 .map(base -> Signature.createBase(Integer.parseInt(base)))
                 .toList();
 

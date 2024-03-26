@@ -15,15 +15,21 @@ public class QueryContext {
     // Extracting
     
     private final Map<Term, SchemaObject> termToObject = new TreeMap<>();
+    private final Map<SchemaObject, Term> objectToTerm = new TreeMap<>();
     
     public QueryContext addTerm(Term term, SchemaObject object) {
         termToObject.put(term, object);
+        objectToTerm.put(object, term);
         
         return this;
     }
     
     public SchemaObject getObject(Term term) {
         return termToObject.get(term);
+    }
+
+    public Term getTerm(SchemaObject object) {
+        return objectToTerm.get(object);
     }
 
     // Schema category
