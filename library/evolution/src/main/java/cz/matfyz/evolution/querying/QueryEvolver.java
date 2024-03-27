@@ -1,6 +1,5 @@
 package cz.matfyz.evolution.querying;
 
-import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.identifiers.Signature;
