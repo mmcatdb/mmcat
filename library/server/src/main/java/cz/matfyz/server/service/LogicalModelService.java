@@ -71,4 +71,5 @@ public class LogicalModelService {
 
         return new LogicalModelWithDatabase(logicalModel, database);
     }
+    
 }

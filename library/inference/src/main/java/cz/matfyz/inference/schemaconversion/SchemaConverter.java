@@ -48,7 +48,7 @@ public class SchemaConverter {
         convertToSchemafromRSD(sc, rsd, rootKey, 1, currentNode);
         SCUtils.addIndexObjecttoArr(sc);
         MappingCreator mappingCreator = new MappingCreator(rootKey, root);
-        Mapping mapping = mappingCreator.createMapping(sc, "RSD_to_SC"); //What will this label be?
+        Mapping mapping = mappingCreator.createMapping(sc, "Full_schema_mapping"); //What will this label be?
         return new CategoryMappingPair(sc, mapping);
     }
 
@@ -63,7 +63,8 @@ public class SchemaConverter {
     public void convertToSchemafromRSD(SchemaCategory sc, RecordSchemaDescription rsdp, Key keyp, int i, AccessTreeNode currentNode) {
         SchemaObject so;
         if (sc.allObjects().isEmpty()) { //adding the root
-            Signature s = Signature.createBase(1);
+            //Signature s = Signature.createBase(1); //this part is not right for the AccessTreeNode creation
+            Signature s = Signature.createEmpty();
 
             Set<Signature> ss = new HashSet<>();
             ss.add(s);
@@ -74,6 +75,7 @@ public class SchemaConverter {
             so = new SchemaObject(keyp, rsdp.getName(), objectIds, sId);
             sc.addObject(so);
 
+            //this.root = new AccessTreeNode(AccessTreeNode.State.Complex, rsdp.getName(), s);
             this.root = new AccessTreeNode(AccessTreeNode.State.Complex, rsdp.getName(), s);
             currentNode = root;
         }

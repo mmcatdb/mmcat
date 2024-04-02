@@ -34,6 +34,8 @@ import cz.matfyz.server.entity.datasource.DataSource;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
+import cz.matfyz.server.entity.logicalmodel.LogicalModel;
+import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
@@ -42,6 +44,7 @@ import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import cz.matfyz.server.exception.SessionException;
 
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatabase;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
@@ -212,15 +215,17 @@ public class JobExecutorService {
     }
     
 
+    // refactor this method!!
     private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
         Id originalId = run.categoryId;
         SchemaCategoryWrapper originalWrapper = schemaService.find(originalId);
         String schemaCatName = originalWrapper.label;        
         final CategoryMappingPair categoryMappingPair;
         String inputType;
+        DatabaseEntity databaseEntity = null;
         
         if (payload.databaseId()!= null){
-            final DatabaseEntity databaseEntity = databaseService.find(payload.databaseId()); 
+            databaseEntity = databaseService.find(payload.databaseId()); 
             String databaseName = databaseEntity.settings.get("database").asText();
             String port = databaseEntity.settings.get("port").asText();
             String host = databaseEntity.settings.get("host").asText();
@@ -239,9 +244,14 @@ public class JobExecutorService {
         }
                 
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+
+        LogicalModelInit logicalModelInit = new LogicalModelInit(databaseEntity.id, originalId, "Initial logical model"); 
+        LogicalModelWithDatabase logicalModelWithDB = logicalModelService.createNew(logicalModelInit);
         
         schemaService.overwriteInfo(wrapper, originalId);
-        mappingService.createNew(categoryMappingPair.mapping());
+        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDB.logicalModel().id);;
+        // I need this to appear in my Postgres Logical Model when I run inference. 
+        // Now it appears when i click on the basic example and i have ever befored run inference
     }
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
@@ -261,6 +271,7 @@ public class JobExecutorService {
         }
 
         if (instance != null)
+            //System.out.println("instance is not null");
             instanceService.saveCategory(run.sessionId, run.categoryId, instance);
     }
 
@@ -298,12 +309,17 @@ public class JobExecutorService {
             // TODO - verzovat databáze - tj. vytvořit vždy novou databázi (v rámci stejného engine)
             //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
             //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
-
+            /*
             if (server.executeModels()) {
                 LOGGER.info("Start executing models ...");
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
+            else { LOGGER.info("Models didn't get executed. Yikes");}*/
+            /* for now I choose not to execute the statements, but just see if they even got created
+            LOGGER.info("Start executing models ...");
+            control.execute(result.statements());
+            LOGGER.info("... models executed."); */
         }
 
         job.data = output.toString();
