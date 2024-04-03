@@ -189,6 +189,12 @@ public class InstanceCategory {
             if (!object.isEmpty())
                 builder.append(object).append("\n");
         builder.append("\n");
+       
+        /*builder.append("Objects :\n");
+        for (InstanceObject object : objects.values())
+            //if (!object.isEmpty())
+            builder.append(object).append("\n");
+        builder.append("\n");*/
 
         builder.append("Signatures: ");
         for (Signature signature : morphisms.keySet())

@@ -52,7 +52,6 @@ public class MappingService {
      * @return
      */
     public MappingInfo createNew(Mapping mapping, Id logicalModelId) {
-        // probs need to obtain MappingInit first, because that's what you can save in MappingRepo
         Signature[] primaryKeyArray = mapping.primaryKey().toArray(new Signature[0]);
 
         MappingInit init = new MappingInit(
@@ -64,7 +63,6 @@ public class MappingService {
                 null); //Version categoryVersion (probs could use Version.generateInitial())
 
         Id generatedId = repository.add(init);
-        //System.out.println("generatedId in MappingService: " + generatedId);
         if (generatedId != null) {
             return new MappingInfo(
                 generatedId,

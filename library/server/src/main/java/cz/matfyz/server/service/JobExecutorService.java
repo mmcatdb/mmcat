@@ -20,7 +20,6 @@ import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
-//import cz.matfyz.server.builder.MappingBuilder;
 import cz.matfyz.server.builder.MetadataContext;
 
 import cz.matfyz.server.configuration.ServerProperties;
@@ -264,14 +263,19 @@ public class JobExecutorService {
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
         @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
+        System.out.println("jobexecutor: " + instance.objects());
+        //System.out.println("print if non empty");
 
+        if (mappingWrappers.isEmpty()) {System.out.println("mapping wrappers is empty");}
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
             final Mapping mapping = mappingWrapper.toMapping(schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
         }
+        System.out.println(instance);
+        System.out.println("instance after");
 
         if (instance != null)
-            //System.out.println("instance is not null");
+            System.out.println(instance);
             instanceService.saveCategory(run.sessionId, run.categoryId, instance);
     }
 

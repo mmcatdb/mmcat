@@ -73,7 +73,8 @@ public record InstanceCategoryWrapper(
 
         for (final InstanceMorphismWrapper morphismWrapper : morphisms)
             morphismWrapper.toInstanceMorphism(context);
-
+        //System.out.println("toInstanceCat: " + category.objects());
+        //System.out.println("toInstanceCat: " + category.morphisms());
         return category;
     }
 

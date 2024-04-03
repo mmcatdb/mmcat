@@ -64,6 +64,7 @@ public class SchemaConverter {
         SchemaObject so;
         if (sc.allObjects().isEmpty()) { //adding the root
             //Signature s = Signature.createBase(1); //this part is not right for the AccessTreeNode creation
+            /*
             Signature s = Signature.createEmpty();
 
             Set<Signature> ss = new HashSet<>();
@@ -71,11 +72,13 @@ public class SchemaConverter {
 
             ObjectIds objectIds = new ObjectIds(s);
 
-            SignatureId sId = new SignatureId(ss);
-            so = new SchemaObject(keyp, rsdp.getName(), objectIds, sId);
+            SignatureId sId = new SignatureId(ss); */
+            Signature s = Signature.createEmpty();
+            ObjectIds ids = ObjectIds.createGenerated();
+            SignatureId superId = SignatureId.createEmpty();
+            so = new SchemaObject(keyp, rsdp.getName(), ids, superId);
             sc.addObject(so);
 
-            //this.root = new AccessTreeNode(AccessTreeNode.State.Complex, rsdp.getName(), s);
             this.root = new AccessTreeNode(AccessTreeNode.State.Complex, rsdp.getName(), s);
             currentNode = root;
         }
