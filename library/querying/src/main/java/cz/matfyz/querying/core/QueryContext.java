@@ -1,10 +1,8 @@
 package cz.matfyz.querying.core;
 
-import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.querying.parsing.WhereTriple;
-import cz.matfyz.querying.parsing.ParserNode.Term;
+import cz.matfyz.querying.parsing.Term;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,32 +12,24 @@ import java.util.TreeMap;
  */
 public class QueryContext {
 
-    // Parsing
-
-    private final Map<BaseSignature, WhereTriple> triples = new TreeMap<>();
-
-    public QueryContext addTriple(WhereTriple triple) {
-        this.triples.put(triple.signature, triple);
-
-        return this;
-    }
-
-    public WhereTriple getTriple(BaseSignature signature) {
-        return triples.get(signature);
-    }
-
     // Extracting
     
     private final Map<Term, SchemaObject> termToObject = new TreeMap<>();
+    private final Map<SchemaObject, Term> objectToTerm = new TreeMap<>();
     
     public QueryContext addTerm(Term term, SchemaObject object) {
         termToObject.put(term, object);
+        objectToTerm.put(object, term);
         
         return this;
     }
     
     public SchemaObject getObject(Term term) {
         return termToObject.get(term);
+    }
+
+    public Term getTerm(SchemaObject object) {
+        return objectToTerm.get(object);
     }
 
     // Schema category

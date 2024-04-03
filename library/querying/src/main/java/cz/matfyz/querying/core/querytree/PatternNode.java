@@ -3,7 +3,7 @@ package cz.matfyz.querying.core.querytree;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.patterntree.KindPattern;
-import cz.matfyz.querying.parsing.ParserNode.Term;
+import cz.matfyz.querying.parsing.Term;
 
 import java.util.List;
 import java.util.Set;

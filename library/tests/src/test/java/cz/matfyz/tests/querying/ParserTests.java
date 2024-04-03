@@ -25,8 +25,10 @@ class ParserTests {
     void parserTest(String queryString) {
         LOGGER.info("Parsing query:\n{}", queryString);
         Assertions.assertDoesNotThrow(() -> {
-            Query query = QueryParser.run(queryString);
-            LOGGER.info("Parsed result:\n{}", query);
+            final Query query = QueryParser.parse(queryString);
+            LOGGER.info("Parsed query:\n{}", query);
+            final String printedQuery = QueryParser.write(query);
+            LOGGER.info("Printed query:\n{}", printedQuery);
         });
     }
 
@@ -67,7 +69,7 @@ class ParserTests {
             VALUES ?status {"completed" "shipped"}
         }
         """,
-    """
+        """
         SELECT {
             ?customer name ?name ;
                 surname ?surname .

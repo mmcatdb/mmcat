@@ -352,6 +352,7 @@ public class JobExecutorService {
         final SchemaCategoryWrapper wrapper = schemaService.find(categoryId);
         final List<SchemaCategoryUpdate> updates = schemaService
             .findAllUpdates(categoryId).stream()
+            .filter(u -> u.prevVersion.compareTo(prevVersion) >= 0 && u.nextVersion.compareTo(nextVersion) <= 0)
             .map(SchemaUpdate::toEvolution).toList();
 
         final SchemaCategory prevCategory = wrapper.toSchemaCategory();
@@ -359,7 +360,7 @@ public class JobExecutorService {
         SchemaCategoryUpdate.setToVersion(prevCategory, updates, wrapper.version, prevVersion);
         SchemaCategoryUpdate.setToVersion(nextCategory, updates, wrapper.version, nextVersion);
 
-        return new QueryEvolver(prevCategory, nextCategory);
+        return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
 }

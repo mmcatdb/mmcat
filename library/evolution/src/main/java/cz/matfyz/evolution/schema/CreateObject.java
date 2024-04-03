@@ -10,6 +10,10 @@ import java.util.List;
 
 public class CreateObject extends SchemaCategory.Editor implements SchemaModificationOperation {
 
+    @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
     public final SchemaObject object;
 
     public CreateObject(SchemaObject object) {

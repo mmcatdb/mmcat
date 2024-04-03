@@ -5,6 +5,10 @@ import cz.matfyz.core.schema.SchemaMorphism.DisconnectedSchemaMorphism;
 
 public class EditMorphism extends SchemaCategory.Editor implements SchemaModificationOperation {
 
+    @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
     // The dom and cod of the morphism are probably null because they have not been created yet during the creation of this operation.
     public final DisconnectedSchemaMorphism newMorphism;
     public final DisconnectedSchemaMorphism oldMorphism;

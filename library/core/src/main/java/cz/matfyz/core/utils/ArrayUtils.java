@@ -109,4 +109,16 @@ public class ArrayUtils {
         return -1;
     }
 
+    public static <T> boolean isShallowEqual(List<T> a, List<T> b) {
+        if (a.size() != b.size())
+            return false;
+
+        for (int i = 0; i < a.size(); i++) {
+            if (a.get(i) != b.get(i))
+                return false;
+        }
+
+        return true;
+    }
+
 }

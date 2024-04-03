@@ -42,7 +42,7 @@ public class QueryToInstance {
     }
 
     private ResultList innerExecute() {
-        final Query query = QueryParser.run(queryString);
+        final Query query = QueryParser.parse(queryString);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
         final QueryResult selection = QueryResolver.run(query.context, queryTree);
         final QueryResult projection = QueryProjector.run(query.context, query.select, selection);
@@ -63,7 +63,7 @@ public class QueryToInstance {
     }
 
     private QueryDescription innerDescribe() {
-        final Query query = QueryParser.run(queryString);
+        final Query query = QueryParser.parse(queryString);
         final QueryNode queryTree = QueryTreeBuilder.run(query.context, schema, kinds, query.where);
 
         return QueryDescriptor.run(query.context, queryTree);

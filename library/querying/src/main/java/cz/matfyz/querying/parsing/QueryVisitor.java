@@ -2,33 +2,43 @@ package cz.matfyz.querying.parsing;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.AggregationOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.exception.GeneralException;
-import cz.matfyz.querying.parsing.ParserNode.Term;
-import cz.matfyz.querying.parsing.ParserNode.TermBuilder;
+import cz.matfyz.querying.exception.ParsingException;
+import cz.matfyz.querying.parsing.Filter.ConditionFilter;
+import cz.matfyz.querying.parsing.Filter.ValueFilter;
 import cz.matfyz.querying.parsing.WhereClause.Type;
+import cz.matfyz.querying.parsing.Term.Aggregation;
+import cz.matfyz.querying.parsing.Term.StringValue;
+import cz.matfyz.querying.parsing.Term.Variable;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatBaseVisitor;
 import cz.matfyz.querying.parsing.antlr4generated.QuerycatParser;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 /**
  * Visitor class whose job is to traverse the AST parsed from each MMQL query, and construct the internal query representation which is subsequently processed by the rest of the algorithm.
  */
 public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
+
+    public static final String SIGNATURE_SEPARATOR = "/";
 
     @Override protected ParserNode aggregateResult(ParserNode aggregate, ParserNode nextResult) {
         return nextResult == null ? aggregate : nextResult;
     }
 
     private QueryContext queryContext;
-    private Deque<TermBuilder> termBuilders = new ArrayDeque<>();
+    private Deque<Term.Builder> termBuilders = new ArrayDeque<>();
 
     @Override public Query visitSelectQuery(QuerycatParser.SelectQueryContext ctx) {
         queryContext = new QueryContext();
@@ -40,10 +50,10 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
     }
 
     @Override public SelectClause visitSelectClause(QuerycatParser.SelectClauseContext ctx) {
-        termBuilders.push(new TermBuilder());
+        termBuilders.push(new Term.Builder());
 
         final var graphTriples = ctx.selectGraphPattern().selectTriples();
-        final List<SelectTriple> triples = graphTriples == null
+        final List<TermTree<String>> triples = graphTriples == null
             ? List.of()
             : visitSelectTriples(graphTriples).triples;
 
@@ -58,116 +68,153 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         final var pattern = visitGroupGraphPattern(ctx.groupGraphPattern());
 
         // TODO nested clauses
-        return new WhereClause(Type.Where, pattern, List.of());
+        return new WhereClause(
+            Type.Where,
+            List.of(),
+            pattern.termBuilder,
+            pattern.termTrees,
+            pattern.condigionFilters,
+            pattern.valueFilters
+        );
     }
 
-    @Override public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
-        final var variableBuilder = new TermBuilder();
-        termBuilders.push(variableBuilder);
+    private record GroupGraphPattern(
+        Term.Builder termBuilder,
+        List<TermTree<Signature>> termTrees,
+        List<ConditionFilter> condigionFilters,
+        List<ValueFilter> valueFilters
+    ) implements ParserNode {}
 
-        final var triples = ctx.triplesBlock().stream()
+    @Override public GroupGraphPattern visitGroupGraphPattern(QuerycatParser.GroupGraphPatternContext ctx) {
+        final var termBuilder = new Term.Builder();
+        termBuilders.push(termBuilder);
+
+        final List<TermTree<Signature>> termTrees = ctx.triplesBlock().stream()
             .flatMap(tb -> visitTriplesBlock(tb).triples.stream())
             .toList();
-        final var filters = ctx.filter_().stream()
+        final List<ConditionFilter> conditionFilters = ctx.filter_().stream()
             .map(f -> visit(f).asFilter().asConditionFilter())
             .toList();
-        final var values = ctx.graphPatternNotTriples().stream()
+        final List<ValueFilter> valueFilters = ctx.graphPatternNotTriples().stream()
             .map(v -> visit(v).asFilter().asValueFilter())
             .toList();
 
         termBuilders.pop();
 
-        return new GroupGraphPattern(triples, filters, values, variableBuilder);
+        return new GroupGraphPattern(termBuilder, termTrees, conditionFilters, valueFilters);
     }
 
-    private record WhereTriplesList(List<WhereTriple> triples) implements ParserNode {}
+    private record WhereTermTrees(List<TermTree<Signature>> triples) implements ParserNode {}
 
-    @Override public WhereTriplesList visitTriplesBlock(QuerycatParser.TriplesBlockContext ctx) {
+    @Override public WhereTermTrees visitTriplesBlock(QuerycatParser.TriplesBlockContext ctx) {
         // Almost identical to select triples, but this is necessary as the grammar definition for these constructs is slightly different.
-        final var sameSubjectTriples = visitTriplesSameSubject(ctx.triplesSameSubject()).triples;
+        final TermTree<String> sameSubjectTriplesRaw = visitTriplesSameSubject(ctx.triplesSameSubject());
+        final TermTree<Signature> sameSubjectTriples = parseSignatures(sameSubjectTriplesRaw);
 
         final var moreTriplesNode = ctx.triplesBlock();
-        final List<WhereTriple> moreTriples = moreTriplesNode == null
+        final List<TermTree<Signature>> moreTriples = moreTriplesNode == null
             ? List.of()
             : visitTriplesBlock(moreTriplesNode).triples;
 
         final var allTriples = Stream.concat(
-            sameSubjectTriples.stream().flatMap(commonTriple -> WhereTriple.fromCommonTriple(commonTriple, termBuilders.peek()).stream()),
+            Stream.of(sameSubjectTriples),
             moreTriples.stream()
         ).toList();
 
-        allTriples.forEach(queryContext::addTriple);
-
-        return new WhereTriplesList(allTriples);
+        return new WhereTermTrees(allTriples);
     }
 
-    private record SelectTriplesList(List<SelectTriple> triples) implements ParserNode {}
+    private TermTree<Signature> parseSignatures(TermTree<String> input) {
+        final @Nullable Signature signature = input.edgeFromParent == null ? null : parseSignature(input.edgeFromParent);
+        final TermTree<Signature> output = signature == null
+            ? TermTree.root(input.term.asVariable())
+            : TermTree.child(input.term, signature);
+
+        for (final var child : input.children) {
+            final var childTree = parseSignatures(child);
+            output.addChild(childTree);
+        }
+
+        return output;
+    }
+
+    private Signature parseSignature(String edge) {
+        try {
+            final var bases = Arrays.stream(edge.split(SIGNATURE_SEPARATOR))
+                .map(base -> Signature.createBase(Integer.parseInt(base)))
+                .toList();
+
+            return Signature.concatenate(bases);
+        }
+        catch (NumberFormatException e) {
+            throw ParsingException.signature(edge);
+        }
+    }
+
+    private record SelectTriplesList(List<TermTree<String>> triples) implements ParserNode {}
 
     @Override public SelectTriplesList visitSelectTriples(QuerycatParser.SelectTriplesContext ctx) {
-        final var sameSubjectTriples = visitTriplesSameSubject(ctx.triplesSameSubject()).triples;
+        final TermTree<String> sameSubjectTriples = visitTriplesSameSubject(ctx.triplesSameSubject());
 
         final var moreTriplesNode = ctx.selectTriples();
-        final List<SelectTriple> moreTriples = moreTriplesNode == null
+        final List<TermTree<String>> moreTriples = moreTriplesNode == null
             ? List.of()
             : visitSelectTriples(moreTriplesNode).triples;
 
         final var allTriples = Stream.concat(
-            sameSubjectTriples.stream().map(SelectTriple::fromCommonTriple),
+            Stream.of(sameSubjectTriples),
             moreTriples.stream()
         ).toList();
 
         return new SelectTriplesList(allTriples);
     }
 
-    private record CommonTriplesList(List<CommonTriple> triples) implements ParserNode {}
-
-    @Override public CommonTriplesList visitTriplesSameSubject(QuerycatParser.TriplesSameSubjectContext ctx) {
-        var variableNode = ctx.varOrTerm().var_();
+    @Override public TermTree<String> visitTriplesSameSubject(QuerycatParser.TriplesSameSubjectContext ctx) {
+        final var variableNode = ctx.varOrTerm().var_();
         if (variableNode == null)
             throw GeneralException.message("Variable expected in term " + ctx.varOrTerm().start);
 
         final Variable subject = visitVar_(variableNode);
-        final MorphismsList propertyList = visitPropertyListNotEmpty(ctx.propertyListNotEmpty());
+        final TermTree<String> output = TermTree.root(subject);
 
-        final var triples = propertyList.morphisms.stream().map(m -> new CommonTriple(subject, m.morphism(), m.term())).toList();
+        final PropertyList propertyList = visitPropertyListNotEmpty(ctx.propertyListNotEmpty());
 
-        return new CommonTriplesList(triples);
+        for (final var term : propertyList.terms)
+            output.addChild(term);
+
+        return output;
     }
 
-    private record MorphismsList(List<MorphismWithTerm> morphisms) implements ParserNode {}
+    private record PropertyList(List<TermTree<String>> terms) implements ParserNode {}
 
-    private record MorphismWithTerm(String morphism, Term term) {}
-
-    @Override public MorphismsList visitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx) {
+    @Override public PropertyList visitPropertyListNotEmpty(QuerycatParser.PropertyListNotEmptyContext ctx) {
         final var verbNodes = ctx.verb();
         final var objectNodes = ctx.objectList();
 
-        final var morphismsAndObjects = new ArrayList<MorphismWithTerm>();
+        final var output = new ArrayList<TermTree<String>>();
 
         final int maxCommonLength = Math.min(verbNodes.size(), objectNodes.size());
         for (int i = 0; i < maxCommonLength; i++) {
-            final var morphism = visitSchemaMorphismOrPath(verbNodes.get(i).schemaMorphismOrPath()).value;
-            final var objects = visitObjectList(objectNodes.get(i)).objects;
-
-            objects.forEach(object -> morphismsAndObjects.add(new MorphismWithTerm(morphism, object)));
+            final String edge = visitSchemaMorphismOrPath(verbNodes.get(i).schemaMorphismOrPath()).value();
+            final Term object = visitObjectList(objectNodes.get(i));
+            
+            output.add(TermTree.child(object, edge));
         }
 
-        return new MorphismsList(morphismsAndObjects);
+        return new PropertyList(output);
     }
 
-    @Override public StringValue visitSchemaMorphismOrPath(QuerycatParser.SchemaMorphismOrPathContext ctx) {
-        // Should we do the compound morphism parsing here?
-        return termBuilders.peek().stringValue(ctx.getText());
+    /** Either a string name or a string representation of a morphism path. */
+    private record StringEdge(String value) implements ParserNode {}
+
+    @Override public StringEdge visitSchemaMorphismOrPath(QuerycatParser.SchemaMorphismOrPathContext ctx) {
+        return new StringEdge(ctx.getText());
     }
 
-    private record ObjectsList(List<Term> objects) implements ParserNode {}
-
-    @Override public ObjectsList visitObjectList(QuerycatParser.ObjectListContext ctx) {
-        final var objects = ctx.object_().stream()
-            .map(objectCtx -> visitObject_(objectCtx).asTerm())
-            .toList();
-
-        return new ObjectsList(objects);
+    @Override public Term visitObjectList(QuerycatParser.ObjectListContext ctx) {
+        // TODO There is always exactly one object in the list - fix it in the parser.
+        final var firstObject = ctx.object_().getFirst();
+        return visitObject_(firstObject).asTerm();
     }
 
     @Override public Variable visitVar_(QuerycatParser.Var_Context ctx) {
@@ -187,7 +234,8 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
 
     @Override public StringValue visitString_(QuerycatParser.String_Context ctx) {
         // This regexp removes all " and ' characters from both the start and the end of the visited string.
-        return termBuilders.peek().stringValue(ctx.getText().replaceAll("(^[\"']+)|([\"']+$)", ""));
+        final String value = ctx.getText().replaceAll("(^[\"']+)|([\"']+$)", "");
+        return termBuilders.peek().stringValue(value);
     }
 
     @Override public ParserNode visitRelationalExpression(QuerycatParser.RelationalExpressionContext ctx) {
@@ -210,7 +258,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
     @Override public ValueFilter visitDataBlock(QuerycatParser.DataBlockContext ctx) {
         final var variable = visitVar_(ctx.var_());
         final var allowedValues = ctx.dataBlockValue().stream()
-            .map(v -> visit(v).asTerm().asStringValue().value)
+            .map(v -> visit(v).asTerm().asStringValue().value())
             .toList();
 
         return new ValueFilter(variable, allowedValues);

@@ -11,9 +11,9 @@ import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.PatternObject;
 import cz.matfyz.querying.core.patterntree.KindPattern;
-import cz.matfyz.querying.parsing.GroupGraphPattern;
-import cz.matfyz.querying.parsing.WhereTriple;
-import cz.matfyz.querying.parsing.ParserNode.Term;
+import cz.matfyz.querying.parsing.Term;
+import cz.matfyz.querying.parsing.WhereClause;
+import cz.matfyz.querying.parsing.WhereClause.WhereTriple;
 
 import java.util.ArrayDeque;
 import java.util.List;
@@ -26,20 +26,20 @@ import java.util.TreeMap;
  */
 public class SchemaExtractor {
 
-    public static ExtractorResult run(QueryContext context, SchemaCategory schema, List<Kind> kinds, GroupGraphPattern pattern) {
-        return new SchemaExtractor(context, schema, kinds, pattern).run();
+    public static ExtractorResult run(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
+        return new SchemaExtractor(context, schema, kinds, clause).run();
     }
 
     private final QueryContext context;
     private final SchemaCategory schema;
     private final List<Kind> kinds;
-    private final GroupGraphPattern pattern;
+    private final WhereClause clause;
 
-    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Kind> kinds, GroupGraphPattern pattern) {
+    private SchemaExtractor(QueryContext context, SchemaCategory schema, List<Kind> kinds, WhereClause clause) {
         this.context = context;
         this.schema = schema;
         this.kinds = kinds;
-        this.pattern = pattern;
+        this.clause = clause;
     }
 
     public record ExtractorResult(
@@ -47,6 +47,7 @@ public class SchemaExtractor {
         List<KindPattern> kindPatterns
     ) {}
 
+    private List<WhereTriple> triples;
     /**
      * List of all morphisms that appear directly in the pattern.
      * They already contain only base signatures without duals.
@@ -54,7 +55,8 @@ public class SchemaExtractor {
     private List<SchemaMorphism> patternMorphisms;
 
     private ExtractorResult run() {
-        patternMorphisms = pattern.triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
+        triples = clause.termTree.toTriples(WhereClause::createTriple);
+        patternMorphisms = triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
 
         createNewSchema();
         updateContext();
@@ -105,7 +107,7 @@ public class SchemaExtractor {
     private void updateContext() {
         context.setSchema(newSchema);
         
-        pattern.triples.forEach(triple -> {
+        triples.forEach(triple -> {
             final var morphism = newSchema.getMorphism(triple.signature);
             signatureToTriple.put(triple.signature, triple);
 
@@ -163,7 +165,7 @@ public class SchemaExtractor {
         if (foundTerm != null)
             return foundTerm;
 
-        final var newVariable = pattern.termBuilder.generatedVariable();
+        final var newVariable = clause.termBuilder.generatedVariable();
         context.addTerm(newVariable, edge.to());
         keyToTerm.put(edge.to().key(), newVariable);
 
