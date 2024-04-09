@@ -17,6 +17,7 @@ import cz.matfyz.core.record.RootRecord;
 import cz.matfyz.core.record.SimpleRecord;
 import cz.matfyz.core.record.SimpleValueRecord;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.utils.UniqueIdProvider;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -71,13 +72,37 @@ public class MTCAlgorithm {
 
     private Deque<StackTriple> createStackWithObject(SchemaObject object, RootRecord rootRecord, ComplexProperty rootAccessPath) {
         InstanceObject instanceObject = category.getObject(object);
-        SuperIdWithValues superId = fetchSuperId(object.superId(), rootRecord);
+        // If the root object has a generated id, we generate it now. This is an exception, because we don't normally generate the ids for the auxiliary properties (which the root object always is).
+        SuperIdWithValues superId = object.ids().isGenerated()
+            ? SuperIdWithValues.fromEmptySignature(UniqueIdProvider.getNext())
+            : fetchSuperId(object.superId(), rootRecord);
+
         Deque<StackTriple> masterStack = new ArrayDeque<>();
 
         DomainRow row = instanceObject.getOrCreateRow(superId);
         addPathChildrenToStack(masterStack, rootAccessPath, row, rootRecord);
 
         return masterStack;
+    }
+
+    // Fetch id-with-values for given root record.
+    private static SuperIdWithValues fetchSuperId(SignatureId superId, RootRecord rootRecord) {
+        final var builder = new SuperIdWithValues.Builder();
+
+        for (Signature signature : superId.signatures()) {
+            /*
+            Object value = rootRecord.values().get(signature).getValue();
+            if (value instanceof String stringValue)
+                builder.add(signature, stringValue);
+            */
+            SimpleRecord<?> simpleRecord = rootRecord.findSimpleRecord(signature);
+            if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
+                builder.add(signature, simpleValueRecord.getValue().toString());
+            // else
+            //     throw InvalidStateException.simpleRecordIsNotValue(simpleRecord);
+        }
+
+        return builder.build();
     }
 
     private void processTopOfStack(Deque<StackTriple> masterStack) {
@@ -95,26 +120,6 @@ public class MTCAlgorithm {
 
             addPathChildrenToStack(masterStack, triple.childAccessPath, childRow, superId.childRecord());
         }
-    }
-
-    // Fetch id-with-values for given root record.
-    private static SuperIdWithValues fetchSuperId(SignatureId superId, RootRecord rootRecord) {
-        var builder = new SuperIdWithValues.Builder();
-
-        for (Signature signature : superId.signatures()) {
-            /*
-            Object value = rootRecord.values().get(signature).getValue();
-            if (value instanceof String stringValue)
-                builder.add(signature, stringValue);
-            */
-            SimpleRecord<?> simpleRecord = rootRecord.findSimpleRecord(signature);
-            if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
-                builder.add(signature, simpleValueRecord.getValue().toString());
-            // else
-            //     throw InvalidStateException.simpleRecordIsNotValue(simpleRecord);
-        }
-
-        return builder.build();
     }
 
     private DomainRow addRelation(InstancePath path, DomainRow parentRow, DomainRow childRow, IComplexRecord childRecord) {
