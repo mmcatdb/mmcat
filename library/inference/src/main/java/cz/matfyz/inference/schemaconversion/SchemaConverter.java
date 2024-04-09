@@ -48,7 +48,9 @@ public class SchemaConverter {
         convertToSchemafromRSD(sc, rsd, rootKey, 1, currentNode);
         SCUtils.addIndexObjecttoArr(sc);
         MappingCreator mappingCreator = new MappingCreator(rootKey, root);
-        Mapping mapping = mappingCreator.createMapping(sc, "Full_schema_mapping"); //What will this label be?
+        //Mapping mapping = mappingCreator.createMapping(sc, "Full_schema_mapping"); //What will this label be?
+        Mapping mapping = mappingCreator.createMapping(sc, "yelpbusinesssample"); //What will this label be?
+        System.out.println("root is auxiliary: " + mapping.accessPath().isAuxiliary());
         return new CategoryMappingPair(sc, mapping);
     }
 
@@ -76,10 +78,12 @@ public class SchemaConverter {
             Signature s = Signature.createEmpty();
             ObjectIds ids = ObjectIds.createGenerated();
             SignatureId superId = SignatureId.createEmpty();
-            so = new SchemaObject(keyp, rsdp.getName(), ids, superId);
+            so = new SchemaObject(keyp, "yelpbusinesssample", ids, superId);
+            //so = new SchemaObject(keyp, rsdp.getName(), ids, superId);
             sc.addObject(so);
 
-            this.root = new AccessTreeNode(AccessTreeNode.State.Complex, rsdp.getName(), s);
+            //this.root = new AccessTreeNode(AccessTreeNode.State.Complex, rsdp.getName(), s);
+            this.root = new AccessTreeNode(AccessTreeNode.State.Complex, "yelpbusinesssample", s);
             currentNode = root;
         }
         else {
@@ -94,17 +98,27 @@ public class SchemaConverter {
 
             for (RecordSchemaDescription rsdch: rsdp.getChildren()) {
                 Key keych = SCUtils.createChildKey(keyp, i);
-
+                
                 Signature sig = SCUtils.createChildSignature(keyp, keych);
                 Min min = SCUtils.findMin(rsdp, rsdch);
-
+/*
                 Set<Signature> sigSet = new HashSet<>();
                 sigSet.add(sig);
 
                 ObjectIds objectIds = new ObjectIds(sig);
 
+                SignatureId superId = new SignatureId(sigSet);*/
+                ObjectIds ids;
+                // kdyz nema deti, je to list a chceme mu dat ids value
+                if (rsdch.getChildren().isEmpty()) {
+                    ids = ObjectIds.createValue();
+                }
+                else { ids = ObjectIds.createGenerated(); }
+                Set<Signature> sigSet = new HashSet<>();
+                sigSet.add(sig);
+
                 SignatureId superId = new SignatureId(sigSet);
-                SchemaObject soch = new SchemaObject(keych, rsdch.getName(), objectIds, superId);
+                SchemaObject soch = new SchemaObject(keych, rsdch.getName(), ids, superId);
                 sc.addObject(soch);
 
                 AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.Simple, soch.label(), sig);

@@ -65,6 +65,8 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+        System.out.println("mongo pullwrapper");
+        System.out.println("query: " + query);
         final var forest = new ForestOfRecords();
 
         try (
@@ -72,6 +74,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         ) {
             while (iterator.hasNext()) {
                 final Document document = iterator.next();
+                System.out.println("document to json: " + document.toJson());
                 final var rootRecord = new RootRecord();
                 getDataFromDocument(rootRecord, document, path);
                 forest.addRecord(rootRecord);
@@ -88,8 +91,11 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         boolean hasSubpathWithDynamicName = false;
 
         for (AccessPath subpath : path.subpaths()) {
-            if (subpath.name() instanceof StaticName staticName)
+            System.out.println("getDataFromDocu name of path: " + subpath.name());
+            if (subpath.name() instanceof StaticName staticName) {
+                System.out.println(subpath.name() + "is about to enter getFieldFromObjectForSubpath");
                 getFieldFromObjectForSubpath(parentRecord, document, staticName.getStringName(), subpath);
+            }
             else
                 hasSubpathWithDynamicName = true;
         }
@@ -124,12 +130,18 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
             return;
         */
 
+        //var value = document.get(key);
+        //if (key.equals("monday")) {System.out.println("changing up that key, girl"); key = "Monday";}
         var value = document.get(key);
+        System.out.println("getFieldFromObjectForSubpath key:" + key );
+        System.out.println("getFieldFromObjectForSubpath value: " + value);
 
-        if (subpath instanceof ComplexProperty complexSubpath)
-            getFieldFromObjectForComplexSubpath(parentRecord, key, value, complexSubpath);
-        else if (subpath instanceof SimpleProperty simpleSubpath)
-            getFieldFromObjectForSimpleSubpath(parentRecord, key, value, simpleSubpath);
+        if (subpath instanceof ComplexProperty complexSubpath) {
+            System.out.println(subpath.name() + "is about to enter getFieldFromObjectForComplexSubpath");
+            getFieldFromObjectForComplexSubpath(parentRecord, key, value, complexSubpath); }
+        else if (subpath instanceof SimpleProperty simpleSubpath) {
+            System.out.println(subpath.name() + "is about to enter getFieldFromObjectForSimpleSubpath");
+            getFieldFromObjectForSimpleSubpath(parentRecord, key, value, simpleSubpath); }
     }
 
     private void getFieldFromObjectForComplexSubpath(ComplexRecord parentRecord, String key, Object value, ComplexProperty complexSubpath) {
@@ -144,6 +156,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private void getFieldFromObjectForSimpleSubpath(ComplexRecord parentRecord, String key, Object value, SimpleProperty simpleSubpath) {
         if (value instanceof ArrayList<?> simpleArray) {
+            System.out.println(simpleSubpath.name() + "is simpleArray");
             var values = new ArrayList<String>();
 
             for (int i = 0; i < simpleArray.size(); i++)

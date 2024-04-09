@@ -20,18 +20,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import cz.matfyz.core.schema.Množina;
-import cz.matfyz.core.schema.generated;
-import cz.matfyz.core.schema.jiných;
-import cz.matfyz.core.schema.které;
-import cz.matfyz.core.schema.není;
-import cz.matfyz.core.schema.se;
-import cz.matfyz.core.schema.složený;
-import cz.matfyz.core.schema.tato;
-import cz.matfyz.core.schema.to;
-import cz.matfyz.core.schema.vytvořit;
-import cz.matfyz.core.schema.z;
-
 /**
  * @author jachymb.bartik
  */

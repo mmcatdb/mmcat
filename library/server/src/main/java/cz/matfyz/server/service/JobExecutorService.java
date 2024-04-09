@@ -249,8 +249,6 @@ public class JobExecutorService {
         
         schemaService.overwriteInfo(wrapper, originalId);
         mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDB.logicalModel().id);;
-        // I need this to appear in my Postgres Logical Model when I run inference. 
-        // Now it appears when i click on the basic example and i have ever befored run inference
     }
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
@@ -263,19 +261,21 @@ public class JobExecutorService {
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
         @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
-        System.out.println("jobexecutor: " + instance.objects());
+        //System.out.println("jobexecutor: " + instance.objects());
         //System.out.println("print if non empty");
+        System.out.println("instance before");
+        System.out.println(instance);
 
         if (mappingWrappers.isEmpty()) {System.out.println("mapping wrappers is empty");}
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
             final Mapping mapping = mappingWrapper.toMapping(schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
         }
-        System.out.println(instance);
+       
         System.out.println("instance after");
+        System.out.println(instance);
 
         if (instance != null)
-            System.out.println(instance);
             instanceService.saveCategory(run.sessionId, run.categoryId, instance);
     }
 
