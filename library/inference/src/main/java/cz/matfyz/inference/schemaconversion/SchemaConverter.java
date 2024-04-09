@@ -1,6 +1,8 @@
 package cz.matfyz.inference.schemaconversion;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import cz.matfyz.core.identifiers.Signature;
@@ -44,14 +46,83 @@ public class SchemaConverter {
      * @return SchemaCategory object representing RSD
      */
     public CategoryMappingPair convertToSchemaCategoryAndMapping() {
+        /*
         AccessTreeNode currentNode = new AccessTreeNode(null, null, null);
         convertToSchemafromRSD(sc, rsd, rootKey, 1, currentNode);
         SCUtils.addIndexObjecttoArr(sc);
         MappingCreator mappingCreator = new MappingCreator(rootKey, root);
         //Mapping mapping = mappingCreator.createMapping(sc, "Full_schema_mapping"); //What will this label be?
         Mapping mapping = mappingCreator.createMapping(sc, "yelpbusinesssample"); //What will this label be?
-        System.out.println("root is auxiliary: " + mapping.accessPath().isAuxiliary());
+        //System.out.println("root is auxiliary: " + mapping.accessPath().isAuxiliary());
+        System.out.println("mapping access path: " + mapping.accessPath());
+        return new CategoryMappingPair(sc, mapping);*/
+        AccessTreeNode currentNode = new AccessTreeNode(null, null, null, null, null, null, null);
+        Map<Integer, Integer> signatureOrder = new HashMap<Integer, Integer>();
+        int last = 0;
+        convertToSchemafromRSD(rsd, rootKey, 1, currentNode, signatureOrder, last);
+        
+        //SCUtils.addIndexObjecttoArr(sc);
+        AccessTreeNode.assignSignatures(this.root, signatureOrder);
+        traverseAndBuild(this.root);
+        MappingCreator mappingCreator = new MappingCreator(rootKey, root);
+        //Mapping mapping = mappingCreator.createMapping(sc, "Full_schema_mapping"); //What will this label be?
+        Mapping mapping = mappingCreator.createMapping(sc, "yelpbusinesssample"); //What will this label be?
+        //System.out.println("root is auxiliary: " + mapping.accessPath().isAuxiliary());
+        System.out.println("mapping access path: " + mapping.accessPath());
         return new CategoryMappingPair(sc, mapping);
+    }
+    
+    public SchemaCategory buildSchemaCategory(AccessTreeNode root) {
+        traverseAndBuild(root);
+        return sc;
+    }
+
+    private void traverseAndBuild(AccessTreeNode currentNode) {
+        SchemaObject currentObject;
+        if (currentNode.getState() == AccessTreeNode.State.Root) {
+            ObjectIds ids = ObjectIds.createGenerated();
+            SignatureId superId = SignatureId.createEmpty();
+            currentObject = new SchemaObject(currentNode.getKey(), "yelpbusinesssample", ids, superId);
+        }
+        else {
+            currentObject = createSchemaObject(currentNode);
+            createSchemaMorphism(currentNode, currentObject);
+        }
+        
+
+
+        for (AccessTreeNode childNode : currentNode.getChildren()) {
+            traverseAndBuild(childNode);
+        }
+    }
+
+    private SchemaObject createSchemaObject(AccessTreeNode node) {
+        ObjectIds ids;
+        SignatureId superId = SignatureId.createEmpty();
+        if (node.getChildren().isEmpty()) {
+            ids = ObjectIds.createValue();
+        }
+        else { 
+            ids = ObjectIds.createGenerated();
+        }
+        SchemaObject object = new SchemaObject(node.getKey(), node.getName(), ids, superId);  // Assuming you can initialize a SchemaObject this way
+        sc.addObject(object);
+        return object;
+    }
+
+    private void createSchemaMorphism(AccessTreeNode node, SchemaObject so) {
+        SchemaObject sop = sc.getObject(node.getParentKey()); //make sure the keys are changed already!
+        
+        SchemaObject dom = sop;
+        SchemaObject cod = so;
+        
+        //need to add the logic with the arrays!!
+        //Signature sig = Signature.createBase(node.getSigVal()); //is this signature correct?
+
+      
+        Set<SchemaMorphism.Tag> tags = new HashSet<>(); //empty for now, because I dont know what to put there
+        SchemaMorphism sm = new SchemaMorphism(node.getSig(), node.getLabel(), node.getMin(), tags, dom, cod);
+        sc.addMorphism(sm);
     }
 
     /**
@@ -61,20 +132,64 @@ public class SchemaConverter {
      * @param rsd RSD which is being processed
      * @param key Key of the current parent RSD
      * @param i int for keeping track of the RSD's children
-     */
+     */  
+    public void convertToSchemafromRSD(RecordSchemaDescription rsdp, Key keyp, int i, AccessTreeNode currentNode, Map<Integer, Integer> signatureOrder, int last) {
+        if (sc.allObjects().isEmpty()) { //adding the root
+            System.out.println("adding root");
+            this.root = new AccessTreeNode(AccessTreeNode.State.Root, "yelpbusinesssample", null, keyp, null, null, null);
+        }
+
+        if (!rsdp.getChildren().isEmpty()) {
+            System.out.println("rsdp name: "+rsdp.getName());
+            if (rsdp.getName().equals("_")) {
+                System.out.println("thats right it is _");
+                currentNode = this.root;
+            }
+            else {
+                currentNode = this.root.findNodeWithName(rsdp.getName());
+            }
+            
+            if (currentNode != null){
+                currentNode.state = AccessTreeNode.State.Complex; //neprepisuje se mi to tady potom do Mappingu??
+            }
+
+            for (RecordSchemaDescription rsdch: rsdp.getChildren()) {
+                Key keych = SCUtils.createChildKey(keyp, i);
+                
+                Integer sigVal = SCUtils.createChildSignature(keyp, keych);
+                if (!signatureOrder.containsKey(sigVal)) {
+                    if (signatureOrder.isEmpty()) {
+                        signatureOrder.put(sigVal, last);
+                    }
+                    else {
+                        last += 1;
+                        signatureOrder.put(sigVal, sigVal);
+                    }
+                    
+                }
+                Min min = SCUtils.findMin(rsdp, rsdch);              
+
+                boolean isArrayp = isTypeArray(rsdp);
+                boolean isArraych = isTypeArray(rsdch);
+
+
+
+                String label = SCUtils.createLabel(rsdch, isArrayp, isArraych);
+    
+                // be aware of the label here, once you use is ARRAY!
+                AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.Simple, rsdch.getName(), sigVal, keych, keyp, label, min);
+                currentNode.addChild(child);
+
+                i++;
+                convertToSchemafromRSD(rsdch, keych, i, child, signatureOrder, last);
+            }
+        }
+    }
+
+    /*
     public void convertToSchemafromRSD(SchemaCategory sc, RecordSchemaDescription rsdp, Key keyp, int i, AccessTreeNode currentNode) {
         SchemaObject so;
         if (sc.allObjects().isEmpty()) { //adding the root
-            //Signature s = Signature.createBase(1); //this part is not right for the AccessTreeNode creation
-            /*
-            Signature s = Signature.createEmpty();
-
-            Set<Signature> ss = new HashSet<>();
-            ss.add(s);
-
-            ObjectIds objectIds = new ObjectIds(s);
-
-            SignatureId sId = new SignatureId(ss); */
             Signature s = Signature.createEmpty();
             ObjectIds ids = ObjectIds.createGenerated();
             SignatureId superId = SignatureId.createEmpty();
@@ -82,8 +197,7 @@ public class SchemaConverter {
             //so = new SchemaObject(keyp, rsdp.getName(), ids, superId);
             sc.addObject(so);
 
-            //this.root = new AccessTreeNode(AccessTreeNode.State.Complex, rsdp.getName(), s);
-            this.root = new AccessTreeNode(AccessTreeNode.State.Complex, "yelpbusinesssample", s);
+            this.root = new AccessTreeNode(AccessTreeNode.State.Root, "yelpbusinesssample", null, keyp, null);
             currentNode = root;
         }
         else {
@@ -99,29 +213,26 @@ public class SchemaConverter {
             for (RecordSchemaDescription rsdch: rsdp.getChildren()) {
                 Key keych = SCUtils.createChildKey(keyp, i);
                 
-                Signature sig = SCUtils.createChildSignature(keyp, keych);
+                Integer sigVal = SCUtils.createChildSignature(keyp, keych);
                 Min min = SCUtils.findMin(rsdp, rsdch);
-/*
-                Set<Signature> sigSet = new HashSet<>();
-                sigSet.add(sig);
 
-                ObjectIds objectIds = new ObjectIds(sig);
-
-                SignatureId superId = new SignatureId(sigSet);*/
                 ObjectIds ids;
+                
                 // kdyz nema deti, je to list a chceme mu dat ids value
                 if (rsdch.getChildren().isEmpty()) {
                     ids = ObjectIds.createValue();
                 }
-                else { ids = ObjectIds.createGenerated(); }
-                Set<Signature> sigSet = new HashSet<>();
-                sigSet.add(sig);
+                else { 
+                    ids = ObjectIds.createGenerated();
+                }
+                SignatureId superId = SignatureId.createEmpty();
 
-                SignatureId superId = new SignatureId(sigSet);
+
+                
                 SchemaObject soch = new SchemaObject(keych, rsdch.getName(), ids, superId);
                 sc.addObject(soch);
 
-                AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.Simple, soch.label(), sig);
+                AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.Simple, soch.label(), sigVal, keych, keyp);
                 currentNode.addChild(child);
 
                 SchemaObject dom = so;
@@ -144,7 +255,7 @@ public class SchemaConverter {
                 convertToSchemafromRSD(sc, rsdch, keych, i, child);
             }
         }
-    }
+    }*/
 
 
     private boolean isTypeArray(RecordSchemaDescription rsd) {

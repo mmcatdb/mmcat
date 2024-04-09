@@ -43,9 +43,10 @@ public class SchemaConversionUtils {
      * @param keyChild
      * @return Signature
      */
-    public Signature createChildSignature(Key keyp, Key keych) {
+    public int createChildSignature(Key keyp, Key keych) {
         int sigval = Objects.hash(keyp.getValue(), keych.getValue());
-        return Signature.createBase(sigval);
+        return sigval;
+        //return Signature.createBase(sigval);
     }
 
     /**
@@ -101,7 +102,7 @@ public class SchemaConversionUtils {
      * This is done once the whole Schema Category gets created.
      * @param sc
      * @return
-     */
+     *//*
     public SchemaCategory addIndexObjecttoArr(SchemaCategory sc) {
         for (SchemaMorphism s: sc.allMorphisms()) {
             if (s.label == Label.RELATIONAL.name()) { // if the object is an array
@@ -119,5 +120,5 @@ public class SchemaConversionUtils {
             }
         }
         return sc;
-    }
+    }*/
 }

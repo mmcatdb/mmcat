@@ -2,8 +2,11 @@ package cz.matfyz.inference.schemaconversion.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 /**
  * Class to hold info about properties in SchemaCat, so that an access path can be
@@ -12,18 +15,27 @@ import cz.matfyz.core.identifiers.Signature;
  */
 public class AccessTreeNode{
 
-    public enum State {Simple, Complex;} 
+    public enum State {Root,Simple, Complex;} 
 
     public State state;
     public String name;
-    public Signature sig;
+    public Integer sigVal;
     public List<AccessTreeNode> children;
+    public Key key;
+    public Key parentKey;
+    public String label;
+    public Min min;
+    public Signature sig;
 
-    public AccessTreeNode(State state, String name, Signature sig) {
+    public AccessTreeNode(State state, String name, Integer sigVal, Key key, Key parentKey, String label, Min min) {
         this.state = state;
         this.name = name;
-        this.sig = sig; // a node contains signature between itself and its parent
+        this.sigVal = sigVal; // a node contains signature between itself and its parent
         this.children = new ArrayList<>();
+        this.key = key;
+        this.parentKey = parentKey;
+        this.label = label;
+        this.min = min;
     }
 
     public void addChild(AccessTreeNode child) {
@@ -40,6 +52,21 @@ public class AccessTreeNode{
 
     public String getName() {
         return name;
+    }
+    public int getSigVal() {
+        return sigVal;
+    }
+    public Key getKey() {
+        return key;
+    }
+    public Key getParentKey() {
+        return parentKey;
+    }
+    public String getLabel() {
+        return label;
+    }
+    public Min getMin() {
+        return min;
     }
     public Signature getSig() {
         return sig;
@@ -61,6 +88,19 @@ public class AccessTreeNode{
         System.out.println(prefix + "Name: " + this.name + ", State: " + this.state + ", Signature: " + (this.sig != null ? this.sig.toString() : "None"));
         for (AccessTreeNode child : this.children) {
             child.printTree(prefix + "    ");
+        }
+    }
+    
+    public static void assignSignatures(AccessTreeNode node, Map<Integer, Integer> signatureOrder) {
+        if (node.state == State.Root) {
+            return;
+        }
+
+        Integer newSigVal = signatureOrder.get(node.getSigVal());
+        node.sig = Signature.createBase(newSigVal);
+
+        for (AccessTreeNode child : node.getChildren()) {
+            assignSignatures(child, signatureOrder);
         }
     }
 
