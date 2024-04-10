@@ -1,6 +1,9 @@
 package cz.matfyz.inference.schemaconversion.utils;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -121,4 +124,14 @@ public class SchemaConversionUtils {
         }
         return sc;
     }*/
+    public Map<Integer, Integer> mapSigVals(List<Integer> sigVals) {
+        Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+        
+        Integer newSigVal = 0;
+        for (Integer sigVal : sigVals) {
+            result.put(sigVal, newSigVal);
+            newSigVal += 1;
+        }
+        return result;
+    }
 }

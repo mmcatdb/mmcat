@@ -85,25 +85,22 @@ public class AccessTreeNode{
     }
 
     public void printTree(String prefix) {
-        System.out.println(prefix + "Name: " + this.name + ", State: " + this.state + ", Signature: " + (this.sig != null ? this.sig.toString() : "None"));
+        System.out.println(prefix + "Name: " + this.name + ", State: " + this.state + ", Signature: " + (this.sig != null ? this.sig.toString() : "None") +
+                ", Signature Value: " + this.sigVal + ", Key: " + this.key + ", Parent Key: " + this.parentKey);
         for (AccessTreeNode child : this.children) {
             child.printTree(prefix + "    ");
         }
     }
     
-    public static void assignSignatures(AccessTreeNode node, Map<Integer, Integer> signatureOrder) {
-        if (node.state == State.Root) {
-            return;
+    public static AccessTreeNode assignSignatures(AccessTreeNode node, Map<Integer, Integer> mappedSigVals) {
+        if (node.state != State.Root) {
+            int newSigVal = mappedSigVals.get(node.getSigVal());
+            node.sig = Signature.createBase(newSigVal);
         }
-
-        Integer newSigVal = signatureOrder.get(node.getSigVal());
-        node.sig = Signature.createBase(newSigVal);
-
         for (AccessTreeNode child : node.getChildren()) {
-            assignSignatures(child, signatureOrder);
+            assignSignatures(child, mappedSigVals);
         }
+        return node;
     }
-
-
 }
 
