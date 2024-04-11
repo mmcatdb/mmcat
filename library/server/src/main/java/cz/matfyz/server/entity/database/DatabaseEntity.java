@@ -58,7 +58,7 @@ public class DatabaseEntity extends Entity {
         return new DatabaseEntity(id, data);
     }
 
-    private DatabaseInit toDatabaseInit() {
+    public DatabaseInit toDatabaseInit() {
         return new DatabaseInit(label, settings, type);
     }
 

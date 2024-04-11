@@ -14,6 +14,7 @@ const links = [
     defineLink('home', 'Home'),
     defineLink('databases', 'Databases'),
     defineLink('dataSources', 'Data Sources'),
+    defineLink('dataInputs', 'Data Inputs'),
     defineLink('about', 'About'),
 ];
 </script>
