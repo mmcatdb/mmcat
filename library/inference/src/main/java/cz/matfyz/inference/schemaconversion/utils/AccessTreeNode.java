@@ -26,8 +26,9 @@ public class AccessTreeNode{
     public String label;
     public Min min;
     public Signature sig;
+    public boolean isArrayType;
 
-    public AccessTreeNode(State state, String name, Integer sigVal, Key key, Key parentKey, String label, Min min) {
+    public AccessTreeNode(State state, String name, Integer sigVal, Key key, Key parentKey, String label, Min min, boolean isArrayType) {
         this.state = state;
         this.name = name;
         this.sigVal = sigVal; // a node contains signature between itself and its parent
@@ -36,6 +37,7 @@ public class AccessTreeNode{
         this.parentKey = parentKey;
         this.label = label;
         this.min = min;
+        this.isArrayType = isArrayType;
     }
 
     public void addChild(AccessTreeNode child) {
@@ -83,6 +85,17 @@ public class AccessTreeNode{
         }
         return null;
     }
+    
+    public static AccessTreeNode assignSignatures(AccessTreeNode node, Map<Integer, Integer> mappedSigVals) {
+        if (node.state != State.Root) {
+            int newSigVal = mappedSigVals.get(node.getSigVal());
+            node.sig = Signature.createBase(newSigVal); //but in sigVal, there is still the old value!
+        }
+        for (AccessTreeNode child : node.getChildren()) {
+            assignSignatures(child, mappedSigVals);
+        }
+        return node;
+    }
 
     public void printTree(String prefix) {
         System.out.println(prefix + "Name: " + this.name + ", State: " + this.state + ", Signature: " + (this.sig != null ? this.sig.toString() : "None") +
@@ -92,15 +105,5 @@ public class AccessTreeNode{
         }
     }
     
-    public static AccessTreeNode assignSignatures(AccessTreeNode node, Map<Integer, Integer> mappedSigVals) {
-        if (node.state != State.Root) {
-            int newSigVal = mappedSigVals.get(node.getSigVal());
-            node.sig = Signature.createBase(newSigVal);
-        }
-        for (AccessTreeNode child : node.getChildren()) {
-            assignSignatures(child, mappedSigVals);
-        }
-        return node;
-    }
 }
 
