@@ -5,16 +5,14 @@ import { DataInputConfiguration, type DataInputConfigurationFromServer } from '.
 export class DataInputInfo implements Entity {
     private constructor(
         public readonly id: Id,
-        public readonly databaseType: Type,
-        public readonly dataSourceType: Type,
+        public readonly type: Type,
         public readonly label: string,
     ) {}
 
     static fromServer(input: DataInputInfoFromServer): DataInputInfo {
         return new DataInputInfo(
             input.id,
-            input.databaseType,
-            input.dataSourceType,
+            input.type,
             input.label,
         );
     }
@@ -22,16 +20,14 @@ export class DataInputInfo implements Entity {
 
 export type DataInputInfoFromServer = {
     id: Id;
-    databaseType: Type; // Full type (i.e. mongodb)
-    dataSourceType: Type;
+    type: Type;
     label: string; // User-defined name
 };
 
 export class DataInputWithConfiguration implements Entity {
     private constructor(
         public readonly id: Id,
-        public readonly databaseType: Type,
-        public readonly dataSourceType: Type,
+        public readonly type: Type,
         public readonly label: string,
         public readonly configuration: DataInputConfiguration,
     ) {}
@@ -39,8 +35,7 @@ export class DataInputWithConfiguration implements Entity {
     static fromServer(input: DataInputWithConfigurationFromServer): DataInputWithConfiguration {
         return new DataInputWithConfiguration(
             input.id,
-            input.databaseType,
-            input.dataSourceType,
+            input.type,
             input.label,
             new DataInputConfiguration(input.configuration),
         );
@@ -49,8 +44,7 @@ export class DataInputWithConfiguration implements Entity {
 
 export type DataInputWithConfigurationFromServer = {
     id: Id;
-    databaseType: Type; // Full type (i.e. mongodb)
-    dataSourceType: Type;
+    type: Type;
     label: string; // User-defined name
     configuration: DataInputConfigurationFromServer;
 };
@@ -59,23 +53,26 @@ export type Settings = {
     host: string;
     port: number;
     database: string;
-    authenticationDatabase?: string;
+    authenticationDatabase?: string;//??
     username: string;
     password?: string;
 };
 
-export type Database = {
+export type DataInput = {
     id: Id;
     type: Type;
     label: string;
     settings: Settings;
 };
 
-export type DatabaseInit = Omit<Database, 'id'>;
+export type DataInputInit = Omit<DataInput, 'id'>;
 
-export type DatabaseUpdate = DeepPartial<DatabaseInit> & { settings: Partial<Settings> };
+export type DataInputUpdate = DeepPartial<DataInputInit> & { settings: Partial<Settings> };
 
 export enum Type {
+    Csv = 'Csv',
+    Json = 'Json',
+    JsonLdStore = 'JsonLdStore',
     mongodb = 'mongodb',
     postgresql = 'postgresql',
     neo4j = 'neo4j'
@@ -94,17 +91,29 @@ export const DB_TYPES: { type: Type, label: string }[] = [
         type: Type.neo4j,
         label: 'Neo4j',
     },
+    {
+        type: Type.Csv,
+        label: 'Csv'
+    },
+    {
+        type: Type.Json,
+        label: 'Json'
+    },
+    {
+        type: Type.JsonLdStore,
+        label: 'JsonLdStore'
+    },
 ];
 
-export function copyDatabaseUpdate(database: DatabaseUpdate | Database): DatabaseUpdate {
-    return { ...database, settings: { ...database.settings } };
+export function copyDataInputUpdate(dataInput: DataInputUpdate | DataInput): DataInputUpdate {
+    return { ...dataInput, settings: { ...dataInput.settings } };
 }
 
-export function getNewDatabaseUpdate(): DatabaseUpdate {
+export function getNewDataInputUpdate(): DataInputUpdate {
     return { settings: {} };
 }
 
-export function createInitFromUpdate(update: DatabaseUpdate): DatabaseInit | null {
+export function createInitFromUpdate(update: DataInputUpdate): DataInputInit | null {
     if (
         !update.type ||
         !update.label ||
@@ -126,7 +135,7 @@ export function createInitFromUpdate(update: DatabaseUpdate): DatabaseInit | nul
             host: update.settings.host,
             port: update.settings.port,
             database: update.settings.database,
-            authenticationDatabase: update.settings.authenticationDatabase ?? undefined,
+            authenticationDatabase: update.settings.authenticationDatabase ?? undefined, // what about here??
             username: update.settings.username,
             password: update.settings.password,
         },

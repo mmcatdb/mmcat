@@ -20,11 +20,11 @@ public class DataInputUpdate {
     }
 
     public boolean hasPassword() {
-        return this.settings.has(DataInput.PASSWORD_FIELD_NAME);
+        return this.settings.has(DataInputEntity.PASSWORD_FIELD_NAME);
     }
 
-    public void setPasswordFrom(DataInput dataInput) {
-        this.settings.set(DataInput.PASSWORD_FIELD_NAME, dataInput.settings.get(DataInput.PASSWORD_FIELD_NAME));
+    public void setPasswordFrom(DataInputEntity dataInput) {
+        this.settings.set(DataInputEntity.PASSWORD_FIELD_NAME, dataInput.settings.get(DataInputEntity.PASSWORD_FIELD_NAME));
     }
 
 }
