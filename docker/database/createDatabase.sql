@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS logical_model;
 DROP TABLE IF EXISTS data_source;
 DROP TABLE IF EXISTS database_for_mapping;
+DROP TABLE IF EXISTS data_input;
 
 DROP TABLE IF EXISTS schema_category_update;
 DROP TABLE IF EXISTS schema_category;
@@ -34,6 +35,11 @@ CREATE TABLE database_for_mapping (
 );
 
 CREATE TABLE data_source (
+    id SERIAL PRIMARY KEY,
+    json_value JSONB NOT NULL
+);
+
+CREATE TABLE data_input (
     id SERIAL PRIMARY KEY,
     json_value JSONB NOT NULL
 );

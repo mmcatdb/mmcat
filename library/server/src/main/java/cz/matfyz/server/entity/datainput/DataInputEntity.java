@@ -39,13 +39,13 @@ public class DataInputEntity extends Entity {
         this(id, dataInput.toDataInputInit());
     }
 
-    public boolean isDB() {
+ /*   public boolean isDB() {
         if (this.type == DataInputType.mongodb || this.type == DataInputType.neo4j ||
                 this.type == DataInputType.postgresql) {
             return true;
         }
         return false;
-    }
+    }*/
     
     
     public void hidePassword() {

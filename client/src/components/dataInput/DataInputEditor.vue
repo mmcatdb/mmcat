@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type DataInput, DB_TYPES, Type, copyDataInputUpdate, getNewDataInputUpdate, createInitFromUpdate, type DataInputUpdate } from '@/types/dataInput';
+import { type DataInput, DI_TYPES, Type, copyDataInputUpdate, getNewDataInputUpdate, createInitFromUpdate, type DataInputUpdate } from '@/types/dataInput';
 import API from '@/utils/api';
 import { computed, ref } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
@@ -18,6 +18,14 @@ const innerValue = ref<DataInputUpdate>(props.dataInput ? copyDataInputUpdate(pr
 
 const isNew = computed(() => !props.dataInput);
 const isValid = computed(() => isNew.value ? true : !!createInitFromUpdate(innerValue.value));
+
+const showDatabaseOptions = computed(() => {
+    return ['mongodb', 'neo4j', 'postgresql'].includes(innerValue.value.type);
+});
+
+const showURLOptions = computed(() => {
+    return ['Csv', 'Json', 'JsonLdStore'].includes(innerValue.value.type);
+});
 
 async function save() {
     fetching.value = true;
@@ -68,7 +76,7 @@ async function deleteMethod() {
 
 <template>
     <div class="editor">
-        <h2>{{ isNew ? 'Add' : 'Edit' }} dataInput</h2>
+        <h2>{{ isNew ? 'Add' : 'Edit' }} Data Input</h2>
         <ValueContainer>
             <ValueRow label="Type:">
                 <select
@@ -76,7 +84,7 @@ async function deleteMethod() {
                     :disabled="!isNew"
                 >
                     <option
-                        v-for="availableType in DB_TYPES"
+                        v-for="availableType in DI_TYPES"
                         :key="availableType.type"
                         :value="availableType.type"
                     >
@@ -87,16 +95,19 @@ async function deleteMethod() {
             <ValueRow label="Label:">
                 <input v-model="innerValue.label" />
             </ValueRow>
-            <ValueRow label="Host:">
+            <ValueRow v-if="showURLOptions" label="URL:">
+                <input v-model="innerValue.settings.url" />
+            </ValueRow>
+            <ValueRow v-if="showDatabaseOptions" label="Host:">
                 <input v-model="innerValue.settings.host" />
             </ValueRow>
-            <ValueRow label="Port:">
+            <ValueRow v-if="showDatabaseOptions" label="Port:">
                 <input
                     v-model="innerValue.settings.port"
                     type="number"
                 />
             </ValueRow>
-            <ValueRow label="Database:">
+            <ValueRow v-if="showDatabaseOptions" label="Database:">
                 <input v-model="innerValue.settings.database" />
             </ValueRow>
             <ValueRow
@@ -105,10 +116,10 @@ async function deleteMethod() {
             >
                 <input v-model="innerValue.settings.authenticationDatabase" />
             </ValueRow>
-            <ValueRow label="Username:">
+            <ValueRow v-if="showDatabaseOptions" label="Username:">
                 <input v-model="innerValue.settings.username" />
             </ValueRow>
-            <ValueRow label="Password:">
+            <ValueRow v-if="showDatabaseOptions" label="Password:">
                 <input v-model="innerValue.settings.password" />
             </ValueRow>
         </ValueContainer>

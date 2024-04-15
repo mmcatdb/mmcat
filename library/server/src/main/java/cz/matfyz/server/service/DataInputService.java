@@ -26,8 +26,8 @@ public class DataInputService {
     @Autowired
     private WrapperService wrapperService;
 
-    public DataInputEntity find(Id databaseId) {
-        return repository.find(databaseId);
+    public DataInputEntity find(Id dataInputId) {
+        return repository.find(dataInputId);
     }
 
     public List<DataInputEntity> findAll() {

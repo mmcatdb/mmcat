@@ -11,12 +11,21 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("data-input")
 public class DataInputProperties {
 
+    private String url;
     private String host;
     private String port;
     private String database;
     private String username;
     private String password;
 
+    public String url() {
+        return url;
+    }
+    
+    public void setUrl(String url) {
+        this.url = url;
+    }
+    
     public String host() {
         return host;
     }

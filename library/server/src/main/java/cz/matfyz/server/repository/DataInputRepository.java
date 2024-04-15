@@ -24,7 +24,7 @@ public class DataInputRepository {
 
     public DataInputEntity find(Id id) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM database_for_mapping WHERE id = ?;");
+            var statement = connection.prepareStatement("SELECT * FROM data_input WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
 
@@ -37,7 +37,7 @@ public class DataInputRepository {
 
     public List<DataInputEntity> findAll() {
         return db.getMultiple((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM database_for_mapping ORDER BY id;");
+            var statement = connection.prepareStatement("SELECT * FROM data_input ORDER BY id;");
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -52,12 +52,12 @@ public class DataInputRepository {
         return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                     SELECT
-                        DISTINCT database_for_mapping.id as id,
-                        database_for_mapping.json_value as json_value
-                    FROM database_for_mapping
-                    JOIN logical_model on logical_model.id = database_for_mapping.id
+                        DISTINCT data_input.id as id,
+                        data_input.json_value as json_value
+                    FROM data_input
+                    JOIN logical_model on logical_model.id = data_input.id
                     WHERE logical_model.schema_category_id = ?
-                    ORDER BY database_for_mapping.id;
+                    ORDER BY data_input.id;
                 """);
             setId(statement, 1, categoryId);
             var resultSet = statement.executeQuery();
@@ -76,7 +76,7 @@ public class DataInputRepository {
 
     private DataInputEntity create(DataInputEntity dataInput) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("INSERT INTO database_for_mapping (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            var statement = connection.prepareStatement("INSERT INTO data_input (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, dataInput.toJsonValue());
 
             int affectedRows = statement.executeUpdate();
@@ -93,7 +93,7 @@ public class DataInputRepository {
 
     private DataInputEntity update(DataInputEntity dataInput) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("UPDATE database_for_mapping SET json_value = ?::jsonb WHERE id = ?;");
+            var statement = connection.prepareStatement("UPDATE data_input SET json_value = ?::jsonb WHERE id = ?;");
             statement.setString(1, dataInput.toJsonValue());
             setId(statement, 2, dataInput.id);
 
@@ -107,7 +107,7 @@ public class DataInputRepository {
 
     public boolean delete(Id id) {
         return db.getBoolean((connection, output) -> {
-            var statement = connection.prepareStatement("DELETE FROM database_for_mapping WHERE id = ?;");
+            var statement = connection.prepareStatement("DELETE FROM data_input WHERE id = ?;");
             setId(statement, 1, id);
 
             int affectedRows = statement.executeUpdate();

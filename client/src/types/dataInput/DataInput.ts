@@ -50,11 +50,12 @@ export type DataInputWithConfigurationFromServer = {
 };
 
 export type Settings = {
-    host: string;
-    port: number;
-    database: string;
-    authenticationDatabase?: string;//??
-    username: string;
+    url?: string;
+    host?: string;
+    port?: number;
+    database?: string;
+    authenticationDatabase?: string;
+    username?: string;
     password?: string;
 };
 
@@ -78,7 +79,7 @@ export enum Type {
     neo4j = 'neo4j'
 }
 
-export const DB_TYPES: { type: Type, label: string }[] = [
+export const DI_TYPES: { type: Type, label: string }[] = [
     {
         type: Type.mongodb,
         label: 'MongoDB',
@@ -114,9 +115,14 @@ export function getNewDataInputUpdate(): DataInputUpdate {
 }
 
 export function createInitFromUpdate(update: DataInputUpdate): DataInputInit | null {
+    if (!update.type || !update.label) {
+        return null;
+    }
+    /*
     if (
         !update.type ||
         !update.label ||
+        !update.settings.url ||
         !update.settings.host ||
         !update.settings.port ||
         !update.settings.database ||
@@ -126,18 +132,19 @@ export function createInitFromUpdate(update: DataInputUpdate): DataInputInit | n
         !update.settings.username ||
         !update.settings.password
     )
-        return null;
+        return null;*/
 
     return {
         type: update.type,
         label: update.label,
         settings: {
-            host: update.settings.host,
-            port: update.settings.port,
-            database: update.settings.database,
+            url: update.settings.url ?? undefined,
+            host: update.settings.host ?? undefined,
+            port: update.settings.port ?? undefined,
+            database: update.settings.database ?? undefined,
             authenticationDatabase: update.settings.authenticationDatabase ?? undefined, // what about here??
-            username: update.settings.username,
-            password: update.settings.password,
+            username: update.settings.username ?? undefined,
+            password: update.settings.password ?? undefined,
         },
     };
 }
