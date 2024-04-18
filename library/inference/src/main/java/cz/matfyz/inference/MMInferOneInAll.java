@@ -86,7 +86,7 @@ public class MMInferOneInAll {
         RecordSchemaDescription rsd = rba.process(wrapper, merge, finalize);
         long end = System.currentTimeMillis();
 
-        SchemaConverter scon = new SchemaConverter(rsd, schemaCatName);
+        SchemaConverter scon = new SchemaConverter(rsd, schemaCatName, collectionName);
 
         CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
 
@@ -123,7 +123,7 @@ public class MMInferOneInAll {
       RecordSchemaDescription rsd = rba.process(wrapper, merge, finalize);
       long end = System.currentTimeMillis();
 
-      SchemaConverter scon = new SchemaConverter(rsd, schemaCatName);
+      SchemaConverter scon = new SchemaConverter(rsd, schemaCatName, collectionName);
 
       CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
       System.out.println("It all went good");

@@ -30,14 +30,17 @@ public class SchemaConverter {
 
     private final RecordSchemaDescription rsd;
     public SchemaCategory sc;
+    public String collectionName; // TODO: I need this to name the root of my SK and my mapping (probably the same as kind name). Right now I am only able to get it when I use DB as input
     public AccessTreeNode root;
     public Key rootKey;
     public SchemaConversionUtils SCUtils;
     public List<Integer> sigVals;
 
-    public SchemaConverter(RecordSchemaDescription rsd, String schemaCatName) {
+    // 
+    public SchemaConverter(RecordSchemaDescription rsd, String schemaCatName, String collectionName) {
         this.rsd = rsd;
         this.sc = new SchemaCategory(schemaCatName);
+        this.collectionName = collectionName;
         this.rootKey = new Key(0);
         this.SCUtils = new SchemaConversionUtils();
         this.sigVals = new ArrayList<Integer>();
@@ -49,21 +52,25 @@ public class SchemaConverter {
      */
     public CategoryMappingPair convertToSchemaCategoryAndMapping() {
      
+        System.out.println(rsd);
         AccessTreeNode currentNode = new AccessTreeNode(null, null, null, null, null, null, null, false);
         int i = 1;
+        System.out.println("Building the Access Tree...");
         buildAccessTree(rsd, rootKey, i, currentNode);
         
         //SCUtils.addIndexObjecttoArr(sc);
+        System.out.println("Assigning signature values...");
         Map<Integer, Integer> mappedSigVals = SCUtils.mapSigVals(this.sigVals);
         this.root = AccessTreeNode.assignSignatures(this.root, mappedSigVals);
         
         //this.root.printTree("");
-        
+        System.out.println("Building the SK...");        
         buildSchemaCategory(this.root);
         //traverseAndBuild(this.root);
         
+        System.out.println("Creating mapping...");
         MappingCreator mappingCreator = new MappingCreator(rootKey, root);
-        Mapping mapping = mappingCreator.createMapping(sc, "yelpbusinesssample"); //What will this label be?
+        Mapping mapping = mappingCreator.createMapping(sc, this.collectionName); //What will this label be?
         
         return new CategoryMappingPair(sc, mapping);
     }
@@ -80,10 +87,11 @@ public class SchemaConverter {
            // System.out.println("traverseAndBuild() adding root");
             ObjectIds ids = ObjectIds.createGenerated();
             SignatureId superId = SignatureId.createEmpty();
-            currentObject = new SchemaObject(currentNode.getKey(), "yelpbusinesssample", ids, superId);
+            currentObject = new SchemaObject(currentNode.getKey(), this.collectionName, ids, superId);
             this.sc.addObject(currentObject);
         }
         else {
+            System.out.println("Creating SO and SM for node: " + currentNode.name);
             currentObject = createSchemaObject(currentNode);
             createSchemaMorphism(currentNode, currentObject);
         }        
@@ -134,7 +142,7 @@ public class SchemaConverter {
     public void buildAccessTree(RecordSchemaDescription rsdp, Key keyp, int i, AccessTreeNode currentNode) {
         if (this.root == null) { //adding the root
             //System.out.println("adding root");
-            this.root = new AccessTreeNode(AccessTreeNode.State.Root, "yelpbusinesssample", null, keyp, null, null, null, false);
+            this.root = new AccessTreeNode(AccessTreeNode.State.Root, this.collectionName, null, keyp, null, null, null, false);
         }
 
         if (!rsdp.getChildren().isEmpty()) {
@@ -152,6 +160,7 @@ public class SchemaConverter {
             }
 
             for (RecordSchemaDescription rsdch: rsdp.getChildren()) {
+                System.out.println("Building access node for: " + rsdch.getName());
                 Key keych = SCUtils.createChildKey(keyp, i);
                 
                 Integer sigVal = SCUtils.createChildSignature(keyp, keych);

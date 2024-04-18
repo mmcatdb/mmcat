@@ -24,7 +24,7 @@ public class MappingCreator {
        System.out.println("access tree: ");
        root.printTree(" ");
        ComplexProperty accessPath = buildComplexPropertyFromNode(root);
-       System.out.println("This is root Key: " + rootKey);
+       //System.out.println("This is root Key: " + rootKey);
        return Mapping.create(sc, rootKey, kindName, accessPath);
    }
 
