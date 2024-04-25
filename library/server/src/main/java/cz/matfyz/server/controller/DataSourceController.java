@@ -1,9 +1,11 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.datasource.DataSource;
+import cz.matfyz.server.entity.datasource.DataSourceEntity;
+import cz.matfyz.server.entity.datasource.DataSourceInfo;
 import cz.matfyz.server.entity.datasource.DataSourceInit;
 import cz.matfyz.server.entity.datasource.DataSourceUpdate;
+import cz.matfyz.server.entity.datasource.DataSourceWithConfiguration;
 import cz.matfyz.server.service.DataSourceService;
 
 import java.util.List;
@@ -30,43 +32,56 @@ public class DataSourceController {
     @Autowired
     private DataSourceService service;
 
+    @GetMapping("/data-source-infos")
+    public List<DataSourceWithConfiguration> getAllDataSourceInfos() {
+        return service.findAllDataSourcesWithConfiguration();
+    }
+
     @GetMapping("/data-sources")
-    public List<DataSource> getAllDataSources(@RequestParam Optional<Id> categoryId) {
-        return categoryId.isPresent() ? service.findAllInCategory(categoryId.get()) : service.findAll();
+    public List<DataSourceEntity> getAllDataSources(@RequestParam Optional<Id> categoryId) {
+        var dataSources = categoryId.isPresent() ? service.findAllInCategory(categoryId.get()) : service.findAll();
+        dataSources.forEach(DataSourceEntity::hidePassword);
+        return dataSources;
     }
 
     @GetMapping("/data-sources/{id}")
-    public DataSource getDataSource(@PathVariable Id id) {
-        DataSource dataSource = service.find(id);
+    public DataSourceEntity getDataSource(@PathVariable Id id) {
+        DataSourceEntity dataSource = service.find(id);
         if (dataSource == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
+        dataSource.hidePassword();
         return dataSource;
     }
 
     @PostMapping("/data-sources")
-    public DataSource createDataSource(@RequestBody DataSourceInit data) {
-        DataSource dataSource = service.createNew(data);
+    public DataSourceInfo createDataSource(@RequestBody DataSourceInit data) {
+        DataSourceEntity dataSource = service.createNew(data);
         if (dataSource == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        return dataSource;
+        return dataSource.toInfo();
     }
 
     @PutMapping("/data-sources/{id}")
-    public DataSource updateDataSource(@PathVariable Id id, @RequestBody DataSourceUpdate update) {
-        DataSource dataSource = service.update(id, update);
+    public DataSourceInfo updateDataSource(@PathVariable Id id, @RequestBody DataSourceUpdate update) {
+        if (!update.hasPassword()) {
+            var originalDataSource = service.find(id);
+            update.setPasswordFrom(originalDataSource);
+        }
+        DataSourceEntity dataSource = service.update(id, update);
         if (dataSource == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 
-        return dataSource;
+        return dataSource.toInfo();
     }
 
     @DeleteMapping("/data-sources/{id}")
     public void deleteDataSource(@PathVariable Id id) {
         boolean status = service.delete(id);
         if (!status)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data source can't be deleted. Check that there aren't any jobs that depend on it.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data source can't be deleted. Check that there aren't any mappings that depend on it.");
     }
 
 }
+

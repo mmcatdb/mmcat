@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { DataSource } from '@/types/dataSource';
 import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
-import IriDisplay from '@/components/common/IriDisplay.vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import type { Id } from '@/types/id';
+import IriDisplay from '../common/IriDisplay.vue';
 
 type DataSourceDisplayProps = {
     dataSource: DataSource;
@@ -28,9 +28,12 @@ const emit = defineEmits([ 'edit' ]);
             <ValueRow label="Type:">
                 {{ dataSource.type }}
             </ValueRow>
-            <ValueRow label="Url:">
+            <ValueRow
+                label="Url:"
+                :class="{ 'opacity-0': !dataSource.settings.url }"
+            >
                 <IriDisplay
-                    :iri="dataSource.url"
+                    :iri="dataSource.settings.url"
                     :max-chars="36"
                     clickable
                 />

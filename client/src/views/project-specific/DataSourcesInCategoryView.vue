@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import API from '@/utils/api';
 import type { DataSource } from '@/types/dataSource';
-
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import { useRouter } from 'vue-router';
@@ -42,7 +41,7 @@ function edit(id: Id) {
 <template>
     <div>
         <h1>Data Sources in category</h1>
-        <div class="data-sources mt-3">
+        <div class="d-flex flex-wrap mt-3">
             <div
                 v-for="dataSource in dataSourcesInCategory"
                 :key="dataSource.id"
@@ -64,7 +63,7 @@ function edit(id: Id) {
             </div>
         </template>
         <h1>Other data sources</h1>
-        <div class="data-sources mt-3">
+        <div class="d-flex flex-wrap mt-3">
             <div
                 v-for="dataSource in dataSourcesOther"
                 :key="dataSource.id"
@@ -79,10 +78,3 @@ function edit(id: Id) {
         <ResourceLoader :loading-function="fetchDataSources" />
     </div>
 </template>
-
-<style scoped>
-.data-sources {
-    display: flex;
-    flex-wrap: wrap;
-}
-</style>

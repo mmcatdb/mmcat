@@ -3,7 +3,6 @@ package cz.matfyz.server.controller;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.repository.DataSourceRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
@@ -37,9 +36,6 @@ public class ActionController {
 
     @Autowired
     private LogicalModelRepository logicalModelRepository;
-
-    @Autowired
-    private DataSourceRepository dataSourceRepository;
 
     @GetMapping("/schema-categories/{categoryId}/actions")
     public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {

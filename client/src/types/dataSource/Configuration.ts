@@ -1,4 +1,4 @@
-export class DataInputConfiguration {
+export class DataSourceConfiguration {
     readonly isPropertyToOneAllowed: boolean;
     readonly isPropertyToManyAllowed: boolean;
     readonly isInliningToOneAllowed: boolean;
@@ -10,7 +10,7 @@ export class DataInputConfiguration {
     readonly isComplexPropertyAllowed: boolean;
     readonly isSchemaLess: boolean;
 
-    public constructor(input: DataInputConfigurationFromServer) {
+    public constructor(input: DataSourceConfigurationFromServer) {
         this.isPropertyToOneAllowed = input.isPropertyToOneAllowed;
         this.isPropertyToManyAllowed = input.isPropertyToManyAllowed;
         this.isInliningToOneAllowed = input.isInliningToOneAllowed;
@@ -24,7 +24,7 @@ export class DataInputConfiguration {
     }
 }
 
-export type DataInputConfigurationFromServer = {
+export type DataSourceConfigurationFromServer = {
     isPropertyToOneAllowed: boolean;
     isPropertyToManyAllowed: boolean;
     isInliningToOneAllowed: boolean;

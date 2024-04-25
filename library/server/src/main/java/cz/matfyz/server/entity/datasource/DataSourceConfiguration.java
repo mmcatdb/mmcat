@@ -1,11 +1,11 @@
-package cz.matfyz.server.entity.datainput;
+package cz.matfyz.server.entity.datasource;
 
 import cz.matfyz.abstractwrappers.AbstractPathWrapper;
 
 /**
  * @author jachym.bartik
  */
-public class DataInputConfiguration {
+public class DataSourceConfiguration {
 
     public final boolean isPropertyToOneAllowed;
     public final boolean isPropertyToManyAllowed;
@@ -18,7 +18,7 @@ public class DataInputConfiguration {
     public final boolean isComplexPropertyAllowed;
     public final boolean isSchemaLess;
 
-    public DataInputConfiguration(AbstractPathWrapper wrapper) {
+    public DataSourceConfiguration(AbstractPathWrapper wrapper) {
         this.isPropertyToOneAllowed = wrapper.isPropertyToOneAllowed();
         this.isPropertyToManyAllowed = wrapper.isPropertyToManyAllowed();
         this.isInliningToOneAllowed = wrapper.isInliningToOneAllowed();

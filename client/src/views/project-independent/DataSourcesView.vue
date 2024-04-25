@@ -2,7 +2,6 @@
 import { ref } from 'vue';
 import API from '@/utils/api';
 import type { DataSource } from '@/types/dataSource';
-
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import { useRouter } from 'vue-router';
@@ -28,7 +27,7 @@ function createNew() {
 <template>
     <div>
         <h1>Data Sources</h1>
-        <div class="data-sources mt-3">
+        <div class="d-flex flex-wrap mt-3">
             <div
                 v-for="dataSource in dataSources"
                 :key="dataSource.id"
@@ -51,10 +50,3 @@ function createNew() {
         <ResourceLoader :loading-function="fetchDataSources" />
     </div>
 </template>
-
-<style scoped>
-.data-sources {
-    display: flex;
-    flex-wrap: wrap;
-}
-</style>

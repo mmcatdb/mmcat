@@ -1,9 +1,11 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.datasource.DataSource;
+import cz.matfyz.server.entity.datasource.DataSourceConfiguration;
+import cz.matfyz.server.entity.datasource.DataSourceEntity;
 import cz.matfyz.server.entity.datasource.DataSourceInit;
 import cz.matfyz.server.entity.datasource.DataSourceUpdate;
+import cz.matfyz.server.entity.datasource.DataSourceWithConfiguration;
 import cz.matfyz.server.repository.DataSourceRepository;
 
 import java.util.List;
@@ -21,29 +23,32 @@ public class DataSourceService {
     @Autowired
     private DataSourceRepository repository;
 
-    public DataSource find(Id dataSourceId) {
+    @Autowired
+    private WrapperService wrapperService;
+
+    public DataSourceEntity find(Id dataSourceId) {
         return repository.find(dataSourceId);
     }
 
-    public List<DataSource> findAll() {
+    public List<DataSourceEntity> findAll() {
         return repository.findAll();
     }
 
-    public List<DataSource> findAllInCategory(Id categoryId) {
+    public List<DataSourceEntity> findAllInCategory(Id categoryId) {
         return repository.findAllInCategory(categoryId);
     }
 
-    public DataSource createNew(DataSourceInit init) {
-        var dataSource = new DataSource.Builder().fromInit(init);
+    public DataSourceEntity createNew(DataSourceInit data) {
+        var dataSource = new DataSourceEntity(null, data);
         return repository.save(dataSource);
     }
 
-    public DataSource update(Id dataSourceId, DataSourceUpdate update) {
-        DataSource dataSource = repository.find(dataSourceId);
+    public DataSourceEntity update(Id dataSourceId, DataSourceUpdate data) {
+        DataSourceEntity dataSource = repository.find(dataSourceId);
         if (dataSource == null)
             return null;
 
-        dataSource.updateFrom(update);
+        dataSource.updateFrom(data);
         return repository.save(dataSource);
     }
 
@@ -51,4 +56,21 @@ public class DataSourceService {
         return repository.delete(dataSourceId);
     }
 
+    public DataSourceWithConfiguration findDataSourceWithConfiguration(Id dataSourceId) {
+        var dataSource = find(dataSourceId);
+        var configuration = new DataSourceConfiguration(wrapperService.getControlWrapper(dataSource).getPathWrapper());
+
+        return new DataSourceWithConfiguration(dataSource, configuration);
+    }
+
+    public List<DataSourceWithConfiguration> findAllDataSourcesWithConfiguration() {
+        return findAll().stream().map(this::getDataSourceConfiguration).toList();
+    }
+
+    public DataSourceWithConfiguration getDataSourceConfiguration(DataSourceEntity dataSource) {
+        final var configuration = new DataSourceConfiguration(wrapperService.getControlWrapper(dataSource).getPathWrapper());
+
+        return new DataSourceWithConfiguration(dataSource, configuration);
+    }
 }
+

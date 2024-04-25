@@ -31,14 +31,4 @@ export const projectIndependentRoutes: RouteRecordRaw[] = [
         name: 'dataSource',
         component: () => import('@/views/project-independent/DataSourceView.vue'),
     },
-    {
-        path: 'data-inputs',
-        name: 'dataInputs',
-        component: () => import('@/views/project-independent/DataInputsView.vue'),
-    },
-    {
-        path: 'data-inputs/:id',
-        name: 'dataInput',
-        component: () => import('@/views/project-independent/DataInputView.vue'),
-    },
 ];

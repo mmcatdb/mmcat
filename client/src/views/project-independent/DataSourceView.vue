@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import API from '@/utils/api';
 import type { DataSource } from '@/types/dataSource';
-
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DataSourceDisplay from '@/components/dataSource/DataSourceDisplay.vue';
 import DataSourceEditor from '@/components/dataSource/DataSourceEditor.vue';
@@ -62,7 +61,7 @@ function cancel() {
     <div>
         <template v-if="isNew">
             <h1>Create new data source</h1>
-            <div class="data-source">
+            <div class="d-flex mt-3">
                 <DataSourceEditor
                     @save="save"
                     @cancel="cancel"
@@ -70,10 +69,10 @@ function cancel() {
             </div>
         </template>
         <template v-else>
-            <h1>Data source</h1>
+            <h1>Data Source</h1>
             <div
                 v-if="dataSource"
-                class="data-source"
+                class="d-flex mt-3"
             >
                 <DataSourceEditor
                     v-if="isEditing"
@@ -100,9 +99,3 @@ function cancel() {
         </template>
     </div>
 </template>
-
-<style scoped>
-.data-source {
-    display: flex;
-}
-</style>

@@ -3,9 +3,9 @@ package cz.matfyz.server.service;
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.database.DatabaseEntity;
-import cz.matfyz.server.entity.datainput.DataInputEntity;
+import cz.matfyz.server.entity.datasource.DataSourceEntity;
 import cz.matfyz.server.exception.DatabaseException;
-import cz.matfyz.server.exception.DataInputException;
+import cz.matfyz.server.exception.DataSourceException;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
 import cz.matfyz.wrappermongodb.MongoDBSettings;
@@ -102,62 +102,62 @@ public class WrapperService {
     
     
     // Added for DataInpu
-    public AbstractControlWrapper getControlWrapper(DataInputEntity dataInput) {
+    public AbstractControlWrapper getControlWrapper(DataSourceEntity dataSource) {
         try {
-            return switch (dataInput.type) {
-                case mongodb -> getMongoDBControlWrapper(dataInput);
-                case postgresql -> getPostgreSQLControlWrapper(dataInput);
-                case neo4j -> getNeo4jControlWrapper(dataInput);
-                default -> throw DataInputException.wrapperNotFound(dataInput);
+            return switch (dataSource.type) {
+                case mongodb -> getMongoDBControlWrapper(dataSource);
+                case postgresql -> getPostgreSQLControlWrapper(dataSource);
+                case neo4j -> getNeo4jControlWrapper(dataSource);
+                default -> throw DataSourceException.wrapperNotFound(dataSource);
             };
         }
         catch (Exception exception) {
-            throw DataInputException.wrapperNotCreated(dataInput, exception);
+            throw DataSourceException.wrapperNotCreated(dataSource, exception);
         }
     }
 
-    private MongoDBControlWrapper getMongoDBControlWrapper(DataInputEntity dataInput) throws IllegalArgumentException, JsonProcessingException {
-        if (!mongoDBCache.containsKey(dataInput.id))
-            mongoDBCache.put(dataInput.id, createMongoDBProvider(dataInput));
+    private MongoDBControlWrapper getMongoDBControlWrapper(DataSourceEntity dataSource) throws IllegalArgumentException, JsonProcessingException {
+        if (!mongoDBCache.containsKey(dataSource.id))
+            mongoDBCache.put(dataSource.id, createMongoDBProvider(dataSource));
 
-        final var provider = mongoDBCache.get(dataInput.id);
+        final var provider = mongoDBCache.get(dataSource.id);
         return new MongoDBControlWrapper(provider);
     }
 
-    private static MongoDBProvider createMongoDBProvider(DataInputEntity dataInput) throws IllegalArgumentException, JsonProcessingException {
-        final var settings = mapper.treeToValue(dataInput.settings, MongoDBSettings.class);
+    private static MongoDBProvider createMongoDBProvider(DataSourceEntity dataSource) throws IllegalArgumentException, JsonProcessingException {
+        final var settings = mapper.treeToValue(dataSource.settings, MongoDBSettings.class);
 
         return new MongoDBProvider(settings);
     }
 
     // PostgreSQL
 
-    private PostgreSQLControlWrapper getPostgreSQLControlWrapper(DataInputEntity dataInput) throws IllegalArgumentException, JsonProcessingException {
-        if (!postgreSQLCache.containsKey(dataInput.id))
-            postgreSQLCache.put(dataInput.id, createPostgreSQLProvider(dataInput));
+    private PostgreSQLControlWrapper getPostgreSQLControlWrapper(DataSourceEntity dataSource) throws IllegalArgumentException, JsonProcessingException {
+        if (!postgreSQLCache.containsKey(dataSource.id))
+            postgreSQLCache.put(dataSource.id, createPostgreSQLProvider(dataSource));
 
-        final var provider = postgreSQLCache.get(dataInput.id);
+        final var provider = postgreSQLCache.get(dataSource.id);
         return new PostgreSQLControlWrapper(provider);
     }
 
-    private static PostgreSQLProvider createPostgreSQLProvider(DataInputEntity dataInput) throws IllegalArgumentException, JsonProcessingException {
-        final var settings = mapper.treeToValue(dataInput.settings, PostgreSQLSettings.class);
+    private static PostgreSQLProvider createPostgreSQLProvider(DataSourceEntity dataSource) throws IllegalArgumentException, JsonProcessingException {
+        final var settings = mapper.treeToValue(dataSource.settings, PostgreSQLSettings.class);
 
         return new PostgreSQLProvider(settings);
     }
 
     // Neo4j
 
-    private Neo4jControlWrapper getNeo4jControlWrapper(DataInputEntity dataInput) throws IllegalArgumentException, JsonProcessingException {
-        if (!neo4jCache.containsKey(dataInput.id))
-            neo4jCache.put(dataInput.id, createNeo4jProvider(dataInput));
+    private Neo4jControlWrapper getNeo4jControlWrapper(DataSourceEntity dataSource) throws IllegalArgumentException, JsonProcessingException {
+        if (!neo4jCache.containsKey(dataSource.id))
+            neo4jCache.put(dataSource.id, createNeo4jProvider(dataSource));
 
-        final var provider = neo4jCache.get(dataInput.id);
+        final var provider = neo4jCache.get(dataSource.id);
         return new Neo4jControlWrapper(provider);
     }
 
-    private static Neo4jProvider createNeo4jProvider(DataInputEntity dataInput) throws IllegalArgumentException, JsonProcessingException {
-        final var settings = mapper.treeToValue(dataInput.settings, Neo4jSettings.class);
+    private static Neo4jProvider createNeo4jProvider(DataSourceEntity dataSource) throws IllegalArgumentException, JsonProcessingException {
+        final var settings = mapper.treeToValue(dataSource.settings, Neo4jSettings.class);
 
         return new Neo4jProvider(settings);
     }

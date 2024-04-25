@@ -1,7 +1,6 @@
 import actions from './routes/actions';
 import databases from './routes/databases';
-import dataSources from './routes/dataSource';
-import dataInputs from './routes/dataInputs';
+import dataSources from './routes/dataSources';
 import instances from './routes/instances';
 import jobs from './routes/jobs';
 import logicalModels from './routes/logicalModels';
@@ -14,7 +13,6 @@ const API = {
     actions,
     databases,
     dataSources,
-    dataInputs,
     instances,
     jobs,
     logicalModels,
