@@ -8,8 +8,8 @@ import { SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from
 import type { Graph } from '../categoryGraph';
 import { ComparableMap } from '@/utils/ComparableMap';
 import type { Mapping } from '../mapping';
-import type { Type } from '../database';
 import { ComparableSet } from '@/utils/ComparableSet';
+import type { DatasourceType } from '../datasource';
 
 export type SchemaCategoryFromServer = {
     id: Id;
@@ -195,12 +195,12 @@ function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObj
 
     morphisms.forEach(morphism => context.morphisms.set(morphism.signature, morphism));
 
-    const typeIndices = new Map<Type, number>();
+    const typeIndices = new Map<DatasourceType, number>();
 
     return logicalModels.map(logicalModel => {
-        const nextIndex = typeIndices.get(logicalModel.database.type) ?? 0;
-        typeIndices.set(logicalModel.database.type, nextIndex + 1);
-        const id = logicalModel.database.type + '-' + nextIndex;
+        const nextIndex = typeIndices.get(logicalModel.datasource.type) ?? 0;
+        typeIndices.set(logicalModel.datasource.type, nextIndex + 1);
+        const id = logicalModel.datasource.type + '-' + nextIndex;
 
         const mappings: GroupMapping[] = [];
 

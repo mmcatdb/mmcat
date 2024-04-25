@@ -9,7 +9,7 @@ public record QueryDescription(
 ) {
 
     public record QueryPartDescription(
-        String databaseIdentifier,
+        String datasourceIdentifier,
         QueryStatement query
     ) {}
 

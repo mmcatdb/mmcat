@@ -2,12 +2,12 @@ package cz.matfyz.server.controller;
 
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.DatabaseInfo;
-import cz.matfyz.server.entity.database.DatabaseWithConfiguration;
+import cz.matfyz.server.entity.datasource.DatasourceInfo;
+import cz.matfyz.server.entity.datasource.DatasourceWithConfiguration;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatabase;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.service.LogicalModelService;
 
 import java.util.List;
@@ -36,15 +36,15 @@ public class LogicalModelController {
     public record LogicalModelDetail(
         Id id,
         Id categoryId,
-        DatabaseWithConfiguration database,
+        DatasourceWithConfiguration datasource,
         String label,
         List<MappingWrapper> mappings
     ) implements IEntity {
-        public static LogicalModelDetail fromEntities(LogicalModel model, DatabaseWithConfiguration database, List<MappingWrapper> mappings) {
+        public static LogicalModelDetail fromEntities(LogicalModel model, DatasourceWithConfiguration datasource, List<MappingWrapper> mappings) {
             return new LogicalModelDetail(
                 model.id,
                 model.categoryId,
-                database,
+                datasource,
                 model.label,
                 mappings
             );
@@ -70,13 +70,13 @@ public class LogicalModelController {
     public record LogicalModelInfo(
         Id id,
         String label,
-        DatabaseInfo database
+        DatasourceInfo datasource
     ) {
-        public static LogicalModelInfo fromEntities(LogicalModelWithDatabase modelWithDatabase) {
+        public static LogicalModelInfo fromEntities(LogicalModelWithDatasource modelWithDatasource) {
             return new LogicalModelInfo(
-                modelWithDatabase.logicalModel().id,
-                modelWithDatabase.logicalModel().label,
-                modelWithDatabase.database().toInfo()
+                modelWithDatasource.logicalModel().id,
+                modelWithDatasource.logicalModel().label,
+                modelWithDatasource.datasource().toInfo()
             );
         }
     }

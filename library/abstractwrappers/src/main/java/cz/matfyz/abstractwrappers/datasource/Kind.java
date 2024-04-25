@@ -3,11 +3,11 @@ package cz.matfyz.abstractwrappers.datasource;
 import cz.matfyz.core.mapping.Mapping;
 
 /**
- * This class represents a kind in a data source. It's identified by the dataSourceId and mapping (more precisely, by the name of the collection, i.e., kindName).
+ * This class represents a kind in a data source. It's identified by the datasourceId and mapping (more precisely, by the name of the collection, i.e., kindName).
  */
 public class Kind implements Comparable<Kind> {
 
-    public final DataSource dataSource;
+    public final Datasource datasource;
     /**
      * There has to be at most one mapping for each kind name in a given data source.
      * If not, many algorithms will broke.
@@ -18,15 +18,15 @@ public class Kind implements Comparable<Kind> {
      */
     public final Mapping mapping;
 
-    public Kind(Mapping mapping, DataSource dataSource) {
+    public Kind(Mapping mapping, Datasource datasource) {
         this.mapping = mapping;
-        this.dataSource = dataSource;
+        this.datasource = datasource;
     }
 
     @Override public int compareTo(Kind other) {
-        final int dataSourceComparison = dataSource.compareTo(other.dataSource);
-        return dataSourceComparison != 0
-            ? dataSourceComparison
+        final int datasourceComparison = datasource.compareTo(other.datasource);
+        return datasourceComparison != 0
+            ? datasourceComparison
             : mapping.compareTo(other.mapping);
     }
 
@@ -35,7 +35,7 @@ public class Kind implements Comparable<Kind> {
     }
 
     @Override public String toString() {
-        return dataSource.identifier + "/" + mapping.kindName();
+        return datasource.identifier + "/" + mapping.kindName();
     }
 
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { type Node, createDefaultFilter } from '@/types/categoryGraph';
-import type { DatabaseWithConfiguration } from '@/types/database';
+import type { DatasourceWithConfiguration } from '@/types/datasource';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
 import { ref, shallowRef, watch } from 'vue';
 import StaticNameInput from './StaticNameInput.vue';
@@ -14,7 +14,7 @@ enum NameType {
 }
 
 type NameInputProps = {
-    database: DatabaseWithConfiguration;
+    datasource: DatasourceWithConfiguration;
     rootNode: Node;
     modelValue: Name;
     isSelfIdentifier: boolean;
@@ -31,7 +31,7 @@ const innerValue = shallowRef(props.modelValue);
 const type = ref(getNameType(props.modelValue));
 const staticValue = ref(props.modelValue instanceof StaticName && !props.modelValue.isAnonymous ? props.modelValue : StaticName.fromString(''));
 const dynamicValue = shallowRef(SequenceSignature.fromSignature(props.modelValue instanceof DynamicName ? props.modelValue.signature : Signature.empty, props.rootNode));
-const filter = ref(createDefaultFilter(props.database.configuration));
+const filter = ref(createDefaultFilter(props.datasource.configuration));
 
 watch(() => props.modelValue, (newValue: Name) => {
     if (!newValue.equals(innerValue.value)) {
@@ -93,7 +93,7 @@ function updateInnerValue() {
         v-model="type"
         type="radio"
         :value="NameType.Dynamic"
-        :disabled="disabled || !database.configuration.isDynamicNamingAllowed || isSelfIdentifier"
+        :disabled="disabled || !datasource.configuration.isDynamicNamingAllowed || isSelfIdentifier"
         @change="updateInnerValue"
     />
     <label
@@ -112,7 +112,7 @@ function updateInnerValue() {
         v-model="type"
         type="radio"
         :value="NameType.Anonymous"
-        :disabled="disabled || !database.configuration.isAnonymousNamingAllowed || isSelfIdentifier"
+        :disabled="disabled || !datasource.configuration.isAnonymousNamingAllowed || isSelfIdentifier"
         @change="updateInnerValue"
     />
     <label

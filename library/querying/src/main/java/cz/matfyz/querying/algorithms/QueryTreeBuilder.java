@@ -1,6 +1,6 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.patterntree.KindPattern;

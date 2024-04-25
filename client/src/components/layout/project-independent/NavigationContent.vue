@@ -12,7 +12,7 @@ function defineLink(pathName: string, label: string): Link {
 
 const links = [
     defineLink('home', 'Home'),
-    defineLink('dataSources', 'Data Sources'),
+    defineLink('datasources', 'Data Sources'),
     defineLink('about', 'About'),
 ];
 </script>

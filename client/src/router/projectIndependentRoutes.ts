@@ -12,23 +12,13 @@ export const projectIndependentRoutes: RouteRecordRaw[] = [
         component: () => import('@/views/project-independent/AboutView.vue'),
     },
     {
-        path: 'databases',
-        name: 'databases',
-        component: () => import('@/views/project-independent/DatabasesView.vue'),
+        path: 'datasources',
+        name: 'datasources',
+        component: () => import('@/views/project-independent/DatasourcesView.vue'),
     },
     {
-        path: 'databases/:id',
-        name: 'database',
-        component: () => import('@/views/project-independent/DatabaseView.vue'),
-    },
-    {
-        path: 'data-sources',
-        name: 'dataSources',
-        component: () => import('@/views/project-independent/DataSourcesView.vue'),
-    },
-    {
-        path: 'data-sources/:id',
-        name: 'dataSource',
-        component: () => import('@/views/project-independent/DataSourceView.vue'),
+        path: 'datasources/:id',
+        name: 'datasource',
+        component: () => import('@/views/project-independent/DatasourceView.vue'),
     },
 ];

@@ -31,7 +31,7 @@ const selectingRootNode = ref<Node>();
 const logicalModels = shallowRef<LogicalModel[]>([]);
 const selectedLogicalModel = shallowRef<LogicalModel>();
 
-const databaseAndRootNodeValid = computed(() => !!selectedLogicalModel.value && !!selectingRootNode.value);
+const datasourceAndRootNodeValid = computed(() => !!selectedLogicalModel.value && !!selectingRootNode.value);
 
 const categoryId = useSchemaCategoryId();
 const category = useSchemaCategoryInfo();
@@ -44,7 +44,7 @@ onMounted(async () => {
     }
 });
 
-function confirmDatabaseAndRootNode() {
+function confirmDatasourceAndRootNode() {
     if (!selectedLogicalModel.value || !selectingRootNode.value)
         return;
 
@@ -61,7 +61,7 @@ async function createMapping(primaryKey: SignatureId) {
     const result = await API.mappings.createNewMapping({}, {
         logicalModelId: selectedLogicalModel.value.id,
         rootObjectKey: accessPath.value.node.schemaObject.key,
-        primaryKey: new SignatureId(selectedLogicalModel.value.database.configuration.isSchemaLess ? [] : primaryKey.signatures).toServer(),
+        primaryKey: new SignatureId(selectedLogicalModel.value.datasource.configuration.isSchemaLess ? [] : primaryKey.signatures).toServer(),
         kindName: accessPath.value.name.toString(),
         accessPath: accessPath.value.toServer(),
         categoryVersion: category.value.versionId,
@@ -102,7 +102,7 @@ async function createMapping(primaryKey: SignatureId) {
                     <div class="button-row">
                         <button
                             :disabled="!selectedLogicalModel || !selectingRootNode"
-                            @click="confirmDatabaseAndRootNode"
+                            @click="confirmDatasourceAndRootNode"
                         >
                             Confirm
                         </button>
@@ -110,7 +110,7 @@ async function createMapping(primaryKey: SignatureId) {
                 </div>
                 <AccessPathEditor
                     v-else
-                    :database="selectedLogicalModel.database"
+                    :datasource="selectedLogicalModel.datasource"
                     :root-property="accessPath"
                     @finish="createMapping"
                 />

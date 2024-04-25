@@ -1,7 +1,7 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
-import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.abstractwrappers.exception.QueryException;
 import cz.matfyz.abstractwrappers.querycontent.StringQuery;
 import cz.matfyz.abstractwrappers.utils.BaseQueryWrapper;

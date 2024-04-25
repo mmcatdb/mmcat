@@ -1,9 +1,9 @@
-import { DatabaseWithConfiguration, type DatabaseInfoFromServer, type DatabaseWithConfigurationFromServer, DatabaseInfo } from './database';
+import { DatasourceInfo, DatasourceWithConfiguration, type DatasourceInfoFromServer, type DatasourceWithConfigurationFromServer } from './datasource';
 import type { Id, Entity } from './id';
 import { Mapping, type MappingFromServer } from './mapping';
 
 export type LogicalModelInit = {
-    databaseId: Id;
+    datasourceId: Id;
     categoryId: Id;
     label: string;
 };
@@ -12,14 +12,14 @@ export class LogicalModelInfo implements Entity {
     private constructor(
         public readonly id: Id,
         public readonly label: string,
-        public readonly database: DatabaseInfo,
+        public readonly datasource: DatasourceInfo,
     ) {}
 
     static fromServer(input: LogicalModelInfoFromServer): LogicalModelInfo {
         return new LogicalModelInfo(
             input.id,
             input.label,
-            DatabaseInfo.fromServer(input.database),
+            DatasourceInfo.fromServer(input.datasource),
         );
     }
 }
@@ -27,7 +27,7 @@ export class LogicalModelInfo implements Entity {
 export type LogicalModelInfoFromServer = {
     id: Id;
     label: string;
-    database: DatabaseInfoFromServer;
+    datasource: DatasourceInfoFromServer;
 };
 
 export class LogicalModel implements Entity {
@@ -35,7 +35,7 @@ export class LogicalModel implements Entity {
         public readonly id: Id,
         public readonly label: string,
         public readonly categoryId: Id,
-        public readonly database: DatabaseWithConfiguration,
+        public readonly datasource: DatasourceWithConfiguration,
         public readonly mappings: Mapping[],
     ) {}
 
@@ -45,7 +45,7 @@ export class LogicalModel implements Entity {
             input.id,
             input.label,
             input.categoryId,
-            DatabaseWithConfiguration.fromServer(input.database),
+            DatasourceWithConfiguration.fromServer(input.datasource),
             input.mappings.map(Mapping.fromServer),
         );
     }
@@ -55,6 +55,6 @@ export type LogicalModelFromServer = {
     id: Id;
     categoryId: Id;
     label: string;
-    database: DatabaseWithConfigurationFromServer;
+    datasource: DatasourceWithConfigurationFromServer;
     mappings: MappingFromServer[];
 };

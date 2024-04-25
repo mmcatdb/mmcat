@@ -3,8 +3,7 @@ import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty, Seq
 import { PropertyType, createDefaultFilter, type Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { ref, computed, shallowRef } from 'vue';
-import type { DatabaseWithConfiguration } from '@/types/database';
-
+import type { DatasourceWithConfiguration } from '@/types/datasource';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
@@ -20,7 +19,7 @@ enum State {
 }
 
 type EditPropertyProps = {
-    database: DatabaseWithConfiguration;
+    datasource: DatasourceWithConfiguration;
     property: GraphChildProperty;
 };
 
@@ -33,7 +32,7 @@ const signature = shallowRef(props.property.signature.copy());
 const isAuxiliary = ref('isAuxiliary' in props.property && props.property.isAuxiliary);
 const name = shallowRef<Name>(props.property.name.copy());
 const state = ref(State.SelectSignature);
-const filter = ref(createDefaultFilter(props.database.configuration));
+const filter = ref(createDefaultFilter(props.datasource.configuration));
 const typeIsDetermined = ref(false);
 
 const typeChanged = computed(() => type.value !== propertyToType(props.property));
@@ -69,7 +68,7 @@ const isSignatureValid = computed(() => {
     if (signature.value.isEmpty)
         return false;
 
-    if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
+    if (!props.datasource.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
     return true;
@@ -93,7 +92,7 @@ function confirmSignature() {
 }
 
 function determinePropertyType(node: Node): PropertyType | null {
-    if (!props.database.configuration.isComplexPropertyAllowed)
+    if (!props.datasource.configuration.isComplexPropertyAllowed)
         return PropertyType.Simple;
 
     if (isAuxiliary.value)
@@ -157,7 +156,7 @@ function isAuxiliaryClicked() {
                 />
             </ValueRow>
             <ValueRow
-                v-if="state >= State.SelectSignature && database.configuration.isGroupingAllowed"
+                v-if="state >= State.SelectSignature && datasource.configuration.isGroupingAllowed"
                 label="Is auxiliary:"
             >
                 <input
@@ -191,7 +190,7 @@ function isAuxiliaryClicked() {
             >
                 <NameInput
                     v-model="name"
-                    :database="database"
+                    :datasource="datasource"
                     :root-node="property.parentNode"
                     :is-self-identifier="isSelfIdentifier"
                 />

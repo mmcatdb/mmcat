@@ -6,7 +6,7 @@ import { ref, computed, shallowRef } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
-import type { DatabaseWithConfiguration } from '@/types/database';
+import type { DatasourceWithConfiguration } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '@/components/category/SignatureDisplay.vue';
@@ -18,7 +18,7 @@ enum State {
 }
 
 type AddPropertyProps = {
-    database: DatabaseWithConfiguration;
+    datasource: DatasourceWithConfiguration;
     parentProperty: GraphParentProperty;
 };
 
@@ -31,7 +31,7 @@ const signature = shallowRef(SequenceSignature.empty(props.parentProperty.node))
 const isAuxiliary = ref(false);
 const name = shallowRef<Name>(StaticName.fromString(''));
 const state = ref(State.SelectSignature);
-const filter = ref(createDefaultFilter(props.database.configuration));
+const filter = ref(createDefaultFilter(props.datasource.configuration));
 const typeIsDetermined = ref(false);
 
 function save() {
@@ -59,7 +59,7 @@ const isSignatureValid = computed(() => {
     if (signature.value.isEmpty)
         return false;
 
-    if (!props.database.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
+    if (!props.datasource.configuration.isComplexPropertyAllowed && signature.value.sequence.lastNode.determinedPropertyType === PropertyType.Complex)
         return false;
 
     return true;
@@ -96,7 +96,7 @@ function confirmSignature() {
 }
 
 function determinePropertyType(node: Node): PropertyType | null {
-    if (!props.database.configuration.isComplexPropertyAllowed)
+    if (!props.datasource.configuration.isComplexPropertyAllowed)
         return PropertyType.Simple;
 
     if (isAuxiliary.value)
@@ -146,7 +146,7 @@ function isAuxiliaryClicked() {
         <h2>Add property</h2>
         <ValueContainer>
             <ValueRow
-                v-if="state >= State.SelectSignature && database.configuration.isGroupingAllowed"
+                v-if="state >= State.SelectSignature && datasource.configuration.isGroupingAllowed"
                 label="Is auxiliary:"
             >
                 <input
@@ -180,7 +180,7 @@ function isAuxiliaryClicked() {
             >
                 <NameInput
                     v-model="name"
-                    :database="database"
+                    :datasource="datasource"
                     :root-node="parentProperty.node"
                     :is-self-identifier="isSelfIdentifier"
                 />

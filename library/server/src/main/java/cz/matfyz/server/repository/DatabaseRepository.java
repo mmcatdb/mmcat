@@ -4,7 +4,7 @@ import static cz.matfyz.server.repository.utils.Utils.getId;
 import static cz.matfyz.server.repository.utils.Utils.setId;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.DatabaseEntity;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.Statement;
@@ -22,42 +22,42 @@ public class DatabaseRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public DatabaseEntity find(Id id) {
+    public DatasourceWrapper find(Id id) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM database_for_mapping WHERE id = ?;");
+            var statement = connection.prepareStatement("SELECT * FROM datasource WHERE id = ?;");
             setId(statement, 1, id);
             var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
                 String jsonValue = resultSet.getString("json_value");
-                output.set(DatabaseEntity.fromJsonValue(id, jsonValue));
+                output.set(DatasourceWrapper.fromJsonValue(id, jsonValue));
             }
         });
     }
 
-    public List<DatabaseEntity> findAll() {
+    public List<DatasourceWrapper> findAll() {
         return db.getMultiple((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM database_for_mapping ORDER BY id;");
+            var statement = connection.prepareStatement("SELECT * FROM datasource ORDER BY id;");
             var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(DatabaseEntity.fromJsonValue(id, jsonValue));
+                output.add(DatasourceWrapper.fromJsonValue(id, jsonValue));
             }
         });
     }
 
-    public List<DatabaseEntity> findAllInCategory(Id categoryId) {
+    public List<DatasourceWrapper> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             var statement = connection.prepareStatement("""
                     SELECT
-                        DISTINCT database_for_mapping.id as id,
-                        database_for_mapping.json_value as json_value
-                    FROM database_for_mapping
-                    JOIN logical_model on logical_model.id = database_for_mapping.id
+                        DISTINCT datasource.id as id,
+                        datasource.json_value as json_value
+                    FROM datasource
+                    JOIN logical_model on logical_model.id = datasource.id
                     WHERE logical_model.schema_category_id = ?
-                    ORDER BY database_for_mapping.id;
+                    ORDER BY datasource.id;
                 """);
             setId(statement, 1, categoryId);
             var resultSet = statement.executeQuery();
@@ -65,19 +65,19 @@ public class DatabaseRepository {
             while (resultSet.next()) {
                 Id id = getId(resultSet, "id");
                 String jsonValue = resultSet.getString("json_value");
-                output.add(DatabaseEntity.fromJsonValue(id, jsonValue));
+                output.add(DatasourceWrapper.fromJsonValue(id, jsonValue));
             }
         });
     }
 
-    public DatabaseEntity save(DatabaseEntity database) {
-        return database.id == null ? create(database) : update(database);
+    public DatasourceWrapper save(DatasourceWrapper datasource) {
+        return datasource.id == null ? create(datasource) : update(datasource);
     }
 
-    private DatabaseEntity create(DatabaseEntity database) {
+    private DatasourceWrapper create(DatasourceWrapper datasource) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("INSERT INTO database_for_mapping (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
-            statement.setString(1, database.toJsonValue());
+            var statement = connection.prepareStatement("INSERT INTO datasource (json_value) VALUES (?::jsonb);", Statement.RETURN_GENERATED_KEYS);
+            statement.setString(1, datasource.toJsonValue());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
@@ -86,28 +86,28 @@ public class DatabaseRepository {
             var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 Id id = getId(generatedKeys, "id");
-                output.set(new DatabaseEntity(id, database));
+                output.set(new DatasourceWrapper(id, datasource));
             }
         });
     }
 
-    private DatabaseEntity update(DatabaseEntity database) {
+    private DatasourceWrapper update(DatasourceWrapper datasource) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("UPDATE database_for_mapping SET json_value = ?::jsonb WHERE id = ?;");
-            statement.setString(1, database.toJsonValue());
-            setId(statement, 2, database.id);
+            var statement = connection.prepareStatement("UPDATE datasource SET json_value = ?::jsonb WHERE id = ?;");
+            statement.setString(1, datasource.toJsonValue());
+            setId(statement, 2, datasource.id);
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
                 return;
 
-            output.set(new DatabaseEntity(database.id, database));
+            output.set(new DatasourceWrapper(datasource.id, datasource));
         });
     }
 
     public boolean delete(Id id) {
         return db.getBoolean((connection, output) -> {
-            var statement = connection.prepareStatement("DELETE FROM database_for_mapping WHERE id = ?;");
+            var statement = connection.prepareStatement("DELETE FROM datasource WHERE id = ?;");
             setId(statement, 1, id);
 
             int affectedRows = statement.executeUpdate();

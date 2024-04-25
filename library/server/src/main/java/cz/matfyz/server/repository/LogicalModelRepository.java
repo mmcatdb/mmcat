@@ -6,7 +6,7 @@ import static cz.matfyz.server.repository.utils.Utils.setId;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.DatabaseEntity;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
@@ -28,32 +28,32 @@ public class LogicalModelRepository {
     @Autowired
     private DatabaseWrapper db;
 
-    public record LogicalModelWithDatabase(
+    public record LogicalModelWithDatasource(
         LogicalModel logicalModel,
-        DatabaseEntity database
+        DatasourceWrapper datasource
     ) {}
 
-    private static LogicalModelWithDatabase modelFromResultSet(ResultSet resultSet, Id modelId, Id categoryId) throws SQLException, JsonProcessingException {
+    private static LogicalModelWithDatasource modelFromResultSet(ResultSet resultSet, Id modelId, Id categoryId) throws SQLException, JsonProcessingException {
         final String modelJsonValue = resultSet.getString("logical_model.json_value");
-        final Id databaseId = getId(resultSet, "database.id");
-        final String databaseJsonValue = resultSet.getString("database.json_value");
+        final Id datasourceId = getId(resultSet, "datasource.id");
+        final String datasourceJsonValue = resultSet.getString("datasource.json_value");
 
-        return new LogicalModelWithDatabase(
-            LogicalModel.fromJsonValue(modelId, categoryId, databaseId, modelJsonValue),
-            DatabaseEntity.fromJsonValue(databaseId, databaseJsonValue)
+        return new LogicalModelWithDatasource(
+            LogicalModel.fromJsonValue(modelId, categoryId, datasourceId, modelJsonValue),
+            DatasourceWrapper.fromJsonValue(datasourceId, datasourceJsonValue)
         );
     }
 
-    public List<LogicalModelWithDatabase> findAllInCategory(Id categoryId) {
+    public List<LogicalModelWithDatasource> findAllInCategory(Id categoryId) {
         return db.getMultiple((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
                     logical_model.id as "logical_model.id",
                     logical_model.json_value as "logical_model.json_value",
-                    database_for_mapping.id as "database.id",
-                    database_for_mapping.json_value as "database.json_value"
+                    datasource.id as "datasource.id",
+                    datasource.json_value as "datasource.json_value"
                 FROM logical_model
-                JOIN database_for_mapping ON database_for_mapping.id = logical_model.database_id
+                JOIN datasource ON datasource.id = logical_model.datasource_id
                 WHERE logical_model.schema_category_id = ?
                 ORDER BY logical_model.id;
                 """);
@@ -67,16 +67,16 @@ public class LogicalModelRepository {
         });
     }
 
-    public LogicalModelWithDatabase find(Id id) {
+    public LogicalModelWithDatasource find(Id id) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
                 SELECT
                     logical_model.schema_category_id as "logical_model.schema_category_id",
                     logical_model.json_value as "logical_model.json_value",
-                    database_for_mapping.id as "database.id",
-                    database_for_mapping.json_value as "database.json_value"
+                    datasource.id as "datasource.id",
+                    datasource.json_value as "datasource.json_value"
                 FROM logical_model
-                JOIN database_for_mapping ON database_for_mapping.id = logical_model.database_id
+                JOIN datasource ON datasource.id = logical_model.datasource_id
                 WHERE logical_model.id = ?;
                 """);
             setId(statement, 1, id);
@@ -93,13 +93,13 @@ public class LogicalModelRepository {
     public Id add(LogicalModelInit init) {
         return db.get((connection, output) -> {
             final var statement = connection.prepareStatement("""
-                INSERT INTO logical_model (schema_category_id, database_id, json_value)
+                INSERT INTO logical_model (schema_category_id, datasource_id, json_value)
                 VALUES (?, ?, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
             setId(statement, 1, init.categoryId());
-            setId(statement, 2, init.databaseId());
+            setId(statement, 2, init.datasourceId());
             statement.setString(3, init.toJsonValue());
 
             final int affectedRows = statement.executeUpdate();

@@ -1,4 +1,4 @@
-import { DatabaseInfo, type DatabaseInfoFromServer } from './database';
+import { DatasourceInfo, type DatasourceInfoFromServer } from './datasource';
 import type { Entity, Id, VersionId } from './id';
 
 export type QueryFromServer = {
@@ -103,7 +103,7 @@ export type QueryDescriptionFromServer = {
 };
 
 type QueryPartDescriptionFromServer = {
-    database: DatabaseInfoFromServer;
+    datasource: DatasourceInfoFromServer;
     content: string;
     structure: string;
 };
@@ -122,14 +122,14 @@ export class QueryDescription {
 
 export class QueryPartDescription {
     private constructor(
-        readonly database: DatabaseInfo,
+        readonly datasource: DatasourceInfo,
         readonly content: string,
         readonly structure: string,
     ) {}
 
     static fromServer(input: QueryPartDescriptionFromServer): QueryPartDescription {
         return new QueryPartDescription(
-            DatabaseInfo.fromServer(input.database),
+            DatasourceInfo.fromServer(input.datasource),
             input.content,
             input.structure,
         );

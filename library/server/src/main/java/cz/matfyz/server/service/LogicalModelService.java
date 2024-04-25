@@ -5,7 +5,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.repository.LogicalModelRepository;
-import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatabase;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 
 import java.util.List;
 
@@ -26,13 +26,13 @@ public class LogicalModelService {
     private MappingService mappingService;
 
     @Autowired
-    private DatabaseService databaseService;
+    private DatasourceService datasourceService;
 
-    public List<LogicalModelWithDatabase> findAll(Id categoryId) {
+    public List<LogicalModelWithDatasource> findAll(Id categoryId) {
         return repository.findAllInCategory(categoryId);
     }
 
-    public LogicalModelWithDatabase find(Id logicalModelId) {
+    public LogicalModelWithDatasource find(Id logicalModelId) {
         return repository.find(logicalModelId);
     }
 
@@ -42,7 +42,7 @@ public class LogicalModelService {
 
         return LogicalModelDetail.fromEntities(
             model.logicalModel(),
-            databaseService.getDatabaseConfiguration(model.database()),
+            datasourceService.getDatasourceConfiguration(model.datasource()),
             mappings
         );
     }
@@ -53,22 +53,22 @@ public class LogicalModelService {
 
             return LogicalModelDetail.fromEntities(
                 model.logicalModel(),
-                databaseService.getDatabaseConfiguration(model.database()),
+                datasourceService.getDatasourceConfiguration(model.datasource()),
                 mappings
             );
         }).toList();
     }
 
-    public LogicalModelWithDatabase createNew(LogicalModelInit init) {
-        final var database = databaseService.find(init.databaseId());
+    public LogicalModelWithDatasource createNew(LogicalModelInit init) {
+        final var datasource = datasourceService.find(init.datasourceId());
         final Id generatedId = repository.add(init);
         final var logicalModel = new LogicalModel(
             generatedId,
             init.categoryId(),
-            init.databaseId(),
+            init.datasourceId(),
             init.label()
         );
 
-        return new LogicalModelWithDatabase(logicalModel, database);
+        return new LogicalModelWithDatasource(logicalModel, datasource);
     }
 }

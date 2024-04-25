@@ -4,7 +4,7 @@ import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
-import type { DataSource } from '@/types/dataSource';
+import type { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
@@ -14,7 +14,7 @@ const emit = defineEmits<{
 }>();
 
 const logicalModels = ref<LogicalModel[]>();
-const dataSources = ref<DataSource[]>();
+const datasources = ref<Datasource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
 const actionName = ref<string>('');
@@ -28,9 +28,9 @@ onMounted(async () => {
     if (logicalModelResult.status)
         logicalModels.value = logicalModelResult.data.map(LogicalModel.fromServer);
 
-    const dataSourceResult = await API.dataSources.getAllDataSources({});
-    if (dataSourceResult.status)
-        dataSources.value = dataSourceResult.data;
+    const datasourceResult = await API.datasources.getAllDatasources({});
+    if (datasourceResult.status)
+        datasources.value = datasourceResult.data;
 
     fetched.value = true;
 });

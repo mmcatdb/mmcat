@@ -1,7 +1,7 @@
 package cz.matfyz.server.example.basic;
 
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.DatabaseEntity;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
@@ -23,8 +23,8 @@ import org.springframework.stereotype.Component;
 public class ExampleSetup {
 
     @Autowired
-    @Qualifier("basicDatabaseSetup")
-    private DatabaseSetup databaseSetup;
+    @Qualifier("basicDatasourceSetup")
+    private DatasourceSetup datasourceSetup;
 
     @Autowired
     @Qualifier("basicMappingSetup")
@@ -32,8 +32,8 @@ public class ExampleSetup {
 
     public void setup() {
         final SchemaCategoryWrapper schema = createSchemaCategory();
-        final List<DatabaseEntity> databases = databaseSetup.createDatabases();
-        final List<LogicalModel> logicalModels = createLogicalModels(databases, schema.id);
+        final List<DatasourceWrapper> datasources = datasourceSetup.createDatasources();
+        final List<LogicalModel> logicalModels = createLogicalModels(datasources, schema.id);
         final List<MappingInfo> mappings = mappingSetup.createMappings(logicalModels, schema);
 
         // TODO jobs
@@ -54,8 +54,8 @@ public class ExampleSetup {
     @Autowired
     private LogicalModelService logicalModelService;
 
-    private List<LogicalModel> createLogicalModels(List<DatabaseEntity> databases, Id schemaId) {
-        return databases.stream().map(database -> logicalModelService.createNew(new LogicalModelInit(database.id, schemaId, database.label)).logicalModel()).toList();
+    private List<LogicalModel> createLogicalModels(List<DatasourceWrapper> datasources, Id schemaId) {
+        return datasources.stream().map(datasource -> logicalModelService.createNew(new LogicalModelInit(datasource.id, schemaId, datasource.label)).logicalModel()).toList();
     }
 
 }

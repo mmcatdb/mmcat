@@ -12,9 +12,9 @@ import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.core.utils.UniqueIdProvider;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.DatabaseEntity;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
-import cz.matfyz.server.service.DatabaseService;
+import cz.matfyz.server.service.DatasourceService;
 import cz.matfyz.server.service.LogicalModelService;
 import cz.matfyz.server.service.MappingService;
 import cz.matfyz.server.service.SchemaCategoryService;
@@ -45,7 +45,7 @@ class ServerApplicationTests {
     private LogicalModelService logicalModelService;
 
     @Autowired
-    private DatabaseService databaseService;
+    private DatasourceService datasourceService;
 
     @Autowired
     private SchemaCategoryService categoryService;
@@ -71,7 +71,7 @@ class ServerApplicationTests {
         //final int[] batches = new int[] { 128 };
         //final int[] batches = new int[] { 256 };
         //final int[] batches = new int[] { 48, 80, 96 };
-        final Id postgresqlDatabaseId = new Id("5");
+        final Id postgresqlDatasourceId = new Id("5");
         final List<Id> postgresqlMappingIds = List.of(3, 4, 5, 6, 7, 8).stream().map(number -> new Id("" + number)).toList();
         /*
             app_customer
@@ -83,7 +83,7 @@ class ServerApplicationTests {
             order
          */
 
-        final Id mongodbDatabaseId = new Id("4");
+        final Id mongodbDatasourceId = new Id("4");
         final Id mongodbMappingId = new Id("9");
 
         for (int i = 0; i < repetitions; i++) {
@@ -96,10 +96,10 @@ class ServerApplicationTests {
 
                 InstanceCategory instance = null;
                 for (var mappingId : postgresqlMappingIds) {
-                    instance = importMapping(instance, mappingId, postgresqlDatabaseId, batch * batchMultiplier);
+                    instance = importMapping(instance, mappingId, postgresqlDatasourceId, batch * batchMultiplier);
                 }
 
-                exportMapping(instance, mongodbMappingId, mongodbDatabaseId);
+                exportMapping(instance, mongodbMappingId, mongodbDatasourceId);
 
                 LOGGER.info("\n" + message);
             }
@@ -108,12 +108,12 @@ class ServerApplicationTests {
         LOGGER.info("Finished");
     }
 
-    private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id databaseId, int records) throws Exception {
+    private InstanceCategory importMapping(InstanceCategory instance, Id mappingId, Id datasourceId, int records) throws Exception {
         var mappingWrapper = mappingService.find(mappingId);
         var mapping = createMapping(mappingWrapper);
 
-        DatabaseEntity database = databaseService.find(databaseId);
-        AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
+        DatasourceWrapper datasource = datasourceService.find(datasourceId);
+        AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
 
         var newInstance = new DatabaseToInstance()
             .input(mapping, instance, pullWrapper, new KindNameQuery(mapping.kindName(), records, null))
@@ -129,12 +129,12 @@ class ServerApplicationTests {
         return newInstance;
     }
 
-    private void exportMapping(InstanceCategory instance, Id mappingId, Id databaseId) throws Exception {
+    private void exportMapping(InstanceCategory instance, Id mappingId, Id datasourceId) throws Exception {
         var mappingWrapper = mappingService.find(mappingId);
         var mapping = createMapping(mappingWrapper);
 
-        DatabaseEntity database = databaseService.find(databaseId);
-        final var control = wrapperService.getControlWrapper(database);
+        DatasourceWrapper datasource = datasourceService.find(datasourceId);
+        final var control = wrapperService.getControlWrapper(datasource);
         AbstractDDLWrapper ddlWrapper = control.getDDLWrapper();
         AbstractDMLWrapper dmlWrapper = control.getDMLWrapper();
         AbstractICWrapper icWrapper = control.getICWrapper();
