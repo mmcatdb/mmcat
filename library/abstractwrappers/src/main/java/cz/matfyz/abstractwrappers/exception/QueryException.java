@@ -6,9 +6,6 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class QueryException extends WrapperException {
 
     private QueryException(String name, Serializable data) {

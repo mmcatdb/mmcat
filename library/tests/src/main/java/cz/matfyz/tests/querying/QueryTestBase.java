@@ -19,9 +19,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public class QueryTestBase {
 
     @SuppressWarnings({ "java:s1068", "unused" })

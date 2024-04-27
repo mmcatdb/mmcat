@@ -9,7 +9,6 @@ import java.util.List;
  * This is a complex record whose only purpose is to store one complex record child.
  * Imagine property A with dynamic (complex) children B. There will be one record A with multiple children B. But, there should be multiple objects that corresponds to "type" A, each with exactly one corresponding object B.
  * Thus when record A is processed (in the {@link MTCAlgorithm#fetchSuperIds() fetchSuperIds()} function), a different instance of this class is returned for each record B.
- * @author jachymb.bartik
  */
 public class DynamicRecordWrapper implements IComplexRecord {
 

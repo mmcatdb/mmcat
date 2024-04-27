@@ -2,9 +2,6 @@ package cz.matfyz.server.entity;
 
 import cz.matfyz.core.identifiers.Identified;
 
-/**
- * @author jachym.bartik
- */
 public class Entity implements Identified<Entity, Id> {
 
     public final Id id;

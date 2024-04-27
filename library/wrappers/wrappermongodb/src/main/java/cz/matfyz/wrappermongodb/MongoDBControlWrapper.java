@@ -16,9 +16,6 @@ import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public class MongoDBControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })

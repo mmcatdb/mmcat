@@ -1,8 +1,5 @@
 package cz.matfyz.wrapperjsonld;
 
-/**
- * @author jachymb.bartik
- */
 public class JsonLdProvider {
 
     public final JsonLdSettings settings;

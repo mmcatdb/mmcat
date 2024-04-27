@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-/**
- * @author pavel.koupil
- */
 public class ForestOfRecords implements Iterable<RootRecord> {
 
     private final List<RootRecord> records = new ArrayList<>();

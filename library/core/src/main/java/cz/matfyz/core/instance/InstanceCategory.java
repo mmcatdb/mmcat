@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 public class InstanceCategory {
 
     // Evolution extension

@@ -2,9 +2,6 @@ package cz.matfyz.querying.exception;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class GeneralException extends QueryingException {
 
     protected GeneralException(String name, Serializable data, Throwable cause) {

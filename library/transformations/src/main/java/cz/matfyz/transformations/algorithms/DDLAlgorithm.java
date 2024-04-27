@@ -20,9 +20,6 @@ import java.util.Deque;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * @author jachymb.bartik
- */
 public class DDLAlgorithm {
 
     private Mapping mapping;

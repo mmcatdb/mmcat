@@ -6,9 +6,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * @author jachym.bartik
- */
 public class Reference {
 
     private final Name name;

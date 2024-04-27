@@ -8,9 +8,6 @@ import cz.matfyz.server.builder.MetadataContext;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author jachym.bartik
- */
 public record SchemaObjectWrapper(
     Key key,
     Data data,

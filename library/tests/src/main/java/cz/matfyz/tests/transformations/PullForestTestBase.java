@@ -12,9 +12,6 @@ import cz.matfyz.wrapperdummy.DummyPullWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public class PullForestTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PullForestTestBase.class);

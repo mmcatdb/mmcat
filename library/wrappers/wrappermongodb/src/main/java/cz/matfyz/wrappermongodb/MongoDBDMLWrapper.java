@@ -12,9 +12,6 @@ import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 
-/**
- * @author jachymb.bartik
- */
 public class MongoDBDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;

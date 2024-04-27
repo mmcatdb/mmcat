@@ -15,9 +15,6 @@ import java.util.function.Predicate;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author jachymb.bartik
- */
 public abstract class GraphUtils {
 
     public interface Edge<N extends Comparable<N>> {

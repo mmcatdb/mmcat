@@ -4,9 +4,6 @@ import java.util.Iterator;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
-/**
- * @author jachymb.bartik
- */
 public class IterableUtils {
 
     private IterableUtils() {}

@@ -5,9 +5,6 @@ import cz.matfyz.querying.core.querytree.QueryNode;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class QueryTreeException extends QueryingException {
 
     protected QueryTreeException(String name, Serializable data) {

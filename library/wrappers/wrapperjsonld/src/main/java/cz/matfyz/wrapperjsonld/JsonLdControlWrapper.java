@@ -17,9 +17,6 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public class JsonLdControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })

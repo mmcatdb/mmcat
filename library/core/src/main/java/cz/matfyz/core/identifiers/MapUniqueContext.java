@@ -4,9 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * @author jachymb.bartik
- */
 public class MapUniqueContext<O extends Identified<O, K>, K extends Comparable<K>> implements UniqueContext<O, K> {
 
     private final Map<K, O> uniqueObjects;

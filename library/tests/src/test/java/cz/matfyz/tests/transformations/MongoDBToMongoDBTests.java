@@ -18,9 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 class MongoDBToMongoDBTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToMongoDBTests.class);

@@ -2,9 +2,6 @@ package cz.matfyz.core.record;
 
 import cz.matfyz.core.identifiers.Signature;
 
-/**
- * @author jachym.bartik
- */
 public class DynamicRecordName extends RecordName {
 
     private final Signature signature;

@@ -15,10 +15,6 @@ import java.util.TreeSet;
 import org.json.JSONArray;
 import org.junit.jupiter.api.Assertions;
 
-
-/**
- * @author jachymb.bartik
- */
 public class DDLAlgorithmTestBase {
 
     private final Mapping mapping;

@@ -16,9 +16,6 @@ import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })

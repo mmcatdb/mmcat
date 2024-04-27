@@ -5,9 +5,6 @@ import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author jachym.bartik
- */
 public class DummyDMLWrapper implements AbstractDMLWrapper {
     //private List<String> methods = new ArrayList<>();
 

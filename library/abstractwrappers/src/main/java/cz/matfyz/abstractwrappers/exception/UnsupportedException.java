@@ -4,9 +4,6 @@ import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class UnsupportedException extends WrapperException {
 
     private record UnsupportedData(

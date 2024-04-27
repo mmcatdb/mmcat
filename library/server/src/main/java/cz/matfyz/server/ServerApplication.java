@@ -12,9 +12,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-/**
- * @author jachym.bartik
- */
 @SpringBootApplication
 // First load the default.properties file. Then it will be overriden by application.properties.
 @PropertySource("classpath:default.properties")

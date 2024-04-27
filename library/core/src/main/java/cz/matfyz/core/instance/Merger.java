@@ -13,9 +13,6 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachym.bartik
- */
 class Merger {
 
     @SuppressWarnings({ "java:s1068", "unused" })

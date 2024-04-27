@@ -3,9 +3,6 @@ package cz.matfyz.server.configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * @author jachym.bartik
- */
 @Component
 @ConfigurationProperties("database")
 public class DatabaseProperties {

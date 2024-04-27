@@ -24,9 +24,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
-/**
- * @author jachym.bartik
- */
 @Service
 public class WrapperService {
 

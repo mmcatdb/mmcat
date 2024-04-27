@@ -3,7 +3,6 @@ package cz.matfyz.core.instance;
 /**
  * This class represents a relation between two members of two domains ({@link DomainRow}).
  * It corresponds to a single {@link InstanceMorphism}.
- * @author jachym.bartik
  */
 public class MappingRow implements Comparable<MappingRow> {
 

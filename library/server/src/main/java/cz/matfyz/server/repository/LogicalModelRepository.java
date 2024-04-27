@@ -19,9 +19,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-/**
- * @author jachym.bartik
- */
 @Repository
 public class LogicalModelRepository {
 

@@ -4,9 +4,6 @@ import cz.matfyz.querying.parsing.ParserNode;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class ParsingException extends QueryingException {
 
     protected ParsingException(String name, Serializable data) {

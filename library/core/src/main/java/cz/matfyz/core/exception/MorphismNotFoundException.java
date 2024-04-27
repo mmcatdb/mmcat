@@ -3,9 +3,6 @@ package cz.matfyz.core.exception;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 
-/**
- * @author jachymb.bartik
- */
 public class MorphismNotFoundException extends CoreException {
 
     private MorphismNotFoundException(String name, Signature signature) {

@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jachymb.bartik
  * @implNote A custom ordering of the elements of the arrays isn't supported in the current iteration of the framework.
  */
 public class DMLAlgorithm {

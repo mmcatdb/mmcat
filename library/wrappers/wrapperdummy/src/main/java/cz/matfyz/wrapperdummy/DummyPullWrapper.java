@@ -26,9 +26,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 public class DummyPullWrapper implements AbstractPullWrapper {
 
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {

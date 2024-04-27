@@ -8,9 +8,6 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.MappingRepository;
 import cz.matfyz.server.repository.MappingRepository.MappingJsonValue;
 
-/**
- * @author jachym.bartik
- */
 public record MappingInit(
     Id logicalModelId,
     Key rootObjectKey,

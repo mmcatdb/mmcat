@@ -4,9 +4,6 @@ import cz.matfyz.core.identifiers.Signature;
 
 import java.util.List;
 
-/**
- * @author jachymb.bartik
- */
 public class SimpleArrayRecord<T> extends SimpleRecord<T> {
 
     private final List<T> values;

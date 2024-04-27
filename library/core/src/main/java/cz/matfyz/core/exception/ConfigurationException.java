@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 /**
  * Some configuration files / keys are missing.
- * @author jachymb.bartik
  */
 public class ConfigurationException extends NamedException {
 

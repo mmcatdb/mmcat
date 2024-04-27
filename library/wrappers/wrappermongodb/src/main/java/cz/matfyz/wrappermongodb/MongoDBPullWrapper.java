@@ -33,9 +33,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 
-/**
- * @author jachymb.bartik
- */
 public class MongoDBPullWrapper implements AbstractPullWrapper {
 
     private MongoDBProvider provider;

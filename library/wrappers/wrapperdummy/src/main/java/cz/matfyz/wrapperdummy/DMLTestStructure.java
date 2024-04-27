@@ -7,9 +7,6 @@ import java.util.TreeSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * @author jachym.bartik
- */
 public class DMLTestStructure {
 
     private String name;

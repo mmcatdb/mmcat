@@ -16,9 +16,6 @@ import java.util.function.Supplier;
 import org.json.JSONArray;
 import org.junit.jupiter.api.Assertions;
 
-/**
- * @author jachymb.bartik
- */
 public class DMLAlgorithmTestBase {
 
     private final Mapping mapping;

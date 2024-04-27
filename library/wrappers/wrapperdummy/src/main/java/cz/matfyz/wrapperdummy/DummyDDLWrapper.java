@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author jachym.bartik
- */
 public class DummyDDLWrapper implements AbstractDDLWrapper {
 
     private List<String> methods = new ArrayList<>();

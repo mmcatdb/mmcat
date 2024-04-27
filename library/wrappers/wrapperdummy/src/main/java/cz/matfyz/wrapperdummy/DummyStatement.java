@@ -2,9 +2,6 @@ package cz.matfyz.wrapperdummy;
 
 import cz.matfyz.abstractwrappers.AbstractStatement;
 
-/**
- * @author jachymb.bartik
- */
 public class DummyStatement implements AbstractStatement {
 
     private String content;

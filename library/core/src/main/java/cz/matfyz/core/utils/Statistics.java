@@ -9,9 +9,6 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public abstract class Statistics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Statistics.class);

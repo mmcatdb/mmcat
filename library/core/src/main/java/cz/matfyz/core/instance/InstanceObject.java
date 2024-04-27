@@ -19,7 +19,6 @@ import java.util.TreeSet;
 
 /**
  * Each object from instance category is modeled as a set of tuples ({@link DomainRow}).
- * @author pavel.koupil, jachym.bartik
  */
 public class InstanceObject implements Identified<InstanceObject, Key> {
 

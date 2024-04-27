@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 /**
  * A base class for all core exceptions.
- * @author jachymb.bartik
  */
 public abstract class CoreException extends NamedException {
 

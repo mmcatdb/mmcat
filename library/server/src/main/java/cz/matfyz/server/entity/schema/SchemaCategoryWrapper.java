@@ -18,9 +18,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author jachym.bartik
- */
 @JsonDeserialize(using = SchemaCategoryWrapper.Deserializer.class)
 public class SchemaCategoryWrapper extends SchemaCategoryInfo {
 

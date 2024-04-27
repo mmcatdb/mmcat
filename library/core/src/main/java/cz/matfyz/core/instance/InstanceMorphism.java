@@ -12,9 +12,6 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 public class InstanceMorphism implements Identified<InstanceMorphism, Signature> {
 
     @SuppressWarnings({ "java:s1068", "unused" })

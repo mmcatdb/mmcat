@@ -6,9 +6,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * @author jachymb.bartik
- */
 public class PostgreSQLProvider {
 
     public final PostgreSQLSettings settings;

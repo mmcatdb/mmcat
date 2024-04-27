@@ -6,9 +6,6 @@ import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class DatasourceException extends ServerException {
 
     private record Data(

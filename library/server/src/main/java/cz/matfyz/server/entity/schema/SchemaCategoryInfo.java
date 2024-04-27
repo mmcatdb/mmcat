@@ -4,9 +4,6 @@ import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 
-/**
- * @author jachym.bartik
- */
 public class SchemaCategoryInfo extends Entity {
 
     public final String label;

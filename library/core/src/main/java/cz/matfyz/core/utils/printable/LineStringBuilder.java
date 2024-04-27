@@ -3,9 +3,6 @@ package cz.matfyz.core.utils.printable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-/**
- * @author jachymb.bartik
- */
 class LineStringBuilder implements Printer {
 
     private int indentationLevel;
