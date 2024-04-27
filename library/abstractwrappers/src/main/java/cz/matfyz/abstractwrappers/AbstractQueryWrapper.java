@@ -1,6 +1,6 @@
 package cz.matfyz.abstractwrappers;
 
-import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.querying.QueryStructure;

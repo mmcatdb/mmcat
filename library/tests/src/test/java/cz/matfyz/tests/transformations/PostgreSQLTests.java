@@ -3,9 +3,9 @@ package cz.matfyz.tests.transformations;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.PostgreSQL;
-import cz.matfyz.tests.example.common.TestDatabase;
+import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -20,19 +20,19 @@ class PostgreSQLTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLTests.class);
 
-    private static final Databases databases = new Databases();
-    private static final SchemaCategory schema = databases.schema;
-    private static final TestDatabase<PostgreSQLControlWrapper> database = databases.postgreSQL();
+    private static final Datasources datasources = new Datasources();
+    private static final SchemaCategory schema = datasources.schema;
+    private static final TestDatasource<PostgreSQLControlWrapper> datasource = datasources.postgreSQL();
 
     @BeforeAll
     static void setup() {
-        database.setup();
+        datasource.setup();
     }
 
     @Test
     void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
-            var inputWrapper = database.wrapper.getPullWrapper();
+            var inputWrapper = datasource.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readTableAsStringForTests(PostgreSQL.orderKind);
             LOGGER.debug("DB content:\n" + dbContent);
         });
@@ -40,7 +40,7 @@ class PostgreSQLTests {
 
     @Test
     void getForestForBasicTest() throws Exception {
-        new PullForestTestBase(PostgreSQL.order(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(PostgreSQL.order(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100"
@@ -53,7 +53,7 @@ class PostgreSQLTests {
 
     @Test
     void getForestForStructureTest() throws Exception {
-        new PullForestTestBase(PostgreSQL.product(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(PostgreSQL.product(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "id": "123",

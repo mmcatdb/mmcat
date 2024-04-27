@@ -9,46 +9,15 @@
     <packaging>jar</packaging>
     <artifactId>tests</artifactId>
     <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>transformations</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>evolution</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>querying</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wrapperdummy</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wrappermongodb</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wrapperpostgresql</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>wrapperneo4j</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>core</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>transformations</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>evolution</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>querying</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperdummy</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperjsonld</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>wrappermongodb</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperneo4j</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperpostgresql</artifactId><version>${project.version}</version></dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

@@ -1,5 +1,7 @@
 package cz.matfyz.wrapperneo4j;
 
+import org.neo4j.driver.AuthToken;
+import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
@@ -22,9 +24,34 @@ public class Neo4jProvider {
 
     public Session getSession() {
         if (driver == null)
-            driver = GraphDatabase.driver(settings.getConnectionString(), settings.getAuthToken());
+            driver = GraphDatabase.driver(settings.createConnectionString(), settings.createAuthToken());
 
-        return driver.session(SessionConfig.forDatabase(settings.getDatabase()));
+        return driver.session(SessionConfig.forDatabase(settings.database));
+    }
+
+    public record Neo4jSettings(
+        String host,
+        String port,
+        String database,
+        String username,
+        String password,
+        boolean isWritable,
+        boolean isQueryable
+    ) {
+
+        String createConnectionString() {
+            return new StringBuilder()
+                .append("bolt://")
+                .append(host)
+                .append(":")
+                .append(port)
+                .toString();
+        }
+
+        AuthToken createAuthToken() {
+            return AuthTokens.basic(username, password);
+        }
+
     }
 
 }

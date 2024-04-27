@@ -17,10 +17,10 @@ console.log(props.description);
     >
         <div
             v-for="part in description.parts"
-            :key="part.database.id"
+            :key="part.datasource.id"
         >
             <div class="pb-1 fw-semibold">
-                {{ part.database.label }}:
+                {{ part.datasource.label }}:
             </div>
             <TextArea
                 v-model="part.structure"

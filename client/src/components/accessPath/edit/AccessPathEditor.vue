@@ -2,7 +2,7 @@
 import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
 import { shallowRef } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
-import type { DatabaseWithConfiguration } from '@/types/database';
+import type { Datasource } from '@/types/datasource';
 import AddProperty from './AddProperty.vue';
 import EditProperty from './EditProperty.vue';
 import StaticNameInput from '../input/StaticNameInput.vue';
@@ -24,7 +24,7 @@ type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
 
 type AccessPathEditorProps = {
-    database: DatabaseWithConfiguration;
+    datasource: Datasource;
     rootProperty: GraphRootProperty;
 };
 
@@ -75,8 +75,8 @@ function finishMapping() {
             <div class="editor">
                 <template v-if="state.type === State.Default">
                     <ValueContainer>
-                        <ValueRow label="Database:">
-                            {{ database.label }}
+                        <ValueRow label="Datasource:">
+                            {{ datasource.label }}
                         </ValueRow>
                         <ValueRow label="Root object:">
                             {{ rootProperty.node.label }}
@@ -104,7 +104,7 @@ function finishMapping() {
                 </template>
                 <template v-else-if="state.type === State.AddProperty">
                     <AddProperty
-                        :database="database"
+                        :datasource="datasource"
                         :parent-property="state.parent"
                         @save="setStateToDefault"
                         @cancel="setStateToDefault"
@@ -112,7 +112,7 @@ function finishMapping() {
                 </template>
                 <template v-else-if="state.type === State.EditProperty">
                     <EditProperty
-                        :database="database"
+                        :datasource="datasource"
                         :property="state.property"
                         @save="setStateToDefault"
                         @cancel="setStateToDefault"

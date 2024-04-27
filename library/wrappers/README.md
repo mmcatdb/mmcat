@@ -1,6 +1,6 @@
 # wrappers
 
-This package contains specific implementations of the [abstract wrappers](../abstractwrappers/README.md) for selected database system. These currently include:
+This package contains specific implementations of the [abstract wrappers](../abstractwrappers/README.md) for selected datasource. These currently include:
 - MongoDB
 - PostgreSQL
 - Neo4j

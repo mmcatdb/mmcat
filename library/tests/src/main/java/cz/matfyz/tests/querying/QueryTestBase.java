@@ -3,12 +3,12 @@ package cz.matfyz.tests.querying;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import cz.matfyz.abstractwrappers.database.Database;
-import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.datasource.Datasource;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
-import cz.matfyz.tests.example.common.TestDatabase;
+import cz.matfyz.tests.example.common.TestDatasource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +49,10 @@ public class QueryTestBase {
         return this;
     }
 
-    private List<TestDatabase<?>> databases = new ArrayList<>();
+    private List<TestDatasource<?>> datasources = new ArrayList<>();
 
-    public QueryTestBase addDatabase(TestDatabase<?> database) {
-        databases.add(database);
+    public QueryTestBase addDatasource(TestDatasource<?> datasource) {
+        datasources.add(datasource);
 
         return this;
     }
@@ -73,12 +73,12 @@ public class QueryTestBase {
     }
 
     private List<Kind> defineKinds() {
-        return databases.stream().flatMap(testDatabase -> {
-            final var builder = new Database.Builder();
-            testDatabase.mappings.forEach(builder::mapping);
-            final var database = builder.build(testDatabase.type, testDatabase.wrapper, testDatabase.id);
+        return datasources.stream().flatMap(testDatasource -> {
+            final var builder = new Datasource.Builder();
+            testDatasource.mappings.forEach(builder::mapping);
+            final var datasource = builder.build(testDatasource.type, testDatasource.wrapper, testDatasource.id);
 
-            return database.kinds.stream();
+            return datasource.kinds.stream();
         }).toList();
     }
 

@@ -4,7 +4,8 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.DatabaseInfo;
+import cz.matfyz.server.entity.datasource.DatasourceDetail;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.repository.QueryRepository;
@@ -57,12 +58,12 @@ public class QueryController {
     ) {}
 
     public record QueryPartDescription(
-        DatabaseInfo database,
+        DatasourceDetail datasource,
         String content,
         String structure
     ) {
-        public QueryPartDescription(DatabaseInfo database, QueryStatement query) {
-            this(database, query.content().toString(), query.structure().toString());
+        public QueryPartDescription(DatasourceDetail datasource, QueryStatement query) {
+            this(datasource, query.content().toString(), query.structure().toString());
         }
     }
 

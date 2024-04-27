@@ -12,8 +12,8 @@ public class PostgreSQLPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();
 
-    @Override public void addProperty(String hierarchy) {
-        this.properties.add(hierarchy);
+    @Override public void addProperty(String path) {
+        this.properties.add(path);
     }
 
     @Override public boolean check() {

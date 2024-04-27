@@ -3,7 +3,6 @@ package cz.matfyz.server.controller;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.repository.DataSourceRepository;
 import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
@@ -39,7 +38,7 @@ public class ActionController {
     private LogicalModelRepository logicalModelRepository;
 
     @Autowired
-    private DataSourceRepository dataSourceRepository;
+    private LogicalModelController logicalModelController;
 
     @GetMapping("/schema-categories/{categoryId}/actions")
     public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {
@@ -80,12 +79,12 @@ public class ActionController {
     ActionPayloadDetail actionPayloadToDetail(ActionPayload payload) {
         if (payload instanceof ModelToCategoryPayload modelToCategoryPayload) {
             final var model = logicalModelRepository.find(modelToCategoryPayload.logicalModelId());
-            final var info = LogicalModelInfo.fromEntities(model);
+            final var info = logicalModelController.createInfo(model);
             return new ModelToCategoryPayloadDetail(info);
         }
         if (payload instanceof CategoryToModelPayload categoryToModelPayload) {
             final var model = logicalModelRepository.find(categoryToModelPayload.logicalModelId());
-            final var info = LogicalModelInfo.fromEntities(model);
+            final var info = logicalModelController.createInfo(model);
             return new CategoryToModelPayloadDetail(info);
         }
         if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {

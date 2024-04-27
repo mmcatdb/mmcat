@@ -24,7 +24,7 @@ function setValueFromParent(newValue: StaticName) {
     if (newValue.equals(innerValue.value))
         return;
 
-    staticValue.value = validateDatabaseName(props.modelValue.value);
+    staticValue.value = validateDatasourceName(props.modelValue.value);
     if (staticValue.value !== props.modelValue.value) {
         innerValue.value = StaticName.fromString(staticValue.value);
         emit('update:modelValue', innerValue.value);
@@ -33,12 +33,12 @@ function setValueFromParent(newValue: StaticName) {
     innerValue.value = props.modelValue;
 }
 
-function validateDatabaseName(value: string): string {
+function validateDatasourceName(value: string): string {
     return value.replace(/\s/g, '_').replace(/[^\w.]/g, '.');
 }
 
 function updateInnerValue() {
-    staticValue.value = validateDatabaseName(staticValue.value);
+    staticValue.value = validateDatasourceName(staticValue.value);
     innerValue.value = StaticName.fromString(staticValue.value);
     emit('update:modelValue', innerValue.value);
 }
