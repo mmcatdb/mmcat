@@ -1,3 +1,18 @@
+export type DatasourceConfigurationFromServer = {
+    isPropertyToOneAllowed: boolean;
+    isPropertyToManyAllowed: boolean;
+    isInliningToOneAllowed: boolean;
+    isInliningToManyAllowed: boolean;
+    isGroupingAllowed: boolean;
+    isDynamicNamingAllowed: boolean;
+    isAnonymousNamingAllowed: boolean;
+    isReferenceAllowed: boolean;
+    isComplexPropertyAllowed: boolean;
+    isSchemaLess: boolean;
+    isWritable: boolean;
+    isQueryable: boolean;
+};
+
 export class DatasourceConfiguration {
     readonly isPropertyToOneAllowed: boolean;
     readonly isPropertyToManyAllowed: boolean;
@@ -9,6 +24,8 @@ export class DatasourceConfiguration {
     readonly isReferenceAllowed: boolean; // TODO The IC reference algorithm.
     readonly isComplexPropertyAllowed: boolean;
     readonly isSchemaLess: boolean;
+    readonly isWritable: boolean;
+    readonly isQueryable: boolean;
 
     public constructor(input: DatasourceConfigurationFromServer) {
         this.isPropertyToOneAllowed = input.isPropertyToOneAllowed;
@@ -21,18 +38,7 @@ export class DatasourceConfiguration {
         this.isReferenceAllowed = input.isReferenceAllowed;
         this.isComplexPropertyAllowed = input.isComplexPropertyAllowed;
         this.isSchemaLess = input.isSchemaLess;
+        this.isWritable = input.isWritable;
+        this.isQueryable = input.isQueryable;
     }
 }
-
-export type DatasourceConfigurationFromServer = {
-    isPropertyToOneAllowed: boolean;
-    isPropertyToManyAllowed: boolean;
-    isInliningToOneAllowed: boolean;
-    isInliningToManyAllowed: boolean;
-    isGroupingAllowed: boolean;
-    isDynamicNamingAllowed: boolean;
-    isAnonymousNamingAllowed: boolean;
-    isReferenceAllowed: boolean;
-    isComplexPropertyAllowed: boolean;
-    isSchemaLess: boolean;
-};

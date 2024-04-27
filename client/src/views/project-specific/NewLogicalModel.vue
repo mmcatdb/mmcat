@@ -5,17 +5,17 @@ import { useRouter } from 'vue-router';
 import { useSchemaCategoryId } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { DatasourceWithConfiguration } from '@/types/datasource';
+import { Datasource } from '@/types/datasource';
 
-const datasources = ref<DatasourceWithConfiguration[]>();
-const selectedDatasource = ref<DatasourceWithConfiguration>();
+const datasources = ref<Datasource[]>();
+const selectedDatasource = ref<Datasource>();
 const label = ref('');
 const fetching = ref(false);
 
 onMounted(async () => {
-    const result = await API.datasources.getAllDatasourceInfos({});
+    const result = await API.datasources.getAllDatasources({});
     if (result.status)
-        datasources.value = result.data.map(DatasourceWithConfiguration.fromServer);
+        datasources.value = result.data.map(Datasource.fromServer);
 });
 
 const router = useRouter();

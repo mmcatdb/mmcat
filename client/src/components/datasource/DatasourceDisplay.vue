@@ -6,12 +6,10 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import type { Id } from '@/types/id';
 import IriDisplay from '../common/IriDisplay.vue';
 
-type DatasourceDisplayProps = {
+defineProps<{
     datasource: Datasource;
     categoryId?: Id;
-};
-
-defineProps<DatasourceDisplayProps>();
+}>();
 
 const emit = defineEmits([ 'edit' ]);
 </script>

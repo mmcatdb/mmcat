@@ -28,22 +28,26 @@ CREATE TABLE schema_category_update (
 );
 
 CREATE TABLE datasource (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY,
     json_value JSONB NOT NULL
 );
 
-INSERT INTO datasource (json_value)
+INSERT INTO datasource (id, json_value)
 VALUES
-    ('{
-        "url": "https://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld",
+    ('119dd3fc-aabd-4195-9d12-94abf4fceeb0', '{
         "label": "Czech business registry",
-        "type": "JsonLdStore"
+        "type": "jsonld",
+        "settings": {
+            "url": "https://data.mmcatdb.com/test2.jsonld",
+            "isWritable": false,
+            "isQueryable": false
+        }
     }');
 
 CREATE TABLE logical_model (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
-    datasource_id INTEGER NOT NULL REFERENCES datasource,
+    datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
 );
 

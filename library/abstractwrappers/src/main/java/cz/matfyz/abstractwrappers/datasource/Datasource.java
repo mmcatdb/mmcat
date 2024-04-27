@@ -21,7 +21,7 @@ public class Datasource implements Comparable<Datasource> {
         neo4j,
         csv,
         json,
-        jsonLd,
+        jsonld,
     }
 
     public final DatasourceType type;

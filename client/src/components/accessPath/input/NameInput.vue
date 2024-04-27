@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SequenceSignature } from '@/types/accessPath/graph';
 import { type Node, createDefaultFilter } from '@/types/categoryGraph';
-import type { DatasourceWithConfiguration } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 import { DynamicName, Signature, StaticName, type Name } from '@/types/identifiers';
 import { ref, shallowRef, watch } from 'vue';
 import StaticNameInput from './StaticNameInput.vue';
@@ -14,7 +14,7 @@ enum NameType {
 }
 
 type NameInputProps = {
-    datasource: DatasourceWithConfiguration;
+    datasource: Datasource;
     rootNode: Node;
     modelValue: Name;
     isSelfIdentifier: boolean;

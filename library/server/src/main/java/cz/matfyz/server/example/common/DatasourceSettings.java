@@ -3,9 +3,9 @@ package cz.matfyz.server.example.common;
 import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.configuration.SetupProperties;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
-import cz.matfyz.wrappermongodb.MongoDBSettings;
-import cz.matfyz.wrapperneo4j.Neo4jSettings;
-import cz.matfyz.wrapperpostgresql.PostgreSQLSettings;
+import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
+import cz.matfyz.wrapperneo4j.Neo4jProvider.Neo4jSettings;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,7 +27,9 @@ public class DatasourceSettings {
             properties.isInDocker() ? "5432" : "3204",
             database,
             properties.username(),
-            properties.password()
+            properties.password(),
+            true,
+            true
         );
 
         return new DatasourceInit(label, DatasourceType.postgresql, mapper.valueToTree(settings));
@@ -40,7 +42,9 @@ public class DatasourceSettings {
             "admin",
             database,
             properties.username(),
-            properties.password()
+            properties.password(),
+            true,
+            true
         );
 
         return new DatasourceInit(label, DatasourceType.mongodb, mapper.valueToTree(settings));
@@ -52,7 +56,10 @@ public class DatasourceSettings {
             properties.isInDocker() ? "7687" : "3206",
             "neo4j",
             "neo4j",
-            properties.password()
+            properties.password(),
+            true,
+            // TODO enable when it's implemented
+            false
         );
 
         return new DatasourceInit(label, DatasourceType.neo4j, mapper.valueToTree(settings));

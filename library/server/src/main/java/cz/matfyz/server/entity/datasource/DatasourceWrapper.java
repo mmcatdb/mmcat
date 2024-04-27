@@ -3,13 +3,11 @@ package cz.matfyz.server.entity.datasource;
 import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.repository.utils.Utils;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class DatasourceWrapper extends Entity {
@@ -17,23 +15,23 @@ public class DatasourceWrapper extends Entity {
     public static final String PASSWORD_FIELD_NAME = "password";
 
     public String label;
-    public DatasourceType type;    
+    public final DatasourceType type;
     public ObjectNode settings;
 
-    @JsonCreator
-    public DatasourceWrapper(@JsonProperty("id") Id id) {
+    private DatasourceWrapper(Id id, String label, DatasourceType type, ObjectNode settings) {
         super(id);
+        this.label = label;
+        this.type = type;
+        this.settings = settings;
     }
 
-    public DatasourceWrapper(Id id, DatasourceInit data) {
-        super(id);
-        this.label = data.label;
-        this.type = data.type;
-        this.settings = data.settings;
-    }
-
-    public DatasourceWrapper(Id id, DatasourceWrapper datasource) {
-        this(id, datasource.toDatasourceInit());
+    public static DatasourceWrapper createNew(DatasourceInit init) {
+        return new DatasourceWrapper(
+            Id.createNewUUID(),
+            init.label(),
+            init.type(),
+            init.settings()
+        );
     }
     
     public void hidePassword() {
@@ -41,30 +39,38 @@ public class DatasourceWrapper extends Entity {
     }
 
     public void updateFrom(DatasourceUpdate data) {
-        if (data.label != null)
-            this.label = data.label;
+        if (data.label() != null)
+            this.label = data.label();
 
-        if (data.settings != null)
-            this.settings = data.settings;
+        if (data.settings() != null)
+            this.settings = data.settings();
     }
 
-    private static final ObjectReader dataJsonReader = new ObjectMapper().readerFor(DatasourceInit.class);
+    public record JsonValue(
+        String label, 
+        DatasourceType type, 
+        ObjectNode settings
+    ) {}
 
-    public static DatasourceWrapper fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
-        DatasourceInit data = dataJsonReader.readValue(jsonValue);
-        return new DatasourceWrapper(id, data);
-    }
+    private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
+    private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(JsonValue.class);
 
-    public DatasourceInit toDatasourceInit() {
-        return new DatasourceInit(label, type, settings);
+    public static DatasourceWrapper fromJsonValue(Id id, String jsonValueString) throws JsonProcessingException {
+        final JsonValue jsonValue = jsonValueReader.readValue(jsonValueString);
+        return new DatasourceWrapper(
+            id,
+            jsonValue.label(),
+            jsonValue.type(),
+            jsonValue.settings()
+        );
     }
 
     public String toJsonValue() throws JsonProcessingException {
-        return Utils.toJsonWithoutProperties(this, "id");
-    }
-
-    public DatasourceInfo toInfo() {
-        return new DatasourceInfo(id, type, label);
+        return jsonValueWriter.writeValueAsString(new JsonValue(
+            label,
+            type,
+            settings
+        ));
     }
 
 }

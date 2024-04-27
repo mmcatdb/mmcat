@@ -2,7 +2,7 @@
 import type { GraphComplexProperty, GraphRootProperty, GraphChildProperty, GraphParentProperty } from '@/types/accessPath/graph';
 import { shallowRef } from 'vue';
 import ParentPropertyDisplay from '../display/ParentPropertyDisplay.vue';
-import type { DatasourceWithConfiguration } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 import AddProperty from './AddProperty.vue';
 import EditProperty from './EditProperty.vue';
 import StaticNameInput from '../input/StaticNameInput.vue';
@@ -24,7 +24,7 @@ type StateValue = GenericStateValue<State.Default, unknown> |
     GenericStateValue<State.EditProperty, { property: GraphChildProperty }>;
 
 type AccessPathEditorProps = {
-    datasource: DatasourceWithConfiguration;
+    datasource: Datasource;
     rootProperty: GraphRootProperty;
 };
 

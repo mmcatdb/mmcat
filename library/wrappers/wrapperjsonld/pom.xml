@@ -3,20 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>cz.matfyz</groupId>
-        <artifactId>mmcat</artifactId>
+        <artifactId>wrappers</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>wrappers</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>wrappercassandra</module>
-        <module>wrapperdummy</module>
-        <module>wrapperjsonld</module>
-        <module>wrappermongodb</module>
-        <module>wrapperneo4j</module>
-        <module>wrapperpostgresql</module>
-        <module>wrapperriak</module>
-    </modules>
+    <artifactId>wrapperjsonld</artifactId>
+    <packaging>jar</packaging>
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>abstractwrappers</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

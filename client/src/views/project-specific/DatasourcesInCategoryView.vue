@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import API from '@/utils/api';
-import type { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/datasource';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
 import { useRouter } from 'vue-router';
@@ -21,8 +21,10 @@ async function fetchDatasources() {
     if (!resultInCategory.status || !resultOther.status)
         return false;
 
-    datasourcesInCategory.value = resultInCategory.data;
-    datasourcesOther.value = resultOther.data.filter(datasource => !resultInCategory.data.find(d => d.id === datasource.id));
+    datasourcesInCategory.value = resultInCategory.data.map(Datasource.fromServer);
+    datasourcesOther.value = resultOther.data
+        .filter(datasource => !resultInCategory.data.find(d => d.id === datasource.id))
+        .map(Datasource.fromServer);
 
     return true;
 }

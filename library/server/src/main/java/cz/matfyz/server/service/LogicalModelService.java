@@ -1,9 +1,12 @@
 package cz.matfyz.server.service;
 
+import cz.matfyz.server.controller.DatasourceController;
 import cz.matfyz.server.controller.LogicalModelController.LogicalModelDetail;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
+import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.LogicalModelRepository;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 
@@ -36,26 +39,24 @@ public class LogicalModelService {
         return repository.find(logicalModelId);
     }
 
-    public LogicalModelDetail findFull(Id logicalModelId) {
+    public record LogicalModelWithMappings(
+        LogicalModel logicalModel,
+        DatasourceWrapper datasource,
+        List<MappingWrapper> mappings
+    ) {}
+
+    public LogicalModelWithMappings findFull(Id logicalModelId) {
         final var model = find(logicalModelId);
         final var mappings = mappingService.findAll(logicalModelId);
 
-        return LogicalModelDetail.fromEntities(
-            model.logicalModel(),
-            datasourceService.getDatasourceConfiguration(model.datasource()),
-            mappings
-        );
+        return new LogicalModelWithMappings(model.logicalModel(), model.datasource(), mappings);
     }
 
-    public List<LogicalModelDetail> findAllFull(Id categoryId) {
+    public List<LogicalModelWithMappings> findAllFull(Id categoryId) {
         return repository.findAllInCategory(categoryId).stream().map(model -> {
             final var mappings = mappingService.findAll(model.logicalModel().id);
 
-            return LogicalModelDetail.fromEntities(
-                model.logicalModel(),
-                datasourceService.getDatasourceConfiguration(model.datasource()),
-                mappings
-            );
+            return new LogicalModelWithMappings(model.logicalModel(), model.datasource(), mappings);
         }).toList();
     }
 

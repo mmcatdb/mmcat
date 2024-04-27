@@ -175,7 +175,7 @@ public class JobExecutorService {
             //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
             //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
 
-            if (server.executeModels()) {
+            if (server.executeModels() && control.isWritable()) {
                 LOGGER.info("Start executing models ...");
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import API from '@/utils/api';
-import type { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/datasource';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import DatasourceDisplay from '@/components/datasource/DatasourceDisplay.vue';
 import { useRouter } from 'vue-router';
@@ -13,7 +13,7 @@ async function fetchDatasources() {
     if (!result.status)
         return false;
 
-    datasources.value = result.data;
+    datasources.value = result.data.map(Datasource.fromServer);
     return true;
 }
 

@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.abstractwrappers.exception.UnsupportedException;
 
 import java.util.ArrayList;
@@ -42,13 +43,13 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override public boolean addComplexProperty(Set<String> names, boolean required) {
-        throw UnsupportedException.addComplexProperty(PostgreSQLControlWrapper.TYPE);
+        throw UnsupportedException.addComplexProperty(DatasourceType.postgresql);
         // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
         // TODO dynamic named properties?
     }
 
     @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) {
-        throw UnsupportedException.addComplexArrayProperty(PostgreSQLControlWrapper.TYPE);
+        throw UnsupportedException.addComplexArrayProperty(DatasourceType.postgresql);
         // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
     }
 

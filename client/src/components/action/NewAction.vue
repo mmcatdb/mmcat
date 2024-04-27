@@ -4,7 +4,7 @@ import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
-import type { Datasource } from '@/types/datasource';
+import { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
@@ -30,7 +30,7 @@ onMounted(async () => {
 
     const datasourceResult = await API.datasources.getAllDatasources({});
     if (datasourceResult.status)
-        datasources.value = datasourceResult.data;
+        datasources.value = datasourceResult.data.map(Datasource.fromServer);
 
     fetched.value = true;
 });

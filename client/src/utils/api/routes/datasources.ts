@@ -1,22 +1,19 @@
 import type { Empty, StringLike } from '@/types/api/routes';
 import { GET, POST, PUT, DELETE } from '../routeFunctions';
-import type { Datasource, DatasourceInit, DatasourceUpdate, DatasourceInfoFromServer, DatasourceWithConfigurationFromServer } from '@/types/datasource';
+import type { DatasourceInit, DatasourceUpdate, DatasourceFromServer } from '@/types/datasource';
 import type { Id } from '@/types/id';
 
 const datasources = {
-    getAllDatasourceInfos: GET<Empty, DatasourceWithConfigurationFromServer[]>(
-        () => `/datasource-infos`,
-    ),
-    getAllDatasources: GET<Empty, Datasource[], { categoryId: Id }>(
+    getAllDatasources: GET<Empty, DatasourceFromServer[], { categoryId: Id }>(
         () => `/datasources`,
     ),
-    getDatasource: GET<{ id: StringLike }, Datasource>(
+    getDatasource: GET<{ id: StringLike }, DatasourceFromServer>(
         u => `/datasources/${u.id}`,
     ),
-    createDatasource: POST<Empty, DatasourceInfoFromServer, DatasourceInit>(
+    createDatasource: POST<Empty, DatasourceFromServer, DatasourceInit>(
         () => `/datasources`,
     ),
-    updateDatasource: PUT<{ id: StringLike }, DatasourceInfoFromServer, DatasourceUpdate>(
+    updateDatasource: PUT<{ id: StringLike }, DatasourceFromServer, DatasourceUpdate>(
         u => `/datasources/${u.id}`,
     ),
     deleteDatasource: DELETE<{ id: StringLike }, void>(

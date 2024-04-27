@@ -15,4 +15,4 @@ coverage
 .env
 
 public/adminer.php
-public/data-sources/*
+public/datasources/*

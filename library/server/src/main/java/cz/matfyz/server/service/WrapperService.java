@@ -4,15 +4,18 @@ import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.exception.DatasourceException;
+import cz.matfyz.wrapperjsonld.JsonLdControlWrapper;
+import cz.matfyz.wrapperjsonld.JsonLdProvider;
+import cz.matfyz.wrapperjsonld.JsonLdProvider.JsonLdSettings;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
-import cz.matfyz.wrappermongodb.MongoDBSettings;
+import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
 import cz.matfyz.wrapperneo4j.Neo4jControlWrapper;
 import cz.matfyz.wrapperneo4j.Neo4jProvider;
-import cz.matfyz.wrapperneo4j.Neo4jSettings;
+import cz.matfyz.wrapperneo4j.Neo4jProvider.Neo4jSettings;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
-import cz.matfyz.wrapperpostgresql.PostgreSQLSettings;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -33,6 +36,7 @@ public class WrapperService {
                 case mongodb -> getMongoDBControlWrapper(datasource);
                 case postgresql -> getPostgreSQLControlWrapper(datasource);
                 case neo4j -> getNeo4jControlWrapper(datasource);
+                case jsonld -> getJsonLdControlWrapper(datasource);
                 default -> throw DatasourceException.wrapperNotFound(datasource);
             };
         }
@@ -95,6 +99,19 @@ public class WrapperService {
         final var settings = mapper.treeToValue(datasource.settings, Neo4jSettings.class);
 
         return new Neo4jProvider(settings);
+    }
+
+    // JsonLd
+
+    private JsonLdControlWrapper getJsonLdControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+        final var provider = createJsonLdProvider(datasource);
+        return new JsonLdControlWrapper(provider);
+    }
+
+    private static JsonLdProvider createJsonLdProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+        final var settings = mapper.treeToValue(datasource.settings, JsonLdSettings.class);
+
+        return new JsonLdProvider(settings);
     }
 
 }

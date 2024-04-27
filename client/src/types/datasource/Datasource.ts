@@ -1,53 +1,33 @@
 import type { Entity, Id } from '../id';
-import type { DeepPartial } from '../utils';
 import { DatasourceConfiguration, type DatasourceConfigurationFromServer } from './Configuration';
 
-export class DatasourceInfo implements Entity {
-    private constructor(
-        public readonly id: Id,
-        public readonly type: DatasourceType,
-        public readonly label: string,
-    ) {}
-
-    static fromServer(input: DatasourceInfoFromServer): DatasourceInfo {
-        return new DatasourceInfo(
-            input.id,
-            input.type,
-            input.label,
-        );
-    }
-}
-
-export type DatasourceInfoFromServer = {
+export type DatasourceFromServer = {
     id: Id;
     type: DatasourceType;
-    label: string; // User-defined name
+    label: string;
+    settings: Settings;
+    configuration: DatasourceConfigurationFromServer;
 };
 
-export class DatasourceWithConfiguration implements Entity {
+export class Datasource implements Entity {
     private constructor(
         public readonly id: Id,
         public readonly type: DatasourceType,
         public readonly label: string,
+        public readonly settings: Settings,
         public readonly configuration: DatasourceConfiguration,
     ) {}
 
-    static fromServer(input: DatasourceWithConfigurationFromServer): DatasourceWithConfiguration {
-        return new DatasourceWithConfiguration(
+    static fromServer(input: DatasourceFromServer): Datasource {
+        return new Datasource(
             input.id,
             input.type,
             input.label,
+            input.settings,
             new DatasourceConfiguration(input.configuration),
         );
     }
 }
-
-export type DatasourceWithConfigurationFromServer = {
-    id: Id;
-    type: DatasourceType;
-    label: string; // User-defined name
-    configuration: DatasourceConfigurationFromServer;
-};
 
 export type Settings = {
     url?: string;
@@ -57,18 +37,17 @@ export type Settings = {
     authenticationDatabase?: string;
     username?: string;
     password?: string;
+    isWritable?: boolean;
+    isQueryable?: boolean;
 };
 
-export type Datasource = {
-    id: Id;
+export type DatasourceInit = {
     type: DatasourceType;
     label: string;
     settings: Settings;
 };
 
-export type DatasourceInit = Omit<Datasource, 'id'>;
-
-export type DatasourceUpdate = DeepPartial<DatasourceInit> & { settings: Partial<Settings> };
+export type DatasourceUpdate = Omit<DatasourceInit, 'type'>;
 
 export enum DatasourceType {
     mongodb = 'mongodb',
@@ -76,7 +55,7 @@ export enum DatasourceType {
     neo4j = 'neo4j',
     csv = 'csv',
     json = 'json',
-    jsonLd = 'jsonLd',
+    jsonld = 'jsonld',
 }
 
 export function isDatabase(type: DatasourceType): boolean {
@@ -84,7 +63,7 @@ export function isDatabase(type: DatasourceType): boolean {
 }
 
 export function isFile(type: DatasourceType): boolean {
-    return [ DatasourceType.csv, DatasourceType.json, DatasourceType.jsonLd ].includes(type);
+    return [ DatasourceType.csv, DatasourceType.json, DatasourceType.jsonld ].includes(type);
 }
 
 export const DATASOURCE_TYPES: { type: DatasourceType, label: string }[] = [
@@ -109,34 +88,20 @@ export const DATASOURCE_TYPES: { type: DatasourceType, label: string }[] = [
         label: 'JSON',
     },
     {
-        type: DatasourceType.jsonLd,
+        type: DatasourceType.jsonld,
         label: 'JSON-LD',
     },
 ];
 
-export function copyDatasourceUpdate(datasource: DatasourceUpdate | Datasource): DatasourceUpdate {
-    return { ...datasource, settings: { ...datasource.settings } };
-}
+export function validateSettings(settings: Settings, type: DatasourceType): boolean {
+    if (isFile(type))
+        return !!settings.url;
 
-export function getNewDatasourceUpdate(): DatasourceUpdate {
-    return { settings: {} };
-}
+    if (!settings.host || !settings.port || !settings.database || !settings.username || !settings.password)
+        return false;
 
-export function createInitFromUpdate(update: DatasourceUpdate): DatasourceInit | null {
-    if (!update.type || !update.label) 
-        return null;
+    if (type === DatasourceType.mongodb && !settings.authenticationDatabase)
+        return false;
 
-    return {
-        type: update.type,
-        label: update.label,
-        settings: {
-            url: update.settings.url,
-            host: update.settings.host,
-            port: update.settings.port,
-            database: update.settings.database,
-            authenticationDatabase: update.settings.authenticationDatabase,
-            username: update.settings.username,
-            password: update.settings.password,
-        },
-    };
+    return true;
 }

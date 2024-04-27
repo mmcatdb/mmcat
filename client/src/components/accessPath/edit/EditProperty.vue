@@ -3,7 +3,7 @@ import { GraphSimpleProperty, GraphComplexProperty, type GraphChildProperty, Seq
 import { PropertyType, createDefaultFilter, type Node } from '@/types/categoryGraph';
 import { StaticName, type Name } from '@/types/identifiers';
 import { ref, computed, shallowRef } from 'vue';
-import type { DatasourceWithConfiguration } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
@@ -19,7 +19,7 @@ enum State {
 }
 
 type EditPropertyProps = {
-    datasource: DatasourceWithConfiguration;
+    datasource: Datasource;
     property: GraphChildProperty;
 };
 

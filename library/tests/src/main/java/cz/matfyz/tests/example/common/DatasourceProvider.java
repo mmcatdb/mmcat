@@ -5,13 +5,13 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.utils.Config;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
-import cz.matfyz.wrappermongodb.MongoDBSettings;
+import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
 import cz.matfyz.wrapperneo4j.Neo4jControlWrapper;
 import cz.matfyz.wrapperneo4j.Neo4jProvider;
-import cz.matfyz.wrapperneo4j.Neo4jSettings;
+import cz.matfyz.wrapperneo4j.Neo4jProvider.Neo4jSettings;
 import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
-import cz.matfyz.wrapperpostgresql.PostgreSQLSettings;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 
 public class DatasourceProvider {
 
@@ -32,7 +32,9 @@ public class DatasourceProvider {
                 config.getBool("isInDocker") ? "5432" : "3204",
                 config.get("database"),
                 config.get("username"),
-                config.get("password")
+                config.get("password"),
+                true,
+                true
             ));
         }
 
@@ -56,7 +58,9 @@ public class DatasourceProvider {
                 "admin",
                 config.get("database"),
                 config.get("username"),
-                config.get("password")
+                config.get("password"),
+                true,
+                true
             ));
         }
 
@@ -79,7 +83,9 @@ public class DatasourceProvider {
                 config.getBool("isInDocker") ? "7687" : "3206",
                 "neo4j",
                 "neo4j",
-                config.get("password")
+                config.get("password"),
+                true,
+                true
             ));
         }
 

@@ -1,4 +1,4 @@
-package cz.matfyz.wrappermongodb;
+package cz.matfyz.wrapperjsonld;
 
 import cz.matfyz.abstractwrappers.AbstractPathWrapper;
 
@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author jachymb.bartik
  */
-public class MongoDBPathWrapper implements AbstractPathWrapper {
+public class JsonLdPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();
 
@@ -17,10 +17,12 @@ public class MongoDBPathWrapper implements AbstractPathWrapper {
     }
 
     @Override public boolean check() {
-        return properties.stream().anyMatch(property -> "_id".equals(property.substring(property.indexOf('/') + 1)));
+        throw new UnsupportedOperationException("JsonLdPathWrapper.check not implemented.");
     }
 
+    
     // CHECKSTYLE:OFF
+    // TODO check the correctness of the following methods:
     @Override public boolean isPropertyToOneAllowed() { return true; }
     @Override public boolean isPropertyToManyAllowed() { return true; }
     @Override public boolean isInliningToOneAllowed() { return true; }

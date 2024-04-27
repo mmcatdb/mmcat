@@ -1,4 +1,4 @@
-import { DatasourceInfo, type DatasourceInfoFromServer } from './datasource';
+import { Datasource, type DatasourceFromServer } from './datasource';
 import type { Entity, Id, VersionId } from './id';
 
 export type QueryFromServer = {
@@ -102,17 +102,11 @@ export type QueryDescriptionFromServer = {
     parts: QueryPartDescriptionFromServer[];
 };
 
-type QueryPartDescriptionFromServer = {
-    datasource: DatasourceInfoFromServer;
-    content: string;
-    structure: string;
-};
-
 export class QueryDescription {
     private constructor(
         readonly parts: QueryPartDescription[],
     ) {}
-
+    
     static fromServer(input: QueryDescriptionFromServer): QueryDescription {
         return new QueryDescription(
             input.parts.map(QueryPartDescription.fromServer),
@@ -120,16 +114,22 @@ export class QueryDescription {
     }
 }
 
+type QueryPartDescriptionFromServer = {
+    datasource: DatasourceFromServer;
+    content: string;
+    structure: string;
+};
+
 export class QueryPartDescription {
     private constructor(
-        readonly datasource: DatasourceInfo,
+        readonly datasource: Datasource,
         readonly content: string,
         readonly structure: string,
     ) {}
 
     static fromServer(input: QueryPartDescriptionFromServer): QueryPartDescription {
         return new QueryPartDescription(
-            DatasourceInfo.fromServer(input.datasource),
+            Datasource.fromServer(input.datasource),
             input.content,
             input.structure,
         );

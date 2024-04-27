@@ -5,7 +5,7 @@ package cz.matfyz.abstractwrappers;
  */
 public interface AbstractPathWrapper {
 
-    void addProperty(String hierarchy);
+    void addProperty(String path);
 
     boolean check();
 

@@ -6,7 +6,7 @@ import { ref, computed, shallowRef } from 'vue';
 import SignatureInput from '../input/SignatureInput.vue';
 import TypeInput from '../input/TypeInput.vue';
 import NameInput from '../input/NameInput.vue';
-import type { DatasourceWithConfiguration } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import SignatureDisplay from '@/components/category/SignatureDisplay.vue';
@@ -18,7 +18,7 @@ enum State {
 }
 
 type AddPropertyProps = {
-    datasource: DatasourceWithConfiguration;
+    datasource: Datasource;
     parentProperty: GraphParentProperty;
 };
 

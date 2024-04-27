@@ -64,7 +64,7 @@ public class MappingRepository {
                 final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
                 output.set(new MappingWrapper(id, logicalModelId, parsedJsonValue));
             }
-        }, "Mapping with id: %s not found.", id);
+        }, "Mapping", id);
     }
 
     public List<MappingWrapper> findAll(Id logicalModelId) {

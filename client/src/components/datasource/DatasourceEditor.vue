@@ -1,26 +1,60 @@
 <script setup lang="ts">
-import { type Datasource, DATASOURCE_TYPES, DatasourceType, copyDatasourceUpdate, getNewDatasourceUpdate, createInitFromUpdate, type DatasourceUpdate, isDatabase, isFile } from '@/types/datasource';
+import { Datasource, DATASOURCE_TYPES, DatasourceType, validateSettings, type Settings, isDatabase, isFile, type DatasourceInit } from '@/types/datasource';
 import API from '@/utils/api';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 
-type DatasourceEditorProps = {
+const props = defineProps<{
     datasource?: Datasource;
-};
+}>();
 
-const props = defineProps<DatasourceEditorProps>();
-
-const emit = defineEmits([ 'save', 'cancel', 'delete' ]);
+const emit = defineEmits<{
+    (e: 'save', datasource: Datasource): void;
+    (e: 'cancel'): void;
+    (e: 'delete'): void;
+}>();
 
 const fetching = ref(false);
-const innerValue = ref<DatasourceUpdate>(props.datasource ? copyDatasourceUpdate(props.datasource) : getNewDatasourceUpdate());
+
+
+type InnerValue = {
+    type?: DatasourceType;
+    label: string;
+    settings: Settings;
+};
+
+const initialValue: InnerValue = props.datasource
+    ? { ...props.datasource, settings: { ...props.datasource.settings } }
+    : { label: '', settings: {} };
+
+const innerValue = ref<InnerValue>(initialValue);
 
 const isNew = computed(() => !props.datasource);
-const isValid = computed(() => isNew.value ? true : !!createInitFromUpdate(innerValue.value));
+const isValid = computed(() => {
+    if (!innerValue.value.label)
+        return false;
+
+    const type = innerValue.value.type ?? props.datasource?.type;
+    if (!type)
+        return false;
+
+    return validateSettings(innerValue.value.settings, type);
+});
 
 const showDatabaseOptions = computed(() => innerValue.value.type && isDatabase(innerValue.value.type));
-const showURLOptions = computed(() => innerValue.value.type && isFile(innerValue.value.type));
+const showFileOptions = computed(() => innerValue.value.type && isFile(innerValue.value.type));
+
+watch(() => innerValue.value.type, (type) => {
+    if (type && isDatabase(type)) {
+        innerValue.value.settings.isWritable = true;
+        innerValue.value.settings.isQueryable = true;
+    }
+    else {
+        innerValue.value.settings.isWritable = false;
+        innerValue.value.settings.isQueryable = false;
+    }
+});
 
 async function save() {
     fetching.value = true;
@@ -31,13 +65,16 @@ async function save() {
 }
 
 async function createNew() {
-    const init = createInitFromUpdate(innerValue.value);
-    if (!init)
+    const init = innerValue.value;
+    if (!init.type)
         return;
 
-    const result = await API.datasources.createDatasource({}, init);
-    if (result.status)
-        emit('save', result.data);
+    const result = await API.datasources.createDatasource({}, init as DatasourceInit);
+    if (!result.status)
+        return;
+
+    const newDatasource = Datasource.fromServer(result.data);
+    emit('save', newDatasource);
 }
 
 async function updateOld() {
@@ -91,7 +128,7 @@ async function deleteMethod() {
                 <input v-model="innerValue.label" />
             </ValueRow>
             <ValueRow
-                v-if="showURLOptions"
+                v-if="showFileOptions"
                 label="URL:"
             >
                 <input v-model="innerValue.settings.url" />
@@ -119,7 +156,7 @@ async function deleteMethod() {
             </ValueRow>
             <ValueRow
                 :class="{ hidden: innerValue.type !== DatasourceType.mongodb }"
-                label="Authentication Database:"
+                label="Authentication database:"
             >
                 <input v-model="innerValue.settings.authenticationDatabase" />
             </ValueRow>
@@ -134,6 +171,22 @@ async function deleteMethod() {
                 label="Password:"
             >
                 <input v-model="innerValue.settings.password" />
+            </ValueRow>
+            <ValueRow
+                label="Is writable:"
+            >
+                <input
+                    v-model="innerValue.settings.isWritable"
+                    type="checkbox"
+                />
+            </ValueRow>
+            <ValueRow
+                label="Is queryable:"
+            >
+                <input
+                    v-model="innerValue.settings.isQueryable"
+                    type="checkbox"
+                />
             </ValueRow>
         </ValueContainer>
         <div class="button-row">

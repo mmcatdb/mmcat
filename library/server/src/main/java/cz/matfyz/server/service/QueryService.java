@@ -2,11 +2,11 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.datasource.Datasource;
 import cz.matfyz.abstractwrappers.datasource.Kind;
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.server.controller.QueryController.QueryPartDescription;
+import cz.matfyz.server.controller.DatasourceController;
 import cz.matfyz.server.controller.QueryController.QueryDescription;
 import cz.matfyz.server.controller.QueryController.QueryInit;
 import cz.matfyz.server.controller.QueryController.QueryVersionUpdate;
@@ -46,6 +46,9 @@ public class QueryService {
     @Autowired
     private SchemaCategoryRepository categoryRepository;
 
+    @Autowired
+    private DatasourceController datasourceController;
+
     public ResultList executeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
@@ -63,7 +66,8 @@ public class QueryService {
 
         final var parts = rawDescriptions.parts().stream().map(d -> {
             final var datasource = kindsAndDatasources.datasources.get(new Id(d.datasourceIdentifier()));
-            return new QueryPartDescription(datasource.toInfo(), d.query());
+            final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
+            return new QueryPartDescription(datasourceDetail, d.query());
         }).toList();
 
         return new QueryDescription(parts);
@@ -79,18 +83,20 @@ public class QueryService {
 
         final var kinds = logicalModelService
             .findAll(categoryId).stream()
-            // TODO enable neo4j when it's supported
-            .filter(model -> model.datasource().type != DatasourceType.neo4j)
             .flatMap(model -> {
-                final DatasourceWrapper datasourceEntity = model.datasource();
-                datasources.put(datasourceEntity.id, datasourceEntity);
+                final DatasourceWrapper datasourceWrapper = model.datasource();
+                final var control = wrapperService.getControlWrapper(datasourceWrapper);
+                if (!control.isQueryable())
+                    return List.<Kind>of().stream();
+
+                datasources.put(datasourceWrapper.id, datasourceWrapper);
 
                 final var builder = new Datasource.Builder();
                 mappingService.findAll(model.logicalModel().id).forEach(mappingWrapper -> {
                     final var mapping = mappingWrapper.toMapping(category);
                     builder.mapping(mapping);
                 });
-                final var datasource = builder.build(datasourceEntity.type, wrapperService.getControlWrapper(datasourceEntity), datasourceEntity.id.toString());
+                final var datasource = builder.build(datasourceWrapper.type, control, datasourceWrapper.id.toString());
                 return datasource.kinds.stream();
             }).toList();
 

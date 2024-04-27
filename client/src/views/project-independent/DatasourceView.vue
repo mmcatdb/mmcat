@@ -13,7 +13,7 @@ const router = useRouter();
 
 const rawId = route.params.id as string;
 const isNew = rawId === 'new';
-const id = isNew ? null : parseInt(rawId);
+const id = isNew ? undefined : rawId;
 
 const isEditing = ref(isNew || route.query.state === 'editing');
 const categoryId = toQueryScalar(route.query.categoryId);
