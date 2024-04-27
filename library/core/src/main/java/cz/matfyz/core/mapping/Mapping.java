@@ -17,9 +17,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 @JsonDeserialize(using = Mapping.Deserializer.class)
 public class Mapping implements Comparable<Mapping> {
 

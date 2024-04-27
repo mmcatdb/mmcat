@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author jachymb.bartik
- */
 public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;

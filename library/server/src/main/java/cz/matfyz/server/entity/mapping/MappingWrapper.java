@@ -12,9 +12,6 @@ import cz.matfyz.server.repository.MappingRepository.MappingJsonValue;
 
 import java.util.List;
 
-/**
- * @author jachym.bartik
- */
 public record MappingWrapper(
     Id id,
     Id logicalModelId,

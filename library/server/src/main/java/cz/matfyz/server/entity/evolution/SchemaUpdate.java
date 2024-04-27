@@ -12,9 +12,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
-/**
- * @author jachym.bartik
- */
 public class SchemaUpdate extends Entity {
 
     public final Id categoryId;

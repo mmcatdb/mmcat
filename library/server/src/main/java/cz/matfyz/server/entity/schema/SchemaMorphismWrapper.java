@@ -11,9 +11,6 @@ import java.util.Set;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author jachym.bartik
- */
 public record SchemaMorphismWrapper(
     Signature signature,
     String label,

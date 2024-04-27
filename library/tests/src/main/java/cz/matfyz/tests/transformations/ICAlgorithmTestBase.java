@@ -14,9 +14,6 @@ import java.util.stream.Stream;
 import org.json.JSONArray;
 import org.junit.jupiter.api.Assertions;
 
-/**
- * @author jachymb.bartik
- */
 public class ICAlgorithmTestBase {
 
     private Mapping mapping;

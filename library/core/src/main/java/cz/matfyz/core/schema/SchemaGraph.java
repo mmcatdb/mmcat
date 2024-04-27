@@ -15,9 +15,6 @@ import java.util.TreeSet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author pavel.koupil, jachymb.bartik
- */
 public class SchemaGraph {
 
     private final Map<SchemaObject, Node> nodes = new TreeMap<>();

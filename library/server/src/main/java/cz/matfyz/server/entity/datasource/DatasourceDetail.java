@@ -6,9 +6,6 @@ import cz.matfyz.server.entity.Id;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-/**
- * @author jachym.bartik
- */
 public record DatasourceDetail(
     Id id,
     DatasourceType type,

@@ -11,9 +11,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 @JsonDeserialize(using = Name.Deserializer.class)
 public abstract class Name implements Serializable {
 

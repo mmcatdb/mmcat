@@ -6,9 +6,6 @@ import cz.matfyz.core.record.SimpleRecord;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class InvalidStateException extends TransformationException {
 
     private InvalidStateException(String name, Serializable data) {

@@ -7,9 +7,6 @@ import cz.matfyz.abstractwrappers.exception.InvalidNameException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author jachymb.bartik
- */
 public class Neo4jDMLWrapper implements AbstractDMLWrapper {
 
     private record PropertyValue(String name, String value) {}

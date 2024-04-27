@@ -7,9 +7,6 @@ import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-/**
- * @author jachym.bartik
- */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = SchemaModificationOperation.CreateObject.class, name = "createObject"),

@@ -25,9 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * @author jachym.bartik
- */
 @RestController
 public class JobController {
 

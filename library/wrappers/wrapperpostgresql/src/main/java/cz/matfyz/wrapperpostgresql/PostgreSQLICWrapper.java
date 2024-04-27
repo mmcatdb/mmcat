@@ -9,9 +9,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-/**
- * @author jachymb.bartik
- */
 public class PostgreSQLICWrapper implements AbstractICWrapper {
 
     private final List<Constraint> constraints = new ArrayList<>();

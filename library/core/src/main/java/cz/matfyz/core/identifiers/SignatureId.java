@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * Id is a set of signatures (each corresponding to a base or a composite morphism).
- * @author jachymb.bartik
  */
 @JsonSerialize(using = SignatureId.Serializer.class)
 @JsonDeserialize(using = SignatureId.Deserializer.class)

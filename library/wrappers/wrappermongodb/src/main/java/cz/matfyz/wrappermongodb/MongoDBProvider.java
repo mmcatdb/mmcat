@@ -5,9 +5,6 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author jachymb.bartik
- */
 public class MongoDBProvider {
 
     public final MongoDBSettings settings;

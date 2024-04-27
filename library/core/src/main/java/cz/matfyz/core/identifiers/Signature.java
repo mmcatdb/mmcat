@@ -25,7 +25,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * This class represents a signature of a morphism. It can be empty, base or composite.
- * @author jachym.bartik
  */
 @JsonSerialize(using = Signature.Serializer.class)
 @JsonDeserialize(using = Signature.Deserializer.class)

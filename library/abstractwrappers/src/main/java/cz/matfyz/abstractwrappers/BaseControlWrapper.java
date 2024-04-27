@@ -1,8 +1,5 @@
 package cz.matfyz.abstractwrappers;
 
-/**
- * @author jachym.bartik
- */
 public class BaseControlWrapper {
 
     private final boolean isWritable;

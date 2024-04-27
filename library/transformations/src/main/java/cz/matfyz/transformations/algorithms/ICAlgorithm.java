@@ -19,9 +19,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-/**
- * @author jachymb.bartik
- */
 public class ICAlgorithm {
 
     private Mapping mapping;

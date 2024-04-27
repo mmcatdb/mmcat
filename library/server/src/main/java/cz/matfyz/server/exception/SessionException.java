@@ -4,9 +4,6 @@ import cz.matfyz.server.entity.Id;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class SessionException extends ServerException {
 
     private SessionException(String name, Serializable data) {

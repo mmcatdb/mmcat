@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * This class represents a 'key' of an object as is described in the paper. It's basically just a number with extra steps.
- * @author pavel.koupil, jachym.bartik
  */
 @JsonSerialize(using = Key.Serializer.class)
 public class Key implements Serializable, Comparable<Key> {

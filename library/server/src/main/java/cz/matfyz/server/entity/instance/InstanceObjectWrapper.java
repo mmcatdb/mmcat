@@ -13,9 +13,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-/**
- * @author jachym.bartik
- */
 public record InstanceObjectWrapper(
     Key key,
     List<DomainRowWrapper> rows

@@ -8,9 +8,6 @@ import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * @author jachym.bartik
- */
 public class MetadataContext {
 
     private Id id;

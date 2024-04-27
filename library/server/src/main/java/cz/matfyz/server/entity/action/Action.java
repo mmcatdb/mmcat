@@ -8,9 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-/**
- * @author jachym.bartik
- */
 public class Action extends Entity {
 
     public final Id categoryId;

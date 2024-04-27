@@ -7,9 +7,6 @@ import cz.matfyz.core.identifiers.Signature;
 
 import java.util.Set;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 public class SchemaMorphism implements Identified<SchemaMorphism, Signature> {
 
     public enum Min {

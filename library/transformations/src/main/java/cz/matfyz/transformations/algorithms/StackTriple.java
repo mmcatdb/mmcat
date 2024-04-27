@@ -6,9 +6,6 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.record.IComplexRecord;
 import cz.matfyz.core.utils.printable.*;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 public class StackTriple implements Printable {
 
     public final InstancePath parentToChild;

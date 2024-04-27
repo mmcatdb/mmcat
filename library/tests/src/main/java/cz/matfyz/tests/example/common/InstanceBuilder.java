@@ -16,9 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * @author jachymb.bartik
- */
 public class InstanceBuilder {
 
     private final InstanceCategory instance;

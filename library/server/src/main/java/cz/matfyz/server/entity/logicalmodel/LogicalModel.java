@@ -10,9 +10,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 
-/**
- * @author jachym.bartik
- */
 public class LogicalModel extends Entity {
 
     public final Id categoryId;

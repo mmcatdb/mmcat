@@ -20,9 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-/**
- * @author jachymb.bartik
- */
 class Neo4jTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jTests.class);

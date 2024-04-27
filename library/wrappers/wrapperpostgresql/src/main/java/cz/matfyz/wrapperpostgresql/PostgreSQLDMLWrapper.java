@@ -6,9 +6,6 @@ import cz.matfyz.abstractwrappers.exception.InvalidNameException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author jachymb.bartik
- */
 public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
 
     private String kindName = null;

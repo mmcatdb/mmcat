@@ -8,9 +8,6 @@ import cz.matfyz.server.entity.instance.InstanceCategoryWrapper.WrapperContext;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author jachym.bartik
- */
 public record InstanceMorphismWrapper(
     Signature signature,
     List<MappingRowWrapper> mappings

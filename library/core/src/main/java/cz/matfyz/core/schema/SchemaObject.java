@@ -5,9 +5,6 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.SignatureId;
 
-/**
- * @author pavel.koupil, jachymb.bartik
- */
 public class SchemaObject implements Identified<SchemaObject, Key> {
 
     /** A unique identifier of the object (within one schema category). */

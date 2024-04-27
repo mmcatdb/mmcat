@@ -7,9 +7,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-/**
- * @author jachym.bartik
- */
 public record LogicalModelInit(
     Id datasourceId,
     Id categoryId,

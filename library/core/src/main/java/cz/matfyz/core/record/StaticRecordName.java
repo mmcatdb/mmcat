@@ -2,9 +2,6 @@ package cz.matfyz.core.record;
 
 import cz.matfyz.core.mapping.StaticName.Type;
 
-/**
- * @author jachym.bartik
- */
 public class StaticRecordName extends RecordName {
 
     private final Type type;

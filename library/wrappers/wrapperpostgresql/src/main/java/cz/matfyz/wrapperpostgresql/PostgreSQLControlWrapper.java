@@ -16,9 +16,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public class PostgreSQLControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })

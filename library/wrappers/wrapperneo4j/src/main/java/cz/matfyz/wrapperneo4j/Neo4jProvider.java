@@ -7,9 +7,6 @@ import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.SessionConfig;
 
-/**
- * @author jachymb.bartik
- */
 public class Neo4jProvider {
 
     public final Neo4jSettings settings;

@@ -7,9 +7,6 @@ import java.util.Set;
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 
-/**
- * @author jachymb.bartik
- */
 public class MongoDBDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;

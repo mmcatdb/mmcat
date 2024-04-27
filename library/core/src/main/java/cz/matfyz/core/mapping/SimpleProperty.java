@@ -25,7 +25,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A simple value node in the access path tree. Its context is undefined (null).
- * @author jachymb.bartik
  */
 @JsonSerialize(using = SimpleProperty.Serializer.class)
 @JsonDeserialize(using = SimpleProperty.Deserializer.class)

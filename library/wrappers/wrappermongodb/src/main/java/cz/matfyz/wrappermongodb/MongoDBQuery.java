@@ -19,7 +19,6 @@ import org.bson.json.JsonWriterSettings;
 
 /**
  * Represents an aggregate query that will be run against the MongoDB driver.
- * @author jachymb.bartik
  */
 public class MongoDBQuery implements QueryContent {
 

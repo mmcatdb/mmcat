@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * A base class for all server exceptions.
- * @author jachymb.bartik
  */
 @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
 public abstract class ServerException extends NamedException {

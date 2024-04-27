@@ -13,9 +13,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author jachym.bartik
- */
 public class Job extends Entity {
 
     public enum State {

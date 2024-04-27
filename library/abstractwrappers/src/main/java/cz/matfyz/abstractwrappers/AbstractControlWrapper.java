@@ -5,9 +5,6 @@ import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import java.nio.file.Path;
 import java.util.Collection;
 
-/**
- * @author jachym.bartik
- */
 public interface AbstractControlWrapper {
 
     boolean isWritable();

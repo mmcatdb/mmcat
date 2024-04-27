@@ -5,9 +5,6 @@ import cz.matfyz.abstractwrappers.AbstractPathWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author jachymb.bartik
- */
 public class MongoDBPathWrapper implements AbstractPathWrapper {
 
     private final List<String> properties = new ArrayList<>();

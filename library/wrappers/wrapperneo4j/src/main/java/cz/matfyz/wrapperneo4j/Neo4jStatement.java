@@ -2,9 +2,6 @@ package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractStatement;
 
-/**
- * @author jachymb.bartik
- */
 public class Neo4jStatement implements AbstractStatement {
 
     private String content;

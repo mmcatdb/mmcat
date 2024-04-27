@@ -17,9 +17,6 @@ import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 public class PullToDDLAndDMLTestBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PullToDDLAndDMLTestBase.class);

@@ -13,9 +13,6 @@ import cz.matfyz.core.utils.Statistics.Counter;
 import cz.matfyz.core.utils.Statistics.Interval;
 import cz.matfyz.transformations.algorithms.MTCAlgorithm;
 
-/**
- * @author jachym.bartik
- */
 public class DatabaseToInstance {
 
     private Mapping mapping;
