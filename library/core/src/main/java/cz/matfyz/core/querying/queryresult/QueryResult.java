@@ -4,7 +4,7 @@ import cz.matfyz.core.querying.QueryStructure;
 
 /**
  * This class represents the result of a selection part of a query. It contains (a) data and (b) structure of the data.
- * Because we need to support all possible database systems, the data is represented as a tree.
+ * Because we need to support all possible datasources, the data is represented as a tree.
  */
 public class QueryResult {
 

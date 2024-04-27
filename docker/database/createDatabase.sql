@@ -6,8 +6,7 @@ DROP TABLE IF EXISTS session;
 DROP TABLE IF EXISTS action;
 DROP TABLE IF EXISTS mapping;
 DROP TABLE IF EXISTS logical_model;
-DROP TABLE IF EXISTS data_source;
-DROP TABLE IF EXISTS database_for_mapping;
+DROP TABLE IF EXISTS datasource;
 
 DROP TABLE IF EXISTS schema_category_update;
 DROP TABLE IF EXISTS schema_category;
@@ -28,28 +27,27 @@ CREATE TABLE schema_category_update (
     json_value JSONB NOT NULL
 );
 
-CREATE TABLE database_for_mapping (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE datasource (
+    id UUID PRIMARY KEY,
     json_value JSONB NOT NULL
 );
 
-CREATE TABLE data_source (
-    id SERIAL PRIMARY KEY,
-    json_value JSONB NOT NULL
-);
-
-INSERT INTO data_source (json_value)
+INSERT INTO datasource (id, json_value)
 VALUES
-    ('{
-        "url": "https://nosql.ms.mff.cuni.cz/mmcat/data-sources/test2.jsonld",
+    ('119dd3fc-aabd-4195-9d12-94abf4fceeb0', '{
         "label": "Czech business registry",
-        "type": "JsonLdStore"
+        "type": "jsonld",
+        "settings": {
+            "url": "https://data.mmcatdb.com/test2.jsonld",
+            "isWritable": false,
+            "isQueryable": false
+        }
     }');
 
 CREATE TABLE logical_model (
     id SERIAL PRIMARY KEY,
     schema_category_id INTEGER NOT NULL REFERENCES schema_category,
-    database_id INTEGER NOT NULL REFERENCES database_for_mapping,
+    datasource_id UUID NOT NULL REFERENCES datasource,
     json_value JSONB NOT NULL
 );
 

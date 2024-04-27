@@ -1,6 +1,6 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -13,18 +13,18 @@ class QueryTests {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
-    private static final Databases databases = new Databases();
+    private static final Datasources datasource = new Datasources();
 
     @BeforeAll
     static void setup() {
-        databases.postgreSQL().setup();
-        databases.mongoDB().setup();
+        datasource.postgreSQL().setup();
+        datasource.mongoDB().setup();
     }
 
     @Test
     void basicPostgreSQL() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?order number ?number .
@@ -45,8 +45,8 @@ class QueryTests {
 
     @Test
     void basicMongoDB() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?order number ?number .
@@ -67,8 +67,8 @@ class QueryTests {
 
     @Test
     void nestedMongoDB() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?order street ?street ;
@@ -108,8 +108,8 @@ class QueryTests {
      */
     @Test
     void nestedMongoDBWithArray() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?order items ?item .
@@ -149,8 +149,8 @@ class QueryTests {
      */
     @Test
     void flattenArrayInSelection() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?order id ?id .
@@ -176,8 +176,8 @@ class QueryTests {
      */
     @Test
     void flattenArrayInProjection() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?order id ?id ;
@@ -206,8 +206,8 @@ class QueryTests {
 
     @Test
     void alias() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?o has_number ?n .
@@ -231,8 +231,8 @@ class QueryTests {
      */
     @Test
     void dualSignature() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?order number ?number .
@@ -253,8 +253,8 @@ class QueryTests {
 
     @Test
     void multipleElements() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?order tags ?tag .
@@ -275,8 +275,8 @@ class QueryTests {
 
     @Test
     void filter() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?order number ?number .
@@ -297,8 +297,8 @@ class QueryTests {
 
     @Test
     void multipleFilters() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?order number ?number .
@@ -320,8 +320,8 @@ class QueryTests {
 
     @Test
     void multipleProperties() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?product id ?id ;
@@ -358,8 +358,8 @@ class QueryTests {
 
     @Test
     void multipleCompositeProperties() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?order items ?item .
@@ -397,8 +397,8 @@ class QueryTests {
 
     @Test
     void differentProjectionRoot() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.mongoDB())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.mongoDB())
             .query("""
                 SELECT {
                     ?item quantity ?quantity ;
@@ -427,8 +427,8 @@ class QueryTests {
      */
     @Test
     void notNeededJoin() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?item number ?number ;
@@ -459,8 +459,8 @@ class QueryTests {
 
     @Test
     void oneDatabaseJoin() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?item quantity ?quantity ;
@@ -491,11 +491,11 @@ class QueryTests {
 
     @Test
     void multipleDatabasesJoin() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
-            .addDatabase(
-                databases.createNewMongoDB()
-                    .addMapping(MongoDB.address(databases.schema))
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
+            .addDatasource(
+                datasource.createNewMongoDB()
+                    .addMapping(MongoDB.address(datasource.schema))
             )
             .query("""
                 SELECT {
@@ -530,8 +530,8 @@ class QueryTests {
      */
     @Test
     void unnecessaryVariables() {
-        new QueryTestBase(databases.schema)
-            .addDatabase(databases.postgreSQL())
+        new QueryTestBase(datasource.schema)
+            .addDatasource(datasource.postgreSQL())
             .query("""
                 SELECT {
                     ?item number ?number ;

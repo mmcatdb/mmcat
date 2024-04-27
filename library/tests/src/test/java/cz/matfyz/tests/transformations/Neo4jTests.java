@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.Neo4j;
-import cz.matfyz.tests.example.common.TestDatabase;
+import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.wrapperneo4j.Neo4jControlWrapper;
 import cz.matfyz.wrapperneo4j.Neo4jStatement;
 
@@ -27,19 +27,19 @@ class Neo4jTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jTests.class);
 
-    private static final Databases databases = new Databases();
-    private static final SchemaCategory schema = databases.schema;
-    private static final TestDatabase<Neo4jControlWrapper> database = databases.neo4j();
+    private static final Datasources datasources = new Datasources();
+    private static final SchemaCategory schema = datasources.schema;
+    private static final TestDatasource<Neo4jControlWrapper> datasource = datasources.neo4j();
 
     @BeforeAll
     static void setup() {
-        database.setup();
+        datasource.setup();
     }
 
     @Test
     void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
-            var inputWrapper = database.wrapper.getPullWrapper();
+            var inputWrapper = datasource.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readNodeAsStringForTests(Neo4j.orderKind);
             LOGGER.debug("DB content:\n" + dbContent);
         });
@@ -47,7 +47,7 @@ class Neo4jTests {
 
     @Test
     void getForestForNodeTest() throws Exception {
-        new PullForestTestBase(Neo4j.order(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(Neo4j.order(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "customer": "Alice",
@@ -62,7 +62,7 @@ class Neo4jTests {
 
     @Test
     void getForestForRelationshipTest() throws Exception {
-        new PullForestTestBase(Neo4j.item(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(Neo4j.item(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "quantity": "10",
@@ -108,7 +108,7 @@ class Neo4jTests {
     @Test
     void testOfWrite() {
         assertDoesNotThrow(() -> {
-            database.wrapper.execute(List.of(
+            datasource.wrapper.execute(List.of(
                 Neo4jStatement.createEmpty(),
                 new Neo4jStatement("CREATE (a:TestOfWrite { test: '1' });")
             ));
@@ -119,7 +119,7 @@ class Neo4jTests {
         );
 
         assertThrows(ExecuteException.class, () -> {
-            database.wrapper.execute(invalidStatements);
+            datasource.wrapper.execute(invalidStatements);
         });
     }
 

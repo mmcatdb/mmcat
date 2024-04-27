@@ -12,7 +12,7 @@ import cz.matfyz.querying.algorithms.queryresult.QueryStructureMerger;
 import cz.matfyz.querying.algorithms.translator.QueryTranslator;
 import cz.matfyz.querying.core.QueryContext;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
-import cz.matfyz.querying.core.querytree.DatabaseNode;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.MinusNode;
@@ -27,10 +27,6 @@ import cz.matfyz.querying.parsing.Filter.ValueFilter;
 
 import java.util.List;
 
-/**
- * This class translates a query tree to a query for a specific database.
- * The provided tree has to have `database`, meaning it can be fully resolved withing the given database system.
- */
 public class QueryResolver implements QueryVisitor<QueryResult> {
 
     public static QueryResult run(QueryContext context, QueryNode rootNode) {
@@ -49,15 +45,15 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
         return rootNode.accept(this);
     }
 
-    public QueryResult visit(DatabaseNode node) {
+    public QueryResult visit(DatasourceNode node) {
         final QueryStatement query = QueryTranslator.run(context, node);
-        final var pullWrapper = node.database.control.getPullWrapper();
+        final var pullWrapper = node.datasource.control.getPullWrapper();
 
         return pullWrapper.executeQuery(query);
     }
 
     public QueryResult visit(PatternNode node) {
-        throw QueryTreeException.unsupportedOutsideDatabase(node);
+        throw QueryTreeException.unsupportedOutsideDatasource(node);
     }
 
     public QueryResult visit(FilterNode node) {

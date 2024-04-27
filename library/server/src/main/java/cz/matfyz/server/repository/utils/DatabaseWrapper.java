@@ -6,7 +6,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.exception.NotFoundException;
 import cz.matfyz.server.exception.RepositoryException;
 import cz.matfyz.wrapperpostgresql.PostgreSQLProvider;
-import cz.matfyz.wrapperpostgresql.PostgreSQLSettings;
+import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -54,7 +54,9 @@ public class DatabaseWrapper {
                 properties.port(),
                 properties.database(),
                 properties.username(),
-                properties.password()
+                properties.password(),
+                true,
+                true
             ));
 
         return connectionProvider;

@@ -25,10 +25,10 @@ const route = useRoute();
                 {{ logicalModel.id }}
             </ValueRow>
             <ValueRow
-                label="Database:"
+                label="Datasource:"
             >
-                <RouterLink :to="{ name: 'database', params: { id: logicalModel.database.id }, query: { categoryId: route.params.categoryId } }">
-                    {{ logicalModel.database.label }}
+                <RouterLink :to="{ name: 'datasource', params: { id: logicalModel.datasource.id }, query: { categoryId: route.params.categoryId } }">
+                    {{ logicalModel.datasource.label }}
                 </RouterLink>
             </ValueRow>
         </ValueContainer>

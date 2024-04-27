@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { Iri } from '@/types/dataSource';
 import { computed } from 'vue';
 
 type IriDisplayProps = {
-    iri?: Iri;
+    iri?: string;
     maxChars?: number;
     clickable?: boolean;
 };

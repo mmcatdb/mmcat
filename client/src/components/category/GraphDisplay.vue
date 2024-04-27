@@ -107,7 +107,7 @@ function toggleGroup(groupId: string) {
                             type="checkbox"
                             @input="() => toggleGroup(group.id)"
                         />
-                        {{ group.logicalModel.database.label }}
+                        {{ group.logicalModel.datasource.label }}
                     </label>
                 </div>
             </div>

@@ -2,6 +2,7 @@ package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.io.IOException;
@@ -18,19 +19,18 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jachymb.bartik
  */
-public class Neo4jControlWrapper implements AbstractControlWrapper {
+public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(Neo4jControlWrapper.class);
 
-    static final String TYPE = "neo4j";
-
     static final String FROM_NODE_PROPERTY_PREFIX = "_from.";
     static final String TO_NODE_PROPERTY_PREFIX = "_to.";
 
-    private Neo4jProvider provider;
+    private final Neo4jProvider provider;
 
     public Neo4jControlWrapper(Neo4jProvider provider) {
+        super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
     }
 
@@ -72,28 +72,6 @@ public class Neo4jControlWrapper implements AbstractControlWrapper {
             throw new ExecuteException(e, path);
         }
     }
-
-    // String beforePasswordString = new StringBuilder()
-    //     .append("cypher-shell -f ")
-    //     .append(path.toString())
-    //     .append(" -a bolt://")
-    //     .append(Neo4j.HOST)
-    //     .append(":")
-    //     .append(Neo4j.PORT)
-    //     .append(" -u ")
-    //     .append(Neo4j.USERNAME)
-    //     .append(" -p ")
-    //     .toString();
-
-    // LOGGER.info("Executing: " + beforePasswordString + "********");
-
-    // String commandString = beforePasswordString + Neo4j.PASSWORD;
-    // Runtime runtime = Runtime.getRuntime();
-    // Process process = runtime.exec(commandString);
-    // process.waitFor();
-
-    // BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    // LOGGER.info(bufferReader.lines().collect(Collectors.joining("\n")));
 
     @Override public Neo4jDDLWrapper getDDLWrapper() {
         return new Neo4jDDLWrapper();

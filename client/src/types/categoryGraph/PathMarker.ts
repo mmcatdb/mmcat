@@ -1,4 +1,4 @@
-import type { DatabaseConfiguration } from '../database';
+import type { DatasourceConfiguration } from '../datasource';
 import type { Signature } from '../identifiers';
 import { Cardinality, type Max, type Min } from '../schema';
 import type { Edge } from './Edge';
@@ -156,7 +156,7 @@ function createPathSegment(sourceNode: Node, neighbor: Neighbor, previousSegment
     };
 }
 
-export function createDefaultFilter(configuration: DatabaseConfiguration): Filter {
+export function createDefaultFilter(configuration: DatasourceConfiguration): Filter {
     return {
         function: (segment: PathSegment) => segment.previousSegment
             ? (segment.fullMorphism.max === Cardinality.One ? configuration.isPropertyToOneAllowed : configuration.isPropertyToManyAllowed)

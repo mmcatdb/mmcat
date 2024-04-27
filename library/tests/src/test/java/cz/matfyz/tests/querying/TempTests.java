@@ -1,7 +1,7 @@
 package cz.matfyz.tests.querying;
 
-import cz.matfyz.abstractwrappers.database.Database;
-import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.datasource.Datasource;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.querying.queryresult.ResultMap;
 import cz.matfyz.core.querying.queryresult.ResultNode;
@@ -10,8 +10,8 @@ import cz.matfyz.querying.algorithms.QueryTreeBuilder;
 import cz.matfyz.querying.core.querytree.QueryNode;
 import cz.matfyz.querying.parsing.Query;
 import cz.matfyz.querying.parsing.QueryParser;
-import cz.matfyz.tests.example.basic.Databases;
-import cz.matfyz.tests.example.common.TestDatabase;
+import cz.matfyz.tests.example.basic.Datasources;
+import cz.matfyz.tests.example.common.TestDatasource;
 
 import java.util.List;
 import java.util.TreeMap;
@@ -28,13 +28,13 @@ class TempTests {
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryTests.class);
 
-    private static final Databases databases = new Databases();
-    private static final List<Kind> kinds = defineKinds(List.of(databases.postgreSQL()));
+    private static final Datasources datasources = new Datasources();
+    private static final List<Kind> kinds = defineKinds(List.of(datasources.postgreSQL()));
 
     @Test
     void test() {
         final Query query = QueryParser.parse(queryString);
-        final QueryNode queryTree = QueryTreeBuilder.run(query.context, databases.schema, kinds, query.where);
+        final QueryNode queryTree = QueryTreeBuilder.run(query.context, datasources.schema, kinds, query.where);
         final var output = QueryResolver.run(query.context, queryTree);
 
         LOGGER.info("OK");
@@ -50,14 +50,14 @@ class TempTests {
         }
     """;
 
-    private static List<Kind> defineKinds(List<TestDatabase<?>> testDatabases) {
-        return testDatabases.stream()
-            .flatMap(testDatabase -> {
-                final var builder = new Database.Builder();
-                testDatabase.mappings.stream().forEach(builder::mapping);
-                final var database = builder.build(testDatabase.type, testDatabase.wrapper, testDatabase.id);
+    private static List<Kind> defineKinds(List<TestDatasource<?>> testDatasources) {
+        return testDatasources.stream()
+            .flatMap(testDatasource -> {
+                final var builder = new Datasource.Builder();
+                testDatasource.mappings.stream().forEach(builder::mapping);
+                final var datasource = builder.build(testDatasource.type, testDatasource.wrapper, testDatasource.id);
 
-                return database.kinds.stream();
+                return datasource.kinds.stream();
             })
             .toList();
     }

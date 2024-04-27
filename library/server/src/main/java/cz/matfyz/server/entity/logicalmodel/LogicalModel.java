@@ -16,17 +16,17 @@ import com.fasterxml.jackson.databind.ObjectReader;
 public class LogicalModel extends Entity {
 
     public final Id categoryId;
-    public final Id databaseId;
+    public final Id datasourceId;
     public final String label;
 
-    public LogicalModel(Id id, Id categoryId, Id databaseId, String label) {
+    public LogicalModel(Id id, Id categoryId, Id datasourceId, String label) {
         super(id);
         this.categoryId = categoryId;
-        this.databaseId = databaseId;
+        this.datasourceId = datasourceId;
         this.label = label;
     }
 
-    private static final List<String> idPropertyNames = List.of("id", "categoryId", "databaseId");
+    private static final List<String> idPropertyNames = List.of("id", "categoryId", "datasourceId");
 
     public String toJsonValue() throws JsonProcessingException {
         return Utils.toJsonWithoutProperties(this, idPropertyNames);
@@ -38,10 +38,10 @@ public class LogicalModel extends Entity {
 
     private static final ObjectReader reader = new ObjectMapper().readerFor(JsonValue.class);
 
-    public static LogicalModel fromJsonValue(Id id, Id categoryId, Id databaseId, String jsonValue) throws JsonProcessingException {
+    public static LogicalModel fromJsonValue(Id id, Id categoryId, Id datasourceId, String jsonValue) throws JsonProcessingException {
         final JsonValue parsedValue = reader.readValue(jsonValue);
 
-        return new LogicalModel(id, categoryId, databaseId, parsedValue.label);
+        return new LogicalModel(id, categoryId, datasourceId, parsedValue.label);
     }
 
 }
