@@ -4,9 +4,6 @@ import cz.matfyz.core.mapping.IdentifierStructure;
 
 import java.util.Set;
 
-/**
- * @author pavel.koupil
- */
 public interface AbstractICWrapper {
 
     void appendIdentifier(String kindName, IdentifierStructure identifier);

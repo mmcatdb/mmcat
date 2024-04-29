@@ -19,9 +19,6 @@ import org.neo4j.driver.Query;
 import org.neo4j.driver.Session;
 import org.neo4j.driver.Value;
 
-/**
- * @author jachymb.bartik
- */
 public class Neo4jPullWrapper implements AbstractPullWrapper {
 
     private Neo4jProvider provider;

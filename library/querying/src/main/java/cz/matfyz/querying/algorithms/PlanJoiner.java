@@ -1,7 +1,7 @@
 package cz.matfyz.querying.algorithms;
 
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.JoinCondition;
-import cz.matfyz.abstractwrappers.database.Database;
+import cz.matfyz.abstractwrappers.datasource.Datasource;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
@@ -13,7 +13,7 @@ import cz.matfyz.querying.core.ObjectColoring;
 import cz.matfyz.querying.core.JoinCandidate;
 import cz.matfyz.querying.core.JoinCandidate.JoinType;
 import cz.matfyz.querying.core.patterntree.KindPattern;
-import cz.matfyz.querying.core.querytree.DatabaseNode;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.PatternNode;
 import cz.matfyz.querying.core.querytree.QueryNode;
@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This class is responsible for joining multiple kinds from the same pattern plan. The kinds might be from different databases.
+ * This class is responsible for joining multiple kinds from the same pattern plan. The kinds might be from different datasources.
  */
 public class PlanJoiner {
 
@@ -58,9 +58,9 @@ public class PlanJoiner {
             // If there is only one kind, there is nothing to join.
             final var onlyKind = allKinds.stream().findFirst().get(); // NOSONAR
             final var patternNode = new PatternNode(allKinds, schema, List.of(), onlyKind.root.term);
-            final var database = onlyKind.kind.database;
+            final var datasource = onlyKind.kind.datasource;
 
-            return new DatabaseNode(patternNode, database);
+            return new DatasourceNode(patternNode, datasource);
         }
 
         // TODO there might be some joining needed for OPTIONAL joins?
@@ -68,7 +68,7 @@ public class PlanJoiner {
         final ObjectColoring coloring = ObjectColoring.create(allKinds);
         // First, we find all possible join candidates.
         final List<JoinCandidate> joinCandidates = createJoinCandidates(coloring);
-        // Then we group them by their database pairs. Remind you, both databases in the pair can be the same.
+        // Then we group them by their datasource pairs. Remind you, both datasources in the pair can be the same.
         final List<JoinGroup> candidateGroups = groupJoinCandidates(joinCandidates);
         // Remove the candidates that don't make sence or aren't necessary.
         final List<JoinGroup> filteredGroups = filterJoinCandidates(candidateGroups);
@@ -83,7 +83,7 @@ public class PlanJoiner {
     }
 
     /**
-     * Finds all possible join candidates between the kinds in the coloring. The databases of the kinds are not considered here.
+     * Finds all possible join candidates between the kinds in the coloring. The datasources of the kinds are not considered here.
      */
     private List<JoinCandidate> createJoinCandidates(ObjectColoring coloring) {
         final var output = new ArrayList<JoinCandidate>();
@@ -163,34 +163,34 @@ public class PlanJoiner {
             : null;
     }
 
-    /** A pair of databases. Both can be the same database! */
-    private record DatabasePair(Database first, Database second) implements Comparable<DatabasePair> {
-        public static DatabasePair create(JoinCandidate candidate) {
-            final var a = candidate.from().kind.database;
-            final var b = candidate.to().kind.database;
+    /** A pair of datasources. Both can be the same datasource! */
+    private record DatasourcePair(Datasource first, Datasource second) implements Comparable<DatasourcePair> {
+        public static DatasourcePair create(JoinCandidate candidate) {
+            final var a = candidate.from().kind.datasource;
+            final var b = candidate.to().kind.datasource;
             final boolean comparison = a.compareTo(b) > 0;
 
-            return new DatabasePair(comparison ? a : b, comparison ? b : a);
+            return new DatasourcePair(comparison ? a : b, comparison ? b : a);
         }
 
-        @Override public int compareTo(DatabasePair other) {
+        @Override public int compareTo(DatasourcePair other) {
             final int firstComparison = first.compareTo(other.first);
             return firstComparison != 0 ? firstComparison : second.compareTo(other.second);
         }
 
-        public boolean isSameDatabase() {
+        public boolean isSameDatasource() {
             return first.equals(second);
         }
     }
 
-    /** All candidates that have the same database pair. */
-    private record JoinGroup(DatabasePair databases, List<JoinCandidate> candidates) {}
+    /** All candidates that have the same datasource pair. */
+    private record JoinGroup(DatasourcePair datasources, List<JoinCandidate> candidates) {}
 
-    /** Groups the join candidates by their database pair. */
+    /** Groups the join candidates by their datasource pair. */
     private List<JoinGroup> groupJoinCandidates(List<JoinCandidate> candidates) {
-        final var output = new TreeMap<DatabasePair, List<JoinCandidate>>();
+        final var output = new TreeMap<DatasourcePair, List<JoinCandidate>>();
         candidates.forEach(c -> output
-            .computeIfAbsent(DatabasePair.create(c), p -> new ArrayList<>())
+            .computeIfAbsent(DatasourcePair.create(c), p -> new ArrayList<>())
             .add(c)
         );
 
@@ -200,7 +200,7 @@ public class PlanJoiner {
     }
 
     /**
-     * If there are multiple join candidates between the same databases, we don't need them all.
+     * If there are multiple join candidates between the same datasources, we don't need them all.
      * If there are any id-ref joins, we select one of them and discard all others.
      * Otherwise, we keep all value-value joins.
      */
@@ -208,7 +208,7 @@ public class PlanJoiner {
         return groups.stream().map(g -> {
             final var idRefCandidate = g.candidates.stream().filter(c -> c.type() == JoinType.IdRef).findFirst();
             return idRefCandidate.isPresent()
-                ? new JoinGroup(g.databases, List.of(idRefCandidate.get()))
+                ? new JoinGroup(g.datasources, List.of(idRefCandidate.get()))
                 : g;
         }).toList();
     }
@@ -216,11 +216,11 @@ public class PlanJoiner {
     private List<QueryPart> createQueryParts(List<JoinGroup> groups, List<JoinCandidate> candidatesBetweenParts) {
         final List<QueryPart> output = new ArrayList<>();
 
-        // First, we merge all kinds from a same database to a minimal number of query parts.
+        // First, we merge all kinds from a same datasource to a minimal number of query parts.
         groups.stream()
-            .filter(g -> g.databases.isSameDatabase())
+            .filter(g -> g.datasources.isSameDatasource())
             .forEach(g -> {
-                final var parts = mergeSameDatabaseCandidates(g.candidates, candidatesBetweenParts);
+                final var parts = mergeSameDatasourceCandidates(g.candidates, candidatesBetweenParts);
                 output.addAll(parts);
             });
 
@@ -228,9 +228,9 @@ public class PlanJoiner {
         final Set<KindPattern> coveredKinds = new TreeSet<>();
         output.forEach(p -> coveredKinds.addAll(p.kinds));
             
-        // Now we add the candidates between different databases to the betweenParts output.
+        // Now we add the candidates between different datasources to the betweenParts output.
         groups.stream()
-            .filter(g -> !g.databases.isSameDatabase())
+            .filter(g -> !g.datasources.isSameDatasource())
             .forEach(g -> candidatesBetweenParts.addAll(g.candidates));
         
         // Lastly, we create a single-kind query part for all kinds that are not covered by the previously created query parts. Let's hope they are covered by the joins.
@@ -244,19 +244,19 @@ public class PlanJoiner {
         return output;
     }
 
-    /** A query part is a part of query that can be executed at once in a single database. */
+    /** A query part is a part of query that can be executed at once in a single datasource. */
     public record QueryPart(Set<KindPattern> kinds, List<JoinCandidate> joinCandidates, Term rootTerm) {}
 
-    /** Merges kinds from a single database to a minimal number of query parts. */
-    private List<QueryPart> mergeSameDatabaseCandidates(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
+    /** Merges kinds from a single datasource to a minimal number of query parts. */
+    private List<QueryPart> mergeSameDatasourceCandidates(List<JoinCandidate> candidates, List<JoinCandidate> candidatesBetweenParts) {
         if (candidates.isEmpty())
             // TODO error?
             return List.of();
 
-        // All of the candidates have to have the same database.
-        final Database database = candidates.get(0).from().kind.database;
-        // If the database supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
-        if (database.control.getQueryWrapper().isJoinSupported())
+        // All of the candidates have to have the same datasource.
+        final Datasource datasource = candidates.get(0).from().kind.datasource;
+        // If the datasource supports joins, we use the candidates as edges to construct graph components. Then we create one query part from each component.
+        if (datasource.control.getQueryWrapper().isJoinSupported())
             return GraphUtils.findComponents(candidates).stream().map(this::createQueryPart).toList();
 
         // Othervise, we have to create custom query part for each kind.
@@ -344,14 +344,14 @@ public class PlanJoiner {
             return queryPart.kinds;
         }
 
-        public DatabaseNode toQueryNode(SchemaCategory schema) {
+        public DatasourceNode toQueryNode(SchemaCategory schema) {
             // TODO schema
             // final var pattern = PatternNode.createFinal(kinds(), null, queryPart.joinCandidates);
             // return new GroupNode(pattern, operations, filters);
             final var patternNode = new PatternNode(queryPart.kinds, schema, queryPart.joinCandidates, queryPart.rootTerm);
-            final var database = queryPart.kinds.stream().findFirst().get().kind.database;
+            final var datasource = queryPart.kinds.stream().findFirst().get().kind.datasource;
 
-            return new DatabaseNode(patternNode, database);
+            return new DatasourceNode(patternNode, datasource);
         }
     }
 

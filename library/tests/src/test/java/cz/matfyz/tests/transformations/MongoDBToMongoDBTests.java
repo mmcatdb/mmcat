@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
-import cz.matfyz.tests.example.common.TestDatabase;
+import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBDDLWrapper;
 import cz.matfyz.wrappermongodb.MongoDBDMLWrapper;
@@ -18,26 +18,23 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 class MongoDBToMongoDBTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToMongoDBTests.class);
 
-    private static final Databases databases = new Databases();
-    private static final SchemaCategory schema = databases.schema;
-    private static final TestDatabase<MongoDBControlWrapper> database = databases.mongoDB();
+    private static final Datasources datasources = new Datasources();
+    private static final SchemaCategory schema = datasources.schema;
+    private static final TestDatasource<MongoDBControlWrapper> datasource = datasources.mongoDB();
 
     @BeforeAll
     public static void setup() {
-        database.setup();
+        datasource.setup();
     }
 
     @Test
     void basicTest() {
         new PullToDDLAndDMLTestBase(
-            database.wrapper.getPullWrapper(),
+            datasource.wrapper.getPullWrapper(),
             new MongoDBDDLWrapper(),
             new MongoDBDMLWrapper(),
             MongoDB.order(schema)
@@ -64,7 +61,7 @@ class MongoDBToMongoDBTests {
     @Test
     void complex_arrayTest() {
         new PullToDDLAndDMLTestBase(
-            database.wrapper.getPullWrapper(),
+            datasource.wrapper.getPullWrapper(),
             new MongoDBDDLWrapper(),
             new MongoDBDMLWrapper(),
             MongoDB.item(schema)

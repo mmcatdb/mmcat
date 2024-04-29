@@ -11,9 +11,6 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
 import java.util.Collection;
 import java.util.Set;
 
-/**
- * @author pavel.koupil, jachymb.bartik
- */
 public class SchemaCategory {
 
     public final String label;

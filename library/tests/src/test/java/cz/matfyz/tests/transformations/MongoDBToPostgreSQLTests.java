@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.PostgreSQL;
 import cz.matfyz.wrapperpostgresql.PostgreSQLDDLWrapper;
 import cz.matfyz.wrapperpostgresql.PostgreSQLDMLWrapper;
@@ -16,26 +16,23 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
 class MongoDBToPostgreSQLTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBToPostgreSQLTests.class);
 
-    private static final Databases databases = new Databases();
-    private static final SchemaCategory schema = databases.schema;
+    private static final Datasources datasources = new Datasources();
+    private static final SchemaCategory schema = datasources.schema;
 
     @BeforeAll
     static void setup() {
-        databases.mongoDB().setup();
-        databases.postgreSQL().setup();
+        datasources.mongoDB().setup();
+        datasources.postgreSQL().setup();
     }
 
     @Test
     void basicTest() {
         new PullToDDLAndDMLTestBase(
-            databases.mongoDB().wrapper.getPullWrapper(),
+            datasources.mongoDB().wrapper.getPullWrapper(),
             new PostgreSQLDDLWrapper(),
             new PostgreSQLDMLWrapper(),
             PostgreSQL.order(schema)

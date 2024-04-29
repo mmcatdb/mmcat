@@ -22,9 +22,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 
-/**
- * @author jachymb.bartik
- */
 public class MTCAlgorithmTestBase {
 
     private record MappingWithRecords(

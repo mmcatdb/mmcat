@@ -3,9 +3,9 @@ package cz.matfyz.tests.transformations;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.tests.example.basic.Databases;
+import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.MongoDB;
-import cz.matfyz.tests.example.common.TestDatabase;
+import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -13,27 +13,23 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-/**
- * @author jachymb.bartik
- */
 public class MongoDBTests {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBTests.class);
 
-    private static final Databases databases = new Databases();
-    private static final SchemaCategory schema = databases.schema;
-    private static final TestDatabase<MongoDBControlWrapper> database = databases.mongoDB();
+    private static final Datasources datasources = new Datasources();
+    private static final SchemaCategory schema = datasources.schema;
+    private static final TestDatasource<MongoDBControlWrapper> datasource = datasources.mongoDB();
 
     @BeforeAll
     public static void setup() {
-        database.setup();
+        datasource.setup();
     }
 
     @Test
     void readFromDB_DoesNotThrow() {
         assertDoesNotThrow(() -> {
-            var inputWrapper = database.wrapper.getPullWrapper();
+            var inputWrapper = datasource.wrapper.getPullWrapper();
             var dbContent = inputWrapper.readCollectionAsStringForTests(MongoDB.orderKind);
             LOGGER.trace("DB content:\n" + dbContent);
         });
@@ -41,7 +37,7 @@ public class MongoDBTests {
 
     @Test
     void getForestForBasicTest() throws Exception {
-        new PullForestTestBase(MongoDB.order(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(MongoDB.order(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100"
@@ -54,7 +50,7 @@ public class MongoDBTests {
 
     @Test
     void getForestForStructureTest() throws Exception {
-        new PullForestTestBase(MongoDB.address(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(MongoDB.address(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100",
@@ -77,7 +73,7 @@ public class MongoDBTests {
 
     @Test
     void getForestForSimpleArrayTest() throws Exception {
-        new PullForestTestBase(MongoDB.tag(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(MongoDB.tag(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100",
@@ -100,7 +96,7 @@ public class MongoDBTests {
 
     @Test
     void getForestForComplexArrayTest() throws Exception {
-        new PullForestTestBase(MongoDB.item(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(MongoDB.item(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100",
@@ -145,7 +141,7 @@ public class MongoDBTests {
 
     @Test
     void getForestForEmptyArrayTest() throws Exception {
-        new PullForestTestBase(MongoDB.itemEmpty(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(MongoDB.itemEmpty(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100",
@@ -160,7 +156,7 @@ public class MongoDBTests {
 
     @Test
     void getForestForComplexMapTest() throws Exception {
-        new PullForestTestBase(MongoDB.note(schema), database.wrapper.getPullWrapper())
+        new PullForestTestBase(MongoDB.note(schema), datasource.wrapper.getPullWrapper())
             .expected("""
                 [{
                     "number": "o_100",

@@ -6,16 +6,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * @author jachymb.bartik
- */
 public class PostgreSQLProvider {
 
     public final PostgreSQLSettings settings;
 
     // This class is also meant to be instantiated only once (see the MongoDB wrapper) but it currently doesn't use any caching itself.
     // However, some connection pooling can be added in the future.
-    //private Connection connection;
 
     public PostgreSQLProvider(PostgreSQLSettings settings) {
         this.settings = settings;
@@ -23,11 +19,38 @@ public class PostgreSQLProvider {
 
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection(settings.getConnectionString());
+            return DriverManager.getConnection(settings.createConnectionString());
         }
         catch (SQLException e) {
             throw new OtherException(e);
         }
+    }
+
+    public record PostgreSQLSettings(
+        String host,
+        String port,
+        String database,
+        String username,
+        String password,
+        boolean isWritable,
+        boolean isQueryable
+    ) {
+
+        String createConnectionString() {
+            return new StringBuilder()
+                .append("jdbc:postgresql://")
+                .append(host)
+                .append(":")
+                .append(port)
+                .append("/")
+                .append(database)
+                .append("?user=")
+                .append(username)
+                .append("&password=")
+                .append(password)
+                .toString();
+        }
+
     }
 
 }

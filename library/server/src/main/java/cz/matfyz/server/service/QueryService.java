@@ -1,17 +1,17 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.abstractwrappers.database.Database;
-import cz.matfyz.abstractwrappers.database.Kind;
-import cz.matfyz.abstractwrappers.database.Database.DatabaseType;
+import cz.matfyz.abstractwrappers.datasource.Datasource;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.querying.queryresult.ResultList;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.querying.algorithms.QueryToInstance;
 import cz.matfyz.server.controller.QueryController.QueryPartDescription;
+import cz.matfyz.server.controller.DatasourceController;
 import cz.matfyz.server.controller.QueryController.QueryDescription;
 import cz.matfyz.server.controller.QueryController.QueryInit;
 import cz.matfyz.server.controller.QueryController.QueryVersionUpdate;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.database.DatabaseEntity;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.repository.QueryRepository;
@@ -25,9 +25,6 @@ import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @author jachym.bartik
- */
 @RestController
 public class QueryService {
 
@@ -46,55 +43,61 @@ public class QueryService {
     @Autowired
     private SchemaCategoryRepository categoryRepository;
 
+    @Autowired
+    private DatasourceController datasourceController;
+
     public ResultList executeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
-        final var kindsAndDatabases = defineKinds(categoryWrapper.id, category);
+        final var kindsAndDatasources = defineKinds(categoryWrapper.id, category);
 
-        return new QueryToInstance(category, queryString, kindsAndDatabases.kinds).execute();
+        return new QueryToInstance(category, queryString, kindsAndDatasources.kinds).execute();
     }
 
     public QueryDescription describeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
-        final var kindsAndDatabases = defineKinds(categoryWrapper.id, category);
+        final var kindsAndDatasources = defineKinds(categoryWrapper.id, category);
 
-        final var rawDescriptions = new QueryToInstance(category, queryString, kindsAndDatabases.kinds).describe();
+        final var rawDescriptions = new QueryToInstance(category, queryString, kindsAndDatasources.kinds).describe();
 
         final var parts = rawDescriptions.parts().stream().map(d -> {
-            final var database = kindsAndDatabases.databases.get(new Id(d.databaseIdentifier()));
-            return new QueryPartDescription(database.toInfo(), d.query());
+            final var datasource = kindsAndDatasources.datasources.get(new Id(d.datasourceIdentifier()));
+            final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
+            return new QueryPartDescription(datasourceDetail, d.query());
         }).toList();
 
         return new QueryDescription(parts);
     }
 
-    private record KindsAndDatabases(
+    private record KindsAndDatasources(
         List<Kind> kinds,
-        Map<Id, DatabaseEntity> databases
+        Map<Id, DatasourceWrapper> datasources
     ) {}
 
-    private KindsAndDatabases defineKinds(Id categoryId, SchemaCategory category) {
-        final Map<Id, DatabaseEntity> databases = new TreeMap<>();
+    private KindsAndDatasources defineKinds(Id categoryId, SchemaCategory category) {
+        final Map<Id, DatasourceWrapper> datasources = new TreeMap<>();
 
         final var kinds = logicalModelService
             .findAll(categoryId).stream()
-            // TODO enable neo4j when it's supported
-            .filter(model -> model.database().type != DatabaseType.neo4j)
             .flatMap(model -> {
-                final DatabaseEntity databaseEntity = model.database();
-                databases.put(databaseEntity.id, databaseEntity);
+                final DatasourceWrapper datasourceWrapper = model.datasource();
+                final var control = wrapperService.getControlWrapper(datasourceWrapper);
+                if (!control.isQueryable())
+                    return List.<Kind>of().stream();
 
-                final var builder = new Database.Builder();
+                datasources.put(datasourceWrapper.id, datasourceWrapper);
+
+                final var builder = new Datasource.Builder();
                 mappingService.findAll(model.logicalModel().id).forEach(mappingWrapper -> {
                     final var mapping = mappingWrapper.toMapping(category);
                     builder.mapping(mapping);
                 });
-                final var database = builder.build(databaseEntity.type, wrapperService.getControlWrapper(databaseEntity), databaseEntity.id.toString());
-                return database.kinds.stream();
+                final var datasource = builder.build(datasourceWrapper.type, control, datasourceWrapper.id.toString());
+                return datasource.kinds.stream();
             }).toList();
 
-        return new KindsAndDatabases(kinds, databases);
+        return new KindsAndDatasources(kinds, datasources);
     }
 
     public QueryWithVersion createQuery(QueryInit init) {

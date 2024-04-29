@@ -5,9 +5,6 @@ import cz.matfyz.server.entity.Id;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-/**
- * @author jachym.bartik
- */
 public class Run extends Entity {
 
     public final Id categoryId;

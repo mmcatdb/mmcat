@@ -9,9 +9,6 @@ import cz.matfyz.core.schema.SchemaObject;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * @author jachymb.bartik
- */
 public class InstanceCategoryBuilder {
 
     private SchemaCategory schemaCategory;

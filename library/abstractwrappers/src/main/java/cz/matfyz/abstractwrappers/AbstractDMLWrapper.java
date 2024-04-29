@@ -1,8 +1,5 @@
 package cz.matfyz.abstractwrappers;
 
-/**
- * @author pavel.koupil
- */
 public interface AbstractDMLWrapper {
 
     void setKindName(String name);

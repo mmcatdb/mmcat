@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 /**
  * This class represents a general node of the record tree. Record was already taken by java ...
- * @author jachymb.bartik
  */
 public abstract class DataRecord implements Serializable {
 

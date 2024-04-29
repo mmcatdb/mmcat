@@ -20,7 +20,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * Common ancestor for the access path tree. It can be a {@link ComplexProperty} or a {@link SimpleProperty}.
  * Each node is a tuple (name, context, value).
- * @author pavel.koupil, jachym.bartik
  */
 @JsonDeserialize(using = AccessPath.Deserializer.class)
 public abstract class AccessPath implements Printable {

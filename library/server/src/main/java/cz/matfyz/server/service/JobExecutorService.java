@@ -27,9 +27,7 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
-import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
-import cz.matfyz.server.entity.database.DatabaseEntity;
-import cz.matfyz.server.entity.datasource.DataSource;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
@@ -68,9 +66,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-/**
- * @author jachym.bartik
- */
 @Service
 public class JobExecutorService {
 
@@ -255,8 +250,8 @@ public class JobExecutorService {
         if (run.sessionId == null)
             throw SessionException.notFound(run.id);
 
-        final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
-        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(database).getPullWrapper();
+        final DatasourceWrapper datasource = logicalModelService.find(payload.logicalModelId()).datasource();
+        final AbstractPullWrapper pullWrapper = wrapperService.getControlWrapper(datasource).getPullWrapper();
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
@@ -286,12 +281,12 @@ public class JobExecutorService {
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
         @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
 
-        final DatabaseEntity database = logicalModelService.find(payload.logicalModelId()).database();
+        final DatasourceWrapper datasource = logicalModelService.find(payload.logicalModelId()).datasource();
         final List<Mapping> mappings = mappingService.findAll(payload.logicalModelId()).stream()
             .map(wrapper -> wrapper.toMapping(schema))
             .toList();
 
-        final AbstractControlWrapper control = wrapperService.getControlWrapper(database);
+        final AbstractControlWrapper control = wrapperService.getControlWrapper(datasource);
 
         final var output = new StringBuilder();
         for (final Mapping mapping : mappings) {
@@ -313,8 +308,8 @@ public class JobExecutorService {
             // TODO - verzovat databáze - tj. vytvořit vždy novou databázi (v rámci stejného engine)
             //  - např. uživatel zvolí "my_db", tak vytvářet "my_db_1", "my_db_2" a podobně
             //  - resp. při opětovném spuštění to smazat a vytvořit znovu ...
-            /*
-            if (server.executeModels()) {
+
+            if (server.executeModels() && control.isWritable()) {
                 LOGGER.info("Start executing models ...");
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");

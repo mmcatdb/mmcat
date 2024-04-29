@@ -1,10 +1,10 @@
 package cz.matfyz.server.example.basic;
 
 import cz.matfyz.server.configuration.SetupProperties;
-import cz.matfyz.server.entity.database.DatabaseEntity;
-import cz.matfyz.server.entity.database.DatabaseInit;
-import cz.matfyz.server.example.common.DatabaseSettings;
-import cz.matfyz.server.service.DatabaseService;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+import cz.matfyz.server.entity.datasource.DatasourceInit;
+import cz.matfyz.server.example.common.DatasourceSettings;
+import cz.matfyz.server.service.DatasourceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,26 +12,26 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("basicDatabaseSetup")
-class DatabaseSetup {
+@Component("basicDatasourceSetup")
+class DatasourceSetup {
 
-    private final DatabaseSettings settings;
-    private final DatabaseService databaseService;
+    private final DatasourceSettings settings;
+    private final DatasourceService datasourceService;
 
     @Autowired
-    DatabaseSetup(SetupProperties properties, DatabaseService databaseService) {
-        this.settings = new DatabaseSettings(properties, properties.basicDatabase());
-        this.databaseService = databaseService;
+    DatasourceSetup(SetupProperties properties, DatasourceService datasourceService) {
+        this.settings = new DatasourceSettings(properties, properties.basicDatabase());
+        this.datasourceService = datasourceService;
     }
 
-    List<DatabaseEntity> createDatabases() {
-        final List<DatabaseInit> inits = new ArrayList<>();
+    List<DatasourceWrapper> createDatasources() {
+        final List<DatasourceInit> inits = new ArrayList<>();
 
         inits.add(settings.createPostgreSQL("PostgreSQL - Basic"));
         inits.add(settings.createMongoDB("MongoDB - Basic"));
         inits.add(settings.createNeo4j("Neo4j - Basic"));
 
-        return inits.stream().map(databaseService::createNew).toList();
+        return inits.stream().map(datasourceService::createNew).toList();
     }
 
 }

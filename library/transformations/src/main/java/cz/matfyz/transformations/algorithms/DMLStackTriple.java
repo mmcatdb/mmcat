@@ -4,9 +4,6 @@ import cz.matfyz.core.instance.DomainRow;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.utils.printable.*;
 
-/**
- * @author pavel.koupil, jachym.bartik
- */
 public class DMLStackTriple implements Printable {
 
     public final DomainRow pid;

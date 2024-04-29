@@ -9,9 +9,6 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * @author jachym.bartik
- */
 public interface InputStreamProvider {
 
     InputStream getInputStream() throws IOException;

@@ -6,9 +6,6 @@ import cz.matfyz.querying.parsing.Term;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @author jachymb.bartik
- */
 public class ProjectingException extends QueryingException {
 
     protected ProjectingException(String name, Serializable data) {

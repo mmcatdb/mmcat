@@ -4,9 +4,6 @@ import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-/**
- * @author pavel.koupil
- */
 public class IdentifierStructure {
 
     private final SortedSet<String> properties;

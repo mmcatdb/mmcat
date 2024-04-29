@@ -12,7 +12,6 @@ import java.util.TreeMap;
 /**
  * This class represents an inner node of the record tree.
  * The value of this record are its children.
- * @author jachymb.bartik
  */
 public class ComplexRecord extends DataRecord implements IComplexRecord, Printable {
 

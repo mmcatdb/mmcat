@@ -5,9 +5,6 @@ import cz.matfyz.core.mapping.StaticName;
 
 import java.util.Set;
 
-/**
- * @author pavel.koupil
- */
 public interface AbstractDDLWrapper {
 
     String PATH_SEPARATOR = "/";

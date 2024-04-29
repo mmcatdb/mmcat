@@ -2,9 +2,6 @@ package cz.matfyz.abstractwrappers.exception;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class InvalidNameException extends WrapperException {
 
     private record InvalidNameData(

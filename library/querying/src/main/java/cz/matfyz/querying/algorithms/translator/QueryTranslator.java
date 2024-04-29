@@ -6,10 +6,10 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper.ComparisonOperator;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Constant;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.Property;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper.QueryStatement;
-import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.querying.core.QueryContext;
-import cz.matfyz.querying.core.querytree.DatabaseNode;
+import cz.matfyz.querying.core.querytree.DatasourceNode;
 import cz.matfyz.querying.core.querytree.FilterNode;
 import cz.matfyz.querying.core.querytree.JoinNode;
 import cz.matfyz.querying.core.querytree.MinusNode;
@@ -25,33 +25,33 @@ import cz.matfyz.querying.parsing.Term.Variable;
 import cz.matfyz.querying.parsing.Term;
 
 /**
- * This class translates a query tree to a query for a specific database.
- * The provided tree has to have `database`, meaning it can be fully resolved within the given database system.
+ * This class translates a query tree to a query for a specific datasource.
+ * The provided tree has to have `datasource`, meaning it can be fully resolved within the given datasource system.
  */
 public class QueryTranslator implements QueryVisitor<Void> {
 
-    public static QueryStatement run(QueryContext context, DatabaseNode databaseNode) {
-        return new QueryTranslator(context, databaseNode).run();
+    public static QueryStatement run(QueryContext context, DatasourceNode datasourceNode) {
+        return new QueryTranslator(context, datasourceNode).run();
     }
 
     private final QueryContext context;
-    private final DatabaseNode databaseNode;
+    private final DatasourceNode datasourceNode;
     private AbstractQueryWrapper wrapper;
 
-    public QueryTranslator(QueryContext context, DatabaseNode databaseNode) {
+    public QueryTranslator(QueryContext context, DatasourceNode datasourceNode) {
         this.context = context;
-        this.databaseNode = databaseNode;
+        this.datasourceNode = datasourceNode;
     }
 
     private QueryStatement run() {
-        this.wrapper = databaseNode.database.control.getQueryWrapper();
-        databaseNode.child.accept(this);
+        this.wrapper = datasourceNode.datasource.control.getQueryWrapper();
+        datasourceNode.child.accept(this);
 
         return this.wrapper.createDSLStatement();
     }
 
-    public Void visit(DatabaseNode node) {
-        throw QueryTreeException.multipleDatabases(databaseNode.database, node.database);
+    public Void visit(DatasourceNode node) {
+        throw QueryTreeException.multipleDatasources(datasourceNode.datasource, node.datasource);
     }
 
     public Void visit(PatternNode node) {

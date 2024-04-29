@@ -29,7 +29,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 /**
  * A complex value in the access path tree. Its context is a signature of a morphism (or undefined in case of an auxiliary property)
  * It has subpaths and it provides many methods needed by the algorithms described in the paper.
- * @author jachymb.bartik
  */
 @JsonSerialize(using = ComplexProperty.Serializer.class)
 @JsonDeserialize(using = ComplexProperty.Deserializer.class)

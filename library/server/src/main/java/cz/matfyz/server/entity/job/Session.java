@@ -11,8 +11,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
- * @author jachym.bartik
- * 
  * This class is something like a prototype of users' sessions. It is used mainly for preserving the results of transformation jobs.
  */
 public class Session extends Entity {

@@ -22,9 +22,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-/**
- * @author jachym.bartik
- */
 @Repository
 public class MappingRepository {
 
@@ -64,7 +61,7 @@ public class MappingRepository {
                 final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
                 output.set(new MappingWrapper(id, logicalModelId, parsedJsonValue));
             }
-        }, "Mapping with id: %s not found.", id);
+        }, "Mapping", id);
     }
 
     public List<MappingWrapper> findAll(Id logicalModelId) {

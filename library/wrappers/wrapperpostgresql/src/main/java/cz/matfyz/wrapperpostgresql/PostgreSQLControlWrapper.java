@@ -2,6 +2,7 @@ package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.io.IOException;
@@ -15,19 +16,15 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
-public class PostgreSQLControlWrapper implements AbstractControlWrapper {
+public class PostgreSQLControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSQLControlWrapper.class);
 
-    static final String TYPE = "postgresql";
-
-    private PostgreSQLProvider provider;
+    private final PostgreSQLProvider provider;
 
     public PostgreSQLControlWrapper(PostgreSQLProvider provider) {
+        super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
     }
 
@@ -66,35 +63,6 @@ public class PostgreSQLControlWrapper implements AbstractControlWrapper {
             throw new ExecuteException(e, path);
         }
     }
-
-    // String beforePasswordString = new StringBuilder()
-    //     .append("psql postgresql://")
-    //     .append(PostgreSQL.USERNAME)
-    //     .append(":")
-    //     .toString();
-
-    // String afterPasswordString = new StringBuilder()
-    //     .append("@")
-    //     .append(PostgreSQL.HOST)
-    //     .append(":")
-    //     .append(PostgreSQL.PORT)
-    //     .append("/")
-    //     .append(PostgreSQL.DATABASE)
-    //     .append(" -f ")
-    //     .append(path.toString())
-    //     .toString();
-
-    // LOGGER.info("Executing: " + beforePasswordString + "********" + afterPasswordString);
-
-    // String commandString = beforePasswordString + PostgreSQL.PASSWORD + afterPasswordString;
-    // Runtime runtime = Runtime.getRuntime();
-    // Process process = runtime.exec(commandString);
-    // process.waitFor();
-
-    // BufferedReader bufferReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    // String info = bufferReader.lines().collect(Collectors.joining());
-    // LOGGER.info(info);
-
 
     @Override public PostgreSQLDDLWrapper getDDLWrapper() {
         return new PostgreSQLDDLWrapper();

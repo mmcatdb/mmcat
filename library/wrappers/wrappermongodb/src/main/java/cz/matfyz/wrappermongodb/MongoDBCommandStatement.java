@@ -4,9 +4,6 @@ import cz.matfyz.abstractwrappers.AbstractStatement;
 
 import org.bson.BsonDocument;
 
-/**
- * @author jachymb.bartik
- */
 public class MongoDBCommandStatement implements AbstractStatement {
 
     private String content;

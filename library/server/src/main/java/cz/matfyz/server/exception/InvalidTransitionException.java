@@ -5,9 +5,6 @@ import cz.matfyz.server.entity.job.Job.State;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class InvalidTransitionException extends ServerException {
 
     private record Data(

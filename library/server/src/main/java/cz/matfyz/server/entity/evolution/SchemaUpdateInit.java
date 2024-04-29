@@ -5,9 +5,6 @@ import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 
 import java.util.List;
 
-/**
- * @author jachym.bartik
- */
 public record SchemaUpdateInit(
     Version prevVersion,
     List<VersionedSMO> operations,

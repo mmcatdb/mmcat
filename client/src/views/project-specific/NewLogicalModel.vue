@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { DatabaseWithConfiguration } from '@/types/database';
 import API from '@/utils/api';
 import { useRouter } from 'vue-router';
 import { useSchemaCategoryId } from '@/utils/injects';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
+import { Datasource } from '@/types/datasource';
 
-const databases = ref<DatabaseWithConfiguration[]>();
-const selectedDatabase = ref<DatabaseWithConfiguration>();
+const datasources = ref<Datasource[]>();
+const selectedDatasource = ref<Datasource>();
 const label = ref('');
 const fetching = ref(false);
 
 onMounted(async () => {
-    const result = await API.databases.getAllDatabaseInfos({});
+    const result = await API.datasources.getAllDatasources({});
     if (result.status)
-        databases.value = result.data.map(DatabaseWithConfiguration.fromServer);
+        datasources.value = result.data.map(Datasource.fromServer);
 });
 
 const router = useRouter();
@@ -23,13 +23,13 @@ const router = useRouter();
 const categoryId = useSchemaCategoryId();
 
 async function createLogicalModel() {
-    if (!selectedDatabase.value || !label.value)
+    if (!selectedDatasource.value || !label.value)
         return;
 
     fetching.value = true;
 
     const result = await API.logicalModels.createNewLogicalModel({}, {
-        databaseId: selectedDatabase.value.id,
+        datasourceId: selectedDatasource.value.id,
         categoryId,
         label: label.value,
     });
@@ -44,14 +44,14 @@ async function createLogicalModel() {
     <div>
         <h1>Create a new logical model</h1>
         <ValueContainer>
-            <ValueRow label="Database:">
-                <select v-model="selectedDatabase">
+            <ValueRow label="Datasource:">
+                <select v-model="selectedDatasource">
                     <option
-                        v-for="database in databases"
-                        :key="database.id"
-                        :value="database"
+                        v-for="datasource in datasources"
+                        :key="datasource.id"
+                        :value="datasource"
                     >
-                        {{ database.label }}
+                        {{ datasource.label }}
                     </option>
                 </select>
             </ValueRow>
@@ -61,7 +61,7 @@ async function createLogicalModel() {
         </ValueContainer>
         <div class="button-row">
             <button
-                :disabled="fetching || !selectedDatabase || !label"
+                :disabled="fetching || !selectedDatasource || !label"
                 @click="createLogicalModel"
             >
                 Create logical model

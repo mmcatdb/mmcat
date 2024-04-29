@@ -6,9 +6,6 @@ import cz.matfyz.core.identifiers.Signature;
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * @author jachymb.bartik
- */
 public class DependencyException extends EvolutionException {
 
     private record DependencyData(

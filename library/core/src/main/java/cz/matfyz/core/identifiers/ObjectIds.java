@@ -20,9 +20,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-/**
- * @author jachymb.bartik
- */
 @JsonSerialize(using = ObjectIds.Serializer.class)
 @JsonDeserialize(using = ObjectIds.Deserializer.class)
 public class ObjectIds implements Serializable {

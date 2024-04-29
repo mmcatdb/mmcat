@@ -1,8 +1,5 @@
 package cz.matfyz.abstractwrappers.querycontent;
 
-/**
- * @author jachym.bartik
- */
 public class KindNameQuery implements QueryContent {
 
     public final String kindName;

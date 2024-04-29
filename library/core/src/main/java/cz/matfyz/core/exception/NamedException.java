@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 /**
  * A base class for all exceptions. It is supposed to be recognized by the client application.
- * @author jachymb.bartik
  */
 @JsonSerialize(using = NamedException.Serializer.class)
 public abstract class NamedException extends RuntimeException {

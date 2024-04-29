@@ -2,9 +2,6 @@ package cz.matfyz.core.record;
 
 import cz.matfyz.core.identifiers.Signature;
 
-/**
- * @author jachymb.bartik
- */
 public class SimpleValueRecord<T> extends SimpleRecord<T> {
 
     private final T value;

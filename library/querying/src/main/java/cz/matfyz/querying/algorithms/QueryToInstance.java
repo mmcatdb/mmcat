@@ -1,6 +1,6 @@
 package cz.matfyz.querying.algorithms;
 
-import cz.matfyz.abstractwrappers.database.Kind;
+import cz.matfyz.abstractwrappers.datasource.Kind;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.querying.queryresult.QueryResult;

@@ -1,8 +1,5 @@
 package cz.matfyz.core.exception;
 
-/**
- * @author jachymb.bartik
- */
 public class SignatureException extends CoreException {
 
     private SignatureException(String type, String value) {

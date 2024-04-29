@@ -2,6 +2,7 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.io.BufferedReader;
@@ -15,19 +16,15 @@ import com.mongodb.MongoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author jachymb.bartik
- */
-public class MongoDBControlWrapper implements AbstractControlWrapper {
+public class MongoDBControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoDBControlWrapper.class);
 
-    static final String TYPE = "mongodb";
-
-    private MongoDBProvider provider;
+    private final MongoDBProvider provider;
 
     public MongoDBControlWrapper(MongoDBProvider provider) {
+        super(provider.settings.isWritable(), provider.settings.isQueryable());
         this.provider = provider;
     }
 
@@ -46,7 +43,7 @@ public class MongoDBControlWrapper implements AbstractControlWrapper {
     @Override public void execute(Path path) {
         try {
             // Unfortunatelly, there isn't a way how to run the commands by the driver. So we have to use the shell. Make sure the mongosh is installed.
-            String[] command = { "mongosh", provider.settings.getConnectionString(), path.toString() };
+            String[] command = { "mongosh", provider.settings.createConnectionString(), path.toString() };
 
             Runtime runtime = Runtime.getRuntime();
             Process process = runtime.exec(command);

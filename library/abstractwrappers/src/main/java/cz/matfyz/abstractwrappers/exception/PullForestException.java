@@ -5,9 +5,6 @@ import cz.matfyz.abstractwrappers.querycontent.QueryContent;
 
 import java.io.Serializable;
 
-/**
- * @author jachymb.bartik
- */
 public class PullForestException extends WrapperException {
 
     public PullForestException(String name, Serializable data, Exception exception) {

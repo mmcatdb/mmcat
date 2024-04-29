@@ -1,8 +1,5 @@
 package cz.matfyz.server.exception;
 
-/**
- * @author jachymb.bartik
- */
 public class RepositoryException extends ServerException {
 
     private RepositoryException(String name, Throwable cause) {

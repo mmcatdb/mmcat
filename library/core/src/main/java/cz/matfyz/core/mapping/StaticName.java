@@ -14,9 +14,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-/**
- * @author jachym.bartik
- */
 @JsonSerialize(using = StaticName.Serializer.class)
 @JsonDeserialize(using = StaticName.Deserializer.class)
 public class StaticName extends Name {

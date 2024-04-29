@@ -4,8 +4,7 @@ import API from '@/utils/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { useSchemaCategoryId } from '@/utils/injects';
 import type { Id } from '@/types/id';
-import { DataSource } from '@/types/dataSource';
-import { DatabaseInfo } from '@/types/database';
+import { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import RadioInput from '@/components/input/RadioInput.vue';
@@ -16,8 +15,7 @@ const emit = defineEmits<{
 }>();
 
 const logicalModels = ref<LogicalModel[]>();
-const dataSources = ref<DataSource[]>();
-const databases = ref<DatabaseInfo[]>();
+const datasources = ref<Datasource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
 const dataSourceId = ref<Id>();
@@ -35,9 +33,9 @@ onMounted(async () => {
     if (logicalModelResult.status)
         logicalModels.value = logicalModelResult.data.map(LogicalModel.fromServer);
 
-    const dataSourceResult = await API.dataSources.getAllDataSources({});
-    if (dataSourceResult.status)
-        dataSources.value = dataSourceResult.data.map(DataSource.fromServer);
+    const datasourceResult = await API.datasources.getAllDatasources({});
+    if (datasourceResult.status)
+        datasources.value = datasourceResult.data.map(Datasource.fromServer);
 
     const databaseResult = await API.databases.getAllDatabaseInfos({});
     if (databaseResult.status)

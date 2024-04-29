@@ -6,9 +6,6 @@ import cz.matfyz.tests.example.basic.PostgreSQL;
 
 import org.junit.jupiter.api.Test;
 
-/**
- * @author jachymb.bartik
- */
 class ICAlgorithmTests {
 
     private static final SchemaCategory schema = Schema.newSchemaCategory();

@@ -4,7 +4,6 @@ import java.util.List;
 
 /**
  * This class represents a base signature of a morphism or a dual to a morphism.
- * @author jachym.bartik
  */
 public class BaseSignature extends Signature {
 

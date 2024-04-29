@@ -54,8 +54,8 @@ const category = useSchemaCategoryInfo();
             <ValueRow label="Logical model:">
                 {{ mapping.logicalModel.label }}
             </ValueRow>
-            <ValueRow label="Database:">
-                {{ mapping.logicalModel.database.label }}
+            <ValueRow label="Datasource:">
+                {{ mapping.logicalModel.datasource.label }}
             </ValueRow>
             -->
         </ValueContainer>

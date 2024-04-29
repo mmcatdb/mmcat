@@ -6,9 +6,6 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Collection;
 
-/**
- * @author jachymb.bartik
- */
 public class ExecuteException extends WrapperException {
 
     private record ExecuteStatementsData(

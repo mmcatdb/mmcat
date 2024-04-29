@@ -60,7 +60,7 @@ export class Graph {
         node.remove();
         this.nodes.delete(object.key);
 
-        // Only the newly created nodes can be deleted an those can't be in any database so we don't have to remove their database placeholders.
+        // Only the newly created nodes can be deleted an those can't be in any datasource so we don't have to remove their datasource placeholders.
         // TODO might not be true anymore.
     }
 

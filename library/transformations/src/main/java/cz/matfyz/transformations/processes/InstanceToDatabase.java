@@ -20,9 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * @author jachym.bartik
- */
 public class InstanceToDatabase {
 
     private Mapping mapping;

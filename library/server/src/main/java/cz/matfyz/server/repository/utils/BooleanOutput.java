@@ -1,8 +1,5 @@
 package cz.matfyz.server.repository.utils;
 
-/**
- * @author jachym.bartik
- */
 public class BooleanOutput {
 
     private boolean output = false;

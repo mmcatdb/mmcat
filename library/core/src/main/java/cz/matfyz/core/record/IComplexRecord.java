@@ -7,7 +7,6 @@ import java.util.List;
 /**
  * This class represents an inner node (so it can be root) of the record tree.
  * The value of this record are its children.
- * @author jachymb.bartik
  */
 public interface IComplexRecord {
 

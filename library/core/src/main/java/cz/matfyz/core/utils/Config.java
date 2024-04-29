@@ -7,9 +7,6 @@ import java.io.FileReader;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-/**
- * @author jachymb.bartik
- */
 public class Config {
 
     private final String prefix;

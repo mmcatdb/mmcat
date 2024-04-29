@@ -4,10 +4,6 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 
 import java.util.Set;
 
-
-/**
- * @author jachymb.bartik
- */
 public class Neo4jDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
