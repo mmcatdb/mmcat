@@ -7,7 +7,6 @@ import type { Id } from '@/types/id';
 import { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import RadioInput from '@/components/input/RadioInput.vue';
 import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
 
 const emit = defineEmits<{
@@ -18,13 +17,11 @@ const logicalModels = ref<LogicalModel[]>();
 const datasources = ref<Datasource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
-const dataSourceId = ref<Id>();
-const databaseId = ref<Id>();
+const datasourceId = ref<Id>();
 const collectionName = ref('');
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
-const selectedOption = ref('database'); 
 
 const categoryId = useSchemaCategoryId();
 
@@ -37,10 +34,6 @@ onMounted(async () => {
     if (datasourceResult.status)
         datasources.value = datasourceResult.data.map(Datasource.fromServer);
 
-    const databaseResult = await API.databases.getAllDatabaseInfos({});
-    if (databaseResult.status)
-        databases.value = databaseResult.data.map(DatabaseInfo.fromServer);
-
     fetched.value = true;
 });
 
@@ -49,7 +42,7 @@ const dataValid = computed(() => {
         return false;
 
     if (actionType.value === ActionType.RSDToCategory) 
-        return !!dataSourceId.value || !!databaseId.value && !!collectionName.value;
+       return !!datasourceId.value && !!collectionName.value; // this will fail, if collectionName will be null
     else return !!logicalModelId.value;
     
 });
@@ -61,8 +54,8 @@ async function createAction() {
     if (actionType.value === ActionType.RSDToCategory) {
         payload = {
             type: actionType.value,
-            dataSourceId: dataSourceId.value || null,
-            databaseId: databaseId.value || null,
+            datasourceId: datasourceId.value,
+            //databaseId: databaseId.value || null,
             collectionName: collectionName.value || null,
         };
     }
@@ -112,56 +105,22 @@ async function createAction() {
             <ValueRow label="Label:">
                 <input v-model="actionName" />
             </ValueRow>
-            <ValueRow 
-                v-if="actionType === ActionType.RSDToCategory" label="Select data input:">
-                <RadioInput
-                    :model-value="selectedOption"
-                    :value="'dataSource'"
-                    :disabled="false"
-                    @update:model-value="selectedOption = $event"
-                >
-                    Data Source
-                </RadioInput>
-                <RadioInput
-                    :model-value="selectedOption"
-                    :value="'database'"
-                    :disabled="false"
-                    @update:model-value="selectedOption = $event"
-                >
-                    Database
-                </RadioInput> 
-            </ValueRow>
             <ValueRow
-                v-if="actionType === ActionType.RSDToCategory && selectedOption === 'dataSource'"
+                v-if="actionType === ActionType.RSDToCategory"
                 label="Data source:"
             >    
-                <select v-model="dataSourceId">
+                <select v-model="datasourceId">
                     <option
-                        v-for="dataSource in dataSources"
-                        :key="dataSource.id"
-                        :value="dataSource.id"
+                        v-for="datasource in datasources"
+                        :key="datasource.id"
+                        :value="datasource.id"
                     >
-                        {{ dataSource.label }}
+                        {{ datasource.label }}
                     </option>
                 </select>
             </ValueRow>
             <ValueRow
-                v-if="actionType === ActionType.RSDToCategory && selectedOption === 'database'"
-                label="Database:"
-            >    
-                <select v-model="databaseId">
-
-                    <option
-                        v-for="database in databases"
-                        :key="database.id"
-                        :value="database.id"
-                    >
-                        {{ database.label }}
-                    </option>
-                </select>
-            </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.RSDToCategory && selectedOption === 'database'"
+                v-if="actionType === ActionType.RSDToCategory"
                 label="Enter collection name:"
             >    
                 <textarea v-model="collectionName" 

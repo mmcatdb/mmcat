@@ -1,7 +1,6 @@
 import type { Entity, Id, VersionId } from './id';
 import { LogicalModelInfo, type LogicalModelFromServer, type LogicalModelInfoFromServer } from './logicalModel';
-import {  DatabaseInfo, type DatabaseInfoFromServer } from './database';
-import {  DataSource, type DataSourceFromServer } from './dataSource';
+import {  Datasource, type DatasourceFromServer } from './datasource';
 
 export type ActionFromServer = {
     id: Id;
@@ -90,8 +89,7 @@ export type ActionPayloadInit = {
     logicalModelId: Id;
 } | {
     type: ActionType.RSDToCategory;
-    dataSourceId?: Id; //these are now optional
-    databaseId?: Id;
+    datasourceId: Id; 
     collectionName?: String;
 };
 
@@ -153,8 +151,7 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
 }
 
 type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
-    dataSource?: DataSourceFromServer;
-    database?: DatabaseInfoFromServer;
+    datasource: DatasourceFromServer;
     collectionName?: String;
 };
 
@@ -162,20 +159,16 @@ class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory
     readonly type = ActionType.RSDToCategory;
 
     private constructor(
-        readonly dataSource?: DataSource,
-        readonly database?: DatabaseInfo,
+        readonly datasource: Datasource,
         readonly collectionName?: String,
     ) {
-        if (dataSource && database) 
-            throw new Error("RSDToCategoryPayload can only have one source of data: either 'Data Source' or 'Logical Model'");
         
     }
 
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
-        const dataSource = input.dataSource ? DataSource.fromServer(input.dataSource) : undefined;
-        const database = input.database ? DatabaseInfo.fromServer(input.database) : undefined;
+        const datasource =  Datasource.fromServer(input.datasource)
         const collectionName = input.collectionName ? input.collectionName : undefined
-        return new RSDToCategoryPayload(dataSource, database, collectionName);
+        return new RSDToCategoryPayload(datasource, collectionName);
     }
 }
 

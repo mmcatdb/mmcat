@@ -16,7 +16,6 @@
         <module>wrapperneo4j</module>
         <module>wrapperpostgresql</module>
         <module>wrapperriak</module>
-        <module>wrapperdummy</module>
         <module>wrapperjson</module>
         <module>wrappercsv</module>
     </modules>

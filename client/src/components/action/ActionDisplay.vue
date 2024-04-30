@@ -54,23 +54,15 @@ async function deleteAction() {
                 {{ action.payload.type }}
             </ValueRow>
             <ValueRow
-                v-if="action.payload.type === ActionType.RSDToCategory && action.payload.dataSource"
+                v-if="action.payload.type === ActionType.RSDToCategory "
                 label="Data source:"
             >
-                <RouterLink :to="{ name: 'dataSource', params: {id: action.payload.dataSource.id }, query: { categoryId: action.categoryId } }">
-                    {{ action.payload.dataSource.label }}
+                <RouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id }, query: { categoryId: action.categoryId } }">
+                    {{ action.payload.datasource.label }}
                 </RouterLink> 
             </ValueRow>
             <ValueRow
-                v-else-if="action.payload.type === ActionType.RSDToCategory && action.payload.database"
-                label="Database:"
-            >
-                <RouterLink :to="{ name: 'database', params: { id: action.payload.database.id } }">
-                    {{ action.payload.database.label }}
-                </RouterLink>
-            </ValueRow> 
-            <ValueRow
-                v-if="action.payload.type === ActionType.RSDToCategory && action.payload.database"
+                v-if="action.payload.type === ActionType.RSDToCategory"
                 label="Collection Name:"
             >
                 {{ action.payload.collectionName }}

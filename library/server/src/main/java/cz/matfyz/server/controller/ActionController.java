@@ -1,23 +1,25 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.evolution.Version;
-import cz.matfyz.server.entity.database.DatabaseEntity;
 import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.LogicalModelRepository;
-import cz.matfyz.server.repository.DatabaseRepository;
+import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
-import cz.matfyz.server.entity.datasource.DataSource;
+import cz.matfyz.server.entity.datasource.DatasourceDetail;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 
+import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
+import cz.matfyz.wrappermongodb.MongoDBProvider;
+import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -42,6 +44,9 @@ public class ActionController {
 
     @Autowired
     private LogicalModelController logicalModelController;
+
+    @Autowired
+    private DatasourceRepository datasourceRepository;
 
     @GetMapping("/schema-categories/{categoryId}/actions")
     public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {
@@ -94,18 +99,19 @@ public class ActionController {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
         if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
-            DataSource dataSource = null;
-            DatabaseEntity database = null;
             String collectionName = null;
-            if (rsdToCategoryPayload.dataSourceId() != null ){
-                dataSource = dataSourceRepository.find(rsdToCategoryPayload.dataSourceId());
-            }
-            else {
-                database = databaseRepository.find(rsdToCategoryPayload.databaseId());
+
+            DatasourceWrapper datasourceWrapper = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
+            // temporary solution
+            MongoDBSettings settings = new MongoDBSettings("localhost", "3205", "admin", "yelpbusiness", "user", "password", false, false);
+
+            DatasourceDetail datasource = DatasourceDetail.create(datasourceWrapper, new MongoDBControlWrapper(new MongoDBProvider(settings)));
+            try {
                 collectionName = rsdToCategoryPayload.collectionName();
             }
+            catch (Exception e) { }         
             
-            return new RSDToCategoryPayloadDetail(dataSource, database, collectionName);
+            return new RSDToCategoryPayloadDetail(datasource, collectionName);
         }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
@@ -145,8 +151,7 @@ public class ActionController {
     ) implements ActionPayloadDetail {}
     
     record RSDToCategoryPayloadDetail(
-            DataSource dataSource,
-            DatabaseEntity database,
+            DatasourceDetail datasource,
             String collectionName
     ) implements ActionPayloadDetail {}
 

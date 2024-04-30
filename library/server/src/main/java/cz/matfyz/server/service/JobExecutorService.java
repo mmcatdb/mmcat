@@ -26,22 +26,25 @@ import cz.matfyz.server.configuration.ServerProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
+import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 
+import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+
 import cz.matfyz.server.exception.SessionException;
 
 import cz.matfyz.server.repository.JobRepository;
-import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatabase;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
@@ -96,10 +99,7 @@ public class JobExecutorService {
     private QueryRepository queryRepository;
     
     @Autowired
-    private DataSourceService dataSourceService;
-    
-    @Autowired
-    private DatabaseService databaseService;
+    private DatasourceService datasourceService;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
@@ -215,35 +215,31 @@ public class JobExecutorService {
         SchemaCategoryWrapper originalWrapper = schemaService.find(originalId);
         String schemaCatName = originalWrapper.label;        
         final CategoryMappingPair categoryMappingPair;
-        String inputType;
-        DatabaseEntity databaseEntity = null;
-        
-        if (payload.databaseId()!= null){
-            databaseEntity = databaseService.find(payload.databaseId()); 
-            String databaseName = databaseEntity.settings.get("database").asText();
-            String port = databaseEntity.settings.get("port").asText();
-            String host = databaseEntity.settings.get("host").asText();
-            String uri = host + ":" + port;
-            inputType = "Database";
-            
-            categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, payload.collectionName(), schemaCatName, null, inputType).run();
-            
-        }
-        else {
-            final DataSource dataSource = dataSourceService.find(payload.dataSourceId());
-            final var inputStreamProvider = new UrlInputStreamProvider(dataSource.url);        
-            inputType = dataSource.type.name();
-           
-            categoryMappingPair = new MMInferOneInAll().input("appName", null, null, null, schemaCatName, inputStreamProvider, inputType).run();
+
+        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
+        // temporary solution
+        switch (datasourceWrapper.type) {
+            case mongodb:
+                String databaseName = datasourceWrapper.settings.get("database").asText();
+                String port = datasourceWrapper.settings.get("port").asText();
+                String host = datasourceWrapper.settings.get("host").asText();
+                String uri = host + ":" + port;
+                categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, payload.collectionName(), schemaCatName, null, datasourceWrapper.type).run();
+                break;
+            // now when I am using file
+            default:
+                final var inputStreamProvider = new UrlInputStreamProvider(datasourceWrapper.settings.get("url").asText()); 
+                categoryMappingPair = new MMInferOneInAll().input("appName", null, null, null, schemaCatName, inputStreamProvider, datasourceWrapper.type).run();       
+                break;
         }
                 
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
 
-        LogicalModelInit logicalModelInit = new LogicalModelInit(databaseEntity.id, originalId, "Initial logical model"); 
-        LogicalModelWithDatabase logicalModelWithDB = logicalModelService.createNew(logicalModelInit);
+        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, originalId, "Initial logical model"); 
+        LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
         
         schemaService.overwriteInfo(wrapper, originalId);
-        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDB.logicalModel().id);;
+        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
     }
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
@@ -314,7 +310,7 @@ public class JobExecutorService {
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
-            else { LOGGER.info("Models didn't get executed. Yikes");}*/
+            /*else { LOGGER.info("Models didn't get executed. Yikes");}*/
             /* for now I choose not to execute the statements, but just see if they even got created
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
