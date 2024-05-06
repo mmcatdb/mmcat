@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.matfyz.core.rsd.*;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.*;
 
@@ -23,7 +24,7 @@ public enum MapJSONRecord{
         result.setName(key);
         result.setUnique(Char.UNKNOWN);
         result.setId(Char.UNKNOWN);
-        result.setShare(new Share(1, firstOccurrence ? 1 : 0));
+        //result.setShare(new Share(1, firstOccurrence ? 1 : 0));
 
         int types = Type.OBJECT;
 
@@ -58,8 +59,9 @@ public enum MapJSONRecord{
         return result;
     }
 
-    private List<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
-        List<RecordSchemaDescription> children = new ArrayList<>();
+    private ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
+        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
+        //  List<RecordSchemaDescription> children = new ArrayList<>();
 //        Set<RecordSchemaDescription> children = new HashSet<>();
         for (Map.Entry<String, Object> value : t1) {
             children.add(process(value.getKey(), value.getValue(), true, true));
@@ -68,8 +70,9 @@ public enum MapJSONRecord{
         return children;
     }
 
-    private List<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
-        List<RecordSchemaDescription> children = new ArrayList<>();
+    private ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
+        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
+        //List<RecordSchemaDescription> children = new ArrayList<>();
         Set<Object> visited = new HashSet<>();
         for (Object value : t1) {
             if (value == null) {

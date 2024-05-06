@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperjson;
 
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
+import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
@@ -97,5 +98,24 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
         return null;
 
     }
+
+     @Override
+    public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
+    }
+
+    @Override
+    public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'loadPropertyData'");
+    }
+
+    @Override
+    public AbstractInferenceWrapper copy() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+    }
+
 
 }

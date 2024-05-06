@@ -12,45 +12,44 @@ import java.io.Serializable;
  */
 public class Share implements Serializable {
 
-    private Integer total;
-    private Integer first;
+	private int total;
+	private int first;
 
-    public Share() {
-        this.total = 1;
-        this.first = 1;
-    }
+	public Share() {
+		this.total = 1;
+		this.first = 1;
+	}
 
-    public Share(Integer total, Integer first) {
-        this.total = total;
-        this.first = first;
-    }
+	public Share(int total, int first) {
+		this.total = total;
+		this.first = first;
+	}
 
-    public Integer getTotal() {
-        return total;
-    }
+	public int getTotal() {
+		return total;
+	}
 
-    public void setTotal(Integer total) {
-        this.total = total;
-    }
+	public void setTotal(int total) {
+		this.total = total;
+	}
 
-    public Integer getFirst() {
-        return first;
-    }
+	public int getFirst() {
+		return first;
+	}
 
-    public void setFirst(Integer first) {
-        this.first = first;
-    }
+	public void setFirst(int first) {
+		this.first = first;
+	}
 
-    @Override
-    public String toString() {
-        return "Share{" + total + "/" + first + '}';
-    }
-
-    public Share add(Share other) {
-        Share result = new Share();
-        result.total = this.total + other.total;
-        result.first = this.first + other.first;
-        return result;
-    }
+	@Override
+	public String toString() {
+		return "Share{" + total + "/" + first + '}';
+	}
+        
+        public Share add(Share other) {
+            this.total += other.total;
+            this.first += other.first;
+            return this;
+        }
 
 }

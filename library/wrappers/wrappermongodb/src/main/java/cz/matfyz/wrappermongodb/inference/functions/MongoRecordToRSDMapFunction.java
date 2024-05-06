@@ -4,13 +4,13 @@
  */
 package cz.matfyz.wrappermongodb.inference.functions;
 
+import cz.matfyz.core.rsd.*;
+
 import java.io.Serializable;
 
+import cz.matfyz.wrappermongodb.inference.helpers.MapMongoDocument;
 import org.apache.spark.api.java.function.Function;
 import org.bson.Document;
-
-import cz.matfyz.core.rsd.*;
-import cz.matfyz.wrappermongodb.inference.helpers.MapMongoDocument;
 
 /**
  *
@@ -18,10 +18,10 @@ import cz.matfyz.wrappermongodb.inference.helpers.MapMongoDocument;
  */
 public class MongoRecordToRSDMapFunction implements Function<Document, RecordSchemaDescription>, Serializable {
 
-    @Override
-    public RecordSchemaDescription call(Document t1) {
-        return MapMongoDocument.INSTANCE.process(t1);
-    }
+	@Override
+	public RecordSchemaDescription call(Document t1) {
+		return MapMongoDocument.INSTANCE.process(t1);
+	}
 
 
 }

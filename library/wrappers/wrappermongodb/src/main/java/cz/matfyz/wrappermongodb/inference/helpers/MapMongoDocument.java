@@ -1,42 +1,50 @@
 package cz.matfyz.wrappermongodb.inference.helpers;
 
+//import cz.cuni.matfyz.mminfer.model.*;
 //import cz.cuni.matfyz.mminfer.persister.model.RecordSchemaDescription;
+import cz.matfyz.core.rsd.Char;
+import cz.matfyz.core.rsd.Model;
+import cz.matfyz.core.rsd.RecordSchemaDescription;
+import cz.matfyz.core.rsd.Type;
+import java.util.Collections;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.matfyz.core.rsd.*;
-
-import java.util.*;
+//import java.util.*;
+//import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList; 
 
 /**
  *
  * @author sebastian.hricko
  */
 public enum MapMongoDocument {
-    INSTANCE;
+	INSTANCE;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapMongoDocument.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MapMongoDocument.class);
 
-    public RecordSchemaDescription process(Document t) {
-        RecordSchemaDescription result = new RecordSchemaDescription();
+	public RecordSchemaDescription process(Document t) {
+		RecordSchemaDescription result = new RecordSchemaDescription();
 
-        result.setName("_");
-        result.setUnique(Char.FALSE);
-        result.setShare(new Share());
-        result.setId(Char.FALSE);
-        result.setTypes(Type.MAP);
-        result.setModels(Model.DOC);
+		result.setName("_");
+		result.setUnique(Char.FALSE);
+		result.setShareTotal(1);
+		result.setShareFirst(1);
+//		result.setShare(new Share());
+		result.setId(Char.FALSE);
+		result.setTypes(Type.MAP);
+		result.setModels(Model.DOC);
 
-        List<RecordSchemaDescription> children = new ArrayList<>();
+		ObjectArrayList/*List*/<RecordSchemaDescription> children = new ObjectArrayList/*ArrayList*/<>(t.size());
 
-        t.forEach((key, value) -> children.add(MapMongoRecord.INSTANCE.process(key, value, true, true)));
+		t.forEach((key, value) -> children.add(MapMongoRecord.INSTANCE.process(key, value, true, true)));
 
-        Collections.sort(children);
+		Collections.sort(children);
 
-        result.setChildren(children);
+		result.setChildren(children);
 
-        return result;
-    }
+		return result;
+	}
 
 }

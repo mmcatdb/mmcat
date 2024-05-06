@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cz.matfyz.core.rsd.*;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.*;
 
@@ -18,12 +19,13 @@ public enum MapJSONDocument {
 
         result.setName("_");
         result.setUnique(Char.FALSE);
-        result.setShare(new Share());
+       // result.setShare(new Share());
         result.setId(Char.FALSE);
         result.setTypes(Type.MAP);
         result.setModels(Model.DOC);
 
-        List<RecordSchemaDescription> children = new ArrayList<>();
+        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
+        //List<RecordSchemaDescription> children = new ArrayList<>();
 
         t.forEach((key, value) -> children.add(MapJSONRecord.INSTANCE.process(key, value, true, true)));
 

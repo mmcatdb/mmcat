@@ -4,14 +4,13 @@
  */
 package cz.matfyz.wrappermongodb.inference.functions;
 
+import cz.matfyz.core.rsd.RawProperty;
 import java.io.Serializable;
 import java.util.*;
 
+import cz.matfyz.wrappermongodb.inference.helpers.MongoRecordToRawPropertyFlatMap;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.bson.Document;
-
-import cz.matfyz.core.rsd.RawProperty;
-import cz.matfyz.wrappermongodb.inference.helpers.MongoRecordToRawPropertyFlatMap;
 
 /**
  *
@@ -19,15 +18,15 @@ import cz.matfyz.wrappermongodb.inference.helpers.MongoRecordToRawPropertyFlatMa
  */
 public class MongoRecordToDataRawPropertyFlatMapFunction implements FlatMapFunction<Document, RawProperty>, Serializable {
 
-    String collectionName;
+	String collectionName;
 
-    public MongoRecordToDataRawPropertyFlatMapFunction(String collectionName) {
-        this.collectionName = collectionName;
-    }
+	public MongoRecordToDataRawPropertyFlatMapFunction(String collectionName) {
+		this.collectionName = collectionName;
+	}
 
-    @Override
-    public Iterator<RawProperty> call(Document t) {
-        return MongoRecordToRawPropertyFlatMap.INSTANCE.process(collectionName, t, false, true);
-    }
+	@Override
+	public Iterator<RawProperty> call(Document t) {
+		return MongoRecordToRawPropertyFlatMap.INSTANCE.process(collectionName, t, false, true);
+	}
 
 }

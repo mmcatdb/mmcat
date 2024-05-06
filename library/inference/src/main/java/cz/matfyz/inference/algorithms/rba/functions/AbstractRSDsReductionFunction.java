@@ -4,10 +4,9 @@
  */
 package cz.matfyz.inference.algorithms.rba.functions;
 
+import cz.matfyz.core.rsd.RecordSchemaDescription;
 import java.io.Serializable;
 import org.apache.spark.api.java.function.Function2;
-
-import cz.matfyz.core.rsd.RecordSchemaDescription;
 
 /**
  *

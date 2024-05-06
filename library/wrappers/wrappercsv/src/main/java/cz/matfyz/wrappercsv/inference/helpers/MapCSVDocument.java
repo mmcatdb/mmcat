@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import cz.matfyz.core.rsd.*;
 import cz.matfyz.wrappercsv.inference.helpers.MapCSVDocument;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList; 
+
 import java.util.*;
 
 public enum MapCSVDocument {
@@ -18,16 +20,18 @@ public enum MapCSVDocument {
 
         result.setName("_");
         result.setUnique(Char.FALSE);
-        result.setShare(new Share());
+        //result.setShare(new Share());
         result.setId(Char.FALSE);
         result.setTypes(Type.MAP);
         result.setModels(Model.DOC);
 
-        List<RecordSchemaDescription> children = new ArrayList<>();
+        //List<RecordSchemaDescription> children = new ArrayList<>();
+
+        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
 
         t.forEach((key, value) -> children.add(MapCSVRecord.INSTANCE.process(key, value, true, true)));
         
-        Collections.sort(children);
+        //Collections.sort(children);
 
         result.setChildren(children);
 

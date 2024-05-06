@@ -10,8 +10,7 @@
         <module>core</module>
         <module>transformations</module>
         <module>wrappers</module>
-        <module>inference</module>
-        <module>inference2</module> 
+        <module>inference</module> 
         <module>server</module>
         <module>evolution</module>
         <module>querying</module>
