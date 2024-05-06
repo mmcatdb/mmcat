@@ -63,9 +63,9 @@ async function deleteAction() {
             </ValueRow>
             <ValueRow
                 v-if="action.payload.type === ActionType.RSDToCategory"
-                label="Collection Name:"
+                label="Kind Name:"
             >
-                {{ action.payload.collectionName }}
+                {{ action.payload.kindName }}
             </ValueRow> 
             <ValueRow
                 v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"

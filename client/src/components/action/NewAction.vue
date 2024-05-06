@@ -18,7 +18,7 @@ const datasources = ref<Datasource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
 const datasourceId = ref<Id>();
-const collectionName = ref('');
+const kindName = ref('');
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
@@ -42,7 +42,7 @@ const dataValid = computed(() => {
         return false;
 
     if (actionType.value === ActionType.RSDToCategory) 
-       return !!datasourceId.value && !!collectionName.value; // this will fail, if collectionName will be null
+       return !!datasourceId.value && !!kindName.value; // this will fail, if kindName will be null
     else return !!logicalModelId.value;
     
 });
@@ -55,8 +55,7 @@ async function createAction() {
         payload = {
             type: actionType.value,
             datasourceId: datasourceId.value,
-            //databaseId: databaseId.value || null,
-            collectionName: collectionName.value || null,
+            kindName: kindName.value,
         };
     }
     else {
@@ -121,9 +120,9 @@ async function createAction() {
             </ValueRow>
             <ValueRow
                 v-if="actionType === ActionType.RSDToCategory"
-                label="Enter collection name:"
+                label="Enter kind name:"
             >    
-                <textarea v-model="collectionName" 
+                <textarea v-model="kindName" 
                 >
                 </textarea>    
             </ValueRow>

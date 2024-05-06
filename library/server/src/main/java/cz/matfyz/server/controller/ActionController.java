@@ -99,7 +99,7 @@ public class ActionController {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
         if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
-            String collectionName = null;
+            String kindName = null;
 
             DatasourceWrapper datasourceWrapper = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
             // temporary solution
@@ -107,11 +107,11 @@ public class ActionController {
 
             DatasourceDetail datasource = DatasourceDetail.create(datasourceWrapper, new MongoDBControlWrapper(new MongoDBProvider(settings)));
             try {
-                collectionName = rsdToCategoryPayload.collectionName();
+                kindName = rsdToCategoryPayload.kindName();
             }
             catch (Exception e) { }         
             
-            return new RSDToCategoryPayloadDetail(datasource, collectionName);
+            return new RSDToCategoryPayloadDetail(datasource, kindName);
         }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
@@ -152,7 +152,7 @@ public class ActionController {
     
     record RSDToCategoryPayloadDetail(
             DatasourceDetail datasource,
-            String collectionName
+            String kindName
     ) implements ActionPayloadDetail {}
 
 }

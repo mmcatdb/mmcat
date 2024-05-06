@@ -8,6 +8,6 @@ import cz.matfyz.server.entity.action.ActionPayload;
  */
 public record RSDToCategoryPayload(
         Id datasourceId,
-        String collectionName
+        String kindName
 ) implements ActionPayload {}
 
