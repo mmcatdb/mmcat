@@ -18,9 +18,12 @@ import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 
-import cz.matfyz.inference.MMInferOneInAll;
-import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+//import cz.matfyz.inference.MMInferOneInAll;
+//import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.server.builder.MetadataContext;
+
+import cz.matfyz.inference2.MMInferOneInAll;
+import cz.matfyz.inference2.schemaconversion.utils.CategoryMappingPair;
 
 import cz.matfyz.server.configuration.ServerProperties;
 import cz.matfyz.server.entity.Id;

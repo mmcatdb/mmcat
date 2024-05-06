@@ -29,7 +29,7 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
 	private int id;		// TODO: rozepsat na konstanty vestaveneho datoveho typu char, podobne jako typy a modely
 
 	private /*Set<Type>*/ int types;
-
+ 
 	private /*Set<Model>*/ int models;
 
 	private /*List*/ ObjectArrayList<RecordSchemaDescription> children;	// TODO: pouzit knihovnu https://trove4j.sourceforge.net/javadocs/gnu/trove/list/linked/TLinkedList.html nebo podobne efektivni a vhodnou - mene vytvorenych objektu, pametove uspornejsi a ve vysledku rychlejsi
