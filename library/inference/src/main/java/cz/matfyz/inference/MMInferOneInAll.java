@@ -6,9 +6,7 @@ package cz.matfyz.inference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Scanner;
 import cz.matfyz.inference.algorithms.miner.CandidateMinerAlgorithm;
-//import cz.matfyz.inference2.algorithms.miner.CandidateMinerAlgorithmLegacy;
 import cz.matfyz.inference.algorithms.pba.PropertyBasedAlgorithm;
-//import cz.matfyz.inference2.algorithms.pba.PropertyBasedAlgorithmLegacy;
 import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalCombFunction;
 import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalSeqFunction;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
@@ -23,6 +21,11 @@ import cz.matfyz.core.rsd.utils.BasicHashFunction;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.utils.StartingEndingFilter;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+
 import static org.apache.hadoop.crypto.key.KeyProvider.options;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
@@ -36,11 +39,14 @@ import cz.matfyz.core.utils.InputStreamProvider;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
-import cz.matfyz.wrapperjson.JSONInferenceWrapper;
-import cz.matfyz.wrappercsv.CSVInferenceWrapper;
+import cz.matfyz.wrapperjson.JsonInferenceWrapper;
+import cz.matfyz.wrappercsv.CsvInferenceWrapper;
 import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+
+/// brand new ///
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 
 /**
@@ -55,17 +61,19 @@ public class MMInferOneInAll {
 	public static String appName;
     public static String uri;
     public static String databaseName;
-    public static String collectionName;
+    public static String kindName;
+	public static List<String> collectionNames;
     public static String schemaCatName;
     public static InputStreamProvider inputStreamProvider;
     public static DatasourceType datasourceType;
     public static String checkpointDir;
 
-	public MMInferOneInAll input(String appName, String uri, String databaseName, String collectionName, String schemaCatName, InputStreamProvider inputStreamProvider, DatasourceType datasourceType) {
+	public MMInferOneInAll input(String appName, String uri, String databaseName, String kindName, List<String> collectionNames, String schemaCatName, InputStreamProvider inputStreamProvider, DatasourceType datasourceType) {
         MMInferOneInAll.appName = appName;
         MMInferOneInAll.uri = uri;
         MMInferOneInAll.databaseName = databaseName;
-        MMInferOneInAll.collectionName = collectionName;
+        MMInferOneInAll.kindName = kindName;
+		MMInferOneInAll.collectionNames = collectionNames;
         MMInferOneInAll.schemaCatName = schemaCatName;
         MMInferOneInAll.inputStreamProvider = inputStreamProvider;
         MMInferOneInAll.datasourceType = datasourceType;   
@@ -121,78 +129,204 @@ public class MMInferOneInAll {
 		System.out.println("RESULT_TIME_PROPERTY_BA TOTAL: " + (end - start) + "ms");
 	}
 
-/* 	public static void executePBALegacy(AbstractInferenceWrapper2 wrapper, boolean stop) {
-		PropertyBasedAlgorithmLegacy pba = new PropertyBasedAlgorithmLegacy();
 
-		DefaultLocalSeqFunction seqFunction = new DefaultLocalSeqFunction();
-		DefaultLocalCombFunction combFunction = new DefaultLocalCombFunction();
-
-		long start = System.currentTimeMillis();
-		RecordSchemaDescription rsd = pba.process(wrapper, seqFunction, combFunction, stop);
-//		RecordSchemaDescription rsd2 = finalize.process();		// TODO: SLOUCIT DOHROMADY!
-		long end = System.currentTimeMillis();
-
-		System.out.print("RESULT_PROPERTY_LEGACY: ");
-		System.out.println(rsd == null ? "NULL" : rsd);
-		System.out.println("RESULT_TIME_LEGACY TOTAL: " + (end - start) + "ms");
-	}*/
-
-        public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper) throws Exception {
+        public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
             // TODO
             BloomFilter.setParams(10000, new BasicHashFunction());
             StartingEndingFilter.setParams(10000);
             CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
-            Candidates candidates = candidateMiner.process(wrapper);
+            Candidates candidates = candidateMiner.process(wrapper, kinds);
 
 			return candidates;
         }
                
 
 	public static CategoryMappingPair innerRun() throws Exception {
+		configureLogging();
+		System.out.println("RESULT_TIME ----- ----- ----- ----- -----");
+	
+		Map<String, AbstractInferenceWrapper> wrappers = prepareWrappers();
+	
+		Map<String, RecordSchemaDescription> rsds = wrappers.entrySet().stream()
+			.collect(Collectors.toMap(Map.Entry::getKey,
+									  entry -> MMInferOneInAll.executeRBA(entry.getValue(), true)));
+		// or this is the written out version
+		/*
+		Map<String, RecordSchemaDescription> rsds = new HashMap<>();
+		for (String collectionName : wrappers.keySet()) {
+			RecordSchemaDescription r = MMInferOneInAll.executeRBA(wrappers.get(collectionName), true);
+			rsds.put(collectionName, r);
+		} */
+	
+		RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
+	
+		SchemaConverter scon = new SchemaConverter(rsd, schemaCatName, kindName);
+		return scon.convertToSchemaCategoryAndMapping();
+	}
 
-//		Logger.getLogger("org.apache.spark").setLevel(Level.INFO);
-//		Logger.getLogger("org.sparkproject").setLevel(Level.INFO);
-		LoggingSystem.get(MMInferOneInAll.class.getClassLoader()).setLogLevel("org.apache.spark", LogLevel.WARN);
-		LoggingSystem.get(MMInferOneInAll.class.getClassLoader()).setLogLevel("org.sparkproject", LogLevel.WARN);
-		LoggingSystem.get(MMInferOneInAll.class.getClassLoader()).setLogLevel("io.netty", LogLevel.WARN);
-		LoggingSystem.get(MMInferOneInAll.class.getClassLoader()).setLogLevel("org.apache.hadoop", LogLevel.WARN);
-		LoggingSystem.get(MMInferOneInAll.class.getClassLoader()).setLogLevel("com.mongodb", LogLevel.WARN);
-		LoggingSystem.get(MMInferOneInAll.class.getClassLoader()).setLogLevel("org.mongodb", LogLevel.WARN);
-
-		AbstractInferenceWrapper wrapper; // = new MongoDBInferenceSchemaLessWrapper2(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
-
-			System.out.println("RESULT_TIME ----- ----- ----- ----- -----");
-
-		switch(datasourceType) { 
+	private static Map<String, AbstractInferenceWrapper> prepareWrappers() throws IllegalArgumentException {
+		Map<String, AbstractInferenceWrapper> wrappers = new HashMap<>();
+		switch (datasourceType) {
 			case mongodb:
-				wrapper = new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, collectionName, checkpointDir);
+				collectionNames.forEach(name ->
+					wrappers.put(name, new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, name, checkpointDir)));
 				break;
-	/* 		case json:
-				wrapper = new JSONInferenceWrapper(sparkMaster, appName, inputStreamProvider, checkpointDir);
+			case json:
+				wrappers.put("single_collection", new JsonInferenceWrapper(sparkMaster, appName, inputStreamProvider, checkpointDir));
 				break;
 			case csv:
-				wrapper = new CSVInferenceWrapper(sparkMaster, appName, inputStreamProvider, checkpointDir);
-				break;*/
-			default:
-				wrapper = null;
-				System.out.println("Forbidden input type used."); 
+				wrappers.put("single_collection", new CsvInferenceWrapper(sparkMaster, appName, inputStreamProvider, checkpointDir));
 				break;
+			default:
+				throw new IllegalArgumentException("Unsupported or undefined datasource type.");
 		}
-
-		Candidates candidates = MMInferOneInAll.executeCandidateMiner(wrapper);
-
-		System.out.println("Candidates");
-		System.out.println(candidates);
-		
-		RecordSchemaDescription rsd = MMInferOneInAll.executeRBA(wrapper, true);
-		// MMInferOneInAll.executeRBA(wrapper, printSchema.equalsIgnoreCase("print"));
-
-		SchemaConverter scon = new SchemaConverter(rsd, schemaCatName, collectionName);
-
-        CategoryMappingPair cmp = scon.convertToSchemaCategoryAndMapping();
-
-        return cmp;                   
-		
-
+		return wrappers;
 	}
+	
+	private static RecordSchemaDescription mergeRecordSchemaDescriptions(Map<String, RecordSchemaDescription> rsds) {
+		if (rsds.size() == 1) {
+			return rsds.values().iterator().next();
+		}
+		// Assuming mergeByName is a method that merges all RSDs into a complex one based on names.
+		return mergeByName(rsds);
+	}
+
+	private static void configureLogging() {
+		ClassLoader classLoader = MMInferOneInAll.class.getClassLoader();
+		String[] loggers = {"org.apache.spark", "org.sparkproject", "io.netty", "org.apache.hadoop", "com.mongodb", "org.mongodb"};
+		for (String logger : loggers) {
+			LoggingSystem.get(classLoader).setLogLevel(logger, LogLevel.WARN);
+		}
+	}
+
+	public static RecordSchemaDescription mergeByNames(Map<String, RecordSchemaDescription> rsds) {
+		RecordSchemaDescription complexRSD = new RecordSchemaDescription();
+
+		for (String collectionName : rsds.keySet()) {
+			RecordSchemaDescription rsd = rsds.get(collectionName);
+			//rsdToAdd.setName(collectionName);
+			ObjectArrayList<RecordSchemaDescription> children = complexRSD.getChildren();
+			//children.add(rsdToAdd);
+		}
+		return complexRSD;
+	}
+
+	public static RecordSchemaDescription mergeByName(Map<String, RecordSchemaDescription> rsds) {
+		RecordSchemaDescription complexRSD = null;
+	
+		// Traverse through all entries in rsds
+		for (RecordSchemaDescription rsd : rsds.values()) {
+			if (mergeChildren(rsd, rsds)) {
+				complexRSD = rsd;
+			}			
+		}
+		return complexRSD;
+	}
+	
+	/**
+	 * Recursively replace children of the given rsd if their names match any key in rsds.
+	 */
+	private static boolean mergeChildren(RecordSchemaDescription rsd, Map<String, RecordSchemaDescription> rsds) {
+		//System.out.println("mergeChildren, rsd name: " + rsd.getName());
+		if (rsd.getChildren() != null && !rsd.getChildren().isEmpty()) {
+			ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
+			
+			for (RecordSchemaDescription child : rsd.getChildren()) {
+				if (rsds.containsKey(child.getName())) {
+					//System.out.println("replacing child: " + child.getName());
+					// Replace the child with the corresponding RSD from rsds
+					RecordSchemaDescription replacementRSD = rsds.get(child.getName());
+					replacementRSD.setName(child.getName());
+					mergeChildren(replacementRSD, rsds); // Ensure to merge its children too
+					newChildren.add(replacementRSD);
+				} else {
+					// Otherwise, recursively process this child
+					mergeChildren(child, rsds);
+					newChildren.add(child);
+				}
+			}
+	
+			// Update the children of the current rsd
+			if (newChildren != rsd.getChildren()) {
+				rsd.setChildren(newChildren);
+				return true;
+			}
+
+			return false;
+		}
+		return false;
+	}
+
+	// merges two RSDs into one, creating a new root
+	public static RecordSchemaDescription mergeToComplex(Map<String, RecordSchemaDescription> rsds) {
+		RecordSchemaDescription complexRSD = new RecordSchemaDescription();
+		complexRSD.setName("_");
+		// changing the root name "_" to collectionName
+		// be aware that I am not setting any additional fields, like shareFirst or shareTotal for the root
+		for (String collectionName : rsds.keySet()) {
+			RecordSchemaDescription rsdToAdd = rsds.get(collectionName);
+			rsdToAdd.setName(collectionName);
+			ObjectArrayList<RecordSchemaDescription> children = complexRSD.getChildren();
+			children.add(rsdToAdd);
+		}
+		return complexRSD;
+	}
+
+    // Recursive method to merge two RSDs
+    public static RecordSchemaDescription mergeRSDs(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) {
+        if (rsd1 == null || rsd2 == null) {
+			System.out.println("returning just one");
+            return rsd1 != null ? rsd1 : rsd2;
+        }
+
+        // RecordSchemaDescription mergedRSD = new RecordSchemaDescription(rsd1.name);
+		RecordSchemaDescription mergedRSD = new RecordSchemaDescription();
+		mergedRSD.setName(rsd1.getName());
+        Map<String, RecordSchemaDescription> childMap = new HashMap<>();
+
+        // Process all children from rsd1
+        for (RecordSchemaDescription child : rsd1.getChildren()) {
+			RecordSchemaDescription ch = new RecordSchemaDescription();
+			ch.setName(child.getName());
+            childMap.put(child.getName(), ch);
+        }
+
+        // Merge children from rsd1 into the map
+        for (RecordSchemaDescription child : rsd1.getChildren()) {
+            RecordSchemaDescription mergedChild = childMap.get(child.getName());
+            mergeChildProperties(mergedChild, child);
+        }
+
+        // Merge children from rsd2 into the map
+        for (RecordSchemaDescription child : rsd2.getChildren()) {
+            if (childMap.containsKey(child.getName())) {
+                RecordSchemaDescription mergedChild = childMap.get(child.getName());
+                mergeChildProperties(mergedChild, child);
+                mergedChild = mergeRSDs(mergedChild, child);
+            } else {
+				RecordSchemaDescription ch = new RecordSchemaDescription();
+				ch.setName(child.getName());
+                childMap.put(child.getName(), ch);
+                mergeChildProperties(childMap.get(child.getName()), child);
+            }
+        }
+
+        // Add all values from the map to the merged RSD
+		ObjectArrayList<RecordSchemaDescription> children = mergedRSD.getChildren();
+		for (RecordSchemaDescription ch : childMap.values()) {
+			children.add(ch);
+		}
+        mergedRSD.setChildren(children);
+        return mergedRSD;
+    }
+
+    // Helper method to merge properties of two RSDs
+    private static void mergeChildProperties(RecordSchemaDescription target, RecordSchemaDescription source) {
+        target.setUnique(target.getUnique() + source.getUnique());
+        target.setShareTotal(target.getShareTotal() + source.getShareTotal());
+        target.setShareFirst(target.getShareFirst() + source.getShareFirst());
+        //target.types |= source.types; // Assuming bitwise OR for types
+        //target.models += source.models; // Summing models if applicable
+    }
+
 }

@@ -14,9 +14,20 @@ import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 
+import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
+
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
 import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
+
+import cz.matfyz.wrapperjson.JsonControlWrapper;
+import cz.matfyz.wrapperjson.JsonProvider;
+import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
+
+import cz.matfyz.wrappercsv.CsvControlWrapper;
+import cz.matfyz.wrappercsv.CsvProvider;
+import cz.matfyz.wrappercsv.CsvProvider.CsvSettings;
+
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
@@ -99,22 +110,35 @@ public class ActionController {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
         if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
-            String kindName = null;
-
-            DatasourceWrapper datasourceWrapper = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
-            // temporary solution
-            MongoDBSettings settings = new MongoDBSettings("localhost", "3205", "admin", "yelpbusiness", "user", "password", false, false);
-
-            DatasourceDetail datasource = DatasourceDetail.create(datasourceWrapper, new MongoDBControlWrapper(new MongoDBProvider(settings)));
-            try {
-                kindName = rsdToCategoryPayload.kindName();
-            }
-            catch (Exception e) { }         
-            
+            final var datasource = createDatasourceDetail(rsdToCategoryPayload);
+            final var kindName = rsdToCategoryPayload.kindName();            
             return new RSDToCategoryPayloadDetail(datasource, kindName);
         }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
+    }
+
+    private DatasourceDetail createDatasourceDetail(RSDToCategoryPayload rsdToCategoryPayload) {
+        DatasourceWrapper datasourceWrapper = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
+
+        switch (datasourceWrapper.type) {
+            case mongodb:
+                MongoDBSettings settings = new MongoDBSettings(datasourceWrapper.settings.get("host").asText(), datasourceWrapper.settings.get("port").asText(), 
+                    datasourceWrapper.settings.get("authenticationDatabase").asText(), datasourceWrapper.settings.get("database").asText(), datasourceWrapper.settings.get("username").asText(), 
+                    datasourceWrapper.settings.get("password").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
+                    // above probably shouldnt use asText() for the bool values?
+                return DatasourceDetail.create(datasourceWrapper, new MongoDBControlWrapper(new MongoDBProvider(settings)));
+            case json:
+                JsonSettings settingsJson = new JsonSettings(datasourceWrapper.settings.get("url").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
+                return DatasourceDetail.create(datasourceWrapper, new JsonControlWrapper(new JsonProvider(settingsJson)));
+            case csv:
+                CsvSettings settingsCsv = new CsvSettings(datasourceWrapper.settings.get("url").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
+                return DatasourceDetail.create(datasourceWrapper, new CsvControlWrapper(new CsvProvider(settingsCsv)));
+            default:
+                throw new IllegalArgumentException("Unsupported or undefined datasource type.");
+        }
+
+        
     }
 
     record ActionDetail(

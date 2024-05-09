@@ -23,7 +23,7 @@ import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 
-import cz.matfyz.server.configuration.ServerProperties;
+import cz.matfyz.server.configuration.ServerProperties; 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
@@ -54,6 +54,7 @@ import cz.matfyz.transformations.processes.InstanceToDatabase;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
@@ -69,6 +70,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoClient;
 
 @Service
 public class JobExecutorService {
@@ -153,95 +158,7 @@ public class JobExecutorService {
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
-    /**
-     * Layout algo using JUNG library
-     * @param objects
-     * @return
-     */
-    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
-        // first create SchemaGraph - I decided not to, because there is no logic to access Nodes/Edges
-        // create JUNG graph        
-        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
-        
-        for (SchemaObject o : objects) {
-            graph.addVertex(o);
-        }
-        for (SchemaMorphism m : morphisms) {
-            graph.addEdge(m, m.dom(), m.cod());
-        }
-        
-        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
-        layout.setSize(new Dimension(600, 600));
-        
-        for (int i = 0; i < 1000; i ++) { // to initialize positions
-            layout.step();
-        }
-
-        Map<Key, Position> positions = new HashMap<>();
-        for (SchemaObject node : graph.getVertices()) {
-            double x = layout.getX(node);
-            double y = layout.getY(node);
-            positions.put(node.key(), new Position(x, y));
-        }
-        
-        return positions;        
-    }
-
-    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-        MetadataContext context = new MetadataContext();
-
-        Id id = new Id("schm_from_rsd"); //now hard coded special id
-        context.setId(id);
-
-        Version version = Version.generateInitial(); 
-        context.setVersion(version);
-
-        //maybe get rid of this second loop? and do all in one
-        Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());
-
-        for (Map.Entry<Key, Position> entry: positions.entrySet()) {
-            Key key = entry.getKey();
-            Position position = entry.getValue();
-            context.setPosition(key, position);
-        }
-        SchemaCategoryWrapper wrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
-
-        return wrapper;
-    }
     
-
-    // refactor this method!!
-    private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
-        Id originalId = run.categoryId;
-        SchemaCategoryWrapper originalWrapper = schemaService.find(originalId);
-        String schemaCatName = originalWrapper.label;        
-        final CategoryMappingPair categoryMappingPair;
-
-        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
-        // temporary solution
-        switch (datasourceWrapper.type) {
-            case mongodb:
-                String databaseName = datasourceWrapper.settings.get("database").asText();
-                String port = datasourceWrapper.settings.get("port").asText();
-                String host = datasourceWrapper.settings.get("host").asText();
-                String uri = host + ":" + port;
-                categoryMappingPair = new MMInferOneInAll().input("appName", uri, databaseName, payload.collectionName(), schemaCatName, null, datasourceWrapper.type).run();
-                break;
-            // now when I am using file
-            default:
-                final var inputStreamProvider = new UrlInputStreamProvider(datasourceWrapper.settings.get("url").asText()); 
-                categoryMappingPair = new MMInferOneInAll().input("appName", null, null, null, schemaCatName, inputStreamProvider, datasourceWrapper.type).run();       
-                break;
-        }
-                
-        SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
-
-        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, originalId, "Initial logical model"); 
-        LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
-        
-        schemaService.overwriteInfo(wrapper, originalId);
-        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
-    }
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
         if (run.sessionId == null)
@@ -353,6 +270,99 @@ public class JobExecutorService {
         SchemaCategoryUpdate.setToVersion(nextCategory, updates, wrapper.version, nextVersion);
 
         return new QueryEvolver(prevCategory, nextCategory, updates);
+    }
+
+    private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+        SchemaCategoryWrapper originalWrapper = schemaService.find(run.categoryId);   // extracting the empty SK wrapper
+        String schemaCatName = originalWrapper.label;        
+
+        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
+        
+        final CategoryMappingPair categoryMappingPair = processDatasource(datasourceWrapper, schemaCatName, payload);
+
+        SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+
+        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model"); 
+        LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
+        
+        schemaService.overwriteInfo(wrapper, run.categoryId);
+        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);        
+    } 
+
+    private CategoryMappingPair processDatasource(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
+        switch (datasourceWrapper.type) {
+            case mongodb:    
+                return processMongoDB(datasourceWrapper, schemaCatName, payload);
+            case json:
+                return processFile(datasourceWrapper, schemaCatName, payload);
+            case csv:
+                return processFile(datasourceWrapper, schemaCatName, payload);
+            default:
+            throw new IllegalArgumentException("Unsupported or undefined datasource type.");
+        }
+    }
+
+    private CategoryMappingPair processMongoDB(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
+        String databaseName = datasourceWrapper.settings.get("database").asText();
+        String port = datasourceWrapper.settings.get("port").asText();
+        String host = datasourceWrapper.settings.get("host").asText();
+        String uri = host + ":" + port;
+
+        MongoClient mongoClient = MongoClients.create("mongodb://" + uri);
+        MongoDatabase database = mongoClient.getDatabase(databaseName);
+        List<String> collectionNames = database.listCollectionNames().into(new ArrayList<>());
+        collectionNames.forEach(name -> System.out.println("collection name: " + name));
+
+        return new MMInferOneInAll().input("appName", uri, database.getName(), payload.kindName(), collectionNames, schemaCatName, null, datasourceWrapper.type).run();
+    }
+    
+    private CategoryMappingPair processFile(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
+        UrlInputStreamProvider inputStreamProvider = new UrlInputStreamProvider(datasourceWrapper.settings.get("url").asText()); 
+        return new MMInferOneInAll().input("appName", null, null, payload.kindName(), null, schemaCatName, inputStreamProvider, datasourceWrapper.type).run();       
+    }
+
+      /**
+     * Layout algo using JUNG library
+     * @param objects
+     * @return
+     */
+    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {    
+        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
+        
+        for (SchemaObject o : objects) {
+            graph.addVertex(o);
+        }
+        for (SchemaMorphism m : morphisms) {
+            graph.addEdge(m, m.dom(), m.cod());
+        }
+        
+        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
+        layout.setSize(new Dimension(600, 600));
+        
+        for (int i = 0; i < 1000; i ++) { // initialize positions
+            layout.step();
+        }
+
+        Map<Key, Position> positions = new HashMap<>();
+        for (SchemaObject node : graph.getVertices()) {
+            double x = layout.getX(node);
+            double y = layout.getY(node);
+            positions.put(node.key(), new Position(x, y));
+        }
+        
+        return positions;        
+    }
+
+    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
+        MetadataContext context = new MetadataContext();
+ 
+        context.setId(new Id(null)); 
+        context.setVersion(Version.generateInitial());
+
+        Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());
+        positions.forEach(context::setPosition);
+
+        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
     }
 
 }
