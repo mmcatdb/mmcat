@@ -1,4 +1,4 @@
-package cz.matfyz.wrappermongodb.inference.functions;
+package cz.matfyz.wrappermongodb.inference;
 
 import cz.matfyz.core.rsd.Char;
 import cz.matfyz.core.rsd.Model;
@@ -15,23 +15,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
-public class MongoRecordToPropertiesMapFunction implements FlatMapFunction<Document, RecordSchemaDescription> {
+public class RecordToPropertiesMap implements FlatMapFunction<Document, RecordSchemaDescription> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoRecordToPropertiesMapFunction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecordToPropertiesMap.class);
 
     private final String collectionName;
 
-    public MongoRecordToPropertiesMapFunction(String collectionName) {
-        this.collectionName = collectionName + '/';
+    public RecordToPropertiesMap(String collectionName) {
+        this.collectionName = collectionName;
     }
 
     @Override
     public Iterator<RecordSchemaDescription> call(Document document) throws Exception {
-
-        ObjectArrayList<RecordSchemaDescription> result = new ObjectArrayList<>();    // TODO: USE FAST UTIL!
+        // TODO: USE FAST UTIL!
+        ObjectArrayList<RecordSchemaDescription> result = new ObjectArrayList<>();
 
         document.forEach((key, value) -> {
-            appendProperty(collectionName/* + '/'*/ + key, value, 1, result, true);
+            appendProperty(collectionName + '/' + key, value, 1, result, true);
         });
 
         return result.iterator();

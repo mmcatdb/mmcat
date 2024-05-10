@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement;
 
 import java.util.Set;
 
@@ -12,7 +13,7 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
         kindName = name;
     }
 
-    @Override public boolean isSchemaLess() {
+    @Override public boolean isSchemaless() {
         return true;
     }
 
@@ -32,8 +33,8 @@ public class Neo4jDDLWrapper implements AbstractDDLWrapper {
         return false;
     }
 
-    @Override public Neo4jStatement createDDLStatement() {
-        return Neo4jStatement.createEmpty();
+    @Override public AbstractStatement createDDLStatement() {
+        return AbstractStatement.createEmpty();
     }
 
 }

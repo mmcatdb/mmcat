@@ -1,6 +1,7 @@
 package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
@@ -64,8 +65,8 @@ public class MongoDBControlWrapper extends BaseControlWrapper implements Abstrac
         return new MongoDBDDLWrapper();
     }
 
-    @Override public MongoDBICWrapper getICWrapper() {
-        return new MongoDBICWrapper();
+    @Override public AbstractICWrapper getICWrapper() {
+        return AbstractICWrapper.createEmpty();
     }
 
     @Override public MongoDBDMLWrapper getDMLWrapper() {

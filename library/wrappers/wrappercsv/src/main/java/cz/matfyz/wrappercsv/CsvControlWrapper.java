@@ -42,7 +42,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
     }
 
     @Override public AbstractICWrapper getICWrapper() {
-        throw new UnsupportedOperationException("CsvControlWrapper.getICWrapper not implemented.");
+        return AbstractICWrapper.createEmpty();
     }
 
     @Override public AbstractDMLWrapper getDMLWrapper() {

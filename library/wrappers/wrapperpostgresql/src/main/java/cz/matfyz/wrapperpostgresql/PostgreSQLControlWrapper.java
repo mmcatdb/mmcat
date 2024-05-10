@@ -2,6 +2,7 @@ package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
@@ -54,7 +55,7 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper implements Abst
             final var statements = Stream.of(script.split(";\\s*\n"))
                 .map(String::strip)
                 .filter(s -> !s.isBlank())
-                .map(s -> (AbstractStatement) new PostgreSQLStatement(s))
+                .map(s -> (AbstractStatement) new StringStatement(s))
                 .toList();
 
             execute(statements);

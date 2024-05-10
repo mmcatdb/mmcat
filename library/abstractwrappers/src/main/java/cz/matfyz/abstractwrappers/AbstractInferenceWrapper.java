@@ -19,7 +19,7 @@ public abstract class AbstractInferenceWrapper {
 
     public abstract JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema();
 
-        public abstract JavaPairRDD<String, PropertyHeuristics> loadPropertyData();
+    public abstract JavaPairRDD<String, PropertyHeuristics> loadPropertyData();
 
     public abstract void initiateContext();
 
@@ -27,6 +27,6 @@ public abstract class AbstractInferenceWrapper {
 
     public abstract JavaPairRDD<String, RecordSchemaDescription> loadRSDPairs();
 
-        public abstract AbstractInferenceWrapper copy();
+    public abstract AbstractInferenceWrapper copy();
 
 }

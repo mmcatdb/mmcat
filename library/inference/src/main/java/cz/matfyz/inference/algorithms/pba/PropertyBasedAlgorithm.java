@@ -4,7 +4,6 @@ import cz.matfyz.inference.algorithms.pba.functions.AbstractCombFunction;
 import cz.matfyz.inference.algorithms.pba.functions.AbstractSeqFunction;
 import cz.matfyz.inference.algorithms.pba.functions.FinalizeCombFunction;
 import cz.matfyz.inference.algorithms.pba.functions.FinalizeSeqFunction;
-import cz.matfyz.inference.algorithms.pba.functions.MapTupleToPropertySchemaDescription;
 import cz.matfyz.inference.algorithms.pba.functions.ReduceRSDsFunction;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
@@ -14,6 +13,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import scala.Tuple2;
 
 @Service
 public class PropertyBasedAlgorithm {
@@ -33,15 +33,13 @@ public class PropertyBasedAlgorithm {
             System.out.println("RESULT_TIME_PBA AFTER MAPPING: " + (System.currentTimeMillis() - start) + "ms");
 
             JavaPairRDD<String, RecordSchemaDescription> reducedProperties = propertiesToReduce.reduceByKey(
-                    new ReduceRSDsFunction()
+                new ReduceRSDsFunction()
             );
 
 //            long count = reducedProperties.count();
 //            System.out.println("RESULT_TIME_PBA COUNT OPTIMISED: " + count);
 //            return null;
-            JavaRDD<RecordSchemaDescription> schemas = reducedProperties.map(
-                    new MapTupleToPropertySchemaDescription()
-            );
+            JavaRDD<RecordSchemaDescription> schemas = reducedProperties.map(Tuple2::_2);
 
             RecordSchemaDescription result = schemas.aggregate(new RecordSchemaDescription(), new FinalizeCombFunction(), new FinalizeSeqFunction());
             System.out.println("RESULT_TIME_PBA AFTER_AGGREGATION_TO_SINGLE_RSD " + (System.currentTimeMillis() - start) + "ms");

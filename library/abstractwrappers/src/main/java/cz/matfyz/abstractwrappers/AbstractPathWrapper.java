@@ -58,6 +58,6 @@ public interface AbstractPathWrapper {
      * The database system is schema less, meaning there are no such thinks like IC and DDL statements.
      * Although some DDL statements might still exist (e.g., create collection in MongoDB).
      */
-    boolean isSchemaLess();
+    boolean isSchemaless();
 
 }

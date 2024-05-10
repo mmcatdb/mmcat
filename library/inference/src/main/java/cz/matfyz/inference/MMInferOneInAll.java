@@ -9,7 +9,7 @@ import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunctio
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
+import cz.matfyz.wrappermongodb.MongoDBInferenceWrapper;
 import cz.matfyz.core.rsd.utils.BloomFilter;
 import cz.matfyz.core.rsd.utils.BasicHashFunction;
 import cz.matfyz.core.rsd.Candidates;
@@ -153,7 +153,7 @@ public class MMInferOneInAll {
         switch (datasourceType) {
             case mongodb:
                 collectionNames.forEach(name ->
-                    wrappers.put(name, new MongoDBInferenceSchemaLessWrapper(sparkMaster, appName, uri, databaseName, name, checkpointDir)));
+                    wrappers.put(name, new MongoDBInferenceWrapper(sparkMaster, appName, uri, databaseName, name, checkpointDir)));
                 break;
             case json:
                 wrappers.put("single_collection", new JsonInferenceWrapper(sparkMaster, appName, inputStreamProvider, checkpointDir));

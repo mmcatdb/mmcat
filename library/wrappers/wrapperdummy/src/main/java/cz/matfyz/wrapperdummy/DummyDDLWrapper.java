@@ -18,8 +18,8 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
         methods.add("setKindName(" + name + ")");
     }
 
-    @Override public boolean isSchemaLess() {
-        methods.add("isSchemaLess()");
+    @Override public boolean isSchemaless() {
+        methods.add("isSchemaless()");
         return false;
     }
 

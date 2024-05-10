@@ -1,4 +1,4 @@
-package cz.matfyz.wrappermongodb.inference.helpers;
+package cz.matfyz.wrappermongodb.inference;
 
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
@@ -8,18 +8,24 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public enum MongoRecordToRawPropertyFlatMap {
-    INSTANCE;
-
-    boolean loadSchema, loadData;
+public class MongoRecordToRawPropertyFlatMap {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoRecordToRawPropertyFlatMap.class);
 
-    public Iterator<RawProperty> process(String collectionName, Document t, boolean loadSchema, boolean loadData) {
+    public static Iterator<RawProperty> process(String collectionName, Document t, boolean loadSchema, boolean loadData) {
+        return new MongoRecordToRawPropertyFlatMap(loadSchema, loadData).process(collectionName, t);
+    }
 
+    private final boolean loadSchema;
+    private final boolean loadData;
+
+
+    private MongoRecordToRawPropertyFlatMap(boolean loadSchema, boolean loadData) {
         this.loadSchema = loadSchema;
         this.loadData = loadData;
+    }
 
+    public Iterator<RawProperty> process(String collectionName, Document t) {
         List<RawProperty> result = new ArrayList<>(objectToRawProperties(collectionName, new Document(), true));
 
         t.forEach((key, value) -> {
@@ -60,7 +66,7 @@ public enum MongoRecordToRawPropertyFlatMap {
 
     private Collection<? extends RawProperty> objectToRawProperties(String key, Object value, boolean firstOccurrence) {
         List<RawProperty> result = new ArrayList<>();
-        RecordSchemaDescription schema = loadSchema ? MapMongoRecord.INSTANCE.process(key, value, false, true) : null;
+        RecordSchemaDescription schema = loadSchema ? MapMongoRecord.process(key, value, false, true) : null;
         if (value instanceof Map) {
             result.add(new RawProperty(key, null, schema, 1, firstOccurrence ? 1 : 0));
             result.addAll(mapToRawProperties(key, ((Map<String, Object>) value).entrySet()));
@@ -74,6 +80,5 @@ public enum MongoRecordToRawPropertyFlatMap {
 
         return result;
     }
-
 
 }

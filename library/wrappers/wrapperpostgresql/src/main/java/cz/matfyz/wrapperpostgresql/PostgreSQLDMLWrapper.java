@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidNameException;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
         return name.matches("^[\\w.]+$");
     }
 
-    @Override public PostgreSQLStatement createDMLStatement() {
+    @Override public StringStatement createDMLStatement() {
         if (kindName == null)
             throw InvalidNameException.kind(null);
 
@@ -41,7 +42,7 @@ public class PostgreSQLDMLWrapper implements AbstractDMLWrapper {
         List<String> escapedValues = propertyValues.stream().map(propertyValue -> escapeString(propertyValue.value)).toList();
 
         String content = String.format("INSERT INTO \"%s\" (%s)\nVALUES (%s);", kindName, String.join(", ", escapedNames), String.join(", ", escapedValues));
-        return new PostgreSQLStatement(content);
+        return new StringStatement(content);
     }
 
     private String escapeString(String input) {

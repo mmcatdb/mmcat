@@ -29,6 +29,6 @@ public class CsvPathWrapper implements AbstractPathWrapper {
     @Override public boolean isAnonymousNamingAllowed() { return true; }
     @Override public boolean isReferenceAllowed() { return true; }
     @Override public boolean isComplexPropertyAllowed() { return true; }
-    @Override public boolean isSchemaLess() { return true; }
+    @Override public boolean isSchemaless() { return true; }
     // CHECKSTYLE:ON
 }

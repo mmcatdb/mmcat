@@ -1,4 +1,4 @@
-package cz.matfyz.wrapperjson.inference.helpers;
+package cz.matfyz.wrapperjson.inference;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -9,12 +9,13 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.*;
 
-public enum MapJSONDocument {
-    INSTANCE;
+public abstract class MapJsonDocument {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapJSONDocument.class);
+    private MapJsonDocument() {}
 
-    public RecordSchemaDescription process(Document t) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapJsonDocument.class);
+
+    public static RecordSchemaDescription process(Document t) {
         RecordSchemaDescription result = new RecordSchemaDescription();
 
         result.setName("_");
@@ -27,7 +28,7 @@ public enum MapJSONDocument {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
         //List<RecordSchemaDescription> children = new ArrayList<>();
 
-        t.forEach((key, value) -> children.add(MapJSONRecord.INSTANCE.process(key, value, true, true)));
+        t.forEach((key, value) -> children.add(MapJsonRecord.process(key, value, true, true)));
 
         Collections.sort(children);
 

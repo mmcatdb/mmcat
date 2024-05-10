@@ -1,26 +1,26 @@
-package cz.matfyz.wrappermongodb.inference.helpers;
+package cz.matfyz.wrapperjson.inference;
 
-import cz.matfyz.core.rsd.*;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import cz.matfyz.core.rsd.*;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
-public enum MapMongoRecord {
-    INSTANCE;
+import java.util.*;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapMongoRecord.class);
+public abstract class MapJsonRecord {
 
-    public RecordSchemaDescription process(String key, Object value, boolean processChildren, boolean firstOccurrence) {
+    private MapJsonRecord() {}
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapJsonRecord.class);
+
+    public static RecordSchemaDescription process(String key, Object value, boolean processChildren, boolean firstOccurrence) {
         RecordSchemaDescription result = new RecordSchemaDescription();
         result.setName(key);
         result.setUnique(Char.UNKNOWN);
         result.setId(Char.UNKNOWN);
-        result.setShareTotal(1);
-        result.setShareFirst(firstOccurrence ? 1 : 0);
-//        result.setShare(new Share(1, firstOccurrence ? 1 : 0));
+        //result.setShare(new Share(1, firstOccurrence ? 1 : 0));
 
         int types = Type.OBJECT;
 
@@ -55,8 +55,9 @@ public enum MapMongoRecord {
         return result;
     }
 
-    private /*List*/ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
-        ObjectArrayList/*List*/<RecordSchemaDescription> children = new /*ArrayList*/ObjectArrayList<>();
+    private static ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
+        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
+        //  List<RecordSchemaDescription> children = new ArrayList<>();
 //        Set<RecordSchemaDescription> children = new HashSet<>();
         for (Map.Entry<String, Object> value : t1) {
             children.add(process(value.getKey(), value.getValue(), true, true));
@@ -65,8 +66,9 @@ public enum MapMongoRecord {
         return children;
     }
 
-    private ObjectArrayList/*List*/<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
-        ObjectArrayList/*List*/<RecordSchemaDescription> children = new ObjectArrayList/*ArrayList*/<>();
+    private static ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
+        ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
+        //List<RecordSchemaDescription> children = new ArrayList<>();
         Set<Object> visited = new HashSet<>();
         for (Object value : t1) {
             if (value == null) {
@@ -81,4 +83,5 @@ public enum MapMongoRecord {
         }
         return children;
     }
+
 }

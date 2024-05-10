@@ -39,7 +39,7 @@ public record DatasourceDetail(
         boolean isAnonymousNamingAllowed,
         boolean isReferenceAllowed,
         boolean isComplexPropertyAllowed,
-        boolean isSchemaLess,
+        boolean isSchemaless,
         boolean isWritable,
         boolean isQueryable
     ) {
@@ -57,7 +57,7 @@ public record DatasourceDetail(
                 path.isAnonymousNamingAllowed(),
                 path.isReferenceAllowed(),
                 path.isComplexPropertyAllowed(),
-                path.isSchemaLess(),
+                path.isSchemaless(),
                 wrapper.isWritable(),
                 wrapper.isQueryable()
             );

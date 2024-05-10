@@ -6,7 +6,7 @@ import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
 import cz.matfyz.core.utils.InputStreamProvider;
-import cz.matfyz.wrapperjson.inference.functions.JSONRecordToRSDMapFunction;
+import cz.matfyz.wrapperjson.inference.MapJsonDocument;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     // assuming that in the json file one line represent one object
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
-        return jsonDocuments.map(new JSONRecordToRSDMapFunction());
+        return jsonDocuments.map(MapJsonDocument::process);
     }
 
     public JavaRDD<Document> loadDocuments() {

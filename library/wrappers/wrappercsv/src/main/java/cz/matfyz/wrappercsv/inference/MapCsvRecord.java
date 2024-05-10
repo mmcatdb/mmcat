@@ -1,20 +1,19 @@
-package cz.matfyz.wrapperjson.inference.helpers;
-
-import org.bson.types.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package cz.matfyz.wrappercsv.inference;
 
 import cz.matfyz.core.rsd.*;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.*;
 
-public enum MapJSONRecord {
-    INSTANCE;
+public abstract class MapCsvRecord {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapJSONRecord.class);
+    private MapCsvRecord() {}
 
-    public RecordSchemaDescription process(String key, Object value, boolean processChildren, boolean firstOccurrence) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapCsvRecord.class);
+
+    public static RecordSchemaDescription process(String key, Object value, boolean processChildren, boolean firstOccurrence) {
         RecordSchemaDescription result = new RecordSchemaDescription();
         result.setName(key);
         result.setUnique(Char.UNKNOWN);
@@ -33,7 +32,7 @@ public enum MapJSONRecord {
             types = types | Type.NUMBER;
         } else if (value instanceof Boolean) {
             types = types | Type.BOOLEAN;
-        } else if (value instanceof ObjectId || value instanceof String) {
+        } else if (value instanceof String) {
             types = types | Type.STRING;
         } else if (value instanceof Map) {
             types = types | Type.MAP;
@@ -54,18 +53,18 @@ public enum MapJSONRecord {
         return result;
     }
 
-    private ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
+    private static ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //  List<RecordSchemaDescription> children = new ArrayList<>();
+        //List<RecordSchemaDescription> children = new ArrayList<>();
 //        Set<RecordSchemaDescription> children = new HashSet<>();
         for (Map.Entry<String, Object> value : t1) {
             children.add(process(value.getKey(), value.getValue(), true, true));
         }
-        Collections.sort(children);
+        //Collections.sort(children);
         return children;
     }
 
-    private ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
+    private static ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
         //List<RecordSchemaDescription> children = new ArrayList<>();
         Set<Object> visited = new HashSet<>();
@@ -82,4 +81,5 @@ public enum MapJSONRecord {
         }
         return children;
     }
+
 }

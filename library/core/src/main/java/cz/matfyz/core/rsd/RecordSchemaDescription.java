@@ -24,12 +24,9 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
 
     private /*List*/ ObjectArrayList<RecordSchemaDescription> children;    // TODO: pouzit knihovnu https://trove4j.sourceforge.net/javadocs/gnu/trove/list/linked/TLinkedList.html nebo podobne efektivni a vhodnou - mene vytvorenych objektu, pametove uspornejsi a ve vysledku rychlejsi
 
-    private RegExp regExp;
-
-    private Reference ref;
 
     public RecordSchemaDescription() {
-        this("", Char.UNKNOWN, 0, 0/*new Share()*/, Char.UNKNOWN, /*new TreeSet<>(), new TreeSet<>(),*/ new /*ArrayList*/ ObjectArrayList<>(), null, null);
+        this("", Char.UNKNOWN, 0, 0/*new Share()*/, Char.UNKNOWN, /*new TreeSet<>(), new TreeSet<>(),*/ new /*ArrayList*/ ObjectArrayList<>());
     }
 
     public RecordSchemaDescription(
@@ -39,9 +36,8 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
             int id,
             //            Set<Type> types,
             //            Set<Model> models,
-            /*List*/ ObjectArrayList<RecordSchemaDescription> children,
-            RegExp regExp,
-            Reference ref) {
+            ObjectArrayList<RecordSchemaDescription> children
+            ) {
         this.name = name;
         this.unique = unique;
 //        this.share = share;
@@ -51,8 +47,6 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.types = 0;
         this.models = 0;
         this.children = children;
-//        this.regExp = regExp;
-//        this.ref = ref;
     }
 
     public String getName() {
@@ -126,22 +120,6 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.children = children;
     }
 
-    public RegExp getRegExp() {
-        return regExp;
-    }
-
-    public void setRegExp(RegExp regExp) {
-        this.regExp = regExp;
-    }
-
-    public Reference getRef() {
-        return ref;
-    }
-
-    public void setRef(Reference ref) {
-        this.ref = ref;
-    }
-
     @Override
     public int compareTo(RecordSchemaDescription o) {
         // WARN: TOHLE JE SPATNE, JE TU BUG! TAKHLE SE TO POROVNAVAT NEDA
@@ -169,8 +147,6 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         sb.append(", types=").append(types);
         sb.append(", models=").append(models);
         sb.append(", children=").append(children);
-        sb.append(", regExp=").append(regExp);
-        sb.append(", ref=").append(ref);
         sb.append('}');
         return sb.toString();
     }

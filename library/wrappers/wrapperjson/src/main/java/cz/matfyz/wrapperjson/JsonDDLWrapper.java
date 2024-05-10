@@ -15,7 +15,7 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override
-    public boolean isSchemaLess() {
+    public boolean isSchemaless() {
         return true;
     }
 

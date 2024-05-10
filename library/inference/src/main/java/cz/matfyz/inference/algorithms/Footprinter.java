@@ -1,11 +1,9 @@
 package cz.matfyz.inference.algorithms;
 
 import cz.matfyz.inference.algorithms.miner.functions.ReduceHeuristicsFunction;
-import cz.matfyz.inference.algorithms.miner.functions.MapTupleToHeuristics;
 import cz.matfyz.inference.algorithms.miner.functions.FinalizeFootprinterCombFunction;
 import cz.matfyz.core.rsd.*;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import cz.matfyz.wrappermongodb.inference.functions.HeuristicsToKeyPairFunction;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -16,6 +14,7 @@ import cz.matfyz.inference.algorithms.miner.functions.FlatMapToParentsFunction;
 import cz.matfyz.inference.algorithms.miner.functions.SetRequiredTagFlatMapFunction;
 import java.util.List;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import scala.Tuple2;
 
 public enum Footprinter {
     INSTANCE;
@@ -33,14 +32,10 @@ public enum Footprinter {
         );
 
         // trow away key value pair
-        JavaRDD<PropertyHeuristics> onlyHeuristics = reducedHeuristics.map(
-            new MapTupleToHeuristics()
-        );
+        JavaRDD<PropertyHeuristics> onlyHeuristics = reducedHeuristics.map(Tuple2::_2);
 
         // map to (hierarchicalName, heuristics)
-        JavaPairRDD<String, PropertyHeuristics> toAgregate = onlyHeuristics.mapToPair(
-            new HeuristicsToKeyPairFunction()
-        );
+        JavaPairRDD<String, PropertyHeuristics> toAgregate = onlyHeuristics.mapToPair(t -> new Tuple2<>(t.getHierarchicalName(), t));
 
         // agregate by key
         JavaPairRDD<String, PropertyHeuristics> aggregatedHeuristics = toAgregate.reduceByKey(
@@ -48,9 +43,7 @@ public enum Footprinter {
         );
 
         // trow away hierarchicalName
-        JavaRDD<PropertyHeuristics> onlyHeuristics2 = aggregatedHeuristics.map(
-            new MapTupleToHeuristics()
-        );
+        JavaRDD<PropertyHeuristics> onlyHeuristics2 = aggregatedHeuristics.map(Tuple2::_2);
 
         // nastaveni sequential tagu
         JavaRDD<PropertyHeuristics> withSequential = onlyHeuristics2.map(
@@ -70,9 +63,7 @@ public enum Footprinter {
         );
 
         // trow away hierarchicalName
-        JavaRDD<PropertyHeuristics> heuristics = withRequired.map(
-            new MapTupleToHeuristics()
-        );
+        JavaRDD<PropertyHeuristics> heuristics = withRequired.map(Tuple2::_2);
 
         // remove later
         /*heuristics.foreach(new VoidFunction<PropertyHeuristics>() {

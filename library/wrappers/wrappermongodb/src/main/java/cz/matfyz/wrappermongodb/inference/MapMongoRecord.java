@@ -1,23 +1,27 @@
-package cz.matfyz.wrappercsv.inference.helpers;
+package cz.matfyz.wrappermongodb.inference;
 
 import cz.matfyz.core.rsd.*;
-
+import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+
 import java.util.*;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
-public enum MapCSVRecord {
-    INSTANCE;
+public abstract class MapMongoRecord {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapCSVRecord.class);
+    private MapMongoRecord() {}
 
-    public RecordSchemaDescription process(String key, Object value, boolean processChildren, boolean firstOccurrence) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapMongoRecord.class);
+
+    public static RecordSchemaDescription process(String key, Object value, boolean processChildren, boolean firstOccurrence) {
         RecordSchemaDescription result = new RecordSchemaDescription();
         result.setName(key);
         result.setUnique(Char.UNKNOWN);
         result.setId(Char.UNKNOWN);
-        //result.setShare(new Share(1, firstOccurrence ? 1 : 0));
+        result.setShareTotal(1);
+        result.setShareFirst(firstOccurrence ? 1 : 0);
+//        result.setShare(new Share(1, firstOccurrence ? 1 : 0));
 
         int types = Type.OBJECT;
 
@@ -31,7 +35,7 @@ public enum MapCSVRecord {
             types = types | Type.NUMBER;
         } else if (value instanceof Boolean) {
             types = types | Type.BOOLEAN;
-        } else if (value instanceof String) {
+        } else if (value instanceof ObjectId || value instanceof String) {
             types = types | Type.STRING;
         } else if (value instanceof Map) {
             types = types | Type.MAP;
@@ -52,21 +56,21 @@ public enum MapCSVRecord {
         return result;
     }
 
-    private ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
+    private static ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //List<RecordSchemaDescription> children = new ArrayList<>();
-//        Set<RecordSchemaDescription> children = new HashSet<>();
-        for (Map.Entry<String, Object> value : t1) {
+        // Set<RecordSchemaDescription> children = new HashSet<>();
+
+        for (Map.Entry<String, Object> value : t1)
             children.add(process(value.getKey(), value.getValue(), true, true));
-        }
-        //Collections.sort(children);
+
+        Collections.sort(children);
         return children;
     }
 
-    private ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
+    private static ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //List<RecordSchemaDescription> children = new ArrayList<>();
         Set<Object> visited = new HashSet<>();
+
         for (Object value : t1) {
             if (value == null) {
                 children.add(process("_", value, true, true));
@@ -78,6 +82,7 @@ public enum MapCSVRecord {
             }
 
         }
+
         return children;
     }
 

@@ -15,7 +15,7 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
         kindName = name;
     }
 
-    @Override public boolean isSchemaLess() {
+    @Override public boolean isSchemaless() {
         return true;
     }
 

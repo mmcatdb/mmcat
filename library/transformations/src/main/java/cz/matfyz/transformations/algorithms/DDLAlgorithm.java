@@ -40,7 +40,7 @@ public class DDLAlgorithm {
     public AbstractStatement algorithm() {
         wrapper.setKindName(mapping.kindName());
 
-        if (!wrapper.isSchemaLess()) {
+        if (!wrapper.isSchemaless()) {
             Deque<StackElement> masterStack = new ArrayDeque<>();
             addSubpathsToStack(masterStack, mapping.accessPath(), Set.of(AbstractDDLWrapper.EMPTY_NAME));
 

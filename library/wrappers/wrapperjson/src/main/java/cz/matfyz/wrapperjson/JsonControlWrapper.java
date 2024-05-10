@@ -1,12 +1,12 @@
 package cz.matfyz.wrapperjson;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
-import cz.matfyz.abstractwrappers.utils.GenericICWrapper;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -39,8 +39,8 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
         return new JsonDDLWrapper();
     }
 
-    @Override public GenericICWrapper getICWrapper() {
-        return new GenericICWrapper();
+    @Override public AbstractICWrapper getICWrapper() {
+        return AbstractICWrapper.createEmpty();
     }
 
     @Override public JsonDMLWrapper getDMLWrapper() {

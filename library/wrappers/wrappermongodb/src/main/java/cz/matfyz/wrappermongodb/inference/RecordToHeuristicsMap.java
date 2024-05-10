@@ -1,4 +1,4 @@
-package cz.matfyz.wrappermongodb.inference.functions;
+package cz.matfyz.wrappermongodb.inference;
 
 import cz.matfyz.core.rsd.utils.BlobClobHashing;
 import cz.matfyz.core.rsd.PropertyHeuristics;
@@ -18,13 +18,13 @@ import org.slf4j.LoggerFactory;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import scala.Tuple2;
 
-public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<Document, String, PropertyHeuristics> {
+public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, String, PropertyHeuristics> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MongoRecordToHeuristicsMapFunction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecordToHeuristicsMap.class);
 
     private final String collectionName;
 
-    public MongoRecordToHeuristicsMapFunction(String collectionName) {
+    public RecordToHeuristicsMap(String collectionName) {
         this.collectionName = collectionName;
     }
 

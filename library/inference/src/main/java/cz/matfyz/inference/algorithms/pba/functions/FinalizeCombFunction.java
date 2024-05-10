@@ -39,8 +39,6 @@ public class FinalizeCombFunction implements Function2<RecordSchemaDescription, 
             tree.setUnique(property.getId());
             tree.setTypes(tree.getTypes() | property.getTypes());
             tree.setModels(property.getModels());
-//            tree.setRegExp(property.getSchema().getRegExp());
-//            tree.setRef(property.getSchema().getRef());
         }
     }
 

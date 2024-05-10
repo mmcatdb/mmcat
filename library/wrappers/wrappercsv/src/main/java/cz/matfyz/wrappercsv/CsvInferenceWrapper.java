@@ -6,7 +6,7 @@ import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
 import cz.matfyz.core.utils.InputStreamProvider;
-import cz.matfyz.wrappercsv.inference.functions.CSVRecordToRSDMapFunction;
+import cz.matfyz.wrappercsv.inference.MapCsvDocument;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     // also assuming the csv is comma delimited
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
-        return csvDocuments.map(new CSVRecordToRSDMapFunction());
+        return csvDocuments.map(MapCsvDocument::process);
     }
 
     public JavaRDD<Map<String, String>> loadDocuments() {

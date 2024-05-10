@@ -2,6 +2,7 @@ package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.InvalidNameException;
 
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
         return name.matches("^[\\w.]+$");
     }
 
-    @Override public Neo4jStatement createDMLStatement() {
+    @Override public StringStatement createDMLStatement() {
         if (kindName == null)
             throw InvalidNameException.kind(null);
 
@@ -72,13 +73,13 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
             return processRelationship();
     }
 
-    private Neo4jStatement processNode() {
-        return new Neo4jStatement(
+    private StringStatement processNode() {
+        return new StringStatement(
             createMergeForNode("", kindName, propertyValues) + ";"
         );
     }
 
-    private Neo4jStatement processRelationship() {
+    private StringStatement processRelationship() {
         if (fromNodeLabel == null || toNodeLabel == null)
             throw InvalidNameException.node(null);
 
@@ -86,7 +87,7 @@ public class Neo4jDMLWrapper implements AbstractDMLWrapper {
         final String toNodeMerge = createMergeForNode("to", toNodeLabel, toNodeValues);
         final String relationshipMerge = String.format("MERGE (from)-[:%s %s]->(to)", kindName, propertiesToString(propertyValues));
 
-        return new Neo4jStatement(
+        return new StringStatement(
             fromNodeMerge + "\n"
             + toNodeMerge + "\n"
             + relationshipMerge + ";"
