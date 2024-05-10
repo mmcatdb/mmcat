@@ -8,10 +8,6 @@
     </parent>
     <artifactId>abstractwrappers</artifactId>
     <packaging>jar</packaging>
-    <properties>
-        <spark.version>3.5.0 </spark.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -24,6 +20,6 @@
             <artifactId>spark-core_2.12</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
-        </dependency> 
+        </dependency>
     </dependencies>
 </project>

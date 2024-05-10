@@ -7,19 +7,10 @@ package cz.matfyz.core.rsd;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 /**
  *
  * @author sebastian.hricko
  */
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 public class Candidates {
     List<PrimaryKeyCandidate> pkCandidates = new ArrayList<>();
     List<ReferenceCandidate> refCandidates = new ArrayList<>();

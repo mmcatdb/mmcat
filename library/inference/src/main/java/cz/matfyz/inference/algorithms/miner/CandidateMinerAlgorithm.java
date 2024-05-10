@@ -5,8 +5,6 @@
 package cz.matfyz.inference.algorithms.miner;
 
 import cz.matfyz.inference.algorithms.Footprinter;
-import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalCombFunction;
-import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalSeqFunction;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
@@ -21,7 +19,6 @@ import cz.matfyz.inference.algorithms.miner.functions.SuitableReferencePropertie
 import org.apache.spark.api.java.JavaPairRDD;
 import scala.Tuple2;
 import cz.matfyz.inference.algorithms.miner.functions.ReferenceTupleToPairWithSubsetTypeMapFunction;
-
 
 /**
  *

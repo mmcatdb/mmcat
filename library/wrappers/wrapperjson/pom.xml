@@ -8,10 +8,6 @@
     </parent>
     <artifactId>wrapperjson</artifactId>
     <packaging>jar</packaging>
-    <properties>
-        <spark.version>3.5.0 </spark.version>
-        <mongodb.spark.version>3.0.2</mongodb.spark.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -22,19 +18,16 @@
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
             <version>4.8.2</version>
-        </dependency> 
-
+        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.12</artifactId>
             <version>${spark.version}</version>
-   <!--         <scope>provided</scope> -->
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.12</artifactId>
             <version>${spark.version}</version>
-  <!--          <scope>provided</scope> -->
         </dependency>
         <dependency>
             <groupId>org.mongodb.spark</groupId>
@@ -42,6 +35,6 @@
             <version>${mongodb.spark.version}</version>
             <scope>compile</scope>
             <type>jar</type>
-        </dependency> 
+        </dependency>
     </dependencies>
 </project>

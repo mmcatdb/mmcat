@@ -10,20 +10,16 @@ import cz.matfyz.core.rsd.utils.BloomFilter;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  *
  * @author pavel.koupil
  */
-@Setter
-@Getter
 public class ProcessedProperty implements Serializable, Comparable<ProcessedProperty> {
 
 	private Set<ProcessedProperty> children;
 	private ProcessedProperty parent;
-        private RecordSchemaDescription schema;
+	private RecordSchemaDescription schema;
 	private PropertyHeuristics heuristics;
 	private String hierarchicalName;
 
@@ -106,6 +102,14 @@ public class ProcessedProperty implements Serializable, Comparable<ProcessedProp
 
 	public void setSchema(RecordSchemaDescription schema) {
 		this.schema = schema;
+	}
+
+	public PropertyHeuristics getHeuristics() {
+		return heuristics;
+	}
+
+	public void setHeuristics(PropertyHeuristics heuristics) {
+		this.heuristics = heuristics;
 	}
 
 	public String getHierarchicalName() {

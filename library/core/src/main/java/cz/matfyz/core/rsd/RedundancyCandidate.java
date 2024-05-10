@@ -4,22 +4,12 @@
  */
 package cz.matfyz.core.rsd;
 
-import cz.matfyz.core.rsd.RedundancyPair;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.util.List;
 
 /**
  *
  * @author pavel.koupil, sebastian.hricko
  */
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 public class RedundancyCandidate {
 
     final String type = "redundancy";

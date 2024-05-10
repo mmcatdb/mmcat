@@ -5,19 +5,11 @@
 package cz.matfyz.core.rsd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  *
  * @author pavel.koupil, sebastian.hricko
  */
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 public class ReferenceCandidate {
 
     final String type = "reference";
