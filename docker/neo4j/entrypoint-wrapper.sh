@@ -7,7 +7,7 @@ set -m
 /startup/docker-entrypoint.sh $1 &
 
 # Wait for Neo4j.
-wget --quiet --tries=10 --waitretry=2 -O /dev/null http://localhost:7474
+wget --quiet --tries=10 --waitretry=2 --retry-connrefused -O /dev/null http://localhost:7474
 
 ./entrypoint.sh
 
