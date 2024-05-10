@@ -5,20 +5,17 @@ import cz.matfyz.inference.algorithms.pba.functions.AbstractSeqFunction;
 import cz.matfyz.inference.algorithms.pba.functions.FinalizeCombFunction;
 import cz.matfyz.inference.algorithms.pba.functions.FinalizeSeqFunction;
 import cz.matfyz.inference.algorithms.pba.functions.ReduceRSDsFunction;
-import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import scala.Tuple2;
 
-@Service
 public class PropertyBasedAlgorithm {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RecordBasedAlgorithm.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PropertyBasedAlgorithm.class);
 
     public RecordSchemaDescription process(AbstractInferenceWrapper wrapper, AbstractSeqFunction merge, AbstractCombFunction merge2) {
 

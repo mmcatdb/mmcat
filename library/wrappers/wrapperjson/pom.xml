@@ -29,12 +29,5 @@
             <artifactId>spark-core_2.12</artifactId>
             <version>${spark.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.mongodb.spark</groupId>
-            <artifactId>mongo-spark-connector_2.12</artifactId>
-            <version>${mongodb.spark.version}</version>
-            <scope>compile</scope>
-            <type>jar</type>
-        </dependency>
     </dependencies>
 </project>

@@ -4,11 +4,13 @@ import cz.matfyz.abstractwrappers.AbstractControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPathWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.nio.file.Path;
@@ -59,6 +61,10 @@ public class JsonLdControlWrapper extends BaseControlWrapper implements Abstract
 
     @Override public AbstractQueryWrapper getQueryWrapper() {
         throw new UnsupportedOperationException("JsonLdControlWrapper.getQueryWrapper not implemented.");
+    }
+
+    @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+        throw new UnsupportedOperationException("JsonLdControlWrapper.getInferenceWrapper not implemented.");
     }
 
 }

@@ -9,6 +9,7 @@ import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.nio.file.Path;
@@ -59,6 +60,10 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
 
     @Override public AbstractQueryWrapper getQueryWrapper() {
         throw new UnsupportedOperationException("CsvControlWrapper.getQueryWrapper not implemented.");
+    }
+
+    @Override public CsvInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+        return new CsvInferenceWrapper(provider, sparkSettings);
     }
 
 }

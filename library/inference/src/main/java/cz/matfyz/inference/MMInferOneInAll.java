@@ -9,7 +9,6 @@ import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunctio
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import cz.matfyz.wrappermongodb.MongoDBInferenceWrapper;
 import cz.matfyz.core.rsd.utils.BloomFilter;
 import cz.matfyz.core.rsd.utils.BasicHashFunction;
 import cz.matfyz.core.rsd.Candidates;
@@ -19,48 +18,26 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
-import org.springframework.boot.logging.LogLevel;
-import org.springframework.boot.logging.LoggingSystem;
-
 //// from the old inference version ///
 
-import cz.matfyz.core.utils.InputStreamProvider;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
-import cz.matfyz.wrapperjson.JsonInferenceWrapper;
-import cz.matfyz.wrappercsv.CsvInferenceWrapper;
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 
 //// for the new inference version ////
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 public class MMInferOneInAll {
 
-    public static final String PROPERTY_SPARK_MASTER = "baazizi.sparkMaster";
-    private static final String sparkMaster = System.getProperty(PROPERTY_SPARK_MASTER, "local[*]");
+    private AbstractInferenceWrapper wrapper;
+    private String kindName;
+    private String categoryLabel;
 
-    public static String appName;
-    public static String uri;
-    public static String databaseName;
-    public static String kindName;
-    public static List<String> collectionNames;
-    public static String schemaCatName;
-    public static InputStreamProvider inputStreamProvider;
-    public static DatasourceType datasourceType;
-    public static String checkpointDir;
+    public MMInferOneInAll input(AbstractInferenceWrapper wrapper, String kindName, String categoryLabel) {
+        this.wrapper = wrapper;
+        this.kindName = kindName;
+        this.categoryLabel = categoryLabel;
 
-    // TODO: Make the input/class prettier
-    public MMInferOneInAll input(String appName, String uri, String databaseName, String kindName, List<String> collectionNames, String schemaCatName, InputStreamProvider inputStreamProvider, DatasourceType datasourceType) {
-        MMInferOneInAll.appName = appName;
-        MMInferOneInAll.uri = uri;
-        MMInferOneInAll.databaseName = databaseName;
-        MMInferOneInAll.kindName = kindName;
-        MMInferOneInAll.collectionNames = collectionNames;
-        MMInferOneInAll.schemaCatName = schemaCatName;
-        MMInferOneInAll.inputStreamProvider = inputStreamProvider;
-        MMInferOneInAll.datasourceType = datasourceType;
-        MMInferOneInAll.checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; // hard coded for now
         return this;
     }
 
@@ -73,7 +50,42 @@ public class MMInferOneInAll {
         }
     }
 
-    public static RecordSchemaDescription executeRBA(AbstractInferenceWrapper wrapper, boolean printSchema) {
+    private CategoryMappingPair innerRun() throws Exception {
+        System.out.println("RESULT_TIME ----- ----- ----- ----- -----");
+
+        Map<String, AbstractInferenceWrapper> wrappers = prepareWrappers(wrapper);
+
+        Map<String, RecordSchemaDescription> rsds = wrappers.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> MMInferOneInAll.executeRBA(entry.getValue(), true)));
+        // or this is the written out version
+        /*
+        Map<String, RecordSchemaDescription> rsds = new HashMap<>();
+        for (String collectionName : wrappers.keySet()) {
+            RecordSchemaDescription r = MMInferOneInAll.executeRBA(wrappers.get(collectionName), true);
+            rsds.put(collectionName, r);
+        } */
+
+        // TODO: review the merging, though
+        RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
+
+        SchemaConverter scon = new SchemaConverter(rsd, categoryLabel, kindName);
+        return scon.convertToSchemaCategoryAndMapping();
+    }
+
+    private static Map<String, AbstractInferenceWrapper> prepareWrappers(AbstractInferenceWrapper inputWrapper) throws IllegalArgumentException {
+        Map<String, AbstractInferenceWrapper> wrappers = new HashMap<>();
+
+        inputWrapper.getKindNames().forEach(kindName -> {
+            final AbstractInferenceWrapper copy = inputWrapper.copy();
+            copy.kindName = kindName;
+
+            wrappers.put(kindName, copy);
+        });
+
+        return wrappers;
+    }
+
+    private static RecordSchemaDescription executeRBA(AbstractInferenceWrapper wrapper, boolean printSchema) {
         RecordBasedAlgorithm rba = new RecordBasedAlgorithm();
 
         AbstractRSDsReductionFunction merge = new DefaultLocalReductionFunction();
@@ -92,7 +104,7 @@ public class MMInferOneInAll {
         return rsd;
     }
 
-    public static void executePBA(AbstractInferenceWrapper wrapper, boolean printSchema) {
+    private static void executePBA(AbstractInferenceWrapper wrapper, boolean printSchema) {
         PropertyBasedAlgorithm pba = new PropertyBasedAlgorithm();
 
         DefaultLocalSeqFunction seqFunction = new DefaultLocalSeqFunction();
@@ -113,58 +125,14 @@ public class MMInferOneInAll {
     }
 
 
-        public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
-            // TODO
-            BloomFilter.setParams(10000, new BasicHashFunction());
-            StartingEndingFilter.setParams(10000);
-            CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
-            Candidates candidates = candidateMiner.process(wrapper, kinds);
+    public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
+        // TODO
+        BloomFilter.setParams(10000, new BasicHashFunction());
+        StartingEndingFilter.setParams(10000);
+        CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();
+        Candidates candidates = candidateMiner.process(wrapper, kinds);
 
-            return candidates;
-        }
-
-
-    public static CategoryMappingPair innerRun() throws Exception {
-        configureLogging();
-        System.out.println("RESULT_TIME ----- ----- ----- ----- -----");
-
-        Map<String, AbstractInferenceWrapper> wrappers = prepareWrappers();
-
-        Map<String, RecordSchemaDescription> rsds = wrappers.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey,
-                                      entry -> MMInferOneInAll.executeRBA(entry.getValue(), true)));
-        // or this is the written out version
-        /*
-        Map<String, RecordSchemaDescription> rsds = new HashMap<>();
-        for (String collectionName : wrappers.keySet()) {
-            RecordSchemaDescription r = MMInferOneInAll.executeRBA(wrappers.get(collectionName), true);
-            rsds.put(collectionName, r);
-        } */
-
-        // TODO: review the merging, though
-        RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
-
-        SchemaConverter scon = new SchemaConverter(rsd, schemaCatName, kindName);
-        return scon.convertToSchemaCategoryAndMapping();
-    }
-
-    private static Map<String, AbstractInferenceWrapper> prepareWrappers() throws IllegalArgumentException {
-        Map<String, AbstractInferenceWrapper> wrappers = new HashMap<>();
-        switch (datasourceType) {
-            case mongodb:
-                collectionNames.forEach(name ->
-                    wrappers.put(name, new MongoDBInferenceWrapper(sparkMaster, appName, uri, databaseName, name, checkpointDir)));
-                break;
-            case json:
-                wrappers.put("single_collection", new JsonInferenceWrapper(sparkMaster, appName, inputStreamProvider, checkpointDir));
-                break;
-            case csv:
-                wrappers.put("single_collection", new CsvInferenceWrapper(sparkMaster, appName, inputStreamProvider, checkpointDir));
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported or undefined datasource type.");
-        }
-        return wrappers;
+        return candidates;
     }
 
     private static RecordSchemaDescription mergeRecordSchemaDescriptions(Map<String, RecordSchemaDescription> rsds) {
@@ -174,15 +142,7 @@ public class MMInferOneInAll {
         return mergeByName(rsds);
     }
 
-    private static void configureLogging() {
-        ClassLoader classLoader = MMInferOneInAll.class.getClassLoader();
-        String[] loggers = {"org.apache.spark", "org.sparkproject", "io.netty", "org.apache.hadoop", "com.mongodb", "org.mongodb"};
-        for (String logger : loggers) {
-            LoggingSystem.get(classLoader).setLogLevel(logger, LogLevel.WARN);
-        }
-    }
-
-    public static RecordSchemaDescription mergeByName(Map<String, RecordSchemaDescription> rsds) {
+    private static RecordSchemaDescription mergeByName(Map<String, RecordSchemaDescription> rsds) {
         RecordSchemaDescription complexRSD = null;
 
         // Traverse through all entries in rsds

@@ -61,6 +61,29 @@ public class MongoDBProvider {
             return builder.toString();
         }
 
+        public String createSparkConnectionString() {
+            final var builder = new StringBuilder()
+                .append("mongodb://");
+
+            if (username != null)
+                builder
+                    .append(username);
+
+            if (password != null)
+                builder
+                    .append(":")
+                    .append(password);
+
+            builder
+                .append("@")
+                .append(host)
+                .append(":")
+                .append(port)
+                .append("/");
+
+            return builder.toString();
+        }
+
     }
 
 }

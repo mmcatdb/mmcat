@@ -1,9 +1,11 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.io.IOException;
@@ -87,6 +89,10 @@ public class PostgreSQLControlWrapper extends BaseControlWrapper implements Abst
 
     @Override public PostgreSQLQueryWrapper getQueryWrapper() {
         return new PostgreSQLQueryWrapper();
+    }
+
+    @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+        throw new UnsupportedOperationException("PostgreSQLControlWrapper.getInferenceWrapper not implemented.");
     }
 
 }

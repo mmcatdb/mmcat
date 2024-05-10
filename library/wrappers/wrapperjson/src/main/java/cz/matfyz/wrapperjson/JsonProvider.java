@@ -1,5 +1,10 @@
 package cz.matfyz.wrapperjson;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
+
 public class JsonProvider {
 
     public final JsonSettings settings;
@@ -10,6 +15,10 @@ public class JsonProvider {
 
     public String getUrl() {
         return settings.url;
+    }
+
+    public InputStream getInputStream() throws IOException {
+        return new UrlInputStreamProvider(settings.url).getInputStream();
     }
 
     public record JsonSettings(

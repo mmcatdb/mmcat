@@ -1,7 +1,9 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
@@ -11,7 +13,6 @@ import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.utils.ArrayUtils;
-import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
@@ -46,7 +47,6 @@ import java.awt.Dimension;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
@@ -57,10 +57,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoClient;
 
 @Service
 public class JobExecutorService {
@@ -261,54 +257,35 @@ public class JobExecutorService {
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
-    private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
-        SchemaCategoryWrapper originalWrapper = schemaService.find(run.categoryId);   // extracting the empty SK wrapper
-        String schemaCatName = originalWrapper.label;
+    // TODO make this configurable
+    private static final String SPARK_MASTER = System.getProperty("baazizi.sparkMaster", "local[*]");
 
+    private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+        // extracting the empty SK wrapper
+        final SchemaCategoryWrapper originalSchemaWrapper = schemaService.find(run.categoryId);
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
 
-        final CategoryMappingPair categoryMappingPair = processDatasource(datasourceWrapper, schemaCatName, payload);
+        final var sparkSettings = new SparkSettings(
+            SPARK_MASTER,
+            // TODO this is probably not needed at all, it's supposed to be just a name in some web gui?
+            "appName",
+            // TODO make this configurable
+            "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"
+        );
+        final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
-        SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+            .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
+            .run();
 
-        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model"); // what about this label?
+        final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+
+        // what about this label?
+        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model");
         LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
 
-        schemaService.overwriteInfo(wrapper, run.categoryId);
+        schemaService.overwriteInfo(schemaWrapper, run.categoryId);
         mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
-    }
-
-    private CategoryMappingPair processDatasource(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
-        switch (datasourceWrapper.type) {
-            case mongodb:
-                return processMongoDB(datasourceWrapper, schemaCatName, payload);
-            case json:
-                return processFile(datasourceWrapper, schemaCatName, payload);
-            case csv:
-                return processFile(datasourceWrapper, schemaCatName, payload);
-            default:
-            throw new IllegalArgumentException("Unsupported or undefined datasource type.");
-        }
-    }
-
-    private CategoryMappingPair processMongoDB(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
-        String databaseName = datasourceWrapper.settings.get("database").asText();
-        String port = datasourceWrapper.settings.get("port").asText();
-        String host = datasourceWrapper.settings.get("host").asText();
-        String uri = host + ":" + port;
-
-        // to get the collection names
-        MongoClient mongoClient = MongoClients.create("mongodb://" + uri);
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        List<String> collectionNames = database.listCollectionNames().into(new ArrayList<>());
-        collectionNames.forEach(name -> System.out.println("collection name: " + name));
-
-        return new MMInferOneInAll().input("appName", uri, database.getName(), payload.kindName(), collectionNames, schemaCatName, null, datasourceWrapper.type).run();
-    }
-
-    private CategoryMappingPair processFile(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
-        UrlInputStreamProvider inputStreamProvider = new UrlInputStreamProvider(datasourceWrapper.settings.get("url").asText());
-        return new MMInferOneInAll().input("appName", null, null, payload.kindName(), null, schemaCatName, inputStreamProvider, datasourceWrapper.type).run();
     }
 
     /**

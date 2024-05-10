@@ -8,7 +8,6 @@ import cz.matfyz.core.querying.queryresult.QueryResult;
 import cz.matfyz.core.record.ForestOfRecords;
 import cz.matfyz.core.record.RecordName;
 import cz.matfyz.core.record.RootRecord;
-import cz.matfyz.core.utils.InputStreamProvider.UrlInputStreamProvider;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.DynamicName;
@@ -30,12 +29,11 @@ import java.io.InputStream;
 
 public class JsonPullWrapper implements AbstractPullWrapper {
 
-    private JsonProvider provider;
+    private final JsonProvider provider;
 
     public JsonPullWrapper(JsonProvider provider) {
         this.provider = provider;
     }
-
 
     @Override
     public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
@@ -43,8 +41,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         System.out.println("query: " + query);
         final var forest = new ForestOfRecords();
 
-        UrlInputStreamProvider inputStreamProvider = new UrlInputStreamProvider(provider.getUrl());
-        try (InputStream inputStream = inputStreamProvider.getInputStream()) {
+        try (InputStream inputStream = provider.getInputStream()) {
             processJsonStream(inputStream, forest, path);
         } catch (IOException e) {
             throw PullForestException.innerException(e);

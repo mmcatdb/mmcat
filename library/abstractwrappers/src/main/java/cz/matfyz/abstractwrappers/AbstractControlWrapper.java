@@ -1,5 +1,6 @@
 package cz.matfyz.abstractwrappers;
 
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.nio.file.Path;
@@ -26,5 +27,7 @@ public interface AbstractControlWrapper {
     AbstractPathWrapper getPathWrapper();
 
     AbstractQueryWrapper getQueryWrapper();
+
+    AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings);
 
 }

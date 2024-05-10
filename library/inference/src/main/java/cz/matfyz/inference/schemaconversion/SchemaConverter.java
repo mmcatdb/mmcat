@@ -36,9 +36,9 @@ public class SchemaConverter {
     public List<Integer> sigVals;
 
     //
-    public SchemaConverter(RecordSchemaDescription rsd, String schemaCatName, String kindName) {
+    public SchemaConverter(RecordSchemaDescription rsd, String categoryLabel, String kindName) {
         this.rsd = rsd;
-        this.sc = new SchemaCategory(schemaCatName);
+        this.sc = new SchemaCategory(categoryLabel);
         this.kindName = kindName;
         this.rootKey = new Key(0);
         this.SCUtils = new SchemaConversionUtils();

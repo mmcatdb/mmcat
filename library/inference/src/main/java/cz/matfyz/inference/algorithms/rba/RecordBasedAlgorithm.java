@@ -7,9 +7,7 @@ import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import org.apache.spark.api.java.JavaRDD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-@Service
 public class RecordBasedAlgorithm {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecordBasedAlgorithm.class);

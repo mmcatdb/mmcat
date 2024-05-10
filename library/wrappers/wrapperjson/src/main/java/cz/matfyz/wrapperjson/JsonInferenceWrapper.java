@@ -5,7 +5,6 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
-import cz.matfyz.core.utils.InputStreamProvider;
 import cz.matfyz.wrapperjson.inference.MapJsonDocument;
 
 import java.io.BufferedReader;
@@ -23,26 +22,22 @@ import org.bson.Document;
 
 public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
+    private final JsonProvider provider;
+    private final SparkSettings sparkSettings;
+
     private SparkSession sparkSession;
     private JavaSparkContext context;
 
-    private final String sparkMaster;
-    private final String appName;
-    private final InputStreamProvider inputStreamProvider;
-    private final String checkpointDir;
-
-    public JsonInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
-        this.sparkMaster = sparkMaster;
-        this.appName = appName;
-        this.inputStreamProvider = inputStreamProvider;
-        this.checkpointDir = checkpointDir;
+    public JsonInferenceWrapper(JsonProvider provider, SparkSettings sparkSettings) {
+        this.provider = provider;
+        this.sparkSettings = sparkSettings;
     }
 
     @Override
     public void buildSession() {
-        sparkSession = SparkSession.builder().master(sparkMaster)
-                .appName(appName)
-                .getOrCreate();
+        sparkSession = SparkSession.builder().master(sparkSettings.master())
+            .appName(sparkSettings.appName())
+            .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
 
@@ -64,7 +59,6 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         return null;
     }
 
-
     @Override
     // assuming that in the json file one line represent one object
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
@@ -75,11 +69,13 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     public JavaRDD<Document> loadDocuments() {
         JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
         newContext.setLogLevel("ERROR");
-        newContext.setCheckpointDir(checkpointDir);
+        newContext.setCheckpointDir(sparkSettings.checkpointDir());
 
         List<String> lines = new ArrayList<>();
-        try (InputStream inputStream = inputStreamProvider.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (
+            InputStream inputStream = provider.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
             String line;
             while ((line = reader.readLine()) != null) {
                 lines.add(line);
@@ -116,6 +112,5 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }
-
 
 }

@@ -5,7 +5,6 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
-import cz.matfyz.core.utils.InputStreamProvider;
 import cz.matfyz.wrappercsv.inference.MapCsvDocument;
 
 import java.io.BufferedReader;
@@ -23,25 +22,21 @@ import org.apache.spark.sql.SparkSession;
 
 public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
+    private final CsvProvider provider;
+    private final SparkSettings sparkSettings;
+
     private SparkSession sparkSession;
     private JavaSparkContext context;
 
-    private final String sparkMaster;
-    private final String appName;
-    private final InputStreamProvider inputStreamProvider;
-    private final String checkpointDir;
-
-    public CsvInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
-        this.sparkMaster = sparkMaster;
-        this.appName = appName;
-        this.inputStreamProvider = inputStreamProvider;
-        this.checkpointDir = checkpointDir;
+    public CsvInferenceWrapper(CsvProvider provider, SparkSettings sparkSettings) {
+        this.provider = provider;
+        this.sparkSettings = sparkSettings;
     }
 
     @Override
     public void buildSession() {
-        sparkSession = SparkSession.builder().master(sparkMaster)
-                .appName(appName) // I probs need to add the file here?
+        sparkSession = SparkSession.builder().master(sparkSettings.master())
+                .appName(sparkSettings.appName()) // I probs need to add the file here?
                 .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
@@ -76,14 +71,14 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     public JavaRDD<Map<String, String>> loadDocuments() {
         JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
         newContext.setLogLevel("ERROR");
-        newContext.setCheckpointDir(checkpointDir);
+        newContext.setCheckpointDir(sparkSettings.checkpointDir());
 
         List<Map<String, String>> lines = new ArrayList<>();
         boolean firstLine = false;
         String[] header = null;
 
-        try (InputStream inputStream = inputStreamProvider.getInputStream();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        try (InputStream inputStream = provider.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 // Assuming the file only uses commas as delimiter and not in any other way!
