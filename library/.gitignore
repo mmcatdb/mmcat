@@ -3,10 +3,10 @@
 /mm-cat/transformations/nbproject/
 /mm-cat/tests/nbproject/
 **/target/**
+**/bin/**
 .vscode
 application.properties
 .env
-/bin/
 .classpath
 .project
 .settings
