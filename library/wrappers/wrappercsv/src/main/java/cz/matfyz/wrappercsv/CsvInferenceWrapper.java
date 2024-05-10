@@ -21,7 +21,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
-public class CSVInferenceWrapper extends AbstractInferenceWrapper {
+public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
     private JavaSparkContext context;
@@ -31,7 +31,7 @@ public class CSVInferenceWrapper extends AbstractInferenceWrapper {
     private final InputStreamProvider inputStreamProvider;
     private final String checkpointDir;
     
-    public CSVInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
+    public CsvInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
         this.sparkMaster = sparkMaster;
         this.appName = appName;
         this.inputStreamProvider = inputStreamProvider;  

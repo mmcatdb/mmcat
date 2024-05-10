@@ -3,8 +3,6 @@
  */
 package cz.matfyz.inference;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Scanner;
 import cz.matfyz.inference.algorithms.miner.CandidateMinerAlgorithm;
 import cz.matfyz.inference.algorithms.pba.PropertyBasedAlgorithm;
 import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalCombFunction;
@@ -12,7 +10,6 @@ import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalSeqFunction;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
-import cz.matfyz.core.rsd.ProcessedProperty; 
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
@@ -21,19 +18,14 @@ import cz.matfyz.core.rsd.utils.BasicHashFunction;
 import cz.matfyz.core.rsd.Candidates;
 import cz.matfyz.core.rsd.utils.StartingEndingFilter;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
-import static org.apache.hadoop.crypto.key.KeyProvider.options;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
-import scala.Tuple2;
 
 //// from the old inference version ///
-
-import java.io.IOException;
 
 import cz.matfyz.core.utils.InputStreamProvider;
 import cz.matfyz.core.exception.OtherException;
@@ -41,13 +33,10 @@ import cz.matfyz.inference.schemaconversion.SchemaConverter;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.wrapperjson.JsonInferenceWrapper;
 import cz.matfyz.wrappercsv.CsvInferenceWrapper;
-import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 
 //// for the new inference version ////
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-
 
 /**
  *

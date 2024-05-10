@@ -21,7 +21,7 @@ import org.apache.spark.sql.SparkSession;
 import org.bson.Document;
 
 
-public class JSONInferenceWrapper extends AbstractInferenceWrapper {
+public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
     private JavaSparkContext context;
@@ -31,7 +31,7 @@ public class JSONInferenceWrapper extends AbstractInferenceWrapper {
     private final InputStreamProvider inputStreamProvider;
     private final String checkpointDir;
     
-    public JSONInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
+    public JsonInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
         this.sparkMaster = sparkMaster;
         this.appName = appName;
         this.inputStreamProvider = inputStreamProvider;
