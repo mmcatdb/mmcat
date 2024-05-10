@@ -1,13 +1,11 @@
 package cz.matfyz.inference.schemaconversion.utils;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
-import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Key; 
 import cz.matfyz.core.rsd.Char;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
@@ -25,10 +23,7 @@ public class SchemaConversionUtils {
     public SchemaConversionUtils() {}
 
     /**
-     * Helper method for creating the child key
-     * @param keyParent
-     * @param i
-     * @return Child's key
+     * For creating the child key
      */
     public Key createChildKey(Key keyp, int i) {
         int keyvalp = keyp.getValue();
@@ -37,53 +32,48 @@ public class SchemaConversionUtils {
     }
 
     /**
-     * Helper method for creating signature for the parent-child morphism
-     * @param keyParent
-     * @param keyChild
-     * @return Signature
+     * For creating signature for the parent-child morphism
      */
     public int createChildSignature(Key keyp, Key keych) {
         int sigval = Objects.hash(keyp.getValue(), keych.getValue());
         return sigval;
-        //return Signature.createBase(sigval);
     }
 
     /**
-     * Finding the cardinality between rsds
-     * @param rsdp
-     * @param rsdch
-     * @return
+     * For finding the cardinality between rsds
      */
     public Min findMin(RecordSchemaDescription rsdp, RecordSchemaDescription rsdch) {
-        Share sharep = rsdp.getShare();
-        Share sharech = rsdch.getShare();
+        int sharepTotal = rsdp.getShareTotal();
+        int sharechTotal = rsdch.getShareTotal();
+
+        int sharepFirst = rsdp.getShareFirst();
+        int sharechFirst = rsdch.getShareFirst();
 
         Min min = Min.ONE;
 
-        if (sharep.getTotal() == sharech.getTotal() && sharep.getFirst() == sharech.getFirst()) {
+        if (sharepTotal == sharechTotal && sharepFirst == sharechFirst) {
             min = Min.ONE;
-        } else if (sharep.getTotal() > sharech.getTotal() && sharep.getFirst() > sharech.getFirst()) {
+        } else if (sharepTotal > sharechTotal && sharepFirst > sharechFirst) {
             min = Min.ZERO;
-        } else if (sharep.getTotal() < sharech.getTotal()) {
-            if (sharep.getFirst() < sharech.getFirst()) {
+        } else if (sharepTotal < sharechTotal) {
+            if (sharepFirst < sharechFirst) {
                 min = Min.ONE;
-            } else if (sharep.getFirst() == sharech.getFirst()) {
+            } else if (sharepFirst == sharechFirst) {
                 min = Min.ZERO;
             }
         }
         return min;
     }
+
     /**
-     * Get the right label for the Schema Morphism.
+     * For getting the right label for the Schema Morphism.
      * For now we label 2 types of morphisms: identification & relational.
      * A morphism is labeled as identification if its codomain is an identificator
      * And it is labeled as relational if its domain is an array type
-     * @return
-     */
-    
+     */    
     public String createLabel(RecordSchemaDescription rsdch, boolean isArrayp, boolean isArraych) {
 
-        if (isArraych || isArrayp) { // meaning the parent is an array (works for now, might not work later!)
+        if (isArraych || isArrayp) { // meaning the parent is an array (works for now, might not work later)
             return Label.RELATIONAL.name();
         }
         else {
@@ -92,34 +82,37 @@ public class SchemaConversionUtils {
                 return Label.IDENTIFIER.name();
             }
         }
-        // can a relational morphism be also identification? (now I assume that not)
+        // can a relational morphism be also identification? (probably not)
         return null; //when there is no particular label
     }
     
     /**
+     * For creating an extra identification property
      * For each array object add an extra child named "_index".
      * This is done once the whole Schema Category gets created.
-     * @param sc
-     * @return
      *//*
     public SchemaCategory addIndexObjecttoArr(SchemaCategory sc) {
         for (SchemaMorphism s: sc.allMorphisms()) {
             if (s.label == Label.RELATIONAL.name()) { // if the object is an array
                 SchemaObject sop = s.dom();
                 Key keyp = sop.key();
-                Key keych = createChildKey(keyp, 0); // probs could just put zero here, but have to check!!
+                Key keych = createChildKey(keyp, 0); // is the 0 ok?
                 
                 SchemaObject soch = new SchemaObject(keych, "_index", null, null);
                 sc.addObject(soch);
 
                 Signature sig = createChildSignature(keyp, keych);
                 Set<SchemaMorphism.Tag> tags = new HashSet<>();
-                SchemaMorphism sm = new SchemaMorphism(sig, null, Min.ZERO, tags, sop, soch); //is this min right?
+                SchemaMorphism sm = new SchemaMorphism(sig, null, Min.ZERO, tags, sop, soch); //is the min right?
                 sc.addMorphism(sm);
             }
         }
         return sc;
     }*/
+
+    /**
+     * For mapping the hashed signature values to a sequence starting from 0
+     */
     public Map<Integer, Integer> mapSigVals(List<Integer> sigVals) {
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
         

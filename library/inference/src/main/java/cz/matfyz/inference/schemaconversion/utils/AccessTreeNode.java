@@ -15,7 +15,7 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
  */
 public class AccessTreeNode{
 
-    public enum State {Root,Simple, Complex;} 
+    public enum State {Root, Simple, Complex;} 
 
     public State state;
     public String name;
@@ -89,7 +89,7 @@ public class AccessTreeNode{
     public static AccessTreeNode assignSignatures(AccessTreeNode node, Map<Integer, Integer> mappedSigVals) {
         if (node.state != State.Root) {
             int newSigVal = mappedSigVals.get(node.getSigVal());
-            node.sig = Signature.createBase(newSigVal); //but in sigVal, there is still the old value!
+            node.sig = Signature.createBase(newSigVal); // but in sigVal, there is still the old value
         }
         for (AccessTreeNode child : node.getChildren()) {
             assignSignatures(child, mappedSigVals);

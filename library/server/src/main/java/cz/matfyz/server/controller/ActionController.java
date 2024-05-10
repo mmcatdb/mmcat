@@ -126,7 +126,6 @@ public class ActionController {
                 MongoDBSettings settings = new MongoDBSettings(datasourceWrapper.settings.get("host").asText(), datasourceWrapper.settings.get("port").asText(), 
                     datasourceWrapper.settings.get("authenticationDatabase").asText(), datasourceWrapper.settings.get("database").asText(), datasourceWrapper.settings.get("username").asText(), 
                     datasourceWrapper.settings.get("password").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
-                    // above probably shouldnt use asText() for the bool values?
                 return DatasourceDetail.create(datasourceWrapper, new MongoDBControlWrapper(new MongoDBProvider(settings)));
             case json:
                 JsonSettings settingsJson = new JsonSettings(datasourceWrapper.settings.get("url").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());

@@ -1,12 +1,9 @@
 package cz.matfyz.inference.schemaconversion.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.*;
 import cz.matfyz.core.schema.SchemaCategory;
 
@@ -24,7 +21,6 @@ public class MappingCreator {
        System.out.println("access tree: ");
        root.printTree(" ");
        ComplexProperty accessPath = buildComplexPropertyFromNode(root);
-       //System.out.println("This is root Key: " + rootKey);
        return Mapping.create(sc, rootKey, kindName, accessPath);
    }
 

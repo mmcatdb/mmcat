@@ -28,7 +28,7 @@ import cz.matfyz.inference.algorithms.miner.functions.ReferenceTupleToPairWithSu
  * @author pavel.koupil
  */
 public class CandidateMinerAlgorithm implements Serializable{
-    public Candidates process(AbstractInferenceWrapper wrapper) throws Exception {
+    public Candidates process(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
         
         wrapper.buildSession();
         wrapper.initiateContext();
@@ -36,10 +36,11 @@ public class CandidateMinerAlgorithm implements Serializable{
         List<AbstractInferenceWrapper> wrappers = new ArrayList<>();
         
         try {
-                List<String> kinds = new ArrayList<>(); 
-                // kinds.add("imdb1k");
+                //List<String> kinds = new ArrayList<>(); 
+                //kinds.add("apps");
+                //kinds.add("reviews");
                 // kinds.add("imdb4k");
-                kinds.add("wikidata40");
+                //kinds.add("wikidata40");
 
                 JavaRDD<PropertyHeuristics> all = null;
 

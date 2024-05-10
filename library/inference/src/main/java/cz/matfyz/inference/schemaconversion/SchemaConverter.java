@@ -28,19 +28,19 @@ import cz.matfyz.core.rsd.Type;
  */
 public class SchemaConverter {
 
-    private final RecordSchemaDescription rsd;
+    private final RecordSchemaDescription rsd; 
     public SchemaCategory sc;
-    public String collectionName; // TODO: I need this to name the root of my SK and my mapping (probably the same as kind name). Right now I am only able to get it when I use DB as input
+    public String kindName; // TODO: I need this to name the root of my SK and my mapping (probably the same as kind name). Getting it as user inpu rn, but in case of MongoDB, it has to match a collection name! (otherwise cant pull from it)
     public AccessTreeNode root;
     public Key rootKey;
     public SchemaConversionUtils SCUtils;
     public List<Integer> sigVals;
 
     // 
-    public SchemaConverter(RecordSchemaDescription rsd, String schemaCatName, String collectionName) {
+    public SchemaConverter(RecordSchemaDescription rsd, String schemaCatName, String kindName) {
         this.rsd = rsd;
         this.sc = new SchemaCategory(schemaCatName);
-        this.collectionName = collectionName;
+        this.kindName = kindName;
         this.rootKey = new Key(0);
         this.SCUtils = new SchemaConversionUtils();
         this.sigVals = new ArrayList<Integer>();
@@ -70,7 +70,7 @@ public class SchemaConverter {
         
         System.out.println("Creating mapping...");
         MappingCreator mappingCreator = new MappingCreator(rootKey, root);
-        Mapping mapping = mappingCreator.createMapping(sc, this.collectionName); //What will this label be?
+        Mapping mapping = mappingCreator.createMapping(sc, this.kindName); //What will this label be?
         
         return new CategoryMappingPair(sc, mapping);
     }
@@ -87,7 +87,7 @@ public class SchemaConverter {
            // System.out.println("traverseAndBuild() adding root");
             ObjectIds ids = ObjectIds.createGenerated();
             SignatureId superId = SignatureId.createEmpty();
-            currentObject = new SchemaObject(currentNode.getKey(), this.collectionName, ids, superId);
+            currentObject = new SchemaObject(currentNode.getKey(), this.kindName, ids, superId);
             this.sc.addObject(currentObject);
         }
         else {
@@ -142,7 +142,7 @@ public class SchemaConverter {
     public void buildAccessTree(RecordSchemaDescription rsdp, Key keyp, int i, AccessTreeNode currentNode) {
         if (this.root == null) { //adding the root
             //System.out.println("adding root");
-            this.root = new AccessTreeNode(AccessTreeNode.State.Root, this.collectionName, null, keyp, null, null, null, false);
+            this.root = new AccessTreeNode(AccessTreeNode.State.Root, this.kindName, null, keyp, null, null, null, false);
         }
 
         if (!rsdp.getChildren().isEmpty()) {

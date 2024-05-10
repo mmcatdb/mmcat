@@ -61,7 +61,6 @@ import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 
 import java.awt.Dimension;
-import java.awt.geom.Point2D;
 import edu.uci.ics.jung.graph.Graph;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -282,7 +281,7 @@ public class JobExecutorService {
 
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
 
-        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model"); 
+        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model"); // what about this label?
         LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
         
         schemaService.overwriteInfo(wrapper, run.categoryId);
@@ -308,6 +307,7 @@ public class JobExecutorService {
         String host = datasourceWrapper.settings.get("host").asText();
         String uri = host + ":" + port;
 
+        // to get the collection names
         MongoClient mongoClient = MongoClients.create("mongodb://" + uri);
         MongoDatabase database = mongoClient.getDatabase(databaseName);
         List<String> collectionNames = database.listCollectionNames().into(new ArrayList<>());
@@ -321,10 +321,8 @@ public class JobExecutorService {
         return new MMInferOneInAll().input("appName", null, null, payload.kindName(), null, schemaCatName, inputStreamProvider, datasourceWrapper.type).run();       
     }
 
-      /**
+    /**
      * Layout algo using JUNG library
-     * @param objects
-     * @return
      */
     private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {    
         DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
@@ -356,7 +354,7 @@ public class JobExecutorService {
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
         MetadataContext context = new MetadataContext();
  
-        context.setId(new Id(null)); 
+        context.setId(new Id(null)); // is null ok?
         context.setVersion(Version.generateInitial());
 
         Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());

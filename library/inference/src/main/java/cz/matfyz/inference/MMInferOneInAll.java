@@ -31,7 +31,7 @@ import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 import scala.Tuple2;
 
-//// from the old version ///
+//// from the old inference version ///
 
 import java.io.IOException;
 
@@ -45,7 +45,7 @@ import cz.matfyz.wrappermongodb.MongoDBInferenceSchemaLessWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 
-/// brand new ///
+//// for the new inference version ////
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 
@@ -68,6 +68,7 @@ public class MMInferOneInAll {
     public static DatasourceType datasourceType;
     public static String checkpointDir;
 
+	// TODO: Make the input/class prettier
 	public MMInferOneInAll input(String appName, String uri, String databaseName, String kindName, List<String> collectionNames, String schemaCatName, InputStreamProvider inputStreamProvider, DatasourceType datasourceType) {
         MMInferOneInAll.appName = appName;
         MMInferOneInAll.uri = uri;
@@ -77,7 +78,7 @@ public class MMInferOneInAll {
         MMInferOneInAll.schemaCatName = schemaCatName;
         MMInferOneInAll.inputStreamProvider = inputStreamProvider;
         MMInferOneInAll.datasourceType = datasourceType;   
-        MMInferOneInAll.checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; //hard coded for now
+        MMInferOneInAll.checkpointDir = "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"; // hard coded for now
         return this;
     } 
 
@@ -158,6 +159,7 @@ public class MMInferOneInAll {
 			rsds.put(collectionName, r);
 		} */
 	
+		// TODO: review the merging, though
 		RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
 	
 		SchemaConverter scon = new SchemaConverter(rsd, schemaCatName, kindName);
@@ -187,7 +189,6 @@ public class MMInferOneInAll {
 		if (rsds.size() == 1) {
 			return rsds.values().iterator().next();
 		}
-		// Assuming mergeByName is a method that merges all RSDs into a complex one based on names.
 		return mergeByName(rsds);
 	}
 
@@ -197,18 +198,6 @@ public class MMInferOneInAll {
 		for (String logger : loggers) {
 			LoggingSystem.get(classLoader).setLogLevel(logger, LogLevel.WARN);
 		}
-	}
-
-	public static RecordSchemaDescription mergeByNames(Map<String, RecordSchemaDescription> rsds) {
-		RecordSchemaDescription complexRSD = new RecordSchemaDescription();
-
-		for (String collectionName : rsds.keySet()) {
-			RecordSchemaDescription rsd = rsds.get(collectionName);
-			//rsdToAdd.setName(collectionName);
-			ObjectArrayList<RecordSchemaDescription> children = complexRSD.getChildren();
-			//children.add(rsdToAdd);
-		}
-		return complexRSD;
 	}
 
 	public static RecordSchemaDescription mergeByName(Map<String, RecordSchemaDescription> rsds) {
@@ -222,10 +211,26 @@ public class MMInferOneInAll {
 		}
 		return complexRSD;
 	}
+
+	/// Follow alternative merging methods ///
+	/*
+	public static RecordSchemaDescription mergeByNames(Map<String, RecordSchemaDescription> rsds) {
+		RecordSchemaDescription complexRSD = new RecordSchemaDescription();
+
+		for (String collectionName : rsds.keySet()) {
+			RecordSchemaDescription rsd = rsds.get(collectionName);
+			//rsdToAdd.setName(collectionName);
+			ObjectArrayList<RecordSchemaDescription> children = complexRSD.getChildren();
+			//children.add(rsdToAdd);
+		}
+		return complexRSD;
+	} */
+
 	
 	/**
 	 * Recursively replace children of the given rsd if their names match any key in rsds.
 	 */
+	/*
 	private static boolean mergeChildren(RecordSchemaDescription rsd, Map<String, RecordSchemaDescription> rsds) {
 		//System.out.println("mergeChildren, rsd name: " + rsd.getName());
 		if (rsd.getChildren() != null && !rsd.getChildren().isEmpty()) {
@@ -234,30 +239,32 @@ public class MMInferOneInAll {
 			for (RecordSchemaDescription child : rsd.getChildren()) {
 				if (rsds.containsKey(child.getName())) {
 					//System.out.println("replacing child: " + child.getName());
-					// Replace the child with the corresponding RSD from rsds
+					// replace the child with the corresponding RSD from rsds
 					RecordSchemaDescription replacementRSD = rsds.get(child.getName());
 					replacementRSD.setName(child.getName());
-					mergeChildren(replacementRSD, rsds); // Ensure to merge its children too
+					mergeChildren(replacementRSD, rsds); // ensure to merge its children too
 					newChildren.add(replacementRSD);
 				} else {
-					// Otherwise, recursively process this child
 					mergeChildren(child, rsds);
 					newChildren.add(child);
 				}
 			}
 	
-			// Update the children of the current rsd
+			// update children of current rsd
 			if (newChildren != rsd.getChildren()) {
 				rsd.setChildren(newChildren);
 				return true;
 			}
-
 			return false;
 		}
 		return false;
-	}
+	} */
 
-	// merges two RSDs into one, creating a new root
+	/**
+	 * WIP
+	 * Merges two RSDs into one, creating a new root
+	 */
+	/*
 	public static RecordSchemaDescription mergeToComplex(Map<String, RecordSchemaDescription> rsds) {
 		RecordSchemaDescription complexRSD = new RecordSchemaDescription();
 		complexRSD.setName("_");
@@ -270,9 +277,13 @@ public class MMInferOneInAll {
 			children.add(rsdToAdd);
 		}
 		return complexRSD;
-	}
+	} */
 
-    // Recursive method to merge two RSDs
+	/**
+	 * WIP
+	 * Merges 2 rsds w/o any condition
+	 */
+	/*
     public static RecordSchemaDescription mergeRSDs(RecordSchemaDescription rsd1, RecordSchemaDescription rsd2) {
         if (rsd1 == null || rsd2 == null) {
 			System.out.println("returning just one");
@@ -290,14 +301,10 @@ public class MMInferOneInAll {
 			ch.setName(child.getName());
             childMap.put(child.getName(), ch);
         }
-
-        // Merge children from rsd1 into the map
         for (RecordSchemaDescription child : rsd1.getChildren()) {
             RecordSchemaDescription mergedChild = childMap.get(child.getName());
             mergeChildProperties(mergedChild, child);
         }
-
-        // Merge children from rsd2 into the map
         for (RecordSchemaDescription child : rsd2.getChildren()) {
             if (childMap.containsKey(child.getName())) {
                 RecordSchemaDescription mergedChild = childMap.get(child.getName());
@@ -310,23 +317,20 @@ public class MMInferOneInAll {
                 mergeChildProperties(childMap.get(child.getName()), child);
             }
         }
-
-        // Add all values from the map to the merged RSD
 		ObjectArrayList<RecordSchemaDescription> children = mergedRSD.getChildren();
 		for (RecordSchemaDescription ch : childMap.values()) {
 			children.add(ch);
 		}
         mergedRSD.setChildren(children);
         return mergedRSD;
-    }
+    }*/
 
-    // Helper method to merge properties of two RSDs
+    // helper method to merge properties of two RSDs
+	/*
     private static void mergeChildProperties(RecordSchemaDescription target, RecordSchemaDescription source) {
         target.setUnique(target.getUnique() + source.getUnique());
         target.setShareTotal(target.getShareTotal() + source.getShareTotal());
         target.setShareFirst(target.getShareFirst() + source.getShareFirst());
-        //target.types |= source.types; // Assuming bitwise OR for types
-        //target.models += source.models; // Summing models if applicable
-    }
+    }*/
 
 }
