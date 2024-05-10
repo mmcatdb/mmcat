@@ -212,25 +212,9 @@ public class MMInferOneInAll {
 		return complexRSD;
 	}
 
-	/// Follow alternative merging methods ///
-	/*
-	public static RecordSchemaDescription mergeByNames(Map<String, RecordSchemaDescription> rsds) {
-		RecordSchemaDescription complexRSD = new RecordSchemaDescription();
-
-		for (String collectionName : rsds.keySet()) {
-			RecordSchemaDescription rsd = rsds.get(collectionName);
-			//rsdToAdd.setName(collectionName);
-			ObjectArrayList<RecordSchemaDescription> children = complexRSD.getChildren();
-			//children.add(rsdToAdd);
-		}
-		return complexRSD;
-	} */
-
-	
-	/**
+		/**
 	 * Recursively replace children of the given rsd if their names match any key in rsds.
 	 */
-	/*
 	private static boolean mergeChildren(RecordSchemaDescription rsd, Map<String, RecordSchemaDescription> rsds) {
 		//System.out.println("mergeChildren, rsd name: " + rsd.getName());
 		if (rsd.getChildren() != null && !rsd.getChildren().isEmpty()) {
@@ -258,7 +242,22 @@ public class MMInferOneInAll {
 			return false;
 		}
 		return false;
+	} 
+
+	/// Follow alternative merging methods ///
+	/*
+	public static RecordSchemaDescription mergeByNames(Map<String, RecordSchemaDescription> rsds) {
+		RecordSchemaDescription complexRSD = new RecordSchemaDescription();
+
+		for (String collectionName : rsds.keySet()) {
+			RecordSchemaDescription rsd = rsds.get(collectionName);
+			//rsdToAdd.setName(collectionName);
+			ObjectArrayList<RecordSchemaDescription> children = complexRSD.getChildren();
+			//children.add(rsdToAdd);
+		}
+		return complexRSD;
 	} */
+
 
 	/**
 	 * WIP
