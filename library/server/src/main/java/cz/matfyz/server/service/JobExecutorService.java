@@ -8,7 +8,6 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SchemaGraph;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.utils.ArrayUtils;
@@ -17,13 +16,10 @@ import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
-
-import cz.matfyz.server.builder.MetadataContext;
-
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
-
-import cz.matfyz.server.configuration.ServerProperties; 
+import cz.matfyz.server.builder.MetadataContext;
+import cz.matfyz.server.configuration.ServerProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
@@ -33,24 +29,20 @@ import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
-import cz.matfyz.server.entity.logicalmodel.LogicalModel;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
-
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
-
 import cz.matfyz.server.exception.SessionException;
-
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
+import java.awt.Dimension;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -58,10 +50,6 @@ import java.util.ArrayList;
 import java.util.Map;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
-import edu.uci.ics.jung.algorithms.layout.Layout;
-
-import java.awt.Dimension;
-import edu.uci.ics.jung.graph.Graph;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -102,7 +90,7 @@ public class JobExecutorService {
 
     @Autowired
     private QueryRepository queryRepository;
-    
+
     @Autowired
     private DatasourceService datasourceService;
 
@@ -153,11 +141,11 @@ public class JobExecutorService {
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
         else if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload)
-            RSDToCategoryAlgorithm(run, rsdToCategoryPayload);
+            rsdToCategoryAlgorithm(run, rsdToCategoryPayload);
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
-    
+
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
         if (run.sessionId == null)
@@ -174,12 +162,14 @@ public class JobExecutorService {
         System.out.println("instance before");
         System.out.println(instance);
 
-        if (mappingWrappers.isEmpty()) {System.out.println("mapping wrappers is empty");}
+        if (mappingWrappers.isEmpty())
+            System.out.println("mapping wrappers is empty");
+
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
             final Mapping mapping = mappingWrapper.toMapping(schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
         }
-       
+
         System.out.println("instance after");
         System.out.println(instance);
 
@@ -271,26 +261,26 @@ public class JobExecutorService {
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
-    private void RSDToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+    private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
         SchemaCategoryWrapper originalWrapper = schemaService.find(run.categoryId);   // extracting the empty SK wrapper
-        String schemaCatName = originalWrapper.label;        
+        String schemaCatName = originalWrapper.label;
 
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
-        
+
         final CategoryMappingPair categoryMappingPair = processDatasource(datasourceWrapper, schemaCatName, payload);
 
         SchemaCategoryWrapper wrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
 
         LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model"); // what about this label?
         LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
-        
+
         schemaService.overwriteInfo(wrapper, run.categoryId);
-        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);        
-    } 
+        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
+    }
 
     private CategoryMappingPair processDatasource(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
         switch (datasourceWrapper.type) {
-            case mongodb:    
+            case mongodb:
                 return processMongoDB(datasourceWrapper, schemaCatName, payload);
             case json:
                 return processFile(datasourceWrapper, schemaCatName, payload);
@@ -315,29 +305,29 @@ public class JobExecutorService {
 
         return new MMInferOneInAll().input("appName", uri, database.getName(), payload.kindName(), collectionNames, schemaCatName, null, datasourceWrapper.type).run();
     }
-    
+
     private CategoryMappingPair processFile(DatasourceWrapper datasourceWrapper, String schemaCatName, RSDToCategoryPayload payload) {
-        UrlInputStreamProvider inputStreamProvider = new UrlInputStreamProvider(datasourceWrapper.settings.get("url").asText()); 
-        return new MMInferOneInAll().input("appName", null, null, payload.kindName(), null, schemaCatName, inputStreamProvider, datasourceWrapper.type).run();       
+        UrlInputStreamProvider inputStreamProvider = new UrlInputStreamProvider(datasourceWrapper.settings.get("url").asText());
+        return new MMInferOneInAll().input("appName", null, null, payload.kindName(), null, schemaCatName, inputStreamProvider, datasourceWrapper.type).run();
     }
 
     /**
      * Layout algo using JUNG library
      */
-    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {    
+    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
         DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
-        
+
         for (SchemaObject o : objects) {
             graph.addVertex(o);
         }
         for (SchemaMorphism m : morphisms) {
             graph.addEdge(m, m.dom(), m.cod());
         }
-        
+
         FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
         layout.setSize(new Dimension(600, 600));
-        
-        for (int i = 0; i < 1000; i ++) { // initialize positions
+
+        for (int i = 0; i < 1000; i++) { // initialize positions
             layout.step();
         }
 
@@ -347,13 +337,13 @@ public class JobExecutorService {
             double y = layout.getY(node);
             positions.put(node.key(), new Position(x, y));
         }
-        
-        return positions;        
+
+        return positions;
     }
 
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
         MetadataContext context = new MetadataContext();
- 
+
         context.setId(new Id(null)); // is null ok?
         context.setVersion(Version.generateInitial());
 

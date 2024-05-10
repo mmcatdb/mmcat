@@ -1,6 +1,5 @@
 package cz.matfyz.wrapperjson.inference.helpers;
 
-//import cz.cuni.matfyz.mminfer.persister.model.RecordSchemaDescription;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 import java.util.*;
 
-/**
- *
- * @author sebastian.hricko
- */
-public enum MapJSONRecord{
+public enum MapJSONRecord {
     INSTANCE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapJSONRecord.class);

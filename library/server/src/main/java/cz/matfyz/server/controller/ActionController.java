@@ -14,8 +14,6 @@ import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
-
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
 import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
@@ -111,7 +109,7 @@ public class ActionController {
         }
         if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
             final var datasource = createDatasourceDetail(rsdToCategoryPayload);
-            final var kindName = rsdToCategoryPayload.kindName();            
+            final var kindName = rsdToCategoryPayload.kindName();
             return new RSDToCategoryPayloadDetail(datasource, kindName);
         }
 
@@ -123,8 +121,8 @@ public class ActionController {
 
         switch (datasourceWrapper.type) {
             case mongodb:
-                MongoDBSettings settings = new MongoDBSettings(datasourceWrapper.settings.get("host").asText(), datasourceWrapper.settings.get("port").asText(), 
-                    datasourceWrapper.settings.get("authenticationDatabase").asText(), datasourceWrapper.settings.get("database").asText(), datasourceWrapper.settings.get("username").asText(), 
+                MongoDBSettings settings = new MongoDBSettings(datasourceWrapper.settings.get("host").asText(), datasourceWrapper.settings.get("port").asText(),
+                    datasourceWrapper.settings.get("authenticationDatabase").asText(), datasourceWrapper.settings.get("database").asText(), datasourceWrapper.settings.get("username").asText(),
                     datasourceWrapper.settings.get("password").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
                 return DatasourceDetail.create(datasourceWrapper, new MongoDBControlWrapper(new MongoDBProvider(settings)));
             case json:
@@ -137,7 +135,7 @@ public class ActionController {
                 throw new IllegalArgumentException("Unsupported or undefined datasource type.");
         }
 
-        
+
     }
 
     record ActionDetail(
@@ -172,7 +170,7 @@ public class ActionController {
         Version prevVersion,
         Version nextVersion
     ) implements ActionPayloadDetail {}
-    
+
     record RSDToCategoryPayloadDetail(
             DatasourceDetail datasource,
             String kindName

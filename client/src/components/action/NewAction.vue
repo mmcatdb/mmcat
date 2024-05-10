@@ -41,10 +41,10 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    if (actionType.value === ActionType.RSDToCategory) 
+    if (actionType.value === ActionType.RSDToCategory)
        return !!datasourceId.value && !!kindName.value; // this will fail, if kindName will be null
     else return !!logicalModelId.value;
-    
+
 });
 
 async function createAction() {
@@ -63,7 +63,7 @@ async function createAction() {
             type: actionType.value,
             logicalModelId: logicalModelId.value,
         };
-    } 
+    }
     /*
     const payload = actionType.value === ActionType.JsonLdToCategory ? {
         type: ActionType.JsonLdToCategory,
@@ -107,7 +107,7 @@ async function createAction() {
             <ValueRow
                 v-if="actionType === ActionType.RSDToCategory"
                 label="Data source:"
-            >    
+            >
                 <select v-model="datasourceId">
                     <option
                         v-for="datasource in datasources"
@@ -121,10 +121,10 @@ async function createAction() {
             <ValueRow
                 v-if="actionType === ActionType.RSDToCategory"
                 label="Enter kind name:"
-            >    
-                <textarea v-model="kindName" 
+            >
+                <textarea v-model="kindName"
                 >
-                </textarea>    
+                </textarea>
             </ValueRow>
             <ValueRow
                 v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"

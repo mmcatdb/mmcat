@@ -11,13 +11,13 @@ public class CsvPathWrapper implements AbstractPathWrapper {
 
     @Override public void addProperty(String path) {
         properties.add(path);
-    } 
+    }
 
     @Override public boolean check() {
         throw new UnsupportedOperationException("CsvPathWrapper.check not implemented.");
     }
 
-    
+
     // CHECKSTYLE:OFF
     // TODO check the correctness of the following methods:
     @Override public boolean isPropertyToOneAllowed() { return true; }

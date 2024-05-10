@@ -1,14 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cz.matfyz.wrappermongodb.inference.functions;
 
 import cz.matfyz.core.rsd.utils.BlobClobHashing;
 import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.utils.BasicHashFunction;
 import cz.matfyz.core.rsd.utils.BloomFilter;
-import java.io.Serializable;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.util.HashSet;
@@ -23,33 +18,29 @@ import org.slf4j.LoggerFactory;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import scala.Tuple2;
 
-/**
- *
- * @author simek.jan
- */
-public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<Document, String, PropertyHeuristics>, Serializable {
-    
+public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<Document, String, PropertyHeuristics> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MongoRecordToHeuristicsMapFunction.class);
 
     private final String collectionName;
 
     public MongoRecordToHeuristicsMapFunction(String collectionName) {
-		this.collectionName = collectionName;
+        this.collectionName = collectionName;
     }
-    
+
     @Override
-    public Iterator<Tuple2<String, PropertyHeuristics>> call (Document document) {
+    public Iterator<Tuple2<String, PropertyHeuristics>> call(Document document) {
         ObjectArrayList<Tuple2<String, PropertyHeuristics>> result = new ObjectArrayList<Tuple2<String, PropertyHeuristics>>();
-        
+
         appendHeuristics(collectionName, new Document(), 1, result, true);
-        
+
         document.forEach((key, value) -> {
             appendHeuristics(collectionName + '/' + key, value, 1, result, true);
         });
-        
+
         return result.iterator();
     }
-    
+
     private void appendHeuristics(String key, Object value, int firstShare, ObjectArrayList<Tuple2<String, PropertyHeuristics>> result, boolean appendThisProperty) {
         if (value == null)
             return;
@@ -57,7 +48,7 @@ public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<D
             PropertyHeuristics heuristics = buildHeuristics(key, value, firstShare, 1);
             result.add(new Tuple2<String, PropertyHeuristics>(key + "::" + value.toString(), heuristics));
         }
-        
+
         if (value instanceof Map) {
             appendMapHeuristics(key, ((Map<String, Object>) value).entrySet(), result);
         }
@@ -65,7 +56,7 @@ public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<D
             appendListHeuristics(key, (List<Object>) value, result);
         }
     }
-    
+
     private PropertyHeuristics buildHeuristics(String key, Object value, int first, int total) {
         return new PropertyHeuristics() {
             {
@@ -78,10 +69,10 @@ public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<D
                     setTemp(resultOfHashFunction);
                 }
                 else if (value instanceof Blob) {
-                    valueToSave = BlobClobHashing.BlobToHash((Blob) value);
+                    valueToSave = BlobClobHashing.blobToHash((Blob) value);
                 }
                 else if (value instanceof Clob) {
-                    valueToSave = BlobClobHashing.ClobToHash((Clob) value);
+                    valueToSave = BlobClobHashing.clobToHash((Clob) value);
                 }
                 setMin(valueToSave);
                 setMax(valueToSave);
@@ -97,20 +88,20 @@ public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<D
             }
         };
     }
-    
+
     private void appendMapHeuristics(String parentName, Set<Map.Entry<String, Object>> nestedProperties,  ObjectArrayList<Tuple2<String, PropertyHeuristics>> result) {
         parentName += "/";
-        
+
         for (Map.Entry<String, Object> value : nestedProperties) {
             String hierarchicalName = parentName + value.getKey();
             appendHeuristics(hierarchicalName, value.getValue(), 1, result, true);
         }
     }
-    
+
     private void appendListHeuristics(String parentName, List<Object> elements,  ObjectArrayList<Tuple2<String, PropertyHeuristics>> result) {
         Set<Object> visited = new HashSet<>();
         String hierarchicalName = parentName + "/_";
-         
+
         for (Object value : elements) {
             if (visited.stream().anyMatch(v -> value.getClass().isInstance(v))) {
                 appendHeuristics(hierarchicalName, value, 0, result, false);
@@ -119,6 +110,6 @@ public class MongoRecordToHeuristicsMapFunction implements PairFlatMapFunction<D
                 appendHeuristics(hierarchicalName, value, 1, result, true);
             }
         }
-        
+
     }
 }

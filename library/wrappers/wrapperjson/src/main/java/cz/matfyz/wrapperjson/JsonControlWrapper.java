@@ -1,11 +1,7 @@
 package cz.matfyz.wrapperjson;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
-import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractPathWrapper;
-import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
@@ -38,7 +34,7 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
     @Override public void execute(Path path) throws ExecuteException {
         throw new UnsupportedOperationException("JsonControlWrapper.execute not implemented.");
     }
-    
+
     @Override public JsonDDLWrapper getDDLWrapper() {
         return new JsonDDLWrapper();
     }

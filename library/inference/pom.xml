@@ -44,7 +44,7 @@
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId> 
+            <artifactId>mongo-java-driver</artifactId>
             <version>3.12.10</version>
         </dependency>
         <dependency>
@@ -58,7 +58,7 @@
             <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>
             <version>${fastutil.version}</version>
-        </dependency>               
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>wrappermongodb</artifactId>

@@ -261,57 +261,57 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
 
         return output;
     }
-    
+
     private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
-    
+
     public void addReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
         var referencesForSignature = referencesToRows.computeIfAbsent(signatureInThis, x -> new TreeSet<>());
         referencesForSignature.add(new ReferenceToRow(signatureInThis, path, signatureInOther));
     }
-    
+
     public Set<ReferenceToRow> getReferencesForSignature(Signature signatureInThis) {
         return referencesToRows.get(signatureInThis);
     }
-    
+
     public static class ReferenceToRow implements Comparable<ReferenceToRow> {
-        
+
         public final Signature signatureInThis;
         public final InstancePath path;
         public final Signature signatureInOther;
-        
+
         public ReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
             this.signatureInThis = signatureInThis;
             this.path = path;
             this.signatureInOther = signatureInOther;
         }
-        
+
         @Override public boolean equals(Object object) {
             if (this == object)
                 return true;
-            
+
             return object instanceof ReferenceToRow reference
                 && signatureInThis.equals(reference.signatureInThis)
                 && path.equals(reference.path)
                 && signatureInOther.equals(reference.signatureInOther);
         }
-        
+
         @Override public int compareTo(ReferenceToRow reference) {
             if (this == reference)
                 return 0;
-            
+
             final var x1 = signatureInThis.compareTo(reference.signatureInThis);
             if (x1 != 0)
                 return x1;
-            
+
             final var x2 = path.signature().compareTo(reference.path.signature());
             if (x2 != 0)
                 return x2;
-            
+
             return signatureInOther.compareTo(reference.signatureInOther);
         }
-        
+
     }
-    
+
     // Identification
 
     @Override public Key identifier() {
@@ -327,7 +327,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     }
 
     // Identification
-    
+
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 

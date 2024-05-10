@@ -28,12 +28,12 @@ public class GenericICWrapper implements AbstractICWrapper {
     }
 
     private static class EmptyStatement implements AbstractStatement {
-        
+
         private EmptyStatement() {}
-        
+
         @Override
         public String getContent() {
-            return ""; 
+            return "";
         }
 
         private static EmptyStatement instance = new EmptyStatement();

@@ -11,11 +11,14 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
 /**
  * Class to hold info about properties in SchemaCat, so that an access path can be
  * later constructed.
- *
  */
-public class AccessTreeNode{
+public class AccessTreeNode {
 
-    public enum State {Root, Simple, Complex;} 
+    public enum State {
+        Root,
+        Simple,
+        Complex,
+    }
 
     public State state;
     public String name;
@@ -85,7 +88,7 @@ public class AccessTreeNode{
         }
         return null;
     }
-    
+
     public static AccessTreeNode assignSignatures(AccessTreeNode node, Map<Integer, Integer> mappedSigVals) {
         if (node.state != State.Root) {
             int newSigVal = mappedSigVals.get(node.getSigVal());
@@ -104,6 +107,6 @@ public class AccessTreeNode{
             child.printTree(prefix + "    ");
         }
     }
-    
+
 }
 

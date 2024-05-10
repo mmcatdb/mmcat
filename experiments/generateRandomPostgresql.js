@@ -101,7 +101,7 @@ function getRandomItems() {
     return orderItems.filter(item => {
         if (ids.includes(item.id))
             return false;
-        
+
         ids.push(item.id);
         return true;
     });

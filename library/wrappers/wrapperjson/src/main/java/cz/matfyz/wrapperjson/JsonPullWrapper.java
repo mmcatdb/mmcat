@@ -78,7 +78,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
                 StaticName staticName = (StaticName) name;
                 String fieldName = staticName.getStringName();
                 JsonNode valueNode = jsonNode.get(fieldName);
-                
+
                 if (valueNode != null) {
                     if (subpath instanceof ComplexProperty complexSubpath) {
                         if (valueNode.isObject()) {
@@ -94,7 +94,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
             }
         }
     }
-    
+
     private void handleJsonArray(ComplexRecord parentRecord, JsonNode arrayNode, ComplexProperty complexSubpath, String fieldName) {
         for (JsonNode itemNode : arrayNode) {
             if (itemNode.isObject()) {
@@ -103,7 +103,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
             }
         }
     }
-    
+
     private void handleSimpleProperty(ComplexRecord parentRecord, JsonNode valueNode, SimpleProperty simpleSubpath, String fieldName) {
         if (valueNode.isArray()) {
             ArrayList<String> values = new ArrayList<>();
@@ -115,7 +115,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
             parentRecord.addSimpleValueRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), valueNode.asText());
         }
     }
-    
+
     private RecordName toRecordName(Name name, String valueIfDynamic) {
         if (name instanceof DynamicName dynamicName)
             return dynamicName.toRecordName(valueIfDynamic);

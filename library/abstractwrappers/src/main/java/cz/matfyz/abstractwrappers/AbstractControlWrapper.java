@@ -8,7 +8,7 @@ import java.util.Collection;
 public interface AbstractControlWrapper {
 
     boolean isWritable();
-    
+
     boolean isQueryable();
 
     void execute(Collection<AbstractStatement> statement) throws ExecuteException;

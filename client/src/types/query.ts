@@ -106,7 +106,7 @@ export class QueryDescription {
     private constructor(
         readonly parts: QueryPartDescription[],
     ) {}
-    
+
     static fromServer(input: QueryDescriptionFromServer): QueryDescription {
         return new QueryDescription(
             input.parts.map(QueryPartDescription.fromServer),

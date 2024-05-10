@@ -89,7 +89,7 @@ export type ActionPayloadInit = {
     logicalModelId: Id;
 } | {
     type: ActionType.RSDToCategory;
-    datasourceId: Id; 
+    datasourceId: Id;
     kindName: String;
 };
 
@@ -162,7 +162,7 @@ class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory
         readonly datasource: Datasource,
         readonly kindName: String,
     ) {
-        
+
     }
 
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {

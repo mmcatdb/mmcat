@@ -31,7 +31,7 @@ public class JsonDMLWrapper implements AbstractDMLWrapper {
             for (PropertyValue propertyValue : propertyValues) {
                 constructor.addProperty(propertyValue);
             }
-            String jsonContent = constructor.toPrettyString(); 
+            String jsonContent = constructor.toPrettyString();
             return new JsonCommandStatement(jsonContent);
         } catch (Exception e) {
             throw new OtherException(e);

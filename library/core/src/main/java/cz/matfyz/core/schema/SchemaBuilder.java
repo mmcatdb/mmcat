@@ -88,7 +88,7 @@ public class SchemaBuilder {
         final var object = new BuilderObject(key, label, ids);
         objectsByKey.put(object.key(), object);
         objectsByLabel.put(object.label(), object);
-        
+
         nextIdsIsGenerated = false;
 
         return object;
@@ -186,7 +186,7 @@ public class SchemaBuilder {
     }
 
     // Convenience methods for creating composite signatures.
-        
+
     public Signature dual(BuilderMorphism morphism) {
         return morphism.signature().dual();
     }
@@ -218,7 +218,7 @@ public class SchemaBuilder {
 
     private Set<BuilderObject> objectsToSkip = new TreeSet<>();
 
-    public SchemaBuilder skip(BuilderObject ...objects) {
+    public SchemaBuilder skip(BuilderObject... objects) {
         objectsToSkip.addAll(List.of(objects));
 
         return this;
@@ -226,9 +226,9 @@ public class SchemaBuilder {
 
     private Set<BuilderMorphism> morphismsToSkip = new TreeSet<>();
 
-    public SchemaBuilder skip(BuilderMorphism ...morphisms) {
+    public SchemaBuilder skip(BuilderMorphism... morphisms) {
         morphismsToSkip.addAll(List.of(morphisms));
-        
+
         return this;
     }
 
@@ -246,7 +246,7 @@ public class SchemaBuilder {
         morphismsBySignature.values().forEach(m -> {
             if (morphismsToSkip.contains(m) || objectsToSkip.contains(m.dom) || objectsToSkip.contains(m.cod))
                 return;
-                
+
             if (!(m.signature instanceof BaseSignature))
                 return;
 

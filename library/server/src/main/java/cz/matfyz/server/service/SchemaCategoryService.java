@@ -1,11 +1,6 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.core.identifiers.MapUniqueContext;
-import cz.matfyz.core.identifiers.UniqueContext;
-import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.entity.Id;
@@ -15,10 +10,8 @@ import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 
 import java.util.List;
 
@@ -65,18 +58,15 @@ public class SchemaCategoryService {
 
         return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "new_label", wrapper.version);
     }
-    
+
     /***
      * Temporary workaround method for inference
      * Overwrites the existing empty SchemaCategory
-     * @param wrapper
-     * @param id
-     * @return
      */
     public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
         final boolean saved = repository.save(wrapper, id);
-        
-        return saved == false ? null : new SchemaCategoryInfo(id, "new_label", wrapper.version);      
+
+        return saved ? new SchemaCategoryInfo(id, "new_label", wrapper.version) : null;
     }
 
     public SchemaCategoryInfo findInfo(Id id) {
@@ -86,7 +76,7 @@ public class SchemaCategoryService {
     public SchemaCategoryWrapper find(Id id) {
         return repository.find(id);
     }
-    
+
 
     public @Nullable SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);

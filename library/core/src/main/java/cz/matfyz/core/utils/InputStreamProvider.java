@@ -13,30 +13,30 @@ public interface InputStreamProvider {
 
     InputStream getInputStream() throws IOException;
 
-    public static class FileInputStreamProvider implements InputStreamProvider {
+    class FileInputStreamProvider implements InputStreamProvider {
 
         private String fileName;
-    
+
         public FileInputStreamProvider(String fileName) {
             this.fileName = fileName;
         }
-    
+
         public InputStream getInputStream() throws IOException {
             try {
                 final var fileUrl = ClassLoader.getSystemResource(fileName);
                 Path pathToDataFile = Paths.get(fileUrl.toURI()).toAbsolutePath();
                 File dataFile = pathToDataFile.toFile();
-    
+
                 return new FileInputStream(dataFile);
             }
             catch (Exception e) {
                 throw new IOException("Cannot read from local file " + fileName + ".", e.getCause());
             }
         }
-    
+
     }
 
-    public static class UrlInputStreamProvider implements InputStreamProvider {
+    class UrlInputStreamProvider implements InputStreamProvider {
 
         private String url;
 

@@ -61,7 +61,7 @@ public class PostgreSQLQueryWrapper extends BaseQueryWrapper implements Abstract
         final String projectionsString = projections.stream()
             .map(projection -> "    " + getProjection(projection))
             .collect(Collectors.joining(",\n"));
-            
+
         builder
             .append("SELECT\n")
             .append(projectionsString)

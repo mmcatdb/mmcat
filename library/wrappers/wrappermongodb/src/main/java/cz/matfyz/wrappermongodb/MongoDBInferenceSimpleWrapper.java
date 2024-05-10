@@ -19,17 +19,17 @@ public class MongoDBInferenceSimpleWrapper {
         return instance;
     }
 
-    private MongoDBInferenceSimpleWrapper(){}
+    private MongoDBInferenceSimpleWrapper() {}
 
     public void buildTestSession() {
         MongoClientOptions opts = new MongoClientOptions.Builder().maxConnectionIdleTime(86400000).build();
-        client = new MongoClient(new ServerAddress("localhost" , 27017), opts);
+        client = new MongoClient(new ServerAddress("localhost", 27017), opts);
         client.startSession();
     }
 
     public void buildSession(String uri, String port, String user, String password) {
         MongoClientOptions opts = new MongoClientOptions.Builder().maxConnectionIdleTime(86400000).build();
-        client = new MongoClient(new ServerAddress(uri , Integer.parseInt(port)), opts);
+        client = new MongoClient(new ServerAddress(uri, Integer.parseInt(port)), opts);
         client.startSession();
     }
 

@@ -19,7 +19,7 @@ public class JsonTestBase {
     public JsonTestBase(boolean isVerbose) {
         this.isVerbose = isVerbose;
     }
-    
+
     private static String serialize(Object object) throws IOException {
         return mapper.writeValueAsString(object);
     }

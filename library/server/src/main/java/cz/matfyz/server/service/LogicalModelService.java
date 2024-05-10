@@ -1,7 +1,5 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.server.controller.DatasourceController;
-import cz.matfyz.server.controller.LogicalModelController.LogicalModelDetail;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
@@ -69,5 +67,5 @@ public class LogicalModelService {
 
         return new LogicalModelWithDatasource(logicalModel, datasource);
     }
-    
+
 }

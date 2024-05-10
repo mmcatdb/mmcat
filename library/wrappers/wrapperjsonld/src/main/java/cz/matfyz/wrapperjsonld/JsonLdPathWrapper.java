@@ -17,7 +17,7 @@ public class JsonLdPathWrapper implements AbstractPathWrapper {
         throw new UnsupportedOperationException("JsonLdPathWrapper.check not implemented.");
     }
 
-    
+
     // CHECKSTYLE:OFF
     // TODO check the correctness of the following methods:
     @Override public boolean isPropertyToOneAllowed() { return true; }

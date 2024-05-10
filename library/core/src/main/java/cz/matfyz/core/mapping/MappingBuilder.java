@@ -24,7 +24,7 @@ public class MappingBuilder {
     public ComplexProperty complex(BuilderMorphism name, BuilderMorphism morphism, AccessPath... subpaths) {
         return complex(name.signature(), morphism.signature(), subpaths);
     }
-    
+
     public ComplexProperty auxiliary(String name, AccessPath... subpaths) {
         return new ComplexProperty(new StaticName(name), Signature.createEmpty(), List.of(subpaths));
     }

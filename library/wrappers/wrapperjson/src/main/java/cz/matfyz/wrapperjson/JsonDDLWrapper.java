@@ -6,8 +6,8 @@ import java.util.Set;
 
 public class JsonDDLWrapper implements AbstractDDLWrapper {
 
-    private String kindName = null; 
-    
+    private String kindName = null;
+
 
     @Override
     public void setKindName(String name) {
@@ -16,7 +16,7 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
 
     @Override
     public boolean isSchemaLess() {
-        return true; 
+        return true;
     }
 
 

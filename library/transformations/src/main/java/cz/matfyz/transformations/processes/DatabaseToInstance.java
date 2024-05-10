@@ -52,7 +52,7 @@ public class DatabaseToInstance {
         var finalQuery = query != null ? query : new KindNameQuery(mapping.kindName());
 
         ForestOfRecords forest = pullWrapper.pullForest(mapping.accessPath(), finalQuery);
-        
+
         Statistics.set(Counter.PULLED_RECORDS, forest.size());
 
         InstanceCategory instance = currentInstance != null

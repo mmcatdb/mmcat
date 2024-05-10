@@ -83,7 +83,7 @@ public record InstanceCategoryWrapper(
         public final Map<Key, Map<Integer, DomainRow>> idToRow = new TreeMap<>();
         public final Map<Key, Map<DomainRow, Integer>> rowToId = new TreeMap<>();
 
-        public WrapperContext(InstanceCategory category) {
+        WrapperContext(InstanceCategory category) {
             this.category = category;
         }
     }

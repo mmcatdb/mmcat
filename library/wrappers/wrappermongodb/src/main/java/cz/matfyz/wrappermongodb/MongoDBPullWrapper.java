@@ -130,7 +130,7 @@ public class MongoDBPullWrapper implements AbstractPullWrapper {
         //var value = document.get(key);
         //if (key.equals("monday")) {System.out.println("changing up that key, girl"); key = "Monday";}
         var value = document.get(key);
-        System.out.println("getFieldFromObjectForSubpath key:" + key );
+        System.out.println("getFieldFromObjectForSubpath key:" + key);
         System.out.println("getFieldFromObjectForSubpath value: " + value);
 
         if (subpath instanceof ComplexProperty complexSubpath) {

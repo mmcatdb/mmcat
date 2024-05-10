@@ -59,14 +59,14 @@ async function deleteAction() {
             >
                 <RouterLink :to="{ name: 'datasource', params: {id: action.payload.datasource.id }, query: { categoryId: action.categoryId } }">
                     {{ action.payload.datasource.label }}
-                </RouterLink> 
+                </RouterLink>
             </ValueRow>
             <ValueRow
                 v-if="action.payload.type === ActionType.RSDToCategory"
                 label="Kind Name:"
             >
                 {{ action.payload.kindName }}
-            </ValueRow> 
+            </ValueRow>
             <ValueRow
                 v-else-if="action.payload.type === ActionType.CategoryToModel || action.payload.type === ActionType.ModelToCategory"
                 label="Logical model:"
@@ -79,7 +79,7 @@ async function deleteAction() {
                 v-else-if="action.payload.type === ActionType.UpdateSchema"
                 label="Versions:"
             >
-              <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" /> 
+              <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
             </ValueRow>
             <!--
                 <ValueRow label="State:">

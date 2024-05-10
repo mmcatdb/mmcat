@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cz.matfyz.core.rsd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-/**
- *
- * @author sebastian.hricko
- */
 public class RedundancyPair {
     @JsonIgnore
     transient Object property1;

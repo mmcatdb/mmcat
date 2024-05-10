@@ -157,14 +157,14 @@ public class ComplexProperty extends AccessPath {
 
         Collections.reverse(path);
         path.remove(0);
-        
+
         return path;
     }
 
     @Override protected @Nullable List<AccessPath> getPropertyPathInternal(Signature signature) {
         if (signature.isEmpty())
             return new ArrayList<>(List.of(this));
-            
+
         for (var subpath : subpaths) {
             final var subSignature = signature.cutPrefix(subpath.signature);
             if (subSignature == null)

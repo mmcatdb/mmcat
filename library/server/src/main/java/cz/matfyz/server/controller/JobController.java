@@ -59,14 +59,14 @@ public class JobController {
     public JobDetail createRun(@PathVariable Id actionId, @CookieValue(name = "session", defaultValue = "") Id sessionId) {
         if (sessionId.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Session ID is required.");
-        
+
         final var action = actionRepository.find(actionId);
 
         return jobToJobDetail(service.createUserRun(action, sessionId));
     }
 
     @PostMapping("/jobs/{id}/restart")
-    public JobDetail createRestartedJob(@PathVariable Id id){
+    public JobDetail createRestartedJob(@PathVariable Id id) {
         final var jobWithRun = repository.find(id);
 
         return jobToJobDetail(service.createRestartedJob(jobWithRun));

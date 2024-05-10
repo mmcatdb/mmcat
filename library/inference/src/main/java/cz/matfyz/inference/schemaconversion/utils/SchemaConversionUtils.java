@@ -5,21 +5,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import cz.matfyz.core.identifiers.Key; 
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.rsd.Char;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
-import cz.matfyz.core.rsd.Share;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 public class SchemaConversionUtils {
-    
+
     /**
      * To label the morphisms
      */
     public enum Label {
         IDENTIFIER, RELATIONAL;
     }
-    
+
     public SchemaConversionUtils() {}
 
     /**
@@ -70,7 +69,7 @@ public class SchemaConversionUtils {
      * For now we label 2 types of morphisms: identification & relational.
      * A morphism is labeled as identification if its codomain is an identificator
      * And it is labeled as relational if its domain is an array type
-     */    
+     */
     public String createLabel(RecordSchemaDescription rsdch, boolean isArrayp, boolean isArraych) {
 
         if (isArraych || isArrayp) { // meaning the parent is an array (works for now, might not work later)
@@ -85,7 +84,7 @@ public class SchemaConversionUtils {
         // can a relational morphism be also identification? (probably not)
         return null; //when there is no particular label
     }
-    
+
     /**
      * For creating an extra identification property
      * For each array object add an extra child named "_index".
@@ -97,7 +96,7 @@ public class SchemaConversionUtils {
                 SchemaObject sop = s.dom();
                 Key keyp = sop.key();
                 Key keych = createChildKey(keyp, 0); // is the 0 ok?
-                
+
                 SchemaObject soch = new SchemaObject(keych, "_index", null, null);
                 sc.addObject(soch);
 
@@ -115,7 +114,7 @@ public class SchemaConversionUtils {
      */
     public Map<Integer, Integer> mapSigVals(List<Integer> sigVals) {
         Map<Integer, Integer> result = new HashMap<Integer, Integer>();
-        
+
         Integer newSigVal = 0;
         for (Integer sigVal : sigVals) {
             result.put(sigVal, newSigVal);

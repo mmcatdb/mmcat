@@ -34,20 +34,20 @@ public class MongoDBProvider {
         boolean isWritable,
         boolean isQueryable
     ) {
-    
+
         public String createConnectionString() {
             final var builder = new StringBuilder()
                 .append("mongodb://");
-    
+
             if (username != null)
                 builder
                     .append(username);
-    
+
             if (password != null)
                 builder
                     .append(":")
                     .append(password);
-    
+
             builder
                 .append("@")
                 .append(host)
@@ -57,10 +57,10 @@ public class MongoDBProvider {
                 .append(database)
                 .append("?authSource=")
                 .append(authenticationDatabase);
-    
+
             return builder.toString();
         }
-    
+
     }
 
 }

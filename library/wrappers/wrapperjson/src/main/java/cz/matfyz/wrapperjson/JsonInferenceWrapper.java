@@ -25,38 +25,38 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
     private JavaSparkContext context;
-    
+
     private final String sparkMaster;
     private final String appName;
     private final InputStreamProvider inputStreamProvider;
     private final String checkpointDir;
-    
+
     public JsonInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
         this.sparkMaster = sparkMaster;
         this.appName = appName;
         this.inputStreamProvider = inputStreamProvider;
-        this.checkpointDir = checkpointDir; 
+        this.checkpointDir = checkpointDir;
     }
-    
+
     @Override
     public void buildSession() {
         sparkSession = SparkSession.builder().master(sparkMaster)
-                .appName(appName) 
+                .appName(appName)
                 .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
-        
+
     }
 
     @Override
     public void stopSession() {
-            sparkSession.stop();      
+            sparkSession.stop();
     }
-    
+
     @Override
     public void initiateContext() {
         context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");        
+        context.setLogLevel("ERROR");
     }
 
     @Override
@@ -71,12 +71,12 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         JavaRDD<Document> jsonDocuments = loadDocuments();
         return jsonDocuments.map(new JSONRecordToRSDMapFunction());
     }
-    
+
     public JavaRDD<Document> loadDocuments() {
         JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
         newContext.setLogLevel("ERROR");
         newContext.setCheckpointDir(checkpointDir);
-        
+
         List<String> lines = new ArrayList<>();
         try (InputStream inputStream = inputStreamProvider.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
@@ -87,7 +87,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
             return context.emptyRDD();
-        }            
+        }
         JavaRDD<String> jsonLines = context.parallelize(lines);
         JavaRDD<Document> jsonDocuments = jsonLines.map(Document::parse);
         return jsonDocuments;

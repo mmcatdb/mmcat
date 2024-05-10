@@ -4,7 +4,6 @@ import cz.matfyz.core.schema.SchemaCategory;
 
 import cz.matfyz.core.mapping.Mapping;
 
-
 /**
  * Record to hold the final result of SchemaConversion - SchemaCategory and Mapping
  */

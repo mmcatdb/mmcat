@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cz.matfyz.inference.algorithms.miner.functions;
 
 import java.io.ByteArrayOutputStream;
@@ -9,14 +5,11 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.security.MessageDigest;
 import java.sql.Blob;
-import java.sql.Clob; 
+import java.sql.Clob;
 
-/**
- *
- * @author simek.jan
- */
 public class BlobClobHashing {
-    public static String BlobToHash(Blob blob) {
+
+    public static String blobToHash(Blob blob) {
          try (InputStream is = blob.getBinaryStream()) {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int nRead;
@@ -29,10 +22,10 @@ public class BlobClobHashing {
         }
         catch (Exception e) {
             return "";
-        }        
+        }
     }
-    
-    public static String ClobToHash(Clob clob) {
+
+    public static String clobToHash(Clob clob) {
         try {
             Reader reader = clob.getCharacterStream();
             char[] buffer = new char[1024];
@@ -48,7 +41,7 @@ public class BlobClobHashing {
            return "";
         }
     }
-    
+
     private static String md5Hashing(byte[] bytes) throws Exception {
         MessageDigest md = MessageDigest.getInstance("MD5");
         byte[] digest = md.digest(bytes);
@@ -58,4 +51,5 @@ public class BlobClobHashing {
         }
         return result.toString();
     }
+
 }

@@ -33,7 +33,7 @@ public class DatasourceService {
     public DatasourceWrapper createNew(DatasourceInit data) {
         final var datasource = DatasourceWrapper.createNew(data);
         repository.save(datasource);
-        
+
         return datasource;
     }
 

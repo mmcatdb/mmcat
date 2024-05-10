@@ -1,13 +1,10 @@
 package cz.matfyz.wrappercsv.inference.helpers;
 
+import cz.matfyz.core.rsd.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cz.matfyz.core.rsd.*;
-import cz.matfyz.wrappercsv.inference.helpers.MapCSVRecord;
-
-import it.unimi.dsi.fastutil.objects.ObjectArrayList; 
-
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.*;
 
 public enum MapCSVRecord {

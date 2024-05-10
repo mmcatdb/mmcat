@@ -1,18 +1,15 @@
 package cz.matfyz.wrappercsv.inference.helpers;
 
+import cz.matfyz.core.rsd.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import cz.matfyz.core.rsd.*;
-import cz.matfyz.wrappercsv.inference.helpers.MapCSVDocument;
-
-import it.unimi.dsi.fastutil.objects.ObjectArrayList; 
-
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.*;
 
 public enum MapCSVDocument {
     INSTANCE;
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MapCSVDocument.class);
 
     public RecordSchemaDescription process(Map<String, String> t) {
@@ -30,13 +27,13 @@ public enum MapCSVDocument {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
 
         t.forEach((key, value) -> children.add(MapCSVRecord.INSTANCE.process(key, value, true, true)));
-        
+
         //Collections.sort(children);
 
         result.setChildren(children);
 
         return result;
     }
-    
+
 
 }

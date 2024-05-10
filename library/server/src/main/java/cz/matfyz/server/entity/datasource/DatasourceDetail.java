@@ -43,7 +43,7 @@ public record DatasourceDetail(
         boolean isWritable,
         boolean isQueryable
     ) {
-        
+
         public static DatasourceConfiguration create(DatasourceWrapper datasource, AbstractControlWrapper wrapper) {
             final var path = wrapper.getPathWrapper();
 

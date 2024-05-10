@@ -111,7 +111,7 @@ public class SchemaCategoryRepository {
      * while creating the new (empty) info
      * @return
      */
-    public boolean save(SchemaCategoryWrapper wrapper, Id id) {      
+    public boolean save(SchemaCategoryWrapper wrapper, Id id) {
         return db.get((connection, output) -> {
         var statement = connection.prepareStatement("""
                 UPDATE schema_category
@@ -121,12 +121,12 @@ public class SchemaCategoryRepository {
         statement.setString(1, wrapper.toJsonValue());
         setId(statement, 2, id);
         //setId(statement, 2, wrapper.id);
-        
+
         int affectedRows = statement.executeUpdate();
         output.set(affectedRows != 0);
-        });    
+        });
     }
-    
+
     public boolean update(SchemaCategoryWrapper wrapper, SchemaUpdate update) {
         return db.get((connection, output) -> {
             var statement = connection.prepareStatement("""

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cz.matfyz.inference.algorithms.miner.functions;
 
 import cz.matfyz.core.rsd.PropertyHeuristics;
@@ -11,10 +7,6 @@ import java.util.List;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
-/**
- * 
- * @author simek.jan
- */
 public class FlatMapToParentsFunction implements PairFlatMapFunction<PropertyHeuristics, String, PropertyHeuristics> {
     @Override
     public Iterator<Tuple2<String, PropertyHeuristics>> call(PropertyHeuristics heuristics) {
@@ -23,7 +15,7 @@ public class FlatMapToParentsFunction implements PairFlatMapFunction<PropertyHeu
         int index = heuristics.getHierarchicalName().lastIndexOf("/");
         String parentName = "";
         if (index != -1) {
-           parentName = heuristics.getHierarchicalName().substring(0, index);    
+           parentName = heuristics.getHierarchicalName().substring(0, index);
         }
         list.add(new Tuple2<>(parentName, heuristics));
         return list.iterator();

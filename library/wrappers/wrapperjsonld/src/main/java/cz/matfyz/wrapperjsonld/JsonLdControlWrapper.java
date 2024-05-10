@@ -36,7 +36,7 @@ public class JsonLdControlWrapper extends BaseControlWrapper implements Abstract
     @Override public void execute(Path path) throws ExecuteException {
         throw new UnsupportedOperationException("JsonLdControlWrapper.execute not implemented.");
     }
-    
+
     @Override public AbstractDDLWrapper getDDLWrapper() {
         throw new UnsupportedOperationException("JsonLdControlWrapper.getDDLWrapper not implemented.");
     }

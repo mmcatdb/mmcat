@@ -55,11 +55,11 @@ public interface Term extends ParserNode, Comparable<Term> {
         @Override public String getIdentifier() {
             return "s_" + id;
         }
-    
+
         @Override public boolean equals(Object other) {
             return other instanceof StringValue wrapper && wrapper.id.equals(id);
         }
-    
+
         @Override public String toString() {
             return this.id + "(" + value + ")";
         }
@@ -78,15 +78,15 @@ public interface Term extends ParserNode, Comparable<Term> {
         @Override public String getIdentifier() {
             return "v_" + name;
         }
-    
+
         @Override public boolean isOriginal() {
             return isOriginal;
         }
-    
+
         @Override public boolean equals(Object other) {
             return other instanceof Variable variable && variable.name.equals(name);
         }
-    
+
         @Override public String toString() {
             return "?" + name;
         }
@@ -105,18 +105,18 @@ public interface Term extends ParserNode, Comparable<Term> {
         @Override public String getIdentifier() {
             return "a_" + operator + "_" + variable.name;
         }
-    
+
         @Override public boolean equals(Object other) {
             return other instanceof Aggregation aggregation && variable.equals(aggregation.variable) && operator == aggregation.operator;
         }
-    
+
         @Override public String toString() {
             return operator.toString() + "(" + variable.toString() + ")";
         }
 
     }
 
-    public static class Builder {
+    class Builder {
 
         // Variables
 

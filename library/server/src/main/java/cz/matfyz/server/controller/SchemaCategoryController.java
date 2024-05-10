@@ -8,7 +8,6 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.matfyz.server.service.SchemaCategoryService;
-import cz.matfyz.core.schema.SchemaCategory;
 
 import java.util.List;
 

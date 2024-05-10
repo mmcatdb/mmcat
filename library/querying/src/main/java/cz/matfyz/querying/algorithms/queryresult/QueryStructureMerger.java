@@ -45,7 +45,7 @@ public class QueryStructureMerger {
         public QueryResult apply(ResultList source, ResultList target) {
             // First create the index.
             sourceTform.apply(new TformContext(source));
-            
+
             // Then then merge the source to the target and remove the target identifiers.
             targetTform.apply(new TformContext(target));
 
@@ -85,7 +85,7 @@ public class QueryStructureMerger {
         current.addChild(new RemoveFromMap(deleteKeys.get(deleteKeys.size() - 1)));
 
         final var newStructure = createNewStructure(targetProperty, targetToMatch, sourceToMatch, deleteKeys);
-        
+
         return new MergeTform(sourceTform, targetTform, newStructure);
     }
 
@@ -108,7 +108,7 @@ public class QueryStructureMerger {
             final var map = targetToMatch.get(i);
             if (map.children().size() > 1)
                 break;
-            
+
             // If the map has only one child (which will be deleted) so it's safe to delete it as well.
             keyToDelete = map.name;
         }

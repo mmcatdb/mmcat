@@ -76,7 +76,7 @@ public class Schema {
     // The same key here is intentional - we want to replace the previous morphisms.
     public static final BuilderMorphism orderedToCustomer =     builder.morphism(ordered, customer, 12);
     public static final BuilderMorphism orderedToOrder =        builder.morphism(ordered, order, 18);
-    
+
     public static final BuilderMorphism orderedToCustomerId =   builder.composite(orderedToCustomer, customerToCustomerId);
     public static final BuilderMorphism orderedToOrderId =      builder.composite(orderedToOrder, orderToOrderId);
 

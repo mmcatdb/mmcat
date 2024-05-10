@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cz.matfyz.core.rsd.helpers;
 
 import cz.matfyz.core.rsd.ProcessedProperty;
@@ -11,10 +7,6 @@ import cz.matfyz.core.rsd.RecordSchemaDescription;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author sebastian.hricko
- */
 public enum BuildPropertyTree {
     INSTANCE;
 
@@ -59,27 +51,27 @@ public enum BuildPropertyTree {
         if (result.getChildren().isEmpty())
             return result;
         else {
-            result = (ProcessedProperty) result.getChildren().toArray()[0];	//remove fake root element
+            result = (ProcessedProperty) result.getChildren().toArray()[0];    //remove fake root element
         }
         return result;
     }
 
     private void addPropertyToTree(ProcessedProperty property, String[] nodes, ProcessedProperty tree, int index) {
         for (ProcessedProperty subtree : tree.getChildren()) {
-            if (subtree.getHierarchicalName().equals(nodes[index])) {	//find the subtree that is of the same name as the current node name
-                addNodeToTree(property, nodes, index, subtree);		//add the node to the subtree and return
+            if (subtree.getHierarchicalName().equals(nodes[index])) {    //find the subtree that is of the same name as the current node name
+                addNodeToTree(property, nodes, index, subtree);        //add the node to the subtree and return
                 return;
             }
         }
-        ProcessedProperty subtree = new ProcessedProperty(nodes[index], new RecordSchemaDescription());	//no subtree has been found, create one with the current node name
-        addNodeToTree(property, nodes, index, subtree);		//add the node to the subtree
-        tree.addChild(subtree); 	//add subtree to the tree
+        ProcessedProperty subtree = new ProcessedProperty(nodes[index], new RecordSchemaDescription());    //no subtree has been found, create one with the current node name
+        addNodeToTree(property, nodes, index, subtree);        //add the node to the subtree
+        tree.addChild(subtree);     //add subtree to the tree
         property.setParent(tree);
     }
 
     private void addNodeToTree(ProcessedProperty property, String[] nodes, int index, ProcessedProperty tree) {
-        if (nodes.length > index + 1) {		//if the current node is not the last node in hierarchicalName
-            addPropertyToTree(property, nodes, tree, index + 1); 		//proceed with the next node name
+        if (nodes.length > index + 1) {        //if the current node is not the last node in hierarchicalName
+            addPropertyToTree(property, nodes, tree, index + 1);         //proceed with the next node name
         } else {
             tree.setHeuristics(property.getHeuristics());
         }

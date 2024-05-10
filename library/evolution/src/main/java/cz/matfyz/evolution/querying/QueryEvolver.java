@@ -175,7 +175,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         public final List<TermTree<TEdge>> deleted = new ArrayList<>();
         private final Predicate<TermTree<TEdge>> predicate;
 
-        public SubtreeDeletor(Predicate<TermTree<TEdge>> predicate) {
+        SubtreeDeletor(Predicate<TermTree<TEdge>> predicate) {
             this.predicate = predicate;
         }
 
@@ -206,7 +206,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
                 : TermTree.child(input.term, input.edgeFromParent);
 
             newChildren.forEach(output::addChild);
-            
+
             return output;
         }
 

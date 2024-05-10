@@ -4,7 +4,7 @@ services:
     adminer:
         container_name: "mmcat-adminer"
         restart: always
-        build: 
+        build:
             context: .
             dockerfile: docker/adminer/Dockerfile
         ports:
@@ -13,7 +13,7 @@ services:
     database:
         container_name: "mmcat-database"
         restart: always
-        build: 
+        build:
             context: .
             dockerfile: docker/database/Dockerfile
         env_file: .env
@@ -25,7 +25,7 @@ services:
     postgresql:
         container_name: "mmcat-postgresql"
         restart: always
-        build: 
+        build:
             context: .
             dockerfile: docker/postgresql/Dockerfile
         env_file: .env
@@ -37,7 +37,7 @@ services:
     mongodb:
         container_name: "mmcat-mongodb"
         restart: always
-        build: 
+        build:
             context: .
             dockerfile: docker/mongodb/Dockerfile
         env_file: .env
@@ -47,7 +47,7 @@ services:
     neo4j:
         container_name: "mmcat-neo4j"
         restart: always
-        build: 
+        build:
             context: .
             dockerfile: docker/neo4j/Dockerfile
         env_file: .env

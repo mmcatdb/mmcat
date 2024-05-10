@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package cz.matfyz.inference.algorithms.miner.functions;
 
 import cz.matfyz.core.rsd.PropertyHeuristics;
@@ -11,14 +7,10 @@ import java.util.List;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
-/**
- *
- * @author simek.jan
- */
 public class SetRequiredTagFlatMapFunction implements PairFlatMapFunction<Tuple2<String, Iterable<PropertyHeuristics>>, String, PropertyHeuristics> {
     @Override
     public Iterator<Tuple2<String, PropertyHeuristics>> call(Tuple2<String, Iterable<PropertyHeuristics>> tuple) {
-        List<Tuple2<String, PropertyHeuristics>> result = new ArrayList<>(); 
+        List<Tuple2<String, PropertyHeuristics>> result = new ArrayList<>();
         int parentCount = 0;
         PropertyHeuristics parent = null;
         for (PropertyHeuristics p : tuple._2) {
@@ -30,7 +22,7 @@ public class SetRequiredTagFlatMapFunction implements PairFlatMapFunction<Tuple2
             }
         }
         if (parent != null) {
-            for (PropertyHeuristics p : tuple._2) {   
+            for (PropertyHeuristics p : tuple._2) {
                 if (!parent.equals(p)) {
                     if (parentCount == p.getCount()) {
                         p.setRequired(true);
@@ -38,7 +30,7 @@ public class SetRequiredTagFlatMapFunction implements PairFlatMapFunction<Tuple2
                     result.add(new Tuple2<>(tuple._1, p));
                 }
             }
-        }   
+        }
         else {
             for (PropertyHeuristics p : tuple._2) {
                 result.add(new Tuple2<>(tuple._1, p));

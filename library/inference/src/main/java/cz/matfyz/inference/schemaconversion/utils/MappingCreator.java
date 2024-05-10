@@ -11,7 +11,7 @@ public class MappingCreator {
     public Key rootKey;
     public AccessTreeNode root;
     private MappingBuilder builder = new MappingBuilder();
-    
+
     public MappingCreator(Key rootKey, AccessTreeNode root) {
         this.rootKey = rootKey;
         this.root = root;
@@ -43,7 +43,7 @@ public class MappingCreator {
            return builder.complex(node.getName(), node.getSig(), subpaths.toArray(new AccessPath[0]));
        }
    }
- 
+
 }
 
 

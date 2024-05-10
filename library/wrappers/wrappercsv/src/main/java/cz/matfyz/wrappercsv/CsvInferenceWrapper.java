@@ -25,19 +25,19 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
     private JavaSparkContext context;
-    
+
     private final String sparkMaster;
     private final String appName;
     private final InputStreamProvider inputStreamProvider;
     private final String checkpointDir;
-    
+
     public CsvInferenceWrapper(String sparkMaster, String appName, InputStreamProvider inputStreamProvider, String checkpointDir) {
         this.sparkMaster = sparkMaster;
         this.appName = appName;
-        this.inputStreamProvider = inputStreamProvider;  
+        this.inputStreamProvider = inputStreamProvider;
         this.checkpointDir = checkpointDir;
     }
-    
+
     @Override
     public void buildSession() {
         sparkSession = SparkSession.builder().master(sparkMaster)
@@ -45,18 +45,18 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
                 .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
-        
+
     }
 
     @Override
     public void stopSession() {
-            sparkSession.stop();      
+            sparkSession.stop();
     }
-    
+
     @Override
     public void initiateContext() {
         context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");        
+        context.setLogLevel("ERROR");
     }
 
     @Override
@@ -72,16 +72,16 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
         return csvDocuments.map(new CSVRecordToRSDMapFunction());
     }
-    
+
     public JavaRDD<Map<String, String>> loadDocuments() {
         JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
         newContext.setLogLevel("ERROR");
         newContext.setCheckpointDir(checkpointDir);
-               
+
         List<Map<String, String>> lines = new ArrayList<>();
         boolean firstLine = false;
         String[] header = null;
-        
+
         try (InputStream inputStream = inputStreamProvider.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
@@ -93,19 +93,19 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
                     firstLine = true;
                 }
                 else {
-                    //assuming there is no data missing 
+                    //assuming there is no data missing
                     Map<String, String> lineMap = new HashMap<String, String>();
                     for (int i = 0; i < elements.length; i++) {
                         lineMap.put(header[i], elements[i]);
                         //System.out.println("header: " + header[i] + " column valu: " + elements[i]);
                     }
                     lines.add(lineMap);
-                }             
+                }
             }
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
             return context.emptyRDD();
-        }            
+        }
         JavaRDD<Map<String, String>> csvDocuments = context.parallelize(lines);
         return csvDocuments;
     }

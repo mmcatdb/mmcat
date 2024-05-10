@@ -227,12 +227,12 @@ public class PlanJoiner {
         // These kinds are already covered by the query parts.
         final Set<KindPattern> coveredKinds = new TreeSet<>();
         output.forEach(p -> coveredKinds.addAll(p.kinds));
-            
+
         // Now we add the candidates between different datasources to the betweenParts output.
         groups.stream()
             .filter(g -> !g.datasources.isSameDatasource())
             .forEach(g -> candidatesBetweenParts.addAll(g.candidates));
-        
+
         // Lastly, we create a single-kind query part for all kinds that are not covered by the previously created query parts. Let's hope they are covered by the joins.
         allKinds.stream()
             .filter(k -> !coveredKinds.contains(k))

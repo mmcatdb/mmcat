@@ -14,7 +14,7 @@ public class Merger {
     public static QueryResult run(SchemaCategory schema, QueryResult fromResult, QueryResult toResult, JoinCandidate join) {
         return new Merger(schema, fromResult, toResult).run(join);
     }
-    
+
     private final SchemaCategory schema;
     private final QueryResult fromResult;
     private final QueryResult toResult;

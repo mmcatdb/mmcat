@@ -55,7 +55,7 @@ const isSelfIdentifier = computed(() => signature.value.isEmpty && signature.val
 const isSignatureValid = computed(() => {
     if (isAuxiliary.value)
         return signature.value.isEmpty;
-    
+
     if (signature.value.isEmpty)
         return false;
 
