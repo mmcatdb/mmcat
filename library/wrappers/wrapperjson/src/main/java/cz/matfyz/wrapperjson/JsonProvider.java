@@ -8,6 +8,10 @@ public class JsonProvider {
         this.settings = settings;
     }
 
+    public String getUrl() {
+        return settings.url;
+    }
+
     public record JsonSettings(
         String url,
         boolean isWritable,

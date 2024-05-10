@@ -10,6 +10,7 @@ import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.abstractwrappers.utils.GenericICWrapper;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -17,6 +18,7 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO: make sure that there is only one Mapping for each Logical Model
 public class JsonControlWrapper extends BaseControlWrapper implements AbstractControlWrapper {
 
     @SuppressWarnings({ "java:s1068", "unused" })
@@ -37,20 +39,20 @@ public class JsonControlWrapper extends BaseControlWrapper implements AbstractCo
         throw new UnsupportedOperationException("JsonControlWrapper.execute not implemented.");
     }
     
-    @Override public AbstractDDLWrapper getDDLWrapper() {
-        throw new UnsupportedOperationException("JsonControlWrapper.getDDLWrapper not implemented.");
+    @Override public JsonDDLWrapper getDDLWrapper() {
+        return new JsonDDLWrapper();
     }
 
-    @Override public AbstractICWrapper getICWrapper() {
-        throw new UnsupportedOperationException("JsonControlWrapper.getICWrapper not implemented.");
+    @Override public GenericICWrapper getICWrapper() {
+        return new GenericICWrapper();
     }
 
-    @Override public AbstractDMLWrapper getDMLWrapper() {
-        throw new UnsupportedOperationException("JsonControlWrapper.getDMLWrapper not implemented.");
+    @Override public JsonDMLWrapper getDMLWrapper() {
+        return new JsonDMLWrapper();
     }
 
-    @Override public AbstractPullWrapper getPullWrapper() {
-        throw new UnsupportedOperationException("JsonControlWrapper.getPullWrapper not implemented.");
+    @Override public JsonPullWrapper getPullWrapper() {
+        return new JsonPullWrapper(provider);
     }
 
     @Override public AbstractPathWrapper getPathWrapper() {
