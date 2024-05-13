@@ -35,7 +35,6 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
     private String collectionName() {
         return collectionName();
     }
-
     public MongoDBInferenceWrapper(MongoDBProvider provider, SparkSettings sparkSettings) {
         this.provider = provider;
         this.sparkSettings = sparkSettings;
@@ -45,7 +44,6 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
     public void buildSession() {
         // TODO the whole session management should be handled by the MongoDBProvider
         sparkSession = SparkSession.builder().master(sparkSettings.master())
-            .appName(sparkSettings.appName())
             .config("spark.mongodb.input.uri", provider.settings.createSparkConnectionString())
             .config("spark.mongodb.input.database", provider.settings.database())
             .config("spark.mongodb.input.collection", kindName)
@@ -96,7 +94,6 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
     private JavaMongoRDD<Document> loadRecords() {
         JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
         newContext.setLogLevel("ERROR");
-        newContext.setCheckpointDir(sparkSettings.appName());
         Map<String, String> readOverrides = new HashMap<>();
         readOverrides.put("collection", kindName);
         ReadConfig readConfig = ReadConfig.create(newContext).withOptions(readOverrides);

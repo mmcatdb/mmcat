@@ -36,7 +36,6 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     @Override
     public void buildSession() {
         sparkSession = SparkSession.builder().master(sparkSettings.master())
-            .appName(sparkSettings.appName())
             .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
@@ -109,8 +108,10 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     @Override
     public AbstractInferenceWrapper copy() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+        return new JsonInferenceWrapper(
+            this.provider, 
+            this.sparkSettings
+        );
     }
 
 }

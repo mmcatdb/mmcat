@@ -36,7 +36,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     @Override
     public void buildSession() {
         sparkSession = SparkSession.builder().master(sparkSettings.master())
-                .appName(sparkSettings.appName()) // I probs need to add the file here?
                 .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
@@ -125,8 +124,10 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     @Override
     public AbstractInferenceWrapper copy() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'copy'");
+        return new CsvInferenceWrapper(
+            this.provider,
+            this.sparkSettings
+        );
     }
 
 }

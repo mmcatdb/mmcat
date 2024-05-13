@@ -43,7 +43,6 @@ public abstract class AbstractInferenceWrapper {
 
     public record SparkSettings(
         String master,
-        String appName,
         String checkpointDir
     ) {}
 

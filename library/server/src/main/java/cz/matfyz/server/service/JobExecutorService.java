@@ -51,6 +51,8 @@ import java.util.Map;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,8 +259,13 @@ public class JobExecutorService {
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
-    // TODO make this configurable
-    private static final String SPARK_MASTER = System.getProperty("baazizi.sparkMaster", "local[*]");
+    // private static final String SPARK_MASTER = System.getProperty("baazizi.sparkMaster", "local[*]");    
+    private static final Dotenv dotenv = Dotenv.configure()
+        .directory("../../")  // points to the parent directory where there is the .env file with the SPARK_MASTER var
+        .load();
+
+    private static final String sparkMaster = dotenv.get("SPARK_MASTER");
+
 
     private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
         // extracting the empty SK wrapper
@@ -266,9 +273,7 @@ public class JobExecutorService {
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
 
         final var sparkSettings = new SparkSettings(
-            SPARK_MASTER,
-            // TODO this is probably not needed at all, it's supposed to be just a name in some web gui?
-            "appName",
+            sparkMaster,
             // TODO make this configurable
             "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"
         );
