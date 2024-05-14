@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { LogicalModel } from '@/types/logicalModel';
+
+import { isFile } from '@/types/datasource';
 
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
+import { Mapping } from '@/types/mapping';
 
 const logicalModel = ref<LogicalModel>();
 
@@ -26,6 +29,20 @@ const router = useRouter();
 function createNewMapping() {
     router.push({ name: 'accessPathEditor', query: { logicalModelId: route.params.id } });
 }
+
+const mappingsHeading = computed(() => {
+    if (isFile(logicalModel.value?.datasource?.type)) 
+        return "Mapping";
+    else return "Mappings";
+});
+
+const canCreateNewMapping = computed(() => {
+    if (isFile(logicalModel.value?.datasource?.type) && logicalModel.value?.mappings?.length > 0) {
+        return false;
+    }
+    return true;
+});
+
 </script>
 
 <template>
@@ -37,10 +54,11 @@ function createNewMapping() {
                     :logical-model="logicalModel"
                 />
             </div>
-            <h2>Mappings</h2>
+                <h2>{{mappingsHeading}}</h2>
             <div class="button-row">
                 <button
                     @click="createNewMapping"
+                    :disabled="!canCreateNewMapping"
                 >
                     Create new
                 </button>
