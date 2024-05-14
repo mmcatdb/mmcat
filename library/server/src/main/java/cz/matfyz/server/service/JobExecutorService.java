@@ -265,6 +265,7 @@ public class JobExecutorService {
         .load();
 
     private static final String sparkMaster = dotenv.get("SPARK_MASTER");
+    private static final String sparkCheckpointPath = dotenv.get("SPARK_CHECKPOINT");
 
 
     private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
@@ -274,8 +275,7 @@ public class JobExecutorService {
 
         final var sparkSettings = new SparkSettings(
             sparkMaster,
-            // TODO make this configurable
-            "C:\\Users\\alzbe\\Documents\\mff_mgr\\Diplomka\\Apps\\temp\\checkpoint"
+            sparkCheckpointPath
         );
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
