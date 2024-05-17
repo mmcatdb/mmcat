@@ -3,8 +3,6 @@ package cz.matfyz.abstractwrappers;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
-import cz.matfyz.core.mapping.Mapping;
-
 import java.nio.file.Path;
 import java.util.Collection;
 
@@ -31,7 +29,5 @@ public interface AbstractControlWrapper {
     AbstractQueryWrapper getQueryWrapper();
 
     AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings);
-
-    AbstractDDLWrapper getDDLWrapper(Mapping mapping);
 
 }

@@ -1,62 +1,45 @@
 package cz.matfyz.wrappercsv;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.matfyz.core.mapping.ComplexProperty;
-import cz.matfyz.core.mapping.Mapping;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.StringJoiner;
 
 public class CsvDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
-    private Mapping mapping;
+    private List<String> properties = new ArrayList<>();
 
-    public CsvDDLWrapper(Mapping mapping) {
-        this.mapping = mapping;
-    }
-
-    @Override
-    public void setKindName(String name) {
+    @Override public void setKindName(String name) {
         kindName = name;
     }
 
-    @Override
-    public boolean isSchemaless() {
+    @Override public boolean isSchemaless() {
         return true;
     }
 
-    @Override
-    public boolean addSimpleProperty(Set<String> names, boolean required) {
-        return false;
+    @Override public boolean addSimpleProperty(Set<String> names, boolean required) {
+        properties.addAll(names);
+        return true;
     }
 
-    @Override
-    public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
       return false;
     }
 
-    @Override
-    public boolean addComplexProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexProperty(Set<String> names, boolean required) {
         return false;
     }
 
-    @Override
-    public boolean addComplexArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) {
        return false;
     }
 
-    @Override
-    public CsvCommandStatement createDDLStatement() {
-        ComplexProperty accessPath = mapping.accessPath();
-        List<String> headers = accessPath.getSubpathNames();
+    @Override public CsvCommandStatement createDDLStatement() {
+        final String headerLine = String.join(",", properties);
 
-        StringJoiner joiner = new StringJoiner(",");
-        for (String header : headers) {
-            joiner.add(header);
-        }
-        String headerLine = joiner.toString();
         return new CsvCommandStatement(headerLine);
     }
+
 }

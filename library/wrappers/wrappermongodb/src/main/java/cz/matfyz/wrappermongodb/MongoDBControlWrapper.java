@@ -1,13 +1,11 @@
 package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
-import cz.matfyz.core.mapping.Mapping;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -92,9 +90,4 @@ public class MongoDBControlWrapper extends BaseControlWrapper implements Abstrac
         return new MongoDBInferenceWrapper(provider, sparkSettings);
     }
 
-    @Override
-    public AbstractDDLWrapper getDDLWrapper(Mapping mapping) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDDLWrapper'");
-    }
 }

@@ -8,10 +8,7 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
-import cz.matfyz.core.mapping.Mapping;
-
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -38,11 +35,7 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
     }
 
     @Override public CsvDDLWrapper getDDLWrapper() {
-        throw new UnsupportedOperationException("CsvControlWrapper.getDDLWrapper not implemented, instead getDDLWrapper(Mapping) implemented.");
-    }
-
-    public CsvDDLWrapper getDDLWrapper(Mapping mapping) {
-        return new CsvDDLWrapper(mapping);
+        return new CsvDDLWrapper();
     }
 
     @Override public AbstractICWrapper getICWrapper() {

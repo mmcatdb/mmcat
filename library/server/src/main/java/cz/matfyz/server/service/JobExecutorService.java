@@ -1,11 +1,9 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
-import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
@@ -198,7 +196,7 @@ public class JobExecutorService {
                     mapping,
                     mappings,
                     instance,
-                    getDDLWrapper(control, datasource, mapping),
+                    control.getDDLWrapper(),
                     control.getDMLWrapper(),
                     control.getICWrapper()
                 )
@@ -225,15 +223,6 @@ public class JobExecutorService {
         }
 
         job.data = output.toString();
-    }
-
-    private AbstractDDLWrapper getDDLWrapper(AbstractControlWrapper control, DatasourceWrapper datasource, Mapping mapping) {
-        AbstractDDLWrapper DDLWrapper;
-        if (datasource.type == DatasourceType.csv)
-            DDLWrapper = control.getDDLWrapper(mapping);
-        else { DDLWrapper = control.getDDLWrapper();}
-
-        return DDLWrapper;
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {

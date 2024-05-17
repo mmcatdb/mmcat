@@ -102,26 +102,22 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return new QueryUpdateResult(newContent, errors);
     }
 
-    @Override
-    public Void visit(Composite operation) {
+    @Override public Void visit(Composite operation) {
         /* This function is intentionally empty. */
         return null;
     }
 
-    @Override
-    public Void visit(CreateMorphism operation) {
+    @Override public Void visit(CreateMorphism operation) {
         /* This function is intentionally empty. */
         return null;
     }
 
-    @Override
-    public Void visit(CreateObject operation) {
+    @Override public Void visit(CreateObject operation) {
         /* This function is intentionally empty. */
         return null;
     }
 
-    @Override
-    public Void visit(DeleteMorphism operation) {
+    @Override public Void visit(DeleteMorphism operation) {
         final Signature signatureToDelete = operation.morphism.signature();
 
         final var whereDeletor = new SubtreeDeletor<Signature>(tree -> tree.edgeFromParent != null && tree.edgeFromParent.contains(signatureToDelete));
@@ -145,8 +141,7 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visit(DeleteObject operation) {
+    @Override public Void visit(DeleteObject operation) {
         final @Nullable Term termToDelete = query.context.getTerm(operation.object);
         if (termToDelete == null)
             return null;
@@ -217,14 +212,12 @@ public class QueryEvolver implements SchemaEvolutionVisitor<Void> {
 
     }
 
-    @Override
-    public Void visit(EditMorphism operation) {
+    @Override public Void visit(EditMorphism operation) {
         errors.add(new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }
 
-    @Override
-    public Void visit(EditObject operation) {
+    @Override public Void visit(EditObject operation) {
         errors.add(new QueryUpdateError(ErrorType.UpdateError, "Unexpected error in the query", null));
         return null;
     }

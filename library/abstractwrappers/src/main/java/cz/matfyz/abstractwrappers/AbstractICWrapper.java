@@ -33,23 +33,19 @@ public interface AbstractICWrapper {
 
         private static final EmptyICWrapper instance = new EmptyICWrapper();
 
-        @Override
-        public void appendIdentifier(String kindName, IdentifierStructure identifier) {
+        @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {
             // This method intentionally does nothing.
         }
     
-        @Override
-        public void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs) {
+        @Override public void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs) {
             // This method intentionally does nothing.
         }
     
-        @Override
-        public AbstractStatement createICStatement() {
+        @Override public AbstractStatement createICStatement() {
             return AbstractStatement.createEmpty();
         }
     
-        @Override
-        public AbstractStatement createICRemoveStatement() {
+        @Override public AbstractStatement createICRemoveStatement() {
             return AbstractStatement.createEmpty();
         }
     

@@ -20,8 +20,7 @@ public interface AbstractStatement {
             return "".equals(content) ? empty : new StringStatement(content);
         }
 
-        @Override
-        public String getContent() {
+        @Override public String getContent() {
             return content;
         }
 
