@@ -4,10 +4,11 @@ A backend application for the MM-cat tool. It is based on the Spring Boot framew
 
 ## Configuration
 
-- Copy the sample configuration file and fill all the necessary information.
+- Copy the sample configuration file to `application.properties` and fill all the necessary information.
 ```bash
-cp src/main/resources/default.properties src/main/resources/application.properties
+cp src/main/resources/default.properties ./application.properties
 ```
+- *Note: It's important to put the file in this directory. Otherwise, it would be bundled in the `.jar` file, so its secrets would be exposed. Also, now it's possible to change the values even after compilation.*
 - Additional settings are in the `src/main/java/cz/matfyz/server/Settings.java` file.
 - For more information see the [Configuration Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config).
 
@@ -20,15 +21,12 @@ cp src/main/resources/default.properties src/main/resources/application.properti
 ```bash
 mvn spring-boot:run
 ```
+- Whenever something in this directory changes, the server will be automatically reloaded.
+    - However, changes in other modules won't be reflected. You need to recompile the whole project, see the [Library](../README.md) documentation.
 
 ### Build application
 
-```bash
-mvn clean package
-```
-
-- You can then run the application by:
-
+- The application is already compiled and packed in the `.jar` file. You can run it by:
 ```bash
 java -jar target/server-1.0-SNAPSHOT-app.jar
 ```

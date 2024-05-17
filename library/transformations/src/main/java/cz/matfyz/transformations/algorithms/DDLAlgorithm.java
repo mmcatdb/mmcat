@@ -57,11 +57,11 @@ public class DDLAlgorithm {
     }
 
     private void processTopOfStack(Deque<StackElement> masterStack) {
-        StackElement element = masterStack.pop();
-        AccessPath path = element.accessPath();
+        final StackElement element = masterStack.pop();
+        final AccessPath path = element.accessPath();
 
-        Set<String> propertyName = determinePropertyName(path);
-        Set<String> names = concatenate(element.names(), propertyName);
+        final Set<String> propertyName = determinePropertyName(path);
+        final Set<String> names = concatenate(element.names(), propertyName);
 
         if (path instanceof SimpleProperty simpleProperty) {
             processPath(simpleProperty, names);
@@ -78,22 +78,21 @@ public class DDLAlgorithm {
         if (path.name() instanceof StaticName staticName)
             return Set.of(staticName.getStringName());
 
-        var dynamicName = (DynamicName) path.name();
+        final var dynamicName = (DynamicName) path.name();
+        final InstanceObject instanceObject = category.getMorphism(dynamicName.signature()).cod();
 
-        InstanceObject instanceObject = category.getMorphism(dynamicName.signature()).cod();
-
-        var output = new TreeSet<String>();
+        final var output = new TreeSet<String>();
         // The rows have to have only empty signature so we can just pull all rows.
-        for (DomainRow row : instanceObject.allRowsToSet())
+        for (final DomainRow row : instanceObject.allRowsToSet())
             output.add(row.getValue(Signature.createEmpty()));
 
         return output;
     }
 
     private Set<String> concatenate(Set<String> names1, Set<String> names2) {
-        var output = new TreeSet<String>();
-        for (String name1 : names1)
-            for (String name2 : names2)
+        final var output = new TreeSet<String>();
+        for (final String name1 : names1)
+            for (final String name2 : names2)
                 output.add(concatenatePaths(name1, name2));
 
         return output;

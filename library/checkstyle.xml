@@ -123,7 +123,9 @@
         <!-- Miscellaneous other checks. -->
         <!-- See https://checkstyle.org/checks/misc/index.html -->
         <module name="ArrayTypeStyle"/>
-        <module name="TodoComment"/>
+        <module name="TodoComment">
+            <property name="severity" value="warning"/>
+        </module>
         <module name="UpperEll"/>
     </module>
 </module>
