@@ -20,7 +20,8 @@ import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.server.builder.MetadataContext;
-import cz.matfyz.server.configuration.ServerProperties;
+import cz.matfyz.server.Configuration.ServerProperties;
+import cz.matfyz.server.Configuration.SparkProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
@@ -48,11 +49,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.algorithms.layout.FRLayout;
-
-import io.github.cdimascio.dotenv.Dotenv;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +86,9 @@ public class JobExecutorService {
     private ServerProperties server;
 
     @Autowired
+    private SparkProperties spark;
+
+    @Autowired
     private QueryRepository queryRepository;
 
     @Autowired
@@ -113,6 +115,8 @@ public class JobExecutorService {
             return;
         }
 
+        job.state = Job.State.Running;
+        repository.save(job);
         LOGGER.info("Job { id: {}, name: '{}' } started.", job.id, job.label);
 
         try {
@@ -259,24 +263,12 @@ public class JobExecutorService {
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
-    // private static final String SPARK_MASTER = System.getProperty("baazizi.sparkMaster", "local[*]");    
-    private static final Dotenv dotenv = Dotenv.configure()
-        .directory("../../")  // points to the parent directory where there is the .env file with the SPARK vars
-        .load();
-
-    private static final String sparkMaster = dotenv.get("SPARK_MASTER");
-    private static final String sparkCheckpointPath = dotenv.get("SPARK_CHECKPOINT");
-
-
     private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
         // extracting the empty SK wrapper
         final SchemaCategoryWrapper originalSchemaWrapper = schemaService.find(run.categoryId);
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
 
-        final var sparkSettings = new SparkSettings(
-            sparkMaster,
-            sparkCheckpointPath
-        );
+        final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
         final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
@@ -312,7 +304,6 @@ public class JobExecutorService {
                 System.out.println();
                 graph.addEdge(m, m.dom(), m.cod());
             }
-            
         }
 
         FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);

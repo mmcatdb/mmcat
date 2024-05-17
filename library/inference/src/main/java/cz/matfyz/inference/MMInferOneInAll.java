@@ -154,35 +154,36 @@ public class MMInferOneInAll {
         return complexRSD;
     }
 
-        /**
+    /**
      * Recursively replace children of the given rsd if their names match any key in rsds.
      */
     private static boolean mergeChildren(RecordSchemaDescription rsd, Map<String, RecordSchemaDescription> rsds) {
-        //System.out.println("mergeChildren, rsd name: " + rsd.getName());
-        if (rsd.getChildren() != null && !rsd.getChildren().isEmpty()) {
-            ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
-
-            for (RecordSchemaDescription child : rsd.getChildren()) {
-                if (rsds.containsKey(child.getName())) {
-                    //System.out.println("replacing child: " + child.getName());
-                    // replace the child with the corresponding RSD from rsds
-                    RecordSchemaDescription replacementRSD = rsds.get(child.getName());
-                    replacementRSD.setName(child.getName());
-                    mergeChildren(replacementRSD, rsds); // ensure to merge its children too
-                    newChildren.add(replacementRSD);
-                } else {
-                    mergeChildren(child, rsds);
-                    newChildren.add(child);
-                }
-            }
-
-            // update children of current rsd
-            if (newChildren != rsd.getChildren()) {
-                rsd.setChildren(newChildren);
-                return true;
-            }
+        // System.out.println("mergeChildren, rsd name: " + rsd.getName());
+        if (rsd.getChildren() == null || rsd.getChildren().isEmpty())
             return false;
+
+        ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
+
+        for (RecordSchemaDescription child : rsd.getChildren()) {
+            if (rsds.containsKey(child.getName())) {
+                System.out.println("replacing child: " + child.getName());
+                // replace the child with the corresponding RSD from rsds
+                RecordSchemaDescription replacementRSD = rsds.get(child.getName());
+                replacementRSD.setName(child.getName());
+                mergeChildren(replacementRSD, rsds); // ensure to merge its children too
+                newChildren.add(replacementRSD);
+            } else {
+                mergeChildren(child, rsds);
+                newChildren.add(child);
+            }
         }
+
+        // update children of current rsd
+        if (newChildren != rsd.getChildren()) {
+            rsd.setChildren(newChildren);
+            return true;
+        }
+
         return false;
     }
 

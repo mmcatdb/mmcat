@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.neo4j.Neo4jAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.task.TaskExecutor;
@@ -21,6 +22,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 // This is needed to enable the @Scheduled annotations.
 @EnableScheduling
+// This is needed to make the @ConfigurationProperties annotations work with records.
+@ConfigurationPropertiesScan({ "cz.matfyz.server" })
 public class ServerApplication {
 
     public static void main(String[] args) {

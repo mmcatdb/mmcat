@@ -1,7 +1,7 @@
 package cz.matfyz.server.example.common;
 
 import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
-import cz.matfyz.server.configuration.SetupProperties;
+import cz.matfyz.server.Configuration.SetupProperties;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
 import cz.matfyz.wrapperneo4j.Neo4jProvider.Neo4jSettings;

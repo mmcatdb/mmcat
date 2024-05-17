@@ -42,7 +42,7 @@ const dataValid = computed(() => {
         return false;
 
     if (actionType.value === ActionType.RSDToCategory)
-       return !!datasourceId.value && !!kindName.value; // this will fail, if kindName will be null
+        return !!datasourceId.value && !!kindName.value; // this will fail, if kindName will be null
     else return !!logicalModelId.value;
 
 });
@@ -64,14 +64,6 @@ async function createAction() {
             logicalModelId: logicalModelId.value,
         };
     }
-    /*
-    const payload = actionType.value === ActionType.JsonLdToCategory ? {
-        type: ActionType.JsonLdToCategory,
-        dataSourceId: dataSourceId.value,
-    } : {
-        type: actionType.value,
-        logicalModelId: logicalModelId.value,
-    };*/
 
     const result = await API.actions.createAction({}, {
         categoryId,
@@ -80,7 +72,6 @@ async function createAction() {
     });
     if (result.status)
         emit('newAction', Action.fromServer(result.data));
-    //else {const a = "a"}
 
     fetching.value = false;
 }
@@ -120,11 +111,9 @@ async function createAction() {
             </ValueRow>
             <ValueRow
                 v-if="actionType === ActionType.RSDToCategory"
-                label="Enter kind name:"
+                label="Kind name:"
             >
-                <textarea v-model="kindName"
-                >
-                </textarea>
+                <input v-model="kindName" />
             </ValueRow>
             <ValueRow
                 v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"

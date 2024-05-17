@@ -1,6 +1,6 @@
 package cz.matfyz.server;
 
-import cz.matfyz.server.configuration.ServerProperties;
+import cz.matfyz.server.Configuration.ServerProperties;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

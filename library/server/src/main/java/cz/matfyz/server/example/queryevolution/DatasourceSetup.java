@@ -1,6 +1,6 @@
 package cz.matfyz.server.example.queryevolution;
 
-import cz.matfyz.server.configuration.SetupProperties;
+import cz.matfyz.server.Configuration.SetupProperties;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.example.common.DatasourceSettings;
