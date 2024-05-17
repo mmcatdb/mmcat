@@ -1,8 +1,12 @@
 package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractICWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.io.IOException;
@@ -37,7 +41,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractC
         ) {
             // TODO transactions?
             for (final var statement : statements) {
-                if (statement.equals(Neo4jStatement.createEmpty()))
+                if (statement.equals(AbstractStatement.createEmpty()))
                     continue;
 
                 final var query = new Query(statement.getContent());
@@ -60,7 +64,7 @@ public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractC
             final var statements = Stream.of(script.split(";\\s*\n"))
                 .map(String::strip)
                 .filter(s -> !s.isBlank())
-                .map(s -> (AbstractStatement) new Neo4jStatement(s))
+                .map(s -> (AbstractStatement) new StringStatement(s))
                 .toList();
 
             execute(statements);
@@ -74,8 +78,8 @@ public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractC
         return new Neo4jDDLWrapper();
     }
 
-    @Override public Neo4jICWrapper getICWrapper() {
-        return new Neo4jICWrapper();
+    @Override public AbstractICWrapper getICWrapper() {
+        return AbstractICWrapper.createEmpty();
     }
 
     @Override public Neo4jDMLWrapper getDMLWrapper() {
@@ -92,6 +96,10 @@ public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractC
 
     @Override public Neo4jQueryWrapper getQueryWrapper() {
         return new Neo4jQueryWrapper();
+    }
+
+    @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+        throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
     }
 
 }

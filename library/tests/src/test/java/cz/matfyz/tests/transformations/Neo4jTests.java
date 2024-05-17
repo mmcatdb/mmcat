@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import cz.matfyz.abstractwrappers.AbstractStatement;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.tests.example.basic.Datasources;
 import cz.matfyz.tests.example.basic.Neo4j;
 import cz.matfyz.tests.example.common.TestDatasource;
 import cz.matfyz.wrapperneo4j.Neo4jControlWrapper;
-import cz.matfyz.wrapperneo4j.Neo4jStatement;
 
 import java.util.List;
 
@@ -106,13 +106,13 @@ class Neo4jTests {
     void testOfWrite() {
         assertDoesNotThrow(() -> {
             datasource.wrapper.execute(List.of(
-                Neo4jStatement.createEmpty(),
-                new Neo4jStatement("CREATE (a:TestOfWrite { test: '1' });")
+                AbstractStatement.createEmpty(),
+                new StringStatement("CREATE (a:TestOfWrite { test: '1' });")
             ));
         });
 
         List<AbstractStatement> invalidStatements = List.of(
-            new Neo4jStatement("invalid statement")
+            new StringStatement("invalid statement")
         );
 
         assertThrows(ExecuteException.class, () -> {

@@ -1,29 +1,41 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaMorphism;
+import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
+import cz.matfyz.inference.MMInferOneInAll;
+import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.configuration.ServerProperties;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
+import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
+import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
+import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
@@ -31,7 +43,15 @@ import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
+import java.awt.Dimension;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+
+import io.github.cdimascio.dotenv.Dotenv;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -68,6 +88,9 @@ public class JobExecutorService {
 
     @Autowired
     private QueryRepository queryRepository;
+
+    @Autowired
+    private DatasourceService datasourceService;
 
     // The jobs in general can not run in parallel (for example, one can export from the instance category the second one is importing into).
     // There is a space for an optimalizaiton (only importing / only exporting jobs can run in parallel) but it would require a synchronization on the instance level in the transformation algorithms.
@@ -115,7 +138,12 @@ public class JobExecutorService {
             modelToCategoryAlgorithm(run, job, modelToCategoryPayload);
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
+        else if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload)
+            rsdToCategoryAlgorithm(run, rsdToCategoryPayload);
+
+        //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
+
 
     private void modelToCategoryAlgorithm(Run run, Job job, ModelToCategoryPayload payload) {
         if (run.sessionId == null)
@@ -127,11 +155,21 @@ public class JobExecutorService {
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
         @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
+        //System.out.println("jobexecutor: " + instance.objects());
+        //System.out.println("print if non empty");
+        System.out.println("instance before");
+        System.out.println(instance);
+
+        if (mappingWrappers.isEmpty())
+            System.out.println("mapping wrappers is empty");
 
         for (final MappingWrapper mappingWrapper : mappingWrappers) {
             final Mapping mapping = mappingWrapper.toMapping(schema);
             instance = new DatabaseToInstance().input(mapping, instance, pullWrapper).run();
         }
+
+        System.out.println("instance after");
+        System.out.println(instance);
 
         if (instance != null)
             instanceService.saveCategory(run.sessionId, run.categoryId, instance);
@@ -177,6 +215,11 @@ public class JobExecutorService {
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
+            /*else { LOGGER.info("Models didn't get executed. Yikes");}*/
+            /* for now I choose not to execute the statements, but just see if they even get created
+            LOGGER.info("Start executing models ...");
+            control.execute(result.statements());
+            LOGGER.info("... models executed."); */
         }
 
         job.data = output.toString();
@@ -214,6 +257,91 @@ public class JobExecutorService {
         SchemaCategoryUpdate.setToVersion(nextCategory, updates, wrapper.version, nextVersion);
 
         return new QueryEvolver(prevCategory, nextCategory, updates);
+    }
+
+    // private static final String SPARK_MASTER = System.getProperty("baazizi.sparkMaster", "local[*]");    
+    private static final Dotenv dotenv = Dotenv.configure()
+        .directory("../../")  // points to the parent directory where there is the .env file with the SPARK vars
+        .load();
+
+    private static final String sparkMaster = dotenv.get("SPARK_MASTER");
+    private static final String sparkCheckpointPath = dotenv.get("SPARK_CHECKPOINT");
+
+
+    private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+        // extracting the empty SK wrapper
+        final SchemaCategoryWrapper originalSchemaWrapper = schemaService.find(run.categoryId);
+        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
+
+        final var sparkSettings = new SparkSettings(
+            sparkMaster,
+            sparkCheckpointPath
+        );
+        final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
+
+        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+            .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
+            .run();
+
+        //System.out.println(categoryMappingPair.schemaCat().allObjects());
+        //System.out.println(categoryMappingPair.schemaCat().allMorphisms());
+        final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+
+        // what about this label?
+        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model");
+        LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
+
+        schemaService.overwriteInfo(schemaWrapper, run.categoryId);
+        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
+    }
+
+    /**
+     * Layout algo using JUNG library
+     */
+    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
+        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
+
+        for (SchemaObject o : objects) {
+            graph.addVertex(o);
+        }
+        System.out.println("Adding morphisms to graph");
+        for (SchemaMorphism m : morphisms) {
+            if (m.dom() != null && m.cod() != null) {
+                System.out.println("Domain: " + m.dom().label());
+                System.out.println("Codomain: " + m.cod().label());
+                System.out.println();
+                graph.addEdge(m, m.dom(), m.cod());
+            }
+            
+        }
+
+        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
+        layout.setSize(new Dimension(600, 600));
+
+        for (int i = 0; i < 1000; i++) { // initialize positions
+            layout.step();
+        }
+
+        Map<Key, Position> positions = new HashMap<>();
+        for (SchemaObject node : graph.getVertices()) {
+            double x = layout.getX(node);
+            double y = layout.getY(node);
+            positions.put(node.key(), new Position(x, y));
+        }
+
+        return positions;
+    }
+
+    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
+        MetadataContext context = new MetadataContext();
+
+        context.setId(new Id(null)); // is null ok?
+        context.setVersion(Version.generateInitial());
+
+        Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());
+        positions.forEach(context::setPosition);
+
+        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
     }
 
 }

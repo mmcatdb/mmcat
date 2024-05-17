@@ -45,7 +45,7 @@ class PatternTranslator {
 
     private void run(PatternNode pattern) {
         wrapperContext = new WrapperContext(context, pattern.rootTerm);
-        
+
         pattern.kinds.forEach(this::processKind);
         pattern.joinCandidates.forEach(this::processJoinCandidate);
 
@@ -136,28 +136,28 @@ class PatternTranslator {
 
             return property;
         }
-    
+
         QueryStructure findOrCreateStructure(@Nullable Property property) {
             if (property == null)
                 return rootStructure;
-    
+
             if (property.path.isEmpty())
                 return findOrCreateStructure(property.parent);
-    
+
             final var found = propertyToStructure.get(property);
             if (found != null)
                 return found;
-    
+
             final var isArray = property.path.hasDual();
             final Term term = propertyToTerm.get(property);
             final var structure = new QueryStructure(term.getIdentifier(), isArray, context.getObject(term));
 
             propertyToStructure.put(property, structure);
             structureToProperty.put(structure, property);
-    
+
             final var parent = findOrCreateStructure(property.parent);
             parent.addChild(structure, property.path);
-    
+
             return structure;
         }
 
@@ -188,7 +188,7 @@ class PatternTranslator {
             // All original objects are added.
             if (object.term.isOriginal())
                 output.add(object);
-                
+
             // If the object has multiple children, the last child of array has to be preserved (if it isn't null ofc).
             if (object.children().size() > 1 && lastChildOfArray != null)
                 output.add(lastChildOfArray);

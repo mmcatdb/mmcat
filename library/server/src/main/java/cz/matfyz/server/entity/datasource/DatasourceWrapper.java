@@ -33,7 +33,7 @@ public class DatasourceWrapper extends Entity {
             init.settings()
         );
     }
-    
+
     public void hidePassword() {
         this.settings.remove(PASSWORD_FIELD_NAME);
     }
@@ -47,8 +47,8 @@ public class DatasourceWrapper extends Entity {
     }
 
     public record JsonValue(
-        String label, 
-        DatasourceType type, 
+        String label,
+        DatasourceType type,
         ObjectNode settings
     ) {}
 

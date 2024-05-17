@@ -106,7 +106,7 @@ public class SchemaExtractor {
 
     private void updateContext() {
         context.setSchema(newSchema);
-        
+
         triples.forEach(triple -> {
             final var morphism = newSchema.getMorphism(triple.signature);
             signatureToTriple.put(triple.signature, triple);

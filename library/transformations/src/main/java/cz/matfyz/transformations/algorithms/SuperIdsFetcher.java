@@ -160,13 +160,16 @@ public class SuperIdsFetcher {
 
     private void addStaticNameSignaturesToBuilder(SuperIdWithValues.Builder builder, Set<Signature> signatures, IComplexRecord childRecord) {
         for (Signature signature : signatures) {
+            System.out.println("superidfetcher signature: " + signature);
             // How the signature looks like from the parent object.
             var signatureInParentRow = signature.traverseThrough(parentToChild);
 
             // Why java still doesn't support output arguments?
             String value;
             if (signatureInParentRow == null) {
+                //here simpleRecord is null
                 SimpleRecord<?> simpleRecord = childRecord.getSimpleRecord(signature);
+                //System.out.println("superidfetcher simple record type: " + simpleRecord.getClass());
                 if (simpleRecord instanceof SimpleValueRecord<?> simpleValueRecord)
                     value = simpleValueRecord.getValue().toString();
                 else if (childRecord.name() instanceof DynamicRecordName dynamicName && dynamicName.signature().equals(signature))

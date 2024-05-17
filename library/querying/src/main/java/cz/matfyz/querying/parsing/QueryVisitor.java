@@ -197,7 +197,7 @@ public class QueryVisitor extends QuerycatBaseVisitor<ParserNode> {
         for (int i = 0; i < maxCommonLength; i++) {
             final String edge = visitSchemaMorphismOrPath(verbNodes.get(i).schemaMorphismOrPath()).value();
             final Term object = visitObjectList(objectNodes.get(i));
-            
+
             output.add(TermTree.child(object, edge));
         }
 

@@ -247,7 +247,7 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         @Override public SuperIdWithValues deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
             final Map<Signature, String> tuples = new TreeMap<>();
-            
+
             final var iterator = node.elements();
             while (iterator.hasNext()) {
                 final JsonNode object = iterator.next();

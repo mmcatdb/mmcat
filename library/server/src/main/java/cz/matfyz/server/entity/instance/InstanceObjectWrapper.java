@@ -67,5 +67,5 @@ public record InstanceObjectWrapper(
         List<String> technicalIds,
         List<Signature> pendingReferences
     ) {}
-    
+
 }

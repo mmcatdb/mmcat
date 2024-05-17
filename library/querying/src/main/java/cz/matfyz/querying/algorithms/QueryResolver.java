@@ -74,21 +74,21 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
             throw new UnsupportedOperationException("Joining by value is not implemented.");
 
         final JoinCondition condition = node.candidate.joinProperties().getFirst();
-        
+
         final var idResult = node.fromChild.accept(this);
         final var refResult = node.toChild.accept(this);
-        
+
         // Let's assume that the idRoot is the same as idProperty, i.e., the structure with the id is in the root of the result.
         // TODO Relax this assumption. Probably after we use graph instead of a tree, because we would have to somewhat reorganize the result first.
         // Maybe we can do that simply by turning the parent --> child to child --> array --> parent. Or even just child --> parent if the cardinality is OK?
         final QueryStructure idRoot = idResult.structure;
         final QueryStructure refRoot = refResult.structure;
-        
+
         final QueryStructure idMatch = findStructure(idRoot, condition.from());
         final QueryStructure refMatch = findStructure(refRoot, condition.to());
 
         final QueryStructure refProperty = findParent(idRoot, refRoot, refMatch);
-        
+
         final var tform = QueryStructureMerger.run(idRoot, refRoot, refProperty, idMatch, refMatch);
 
 
@@ -105,10 +105,10 @@ public class QueryResolver implements QueryVisitor<QueryResult> {
 
 
 
-     
+
         return tform.apply(idResult.data, refResult.data);
     }
-    
+
     private QueryStructure findStructure(QueryStructure parent, Signature signature) {
         // TODO This might not work generally when the same schema object is used multiple times in the query. But it should work for now.
         final SchemaObject schemaObject = context.getSchema().getEdge(signature.getLast()).to();

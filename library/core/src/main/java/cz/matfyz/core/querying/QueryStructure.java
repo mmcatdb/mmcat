@@ -45,7 +45,7 @@ public class QueryStructure implements Tree<QueryStructure>, Printable {
         this.children.put(child.name, child);
         child.parent = this;
         child.signatureFromParent = signature;
-        
+
         return child;
     }
 

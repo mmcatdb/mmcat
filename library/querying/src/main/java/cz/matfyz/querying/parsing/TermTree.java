@@ -46,7 +46,7 @@ public class TermTree<TEdge> implements ParserNode, Tree<TermTree<TEdge>>, Print
     public static <SEdge> TermTree<SEdge> root(Variable term) {
         return new TermTree<>(term, null);
     }
-    
+
     public static <SEdge> TermTree<SEdge> child(Term term, SEdge edge) {
         return new TermTree<>(term, edge);
     }
@@ -137,7 +137,7 @@ public class TermTree<TEdge> implements ParserNode, Tree<TermTree<TEdge>>, Print
         if (child.children.isEmpty())
             printer.append(" .");
         printer.nextLine();
-        
+
         if (children.size() > 1)
             printer.remove().up();
     }

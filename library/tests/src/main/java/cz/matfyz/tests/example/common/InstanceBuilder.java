@@ -68,7 +68,7 @@ public class InstanceBuilder {
     public MappingRow morphism(Signature signature, DomainRow domainRow, DomainRow codomainRow) {
         var row = new MappingRow(domainRow, codomainRow);
         instance.getMorphism(signature).addMapping(row);
-        
+
         return row;
     }
 
@@ -86,7 +86,7 @@ public class InstanceBuilder {
 
     private Map<Key, List<DomainRow>> createdRows = new TreeMap<>();
 
-    
+
     public List<DomainRow> getRows(Key key) {
         return createdRows.get(key);
     }

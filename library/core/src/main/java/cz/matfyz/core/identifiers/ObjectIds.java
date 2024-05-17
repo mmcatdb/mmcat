@@ -23,8 +23,9 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 @JsonSerialize(using = ObjectIds.Serializer.class)
 @JsonDeserialize(using = ObjectIds.Deserializer.class)
 public class ObjectIds implements Serializable {
-
     public enum Type {
+        // This set of signaturs points to other value/generated identified objects, which form a composite identifier
+        // (or simple, if there is just a single signature)
         /** A set of signatures. */
         Signatures,
         /** A simple string value. */

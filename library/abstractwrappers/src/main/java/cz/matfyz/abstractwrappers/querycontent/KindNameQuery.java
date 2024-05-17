@@ -33,7 +33,7 @@ public class KindNameQuery implements QueryContent {
     public KindNameQuery(String kindName) {
         this(kindName, null, null);
     }
-    
+
     @Override public String toString() {
         return "kindName: " + kindName + "\noffset: " + offset + "\nlimit: " + limit;
     }

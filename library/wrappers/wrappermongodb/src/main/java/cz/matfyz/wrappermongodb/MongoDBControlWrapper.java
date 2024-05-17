@@ -1,8 +1,10 @@
 package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.io.BufferedReader;
@@ -64,8 +66,8 @@ public class MongoDBControlWrapper extends BaseControlWrapper implements Abstrac
         return new MongoDBDDLWrapper();
     }
 
-    @Override public MongoDBICWrapper getICWrapper() {
-        return new MongoDBICWrapper();
+    @Override public AbstractICWrapper getICWrapper() {
+        return AbstractICWrapper.createEmpty();
     }
 
     @Override public MongoDBDMLWrapper getDMLWrapper() {
@@ -82,6 +84,10 @@ public class MongoDBControlWrapper extends BaseControlWrapper implements Abstrac
 
     @Override public MongoDBQueryWrapper getQueryWrapper() {
         return new MongoDBQueryWrapper();
+    }
+
+    @Override public MongoDBInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
+        return new MongoDBInferenceWrapper(provider, sparkSettings);
     }
 
 }

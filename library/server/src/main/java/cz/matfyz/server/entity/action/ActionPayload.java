@@ -3,6 +3,7 @@ package cz.matfyz.server.entity.action;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
+import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 
 import java.io.Serializable;
 
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = CategoryToModelPayload.class, name = "CategoryToModel"),
     @JsonSubTypes.Type(value = ModelToCategoryPayload.class, name = "ModelToCategory"),
     @JsonSubTypes.Type(value = UpdateSchemaPayload.class, name = "UpdateSchema"),
+    @JsonSubTypes.Type(value = RSDToCategoryPayload.class, name = "RSDToCategory")
 })
 public interface ActionPayload extends Serializable {
 

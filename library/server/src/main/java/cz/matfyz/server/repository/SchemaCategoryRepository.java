@@ -104,6 +104,28 @@ public class SchemaCategoryRepository {
                 output.set(getId(generatedKeys, "id"));
         });
     }
+    /***
+     * Temporary workaround method for inference
+     * Overwrites the existing empty SchemaCategory
+     * @param wrapper, id is the id that was originally generated
+     * while creating the new (empty) info
+     * @return
+     */
+    public boolean save(SchemaCategoryWrapper wrapper, Id id) {
+        return db.get((connection, output) -> {
+        var statement = connection.prepareStatement("""
+                UPDATE schema_category
+                SET json_value = ?::jsonb
+                WHERE id = ?;
+                """);
+        statement.setString(1, wrapper.toJsonValue());
+        setId(statement, 2, id);
+        //setId(statement, 2, wrapper.id);
+
+        int affectedRows = statement.executeUpdate();
+        output.set(affectedRows != 0);
+        });
+    }
 
     public boolean update(SchemaCategoryWrapper wrapper, SchemaUpdate update) {
         return db.get((connection, output) -> {

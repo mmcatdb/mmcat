@@ -24,8 +24,10 @@ public class InstanceCategoryBuilder {
 
     public InstanceCategory build() {
         result = new InstanceCategory(schemaCategory, objects, morphisms);
+        //System.out.println("building the instance category");
 
         for (SchemaObject schemaObject : schemaCategory.allObjects()) {
+            //System.out.println("schema object in InstanceCategoryBuilder: " + schemaObject);
             InstanceObject instanceObject = createObject(schemaObject);
             objects.put(instanceObject.key(), instanceObject);
         }
@@ -33,6 +35,7 @@ public class InstanceCategoryBuilder {
         // The base moprhisms must be created first because the composite ones use them.
         var baseMorphisms = schemaCategory.allMorphisms().stream().filter(SchemaMorphism::isBase).toList();
         for (SchemaMorphism schemaMorphism : baseMorphisms) {
+            //System.out.println("schema morphism in InstanceCategoryBuilder: " + schemaMorphism);
             InstanceMorphism instanceMorphism = createMorphism(schemaMorphism);
             morphisms.put(schemaMorphism.signature(), instanceMorphism);
         }

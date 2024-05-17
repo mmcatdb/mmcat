@@ -4,11 +4,28 @@ import cz.matfyz.evolution.Version;
 import cz.matfyz.server.controller.LogicalModelController.LogicalModelInfo;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.LogicalModelRepository;
+import cz.matfyz.server.repository.DatasourceRepository;
 import cz.matfyz.server.entity.action.Action;
 import cz.matfyz.server.entity.action.ActionPayload;
 import cz.matfyz.server.entity.action.payload.CategoryToModelPayload;
 import cz.matfyz.server.entity.action.payload.ModelToCategoryPayload;
 import cz.matfyz.server.entity.action.payload.UpdateSchemaPayload;
+import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
+import cz.matfyz.server.entity.datasource.DatasourceDetail;
+import cz.matfyz.server.entity.datasource.DatasourceWrapper;
+
+import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
+import cz.matfyz.wrappermongodb.MongoDBProvider;
+import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
+
+import cz.matfyz.wrapperjson.JsonControlWrapper;
+import cz.matfyz.wrapperjson.JsonProvider;
+import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
+
+import cz.matfyz.wrappercsv.CsvControlWrapper;
+import cz.matfyz.wrappercsv.CsvProvider;
+import cz.matfyz.wrappercsv.CsvProvider.CsvSettings;
+
 import cz.matfyz.server.service.ActionService;
 
 import java.util.List;
@@ -36,6 +53,9 @@ public class ActionController {
 
     @Autowired
     private LogicalModelController logicalModelController;
+
+    @Autowired
+    private DatasourceRepository datasourceRepository;
 
     @GetMapping("/schema-categories/{categoryId}/actions")
     public List<ActionDetail> getAllActionsInCategory(@PathVariable Id categoryId) {
@@ -87,8 +107,35 @@ public class ActionController {
         if (payload instanceof UpdateSchemaPayload updateSchemaPayload) {
             return new UpdateSchemaPayloadDetail(updateSchemaPayload.prevVersion(), updateSchemaPayload.nextVersion());
         }
+        if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
+            final var datasource = createDatasourceDetail(rsdToCategoryPayload);
+            final var kindName = rsdToCategoryPayload.kindName();
+            return new RSDToCategoryPayloadDetail(datasource, kindName);
+        }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
+    }
+
+    private DatasourceDetail createDatasourceDetail(RSDToCategoryPayload rsdToCategoryPayload) {
+        DatasourceWrapper datasourceWrapper = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
+
+        switch (datasourceWrapper.type) {
+            case mongodb:
+                MongoDBSettings settings = new MongoDBSettings(datasourceWrapper.settings.get("host").asText(), datasourceWrapper.settings.get("port").asText(),
+                    datasourceWrapper.settings.get("authenticationDatabase").asText(), datasourceWrapper.settings.get("database").asText(), datasourceWrapper.settings.get("username").asText(),
+                    datasourceWrapper.settings.get("password").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
+                return DatasourceDetail.create(datasourceWrapper, new MongoDBControlWrapper(new MongoDBProvider(settings)));
+            case json:
+                JsonSettings settingsJson = new JsonSettings(datasourceWrapper.settings.get("url").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
+                return DatasourceDetail.create(datasourceWrapper, new JsonControlWrapper(new JsonProvider(settingsJson)));
+            case csv:
+                CsvSettings settingsCsv = new CsvSettings(datasourceWrapper.settings.get("url").asText(), datasourceWrapper.settings.get("isWritable").asBoolean(), datasourceWrapper.settings.get("isQueryable").asBoolean());
+                return DatasourceDetail.create(datasourceWrapper, new CsvControlWrapper(new CsvProvider(settingsCsv)));
+            default:
+                throw new IllegalArgumentException("Unsupported or undefined datasource type.");
+        }
+
+
     }
 
     record ActionDetail(
@@ -107,6 +154,7 @@ public class ActionController {
         @JsonSubTypes.Type(value = CategoryToModelPayloadDetail.class, name = "CategoryToModel"),
         @JsonSubTypes.Type(value = ModelToCategoryPayloadDetail.class, name = "ModelToCategory"),
         @JsonSubTypes.Type(value = UpdateSchemaPayloadDetail.class, name = "UpdateSchema"),
+        @JsonSubTypes.Type(value = RSDToCategoryPayloadDetail.class, name = "RSDToCategory"),
     })
     interface ActionPayloadDetail {}
 
@@ -121,6 +169,11 @@ public class ActionController {
     record UpdateSchemaPayloadDetail(
         Version prevVersion,
         Version nextVersion
+    ) implements ActionPayloadDetail {}
+
+    record RSDToCategoryPayloadDetail(
+            DatasourceDetail datasource,
+            String kindName
     ) implements ActionPayloadDetail {}
 
 }

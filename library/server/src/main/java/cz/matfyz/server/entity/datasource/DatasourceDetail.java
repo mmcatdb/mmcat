@@ -39,11 +39,11 @@ public record DatasourceDetail(
         boolean isAnonymousNamingAllowed,
         boolean isReferenceAllowed,
         boolean isComplexPropertyAllowed,
-        boolean isSchemaLess,
+        boolean isSchemaless,
         boolean isWritable,
         boolean isQueryable
     ) {
-        
+
         public static DatasourceConfiguration create(DatasourceWrapper datasource, AbstractControlWrapper wrapper) {
             final var path = wrapper.getPathWrapper();
 
@@ -57,7 +57,7 @@ public record DatasourceDetail(
                 path.isAnonymousNamingAllowed(),
                 path.isReferenceAllowed(),
                 path.isComplexPropertyAllowed(),
-                path.isSchemaLess(),
+                path.isSchemaless(),
                 wrapper.isWritable(),
                 wrapper.isQueryable()
             );

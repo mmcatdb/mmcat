@@ -2,6 +2,7 @@ package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper.AttributePair;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.core.mapping.IdentifierStructure;
 
 import java.util.ArrayList;
@@ -21,14 +22,14 @@ public class PostgreSQLICWrapper implements AbstractICWrapper {
         constraints.add(new ReferenceConstraint(referencingKind, referencedKind, attributePairs));
     }
 
-    @Override public PostgreSQLStatement createICStatement() {
+    @Override public StringStatement createICStatement() {
         String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::addCommand).toList()) + "\n";
-        return new PostgreSQLStatement(content);
+        return new StringStatement(content);
     }
 
-    @Override public PostgreSQLStatement createICRemoveStatement() {
+    @Override public StringStatement createICRemoveStatement() {
         String content = "\n" + String.join("\n\n", constraints.stream().map(Constraint::dropCommand).toList()) + "\n";
-        return new PostgreSQLStatement(content);
+        return new StringStatement(content);
     }
 
 }

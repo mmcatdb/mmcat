@@ -8,7 +8,7 @@ export type DatasourceConfigurationFromServer = {
     isAnonymousNamingAllowed: boolean;
     isReferenceAllowed: boolean;
     isComplexPropertyAllowed: boolean;
-    isSchemaLess: boolean;
+    isSchemaless: boolean;
     isWritable: boolean;
     isQueryable: boolean;
 };
@@ -23,7 +23,7 @@ export class DatasourceConfiguration {
     readonly isAnonymousNamingAllowed: boolean;
     readonly isReferenceAllowed: boolean; // TODO The IC reference algorithm.
     readonly isComplexPropertyAllowed: boolean;
-    readonly isSchemaLess: boolean;
+    readonly isSchemaless: boolean;
     readonly isWritable: boolean;
     readonly isQueryable: boolean;
 
@@ -37,7 +37,7 @@ export class DatasourceConfiguration {
         this.isAnonymousNamingAllowed = input.isAnonymousNamingAllowed;
         this.isReferenceAllowed = input.isReferenceAllowed;
         this.isComplexPropertyAllowed = input.isComplexPropertyAllowed;
-        this.isSchemaLess = input.isSchemaLess;
+        this.isSchemaless = input.isSchemaless;
         this.isWritable = input.isWritable;
         this.isQueryable = input.isQueryable;
     }

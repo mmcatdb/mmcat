@@ -61,7 +61,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         return new QueryStatement(content, context.rootStructure());
     }
 
-    private final Bson createProjections() {
+    private Bson createProjections() {
         final var output = new BsonDocument();
         for (final var projection : projections)
             Projector.createProjection(context, output, projection);
@@ -113,7 +113,7 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
                 traverseSimpleStructure(structure);
                 return;
             }
-    
+
             // It's an array. We have to use the $map function in order to map the objects correctly. See the example below.
             if (currentDocument.containsKey(structure.name)) {
                 currentDocument = currentDocument.getDocument(structure.name).getDocument("$map").getDocument("in");
@@ -140,14 +140,14 @@ public class MongoDBQueryWrapper extends BaseQueryWrapper implements AbstractQue
         private static BsonDocument createMapOperator(BsonDocument parent, String structureName, String pathName) {
             final var nested = new BsonDocument();
             parent.put(structureName, nested);
-    
+
             final var map = new BsonDocument();
             nested.put("$map", map);
-            
+
             map.put("input", new BsonString("$" + pathName));
             final var child = new BsonDocument();
             map.put("in", child);
-    
+
             return child;
         }
 

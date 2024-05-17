@@ -150,7 +150,7 @@ public interface AbstractQueryWrapper {
     void addFilter(Property left, Constant right, ComparisonOperator operator);
 
     public interface AbstractWrapperContext {
-        
+
         QueryStructure rootStructure();
 
         /** Finds a property for given structure except for the root structure (which has no corresponding property). */

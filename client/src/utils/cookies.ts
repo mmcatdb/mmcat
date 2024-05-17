@@ -6,7 +6,7 @@ function get(key: string): string | undefined {
     const cookies = document.cookie.split(';');
     for (const cookie of cookies) {
         const [ cookieKey, cookieValue ] = cookie.split('=');
-        if (cookieKey.trim() === key) 
+        if (cookieKey.trim() === key)
             return cookieValue;
     }
 }

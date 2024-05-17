@@ -30,5 +30,5 @@ mvn clean package
 - You can then run the application by:
 
 ```bash
-java -jar target/server-1.0-SNAPSHOT.jar
+java -jar target/server-1.0-SNAPSHOT-app.jar
 ```

@@ -7,7 +7,7 @@ import type { Id } from '@/types/id';
 import { Datasource } from '@/types/datasource';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
+import { ActionType, type ActionPayloadInit, ACTION_TYPES, Action } from '@/types/action';
 
 const emit = defineEmits<{
     (e: 'newAction', action: Action): void;
@@ -17,6 +17,8 @@ const logicalModels = ref<LogicalModel[]>();
 const datasources = ref<Datasource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
+const datasourceId = ref<Id>();
+const kindName = ref('');
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
@@ -39,16 +41,37 @@ const dataValid = computed(() => {
     if (!actionName.value)
         return false;
 
-    return !!logicalModelId.value;
+    if (actionType.value === ActionType.RSDToCategory)
+       return !!datasourceId.value && !!kindName.value; // this will fail, if kindName will be null
+    else return !!logicalModelId.value;
+
 });
 
 async function createAction() {
     fetching.value = true;
+    let payload;
 
-    const payload = {
+    if (actionType.value === ActionType.RSDToCategory) {
+        payload = {
+            type: actionType.value,
+            datasourceId: datasourceId.value,
+            kindName: kindName.value,
+        };
+    }
+    else {
+        payload = {
+            type: actionType.value,
+            logicalModelId: logicalModelId.value,
+        };
+    }
+    /*
+    const payload = actionType.value === ActionType.JsonLdToCategory ? {
+        type: ActionType.JsonLdToCategory,
+        dataSourceId: dataSourceId.value,
+    } : {
         type: actionType.value,
         logicalModelId: logicalModelId.value,
-    };
+    };*/
 
     const result = await API.actions.createAction({}, {
         categoryId,
@@ -57,6 +80,7 @@ async function createAction() {
     });
     if (result.status)
         emit('newAction', Action.fromServer(result.data));
+    //else {const a = "a"}
 
     fetching.value = false;
 }
@@ -80,7 +104,32 @@ async function createAction() {
             <ValueRow label="Label:">
                 <input v-model="actionName" />
             </ValueRow>
-            <ValueRow label="Logical model:">
+            <ValueRow
+                v-if="actionType === ActionType.RSDToCategory"
+                label="Data source:"
+            >
+                <select v-model="datasourceId">
+                    <option
+                        v-for="datasource in datasources"
+                        :key="datasource.id"
+                        :value="datasource.id"
+                    >
+                        {{ datasource.label }}
+                    </option>
+                </select>
+            </ValueRow>
+            <ValueRow
+                v-if="actionType === ActionType.RSDToCategory"
+                label="Enter kind name:"
+            >
+                <textarea v-model="kindName"
+                >
+                </textarea>
+            </ValueRow>
+            <ValueRow
+                v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"
+                label="Logical model:"
+            >
                 <select v-model="logicalModelId">
                     <option
                         v-for="logicalModel in logicalModels"

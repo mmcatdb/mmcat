@@ -13,7 +13,7 @@ public interface AbstractDDLWrapper {
 
     void setKindName(String name);
 
-    boolean isSchemaLess();
+    boolean isSchemaless();
 
     boolean addSimpleProperty(Set<String> names, boolean required) throws UnsupportedException;
 

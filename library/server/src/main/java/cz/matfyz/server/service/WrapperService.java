@@ -7,6 +7,12 @@ import cz.matfyz.server.exception.DatasourceException;
 import cz.matfyz.wrapperjsonld.JsonLdControlWrapper;
 import cz.matfyz.wrapperjsonld.JsonLdProvider;
 import cz.matfyz.wrapperjsonld.JsonLdProvider.JsonLdSettings;
+import cz.matfyz.wrapperjson.JsonControlWrapper;
+import cz.matfyz.wrapperjson.JsonProvider;
+import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
+import cz.matfyz.wrappercsv.CsvControlWrapper;
+import cz.matfyz.wrappercsv.CsvProvider;
+import cz.matfyz.wrappercsv.CsvProvider.CsvSettings;
 import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
 import cz.matfyz.wrappermongodb.MongoDBProvider;
 import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
@@ -34,6 +40,8 @@ public class WrapperService {
                 case postgresql -> getPostgreSQLControlWrapper(datasource);
                 case neo4j -> getNeo4jControlWrapper(datasource);
                 case jsonld -> getJsonLdControlWrapper(datasource);
+                case json -> getJsonControlWrapper(datasource);
+                case csv -> getCsvControlWrapper(datasource);
                 default -> throw DatasourceException.wrapperNotFound(datasource);
             };
         }
@@ -109,6 +117,32 @@ public class WrapperService {
         final var settings = mapper.treeToValue(datasource.settings, JsonLdSettings.class);
 
         return new JsonLdProvider(settings);
+    }
+
+    // Json
+
+    private JsonControlWrapper getJsonControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+        final var provider = createJsonProvider(datasource);
+        return new JsonControlWrapper(provider);
+    }
+
+    private static JsonProvider createJsonProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+        final var settings = mapper.treeToValue(datasource.settings, JsonSettings.class);
+
+        return new JsonProvider(settings);
+    }
+
+    // Csv
+
+    private CsvControlWrapper getCsvControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+        final var provider = createCsvProvider(datasource);
+        return new CsvControlWrapper(provider);
+    }
+
+    private static CsvProvider createCsvProvider(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
+        final var settings = mapper.treeToValue(datasource.settings, CsvSettings.class);
+
+        return new CsvProvider(settings);
     }
 
 }

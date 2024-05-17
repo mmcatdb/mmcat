@@ -73,7 +73,8 @@ public record InstanceCategoryWrapper(
 
         for (final InstanceMorphismWrapper morphismWrapper : morphisms)
             morphismWrapper.toInstanceMorphism(context);
-
+        //System.out.println("toInstanceCat: " + category.objects());
+        //System.out.println("toInstanceCat: " + category.morphisms());
         return category;
     }
 
@@ -82,7 +83,7 @@ public record InstanceCategoryWrapper(
         public final Map<Key, Map<Integer, DomainRow>> idToRow = new TreeMap<>();
         public final Map<Key, Map<DomainRow, Integer>> rowToId = new TreeMap<>();
 
-        public WrapperContext(InstanceCategory category) {
+        WrapperContext(InstanceCategory category) {
             this.category = category;
         }
     }

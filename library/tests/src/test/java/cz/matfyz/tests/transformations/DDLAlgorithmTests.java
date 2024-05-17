@@ -21,7 +21,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(order)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)"
                 ]
@@ -41,7 +41,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(address)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexProperty([ address ], true)",
@@ -65,7 +65,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(tag)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addSimpleArrayProperty([ tags ], false)"
@@ -92,7 +92,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(orderItem)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexArrayProperty([ items ], false)",
@@ -119,7 +119,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(contact)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexProperty([ contact ], false)",
@@ -141,7 +141,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(customer)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ customer/number ], true)",
                     "addSimpleProperty([ customer/name ], true)"
@@ -162,7 +162,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(address)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexProperty([ address ], true)",
@@ -184,7 +184,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(address)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexProperty([ address ], true)",
@@ -206,7 +206,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(orderItem)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexArrayProperty([ items ], false)",
@@ -233,7 +233,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(note)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexProperty([ note ], false)",
@@ -263,7 +263,7 @@ class DDLAlgorithmTests {
             .expected("""
                 [
                     "setKindName(orderItem)",
-                    "isSchemaLess()",
+                    "isSchemaless()",
                     "createDDLStatement()",
                     "addSimpleProperty([ number ], true)",
                     "addComplexArrayProperty([ items ], false)",
@@ -295,7 +295,7 @@ class DDLAlgorithmTests {
 
     // [
     //     "setKindName(order_v3)",
-    //     "isSchemaLess()",
+    //     "isSchemaless()",
     //     "createDDLStatement()",
     //     "addSimpleProperty([ id ], true)",
     //     "addSimpleProperty([ number ], true)"

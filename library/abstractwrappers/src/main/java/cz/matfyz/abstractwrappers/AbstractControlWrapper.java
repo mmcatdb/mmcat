@@ -1,5 +1,6 @@
 package cz.matfyz.abstractwrappers;
 
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
 import java.nio.file.Path;
@@ -8,7 +9,7 @@ import java.util.Collection;
 public interface AbstractControlWrapper {
 
     boolean isWritable();
-    
+
     boolean isQueryable();
 
     void execute(Collection<AbstractStatement> statement) throws ExecuteException;
@@ -26,5 +27,7 @@ public interface AbstractControlWrapper {
     AbstractPathWrapper getPathWrapper();
 
     AbstractQueryWrapper getQueryWrapper();
+
+    AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings);
 
 }

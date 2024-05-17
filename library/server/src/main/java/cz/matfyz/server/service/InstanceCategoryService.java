@@ -22,6 +22,7 @@ public class InstanceCategoryService {
 
     public @Nullable InstanceCategory loadCategory(Id sessionId, SchemaCategory schemaCategory) {
         final var wrapper = repository.find(sessionId);
+        //if (wrapper == null) {System.out.println("wrapper is null in InstanceCatService.loadCategory()");}
         return wrapper != null ? wrapper.toInstanceCategory(schemaCategory) : null;
     }
 

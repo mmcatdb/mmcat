@@ -321,7 +321,7 @@ public abstract class TformStep implements Printable {
                 printer.remove();
 
             printer.append(", ");
-            
+
             if (selfKey != null) {
                 printer.append(selfKey);
             }

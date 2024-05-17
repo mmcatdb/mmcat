@@ -1,5 +1,6 @@
 import type { Entity, Id, VersionId } from './id';
-import { LogicalModelInfo, type LogicalModelInfoFromServer } from './logicalModel';
+import { LogicalModelInfo, type LogicalModelFromServer, type LogicalModelInfoFromServer } from './logicalModel';
+import {  Datasource, type DatasourceFromServer } from './datasource';
 
 export type ActionFromServer = {
     id: Id;
@@ -37,6 +38,7 @@ export enum ActionType {
     ModelToCategory = 'ModelToCategory',
     CategoryToModel = 'CategoryToModel',
     UpdateSchema = 'UpdateSchema',
+    RSDToCategory = 'RSDToCategory'
 }
 
 export const ACTION_TYPES = [
@@ -48,6 +50,10 @@ export const ACTION_TYPES = [
         label: 'Category to Model',
         value: ActionType.CategoryToModel,
     },
+    {
+        label: 'RSD to Category',
+        value: ActionType.RSDToCategory,
+    },
 ];
 
 interface ActionPayloadType<TType extends ActionType = ActionType> {
@@ -58,6 +64,7 @@ export type ActionPayload =
     | ModelToCategoryPayload
     | CategoryToModelPayload
     | UpdateSchemaPayload
+    | RSDToCategoryPayload
     ;
 
 export type ActionPayloadFromServer<T extends ActionType = ActionType> = {
@@ -72,12 +79,18 @@ export function actionPayloadFromServer(input: ActionPayloadFromServer): ActionP
         return CategoryToModelPayload.fromServer(input as CategoryToModelPayloadFromServer);
     case ActionType.UpdateSchema:
         return UpdateSchemaPayload.fromServer(input as UpdateSchemaPayloadFromServer);
+    case ActionType.RSDToCategory:
+        return RSDToCategoryPayload.fromServer(input as RSDToCategoryPayloadFromServer);
     }
 }
 
 export type ActionPayloadInit = {
     type: ActionType.ModelToCategory | ActionType.CategoryToModel;
     logicalModelId: Id;
+} | {
+    type: ActionType.RSDToCategory;
+    datasourceId: Id;
+    kindName: String;
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
@@ -134,6 +147,28 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
             input.prevVersion,
             input.nextVersion,
         );
+    }
+}
+
+type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
+    datasource: DatasourceFromServer;
+    kindName: String;
+};
+
+class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
+    readonly type = ActionType.RSDToCategory;
+
+    private constructor(
+        readonly datasource: Datasource,
+        readonly kindName: String,
+    ) {
+
+    }
+
+    static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
+        const datasource =  Datasource.fromServer(input.datasource)
+        const kindName = input.kindName
+        return new RSDToCategoryPayload(datasource, kindName);
     }
 }
 

@@ -5,7 +5,6 @@ import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryUpdateResult.QueryUpdateError;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceDetail;
-import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.query.Query;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.repository.QueryRepository;

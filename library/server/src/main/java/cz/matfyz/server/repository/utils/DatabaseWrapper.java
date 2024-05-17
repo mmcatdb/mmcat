@@ -113,7 +113,7 @@ public class DatabaseWrapper {
         }
     }
 
-    public void execute(String ...statements) {
+    public void execute(String... statements) {
         try (
             Connection connection = getConnection()
         ) {

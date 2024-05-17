@@ -34,7 +34,7 @@ export class InstanceMorphism {
             if (domRow && codRow)
                 mappings.push(new MappingRow(domRow, codRow));
         });
-        
+
         return new InstanceMorphism(
             morphism,
             dom,

@@ -59,6 +59,7 @@ public class PostgreSQLPullWrapper implements AbstractPullWrapper {
     }
 
     @Override public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
+        System.out.println("pullForest from postgres");
         try (
             Connection connection = provider.getConnection();
             PreparedStatement statement = prepareStatement(connection, query);

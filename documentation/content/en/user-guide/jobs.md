@@ -9,9 +9,9 @@ A job is a transformation algorithm applied on a [mapping](mappings.md) that can
 
 ### Model to Category
 
-The data is imported from the database (specified in the mapping) to the instance category. If there already is an instance category, it will be expanded with the new data. If there is not any, it will be created. 
+The data is imported from the database (specified in the mapping) to the instance category. If there already is an instance category, it will be expanded with the new data. If there is not any, it will be created.
 
-It is important to note that the instance category is bound with the session. This means that after some time the category will be automatically deleted. 
+It is important to note that the instance category is bound with the session. This means that after some time the category will be automatically deleted.
 
 ### Category to Model
 

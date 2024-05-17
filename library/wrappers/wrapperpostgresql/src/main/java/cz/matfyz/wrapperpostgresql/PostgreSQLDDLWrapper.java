@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperpostgresql;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
+import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.abstractwrappers.exception.UnsupportedException;
 
@@ -17,7 +18,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         kindName = name;
     }
 
-    @Override public boolean isSchemaLess() {
+    @Override public boolean isSchemaless() {
         return false;
     }
 
@@ -50,7 +51,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
     }
 
-    @Override public PostgreSQLStatement createDDLStatement() {
+    @Override public StringStatement createDDLStatement() {
         String commands = String.join(",\n", properties.stream().map(property -> AbstractDDLWrapper.INDENTATION + property.command).toList());
         String content = String.format("""
             CREATE TABLE \"%s\" (
@@ -58,7 +59,7 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
             );
             """, kindName, commands);
 
-        return new PostgreSQLStatement(content);
+        return new StringStatement(content);
     }
 
     private record Property(

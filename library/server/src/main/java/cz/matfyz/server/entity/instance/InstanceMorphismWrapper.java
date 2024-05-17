@@ -23,7 +23,7 @@ public record InstanceMorphismWrapper(
             final int cod = codRowToId.get(mapping.codomainRow());
             mappings.add(new MappingRowWrapper(dom, cod));
         }
-        
+
         return new InstanceMorphismWrapper(
             morphism.signature(),
             mappings
