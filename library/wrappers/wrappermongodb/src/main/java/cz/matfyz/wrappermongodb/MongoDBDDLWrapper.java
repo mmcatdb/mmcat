@@ -2,8 +2,6 @@ package cz.matfyz.wrappermongodb;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 
-import java.util.Set;
-
 import org.bson.BsonDocument;
 import org.bson.BsonString;
 
@@ -19,19 +17,19 @@ public class MongoDBDDLWrapper implements AbstractDDLWrapper {
         return true;
     }
 
-    @Override public boolean addSimpleProperty(Set<String> names, boolean required) {
+    @Override public boolean addSimpleProperty(String path, boolean required) {
         return false;
     }
 
-    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
         return false;
     }
 
-    @Override public boolean addComplexProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexProperty(String path, boolean required) {
         return false;
     }
 
-    @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexArrayProperty(String path, boolean required) {
         return false;
     }
 

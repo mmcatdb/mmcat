@@ -7,7 +7,6 @@ import cz.matfyz.abstractwrappers.exception.UnsupportedException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
@@ -22,31 +21,28 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
         return false;
     }
 
-    @Override public boolean addSimpleProperty(Set<String> names, boolean required) {
-        names.forEach(name -> {
-            String command = "\"" + name + "\" TEXT" + (required ? " NOT NULL" : "");
-            properties.add(new Property(name, command));
-        });
+    @Override public boolean addSimpleProperty(String path, boolean required) {
+        // The postgres structure is flat, therefore, the path should be equal to the simple name of the property.
+        String command = "\"" + path + "\" TEXT" + (required ? " NOT NULL" : "");
+        properties.add(new Property(path, command));
 
         return true;
     }
 
-    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
-        names.forEach(name -> {
-            String command = "\"" + name + "\" TEXT[]" + (required ? " NOT NULL" : "");
-            properties.add(new Property(name, command));
-        });
+    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
+        String command = "\"" + path + "\" TEXT[]" + (required ? " NOT NULL" : "");
+        properties.add(new Property(path, command));
 
         return true;
     }
 
-    @Override public boolean addComplexProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexProperty(String path, boolean required) {
         throw UnsupportedException.addComplexProperty(DatasourceType.postgresql);
         // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
         // TODO dynamic named properties?
     }
 
-    @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexArrayProperty(String path, boolean required) {
         throw UnsupportedException.addComplexArrayProperty(DatasourceType.postgresql);
         // It is supported in a newer version (see https://www.postgresql.org/docs/10/rowtypes.html) so it could be implemented later.
     }

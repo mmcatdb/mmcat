@@ -8,7 +8,7 @@ public interface AbstractICWrapper {
 
     void appendIdentifier(String kindName, IdentifierStructure identifier);
 
-    public record AttributePair(String referencing, String referenced) implements Comparable<AttributePair> {
+    record AttributePair(String referencing, String referenced) implements Comparable<AttributePair> {
 
         @Override public int compareTo(AttributePair object) {
             int firstResult = referencing.compareTo(object.referencing);
@@ -23,7 +23,7 @@ public interface AbstractICWrapper {
 
     AbstractStatement createICRemoveStatement();
 
-    public static AbstractICWrapper createEmpty() {
+    static AbstractICWrapper createEmpty() {
         return EmptyICWrapper.instance;
     }
 
@@ -36,19 +36,19 @@ public interface AbstractICWrapper {
         @Override public void appendIdentifier(String kindName, IdentifierStructure identifier) {
             // This method intentionally does nothing.
         }
-    
+
         @Override public void appendReference(String referencingKind, String referencedKind, Set<AttributePair> attributePairs) {
             // This method intentionally does nothing.
         }
-    
+
         @Override public AbstractStatement createICStatement() {
             return AbstractStatement.createEmpty();
         }
-    
+
         @Override public AbstractStatement createICRemoveStatement() {
             return AbstractStatement.createEmpty();
         }
-    
+
     }
-    
+
 }

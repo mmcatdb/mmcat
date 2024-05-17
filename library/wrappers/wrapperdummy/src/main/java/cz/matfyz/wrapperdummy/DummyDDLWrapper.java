@@ -4,7 +4,6 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class DummyDDLWrapper implements AbstractDDLWrapper {
 
@@ -23,23 +22,23 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
         return false;
     }
 
-    @Override public boolean addSimpleProperty(Set<String> names, boolean required) {
-        methods.add("addSimpleProperty(" + setToString(names) + ", " + required + ")");
+    @Override public boolean addSimpleProperty(String path, boolean required) {
+        methods.add("addSimpleProperty(" + path + ", " + required + ")");
         return true;
     }
 
-    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
-        methods.add("addSimpleArrayProperty(" + setToString(names) + ", " + required + ")");
+    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
+        methods.add("addSimpleArrayProperty(" + path + ", " + required + ")");
         return true;
     }
 
-    @Override public boolean addComplexProperty(Set<String> names, boolean required) {
-        methods.add("addComplexProperty(" + setToString(names) + ", " + required + ")");
+    @Override public boolean addComplexProperty(String path, boolean required) {
+        methods.add("addComplexProperty(" + path + ", " + required + ")");
         return true;
     }
 
-    @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) {
-        methods.add("addComplexArrayProperty(" + setToString(names) + ", " + required + ")");
+    @Override public boolean addComplexArrayProperty(String path, boolean required) {
+        methods.add("addComplexArrayProperty(" + path + ", " + required + ")");
         return true;
     }
 
@@ -48,22 +47,4 @@ public class DummyDDLWrapper implements AbstractDDLWrapper {
         return new DummyStatement("");
     }
 
-    private String setToString(Set<String> strings) {
-        var builder = new StringBuilder();
-
-        builder.append("[");
-        int index = 0;
-        for (String string : strings) {
-            if (index > 0)
-                builder.append(",");
-            index++;
-            builder.append(" ").append(string);
-        }
-
-        if (index > 0)
-            builder.append(" ");
-        builder.append("]");
-
-        return builder.toString();
-    }
 }

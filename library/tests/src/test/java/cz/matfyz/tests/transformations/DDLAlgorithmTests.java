@@ -23,7 +23,7 @@ class DDLAlgorithmTests {
                     "setKindName(order)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)"
+                    "addSimpleProperty(number, true)"
                 ]
             """)
             .run();
@@ -43,11 +43,11 @@ class DDLAlgorithmTests {
                     "setKindName(address)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexProperty([ address ], true)",
-                    "addSimpleProperty([ address/street ], true)",
-                    "addSimpleProperty([ address/city ], true)",
-                    "addSimpleProperty([ address/zip ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexProperty(address, true)",
+                    "addSimpleProperty(address/street, true)",
+                    "addSimpleProperty(address/city, true)",
+                    "addSimpleProperty(address/zip, true)"
                 ]
             """)
             .run();
@@ -67,8 +67,8 @@ class DDLAlgorithmTests {
                     "setKindName(tag)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addSimpleArrayProperty([ tags ], false)"
+                    "addSimpleProperty(number, true)",
+                    "addSimpleArrayProperty(tags, false)"
                 ]
             """)
             .run();
@@ -94,12 +94,12 @@ class DDLAlgorithmTests {
                     "setKindName(orderItem)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexArrayProperty([ items ], false)",
-                    "addSimpleProperty([ items/id ], true)",
-                    "addSimpleProperty([ items/label ], false)",
-                    "addSimpleProperty([ items/price ], false)",
-                    "addSimpleProperty([ items/quantity ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexArrayProperty(items, false)",
+                    "addSimpleProperty(items/id, true)",
+                    "addSimpleProperty(items/label, false)",
+                    "addSimpleProperty(items/price, false)",
+                    "addSimpleProperty(items/quantity, true)"
                 ]
             """)
             .run();
@@ -121,9 +121,9 @@ class DDLAlgorithmTests {
                     "setKindName(contact)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexProperty([ contact ], false)",
-                    "addSimpleProperty([ contact/cellphone, contact/email, contact/skype ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexProperty(contact, false)",
+                    "addSimpleProperty(contact/*, true)"
                 ]
             """)
             .run();
@@ -143,8 +143,8 @@ class DDLAlgorithmTests {
                     "setKindName(customer)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ customer/number ], true)",
-                    "addSimpleProperty([ customer/name ], true)"
+                    "addSimpleProperty(customer/number, true)",
+                    "addSimpleProperty(customer/name, true)"
                 ]
             """)
             .run();
@@ -164,11 +164,11 @@ class DDLAlgorithmTests {
                     "setKindName(address)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexProperty([ address ], true)",
-                    "addSimpleProperty([ address/street ], true)",
-                    "addSimpleProperty([ address/city ], true)",
-                    "addSimpleProperty([ address/zip ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexProperty(address, true)",
+                    "addSimpleProperty(address/street, true)",
+                    "addSimpleProperty(address/city, true)",
+                    "addSimpleProperty(address/zip, true)"
                 ]
             """)
             .run();
@@ -186,11 +186,11 @@ class DDLAlgorithmTests {
                     "setKindName(address)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexProperty([ address ], true)",
-                    "addSimpleProperty([ address/street ], true)",
-                    "addSimpleProperty([ address/city ], true)",
-                    "addSimpleProperty([ address/zip ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexProperty(address, true)",
+                    "addSimpleProperty(address/street, true)",
+                    "addSimpleProperty(address/city, true)",
+                    "addSimpleProperty(address/zip, true)"
                 ]
             """)
             .run();
@@ -208,12 +208,12 @@ class DDLAlgorithmTests {
                     "setKindName(orderItem)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexArrayProperty([ items ], false)",
-                    "addSimpleProperty([ items/id ], true)",
-                    "addSimpleProperty([ items/label ], false)",
-                    "addSimpleProperty([ items/price ], false)",
-                    "addSimpleProperty([ items/quantity ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexArrayProperty(items, false)",
+                    "addSimpleProperty(items/id, true)",
+                    "addSimpleProperty(items/label, false)",
+                    "addSimpleProperty(items/price, false)",
+                    "addSimpleProperty(items/quantity, true)"
                 ]
             """)
             .run();
@@ -235,11 +235,11 @@ class DDLAlgorithmTests {
                     "setKindName(note)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexProperty([ note ], false)",
-                    "addComplexProperty([ note/cs-CZ, note/en-GB, note/en-US ], true)",
-                    "addSimpleProperty([ note/cs-CZ/subject, note/en-GB/subject, note/en-US/subject ], true)",
-                    "addSimpleProperty([ note/cs-CZ/content, note/en-GB/content, note/en-US/content ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexProperty(note, false)",
+                    "addComplexProperty(note/*, true)",
+                    "addSimpleProperty(note/*/subject, true)",
+                    "addSimpleProperty(note/*/content, true)"
                 ]
             """)
             .run();
@@ -265,12 +265,12 @@ class DDLAlgorithmTests {
                     "setKindName(orderItem)",
                     "isSchemaless()",
                     "createDDLStatement()",
-                    "addSimpleProperty([ number ], true)",
-                    "addComplexArrayProperty([ items ], false)",
-                    "addSimpleProperty([ items/id ], true)",
-                    "addSimpleProperty([ items/label ], false)",
-                    "addSimpleProperty([ items/price ], false)",
-                    "addSimpleProperty([ items/quantity ], true)"
+                    "addSimpleProperty(number, true)",
+                    "addComplexArrayProperty(items, false)",
+                    "addSimpleProperty(items/id, true)",
+                    "addSimpleProperty(items/label, false)",
+                    "addSimpleProperty(items/price, false)",
+                    "addSimpleProperty(items/quantity, true)"
                 ]
             """)
             .run();
@@ -297,8 +297,8 @@ class DDLAlgorithmTests {
     //     "setKindName(order_v3)",
     //     "isSchemaless()",
     //     "createDDLStatement()",
-    //     "addSimpleProperty([ id ], true)",
-    //     "addSimpleProperty([ number ], true)"
+    //     "addSimpleProperty(id, true)",
+    //     "addSimpleProperty(number, true)"
     // ]
 
 }

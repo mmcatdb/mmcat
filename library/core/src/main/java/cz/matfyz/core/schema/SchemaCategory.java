@@ -8,7 +8,9 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.UniqueContext;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public class SchemaCategory {
@@ -91,6 +93,42 @@ public class SchemaCategory {
             getMorphism(base.toNonDual()),
             !base.isDual()
         );
+    }
+
+    public record SchemaPath(
+        List<SchemaEdge> edges,
+        Signature signature
+    ) {
+        public SchemaObject from() {
+            return edges.get(0).from();
+        }
+
+        public SchemaObject to() {
+            return edges.get(edges.size() - 1).to();
+        }
+
+        public boolean isArray() {
+            for (final var edge : edges)
+                if (edge.isArray())
+                    return true;
+
+            return false;
+        }
+
+        public Min min() {
+            for (final var edge : edges)
+                if (edge.isArray() || edge.morphism.min() == Min.ZERO)
+                    return Min.ZERO;
+
+            return Min.ONE;
+        }
+    }
+
+    public SchemaPath getPath(Signature signature) {
+        final var list = new ArrayList<SchemaEdge>();
+        signature.toBases().stream().map(this::getEdge).forEach(list::add);
+
+        return new SchemaPath(list, signature);
     }
 
     public Collection<SchemaObject> allObjects() {

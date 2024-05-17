@@ -107,7 +107,7 @@ public class MTCAlgorithm {
         StackTriple triple = masterStack.pop();
         final var superIds = SuperIdsFetcher.fetch(triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
-        InstanceObject childInstance = triple.parentToChild.cod();
+        InstanceObject childInstance = triple.parentToChild.to();
 
         for (final var superId : superIds) {
             DomainRow childRow = childInstance.getOrCreateRow(superId.superId());
@@ -127,7 +127,7 @@ public class MTCAlgorithm {
         var currentToChild = path.signature();
 
         for (final var edge : path.edges()) {
-            var instanceObject = edge.cod();
+            var instanceObject = edge.to();
 
             parentToCurrent = parentToCurrent.concatenate(currentToChild.getFirst());
             currentToChild = currentToChild.cutFirst();

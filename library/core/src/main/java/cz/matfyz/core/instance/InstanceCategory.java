@@ -82,11 +82,11 @@ public class InstanceCategory {
             return direction ? morphism.signature() : morphism.signature().dual();
         }
 
-        public InstanceObject dom() {
+        public InstanceObject from() {
             return direction ? morphism.dom() : morphism.cod();
         }
 
-        public InstanceObject cod() {
+        public InstanceObject to() {
             return direction ? morphism.cod() : morphism.dom();
         }
 
@@ -113,12 +113,12 @@ public class InstanceCategory {
         List<InstanceEdge> edges,
         Signature signature
     ) {
-        public InstanceObject dom() {
-            return edges.get(0).dom();
+        public InstanceObject from() {
+            return edges.get(0).from();
         }
 
-        public InstanceObject cod() {
-            return edges.get(edges.size() - 1).cod();
+        public InstanceObject to() {
+            return edges.get(edges.size() - 1).to();
         }
 
         public boolean isArray() {
@@ -164,7 +164,7 @@ public class InstanceCategory {
             signatureToTarget = signatureToTarget.concatenate(currentBase);
 
             var pathFromTarget = getPath(signatureToTarget.dual());
-            var currentTarget = pathFromTarget.cod();
+            var currentTarget = pathFromTarget.to();
             if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;
 

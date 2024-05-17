@@ -50,7 +50,7 @@ public class SuperIdsFetcher {
         this.output = new ArrayList<>();
         this.parentRow = parentRow;
         this.parentToChild = path.signature();
-        this.childObject = path.cod();
+        this.childObject = path.to();
         this.childAccessPath = childAccessPath;
     }
 

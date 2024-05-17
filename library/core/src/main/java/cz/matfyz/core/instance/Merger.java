@@ -67,7 +67,7 @@ class Merger {
      * @return
      */
     public DomainRow merge(SuperIdWithValues superId, DomainRow parent, InstanceEdge edge) {
-        final var childObject = edge.cod();
+        final var childObject = edge.to();
 
         // First, we try to find the row by the superId.
         var currentRow = childObject.getRow(superId);
@@ -78,7 +78,7 @@ class Merger {
         if (!edge.isArray()) {
             var mapping = parent.getMappingsForEdge(edge).stream().findFirst();
             if (mapping.isPresent())
-                return addToRow(mapping.get().codomainRow(), superId, edge.cod());
+                return addToRow(mapping.get().codomainRow(), superId, edge.to());
         }
 
         // No such row exists yet, so we have to create it. It also cannot be merged so we are not doing that.
@@ -95,12 +95,12 @@ class Merger {
         // TODO more effective search, e.g., map.
         for (final var codomainRow : parent.getCodomainForEdge(edge))
             if (codomainRow.equals(currentRow))
-                return addToRow(currentRow, superId, edge.cod()); // The connection already exists so we just have to add to the superId.
+                return addToRow(currentRow, superId, edge.to()); // The connection already exists so we just have to add to the superId.
 
         // The connection does not exist yet, so we create it and then merge it.
         // TODO optimization - merging with the knowledge of the connection, so we would not have create it, then delete it and then create it for the new row.
         edge.createMapping(parent, currentRow);
-        return addToRow(currentRow, superId, edge.cod());
+        return addToRow(currentRow, superId, edge.to());
     }
 
     /**

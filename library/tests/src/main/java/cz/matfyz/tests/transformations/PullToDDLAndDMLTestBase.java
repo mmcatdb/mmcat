@@ -54,7 +54,7 @@ public class PullToDDLAndDMLTestBase {
         LOGGER.trace("Created Instance Category:\n" + instance);
 
         var ddlAlgorithm = new DDLAlgorithm();
-        ddlAlgorithm.input(mapping, instance, ddlWrapper);
+        ddlAlgorithm.input(mapping, mapping.category(), ddlWrapper);
         var ddlStatement = ddlAlgorithm.algorithm();
 
         LOGGER.info("Created DDL Statement:\n" + ddlStatement.getContent());

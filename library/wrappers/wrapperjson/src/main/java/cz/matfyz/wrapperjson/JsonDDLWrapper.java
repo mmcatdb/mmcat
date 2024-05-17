@@ -2,8 +2,6 @@ package cz.matfyz.wrapperjson;
 
 import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 
-import java.util.Set;
-
 public class JsonDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
@@ -21,22 +19,22 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
 
 
     @Override
-    public boolean addSimpleProperty(Set<String> names, boolean required) {
+    public boolean addSimpleProperty(String path, boolean required) {
         return false;
     }
 
     @Override
-    public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
+    public boolean addSimpleArrayProperty(String path, boolean required) {
       return false;
     }
 
     @Override
-    public boolean addComplexProperty(Set<String> names, boolean required) {
+    public boolean addComplexProperty(String path, boolean required) {
         return false;
     }
 
     @Override
-    public boolean addComplexArrayProperty(Set<String> names, boolean required) {
+    public boolean addComplexArrayProperty(String path, boolean required) {
        return false;
     }
 

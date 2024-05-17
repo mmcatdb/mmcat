@@ -4,7 +4,6 @@ import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class CsvDDLWrapper implements AbstractDDLWrapper {
 
@@ -19,20 +18,21 @@ public class CsvDDLWrapper implements AbstractDDLWrapper {
         return true;
     }
 
-    @Override public boolean addSimpleProperty(Set<String> names, boolean required) {
-        properties.addAll(names);
+    @Override public boolean addSimpleProperty(String path, boolean required) {
+        // The csv structure is flat, therefore, the path should be equal to the simple name of the property.
+        properties.add(path);
         return true;
     }
 
-    @Override public boolean addSimpleArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addSimpleArrayProperty(String path, boolean required) {
       return false;
     }
 
-    @Override public boolean addComplexProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexProperty(String path, boolean required) {
         return false;
     }
 
-    @Override public boolean addComplexArrayProperty(Set<String> names, boolean required) {
+    @Override public boolean addComplexArrayProperty(String path, boolean required) {
        return false;
     }
 

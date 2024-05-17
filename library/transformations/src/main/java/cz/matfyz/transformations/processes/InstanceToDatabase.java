@@ -72,7 +72,7 @@ public class InstanceToDatabase {
             : new InstanceCategoryBuilder().setSchemaCategory(mapping.category()).build();
 
         final var ddlTform = new DDLAlgorithm();
-        ddlTform.input(mapping, instance, ddlWrapper);
+        ddlTform.input(mapping, mapping.category(), ddlWrapper);
 
         final var icTform = new ICAlgorithm();
         icTform.input(mapping, allMappings, icWrapper);
