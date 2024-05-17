@@ -13,6 +13,10 @@ public class CsvProvider {
         this.settings = settings;
     }
 
+    public String getUrl() {
+        return settings.url;
+    }
+
     public InputStream getInputStream() throws IOException {
         return new UrlInputStreamProvider(settings.url).getInputStream();
     }

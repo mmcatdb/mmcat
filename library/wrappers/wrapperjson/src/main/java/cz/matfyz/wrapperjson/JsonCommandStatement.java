@@ -3,7 +3,7 @@ package cz.matfyz.wrapperjson;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 
 public class JsonCommandStatement implements AbstractStatement {
-    private String schema;
+    private final String schema;
 
     public JsonCommandStatement(String schema) {
         this.schema = schema;

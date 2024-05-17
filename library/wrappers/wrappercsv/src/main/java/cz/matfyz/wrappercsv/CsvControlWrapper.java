@@ -1,18 +1,17 @@
 package cz.matfyz.wrappercsv;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
-import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
-import cz.matfyz.abstractwrappers.AbstractDMLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
-import cz.matfyz.abstractwrappers.AbstractPathWrapper;
-import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractQueryWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
+import cz.matfyz.core.mapping.Mapping;
+
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -38,23 +37,27 @@ public class CsvControlWrapper extends BaseControlWrapper implements AbstractCon
         throw new UnsupportedOperationException("CsvControlWrapper.execute not implemented.");
     }
 
-    @Override public AbstractDDLWrapper getDDLWrapper() {
-        throw new UnsupportedOperationException("CsvControlWrapper.getDDLWrapper not implemented.");
+    @Override public CsvDDLWrapper getDDLWrapper() {
+        throw new UnsupportedOperationException("CsvControlWrapper.getDDLWrapper not implemented, instead getDDLWrapper(Mapping) implemented.");
+    }
+
+    public CsvDDLWrapper getDDLWrapper(Mapping mapping) {
+        return new CsvDDLWrapper(mapping);
     }
 
     @Override public AbstractICWrapper getICWrapper() {
         return AbstractICWrapper.createEmpty();
     }
 
-    @Override public AbstractDMLWrapper getDMLWrapper() {
-        throw new UnsupportedOperationException("CsvControlWrapper.getDMLWrapper not implemented.");
+    @Override public CsvDMLWrapper getDMLWrapper() {
+        return new CsvDMLWrapper();
     }
 
-    @Override public AbstractPullWrapper getPullWrapper() {
-        throw new UnsupportedOperationException("CsvControlWrapper.getPullWrapper not implemented.");
+    @Override public CsvPullWrapper getPullWrapper() {
+        return new CsvPullWrapper(provider);
     }
 
-    @Override public AbstractPathWrapper getPathWrapper() {
+    @Override public CsvPathWrapper getPathWrapper() {
         return new CsvPathWrapper();
     }
 

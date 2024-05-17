@@ -18,14 +18,13 @@ import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.io.InputStream;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.InputStream;
 
 public class JsonPullWrapper implements AbstractPullWrapper {
 

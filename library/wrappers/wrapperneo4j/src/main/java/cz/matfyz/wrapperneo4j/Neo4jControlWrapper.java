@@ -1,6 +1,7 @@
 package cz.matfyz.wrapperneo4j;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractICWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractStatement;
@@ -8,6 +9,7 @@ import cz.matfyz.abstractwrappers.AbstractStatement.StringStatement;
 import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
+import cz.matfyz.core.mapping.Mapping;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -100,6 +102,12 @@ public class Neo4jControlWrapper extends BaseControlWrapper implements AbstractC
 
     @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
         throw new UnsupportedOperationException("Neo4jControlWrapper.getInferenceWrapper not implemented.");
+    }
+
+    @Override
+    public AbstractDDLWrapper getDDLWrapper(Mapping mapping) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDDLWrapper'");
     }
 
 }

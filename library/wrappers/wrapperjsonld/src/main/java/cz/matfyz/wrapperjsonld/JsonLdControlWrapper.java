@@ -13,6 +13,8 @@ import cz.matfyz.abstractwrappers.BaseControlWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.abstractwrappers.exception.ExecuteException;
 
+import cz.matfyz.core.mapping.Mapping;
+
 import java.nio.file.Path;
 import java.util.Collection;
 
@@ -65,6 +67,12 @@ public class JsonLdControlWrapper extends BaseControlWrapper implements Abstract
 
     @Override public AbstractInferenceWrapper getInferenceWrapper(SparkSettings sparkSettings) {
         throw new UnsupportedOperationException("JsonLdControlWrapper.getInferenceWrapper not implemented.");
+    }
+
+    @Override
+    public AbstractDDLWrapper getDDLWrapper(Mapping mapping) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDDLWrapper'");
     }
 
 }

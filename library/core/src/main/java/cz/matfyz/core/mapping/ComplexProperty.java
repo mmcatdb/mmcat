@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -250,6 +251,12 @@ public class ComplexProperty extends AccessPath {
         }
 
         return newSubpaths;
+    }
+
+    public List<String> getSubpathNames() {
+        return subpaths.stream()
+                    .map(subpath -> subpath.name.toString())
+                    .collect(Collectors.toList());
     }
 
     public static class Serializer extends StdSerializer<ComplexProperty> {

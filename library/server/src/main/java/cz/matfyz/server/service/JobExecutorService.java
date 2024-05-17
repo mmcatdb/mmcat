@@ -1,9 +1,11 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.abstractwrappers.AbstractControlWrapper;
+import cz.matfyz.abstractwrappers.AbstractDDLWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.abstractwrappers.AbstractPullWrapper;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
+import cz.matfyz.abstractwrappers.datasource.Datasource.DatasourceType;
 import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
@@ -196,7 +198,7 @@ public class JobExecutorService {
                     mapping,
                     mappings,
                     instance,
-                    control.getDDLWrapper(),
+                    getDDLWrapper(control, datasource, mapping),
                     control.getDMLWrapper(),
                     control.getICWrapper()
                 )
@@ -216,13 +218,22 @@ public class JobExecutorService {
                 LOGGER.info("... models executed.");
             }
             /*else { LOGGER.info("Models didn't get executed. Yikes");}*/
-            /* for now I choose not to execute the statements, but just see if they even got created
+            /* for now I choose not to execute the statements, but just see if they even get created
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
             LOGGER.info("... models executed."); */
         }
 
         job.data = output.toString();
+    }
+
+    private AbstractDDLWrapper getDDLWrapper(AbstractControlWrapper control, DatasourceWrapper datasource, Mapping mapping) {
+        AbstractDDLWrapper DDLWrapper;
+        if (datasource.type == DatasourceType.csv)
+            DDLWrapper = control.getDDLWrapper(mapping);
+        else { DDLWrapper = control.getDDLWrapper();}
+
+        return DDLWrapper;
     }
 
     private void updateSchemaAlgorithm(Run run, UpdateSchemaPayload payload) {
@@ -261,7 +272,7 @@ public class JobExecutorService {
 
     // private static final String SPARK_MASTER = System.getProperty("baazizi.sparkMaster", "local[*]");    
     private static final Dotenv dotenv = Dotenv.configure()
-        .directory("../../")  // points to the parent directory where there is the .env file with the SPARK_MASTER var
+        .directory("../../")  // points to the parent directory where there is the .env file with the SPARK vars
         .load();
 
     private static final String sparkMaster = dotenv.get("SPARK_MASTER");
@@ -283,6 +294,8 @@ public class JobExecutorService {
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
+        //System.out.println(categoryMappingPair.schemaCat().allObjects());
+        //System.out.println(categoryMappingPair.schemaCat().allMorphisms());
         final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
 
         // what about this label?
@@ -302,8 +315,15 @@ public class JobExecutorService {
         for (SchemaObject o : objects) {
             graph.addVertex(o);
         }
+        System.out.println("Adding morphisms to graph");
         for (SchemaMorphism m : morphisms) {
-            graph.addEdge(m, m.dom(), m.cod());
+            if (m.dom() != null && m.cod() != null) {
+                System.out.println("Domain: " + m.dom().label());
+                System.out.println("Codomain: " + m.cod().label());
+                System.out.println();
+                graph.addEdge(m, m.dom(), m.cod());
+            }
+            
         }
 
         FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
