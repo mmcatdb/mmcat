@@ -120,6 +120,64 @@ public final class RecordSchemaDescription implements Serializable, Comparable<R
         this.children = children;
     }
 
+    public boolean hasParentWithChildName(String childName) {
+        for (RecordSchemaDescription child : this.children) {
+            if (child.getName().equals(childName))
+                return true;
+            child.hasParentWithChildName(childName);
+        }
+        return false;
+    }
+
+
+    public boolean addChildrenIfNameMatches(RecordSchemaDescription rsd) {
+        if (this.name.equals(rsd.getName())) {
+            if (isReferencingRSD(this)) {
+                ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
+                this.setChildren(newChildren);  
+            }
+            for (RecordSchemaDescription child : rsd.getChildren()) {
+                addChildren(child);
+            }
+            return true;
+        }
+        for (RecordSchemaDescription oldChild : this.children) {
+            if (oldChild.addChildrenIfNameMatches(rsd)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void addChildren(RecordSchemaDescription child) {
+        ObjectArrayList<RecordSchemaDescription> newChildren = new ObjectArrayList<>();
+        for (RecordSchemaDescription oldChild : this.children) {
+            newChildren.add(oldChild);
+        }
+        newChildren.add(child);
+        this.setChildren(newChildren);                    
+    }
+
+    private boolean isReferencingRSD(RecordSchemaDescription rsd) {
+        for (RecordSchemaDescription child : rsd.getChildren()) {
+            if (!child.getName().equals("_")) {
+                return false;
+            }
+        }
+        return true;
+    }    
+
+    public boolean removeChildByName(String name) {
+        for (RecordSchemaDescription child : children) {
+            if (child.getName().equals(name)) {
+                children.remove(child);
+                return true;
+            } else if (child.removeChildByName(name))
+                return true;
+        }
+        return false;
+    }
+
     @Override
     public int compareTo(RecordSchemaDescription o) {
         // WARN: TOHLE JE SPATNE, JE TU BUG! TAKHLE SE TO POROVNAVAT NEDA

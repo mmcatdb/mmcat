@@ -32,9 +32,15 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
     private SparkSession sparkSession;
     private JavaSparkContext context;
 
-    private String collectionName() {
+/*    private String collectionName() {
         return collectionName();
+    } */
+
+    private String collectionName() {
+        return kindName;
     }
+
+
     public MongoDBInferenceWrapper(MongoDBProvider provider, SparkSettings sparkSettings) {
         this.provider = provider;
         this.sparkSettings = sparkSettings;

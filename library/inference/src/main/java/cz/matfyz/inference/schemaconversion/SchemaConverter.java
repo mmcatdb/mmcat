@@ -55,6 +55,8 @@ public class SchemaConverter {
         AccessTreeNode currentNode = new AccessTreeNode(null, null, null, null, null, null, null, false);
         int i = 1;
         System.out.println("Building the Access Tree...");
+        // first change the root name, so that it is easier while building the tree
+        rsd.setName("root");
         buildAccessTree(rsd, rootKey, i, currentNode);
 
         //SCUtils.addIndexObjecttoArr(sc);
@@ -65,7 +67,23 @@ public class SchemaConverter {
         //this.root.printTree("");
         System.out.println("Building the SK...");
         buildSchemaCategory(this.root);
-        //traverseAndBuild(this.root);
+
+        System.out.println("Morphisms in the final SK: ");
+        for (SchemaMorphism m : sc.allMorphisms()) {
+            if (m.dom() == null) {
+                System.out.println("Domain is null");
+            }
+            else
+                System.out.println("Domain: " +  m.dom().label() );
+
+            if (m.cod() == null) {
+                System.out.println("Codomain is null");
+            }
+            else
+                System.out.println("Codomain: " +  m.cod().label() );
+            System.out.println();
+        }
+        
 
         System.out.println("Creating mapping...");
         MappingCreator mappingCreator = new MappingCreator(rootKey, root);
@@ -116,17 +134,27 @@ public class SchemaConverter {
     }
 
     private void createSchemaMorphism(AccessTreeNode node, SchemaObject so) {
+        /*
+        System.out.println("SK before accessing the parent node");
+        System.out.println(sc.allObjects());*/
         SchemaObject sop = sc.getObject(node.getParentKey());
 
+    /*    if (sop == null) {
+            System.out.println("Error while creating morphism. Domain is null and codomain is " + so.label());
+            System.out.println("Node key: " + node.getKey());
+            System.out.println("Parent key: " + node.getParentKey());
+            System.out.println(sc.allObjects());
+        }
+        */
         SchemaObject dom = sop;
         SchemaObject cod = so;
 
-        if (node.isArrayType) {
+        if (node.isArrayType) { // the morphism turns around when it is an array
             dom = so;
             cod = sop;
         }
 
-        Set<SchemaMorphism.Tag> tags = new HashSet<>(); //empty for now, because I dont know what to put there
+        Set<SchemaMorphism.Tag> tags = new HashSet<>(); //empty for now
         SchemaMorphism sm = new SchemaMorphism(node.getSig(), node.getLabel(), node.getMin(), tags, dom, cod);
         sc.addMorphism(sm);
     }
@@ -146,13 +174,13 @@ public class SchemaConverter {
 
         if (!rsdp.getChildren().isEmpty()) {
             //System.out.println("rsdp name: "+rsdp.getName());
-            if (rsdp.getName().equals("_")) { // do a different condition here
+            if (rsdp.getName().equals("root")) { // do a different condition here
                 //System.out.println("thats right it is _");
                 currentNode = this.root;
             }
-            else {
+    /*        else {
                 currentNode = this.root.findNodeWithName(rsdp.getName());
-            }
+            } */
 
             if (currentNode != null & currentNode.state != AccessTreeNode.State.Root) {
                 currentNode.state = AccessTreeNode.State.Complex;

@@ -292,22 +292,38 @@ public class JobExecutorService {
      */
     private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
         DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
-
         for (SchemaObject o : objects) {
             graph.addVertex(o);
         }
-        System.out.println("Adding morphisms to graph");
+
         for (SchemaMorphism m : morphisms) {
-            if (m.dom() != null && m.cod() != null) {
-                System.out.println("Domain: " + m.dom().label());
-                System.out.println("Codomain: " + m.cod().label());
-                System.out.println();
+            if (m.dom() != null && m.cod() != null) 
                 graph.addEdge(m, m.dom(), m.cod());
-            }
         }
 
+        // determine the layout size based on the num of nodes
+        int numNodes = objects.size();
+        int layoutSize = Math.max(600, (int) (Math.log(numNodes + 1.0) * 200));
+
+
         FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
-        layout.setSize(new Dimension(600, 600));
+        //layout.setSize(new Dimension(600, 600));
+        layout.setSize(new Dimension(layoutSize, layoutSize));
+
+        // Adjust attraction and repulsion multipliers based on the graph size
+        // Only applies for FRLayout
+        // play with these parameters to tweek how the graph will look like        
+        if (numNodes > 50) {
+            layout.setAttractionMultiplier(0.75);
+            layout.setRepulsionMultiplier(2.0);
+        } else if (numNodes > 20) {
+            layout.setAttractionMultiplier(0.85);
+            layout.setRepulsionMultiplier(1.5);
+        } else {
+            layout.setAttractionMultiplier(1.0);
+            layout.setRepulsionMultiplier(1.0);
+        }
+        
 
         for (int i = 0; i < 1000; i++) { // initialize positions
             layout.step();
@@ -319,9 +335,60 @@ public class JobExecutorService {
             double y = layout.getY(node);
             positions.put(node.key(), new Position(x, y));
         }
+        ensureNoOverlap(positions, layoutSize);
 
         return positions;
     }
+
+    private void ensureNoOverlap(Map<Key, Position> positions, int layoutSize) {
+        double nodeRadius = 10.0; // Assume a radius for each node
+        double margin = 50.0; // Margin to keep nodes away from the edges
+        int maxIterations = 100; // Maximum number of iterations
+        int iteration = 0;
+    
+        boolean overlapExists;
+        do {
+            overlapExists = false;
+            Map<Key, Position> newPositions = new HashMap<>(positions);
+    
+            for (Key key1 : positions.keySet()) {
+                Position pos1 = positions.get(key1);
+                for (Key key2 : positions.keySet()) {
+                    if (key1.equals(key2)) continue;
+                    Position pos2 = positions.get(key2);
+    
+                    double dx = pos1.x() - pos2.x();
+                    double dy = pos1.y() - pos2.y();
+                    double distance = Math.sqrt(dx * dx + dy * dy);
+    
+                    if (distance < 2 * nodeRadius) { // Nodes are overlapping
+                        overlapExists = true;
+                        double overlap = 2 * nodeRadius - distance;
+                        double angle = Math.atan2(dy, dx);
+    
+                        // Move nodes away from each other
+                        double newX1 = pos1.x() + Math.cos(angle) * overlap / 2;
+                        double newY1 = pos1.y() + Math.sin(angle) * overlap / 2;
+                        double newX2 = pos2.x() - Math.cos(angle) * overlap / 2;
+                        double newY2 = pos2.y() - Math.sin(angle) * overlap / 2;
+    
+                        // Ensure nodes are within layout bounds
+                        newX1 = Math.max(margin, Math.min(newX1, layoutSize - margin));
+                        newY1 = Math.max(margin, Math.min(newY1, layoutSize - margin));
+                        newX2 = Math.max(margin, Math.min(newX2, layoutSize - margin));
+                        newY2 = Math.max(margin, Math.min(newY2, layoutSize - margin));
+    
+                        newPositions.put(key1, new Position(newX1, newY1));
+                        newPositions.put(key2, new Position(newX2, newY2));
+                    }
+                }
+            }
+            positions.putAll(newPositions);
+            iteration++;
+        } while (overlapExists && iteration < maxIterations);
+    }
+    
+
 
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
         MetadataContext context = new MetadataContext();
