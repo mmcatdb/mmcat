@@ -23,14 +23,14 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
 
     @Override public boolean addSimpleProperty(String path, boolean required) {
         // The postgres structure is flat, therefore, the path should be equal to the simple name of the property.
-        String command = "\"" + path + "\" TEXT" + (required ? " NOT NULL" : "");
+        final String command = "\"" + path + "\" TEXT" + (required ? " NOT NULL" : "");
         properties.add(new Property(path, command));
 
         return true;
     }
 
     @Override public boolean addSimpleArrayProperty(String path, boolean required) {
-        String command = "\"" + path + "\" TEXT[]" + (required ? " NOT NULL" : "");
+        final String command = "\"" + path + "\" TEXT[]" + (required ? " NOT NULL" : "");
         properties.add(new Property(path, command));
 
         return true;
@@ -48,8 +48,8 @@ public class PostgreSQLDDLWrapper implements AbstractDDLWrapper {
     }
 
     @Override public StringStatement createDDLStatement() {
-        String commands = String.join(",\n", properties.stream().map(property -> AbstractDDLWrapper.INDENTATION + property.command).toList());
-        String content = String.format("""
+        final String commands = String.join(",\n", properties.stream().map(property -> AbstractDDLWrapper.INDENTATION + property.command).toList());
+        final String content = String.format("""
             CREATE TABLE \"%s\" (
             %s
             );
