@@ -22,21 +22,40 @@ public class SchemaConversionUtils {
     public SchemaConversionUtils() {}
 
     /**
-     * For creating the child key
+     * For creating the child key.
+     * The keys need to be positive, otherwise there are problems with retrieving Positions in the MetadatContext later.
+     * (But it might create collisions)
      */
     public Key createChildKey(Key keyp, int i) {
         int keyvalp = keyp.getValue();
-        int keyvalch = Objects.hash(keyvalp, i);
+        int keyvalch = Math.abs(Objects.hash(keyvalp, i));
         return new Key(keyvalch);
     }
 
     /**
      * For creating signature for the parent-child morphism
+     * Custom hashing with prime numbers. The primes are hard coded to avoid introducing unexpectedness.
+     * This should produce fewer collisions then using Object.hash()
      */
-    public int createChildSignature(Key keyp, Key keych) {
+    /*
+    public int createChildSigVal(Key keyp, Key keych) {
         int sigval = Objects.hash(keyp.getValue(), keych.getValue());
         return sigval;
+    }*/
+
+    public int createChildSigVal(Key keyp, Key keych) {
+        int prime1 = 31;
+        int prime2 = 37;
+        int prime3 = 41;
+    
+        int result = 1;
+        result = prime1 * result + keyp.getValue();
+        result = prime2 * result + keych.getValue();
+        result = prime3 * result + (keyp.getValue() ^ keych.getValue());
+        
+        return result;
     }
+    
 
     /**
      * For finding the cardinality between rsds
@@ -71,8 +90,8 @@ public class SchemaConversionUtils {
      * And it is labeled as relational if its domain is an array type
      */
     public String createLabel(RecordSchemaDescription rsdch, boolean isArrayp, boolean isArraych) {
-
-        if (isArraych || isArrayp) { // meaning the parent is an array (works for now, might not work later)
+       // if (isArraych || isArrayp) { 
+        if (isArraych) { 
             return Label.RELATIONAL.name();
         }
         else {

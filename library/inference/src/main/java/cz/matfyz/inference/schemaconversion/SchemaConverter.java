@@ -54,37 +54,35 @@ public class SchemaConverter {
         System.out.println(rsd);
         AccessTreeNode currentNode = new AccessTreeNode(null, null, null, null, null, null, null, false);
         int i = 1;
+
         System.out.println("Building the Access Tree...");
-        // first change the root name, so that it is easier while building the tree
-        rsd.setName("root");
+        rsd.setName("root"); // first change the root name, so that it is more easily recognizable while building the tree
         buildAccessTree(rsd, rootKey, i, currentNode);
+        System.out.println((!root.areKeysUnique() ? "Keys in the tree are not unique." : "Keys in the tree are all unique.") + "\n");
+        System.out.println("Initial access tree: ");
+        root.printTree(" ");
+
+        System.out.println("Processing the array nodes...");
+        root.transformArrayNodes();
+        System.out.println("Access tree after processing array nodes: ");
+        root.printTree(" ");
 
         //SCUtils.addIndexObjecttoArr(sc);
         System.out.println("Assigning signature values...");
         Map<Integer, Integer> mappedSigVals = SCUtils.mapSigVals(this.sigVals);
         this.root = AccessTreeNode.assignSignatures(this.root, mappedSigVals);
+        System.out.println((!root.areSigValsUnique() ? "Signature vals in the tree are not unique." : "Signature vals in the tree are all unique.") + "\n");
 
-        //this.root.printTree("");
         System.out.println("Building the SK...");
         buildSchemaCategory(this.root);
 
         System.out.println("Morphisms in the final SK: ");
         for (SchemaMorphism m : sc.allMorphisms()) {
-            if (m.dom() == null) {
-                System.out.println("Domain is null");
-            }
-            else
-                System.out.println("Domain: " +  m.dom().label() );
-
-            if (m.cod() == null) {
-                System.out.println("Codomain is null");
-            }
-            else
-                System.out.println("Codomain: " +  m.cod().label() );
+            System.out.println(m.dom() == null ? "Domain is null" : "Domain: " + m.dom().label());
+            System.out.println(m.cod() == null ? "Codomain is null" : "Codomain: " + m.cod().label());
             System.out.println();
         }
-        
-
+      
         System.out.println("Creating mapping...");
         MappingCreator mappingCreator = new MappingCreator(rootKey, root);
         Mapping mapping = mappingCreator.createMapping(sc, this.kindName); //What will this label be?
@@ -99,6 +97,7 @@ public class SchemaConverter {
 
     private void traverseAndBuild(AccessTreeNode currentNode) {
         SchemaObject currentObject;
+        boolean skipArrayRoot = false;
         //System.out.println(currentNode.getLabel());
         if (currentNode.getState() == AccessTreeNode.State.Root) {
            // System.out.println("traverseAndBuild() adding root");
@@ -110,10 +109,13 @@ public class SchemaConverter {
         else {
             System.out.println("Creating SO and SM for node: " + currentNode.name);
             currentObject = createSchemaObject(currentNode);
-            createSchemaMorphism(currentNode, currentObject);
+            createSchemaMorphism(currentNode, currentObject); 
         }
 
         for (AccessTreeNode childNode : currentNode.getChildren()) {
+            if (skipArrayRoot) {
+                childNode.setParentKey(currentNode.getParentKey());
+            }
             traverseAndBuild(childNode);
         }
     }
@@ -134,21 +136,20 @@ public class SchemaConverter {
     }
 
     private void createSchemaMorphism(AccessTreeNode node, SchemaObject so) {
-        /*
-        System.out.println("SK before accessing the parent node");
-        System.out.println(sc.allObjects());*/
+        
         SchemaObject sop = sc.getObject(node.getParentKey());
 
-    /*    if (sop == null) {
+        if (sop == null) {
+            System.out.println("SK after accessing the parent node");
+            System.out.println(sc.allObjects());
             System.out.println("Error while creating morphism. Domain is null and codomain is " + so.label());
             System.out.println("Node key: " + node.getKey());
             System.out.println("Parent key: " + node.getParentKey());
-            System.out.println(sc.allObjects());
         }
-        */
+        
         SchemaObject dom = sop;
         SchemaObject cod = so;
-
+        
         if (node.isArrayType) { // the morphism turns around when it is an array
             dom = so;
             cod = sop;
@@ -174,14 +175,9 @@ public class SchemaConverter {
 
         if (!rsdp.getChildren().isEmpty()) {
             //System.out.println("rsdp name: "+rsdp.getName());
-            if (rsdp.getName().equals("root")) { // do a different condition here
-                //System.out.println("thats right it is _");
+            if (rsdp.getName().equals("root")) { // do a different condition here maybe?
                 currentNode = this.root;
             }
-    /*        else {
-                currentNode = this.root.findNodeWithName(rsdp.getName());
-            } */
-
             if (currentNode != null & currentNode.state != AccessTreeNode.State.Root) {
                 currentNode.state = AccessTreeNode.State.Complex;
             }
@@ -190,7 +186,7 @@ public class SchemaConverter {
                 System.out.println("Building access node for: " + rsdch.getName());
                 Key keych = SCUtils.createChildKey(keyp, i);
 
-                Integer sigVal = SCUtils.createChildSignature(keyp, keych);
+                Integer sigVal = SCUtils.createChildSigVal(keyp, keych);
                 //System.out.println("sigVal: " + sigVal);
                 this.sigVals.add(sigVal);
 
@@ -199,13 +195,10 @@ public class SchemaConverter {
                 boolean isArrayp = isTypeArray(rsdp);
                 boolean isArraych = isTypeArray(rsdch);
 
-
                 String label = SCUtils.createLabel(rsdch, isArrayp, isArraych);
 
-                // be aware of the label here, once you use is ARRAY!
                 AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.Simple, rsdch.getName(), sigVal, keych, keyp, label, min, isArraych);
                 currentNode.addChild(child);
-
 
                 i++;
                 buildAccessTree(rsdch, keych, i, child);

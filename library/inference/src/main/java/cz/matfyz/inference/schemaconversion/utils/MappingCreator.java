@@ -18,8 +18,6 @@ public class MappingCreator {
     }
 
    public Mapping createMapping(SchemaCategory sc, String kindName) {
-       System.out.println("access tree: ");
-       root.printTree(" ");
        ComplexProperty accessPath = buildComplexPropertyFromNode(root);
        return Mapping.create(sc, rootKey, kindName, accessPath);
    }
@@ -36,10 +34,10 @@ public class MappingCreator {
        }
 
        if (node.getState() == AccessTreeNode.State.Root) {
-           System.out.println("adding root to mapping");
+           System.out.println("Adding root to mapping");
            return builder.root(subpaths.toArray(new AccessPath[0]));
        } else {
-           System.out.println("creating complex property for: " + node.getName());
+           System.out.println("Creating complex property for: " + node.getName());
            return builder.complex(node.getName(), node.getSig(), subpaths.toArray(new AccessPath[0]));
        }
    }
