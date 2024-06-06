@@ -4,17 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Candidates {
-    List<PrimaryKeyCandidate> pkCandidates = new ArrayList<>();
+    public final List<PrimaryKeyCandidate> pkCandidates = new ArrayList<>();
     List<ReferenceCandidate> refCandidates = new ArrayList<>();
     List<RedundancyCandidate> redCandidates = new ArrayList<>();
-
-    public List<PrimaryKeyCandidate> getPkCandidates() {
-        return pkCandidates;
-    }
-
-    public void setPkCandidates(List<PrimaryKeyCandidate> pkCandidates) {
-        this.pkCandidates = pkCandidates;
-    }
 
     public List<ReferenceCandidate> getRefCandidates() {
         return refCandidates;

@@ -1,9 +1,6 @@
 package cz.matfyz.inference.schemaconversion;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import cz.matfyz.core.schema.SchemaMorphism.Min;
@@ -11,13 +8,14 @@ import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.utils.MappingCreator;
 import cz.matfyz.inference.schemaconversion.utils.SchemaConversionUtils;
+import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.identifiers.ObjectIds;
-
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Type;
@@ -32,8 +30,6 @@ public class SchemaConverter {
     public String kindName; // TODO: I need this to name the root of my SK and my mapping (probably the same as kind name). Getting it as user inpu rn, but in case of MongoDB, it has to match a collection name! (otherwise cant pull from it)
     public AccessTreeNode root;
     public Key rootKey;
-    public SchemaConversionUtils SCUtils;
-    public List<Integer> sigVals;
 
     //
     public SchemaConverter(RecordSchemaDescription rsd, String categoryLabel, String kindName) {
@@ -41,8 +37,6 @@ public class SchemaConverter {
         this.sc = new SchemaCategory(categoryLabel);
         this.kindName = kindName;
         this.rootKey = new Key(0);
-        this.SCUtils = new SchemaConversionUtils();
-        this.sigVals = new ArrayList<Integer>();
     }
 
     /**
@@ -66,12 +60,6 @@ public class SchemaConverter {
         root.transformArrayNodes();
         System.out.println("Access tree after processing array nodes: ");
         root.printTree(" ");
-
-        //SCUtils.addIndexObjecttoArr(sc);
-        System.out.println("Assigning signature values...");
-        Map<Integer, Integer> mappedSigVals = SCUtils.mapSigVals(this.sigVals);
-        this.root = AccessTreeNode.assignSignatures(this.root, mappedSigVals);
-        System.out.println((!root.areSigValsUnique() ? "Signature vals in the tree are not unique." : "Signature vals in the tree are all unique.") + "\n");
 
         System.out.println("Building the SK...");
         buildSchemaCategory(this.root);
@@ -109,7 +97,7 @@ public class SchemaConverter {
         else {
             System.out.println("Creating SO and SM for node: " + currentNode.name);
             currentObject = createSchemaObject(currentNode);
-            createSchemaMorphism(currentNode, currentObject); 
+            createSchemaMorphism(currentNode, currentObject);
         }
 
         for (AccessTreeNode childNode : currentNode.getChildren()) {
@@ -127,7 +115,9 @@ public class SchemaConverter {
         if (node.getChildren().isEmpty()) {
             ids = ObjectIds.createValue();
         }
-        else { ids = ObjectIds.createGenerated(); }
+        else {
+            ids = ObjectIds.createGenerated();
+        }
 
         SchemaObject object = new SchemaObject(node.getKey(), node.getName(), ids, superId);
         this.sc.addObject(object);
@@ -160,6 +150,10 @@ public class SchemaConverter {
         sc.addMorphism(sm);
     }
 
+    // TODO better description
+    private int nextKey = 1;
+    private int nextSignature = 0;
+
     /**
      * Recursive method for converting RSD to Schema Category
      * @param sc Schema Category which is being built
@@ -167,41 +161,38 @@ public class SchemaConverter {
      * @param key Key of the current parent RSD
      * @param i int for keeping track of the RSD's children
      */
-    public void buildAccessTree(RecordSchemaDescription rsdp, Key keyp, int i, AccessTreeNode currentNode) {
+    public void buildAccessTree(RecordSchemaDescription parentRsd, Key keyp, int i, AccessTreeNode currentNode) {
         if (this.root == null) { //adding the root
             //System.out.println("adding root");
             this.root = new AccessTreeNode(AccessTreeNode.State.Root, this.kindName, null, keyp, null, null, null, false);
         }
 
-        if (!rsdp.getChildren().isEmpty()) {
+        if (!parentRsd.getChildren().isEmpty()) {
             //System.out.println("rsdp name: "+rsdp.getName());
-            if (rsdp.getName().equals("root")) { // do a different condition here maybe?
+            if (parentRsd.getName().equals("root")) { // do a different condition here maybe?
                 currentNode = this.root;
             }
             if (currentNode != null & currentNode.state != AccessTreeNode.State.Root) {
                 currentNode.state = AccessTreeNode.State.Complex;
             }
 
-            for (RecordSchemaDescription rsdch: rsdp.getChildren()) {
-                System.out.println("Building access node for: " + rsdch.getName());
-                Key keych = SCUtils.createChildKey(keyp, i);
+            for (RecordSchemaDescription childRsd: parentRsd.getChildren()) {
+                System.out.println("Building access node for: " + childRsd.getName());
+                
+                Key keyChild = new Key(nextKey++);
+                
+                Min min = SchemaConversionUtils.findMin(parentRsd, childRsd);
+                
+                boolean isArray = isTypeArray(childRsd);
+                BaseSignature signature = Signature.createBase(nextSignature++);
 
-                Integer sigVal = SCUtils.createChildSigVal(keyp, keych);
-                //System.out.println("sigVal: " + sigVal);
-                this.sigVals.add(sigVal);
+                String label = SchemaConversionUtils.createLabel(childRsd, isArray);
 
-                Min min = SCUtils.findMin(rsdp, rsdch);
-
-                boolean isArrayp = isTypeArray(rsdp);
-                boolean isArraych = isTypeArray(rsdch);
-
-                String label = SCUtils.createLabel(rsdch, isArrayp, isArraych);
-
-                AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.Simple, rsdch.getName(), sigVal, keych, keyp, label, min, isArraych);
+                AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.Simple, childRsd.getName(), signature, keyChild, keyp, label, min, isArray);
                 currentNode.addChild(child);
 
                 i++;
-                buildAccessTree(rsdch, keych, i, child);
+                buildAccessTree(childRsd, keyChild, i, child);
             }
         }
     }

@@ -60,7 +60,7 @@ public class MMInferOneInAll {
 
         Map<String, RecordSchemaDescription> rsds = wrappers.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> MMInferOneInAll.executeRBA(entry.getValue(), true)));
- 
+
         // There are two types of candidates available at the moment: primary key and reference
         // If there are any primary key candidates, then the RSDs can be merged into one (but be aware of the _id default identifier in mongo, this shouldn't count)
         // If there are any reference candidates, then these RSDs can be merged hierarchically, based on who is referencing who

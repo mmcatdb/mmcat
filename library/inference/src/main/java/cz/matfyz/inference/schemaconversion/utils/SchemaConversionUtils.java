@@ -1,8 +1,5 @@
 package cz.matfyz.inference.schemaconversion.utils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import cz.matfyz.core.identifiers.Key;
@@ -19,48 +16,22 @@ public class SchemaConversionUtils {
         IDENTIFIER, RELATIONAL;
     }
 
-    public SchemaConversionUtils() {}
+    private SchemaConversionUtils() {}
 
     /**
      * For creating the child key.
      * The keys need to be positive, otherwise there are problems with retrieving Positions in the MetadatContext later.
      * (But it might create collisions)
      */
-    public Key createChildKey(Key keyp, int i) {
+    public static Key createChildKey(Key keyp, int i) {
         int keyvalp = keyp.getValue();
         int keyvalch = Math.abs(Objects.hash(keyvalp, i));
         return new Key(keyvalch);
     }
-
-    /**
-     * For creating signature for the parent-child morphism
-     * Custom hashing with prime numbers. The primes are hard coded to avoid introducing unexpectedness.
-     * This should produce fewer collisions then using Object.hash()
-     */
-    /*
-    public int createChildSigVal(Key keyp, Key keych) {
-        int sigval = Objects.hash(keyp.getValue(), keych.getValue());
-        return sigval;
-    }*/
-
-    public int createChildSigVal(Key keyp, Key keych) {
-        int prime1 = 31;
-        int prime2 = 37;
-        int prime3 = 41;
-    
-        int result = 1;
-        result = prime1 * result + keyp.getValue();
-        result = prime2 * result + keych.getValue();
-        result = prime3 * result + (keyp.getValue() ^ keych.getValue());
-        
-        return result;
-    }
-    
-
     /**
      * For finding the cardinality between rsds
      */
-    public Min findMin(RecordSchemaDescription rsdp, RecordSchemaDescription rsdch) {
+    public static Min findMin(RecordSchemaDescription rsdp, RecordSchemaDescription rsdch) {
         int sharepTotal = rsdp.getShareTotal();
         int sharechTotal = rsdch.getShareTotal();
 
@@ -89,14 +60,13 @@ public class SchemaConversionUtils {
      * A morphism is labeled as identification if its codomain is an identificator
      * And it is labeled as relational if its domain is an array type
      */
-    public String createLabel(RecordSchemaDescription rsdch, boolean isArrayp, boolean isArraych) {
-       // if (isArraych || isArrayp) { 
-        if (isArraych) { 
+    public static String createLabel(RecordSchemaDescription rsd, boolean isArray) {
+        if (isArray) {
             return Label.RELATIONAL.name();
         }
         else {
             // the values for Char are TRUE, FALSE and UNKNOWN
-            if (rsdch.getUnique() == Char.TRUE) {
+            if (rsd.getUnique() == Char.TRUE) {
                 return Label.IDENTIFIER.name();
             }
         }
@@ -128,17 +98,4 @@ public class SchemaConversionUtils {
         return sc;
     }*/
 
-    /**
-     * For mapping the hashed signature values to a sequence starting from 0
-     */
-    public Map<Integer, Integer> mapSigVals(List<Integer> sigVals) {
-        Map<Integer, Integer> result = new HashMap<Integer, Integer>();
-
-        Integer newSigVal = 0;
-        for (Integer sigVal : sigVals) {
-            result.put(sigVal, newSigVal);
-            newSigVal += 1;
-        }
-        return result;
-    }
 }

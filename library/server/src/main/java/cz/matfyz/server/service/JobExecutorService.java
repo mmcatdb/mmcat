@@ -297,7 +297,7 @@ public class JobExecutorService {
         }
 
         for (SchemaMorphism m : morphisms) {
-            if (m.dom() != null && m.cod() != null) 
+            if (m.dom() != null && m.cod() != null)
                 graph.addEdge(m, m.dom(), m.cod());
         }
 
@@ -312,7 +312,7 @@ public class JobExecutorService {
 
         // Adjust attraction and repulsion multipliers based on the graph size
         // Only applies for FRLayout
-        // play with these parameters to tweek how the graph will look like        
+        // play with these parameters to tweek how the graph will look like
         if (numNodes > 50) {
             layout.setAttractionMultiplier(0.75);
             layout.setRepulsionMultiplier(2.0);
@@ -323,7 +323,6 @@ public class JobExecutorService {
             layout.setAttractionMultiplier(1.0);
             layout.setRepulsionMultiplier(1.0);
         }
-        
 
         for (int i = 0; i < 1000; i++) { // initialize positions
             layout.step();
@@ -365,7 +364,7 @@ public class JobExecutorService {
                         overlapExists = true;
                         double overlap = 2 * nodeRadius - distance;
                         double angle = Math.atan2(dy, dx);
-    
+
                         // Move nodes away from each other
                         double newX1 = pos1.x() + Math.cos(angle) * overlap / 2;
                         double newY1 = pos1.y() + Math.sin(angle) * overlap / 2;

@@ -111,7 +111,7 @@ public class CandidateMinerAlgorithm implements Serializable {
 
             primaryKeyCandidates.collect().forEach(heuristics -> {
                 PrimaryKeyCandidate pkCandidate = toPrimaryKeyCandidate(heuristics);
-                candidates.getPkCandidates().add(pkCandidate);
+                candidates.pkCandidates.add(pkCandidate);
             });
 
             // Convert reference candidates to ReferenceCandidate and add to candidates
