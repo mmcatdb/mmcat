@@ -24,13 +24,16 @@ public class RecordSchemaDescriptionMerger {
         System.out.println("pkProperty: " + names[names.length - 2]);
         System.out.println("Primary key: " + primaryKey);
 
-        RecordSchemaDescription pkRSD = getRSDAccordingToNames(rsds.get(pkCollectionName), names);
+        RecordSchemaDescription prePkRSD = rsds.get(pkCollectionName);
+        cleanRSD(prePkRSD, pkCollectionName, new String[] {"_id"});
+
+        RecordSchemaDescription pkRSD = getRSDAccordingToNames(prePkRSD, names);
 
         for (String collectionName : rsds.keySet()) {
             if (!collectionName.equals(pkCollectionName)) {
                 RecordSchemaDescription currentRSD = rsds.get(collectionName);
                 cleanRSD(currentRSD, collectionName, new String[] {"_id", primaryKey});         
-                pkRSD.addChildren(currentRSD);          
+                pkRSD.addChildren(currentRSD);      
             }
         }
         return pkRSD;
@@ -87,11 +90,12 @@ public class RecordSchemaDescriptionMerger {
     }
 
     public static RecordSchemaDescription getRSDAccordingToNames(RecordSchemaDescription rsd, String[] names) {
-        System.out.println("In getRSDAccordingToNames");
         for (int i = 1; i < names.length; ++i) {
             for (RecordSchemaDescription child : rsd.getChildren()) {
-                if (child.getName().equals(names[names.length - 2]))
-                    return child;
+                //System.out.println("in getRSDAccNames, child name: " + child.getName());
+                if (child.getName().equals(names[names.length - 1])) // child is the pk
+                    //return child;
+                    return rsd;
                 if (child.getName().equals(names[i])) {
                     rsd = child;
                     break;
@@ -102,6 +106,7 @@ public class RecordSchemaDescriptionMerger {
     }
 
     private static void cleanRSD(RecordSchemaDescription rsd, String newName, String[] propertyNamesToDelete) {
+        System.out.println("cleaning RSD: " + newName);
         // get rid of "_id", but this only applies to mongoDB, so be aware! 
         rsd.setName(newName); // changing from "_" to the collection name    
         for (String propertyName : propertyNamesToDelete) 

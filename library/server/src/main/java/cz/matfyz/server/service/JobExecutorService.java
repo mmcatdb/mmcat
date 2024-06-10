@@ -20,6 +20,7 @@ import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.server.builder.MetadataContext;
+import cz.matfyz.server.builder.GeneratedDataModel;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
 import cz.matfyz.server.entity.Id;
@@ -193,6 +194,8 @@ public class JobExecutorService {
 
         final AbstractControlWrapper control = wrapperService.getControlWrapper(datasource);
 
+        GeneratedDataModel generatedDataModel = new GeneratedDataModel(schema.label, run.categoryId, datasource.type);
+
         final var output = new StringBuilder();
         for (final Mapping mapping : mappings) {
             final var result = new InstanceToDatabase()
@@ -219,12 +222,19 @@ public class JobExecutorService {
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
-            /*else { LOGGER.info("Models didn't get executed. Yikes");}*/
+            /*else { LOGGER.info("Models didn't get executed.");}*/
             /* for now I choose not to execute the statements, but just see if they even get created
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
             LOGGER.info("... models executed."); */
+
+            // Adding the schema for each mapping here
+            generatedDataModel.addAccessPath(mapping.accessPath());
+            //output.append(mapping.accessPath().toString() + "\n");
         }
+
+        output.append("Schema follows:" + "\n");
+        output.append(generatedDataModel);
 
         job.data = output.toString();
     }
