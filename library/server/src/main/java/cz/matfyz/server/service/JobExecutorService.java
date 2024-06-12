@@ -9,8 +9,6 @@ import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
@@ -42,17 +40,13 @@ import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
+import cz.matfyz.server.utils.LayoutUtil;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
-import java.awt.Dimension;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -287,9 +281,8 @@ public class JobExecutorService {
 
         //System.out.println(categoryMappingPair.schemaCat().allObjects());
         //System.out.println(categoryMappingPair.schemaCat().allMorphisms());
-        final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+        final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
-        // what about this label?
         LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model");
         LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
 
@@ -297,118 +290,15 @@ public class JobExecutorService {
         mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
     }
 
-    /**
-     * Layout algo using JUNG library
-     */
-    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
-        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
-        for (SchemaObject o : objects) {
-            graph.addVertex(o);
-        }
-
-        for (SchemaMorphism m : morphisms) {
-            if (m.dom() != null && m.cod() != null)
-                graph.addEdge(m, m.dom(), m.cod());
-        }
-
-        // determine the layout size based on the num of nodes
-        int numNodes = objects.size();
-        int layoutSize = Math.max(600, (int) (Math.log(numNodes + 1.0) * 200));
-
-
-        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
-        //layout.setSize(new Dimension(600, 600));
-        layout.setSize(new Dimension(layoutSize, layoutSize));
-
-        // Adjust attraction and repulsion multipliers based on the graph size
-        // Only applies for FRLayout
-        // play with these parameters to tweek how the graph will look like
-        if (numNodes > 50) {
-            layout.setAttractionMultiplier(0.75);
-            layout.setRepulsionMultiplier(2.0);
-        } else if (numNodes > 20) {
-            layout.setAttractionMultiplier(0.85);
-            layout.setRepulsionMultiplier(1.5);
-        } else {
-            layout.setAttractionMultiplier(1.0);
-            layout.setRepulsionMultiplier(1.0);
-        }
-
-        for (int i = 0; i < 1000; i++) { // initialize positions
-            layout.step();
-        }
-
-        Map<Key, Position> positions = new HashMap<>();
-        for (SchemaObject node : graph.getVertices()) {
-            double x = layout.getX(node);
-            double y = layout.getY(node);
-            positions.put(node.key(), new Position(x, y));
-        }
-        ensureNoOverlap(positions, layoutSize);
-
-        return positions;
-    }
-
-    private void ensureNoOverlap(Map<Key, Position> positions, int layoutSize) {
-        double nodeRadius = 10.0; // Assume a radius for each node
-        double margin = 50.0; // Margin to keep nodes away from the edges
-        int maxIterations = 100; // Maximum number of iterations
-        int iteration = 0;
-    
-        boolean overlapExists;
-        do {
-            overlapExists = false;
-            Map<Key, Position> newPositions = new HashMap<>(positions);
-    
-            for (Key key1 : positions.keySet()) {
-                Position pos1 = positions.get(key1);
-                for (Key key2 : positions.keySet()) {
-                    if (key1.equals(key2)) continue;
-                    Position pos2 = positions.get(key2);
-    
-                    double dx = pos1.x() - pos2.x();
-                    double dy = pos1.y() - pos2.y();
-                    double distance = Math.sqrt(dx * dx + dy * dy);
-    
-                    if (distance < 2 * nodeRadius) { // Nodes are overlapping
-                        overlapExists = true;
-                        double overlap = 2 * nodeRadius - distance;
-                        double angle = Math.atan2(dy, dx);
-
-                        // Move nodes away from each other
-                        double newX1 = pos1.x() + Math.cos(angle) * overlap / 2;
-                        double newY1 = pos1.y() + Math.sin(angle) * overlap / 2;
-                        double newX2 = pos2.x() - Math.cos(angle) * overlap / 2;
-                        double newY2 = pos2.y() - Math.sin(angle) * overlap / 2;
-    
-                        // Ensure nodes are within layout bounds
-                        newX1 = Math.max(margin, Math.min(newX1, layoutSize - margin));
-                        newY1 = Math.max(margin, Math.min(newY1, layoutSize - margin));
-                        newX2 = Math.max(margin, Math.min(newX2, layoutSize - margin));
-                        newY2 = Math.max(margin, Math.min(newY2, layoutSize - margin));
-    
-                        newPositions.put(key1, new Position(newX1, newY1));
-                        newPositions.put(key2, new Position(newX2, newY2));
-                    }
-                }
-            }
-            positions.putAll(newPositions);
-            iteration++;
-        } while (overlapExists && iteration < maxIterations);
-    }
-    
-
-
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
         MetadataContext context = new MetadataContext();
 
         context.setId(new Id(null)); // is null ok?
         context.setVersion(Version.generateInitial());
 
-        Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());
+        Map<Key, Position> positions = LayoutUtil.layoutObjects(category);
         positions.forEach(context::setPosition);
 
         return SchemaCategoryWrapper.fromSchemaCategory(category, context);
     }
-
 }

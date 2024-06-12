@@ -2,59 +2,60 @@ package cz.matfyz.inference.schemaconversion.utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.NoSuchElementException;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 /**
- * Class to hold info about properties in SchemaCat, so that an access path can be
- * later constructed.
+ * Class to hold info about properties in SchemaCategory, so that an access path can be constructed.
  */
 public class AccessTreeNode {
 
     public enum State {
-        Root,
-        Simple,
-        Complex,
+        ROOT,
+        SIMPLE,
+        COMPLEX,
     }
 
-    public State state;
-    public String name;
-    public List<AccessTreeNode> children;
-    public Key key;
-    public Key parentKey;
-    public String label;
-    public Min min;
-    public BaseSignature sig;
-    public boolean isArrayType;
+    private State state;
+    private final String name;
+    private final BaseSignature signature;
+    private final Key key;
+    private Key parentKey;
+    private final String label;
+    private final Min min;
+    private final boolean isArrayType;
+    private List<AccessTreeNode> children;
 
     public AccessTreeNode(State state, String name, BaseSignature signature, Key key, Key parentKey, String label, Min min, boolean isArrayType) {
         this.state = state;
         this.name = name;
-        this.sig = signature;
-        this.children = new ArrayList<>();
+        this.signature = signature;
         this.key = key;
         this.parentKey = parentKey;
         this.label = label;
         this.min = min;
         this.isArrayType = isArrayType;
+        this.children = new ArrayList<>();
     }
 
-    public void addChild(AccessTreeNode child) {
-        children.add(child);
-    }
-    public List<AccessTreeNode> getChildren() {
-        return children;
-    }
     public State getState() {
         return state;
     }
+    public void setState(State newState) {
+        this.state = newState;
+    }
+
     public String getName() {
         return name;
     }
+
+    public BaseSignature getSignature() {
+        return signature;
+    }
+
     public Key getKey() {
         return key;
     }
@@ -64,20 +65,27 @@ public class AccessTreeNode {
     public void setParentKey(Key parentKey) {
         this.parentKey = parentKey;
     }
+
     public String getLabel() {
         return label;
     }
+
     public Min getMin() {
         return min;
     }
-    public BaseSignature getSig() {
-        return sig;
-    }
+
     public boolean getIsArrayType() {
         return isArrayType;
     }
 
-    public static AccessTreeNode findNodeWithKey(Key targetKey, AccessTreeNode node) {
+    public List<AccessTreeNode> getChildren() {
+        return children;
+    }
+    public void addChild(AccessTreeNode child) {
+        children.add(child);
+    }
+
+    public static AccessTreeNode findNodeWithKey(Key targetKey, AccessTreeNode node) throws Exception {
         if (node.key.equals(targetKey)) {
             return node;
         }
@@ -87,7 +95,7 @@ public class AccessTreeNode {
                 return result;
             }
         }
-        return null;
+        throw new NoSuchElementException("Node with key " + targetKey + " not found.");
     }
 
     /**
@@ -98,14 +106,9 @@ public class AccessTreeNode {
      */
     public void transformArrayNodes() {
         if (this.isArrayType) {
-            // get the first child
-            AccessTreeNode child = this.children.get(0);
+            AccessTreeNode child = this.children.get(0); // getting the first child
             if (child.getName().equals("_")) {
-                List<AccessTreeNode> newChildren = new ArrayList<>(child.getChildren());
-                for (AccessTreeNode newChild : newChildren) {
-                    newChild.setParentKey(this.key);
-                }
-                this.children = newChildren;
+                promoteChildren(child);
             }
         }
         for (AccessTreeNode child : this.children) {
@@ -113,36 +116,24 @@ public class AccessTreeNode {
         }
     }
 
-    /**
-     * Check if all keys in the tree are unique
-     * (Maybe merge with the other method so that you dont traverse the tree twice?)
-     */
-    public boolean areKeysUnique() {
-        Set<Key> keySet = new HashSet<>();
-        return areKeysUniqueHelper(this, keySet);
-    }
-
-    private boolean areKeysUniqueHelper(AccessTreeNode node, Set<Key> keySet) {
-        if (node.key != null) {
-            if (keySet.contains(node.key)) {
-                return false;
-            }
-            keySet.add(node.key);
+    private void promoteChildren(AccessTreeNode child) {
+        List<AccessTreeNode> newChildren = new ArrayList<>(child.getChildren());
+        for (AccessTreeNode newChild : newChildren) {
+            newChild.setParentKey(this.key);
         }
-        for (AccessTreeNode child : node.children) {
-            if (!areKeysUniqueHelper(child, keySet)) {
-                return false;
-            }
-        }
-        return true;
+        this.children = newChildren;
     }
 
     public void printTree(String prefix) {
-        System.out.println(prefix + "Name: " + this.name + ", State: " + this.state + ", Signature: " + (this.sig != null ? this.sig.toString() : "None") + ", Key: " + this.key + ", Parent Key: " + this.parentKey + ", isArrayType: " + this.isArrayType);
+        System.out.println(prefix + "Name: " + this.name +
+                                    ", State: " + this.state +
+                                    ", Signature: " + (this.signature != null ? this.signature.toString() : "None") +
+                                    ", Key: " + this.key +
+                                    ", Parent Key: " + this.parentKey +
+                                    ", isArrayType: " + this.isArrayType);
         for (AccessTreeNode child : this.children) {
             child.printTree(prefix + "    ");
         }
     }
-
 }
 

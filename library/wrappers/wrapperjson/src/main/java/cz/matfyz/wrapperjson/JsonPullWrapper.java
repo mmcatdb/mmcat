@@ -54,7 +54,6 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         JsonParser parser = factory.createParser(inputStream);
         ObjectMapper objectMapper = new ObjectMapper();
 
-        //while (parser.nextToken() != JsonToken.END_ARRAY) {
         // TODO: check for the usulal structure of Json files - should there be an array or not
         while (parser.nextToken() != null) {
             if (parser.currentToken() == JsonToken.START_OBJECT) {
@@ -123,7 +122,6 @@ public class JsonPullWrapper implements AbstractPullWrapper {
 
     @Override
     public QueryResult executeQuery(QueryStatement statement) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 

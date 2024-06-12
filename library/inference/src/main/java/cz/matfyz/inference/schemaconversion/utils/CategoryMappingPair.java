@@ -8,6 +8,6 @@ import cz.matfyz.core.mapping.Mapping;
  * Record to hold the final result of SchemaConversion - SchemaCategory and Mapping
  */
 public record CategoryMappingPair(
-    SchemaCategory schemaCat,
+    SchemaCategory schemaCategory,
     Mapping mapping
 ) {}

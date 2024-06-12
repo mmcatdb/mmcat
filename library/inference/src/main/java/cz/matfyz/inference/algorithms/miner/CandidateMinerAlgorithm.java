@@ -120,7 +120,7 @@ public class CandidateMinerAlgorithm implements Serializable {
                 PropertyHeuristics referred = tuple._1._2;
                 SubsetType subsetType = tuple._2;
                 ReferenceCandidate refCandidate = toReferenceCandidate(referencing, referred, subsetType);
-                candidates.getRefCandidates().add(refCandidate);
+                candidates.refCandidates.add(refCandidate);
             });
 
             return candidates;
@@ -133,23 +133,11 @@ public class CandidateMinerAlgorithm implements Serializable {
     }
 
     private PrimaryKeyCandidate toPrimaryKeyCandidate(PropertyHeuristics heuristics) {
-        PrimaryKeyCandidate pkCandidate = new PrimaryKeyCandidate();
-        pkCandidate.setHierarchicalName(heuristics.getHierarchicalName());
-        pkCandidate.setSelected(false); // Not sure what goes here
-        pkCandidate.setProperty(heuristics);
-        return pkCandidate;
+        return new PrimaryKeyCandidate(heuristics, heuristics.getHierarchicalName(), false);
     }
 
     private ReferenceCandidate toReferenceCandidate(PropertyHeuristics referencing, PropertyHeuristics referred, SubsetType subsetType) {
-        ReferenceCandidate refCandidate = new ReferenceCandidate();
-        refCandidate.setReferencing(referencing.getHierarchicalName());
-        refCandidate.setReferred(referred.getHierarchicalName());
-        refCandidate.setWeak(false); // Not sure what goes here
-        refCandidate.setSelected(false); // Not sure what goes here
-        refCandidate.setReferencingProperty(referencing);
-        refCandidate.setReferredProperty(referred);
-        refCandidate.setSubsetType(subsetType);
-        return refCandidate;
+        return new ReferenceCandidate(subsetType, referred, referencing, referred.getHierarchicalName(), referencing.getHierarchicalName(), false, false);
     }
 
 }

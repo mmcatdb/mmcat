@@ -2,42 +2,26 @@ package cz.matfyz.core.rsd;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class PrimaryKeyCandidate {
-    final String type = "primary";
-    @JsonIgnore
-    transient Object property;
-    String hierarchicalName;
-    boolean selected;
-
-    public String getHierarchicalName() {
-        return hierarchicalName;
+public record PrimaryKeyCandidate(
+    String type,
+    @JsonIgnore Object property,
+    String hierarchicalName,
+    boolean selected
+) {
+    public PrimaryKeyCandidate(
+        Object property,
+        String hierarchicalName,
+        boolean selected
+    ) {
+        this("primary", property, hierarchicalName, selected);
     }
 
-    public void setHierarchicalName(String hierarchicalName) {
-        this.hierarchicalName = hierarchicalName;
-    }
-
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
-    public Object getProperty() {
-        return property;
-    }
-
-    public void setProperty(Object property) {
-        this.property = property;
-    }
-
-    public String getType() {
-        return type;
-    }
-
+    @Override
     public String toString() {
-        return "PrimaryKeyCandidate{" + "type=" + type + ", hierarchicalName=" + hierarchicalName + ", selected=" + selected + '}';
+        return "PrimaryKeyCandidate{" +
+                "type=" + type +
+                ", hierarchicalName=" + hierarchicalName +
+                ", selected=" + selected +
+                '}';
     }
 }

@@ -23,13 +23,9 @@ public abstract class MapCsvDocument {
         result.setTypes(Type.MAP);
         result.setModels(Model.DOC);
 
-        //List<RecordSchemaDescription> children = new ArrayList<>();
-
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
 
         t.forEach((key, value) -> children.add(MapCsvRecord.process(key, value, true, true)));
-
-        //Collections.sort(children);
 
         result.setChildren(children);
 

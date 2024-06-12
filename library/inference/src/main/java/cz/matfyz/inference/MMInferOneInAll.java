@@ -27,9 +27,6 @@ import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.inference.schemaconversion.SchemaConverter;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 
-//// for the new inference version ////
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-
 public class MMInferOneInAll {
 
     private AbstractInferenceWrapper wrapper;
@@ -63,37 +60,35 @@ public class MMInferOneInAll {
 
         // There are two types of candidates available at the moment: primary key and reference
         // If there are any primary key candidates, then the RSDs can be merged into one (but be aware of the _id default identifier in mongo, this shouldn't count)
-        // If there are any reference candidates, then these RSDs can be merged hierarchically, based on who is referencing who
+        // If there are sany reference candidates, then these RSDs can be merged hierarchically, based on who is referencing who
 
         // TODO: Check better the output of the candidate miner, do the references and pks always make sense?
 
         // If I merge based on primary key, then no other merging will be necessary,
         // because primary key is present in all RSDs and so all can be merged together
         // So it is either merging based on primary key or reference, or none
-        RecordSchemaDescription rsd;
-        RecordSchemaDescriptionMerger merger = new RecordSchemaDescriptionMerger();
 
+        RecordSchemaDescription rsd;
         if (rsds.size() > 1) { // Do not run the candidates, if there is only one rsd
             Candidates candidates = executeCandidateMiner(wrapper, wrapper.getKindNames());
             System.out.println("Candidates: " + candidates);
 
             PrimaryKeyCandidate pkCandidate = Candidates.firstPkCandidatesThatNotEndWith(candidates, "/_id");
-            if (!candidates.isPkCandidatesEmpty() && pkCandidate != null) {// but what if the db isn't mongo and there is an actual property named "_id"?
+            if (!candidates.pkCandidates.isEmpty() && pkCandidate != null) { // but what if the db isn't mongo and there is an actual property named "_id"?
                 // get the first PK candidate which will be in the candidate array and wont end with "/_id" and merge all based on that
-                rsd = merger.mergeBasedOnPrimaryKey(rsds, pkCandidate);
+                rsd = RecordSchemaDescriptionMerger.mergeBasedOnPrimaryKey(rsds, pkCandidate);
             }
-            else if (!candidates.isRefCandidatesEmpty()) { // there could be multiple reference candidates and I need to process them all 
-                for (ReferenceCandidate refCandidate : candidates.getRefCandidates()) {
-                    rsds = merger.mergeBasedOnReference(rsds, refCandidate);    
+            else if (!candidates.refCandidates.isEmpty()) { // there could be multiple reference candidates and I need to process them all
+                for (ReferenceCandidate refCandidate : candidates.refCandidates) {
+                    rsds = RecordSchemaDescriptionMerger.mergeBasedOnReference(rsds, refCandidate);
                 }
                 rsd = rsds.values().iterator().next(); // now there should be just one key-value pair, because the algo merged it all
-                
             }
             else { // what to do when there are multiple RSDs, but no candidates?
                 throw new IllegalStateException("No candidates for merging found.");
-            }            
+            }
         }
-        else 
+        else
             rsd = rsds.values().iterator().next();
 
         SchemaConverter scon = new SchemaConverter(rsd, categoryLabel, kindName);
@@ -101,7 +96,6 @@ public class MMInferOneInAll {
     }
 
     private static Map<String, AbstractInferenceWrapper> prepareWrappers(AbstractInferenceWrapper inputWrapper) throws IllegalArgumentException {
-        System.out.println("preparing wrappers");
         Map<String, AbstractInferenceWrapper> wrappers = new HashMap<>();
 
         System.out.println("getKindNames from the db: " + inputWrapper.getKindNames());

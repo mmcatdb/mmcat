@@ -55,8 +55,6 @@ public abstract class MapCsvRecord {
 
     private static ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //List<RecordSchemaDescription> children = new ArrayList<>();
-//        Set<RecordSchemaDescription> children = new HashSet<>();
         for (Map.Entry<String, Object> value : t1) {
             children.add(process(value.getKey(), value.getValue(), true, true));
         }
@@ -66,7 +64,6 @@ public abstract class MapCsvRecord {
 
     private static ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //List<RecordSchemaDescription> children = new ArrayList<>();
         Set<Object> visited = new HashSet<>();
         for (Object value : t1) {
             if (value == null) {

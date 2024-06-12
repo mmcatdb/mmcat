@@ -2,47 +2,22 @@ package cz.matfyz.core.rsd;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class Candidates {
     public final List<PrimaryKeyCandidate> pkCandidates = new ArrayList<>();
-    List<ReferenceCandidate> refCandidates = new ArrayList<>();
-    List<RedundancyCandidate> redCandidates = new ArrayList<>();
+    public final List<ReferenceCandidate> refCandidates = new ArrayList<>();
+    public final List<RedundancyCandidate> redCandidates = new ArrayList<>();
 
-    public List<ReferenceCandidate> getRefCandidates() {
-        return refCandidates;
-    }
-
-    public void setRefCandidates(List<ReferenceCandidate> refCandidates) {
-        this.refCandidates = refCandidates;
-    }
-
-    public List<RedundancyCandidate> getRedCandidates() {
-        return redCandidates;
-    }
-
-    public void setRedCandidates(List<RedundancyCandidate> redCandidates) {
-        this.redCandidates = redCandidates;
-    }
-
-    public boolean isPkCandidatesEmpty() {
-        return pkCandidates.isEmpty();
-    }
-
-    public boolean isRefCandidatesEmpty() {
-        return refCandidates.isEmpty();
-    }
-
-    public boolean isRedCandidatesEmpty() {
-        return redCandidates.isEmpty();
-    }
     // get the first PK candidate which will be in the candidate array and wont end with a certain string (most probably "/_id")
     public static PrimaryKeyCandidate firstPkCandidatesThatNotEndWith(Candidates candidates, String s) {
         for (PrimaryKeyCandidate candidate : candidates.pkCandidates) {
-            if (!candidate.getHierarchicalName().endsWith(s)) {
+            if (!candidate.hierarchicalName().endsWith(s)) {
                 return candidate;
             }
         }
-        return null;
+        //throw new NoSuchElementException("No primary key candidate that does not end with: " + s);
+        return null; // returning null, when there is no such candidate
     }
 
     @Override

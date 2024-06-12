@@ -6,7 +6,6 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
 
     private String kindName = null;
 
-
     @Override
     public void setKindName(String name) {
         kindName = name;
@@ -16,7 +15,6 @@ public class JsonDDLWrapper implements AbstractDDLWrapper {
     public boolean isSchemaless() {
         return true;
     }
-
 
     @Override
     public boolean addSimpleProperty(String path, boolean required) {

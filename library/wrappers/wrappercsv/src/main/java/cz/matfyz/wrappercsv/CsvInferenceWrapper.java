@@ -39,7 +39,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
                 .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
-
     }
 
     @Override
@@ -58,10 +57,9 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
         return null;
     }
 
-
     @Override
-    // assuming that the first line of the csv is the header
-    // also assuming the csv is comma delimited
+    // assuming that the first line of the csv is the header, the csv is comma delimited and there are no missing data
+    // TODO: get rid of assumptions
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
         return csvDocuments.map(MapCsvDocument::process);
@@ -85,13 +83,10 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
                 if (!firstLine) {
                     header = elements;
                     firstLine = true;
-                }
-                else {
-                    //assuming there is no data missing
+                } else {
                     Map<String, String> lineMap = new HashMap<String, String>();
                     for (int i = 0; i < elements.length; i++) {
                         lineMap.put(header[i], elements[i]);
-                        //System.out.println("header: " + header[i] + " column valu: " + elements[i]);
                     }
                     lines.add(lineMap);
                 }
@@ -112,13 +107,11 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     @Override
     public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
     }
 
     @Override
     public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertyData'");
     }
 
@@ -129,5 +122,4 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
             this.sparkSettings
         );
     }
-
 }

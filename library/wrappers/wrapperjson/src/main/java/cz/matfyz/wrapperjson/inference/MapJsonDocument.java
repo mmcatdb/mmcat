@@ -26,7 +26,6 @@ public abstract class MapJsonDocument {
         result.setModels(Model.DOC);
 
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //List<RecordSchemaDescription> children = new ArrayList<>();
 
         t.forEach((key, value) -> children.add(MapJsonRecord.process(key, value, true, true)));
 

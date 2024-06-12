@@ -10,7 +10,7 @@ import java.util.StringJoiner;
 
 public class CsvDMLWrapper implements AbstractDMLWrapper {
 
-    private String kindName = null; 
+    private String kindName = null;
     private Map<String, String> rowData = new LinkedHashMap<>();
 
     @Override
@@ -20,7 +20,7 @@ public class CsvDMLWrapper implements AbstractDMLWrapper {
 
     @Override
     public void append(String name, Object value) {
-        String stringValue = value == null ? "" : value.toString(); 
+        String stringValue = value == null ? "" : value.toString();
         rowData.put(name, stringValue);
     }
 
@@ -39,7 +39,7 @@ public class CsvDMLWrapper implements AbstractDMLWrapper {
 
     @Override
     public void clear() {
-        rowData.clear(); // Clear existing data ready for new entries
+        rowData.clear(); // reset
     }
 
 }
