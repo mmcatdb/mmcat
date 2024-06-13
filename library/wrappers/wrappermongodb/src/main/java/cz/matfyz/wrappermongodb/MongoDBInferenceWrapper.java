@@ -97,7 +97,7 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
         return records.mapToPair(t -> new Tuple2<>("_", MapMongoDocument.process(t)));
     }
 
-    private JavaMongoRDD<Document> loadRecords() {
+    public JavaMongoRDD<Document> loadRecords() {
         JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
         newContext.setLogLevel("ERROR");
         Map<String, String> readOverrides = new HashMap<>();

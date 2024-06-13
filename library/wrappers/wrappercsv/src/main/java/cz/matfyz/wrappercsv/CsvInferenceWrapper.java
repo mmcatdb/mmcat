@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,13 +79,13 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                // Assuming the file only uses commas as delimiter and not in any other way!
-                String[] elements = line.split(",\\s*");
+                char delimiter = detectDelimiter(line);
+                String[] elements = line.split(Character.toString(delimiter) + "\\s*");
                 if (!firstLine) {
                     header = elements;
                     firstLine = true;
                 } else {
-                    Map<String, String> lineMap = new HashMap<String, String>();
+                    Map<String, String> lineMap = new HashMap<>();
                     for (int i = 0; i < elements.length; i++) {
                         lineMap.put(header[i], elements[i]);
                     }
@@ -97,6 +98,17 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
         }
         JavaRDD<Map<String, String>> csvDocuments = context.parallelize(lines);
         return csvDocuments;
+    }
+
+    // The allowed delimiters: {',', '\t', ';'}
+    private char detectDelimiter(String line) {
+        char[] possibleDelimiters = {',', '\t', ';'};
+        Map<Character, Integer> delimiterCount = new HashMap<>();
+        for (char delimiter : possibleDelimiters) {
+            int count = line.split(Character.toString(delimiter)).length - 1;
+            delimiterCount.put(delimiter, count);
+        }
+        return Collections.max(delimiterCount.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
     @Override
