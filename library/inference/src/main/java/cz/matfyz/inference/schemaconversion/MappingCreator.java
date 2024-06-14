@@ -1,4 +1,4 @@
-package cz.matfyz.inference.schemaconversion.utils;
+package cz.matfyz.inference.schemaconversion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.mapping.*;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 
 public class MappingCreator {
     public final Key rootKey;
