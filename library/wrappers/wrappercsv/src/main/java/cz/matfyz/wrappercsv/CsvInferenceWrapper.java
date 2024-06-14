@@ -5,12 +5,14 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
+import cz.matfyz.wrappercsv.inference.DocumentToHeuristicsMap;
 import cz.matfyz.wrappercsv.inference.MapCsvDocument;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +30,10 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
     private JavaSparkContext context;
+
+    private String fileName() {
+        return kindName;
+    }
 
     public CsvInferenceWrapper(CsvProvider provider, SparkSettings sparkSettings) {
         this.provider = provider;
@@ -75,7 +81,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
         boolean firstLine = false;
         String[] header = null;
 
-        try (InputStream inputStream = provider.getInputStream();
+        try (InputStream inputStream = provider.getInputStream(kindName);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -124,7 +130,9 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     @Override
     public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
-        throw new UnsupportedOperationException("Unimplemented method 'loadPropertyData'");
+        JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
+
+        return csvDocuments.flatMapToPair(new DocumentToHeuristicsMap(fileName()));
     }
 
     @Override
@@ -133,5 +141,14 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
             this.provider,
             this.sparkSettings
         );
+    }
+
+    @Override
+    public List<String> getKindNames() {
+        try {
+            return provider.getCsvFileNames();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Error getting csv file names", e);
+        }
     }
 }

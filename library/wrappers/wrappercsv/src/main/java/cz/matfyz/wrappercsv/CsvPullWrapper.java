@@ -33,7 +33,7 @@ public class CsvPullWrapper implements AbstractPullWrapper {
     public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
         final var forest = new ForestOfRecords();
 
-        try (InputStream inputStream = provider.getInputStream();
+        try (InputStream inputStream = provider.getInputStream(path.name().toString());
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String headerLine = reader.readLine();
             if (headerLine == null) {

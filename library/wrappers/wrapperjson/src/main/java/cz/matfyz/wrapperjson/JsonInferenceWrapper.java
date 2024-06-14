@@ -5,12 +5,14 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
+import cz.matfyz.wrapperjson.inference.DocumentToHeuristicsMap;
 import cz.matfyz.wrapperjson.inference.MapJsonDocument;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +33,10 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
     private JavaSparkContext context;
+
+    private String fileName() {
+        return kindName;
+    }
 
     public JsonInferenceWrapper(JsonProvider provider, SparkSettings sparkSettings) {
         this.provider = provider;
@@ -76,7 +82,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try (
-            InputStream inputStream = provider.getInputStream();
+            InputStream inputStream = provider.getInputStream(kindName);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             String content = reader.lines().collect(Collectors.joining("\n"));
@@ -120,8 +126,18 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     @Override
     public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'loadPropertyData'");
+        JavaRDD<Document> jsonDocuments = loadDocuments();
+
+        return jsonDocuments.flatMapToPair(new DocumentToHeuristicsMap(fileName()));
+    }
+
+    @Override
+    public List<String> getKindNames() {
+        try {
+            return provider.getJsonFileNames();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Error getting json file names", e);
+        }
     }
 
     @Override

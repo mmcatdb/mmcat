@@ -6,9 +6,12 @@ import cz.matfyz.wrappercsv.CsvInferenceWrapper;
 import cz.matfyz.wrappercsv.CsvProvider;
 import cz.matfyz.wrappercsv.CsvProvider.CsvSettings;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,6 +27,42 @@ public class CsvInferenceWrapperTests {
         csvInferenceWrapper.buildSession();
         csvInferenceWrapper.initiateContext();
         return csvInferenceWrapper;
+    }
+
+    // change it to folder, not file
+    @Test
+    void testServerUrl() throws Exception {
+        @SuppressWarnings("deprecation")
+        URL url = new URL("https://data.mmcatdb.com/googleplaystore.csv");
+        final var settings = new CsvSettings(url.toURI().toString(), false, false);
+        final var csvProvider = new CsvProvider(settings);
+
+        assertEquals("https://data.mmcatdb.com/googleplaystore.csv", csvProvider.getUrl());
+
+        try (InputStream inputStream = csvProvider.getInputStream("googleplaystore")) {
+            assertNotNull(inputStream);
+        }
+    }
+
+    @Test
+    void testLocalUrl() throws Exception {
+        @SuppressWarnings("deprecation")
+        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/");
+        final var settings = new CsvSettings(url.toURI().toString(), false, false);
+        final var csvProvider = new CsvProvider(settings);
+
+        final List<String> fileNames = csvProvider.getCsvFileNames();
+
+        for (String fileName : fileNames) {
+            System.out.println(fileName);
+            try (InputStream inputStream = csvProvider.getInputStream(fileName)) {
+                assertNotNull(inputStream);
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                assertNotNull(reader.readLine(), "The header should not be empty");
+            }
+        }
+
     }
 
     @Test
@@ -80,7 +119,7 @@ public class CsvInferenceWrapperTests {
         }
 
         @Override
-        public InputStream getInputStream() {
+        public InputStream getInputStream(String kindName) {
             return new ByteArrayInputStream(csvContent.getBytes());
         }
     }

@@ -9,6 +9,7 @@ import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,6 +25,23 @@ public class JsonInferenceWrapperTests {
         jsonInferenceWrapper.buildSession();
         jsonInferenceWrapper.initiateContext();
         return jsonInferenceWrapper;
+    }
+
+    @Test
+    void testLocalUrl() throws Exception {
+        @SuppressWarnings("deprecation")
+        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/test_json_folder/");
+        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var jsonProvider = new JsonProvider(settings);
+
+        final List<String> fileNames = jsonProvider.getJsonFileNames();
+
+        for (String fileName : fileNames) {
+            System.out.println(fileName);
+            try (InputStream inputStream = jsonProvider.getInputStream(fileName)) {
+                assertNotNull(inputStream);
+            }
+        }
     }
 
     @Test
@@ -93,7 +111,7 @@ public class JsonInferenceWrapperTests {
         }
 
         @Override
-        public InputStream getInputStream() {
+        public InputStream getInputStream(String kindName) {
             return new ByteArrayInputStream(jsonContent.getBytes());
         }
     }

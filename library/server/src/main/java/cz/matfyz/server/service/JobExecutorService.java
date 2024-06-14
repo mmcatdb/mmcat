@@ -279,8 +279,6 @@ public class JobExecutorService {
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
-        //System.out.println(categoryMappingPair.schemaCat().allObjects());
-        //System.out.println(categoryMappingPair.schemaCat().allMorphisms());
         final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
         LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model");

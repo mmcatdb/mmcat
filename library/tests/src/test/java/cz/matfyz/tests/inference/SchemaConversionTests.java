@@ -25,6 +25,7 @@ import cz.matfyz.wrapperjson.JsonProvider.JsonSettings;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.net.URL;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -163,4 +164,30 @@ public class SchemaConversionTests {
         }
         return count;
     }
+
+    // TODO: try a different folder, this one has no candidates
+    @Test
+    void testMultipleRSDToSchemaCategoryAndMapping() throws Exception {
+        @SuppressWarnings("deprecation")
+        final var url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/");
+        final var settings = new CsvSettings(url.toURI().toString(), false, false);
+        final var csvProvider = new CsvProvider(settings);
+
+        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
+
+        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+            .input(inferenceWrapper, "user", "Test Schema Category")
+            .run();
+
+        final SchemaCategory schemaCategory = categoryMappingPair.schemaCategory();
+        final Mapping mapping = categoryMappingPair.mapping();
+
+        System.out.println(schemaCategory.allObjects());
+
+        //assertEquals(22, schemaCategory.allObjects().size(), "There should be 10 Schema Objects.");
+        //assertEquals(21, schemaCategory.allMorphisms().size(), "There should be 10 Schema Morphisms.");
+
+        //assertEquals(3, countComplexProperties(mapping), "There should be 3 complex properties");
+    }
+
 }
