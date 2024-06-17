@@ -28,7 +28,23 @@ public class JsonInferenceWrapperTests {
     }
 
     @Test
-    void testLocalUrl() throws Exception {
+    void testServerUrl() throws Exception {
+        @SuppressWarnings("deprecation")
+        URL url = new URL("https://data.mmcatdb.com/yelp_business_sample.json");
+        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var jsonProvider = new JsonProvider(settings);
+
+        final List<String> fileNames = jsonProvider.getJsonFileNames();
+
+        assertEquals("yelp_business_sample", fileNames.get(0));
+
+        try (InputStream inputStream = jsonProvider.getInputStream("yelpbusinesssampel")) {
+            assertNotNull(inputStream);
+        }
+    }
+
+    @Test
+    void testLocalUrlFolder() throws Exception {
         @SuppressWarnings("deprecation")
         URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/test_json_folder/");
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
@@ -41,6 +57,22 @@ public class JsonInferenceWrapperTests {
             try (InputStream inputStream = jsonProvider.getInputStream(fileName)) {
                 assertNotNull(inputStream);
             }
+        }
+    }
+
+    @Test
+    void testLocalUrlFile() throws Exception {
+        @SuppressWarnings("deprecation")
+        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/test_json_folder/customer.json");
+        final var settings = new JsonSettings(url.toURI().toString(), false, false);
+        final var jsonProvider = new JsonProvider(settings);
+
+        final List<String> fileNames = jsonProvider.getJsonFileNames();
+
+        assertEquals("customer", fileNames.get(0));
+
+        try (InputStream inputStream = jsonProvider.getInputStream("yelpbusinesssampel")) {
+            assertNotNull(inputStream);
         }
     }
 

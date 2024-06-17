@@ -23,23 +23,56 @@ public class CsvProvider {
     }
 
     public InputStream getInputStream(String kindName) throws IOException {
-        return new UrlInputStreamProvider(settings.url + kindName + ".csv").getInputStream();
+        if (settings.url.endsWith(".csv")) {
+            return new UrlInputStreamProvider(settings.url).getInputStream();
+        } else {
+            return new UrlInputStreamProvider(settings.url + kindName + ".csv").getInputStream();
+        }
     }
 
-    public List<String> getCsvFileNames() throws URISyntaxException {
-        List<String> csvFileNames = new ArrayList<>();
+    /*
+     * There is not a straight forward way to access filenames in remote folder
+     * Therefore, right now it is possible to access local folders or files and remote just files.
+     */
+    public List<String> getCsvFileNames() throws URISyntaxException, IOException {
         URI uri = new URI(settings.url);
-        File directory = new File(uri);
+        if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
+            return getRemoteCsvFileNames(uri);
+        } else if ("file".equals(uri.getScheme())) {
+            return getLocalCsvFileNames(uri);
+        } else {
+            throw new IllegalArgumentException("Unsupported URI scheme: " + uri.getScheme());
+        }
+    }
 
-        if (directory.isDirectory()) {
-            File[] files = directory.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
+    private List<String> getRemoteCsvFileNames(URI uri) {
+        List<String> csvFileNames = new ArrayList<>();
+        if (settings.url.endsWith(".csv")) {
+            csvFileNames.add(new File(uri.getPath()).getName().replace(".csv", ""));
+        } else {
+            throw new IllegalArgumentException("The provided URL does not point to a directory.");
+        }
+        return csvFileNames;
+    }
+
+    private List<String> getLocalCsvFileNames(URI uri) {
+        List<String> csvFileNames = new ArrayList<>();
+        File file = new File(uri);
+        if (settings.url.endsWith(".csv")) {
+            if (file.exists()) {
+                csvFileNames.add(file.getName().replace(".csv", ""));
+            } else {
+                throw new IllegalArgumentException("The provided URL does not point to an existing file.");
+            }
+        } else if (file.isDirectory()) {
+            File[] files = file.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
             if (files != null) {
-                for (File file : files) {
-                    csvFileNames.add(file.getName().replace(".csv", ""));
+                for (File csvFile : files) {
+                    csvFileNames.add(csvFile.getName().replace(".csv", ""));
                 }
             }
         } else {
-            throw new IllegalArgumentException("The provided URL does not point to a directory.");
+            throw new IllegalArgumentException("The provided URL does not point to a directory or a valid file.");
         }
         return csvFileNames;
     }

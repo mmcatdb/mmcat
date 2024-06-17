@@ -26,10 +26,6 @@ public abstract class MapJsonRecord {
 
         result.setModels(Model.DOC);
 //        result.addType(Type.OBJECT);
-        if (key.equals("_id") || key.endsWith("/_id")) {
-            result.setId(Char.TRUE);        //if the name of the property is _id, then it has to be unique identifier (MongoDB convention)
-            result.setUnique(Char.TRUE);
-        }
         if (value instanceof Number) {
             types = types | Type.NUMBER;
         } else if (value instanceof Boolean) {

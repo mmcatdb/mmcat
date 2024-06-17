@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DocumentToHeuristicsMap implements PairFlatMapFunction<Map<String, String>, String, PropertyHeuristics> {
+public class RecordToHeuristicsMap implements PairFlatMapFunction<Map<String, String>, String, PropertyHeuristics> {
 
     private final String fileName;
 
-    public DocumentToHeuristicsMap(String fileName) {
+    public RecordToHeuristicsMap(String fileName) {
         this.fileName = fileName;
     }
 

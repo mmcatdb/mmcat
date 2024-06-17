@@ -1,9 +1,6 @@
 package cz.matfyz.inference;
 
 import cz.matfyz.inference.algorithms.miner.CandidateMinerAlgorithm;
-import cz.matfyz.inference.algorithms.pba.PropertyBasedAlgorithm;
-import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalCombFunction;
-import cz.matfyz.inference.algorithms.pba.functions.DefaultLocalSeqFunction;
 import cz.matfyz.inference.algorithms.rba.RecordBasedAlgorithm;
 import cz.matfyz.inference.algorithms.rba.functions.AbstractRSDsReductionFunction;
 import cz.matfyz.inference.algorithms.rba.functions.DefaultLocalReductionFunction;
@@ -55,44 +52,12 @@ public class MMInferOneInAll {
 
         Map<String, AbstractInferenceWrapper> wrappers = prepareWrappers(wrapper);
 
-        Map<String, RecordSchemaDescription> rsds = wrappers.entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> MMInferOneInAll.executeRBA(entry.getValue(), true)));
+        Map<String, RecordSchemaDescription> rsds = getRecordSchemaDescriptions(wrappers);
 
-        // There are two types of candidates available at the moment: primary key and reference
-        // If there are any primary key candidates, then the RSDs can be merged into one (but be aware of the _id default identifier in mongo, this shouldn't count)
-        // If there are sany reference candidates, then these RSDs can be merged hierarchically, based on who is referencing who
+        RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
 
-        // TODO: Check better the output of the candidate miner, do the references and pks always make sense?
-
-        // If I merge based on primary key, then no other merging will be necessary,
-        // because primary key is present in all RSDs and so all can be merged together
-        // So it is either merging based on primary key or reference, or none
-
-        RecordSchemaDescription rsd;
-        if (rsds.size() > 1) { // Do not run the candidates, if there is only one rsd
-            Candidates candidates = executeCandidateMiner(wrapper, wrapper.getKindNames());
-            System.out.println("Candidates: " + candidates);
-
-            PrimaryKeyCandidate pkCandidate = Candidates.firstPkCandidatesThatNotEndWith(candidates, "/_id");
-            if (!candidates.pkCandidates.isEmpty() && pkCandidate != null) { // but what if the db isn't mongo and there is an actual property named "_id"?
-                // get the first PK candidate which will be in the candidate array and wont end with "/_id" and merge all based on that
-                rsd = RecordSchemaDescriptionMerger.mergeBasedOnPrimaryKey(rsds, pkCandidate);
-            }
-            else if (!candidates.refCandidates.isEmpty()) { // there could be multiple reference candidates and I need to process them all
-                for (ReferenceCandidate refCandidate : candidates.refCandidates) {
-                    rsds = RecordSchemaDescriptionMerger.mergeBasedOnReference(rsds, refCandidate);
-                }
-                rsd = rsds.values().iterator().next(); // now there should be just one key-value pair, because the algo merged it all
-            }
-            else { // what to do when there are multiple RSDs, but no candidates?
-                throw new IllegalStateException("No candidates for merging found.");
-            }
-        }
-        else
-            rsd = rsds.values().iterator().next();
-
-        SchemaConverter scon = new SchemaConverter(rsd, categoryLabel, kindName);
-        return scon.convertToSchemaCategoryAndMapping();
+        SchemaConverter schemaConverter = new SchemaConverter(rsd, categoryLabel, kindName);
+        return schemaConverter.convertToSchemaCategoryAndMapping();
     }
 
     private static Map<String, AbstractInferenceWrapper> prepareWrappers(AbstractInferenceWrapper inputWrapper) throws IllegalArgumentException {
@@ -107,8 +72,12 @@ public class MMInferOneInAll {
 
             wrappers.put(kindName, copy);
         });
-
         return wrappers;
+    }
+
+    private Map<String, RecordSchemaDescription> getRecordSchemaDescriptions(Map<String, AbstractInferenceWrapper> wrappers) {
+        return wrappers.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> executeRBA(entry.getValue(), true)));
     }
 
 
@@ -131,29 +100,38 @@ public class MMInferOneInAll {
         return rsd;
     }
 
-    private static void executePBA(AbstractInferenceWrapper wrapper, boolean printSchema) {
-        PropertyBasedAlgorithm pba = new PropertyBasedAlgorithm();
+    private RecordSchemaDescription mergeRecordSchemaDescriptions(Map<String, RecordSchemaDescription> rsds) throws Exception {
+        // There are two types of candidates available at the moment: primary key and reference
+        // If there are any primary key candidates, then the RSDs can be merged into one (but be aware of the _id default identifier in mongo, this shouldn't count)
+        // If there are sany reference candidates, then these RSDs can be merged hierarchically, based on who is referencing who
 
-        DefaultLocalSeqFunction seqFunction = new DefaultLocalSeqFunction();
-        DefaultLocalCombFunction combFunction = new DefaultLocalCombFunction();
+        // TODO: Check better the output of the candidate miner, do the references and pks always make sense?
 
-        long start = System.currentTimeMillis();
-        RecordSchemaDescription rsd = pba.process(wrapper, seqFunction, combFunction);
+        // If I merge based on primary key, then no other merging will be necessary,
+        // because primary key is present in all RSDs and so all can be merged together
+        // So it is either merging based on primary key or reference, or none
 
-//        RecordSchemaDescription rsd2 = finalize.process();        // TODO: SLOUCIT DOHROMADY!
-        long end = System.currentTimeMillis();
-
-        if (printSchema) {
-            System.out.print("RESULT_PROPERTY_BA: ");
-            System.out.println(rsd == null ? "NULL" : rsd);
+        if (rsds.size() <= 1) { // Do not run the candidates, if there is only one rsd
+            return rsds.values().iterator().next();
         }
+        Candidates candidates = executeCandidateMiner(wrapper, wrapper.getKindNames());
+        System.out.println("Candidates: " + candidates);
 
-        System.out.println("RESULT_TIME_PROPERTY_BA TOTAL: " + (end - start) + "ms");
+        PrimaryKeyCandidate pkCandidate = Candidates.firstPkCandidatesThatNotEndWith(candidates, "/_id");
+        if (!candidates.pkCandidates.isEmpty() && pkCandidate != null) { // but what if the db isn't mongo and there is an actual property named "_id"?
+            // get the first PK candidate which will be in the candidate array and wont end with "/_id" and merge all based on that
+            return RecordSchemaDescriptionMerger.mergeBasedOnPrimaryKey(rsds, pkCandidate);
+        } else if (!candidates.refCandidates.isEmpty()) { // there could be multiple reference candidates and I need to process them all
+            for (ReferenceCandidate refCandidate : candidates.refCandidates) { // very very wonky :o
+                rsds = RecordSchemaDescriptionMerger.mergeBasedOnReference(rsds, refCandidate);
+            }
+            return rsds.values().iterator().next(); // now there should be just one key-value pair, because the algo merged it all
+        } else { // multiple RSDs, but no candidates
+            throw new IllegalStateException("No candidates for merging found.");
+        }
     }
 
-
     public static Candidates executeCandidateMiner(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
-        // TODO
         BloomFilter.setParams(10000, new BasicHashFunction());
         StartingEndingFilter.setParams(10000);
         CandidateMinerAlgorithm candidateMiner = new CandidateMinerAlgorithm();

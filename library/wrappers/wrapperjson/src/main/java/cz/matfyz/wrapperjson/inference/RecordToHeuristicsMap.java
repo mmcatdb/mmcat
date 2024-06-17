@@ -18,13 +18,13 @@ import org.slf4j.LoggerFactory;
 import shaded.parquet.it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import scala.Tuple2;
 
-public class DocumentToHeuristicsMap implements PairFlatMapFunction<Document, String, PropertyHeuristics> {
+public class RecordToHeuristicsMap implements PairFlatMapFunction<Document, String, PropertyHeuristics> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentToHeuristicsMap.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecordToHeuristicsMap.class);
 
     private final String collectionName;
 
-    public DocumentToHeuristicsMap(String collectionName) {
+    public RecordToHeuristicsMap(String collectionName) {
         this.collectionName = collectionName;
     }
 

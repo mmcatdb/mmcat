@@ -29,15 +29,16 @@ public class CsvInferenceWrapperTests {
         return csvInferenceWrapper;
     }
 
-    // change it to folder, not file
     @Test
-    void testServerUrl() throws Exception {
+    void testServerUrl() throws Exception { // testing file
         @SuppressWarnings("deprecation")
         URL url = new URL("https://data.mmcatdb.com/googleplaystore.csv");
         final var settings = new CsvSettings(url.toURI().toString(), false, false);
         final var csvProvider = new CsvProvider(settings);
 
-        assertEquals("https://data.mmcatdb.com/googleplaystore.csv", csvProvider.getUrl());
+        final List<String> fileNames = csvProvider.getCsvFileNames();
+
+        assertEquals("googleplaystore", fileNames.get(0));
 
         try (InputStream inputStream = csvProvider.getInputStream("googleplaystore")) {
             assertNotNull(inputStream);
@@ -45,7 +46,7 @@ public class CsvInferenceWrapperTests {
     }
 
     @Test
-    void testLocalUrl() throws Exception {
+    void testLocalUrlFolder() throws Exception { // testing folder
         @SuppressWarnings("deprecation")
         URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/");
         final var settings = new CsvSettings(url.toURI().toString(), false, false);
@@ -62,7 +63,22 @@ public class CsvInferenceWrapperTests {
                 assertNotNull(reader.readLine(), "The header should not be empty");
             }
         }
+    }
 
+    @Test
+    void testLocalUrlFile() throws Exception { // testing folder
+        @SuppressWarnings("deprecation")
+        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/user_table.csv");
+        final var settings = new CsvSettings(url.toURI().toString(), false, false);
+        final var csvProvider = new CsvProvider(settings);
+
+        final List<String> fileNames = csvProvider.getCsvFileNames();
+
+        assertEquals("user_table", fileNames.get(0));
+
+        try (InputStream inputStream = csvProvider.getInputStream("user_table")) {
+            assertNotNull(inputStream);
+        }
     }
 
     @Test

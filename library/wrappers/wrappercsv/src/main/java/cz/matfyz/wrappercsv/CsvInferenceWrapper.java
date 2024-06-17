@@ -5,7 +5,7 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
-import cz.matfyz.wrappercsv.inference.DocumentToHeuristicsMap;
+import cz.matfyz.wrappercsv.inference.RecordToHeuristicsMap;
 import cz.matfyz.wrappercsv.inference.MapCsvDocument;
 
 import java.io.BufferedReader;
@@ -132,7 +132,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
 
-        return csvDocuments.flatMapToPair(new DocumentToHeuristicsMap(fileName()));
+        return csvDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
     }
 
     @Override
@@ -147,7 +147,7 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     public List<String> getKindNames() {
         try {
             return provider.getCsvFileNames();
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             throw new RuntimeException("Error getting csv file names", e);
         }
     }

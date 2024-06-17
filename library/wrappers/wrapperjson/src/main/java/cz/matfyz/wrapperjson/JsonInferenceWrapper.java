@@ -5,7 +5,7 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
-import cz.matfyz.wrapperjson.inference.DocumentToHeuristicsMap;
+import cz.matfyz.wrapperjson.inference.RecordToHeuristicsMap;
 import cz.matfyz.wrapperjson.inference.MapJsonDocument;
 
 import java.io.BufferedReader;
@@ -128,15 +128,15 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
 
-        return jsonDocuments.flatMapToPair(new DocumentToHeuristicsMap(fileName()));
+        return jsonDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
     }
 
     @Override
     public List<String> getKindNames() {
         try {
             return provider.getJsonFileNames();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Error getting json file names", e);
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException("Error getting jsonc file names", e);
         }
     }
 
