@@ -23,13 +23,14 @@ public class RecordSchemaDescriptionMerger {
      */
     public static RecordSchemaDescription mergeBasedOnPrimaryKey(Map<String, RecordSchemaDescription> rsds, PrimaryKeyCandidate candidate) {
         LOGGER.info("Merging based on primary key...");
+        System.out.println("Merging based on primary key...");
         String[] names = candidate.hierarchicalName().split("/");  // the hierarchical name can have more than 2 parts : dfs/cds/cds/cd
         String primaryKeyCollectionName = names[0];
         String primaryKey = names[names.length - 1];
 
-        LOGGER.info("PrimaryKeyCollectionName: {}", primaryKeyCollectionName);
-        LOGGER.info("PrimaryKeyProperty: {}", names[names.length - 2]);
-        LOGGER.info("Primarykey: {}", primaryKey);
+        System.out.println("PrimaryKeyCollectionName: " + primaryKeyCollectionName);
+        System.out.println("PrimaryKeyProperty: " + names[names.length - 2]);
+        System.out.println("Primarykey: " + primaryKey);
 
         RecordSchemaDescription primaryKeyRSD = cloneRSD(rsds.get(primaryKeyCollectionName));
         cleanRSD(primaryKeyRSD, primaryKeyCollectionName, new String[] {"_id"});
@@ -50,12 +51,13 @@ public class RecordSchemaDescriptionMerger {
         // not all reference candidates might be valid
         // valid: ref property is present in the other rsd(s)
         LOGGER.info("Merging based on references...");
+        System.out.println("Merging based on references...");
         String[] names = candidate.referred().split("/");
         String referencingCollectionName = names[0];
         String referredProperty = names[names.length - 1];
 
-        LOGGER.info("Referencing collection name: {}", referencingCollectionName);
-        LOGGER.info("Refered property: {}", referredProperty);
+        System.out.println("Referencing collection name: " + referencingCollectionName);
+        System.out.println("Refered property: " + referredProperty);
 
         Map<String, RecordSchemaDescription> newRSDs = new HashMap<>(rsds);
 

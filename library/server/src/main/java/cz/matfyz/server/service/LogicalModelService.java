@@ -68,4 +68,12 @@ public class LogicalModelService {
         return new LogicalModelWithDatasource(logicalModel, datasource);
     }
 
+    public void remove(Id logicalModelId) {
+        if (repository.find(logicalModelId) == null) {
+            throw new IllegalArgumentException("Logical model with ID " + logicalModelId + "does not exist");
+        }
+        mappingService.removeAll(logicalModelId);
+        repository.remove(logicalModelId);
+    }
+
 }

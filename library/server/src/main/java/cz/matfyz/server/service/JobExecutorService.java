@@ -281,8 +281,8 @@ public class JobExecutorService {
 
         final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
-        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model");
-        LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
+        // TODO: right now we are testing the presence of the intial log model with the label, not great:(
+        LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, run.categoryId, "Initial logical model");
 
         schemaService.overwriteInfo(schemaWrapper, run.categoryId);
         mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
@@ -298,5 +298,15 @@ public class JobExecutorService {
         positions.forEach(context::setPosition);
 
         return SchemaCategoryWrapper.fromSchemaCategory(category, context);
+    }
+
+    private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id schemaCategoryId, String initialLogicalModelLabel) {
+        for (LogicalModelWithDatasource logicalModel : logicalModelService.findAll(schemaCategoryId)) {
+            if (logicalModel.logicalModel().label.equals(initialLogicalModelLabel)) {
+                logicalModelService.remove(logicalModel.logicalModel().id);
+            }
+        }
+        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceId, schemaCategoryId, initialLogicalModelLabel);
+        return logicalModelService.createNew(logicalModelInit);
     }
 }

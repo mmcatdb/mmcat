@@ -24,9 +24,6 @@ public class CandidateMinerAlgorithm implements Serializable {
         System.out.println("processing candidates");
         Candidates candidates = new Candidates();
 
-       // wrapper.buildSession();
-       // wrapper.initiateContext();
-
         List<AbstractInferenceWrapper> wrappers = new ArrayList<>();
 
         try {

@@ -109,4 +109,17 @@ public class LogicalModelRepository {
         });
     }
 
+    public boolean remove(Id id) {
+        return db.getBoolean((connection, output) -> {
+            final var statement = connection.prepareStatement("""
+                DELETE FROM logical_model
+                WHERE id = ?;
+                """
+            );
+            setId(statement, 1, id);
+            int affectedRows = statement.executeUpdate();
+            output.set(affectedRows > 0);
+        });
+    }
+
 }

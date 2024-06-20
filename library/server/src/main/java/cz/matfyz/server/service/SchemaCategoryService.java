@@ -48,25 +48,21 @@ public class SchemaCategoryService {
     }
 
     /*
-     * Created for the case when I receive SchemaCategoryWrapper from mminfer
+     * Created for the case when I receive SchemaCategoryWrapper from inference
      * Be aware of the label in creating SchemaCategoryInit
-     * Maybe now, I will have to accept SK not SKWrapper! and make the contentext here!
      * */
     public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {
         final Id generatedId = repository.add(wrapper);
-        //System.out.println("This is the generated ID: " + generatedId);
-
-        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "new_label", wrapper.version);
+        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "Schema_category_info", wrapper.version);
     }
 
     /***
-     * Temporary workaround method for inference
+     * Workaround method for inference
      * Overwrites the existing empty SchemaCategory
      */
     public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
         final boolean saved = repository.save(wrapper, id);
-
-        return saved ? new SchemaCategoryInfo(id, "new_label", wrapper.version) : null;
+        return saved ? new SchemaCategoryInfo(id, "Schema_category_info", wrapper.version) : null;
     }
 
     public SchemaCategoryInfo findInfo(Id id) {
@@ -76,7 +72,6 @@ public class SchemaCategoryService {
     public SchemaCategoryWrapper find(Id id) {
         return repository.find(id);
     }
-
 
     public @Nullable SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);

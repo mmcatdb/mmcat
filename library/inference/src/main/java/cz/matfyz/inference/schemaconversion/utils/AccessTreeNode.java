@@ -105,7 +105,7 @@ public class AccessTreeNode {
         It then recursively applies this transformation to all children of the current node.
      */
     public void transformArrayNodes() {
-        if (this.isArrayType) {
+        if (this.isArrayType && !this.children.isEmpty()) {
             AccessTreeNode child = this.children.get(0); // getting the first child
             if (child.getName().equals("_")) {
                 promoteChildren(child);
