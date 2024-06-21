@@ -26,7 +26,8 @@ public class Configuration {
         String username,
         String password,
         String basicDatabase,
-        String queryEvolutionDatabase
+        String queryEvolutionDatabase,
+        String inferenceDatabase
     ) {}
 
     @ConfigurationProperties("spark")

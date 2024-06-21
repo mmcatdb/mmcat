@@ -25,6 +25,10 @@ public class IndexController {
     @Qualifier("queryEvolutionExampleSetup")
     cz.matfyz.server.example.queryevolution.ExampleSetup queryEvolutionExampleSetup;
 
+    @Autowired
+    @Qualifier("inferenceExampleSetup")
+    cz.matfyz.server.example.inference.ExampleSetup inferenceExampleSetup;
+
     @PostMapping("/example-schema/{name}")
     public void addExampleSchema(@PathVariable String name) {
         switch (name) {
@@ -33,6 +37,7 @@ public class IndexController {
             case "query-evolution-2" -> queryEvolutionExampleSetup.setup(2);
             case "query-evolution-3" -> queryEvolutionExampleSetup.setup(3);
             case "query-evolution-4" -> queryEvolutionExampleSetup.setup(4);
+            case "inference" -> inferenceExampleSetup.setup();
             default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }

@@ -10,6 +10,7 @@ db.createUser({
     roles: [
         { role: "readWrite", db: "${EXAMPLE_DATABASE_BASIC}" },
         { role: "readWrite", db: "${EXAMPLE_DATABASE_QUERY_EVOLUTION}" },
+        { role: "readWrite", db: "${EXAMPLE_DATABASE_INFERENCE}" },
         { role: "readWrite", db: "test" },
     ],
 });
@@ -18,4 +19,6 @@ use ${EXAMPLE_DATABASE_BASIC};
 load('setupMongodbBasic.js');
 use ${EXAMPLE_DATABASE_QUERY_EVOLUTION};
 load('setupMongodbQueryEvolution.js');
+use ${EXAMPLE_DATABASE_INFERENCE};
+load('setupMongodbInference.js');
 EOSQL
