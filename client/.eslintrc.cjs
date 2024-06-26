@@ -45,5 +45,7 @@ module.exports = {
         '@typescript-eslint/consistent-type-definitions': [ 'warn', 'type' ],
         '@typescript-eslint/unbound-method': [ 'error', { 'ignoreStatic': true } ],
         '@typescript-eslint/no-unused-vars': [ 'error', { 'destructuredArrayIgnorePattern': '^_' } ],
+        '@typescript-eslint/restrict-template-expressions': [ 'off' ],
+        '@typescript-eslint/restrict-plus-operands': [ 'off' ],
     },
 }
