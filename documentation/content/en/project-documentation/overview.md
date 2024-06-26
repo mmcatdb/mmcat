@@ -27,7 +27,7 @@ Depicted in gray, these classes hide the specific databases and provide a platfo
 
 Each supported database system has its own wrappers which are a concrete implementation of the `abstractWrappers` module. These communicate directly with the drivers of the selected database. Currently, the PostgreSQL and MongoDB systems are supported.
 
-### `server`, ` example-ui`
+### `server`, ` client`
 
 The red boxes represent all high-level operations the user can do with the framework:
 - querying over the categorical representation,
@@ -35,7 +35,7 @@ The red boxes represent all high-level operations the user can do with the frame
 - migration of data from one database system to another,
 - evolution management of the categorical representation.
 
-Currently, only the data migration operation is implemented fully, but the others are going to be as well. All the operations will be accessible via the [backend](backend.md) and [frontend](frontend.md) applications which are located in the `server` and `example-ui` modules.
+Currently, only the data migration operation is implemented fully, but the others are going to be as well. All the operations will be accessible via the [backend](backend.md) and [frontend](frontend.md) applications which are located in the `server` and `client` modules.
 
 ## Disclaimer
 
