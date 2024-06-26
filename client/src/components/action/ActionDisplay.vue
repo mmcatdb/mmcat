@@ -79,7 +79,7 @@ async function deleteAction() {
                 v-else-if="action.payload.type === ActionType.UpdateSchema"
                 label="Versions:"
             >
-              <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
+                <!--  <VersionDisplay :version-id="action.payload.prevVersion" /> --> <VersionDisplay :version-id="action.payload.nextVersion" />
             </ValueRow>
             <!--
                 <ValueRow label="State:">

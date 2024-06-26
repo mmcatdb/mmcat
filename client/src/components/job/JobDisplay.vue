@@ -86,40 +86,35 @@ async function restartJob() {
                         {{ job.id }}
                     </div>
                 </div>
-        </div>
-        <div>
-            {{ job.payload.type }}
-        </div>
-        <div class="col-3">
-            <template v-if="job.payload.type === ActionType.RSDToCategory && job.payload.dataSource">
-                <RouterLink :to="{ name: 'dataSource', params: { id: job.payload.dataSource.id }, query: { categoryId: job.categoryId } }">
-                    {{ job.payload.dataSource.label }}
-                </RouterLink>
-            </template>
-            <template v-else-if="job.payload.type === ActionType.RSDToCategory && job.payload.database">
-                <RouterLink :to="{ name: 'database', params: { id: job.payload.database.id } }">
-                    {{ job.payload.database.label }}
-                </RouterLink>
-            </template>
-            <template v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
-                <RouterLink :to="{ name: 'logicalModel', params: { id: job.payload.logicalModel.id } }">
-                    {{ job.payload.logicalModel.label }}
-                </RouterLink>
-            </template>
-            <template v-else>
-                <VersionDisplay :version-id="job.payload.prevVersion" /> --> <VersionDisplay :version-id="job.payload.nextVersion" />
-            </template>
-        </div>
-        <div class="flex-grow-1">
-            <div
-                v-if="job.error"
-                class="text-danger"
-            >
-                Error: {{ job.error.name }}
             </div>
-            <template v-else>
+            <div>
+                {{ job.payload.type }}
+            </div>
+            <div class="col-3">
+                <template v-if="job.payload.type === ActionType.RSDToCategory">
+                    <RouterLink :to="{ name: 'datasource', params: { id: job.payload.datasource.id }, query: { categoryId: job.categoryId } }">
+                        {{ job.payload.datasource.label }}
+                    </RouterLink>
+                </template>
+                <template v-else-if="job.payload.type === ActionType.CategoryToModel || job.payload.type === ActionType.ModelToCategory">
+                    <RouterLink :to="{ name: 'logicalModel', params: { id: job.payload.logicalModel.id } }">
+                        {{ job.payload.logicalModel.label }}
+                    </RouterLink>
+                </template>
+                <template v-else>
+                    <VersionDisplay :version-id="job.payload.prevVersion" /> --> <VersionDisplay :version-id="job.payload.nextVersion" />
+                </template>
+            </div>
+            <div class="flex-grow-1">
+                <div
+                    v-if="job.error"
+                    class="text-danger"
+                >
+                    Error: {{ job.error.name }}
+                </div>
+                <template v-else>
             &nbsp;
-            </template>
+                </template>
             </div>
             <div class="d-flex gap-3 align-self-center">
                 <button
