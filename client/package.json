@@ -10,7 +10,7 @@
     },
     "dependencies": {
         "@types/qs": "^6.9.7",
-        "axios": "^0.26.0",
+        "axios": "^1.7.2",
         "bootstrap": "^5.3.3",
         "cytoscape": "^3.21.0",
         "cytoscape-fcose": "^2.1.0",
