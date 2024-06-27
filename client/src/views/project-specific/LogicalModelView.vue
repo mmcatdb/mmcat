@@ -30,18 +30,8 @@ function createNewMapping() {
     router.push({ name: 'accessPathEditor', query: { logicalModelId: route.params.id } });
 }
 
-const mappingsHeading = computed(() => {
-    if (isFile(logicalModel.value?.datasource?.type)) 
-        return "Mapping";
-    else return "Mappings";
-});
+const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(logicalModel.value.datasource.type));
 
-const canCreateNewMapping = computed(() => {
-    if (isFile(logicalModel.value?.datasource?.type) && logicalModel.value?.mappings?.length > 0) {
-        return false;
-    }
-    return true;
-});
 
 </script>
 
@@ -54,11 +44,11 @@ const canCreateNewMapping = computed(() => {
                     :logical-model="logicalModel"
                 />
             </div>
-                <h2>{{mappingsHeading}}</h2>
+            <h2>{{ isForFile ? 'Mapping' : 'Mappings' }}</h2>
             <div class="button-row">
                 <button
+                    :disabled="!(isForFile && logicalModel.mappings.length > 0)"
                     @click="createNewMapping"
-                    :disabled="!canCreateNewMapping"
                 >
                     Create new
                 </button>

@@ -6,7 +6,7 @@ geekdocAnchor: false
 geekdocBreadcrumb: false
 ---
 
-*A multi-model data modelling and evolution framework based on category theory.*
+*A multi-model data modeling and evolution framework based on category theory.*
 
 {{< button size="large" relref="getting-started/quick-start.md" >}}Get Started{{< /button >}}
 <br />

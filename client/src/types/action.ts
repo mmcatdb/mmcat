@@ -90,7 +90,7 @@ export type ActionPayloadInit = {
 } | {
     type: ActionType.RSDToCategory;
     datasourceId: Id;
-    kindName: String;
+    kindName: string;
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
@@ -152,7 +152,7 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
 
 type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
     datasource: DatasourceFromServer;
-    kindName: String;
+    kindName: string;
 };
 
 class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
@@ -160,14 +160,14 @@ class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory
 
     private constructor(
         readonly datasource: Datasource,
-        readonly kindName: String,
+        readonly kindName: string,
     ) {
 
     }
 
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
-        const datasource =  Datasource.fromServer(input.datasource)
-        const kindName = input.kindName
+        const datasource =  Datasource.fromServer(input.datasource);
+        const kindName = input.kindName;
         return new RSDToCategoryPayload(datasource, kindName);
     }
 }

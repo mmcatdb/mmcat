@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
         },
         base,
         server: {
-            port: env.VITE_DEV_SERVER_PORT,
+            port: Number.parseInt(env.VITE_DEV_SERVER_PORT),
         },
     };
 });

@@ -9,7 +9,10 @@
         "baseUrl": ".",
         "paths": {
             "@/*": [ "./src/*" ]
-        }
+        },
+        "types": [
+            "@vue-macros/reactivity-transform/macros-global",
+        ]
     },
     "references": [
         {
