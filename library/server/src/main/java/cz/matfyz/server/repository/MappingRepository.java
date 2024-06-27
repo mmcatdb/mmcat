@@ -137,17 +137,4 @@ public class MappingRepository {
         });
     }
 
-    public boolean removeAll(Id logicalModelId) {
-        return db.getBoolean((connection, output) -> {
-            var statement = connection.prepareStatement("""
-                DELETE FROM mapping
-                WHERE logical_model_id = ?;
-                """
-            );
-            setId(statement, 1, logicalModelId);
-            int affectedRows = statement.executeUpdate();
-            output.set(affectedRows > 0);
-        });
-    }
-
 }

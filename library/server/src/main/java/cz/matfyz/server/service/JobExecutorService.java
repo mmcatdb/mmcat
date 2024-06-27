@@ -153,6 +153,7 @@ public class JobExecutorService {
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
+        System.out.println("Ahoj v jobexecutorService");
         @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
         //System.out.println("jobexecutor: " + instance.objects());
         //System.out.println("print if non empty");
@@ -224,7 +225,6 @@ public class JobExecutorService {
 
             // Adding the schema for each mapping here
             generatedDataModel.addAccessPath(mapping.accessPath());
-            //output.append(mapping.accessPath().toString() + "\n");
         }
 
         output.append("Schema follows:" + "\n");
@@ -281,7 +281,6 @@ public class JobExecutorService {
 
         final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
-        // TODO: right now we are testing the presence of the intial log model with the label, not great:(
         LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, run.categoryId, "Initial logical model");
 
         schemaService.overwriteInfo(schemaWrapper, run.categoryId);
@@ -301,11 +300,6 @@ public class JobExecutorService {
     }
 
     private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id schemaCategoryId, String initialLogicalModelLabel) {
-        for (LogicalModelWithDatasource logicalModel : logicalModelService.findAll(schemaCategoryId)) {
-            if (logicalModel.logicalModel().label.equals(initialLogicalModelLabel)) {
-                logicalModelService.remove(logicalModel.logicalModel().id);
-            }
-        }
         LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceId, schemaCategoryId, initialLogicalModelLabel);
         return logicalModelService.createNew(logicalModelInit);
     }

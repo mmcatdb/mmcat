@@ -72,8 +72,4 @@ public class MappingService {
         }
     }
 
-    public void removeAll(Id logicalModelId) {
-        repository.removeAll(logicalModelId);
-    }
-
 }
