@@ -3,7 +3,7 @@ import type { ComparablePosition, GroupData, SchemaMorphism, SchemaObject } from
 import { Edge } from './Edge';
 import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
-import { ComparableMap } from '@/utils/ComparableMap';
+import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Id } from '../id';
 import { shallowRef } from 'vue';
 

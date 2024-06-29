@@ -9,7 +9,7 @@ module.exports = {
         'plugin:react/jsx-runtime',
         'plugin:react-hooks/recommended',
     ],
-    ignorePatterns: ['dist', '.eslintrc.cjs'],
+    ignorePatterns: ['dist', '.eslintrc.cjs', 'tailwind.config.js', 'postcss.config.js'],
     parser: '@typescript-eslint/parser',
     parserOptions: {
         ecmaVersion: 'latest',
@@ -47,5 +47,7 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': [ 'error', { 'destructuredArrayIgnorePattern': '^_' } ],
         '@typescript-eslint/restrict-template-expressions': [ 'off' ],
         '@typescript-eslint/restrict-plus-operands': [ 'off' ],
+        '@typescript-eslint/no-floating-promises': [ 'warn', { ignoreVoid: true, ignoreIIFE: true } ],
+        '@typescript-eslint/no-misused-promises': [ 'warn', { checksVoidReturn: false } ],
     },
 }

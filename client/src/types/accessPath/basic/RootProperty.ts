@@ -1,4 +1,4 @@
-import { IndentedStringBuilder } from '@/utils/string';
+import { IndentedStringBuilder } from '@/types/utils/string';
 import { Signature, StaticName } from '@/types/identifiers';
 import { subpathFromFromServer, type ChildProperty } from './compositeTypes';
 import type { RootPropertyFromServer } from '../serverTypes';

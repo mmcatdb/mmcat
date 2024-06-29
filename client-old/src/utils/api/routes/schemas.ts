@@ -7,7 +7,7 @@ const schemas = {
     getAllCategoryInfos: GET<Empty, SchemaCategoryInfoFromServer[]>(
         () => `/schema-categories`,
     ),
-    createNewSchema: POST<Empty, SchemaCategoryInfoFromServer, SchemaCategoryInit>(
+    createNewCategory: POST<Empty, SchemaCategoryInfoFromServer, SchemaCategoryInit>(
         () => `/schema-categories`,
     ),
     getCategoryInfo: GET<{ id: StringLike }, SchemaCategoryInfoFromServer>(

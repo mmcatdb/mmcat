@@ -8,7 +8,7 @@ import models from './routes/models';
 import queries from './routes/queries';
 import schemas from './routes/schemas';
 
-const API = {
+const api = {
     actions,
     datasources,
     instances,
@@ -20,4 +20,6 @@ const API = {
     schemas,
 };
 
-export default API;
+export { api };
+
+export type Resolved<TLoaderData extends Record<string, unknown>, TKey extends keyof TLoaderData> = TLoaderData[TKey] extends Promise<infer TResolved> ? TResolved : never;

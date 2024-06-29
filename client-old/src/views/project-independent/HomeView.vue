@@ -32,7 +32,7 @@ async function confirmNewCategory() {
     if (!avaliableCategories.value)
         return;
 
-    const result = await API.schemas.createNewSchema({}, {
+    const result = await API.schemas.createNewCategory({}, {
         label: newCategoryLabel.value,
     });
     if (!result.status)

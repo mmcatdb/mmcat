@@ -1,4 +1,4 @@
-import { UniqueIdProvider } from '@/utils/UniqueIdProvider';
+import { UniqueIdProvider } from '@/types/utils/UniqueIdProvider';
 import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import type { Entity, Id, VersionId } from '../id';
 import { DynamicName, Key, Signature } from '../identifiers';
@@ -6,9 +6,9 @@ import type { LogicalModel } from '../logicalModel';
 import { SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
 import { SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
-import { ComparableMap } from '@/utils/ComparableMap';
+import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Mapping } from '../mapping';
-import { ComparableSet } from '@/utils/ComparableSet';
+import { ComparableSet } from '@/types/utils/ComparableSet';
 import type { DatasourceType } from '../datasource';
 
 export type SchemaCategoryFromServer = {

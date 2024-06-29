@@ -1,4 +1,4 @@
-import { ComparableMap } from '@/utils/ComparableMap';
+import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Core, ElementDefinition, NodeSingular } from 'cytoscape';
 import type { Key, Signature } from '../identifiers';
 import type { ComparablePosition, SchemaObject } from '../schema';

@@ -15,4 +15,8 @@ public class SchemaCategoryInfo extends Entity {
         this.version = version;
     }
 
+    public static SchemaCategoryInfo fromWrapper(SchemaCategoryWrapper wrapper) {
+        return new SchemaCategoryInfo(wrapper.id, wrapper.label, wrapper.version);
+    }
+
 }
