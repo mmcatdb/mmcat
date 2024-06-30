@@ -1,4 +1,7 @@
-import type { Position } from 'cytoscape';
+export type Position = {
+    x: number;
+    y: number;
+};
 
 export class ComparablePosition implements Position {
     private constructor(

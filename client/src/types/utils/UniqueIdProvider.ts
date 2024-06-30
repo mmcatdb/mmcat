@@ -9,36 +9,35 @@ const identityFunction = {
 };
 
 export class UniqueIdProvider<T> {
-    _mapping: Bijection<T, number>;
-    _currentValues: Set<number> = new Set();
-    _maxValue = 0;
+    private readonly currentValues = new Set<number>();
+    private _maxValue = 0;
 
-    constructor(mapping: Bijection<T, number>) {
-        this._mapping = mapping;
-    }
+    constructor(
+        private readonly mapping: Bijection<T, number>,
+    ) {}
 
     static identity(): UniqueIdProvider<number> {
         return new UniqueIdProvider(identityFunction);
     }
 
     add(identifier: T): void {
-        const value = this._mapping.function(identifier);
-        this._currentValues.add(value);
+        const value = this.mapping.function(identifier);
+        this.currentValues.add(value);
         this._maxValue = Math.max(this._maxValue, value);
     }
 
     remove(identifier: T): void {
-        const value = this._mapping.function(identifier);
-        this._currentValues.delete(value);
+        const value = this.mapping.function(identifier);
+        this.currentValues.delete(value);
     }
 
     update(newId: T, oldId: T): void {
-        this._currentValues.delete(this._mapping.function(oldId));
+        this.currentValues.delete(this.mapping.function(oldId));
         this.add(newId);
     }
 
     suggest(): T {
-        return this._mapping.inversion(this._maxValue + 1);
+        return this.mapping.inversion(this._maxValue + 1);
     }
 
     createAndAdd(): T {
@@ -48,7 +47,7 @@ export class UniqueIdProvider<T> {
     }
 
     isAvailable(identifier: T) {
-        return !this._currentValues.has(this._mapping.function(identifier));
+        return !this.currentValues.has(this.mapping.function(identifier));
     }
 
     get maxValue(): number {
@@ -56,6 +55,6 @@ export class UniqueIdProvider<T> {
     }
 
     get maxIdentifier(): T {
-        return this._mapping.inversion(this._maxValue);
+        return this.mapping.inversion(this._maxValue);
     }
 }

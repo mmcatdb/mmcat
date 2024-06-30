@@ -1,48 +1,47 @@
 export type Injection<Key, KeyId> = (key: Key) => KeyId;
 
 export class ComparableSet<Key, Id> implements Set<Key> {
-    _keyToIdFunction: Injection<Key, Id>;
-    _map: Map<Id, Key> = new Map();
+    private readonly map = new Map<Id, Key>();
 
-    public constructor(keyToIdFunction: Injection<Key, Id>) {
-        this._keyToIdFunction = keyToIdFunction;
-    }
+    public constructor(
+        private readonly keyToIdFunction: Injection<Key, Id>,
+    ) {}
 
     clear(): void {
-        this._map.clear();
+        this.map.clear();
     }
 
     delete(key: Key): boolean {
-        return this._map.delete(this._keyToIdFunction(key));
+        return this.map.delete(this.keyToIdFunction(key));
     }
 
     has(key: Key): boolean {
-        return this._map.has(this._keyToIdFunction(key));
+        return this.map.has(this.keyToIdFunction(key));
     }
 
     add(key: Key): this {
-        this._map.set(this._keyToIdFunction(key), key);
+        this.map.set(this.keyToIdFunction(key), key);
         return this;
     }
 
     get size(): number {
-        return this._map.size;
+        return this.map.size;
     }
 
     entries(): IterableIterator<[Key, Key]> {
-        return injectionIterator(this._map.entries(), ([ , key ]) => [ key, key ]);
+        return injectionIterator(this.map.entries(), ([ , key ]) => [ key, key ]);
     }
 
     forEach(callbackfn: (value: Key, value2: Key, set: Set<Key>) => void): void {
-        this._map.forEach(value => callbackfn(value, value, this));
+        this.map.forEach(value => callbackfn(value, value, this));
     }
 
     keys(): IterableIterator<Key> {
-        return this._map.values();
+        return this.map.values();
     }
 
     values(): IterableIterator<Key> {
-        return this._map.values();
+        return this.map.values();
     }
 
     [Symbol.iterator](): IterableIterator<Key> {

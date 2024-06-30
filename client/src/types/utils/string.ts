@@ -7,14 +7,14 @@ export class IndentedStringBuilder {
     }
 
     public static getTabIntendationString(depth: number): string {
-        return [ ...Array(depth) ].map(() => '    ').join();
+        return [ ...Array<undefined>(depth) ].map(() => '    ').join();
     }
 
-    public appendIntended(string: string): IndentedStringBuilder {
+    public appendIntended(string: string): this {
         return this.append(string, true);
     }
 
-    public append(string: string, intended = false): IndentedStringBuilder {
+    public append(string: string, intended = false): this {
         if (string === '')
             return this;
 
@@ -26,11 +26,11 @@ export class IndentedStringBuilder {
         return this;
     }
 
-    public appendIntendedLine(line = ''): IndentedStringBuilder {
+    public appendIntendedLine(line = ''): this {
         return this.appendLine(line, true);
     }
 
-    public appendLine(line = '', intended = false): IndentedStringBuilder {
+    public appendLine(line = '', intended = false): this {
         this.lines.push((intended ? this.intendationString : '') + line);
 
         return this;

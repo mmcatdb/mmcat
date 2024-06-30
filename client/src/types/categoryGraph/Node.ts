@@ -1,10 +1,10 @@
 import { ComparableMap } from '@/types/utils/ComparableMap';
-import type { Core, ElementDefinition, NodeSingular } from 'cytoscape';
+// import type { Core, ElementDefinition, NodeSingular } from 'cytoscape';
+// import { groupHighlightColorToClass } from '@/components/category/defaultGraphStyle';
 import type { Key, Signature } from '../identifiers';
 import type { ComparablePosition, SchemaObject } from '../schema';
 import { DirectedEdge, type Edge } from './Edge';
 import { PathMarker, type MorphismData, type Filter } from './PathMarker';
-import { groupHighlightColorToClass } from '@/components/category/defaultGraphStyle';
 import type { Group } from './Graph';
 
 export enum NodeTag {
@@ -68,7 +68,7 @@ export class Neighbor {
 
 export class Node {
     private node!: NodeSingular;
-    private tags: Set<NodeTag> = new Set();
+    private tags = new Set<NodeTag>();
     availablePathData?: MorphismData;
     isFixed = false;
 
@@ -252,12 +252,12 @@ function createNodeDefinition(object: SchemaObject, position: ComparablePosition
 
 type GroupPlaceholder = {
     group: Group;
-    node: NodeSingular;
+    // node: NodeSingular;
     state: 'root' | 'property' | undefined;
 };
 
 class NodeHighlights {
-    private readonly placeholders: Map<string, GroupPlaceholder> = new Map();
+    private readonly placeholders = new Map<string, GroupPlaceholder>();
 
     public constructor(
         private readonly cytoscape: Core,

@@ -2,7 +2,7 @@ import type { Graph } from '@/types/categoryGraph';
 import { type SchemaCategory, type ObjectDefinition, SchemaObject, type MorphismDefinition, SchemaMorphism } from '@/types/schema';
 import type { LogicalModel } from '../logicalModel';
 import type { Result } from '../api/result';
-import { Version, VersionContext, computeLatestVersions } from './Version';
+import { type Version, VersionContext, computeLatestVersions } from './Version';
 import { CreateMorphism, CreateObject, Composite, DeleteMorphism, DeleteObject, type SMO, EditMorphism, EditObject } from '../schema/operation';
 import type { MetadataUpdate, SchemaUpdate, SchemaUpdateInit } from '../schema/SchemaUpdate';
 import { VersionedSMO } from '../schema/VersionedSMO';

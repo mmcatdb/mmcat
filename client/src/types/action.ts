@@ -1,5 +1,5 @@
 import type { Entity, Id, VersionId } from './id';
-import { LogicalModelInfo, type LogicalModelFromServer, type LogicalModelInfoFromServer } from './logicalModel';
+import { LogicalModelInfo, type LogicalModelInfoFromServer } from './logicalModel';
 import {  Datasource, type DatasourceFromServer } from './datasource';
 
 export type ActionFromServer = {
@@ -56,7 +56,7 @@ export const ACTION_TYPES = [
     },
 ];
 
-interface ActionPayloadType<TType extends ActionType = ActionType> {
+type ActionPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
 }
 

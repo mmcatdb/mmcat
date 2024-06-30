@@ -2,11 +2,11 @@ import { api, type Resolved } from '@/api';
 import { LogicalModel } from '@/types/logicalModel';
 import { SchemaCategory as SchemaCategoryType } from '@/types/schema';
 import { SchemaUpdate } from '@/types/schema/SchemaUpdate';
-import { sleep } from '@/types/utils/common';
 import { Suspense } from 'react';
 import { type Params, useLoaderData, defer, Await } from 'react-router-dom';
 import { LoadingComponent } from '../errorPages';
 import { Portal, portals } from '@/components/common';
+import { SchemaCategoryGraph } from '@/components/project/SchemaCategoryGraph';
 
 export function SchemaCategory() {
     const loaderData = useLoaderData() as SchemaCategoryLoaderData;
@@ -24,6 +24,8 @@ export function SchemaCategory() {
                         <p>
                             updates: {updates.length}
                         </p>
+
+                        <SchemaCategoryGraph category={category} />
                     </div>
                 )}
             </Await>
@@ -46,7 +48,6 @@ export function schemaCategoryLoader({ params: { projectId } }: { params: Params
         api.schemas.getCategoryWrapper({ id: projectId }),
         api.schemas.getCategoryUpdates({ id: projectId }),
         api.logicalModels.getAllLogicalModelsInCategory({ categoryId: projectId }),
-        sleep(2000),
     ])
         .then(([ categoryResponse, updatesResponse, modelsResponse ]) => {
             if (!categoryResponse.status || !updatesResponse.status || !modelsResponse.status)

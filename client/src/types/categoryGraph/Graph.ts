@@ -1,19 +1,18 @@
-import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from 'cytoscape';
+// import type { Core, EdgeSingular, EventHandler, EventObject, LayoutOptions, NodeSingular } from 'cytoscape';
 import type { ComparablePosition, GroupData, SchemaMorphism, SchemaObject } from '../schema';
 import { Edge } from './Edge';
 import { Node } from './Node';
 import type { Key, Signature } from '../identifiers';
 import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Id } from '../id';
-import { shallowRef } from 'vue';
 
 export type TemporaryEdge = {
     delete: () => void;
 };
 
 export class Graph {
-    private readonly nodes: ComparableMap<Key, number, Node> = new ComparableMap(key => key.value);
-    private readonly edges: ComparableMap<Signature, string, Edge> = new ComparableMap(signature => signature.value);
+    private readonly nodes = new ComparableMap<Key, number, Node>(key => key.value);
+    private readonly edges = new ComparableMap<Signature, string, Edge>(signature => signature.value);
     private readonly eventListener: GraphEventListener;
     public readonly highlights: GraphHighlights;
 
@@ -65,8 +64,8 @@ export class Graph {
     }
 
     createEdge(morphism: SchemaMorphism): Edge {
-        const dom = this.nodes.get(morphism.domKey) as Node;
-        const cod = this.nodes.get(morphism.codKey) as Node;
+        const dom = this.nodes.get(morphism.domKey)!;
+        const cod = this.nodes.get(morphism.codKey)!;
 
         const edge = Edge.create(this.cytoscape, morphism, dom, cod);
         this.edges.set(morphism.signature, edge);
@@ -157,7 +156,7 @@ class GraphEventListener {
         private readonly cytoscape: Core,
     ) {}
 
-    private openSessions: Map<number, ListenerSession> = new Map();
+    private openSessions = new Map<number, ListenerSession>();
 
     openSession(): ListenerSession {
         this.lastSessionId++;
@@ -194,7 +193,7 @@ class ListenerSession {
         private readonly cytoscape: Core,
     ) {}
 
-    private eventHandlers: Map<number, EventHandlerObject> = new Map();
+    private eventHandlers = new Map<number, EventHandlerObject>();
 
     close() {
         [ ...this.eventHandlers.keys() ].forEach(handler => this.removeEventHandler(handler));
@@ -268,7 +267,7 @@ export type GraphHighlightState = {
 } | undefined;
 
 class GraphHighlights {
-    private readonly _groups: Map<string, Group> = new Map();
+    private readonly _groups = new Map<string, Group>();
     /** Reactive accessor */
     readonly groups = shallowRef<Group[]>([]);
     private availableGroups: GroupData[] = [];
