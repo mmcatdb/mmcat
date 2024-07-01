@@ -22,6 +22,8 @@ public class Job extends Entity {
         Ready,
         /** The job is currently being processed. */
         Running,
+        /** The job is waiting for a manual input. */
+        Waiting,
         /** The job is finished, either with a success or with an error. */
         Finished,
         /** The job was canceled while being in one of the previous states. It can never be started (again). */

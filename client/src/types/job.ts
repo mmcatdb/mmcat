@@ -51,6 +51,7 @@ export enum JobState {
     Paused = 'Paused',
     Ready = 'Ready',
     Running = 'Running',
+    Waiting = 'Waiting',
     Finished = 'Finished',
     Canceled = 'Canceled',
     Failed = 'Failed',
