@@ -153,7 +153,6 @@ public class JobExecutorService {
         final List<MappingWrapper> mappingWrappers = mappingService.findAll(payload.logicalModelId());
 
         final SchemaCategory schema = schemaService.find(run.categoryId).toSchemaCategory();
-        System.out.println("Ahoj v jobexecutorService");
         @Nullable InstanceCategory instance = instanceService.loadCategory(run.sessionId, schema);
         //System.out.println("jobexecutor: " + instance.objects());
         //System.out.println("print if non empty");
@@ -227,9 +226,7 @@ public class JobExecutorService {
             generatedDataModel.addAccessPath(mapping.accessPath());
         }
 
-        output.append("Schema follows:" + "\n");
-        output.append(generatedDataModel);
-
+        job.generatedDataModel = generatedDataModel.toString();
         job.data = output.toString();
     }
 

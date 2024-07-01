@@ -16,6 +16,8 @@ type JobDisplayProps = {
 const props = defineProps<JobDisplayProps>();
 const error = computed(() => props.job.error ? { name: props.job.error.name, data: stringify(props.job.error.data) } : undefined);
 const result = computed(() => stringify(props.job.result));
+const resultModel = computed(() => props.job.resultModel);
+const showGeneratedDataModel = ref(false);
 
 function stringify(value: unknown): string | undefined {
     if (value === undefined || value === null)
@@ -61,6 +63,10 @@ async function restartJob() {
         emit('updateJob', Job.fromServer(result.data));
 
     fetching.value = false;
+}
+
+function toggleGeneratedDataModel() {
+    showGeneratedDataModel.value = !showGeneratedDataModel.value;
 }
 </script>
 
@@ -141,6 +147,14 @@ async function restartJob() {
                 >
                     Restart
                 </button>
+                <button
+                    v-if="job.payload.type === ActionType.CategoryToModel && isShowDetail"
+                    :disabled="fetching"
+                    class="secondary"
+                    @click="toggleGeneratedDataModel"
+                >
+                    {{ showGeneratedDataModel ? 'Job output' : 'Generated Model' }}
+                </button>
             </div>
         </div>
         <div
@@ -154,7 +168,14 @@ async function restartJob() {
                 :min-rows="1"
             />
             <TextArea
-                v-if="result"
+                v-if="showGeneratedDataModel && resultModel"
+                :value="resultModel"
+                class="w-100 mt-2"
+                readonly
+                :min-rows="1"
+            />
+            <TextArea
+                v-if="!showGeneratedDataModel && result"
                 v-model="result"
                 class="w-100 mt-2"
                 readonly

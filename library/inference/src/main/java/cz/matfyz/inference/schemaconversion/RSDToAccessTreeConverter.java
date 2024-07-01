@@ -45,7 +45,10 @@ public class RSDToAccessTreeConverter {
                 Key keyChild = new Key(keyGenerator.next());
                 Min min = findMin(rsdParent, rsdChild);
                 boolean isArray = isTypeArray(rsdChild);
-                String label = createLabel(rsdChild, isArray);
+
+                // for now we have decided not to have labels
+                // String label = createLabel(rsdChild, isArray);
+                String label = null;
 
                 AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.SIMPLE, rsdChild.getName(), signature, keyChild, keyParent, label, min, isArray);
                 currentNode.addChild(child);

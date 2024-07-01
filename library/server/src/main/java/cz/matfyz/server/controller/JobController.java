@@ -1,5 +1,6 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.server.builder.GeneratedDataModel;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
@@ -108,13 +109,14 @@ public class JobController {
         Date createdAt,
         Job.State state,
         ActionPayloadDetail payload,
-        @Nullable Serializable data
+        @Nullable Serializable data,
+        @Nullable Serializable generatedDataModel
     ) implements IEntity {
         public static JobDetail create(JobWithRun jobWithRun, ActionPayloadDetail payload) {
             final var job = jobWithRun.job();
             final var run = jobWithRun.run();
 
-            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.createdAt, job.state, payload, job.data);
+            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.createdAt, job.state, payload, job.data, job.generatedDataModel);
         }
     }
 

@@ -37,6 +37,8 @@ public class Job extends Entity {
     public final ActionPayload payload;
     public State state;
     public @Nullable Serializable data = null;
+    /** The generatedDataModel gets created for the CategoryToModelPayload */
+    public @Nullable Serializable generatedDataModel = null;
 
     private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state) {
         super(id);
@@ -63,7 +65,8 @@ public class Job extends Entity {
         Date createdAt,
         ActionPayload payload,
         State state,
-        @Nullable Serializable data
+        @Nullable Serializable data,
+        @Nullable Serializable generatedDataModel
     ) {}
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(JsonValue.class);
@@ -80,6 +83,7 @@ public class Job extends Entity {
             jsonValue.state
         );
         job.data = jsonValue.data;
+        job.generatedDataModel = jsonValue.generatedDataModel;
 
         return job;
     }
@@ -90,7 +94,8 @@ public class Job extends Entity {
             createdAt,
             payload,
             state,
-            data
+            data,
+            generatedDataModel
         ));
     }
 
