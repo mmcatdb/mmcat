@@ -36,7 +36,7 @@ export class Job implements Entity {
             input.state,
             actionPayloadFromServer(input.payload),
             input.state === JobState.Failed ? input.data as JobError : undefined,
-            input.state === JobState.Finished ? input.data : undefined,
+            input.state === JobState.Finished || JobState.Waiting ? input.data : undefined,
             input.state === JobState.Finished ? input.generatedDataModel : undefined,
             new Date(input.createdAt),
         );

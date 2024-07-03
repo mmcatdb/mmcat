@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import API from '@/utils/api';
 import { Job, JobState } from '@/types/job';
 import { ActionType } from '@/types/action';
@@ -7,6 +7,9 @@ import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
+import EvocatDisplay from '../category/EvocatDisplay.vue';
+import { SchemaCategory } from '@/types/schema';
+import { InferenceJobData, isInferenceJobData } from '@/utils/InferenceJobData';
 
 type JobDisplayProps = {
     job: Job;
@@ -15,7 +18,14 @@ type JobDisplayProps = {
 
 const props = defineProps<JobDisplayProps>();
 const error = computed(() => props.job.error ? { name: props.job.error.name, data: stringify(props.job.error.data) } : undefined);
-const result = computed(() => stringify(props.job.result));
+
+const result = computed(() => {
+    if (props.job.payload.type === ActionType.RSDToCategory) {
+        return '';
+    }
+    return stringify(props.job.result);
+});
+
 const resultModel = computed(() => props.job.resultModel);
 const showGeneratedDataModel = ref(false);
 
@@ -65,9 +75,41 @@ async function restartJob() {
     fetching.value = false;
 }
 
+async function saveJob() {
+    fetching.value = true;
+
+    const result = await API.jobs.saveJobResult({ id: props.job.id });
+    if (result.status)
+        emit('updateJob', Job.fromServer(result.data));
+
+    fetching.value = false;
+
+}
+
 function toggleGeneratedDataModel() {
     showGeneratedDataModel.value = !showGeneratedDataModel.value;
 }
+
+// TODO: For some weird reason  sometimes the job is string and needs to be parsed to inferencejobdata first, sometimes it is inferencejobdata right away
+const schemaCategory = computed(() => {
+    if (isInferenceJobData(props.job.result)) {
+        console.log("props.job.result is inferenceJobData");
+        return SchemaCategory.fromServer(props.job.result.inference.schemaCategory, []);
+    }
+    if (typeof props.job.result === 'string') {
+        console.log("props.job.result is string");
+        const parsedResult = JSON.parse(props.job.result);        
+
+        if (isInferenceJobData(parsedResult)) {
+            console.log("probs.job.result is string and inferencejobdata");
+            return SchemaCategory.fromServer(parsedResult.inference.schemaCategory, []);
+        }
+
+        return SchemaCategory.fromServer(parsedResult, []);
+    }
+    return props.job.result as SchemaCategory;
+});
+
 </script>
 
 <template>
@@ -155,11 +197,22 @@ function toggleGeneratedDataModel() {
                 >
                     {{ showGeneratedDataModel ? 'Job output' : 'Generated Model' }}
                 </button>
+                <button 
+                    v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
+                    :disabled="fetching"
+                    class="primary"
+                    @click="saveJob"
+                >
+                    Save and Finish
+                </button>
             </div>
         </div>
         <div
             v-if="isShowDetail"
         >
+            <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
+                <EvocatDisplay :schemaCategory="schemaCategory"/>
+            </template>
             <TextArea
                 v-if="error"
                 v-model="error.data"
@@ -168,19 +221,19 @@ function toggleGeneratedDataModel() {
                 :min-rows="1"
             />
             <TextArea
-                v-if="showGeneratedDataModel && resultModel"
+                v-else-if="showGeneratedDataModel && resultModel"
                 :value="resultModel"
                 class="w-100 mt-2"
                 readonly
                 :min-rows="1"
             />
-            <TextArea
-                v-if="!showGeneratedDataModel && result"
+           <TextArea
+                v-else-if="!showGeneratedDataModel && result && job.payload.type !== ActionType.RSDToCategory"
                 v-model="result"
                 class="w-100 mt-2"
                 readonly
                 :min-rows="1"
-            />
+            /> 
         </div>
     </div>
 </template>

@@ -1,15 +1,16 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.server.builder.GeneratedDataModel;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
+import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.entity.job.Job.State;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
+import cz.matfyz.server.service.JobExecutorService;
 import cz.matfyz.server.service.JobService;
 
 import java.io.Serializable;
@@ -34,6 +35,9 @@ public class JobController {
 
     @Autowired
     private JobService service;
+
+    @Autowired
+    private JobExecutorService jobExecutorService;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -93,6 +97,26 @@ public class JobController {
 
         return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
     }
+
+    @PostMapping("/jobs/{id}/saveResult")
+    public JobDetail saveJobResult(@PathVariable Id id) {
+        final var jobWithRun = repository.find(id);
+        final var job = jobWithRun.job();
+        final var run = jobWithRun.run();
+
+        try {
+            if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
+                jobExecutorService.continueRSDToCategoryProcessing(run, job, rsdToCategoryPayload);
+            } else {
+                throw new IllegalArgumentException("Job results should be saved only for RSDToCategory Payload");
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
+        }
+
+        return jobToJobDetail(service.transition(jobWithRun, State.Finished));
+    }
+
 
     private JobDetail jobToJobDetail(JobWithRun job) {
         final var payload = actionController.actionPayloadToDetail(job.job().payload);

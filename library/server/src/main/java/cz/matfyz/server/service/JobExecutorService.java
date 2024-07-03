@@ -40,6 +40,7 @@ import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
+import cz.matfyz.server.utils.InferenceJobData;
 import cz.matfyz.server.utils.LayoutUtil;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
@@ -47,12 +48,14 @@ import cz.matfyz.transformations.processes.InstanceToDatabase;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class JobExecutorService {
@@ -117,7 +120,11 @@ public class JobExecutorService {
         try {
             processJobByType(run, job);
             LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
-            job.state = Job.State.Finished;
+            if (job.payload instanceof RSDToCategoryPayload) {
+                job.state = Job.State.Waiting;
+            } else {
+                job.state = Job.State.Finished;
+            }
             repository.save(job);
         }
         catch (Exception e) {
@@ -138,7 +145,7 @@ public class JobExecutorService {
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
         else if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload)
-            rsdToCategoryAlgorithm(run, rsdToCategoryPayload);
+            rsdToCategoryAlgorithm(run, job, rsdToCategoryPayload);
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
@@ -264,7 +271,7 @@ public class JobExecutorService {
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
-    private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+    private void rsdToCategoryAlgorithm(Run run, Job job, RSDToCategoryPayload payload) {
         // extracting the empty SK wrapper
         final SchemaCategoryWrapper originalSchemaWrapper = schemaService.find(run.categoryId);
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
@@ -276,12 +283,40 @@ public class JobExecutorService {
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
+        // kdyz zavolam inferenci, tak nejdriv nechci jeste nic ukladat
+        // jeji vysledek (prvotni SK) poslu na frontend v job.data
         final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
-        LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, run.categoryId, "Initial logical model");
+        // TODO: for some reason mapping doesnt survive being sent to client and back, but the SK does
+        InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, categoryMappingPair.mapping()));
+        try {
+            job.data = inferenceJobData.toJsonValue();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
+        }
+    }
+
+    public void continueRSDToCategoryProcessing(Run run, Job job, RSDToCategoryPayload payload) {
+        SchemaCategoryWrapper schemaWrapper = null; //TODO: get rid of this null
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jobDataString = job.data.toString();
+            System.out.println("jodDataString: " + jobDataString);
+
+            if (jobDataString.contains("inference")) { // TODO: make this more clever; checking if job.data is of InferenceJobData
+                InferenceJobData inferenceJobData = objectMapper.readValue(jobDataString, InferenceJobData.class);
+                schemaWrapper = inferenceJobData.inference.schemaCategory;
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to process JSON while extracting the SK from job.data", e);
+        }
+
+        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
+        final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, run.categoryId, "Initial logical model");
 
         schemaService.overwriteInfo(schemaWrapper, run.categoryId);
-        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
+        //mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
+
     }
 
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {

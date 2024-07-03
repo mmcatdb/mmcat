@@ -12,6 +12,10 @@ import { LogicalModel } from '@/types/logicalModel';
 import { DataResultSuccess } from '@/types/api/result';
 import { SchemaUpdate, type MetadataUpdate, type SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
 
+const props = defineProps<{
+    schemaCategory?: SchemaCategory;
+}>();
+
 const categoryId = useSchemaCategoryId();
 
 const evocat = shallowRef<Evocat>();
@@ -20,6 +24,46 @@ const fetching = ref(true);
 
 const emit = defineEmits([ 'evocatCreated' ]);
 
+// TODO: for now I have added this work around so that I can pass a SchemaCategory to EvocatDisplay and see it in my Job Editor
+// but make sure to later create your own display for the editor and get rid of this
+
+async function fetchData() {
+    if (props.schemaCategory) {
+        initializeEvocat(props.schemaCategory);
+        return;
+    }
+    
+    const schemaCategoryResult = await API.schemas.getCategoryWrapper({ id: categoryId });
+    const schemaUpdatesResult = await API.schemas.getCategoryUpdates({ id: categoryId });
+    const logicalModelsResult = await API.logicalModels.getAllLogicalModelsInCategory({ categoryId });
+    fetching.value = false;
+
+    if (!schemaCategoryResult.status || !schemaUpdatesResult.status || !logicalModelsResult.status) {
+        // TODO handle error
+        return;
+    }
+
+    const schemaUpdates = schemaUpdatesResult.data.map(SchemaUpdate.fromServer);
+    const logicalModels = logicalModelsResult.data.map(LogicalModel.fromServer);
+
+    const schemaCategory = SchemaCategory.fromServer(schemaCategoryResult.data, logicalModels);
+    initializeEvocat(schemaCategory, schemaUpdates, logicalModels);
+}
+
+function initializeEvocat(schemaCategory: SchemaCategory, schemaUpdates: SchemaUpdate[] = [], logicalModels: LogicalModel[] = []) {
+    const newEvocat = Evocat.create(schemaCategory, schemaUpdates, logicalModels, {
+        update: updateFunction,
+        updateMetadata: updateMetadataFunction,
+    });
+    evocat.value = newEvocat;
+
+    if (graph.value)
+        contextCompleted(evocat.value, graph.value);
+}
+
+onMounted(fetchData);
+
+/*
 onMounted(async () => {
     const schemaCategoryResult = await API.schemas.getCategoryWrapper({ id: categoryId });
     const schemaUpdatesResult = await API.schemas.getCategoryUpdates({ id: categoryId });
@@ -45,7 +89,7 @@ onMounted(async () => {
         contextCompleted(evocat.value, graph.value);
 
 });
-
+*/
 const info = useSchemaCategoryInfo();
 
 async function updateFunction(update: SchemaUpdateInit, models: LogicalModel[]) {
