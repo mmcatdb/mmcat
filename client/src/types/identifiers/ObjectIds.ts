@@ -41,8 +41,8 @@ export class ObjectIds {
 
     static createCrossProduct(elements: { signature: Signature, ids: ObjectIds }[]): ObjectIds {
         let signatureIds = [ new SignatureId([]) ];
-        for (let i = 0; i < elements.length; i++)
-            signatureIds = ObjectIds.combineCrossProductIds(signatureIds, elements[i].signature, elements[i].ids);
+        for (const element of elements)
+            signatureIds = ObjectIds.combineCrossProductIds(signatureIds, element.signature, element.ids);
 
         return ObjectIds.createSignatures(signatureIds);
     }

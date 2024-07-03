@@ -34,7 +34,7 @@ public class ExampleSetup {
     @Qualifier("queryEvolutionQuerySetup")
     private QuerySetup querySetup;
 
-    public void setup(int version) {
+    public SchemaCategoryWrapper setup(int version) {
         SchemaCategoryWrapper schema = createSchemaCategory();
         final List<DatasourceWrapper> datasources = datasourceSetup.createDatasources();
 
@@ -47,6 +47,8 @@ public class ExampleSetup {
         final List<MappingInfo> mappings = mappingSetup.createMappings(logicalModels, schema, version);
 
         // // TODO jobs
+
+        return schema;
     }
 
     @Autowired

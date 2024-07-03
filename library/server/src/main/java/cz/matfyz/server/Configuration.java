@@ -8,6 +8,7 @@ public class Configuration {
     public record ServerProperties(
         Integer port,
         String origin,
+        String originOld,
         Boolean executeModels
     ) {}
 

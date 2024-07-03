@@ -30,13 +30,15 @@ public class ExampleSetup {
     @Qualifier("basicMappingSetup")
     private MappingSetup mappingSetup;
 
-    public void setup() {
+    public SchemaCategoryWrapper setup() {
         final SchemaCategoryWrapper schema = createSchemaCategory();
         final List<DatasourceWrapper> datasources = datasourceSetup.createDatasources();
         final List<LogicalModel> logicalModels = createLogicalModels(datasources, schema.id);
         final List<MappingInfo> mappings = mappingSetup.createMappings(logicalModels, schema);
 
         // TODO jobs
+
+        return schema;
     }
 
     @Autowired

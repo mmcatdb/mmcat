@@ -1,4 +1,4 @@
-import { ComparableMap } from '@/utils/ComparableMap';
+import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Key, Signature } from '../identifiers';
 import type { Id } from '../id';
 import { InstanceObject, type InstanceObjectFromServer } from './InstanceObject';

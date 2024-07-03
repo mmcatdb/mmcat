@@ -1,5 +1,5 @@
 import { DynamicName, nameFromServer, Signature, StaticName, type Name } from '@/types/identifiers';
-import { IndentedStringBuilder } from '@/utils/string';
+import { IndentedStringBuilder } from '@/types/utils/string';
 import type { ComplexPropertyFromServer } from '../serverTypes';
 import { subpathFromFromServer, type ChildProperty, type ParentProperty } from './compositeTypes';
 
