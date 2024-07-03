@@ -28,8 +28,8 @@ public class SchemaCategoryPublicController {
     }
 
     @PostMapping("/public/schema-categories")
-    public SchemaCategoryInfo createNewSchema(@RequestBody SchemaCategoryInit init) {
-        return controller.createNewSchema(init);
+    public SchemaCategoryInfo createNewCategory(@RequestBody SchemaCategoryInit init) {
+        return controller.createNewCategory(init);
     }
 
     @GetMapping("/public/schema-categories/{id}/info")

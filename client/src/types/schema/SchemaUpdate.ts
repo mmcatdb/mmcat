@@ -1,6 +1,6 @@
-import type { Position } from 'cytoscape';
 import type { Entity, Id, VersionId } from '../id';
 import type { KeyFromServer } from '../identifiers';
+import { type Position } from './Position';
 import { VersionedSMO, type VersionedSMOFromServer } from './VersionedSMO';
 
 export type SchemaUpdateFromServer = {

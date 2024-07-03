@@ -1,19 +1,16 @@
-import { fileURLToPath, URL } from 'url';
-
 import { defineConfig, loadEnv } from 'vite';
-import vue from '@vitejs/plugin-vue';
+import { fileURLToPath, URL } from 'url';
+import react from '@vitejs/plugin-react-swc';
 import { createHtmlPlugin } from 'vite-plugin-html';
-import ReactivityTransform from '@vue-macros/reactivity-transform/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-    // Explicitly load the env files because otherwise they would be loaded after the settings (because their location may depend on this settings).
     const env = loadEnv(mode, process.cwd(), '');
-    const base = env.BASE_PATH || '/';
+    const base = env.ENV_BASE_URL ?? '/';
 
     return {
         plugins: [
-            vue(),
+            react(),
             createHtmlPlugin({
                 inject: {
                     data: {
@@ -21,7 +18,6 @@ export default defineConfig(({ mode }) => {
                     },
                 },
             }),
-            ReactivityTransform(),
         ],
         resolve: {
             alias: {

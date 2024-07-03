@@ -1,14 +1,14 @@
-import { UniqueIdProvider } from '@/utils/UniqueIdProvider';
+import { UniqueIdProvider } from '@/types/utils/UniqueIdProvider';
 import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import type { Entity, Id, VersionId } from '../id';
 import { DynamicName, Key, Signature } from '../identifiers';
 import type { LogicalModel } from '../logicalModel';
 import { SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
-import { SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
+import { type SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
-import { ComparableMap } from '@/utils/ComparableMap';
+import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Mapping } from '../mapping';
-import { ComparableSet } from '@/utils/ComparableSet';
+import { ComparableSet } from '@/types/utils/ComparableSet';
 import type { DatasourceType } from '../datasource';
 
 export type SchemaCategoryFromServer = {
@@ -70,8 +70,8 @@ export class SchemaCategory implements Entity {
         );
     }
 
-    private objects = new ComparableMap<Key, number, VersionedSchemaObject>(key => key.value);
-    private morphisms = new ComparableMap<Signature, string, VersionedSchemaMorphism>(signature => signature.value);
+    private readonly objects = new ComparableMap<Key, number, VersionedSchemaObject>(key => key.value);
+    private readonly morphisms = new ComparableMap<Signature, string, VersionedSchemaMorphism>(signature => signature.value);
 
     createObject(): VersionedSchemaObject {
         const key = this.keysProvider.createAndAdd();
@@ -109,6 +109,10 @@ export class SchemaCategory implements Entity {
         }
 
         return morphism;
+    }
+
+    getMorphisms(): VersionedSchemaMorphism[] {
+        return [ ...this.morphisms.values() ];
     }
 
     private _graph?: Graph;
@@ -227,7 +231,7 @@ function createGroups(logicalModels: LogicalModel[], objects: VersionedSchemaObj
 }
 
 function getObjectsFromPath(path: ParentProperty, context: Context): ComparableSet<SchemaObject, number> {
-    const output: ComparableSet<SchemaObject, number> = new ComparableSet(object => object.key.value);
+    const output = new ComparableSet<SchemaObject, number>(object => object.key.value);
 
     path.subpaths.forEach(subpath => {
         findObjectsFromSignature(subpath.signature, context).forEach(object => output.add(object));
