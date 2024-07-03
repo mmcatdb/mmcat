@@ -285,14 +285,14 @@ export class VersionContext {
         let a = this.currentVersion;
         while (a.id !== ancestor.id) {
             sourceToAncestor.push(a);
-            a = a.parent as Version; // A has to have ancestor because it have been found in the previous function.
+            a = a.parent!; // A has to have ancestor because it have been found in the previous function.
         }
 
         const targetToAncestor = [];
         let b = target;
         while (b.id !== ancestor.id) {
             targetToAncestor.push(b);
-            b = b.parent as Version; // The same reason as above.
+            b = b.parent!; // The same reason as above.
         }
 
         const redoOutput = targetToAncestor.reverse(); // NOSONAR - It's the last time we use that array, so it's basically just renaming.
@@ -327,8 +327,8 @@ export class VersionContext {
         let a: Version | undefined = this.currentVersion;
         let b: Version | undefined = target;
 
-        const visited: Set<string> = new Set();
-        while (a || b) {
+        const visited = new Set<string>();
+        while (a ?? b) {
             if (a) {
                 if (visited.has(a.id))
                     return a;

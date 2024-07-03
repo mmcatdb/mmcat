@@ -1,22 +1,11 @@
 {
-    "extends": "@vue/tsconfig/tsconfig.web.json",
-    "include": [ "env.d.ts", "src/**/*", "src/**/*.vue" ],
-    "compilerOptions": {
-        "target": "es6",
-        "lib": [
-            "es2019"
-        ],
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [ "./src/*" ]
-        },
-        "types": [
-            "@vue-macros/reactivity-transform/macros-global",
-        ]
-    },
+    "files": [],
     "references": [
         {
-            "path": "./tsconfig.vite-config.json"
+            "path": "./tsconfig.app.json"
+        },
+        {
+            "path": "./tsconfig.node.json"
         }
     ]
 }

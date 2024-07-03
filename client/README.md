@@ -1,11 +1,11 @@
-# mmcat-client
+# mmcat-client-old
 
-A frontend application for the MM-cat tool. It is based on [Vue 3](https://vuejs.org/) ([Vite](https://vitejs.dev/)) + TypeScript + Options API.
+A frontend application for the MM-cat tool. It is based on [React](https://react.dev/?uwu=true) ([Vite](https://vitejs.dev/)) + TypeScript + Options API.
 
 ## Requirements
 
-- node 16.13
-- npm 8.1
+- node 22.3
+- npm 10.8
 
 ## Configuration
 
@@ -31,7 +31,13 @@ npm install
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### Type-Check
+
+```sh
+npm run types
+```
+
+### Compile and Minify for Production
 
 ```sh
 npm run build

@@ -9,6 +9,7 @@ A backend application for the MM-cat tool. It is based on the Spring Boot framew
 cp src/main/resources/default.properties ./application.properties
 ```
 - *Note: It's important to put the file in this directory. Otherwise, it would be bundled in the `.jar` file, so its secrets would be exposed. Also, now it's possible to change the values even after compilation.*
+    *More precisely, it has to be in the directory from which the application is run (the `mvn` and `java` commands below).*
 - Additional settings are in the `src/main/java/cz/matfyz/server/Settings.java` file.
 - For more information see the [Configuration Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config).
 

@@ -58,7 +58,7 @@ public class SchemaExtractor {
         triples = clause.termTree.toTriples(WhereClause::createTriple);
         patternMorphisms = triples.stream().map(triple -> schema.getMorphism(triple.signature)).toList();
 
-        createNewSchema();
+        createNewCategory();
         updateContext();
         final var patterns = createKindPatterns();
         // At this point, we can check whether the patterns cover all morphisms from the query. But it isn't necessary, because if some morphisms aren't covered, the QueryPlanner shouldn't be able to create any plan.
@@ -70,7 +70,7 @@ public class SchemaExtractor {
     private SchemaCategory newSchema;
     private Queue<SchemaMorphism> morphismQueue;
 
-    private void createNewSchema() {
+    private void createNewCategory() {
         newSchema = new SchemaCategory(schema.label);
         morphismQueue = new ArrayDeque<>(patternMorphisms);
 

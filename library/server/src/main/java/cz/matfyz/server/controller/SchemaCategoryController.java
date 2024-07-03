@@ -34,7 +34,7 @@ public class SchemaCategoryController {
     }
 
     @PostMapping("/schema-categories")
-    public SchemaCategoryInfo createNewSchema(@RequestBody SchemaCategoryInit init) {
+    public SchemaCategoryInfo createNewCategory(@RequestBody SchemaCategoryInit init) {
         var newInfo = service.createNewInfo(init);
         if (newInfo == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

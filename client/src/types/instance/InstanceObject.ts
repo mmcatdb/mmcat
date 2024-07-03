@@ -1,4 +1,4 @@
-import { ComparableMap } from '@/utils/ComparableMap';
+import { ComparableMap } from '@/types/utils/ComparableMap';
 import { Signature, type KeyFromServer, type SignatureFromServer, Key } from '../identifiers';
 import type { SchemaCategory, SchemaObject } from '../schema';
 

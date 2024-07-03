@@ -1,6 +1,5 @@
-import type { Position } from 'cytoscape';
 import { Key, ObjectIds, SignatureId, type KeyFromServer, type ObjectIdsFromServer, type SignatureIdFromServer } from '../identifiers';
-import { ComparablePosition } from './Position';
+import { ComparablePosition, type Position } from './Position';
 import { SchemaCategoryInvalidError } from './Error';
 import type { Graph } from '../categoryGraph';
 
@@ -98,7 +97,7 @@ export type SchemaObjectFromServer = {
 export class VersionedSchemaObject {
     private constructor(
         readonly key: Key,
-        private _position: ComparablePosition,
+        readonly _position: ComparablePosition,
         private _graph?: Graph,
     ) {}
 
@@ -162,7 +161,7 @@ export class VersionedSchemaObject {
             currentNode.update(this._current);
     }
 
-    private readonly groupIds: Set<string> = new Set();
+    private readonly groupIds = new Set<string>();
 
     addGroup(id: string) {
         this.groupIds.add(id);

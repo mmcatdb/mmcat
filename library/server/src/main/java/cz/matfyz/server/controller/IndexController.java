@@ -1,5 +1,8 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
+import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -26,15 +29,17 @@ public class IndexController {
     cz.matfyz.server.example.queryevolution.ExampleSetup queryEvolutionExampleSetup;
 
     @PostMapping("/example-schema/{name}")
-    public void addExampleSchema(@PathVariable String name) {
-        switch (name) {
+    public SchemaCategoryInfo createExampleCategory(@PathVariable String name) {
+        final SchemaCategoryWrapper wrapper = switch (name) {
             case "basic" -> basicExampleSetup.setup();
             case "query-evolution-1" -> queryEvolutionExampleSetup.setup(1);
             case "query-evolution-2" -> queryEvolutionExampleSetup.setup(2);
             case "query-evolution-3" -> queryEvolutionExampleSetup.setup(3);
             case "query-evolution-4" -> queryEvolutionExampleSetup.setup(4);
             default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        };
+
+        return SchemaCategoryInfo.fromWrapper(wrapper);
     }
 
 }

@@ -1,4 +1,4 @@
-import type { Core, EdgeSingular, ElementDefinition } from 'cytoscape';
+// import type { Core, EdgeSingular, ElementDefinition } from 'cytoscape';
 import type { SchemaMorphism } from '../schema';
 import type { Node } from './Node';
 import type { Signature } from '../identifiers';

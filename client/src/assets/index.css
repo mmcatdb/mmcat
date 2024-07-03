@@ -1,0 +1,28 @@
+@import '_layout.css';
+@import 'reactflow/dist/style.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.main-scroller:not(:has(.main-scroller)) {
+    overflow: auto;
+    scrollbar-gutter: stable;
+
+    &:not(.main-scroller-no-center) {
+        scrollbar-gutter: stable both-edges;
+    }
+
+    height: 100%;
+}
+
+@layer utilities {
+    .hide-scrollbar {
+        -ms-overflow-style: none; /* Internet Explorer 10+ */
+        scrollbar-width: none; /* Firefox */
+
+        &::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+        }
+    }
+}
