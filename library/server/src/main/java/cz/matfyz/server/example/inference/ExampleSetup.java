@@ -35,7 +35,7 @@ public class ExampleSetup {
     @Autowired
     private JobRepository jobRepository;
 
-    public void setup() {
+    public SchemaCategoryWrapper setup() {
         final DatasourceWrapper datasource = datasourceSetup.createDatasource();
 
         // create empty SK
@@ -58,6 +58,8 @@ public class ExampleSetup {
         CategoryToModelPayload ctmPayload = new CategoryToModelPayload(null); // insert logical model Id
         Action ctmAction = createAndSaveAction(ctmPayload, schemaCategory.id, "generate mm data");
         */
+        // this has been added after, because the compiler was complaining in IndexController, that all cases need to return SchemaCategoryWrapper
+        return schemaCategory;
     }
 
     @Autowired

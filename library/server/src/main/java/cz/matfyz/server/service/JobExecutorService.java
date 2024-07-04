@@ -47,6 +47,7 @@ import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -283,8 +284,10 @@ public class JobExecutorService {
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
-        // kdyz zavolam inferenci, tak nejdriv nechci jeste nic ukladat
-        // jeji vysledek (prvotni SK) poslu na frontend v job.data
+        /*
+         * Kdyz zavolam inferenci, tak nejdriv nechci jeste nic ukladat
+         * jeji vysledek (prvotni SK) poslu na frontend v job.data
+         */
         final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
         // TODO: for some reason mapping doesnt survive being sent to client and back, but the SK does
@@ -297,28 +300,36 @@ public class JobExecutorService {
     }
 
     public void continueRSDToCategoryProcessing(Run run, Job job, RSDToCategoryPayload payload) {
-        SchemaCategoryWrapper schemaWrapper = null; //TODO: get rid of this null
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jobDataString = job.data.toString();
-            System.out.println("jodDataString: " + jobDataString);
+        InferenceJobData inferenceJobData = extractInferenceJobData(job);
 
-            if (jobDataString.contains("inference")) { // TODO: make this more clever; checking if job.data is of InferenceJobData
-                InferenceJobData inferenceJobData = objectMapper.readValue(jobDataString, InferenceJobData.class);
-                schemaWrapper = inferenceJobData.inference.schemaCategory;
-            }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process JSON while extracting the SK from job.data", e);
+        if (inferenceJobData == null) {
+            throw new RuntimeException("Failed to extract inferenceJobData from job.data");
         }
+
+        SchemaCategoryWrapper schemaWrapper = inferenceJobData.inference.schemaCategory;
+        //Mapping mapping = inferenceJobData.inference.mapping;
 
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
         final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, run.categoryId, "Initial logical model");
 
         schemaService.overwriteInfo(schemaWrapper, run.categoryId);
-        //mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
-
+        //mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
     }
 
+    private InferenceJobData extractInferenceJobData(Job job) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jobDataString = job.data.toString();
+        System.out.println("jobDataString: " + jobDataString);
+
+        if (jobDataString.contains("inference")) {
+            try {
+                return objectMapper.readValue(jobDataString, InferenceJobData.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to process JSON while extracting the SK and mapping from job.data", e);
+            }
+        }
+        return null;
+    }
     private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
         MetadataContext context = new MetadataContext();
 

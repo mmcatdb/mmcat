@@ -40,7 +40,7 @@ public class Job extends Entity {
     public State state;
     public @Nullable Serializable data = null;
     /** The generatedDataModel gets created for the CategoryToModelPayload */
-    public @Nullable Serializable generatedDataModel = null;
+    public @Nullable Serializable generatedDataModel = null; // TODOD: I will put this in data
 
     private Job(Id id, Id runId, String label, Date createdAt, ActionPayload payload, State state) {
         super(id);

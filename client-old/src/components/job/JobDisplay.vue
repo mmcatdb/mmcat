@@ -9,7 +9,8 @@ import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
 import EvocatDisplay from '../category/EvocatDisplay.vue';
 import { SchemaCategory } from '@/types/schema';
-import { InferenceJobData, isInferenceJobData } from '@/utils/InferenceJobData';
+import { isInferenceJobData } from '@/utils/InferenceJobData';
+import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
 
 type JobDisplayProps = {
     job: Job;
@@ -197,21 +198,28 @@ const schemaCategory = computed(() => {
                 >
                     {{ showGeneratedDataModel ? 'Job output' : 'Generated Model' }}
                 </button>
-                <button 
-                    v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
-                    :disabled="fetching"
-                    class="primary"
-                    @click="saveJob"
-                >
-                    Save and Finish
-                </button>
             </div>
         </div>
         <div
             v-if="isShowDetail"
         >
             <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
-                <EvocatDisplay :schemaCategory="schemaCategory"/>
+                <div class="divide">
+                    <EvocatDisplay :schemaCategory="schemaCategory"/>
+                    <div>
+                        <EditorForInferenceSchemaCategory />
+                        <div class="d-flex justify-content-end mt-2">
+                            <button 
+                                v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
+                                :disabled="fetching"
+                                class="primary"
+                                @click="saveJob"
+                            >
+                                Save and Finish
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </template>
             <TextArea
                 v-if="error"
