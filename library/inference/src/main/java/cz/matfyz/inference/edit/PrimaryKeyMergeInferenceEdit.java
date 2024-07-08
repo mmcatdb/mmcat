@@ -15,6 +15,6 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
 
     @Override
     public void applyEdit(SchemaCategory schemaCategory) {
-        throw new NotImplementedException("PrimaryKeyMergeEdit.applyEdit() is not implemented");
+        throw new NotImplementedException("PrimaryKeyMergeInferenceEdit.applyEdit() is not implemented");
     }
 }

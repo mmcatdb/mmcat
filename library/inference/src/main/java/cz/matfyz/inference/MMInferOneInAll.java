@@ -15,6 +15,8 @@ import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.rsd.utils.StartingEndingFilter;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale.Category;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
@@ -54,10 +56,18 @@ public class MMInferOneInAll {
 
         Map<String, RecordSchemaDescription> rsds = getRecordSchemaDescriptions(wrappers);
 
-        RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
+        //RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
 
-        SchemaConverter schemaConverter = new SchemaConverter(rsd, categoryLabel, kindName);
-        return schemaConverter.convertToSchemaCategoryAndMapping();
+        SchemaConverter schemaConverter = new SchemaConverter(categoryLabel);
+
+        List<CategoryMappingPair> pairs = new ArrayList<CategoryMappingPair>();
+
+        for (String kindName : rsds.keySet()) {
+            schemaConverter.setNewRSD(rsds.get(kindName), kindName);
+            pairs.add(schemaConverter.convertToSchemaCategoryAndMapping());
+        }
+        // TODO: right now merging just the SKs, not the mappings
+        return CategoryMappingPair.merge(pairs, categoryLabel);
     }
 
     private static Map<String, AbstractInferenceWrapper> prepareWrappers(AbstractInferenceWrapper inputWrapper) throws IllegalArgumentException {
@@ -118,6 +128,10 @@ public class MMInferOneInAll {
         System.out.println("Candidates: " + candidates);
 
         PrimaryKeyCandidate pkCandidate = Candidates.firstPkCandidatesThatNotEndWith(candidates, "/_id");
+        // for Yelp; delete afterwards!
+        // PrimaryKeyCandidate pkCandidate = new PrimaryKeyCandidate(new Object(), "review/business_id", false);
+        // for IMDb; delete afterwards!
+        // PrimaryKeyCandidate pkCandidate = new PrimaryKeyCandidate(new Object(), "title_basics/tconst", false);
         if (!candidates.pkCandidates.isEmpty() && pkCandidate != null) { // but what if the db isn't mongo and there is an actual property named "_id"?
             // get the first PK candidate which will be in the candidate array and wont end with "/_id" and merge all based on that
             return RecordSchemaDescriptionMerger.mergeBasedOnPrimaryKey(rsds, pkCandidate);

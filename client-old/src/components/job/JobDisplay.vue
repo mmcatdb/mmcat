@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, shallowRef } from 'vue';
 import API from '@/utils/api';
 import { Job, JobState } from '@/types/job';
 import { ActionType } from '@/types/action';
@@ -7,7 +7,9 @@ import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
-import EvocatDisplay from '../category/EvocatDisplay.vue';
+import type { Graph } from '@/types/categoryGraph';
+import GraphDisplay from '../category/GraphDisplay.vue';
+import { useSchemaCategoryId, useSchemaCategoryInfo } from '@/utils/injects';
 import { SchemaCategory } from '@/types/schema';
 import { isInferenceJobData } from '@/utils/InferenceJobData';
 import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
@@ -29,6 +31,8 @@ const result = computed(() => {
 
 const resultModel = computed(() => props.job.resultModel);
 const showGeneratedDataModel = ref(false);
+
+const graph = shallowRef<Graph>();
 
 function stringify(value: unknown): string | undefined {
     if (value === undefined || value === null)
@@ -110,6 +114,13 @@ const schemaCategory = computed(() => {
     }
     return props.job.result as SchemaCategory;
 });
+
+function graphCreated(newGraph: Graph) {
+    graph.value = newGraph;
+    if (schemaCategory.value) {
+        schemaCategory.value.graph = newGraph;
+    }
+}
 
 </script>
 
@@ -205,7 +216,9 @@ const schemaCategory = computed(() => {
         >
             <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
                 <div class="divide">
-                    <EvocatDisplay :schemaCategory="schemaCategory"/>
+                    <GraphDisplay 
+                        @graph-created="graphCreated"
+                    />
                     <div>
                         <EditorForInferenceSchemaCategory />
                         <div class="d-flex justify-content-end mt-2">

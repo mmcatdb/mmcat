@@ -1,6 +1,17 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue';
 import Merge from './Merge.vue';
+import { Graph } from '@/types/categoryGraph';
+import { useSchemaCategoryInfo, useEvocat } from '@/utils/injects';
+
+//const graph = shallowRef<Graph>;
+//const info = $(useSchemaCategoryInfo());
+//const graph = info.value.graph;
+/*
+const props = defineProps<{
+    graph: Graph;
+    schemaCategory: SchemaCategory;
+}>();*/
 
 enum State {
     Default,
@@ -19,6 +30,16 @@ type StateValue =
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
+const listener = graph.listen();
+/*
+onMounted(() => {
+    listener.onNode('tap', onNodeTapHandler);
+})
+
+onUnmounted(() => {
+    listener.close();
+})
+*/
 function mergeClicked() {
     state.value = { type: State.Merge };
 }
@@ -34,6 +55,11 @@ function recursionClicked() {
 function setStateToDefault() {
     state.value = { type: State.Default };
 }
+
+function onNodeTapHandler(node: Node) {
+    // TODO
+}
+
 
 
 </script>
@@ -54,12 +80,12 @@ function setStateToDefault() {
                 Recursion
             </button>
         </div>
-        <template v-else-if="state.type === State.Merge">
+<!--        <template v-else-if="state.type === State.Merge">
             <Merge
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />
-        </template>
+        </template> -->
     </div>
 
 </template>

@@ -18,18 +18,21 @@ public class SchemaConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaConverter.class);
 
-    private final RecordSchemaDescription rsd;
+    private RecordSchemaDescription rsd;
     public final String categoryLabel;
     public String kindName; // TODO: I need this to name the root of my SK and my mapping (probably the same as kind name). Getting it as user inpu rn, but in case of MongoDB, it has to match a collection name! (otherwise cant pull from it)
     private final UniqueNumberGenerator keyGenerator;
     private final UniqueNumberGenerator signatureGenerator;
 
-    public SchemaConverter(RecordSchemaDescription rsd, String categoryLabel, String kindName) {
-        this.rsd = rsd;
+    public SchemaConverter(String categoryLabel) {
         this.categoryLabel = categoryLabel;
-        this.kindName = kindName;
         this.keyGenerator = new UniqueNumberGenerator(0);
         this.signatureGenerator = new UniqueNumberGenerator(0);
+    }
+
+    public void setNewRSD(RecordSchemaDescription rsd, String kindName) {
+        this.rsd = rsd;
+        this.kindName = kindName;
     }
 
     public CategoryMappingPair convertToSchemaCategoryAndMapping() {
