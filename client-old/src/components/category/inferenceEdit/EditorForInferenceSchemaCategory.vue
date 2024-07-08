@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue';
+import { onMounted, onUnmounted, shallowRef } from 'vue';
 import Merge from './Merge.vue';
-import { Graph } from '@/types/categoryGraph';
+import { Graph, Node } from '@/types/categoryGraph';
 import { useSchemaCategoryInfo, useEvocat } from '@/utils/injects';
+import { SchemaCategory } from '@/types/schema';
 
 //const graph = shallowRef<Graph>;
 //const info = $(useSchemaCategoryInfo());
 //const graph = info.value.graph;
-/*
 const props = defineProps<{
     graph: Graph;
     schemaCategory: SchemaCategory;
-}>();*/
+}>();
 
 enum State {
     Default,
@@ -30,8 +30,8 @@ type StateValue =
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
-const listener = graph.listen();
-/*
+const listener = props.graph.listen();
+
 onMounted(() => {
     listener.onNode('tap', onNodeTapHandler);
 })
@@ -39,7 +39,7 @@ onMounted(() => {
 onUnmounted(() => {
     listener.close();
 })
-*/
+
 function mergeClicked() {
     state.value = { type: State.Merge };
 }
@@ -57,7 +57,7 @@ function setStateToDefault() {
 }
 
 function onNodeTapHandler(node: Node) {
-    // TODO
+    console.log("Node clicked", node);
 }
 
 

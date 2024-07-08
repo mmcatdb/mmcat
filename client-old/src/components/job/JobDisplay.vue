@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, shallowRef } from 'vue';
+import { computed, onMounted, ref, shallowRef } from 'vue';
 import API from '@/utils/api';
 import { Job, JobState } from '@/types/job';
 import { ActionType } from '@/types/action';
@@ -7,12 +7,12 @@ import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
-import type { Graph } from '@/types/categoryGraph';
+import type { Graph, Node } from '@/types/categoryGraph';
 import GraphDisplay from '../category/GraphDisplay.vue';
-import { useSchemaCategoryId, useSchemaCategoryInfo } from '@/utils/injects';
 import { SchemaCategory } from '@/types/schema';
 import { isInferenceJobData } from '@/utils/InferenceJobData';
 import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
+import { useSchemaCategoryId } from '@/utils/injects';
 
 type JobDisplayProps = {
     job: Job;
@@ -115,12 +115,31 @@ const schemaCategory = computed(() => {
     return props.job.result as SchemaCategory;
 });
 
+
+// TODO this is just example
+
+const SK = shallowRef<SchemaCategory>();
+
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
-    if (schemaCategory.value) {
-        schemaCategory.value.graph = newGraph;
+    if (!SK.value) {
+        console.log("This should not happen.")
+        return;
     }
+    SK.value.graph = newGraph;
 }
+
+const categoryId = useSchemaCategoryId()
+
+onMounted(async () => {
+    const schemaCategoryResult = await API.schemas.getCategoryWrapper({ id: categoryId });
+    if (!schemaCategoryResult.status) {
+        // TODO handle error
+        return;
+    }
+
+    SK.value = SchemaCategory.fromServer(schemaCategoryResult.data, []);
+});
 
 </script>
 
@@ -214,13 +233,14 @@ function graphCreated(newGraph: Graph) {
         <div
             v-if="isShowDetail"
         >
-            <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
+            <!-- <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting"> -->
+                <template v-if="SK" >
                 <div class="divide">
                     <GraphDisplay 
                         @graph-created="graphCreated"
                     />
-                    <div>
-                        <EditorForInferenceSchemaCategory />
+                    <div v-if="graph">
+                        <EditorForInferenceSchemaCategory :graph="graph" :schema-category="SK" />
                         <div class="d-flex justify-content-end mt-2">
                             <button 
                                 v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
