@@ -1,6 +1,7 @@
 package cz.matfyz.server.utils;
 
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.inference.edit.AbstractInferenceEdit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.repository.utils.Utils;
 
@@ -65,7 +66,7 @@ public class InferenceJobData implements Serializable {
     }
 
     public final InferenceData inference;
-    public List<String> manual; // TODO: trying just with string for now
+    public List<AbstractInferenceEdit> manual;
     public SchemaCategoryWrapper finalSchema;
 
     public InferenceJobData(InferenceData inference) {
@@ -73,15 +74,12 @@ public class InferenceJobData implements Serializable {
         this.manual = new ArrayList<>();
     }
 
-    public InferenceJobData(InferenceData inference, List<String> manual, SchemaCategoryWrapper finalSchema) {
+    public InferenceJobData(InferenceData inference, List<AbstractInferenceEdit> manual, SchemaCategoryWrapper finalSchema) {
         this.inference = inference;
         this.manual = manual;
         this.finalSchema = finalSchema;
     }
 
-    /***
-     * Custom serialization
-     */
     public String toJsonValue() throws JsonProcessingException {
         return Utils.toJsonWithoutProperties(this, "id");
     }
@@ -89,6 +87,7 @@ public class InferenceJobData implements Serializable {
     public static class Deserializer extends StdDeserializer<InferenceJobData> {
         private static final ObjectReader inferenceDataReader = new ObjectMapper().readerFor(InferenceData.class);
         private static final ObjectReader schemaCategoryReader = new ObjectMapper().readerFor(SchemaCategoryWrapper.class);
+        private static final ObjectReader abstractInferenceEditReader = new ObjectMapper().readerFor(AbstractInferenceEdit.class);
 
         public Deserializer() {
             this(null);
@@ -108,10 +107,10 @@ public class InferenceJobData implements Serializable {
 
             final InferenceData inference = node.has("inference") && !node.get("inference").isNull() ?
                 inferenceDataReader.readValue(node.get("inference")) : null;
-            final List<String> manual = new ArrayList<>();
+            final List<AbstractInferenceEdit> manual = new ArrayList<>();
             if (node.has("manual") && !node.get("manual").isNull()) {
                 for (JsonNode item : node.get("manual")) {
-                    manual.add(item.asText());
+                    manual.add(abstractInferenceEditReader.readValue(item));
                 }
             }
             final SchemaCategoryWrapper finalSchema = node.has("finalSchema") && !node.get("finalSchema").isNull() ?

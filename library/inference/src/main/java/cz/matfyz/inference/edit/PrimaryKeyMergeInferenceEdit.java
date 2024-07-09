@@ -1,6 +1,5 @@
 package cz.matfyz.inference.edit;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceEdit;
 import cz.matfyz.core.schema.SchemaCategory;
 
 import org.apache.hadoop.shaded.org.apache.commons.lang3.NotImplementedException;
@@ -14,7 +13,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
     }
 
     @Override
-    public void applyEdit(SchemaCategory schemaCategory) {
+    public SchemaCategory applyEdit(SchemaCategory schemaCategory) {
         throw new NotImplementedException("PrimaryKeyMergeInferenceEdit.applyEdit() is not implemented");
     }
 }

@@ -1,5 +1,6 @@
 import type { SchemaCategoryFromServer } from '../types/schema';
 import type { Mapping } from '../types/mapping';
+import type { AbstractInferenceEdit } from '../types/inferenceEdit/inferenceEdit';
 
 class InferenceData {
     public readonly schemaCategory: SchemaCategoryFromServer;
@@ -13,7 +14,7 @@ class InferenceData {
 
 export class InferenceJobData {
     public readonly inference: InferenceData;
-    public manual: string[];
+    public manual: AbstractInferenceEdit[];
     public finalSchema: SchemaCategoryFromServer;
 
     constructor(inference: InferenceData) {
