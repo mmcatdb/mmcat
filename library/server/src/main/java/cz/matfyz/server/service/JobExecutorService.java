@@ -16,6 +16,8 @@ import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.inference.MMInferOneInAll;
+import cz.matfyz.inference.edit.AbstractInferenceEdit;
+import cz.matfyz.inference.edit.SchemaCategoryInferenceEditor;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.builder.GeneratedDataModel;
@@ -284,10 +286,6 @@ public class JobExecutorService {
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
-        /*
-         * Kdyz zavolam inferenci, tak nejdriv nechci jeste nic ukladat
-         * jeji vysledek (prvotni SK) poslu na frontend v job.data
-         */
         final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
         // TODO: for some reason mapping doesnt survive being sent to client and back, but the SK does
@@ -299,9 +297,10 @@ public class JobExecutorService {
         }
     }
 
-    public void continueRSDToCategoryProcessing(Run run, Job job, RSDToCategoryPayload payload) {
+    public void continueRSDToCategoryProcessing(Run run, Job job) {
+        RSDToCategoryPayload payload = (RSDToCategoryPayload) job.payload;
         InferenceJobData inferenceJobData = extractInferenceJobData(job);
-
+/*
         if (inferenceJobData == null) {
             throw new RuntimeException("Failed to extract inferenceJobData from job.data");
         }
@@ -309,11 +308,28 @@ public class JobExecutorService {
         SchemaCategoryWrapper schemaWrapper = inferenceJobData.inference.schemaCategory;
         //Mapping mapping = inferenceJobData.inference.mapping;
 
+        SchemaCategoryWrapper edittedSchemaWrapper = editSchemaCategory(inferenceJobData);
+*/
+        SchemaCategoryWrapper schemaWrapper = inferenceJobData.inference.schemaCategory;
+
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
         final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, run.categoryId, "Initial logical model");
 
+        // TODO: once implemented change schemaWrapper to edittedSchemaWrapper
         schemaService.overwriteInfo(schemaWrapper, run.categoryId);
         //mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
+    }
+
+    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
+        MetadataContext context = new MetadataContext();
+
+        context.setId(new Id(null)); // is null ok?
+        context.setVersion(Version.generateInitial());
+
+        Map<Key, Position> positions = LayoutUtil.layoutObjects(category);
+        positions.forEach(context::setPosition);
+
+        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
     }
 
     private InferenceJobData extractInferenceJobData(Job job) {
@@ -330,16 +346,11 @@ public class JobExecutorService {
         }
         return null;
     }
-    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-        MetadataContext context = new MetadataContext();
 
-        context.setId(new Id(null)); // is null ok?
-        context.setVersion(Version.generateInitial());
-
-        Map<Key, Position> positions = LayoutUtil.layoutObjects(category);
-        positions.forEach(context::setPosition);
-
-        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
+    private SchemaCategoryWrapper editSchemaCategory(InferenceJobData inferenceJobData) {
+        SchemaCategoryInferenceEditor inferenceEditor = new SchemaCategoryInferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
+        inferenceEditor.applyEdits();
+        return createWrapperFromCategory(inferenceEditor.getSchemaCategory());
     }
 
     private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id schemaCategoryId, String initialLogicalModelLabel) {

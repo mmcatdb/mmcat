@@ -7,12 +7,7 @@ import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
-import type { Graph, Node } from '@/types/categoryGraph';
-import GraphDisplay from '../category/GraphDisplay.vue';
-import { SchemaCategory } from '@/types/schema';
-import { isInferenceJobData } from '@/utils/InferenceJobData';
-import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
-import { useSchemaCategoryId } from '@/utils/injects';
+import InferenceJobDisplay from '@/components/category/inferenceEdit/InferenceJobDisplay.vue'
 
 type JobDisplayProps = {
     job: Job;
@@ -31,8 +26,6 @@ const result = computed(() => {
 
 const resultModel = computed(() => props.job.resultModel);
 const showGeneratedDataModel = ref(false);
-
-const graph = shallowRef<Graph>();
 
 function stringify(value: unknown): string | undefined {
     if (value === undefined || value === null)
@@ -80,10 +73,10 @@ async function restartJob() {
     fetching.value = false;
 }
 
-async function saveJob() {
+async function saveJob(permanent: boolean) {
     fetching.value = true;
 
-    const result = await API.jobs.saveJobResult({ id: props.job.id });
+    const result = await API.jobs.saveJobResult({ id: props.job.id }, { permanent });
     if (result.status)
         emit('updateJob', Job.fromServer(result.data));
 
@@ -94,52 +87,6 @@ async function saveJob() {
 function toggleGeneratedDataModel() {
     showGeneratedDataModel.value = !showGeneratedDataModel.value;
 }
-
-// TODO: For some weird reason  sometimes the job is string and needs to be parsed to inferencejobdata first, sometimes it is inferencejobdata right away
-const schemaCategory = computed(() => {
-    if (isInferenceJobData(props.job.result)) {
-        console.log("props.job.result is inferenceJobData");
-        return SchemaCategory.fromServer(props.job.result.inference.schemaCategory, []);
-    }
-    if (typeof props.job.result === 'string') {
-        console.log("props.job.result is string");
-        const parsedResult = JSON.parse(props.job.result);        
-
-        if (isInferenceJobData(parsedResult)) {
-            console.log("probs.job.result is string and inferencejobdata");
-            return SchemaCategory.fromServer(parsedResult.inference.schemaCategory, []);
-        }
-
-        return SchemaCategory.fromServer(parsedResult, []);
-    }
-    return props.job.result as SchemaCategory;
-});
-
-
-// TODO this is just example
-
-const SK = shallowRef<SchemaCategory>();
-
-function graphCreated(newGraph: Graph) {
-    graph.value = newGraph;
-    if (!SK.value) {
-        console.log("This should not happen.")
-        return;
-    }
-    SK.value.graph = newGraph;
-}
-
-const categoryId = useSchemaCategoryId()
-
-onMounted(async () => {
-    const schemaCategoryResult = await API.schemas.getCategoryWrapper({ id: categoryId });
-    if (!schemaCategoryResult.status) {
-        // TODO handle error
-        return;
-    }
-
-    SK.value = SchemaCategory.fromServer(schemaCategoryResult.data, []);
-});
 
 </script>
 
@@ -233,25 +180,19 @@ onMounted(async () => {
         <div
             v-if="isShowDetail"
         >
-            <!-- <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting"> -->
-                <template v-if="SK" >
-                <div class="divide">
-                    <GraphDisplay 
-                        @graph-created="graphCreated"
-                    />
-                    <div v-if="graph">
-                        <EditorForInferenceSchemaCategory :graph="graph" :schema-category="SK" />
-                        <div class="d-flex justify-content-end mt-2">
-                            <button 
-                                v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
-                                :disabled="fetching"
-                                class="primary"
-                                @click="saveJob"
-                            >
-                                Save and Finish
-                            </button>
-                        </div>
-                    </div>
+             <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
+                <InferenceJobDisplay 
+                    :job="job"
+                />
+                <div class="d-flex justify-content-end mt-2">
+                    <button 
+                        v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
+                        :disabled="fetching"
+                        class="primary"
+                        @click="() => saveJob(true)"
+                    >
+                        Save and Finish
+                    </button>
                 </div>
             </template>
             <TextArea

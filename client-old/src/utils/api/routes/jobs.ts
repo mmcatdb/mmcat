@@ -1,5 +1,5 @@
 import type { StringLike } from '@/types/api/routes';
-import { GET, POST } from '../routeFunctions';
+import { GET, POST, POST_WITH_DATA } from '../routeFunctions';
 import type { JobFromServer, SessionFromServer } from '@/types/job';
 
 const jobs = {
@@ -21,7 +21,7 @@ const jobs = {
     cancelJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/cancel`,
     ),
-    saveJobResult: POST<{ id: StringLike }, JobFromServer>(
+    saveJobResult: POST_WITH_DATA<{ id: StringLike }, JobFromServer, { permanent: boolean }>(
         u => `/jobs/${u.id}/saveResult`,
     ),
     getAllSessionsInCategory: GET<{ categoryId: StringLike }, SessionFromServer[]>(

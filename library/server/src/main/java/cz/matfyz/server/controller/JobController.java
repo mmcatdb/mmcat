@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -99,16 +101,20 @@ public class JobController {
     }
 
     @PostMapping("/jobs/{id}/saveResult")
-    public JobDetail saveJobResult(@PathVariable Id id) {
+    public JobDetail saveJobResult(@PathVariable Id id, @RequestBody SaveResultRequest saveResultRequest) {
         final var jobWithRun = repository.find(id);
         final var job = jobWithRun.job();
         final var run = jobWithRun.run();
 
+        boolean permanent = saveResultRequest.permanent();
+
         try {
-            if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
-                jobExecutorService.continueRSDToCategoryProcessing(run, job, rsdToCategoryPayload);
+            if (permanent) {
+                // save the final SK
+                jobExecutorService.continueRSDToCategoryProcessing(run, job);
             } else {
-                throw new IllegalArgumentException("Job results should be saved only for RSDToCategory Payload");
+                // make an edit on an SK
+                throw new Exception("Unimplemented case - making edits on SK");
             }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
@@ -154,4 +160,6 @@ public class JobController {
         return service.createSession(categoryId);
     }
 
+
+    public record SaveResultRequest(boolean permanent) {}
 }

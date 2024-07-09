@@ -2,12 +2,8 @@
 import { onMounted, onUnmounted, shallowRef } from 'vue';
 import Merge from './Merge.vue';
 import { Graph, Node } from '@/types/categoryGraph';
-import { useSchemaCategoryInfo, useEvocat } from '@/utils/injects';
 import { SchemaCategory } from '@/types/schema';
 
-//const graph = shallowRef<Graph>;
-//const info = $(useSchemaCategoryInfo());
-//const graph = info.value.graph;
 const props = defineProps<{
     graph: Graph;
     schemaCategory: SchemaCategory;
@@ -80,12 +76,14 @@ function onNodeTapHandler(node: Node) {
                 Recursion
             </button>
         </div>
-<!--        <template v-else-if="state.type === State.Merge">
+        <template v-else-if="state.type === State.Merge">
             <Merge
+                :graph="props.graph"
+                @confirm=""
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />
-        </template> -->
+        </template>
     </div>
 
 </template>
