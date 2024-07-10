@@ -11,16 +11,22 @@ const props = defineProps<{
     graph: Graph
 }>();
 
-const emit = defineEmits([ 'save', 'cancel' ]);
+const emit = defineEmits<{
+    (e: 'save'): void;
+    (e: 'cancel'): void;
+    (e: 'confirm', nodes: (Node | undefined)[]): void;
+}>();
 
 const nodes = shallowRef<(Node | undefined)[]>([]);
 const confirmClicked = ref(false);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
 
+// chci poslat upravy na BE a dostat zmenennou SK
 function confirm() {
     confirmClicked.value = true;
-    //emit('save');
+    console.log("confirm in merge");
+    emit('confirm', nodes.value);
 }
 
 function save() {

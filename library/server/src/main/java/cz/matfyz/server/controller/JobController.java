@@ -1,9 +1,12 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
+import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.inference.edit.AbstractInferenceEdit;
+import cz.matfyz.inference.edit.SaveJobResultPayload;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.entity.action.payload.RSDToCategoryPayload;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.entity.job.Job.State;
@@ -12,11 +15,14 @@ import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.service.JobExecutorService;
 import cz.matfyz.server.service.JobService;
+import cz.matfyz.server.utils.InferenceJobData;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +31,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -100,27 +105,67 @@ public class JobController {
         return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
     }
 
+    // this method is only used in inference
     @PostMapping("/jobs/{id}/saveResult")
-    public JobDetail saveJobResult(@PathVariable Id id, @RequestBody SaveResultRequest saveResultRequest) {
+    public JobDetail saveJobResult(@PathVariable Id id, @RequestBody Helper saveJobResultPayload) {
         final var jobWithRun = repository.find(id);
         final var job = jobWithRun.job();
         final var run = jobWithRun.run();
 
-        boolean permanent = saveResultRequest.permanent();
+        System.out.println("stringified payload right from client: " + saveJobResultPayload.payload());
+
+        boolean permanent = saveJobResultPayload.payload().permanent;
+        InferenceJobData inferenceJobData = extractInferenceJobData(job);
 
         try {
             if (permanent) {
-                // save the final SK
-                jobExecutorService.continueRSDToCategoryProcessing(run, job);
+                // save the final SK and finish the job
+                System.out.println("saving permanent on server");
+                jobExecutorService.finishRSDToCategoryProcessing(run, job, inferenceJobData);
             } else {
-                // make an edit on an SK
-                throw new Exception("Unimplemented case - making edits on SK");
+                // make edits on SK
+                // TODO: deal with mapping too
+                //AbstractInferenceEdit edit = saveJobResultPayload.edit;
+                System.out.println("extracting edit");
+                AbstractInferenceEdit edit = extractInferenceEdit(saveJobResultPayload.payload());
+                System.out.println("edit in jobcontroller: " + edit);
+                jobExecutorService.continueRSDToCategoryProcessing(run, job, inferenceJobData, edit);
             }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
         }
 
         return jobToJobDetail(service.transition(jobWithRun, State.Finished));
+    }
+
+    private InferenceJobData extractInferenceJobData(Job job) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jobDataString = job.data.toString();
+        System.out.println("jobDataString: " + jobDataString);
+
+        if (jobDataString.contains("inference")) {
+            try {
+                return objectMapper.readValue(jobDataString, InferenceJobData.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to process JSON while extracting the SK and mapping from job.data", e);
+            }
+        }
+        return null;
+    }
+
+    private AbstractInferenceEdit extractInferenceEdit(SaveJobResultPayload saveJobResultPayload) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (saveJobResultPayload.edit == null) {
+            System.out.println("edit sent from client is null");
+        }
+        String editString = saveJobResultPayload.edit.toString();
+        System.out.println("editString: " + editString);
+
+        try {
+            return objectMapper.readValue(editString, AbstractInferenceEdit.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to process JSON while extracting the SK and mapping from job.data", e);
+        }
     }
 
 
@@ -160,6 +205,6 @@ public class JobController {
         return service.createSession(categoryId);
     }
 
+    public record Helper(SaveJobResultPayload payload) {}
 
-    public record SaveResultRequest(boolean permanent) {}
 }

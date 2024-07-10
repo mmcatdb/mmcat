@@ -72,6 +72,7 @@ public class InferenceJobData implements Serializable {
     public InferenceJobData(InferenceData inference) {
         this.inference = inference;
         this.manual = new ArrayList<>();
+        this.finalSchema = inference.schemaCategory;
     }
 
     public InferenceJobData(InferenceData inference, List<AbstractInferenceEdit> manual, SchemaCategoryWrapper finalSchema) {

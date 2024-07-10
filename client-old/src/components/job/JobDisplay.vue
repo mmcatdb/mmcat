@@ -8,6 +8,8 @@ import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
 import InferenceJobDisplay from '@/components/category/inferenceEdit/InferenceJobDisplay.vue'
+import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
+import { SaveJobResultPayload } from '@/types/inferenceEdit/inferenceEdit';
 
 type JobDisplayProps = {
     job: Job;
@@ -73,10 +75,18 @@ async function restartJob() {
     fetching.value = false;
 }
 
-async function saveJob(permanent: boolean) {
+async function saveJob(edit: AbstractInferenceEdit, permanent: boolean) {
+    if (edit != null) {
+        console.log("edit is not null in saveJob displayjob");
+    }
+    console.log("confirm in jobdisplay ");   
+
     fetching.value = true;
 
-    const result = await API.jobs.saveJobResult({ id: props.job.id }, { permanent });
+    const saveJobResultPayload = new SaveJobResultPayload(permanent, edit);
+    console.log("saveJobResultPayload before sending to server: " + JSON.stringify(saveJobResultPayload));
+
+    const result = await API.jobs.saveJobResult({ id: props.job.id }, { payload: saveJobResultPayload.toJSON() });
     if (result.status)
         emit('updateJob', Job.fromServer(result.data));
 
@@ -183,13 +193,14 @@ function toggleGeneratedDataModel() {
              <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
                 <InferenceJobDisplay 
                     :job="job"
+                    @updateEdit="(edit) => saveJob(edit, false)"
                 />
                 <div class="d-flex justify-content-end mt-2">
                     <button 
                         v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
                         :disabled="fetching"
                         class="primary"
-                        @click="() => saveJob(true)"
+                        @click="() => saveJob(undefined, true)"
                     >
                         Save and Finish
                     </button>

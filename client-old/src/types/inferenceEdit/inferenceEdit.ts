@@ -19,6 +19,7 @@ export class PrimaryKeyMergeInferenceEdit implements AbstractInferenceEdit {
 }
 
 export class ReferenceMergeInferenceEdit implements AbstractInferenceEdit {
+    public readonly type: string = "reference";
     public readonly referenceKey: Key;
     public readonly referredKey: Key;
 
@@ -28,5 +29,27 @@ export class ReferenceMergeInferenceEdit implements AbstractInferenceEdit {
     }
     applyEdit(schemaCategory: SchemaCategory): SchemaCategory {
         throw new Error("Method not implemented.");
+    }
+
+    toJSON() {
+        return {
+            type: this.type,
+            referenceKey: this.referenceKey,
+            referredKey: this.referredKey
+        };
+    }
+}
+
+export class SaveJobResultPayload {
+    constructor(
+        public permanent: boolean,
+        public edit: AbstractInferenceEdit
+    ) {}
+
+    toJSON() {
+        return {
+            permanent: this.permanent,
+            edit: this.edit instanceof ReferenceMergeInferenceEdit ? this.edit.toJSON() : this.edit
+        };
     }
 }

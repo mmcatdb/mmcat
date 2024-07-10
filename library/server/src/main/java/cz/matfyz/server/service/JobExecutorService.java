@@ -297,9 +297,28 @@ public class JobExecutorService {
         }
     }
 
-    public void continueRSDToCategoryProcessing(Run run, Job job) {
+    public void continueRSDToCategoryProcessing(Run run, Job job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit) {
+        System.out.println("in continueRSDToCategoryProcessing");
+        inferenceJobData.manual.add(edit);
+        System.out.println("inferencejobdata.manual: " + inferenceJobData.manual);
+
+        SchemaCategoryInferenceEditor inferenceEditor = new SchemaCategoryInferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
+        inferenceEditor.applyEdits();
+
+        SchemaCategory edittedSchemaCategory = inferenceEditor.getSchemaCategory();
+        System.out.println("edittedSK: " + edittedSchemaCategory);
+
+        inferenceJobData.finalSchema = createWrapperFromCategory(edittedSchemaCategory);
+
+        try {
+            job.data = inferenceJobData.toJsonValue();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
+        }
+    }
+
+    public void finishRSDToCategoryProcessing(Run run, Job job, InferenceJobData inferenceJobData) {
         RSDToCategoryPayload payload = (RSDToCategoryPayload) job.payload;
-        InferenceJobData inferenceJobData = extractInferenceJobData(job);
 /*
         if (inferenceJobData == null) {
             throw new RuntimeException("Failed to extract inferenceJobData from job.data");
@@ -310,6 +329,7 @@ public class JobExecutorService {
 
         SchemaCategoryWrapper edittedSchemaWrapper = editSchemaCategory(inferenceJobData);
 */
+        // after all the edits, the final schema will be in inferenceJobData.finalSchema, for now we are getting it from inference
         SchemaCategoryWrapper schemaWrapper = inferenceJobData.inference.schemaCategory;
 
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
@@ -330,21 +350,6 @@ public class JobExecutorService {
         positions.forEach(context::setPosition);
 
         return SchemaCategoryWrapper.fromSchemaCategory(category, context);
-    }
-
-    private InferenceJobData extractInferenceJobData(Job job) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jobDataString = job.data.toString();
-        System.out.println("jobDataString: " + jobDataString);
-
-        if (jobDataString.contains("inference")) {
-            try {
-                return objectMapper.readValue(jobDataString, InferenceJobData.class);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to process JSON while extracting the SK and mapping from job.data", e);
-            }
-        }
-        return null;
     }
 
     private SchemaCategoryWrapper editSchemaCategory(InferenceJobData inferenceJobData) {

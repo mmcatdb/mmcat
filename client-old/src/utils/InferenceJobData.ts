@@ -20,6 +20,7 @@ export class InferenceJobData {
     constructor(inference: InferenceData) {
         this.inference = inference;
         this.manual = [];
+        this.finalSchema = inference.schemaCategory;
     }
 }
 
@@ -34,3 +35,15 @@ export function isInferenceJobData(data: any): data is InferenceJobData {
         'mapping' in data.inference
     );
 }
+/*
+export function convertToInferenceJobData(data: any): InferenceJobData | null {
+    const parsedData = JSON.parse(data);
+    if (isInferenceJobData(parsedData)) {
+        const inference = new InferenceData(parsedData.inference.schemaCategory, parsedData.inference.mapping);
+        const inferenceJobData = new InferenceJobData(inference);
+        inferenceJobData.manual = parsedData.manual;
+        inferenceJobData.finalSchema = parsedData.finalSchema;
+        return inferenceJobData;
+    }
+    return null;
+}*/

@@ -34,6 +34,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     @Override
     public SchemaCategory applyEdit(SchemaCategory schemaCategory) {
+        System.out.println("Applying Reference Merge Edit...");
         SchemaObject dom = schemaCategory.getObject(referenceKey);
         SchemaObject cod = schemaCategory.getObject(referredKey);
 

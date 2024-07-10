@@ -45,6 +45,21 @@ export class Job implements Entity {
     setState(state: JobState) {
         this.state = state;
     }
+
+    withUpdatedResult(newResult: unknown): Job {
+        return new Job(
+            this.id,
+            this.categoryId,
+            this.actionId,
+            this.label,
+            this.state,
+            this.payload,
+            this.error,
+            newResult,
+            this.resultModel,
+            this.createdAt
+        );
+    }
 }
 
 export enum JobState {

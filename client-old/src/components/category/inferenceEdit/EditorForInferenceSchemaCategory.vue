@@ -9,6 +9,12 @@ const props = defineProps<{
     schemaCategory: SchemaCategory;
 }>();
 
+const emit = defineEmits<{
+    (e: 'merge-save'): void;
+    (e: 'merge-cancel'): void;
+    (e: 'merge-confirm', nodes: (Node | undefined)[]): void;
+}>();
+
 enum State {
     Default,
     Merge,
@@ -26,6 +32,7 @@ type StateValue =
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
+// ten listener zatim nepotrebuju asi nebudu dal?
 const listener = props.graph.listen();
 
 onMounted(() => {
@@ -56,6 +63,11 @@ function onNodeTapHandler(node: Node) {
     console.log("Node clicked", node);
 }
 
+function confirmEdit(nodes: (Node | undefined)[]) {
+    console.log("confirm in editor");
+    emit('merge-confirm', nodes);
+}
+
 
 
 </script>
@@ -79,7 +91,7 @@ function onNodeTapHandler(node: Node) {
         <template v-else-if="state.type === State.Merge">
             <Merge
                 :graph="props.graph"
-                @confirm=""
+                @confirm="confirmEdit"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
             />
