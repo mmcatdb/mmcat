@@ -10,6 +10,8 @@ import TextArea from '../input/TextArea.vue';
 import InferenceJobDisplay from '@/components/category/inferenceEdit/InferenceJobDisplay.vue'
 import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
 import { SaveJobResultPayload } from '@/types/inferenceEdit/inferenceEdit';
+import { SchemaCategory } from '@/types/schema';
+import { isInferenceJobData } from '@/utils/InferenceJobData';
 
 type JobDisplayProps = {
     job: Job;
@@ -45,6 +47,18 @@ const emit = defineEmits<{
 
 const fetching = ref(false);
 
+const schemaCategory = computed(() => {
+    if (typeof props.job.result === 'string' && props.job.payload.type === ActionType.RSDToCategory) {
+        const parsedResult = JSON.parse(props.job.result);
+        if (isInferenceJobData(parsedResult)) {
+            return SchemaCategory.fromServer(parsedResult.finalSchema, []);
+        } else {
+            throw new Error("InferenceJobData is not the right type");            
+        }
+    }
+    throw new Error("InferenceJobData is not the right type");
+});
+
 async function startJob() {
     fetching.value = true;
 
@@ -78,17 +92,31 @@ async function restartJob() {
 async function saveJob(edit: AbstractInferenceEdit, permanent: boolean) {
     if (edit != null) {
         console.log("edit is not null in saveJob displayjob");
-    }
-    console.log("confirm in jobdisplay ");   
+    }  
 
     fetching.value = true;
 
     const saveJobResultPayload = new SaveJobResultPayload(permanent, edit);
     console.log("saveJobResultPayload before sending to server: " + JSON.stringify(saveJobResultPayload));
 
-    const result = await API.jobs.saveJobResult({ id: props.job.id }, { payload: saveJobResultPayload.toJSON() });
-    if (result.status)
+    const result = await API.jobs.saveJobResult({ id: props.job.id }, { payload: JSON.stringify(saveJobResultPayload) });
+    if (result.status) {
+        console.log("about to emit updateJob in jobdisplay");
         emit('updateJob', Job.fromServer(result.data));
+    }
+
+    fetching.value = false;
+
+}
+
+async function cancelEdit() {
+    fetching.value = true;
+
+    const result = await API.jobs.cancelLastJobEdit({ id: props.job.id });
+    if (result.status) {
+        console.log("about to emit updateJob in jobdisplay");
+        emit('updateJob', Job.fromServer(result.data));
+    }
 
     fetching.value = false;
 
@@ -193,14 +221,16 @@ function toggleGeneratedDataModel() {
              <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
                 <InferenceJobDisplay 
                     :job="job"
+                    :schema-category="schemaCategory"
                     @updateEdit="(edit) => saveJob(edit, false)"
+                    @cancel-edit="cancelEdit"
                 />
                 <div class="d-flex justify-content-end mt-2">
                     <button 
                         v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
                         :disabled="fetching"
                         class="primary"
-                        @click="() => saveJob(undefined, true)"
+                        @click="() => saveJob(null, true)"
                     >
                         Save and Finish
                     </button>

@@ -13,10 +13,6 @@ import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
 import cz.matfyz.wrappercsv.CsvProvider;
 import cz.matfyz.wrappercsv.CsvProvider.CsvSettings;
-import cz.matfyz.wrappermongodb.MongoDBControlWrapper;
-import cz.matfyz.wrappermongodb.MongoDBInferenceWrapper;
-import cz.matfyz.wrappermongodb.MongoDBProvider;
-import cz.matfyz.wrappermongodb.MongoDBProvider.MongoDBSettings;
 
 import java.util.List;
 
@@ -31,7 +27,7 @@ public class SchemaCategoryInferenceEditorTests {
     private static final SparkSettings sparkSettings = new SparkSettings("local[*]", "./spark");
 
     @Test
-    void testInferenceEditApplication() throws Exception {
+    void testReferenceMergeEdit() throws Exception {
 
         final var url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv");
         final var settings = new CsvSettings(url.toURI().toString(), false, false);
@@ -47,9 +43,10 @@ public class SchemaCategoryInferenceEditorTests {
         final Mapping mapping = categoryMappingPair.mapping();
 
         AbstractInferenceEdit edit = new ReferenceMergeInferenceEdit(new Key(1), new Key(2));
-        List<AbstractInferenceEdit> edits = List.of(edit);
-        SchemaCategoryInferenceEditor editor = new SchemaCategoryInferenceEditor(schemaCategory, edits);
-        editor.applyEdits();
-        System.out.println(editor.getSchemaCategory().allMorphisms());
+
+        SchemaCategory editSchemaCategory = edit.applyEdit(schemaCategory);
+        System.out.println("size original: " + schemaCategory.allMorphisms().size());
+        System.out.println("size edit: " + editSchemaCategory.allMorphisms().size());
+        assertEquals(schemaCategory.allMorphisms().size() + 1, editSchemaCategory.allMorphisms().size());
     }
 }

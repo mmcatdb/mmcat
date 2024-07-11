@@ -14,6 +14,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'save'): void;
     (e: 'cancel'): void;
+    (e: 'cancel-edit'): void;
     (e: 'confirm', nodes: (Node | undefined)[]): void;
 }>();
 
@@ -21,11 +22,11 @@ const nodes = shallowRef<(Node | undefined)[]>([]);
 const confirmClicked = ref(false);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
+const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
-// chci poslat upravy na BE a dostat zmenennou SK
+// send edit to BE and apply it
 function confirm() {
     confirmClicked.value = true;
-    console.log("confirm in merge");
     emit('confirm', nodes.value);
 }
 
@@ -33,9 +34,17 @@ function save() {
     // here I want to save the change to the job.data
     emit('save');
 }
-
+// TODO: when nodes selected but not confirmed and cancel clicked I want it to remain in Merge, and only unselect the selected nodes
 function cancel() {
-    emit('cancel');
+    if (noNodesSelected) { // go back to editor
+        emit('cancel');
+    }
+    
+    nodes.value = [undefined, undefined];  //unselect selected nodes
+
+    if (confirmClicked) { // delete the edit (on BE)
+        emit('cancel-edit');
+    }
 }
 </script>
 
@@ -58,19 +67,19 @@ function cancel() {
         />
         <div class="button-row">
             <button
-                :disabled="!nodesSelected"
+                :disabled="!nodesSelected || confirmClicked"
                 @click="confirm"
             >
                 Confirm
             </button>
+        </div>
+        <div class="button-row">
             <button
                 :disabled="!confirmClicked"
                 @click="save"
             >
                 Save
             </button>
-        </div>
-        <div class="button-row">
             <button
                 @click="cancel"
             >

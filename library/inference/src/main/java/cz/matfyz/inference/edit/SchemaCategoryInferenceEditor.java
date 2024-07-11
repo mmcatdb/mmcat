@@ -19,7 +19,6 @@ public class SchemaCategoryInferenceEditor {
     }
 
     public void applyEdits() {
-        System.out.println("applying edits in schemacategoryinfeditor");
         for (AbstractInferenceEdit edit : edits) {
             schemaCategory = edit.applyEdit(schemaCategory);
         }

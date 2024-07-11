@@ -11,7 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'merge-save'): void;
-    (e: 'merge-cancel'): void;
+    (e: 'cancel-edit'): void;
     (e: 'merge-confirm', nodes: (Node | undefined)[]): void;
 }>();
 
@@ -32,7 +32,7 @@ type StateValue =
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
-// ten listener zatim nepotrebuju asi nebudu dal?
+// ten listener zatim nepotrebuju asi nebudu ani dal?
 const listener = props.graph.listen();
 
 onMounted(() => {
@@ -64,8 +64,11 @@ function onNodeTapHandler(node: Node) {
 }
 
 function confirmEdit(nodes: (Node | undefined)[]) {
-    console.log("confirm in editor");
     emit('merge-confirm', nodes);
+}
+
+function cancelEdit() {
+    emit('cancel-edit');
 }
 
 
@@ -94,6 +97,7 @@ function confirmEdit(nodes: (Node | undefined)[]) {
                 @confirm="confirmEdit"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
+                @cancel-edit="cancelEdit"
             />
         </template>
     </div>

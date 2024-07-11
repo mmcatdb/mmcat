@@ -1,5 +1,5 @@
 import type { StringLike } from '@/types/api/routes';
-import { GET, POST, POST_WITH_DATA } from '../routeFunctions';
+import { GET, POST } from '../routeFunctions';
 import type { JobFromServer, SessionFromServer } from '@/types/job';
 import { SaveJobResultPayload } from '@/types/inferenceEdit/inferenceEdit';
 
@@ -22,8 +22,11 @@ const jobs = {
     cancelJob: POST<{ id: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/cancel`,
     ),
-    saveJobResult: POST_WITH_DATA<{ id: StringLike }, JobFromServer, { payload: String }>(
+    saveJobResult: POST<{ id: StringLike, payload: StringLike }, JobFromServer>(
         u => `/jobs/${u.id}/saveResult`,
+    ),
+    cancelLastJobEdit: POST<{ id: StringLike }, JobFromServer>(
+        u => `/jobs/${u.id}/cancelEdit`,
     ),
     getAllSessionsInCategory: GET<{ categoryId: StringLike }, SessionFromServer[]>(
         u => `/schema-categories/${u.categoryId}/sessions`,

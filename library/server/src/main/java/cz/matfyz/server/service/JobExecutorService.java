@@ -40,16 +40,17 @@ import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.server.utils.InferenceJobData;
 import cz.matfyz.server.utils.LayoutUtil;
+import cz.matfyz.server.utils.SchemaCategoryUtil;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -58,7 +59,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class JobExecutorService {
@@ -286,9 +286,9 @@ public class JobExecutorService {
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
-        final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCategory());
+        final SchemaCategoryWrapper schemaWrapper = SchemaCategoryUtil.createWrapperFromCategory(categoryMappingPair.schemaCategory());
 
-        // TODO: for some reason mapping doesnt survive being sent to client and back, but the SK does
+        // TODO: for some reason mapping doesnt survive being sent to client and back, but the SK does - but I dont really need to send it anywhere, I just need to keep it in the job
         InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, categoryMappingPair.mapping()));
         try {
             job.data = inferenceJobData.toJsonValue();
@@ -297,65 +297,44 @@ public class JobExecutorService {
         }
     }
 
-    public void continueRSDToCategoryProcessing(Run run, Job job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit) {
-        System.out.println("in continueRSDToCategoryProcessing");
-        inferenceJobData.manual.add(edit);
-        System.out.println("inferencejobdata.manual: " + inferenceJobData.manual);
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit) {
+        if (edit == null) {
+            inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
+        } else {
+            inferenceJobData.manual.add(edit);
+        }
+        System.out.println("inferenceJobData.manual: " + inferenceJobData.manual);
 
-        SchemaCategoryInferenceEditor inferenceEditor = new SchemaCategoryInferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
-        inferenceEditor.applyEdits();
-
-        SchemaCategory edittedSchemaCategory = inferenceEditor.getSchemaCategory();
-        System.out.println("edittedSK: " + edittedSchemaCategory);
-
-        inferenceJobData.finalSchema = createWrapperFromCategory(edittedSchemaCategory);
+        inferenceJobData.finalSchema = editSchemaCategory(inferenceJobData);
 
         try {
-            job.data = inferenceJobData.toJsonValue();
+            job.job().data = inferenceJobData.toJsonValue();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
         }
+        return job;
     }
 
-    public void finishRSDToCategoryProcessing(Run run, Job job, InferenceJobData inferenceJobData) {
-        RSDToCategoryPayload payload = (RSDToCategoryPayload) job.payload;
-/*
-        if (inferenceJobData == null) {
-            throw new RuntimeException("Failed to extract inferenceJobData from job.data");
-        }
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData) {
+        return continueRSDToCategoryProcessing(job, inferenceJobData, null);
+    }
 
-        SchemaCategoryWrapper schemaWrapper = inferenceJobData.inference.schemaCategory;
-        //Mapping mapping = inferenceJobData.inference.mapping;
+    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, InferenceJobData inferenceJobData) {
+        RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
 
-        SchemaCategoryWrapper edittedSchemaWrapper = editSchemaCategory(inferenceJobData);
-*/
-        // after all the edits, the final schema will be in inferenceJobData.finalSchema, for now we are getting it from inference
         SchemaCategoryWrapper schemaWrapper = inferenceJobData.inference.schemaCategory;
 
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
-        final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, run.categoryId, "Initial logical model");
+        final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");
 
-        // TODO: once implemented change schemaWrapper to edittedSchemaWrapper
-        schemaService.overwriteInfo(schemaWrapper, run.categoryId);
+        schemaService.overwriteInfo(schemaWrapper, jobWithRun.run().categoryId);
         //mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
-    }
-
-    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-        MetadataContext context = new MetadataContext();
-
-        context.setId(new Id(null)); // is null ok?
-        context.setVersion(Version.generateInitial());
-
-        Map<Key, Position> positions = LayoutUtil.layoutObjects(category);
-        positions.forEach(context::setPosition);
-
-        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
     }
 
     private SchemaCategoryWrapper editSchemaCategory(InferenceJobData inferenceJobData) {
         SchemaCategoryInferenceEditor inferenceEditor = new SchemaCategoryInferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
         inferenceEditor.applyEdits();
-        return createWrapperFromCategory(inferenceEditor.getSchemaCategory());
+        return SchemaCategoryUtil.createWrapperFromCategory(inferenceEditor.getSchemaCategory());
     }
 
     private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id schemaCategoryId, String initialLogicalModelLabel) {

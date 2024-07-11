@@ -21,10 +21,6 @@ export function POST<U extends UrlParams, T, D extends PushData = void>(url: Url
     return (urlParams: U, data: D) => rawAPI.POST<T, D>(url(urlParams), data);
 }
 
-export function POST_WITH_DATA<U extends UrlParams, T, D extends PushData>(url: Url<U>): PushRoute<U, T, D> {
-    return (urlParams: U, data: D) => rawAPI.POST<T, D>(url(urlParams), data);
-}
-
 export function PUT<U extends UrlParams, T, D extends PushData = void>(url: Url<U>): PushRoute<U, T, D> {
     return (urlParams: U, data: D) => rawAPI.PUT<T, D>(url(urlParams), data);
 }

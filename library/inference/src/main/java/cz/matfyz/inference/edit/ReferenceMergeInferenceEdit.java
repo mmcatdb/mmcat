@@ -9,7 +9,9 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 @JsonDeserialize(using = ReferenceMergeInferenceEdit.Deserializer.class)
 public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
@@ -34,20 +37,42 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     @Override
     public SchemaCategory applyEdit(SchemaCategory schemaCategory) {
+        // Assumption: when there is a reference, it has exactly one incoming morphism
+        System.out.println("SchemaCategory morphisms before reference merge edit: " + schemaCategory.allMorphisms());
         System.out.println("Applying Reference Merge Edit...");
-        SchemaObject dom = schemaCategory.getObject(referenceKey);
+
+        Key referenceParentKey = getParentKey(schemaCategory, referenceKey);
+        SchemaObject dom = schemaCategory.getObject(referenceParentKey);
         SchemaObject cod = schemaCategory.getObject(referredKey);
 
-        BaseSignature signature = Signature.createBase(getNewSignatureValue(schemaCategory));
+        SchemaMorphism newMorphism = createNewMorphism(schemaCategory, dom, cod);
 
-        SchemaMorphism morphism = new SchemaMorphism(signature, null, Min.ONE, new HashSet<>(), dom, cod);
+        System.out.println("new morphism: " + newMorphism);
+        
+        // add new morphism
+        schemaCategory.addMorphism(newMorphism);
 
-        schemaCategory.addMorphism(morphism);
+        // move the objects which made a morphism with the reference
+        List<Key> referenceMorphismPairKeys = getMorphismPairKeys(schemaCategory, referenceKey);
+        for (Key key : referenceMorphismPairKeys) {
+            SchemaMorphism morphism = createNewMorphism(schemaCategory, dom, schemaCategory.getObject(key));
+            schemaCategory.addMorphism(morphism);
+        }
+
+        // remove the reference object
+        // TODO
+
+        System.out.println("SchemaCategory morphisms after reference merge edit: " + schemaCategory.allMorphisms());
 
         return schemaCategory;
     }
 
-    public int getNewSignatureValue(SchemaCategory schemaCategory) {
+    private SchemaMorphism createNewMorphism(SchemaCategory schemaCategory, SchemaObject dom, SchemaObject cod) {
+        BaseSignature signature = Signature.createBase(getNewSignatureValue(schemaCategory));
+        return new SchemaMorphism(signature, null, Min.ONE, new HashSet<>(), dom, cod);
+    }
+
+    private int getNewSignatureValue(SchemaCategory schemaCategory) {
         int max = 0;
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
             // TODO: here I am relying on the fact, that in inference I create only BaseSignatures
@@ -56,7 +81,26 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
                 max = signatureVal;
             }
         }
-        return max++;
+        return max + 1;
+    }
+
+    private Key getParentKey(SchemaCategory schemaCategory, Key key) {
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (morphism.cod().key() == key) {
+                return morphism.dom().key();
+            }
+        }
+        throw new NotFoundException("Parent key has not been found");
+    }
+
+    private List<Key> getMorphismPairKeys(SchemaCategory schemaCategory, Key key) {
+        List<Key> morphismPairKeys = new ArrayList<>();
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (morphism.dom().key() == key) {
+                morphismPairKeys.add(morphism.cod().key());
+            }
+        }
+        return morphismPairKeys;
     }
 
     public static class Deserializer extends StdDeserializer<ReferenceMergeInferenceEdit> {

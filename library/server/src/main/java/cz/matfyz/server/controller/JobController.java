@@ -107,35 +107,37 @@ public class JobController {
 
     // this method is only used in inference
     @PostMapping("/jobs/{id}/saveResult")
-    public JobDetail saveJobResult(@PathVariable Id id, @RequestBody Helper saveJobResultPayload) {
+    public JobDetail saveJobResult(@PathVariable Id id, @RequestBody SaveJobResultRequest saveJobResultPayloadString) {
         final var jobWithRun = repository.find(id);
-        final var job = jobWithRun.job();
-        final var run = jobWithRun.run();
 
-        System.out.println("stringified payload right from client: " + saveJobResultPayload.payload());
+        InferenceJobData inferenceJobData = extractInferenceJobData(jobWithRun.job());
+        SaveJobResultPayload payload = extractSaveJobResultPayload(saveJobResultPayloadString.payload());
 
-        boolean permanent = saveJobResultPayload.payload().permanent;
-        InferenceJobData inferenceJobData = extractInferenceJobData(job);
+        JobWithRun newJobWithRun;
+
+        boolean permanent = payload.permanent;
 
         try {
             if (permanent) {
                 // save the final SK and finish the job
-                System.out.println("saving permanent on server");
-                jobExecutorService.finishRSDToCategoryProcessing(run, job, inferenceJobData);
+                System.out.println("Saving permanent on server...");
+                jobExecutorService.finishRSDToCategoryProcessing(jobWithRun, inferenceJobData);
+                newJobWithRun = jobWithRun;
             } else {
                 // make edits on SK
                 // TODO: deal with mapping too
-                //AbstractInferenceEdit edit = saveJobResultPayload.edit;
-                System.out.println("extracting edit");
-                AbstractInferenceEdit edit = extractInferenceEdit(saveJobResultPayload.payload());
-                System.out.println("edit in jobcontroller: " + edit);
-                jobExecutorService.continueRSDToCategoryProcessing(run, job, inferenceJobData, edit);
+                AbstractInferenceEdit edit = payload.edit;
+                System.out.println("Applying edits to the SK, the current edit is: " + edit);
+                newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit);
             }
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
         }
-
-        return jobToJobDetail(service.transition(jobWithRun, State.Finished));
+        if (permanent) {
+            return jobToJobDetail(service.transition(newJobWithRun, State.Finished));
+        } else {
+            return jobToJobDetail(service.transition(newJobWithRun, State.Waiting));
+        }
     }
 
     private InferenceJobData extractInferenceJobData(Job job) {
@@ -143,29 +145,36 @@ public class JobController {
         String jobDataString = job.data.toString();
         System.out.println("jobDataString: " + jobDataString);
 
-        if (jobDataString.contains("inference")) {
-            try {
-                return objectMapper.readValue(jobDataString, InferenceJobData.class);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to process JSON while extracting the SK and mapping from job.data", e);
-            }
-        }
-        return null;
-    }
-
-    private AbstractInferenceEdit extractInferenceEdit(SaveJobResultPayload saveJobResultPayload) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        if (saveJobResultPayload.edit == null) {
-            System.out.println("edit sent from client is null");
-        }
-        String editString = saveJobResultPayload.edit.toString();
-        System.out.println("editString: " + editString);
-
         try {
-            return objectMapper.readValue(editString, AbstractInferenceEdit.class);
+            return objectMapper.readValue(jobDataString, InferenceJobData.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to process JSON while extracting the SK and mapping from job.data", e);
         }
+    }
+
+    private SaveJobResultPayload extractSaveJobResultPayload(String saveJobResultPayloadString) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (saveJobResultPayloadString == null) {
+            System.out.println("payload sent from client is null");
+        }
+
+        try {
+            return objectMapper.readValue(saveJobResultPayloadString, SaveJobResultPayload.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to process JSON while extracting the payload from inference job", e);
+        }
+    }
+
+    @PostMapping("/jobs/{id}/cancelEdit")
+    public JobDetail cancelLastJobEdit(@PathVariable Id id) {
+        System.out.println("cancelling last edit...");
+
+        final var jobWithRun = repository.find(id);
+
+        InferenceJobData inferenceJobData = extractInferenceJobData(jobWithRun.job());
+        JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData);
+
+        return jobToJobDetail(service.transition(newJobWithRun, State.Waiting));
     }
 
 
@@ -205,6 +214,6 @@ public class JobController {
         return service.createSession(categoryId);
     }
 
-    public record Helper(SaveJobResultPayload payload) {}
+    public record SaveJobResultRequest(String payload) {}
 
 }

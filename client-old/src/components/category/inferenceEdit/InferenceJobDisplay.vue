@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue';
+import { computed, onMounted, ref, shallowRef, watch } from 'vue';
 import API from '@/utils/api';
 import { Job } from '@/types/job';
 import type { Graph, Node } from '@/types/categoryGraph';
@@ -7,48 +7,38 @@ import GraphDisplay from '../../category/GraphDisplay.vue';
 import { SchemaCategory } from '@/types/schema';
 import { isInferenceJobData } from '@/utils/InferenceJobData';
 import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
-import { useSchemaCategoryId } from '@/utils/injects';
 import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
 import { ReferenceMergeInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'; 
 
 type InferenceJobDisplayProps = {
     job: Job;
+    schemaCategory: SchemaCategory;
 };
 
-/*	InferenceJobDisplay - vyrobí graf, předá jej do SK (kterou získá z jobu),
- bude mít GraphDisplay a EditorForInferenceSchemaCategory.
- A navic: bude mít na starost udržování operací - potvrzení/smazání, zobrazení toho seznamu, fečování na BE, ... 
-
-*/
-
 const props = defineProps<InferenceJobDisplayProps>();
+
 const graph = shallowRef<Graph>();
 
 const emit = defineEmits<{
     (e: 'updateEdit', edit: AbstractInferenceEdit): void;
+    (e: 'cancel-edit'): void;
 }>();
 
-const fetching = ref(false);
-
-const schemaCategory = computed(() => {
-    if (typeof props.job.result === 'string') {
-        const parsedResult = JSON.parse(props.job.result);
-        if (isInferenceJobData(parsedResult)) {
-            return SchemaCategory.fromServer(parsedResult.inference.schemaCategory, []);
-        } else {
-            throw new Error("InferenceJobData is not the right type");            
+watch(() => props.schemaCategory, (newCategory, oldCategory) => {
+    if (newCategory && newCategory !== oldCategory) {
+        if (graph.value) {
+            newCategory.graph = graph.value;
         }
     }
-    throw new Error("InferenceJobData is not the right type");
-});
+}, { immediate: true });
 
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
-    if (!schemaCategory.value) {
+    if (!props.schemaCategory) {
         console.log("This should not happen. - schemaCategory.value empty")
         return;
     }
-    schemaCategory.value.graph = newGraph;
+    props.schemaCategory.graph = newGraph;
 }
 
 function createMergeEdit(nodes: (Node)[]) {
@@ -56,13 +46,15 @@ function createMergeEdit(nodes: (Node)[]) {
     const referredKey = nodes[1].schemaObject.key;
 
     const edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey);
-    console.log("edit referenceKey" + edit.referenceKey);
     confirm(edit);
 }
 
 function confirm(edit: AbstractInferenceEdit) {
-    console.log("confirm in inferencejobdisplay");
     emit('updateEdit', edit);
+}
+
+function cancelEdit() {
+    emit('cancel-edit');
 }
 
 </script>
@@ -79,8 +71,9 @@ function confirm(edit: AbstractInferenceEdit) {
             <div v-if="graph">
                 <EditorForInferenceSchemaCategory 
                     :graph="graph" 
-                    :schema-category="schemaCategory" 
-                    @merge-confirm="createMergeEdit"                
+                    :schema-category="props.schemaCategory" 
+                    @merge-confirm="createMergeEdit"    
+                    @cancel-edit="cancelEdit"            
                 />
             </div>
         </div> 
