@@ -58,7 +58,7 @@ function cancelEdit() {
 }
 
 </script>
-
+<!--
 <template>
     <div
         v-if="job"
@@ -77,5 +77,22 @@ function cancelEdit() {
                 />
             </div>
         </div> 
+    </div>
+</template> -->
+
+<template>
+    <div v-if="job" class="d-flex flex-column">
+        <div class="divide">
+            <GraphDisplay @graph-created="graphCreated" />
+            <div v-if="graph">
+                <EditorForInferenceSchemaCategory 
+                    :graph="graph" 
+                    :schema-category="props.schemaCategory" 
+                    @merge-confirm="createMergeEdit"    
+                    @cancel-edit="cancelEdit"            
+                />
+                <slot name="below-editor"></slot>
+            </div>
+        </div>
     </div>
 </template>

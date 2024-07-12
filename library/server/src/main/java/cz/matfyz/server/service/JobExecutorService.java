@@ -297,32 +297,32 @@ public class JobExecutorService {
         }
     }
 
-    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit) {
-        if (edit == null) {
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit, boolean savePermanent) {
+        if (edit == null && !savePermanent) { //cancel edit
             inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
-        } else {
+        } else if (!savePermanent) { // new edit
             inferenceJobData.manual.add(edit);
         }
         System.out.println("inferenceJobData.manual: " + inferenceJobData.manual);
 
         inferenceJobData.finalSchema = editSchemaCategory(inferenceJobData);
 
-        try {
-            job.job().data = inferenceJobData.toJsonValue();
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
+        if (savePermanent) {
+            finishRSDToCategoryProcessing(job, inferenceJobData.finalSchema);
+        } else {
+            try {
+                job.job().data = inferenceJobData.toJsonValue();
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
+            }
         }
         return job;
     }
 
-    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData) {
-        return continueRSDToCategoryProcessing(job, inferenceJobData, null);
-    }
-
-    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, InferenceJobData inferenceJobData) {
+    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema) {
         RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
 
-        SchemaCategoryWrapper schemaWrapper = inferenceJobData.inference.schemaCategory;
+        SchemaCategoryWrapper schemaWrapper = finalSchema;
 
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
         final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");

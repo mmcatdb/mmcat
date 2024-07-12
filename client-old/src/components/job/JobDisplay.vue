@@ -224,17 +224,19 @@ function toggleGeneratedDataModel() {
                     :schema-category="schemaCategory"
                     @updateEdit="(edit) => saveJob(edit, false)"
                     @cancel-edit="cancelEdit"
-                />
-                <div class="d-flex justify-content-end mt-2">
-                    <button 
-                        v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting && isShowDetail"
-                        :disabled="fetching"
-                        class="primary"
-                        @click="() => saveJob(null, true)"
-                    >
-                        Save and Finish
-                    </button>
-                </div>
+                >
+                    <template #below-editor>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button 
+                                :disabled="fetching"
+                                class="primary"
+                                @click="() => saveJob(null, true)"
+                            >
+                                Save and Finish
+                            </button>
+                        </div>
+                    </template>
+                </InferenceJobDisplay>
             </template>
             <TextArea
                 v-if="error"

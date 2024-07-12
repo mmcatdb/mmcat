@@ -112,32 +112,18 @@ public class JobController {
 
         InferenceJobData inferenceJobData = extractInferenceJobData(jobWithRun.job());
         SaveJobResultPayload payload = extractSaveJobResultPayload(saveJobResultPayloadString.payload());
+        boolean permanent = payload.permanent;
 
         JobWithRun newJobWithRun;
 
-        boolean permanent = payload.permanent;
-
         try {
-            if (permanent) {
-                // save the final SK and finish the job
-                System.out.println("Saving permanent on server...");
-                jobExecutorService.finishRSDToCategoryProcessing(jobWithRun, inferenceJobData);
-                newJobWithRun = jobWithRun;
-            } else {
-                // make edits on SK
-                // TODO: deal with mapping too
-                AbstractInferenceEdit edit = payload.edit;
-                System.out.println("Applying edits to the SK, the current edit is: " + edit);
-                newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit);
-            }
+            AbstractInferenceEdit edit = permanent ? null : payload.edit;
+            newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, permanent);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
         }
-        if (permanent) {
-            return jobToJobDetail(service.transition(newJobWithRun, State.Finished));
-        } else {
-            return jobToJobDetail(service.transition(newJobWithRun, State.Waiting));
-        }
+
+        return jobToJobDetail(service.transition(newJobWithRun, permanent ? State.Finished : State.Waiting));
     }
 
     private InferenceJobData extractInferenceJobData(Job job) {
@@ -172,7 +158,7 @@ public class JobController {
         final var jobWithRun = repository.find(id);
 
         InferenceJobData inferenceJobData = extractInferenceJobData(jobWithRun.job());
-        JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData);
+        JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, null, false);
 
         return jobToJobDetail(service.transition(newJobWithRun, State.Waiting));
     }

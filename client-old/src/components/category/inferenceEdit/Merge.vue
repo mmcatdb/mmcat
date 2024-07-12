@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, shallowRef, watch, onMounted, onUnmounted } from 'vue';
-import { computed } from '@vue/reactivity';
+import { ref, shallowRef, computed } from 'vue';
 import { Graph } from '@/types/categoryGraph';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { SelectionType, type Node, type TemporaryEdge } from '@/types/categoryGraph';
+import { SelectionType, type Node } from '@/types/categoryGraph';
 import NodeInput from '@/components/input/NodeInput.vue';
 
 const props = defineProps<{
@@ -24,16 +23,15 @@ const confirmClicked = ref(false);
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
 const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
-// send edit to BE and apply it
 function confirm() {
     confirmClicked.value = true;
     emit('confirm', nodes.value);
 }
 
-function save() {
-    // here I want to save the change to the job.data
-    emit('save');
+function save() { // do not do anything, just go back t editor
+    emit('cancel');
 }
+
 // TODO: when nodes selected but not confirmed and cancel clicked I want it to remain in Merge, and only unselect the selected nodes
 function cancel() {
     if (noNodesSelected) { // go back to editor
@@ -46,6 +44,7 @@ function cancel() {
         emit('cancel-edit');
     }
 }
+
 </script>
 
 <template>
