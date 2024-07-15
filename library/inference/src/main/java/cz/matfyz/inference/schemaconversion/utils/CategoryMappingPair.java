@@ -17,6 +17,7 @@ public record CategoryMappingPair(
 ) {
     public static CategoryMappingPair merge(List<CategoryMappingPair> pairs, String categoryLabel) {
         SchemaCategory mergedSchemaCategory = new SchemaCategory(categoryLabel);
+        //Mapping mergedMapping 
         for (CategoryMappingPair pair : pairs) {
             for (SchemaObject object : pair.schemaCategory.allObjects()) {
                 mergedSchemaCategory.addObject(object);

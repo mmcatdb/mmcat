@@ -17,7 +17,7 @@ import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
-import cz.matfyz.inference.edit.SchemaCategoryInferenceEditor;
+import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.builder.GeneratedDataModel;
@@ -292,6 +292,9 @@ public class JobExecutorService {
         InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, categoryMappingPair.mapping()));
         try {
             job.data = inferenceJobData.toJsonValue();
+            System.out.println("job.data after inference: ");
+            System.out.println(job.data);
+            System.out.println();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
         }
@@ -305,10 +308,13 @@ public class JobExecutorService {
         }
         System.out.println("inferenceJobData.manual: " + inferenceJobData.manual);
 
-        inferenceJobData.finalSchema = editSchemaCategory(inferenceJobData);
+        //TODO: here I need to insert the mapping to the editor
+        InferenceEditor inferenceEditor = savePermanent ? new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), null, inferenceJobData.manual) : new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
+
+        inferenceJobData.finalSchema = makeEdits(inferenceEditor);
 
         if (savePermanent) {
-            finishRSDToCategoryProcessing(job, inferenceJobData.finalSchema);
+            finishRSDToCategoryProcessing(job, inferenceJobData.finalSchema, inferenceEditor.getFinalMapping());
         } else {
             try {
                 job.job().data = inferenceJobData.toJsonValue();
@@ -319,7 +325,7 @@ public class JobExecutorService {
         return job;
     }
 
-    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema) {
+    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping mapping) {
         RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
 
         SchemaCategoryWrapper schemaWrapper = finalSchema;
@@ -328,11 +334,10 @@ public class JobExecutorService {
         final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");
 
         schemaService.overwriteInfo(schemaWrapper, jobWithRun.run().categoryId);
-        //mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
+        mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
     }
 
-    private SchemaCategoryWrapper editSchemaCategory(InferenceJobData inferenceJobData) {
-        SchemaCategoryInferenceEditor inferenceEditor = new SchemaCategoryInferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
+    private SchemaCategoryWrapper makeEdits(InferenceEditor inferenceEditor) {
         inferenceEditor.applyEdits();
         return SchemaCategoryUtil.createWrapperFromCategory(inferenceEditor.getSchemaCategory());
     }

@@ -1,8 +1,12 @@
 package cz.matfyz.inference.edit;
 
+import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 
 import java.io.IOException;
+import java.util.List;
+
+import javax.xml.validation.Schema;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -23,7 +27,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonDeserialize(using = AbstractInferenceEdit.Deserializer.class)
 public abstract class AbstractInferenceEdit {
 
-    public abstract SchemaCategory applyEdit(SchemaCategory schemaCategory);
+    public abstract SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory);
+    public abstract List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory);
 
     public static class Deserializer extends StdDeserializer<AbstractInferenceEdit> {
 
