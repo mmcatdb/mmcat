@@ -292,9 +292,6 @@ public class JobExecutorService {
         InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, categoryMappingPair.mapping()));
         try {
             job.data = inferenceJobData.toJsonValue();
-            System.out.println("job.data after inference: ");
-            System.out.println(job.data);
-            System.out.println();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
         }

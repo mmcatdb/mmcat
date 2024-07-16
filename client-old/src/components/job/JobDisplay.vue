@@ -222,7 +222,7 @@ function toggleGeneratedDataModel() {
                 <InferenceJobDisplay 
                     :job="job"
                     :schema-category="schemaCategory"
-                    @updateEdit="(edit) => saveJob(edit, false)"
+                    @update-edit="(edit) => saveJob(edit, false)"
                     @cancel-edit="cancelEdit"
                 >
                     <template #below-editor>

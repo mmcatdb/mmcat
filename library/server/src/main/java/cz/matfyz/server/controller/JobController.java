@@ -3,7 +3,7 @@ package cz.matfyz.server.controller;
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
-import cz.matfyz.inference.edit.SaveJobResultPayload;
+import cz.matfyz.inference.edit.utils.SaveJobResultPayload;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;

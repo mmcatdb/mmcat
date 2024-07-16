@@ -2,19 +2,25 @@ import { Key } from "../identifiers";
 import { SchemaCategory } from "../schema";
 
 interface AbstractInferenceEdit {
-    applyEdit(schemaCategory: SchemaCategory): SchemaCategory;
 }
 export type { AbstractInferenceEdit };
 
 
 export class PrimaryKeyMergeInferenceEdit implements AbstractInferenceEdit {
-    public readonly primaryKey: string;
+    public readonly type: string = "primaryKey";
+    public readonly primaryKeyRoot: Key;
+    public readonly primaryKey: Key;
 
-    constructor(primaryKey: string) {
+    constructor(primaryKeyRoot: Key, primaryKey: Key) {
+        this.primaryKeyRoot = primaryKeyRoot
         this.primaryKey = primaryKey;
     }
-    applyEdit(schemaCategory: SchemaCategory): SchemaCategory {
-        throw new Error("Method not implemented.");
+    toJSON() {
+        return {
+            type: this.type,
+            primaryKeyRoot: this.primaryKeyRoot,
+            primaryKey: this.primaryKey
+        };
     }
 }
 
@@ -26,9 +32,6 @@ export class ReferenceMergeInferenceEdit implements AbstractInferenceEdit {
     constructor(referenceKey: Key, referredKey: Key) {
         this.referenceKey = referenceKey;
         this.referredKey = referredKey;
-    }
-    applyEdit(schemaCategory: SchemaCategory): SchemaCategory {
-        throw new Error("Method not implemented.");
     }
 
     toJSON() {

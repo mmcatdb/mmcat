@@ -10,9 +10,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'merge-save'): void;
     (e: 'cancel-edit'): void;
-    (e: 'merge-confirm', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
 }>();
 
 enum State {
@@ -63,8 +63,12 @@ function onNodeTapHandler(node: Node) {
     console.log("Node clicked", node);
 }
 
-function confirmEdit(nodes: (Node | undefined)[]) {
-    emit('merge-confirm', nodes);
+function confirmReferenceMergeEdit(nodes: (Node | undefined)[]) {
+    emit('confirm-reference-merge', nodes);
+}
+
+function confirmPrimaryKeyMergeEdit(nodes: (Node | undefined)[]) {
+    emit('confirm-primary-key-merge', nodes);
 }
 
 function cancelEdit() {
@@ -94,7 +98,8 @@ function cancelEdit() {
         <template v-else-if="state.type === State.Merge">
             <Merge
                 :graph="props.graph"
-                @confirm="confirmEdit"
+                @confirm-reference-merge="confirmReferenceMergeEdit"
+                @confirm-primary-key-merge="confirmPrimaryKeyMergeEdit"
                 @save="setStateToDefault"
                 @cancel="setStateToDefault"
                 @cancel-edit="cancelEdit"

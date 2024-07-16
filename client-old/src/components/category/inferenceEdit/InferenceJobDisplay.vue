@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, shallowRef, watch } from 'vue';
-import API from '@/utils/api';
 import { Job } from '@/types/job';
 import type { Graph, Node } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
 import { SchemaCategory } from '@/types/schema';
-import { isInferenceJobData } from '@/utils/InferenceJobData';
 import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
 import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
-import { ReferenceMergeInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'; 
+import { PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'; 
 
 type InferenceJobDisplayProps = {
     job: Job;
@@ -20,7 +18,7 @@ const props = defineProps<InferenceJobDisplayProps>();
 const graph = shallowRef<Graph>();
 
 const emit = defineEmits<{
-    (e: 'updateEdit', edit: AbstractInferenceEdit): void;
+    (e: 'update-edit', edit: AbstractInferenceEdit): void;
     (e: 'cancel-edit'): void;
 }>();
 
@@ -41,7 +39,7 @@ function graphCreated(newGraph: Graph) {
     props.schemaCategory.graph = newGraph;
 }
 
-function createMergeEdit(nodes: (Node)[]) {
+function createReferenceMergeEdit(nodes: (Node)[]) {
     const referenceKey = nodes[0].schemaObject.key;
     const referredKey = nodes[1].schemaObject.key;
 
@@ -49,8 +47,16 @@ function createMergeEdit(nodes: (Node)[]) {
     confirm(edit);
 }
 
+function createPrimaryKeyMergeEdit(nodes: (Node)[]) {
+    const primaryKeyRoot = nodes[0].schemaObject.key;
+    const primaryKey = nodes[1].schemaObject.key;
+
+    const edit = new PrimaryKeyMergeInferenceEdit(primaryKeyRoot, primaryKey);
+    confirm(edit);
+}
+
 function confirm(edit: AbstractInferenceEdit) {
-    emit('updateEdit', edit);
+    emit('update-edit', edit);
 }
 
 function cancelEdit() {
@@ -58,27 +64,6 @@ function cancelEdit() {
 }
 
 </script>
-<!--
-<template>
-    <div
-        v-if="job"
-        class="d-flex flex-column"
-    >
-            <div class="divide">
-            <GraphDisplay 
-                @graph-created="graphCreated"
-            />
-            <div v-if="graph">
-                <EditorForInferenceSchemaCategory 
-                    :graph="graph" 
-                    :schema-category="props.schemaCategory" 
-                    @merge-confirm="createMergeEdit"    
-                    @cancel-edit="cancelEdit"            
-                />
-            </div>
-        </div> 
-    </div>
-</template> -->
 
 <template>
     <div v-if="job" class="d-flex flex-column">
@@ -88,7 +73,8 @@ function cancelEdit() {
                 <EditorForInferenceSchemaCategory 
                     :graph="graph" 
                     :schema-category="props.schemaCategory" 
-                    @merge-confirm="createMergeEdit"    
+                    @confirm-reference-merge="createReferenceMergeEdit"    
+                    @confirm-primary-key-merge="createPrimaryKeyMergeEdit"
                     @cancel-edit="cancelEdit"            
                 />
                 <slot name="below-editor"></slot>

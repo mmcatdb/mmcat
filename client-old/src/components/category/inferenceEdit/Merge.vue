@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, shallowRef, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { Graph } from '@/types/categoryGraph';
-import ValueContainer from '@/components/layout/page/ValueContainer.vue';
-import ValueRow from '@/components/layout/page/ValueRow.vue';
-import { SelectionType, type Node } from '@/types/categoryGraph';
-import NodeInput from '@/components/input/NodeInput.vue';
+import Divider from '@/components/layout/Divider.vue';
+import { Node } from '@/types/categoryGraph';
+import ReferenceMerge from '@/components/category/inferenceEdit/ReferenceMerge.vue';
+import PrimaryKeyMerge from '@/components/category/inferenceEdit/PrimaryKeyMerge.vue';
 
 const props = defineProps<{
     graph: Graph
@@ -14,35 +14,30 @@ const emit = defineEmits<{
     (e: 'save'): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
-    (e: 'confirm', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
 }>();
 
-const nodes = shallowRef<(Node | undefined)[]>([]);
-const confirmClicked = ref(false);
+const mergeType = ref<'reference' | 'primaryKey'>('reference');
 
-const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
-const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
+const confirmHandler = computed(() => {
+    return mergeType.value === 'reference' ? confirmReference : confirmPrimaryKey;
+});
 
-function confirm() {
-    confirmClicked.value = true;
-    emit('confirm', nodes.value);
+function confirmReference(nodes: (Node | undefined)[]) {
+    emit('confirm-reference-merge', nodes);
 }
 
-function save() { // do not do anything, just go back t editor
+function confirmPrimaryKey(nodes: (Node | undefined)[]) {
+    emit('confirm-primary-key-merge', nodes);
+}
+
+function cancel() {
     emit('cancel');
 }
 
-// TODO: when nodes selected but not confirmed and cancel clicked I want it to remain in Merge, and only unselect the selected nodes
-function cancel() {
-    if (noNodesSelected) { // go back to editor
-        emit('cancel');
-    }
-    
-    nodes.value = [undefined, undefined];  //unselect selected nodes
-
-    if (confirmClicked) { // delete the edit (on BE)
-        emit('cancel-edit');
-    }
+function cancelEdit() {
+    emit('cancel-edit');
 }
 
 </script>
@@ -50,41 +45,23 @@ function cancel() {
 <template>
        <div class="merge">
         <h2>Merge Objects</h2>
-        <ValueContainer>
-            <ValueRow label="Reference object:"> 
-                {{ nodes[0]?.schemaObject.label }}
-            </ValueRow>
-            <ValueRow label="Referred object:"> 
-                {{ nodes[1]?.schemaObject.label }}
-            </ValueRow>
-        </ValueContainer>
-        <NodeInput
-            v-model="nodes"
+        <div class="merge-type">
+            <label>
+                <input type="radio" v-model="mergeType" value="reference"> Reference
+            </label>
+            <label>
+                <input type="radio" v-model="mergeType" value="primaryKey"> Primary Key
+            </label>
+        </div>
+    <Divider />
+        <component
+            :is="mergeType === 'reference' ? ReferenceMerge : PrimaryKeyMerge"
             :graph="props.graph"
-            :count="2"
-            :type="SelectionType.Selected"
+            @confirm="confirmHandler"
+            @save="cancel"
+            @cancel="cancel"
+            @cancel-edit="cancelEdit"
         />
-        <div class="button-row">
-            <button
-                :disabled="!nodesSelected || confirmClicked"
-                @click="confirm"
-            >
-                Confirm
-            </button>
-        </div>
-        <div class="button-row">
-            <button
-                :disabled="!confirmClicked"
-                @click="save"
-            >
-                Save
-            </button>
-            <button
-                @click="cancel"
-            >
-                Cancel
-            </button>
-        </div>
     </div>
 </template>
 

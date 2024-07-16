@@ -1,4 +1,6 @@
-package cz.matfyz.inference.edit;
+package cz.matfyz.inference.edit.utils;
+
+import cz.matfyz.inference.edit.AbstractInferenceEdit;
 
 import java.io.IOException;
 

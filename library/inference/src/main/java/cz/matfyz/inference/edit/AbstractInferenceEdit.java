@@ -6,8 +6,6 @@ import cz.matfyz.core.schema.SchemaCategory;
 import java.io.IOException;
 import java.util.List;
 
-import javax.xml.validation.Schema;
-
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParser;
@@ -22,7 +20,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
     property = "type"
 )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = ReferenceMergeInferenceEdit.class, name = "reference")
+    @JsonSubTypes.Type(value = ReferenceMergeInferenceEdit.class, name = "reference"),
+    @JsonSubTypes.Type(value = PrimaryKeyMergeInferenceEdit.class, name = "primaryKey")
 })
 @JsonDeserialize(using = AbstractInferenceEdit.Deserializer.class)
 public abstract class AbstractInferenceEdit {
@@ -49,6 +48,8 @@ public abstract class AbstractInferenceEdit {
                 switch (type) {
                     case "reference":
                         return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, ReferenceMergeInferenceEdit.class);
+                    case "primaryKey":
+                        return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, PrimaryKeyMergeInferenceEdit.class);
                     default:
                         throw new IllegalArgumentException("Unknown type for AbstractInferenceEdit");
                 }

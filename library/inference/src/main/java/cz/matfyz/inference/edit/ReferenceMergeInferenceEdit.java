@@ -1,21 +1,21 @@
 package cz.matfyz.inference.edit;
 
-import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+
+import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -60,6 +60,18 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     public void setNewIndexSig(Signature sig) {
         this.newIndexSignature = sig;
     }
+    public Signature getOldReferenceSig() {
+        return this.oldReferenceSignature;
+    }
+    public Signature getNewReferenceSig() {
+        return this.newReferenceSignature;
+    }
+    public Signature getOldIndexSig() {
+        return this.oldIndexSignature;
+    }
+    public Signature getNewIndexSig() {
+        return this.newIndexSignature;
+    }
     ////////////////////////////
     @Override
     public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
@@ -76,39 +88,18 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
         // add new morphisms
         Key referenceParentKey = getParentKey(schemaCategory, referenceKey);
-        SchemaMorphism newMorphism = createMorphism(schemaCategory, dom, referenceParentKey);
-        newReferenceSignature = newMorphism.signature();
-        schemaCategory.addMorphism(newMorphism);
+        // TODO: check if the schemaCategory here really changes
+        newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, referenceParentKey);
 
         Key indexKey = getIndexKey(schemaCategory, referenceKey);
-        SchemaMorphism indexMorphism = createMorphism(schemaCategory, dom, indexKey);
-        newIndexSignature = indexMorphism.signature();
-        schemaCategory.addMorphism(indexMorphism);
+        newIndexSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, indexKey);
 
         // remove the reference object and its morphisms
-        schemaCategory = removeReferenceAndItsMorphisms(schemaCategory, Arrays.asList(referenceParentKey, indexKey));
-        SchemaCategoryEditor editor = new SchemaCategoryEditor(schemaCategory);
+        schemaCategory = removeReferenceMorphisms(schemaCategory, Arrays.asList(referenceParentKey, indexKey));
+        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
         editor.deleteObject(referenceKey);
 
         return editor.schemaCategory;
-    }
-
-    private SchemaMorphism createMorphism(SchemaCategory schemaCategory, SchemaObject dom, Key codKey) {
-        SchemaObject cod = schemaCategory.getObject(codKey);
-        BaseSignature signature = Signature.createBase(getNewSignatureValue(schemaCategory));
-        return new SchemaMorphism(signature, null, Min.ONE, new HashSet<>(), dom, cod);
-    }
-
-    private int getNewSignatureValue(SchemaCategory schemaCategory) {
-        int max = 0;
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            // TODO: here I am relying on the fact, that in inference I create only BaseSignatures
-            int signatureVal = Integer.parseInt(morphism.signature().toString());
-            if (signatureVal > max) {
-                max = signatureVal;
-            }
-        }
-        return max + 1;
     }
 
     // TODO: make it more general
@@ -130,7 +121,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         throw new NotFoundException("Index key has not been found");
     }
 
-    private SchemaCategory removeReferenceAndItsMorphisms(SchemaCategory schemaCategory, List<Key> keysToDelete) {
+    private SchemaCategory removeReferenceMorphisms(SchemaCategory schemaCategory, List<Key> keysToDelete) {
         List<SchemaMorphism> morphismsToDelete = new ArrayList<>();
         for (SchemaMorphism morphismToDelete : schemaCategory.allMorphisms()) {
             if (morphismToDelete.dom().key().equals(referenceKey) && keysToDelete.contains(morphismToDelete.cod().key())) {
@@ -153,9 +144,9 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     public List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory) {
 
         // find the two mappings in question
-        Mapping referenceMapping = findReferenceMapping(mappings);
+        Mapping referenceMapping = findMappingWithKey(mappings, referenceKey);
         System.out.println("referenceMapping found: " + referenceMapping.accessPath());
-        Mapping referredMapping = findReferredMapping(mappings);
+        Mapping referredMapping = findMappingWithKey(mappings, referredKey);
         System.out.println("referredMapping found: " + referredMapping.accessPath());
 
         // create the new merged mapping
@@ -166,45 +157,40 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         return updateMappings(mappings, referenceMapping, referredMapping, mergedMapping);
     }
 
-    private Mapping findReferenceMapping(List<Mapping> mappings) {
+    private Mapping findMappingWithKey(List<Mapping> mappings, Key key) {
         for (Mapping mapping : mappings) {
             for (SchemaObject object : mapping.category().allObjects()) {
-                if (object.key().equals(referenceKey)) {
+                if (object.key().equals(key)) {
                     return mapping;
                 }
             }
         }
-        throw new NotFoundException("Reference Mapping has not been found.");
+        throw new NotFoundException("Mapping with key " + key + " has not been found.");
     }
 
-    private Mapping findReferredMapping(List<Mapping> mappings) {
-        for (Mapping mapping : mappings) {
-            for (SchemaObject object : mapping.category().allObjects()) {
-                if (object.key().equals(referredKey)) {
-                    return mapping;
-                }
-            }
-        }
-        throw new NotFoundException("Referred Mapping has not been found.");
-    }
-
-    // TODO: also set the new reference signature
+    // TODO: note all the places where we make the signature dual, this is because we assume, that the reference is a list
     private ComplexProperty mergeComplexProperties(ComplexProperty referenceComplexProperty, ComplexProperty referredComplexProperty) {
         // find the subpath in the reference property with the target signature
         List<AccessPath> newSubpaths = new ArrayList<>();
         boolean replaced = false;
 
         for (AccessPath subpath : referenceComplexProperty.subpaths()) {
-            if (!replaced && subpath.signature().equals(oldReferenceSignature)) {
+            if (!replaced && subpath.signature().equals(oldReferenceSignature.dual())) {
                 // replace it
                 List<AccessPath> combinedSubpaths = new ArrayList<>(referredComplexProperty.subpaths());
-                ComplexProperty newIndexComplexProperty = null;
+                System.out.println("combinedSubpaths: " + combinedSubpaths);
+
+                SimpleProperty newIndexSimpleProperty = null;
+
                 if (subpath instanceof ComplexProperty currentComplexProperty) {
                     AccessPath currentSubpath = currentComplexProperty.getSubpathBySignature(oldIndexSignature); // assuming there is just _index object
-                    newIndexComplexProperty = new ComplexProperty(currentSubpath.name(), newIndexSignature, (List<AccessPath>) currentSubpath); //set the new index signature
+                    System.out.println("currentSubpath: " + currentSubpath);
+
+                    newIndexSimpleProperty = new SimpleProperty(currentSubpath.name(), newIndexSignature); //set the new index signature
+                    System.out.println("newIndexCompelxProp: " + newIndexSimpleProperty);
                 }
-                combinedSubpaths.add(newIndexComplexProperty);
-                newSubpaths.add(new ComplexProperty(subpath.name(), subpath.signature(), combinedSubpaths));
+                combinedSubpaths.add(newIndexSimpleProperty);
+                newSubpaths.add(new ComplexProperty(subpath.name(), newReferenceSignature.dual(), combinedSubpaths));
                 replaced = true;
             } else {
                 newSubpaths.add(subpath);
@@ -216,7 +202,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     private List<Mapping> updateMappings(List<Mapping> mappings, Mapping referenceMapping, Mapping referredMapping, Mapping mergedMapping) {
         List<Mapping> updatedMappings = new ArrayList<>();
         for (Mapping mapping : mappings) {
-            if (!mapping.equals(referenceMapping) && mapping.equals(referredMapping)) {
+            if (!mapping.equals(referenceMapping) && !mapping.equals(referredMapping)) {
                 updatedMappings.add(mapping);
             }
         }
