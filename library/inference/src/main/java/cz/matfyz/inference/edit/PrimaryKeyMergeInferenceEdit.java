@@ -58,16 +58,10 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
             InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, keyToProcess);
         }
 
-        // delete the old morphisms to the primary key and find old primary key objects
-        schemaCategory = removePrimaryKeyMorphisms(schemaCategory, keysToProcess, primaryKeyLabel);
+        // delete the old morphisms to the primary key and old primary key objects
+        schemaCategory = removePrimaryKeyMorphismsAndObjects(schemaCategory, keysToProcess, primaryKeyLabel);
 
-        // delete the old primary key objects
-        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
-        //TODO: which keys are to delete?
-        
-        //editor.deleteObjects(keysToDelete);
-
-        return editor.schemaCategory;
+        return schemaCategory;
     }
 
     private List<Key> findKeysIdentifiedByPrimaryKeyLabel(SchemaCategory schemaCategory, String primaryKeyLabel) {
@@ -81,17 +75,22 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         return keysIdentifiedByPrimaryKey;
     }
 
-    
-    private SchemaCategory removePrimaryKeyMorphisms(SchemaCategory schemaCategory, List<Key> keysToDelete, String primaryKeyLabel) {
+    private SchemaCategory removePrimaryKeyMorphismsAndObjects(SchemaCategory schemaCategory, List<Key> keysToProcess, String primaryKeyLabel) {
         List<SchemaMorphism> morphismsToDelete = new ArrayList<>();
-        for (SchemaMorphism morphismToDelete : schemaCategory.allMorphisms()) {
-            if (morphismToDelete.cod().label().equals(primaryKeyLabel) && keysToDelete.contains(morphismToDelete.cod().key())) {
-                morphismsToDelete.add(morphismToDelete);
+        List<Key> keysToDelete = new ArrayList<>();
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (morphism.cod().label().equals(primaryKeyLabel) && keysToProcess.contains(morphism.dom().key())) {
+                morphismsToDelete.add(morphism);
+                keysToDelete.add(morphism.cod().key());
             }
         }
+        System.out.println("morphisms to delete: " + morphismsToDelete);
+        System.out.println("keys to delete: " + keysToDelete);
         for (SchemaMorphism morphismToDelete : morphismsToDelete) {
             schemaCategory.removeMorphism(morphismToDelete);
         }
+        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
+        editor.deleteObjects(keysToDelete);
         return schemaCategory;
     }
 

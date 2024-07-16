@@ -34,9 +34,14 @@ public class InferenceEditorUtils {
     }
 
     public static Signature createAndAddMorphism(SchemaCategory schemaCategory, SchemaObject dom, Key codKey) {
-        SchemaMorphism newMorphism = createMorphism(schemaCategory, dom, codKey);
-        schemaCategory.addMorphism(newMorphism);
-        return newMorphism.signature();
+        SchemaMorphism existingMorphism = getMorphismIfExists(schemaCategory, dom, codKey);
+        if (existingMorphism != null) {
+            return existingMorphism.signature();
+        } else {
+            SchemaMorphism newMorphism = createMorphism(schemaCategory, dom, codKey);
+            schemaCategory.addMorphism(newMorphism);
+            return newMorphism.signature();
+        }
     }
 
     private static SchemaMorphism createMorphism(SchemaCategory schemaCategory, SchemaObject dom, Key codKey) {
@@ -44,7 +49,16 @@ public class InferenceEditorUtils {
         BaseSignature signature = Signature.createBase(InferenceEditorUtils.getNewSignatureValue(schemaCategory));
         return new SchemaMorphism(signature, null, Min.ONE, new HashSet<>(), dom, cod);
     }
-    
+
+    private static SchemaMorphism getMorphismIfExists(SchemaCategory schemaCategory, SchemaObject dom, Key codKey) {
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (morphism.dom().equals(dom) && morphism.cod().key().equals(codKey)) {
+                return morphism;
+            }
+        }
+        return null;
+    }
+
     public static class SchemaCategoryEditor extends SchemaCategory.Editor {
 
         public final SchemaCategory schemaCategory;
