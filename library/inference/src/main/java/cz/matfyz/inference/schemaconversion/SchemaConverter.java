@@ -46,7 +46,7 @@ public class SchemaConverter {
         root.printTree(" ");
 
         LOGGER.info("Creating the schema category from the access tree...");
-        AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(categoryLabel, signatureGenerator, keyGenerator, kindName);
+        AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(categoryLabel, kindName);
         SchemaCategory schemaCategory = accessTreeToSchemaCategoryConverter.convert(root);
 
         System.out.println("Morphisms in the final SK: ");

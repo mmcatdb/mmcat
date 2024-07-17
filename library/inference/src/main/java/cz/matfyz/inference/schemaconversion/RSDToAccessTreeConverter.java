@@ -41,25 +41,46 @@ public class RSDToAccessTreeConverter {
             }
 
             for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
-                BaseSignature signature = Signature.createBase(signatureGenerator.next());
-                Key keyChild = new Key(keyGenerator.next());
-                Min min = findMin(rsdParent, rsdChild);
-                boolean isArray = isTypeArray(rsdChild);
+                //here we are excluding the "_" objects of arrays
+                if (!rsdChild.getName().equals("_")) {                    
+                    boolean isArray = isTypeArray(rsdChild);
+                    AccessTreeNode.State state = isArray ? AccessTreeNode.State.COMPLEX : AccessTreeNode.State.SIMPLE;
+                    BaseSignature signature = Signature.createBase(signatureGenerator.next());
+                    Key keyChild = new Key(keyGenerator.next());
+                    Min min = findMin(rsdParent, rsdChild);
 
-                // for now we have decided not to have labels
-                // String label = createLabel(rsdChild, isArray);
-                String label = null;
+                    // for now we have decided not to have labels
+                    // String label = createLabel(rsdChild, isArray);
+                    String label = null;
 
-                AccessTreeNode child = new AccessTreeNode(AccessTreeNode.State.SIMPLE, rsdChild.getName(), signature, keyChild, keyParent, label, min, isArray);
-                currentNode.addChild(child);
+                    AccessTreeNode child = new AccessTreeNode(state, rsdChild.getName(), signature, keyChild, keyParent, label, min, isArray);
+                    currentNode.addChild(child);
 
-                buildAccessTree(rsdChild, keyChild, i++, child);
+                    // add _index node, if parent is array and the _index is not yet present
+                    if (isArray && !hasIndexChild(child)) {
+                        BaseSignature signatureIndex = Signature.createBase(signatureGenerator.next());
+                        Key keyIndex = new Key(keyGenerator.next());
+                        AccessTreeNode indexChild = new AccessTreeNode(AccessTreeNode.State.SIMPLE, "_index", signatureIndex, keyIndex, keyChild, null, Min.ONE, false);
+                        child.addChild(indexChild);
+                    }
+
+                    buildAccessTree(rsdChild, keyChild, i++, child);
+                }
             }
         }
     }
 
     private boolean isTypeArray(RecordSchemaDescription rsd) {
         return (rsd.getTypes() & Type.ARRAY) != 0;
+    }
+
+    private boolean hasIndexChild(AccessTreeNode node) {
+        for (AccessTreeNode childNode : node.getChildren()) {
+            if (childNode.getName().equals("_index")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Min findMin(RecordSchemaDescription rsdParent, RecordSchemaDescription rsdChild) {

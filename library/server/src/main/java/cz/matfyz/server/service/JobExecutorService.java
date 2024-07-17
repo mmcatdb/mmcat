@@ -10,6 +10,7 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
@@ -33,6 +34,7 @@ import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
+import cz.matfyz.server.repository.MappingRepository.MappingJsonValue;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
@@ -49,6 +51,10 @@ import cz.matfyz.server.utils.SchemaCategoryUtil;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -282,19 +288,40 @@ public class JobExecutorService {
         final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+        final List<CategoryMappingPair> categoryMappingPairs = new MMInferOneInAll()
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
-        final SchemaCategoryWrapper schemaWrapper = SchemaCategoryUtil.createWrapperFromCategory(categoryMappingPair.schemaCategory());
+        SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(categoryMappingPairs, originalSchemaWrapper.label);
+        List<Mapping> mappings = CategoryMappingPair.getMappings(categoryMappingPairs);
 
-        // TODO: for some reason mapping doesnt survive being sent to client and back, but the SK does - but I dont really need to send it anywhere, I just need to keep it in the job
-        InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, categoryMappingPair.mapping()));
+        final SchemaCategoryWrapper schemaWrapper = SchemaCategoryUtil.createWrapperFromCategory(schemaCategory);
+        final List<MappingJsonValue> mappingsJsonValue = createMappingsJsonValue(mappings);
+
+        InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, mappingsJsonValue));
         try {
             job.data = inferenceJobData.toJsonValue();
+            System.out.println("job.data after inference: " + job.data);
+            System.out.println();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
         }
+    }
+
+    private List<MappingJsonValue> createMappingsJsonValue(List<Mapping> mappings) {
+        List<MappingJsonValue> mappingsJsonValue = new ArrayList<>();
+        for (Mapping mapping : mappings) {
+            mappingsJsonValue.add(new MappingJsonValue(
+                                        mapping.rootObject().key(),
+                                        mapping.primaryKey().toArray(new Signature[0]),
+                                        mapping.kindName(),
+                                        mapping.accessPath(),
+                                        Version.generateInitial(),
+                                        Version.generateInitial()
+                                    ));
+
+        }
+        return mappingsJsonValue;
     }
 
     public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit, boolean savePermanent) {
@@ -305,8 +332,10 @@ public class JobExecutorService {
         }
         System.out.println("inferenceJobData.manual: " + inferenceJobData.manual);
 
-        //TODO: here I need to insert the mapping to the editor
-        InferenceEditor inferenceEditor = savePermanent ? new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), null, inferenceJobData.manual) : new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
+        SchemaCategory inferenceSchemaCategory = inferenceJobData.inference.schemaCategory.toSchemaCategory();
+        List<MappingJsonValue> mappingsJsonValue = inferenceJobData.inference.mapping;
+        
+        InferenceEditor inferenceEditor = savePermanent ? new InferenceEditor(inferenceSchemaCategory, createMappings(mappingsJsonValue, inferenceSchemaCategory), inferenceJobData.manual) : new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
 
         inferenceJobData.finalSchema = makeEdits(inferenceEditor);
 
@@ -322,16 +351,32 @@ public class JobExecutorService {
         return job;
     }
 
-    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping mapping) {
-        RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
 
-        SchemaCategoryWrapper schemaWrapper = finalSchema;
+    private List<Mapping> createMappings(List<MappingJsonValue> mappingsJsonValue, SchemaCategory schemaCategory) {
+        List<Mapping> mappings = new ArrayList<>();
+
+        for (MappingJsonValue mappingJsonValue : mappingsJsonValue) {
+            Collection<Signature> primaryKey = new ArrayList<>();
+            Collections.addAll(primaryKey, mappingJsonValue.primaryKey());
+            mappings.add(new Mapping(
+                                schemaCategory,
+                                mappingJsonValue.rootObjectKey(),
+                                mappingJsonValue.kindName(),
+                                mappingJsonValue.accessPath(),
+                                primaryKey
+                        ));
+        }
+        return mappings;
+    }
+
+    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping finalMapping) {
+        RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
 
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
         final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");
 
-        schemaService.overwriteInfo(schemaWrapper, jobWithRun.run().categoryId);
-        mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
+        schemaService.overwriteInfo(finalSchema, jobWithRun.run().categoryId);
+        mappingService.createNew(finalMapping, logicalModelWithDatasource.logicalModel().id);
     }
 
     private SchemaCategoryWrapper makeEdits(InferenceEditor inferenceEditor) {

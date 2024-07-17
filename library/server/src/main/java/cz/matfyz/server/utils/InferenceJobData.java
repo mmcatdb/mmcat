@@ -1,8 +1,8 @@
 package cz.matfyz.server.utils;
 
-import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
+import cz.matfyz.server.repository.MappingRepository.MappingJsonValue;
 import cz.matfyz.server.repository.utils.Utils;
 
 import java.io.IOException;
@@ -28,16 +28,16 @@ public class InferenceJobData implements Serializable {
     @JsonDeserialize(using = InferenceData.Deserializer.class)
     public static class InferenceData implements Serializable {
         public final SchemaCategoryWrapper schemaCategory;
-        public final Mapping mapping;
+        public final List<MappingJsonValue> mapping;
 
-        public InferenceData(SchemaCategoryWrapper schemaCategory, Mapping mapping) {
+        public InferenceData(SchemaCategoryWrapper schemaCategory, List<MappingJsonValue> mapping) {
             this.schemaCategory = schemaCategory;
             this.mapping = mapping;
         }
 
         public static class Deserializer extends StdDeserializer<InferenceData> {
             private static final ObjectReader schemaCategoryReader = new ObjectMapper().readerFor(SchemaCategoryWrapper.class);
-            private static final ObjectReader mappingReader = new ObjectMapper().readerFor(Mapping.class);
+            private static final ObjectReader mappingJsonValueReader = new ObjectMapper().readerFor(new ObjectMapper().getTypeFactory().constructCollectionType(List.class, MappingJsonValue.class));
 
             public Deserializer() {
                 this(null);
@@ -57,8 +57,8 @@ public class InferenceJobData implements Serializable {
 
                 final SchemaCategoryWrapper schemaCategory = node.has("schemaCategory") && !node.get("schemaCategory").isNull() ?
                     schemaCategoryReader.readValue(node.get("schemaCategory")) : null;
-                final Mapping mapping = node.has("mapping") && !node.get("mapping").isNull() && node.get("mapping").size() > 0 ?
-                    mappingReader.readValue(node.get("mapping")) : null;
+                final List<MappingJsonValue> mapping = node.has("mapping") && !node.get("mapping").isNull() && node.get("mapping").size() > 0 ?
+                    mappingJsonValueReader.readValue(node.get("mapping")) : new ArrayList<>();
 
                 return new InferenceData(schemaCategory, mapping);
             }

@@ -44,11 +44,11 @@ public class SchemaCategoryInferenceEditorTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+        final List<CategoryMappingPair> categoryMappingPair = new MMInferOneInAll()
             .input(inferenceWrapper, "apps", "Test Schema Category")
             .run();
 
-        final Mapping mapping = categoryMappingPair.mapping();
+        //final Mapping mapping = categoryMappingPair.mapping();
 
         //String mappingString = mapping.toJsonValue();
         //System.out.println(mappingString);
@@ -63,11 +63,11 @@ public class SchemaCategoryInferenceEditorTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
             .input(inferenceWrapper, "apps", "Test Schema Category")
             .run();
 
-        final SchemaCategory schemaCategory = categoryMappingPair.schemaCategory();
+        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(pairs, "Test Schema Category");
 
         AbstractInferenceEdit edit = new ReferenceMergeInferenceEdit(new Key(1), new Key(2));
 
@@ -132,7 +132,7 @@ public class SchemaCategoryInferenceEditorTests {
         categoryFinal.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), categoryFinal.getObject(new Key(4)), categoryFinal.getObject(new Key(5))));
 
         ReferenceMergeInferenceEdit edit = new ReferenceMergeInferenceEdit(new Key(2), new Key(4));
-        edit.setOldReferenceSig(Signature.createBase(-2));
+        edit.setOldReferenceSig(Signature.createBase(2));
         edit.setNewReferenceSig(Signature.createBase(6));
         edit.setOldIndexSig(Signature.createBase(3));
         edit.setNewIndexSig(Signature.createBase(7));

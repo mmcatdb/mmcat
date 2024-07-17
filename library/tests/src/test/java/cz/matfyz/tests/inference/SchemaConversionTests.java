@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -117,12 +118,12 @@ public class SchemaConversionTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
             .input(inferenceWrapper, "apps", "Test Schema Category")
             .run();
 
-        final SchemaCategory schemaCategory = categoryMappingPair.schemaCategory();
-        final Mapping mapping = categoryMappingPair.mapping();
+        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(pairs, "Test Schema Category");
+        final Mapping mapping = CategoryMappingPair.getMappings(pairs).get(0);
 
         assertEquals(10, schemaCategory.allObjects().size(), "There should be 10 Schema Objects.");
         assertEquals(9, schemaCategory.allMorphisms().size(), "There should be 10 Schema Morphisms.");
@@ -138,12 +139,12 @@ public class SchemaConversionTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
             .input(inferenceWrapper, "business", "Test Schema Category")
             .run();
 
-        final SchemaCategory schemaCategory = categoryMappingPair.schemaCategory();
-        final Mapping mapping = categoryMappingPair.mapping();
+        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(pairs, "Test Schema Category");
+        final Mapping mapping = CategoryMappingPair.getMappings(pairs).get(0);
 
         assertEquals(22, schemaCategory.allObjects().size(), "There should be 10 Schema Objects.");
         assertEquals(21, schemaCategory.allMorphisms().size(), "There should be 10 Schema Morphisms.");
@@ -175,12 +176,12 @@ public class SchemaConversionTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
             .input(inferenceWrapper, "user", "Test Schema Category")
             .run();
 
-        final SchemaCategory schemaCategory = categoryMappingPair.schemaCategory();
-        final Mapping mapping = categoryMappingPair.mapping();
+        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(pairs, "Test Schema Category");
+        final Mapping mapping = CategoryMappingPair.getMappings(pairs).get(0);
 
         System.out.println(schemaCategory.allObjects());
 

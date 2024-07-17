@@ -4,6 +4,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cz.matfyz.core.mapping.Mapping;
@@ -15,9 +16,9 @@ public record CategoryMappingPair(
     SchemaCategory schemaCategory,
     Mapping mapping
 ) {
-    public static CategoryMappingPair merge(List<CategoryMappingPair> pairs, String categoryLabel) {
+    public static SchemaCategory mergeCategory(List<CategoryMappingPair> pairs, String categoryLabel) {
         SchemaCategory mergedSchemaCategory = new SchemaCategory(categoryLabel);
-        //Mapping mergedMapping 
+
         for (CategoryMappingPair pair : pairs) {
             for (SchemaObject object : pair.schemaCategory.allObjects()) {
                 mergedSchemaCategory.addObject(object);
@@ -26,8 +27,15 @@ public record CategoryMappingPair(
                 mergedSchemaCategory.addMorphism(morphism);
             }
         }
+        return mergedSchemaCategory;
+    }
 
-        return new CategoryMappingPair(mergedSchemaCategory, null);
+    public static List<Mapping> getMappings(List<CategoryMappingPair> pairs) {
+        List mappings = new ArrayList<>();
+        for (CategoryMappingPair pair : pairs) {
+            mappings.add(pair.mapping());
+        }
+        return mappings;
     }
 
 }

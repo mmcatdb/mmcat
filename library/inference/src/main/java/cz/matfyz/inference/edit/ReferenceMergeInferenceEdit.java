@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Collections;
 
 import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
 
@@ -80,7 +81,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
          * and it has 2 outgoing morphism, one for _index and one for the original parent node
          */
         // TODO: the assumptions are not always true; review it and make it more general
-        System.out.println("Applying Reference Merge Edit...");
+        System.out.println("Applying Reference Merge Edit on Schema Category...");
         System.out.println("Reference Key: " + referenceKey);
         System.out.println("Referred Key: " + referredKey);
 
@@ -88,7 +89,6 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
         // add new morphisms
         Key referenceParentKey = getParentKey(schemaCategory, referenceKey);
-        // TODO: check if the schemaCategory here really changes
         newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, referenceParentKey);
 
         Key indexKey = getIndexKey(schemaCategory, referenceKey);
@@ -142,30 +142,52 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     @Override
     public List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory) {
+        System.out.println("Applying Reference Merge Edit on Mapping...");
 
         // find the two mappings in question
-        Mapping referenceMapping = findMappingWithKey(mappings, referenceKey);
+        Mapping referenceMapping = findReferenceMapping(mappings);
         System.out.println("referenceMapping found: " + referenceMapping.accessPath());
-        Mapping referredMapping = findMappingWithKey(mappings, referredKey);
+        Mapping referredMapping = findReferredMapping(mappings, schemaCategory);
         System.out.println("referredMapping found: " + referredMapping.accessPath());
 
         // create the new merged mapping
         ComplexProperty mergedComplexProperty = mergeComplexProperties(referenceMapping.accessPath(), referredMapping.accessPath());
-        Mapping mergedMapping = new Mapping(schemaCategory, referenceKey, referenceMapping.kindName(), mergedComplexProperty, referenceMapping.primaryKey()); // TODO: what about the primary keys?
+        // TODO; what about the primary keys here?
+        Mapping mergedMapping = new Mapping(schemaCategory, referenceMapping.rootObject().key(), referenceMapping.kindName(), mergedComplexProperty, referenceMapping.primaryKey());
         System.out.println("mergedMapping: " + mergedMapping.accessPath());
 
         return updateMappings(mappings, referenceMapping, referredMapping, mergedMapping);
     }
 
-    private Mapping findMappingWithKey(List<Mapping> mappings, Key key) {
+    private Mapping findReferenceMapping(List<Mapping> mappings) {
         for (Mapping mapping : mappings) {
-            for (SchemaObject object : mapping.category().allObjects()) {
-                if (object.key().equals(key)) {
-                    return mapping;
+            if (mapping.accessPath().getSubpathBySignature(oldReferenceSignature.dual()) != null) {
+                return mapping;
+            }
+        }
+        throw new NotFoundException("Mapping for reference has not been found.");
+    }
+
+    private Mapping findReferredMapping(List<Mapping> mappings, SchemaCategory schemaCategory) {
+        // 1) in the schemaCategory find the signature where key is dom or cod
+        // 2) check in which mapping this signature appears, it should appear in exactly one
+        Signature referredSignature = null;
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (morphism.dom().key().equals(referredKey) || morphism.cod().key().equals(referredKey)) {
+                if (!morphism.signature().equals(newIndexSignature) && !morphism.signature().equals(newReferenceSignature)) {
+                    referredSignature = morphism.signature();
                 }
             }
         }
-        throw new NotFoundException("Mapping with key " + key + " has not been found.");
+        if (referredSignature == null) {
+            throw new NotFoundException("Signature for referred object has not been found");
+        }
+        for (Mapping mapping : mappings) {
+            if (mapping.accessPath().getSubpathBySignature(referredSignature) != null) {
+                return mapping;
+            }
+        }
+        throw new NotFoundException("Mapping for referenc with signature " + referredSignature + " has not been found.");
     }
 
     // TODO: note all the places where we make the signature dual, this is because we assume, that the reference is a list

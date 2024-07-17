@@ -1,12 +1,12 @@
 import type { SchemaCategoryFromServer } from '../types/schema';
-import type { Mapping } from '../types/mapping';
+import type { MappingJsonValue } from '../types/mapping';
 import type { AbstractInferenceEdit } from '../types/inferenceEdit/inferenceEdit';
 
 class InferenceData {
     public readonly schemaCategory: SchemaCategoryFromServer;
-    public readonly mapping: Mapping;
+    public readonly mapping: MappingJsonValue[];
 
-    constructor(schemaCategory: SchemaCategoryFromServer, mapping: Mapping) {
+    constructor(schemaCategory: SchemaCategoryFromServer, mapping: MappingJsonValue[]) {
         this.schemaCategory = schemaCategory;
         this.mapping = mapping;
     }
@@ -35,15 +35,3 @@ export function isInferenceJobData(data: any): data is InferenceJobData {
         'mapping' in data.inference
     );
 }
-/*
-export function convertToInferenceJobData(data: any): InferenceJobData | null {
-    const parsedData = JSON.parse(data);
-    if (isInferenceJobData(parsedData)) {
-        const inference = new InferenceData(parsedData.inference.schemaCategory, parsedData.inference.mapping);
-        const inferenceJobData = new InferenceJobData(inference);
-        inferenceJobData.manual = parsedData.manual;
-        inferenceJobData.finalSchema = parsedData.finalSchema;
-        return inferenceJobData;
-    }
-    return null;
-}*/

@@ -15,14 +15,10 @@ import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 public class AccessTreeToSchemaCategoryConverter {
 
     private final SchemaCategory schemaCategory;
-    private final UniqueNumberGenerator signatureGenerator;
-    private final UniqueNumberGenerator keyGenerator;
     private final String kindName;
 
-    public AccessTreeToSchemaCategoryConverter(String categoryLabel, UniqueNumberGenerator signatureGenerator, UniqueNumberGenerator keyGenerator, String kindName) {
+    public AccessTreeToSchemaCategoryConverter(String categoryLabel, String kindName) {
         this.schemaCategory = new SchemaCategory(categoryLabel);
-        this.signatureGenerator = signatureGenerator;
-        this.keyGenerator = keyGenerator;
         this.kindName = kindName;
     }
 
@@ -71,17 +67,9 @@ public class AccessTreeToSchemaCategoryConverter {
         if (node.getIsArrayType()) {
             dom = schemaObject;
             cod = schemaObjectParent;
-            addIndexObject(schemaObject);
         }
 
         SchemaMorphism sm = new SchemaMorphism(node.getSignature(), node.getLabel(), node.getMin(), new HashSet<>(), dom, cod);
         schemaCategory.addMorphism(sm);
-    }
-
-    private void addIndexObject(SchemaObject schemaObjectParent) {
-        SchemaObject schemaObjectChild = new SchemaObject(new Key(keyGenerator.next()), "_index", ObjectIds.createValue(), SignatureId.createEmpty());
-        schemaCategory.addObject(schemaObjectChild);
-        SchemaMorphism newMorphism = new SchemaMorphism(Signature.createBase(signatureGenerator.next()), null, Min.ZERO, new HashSet<>(), schemaObjectParent, schemaObjectChild);
-        schemaCategory.addMorphism(newMorphism);
     }
 }

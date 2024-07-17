@@ -39,7 +39,7 @@ public class MMInferOneInAll {
         return this;
     }
 
-    public CategoryMappingPair run() {
+    public List<CategoryMappingPair> run() {
         try {
             return innerRun();
         }
@@ -48,7 +48,7 @@ public class MMInferOneInAll {
         }
     }
 
-    private CategoryMappingPair innerRun() throws Exception {
+    private List<CategoryMappingPair> innerRun() throws Exception {
         System.out.println("RESULT_TIME ----- ----- ----- ----- -----");
 
         Map<String, AbstractInferenceWrapper> wrappers = prepareWrappers(wrapper);
@@ -65,8 +65,7 @@ public class MMInferOneInAll {
             schemaConverter.setNewRSD(rsds.get(kindName), kindName);
             pairs.add(schemaConverter.convertToSchemaCategoryAndMapping());
         }
-        // TODO: right now merging just the SKs, not the mappings
-        return CategoryMappingPair.merge(pairs, categoryLabel);
+        return pairs;
     }
 
     private static Map<String, AbstractInferenceWrapper> prepareWrappers(AbstractInferenceWrapper inputWrapper) throws IllegalArgumentException {
