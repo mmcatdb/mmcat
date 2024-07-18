@@ -308,22 +308,6 @@ public class JobExecutorService {
         }
     }
 
-    private List<MappingJsonValue> createMappingsJsonValue(List<Mapping> mappings) {
-        List<MappingJsonValue> mappingsJsonValue = new ArrayList<>();
-        for (Mapping mapping : mappings) {
-            mappingsJsonValue.add(new MappingJsonValue(
-                                        mapping.rootObject().key(),
-                                        mapping.primaryKey().toArray(new Signature[0]),
-                                        mapping.kindName(),
-                                        mapping.accessPath(),
-                                        Version.generateInitial(),
-                                        Version.generateInitial()
-                                    ));
-
-        }
-        return mappingsJsonValue;
-    }
-
     public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit, boolean savePermanent) {
         if (edit == null && !savePermanent) { //cancel edit
             inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
@@ -351,6 +335,15 @@ public class JobExecutorService {
         return job;
     }
 
+    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping finalMapping) {
+        RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
+
+        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
+        final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");
+
+        schemaService.overwriteInfo(finalSchema, jobWithRun.run().categoryId);
+        mappingService.createNew(finalMapping, logicalModelWithDatasource.logicalModel().id);
+    }
 
     private List<Mapping> createMappings(List<MappingJsonValue> mappingsJsonValue, SchemaCategory schemaCategory) {
         List<Mapping> mappings = new ArrayList<>();
@@ -369,15 +362,22 @@ public class JobExecutorService {
         return mappings;
     }
 
-    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping finalMapping) {
-        RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
+    private List<MappingJsonValue> createMappingsJsonValue(List<Mapping> mappings) {
+        List<MappingJsonValue> mappingsJsonValue = new ArrayList<>();
+        for (Mapping mapping : mappings) {
+            mappingsJsonValue.add(new MappingJsonValue(
+                                        mapping.rootObject().key(),
+                                        mapping.primaryKey().toArray(new Signature[0]),
+                                        mapping.kindName(),
+                                        mapping.accessPath(),
+                                        Version.generateInitial(),
+                                        Version.generateInitial()
+                                    ));
 
-        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
-        final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");
-
-        schemaService.overwriteInfo(finalSchema, jobWithRun.run().categoryId);
-        mappingService.createNew(finalMapping, logicalModelWithDatasource.logicalModel().id);
+        }
+        return mappingsJsonValue;
     }
+
 
     private SchemaCategoryWrapper makeEdits(InferenceEditor inferenceEditor) {
         inferenceEditor.applyEdits();

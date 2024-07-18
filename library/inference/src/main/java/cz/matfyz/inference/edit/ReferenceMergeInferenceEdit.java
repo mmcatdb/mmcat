@@ -95,11 +95,9 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         newIndexSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, indexKey);
 
         // remove the reference object and its morphisms
-        schemaCategory = removeReferenceMorphisms(schemaCategory, Arrays.asList(referenceParentKey, indexKey));
-        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
-        editor.deleteObject(referenceKey);
+        removeReferenceMorphismsAndObject(schemaCategory, Arrays.asList(referenceParentKey, indexKey));
 
-        return editor.schemaCategory;
+        return schemaCategory;
     }
 
     // TODO: make it more general
@@ -121,7 +119,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         throw new NotFoundException("Index key has not been found");
     }
 
-    private SchemaCategory removeReferenceMorphisms(SchemaCategory schemaCategory, List<Key> keysToDelete) {
+    private void removeReferenceMorphismsAndObject(SchemaCategory schemaCategory, List<Key> keysToDelete) {
         List<SchemaMorphism> morphismsToDelete = new ArrayList<>();
         for (SchemaMorphism morphismToDelete : schemaCategory.allMorphisms()) {
             if (morphismToDelete.dom().key().equals(referenceKey) && keysToDelete.contains(morphismToDelete.cod().key())) {
@@ -137,7 +135,8 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         for (SchemaMorphism morphismToDelete : morphismsToDelete) {
             schemaCategory.removeMorphism(morphismToDelete);
         }
-        return schemaCategory;
+        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
+        editor.deleteObject(referenceKey);
     }
 
     @Override
@@ -156,7 +155,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         Mapping mergedMapping = new Mapping(schemaCategory, referenceMapping.rootObject().key(), referenceMapping.kindName(), mergedComplexProperty, referenceMapping.primaryKey());
         System.out.println("mergedMapping: " + mergedMapping.accessPath());
 
-        return updateMappings(mappings, referenceMapping, referredMapping, mergedMapping);
+        return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(referenceMapping, referredMapping), mergedMapping);
     }
 
     private Mapping findReferenceMapping(List<Mapping> mappings) {
@@ -200,7 +199,6 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
             if (!replaced && subpath.signature().equals(oldReferenceSignature.dual())) {
                 // replace it
                 List<AccessPath> combinedSubpaths = new ArrayList<>(referredComplexProperty.subpaths());
-                System.out.println("combinedSubpaths: " + combinedSubpaths);
 
                 SimpleProperty newIndexSimpleProperty = null;
 
@@ -219,18 +217,6 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
             }
         }
         return new ComplexProperty(referenceComplexProperty.name(), referenceComplexProperty.signature(), newSubpaths);
-    }
-
-    private List<Mapping> updateMappings(List<Mapping> mappings, Mapping referenceMapping, Mapping referredMapping, Mapping mergedMapping) {
-        List<Mapping> updatedMappings = new ArrayList<>();
-        for (Mapping mapping : mappings) {
-            if (!mapping.equals(referenceMapping) && !mapping.equals(referredMapping)) {
-                updatedMappings.add(mapping);
-            }
-        }
-        updatedMappings.add(mergedMapping);
-
-        return updatedMappings;
     }
 
     public static class Deserializer extends StdDeserializer<ReferenceMergeInferenceEdit> {

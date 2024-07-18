@@ -94,7 +94,7 @@ public class SchemaConversionTests {
         root.addChild(child1);
         root.addChild(child2);
 
-        final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter("customer", new UniqueNumberGenerator(0), new UniqueNumberGenerator(0), "person");
+        final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter("customer", "person");
         final SchemaCategory schemaCategory = accessTreeToSchemaCategoryConverter.convert(root);
 
         assertEquals(5, schemaCategory.allObjects().size());

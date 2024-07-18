@@ -236,19 +236,18 @@ public class SchemaCategoryInferenceEditorTests {
         categoryA.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), categoryA.getObject(new Key(0)), categoryA.getObject(new Key(1))));
         categoryA.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), categoryA.getObject(new Key(0)), categoryA.getObject(new Key(2))));
 
-        /*
         MappingBuilder builderA = new MappingBuilder();
         List<AccessPath> subpathsA = new ArrayList<>();
 
-        subpathsA.add(builderA.simple("name", Signature.createBase(1)));
-        subpathsA.add(builderA.complex("reviews", Signature.createBase(-2), builderA.simple("_index", Signature.createBase(3))));
+        subpathsA.add(builderA.simple("name", Signature.createBase(2)));
+        subpathsA.add(builderA.simple("app_id", Signature.createBase(1)));
 
         ComplexProperty complexPropertyA = builderA.complex("app", Signature.createBase(0), subpathsA.toArray(new AccessPath[0]));
 
-        Mapping mappingA = new Mapping(categoryA, new Key(1), "kindNameA", complexPropertyA, null);
+        Mapping mappingA = new Mapping(categoryA, new Key(0), "kindNameA", complexPropertyA, null);
         System.out.println(mappingA.accessPath());
 
-        System.out.println(); */
+        System.out.println();
 
         // Setup B
         SchemaCategory categoryB = new SchemaCategory("schemaB");
@@ -258,17 +257,17 @@ public class SchemaCategoryInferenceEditorTests {
         categoryB.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), categoryB.getObject(new Key(3)), categoryB.getObject(new Key(4))));
         categoryB.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), categoryB.getObject(new Key(3)), categoryB.getObject(new Key(5))));
 
-        /*
         MappingBuilder builderB = new MappingBuilder();
         List<AccessPath> subpathsB = new ArrayList<>();
 
-        subpathsB.add(builderB.simple("text", Signature.createBase(5)));
+        subpathsB.add(builderB.simple("text", Signature.createBase(4)));
+        subpathsB.add(builderB.simple("app_id", Signature.createBase(3)));
 
-        ComplexProperty complexPropertyB = builderB.complex("reviews", Signature.createBase(4), subpathsB.toArray(new AccessPath[0]));
+        ComplexProperty complexPropertyB = builderB.complex("reviews", Signature.createBase(5), subpathsB.toArray(new AccessPath[0]));
 
-        Mapping mappingB = new Mapping(categoryB, new Key(4), "kindNameB", complexPropertyB, null);
+        Mapping mappingB = new Mapping(categoryB, new Key(3), "kindNameB", complexPropertyB, null);
         System.out.println(mappingB.accessPath());
-        */
+
         SchemaCategory category = new SchemaCategory("schema");
         for (SchemaObject obj : categoryA.allObjects()) {
             category.addObject(obj);
@@ -283,22 +282,18 @@ public class SchemaCategoryInferenceEditorTests {
             category.addMorphism(morph);
         }
 
-        /*
         List<Mapping> mappings = new ArrayList<>();
         mappings.add(mappingA);
         mappings.add(mappingB);
-        */
 
         PrimaryKeyMergeInferenceEdit edit = new PrimaryKeyMergeInferenceEdit(new Key(0), new Key(1));
 
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
+        //SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
 
-        /*
-        List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
-
+        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
+/*
         System.out.println();
         System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());
-        */
+        System.out.println(editMappings.size());*/
     }
 }

@@ -8,6 +8,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.mapping.Mapping;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -57,6 +58,18 @@ public class InferenceEditorUtils {
             }
         }
         return null;
+    }
+
+    public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, Mapping mappingToKeep) {
+        List<Mapping> updatedMappings = new ArrayList<>();
+        for (Mapping mapping : mappings) {
+            if (!mappingsToDelete.contains(mapping)) {
+                updatedMappings.add(mapping);
+            }
+        }
+        updatedMappings.add(mappingToKeep);
+
+        return updatedMappings;
     }
 
     public static class SchemaCategoryEditor extends SchemaCategory.Editor {

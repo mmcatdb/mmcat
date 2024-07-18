@@ -1,16 +1,23 @@
 package cz.matfyz.inference.edit;
 
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.mapping.AccessPath;
+import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -18,6 +25,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 @JsonDeserialize(using = PrimaryKeyMergeInferenceEdit.Deserializer.class)
 public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
@@ -28,6 +36,10 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
     public final Key primaryKeyRoot;
     public final Key primaryKey;
 
+    private List<Key> keysIdentifiedByPrimary;
+    private Map<String, Signature> newSignatureMap; // the key is the root of the mapping
+    private Map<String, Signature> oldSignatureMap;
+
     public PrimaryKeyMergeInferenceEdit(Key primaryKeyRoot, Key primaryKey) {
         this.primaryKeyRoot = primaryKeyRoot;
         this.primaryKey = primaryKey;
@@ -37,67 +49,130 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
     public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
         /*
          * Assumption: the primary key has a unique name. All the objects w/ this
-         * name are the same primary key.
+         * name are the same primary keys.
          */
-        System.out.println("Applying Primary Key Merge Edit...");
-        System.out.println("primary key root: " + primaryKeyRoot);
-        System.out.println("primary key: " + primaryKey);
+        System.out.println("Applying Primary Key Merge Edit on Schema Category...");
+        System.out.println("Primary key root: " + primaryKeyRoot);
+        System.out.println("Primary key: " + primaryKey);
 
         SchemaObject dom = schemaCategory.getObject(primaryKeyRoot);
 
         String primaryKeyLabel = schemaCategory.getObject(primaryKey).label();
-        System.out.println("primaryKeyLabel: " + primaryKeyLabel);
 
-        // find all objects which I identified by the primary key
-        List<Key> keysToProcess = findKeysIdentifiedByPrimaryKeyLabel(schemaCategory, primaryKeyLabel);
-        System.out.println("keysToProcess: " + keysToProcess);
+        this.keysIdentifiedByPrimary = findKeysIdentifiedByPrimaryKeyLabel(schemaCategory, primaryKeyLabel);
+        System.out.println( "keysIdentifiedByPrimary: " + keysIdentifiedByPrimary);
 
-        // create morphisms from these keys to the primary root key
-        for (Key keyToProcess : keysToProcess) {
-            // this method returns signature, which I might need later
-            InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, keyToProcess);
-        }
-
-        // delete the old morphisms to the primary key and old primary key objects
-        schemaCategory = removePrimaryKeyMorphismsAndObjects(schemaCategory, keysToProcess, primaryKeyLabel);
+        this.newSignatureMap = createMorphisms(schemaCategory, dom);
+        this.oldSignatureMap = removePrimaryKeyMorphismsAndObjects(schemaCategory, primaryKeyLabel);
 
         return schemaCategory;
     }
 
     private List<Key> findKeysIdentifiedByPrimaryKeyLabel(SchemaCategory schemaCategory, String primaryKeyLabel) {
-        List<Key> keysIdentifiedByPrimaryKey = new ArrayList<>();
-
+        List<Key> keys = new ArrayList<>();
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
             if (morphism.cod().label().equals(primaryKeyLabel) && !morphism.dom().key().equals(primaryKeyRoot)) {
-                keysIdentifiedByPrimaryKey.add(morphism.dom().key());
+                keys.add(morphism.dom().key());
             }
         }
-        return keysIdentifiedByPrimaryKey;
+        return keys;
     }
 
-    private SchemaCategory removePrimaryKeyMorphismsAndObjects(SchemaCategory schemaCategory, List<Key> keysToProcess, String primaryKeyLabel) {
+    private Map<String, Signature> createMorphisms(SchemaCategory schemaCategory, SchemaObject dom) {
+        Map<String, Signature> signatureMap = new HashMap<>();
+        for (Key key : keysIdentifiedByPrimary) {
+            Signature newSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, key);
+            signatureMap.put(schemaCategory.getObject(key).label(), newSignature);
+        }
+        return signatureMap;
+    }
+
+    private Map<String, Signature> removePrimaryKeyMorphismsAndObjects(SchemaCategory schemaCategory, String primaryKeyLabel) {
         List<SchemaMorphism> morphismsToDelete = new ArrayList<>();
         List<Key> keysToDelete = new ArrayList<>();
+        Map<String, Signature> signatureMap = new HashMap<>();
+
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.cod().label().equals(primaryKeyLabel) && keysToProcess.contains(morphism.dom().key())) {
+            if (morphism.cod().label().equals(primaryKeyLabel) && keysIdentifiedByPrimary.contains(morphism.dom().key())) {
                 morphismsToDelete.add(morphism);
                 keysToDelete.add(morphism.cod().key());
+                signatureMap.put(morphism.dom().label(), morphism.signature());
             }
         }
-        System.out.println("morphisms to delete: " + morphismsToDelete);
         System.out.println("keys to delete: " + keysToDelete);
         for (SchemaMorphism morphismToDelete : morphismsToDelete) {
             schemaCategory.removeMorphism(morphismToDelete);
         }
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
         editor.deleteObjects(keysToDelete);
-        return schemaCategory;
+
+        return signatureMap;
     }
 
     @Override
     public List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'applyMappingEdit'");
+        /*
+         * Assumption: When we find object which is identified by the primary key,
+         * we assume that the object is a root in its "part" of the schemaCategory
+         */
+        System.out.println("Applying Primary Key Merge Edit on Mapping...");
+
+        // find primary key mapping and mappings where objects have been identifed by primary key keysIdentifiedByPrimary)
+        Mapping primaryKeyMapping = findPrimaryKeyMapping(mappings);
+        List<Mapping> primaryKeyMappings = findMappingsWithPrimaryKey(mappings);
+
+        System.out.println("primaryKeyMapping: " + primaryKeyMapping.accessPath());
+        System.out.println("accesspaths which had primary key identification:");
+        for (Mapping m : primaryKeyMappings) {
+            System.out.println(m.accessPath());
+        }
+        // add them as complex properties to the primary key mapping
+        ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping.accessPath(), primaryKeyMappings);
+        Mapping mergedMapping = new Mapping(schemaCategory, primaryKeyMapping.rootObject().key(), primaryKeyMapping.kindName(), mergedComplexProperty, primaryKeyMapping.primaryKey());
+        System.out.println("mergedMapping: " + mergedMapping.accessPath());
+        
+        // adding before deleting
+        primaryKeyMappings.add(primaryKeyMapping);
+        return InferenceEditorUtils.updateMappings(mappings, primaryKeyMappings, mergedMapping);        
+    }
+
+    private Mapping findPrimaryKeyMapping(List<Mapping> mappings) {
+        for (Mapping mapping : mappings) {
+            if (mapping.rootObject().key().equals(primaryKeyRoot)) {
+                return mapping;
+            }
+        }
+        throw new NotFoundException("Primary Key Mapping has not been found");
+    }
+
+    private List<Mapping> findMappingsWithPrimaryKey(List<Mapping> mappings) {
+        List<Mapping> primaryKeyMappings = new ArrayList<>();
+        for (Mapping mapping : mappings) {
+            if (keysIdentifiedByPrimary.contains(mapping.rootObject().key())) {
+                primaryKeyMappings.add(mapping);
+            }
+        }
+        return primaryKeyMappings;
+    }
+
+    private ComplexProperty mergeComplexProperties(ComplexProperty primaryKeyComplexProperty, List<Mapping> primaryKeyMappings) {
+
+        List<AccessPath> combinedSubPaths = new ArrayList<>(primaryKeyComplexProperty.subpaths());
+        for (Mapping currentMapping : primaryKeyMappings) {
+            String currentMappingLabel = currentMapping.rootObject().label();
+            System.out.println("currentmappinglabel: " + currentMappingLabel);
+            System.out.println(oldSignatureMap);
+
+            AccessPath accessPathToDelete = currentMapping.accessPath().getSubpathBySignature(oldSignatureMap.get(currentMappingLabel));
+            System.out.println("accesspathtodelete: " + accessPathToDelete);
+
+            ComplexProperty cleanedComplexProperty = currentMapping.accessPath().minusSubpath(accessPathToDelete);
+            System.out.println("cleanedComplexProperty: " + cleanedComplexProperty.subpaths());
+
+            ComplexProperty newComplexProperty = new ComplexProperty(new StaticName(currentMappingLabel), newSignatureMap.get(currentMappingLabel), cleanedComplexProperty.subpaths());
+            combinedSubPaths.add(newComplexProperty);
+        }
+        return new ComplexProperty(primaryKeyComplexProperty.name(), primaryKeyComplexProperty.signature(), combinedSubPaths);
     }
 
     public static class Deserializer extends StdDeserializer<PrimaryKeyMergeInferenceEdit> {
