@@ -36,25 +36,6 @@ public class SchemaCategoryInferenceEditorTests {
     private static final SparkSettings sparkSettings = new SparkSettings("local[*]", "./spark");
 
     @Test
-    void testMappingSerialization() throws Exception {
-
-        final var url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
-        final var csvProvider = new CsvProvider(settings);
-
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
-
-        final List<CategoryMappingPair> categoryMappingPair = new MMInferOneInAll()
-            .input(inferenceWrapper, "apps", "Test Schema Category")
-            .run();
-
-        //final Mapping mapping = categoryMappingPair.mapping();
-
-        //String mappingString = mapping.toJsonValue();
-        //System.out.println(mappingString);
-    }
-
-    @Test
     void testReferenceMergeEditSchemaCategory() throws Exception {
 
         final var url = ClassLoader.getSystemResource("inferenceSampleGoogleApps.csv");

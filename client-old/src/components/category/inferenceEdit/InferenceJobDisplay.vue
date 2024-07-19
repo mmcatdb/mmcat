@@ -6,7 +6,7 @@ import GraphDisplay from '../../category/GraphDisplay.vue';
 import { SchemaCategory } from '@/types/schema';
 import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
 import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
-import { PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'; 
+import { ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'; 
 
 type InferenceJobDisplayProps = {
     job: Job;
@@ -55,6 +55,13 @@ function createPrimaryKeyMergeEdit(nodes: (Node)[]) {
     confirm(edit);
 }
 
+function createClusterEdit(nodes: (Node)[]) {
+    const clusterKeys = nodes.map(node => node.schemaObject.key);
+
+    const edit = new ClusterInferenceEdit(clusterKeys);
+    confirm(edit);
+}
+
 function confirm(edit: AbstractInferenceEdit) {
     emit('update-edit', edit);
 }
@@ -75,6 +82,7 @@ function cancelEdit() {
                     :schema-category="props.schemaCategory" 
                     @confirm-reference-merge="createReferenceMergeEdit"    
                     @confirm-primary-key-merge="createPrimaryKeyMergeEdit"
+                    @confirm-cluster="createClusterEdit"
                     @cancel-edit="cancelEdit"            
                 />
                 <slot name="below-editor"></slot>

@@ -11,16 +11,24 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'confirm', nodes: (Node | undefined)[]): void;
+    (e: 'save'): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
+    (e: 'confirm', nodes: (Node | undefined)[]): void;
 }>();
 
 const nodes = shallowRef<(Node | undefined)[]>([]);
 const confirmClicked = ref(false);
 
-const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
-const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
+const nodesSelected = computed(() => nodes.value.some(node => !!node));
+const noNodesSelected = computed(() => nodes.value.every(node => !node));
+
+const selectedNodeLabels = computed(() => {
+    return nodes.value
+        .filter(node => node !== undefined)
+        .map(node => node?.schemaObject.label)
+        .join(', ');
+});
 
 function confirm() {
     confirmClicked.value = true;
@@ -39,7 +47,6 @@ function cancel() {
     nodes.value = [undefined, undefined];  //unselect selected nodes
 
     if (confirmClicked.value) { // delete the edit (on BE)
-        console.log("cancelling edit");
         emit('cancel-edit');
     }
 }
@@ -47,19 +54,16 @@ function cancel() {
 </script>
 
 <template>
-    <div class="referenceMerge">
+    <div class="cluster">
+    <h2>Cluster Objects</h2>
         <ValueContainer>
-            <ValueRow label="Reference object:"> 
-                {{ nodes[0]?.schemaObject.label }}
-            </ValueRow>
-            <ValueRow label="Referred object:"> 
-                {{ nodes[1]?.schemaObject.label }}
+            <ValueRow label="Objects forming a cluster:"> 
+                {{ selectedNodeLabels }}
             </ValueRow>
         </ValueContainer>
         <NodeInput
             v-model="nodes"
             :graph="props.graph"
-            :count="2"
             :type="SelectionType.Selected"
         />
         <div class="button-row">

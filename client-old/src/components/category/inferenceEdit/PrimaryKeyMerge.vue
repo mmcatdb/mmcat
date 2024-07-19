@@ -11,7 +11,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'save'): void;
     (e: 'confirm', nodes: (Node | undefined)[]): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;

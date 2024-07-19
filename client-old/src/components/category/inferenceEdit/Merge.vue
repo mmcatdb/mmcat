@@ -11,7 +11,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'save'): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
     (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
@@ -58,7 +57,6 @@ function cancelEdit() {
             :is="mergeType === 'reference' ? ReferenceMerge : PrimaryKeyMerge"
             :graph="props.graph"
             @confirm="confirmHandler"
-            @save="cancel"
             @cancel="cancel"
             @cancel-edit="cancelEdit"
         />

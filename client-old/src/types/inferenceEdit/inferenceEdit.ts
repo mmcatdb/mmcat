@@ -43,6 +43,23 @@ export class ReferenceMergeInferenceEdit implements AbstractInferenceEdit {
     }
 }
 
+export class ClusterInferenceEdit implements AbstractInferenceEdit {
+    public readonly type: string = "cluster";
+    public readonly clusterKeys: Key[];
+
+    constructor(clusterKeys: Key[]) {
+        this.clusterKeys = clusterKeys;
+    }
+
+    toJSON() {
+        return {
+            type: this.type,
+            clusterKeys: this.clusterKeys
+        };
+    }
+}
+
+
 export class SaveJobResultPayload {
     constructor(
         public permanent: boolean,

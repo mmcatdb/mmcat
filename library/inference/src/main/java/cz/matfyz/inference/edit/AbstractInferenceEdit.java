@@ -21,7 +21,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = ReferenceMergeInferenceEdit.class, name = "reference"),
-    @JsonSubTypes.Type(value = PrimaryKeyMergeInferenceEdit.class, name = "primaryKey")
+    @JsonSubTypes.Type(value = PrimaryKeyMergeInferenceEdit.class, name = "primaryKey"),
+    @JsonSubTypes.Type(value = ClusterInferenceEdit.class, name = "cluster")
 })
 @JsonDeserialize(using = AbstractInferenceEdit.Deserializer.class)
 public abstract class AbstractInferenceEdit {
@@ -50,6 +51,8 @@ public abstract class AbstractInferenceEdit {
                         return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, ReferenceMergeInferenceEdit.class);
                     case "primaryKey":
                         return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, PrimaryKeyMergeInferenceEdit.class);
+                    case "cluster":
+                        return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, ClusterInferenceEdit.class);
                     default:
                         throw new IllegalArgumentException("Unknown type for AbstractInferenceEdit");
                 }

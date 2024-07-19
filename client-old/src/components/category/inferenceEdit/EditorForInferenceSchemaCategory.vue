@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef } from 'vue';
 import Merge from './Merge.vue';
+import Cluster from './Cluster.vue'
 import { Graph, Node } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 
@@ -13,6 +14,7 @@ const emit = defineEmits<{
     (e: 'cancel-edit'): void;
     (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
     (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-cluster', nodes: (Node | undefined)[]): void;
 }>();
 
 enum State {
@@ -71,6 +73,10 @@ function confirmPrimaryKeyMergeEdit(nodes: (Node | undefined)[]) {
     emit('confirm-primary-key-merge', nodes);
 }
 
+function confirmClusterEdit(nodes: (Node | undefined)[]) {
+    emit('confirm-cluster', nodes);
+}
+
 function cancelEdit() {
     emit('cancel-edit');
 }
@@ -100,7 +106,14 @@ function cancelEdit() {
                 :graph="props.graph"
                 @confirm-reference-merge="confirmReferenceMergeEdit"
                 @confirm-primary-key-merge="confirmPrimaryKeyMergeEdit"
-                @save="setStateToDefault"
+                @cancel="setStateToDefault"
+                @cancel-edit="cancelEdit"
+            />
+        </template>
+        <template v-else-if="state.type === State.Cluster">
+            <Cluster
+                :graph="props.graph"
+                @confirm="confirmClusterEdit"
                 @cancel="setStateToDefault"
                 @cancel-edit="cancelEdit"
             />
