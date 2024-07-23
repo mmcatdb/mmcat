@@ -2,6 +2,7 @@ package cz.matfyz.inference.edit.utils;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.identifiers.UniqueContext;
@@ -74,7 +75,7 @@ public class InferenceEditorUtils {
     }
 
     public static Key createAndAddObject(SchemaCategory schemaCategory, String objectLabel, ObjectIds ids) {
-        SchemaObject newObject = createObject(schemaCategory, objectLabel);
+        SchemaObject newObject = createObject(schemaCategory, objectLabel, ids);
         schemaCategory.addObject(newObject);
         return newObject.key();
     }

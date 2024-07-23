@@ -60,7 +60,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         String primaryKeyLabel = schemaCategory.getObject(primaryKey).label();
 
         this.keysIdentifiedByPrimary = findKeysIdentifiedByPrimaryKeyLabel(schemaCategory, primaryKeyLabel);
-        System.out.println( "keysIdentifiedByPrimary: " + keysIdentifiedByPrimary);
+        System.out.println("keysIdentifiedByPrimary: " + keysIdentifiedByPrimary);
 
         this.newSignatureMap = createMorphisms(schemaCategory, dom);
         this.oldSignatureMap = removePrimaryKeyMorphismsAndObjects(schemaCategory, primaryKeyLabel);
@@ -130,10 +130,10 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping.accessPath(), primaryKeyMappings);
         Mapping mergedMapping = new Mapping(schemaCategory, primaryKeyMapping.rootObject().key(), primaryKeyMapping.kindName(), mergedComplexProperty, primaryKeyMapping.primaryKey());
         System.out.println("mergedMapping: " + mergedMapping.accessPath());
-        
+
         // adding before deleting
         primaryKeyMappings.add(primaryKeyMapping);
-        return InferenceEditorUtils.updateMappings(mappings, primaryKeyMappings, mergedMapping);        
+        return InferenceEditorUtils.updateMappings(mappings, primaryKeyMappings, mergedMapping);
     }
 
     private Mapping findPrimaryKeyMapping(List<Mapping> mappings) {
