@@ -53,6 +53,8 @@ public abstract class AbstractInferenceEdit {
                         return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, PrimaryKeyMergeInferenceEdit.class);
                     case "cluster":
                         return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, ClusterInferenceEdit.class);
+                    case "recursion":
+                        return (AbstractInferenceEdit) parser.getCodec().treeToValue(node, RecursionInferenceEdit.class);
                     default:
                         throw new IllegalArgumentException("Unknown type for AbstractInferenceEdit");
                 }

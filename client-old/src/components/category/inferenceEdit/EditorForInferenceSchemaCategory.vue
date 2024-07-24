@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, shallowRef } from 'vue';
 import Merge from './Merge.vue';
 import Cluster from './Cluster.vue'
+import Recursion from './Recursion.vue'
 import { Graph, Node } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 
@@ -15,6 +16,7 @@ const emit = defineEmits<{
     (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
     (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
     (e: 'confirm-cluster', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-recursion', nodes: (Node | undefined)[]): void;
 }>();
 
 enum State {
@@ -77,10 +79,13 @@ function confirmClusterEdit(nodes: (Node | undefined)[]) {
     emit('confirm-cluster', nodes);
 }
 
+function confirmRecursionEdit(nodes: (Node | undefined)[], edges: (Edge | undefined)[]) {
+    emit('confirm-recursion', nodes, edges);
+}
+
 function cancelEdit() {
     emit('cancel-edit');
 }
-
 
 
 </script>
@@ -114,6 +119,14 @@ function cancelEdit() {
             <Cluster
                 :graph="props.graph"
                 @confirm="confirmClusterEdit"
+                @cancel="setStateToDefault"
+                @cancel-edit="cancelEdit"
+            />
+        </template>
+        <template v-else-if="state.type === State.Recursion">
+            <Recursion
+                :graph="props.graph"
+                @confirm="confirmRecursionEdit"
                 @cancel="setStateToDefault"
                 @cancel-edit="cancelEdit"
             />

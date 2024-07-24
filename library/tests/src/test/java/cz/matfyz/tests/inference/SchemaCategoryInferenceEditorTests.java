@@ -344,4 +344,76 @@ public class SchemaCategoryInferenceEditorTests {
         System.out.println("Editted Size: ");
         System.out.println(editMappings.size());*/
     }
+
+    @Test
+    void testRecursionEdit() throws Exception {
+
+        SchemaCategory category = new SchemaCategory("schema");
+        category.addObject(new SchemaObject(new Key(0), "B", null, null));
+        category.addObject(new SchemaObject(new Key(1), "A", null, null));
+        category.addObject(new SchemaObject(new Key(2), "A", null, null));
+        category.addObject(new SchemaObject(new Key(3), "B", null, null));
+        category.addObject(new SchemaObject(new Key(4), "B", null, null));
+        category.addObject(new SchemaObject(new Key(5), "B", null, null));
+        category.addObject(new SchemaObject(new Key(6), "A", null, null));
+        category.addObject(new SchemaObject(new Key(7), "A", null, null));
+        category.addObject(new SchemaObject(new Key(8), "B", null, null));
+        category.addObject(new SchemaObject(new Key(9), "B", null, null));
+        category.addObject(new SchemaObject(new Key(10), "A", null, null));
+        category.addObject(new SchemaObject(new Key(11), "B", null, null));
+
+        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(2))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(3))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(4))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(5))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(6))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(7))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(7)), category.getObject(new Key(9))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(10)), category.getObject(new Key(11))));
+/*
+        MappingBuilder builder = new MappingBuilder();
+
+        List<AccessPath> subpaths = new ArrayList<>();
+        subpaths.add(builder.simple("c", Signature.createBase(6)));
+        subpaths.add(builder.simple("b", Signature.createBase(5)));
+
+        ComplexProperty complexProperty = builder.complex("app", Signature.createBase(0), subpaths.toArray(new AccessPath[0]));
+
+        Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
+        System.out.println(mapping.accessPath());
+*/
+        System.out.println();
+        System.out.println(category.hasObject(new Key(1)));
+        System.out.println("ahoj");
+        System.out.println(category.getObject(new Key(1)));
+        System.out.println(category.allObjects());
+        System.out.println(category.allObjects().size());
+        System.out.println("ahoj");
+
+        //List<Mapping> mappings = new ArrayList<>();
+        //mappings.add(mapping);
+    
+        //ClusterInferenceEdit edit = new ClusterInferenceEdit(clusterKeys);
+
+        for (SchemaObject so : category.allObjects()) {
+            System.out.println(so.label());
+        }
+
+        //SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
+/*
+        for (SchemaMorphism sm : categoryFinal.allMorphisms()) {
+            System.out.println("dom: " + sm.dom().label());
+            System.out.println("cod: " + sm.cod().label());
+            System.out.println();
+        }*/
+
+        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
+/*
+        System.out.println();
+        System.out.println("Editted Size: ");
+        System.out.println(editMappings.size());*/
+    }
 }

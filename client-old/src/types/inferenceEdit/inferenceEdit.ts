@@ -59,6 +59,24 @@ export class ClusterInferenceEdit implements AbstractInferenceEdit {
     }
 }
 
+export class RecursionInferenceEdit implements AbstractInferenceEdit {
+    public readonly type: string = "recursion";
+    public readonly pattern: PatternSegment[];
+
+    constructor(pattern: PatternSegment[]) {
+        this.pattern = pattern;
+    }
+
+    toJSON() {
+        return {
+            type: this.type,
+            pattern: this.pattern.map(segment => ({
+                nodeName: segment.nodeName,
+                direction: segment.direction
+            }))
+        };
+    }
+}
 
 export class SaveJobResultPayload {
     constructor(
@@ -72,4 +90,9 @@ export class SaveJobResultPayload {
             edit: this.edit instanceof ReferenceMergeInferenceEdit ? this.edit.toJSON() : this.edit
         };
     }
+}
+
+export interface PatternSegment {
+    nodeName: string;
+    direction: "->" | "<-";
 }

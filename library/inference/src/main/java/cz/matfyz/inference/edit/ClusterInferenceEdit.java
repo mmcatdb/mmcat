@@ -48,6 +48,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     private List<Signature> oldSignatures = new ArrayList<>();
     private List<Key> keysToDelete = new ArrayList<>();
     private List<Signature> signaturesToDelete = new ArrayList<>();
+    //tohle nebude fungovat --> viz priklad video - _index, picture - _index
     private Map<String, Signature> mapOldNewSignature = new HashMap<>();
     private Key clusterKey; // maybe i dont need this one anymore?
     private String newClusterName;
