@@ -22,7 +22,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonSubTypes({
     @JsonSubTypes.Type(value = ReferenceMergeInferenceEdit.class, name = "reference"),
     @JsonSubTypes.Type(value = PrimaryKeyMergeInferenceEdit.class, name = "primaryKey"),
-    @JsonSubTypes.Type(value = ClusterInferenceEdit.class, name = "cluster")
+    @JsonSubTypes.Type(value = ClusterInferenceEdit.class, name = "cluster"),
+    @JsonSubTypes.Type(value = RecursionInferenceEdit.class, name = "recursion")
 })
 @JsonDeserialize(using = AbstractInferenceEdit.Deserializer.class)
 public abstract class AbstractInferenceEdit {

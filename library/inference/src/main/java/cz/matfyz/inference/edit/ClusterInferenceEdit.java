@@ -46,13 +46,14 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     private Key newClusterKey;
     private Signature newSignature;
     private List<Signature> oldSignatures = new ArrayList<>();
-    private List<Key> keysToDelete = new ArrayList<>();
-    private List<Signature> signaturesToDelete = new ArrayList<>();
     //tohle nebude fungovat --> viz priklad video - _index, picture - _index
     private Map<String, Signature> mapOldNewSignature = new HashMap<>();
     private Key clusterKey; // maybe i dont need this one anymore?
     private String newClusterName;
     private Signature newTypeSignature;
+
+    private List<Key> keysToDelete = new ArrayList<>();
+    private List<Signature> signaturesToDelete = new ArrayList<>();
 
     public ClusterInferenceEdit(List<Key> clusterKeys) {
         this.clusterKeys = clusterKeys;
@@ -85,7 +86,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         markItemsForDeletion(schemaCategory, clusterRootKey);
 
         // delete the cluster objects and morphisms
-        removeClusterMorphismsAndObjects(schemaCategory);
+        InferenceEditorUtils.removeMorphismsAndObjects(schemaCategory, signaturesToDelete, keysToDelete);
 
         return schemaCategory;
     }
@@ -279,15 +280,6 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
                 }
             }
         }
-    }
-
-    private void removeClusterMorphismsAndObjects(SchemaCategory schemaCategory) {
-        for (Signature sig : signaturesToDelete) {
-            SchemaMorphism morphism = schemaCategory.getMorphism(sig);
-            schemaCategory.removeMorphism(morphism);
-        }
-        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
-        editor.deleteObjects(keysToDelete);
     }
 
 

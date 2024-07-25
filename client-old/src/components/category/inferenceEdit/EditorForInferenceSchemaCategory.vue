@@ -3,7 +3,7 @@ import { onMounted, onUnmounted, shallowRef } from 'vue';
 import Merge from './Merge.vue';
 import Cluster from './Cluster.vue'
 import Recursion from './Recursion.vue'
-import { Graph, Node } from '@/types/categoryGraph';
+import { Graph, Node, Edge } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 
 const props = defineProps<{
@@ -16,7 +16,7 @@ const emit = defineEmits<{
     (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
     (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
     (e: 'confirm-cluster', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-recursion', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-recursion', payload: { nodes: (Node | undefined)[], edges: (Edge | undefined)[] }): void;
 }>();
 
 enum State {
@@ -80,7 +80,7 @@ function confirmClusterEdit(nodes: (Node | undefined)[]) {
 }
 
 function confirmRecursionEdit(nodes: (Node | undefined)[], edges: (Edge | undefined)[]) {
-    emit('confirm-recursion', nodes, edges);
+    emit('confirm-recursion', { nodes, edges });
 }
 
 function cancelEdit() {

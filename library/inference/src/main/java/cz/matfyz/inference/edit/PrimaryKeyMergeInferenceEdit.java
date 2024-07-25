@@ -40,6 +40,9 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
     private Map<String, Signature> newSignatureMap; // the key is the root of the mapping
     private Map<String, Signature> oldSignatureMap;
 
+    private List<Signature> signaturesToDelete = new ArrayList<>();
+    private List<Key> keysToDelete = new ArrayList<>();
+
     public PrimaryKeyMergeInferenceEdit(Key primaryKeyRoot, Key primaryKey) {
         this.primaryKeyRoot = primaryKeyRoot;
         this.primaryKey = primaryKey;
@@ -63,7 +66,9 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         System.out.println("keysIdentifiedByPrimary: " + keysIdentifiedByPrimary);
 
         this.newSignatureMap = createMorphisms(schemaCategory, dom);
-        this.oldSignatureMap = removePrimaryKeyMorphismsAndObjects(schemaCategory, primaryKeyLabel);
+        this.oldSignatureMap = findMorphismsAndObjectsToDelete(schemaCategory, primaryKeyLabel);
+
+        InferenceEditorUtils.removeMorphismsAndObjects(schemaCategory, signaturesToDelete, keysToDelete);
 
         return schemaCategory;
     }
@@ -87,25 +92,16 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         return signatureMap;
     }
 
-    private Map<String, Signature> removePrimaryKeyMorphismsAndObjects(SchemaCategory schemaCategory, String primaryKeyLabel) {
-        List<SchemaMorphism> morphismsToDelete = new ArrayList<>();
-        List<Key> keysToDelete = new ArrayList<>();
+    private Map<String, Signature> findMorphismsAndObjectsToDelete(SchemaCategory schemaCategory, String primaryKeyLabel) {
         Map<String, Signature> signatureMap = new HashMap<>();
 
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
             if (morphism.cod().label().equals(primaryKeyLabel) && keysIdentifiedByPrimary.contains(morphism.dom().key())) {
-                morphismsToDelete.add(morphism);
+                signaturesToDelete.add(morphism.signature());
                 keysToDelete.add(morphism.cod().key());
                 signatureMap.put(morphism.dom().label(), morphism.signature());
             }
         }
-        System.out.println("keys to delete: " + keysToDelete);
-        for (SchemaMorphism morphismToDelete : morphismsToDelete) {
-            schemaCategory.removeMorphism(morphismToDelete);
-        }
-        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
-        editor.deleteObjects(keysToDelete);
-
         return signatureMap;
     }
 
@@ -195,5 +191,4 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
             return new PrimaryKeyMergeInferenceEdit(primaryKeyRoot, primaryKey);
         }
     }
-
 }

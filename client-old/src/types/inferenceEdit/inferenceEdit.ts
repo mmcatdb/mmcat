@@ -5,7 +5,6 @@ interface AbstractInferenceEdit {
 }
 export type { AbstractInferenceEdit };
 
-
 export class PrimaryKeyMergeInferenceEdit implements AbstractInferenceEdit {
     public readonly type: string = "primaryKey";
     public readonly primaryKeyRoot: Key;
@@ -92,7 +91,12 @@ export class SaveJobResultPayload {
     }
 }
 
-export interface PatternSegment {
-    nodeName: string;
-    direction: "->" | "<-";
+export class PatternSegment {
+    public readonly nodeName : string;
+    public readonly direction: string;
+
+    constructor (nodeName: string, direction: string) {
+        this.nodeName = nodeName;
+        this.direction = direction;
+    }
 }

@@ -9,10 +9,20 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 @JsonDeserialize(using = PatternSegment.Deserializer.class)
-public record PatternSegment(
-    String nodeName,
-    String direction  // "->" or "<-"
-) {
+public class PatternSegment {
+    public final String nodeName;
+    public final String direction;
+
+    public PatternSegment(String nodeName, String direction) {
+        this.nodeName = nodeName;
+        this.direction = direction;
+    }
+    
+    @Override
+    public String toString() {
+        return nodeName + " " + direction;
+    }
+
     public static class Deserializer extends StdDeserializer<PatternSegment> {
 
         public Deserializer() {
@@ -33,6 +43,7 @@ public record PatternSegment(
             return new PatternSegment(nodeName, direction);
         }
     }
-
 }
+
+
 

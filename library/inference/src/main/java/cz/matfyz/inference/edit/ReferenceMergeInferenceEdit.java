@@ -41,6 +41,9 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     private Signature oldIndexSignature;
     private Signature newIndexSignature;
 
+    private List<Signature> signaturesToDelete = new ArrayList<>();
+    private List<Key> keysToDelete = new ArrayList<>();
+
     public ReferenceMergeInferenceEdit(Key referenceKey, Key referredKey) {
         this.referenceKey = referenceKey;
         this.referredKey = referredKey;
@@ -94,7 +97,8 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         newIndexSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, indexKey);
 
         // remove the reference object and its morphisms
-        removeReferenceMorphismsAndObject(schemaCategory, Arrays.asList(referenceParentKey, indexKey));
+        findMorphismsAndObjectToDelete(schemaCategory, Arrays.asList(referenceParentKey, indexKey));
+        InferenceEditorUtils.removeMorphismsAndObjects(schemaCategory, signaturesToDelete, keysToDelete);
 
         return schemaCategory;
     }
@@ -118,11 +122,10 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         throw new NotFoundException("Index key has not been found");
     }
 
-    private void removeReferenceMorphismsAndObject(SchemaCategory schemaCategory, List<Key> keysToDelete) {
-        List<SchemaMorphism> morphismsToDelete = new ArrayList<>();
+    private void findMorphismsAndObjectToDelete(SchemaCategory schemaCategory, List<Key> keysToDelete) {
         for (SchemaMorphism morphismToDelete : schemaCategory.allMorphisms()) {
             if (morphismToDelete.dom().key().equals(referenceKey) && keysToDelete.contains(morphismToDelete.cod().key())) {
-                morphismsToDelete.add(morphismToDelete);
+                signaturesToDelete.add(morphismToDelete.signature());
                 // find the reference and index signatures
                 if (morphismToDelete.cod().label().equals("_index")) {
                     oldIndexSignature = morphismToDelete.signature();
@@ -131,11 +134,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
                 }
             }
         }
-        for (SchemaMorphism morphismToDelete : morphismsToDelete) {
-            schemaCategory.removeMorphism(morphismToDelete);
-        }
-        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
-        editor.deleteObject(referenceKey);
+        keysToDelete.add(referenceKey);
     }
 
     @Override

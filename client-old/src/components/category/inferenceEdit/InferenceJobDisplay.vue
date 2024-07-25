@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, shallowRef, watch } from 'vue';
 import { Job } from '@/types/job';
-import type { Graph, Node } from '@/types/categoryGraph';
+import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
 import { SchemaCategory } from '@/types/schema';
 import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
 import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
-import { RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'; 
+import { RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inferenceEdit/inferenceEdit'; 
 
 type InferenceJobDisplayProps = {
     job: Job;
@@ -62,9 +62,30 @@ function createClusterEdit(nodes: (Node)[]) {
     confirm(edit);
 }
 
-function createRecursionEdit(nodes: (Node)[], edges: (Edge)[]) {
+function createRecursionEdit(payload: { nodes: (Node)[], edges: (Edge)[] }) {
+    const { nodes, edges } = payload;
 
-    const edit = new RecursionInferenceEdit();
+    const pattern: PatternSegment[] = [];
+
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const nodeName = node.schemaObject.label;
+        let direction: "->" | "<-" | "" = "";
+
+        if (i < edges.length) {
+            const edge = edges[i];
+            direction = edge.domainNode.equals(node) ? "->" : "<-";
+        }
+
+        pattern.push({ nodeName, direction });
+    }
+
+    // last segment direction should be empty
+    if (pattern.length > 0) {
+        pattern[pattern.length - 1].direction = "";
+    }
+
+    const edit = new RecursionInferenceEdit(pattern);   
     confirm(edit);
 }
 

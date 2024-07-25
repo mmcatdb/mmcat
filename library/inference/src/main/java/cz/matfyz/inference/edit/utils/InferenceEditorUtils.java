@@ -85,6 +85,15 @@ public class InferenceEditorUtils {
         return new SchemaObject(key, objectLabel, ids, SignatureId.createEmpty());
     }
 
+    public static void removeMorphismsAndObjects(SchemaCategory schemaCategory, List<Signature> signaturesToDelete, List<Key> keysToDelete) {
+        for (Signature sig : signaturesToDelete) {
+            SchemaMorphism morphism = schemaCategory.getMorphism(sig);
+            schemaCategory.removeMorphism(morphism);
+        }
+        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
+        editor.deleteObjects(keysToDelete);
+    }
+
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, Mapping mappingToKeep) {
         List<Mapping> updatedMappings = new ArrayList<>();
         for (Mapping mapping : mappings) {
