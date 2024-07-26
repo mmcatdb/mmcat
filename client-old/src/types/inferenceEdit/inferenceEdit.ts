@@ -7,17 +7,14 @@ export type { AbstractInferenceEdit };
 
 export class PrimaryKeyMergeInferenceEdit implements AbstractInferenceEdit {
     public readonly type: string = "primaryKey";
-    public readonly primaryKeyRoot: Key;
     public readonly primaryKey: Key;
 
-    constructor(primaryKeyRoot: Key, primaryKey: Key) {
-        this.primaryKeyRoot = primaryKeyRoot
+    constructor(primaryKey: Key) {
         this.primaryKey = primaryKey;
     }
     toJSON() {
         return {
             type: this.type,
-            primaryKeyRoot: this.primaryKeyRoot,
             primaryKey: this.primaryKey
         };
     }

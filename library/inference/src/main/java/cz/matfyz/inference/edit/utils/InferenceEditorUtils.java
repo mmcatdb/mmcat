@@ -15,6 +15,7 @@ import cz.matfyz.core.mapping.Mapping;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
@@ -48,26 +49,25 @@ public class InferenceEditorUtils {
         return max + 1;
     }
 
-    public static Signature createAndAddMorphism(SchemaCategory schemaCategory, SchemaObject dom, Key codKey) {
-        SchemaMorphism existingMorphism = getMorphismIfExists(schemaCategory, dom, codKey);
+    public static Signature createAndAddMorphism(SchemaCategory schemaCategory, SchemaObject dom, SchemaObject cod) {
+        SchemaMorphism existingMorphism = getMorphismIfExists(schemaCategory, dom, cod);
         if (existingMorphism != null) {
             return existingMorphism.signature();
         } else {
-            SchemaMorphism newMorphism = createMorphism(schemaCategory, dom, codKey);
+            SchemaMorphism newMorphism = createMorphism(schemaCategory, dom, cod);
             schemaCategory.addMorphism(newMorphism);
             return newMorphism.signature();
         }
     }
 
-    private static SchemaMorphism createMorphism(SchemaCategory schemaCategory, SchemaObject dom, Key codKey) {
-        SchemaObject cod = schemaCategory.getObject(codKey);
+    private static SchemaMorphism createMorphism(SchemaCategory schemaCategory, SchemaObject dom, SchemaObject cod) {
         BaseSignature signature = Signature.createBase(getNewSignatureValue(schemaCategory));
         return new SchemaMorphism(signature, null, Min.ONE, new HashSet<>(), dom, cod);
     }
 
-    private static SchemaMorphism getMorphismIfExists(SchemaCategory schemaCategory, SchemaObject dom, Key codKey) {
+    private static SchemaMorphism getMorphismIfExists(SchemaCategory schemaCategory, SchemaObject dom, SchemaObject cod) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().equals(dom) && morphism.cod().key().equals(codKey)) {
+            if (morphism.dom().equals(dom) && morphism.cod().equals(cod)) {
                 return morphism;
             }
         }
@@ -85,7 +85,7 @@ public class InferenceEditorUtils {
         return new SchemaObject(key, objectLabel, ids, SignatureId.createEmpty());
     }
 
-    public static void removeMorphismsAndObjects(SchemaCategory schemaCategory, List<Signature> signaturesToDelete, List<Key> keysToDelete) {
+    public static void removeMorphismsAndObjects(SchemaCategory schemaCategory, Set<Signature> signaturesToDelete, Set<Key> keysToDelete) {
         for (Signature sig : signaturesToDelete) {
             SchemaMorphism morphism = schemaCategory.getMorphism(sig);
             schemaCategory.removeMorphism(morphism);
@@ -106,6 +106,24 @@ public class InferenceEditorUtils {
         return updatedMappings;
     }
 
+    public static SchemaCategory createSchemaCategoryCopy(SchemaCategory original) {
+        SchemaCategory copy = new SchemaCategory(original.label);
+
+        for (SchemaObject schemaObject : original.allObjects()) {
+            SchemaObject objectCopy = new SchemaObject(schemaObject.key(), schemaObject.label(), schemaObject.ids(), schemaObject.superId());
+            copy.addObject(objectCopy);
+        }
+
+        for (SchemaMorphism morphism : original.allMorphisms()) {
+            SchemaObject domCopy = copy.getObject(morphism.dom().key());
+            SchemaObject codCopy = copy.getObject(morphism.cod().key());
+            SchemaMorphism morphCopy = new SchemaMorphism(morphism.signature(), morphism.label, morphism.min(), morphism.tags(), domCopy, codCopy); // Adjust according to your SchemaMorphism constructor
+            copy.addMorphism(morphCopy);
+        }
+
+        return copy;
+    }
+
     public static class SchemaCategoryEditor extends SchemaCategory.Editor {
 
         public final SchemaCategory schemaCategory;
@@ -124,7 +142,7 @@ public class InferenceEditorUtils {
             }
         }
 
-        public void deleteObjects(List<Key> keys) {
+        public void deleteObjects(Set<Key> keys) {
             for (Key key : keys) {
                 deleteObject(key);
             }

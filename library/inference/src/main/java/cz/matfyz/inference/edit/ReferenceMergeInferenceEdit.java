@@ -41,9 +41,6 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     private Signature oldIndexSignature;
     private Signature newIndexSignature;
 
-    private List<Signature> signaturesToDelete = new ArrayList<>();
-    private List<Key> keysToDelete = new ArrayList<>();
-
     public ReferenceMergeInferenceEdit(Key referenceKey, Key referredKey) {
         this.referenceKey = referenceKey;
         this.referredKey = referredKey;
@@ -83,24 +80,24 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
          * and it has 2 outgoing morphism, one for _index and one for the original parent node
          */
         // TODO: the assumptions are not always true; review it and make it more general
-        System.out.println("Applying Reference Merge Edit on Schema Category...");
-        System.out.println("Reference Key: " + referenceKey);
-        System.out.println("Referred Key: " + referredKey);
+        setSchemaCategories(schemaCategory);
 
-        SchemaObject dom = schemaCategory.getObject(referredKey);
+        System.out.println("Applying Reference Merge Edit on Schema Category...");
+
+        SchemaObject dom = newSchemaCategory.getObject(referredKey);
 
         // add new morphisms
-        Key referenceParentKey = getParentKey(schemaCategory, referenceKey);
-        newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, referenceParentKey);
+        Key referenceParentKey = getParentKey(newSchemaCategory, referenceKey);
+        newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, dom, newSchemaCategory.getObject(referenceParentKey));
 
-        Key indexKey = getIndexKey(schemaCategory, referenceKey);
-        newIndexSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, indexKey);
+        Key indexKey = getIndexKey(newSchemaCategory, referenceKey);
+        newIndexSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, dom, newSchemaCategory.getObject(indexKey));
 
         // remove the reference object and its morphisms
-        findMorphismsAndObjectToDelete(schemaCategory, Arrays.asList(referenceParentKey, indexKey));
-        InferenceEditorUtils.removeMorphismsAndObjects(schemaCategory, signaturesToDelete, keysToDelete);
+        findMorphismsAndObjectToDelete(newSchemaCategory, Arrays.asList(referenceParentKey, indexKey));
+        InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
 
-        return schemaCategory;
+        return newSchemaCategory;
     }
 
     // TODO: make it more general
@@ -138,20 +135,17 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     }
 
     @Override
-    public List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory) {
+    public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         System.out.println("Applying Reference Merge Edit on Mapping...");
 
         // find the two mappings in question
         Mapping referenceMapping = findReferenceMapping(mappings);
-        System.out.println("referenceMapping found: " + referenceMapping.accessPath());
-        Mapping referredMapping = findReferredMapping(mappings, schemaCategory);
-        System.out.println("referredMapping found: " + referredMapping.accessPath());
+        Mapping referredMapping = findReferredMapping(mappings, newSchemaCategory);
 
         // create the new merged mapping
         ComplexProperty mergedComplexProperty = mergeComplexProperties(referenceMapping.accessPath(), referredMapping.accessPath());
         // TODO; what about the primary keys here?
-        Mapping mergedMapping = new Mapping(schemaCategory, referenceMapping.rootObject().key(), referenceMapping.kindName(), mergedComplexProperty, referenceMapping.primaryKey());
-        System.out.println("mergedMapping: " + mergedMapping.accessPath());
+        Mapping mergedMapping = new Mapping(newSchemaCategory, referenceMapping.rootObject().key(), referenceMapping.kindName(), mergedComplexProperty, referenceMapping.primaryKey());
 
         return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(referenceMapping, referredMapping), mergedMapping);
     }
@@ -202,10 +196,8 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
                 if (subpath instanceof ComplexProperty currentComplexProperty) {
                     AccessPath currentSubpath = currentComplexProperty.getSubpathBySignature(oldIndexSignature); // assuming there is just _index object
-                    System.out.println("currentSubpath: " + currentSubpath);
 
                     newIndexSimpleProperty = new SimpleProperty(currentSubpath.name(), newIndexSignature); //set the new index signature
-                    System.out.println("newIndexCompelxProp: " + newIndexSimpleProperty);
                 }
                 combinedSubpaths.add(newIndexSimpleProperty);
                 newSubpaths.add(new ComplexProperty(subpath.name(), newReferenceSignature.dual(), combinedSubpaths));

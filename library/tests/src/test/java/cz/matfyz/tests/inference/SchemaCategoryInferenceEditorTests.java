@@ -124,7 +124,7 @@ public class SchemaCategoryInferenceEditorTests {
         mappings.add(mappingA);
         mappings.add(mappingB);
 
-        List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
+        List<Mapping> editMappings = edit.applyMappingEdit(mappings);
 
         System.out.println();
         System.out.println("Editted Mapping: ");
@@ -201,7 +201,7 @@ public class SchemaCategoryInferenceEditorTests {
         System.out.println("new index sig: " + edit.getNewIndexSig());
         System.out.println("old index sig: " + edit.getOldIndexSig());
 
-        List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
+        List<Mapping> editMappings = edit.applyMappingEdit(mappings);
 
         System.out.println();
         System.out.println("Editted Size: ");
@@ -269,7 +269,7 @@ public class SchemaCategoryInferenceEditorTests {
         mappings.add(mappingA);
         mappings.add(mappingB);
 
-        PrimaryKeyMergeInferenceEdit edit = new PrimaryKeyMergeInferenceEdit(new Key(0), new Key(1));
+        PrimaryKeyMergeInferenceEdit edit = new PrimaryKeyMergeInferenceEdit(new Key(1));
 
         //SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
 

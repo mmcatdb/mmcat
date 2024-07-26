@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -52,9 +51,6 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     private String newClusterName;
     private Signature newTypeSignature;
 
-    private List<Key> keysToDelete = new ArrayList<>();
-    private List<Signature> signaturesToDelete = new ArrayList<>();
-
     public ClusterInferenceEdit(List<Key> clusterKeys) {
         this.clusterKeys = clusterKeys;
         this.clusterKey = clusterKeys.get(0);
@@ -67,28 +63,28 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
          * however we assume that one ingoing edge is from the root cluster and
          * all the other ones belong to the cluster and we need them
          */
-        System.out.println("Applying Cluster Edit on Schema Category...");
+        setSchemaCategories(schemaCategory);
+
+         System.out.println("Applying Cluster Edit on Schema Category...");
 
         // find the root of the cluster
-        this.clusterRootKey = findClusterRootKey(schemaCategory);
-        System.out.println("clusterRootKey: " + clusterRootKey);
+        this.clusterRootKey = findClusterRootKey(newSchemaCategory);
 
         // Get new cluster name. TODO : deal with ids
-        List<String> oldClusterNames = getOldClusterNames(schemaCategory);
+        List<String> oldClusterNames = getOldClusterNames(newSchemaCategory);
         this.newClusterName = findRepeatingPattern(oldClusterNames);
-        System.out.println("newClusterName: " + newClusterName);
 
         // traverse one of the members of cluster and create a new SK based on that + add that SK to the original one
-        SchemaCategory newSchemaCategoryPart = traverseAndBuild(schemaCategory, clusterKey, clusterRootKey);
-        addSchemaCategoryPart(schemaCategory, newSchemaCategoryPart, newClusterName, oldClusterNames, clusterRootKey);
+        SchemaCategory newSchemaCategoryPart = traverseAndBuild(newSchemaCategory, clusterKey, clusterRootKey);
+        addSchemaCategoryPart(newSchemaCategory, newSchemaCategoryPart, newClusterName, oldClusterNames, clusterRootKey);
 
         // traverse the SK and find the keys and morphisms to delete
-        markItemsForDeletion(schemaCategory, clusterRootKey);
+        markItemsForDeletion(newSchemaCategory, clusterRootKey);
 
         // delete the cluster objects and morphisms
-        InferenceEditorUtils.removeMorphismsAndObjects(schemaCategory, signaturesToDelete, keysToDelete);
+        InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
 
-        return schemaCategory;
+        return newSchemaCategory;
     }
 
     private Key findClusterRootKey(SchemaCategory schemaCategory) {
@@ -214,14 +210,14 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     // TODO: refactor this, it doesnt make sense
     private void addTypeObjectAndMorphisms(SchemaCategory schemaCategory, SchemaCategory schemaCategoryPart, String newClusterName, Map<Key, Key> mapOldNewKey, Key clusterRootKey, Key newClusterKey) {
         Key typeKey = InferenceEditorUtils.createAndAddObject(schemaCategory, "_type", ObjectIds.createGenerated());
-        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(newClusterKey), typeKey);
+        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(newClusterKey), schemaCategory.getObject(typeKey));
 
         for (SchemaMorphism morphism : schemaCategoryPart.allMorphisms()) {
             SchemaObject dom = schemaCategory.getObject(mapOldNewKey.get(morphism.dom().key()));
-            Signature newSig = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, mapOldNewKey.get(morphism.cod().key()));
+            Signature newSig = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, schemaCategory.getObject(mapOldNewKey.get(morphism.cod().key())));
             mapOldNewSignature.put(morphism.cod().label(), newSig);
         }
-        this.newSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(clusterRootKey), newClusterKey);
+        this.newSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(clusterRootKey), schemaCategory.getObject(newClusterKey));
     }
 
     private void markItemsForDeletion(SchemaCategory schemaCategory, Key clusterRootKey) {
@@ -284,18 +280,16 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
 
 
     @Override
-    public List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory) {
+    public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         System.out.println("Applying Cluster Edit on Mapping...");
 
         // find the cluster mapping
         Mapping clusterMapping = findClusterMapping(mappings);
-        System.out.println("found cluster mapping: " + clusterMapping.accessPath());
 
         // add the new complex property
         // delete the accesspaths with a certain signatures (see primary key)
-        ComplexProperty changedComplexProperty = changeComplexProperties(schemaCategory, clusterMapping.accessPath());
-        Mapping changedMapping = new Mapping(schemaCategory, clusterMapping.rootObject().key(), clusterMapping.kindName(), changedComplexProperty, clusterMapping.primaryKey());
-        System.out.println("ChangedMapping: " + changedMapping.accessPath());
+        ComplexProperty changedComplexProperty = changeComplexProperties(newSchemaCategory, clusterMapping.accessPath());
+        Mapping changedMapping = new Mapping(newSchemaCategory, clusterMapping.rootObject().key(), clusterMapping.kindName(), changedComplexProperty, clusterMapping.primaryKey());
 
         List<Mapping> mappingToDelete = new ArrayList<>();
         mappingToDelete.add(clusterMapping);
@@ -317,18 +311,12 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         // retrieve the complex Property of the first cluster key
         // TODO: make the first element of clusterKeys a constant somewhere
         AccessPath firstClusterAccessPath = clusterComplexProperty.getSubpathBySignature(oldSignatures.get(0));
-        System.out.println("firstClusterAccess: " + firstClusterAccessPath);
-
         ComplexProperty newComplexProperty = getNewComplexProperty(firstClusterAccessPath, clusterComplexProperty);
-        System.out.println("newComplexProperty: " + newComplexProperty.subpaths());
-
         return newComplexProperty;
     }
 
     private ComplexProperty getNewComplexProperty(AccessPath firstClusterAccessPath, ComplexProperty clusterComplexProperty) {
         List<AccessPath> newSubpaths = new ArrayList<>();
-
-        System.out.println("oldSignature: " + oldSignatures);
 
         boolean complexChanged = false;
         for (AccessPath subpath : clusterComplexProperty.subpaths()) {
@@ -359,7 +347,6 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
 
     public ComplexProperty createNewComplexProperty(ComplexProperty original) {
         // Generate new subpaths by transforming each subpath of the original complex property
-        System.out.println("current complex prop: " + original.subpaths());
         List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
 
         // Create a new ComplexProperty with the new subpaths and a new signature
@@ -376,7 +363,6 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         }
 
         ComplexProperty newComplexProperty = builder.complex(name, complexPropertySignature, newSubpaths.toArray(new AccessPath[0]));
-        System.out.println("new complex prop: " + newComplexProperty);
 
         return newComplexProperty;
     }
@@ -399,13 +385,9 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     }
 
     private SimpleProperty createNewSimpleProperty(SimpleProperty original) {
-        System.out.println("current simple prop: " + original);
-        System.out.println("mapoldnewSig: " + mapOldNewSignature);
         SimpleProperty newSimpleProperty = builder.simple(original.name().toString(), mapOldNewSignature.get(original.name().toString()));
-        System.out.println("newSimple prop: " + newSimpleProperty);
         return newSimpleProperty;
     }
-
 
     public static class Deserializer extends StdDeserializer<ClusterInferenceEdit> {
 

@@ -48,10 +48,9 @@ function createReferenceMergeEdit(nodes: (Node)[]) {
 }
 
 function createPrimaryKeyMergeEdit(nodes: (Node)[]) {
-    const primaryKeyRoot = nodes[0].schemaObject.key;
-    const primaryKey = nodes[1].schemaObject.key;
+    const primaryKey = nodes[0].schemaObject.key;
 
-    const edit = new PrimaryKeyMergeInferenceEdit(primaryKeyRoot, primaryKey);
+    const edit = new PrimaryKeyMergeInferenceEdit(primaryKey);
     confirm(edit);
 }
 

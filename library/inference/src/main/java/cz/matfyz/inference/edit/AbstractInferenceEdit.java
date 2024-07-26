@@ -1,10 +1,17 @@
 package cz.matfyz.inference.edit;
 
+import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
+import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -28,8 +35,19 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonDeserialize(using = AbstractInferenceEdit.Deserializer.class)
 public abstract class AbstractInferenceEdit {
 
+    protected SchemaCategory oldSchemaCategory;
+    protected SchemaCategory newSchemaCategory;
+
+    protected Set<Signature> signaturesToDelete = new HashSet<>();
+    protected Set<Key> keysToDelete = new HashSet<>();
+
+    protected void setSchemaCategories(SchemaCategory schemaCategory) {
+        this.oldSchemaCategory = schemaCategory;
+        this.newSchemaCategory = InferenceEditorUtils.createSchemaCategoryCopy(schemaCategory);
+    }
+
     public abstract SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory);
-    public abstract List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory);
+    public abstract List<Mapping> applyMappingEdit(List<Mapping> mappings);
 
     public static class Deserializer extends StdDeserializer<AbstractInferenceEdit> {
 

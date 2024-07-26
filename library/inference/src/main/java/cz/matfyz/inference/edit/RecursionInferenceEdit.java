@@ -13,10 +13,8 @@ import cz.matfyz.inference.edit.utils.PatternSegment;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -24,6 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.apache.commons.collections.ListUtils;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 @JsonDeserialize(using = RecursionInferenceEdit.Deserializer.class)
@@ -34,46 +33,31 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
 
     public final List<PatternSegment> pattern;
 
-    private Set<Signature> signaturesToDelete = new HashSet<>();
-    private Set<Key> keysToDelete = new HashSet<>();
-
     public RecursionInferenceEdit(List<PatternSegment> pattern) {
         this.pattern = pattern;
     }
 
     @Override
-    public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {      
+    public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
+        /*
+         * Assumptions: Morphisms in the pattern are only among the elemenets of the pattern
+         */
         // find the pattern occurence
-        List<List<SchemaObject>> occurences = findPatternOccurences(schemaCategory);
-        System.out.println("occurences: " + occurences);
+        setSchemaCategories(schemaCategory);
 
-        System.out.println("SK objects before replacement: " + schemaCategory.allObjects());
-        System.out.println("morphisms before change");
-        for (SchemaMorphism m: schemaCategory.allMorphisms()) {
-            System.out.println("dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
+        System.out.println("Applying Recursion Edit on Mapping...");
+        List<List<SchemaObject>> occurences = findPatternOccurences(newSchemaCategory);
 
         Map<List<SchemaObject>, Key> mapOccurenceNewKey = new HashMap<>();
         String patternName = createPatternName();
         for (List<SchemaObject> occurrence : occurences) {
-            createNewRecursionObject(schemaCategory, occurrence, mapOccurenceNewKey, patternName);
+            createNewRecursionObject(newSchemaCategory, occurrence, mapOccurenceNewKey, patternName);
         }
         for (List<SchemaObject> occurrence : occurences) {
-            createNewRecursionMorphisms(schemaCategory, occurrence, mapOccurenceNewKey);
+            createNewRecursionMorphisms(newSchemaCategory, occurrence, mapOccurenceNewKey);
         }
 
-        System.out.println("SK objects after replacement: " + schemaCategory.allObjects());
-
-        System.out.println("signatures to delete: " + signaturesToDelete);
-        System.out.println("keys to delete: " + keysToDelete);
-
-        InferenceEditorUtils.removeMorphismsAndObjects(schemaCategory, List.copyOf(signaturesToDelete), List.copyOf(keysToDelete));
-
-        System.out.println("final morphisms:");
-        for (SchemaMorphism m : schemaCategory.allMorphisms()) {
-            System.out.println("dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-            System.out.println();
-        }
+        InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
 
         return schemaCategory;
     }
@@ -94,8 +78,11 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
             currentPath.add(currentNode);
 
             if (patternIndex == pattern.size() - 1) {
-                // found full match
-                result.add(new ArrayList<>(currentPath));
+                // Check if the middle nodes have no other morphisms connected
+                if (isValidPattern(currentPath, schemaCategory)) {
+                    // found full match
+                    result.add(new ArrayList<>(currentPath));
+                }
             } else {
                 if (currentSegment.direction.equals("->")) {
                     for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
@@ -113,6 +100,28 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
             }
             currentPath.remove(currentPath.size() - 1);
         }
+    }
+
+    private boolean isValidPattern(List<SchemaObject> path, SchemaCategory schemaCategory) {
+        for (int i = 1; i < path.size() - 1; i++) {
+            SchemaObject middleNode = path.get(i);
+            if (hasOtherMorphisms(middleNode, path.get(i - 1), path.get(i + 1), schemaCategory)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean hasOtherMorphisms(SchemaObject node, SchemaObject previous, SchemaObject next, SchemaCategory schemaCategory) {
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (morphism.dom().equals(node) && !morphism.cod().equals(next)) {
+                return true;
+            }
+            if (morphism.cod().equals(node) && !morphism.dom().equals(previous)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String createPatternName() {
@@ -135,25 +144,35 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
         SchemaObject first = occurrence.get(0);
         SchemaObject last = occurrence.get(occurrence.size() - 1);
 
+        SchemaObject next = occurrence.get(1);
+        SchemaObject previous = occurrence.get(occurrence.size() - 2);
+
         Key newKey = mapOccurenceNewKey.get(occurrence);
 
-        List<SchemaObject> domObjects = getUpdatedDomObjects(schemaCategory, mapOccurenceNewKey, first, newKey);
-        List<SchemaObject> codObjects = getUpdatedCodObjects(schemaCategory, mapOccurenceNewKey, last, newKey);
+        List<SchemaObject> firstDomObjects = getUpdatedDomObjects(schemaCategory, mapOccurenceNewKey, first, next, newKey);
+        List<SchemaObject> firstCodObjects = getUpdatedCodObjects(schemaCategory, mapOccurenceNewKey, first, next, newKey);
+
+        List<SchemaObject> lastDomObjects = getUpdatedDomObjects(schemaCategory, mapOccurenceNewKey, last, previous, newKey);
+        List<SchemaObject> lastCodObjects = getUpdatedCodObjects(schemaCategory, mapOccurenceNewKey, last, previous, newKey);
+
+        List<SchemaObject> domObjects = ListUtils.union(firstDomObjects, lastDomObjects);
+        List<SchemaObject> codObjects = ListUtils.union(firstCodObjects, lastCodObjects);
+
 
         for (SchemaObject dom : domObjects) {
-            InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, newKey);
+            InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, schemaCategory.getObject(newKey));
         }
         for (SchemaObject cod : codObjects) {
-            InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(newKey), cod.key());
+            InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(newKey), cod);
         }
 
         findPatternSegmentSignaturesToDelete(schemaCategory, occurrence);
     }
 
-    private List<SchemaObject> getUpdatedDomObjects(SchemaCategory schemaCategory, Map<List<SchemaObject>, Key> mapOccurenceNewKey, SchemaObject first, Key newKey) {
+    private List<SchemaObject> getUpdatedDomObjects(SchemaCategory schemaCategory, Map<List<SchemaObject>, Key> mapOccurenceNewKey, SchemaObject element, SchemaObject nextTo, Key newKey) {
         List<SchemaObject> domObjects = new ArrayList<>();
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.cod().equals(first)) {
+            if (morphism.cod().equals(element) && !morphism.dom().equals(nextTo)) {
                 if (keysToDelete.contains(morphism.dom().key())) {
                     domObjects.add(schemaCategory.getObject(findNewKeyInstead(mapOccurenceNewKey, morphism.dom().key(), newKey)));
                 } else {
@@ -165,10 +184,10 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
         return domObjects;
     }
 
-    private List<SchemaObject> getUpdatedCodObjects(SchemaCategory schemaCategory, Map<List<SchemaObject>, Key> mapOccurenceNewKey, SchemaObject last, Key newKey) {
+    private List<SchemaObject> getUpdatedCodObjects(SchemaCategory schemaCategory, Map<List<SchemaObject>, Key> mapOccurenceNewKey, SchemaObject element, SchemaObject nextTo, Key newKey) {
         List<SchemaObject> codObjects = new ArrayList<>();
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().equals(last)) {
+            if (morphism.dom().equals(element) && !morphism.cod().equals(nextTo)) {
                 if (keysToDelete.contains(morphism.cod().key())) {
                     codObjects.add(schemaCategory.getObject(findNewKeyInstead(mapOccurenceNewKey, morphism.cod().key(), newKey)));
                 } else {
@@ -188,7 +207,6 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
                         return mapOccurenceNewKey.get(occurence);
                     }
                 }
-                
             }
         }
         throw new NotFoundException("New Key for key " + keyInOccurence + " has not been found");
@@ -215,7 +233,7 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
     }
 
     @Override
-    public List<Mapping> applyMappingEdit(List<Mapping> mappings, SchemaCategory schemaCategory) {
+    public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'applyMappingEdit'");
     }

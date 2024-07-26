@@ -19,8 +19,8 @@ const emit = defineEmits<{
 const nodes = shallowRef<(Node | undefined)[]>([]);
 const confirmClicked = ref(false);
 
-const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
-const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
+const nodeSelected = computed(() => !!nodes.value[0]);
+const noNodeSelected = computed(() => !nodes.value[0]);
 
 function confirm() {
     confirmClicked.value = true;
@@ -32,14 +32,13 @@ function save() { // do not do anything, just go back t editor
 }
 
 function cancel() {
-    if (noNodesSelected.value) { // go back to editor
+    if (noNodeSelected.value) { // go back to editor
         emit('cancel');
     }
     
-    nodes.value = [undefined, undefined];  //unselect selected nodes
+    nodes.value = [undefined];  //unselect selected nodes
 
     if (confirmClicked.value) { // delete the edit (on BE)
-        console.log("cancelling edit");
         emit('cancel-edit');
     }
 }
@@ -49,22 +48,19 @@ function cancel() {
 <template>
     <div class="referenceMerge">
         <ValueContainer>
-            <ValueRow label="Primary Key Root object:"> 
-                {{ nodes[0]?.schemaObject.label }}
-            </ValueRow>
             <ValueRow label="Primary Key object:"> 
-                {{ nodes[1]?.schemaObject.label }}
+                {{ nodes[0]?.schemaObject.label }}
             </ValueRow>
         </ValueContainer>
         <NodeInput
             v-model="nodes"
             :graph="props.graph"
-            :count="2"
+            :count="1"
             :type="SelectionType.Selected"
         />
         <div class="button-row">
             <button
-                :disabled="!nodesSelected || confirmClicked"
+                :disabled="!nodeSelected || confirmClicked"
                 @click="confirm"
             >
                 Confirm

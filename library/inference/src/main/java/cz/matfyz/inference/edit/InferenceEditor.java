@@ -51,7 +51,7 @@ public class InferenceEditor {
 
     private void applyMappingEdits() {
         for (AbstractInferenceEdit edit : edits) {
-            mappings = edit.applyMappingEdit(mappings, schemaCategory);
+            mappings = edit.applyMappingEdit(mappings);
         }
     }
 
