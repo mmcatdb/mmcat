@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
 
@@ -28,16 +29,19 @@ import org.apache.hadoop.yarn.webapp.NotFoundException;
 @JsonDeserialize(using = ReferenceMergeInferenceEdit.Deserializer.class)
 public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
+    private static final Logger LOGGER = Logger.getLogger(ReferenceMergeInferenceEdit.class.getName());
+    private static final String INDEX_LABEL = "_index";
+
     @JsonProperty("type")
     private final String type = "reference";
 
     public final Key referenceKey;
     public final Key referredKey;
 
-    // these get initialized while running schema category edits
+    private boolean referenceIsArray;
+
     private Signature oldReferenceSignature;
     private Signature newReferenceSignature;
-
     private Signature oldIndexSignature;
     private Signature newIndexSignature;
 
@@ -46,65 +50,61 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         this.referredKey = referredKey;
     }
 
-    //TODO: just for testing purposes, delete later
-    ////////////////////////////////////////////
-    public void setOldReferenceSig(Signature sig) {
-        this.oldReferenceSignature = sig;
-    }
-    public void setNewReferenceSig(Signature sig) {
-        this.newReferenceSignature = sig;
-    }
-    public void setOldIndexSig(Signature sig) {
-        this.oldIndexSignature = sig;
-    }
-    public void setNewIndexSig(Signature sig) {
-        this.newIndexSignature = sig;
-    }
-    public Signature getOldReferenceSig() {
-        return this.oldReferenceSignature;
-    }
-    public Signature getNewReferenceSig() {
-        return this.newReferenceSignature;
-    }
-    public Signature getOldIndexSig() {
-        return this.oldIndexSignature;
-    }
-    public Signature getNewIndexSig() {
-        return this.newIndexSignature;
-    }
-    ////////////////////////////
     @Override
     public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
         /*
-         * Assumption: when there is a reference, the reference is an array object
-         * and it has 2 outgoing morphism, one for _index and one for the original parent node
+         * Assumption: when there is a reference and it is an array object
+         * it has 2 outgoing morphism, one for _index and one for the original parent node
+         * If it is not array, it has only one ingoing morphism from the root
          */
-        // TODO: the assumptions are not always true; review it and make it more general
+        LOGGER.info("Applying Reference Merge Edit on Schema Category...");
+
         setSchemaCategories(schemaCategory);
 
-        System.out.println("Applying Reference Merge Edit on Schema Category...");
+        this.referenceIsArray = isReferenceArray(newSchemaCategory);
 
-        SchemaObject dom = newSchemaCategory.getObject(referredKey);
+        SchemaObject referredObject = newSchemaCategory.getObject(referredKey);
 
-        // add new morphisms
-        Key referenceParentKey = getParentKey(newSchemaCategory, referenceKey);
-        newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, dom, newSchemaCategory.getObject(referenceParentKey));
+        Key referenceParentKey = getReferenceParentKey(newSchemaCategory, referenceIsArray);
 
-        Key indexKey = getIndexKey(newSchemaCategory, referenceKey);
-        newIndexSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, dom, newSchemaCategory.getObject(indexKey));
+        SchemaObject dom = newSchemaCategory.getObject(referenceParentKey);
+        SchemaObject cod = referredObject;
+        Key indexKey = null;
+        if (referenceIsArray) {
+            dom = referredObject;
+            cod = newSchemaCategory.getObject(referenceParentKey);
 
-        // remove the reference object and its morphisms
-        findMorphismsAndObjectToDelete(newSchemaCategory, Arrays.asList(referenceParentKey, indexKey));
+            indexKey = getIndexKey(newSchemaCategory, referenceKey);
+            this.newIndexSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, referredObject, newSchemaCategory.getObject(indexKey));
+        }
+        this.newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, dom, cod);
+
+        findMorphismsAndObjectToDelete(newSchemaCategory, indexKey);
         InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
 
         return newSchemaCategory;
     }
 
-    // TODO: make it more general
-    private Key getParentKey(SchemaCategory schemaCategory, Key key) {
+    private boolean isReferenceArray(SchemaCategory schemaCategory) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().key().equals(key) && !morphism.cod().label().equals("_index")) {
-                return morphism.cod().key();
+            if (morphism.dom().key().equals(referenceKey) && morphism.cod().label().equals(INDEX_LABEL)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // based on the assumptions
+    private Key getReferenceParentKey(SchemaCategory schemaCategory, boolean isReferenceArray) {
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (isReferenceArray) {
+                if (morphism.dom().key().equals(referenceKey) && !morphism.cod().label().equals(INDEX_LABEL)) {
+                    return morphism.cod().key();
+                }
+            } else {
+                if (morphism.cod().key().equals(referenceKey)) {
+                    return morphism.dom().key();
+                }
             }
         }
         throw new NotFoundException("Parent key has not been found");
@@ -112,22 +112,27 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     private Key getIndexKey(SchemaCategory schemaCategory, Key key) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().key().equals(key) && morphism.cod().label().equals("_index")) {
+            if (morphism.dom().key().equals(key) && morphism.cod().label().equals(INDEX_LABEL)) {
                 return morphism.cod().key();
             }
         }
         throw new NotFoundException("Index key has not been found");
     }
 
-    private void findMorphismsAndObjectToDelete(SchemaCategory schemaCategory, List<Key> keysToDelete) {
-        for (SchemaMorphism morphismToDelete : schemaCategory.allMorphisms()) {
-            if (morphismToDelete.dom().key().equals(referenceKey) && keysToDelete.contains(morphismToDelete.cod().key())) {
-                signaturesToDelete.add(morphismToDelete.signature());
+    private void findMorphismsAndObjectToDelete(SchemaCategory schemaCategory, Key indexKey) {
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if (indexKey != null && morphism.dom().key().equals(referenceKey)) {
+                signaturesToDelete.add(morphism.signature());
                 // find the reference and index signatures
-                if (morphismToDelete.cod().label().equals("_index")) {
-                    oldIndexSignature = morphismToDelete.signature();
+                if (morphism.cod().key().equals(indexKey)) {
+                    oldIndexSignature = morphism.signature();
                 } else {
-                    oldReferenceSignature = morphismToDelete.signature();
+                    oldReferenceSignature = morphism.signature();
+                }
+            } else {
+                if (morphism.cod().key().equals(referenceKey)) {
+                    signaturesToDelete.add(morphism.signature());
+                    oldReferenceSignature = morphism.signature();
                 }
             }
         }
@@ -136,23 +141,24 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     @Override
     public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
-        System.out.println("Applying Reference Merge Edit on Mapping...");
+        LOGGER.info("Applying Reference Merge Edit on Mapping...");
 
-        // find the two mappings in question
+        if (referenceIsArray) {
+            this.oldReferenceSignature = this.oldReferenceSignature.dual();
+            this.newReferenceSignature = this.newReferenceSignature.dual();
+        }
+
         Mapping referenceMapping = findReferenceMapping(mappings);
         Mapping referredMapping = findReferredMapping(mappings, newSchemaCategory);
 
-        // create the new merged mapping
-        ComplexProperty mergedComplexProperty = mergeComplexProperties(referenceMapping.accessPath(), referredMapping.accessPath());
-        // TODO; what about the primary keys here?
-        Mapping mergedMapping = new Mapping(newSchemaCategory, referenceMapping.rootObject().key(), referenceMapping.kindName(), mergedComplexProperty, referenceMapping.primaryKey());
+        Mapping mergedMapping = createMergedMapping(referenceMapping, referredMapping);
 
         return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(referenceMapping, referredMapping), mergedMapping);
     }
 
     private Mapping findReferenceMapping(List<Mapping> mappings) {
         for (Mapping mapping : mappings) {
-            if (mapping.accessPath().getSubpathBySignature(oldReferenceSignature.dual()) != null) {
+            if (mapping.accessPath().getSubpathBySignature(oldReferenceSignature) != null) {
                 return mapping;
             }
         }
@@ -162,45 +168,50 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     private Mapping findReferredMapping(List<Mapping> mappings, SchemaCategory schemaCategory) {
         // 1) in the schemaCategory find the signature where key is dom or cod
         // 2) check in which mapping this signature appears, it should appear in exactly one
-        Signature referredSignature = null;
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().key().equals(referredKey) || morphism.cod().key().equals(referredKey)) {
-                if (!morphism.signature().equals(newIndexSignature) && !morphism.signature().equals(newReferenceSignature)) {
-                    referredSignature = morphism.signature();
-                }
-            }
-        }
-        if (referredSignature == null) {
-            throw new NotFoundException("Signature for referred object has not been found");
-        }
+        Signature referredSignature = findReferredSignature(schemaCategory);
         for (Mapping mapping : mappings) {
             if (mapping.accessPath().getSubpathBySignature(referredSignature) != null) {
                 return mapping;
             }
         }
-        throw new NotFoundException("Mapping for referenc with signature " + referredSignature + " has not been found.");
+        throw new NotFoundException("Mapping for referred with signature " + referredSignature + " has not been found.");
     }
 
-    // TODO: note all the places where we make the signature dual, this is because we assume, that the reference is a list
+    private Signature findReferredSignature(SchemaCategory schemaCategory) {
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            if ((morphism.dom().key().equals(referredKey) || morphism.cod().key().equals(referredKey)) && !morphism.signature().equals(newIndexSignature)) {
+                if (referenceIsArray) {
+                    if (!morphism.signature().equals(newReferenceSignature.dual())) {
+                        return morphism.signature();
+                    }
+                } else {
+                    if (!morphism.signature().equals(newReferenceSignature)) {
+                        return morphism.signature();
+                    }
+                }
+            }
+        }
+        throw new NotFoundException("Signature for referred object has not been found");
+    }
+
+    private Mapping createMergedMapping(Mapping referenceMapping, Mapping referredMapping) {
+        ComplexProperty mergedComplexProperty = mergeComplexProperties(referenceMapping.accessPath(), referredMapping.accessPath());
+        return InferenceEditorUtils.createNewMapping(newSchemaCategory, referenceMapping, Arrays.asList(referredMapping), mergedComplexProperty);
+    }
+
     private ComplexProperty mergeComplexProperties(ComplexProperty referenceComplexProperty, ComplexProperty referredComplexProperty) {
-        // find the subpath in the reference property with the target signature
         List<AccessPath> newSubpaths = new ArrayList<>();
         boolean replaced = false;
 
         for (AccessPath subpath : referenceComplexProperty.subpaths()) {
-            if (!replaced && subpath.signature().equals(oldReferenceSignature.dual())) {
-                // replace it
+            if (!replaced && subpath.signature().equals(oldReferenceSignature)) {
                 List<AccessPath> combinedSubpaths = new ArrayList<>(referredComplexProperty.subpaths());
-
-                SimpleProperty newIndexSimpleProperty = null;
-
-                if (subpath instanceof ComplexProperty currentComplexProperty) {
+                if (referenceIsArray && subpath instanceof ComplexProperty currentComplexProperty) {
                     AccessPath currentSubpath = currentComplexProperty.getSubpathBySignature(oldIndexSignature); // assuming there is just _index object
-
-                    newIndexSimpleProperty = new SimpleProperty(currentSubpath.name(), newIndexSignature); //set the new index signature
+                    SimpleProperty newIndexSimpleProperty = new SimpleProperty(currentSubpath.name(), newIndexSignature);
+                    combinedSubpaths.add(newIndexSimpleProperty);
                 }
-                combinedSubpaths.add(newIndexSimpleProperty);
-                newSubpaths.add(new ComplexProperty(subpath.name(), newReferenceSignature.dual(), combinedSubpaths));
+                newSubpaths.add(new ComplexProperty(subpath.name(), newReferenceSignature, combinedSubpaths));
                 replaced = true;
             } else {
                 newSubpaths.add(subpath);

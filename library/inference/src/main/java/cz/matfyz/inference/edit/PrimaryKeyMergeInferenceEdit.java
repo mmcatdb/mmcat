@@ -139,7 +139,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
 
     private Mapping createMergedMapping(Mapping primaryKeyMapping, List<Mapping> primaryKeyMappings) {
         ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping.accessPath(), primaryKeyMappings);
-        return new Mapping(newSchemaCategory, primaryKeyMapping.rootObject().key(), primaryKeyMapping.kindName(), mergedComplexProperty, primaryKeyMapping.primaryKey());
+        return InferenceEditorUtils.createNewMapping(newSchemaCategory, primaryKeyMapping, primaryKeyMappings, mergedComplexProperty);
     }
 
     private ComplexProperty mergeComplexProperties(ComplexProperty primaryKeyComplexProperty, List<Mapping> primaryKeyMappings) {
@@ -171,7 +171,9 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         @Override
         public PrimaryKeyMergeInferenceEdit deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
+
             final Key primaryKey = parser.getCodec().treeToValue(node.get("primaryKey"), Key.class);
+
             return new PrimaryKeyMergeInferenceEdit(primaryKey);
         }
     }

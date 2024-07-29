@@ -10,9 +10,11 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,6 +94,19 @@ public class InferenceEditorUtils {
         }
         InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
         editor.deleteObjects(keysToDelete);
+    }
+
+    public static Mapping createNewMapping(SchemaCategory schemaCategory, Mapping mapping, List<Mapping> mappingsToMerge, ComplexProperty accessPath) {
+        Collection<Signature> primaryKey = new HashSet<>();
+        if (mapping.primaryKey() != null) {
+            primaryKey.addAll(mapping.primaryKey());
+        }
+        for (Mapping mappingToMerge : mappingsToMerge) {
+            if (mappingToMerge.primaryKey() != null) {
+                primaryKey.addAll(mappingToMerge.primaryKey());
+            }
+        }
+        return new Mapping(schemaCategory, mapping.rootObject().key(), mapping.kindName(), accessPath, primaryKey);
     }
 
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, Mapping mappingToKeep) {
