@@ -15,7 +15,6 @@ import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
 import cz.matfyz.inference.edit.ClusterInferenceEdit;
 import cz.matfyz.inference.edit.ReferenceMergeInferenceEdit;
-import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.edit.PrimaryKeyMergeInferenceEdit;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
@@ -271,7 +270,7 @@ public class SchemaCategoryInferenceEditorTests {
 
         PrimaryKeyMergeInferenceEdit edit = new PrimaryKeyMergeInferenceEdit(new Key(1));
 
-        //SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
+        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
 
         //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
 /*

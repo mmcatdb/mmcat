@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -29,15 +30,16 @@ import org.apache.hadoop.yarn.webapp.NotFoundException;
 @JsonDeserialize(using = PrimaryKeyMergeInferenceEdit.Deserializer.class)
 public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
 
+    private static final Logger LOGGER = Logger.getLogger(PrimaryKeyMergeInferenceEdit.class.getName());
+
     @JsonProperty("type")
     private final String type = "primaryKey";
 
     public final Key primaryKey;
 
     private Key primaryKeyRoot;
-
     private List<Key> keysIdentifiedByPrimary;
-    private Map<Key, Signature> newSignatureMap; // the key is the root of the mapping
+    private Map<Key, Signature> newSignatureMap;
     private Map<Key, Signature> oldSignatureMap = new HashMap<>();
 
     public PrimaryKeyMergeInferenceEdit(Key primaryKey) {
@@ -48,21 +50,19 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
     public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
         /*
          * Assumption: the primary key has a unique name. All the objects w/ this
-         * name are the same primary keys.
+         * name are the same primary keys. The primary key is a single object
          */
+        LOGGER.info("Applying Primary Key Merge Edit on Schema Category...");
+
         setSchemaCategories(schemaCategory);
 
-        System.out.println("Applying Primary Key Merge Edit on Schema Category...");
         this.primaryKeyRoot = findPrimaryKeyRoot(newSchemaCategory);
-
         SchemaObject dom = newSchemaCategory.getObject(primaryKeyRoot);
 
         String primaryKeyLabel = newSchemaCategory.getObject(primaryKey).label();
-
         this.keysIdentifiedByPrimary = findKeysIdentifiedByPrimaryKeyLabel(newSchemaCategory, primaryKeyLabel);
 
-        this.newSignatureMap = createMorphisms(newSchemaCategory, dom);
-
+        this.newSignatureMap = createNewMorphisms(newSchemaCategory, dom);
         InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
 
         return newSchemaCategory;
@@ -83,6 +83,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
             if (morphism.cod().label().equals(primaryKeyLabel) && !morphism.dom().key().equals(primaryKeyRoot)) {
                 keys.add(morphism.dom().key());
+
                 signaturesToDelete.add(morphism.signature());
                 keysToDelete.add(morphism.cod().key());
                 oldSignatureMap.put(morphism.dom().key(), morphism.signature());
@@ -91,7 +92,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         return keys;
     }
 
-    private Map<Key, Signature> createMorphisms(SchemaCategory schemaCategory, SchemaObject dom) {
+    private Map<Key, Signature> createNewMorphisms(SchemaCategory schemaCategory, SchemaObject dom) {
         Map<Key, Signature> signatureMap = new HashMap<>();
         for (Key key : keysIdentifiedByPrimary) {
             Signature newSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, schemaCategory.getObject(key));
@@ -106,17 +107,13 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
          * Assumption: When we find object which is identified by the primary key,
          * we assume that the object is a root in its "part" of the schemaCategory
          */
-        System.out.println("Applying Primary Key Merge Edit on Mapping...");
+        LOGGER.info("Applying Primary Key Merge Edit on Mapping...");
 
-        // find primary key mapping and mappings where objects have been identifed by primary key keysIdentifiedByPrimary)
         Mapping primaryKeyMapping = findPrimaryKeyMapping(mappings);
         List<Mapping> primaryKeyMappings = findMappingsWithPrimaryKey(mappings);
 
-        // add them as complex properties to the primary key mapping
-        ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping.accessPath(), primaryKeyMappings);
-        Mapping mergedMapping = new Mapping(newSchemaCategory, primaryKeyMapping.rootObject().key(), primaryKeyMapping.kindName(), mergedComplexProperty, primaryKeyMapping.primaryKey());
+        Mapping mergedMapping = createMergedMapping(primaryKeyMapping, primaryKeyMappings);
 
-        // adding before deleting
         primaryKeyMappings.add(primaryKeyMapping);
         return InferenceEditorUtils.updateMappings(mappings, primaryKeyMappings, mergedMapping);
     }
@@ -140,8 +137,12 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         return primaryKeyMappings;
     }
 
-    private ComplexProperty mergeComplexProperties(ComplexProperty primaryKeyComplexProperty, List<Mapping> primaryKeyMappings) {
+    private Mapping createMergedMapping(Mapping primaryKeyMapping, List<Mapping> primaryKeyMappings) {
+        ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping.accessPath(), primaryKeyMappings);
+        return new Mapping(newSchemaCategory, primaryKeyMapping.rootObject().key(), primaryKeyMapping.kindName(), mergedComplexProperty, primaryKeyMapping.primaryKey());
+    }
 
+    private ComplexProperty mergeComplexProperties(ComplexProperty primaryKeyComplexProperty, List<Mapping> primaryKeyMappings) {
         List<AccessPath> combinedSubPaths = new ArrayList<>(primaryKeyComplexProperty.subpaths());
         for (Mapping currentMapping : primaryKeyMappings) {
             String currentMappingLabel = currentMapping.rootObject().label();
@@ -170,9 +171,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         @Override
         public PrimaryKeyMergeInferenceEdit deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
-
             final Key primaryKey = parser.getCodec().treeToValue(node.get("primaryKey"), Key.class);
-
             return new PrimaryKeyMergeInferenceEdit(primaryKey);
         }
     }
