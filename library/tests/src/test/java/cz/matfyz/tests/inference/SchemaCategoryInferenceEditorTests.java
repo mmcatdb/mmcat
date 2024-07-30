@@ -166,7 +166,7 @@ public class SchemaCategoryInferenceEditorTests {
         for (SchemaMorphism m : categoryFinal.allMorphisms()) {
             System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
         }
-        
+
         List<Mapping> editMappings = edit.applyMappingEdit(mappings);
 
         System.out.println(editMappings.get(0).accessPath());
@@ -174,7 +174,6 @@ public class SchemaCategoryInferenceEditorTests {
 
     @Test
     void testPrimaryKeyMergeEdit() throws Exception {
-
         // Setup A
         SchemaCategory categoryA = new SchemaCategory("schemaA");
         categoryA.addObject(new SchemaObject(new Key(0), "app", null, null));
@@ -280,7 +279,6 @@ public class SchemaCategoryInferenceEditorTests {
         Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
         System.out.println(mapping.accessPath());
 */
-        System.out.println();
 
         //List<Mapping> mappings = new ArrayList<>();
         //mappings.add(mapping);
@@ -290,17 +288,20 @@ public class SchemaCategoryInferenceEditorTests {
 
         ClusterInferenceEdit edit = new ClusterInferenceEdit(clusterKeys);
 
-        for (SchemaObject so : category.allObjects()) {
-            System.out.println(so.label());
+        System.out.println("Schema Category before edit:");
+        System.out.println("Objects: " + category.allObjects());
+        for (SchemaMorphism m : category.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
         }
+        System.out.println();
 
         SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-/*
-        for (SchemaMorphism sm : categoryFinal.allMorphisms()) {
-            System.out.println("dom: " + sm.dom().label());
-            System.out.println("cod: " + sm.cod().label());
-            System.out.println();
-        }*/
+
+        System.out.println("Schema Category after edit:");
+        System.out.println("Objects: " + categoryFinal.allObjects());
+        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+        }
 
         //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
 /*
