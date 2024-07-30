@@ -61,6 +61,7 @@ function cancel() {
 
     if (confirmClicked.value) { // delete the edit (on BE)
         emit('cancel-edit');
+        confirmClicked.value = false;
     }
 }
 

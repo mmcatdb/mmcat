@@ -59,7 +59,7 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
 
         InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
 
-        return schemaCategory;
+        return newSchemaCategory;
     }
 
     private List<List<SchemaObject>> findPatternOccurences(SchemaCategory schemaCategory) {

@@ -39,8 +39,8 @@ function cancel() {
     nodes.value = [undefined, undefined];  //unselect selected nodes
 
     if (confirmClicked.value) { // delete the edit (on BE)
-        console.log("cancelling edit");
         emit('cancel-edit');
+        confirmClicked.value = false;
     }
 }
 

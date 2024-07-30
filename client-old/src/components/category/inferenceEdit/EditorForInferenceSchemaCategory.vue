@@ -36,17 +36,6 @@ type StateValue =
 
 const state = shallowRef<StateValue>({ type: State.Default });
 
-// ten listener zatim nepotrebuju asi nebudu ani dal?
-const listener = props.graph.listen();
-
-onMounted(() => {
-    listener.onNode('tap', onNodeTapHandler);
-})
-
-onUnmounted(() => {
-    listener.close();
-})
-
 function mergeClicked() {
     state.value = { type: State.Merge };
 }
@@ -61,10 +50,6 @@ function recursionClicked() {
 
 function setStateToDefault() {
     state.value = { type: State.Default };
-}
-
-function onNodeTapHandler(node: Node) {
-    console.log("Node clicked", node);
 }
 
 function confirmReferenceMergeEdit(nodes: (Node | undefined)[]) {
