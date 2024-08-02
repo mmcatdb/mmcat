@@ -13,7 +13,9 @@ import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.inference.edit.ClusterInferenceEdit;
 import cz.matfyz.inference.edit.ReferenceMergeInferenceEdit;
+import cz.matfyz.inference.edit.utils.PatternSegment;
 import cz.matfyz.inference.edit.PrimaryKeyMergeInferenceEdit;
+import cz.matfyz.inference.edit.RecursionInferenceEdit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -350,30 +352,29 @@ public class SchemaCategoryInferenceEditorTests {
         Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
         System.out.println(mapping.accessPath());
 */
-        System.out.println();
-        System.out.println(category.hasObject(new Key(1)));
-        System.out.println("ahoj");
-        System.out.println(category.getObject(new Key(1)));
-        System.out.println(category.allObjects());
-        System.out.println(category.allObjects().size());
-        System.out.println("ahoj");
-
         //List<Mapping> mappings = new ArrayList<>();
         //mappings.add(mapping);
+        List<PatternSegment> pattern = new ArrayList<>();
+        pattern.add(new PatternSegment("A", "->"));
+        pattern.add(new PatternSegment("B", "->"));
+        pattern.add(new PatternSegment("A", ""));
 
-        //ClusterInferenceEdit edit = new ClusterInferenceEdit(clusterKeys);
+        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
 
-        for (SchemaObject so : category.allObjects()) {
-            System.out.println(so.label());
+        System.out.println("Schema Category before edit:");
+        System.out.println("Objects: " + category.allObjects());
+        for (SchemaMorphism m : category.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
         }
+        System.out.println();
 
-        //SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-/*
-        for (SchemaMorphism sm : categoryFinal.allMorphisms()) {
-            System.out.println("dom: " + sm.dom().label());
-            System.out.println("cod: " + sm.cod().label());
-            System.out.println();
-        }*/
+        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
+
+        System.out.println("Schema Category after edit:");
+        System.out.println("Objects: " + categoryFinal.allObjects());
+        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+        }
 
         //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
 /*

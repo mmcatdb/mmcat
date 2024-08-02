@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -27,6 +28,8 @@ import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 @JsonDeserialize(using = RecursionInferenceEdit.Deserializer.class)
 public class RecursionInferenceEdit extends AbstractInferenceEdit {
+
+    private static final Logger LOGGER = Logger.getLogger(RecursionInferenceEdit.class.getName());
 
     @JsonProperty("type")
     private final String type = "recursion";
@@ -42,10 +45,10 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
         /*
          * Assumptions: Morphisms in the pattern are only among the elemenets of the pattern
          */
-        // find the pattern occurence
+        LOGGER.info("Applying Recursion Edit on Schema Category...");
+
         setSchemaCategories(schemaCategory);
 
-        System.out.println("Applying Recursion Edit on Mapping...");
         List<List<SchemaObject>> occurences = findPatternOccurences(newSchemaCategory);
 
         Map<List<SchemaObject>, Key> mapOccurenceNewKey = new HashMap<>();

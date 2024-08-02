@@ -129,7 +129,6 @@ public class JobController {
     private InferenceJobData extractInferenceJobData(Job job) {
         ObjectMapper objectMapper = new ObjectMapper();
         String jobDataString = job.data.toString();
-        System.out.println("jobDataString: " + jobDataString);
 
         try {
             return objectMapper.readValue(jobDataString, InferenceJobData.class);

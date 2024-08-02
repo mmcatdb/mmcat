@@ -301,8 +301,6 @@ public class JobExecutorService {
         InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, mappingsJsonValue));
         try {
             job.data = inferenceJobData.toJsonValue();
-            System.out.println("job.data after inference: " + job.data);
-            System.out.println();
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
         }
@@ -314,11 +312,9 @@ public class JobExecutorService {
         } else if (!savePermanent) { // new edit
             inferenceJobData.manual.add(edit);
         }
-        System.out.println("inferenceJobData.manual: " + inferenceJobData.manual);
-
         SchemaCategory inferenceSchemaCategory = inferenceJobData.inference.schemaCategory.toSchemaCategory();
         List<MappingJsonValue> mappingsJsonValue = inferenceJobData.inference.mapping;
-        
+
         InferenceEditor inferenceEditor = savePermanent ? new InferenceEditor(inferenceSchemaCategory, createMappings(mappingsJsonValue, inferenceSchemaCategory), inferenceJobData.manual) : new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
 
         inferenceJobData.finalSchema = makeEdits(inferenceEditor);

@@ -5,6 +5,7 @@ import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
+import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.HashMap;
@@ -34,6 +36,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Multiset;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 @JsonDeserialize(using = ClusterInferenceEdit.Deserializer.class)
@@ -50,11 +54,11 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
 
     private Key newClusterKey;
     private Signature newClusterSignature;
-    private List<Signature> oldSignatures = new ArrayList<>();
-    //tohle nebude fungovat --> viz priklad video - _index, picture - _index
-    private Map<String, Signature> mapOldNewSignature = new HashMap<>();
     private String newClusterName;
     private Signature newTypeSignature;
+
+    private Map<String, Signature> mapOldClusterNameSignature = new HashMap<>(); // this maps the original cluster names to their original signatures
+    private Map<Signature, Signature> mapOldNewSignature = new HashMap<>(); // this maps the original signatures to the new signatures
 
     public ClusterInferenceEdit(List<Key> clusterKeys) {
         this.clusterKeys = clusterKeys;
@@ -64,8 +68,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
         /*
          * Assumption: The startKey can have ingoing and outgoing edges,
-         * however we assume that one ingoing edge is from the root cluster and
-         * all the other ones belong to the cluster and we need them
+         * however we assume that one ingoing edge is from the root cluster
          */
         LOGGER.info("Applying Cluster Edit on Schema Category...");
 
@@ -73,13 +76,12 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
 
         Key clusterRootKey = findClusterRootKey(newSchemaCategory);
 
-        // Get new cluster name. TODO : deal with ids
         List<String> oldClusterNames = getOldClusterNames(newSchemaCategory);
         this.newClusterName = findRepeatingPattern(oldClusterNames);
 
         // traverse one of the members of cluster and create a new SK based on that + add that SK to the original one
         SchemaCategory newSchemaCategoryPart = traverseAndBuild(newSchemaCategory, clusterKeys.get(RND_CLUSTER_IDX), clusterRootKey);
-        addSchemaCategoryPart(newSchemaCategory, newSchemaCategoryPart, newClusterName, oldClusterNames, clusterRootKey);
+        addSchemaCategoryPart(newSchemaCategory, newSchemaCategoryPart, oldClusterNames, clusterRootKey);
 
         findMorphismsAndObjectsToDelete(newSchemaCategory, clusterRootKey);
         InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
@@ -87,13 +89,19 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         return newSchemaCategory;
     }
 
+    // The cluster root is the object, which has an outgoing morphisms to all of the clusterKeys
+    // we assume there is only one such object
     private Key findClusterRootKey(SchemaCategory schemaCategory) {
+        Multiset<Key> rootCandidates = HashMultiset.create();
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.cod().key().equals(clusterKeys.get(RND_CLUSTER_IDX))) {
-                return morphism.dom().key();
+            if (clusterKeys.contains(morphism.cod().key())) {
+                rootCandidates.add(morphism.dom().key());
             }
         }
-        throw new NotFoundException("Root of the cluster has not been found");
+        return rootCandidates.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream().max((o1, o2) -> o1.getValue().compareTo(o2.getValue()))
+                .map(Map.Entry::getKey).orElse(null);
     }
 
     private List<String> getOldClusterNames(SchemaCategory schemaCategory) {
@@ -143,6 +151,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         return longestCommonSubstring;
     }
 
+    // Note: Consumers (+ other functional interfaces) are pretty cool
     private void traverseAndPerform(SchemaCategory category, Key startKey, Key clusterRootKey,
                                     Consumer<SchemaObject> objectConsumer, Consumer<SchemaMorphism> morphismConsumer) {
         Set<Key> visited = new HashSet<>();
@@ -194,7 +203,13 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         );
     }
 
-    private void addSchemaCategoryPart(SchemaCategory schemaCategory, SchemaCategory schemaCategoryPart, String newClusterName, List<String> oldClusterNames, Key clusterRootKey) {
+    private void addSchemaCategoryPart(SchemaCategory schemaCategory, SchemaCategory schemaCategoryPart, List<String> oldClusterNames, Key clusterRootKey) {
+        Map<Key, Key> mapOldNewKey = addObjects(schemaCategory, schemaCategoryPart, oldClusterNames);
+        addMorphisms(schemaCategory, schemaCategoryPart, mapOldNewKey, clusterRootKey);
+        addTypeObjectAndMorphism(schemaCategory);
+    }
+
+    private Map<Key, Key> addObjects(SchemaCategory schemaCategory, SchemaCategory schemaCategoryPart, List<String> oldClusterNames) {
         Map<Key, Key> mapOldNewKey = new HashMap<>();
         for (SchemaObject schemaObject : schemaCategoryPart.allObjects()) {
             Key newKey;
@@ -206,23 +221,21 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
             }
             mapOldNewKey.put(schemaObject.key(), newKey);
         }
-        // add extra object and morphism representing the _type
-        addTypeObjectAndMorphism(schemaCategory);
-        // add the other morphisms
-        addMorphisms(schemaCategory, schemaCategoryPart, mapOldNewKey, clusterRootKey);
-    }
-    private void addTypeObjectAndMorphism(SchemaCategory schemaCategory) {
-        Key typeKey = InferenceEditorUtils.createAndAddObject(schemaCategory, TYPE_LABEL, ObjectIds.createGenerated());
-        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(newClusterKey), schemaCategory.getObject(typeKey));
+        return mapOldNewKey;
     }
 
     private void addMorphisms(SchemaCategory schemaCategory, SchemaCategory schemaCategoryPart, Map<Key, Key> mapOldNewKey, Key clusterRootKey) {
         for (SchemaMorphism morphism : schemaCategoryPart.allMorphisms()) {
             SchemaObject dom = schemaCategory.getObject(mapOldNewKey.get(morphism.dom().key()));
             Signature newSig = InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, schemaCategory.getObject(mapOldNewKey.get(morphism.cod().key())));
-            mapOldNewSignature.put(morphism.cod().label(), newSig);
+            mapOldNewSignature.put(morphism.signature(), newSig);
         }
         this.newClusterSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(clusterRootKey), schemaCategory.getObject(newClusterKey));
+    }
+
+    private void addTypeObjectAndMorphism(SchemaCategory schemaCategory) {
+        Key typeKey = InferenceEditorUtils.createAndAddObject(schemaCategory, TYPE_LABEL, ObjectIds.createValue());
+        this.newTypeSignature = InferenceEditorUtils.createAndAddMorphism(schemaCategory, schemaCategory.getObject(newClusterKey), schemaCategory.getObject(typeKey));
     }
 
     private void findMorphismsAndObjectsToDelete(SchemaCategory schemaCategory, Key clusterRootKey) {
@@ -231,7 +244,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         }
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
             if (morphism.dom().key().equals(clusterRootKey) && clusterKeys.contains(morphism.cod().key())) {
-                oldSignatures.add(morphism.signature());
+                mapOldClusterNameSignature.put(morphism.cod().label(), morphism.signature());
                 signaturesToDelete.add(morphism.signature());
             }
         }
@@ -250,9 +263,10 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
 
     private Mapping findClusterMapping(List<Mapping> mappings) {
         for (Mapping mapping : mappings) {
-            // if it contains at least one of the cluster keys, we should be good (theoretically)
-            // TODO: make sure these assumptions hold
-            if (mapping.accessPath().getSubpathBySignature(oldSignatures.get(0)) != null) {
+            // just try if any of the old signatures is in the mapping, then all of them should be there
+            SchemaObject randomClusterObject = oldSchemaCategory.getObject(clusterKeys.get(RND_CLUSTER_IDX));
+            String randomClusterName = randomClusterObject.label();
+            if (mapping.accessPath().getSubpathBySignature(mapOldClusterNameSignature.get(randomClusterName)) != null) {
                 return mapping;
             }
         }
@@ -265,7 +279,9 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     }
 
     private ComplexProperty changeComplexProperties(ComplexProperty clusterComplexProperty) {
-        AccessPath firstClusterAccessPath = clusterComplexProperty.getSubpathBySignature(oldSignatures.get(RND_CLUSTER_IDX));
+        SchemaObject randomClusterObject = oldSchemaCategory.getObject(clusterKeys.get(RND_CLUSTER_IDX));
+        String randomClusterName = randomClusterObject.label();
+        AccessPath firstClusterAccessPath = clusterComplexProperty.getSubpathBySignature(mapOldClusterNameSignature.get(randomClusterName));
         return getNewComplexProperty(firstClusterAccessPath, clusterComplexProperty);
     }
 
@@ -275,11 +291,13 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
 
         for (AccessPath subpath : clusterComplexProperty.subpaths()) {
             if (subpath instanceof ComplexProperty complexProperty) {
-                for (Signature oldSignature : oldSignatures) { // assuming the cluster elements are all under one complexProperty
-                    AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
-                    if (currentSubpath != null) {
-                        complexProperty = complexProperty.minusSubpath(currentSubpath);
-                        complexChanged = true;
+                if (!complexChanged) {
+                    for (Signature oldSignature : mapOldClusterNameSignature.values()) {
+                        AccessPath currentSubpath = complexProperty.getSubpathBySignature(oldSignature);
+                        if (currentSubpath != null) {
+                            complexProperty = complexProperty.minusSubpath(currentSubpath);
+                            complexChanged = true;
+                        }
                     }
                 }
                 if (complexChanged) {
@@ -297,23 +315,22 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     }
 
     public ComplexProperty createNewComplexProperty(ComplexProperty original) {
-        // Generate new subpaths by transforming each subpath of the original complex property
         List<AccessPath> newSubpaths = transformSubpaths(original.subpaths());
-        // Create a new ComplexProperty with the new subpaths and a new signature
         String name;
         Signature complexPropertySignature;
 
-        if (!mapOldNewSignature.containsKey(original.name().toString())) {
+        if (!mapOldNewSignature.containsKey(original.signature()) && !mapOldNewSignature.containsKey(original.signature().dual())) {
             complexPropertySignature = newClusterSignature;
             name = newClusterName;
             // add the _type object
-            //newSubpaths.add(builder.simple(TYPE_LABEL, newTypeSignature));
-            newSubpaths.add(new SimpleProperty(new StaticName(TYPE_LABEL), newTypeSignature));
+            newSubpaths.add(new SimpleProperty(new DynamicName(newTypeSignature), newTypeSignature));
         } else {
-            complexPropertySignature = mapOldNewSignature.get(original.name().toString());
+            complexPropertySignature = mapOldNewSignature.get(original.signature());
+            if (complexPropertySignature == null) { //meaning the original was an array object and so the signature was dual
+                complexPropertySignature = mapOldNewSignature.get(original.signature().dual()).dual();
+            }
             name = original.name().toString();
         }
-        //return builder.complex(name, complexPropertySignature, newSubpaths.toArray(new AccessPath[0]));
         return new ComplexProperty(new StaticName(name), complexPropertySignature, newSubpaths);
     }
 
@@ -334,8 +351,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     }
 
     private SimpleProperty createNewSimpleProperty(SimpleProperty original) {
-        //return builder.simple(original.name().toString(), mapOldNewSignature.get(original.name().toString()));
-        return new SimpleProperty(original.name(), mapOldNewSignature.get(original.name().toString()));
+        return new SimpleProperty(original.name(), mapOldNewSignature.get(original.signature()));
     }
 
     public static class Deserializer extends StdDeserializer<ClusterInferenceEdit> {
