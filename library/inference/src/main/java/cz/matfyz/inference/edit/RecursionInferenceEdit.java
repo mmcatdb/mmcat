@@ -70,9 +70,10 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
         for (SchemaObject node : schemaCategory.allObjects()) {
             dfsFind(schemaCategory, node, 0, new ArrayList<>(), result);
         }
+        System.out.println(result);
         return result;
     }
-
+/*
     private void dfsFind(SchemaCategory schemaCategory, SchemaObject currentNode, int patternIndex, List<SchemaObject> currentPath, List<List<SchemaObject>> result) {
         if (currentNode == null || patternIndex >= pattern.size()) return;
 
@@ -85,6 +86,55 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
                 if (isValidPattern(currentPath, schemaCategory)) {
                     // found full match
                     result.add(new ArrayList<>(currentPath));
+                }
+            } else {
+                if (currentSegment.direction.equals("->")) {
+                    for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+                        if (morphism.dom().equals(currentNode)) {
+                            dfsFind(schemaCategory, morphism.cod(), patternIndex + 1, currentPath, result);
+                        }
+                    }
+                } else if (currentSegment.direction.equals("<-")) {
+                    for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+                        if (morphism.cod().equals(currentNode)) {
+                            dfsFind(schemaCategory, morphism.dom(), patternIndex + 1, currentPath, result);
+                        }
+                    }
+                }
+            }
+            currentPath.remove(currentPath.size() - 1);
+        }
+    }*/
+
+    private void dfsFind(SchemaCategory schemaCategory, SchemaObject currentNode, int patternIndex, List<SchemaObject> currentPath, List<List<SchemaObject>> result) {
+        if (currentNode == null || patternIndex >= pattern.size()) return;
+    
+        PatternSegment currentSegment = pattern.get(patternIndex);
+        if (currentNode.label().equals(currentSegment.nodeName)) {
+            currentPath.add(currentNode);
+    
+            if (patternIndex == pattern.size() - 1) {
+                // Check if the middle nodes have no other morphisms connected
+                if (isValidPattern(currentPath, schemaCategory)) {
+                    // found full match
+                    result.add(new ArrayList<>(currentPath));
+                    patternIndex = 0;
+                    currentSegment = pattern.get(patternIndex);
+    
+                    // Continue searching from the current position for partial matches
+                    SchemaObject nextNode = null;
+                    for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+                        if (currentSegment.direction.equals("->") && morphism.dom().equals(currentNode)) {
+                            nextNode = morphism.cod();
+                        } else if (currentSegment.direction.equals("<-") && morphism.cod().equals(currentNode)) {
+                            nextNode = morphism.dom();
+                        }
+                    }
+                    if (nextNode != null) {
+                        //currentPath.add(nextNode);
+                        //result.getLast().add(nextNode);
+                        dfsFind(schemaCategory, nextNode, 1, new ArrayList<>(currentPath), result);
+                    }
                 }
             } else {
                 if (currentSegment.direction.equals("->")) {
