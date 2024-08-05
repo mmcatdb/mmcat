@@ -11,13 +11,13 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonDeserialize(using = PatternSegment.Deserializer.class)
 public class PatternSegment {
     public final String nodeName;
-    public final String direction;
+    public final String direction; // These are either: "", "->", "<-", "@->" or "@<-" (where the @ symbol represents a morphism on itself)
 
     public PatternSegment(String nodeName, String direction) {
         this.nodeName = nodeName;
         this.direction = direction;
     }
-    
+
     @Override
     public String toString() {
         return nodeName + " " + direction;
