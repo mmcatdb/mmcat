@@ -27,9 +27,10 @@ const projectIndex = new ParametrizedRoute<'projectId'>('/projects/:projectId', 
 
 export const routes = {
     home: new ParametrizedRoute('/', 'home'),
-    about: '/about',
+    about: 'about',
     project: {
         index: projectIndex,
-        databases: projectIndex.child('/databases', 'databases'),
+        // databases: projectIndex.child('/databases', 'databases'),
     },
+    databases: 'databases',
 } as const;

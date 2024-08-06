@@ -64,8 +64,14 @@ const navbarItems: NavbarItem[] = [
     },
     {
         label: 'About',
-        route: routes.about,
+        // TODO: figure out why it does not work via routes (adding strings to the path, not changing them)
+        // route: routes.about
+        route: '/about',
     },
+    {
+        label: 'Databases',
+        route: '/databases',
+    }
 ];
 
 type ThemeToggleProps = Readonly<{

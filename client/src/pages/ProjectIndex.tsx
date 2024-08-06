@@ -113,11 +113,12 @@ function createMenuItems(projectId: string): MenuItem[] {
             id: routes.project.index.id,
             path: routes.project.index.resolve({ projectId }),
         },
-        {
-            label: 'Databases',
-            icon: 'databases',
-            id: routes.project.databases.id,
-            path: routes.project.databases.resolve({ projectId }),
-        },
+        // TODO: once not using global databases, use this
+        // {
+        //     label: 'Databases',
+        //     icon: 'databases',
+        //     id: routes.project.databases.id,
+        //     path: routes.project.databases.resolve({ projectId }),
+        // },
     ];
 }

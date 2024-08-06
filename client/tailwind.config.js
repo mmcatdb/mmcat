@@ -7,6 +7,7 @@ export default {
         './src/**/*.{js,ts,jsx,tsx}',
         './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}',
     ],
+    important: true,
     theme: {
         extend: {},
         menuDimension: '4rem',

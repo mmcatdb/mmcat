@@ -2,10 +2,10 @@ import { createBrowserRouter } from 'react-router-dom';
 import { Home } from '@/pages/Home';
 import { SchemaCategory, schemaCategoryLoader } from '@/pages/project/SchemaCategory';
 import { About } from '@/pages/About';
-import { routes } from './routes';
-import { ErrorPage } from './errorPages';
-import { ProjectIndex, projectIndexLoader } from './ProjectIndex';
-import { Databases } from './project/Databases';
+import { routes } from '@/pages/routes';
+import { ErrorPage } from '@/pages/errorPages';
+import { ProjectIndex, projectIndexLoader } from '@/pages/ProjectIndex';
+import { Databases } from '@/pages/Databases';
 
 export const router = createBrowserRouter([
     {
@@ -15,7 +15,7 @@ export const router = createBrowserRouter([
         ErrorBoundary: ErrorPage,
     },
     {
-        path: routes.about,
+        path: 'about', // TODO: same problem as in the routes.ts
         Component: About,
     },
     {
@@ -30,11 +30,10 @@ export const router = createBrowserRouter([
                 loader: schemaCategoryLoader,
                 Component: SchemaCategory,
             },
-            {
-                id: routes.project.databases.id,
-                path: routes.project.databases.path,
-                Component: Databases,
-            },
         ],
     },
+    {
+        path: 'databases',
+        Component: Databases,
+    }
 ]);
