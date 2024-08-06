@@ -1,7 +1,5 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
 import cz.matfyz.inference.edit.utils.SaveJobResultPayload;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
@@ -139,9 +137,6 @@ public class JobController {
 
     private SaveJobResultPayload extractSaveJobResultPayload(String saveJobResultPayloadString) {
         ObjectMapper objectMapper = new ObjectMapper();
-        if (saveJobResultPayloadString == null) {
-            System.out.println("payload sent from client is null");
-        }
 
         try {
             return objectMapper.readValue(saveJobResultPayloadString, SaveJobResultPayload.class);

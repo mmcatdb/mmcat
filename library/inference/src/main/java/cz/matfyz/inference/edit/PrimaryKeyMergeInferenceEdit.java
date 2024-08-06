@@ -138,12 +138,12 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
     }
 
     private Mapping createMergedMapping(Mapping primaryKeyMapping, List<Mapping> primaryKeyMappings) {
-        ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping.accessPath(), primaryKeyMappings);
+        ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping, primaryKeyMappings);
         return InferenceEditorUtils.createNewMapping(newSchemaCategory, primaryKeyMapping, primaryKeyMappings, mergedComplexProperty);
     }
 
-    private ComplexProperty mergeComplexProperties(ComplexProperty primaryKeyComplexProperty, List<Mapping> primaryKeyMappings) {
-        List<AccessPath> combinedSubPaths = new ArrayList<>(primaryKeyComplexProperty.subpaths());
+    private ComplexProperty mergeComplexProperties(Mapping primaryKeyMapping, List<Mapping> primaryKeyMappings) {
+        List<AccessPath> combinedSubPaths = new ArrayList<>(cleanPrimaryKeySubpaths(primaryKeyMapping).subpaths());
         for (Mapping currentMapping : primaryKeyMappings) {
             String currentMappingLabel = currentMapping.rootObject().label();
             Key currentMappingKey = currentMapping.rootObject().key();
@@ -155,7 +155,35 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
             ComplexProperty newComplexProperty = new ComplexProperty(new StaticName(currentMappingLabel), newSignatureMap.get(currentMappingKey), cleanedComplexProperty.subpaths());
             combinedSubPaths.add(newComplexProperty);
         }
-        return new ComplexProperty(primaryKeyComplexProperty.name(), primaryKeyComplexProperty.signature(), combinedSubPaths);
+        return new ComplexProperty(primaryKeyMapping.accessPath().name(), primaryKeyMapping.accessPath().signature(), combinedSubPaths);
+    }
+
+    private ComplexProperty cleanPrimaryKeySubpaths(Mapping primaryKeyMapping) {
+        ComplexProperty primaryKeyComplexProperty = primaryKeyMapping.accessPath();
+        for (Signature signature : oldSignatureMap.values()) {
+            AccessPath accessPathToDelete = primaryKeyComplexProperty.getSubpathBySignature(signature);
+            if (accessPathToDelete != null) {
+                primaryKeyComplexProperty = cleanFromAccessPath(primaryKeyComplexProperty, accessPathToDelete);
+            }
+        }
+        return primaryKeyComplexProperty;
+    }
+
+    private ComplexProperty cleanFromAccessPath(ComplexProperty complexProperty, AccessPath accessPathToDelete) {
+        List<AccessPath> cleanedSubpaths = new ArrayList<>();
+        for (AccessPath accessPath : complexProperty.subpaths()) {
+            if (accessPath instanceof ComplexProperty currentComplexProperty) {
+                if (currentComplexProperty.getSubpathBySignature(accessPathToDelete.signature()) != null) {
+                    ComplexProperty cleanedComplexProperty = currentComplexProperty.minusSubpath(accessPathToDelete);
+                    cleanedSubpaths.add(cleanedComplexProperty);
+                } else {
+                    cleanedSubpaths.add(currentComplexProperty);
+                }
+            } else {
+                cleanedSubpaths.add(accessPath);
+            }
+        }
+        return new ComplexProperty(complexProperty.name(), complexProperty.signature(), cleanedSubpaths);
     }
 
     public static class Deserializer extends StdDeserializer<PrimaryKeyMergeInferenceEdit> {

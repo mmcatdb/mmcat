@@ -9,6 +9,7 @@ import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.utils.ArrayUtils;
@@ -373,7 +374,6 @@ public class JobExecutorService {
         }
         return mappingsJsonValue;
     }
-
 
     private SchemaCategoryWrapper makeEdits(InferenceEditor inferenceEditor) {
         inferenceEditor.applyEdits();

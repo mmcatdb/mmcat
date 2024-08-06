@@ -238,7 +238,7 @@ public class SchemaCategoryInferenceEditorTests {
 
         SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
 
-        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
+        List<Mapping> editMappings = edit.applyMappingEdit(mappings);
 /*
         System.out.println();
         System.out.println("Editted Size: ");
@@ -385,7 +385,9 @@ public class SchemaCategoryInferenceEditorTests {
 
     @Test
     void testRecursionEdit2() throws Exception {
-
+        /**
+         * With simple pattern A->B->A and notebook example
+         */
         SchemaCategory category = new SchemaCategory("schema");
         category.addObject(new SchemaObject(new Key(0), "_id", null, null));
         category.addObject(new SchemaObject(new Key(1), "A", null, null));
@@ -434,49 +436,25 @@ public class SchemaCategoryInferenceEditorTests {
             System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
         }
     }
-
     @Test
     void testRecursionEdit3() throws Exception {
-
+        /*
+         * With complex pattern A<-A->B->A and notebook example short version
+         */
         SchemaCategory category = new SchemaCategory("schema");
         category.addObject(new SchemaObject(new Key(0), "_id", null, null));
         category.addObject(new SchemaObject(new Key(1), "A", null, null));
-     //   category.addObject(new SchemaObject(new Key(2), "B", null, null));
         category.addObject(new SchemaObject(new Key(3), "B", null, null));
         category.addObject(new SchemaObject(new Key(4), "A", null, null));
-      //  category.addObject(new SchemaObject(new Key(5), "A", null, null));
         category.addObject(new SchemaObject(new Key(6), "A", null, null));
-     //   category.addObject(new SchemaObject(new Key(7), "B", null, null));
         category.addObject(new SchemaObject(new Key(8), "B", null, null));
-     //   category.addObject(new SchemaObject(new Key(9), "A", null, null));
-     //   category.addObject(new SchemaObject(new Key(10), "B", null, null));
-     //   category.addObject(new SchemaObject(new Key(11), "A", null, null));
 
         category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
-     //   category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(2))));
         category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(3))));
         category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(4))));
-     //   category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(5))));
         category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(6))));
-     //   category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(7))));
         category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
-     //   category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(7)), category.getObject(new Key(9))));
-     //   category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
-     //   category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(10)), category.getObject(new Key(11))));
-/*
-        MappingBuilder builder = new MappingBuilder();
 
-        List<AccessPath> subpaths = new ArrayList<>();
-        subpaths.add(builder.simple("c", Signature.createBase(6)));
-        subpaths.add(builder.simple("b", Signature.createBase(5)));
-
-        ComplexProperty complexProperty = builder.complex("app", Signature.createBase(0), subpaths.toArray(new AccessPath[0]));
-
-        Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
-        System.out.println(mapping.accessPath());
-*/
-        //List<Mapping> mappings = new ArrayList<>();
-        //mappings.add(mapping);
         List<PatternSegment> pattern = new ArrayList<>();
         pattern.add(new PatternSegment("A", "<-"));
         pattern.add(new PatternSegment("A", "->"));
@@ -500,10 +478,125 @@ public class SchemaCategoryInferenceEditorTests {
             System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
         }
 
-        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
-/*
-        System.out.println();
-        System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());*/
     }
+    @Test
+    void testRecursionEdit4() throws Exception {
+        /*
+         * With complex pattern A<-A->B->A and notebook example long version
+         */
+        SchemaCategory category = new SchemaCategory("schema");
+        category.addObject(new SchemaObject(new Key(0), "_id", null, null));
+        category.addObject(new SchemaObject(new Key(1), "A", null, null));
+        category.addObject(new SchemaObject(new Key(2), "B", null, null));
+        category.addObject(new SchemaObject(new Key(3), "B", null, null));
+        category.addObject(new SchemaObject(new Key(4), "A", null, null));
+        category.addObject(new SchemaObject(new Key(5), "A", null, null));
+        category.addObject(new SchemaObject(new Key(6), "A", null, null));
+        category.addObject(new SchemaObject(new Key(7), "B", null, null));
+        category.addObject(new SchemaObject(new Key(8), "B", null, null));
+        category.addObject(new SchemaObject(new Key(9), "A", null, null));
+        category.addObject(new SchemaObject(new Key(10), "B", null, null));
+        category.addObject(new SchemaObject(new Key(11), "A", null, null));
+
+        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(2))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(3))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(4))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(5))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(6))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(7))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(7)), category.getObject(new Key(9))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(10)), category.getObject(new Key(11))));
+
+        List<PatternSegment> pattern = new ArrayList<>();
+        pattern.add(new PatternSegment("A", "<-"));
+        pattern.add(new PatternSegment("A", "->"));
+        pattern.add(new PatternSegment("B", "->"));
+        pattern.add(new PatternSegment("A", ""));
+
+        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+
+        System.out.println("Schema Category before edit:");
+        System.out.println("Objects: " + category.allObjects());
+        for (SchemaMorphism m : category.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+        }
+        System.out.println();
+
+        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
+
+        System.out.println("Schema Category after edit:");
+        System.out.println("Objects: " + categoryFinal.allObjects());
+        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+        }
+
+    }
+    @Test
+    void testRecursionEdit5() throws Exception {
+        /*
+         * With complex pattern A<-A->B->A and client example
+         */
+        SchemaCategory category = new SchemaCategory("schema");
+        category.addObject(new SchemaObject(new Key(0), "checkin", null, null));
+        category.addObject(new SchemaObject(new Key(1), "_id", null, null));
+        category.addObject(new SchemaObject(new Key(2), "A", null, null));
+        category.addObject(new SchemaObject(new Key(3), "A", null, null));
+        category.addObject(new SchemaObject(new Key(4), "B", null, null));
+        category.addObject(new SchemaObject(new Key(5), "A", null, null));
+        category.addObject(new SchemaObject(new Key(6), "B", null, null));
+        category.addObject(new SchemaObject(new Key(7), "A", null, null));
+        category.addObject(new SchemaObject(new Key(8), "B", null, null));
+        category.addObject(new SchemaObject(new Key(9), "A", null, null));
+        category.addObject(new SchemaObject(new Key(10), "B", null, null));
+        category.addObject(new SchemaObject(new Key(11), "B", null, null));
+        category.addObject(new SchemaObject(new Key(12), "A", null, null));
+        category.addObject(new SchemaObject(new Key(13), "business_id", null, null));
+        category.addObject(new SchemaObject(new Key(14), "date", null, null));
+        category.addObject(new SchemaObject(new Key(15), "date", null, null));
+
+
+        category.addMorphism(new SchemaMorphism(Signature.createBase(0), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(12), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(13))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(13), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(14))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(14), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(15))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(11))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(2))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(11)), category.getObject(new Key(12))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(8))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(3))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(4))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(5))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(5)), category.getObject(new Key(6))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(7))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(8)), category.getObject(new Key(9))));
+        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
+
+        List<PatternSegment> pattern = new ArrayList<>();
+        pattern.add(new PatternSegment("A", "<-"));
+        pattern.add(new PatternSegment("A", "->"));
+        pattern.add(new PatternSegment("B", "->"));
+        pattern.add(new PatternSegment("A", ""));
+
+        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+
+        System.out.println("Schema Category before edit:");
+        System.out.println("Objects: " + category.allObjects());
+        for (SchemaMorphism m : category.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+        }
+        System.out.println();
+
+        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
+
+        System.out.println("Schema Category after edit:");
+        System.out.println("Objects: " + categoryFinal.allObjects());
+        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+        }
+
+    }
+
 }
