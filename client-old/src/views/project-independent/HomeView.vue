@@ -15,6 +15,7 @@ const newCategoryLabel = ref('');
 
 const EXAMPLE_SCHEMAS = [
     'basic',
+    'inference',
 ] as const;
 
 type ExampleSchema = typeof EXAMPLE_SCHEMAS[number];
@@ -57,7 +58,11 @@ async function addExampleSchema(name: ExampleSchema) {
     </p>
     <br />
     <p>
-        Detailed instructions on how to use this tool can be found <a :href="DOCUMENTATION_URL">here</a>.
+        Detailed instructions on how to use this tool can be found <a
+            :href="DOCUMENTATION_URL"
+            target="_blank"
+            rel="noreferrer"
+        >here</a>.
     </p>
     <h2 class="mt-3">
         Current schema categories

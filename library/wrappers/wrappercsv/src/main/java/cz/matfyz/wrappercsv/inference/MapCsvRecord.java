@@ -24,10 +24,6 @@ public abstract class MapCsvRecord {
 
         result.setModels(Model.DOC);
 //        result.addType(Type.OBJECT);
-        if (key.equals("_id") || key.endsWith("/_id")) {
-            result.setId(Char.TRUE);        //if the name of the property is _id, then it has to be unique identifier (MongoDB convention)
-            result.setUnique(Char.TRUE);
-        }
         if (value instanceof Number) {
             types = types | Type.NUMBER;
         } else if (value instanceof Boolean) {
@@ -55,8 +51,6 @@ public abstract class MapCsvRecord {
 
     private static ObjectArrayList<RecordSchemaDescription> convertMapChildren(Set<Map.Entry<String, Object>> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //List<RecordSchemaDescription> children = new ArrayList<>();
-//        Set<RecordSchemaDescription> children = new HashSet<>();
         for (Map.Entry<String, Object> value : t1) {
             children.add(process(value.getKey(), value.getValue(), true, true));
         }
@@ -66,7 +60,6 @@ public abstract class MapCsvRecord {
 
     private static ObjectArrayList<RecordSchemaDescription> convertArrayChildren(List<Object> t1) {
         ObjectArrayList<RecordSchemaDescription> children = new ObjectArrayList<>();
-        //List<RecordSchemaDescription> children = new ArrayList<>();
         Set<Object> visited = new HashSet<>();
         for (Object value : t1) {
             if (value == null) {

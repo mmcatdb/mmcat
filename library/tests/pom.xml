@@ -13,7 +13,10 @@
         <dependency><groupId>${project.groupId}</groupId><artifactId>transformations</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>${project.groupId}</groupId><artifactId>evolution</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>${project.groupId}</groupId><artifactId>querying</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>inference</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperdummy</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperjson</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>${project.groupId}</groupId><artifactId>wrappercsv</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperjsonld</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>${project.groupId}</groupId><artifactId>wrappermongodb</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>${project.groupId}</groupId><artifactId>wrapperneo4j</artifactId><version>${project.version}</version></dependency>
@@ -44,6 +47,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <jvmArguments>
+                        --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/sun.nio.cs=ALL-UNNAMED --add-opens=java.base/sun.security.action=ALL-UNNAMED --add-opens=java.base/sun.util.calendar=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED
+                    </jvmArguments>
+                </configuration>
             </plugin>
         </plugins>
     </build>

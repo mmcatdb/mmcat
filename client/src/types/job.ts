@@ -9,6 +9,7 @@ export type JobFromServer = {
     state: JobState;
     payload: ActionPayloadFromServer;
     data: JobError | unknown;
+    generatedDataModel: string | unknown;
     createdAt: string;
 };
 
@@ -22,6 +23,7 @@ export class Job implements Entity {
         public readonly payload: ActionPayload,
         public readonly error: JobError | undefined,
         public readonly result: unknown | undefined,
+        public readonly resultModel: unknown | undefined,
         public readonly createdAt: Date,
     ) {}
 
@@ -34,7 +36,8 @@ export class Job implements Entity {
             input.state,
             actionPayloadFromServer(input.payload),
             input.state === JobState.Failed ? input.data as JobError : undefined,
-            input.state === JobState.Finished ? input.data : undefined,
+            input.state === JobState.Finished || JobState.Waiting ? input.data : undefined,
+            input.state === JobState.Finished ? input.generatedDataModel : undefined,
             new Date(input.createdAt),
         );
     }
@@ -48,6 +51,7 @@ export enum JobState {
     Paused = 'Paused',
     Ready = 'Ready',
     Running = 'Running',
+    Waiting = 'Waiting',
     Finished = 'Finished',
     Canceled = 'Canceled',
     Failed = 'Failed',

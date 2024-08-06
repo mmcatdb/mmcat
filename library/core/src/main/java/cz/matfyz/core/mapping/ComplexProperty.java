@@ -204,7 +204,7 @@ public class ComplexProperty extends AccessPath {
     public ComplexProperty minusSubpath(AccessPath subpath) {
         assert subpaths.stream().anyMatch(path -> path.equals(subpath)) : "Subpath not found in accessPath in minusSubtree";
 
-        final List<AccessPath> newSubpaths = subpaths.stream().filter(path -> path.equals(subpath)).toList();
+        final List<AccessPath> newSubpaths = subpaths.stream().filter(path -> !path.equals(subpath)).toList();
 
         return new ComplexProperty(name, signature, newSubpaths);
     }

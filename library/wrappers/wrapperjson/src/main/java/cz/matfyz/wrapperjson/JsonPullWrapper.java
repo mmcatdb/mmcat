@@ -40,7 +40,7 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         System.out.println("query: " + query);
         final var forest = new ForestOfRecords();
 
-        try (InputStream inputStream = provider.getInputStream()) {
+        try (InputStream inputStream = provider.getInputStream(path.name().toString())) {
             processJsonStream(inputStream, forest, path);
         } catch (IOException e) {
             throw PullForestException.innerException(e);
@@ -54,8 +54,6 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         JsonParser parser = factory.createParser(inputStream);
         ObjectMapper objectMapper = new ObjectMapper();
 
-        //while (parser.nextToken() != JsonToken.END_ARRAY) {
-        // TODO: check for the usulal structure of Json files - should there be an array or not
         while (parser.nextToken() != null) {
             if (parser.currentToken() == JsonToken.START_OBJECT) {
                 System.out.println("current token in processJsonStream: " + parser.currentToken());
@@ -120,10 +118,8 @@ public class JsonPullWrapper implements AbstractPullWrapper {
         return staticName.toRecordName();
     }
 
-
     @Override
     public QueryResult executeQuery(QueryStatement statement) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 

@@ -13,5 +13,4 @@ public class CsvCommandStatement implements AbstractStatement {
     public String getContent() {
         return content;
     }
-    
 }

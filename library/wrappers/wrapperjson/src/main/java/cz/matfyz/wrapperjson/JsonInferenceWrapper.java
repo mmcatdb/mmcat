@@ -5,19 +5,25 @@ import cz.matfyz.core.rsd.PropertyHeuristics;
 import cz.matfyz.core.rsd.RawProperty;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 import cz.matfyz.core.rsd.Share;
+import cz.matfyz.wrapperjson.inference.RecordToHeuristicsMap;
 import cz.matfyz.wrapperjson.inference.MapJsonDocument;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 import org.bson.Document;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 public class JsonInferenceWrapper extends AbstractInferenceWrapper {
@@ -27,6 +33,10 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     private SparkSession sparkSession;
     private JavaSparkContext context;
+
+    private String fileName() {
+        return kindName;
+    }
 
     public JsonInferenceWrapper(JsonProvider provider, SparkSettings sparkSettings) {
         this.provider = provider;
@@ -39,7 +49,6 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
             .getOrCreate();
         context = new JavaSparkContext(sparkSession.sparkContext());
         context.setLogLevel("ERROR");
-
     }
 
     @Override
@@ -59,7 +68,6 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     @Override
-    // assuming that in the json file one line represent one object
     public JavaRDD<RecordSchemaDescription> loadRSDs() {
         JavaRDD<Document> jsonDocuments = loadDocuments();
         return jsonDocuments.map(MapJsonDocument::process);
@@ -70,21 +78,37 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         newContext.setLogLevel("ERROR");
         newContext.setCheckpointDir(sparkSettings.checkpointDir());
 
-        List<String> lines = new ArrayList<>();
+        List<Document> documents = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+
         try (
-            InputStream inputStream = provider.getInputStream();
+            InputStream inputStream = provider.getInputStream(kindName);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
+            String content = reader.lines().collect(Collectors.joining("\n"));
+            try {
+                JsonNode jsonNode = objectMapper.readTree(content);
+                if (jsonNode.isArray()) {
+                    for (JsonNode node : jsonNode) {
+                        documents.add(Document.parse(node.toString()));
+                    }
+                } else {
+                    documents.add(Document.parse(jsonNode.toString()));
+                }
+            } catch (IOException e) {
+                reader.lines().forEach(line -> {
+                    try {
+                        documents.add(Document.parse(line));
+                    } catch (Exception ex) {
+                        System.err.println("Error parsing line as JSON: " + ex.getMessage());
+                    }
+                });
             }
         } catch (IOException e) {
             System.err.println("Error processing input stream: " + e.getMessage());
             return context.emptyRDD();
         }
-        JavaRDD<String> jsonLines = context.parallelize(lines);
-        JavaRDD<Document> jsonDocuments = jsonLines.map(Document::parse);
+        JavaRDD<Document> jsonDocuments = context.parallelize(documents);
         return jsonDocuments;
     }
 
@@ -102,16 +126,25 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     @Override
     public JavaPairRDD<String, PropertyHeuristics> loadPropertyData() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'loadPropertyData'");
+        JavaRDD<Document> jsonDocuments = loadDocuments();
+
+        return jsonDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
+    }
+
+    @Override
+    public List<String> getKindNames() {
+        try {
+            return provider.getJsonFileNames();
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException("Error getting jsonc file names", e);
+        }
     }
 
     @Override
     public AbstractInferenceWrapper copy() {
         return new JsonInferenceWrapper(
-            this.provider, 
+            this.provider,
             this.sparkSettings
         );
     }
-
 }

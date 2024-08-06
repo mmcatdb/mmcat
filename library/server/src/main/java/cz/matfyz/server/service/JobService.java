@@ -78,6 +78,8 @@ public class JobService {
         output.put(State.Paused, Set.of(State.Ready));
         output.put(State.Ready, Set.of(State.Paused));
         output.put(State.Canceled, Set.of(State.Paused, State.Ready));
+        output.put(State.Finished, Set.of(State.Waiting));
+        output.put(State.Waiting, Set.of(State.Waiting));
 
         return output;
     }

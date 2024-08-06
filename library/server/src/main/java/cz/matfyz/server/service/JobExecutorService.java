@@ -9,17 +9,20 @@ import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.identifiers.Key;
+import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
 import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.inference.MMInferOneInAll;
+import cz.matfyz.inference.edit.AbstractInferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.server.builder.MetadataContext;
+import cz.matfyz.server.builder.GeneratedDataModel;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
 import cz.matfyz.server.entity.Id;
@@ -32,6 +35,7 @@ import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
+import cz.matfyz.server.repository.MappingRepository.MappingJsonValue;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
@@ -39,19 +43,23 @@ import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.JobRepository;
+import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
+import cz.matfyz.server.utils.InferenceJobData;
+import cz.matfyz.server.utils.LayoutUtil;
+import cz.matfyz.server.utils.SchemaCategoryUtil;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
-import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import edu.uci.ics.jung.graph.DirectedSparseGraph;
-import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +130,11 @@ public class JobExecutorService {
         try {
             processJobByType(run, job);
             LOGGER.info("Job { id: {}, name: '{}' } finished.", job.id, job.label);
-            job.state = Job.State.Finished;
+            if (job.payload instanceof RSDToCategoryPayload) {
+                job.state = Job.State.Waiting;
+            } else {
+                job.state = Job.State.Finished;
+            }
             repository.save(job);
         }
         catch (Exception e) {
@@ -143,7 +155,7 @@ public class JobExecutorService {
         else if (job.payload instanceof UpdateSchemaPayload updateSchemaPayload)
             updateSchemaAlgorithm(run, updateSchemaPayload);
         else if (job.payload instanceof RSDToCategoryPayload rsdToCategoryPayload)
-            rsdToCategoryAlgorithm(run, rsdToCategoryPayload);
+            rsdToCategoryAlgorithm(run, job, rsdToCategoryPayload);
 
         //Thread.sleep(JOB_DELAY_IN_SECONDS * 1000);
     }
@@ -193,6 +205,8 @@ public class JobExecutorService {
 
         final AbstractControlWrapper control = wrapperService.getControlWrapper(datasource);
 
+        GeneratedDataModel generatedDataModel = new GeneratedDataModel(schema.label, run.categoryId, datasource.type);
+
         final var output = new StringBuilder();
         for (final Mapping mapping : mappings) {
             final var result = new InstanceToDatabase()
@@ -219,13 +233,17 @@ public class JobExecutorService {
                 control.execute(result.statements());
                 LOGGER.info("... models executed.");
             }
-            /*else { LOGGER.info("Models didn't get executed. Yikes");}*/
+            /*else { LOGGER.info("Models didn't get executed.");}*/
             /* for now I choose not to execute the statements, but just see if they even get created
             LOGGER.info("Start executing models ...");
             control.execute(result.statements());
             LOGGER.info("... models executed."); */
+
+            // Adding the schema for each mapping here
+            generatedDataModel.addAccessPath(mapping.accessPath());
         }
 
+        job.generatedDataModel = generatedDataModel.toString();
         job.data = output.toString();
     }
 
@@ -263,7 +281,7 @@ public class JobExecutorService {
         return new QueryEvolver(prevCategory, nextCategory, updates);
     }
 
-    private void rsdToCategoryAlgorithm(Run run, RSDToCategoryPayload payload) {
+    private void rsdToCategoryAlgorithm(Run run, Job job, RSDToCategoryPayload payload) {
         // extracting the empty SK wrapper
         final SchemaCategoryWrapper originalSchemaWrapper = schemaService.find(run.categoryId);
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
@@ -271,68 +289,99 @@ public class JobExecutorService {
         final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
-        final CategoryMappingPair categoryMappingPair = new MMInferOneInAll()
+        final List<CategoryMappingPair> categoryMappingPairs = new MMInferOneInAll()
             .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
             .run();
 
-        //System.out.println(categoryMappingPair.schemaCat().allObjects());
-        //System.out.println(categoryMappingPair.schemaCat().allMorphisms());
-        final SchemaCategoryWrapper schemaWrapper = createWrapperFromCategory(categoryMappingPair.schemaCat());
+        SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(categoryMappingPairs, originalSchemaWrapper.label);
+        List<Mapping> mappings = CategoryMappingPair.getMappings(categoryMappingPairs);
 
-        // what about this label?
-        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceWrapper.id, run.categoryId, "Initial logical model");
-        LogicalModelWithDatasource logicalModelWithDatasource = logicalModelService.createNew(logicalModelInit);
+        final SchemaCategoryWrapper schemaWrapper = SchemaCategoryUtil.createWrapperFromCategory(schemaCategory);
+        final List<MappingJsonValue> mappingsJsonValue = createMappingsJsonValue(mappings);
 
-        schemaService.overwriteInfo(schemaWrapper, run.categoryId);
-        mappingService.createNew(categoryMappingPair.mapping(), logicalModelWithDatasource.logicalModel().id);
+        InferenceJobData inferenceJobData = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper, mappingsJsonValue));
+        try {
+            job.data = inferenceJobData.toJsonValue();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
+        }
     }
 
-    /**
-     * Layout algo using JUNG library
-     */
-    private Map<Key, Position> layoutObjects(Collection<SchemaObject> objects, Collection<SchemaMorphism> morphisms) {
-        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
-
-        for (SchemaObject o : objects) {
-            graph.addVertex(o);
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit, boolean savePermanent) {
+        if (edit == null && !savePermanent) { //cancel edit
+            inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
+        } else if (!savePermanent) { // new edit
+            inferenceJobData.manual.add(edit);
         }
-        System.out.println("Adding morphisms to graph");
-        for (SchemaMorphism m : morphisms) {
-            if (m.dom() != null && m.cod() != null) {
-                System.out.println("Domain: " + m.dom().label());
-                System.out.println("Codomain: " + m.cod().label());
-                System.out.println();
-                graph.addEdge(m, m.dom(), m.cod());
+        SchemaCategory inferenceSchemaCategory = inferenceJobData.inference.schemaCategory.toSchemaCategory();
+        List<MappingJsonValue> mappingsJsonValue = inferenceJobData.inference.mapping;
+
+        InferenceEditor inferenceEditor = savePermanent ? new InferenceEditor(inferenceSchemaCategory, createMappings(mappingsJsonValue, inferenceSchemaCategory), inferenceJobData.manual) : new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
+
+        inferenceJobData.finalSchema = makeEdits(inferenceEditor);
+
+        if (savePermanent) {
+            finishRSDToCategoryProcessing(job, inferenceJobData.finalSchema, inferenceEditor.getFinalMapping());
+        } else {
+            try {
+                job.job().data = inferenceJobData.toJsonValue();
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
             }
         }
-
-        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
-        layout.setSize(new Dimension(600, 600));
-
-        for (int i = 0; i < 1000; i++) { // initialize positions
-            layout.step();
-        }
-
-        Map<Key, Position> positions = new HashMap<>();
-        for (SchemaObject node : graph.getVertices()) {
-            double x = layout.getX(node);
-            double y = layout.getY(node);
-            positions.put(node.key(), new Position(x, y));
-        }
-
-        return positions;
+        return job;
     }
 
-    private SchemaCategoryWrapper createWrapperFromCategory(SchemaCategory category) {
-        MetadataContext context = new MetadataContext();
+    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping finalMapping) {
+        RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
 
-        context.setId(new Id(null)); // is null ok?
-        context.setVersion(Version.generateInitial());
+        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
+        final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");
 
-        Map<Key, Position> positions = layoutObjects(category.allObjects(), category.allMorphisms());
-        positions.forEach(context::setPosition);
-
-        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
+        schemaService.overwriteInfo(finalSchema, jobWithRun.run().categoryId);
+        mappingService.createNew(finalMapping, logicalModelWithDatasource.logicalModel().id);
     }
 
+    private List<Mapping> createMappings(List<MappingJsonValue> mappingsJsonValue, SchemaCategory schemaCategory) {
+        List<Mapping> mappings = new ArrayList<>();
+
+        for (MappingJsonValue mappingJsonValue : mappingsJsonValue) {
+            Collection<Signature> primaryKey = new ArrayList<>();
+            Collections.addAll(primaryKey, mappingJsonValue.primaryKey());
+            mappings.add(new Mapping(
+                                schemaCategory,
+                                mappingJsonValue.rootObjectKey(),
+                                mappingJsonValue.kindName(),
+                                mappingJsonValue.accessPath(),
+                                primaryKey
+                        ));
+        }
+        return mappings;
+    }
+
+    private List<MappingJsonValue> createMappingsJsonValue(List<Mapping> mappings) {
+        List<MappingJsonValue> mappingsJsonValue = new ArrayList<>();
+        for (Mapping mapping : mappings) {
+            mappingsJsonValue.add(new MappingJsonValue(
+                                        mapping.rootObject().key(),
+                                        mapping.primaryKey().toArray(new Signature[0]),
+                                        mapping.kindName(),
+                                        mapping.accessPath(),
+                                        Version.generateInitial(),
+                                        Version.generateInitial()
+                                    ));
+
+        }
+        return mappingsJsonValue;
+    }
+
+    private SchemaCategoryWrapper makeEdits(InferenceEditor inferenceEditor) {
+        inferenceEditor.applyEdits();
+        return SchemaCategoryUtil.createWrapperFromCategory(inferenceEditor.getSchemaCategory());
+    }
+
+    private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id schemaCategoryId, String initialLogicalModelLabel) {
+        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceId, schemaCategoryId, initialLogicalModelLabel);
+        return logicalModelService.createNew(logicalModelInit);
+    }
 }

@@ -11,16 +11,27 @@ import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
+import cz.matfyz.server.repository.MappingRepository.MappingJsonValue;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
+import cz.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.util.List;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Repository
 public class MappingRepository {
@@ -28,6 +39,7 @@ public class MappingRepository {
     @Autowired
     private DatabaseWrapper db;
 
+    @JsonDeserialize(using = MappingJsonValue.Deserializer.class)
     public record MappingJsonValue(
         Key rootObjectKey,
         Signature[] primaryKey,
@@ -35,7 +47,36 @@ public class MappingRepository {
         ComplexProperty accessPath,
         Version version,
         Version categoryVersion
-    ) {}
+    ) {
+        public String toJsonValue() throws JsonProcessingException {
+            return Utils.toJson(this);
+        }
+
+        public static class Deserializer extends StdDeserializer<MappingJsonValue> {
+
+            public Deserializer() {
+                this(null);
+            }
+
+            public Deserializer(Class<?> vc) {
+                super(vc);
+            }
+
+            @Override
+            public MappingJsonValue deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+                JsonNode node = parser.getCodec().readTree(parser);
+
+                Key rootObjectKey = new ObjectMapper().treeToValue(node.get("rootObjectKey"), Key.class);
+                Signature[] primaryKey = new ObjectMapper().treeToValue(node.get("primaryKey"), Signature[].class);
+                String kindName = node.get("kindName").asText();
+                ComplexProperty accessPath = new ObjectMapper().treeToValue(node.get("accessPath"), ComplexProperty.class);
+                Version version = new ObjectMapper().treeToValue(node.get("version"), Version.class);
+                Version categoryVersion = new ObjectMapper().treeToValue(node.get("categoryVersion"), Version.class);
+
+                return new MappingJsonValue(rootObjectKey, primaryKey, kindName, accessPath, version, categoryVersion);
+            }
+         }
+    }
 
     private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(MappingJsonValue.class);
     private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(MappingJsonValue.class);

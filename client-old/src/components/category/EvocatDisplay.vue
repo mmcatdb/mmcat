@@ -12,6 +12,10 @@ import { LogicalModel } from '@/types/logicalModel';
 import { DataResultSuccess } from '@/types/api/result';
 import { SchemaUpdate, type MetadataUpdate, type SchemaUpdateInit } from '@/types/schema/SchemaUpdate';
 
+const props = defineProps<{
+    schemaCategory?: SchemaCategory;
+}>();
+
 const categoryId = useSchemaCategoryId();
 
 const evocat = shallowRef<Evocat>();

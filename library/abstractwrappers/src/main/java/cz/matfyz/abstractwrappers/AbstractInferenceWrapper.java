@@ -32,14 +32,7 @@ public abstract class AbstractInferenceWrapper {
 
     public abstract AbstractInferenceWrapper copy();
 
-    /**
-     * This is a default implementation for files (e.g., json, csv) that have only one "kind". It needs to be overriden for proper databases.
-     */
-    public List<String> getKindNames() {
-        return singleCollection;
-    }
-
-    private final List<String> singleCollection = List.of("single-collection");
+    public abstract List<String> getKindNames();
 
     public record SparkSettings(
         String master,

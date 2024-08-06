@@ -14,19 +14,12 @@ import cz.matfyz.core.mapping.DynamicName;
 import cz.matfyz.core.mapping.Name;
 import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.mapping.StaticName;
-import cz.matfyz.core.record.ComplexRecord;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import java.util.Arrays;
-
 
 public class CsvPullWrapper implements AbstractPullWrapper {
 
@@ -38,11 +31,9 @@ public class CsvPullWrapper implements AbstractPullWrapper {
 
     @Override
     public ForestOfRecords pullForest(ComplexProperty path, QueryContent query) throws PullForestException {
-        //System.out.println("csv pullwrapper");
-        //System.out.println("query: " + query);
         final var forest = new ForestOfRecords();
 
-        try (InputStream inputStream = provider.getInputStream();
+        try (InputStream inputStream = provider.getInputStream(path.name().toString());
              BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String headerLine = reader.readLine();
             if (headerLine == null) {
@@ -53,7 +44,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                //System.out.println("Line to be processed: " + line);
                 String[] values = line.split(",");
                 RootRecord rootRecord = createRecordFromCSVLine(headers, values, path);
                 forest.addRecord(rootRecord);
@@ -80,8 +70,8 @@ public class CsvPullWrapper implements AbstractPullWrapper {
                 if (subpath instanceof SimpleProperty simpleSubpath) {
                     record.addSimpleValueRecord(toRecordName(simpleSubpath.name(), fieldName), simpleSubpath.signature(), value);
                 }
-            }                
-        }    
+            }
+        }
         return record;
     }
 
@@ -94,7 +84,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
         return -1;  // if not found
     }
 
-
     private RecordName toRecordName(Name name, String valueIfDynamic) {
         if (name instanceof DynamicName dynamicName)
             return dynamicName.toRecordName(valueIfDynamic);
@@ -105,7 +94,6 @@ public class CsvPullWrapper implements AbstractPullWrapper {
 
     @Override
     public QueryResult executeQuery(QueryStatement statement) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'executeQuery'");
     }
 }

@@ -2,6 +2,7 @@ package cz.matfyz.server.service;
 
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingInit;
@@ -44,9 +45,7 @@ public class MappingService {
     }
 
     /**
-     * Created for the case when I receive Mapping from mminfer
-     * @param mapping
-     * @return
+     * Created for the case when I receive Mapping from inference
      */
     public MappingInfo createNew(Mapping mapping, Id logicalModelId) {
         Signature[] primaryKeyArray = mapping.primaryKey().toArray(new Signature[0]);
@@ -57,7 +56,7 @@ public class MappingService {
                 primaryKeyArray,
                 mapping.kindName(),
                 mapping.accessPath(),
-                null); //Version categoryVersion (probs could use Version.generateInitial())
+                Version.generateInitial());
 
         Id generatedId = repository.add(init);
         if (generatedId != null) {
