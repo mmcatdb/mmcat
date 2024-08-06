@@ -12,16 +12,14 @@ export class Version {
     }
 
     private constructor(
-        public readonly branchId: number,
         private readonly levelIds: number[],
         private _parent?: Version,
     ) {
-        this._branchlessId = this.levelIds.join('.');
-        this._id = this.branchId + ':' + this._branchlessId;
+        this._id = this.levelIds.join('.');
     }
 
-    static createRoot(branchId: number, levelIds: number[]): Version {
-        return new Version(branchId, levelIds);
+    static createRoot(levelIds: number[]): Version {
+        return new Version(levelIds);
     }
 
     get parent(): Version | undefined {
@@ -40,11 +38,10 @@ export class Version {
         if (newValue) {
             this._parent = newValue;
             this._parent.children.push(this);
-            this._parent.children.sort((a, b) => a.branchId - b.branchId);
         }
     }
 
-    createChild(context: BranchContext, relativeLevel = 0): Version {
+    createChild(relativeLevel = 0): Version {
         if (this.level + relativeLevel < 0)
             throw new Error(`Relative level: ${relativeLevel} cannot be applied to version: ${this}.`);
 
@@ -54,7 +51,6 @@ export class Version {
         newLevelIds[newLevelIds.length - 1]++;
 
         const child = new Version(
-            this.children.length === 0 ? this.branchId : context.generateNextId(),
             newLevelIds,
             this,
         );
@@ -64,11 +60,9 @@ export class Version {
     }
 
     static fromServer(input: VersionFromServer, parent?: Version): Version {
-        const split = input.split(':');
-        const levelIds = split[1].split('.');
+        const levelIds = input.split('.');
 
         const output = new Version(
-            parseInt(split[0]),
             levelIds.map(id => parseInt(id)),
         );
 
@@ -81,12 +75,7 @@ export class Version {
         return this._id;
     }
 
-    private readonly _branchlessId;
     private readonly _id;
-
-    get branchlessId(): string {
-        return this._branchlessId;
-    }
 
     get id(): string {
         return this._id;
@@ -96,11 +85,8 @@ export class Version {
         return this.id;
     }
 
+    /** Returns a number < 0 if this version is smaller (i.e., it was created sooner) than the other version. */
     compare(other: Version): number {
-        const branchComparison = this.branchId - other.branchId;
-        if (branchComparison !== 0)
-            return branchComparison;
-
         const minLength = Math.min(this.levelIds.length, other.levelIds.length);
         for (let i = 0; i < minLength; i++) {
             const comparison = this.levelIds[i] - other.levelIds[i];
@@ -128,42 +114,29 @@ export class Version {
     }
 }
 
-class BranchContext {
-    constructor(
-        private maximalId = 0,
-    ) {}
-
-    generateNextId(): number {
-        this.maximalId++;
-
-        return this.maximalId;
-    }
-}
-
 export class VersionContext {
     private relativeLevel = 0;
 
     private constructor(
-        private readonly branchContext: BranchContext,
         private versions: Version[],
         private version: Version,
+        private lastSavedVersion: Version,
     ) {}
 
     static create(versions: Version[]) {
-        const root = Version.createRoot(0, [ 0 ]);
+        const root = Version.createRoot([ 0 ]);
 
         const lastVersion = versions.length === 0
             ? root
             : versions[versions.length - 1];
 
         const allVersions = [ root, ...versions ];
-        // This is only doable because on save, all the versions with lower branch ids are replaced by the higher ones.
         for (let i = 0; i < allVersions.length - 1; i++)
             allVersions[i + 1].parent = allVersions[i];
 
         return new VersionContext(
-            new BranchContext(lastVersion.branchId), // The last version should have the highest branch id.
             allVersions,
+            lastVersion,
             lastVersion,
         );
     }
@@ -186,15 +159,24 @@ export class VersionContext {
     }
 
     nextLevel() {
+        if (this.lastSavedVersion.compare(this.currentVersion) > 0)
+            throw new Error(`Can't alter previous versions. Current version: ${this.currentVersion}, last saved version: ${this.lastSavedVersion}.`);
+
         this.relativeLevel++;
     }
 
     prevLevel() {
+        if (this.lastSavedVersion.compare(this.currentVersion) > 0)
+            throw new Error(`Can't alter previous versions. Current version: ${this.currentVersion}, last saved version: ${this.lastSavedVersion}.`);
+
         this.relativeLevel--;
     }
 
     createNextVersion(): Version {
-        const newVersion = this.version.createChild(this.branchContext, this.relativeLevel);
+        if (this.lastSavedVersion.compare(this.currentVersion) > 0)
+            throw new Error(`Can't alter previous versions. Current version: ${this.currentVersion}, last saved version: ${this.lastSavedVersion}.`);
+
+        const newVersion = this.version.createChild(this.relativeLevel);
         this.versions.push(newVersion);
         this.version = newVersion;
         this.relativeLevel = 0;
@@ -274,39 +256,29 @@ export class VersionContext {
      * Move from the current version to the target one.
      */
     move(target: Version): { undo: Version[], redo: Version[] } {
-        if (target.id === this.currentVersion.id)
+        const source = this.currentVersion;
+        const comparison = source.compare(target);
+        if (comparison === 0)
             return { undo: [], redo: [] };
 
-        const ancestor = this.findFirstCommonAncestor(target);
-        if (!ancestor)
-            return { undo: [], redo: [] };
+        // If the source version is after the target one, we have to undo the versions.
+        const isUndo = comparison > 0;
+        if (isUndo) {
+            const undo = VersionContext.findPathFromChild(target, source);
+            this.undonedVersions.push(...undo);
 
-        const sourceToAncestor = [];
-        let a = this.currentVersion;
-        while (a.id !== ancestor.id) {
-            sourceToAncestor.push(a);
-            a = a.parent!; // A has to have ancestor because it have been found in the previous function.
+            this.currentVersion = target;
+            return { undo, redo: [] };
         }
 
-        const targetToAncestor = [];
-        let b = target;
-        while (b.id !== ancestor.id) {
-            targetToAncestor.push(b);
-            b = b.parent!; // The same reason as above.
-        }
-
-        const redoOutput = targetToAncestor.reverse(); // NOSONAR - It's the last time we use that array, so it's basically just renaming.
-
-        // The first part is an undo.
-        this.undonedVersions.push(...sourceToAncestor);
-
-        // If it's a straight redo, we annul the undo and redo versions.
-        for (const redoVersion of redoOutput) {
+        const targetToSource = VersionContext.findPathFromChild(source, target);
+        const redo = targetToSource.reverse(); // NOSONAR
+        for (const version of redo) {
             const index = this.undonedVersions.length - 1;
             if (index < 0)
                 break;
 
-            if (this.undonedVersions[index].id === redoVersion.id) {
+            if (this.undonedVersions[index].id === version.id) {
                 this.undonedVersions.pop();
             }
             else {
@@ -316,35 +288,17 @@ export class VersionContext {
         }
 
         this.currentVersion = target;
-
-        return {
-            undo: sourceToAncestor,
-            redo: redoOutput,
-        };
+        return { undo: [], redo };
     }
 
-    private findFirstCommonAncestor(target: Version): Version | undefined {
-        let a: Version | undefined = this.currentVersion;
-        let b: Version | undefined = target;
-
-        const visited = new Set<string>();
-        while (a ?? b) {
-            if (a) {
-                if (visited.has(a.id))
-                    return a;
-                visited.add(a.id);
-                a = a.parent;
-            }
-
-            if (b) {
-                if (visited.has(b.id))
-                    return b;
-                visited.add(b.id);
-                b = b.parent;
-            }
+    /** Make sure the ancestor is truly an ancestor of the child. */
+    private static findPathFromChild(ancestor: Version, child: Version): Version[] {
+        const path = [];
+        while (child.id !== ancestor.id) {
+            path.push(child);
+            child = child.parent!;
         }
-
-        return undefined;
+        return path;
     }
 
     private collectionListeners: VersionsEventFunction[] = [];

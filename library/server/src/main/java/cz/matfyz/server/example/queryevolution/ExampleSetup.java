@@ -59,7 +59,7 @@ public class ExampleSetup {
         final SchemaCategoryInfo schemaInfo = schemaService.createNewInfo(schemaInit);
         final SchemaCategoryWrapper wrapper = schemaService.find(schemaInfo.id);
 
-        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(wrapper, "0:0", 1);
+        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(wrapper, "0", 1);
         return schemaService.update(schemaInfo.id, schemaUpdate);
     }
 

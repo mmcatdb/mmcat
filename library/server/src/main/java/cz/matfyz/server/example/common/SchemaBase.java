@@ -180,20 +180,16 @@ public abstract class SchemaBase {
 
     private static class VersionCounter {
 
-        private final int branchId;
         private final List<Integer> levelIds;
 
-        VersionCounter(int branchId, Collection<Integer> levelIds) {
-            this.branchId = branchId;
+        VersionCounter(Collection<Integer> levelIds) {
             this.levelIds = new ArrayList<>(levelIds);
         }
 
         static VersionCounter fromString(String version) {
-            final var parts = version.split(":");
-            final var branchId = Integer.parseInt(parts[0]);
-            final var levelIds = Stream.of(parts[1].split("\\.")).map(Integer::parseInt).toList();
+            final var levelIds = Stream.of(version.split("\\.")).map(Integer::parseInt).toList();
 
-            return new VersionCounter(branchId, levelIds);
+            return new VersionCounter(levelIds);
         }
 
         private int last() {
@@ -211,7 +207,7 @@ public abstract class SchemaBase {
         String next() {
             levelIds.set(last(), levelIds.get(last()) + 1);
 
-            return branchId + ":" + levelIds.stream().map(Object::toString).collect(Collectors.joining("."));
+            return levelIds.stream().map(Object::toString).collect(Collectors.joining("."));
         }
 
     }

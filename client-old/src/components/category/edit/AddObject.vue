@@ -4,7 +4,7 @@ import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import { useEvocat } from '@/utils/injects';
 
-const { evocat, graph } = $(useEvocat());
+const { evocat } = $(useEvocat());
 
 const emit = defineEmits([ 'save', 'cancel' ]);
 
@@ -13,7 +13,6 @@ const keyIsValid = ref(true);
 
 function save() {
     evocat.createObject({ label: label.value });
-    graph.layout();
     emit('save');
 }
 

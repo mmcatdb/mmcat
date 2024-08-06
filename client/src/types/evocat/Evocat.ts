@@ -89,7 +89,7 @@ export class Evocat {
         const operationsToServer = newOperations.map(operation => operation.toServer());
 
         newOperations.forEach(operation => operation.isNew = false);
-        const versionsToRemove =  [ ...this.operations.values() ]
+        const versionsToRemove = [ ...this.operations.values() ]
             .filter(operation => operation.isNew)
             .map(operation => operation.version);
 
@@ -167,7 +167,7 @@ export class Evocat {
     }
 
     /**
-     * Creates a completely new schema object with key that has never been seen before.
+     * Creates a completely new schema object with a key that has never been seen before.
      */
     createObject(def: ObjectDefinition): SchemaObject {
         const versionedObject = this.schemaCategory.createObject();

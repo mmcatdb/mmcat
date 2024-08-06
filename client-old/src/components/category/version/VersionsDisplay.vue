@@ -87,7 +87,7 @@ const displayedVersions = computed(() => {
             :style="{ marginTop: `${8 * version.level}px` }"
             @click="() => version.id !== currentVersion.id && evocat.move(version)"
         >
-            {{ showAll ? version.id : version.branchlessId }}
+            {{ version.id }}
         </div>
     </div>
 </template>
