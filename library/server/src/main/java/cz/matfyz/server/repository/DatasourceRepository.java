@@ -1,7 +1,6 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
@@ -67,27 +66,25 @@ public class DatasourceRepository {
         });
     }
 
-    public boolean save(DatasourceWrapper datasource) {
-        return db.get((connection, output) -> {
+    public void save(DatasourceWrapper datasource) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO datasource (id, json_value)
                 VALUES (?, ?::jsonb)
                 ON CONFLICT (id) DO UPDATE SET
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, datasource.id);
+            setId(statement, 1, datasource.id());
             statement.setString(2, datasource.toJsonValue());
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 
-    public boolean delete(Id id) {
-        return db.getBoolean((connection, output) -> {
+    public void delete(Id id) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("DELETE FROM datasource WHERE id = ?;");
             setId(statement, 1, id);
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 

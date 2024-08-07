@@ -10,6 +10,7 @@ import cz.matfyz.wrapperpostgresql.PostgreSQLProvider.PostgreSQLSettings;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -59,6 +60,21 @@ public class DatabaseWrapper {
         return connectionProvider;
     }
 
+    // No output
+
+    public void run(DatabaseEmptyFunction function) {
+        resolveDatabaseFunction(connection -> {
+            function.execute(connection);
+            return null;
+        });
+    }
+
+    public interface DatabaseEmptyFunction {
+        void execute(Connection connection) throws SQLException, JsonProcessingException;
+    }
+
+    // Single output
+
     public <T> T get(DatabaseGetSingleFunction<T> function, String type, Id id) {
         return resolveDatabaseFunction(connection -> {
             SingleOutput<T> output = new SingleOutput<>();
@@ -75,26 +91,63 @@ public class DatabaseWrapper {
         return get(function, "", null);
     }
 
-    public <T> List<T> getMultiple(DatabaseGetArrayFunction<T> function) {
+    public interface DatabaseGetSingleFunction<T> {
+        void execute(Connection connection, SingleOutput<T> output) throws SQLException, JsonProcessingException;
+    }
+
+    public class SingleOutput<T> {
+
+        private T output = null;
+        private boolean isEmpty = true;
+
+        public void set(T output) {
+            this.output = output;
+            this.isEmpty = false;
+        }
+
+        public boolean isEmpty() {
+            return isEmpty;
+        }
+
+        T get() {
+            return this.output;
+        }
+
+    }
+
+    // Multiple output
+
+    public <T> List<T> getMultiple(DatabaseGetMultipleFunction<T> function) {
         return resolveDatabaseFunction(connection -> {
-            ArrayOutput<T> output = new ArrayOutput<>();
+            MultipleOutput<T> output = new MultipleOutput<>();
             function.execute(connection, output);
 
             return output.get();
         });
     }
 
-    public boolean getBoolean(DatabaseGetBooleanFunction function) {
-        Boolean resolvedOutput = resolveDatabaseFunction(connection -> {
-            BooleanOutput output = new BooleanOutput();
-            function.execute(connection, output);
+    public interface DatabaseGetMultipleFunction<T> {
+        void execute(Connection connection, MultipleOutput<T> output) throws SQLException, JsonProcessingException;
+    }
 
-            return output.get();
-        });
+    public class MultipleOutput<T> {
 
-        // This is necessary because the resolveDatabaseFunction returns null in case of any error.
-        // Null as a Boolean cannot be casted to boolean so we have to check it manually.
-        return resolvedOutput != null && resolvedOutput;
+        private List<T> output = new ArrayList<>();
+
+        public void add(T outputItem) {
+            this.output.add(outputItem);
+        }
+
+        List<T> get() {
+            return this.output;
+        }
+
+    }
+
+    // Implementation
+
+    interface DatabaseFunction<T> {
+        T execute(Connection connection) throws SQLException, JsonProcessingException;
     }
 
     private <T> T resolveDatabaseFunction(DatabaseFunction<T> function) {
@@ -138,17 +191,5 @@ public class DatabaseWrapper {
             throw e.toSecondaryObject();
         }
     }
-
-    /*
-    public static <T, I, F> List<T> joinMultiple(RepositoryPredicateFunction<I, F> predicateFunction, RepositoryTransformFunction<T, I, F> transformFunction, List<I> inputs, List<F> objects, Function<I, String> errorMessage) {
-        return inputs.stream().map((I input) -> {
-            final var result = objects.stream().filter((F object) -> predicateFunction.execute(input, object)).findFirst();
-            if (!result.isPresent())
-                throw NotFoundException.secondaryObject(errorMessage.apply(input));
-
-            return transformFunction.execute(input, result.get());
-        }).toList();
-    }
-    */
 
 }

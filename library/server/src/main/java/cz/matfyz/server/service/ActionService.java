@@ -26,15 +26,13 @@ public class ActionService {
 
     public Action create(ActionInit init) {
         final var action = Action.createNew(init.categoryId(), init.label(), init.payload());
-
-        // TODO throw an exception if false?
         repository.save(action);
 
         return action;
     }
 
-    public boolean delete(Id id) {
-        return repository.delete(id);
+    public void delete(Id id) {
+        repository.delete(id);
     }
 
 }

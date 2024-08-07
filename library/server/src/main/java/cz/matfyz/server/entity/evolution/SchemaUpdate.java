@@ -46,10 +46,8 @@ public class SchemaUpdate extends Entity {
         );
     }
 
-    private static final List<String> idPropertyNames = List.of("id", "categoryId");
-
     public String toJsonValue() throws JsonProcessingException {
-        return Utils.toJsonWithoutProperties(this, idPropertyNames);
+        return Utils.toJson(new JsonValue(prevVersion, nextVersion, operations));
     }
 
     private record JsonValue(

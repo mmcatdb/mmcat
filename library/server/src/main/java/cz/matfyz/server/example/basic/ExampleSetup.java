@@ -33,7 +33,7 @@ public class ExampleSetup {
     public SchemaCategoryWrapper setup() {
         final SchemaCategoryWrapper schema = createSchemaCategory();
         final List<DatasourceWrapper> datasources = datasourceSetup.createDatasources();
-        final List<LogicalModel> logicalModels = createLogicalModels(datasources, schema.id);
+        final List<LogicalModel> logicalModels = createLogicalModels(datasources, schema.id());
         final List<MappingInfo> mappings = mappingSetup.createMappings(logicalModels, schema);
 
         // TODO jobs
@@ -46,18 +46,18 @@ public class ExampleSetup {
 
     private SchemaCategoryWrapper createSchemaCategory() {
         final SchemaCategoryInit schemaInit = new SchemaCategoryInit(Schema.schemaLabel);
-        final SchemaCategoryInfo schemaInfo = schemaService.createNewInfo(schemaInit);
-        final SchemaCategoryWrapper wrapper = schemaService.find(schemaInfo.id);
+        final SchemaCategoryWrapper schemaWrapper = schemaService.create(schemaInit);
 
-        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(wrapper, "0");
-        return schemaService.update(schemaInfo.id, schemaUpdate);
+        final SchemaUpdateInit schemaUpdate = SchemaSetup.createNewUpdate(schemaWrapper, "0");
+
+        return schemaService.update(schemaWrapper.id(), schemaUpdate);
     }
 
     @Autowired
     private LogicalModelService logicalModelService;
 
     private List<LogicalModel> createLogicalModels(List<DatasourceWrapper> datasources, Id schemaId) {
-        return datasources.stream().map(datasource -> logicalModelService.createNew(new LogicalModelInit(datasource.id, schemaId, datasource.label)).logicalModel()).toList();
+        return datasources.stream().map(datasource -> logicalModelService.createNew(new LogicalModelInit(datasource.id(), schemaId, datasource.label)).logicalModel()).toList();
     }
 
 }

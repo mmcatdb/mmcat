@@ -1,7 +1,6 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.evolution.Version;
@@ -89,8 +88,8 @@ public class SchemaCategoryRepository {
         });
     }
 
-    public Id add(SchemaCategoryWrapper wrapper) {
-        return db.get((connection, output) -> {
+    public void add(SchemaCategoryWrapper wrapper) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO schema_category (json_value)
                 VALUES (?::jsonb);
@@ -98,34 +97,29 @@ public class SchemaCategoryRepository {
                 Statement.RETURN_GENERATED_KEYS
             );
             statement.setString(1, wrapper.toJsonValue());
-
-            final int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0)
-                return;
+            executeChecked(statement);
 
             final var generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next())
-                output.set(getId(generatedKeys, "id"));
+            generatedKeys.next();
+            wrapper.assignId(getId(generatedKeys, "id"));
         });
     }
 
-    public boolean save(SchemaCategoryWrapper wrapper) {
-        return db.get((connection, output) -> {
-        final var statement = connection.prepareStatement("""
-            UPDATE schema_category
-            SET json_value = ?::jsonb
-            WHERE id = ?;
-            """);
-        statement.setString(1, wrapper.toJsonValue());
-        setId(statement, 2, wrapper.id);
-
-        final int affectedRows = statement.executeUpdate();
-        output.set(affectedRows != 0);
+    public void save(SchemaCategoryWrapper wrapper) {
+        db.run(connection -> {
+            final var statement = connection.prepareStatement("""
+                UPDATE schema_category
+                SET json_value = ?::jsonb
+                WHERE id = ?;
+                """);
+            statement.setString(1, wrapper.toJsonValue());
+            setId(statement, 2, wrapper.id());
+            executeChecked(statement);
         });
     }
 
-    public boolean update(SchemaCategoryWrapper wrapper, SchemaUpdate update) {
-        return db.get((connection, output) -> {
+    public void update(SchemaCategoryWrapper wrapper, SchemaUpdate update) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 UPDATE schema_category
                 SET json_value = ?::jsonb
@@ -134,27 +128,23 @@ public class SchemaCategoryRepository {
                 VALUES (?, ?::jsonb);
                 """);
             statement.setString(1, wrapper.toJsonValue());
-            setId(statement, 2, wrapper.id);
-            setId(statement, 3, wrapper.id);
+            setId(statement, 2, wrapper.id());
+            setId(statement, 3, wrapper.id());
             statement.setString(4, update.toJsonValue());
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            executeChecked(statement);
         });
     }
 
-    public boolean updateMetadata(SchemaCategoryWrapper wrapper) {
-        return db.get((connection, output) -> {
+    public void updateMetadata(SchemaCategoryWrapper wrapper) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 UPDATE schema_category
                 SET json_value = ?::jsonb
                 WHERE id = ?;
                 """);
             statement.setString(1, wrapper.toJsonValue());
-            setId(statement, 2, wrapper.id);
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            setId(statement, 2, wrapper.id());
+            executeChecked(statement);
         });
     }
 

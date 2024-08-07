@@ -21,10 +21,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-public class SchemaCategoryInferenceEditorTests {
+class SchemaCategoryInferenceEditorTests {
 
     @Test
-    void testReferenceMergeEditArray() throws Exception {
+    void testReferenceMergeEditArray() {
         // Setup A
         SchemaCategory categoryA = new SchemaCategory("schemaA");
         categoryA.addObject(new SchemaObject(new Key(0), "app", null, null));
@@ -98,7 +98,7 @@ public class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testReferenceMergeEditObject() throws Exception {
+    void testReferenceMergeEditObject() {
 
         // Setup A
         SchemaCategory categoryA = new SchemaCategory("schemaA");
@@ -171,7 +171,7 @@ public class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testPrimaryKeyMergeEdit() throws Exception {
+    void testPrimaryKeyMergeEdit() {
         // Setup A
         SchemaCategory categoryA = new SchemaCategory("schemaA");
         categoryA.addObject(new SchemaObject(new Key(0), "app", null, null));
@@ -242,7 +242,7 @@ public class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testClusterEdit() throws Exception {
+    void testClusterEdit() {
 
         SchemaCategory category = new SchemaCategory("schema");
         category.addObject(new SchemaObject(new Key(0), "world", null, null));
@@ -309,7 +309,7 @@ public class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testRecursionEdit() throws Exception {
+    void testRecursionEdit() {
 
         SchemaCategory category = new SchemaCategory("schema");
         category.addObject(new SchemaObject(new Key(0), "B", null, null));
@@ -380,7 +380,7 @@ public class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testRecursionEdit2() throws Exception {
+    void testRecursionEdit2() {
         /**
          * With simple pattern A->B->A and notebook example
          */
@@ -433,7 +433,7 @@ public class SchemaCategoryInferenceEditorTests {
         }
     }
     @Test
-    void testRecursionEdit3() throws Exception {
+    void testRecursionEdit3() {
         /*
          * With complex pattern A<-A->B->A and notebook example short version
          */
@@ -476,7 +476,7 @@ public class SchemaCategoryInferenceEditorTests {
 
     }
     @Test
-    void testRecursionEdit4() throws Exception {
+    void testRecursionEdit4() {
         /*
          * With complex pattern A<-A->B->A and notebook example long version
          */
@@ -531,7 +531,7 @@ public class SchemaCategoryInferenceEditorTests {
 
     }
     @Test
-    void testRecursionEdit5() throws Exception {
+    void testRecursionEdit5() {
         /*
          * With complex pattern A<-A->B->A and client example
          */

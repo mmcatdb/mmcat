@@ -34,29 +34,17 @@ public class SchemaCategoryService {
         return repository.findAllInfos();
     }
 
-    public SchemaCategoryInfo createNewInfo(SchemaCategoryInit init) {
-        if (init.label() == null)
-            return null;
-
+    public SchemaCategoryWrapper create(SchemaCategoryInit init) {
         final var category = new SchemaCategory(init.label());
-        final var newWrapper = newCategoryToWrapper(category);
-        final Id generatedId = repository.add(newWrapper);
+        final var wrapper = newCategoryToWrapper(category);
+        repository.add(wrapper);
+        jobService.createSession(wrapper.id());
 
-        if (generatedId == null)
-            return null;
-
-        jobService.createSession(generatedId);
-
-        return new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version, newWrapper.version);
+        return wrapper;
     }
 
-    /**
-     * Workaround method for inference
-     * Overwrites the existing empty SchemaCategory
-     */
-    public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
-        final boolean saved = repository.save(wrapper);
-        return saved ? new SchemaCategoryInfo(id, "Schema_category_info", wrapper.version, wrapper.version) : null;
+    public void replace(SchemaCategoryWrapper wrapper) {
+        repository.save(wrapper);
     }
 
     public SchemaCategoryWrapper newCategoryToWrapper(SchemaCategory category) {
@@ -100,8 +88,7 @@ public class SchemaCategoryService {
 
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
 
-        if (!repository.update(newWrapper, update))
-            return null;
+        repository.update(newWrapper, update);
 
         jobService.createSystemRun(
             id,
@@ -112,7 +99,7 @@ public class SchemaCategoryService {
         return newWrapper;
     }
 
-    public boolean updateMetadata(Id id, List<MetadataUpdate> metadataUpdates) {
+    public void updateMetadata(Id id, List<MetadataUpdate> metadataUpdates) {
         final var wrapper = repository.find(id);
 
         final var context = new MetadataContext();
@@ -121,7 +108,7 @@ public class SchemaCategoryService {
 
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
 
-        return repository.updateMetadata(newWrapper);
+        repository.updateMetadata(newWrapper);
     }
 
     public List<SchemaUpdate> findAllUpdates(Id id) {

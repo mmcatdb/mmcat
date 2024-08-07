@@ -14,7 +14,7 @@ public class DatasourceException extends ServerException {
     ) implements Serializable {}
 
     private DatasourceException(String name, DatasourceWrapper datasource, Throwable cause) {
-        super("datasource." + name, new Data(datasource.id, datasource.type), cause);
+        super("datasource." + name, new Data(datasource.id(), datasource.type), cause);
     }
 
     public static DatasourceException wrapperNotFound(DatasourceWrapper datasource) {

@@ -3,7 +3,7 @@ package cz.matfyz.evolution.exception;
 public class VersionException extends EvolutionException {
 
     protected VersionException(String type, String value) {
-        super("version", value, null);
+        super("version." + type, value, null);
     }
 
     public static VersionException parse(String  value) {

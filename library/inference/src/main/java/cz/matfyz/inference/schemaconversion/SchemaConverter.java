@@ -7,7 +7,6 @@ import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 

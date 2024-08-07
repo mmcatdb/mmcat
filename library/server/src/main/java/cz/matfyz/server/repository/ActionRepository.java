@@ -1,7 +1,6 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.action.Action;
@@ -55,8 +54,8 @@ public class ActionRepository {
         });
     }
 
-    public boolean save(Action action) {
-        return db.getBoolean((connection, output) -> {
+    public void save(Action action) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO action (id, schema_category_id, json_value)
                 VALUES (?, ?, ?::jsonb)
@@ -64,24 +63,21 @@ public class ActionRepository {
                     schema_category_id = EXCLUDED.schema_category_id,
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, action.id);
+            setId(statement, 1, action.id());
             setId(statement, 2, action.categoryId);
             statement.setString(3, action.toJsonValue());
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 
-    public boolean delete(Id id) {
-        return db.getBoolean((connection, output) -> {
+    public void delete(Id id) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 DELETE FROM action
                 WHERE id = ?;
                 """);
             setId(statement, 1, id);
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            executeChecked(statement);
         });
     }
 

@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,11 +34,10 @@ public class SchemaCategoryController {
 
     @PostMapping("/schema-categories")
     public SchemaCategoryInfo createNewCategory(@RequestBody SchemaCategoryInit init) {
-        var newInfo = service.createNewInfo(init);
-        if (newInfo == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (init.label() == null)
+            return null;
 
-        return newInfo;
+        return SchemaCategoryInfo.fromWrapper(service.create(init));
     }
 
     @GetMapping("/schema-categories/{id}/info")
@@ -87,8 +85,7 @@ public class SchemaCategoryController {
 
     @PutMapping("/schema-categories/{id}/metadata")
     public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataUpdate> metadataUpdates) {
-        if (!service.updateMetadata(id, metadataUpdates))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        service.updateMetadata(id, metadataUpdates);
     }
 
 }

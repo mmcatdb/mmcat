@@ -16,7 +16,7 @@ public record DatasourceDetail(
 
     private static DatasourceDetail createFromConfiguration(DatasourceWrapper datasource, DatasourceConfiguration configuration) {
         return new DatasourceDetail(
-            datasource.id,
+            datasource.id(),
             datasource.type,
             datasource.label,
             datasource.settings,

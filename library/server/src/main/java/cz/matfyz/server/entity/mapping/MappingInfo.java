@@ -8,4 +8,10 @@ public record MappingInfo(
     Id id,
     String kindName,
     Version version
-) implements IEntity {}
+) implements IEntity {
+
+    public static MappingInfo fromWrapper(MappingWrapper wrapper) {
+        return new MappingInfo(wrapper.id(), wrapper.kindName, wrapper.version);
+    }
+
+}

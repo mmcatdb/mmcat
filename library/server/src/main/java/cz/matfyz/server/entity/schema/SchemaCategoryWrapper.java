@@ -4,21 +4,15 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.entity.Id;
-import cz.matfyz.server.repository.utils.Utils;
 
-import java.io.IOException;
+import java.io.Serializable;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-@JsonDeserialize(using = SchemaCategoryWrapper.Deserializer.class)
 public class SchemaCategoryWrapper extends SchemaCategoryInfo {
 
     public final SchemaObjectWrapper[] objects;
@@ -29,8 +23,6 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         this.objects = objects;
         this.morphisms = morphisms;
     }
-
-    private static final ObjectReader reader = new ObjectMapper().readerFor(SchemaCategoryWrapper.class);
 
     public static SchemaCategoryWrapper fromSchemaCategory(SchemaCategory category, MetadataContext context) {
         final var morphisms = category.allMorphisms().stream().map(SchemaMorphismWrapper::fromSchemaMorphism).toArray(SchemaMorphismWrapper[]::new);
@@ -54,7 +46,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
 
     public SchemaCategory toSchemaCategory(@Nullable MetadataContext context) {
         if (context != null) {
-            context.setId(id);
+            context.setId(id());
             context.setVersion(version);
         }
 
@@ -71,49 +63,35 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
         return category;
     }
 
-    /**
-     * Custom deserialization from the database.
-     */
-    public static SchemaCategoryWrapper fromJsonValue(Id id, String jsonValue) throws JsonProcessingException {
-        return reader.withAttribute("id", id).readValue(jsonValue);
+    private static final ObjectReader jsonValueReader = new ObjectMapper().readerFor(SerializedSchemaCategory.class);
+    private static final ObjectWriter jsonValueWriter = new ObjectMapper().writerFor(SerializedSchemaCategory.class);
+
+    public static SchemaCategoryWrapper fromJsonValue(Id id, String jsonString) throws JsonProcessingException {
+        final SerializedSchemaCategory jsonValue = jsonValueReader.readValue(jsonString);
+        return new SchemaCategoryWrapper(id, jsonValue.label, jsonValue.version, jsonValue.systemVersion, jsonValue.objects, jsonValue.morphisms);
     }
 
-    /**
-     * Custom serialization for the database.
-     */
     public String toJsonValue() throws JsonProcessingException {
-        return Utils.toJsonWithoutProperties(this, "id");
+        return jsonValueWriter.writeValueAsString(toSerializedSchemaCategory());
     }
 
-    public static class Deserializer extends StdDeserializer<SchemaCategoryWrapper> {
+    public SerializedSchemaCategory toSerializedSchemaCategory() {
+        return new SerializedSchemaCategory(label, version, systemVersion, objects, morphisms);
+    }
 
-        public Deserializer() {
-            this(null);
-        }
+    // TODO this is highly suboptimal, refactor when possible
 
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
+    public record SerializedSchemaCategory(
+        String label,
+        Version version,
+        Version systemVersion,
+        SchemaObjectWrapper[] objects,
+        SchemaMorphismWrapper[] morphisms
+    ) implements Serializable {
 
-        private static final ObjectReader idJsonReader = new ObjectMapper().readerFor(Id.class);
-        private static final ObjectReader versionJsonReader = new ObjectMapper().readerFor(Version.class);
-        private static final ObjectReader objectsJsonReader = new ObjectMapper().readerFor(SchemaObjectWrapper[].class);
-        private static final ObjectReader morphismsJsonReader = new ObjectMapper().readerFor(SchemaMorphismWrapper[].class);
-
-        @Override public SchemaCategoryWrapper deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final var idFromContext = (Id) context.getAttribute("id");
-            final Id id = idFromContext != null ? idFromContext : idJsonReader.readValue(node.get("id"));
-
-            final var label = node.get("label").asText();
-            final Version version = versionJsonReader.readValue(node.get("version"));
-            final Version systemVersion = versionJsonReader.readValue(node.get("systemVersion"));
-
-            final SchemaObjectWrapper[] objects = objectsJsonReader.readValue(node.get("objects"));
-            final SchemaMorphismWrapper[] morphisms = morphismsJsonReader.readValue(node.get("morphisms"));
-
-            return new SchemaCategoryWrapper(id, label, version, systemVersion, objects, morphisms);
+        public SchemaCategory toSchemaCategory() {
+            final var wrapper = new SchemaCategoryWrapper(null, label, version, systemVersion, objects, morphisms);
+            return wrapper.toSchemaCategory();
         }
 
     }

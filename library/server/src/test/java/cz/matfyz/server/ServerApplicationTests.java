@@ -149,7 +149,7 @@ class ServerApplicationTests {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper) {
-        final var model = logicalModelService.find(mappingWrapper.logicalModelId());
+        final var model = logicalModelService.find(mappingWrapper.logicalModelId);
         final var categoryWrapper = categoryService.find(model.logicalModel().categoryId);
         final var category = categoryWrapper.toSchemaCategory();
 

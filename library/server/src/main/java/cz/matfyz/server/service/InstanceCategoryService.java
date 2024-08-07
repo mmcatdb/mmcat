@@ -26,9 +26,11 @@ public class InstanceCategoryService {
         return wrapper != null ? wrapper.toInstanceCategory(schemaCategory) : null;
     }
 
-    public @Nullable InstanceCategoryWrapper saveCategory(Id sessionId, Id categoryId, InstanceCategory category) {
+    public InstanceCategoryWrapper saveCategory(Id sessionId, Id categoryId, InstanceCategory category) {
         final var wrapper = InstanceCategoryWrapper.fromInstanceCategory(sessionId, categoryId, category);
-        return repository.save(wrapper) ? wrapper : null;
+        repository.save(wrapper);
+
+        return wrapper;
     }
 
 }

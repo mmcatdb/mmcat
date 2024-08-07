@@ -1,14 +1,12 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.datasource.DatasourceWrapper;
 import cz.matfyz.server.entity.logicalmodel.LogicalModel;
-import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
 import java.sql.ResultSet;
@@ -87,25 +85,22 @@ public class LogicalModelRepository {
         "Logical model", id);
     }
 
-    public Id add(LogicalModelInit init) {
-        return db.get((connection, output) -> {
+    public void add(LogicalModel model) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO logical_model (schema_category_id, datasource_id, json_value)
                 VALUES (?, ?, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            setId(statement, 1, init.categoryId());
-            setId(statement, 2, init.datasourceId());
-            statement.setString(3, init.toJsonValue());
-
-            final int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0)
-                return;
+            setId(statement, 1, model.categoryId);
+            setId(statement, 2, model.datasourceId);
+            statement.setString(3, model.toJsonValue());
+            executeChecked(statement);
 
             final var generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next())
-                output.set(getId(generatedKeys, "id"));
+            generatedKeys.next();
+            model.assignId(getId(generatedKeys, "id"));
         });
     }
 

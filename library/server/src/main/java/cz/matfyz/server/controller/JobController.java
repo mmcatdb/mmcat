@@ -152,7 +152,7 @@ public class JobController {
             final var job = jobWithRun.job();
             final var run = jobWithRun.run();
 
-            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.createdAt, job.state, payload, job.data, job.error);
+            return new JobDetail(job.id(), run.categoryId, run.id(), run.actionId, job.label, job.createdAt, job.state, payload, job.data, job.error);
         }
     }
 

@@ -1,7 +1,6 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
@@ -9,7 +8,6 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInfo;
-import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
 
@@ -30,7 +28,7 @@ public class MappingRepository {
 
     public record MappingJsonValue(
         Key rootObjectKey,
-        Signature[] primaryKey,
+        List<Signature> primaryKey,
         String kindName,
         ComplexProperty accessPath,
         Version version
@@ -57,7 +55,7 @@ public class MappingRepository {
                 final String jsonValue = resultSet.getString("json_value");
                 final Id logicalModelId = getId(resultSet, "logical_model_id");
                 final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
-                output.set(new MappingWrapper(id, logicalModelId, parsedJsonValue));
+                output.set(MappingWrapper.fromJsonValue(id, logicalModelId, parsedJsonValue));
             }
         }, "Mapping", id);
     }
@@ -82,7 +80,7 @@ public class MappingRepository {
                 final String jsonValue = resultSet.getString("json_value");
                 final MappingJsonValue parsedJsonValue = jsonValueReader.readValue(jsonValue);
 
-                output.add(new MappingWrapper(foundId, logicalModelId, parsedJsonValue));
+                output.add(MappingWrapper.fromJsonValue(foundId, logicalModelId, parsedJsonValue));
             }
         });
     }
@@ -111,25 +109,21 @@ public class MappingRepository {
         });
     }
 
-    public Id add(MappingInit init) {
-        return db.get((connection, output) -> {
+    public void add(MappingWrapper wrapper) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO mapping (logical_model_id, json_value)
                 VALUES (?, ?::jsonb);
                 """,
                 Statement.RETURN_GENERATED_KEYS
             );
-            setId(statement, 1, init.logicalModelId());
-            // TODO Fix this.
-            statement.setString(2, jsonValueWriter.writeValueAsString(init.toJsonValue(Version.generateInitial(null))));
-
-            final int affectedRows = statement.executeUpdate();
-            if (affectedRows == 0)
-                return;
+            setId(statement, 1, wrapper.logicalModelId);
+            statement.setString(2, jsonValueWriter.writeValueAsString(wrapper.toJsonValue()));
+            executeChecked(statement);
 
             final var generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next())
-                output.set(getId(generatedKeys, "id"));
+            generatedKeys.next();
+            wrapper.assignId(getId(generatedKeys, "id"));
         });
     }
 

@@ -5,19 +5,10 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaObject;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-
-@JsonDeserialize(using = Mapping.Deserializer.class)
 public class Mapping implements Comparable<Mapping> {
 
     private final SchemaCategory category;
@@ -84,30 +75,23 @@ public class Mapping implements Comparable<Mapping> {
         return kindName.compareTo(other.kindName);
     }
 
-    public static class Deserializer extends StdDeserializer<Mapping> {
+    public record SerializedMapping(
+        Key rootObjectKey,
+        List<Signature> primaryKey,
+        String kindName,
+        ComplexProperty accessPath
+    ) implements Serializable {
 
-        public Deserializer() {
-            this(null);
+        public static SerializedMapping fromMapping(Mapping mapping) {
+            return new SerializedMapping(
+                mapping.rootObject().key(),
+                mapping.primaryKey().stream().toList(),
+                mapping.kindName(),
+                mapping.accessPath()
+            );
         }
 
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        private static final ObjectReader keyJsonReader = new ObjectMapper().readerFor(Key.class);
-        private static final ObjectReader rootPropertyJsonReader = new ObjectMapper().readerFor(ComplexProperty.class);
-        private static final ObjectReader signaturesJsonReader = new ObjectMapper().readerFor(Signature[].class);
-
-        @Override public Mapping deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final var category = (SchemaCategory) context.getAttribute("category");
-            final Key rootObjectKey = keyJsonReader.readValue(node.get("rootObjectKey"));
-
-            final var kindName = node.get("kindName").asText();
-            final List<Signature> primaryKey = List.of(signaturesJsonReader.readValue(node.get("primaryKey")));
-            final ComplexProperty accessPath = rootPropertyJsonReader.readValue(node.get("accessPath"));
-
+        public Mapping toMapping(SchemaCategory category) {
             return new Mapping(
                 category,
                 rootObjectKey,

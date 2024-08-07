@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.bson.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;

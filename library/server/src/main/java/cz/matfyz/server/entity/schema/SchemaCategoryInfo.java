@@ -19,7 +19,7 @@ public class SchemaCategoryInfo extends Entity {
     }
 
     public static SchemaCategoryInfo fromWrapper(SchemaCategoryWrapper wrapper) {
-        return new SchemaCategoryInfo(wrapper.id, wrapper.label, wrapper.version, wrapper.systemVersion);
+        return new SchemaCategoryInfo(wrapper.id(), wrapper.label, wrapper.version, wrapper.systemVersion);
     }
 
 }

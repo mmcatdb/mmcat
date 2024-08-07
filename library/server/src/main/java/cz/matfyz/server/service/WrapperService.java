@@ -55,10 +55,10 @@ public class WrapperService {
     private Map<Id, MongoDBProvider> mongoDBCache = new TreeMap<>();
 
     private MongoDBControlWrapper getMongoDBControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        if (!mongoDBCache.containsKey(datasource.id))
-            mongoDBCache.put(datasource.id, createMongoDBProvider(datasource));
+        if (!mongoDBCache.containsKey(datasource.id()))
+            mongoDBCache.put(datasource.id(), createMongoDBProvider(datasource));
 
-        final var provider = mongoDBCache.get(datasource.id);
+        final var provider = mongoDBCache.get(datasource.id());
         return new MongoDBControlWrapper(provider);
     }
 
@@ -75,10 +75,10 @@ public class WrapperService {
     private Map<Id, PostgreSQLProvider> postgreSQLCache = new TreeMap<>();
 
     private PostgreSQLControlWrapper getPostgreSQLControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        if (!postgreSQLCache.containsKey(datasource.id))
-            postgreSQLCache.put(datasource.id, createPostgreSQLProvider(datasource));
+        if (!postgreSQLCache.containsKey(datasource.id()))
+            postgreSQLCache.put(datasource.id(), createPostgreSQLProvider(datasource));
 
-        final var provider = postgreSQLCache.get(datasource.id);
+        final var provider = postgreSQLCache.get(datasource.id());
         return new PostgreSQLControlWrapper(provider);
     }
 
@@ -93,10 +93,10 @@ public class WrapperService {
     private Map<Id, Neo4jProvider> neo4jCache = new TreeMap<>();
 
     private Neo4jControlWrapper getNeo4jControlWrapper(DatasourceWrapper datasource) throws IllegalArgumentException, JsonProcessingException {
-        if (!neo4jCache.containsKey(datasource.id))
-            neo4jCache.put(datasource.id, createNeo4jProvider(datasource));
+        if (!neo4jCache.containsKey(datasource.id()))
+            neo4jCache.put(datasource.id(), createNeo4jProvider(datasource));
 
-        final var provider = neo4jCache.get(datasource.id);
+        final var provider = neo4jCache.get(datasource.id());
         return new Neo4jControlWrapper(provider);
     }
 

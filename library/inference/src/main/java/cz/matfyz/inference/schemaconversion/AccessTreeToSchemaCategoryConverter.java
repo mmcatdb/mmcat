@@ -1,16 +1,12 @@
 package cz.matfyz.inference.schemaconversion;
 
 import java.util.HashSet;
-import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
-import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
-import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 
 public class AccessTreeToSchemaCategoryConverter {
 

@@ -1,9 +1,9 @@
 package cz.matfyz.server.entity.job.data;
 
+import cz.matfyz.core.mapping.Mapping.SerializedMapping;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.server.entity.job.JobData;
-import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.repository.MappingRepository.MappingJsonValue;
+import cz.matfyz.server.entity.schema.SchemaCategoryWrapper.SerializedSchemaCategory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +13,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public record InferenceJobData(
     InferenceData inference,
     @Nullable List<InferenceEdit> manual,
-    @Nullable SchemaCategoryWrapper finalSchema
+    @Nullable SerializedSchemaCategory finalSchema
 ) implements JobData {
 
     public static record InferenceData(
-        SchemaCategoryWrapper schemaCategory,
-        List<MappingJsonValue> mapping
+        SerializedSchemaCategory schemaCategory,
+        List<SerializedMapping> mappings
     ) {}
 
     public InferenceJobData(InferenceData inference) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, shallowRef } from 'vue';
+import { shallowRef } from 'vue';
 import Merge from './Merge.vue';
 import Cluster from './Cluster.vue';
 import Recursion from './Recursion.vue';

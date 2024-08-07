@@ -38,7 +38,7 @@ public class LogicalModelController {
 
     private LogicalModelDetail createDetail(LogicalModelWithMappings model) {
         return new LogicalModelDetail(
-            model.logicalModel().id,
+            model.logicalModel().id(),
             model.logicalModel().label,
             datasourceController.datasourceToDetail(model.datasource()),
             model.mappings()
@@ -69,7 +69,7 @@ public class LogicalModelController {
 
     LogicalModelInfo createInfo(LogicalModelWithDatasource model) {
         return new LogicalModelInfo(
-            model.logicalModel().id,
+            model.logicalModel().id(),
             model.logicalModel().label,
             datasourceController.datasourceToDetail(model.datasource())
         );

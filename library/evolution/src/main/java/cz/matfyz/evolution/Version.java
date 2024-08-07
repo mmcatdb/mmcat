@@ -64,6 +64,10 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         }
     }
 
+    public Version generateNext() {
+        return generateNext(null);
+    }
+
     public Version generateNext(@Nullable String localValue) {
         return new Version(integerValue + 1, localValue);
     }
