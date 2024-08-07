@@ -27,12 +27,14 @@ public class SchemaUpdate extends Entity {
         this.operations = operations;
     }
 
-    public static SchemaUpdate fromInit(SchemaUpdateInit init, Id categoryId) {
+    public static SchemaUpdate fromInit(SchemaUpdateInit init, Id categoryId, Version systemVersion) {
+        final String newSchemaVersion = init.operations().getLast().version();
+
         return new SchemaUpdate(
             null,
             categoryId,
             init.prevVersion(),
-            init.prevVersion().generateNext(),
+            systemVersion.generateNext(newSchemaVersion),
             init.operations()
         );
     }

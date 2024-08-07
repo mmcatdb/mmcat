@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SparkSession;
 import org.bson.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,37 +28,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     private final JsonProvider provider;
-    private final SparkSettings sparkSettings;
-
-    private SparkSession sparkSession;
-    private JavaSparkContext context;
 
     private String fileName() {
         return kindName;
     }
 
     public JsonInferenceWrapper(JsonProvider provider, SparkSettings sparkSettings) {
+        super(sparkSettings);
         this.provider = provider;
-        this.sparkSettings = sparkSettings;
     }
 
     @Override
-    public void buildSession() {
-        sparkSession = SparkSession.builder().master(sparkSettings.master())
-            .getOrCreate();
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");
-    }
-
-    @Override
-    public void stopSession() {
-            sparkSession.stop();
-    }
-
-    @Override
-    public void initiateContext() {
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");
+    public AbstractInferenceWrapper copy() {
+        return new JsonInferenceWrapper(this.provider, this.sparkSettings);
     }
 
     @Override
@@ -74,10 +55,6 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     public JavaRDD<Document> loadDocuments() {
-        JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
-        newContext.setLogLevel("ERROR");
-        newContext.setCheckpointDir(sparkSettings.checkpointDir());
-
         List<Document> documents = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -118,7 +95,7 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
 
     }
 
-     @Override
+    @Override
     public JavaPairRDD<String, RecordSchemaDescription> loadPropertySchema() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'loadPropertySchema'");
@@ -140,11 +117,4 @@ public class JsonInferenceWrapper extends AbstractInferenceWrapper {
         }
     }
 
-    @Override
-    public AbstractInferenceWrapper copy() {
-        return new JsonInferenceWrapper(
-            this.provider,
-            this.sparkSettings
-        );
-    }
 }

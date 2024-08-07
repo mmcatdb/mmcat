@@ -18,7 +18,7 @@ public class RecordSchemaDescriptionMerger {
         throw new UnsupportedOperationException("Utility class RecordSchemaDescriptionMerger.");
     }
 
-    /***
+    /**
      * Merging based on the primary key
      */
     public static RecordSchemaDescription mergeBasedOnPrimaryKey(Map<String, RecordSchemaDescription> rsds, PrimaryKeyCandidate candidate) {

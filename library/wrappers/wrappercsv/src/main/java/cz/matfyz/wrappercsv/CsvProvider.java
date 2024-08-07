@@ -30,8 +30,8 @@ public class CsvProvider {
         }
     }
 
-    /*
-     * There is not a straight forward way to access filenames in remote folder
+    /**
+     * There is not a straightforward way to access filenames in remote folder
      * Therefore, right now it is possible to access local folders or files and remote just files.
      */
     public List<String> getCsvFileNames() throws URISyntaxException, IOException {

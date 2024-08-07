@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef } from 'vue';
 import Merge from './Merge.vue';
-import Cluster from './Cluster.vue'
-import Recursion from './Recursion.vue'
+import Cluster from './Cluster.vue';
+import Recursion from './Recursion.vue';
 import { Graph, Node, Edge } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 
@@ -76,7 +76,7 @@ function cancelEdit() {
 </script>
 
 <template>
-        <div class="editor">
+    <div class="editor">
         <div
             v-if="state.type === State.Default"
             class="options"
@@ -117,7 +117,6 @@ function cancelEdit() {
             />
         </template>
     </div>
-
 </template>
 
 <style scoped>

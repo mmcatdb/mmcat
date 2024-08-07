@@ -14,7 +14,7 @@ class MTCAlgorithmTests {
     private static final SchemaCategory schema = Schema.newSchemaCategory();
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         UniqueIdProvider.reset();
     }
 

@@ -8,6 +8,7 @@ import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.MappingRepository;
+import cz.matfyz.server.repository.ProjectRepository;
 
 import java.util.List;
 
@@ -20,6 +21,9 @@ public class MappingService {
 
     @Autowired
     private MappingRepository repository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     public MappingWrapper find(Id id) {
         return repository.find(id);
@@ -34,37 +38,37 @@ public class MappingService {
     }
 
     public MappingInfo createNew(MappingInit init) {
-        Id generatedId = repository.add(init);
+        final Version systemVersion = projectRepository.getVersionByLogicalModel(init.logicalModelId());
+        final Id generatedId = repository.add(init);
 
         return generatedId == null ? null : new MappingInfo(
             generatedId,
             init.kindName(),
-            init.version(),
-            init.categoryVersion()
+            systemVersion
         );
     }
 
     /**
-     * Created for the case when I receive Mapping from inference
+     * Created for the case when we receive Mapping from inference.
      */
     public MappingInfo createNew(Mapping mapping, Id logicalModelId) {
+        final Version systemVersion = projectRepository.getVersionByLogicalModel(logicalModelId);
         Signature[] primaryKeyArray = mapping.primaryKey().toArray(new Signature[0]);
 
-        MappingInit init = new MappingInit(
-                logicalModelId,
-                mapping.rootObject().key(),
-                primaryKeyArray,
-                mapping.kindName(),
-                mapping.accessPath(),
-                Version.generateInitial());
+        final MappingInit init = new MappingInit(
+            logicalModelId,
+            mapping.rootObject().key(),
+            primaryKeyArray,
+            mapping.kindName(),
+            mapping.accessPath()
+        );
 
         Id generatedId = repository.add(init);
         if (generatedId != null) {
             return new MappingInfo(
                 generatedId,
                 mapping.kindName(),
-                init.version(),
-                init.categoryVersion()
+                systemVersion
             );
         }
         else {

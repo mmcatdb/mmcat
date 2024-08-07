@@ -1,6 +1,10 @@
 package cz.matfyz.evolution;
 
+import cz.matfyz.evolution.exception.VersionException;
+
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -11,40 +15,61 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+/**
+ * This class represents the system version of a project.
+ * It has a global version and optionally a local version. The former is used for the whole project, the latter is specific for each entity.
+ * In either case, the global version is unique. The local version is only an additional information, i.e., something like a comment or a description.
+ * The format is `<global-version>` or `<global-version>:<local-version>`. The global version is a non-negative integer. Both versions can't contain the `:` character.
+ */
 @JsonSerialize(using = Version.Serializer.class)
 @JsonDeserialize(using = Version.Deserializer.class)
 public class Version implements java.io.Serializable, java.lang.Comparable<Version>, java.lang.CharSequence {
 
     private final String value;
     private final int integerValue;
+    private final @Nullable String localValue;
 
-    //private static int stringSize = 8;
-    //private static String stringFormat = "%0" + stringSize + "d";
     private static String stringFormat = "%d";
+    private static String stringFormatWithLocal = "%d:%s";
 
-    private Version(int integerValue) {
-        this.value = String.format(stringFormat, integerValue);
+    private static final Pattern pattern = Pattern.compile("^([\\d])+(:[^:]+)?$");
+
+    private Version(int integerValue, @Nullable String localValue) {
+        this.value = localValue == null
+            ? String.format(stringFormat, integerValue)
+            : String.format(stringFormatWithLocal, integerValue, localValue);
+
         this.integerValue = integerValue;
+        this.localValue = localValue;
     }
 
-    public Version(String value) {
-        //if (value.length() != stringSize)
-        //    throw new NumberFormatException("Value: " + value + " is not valid version.");
+    public static Version fromString(String value) {
+        final Matcher matcher = pattern.matcher(value);
+        if (!matcher.matches())
+            throw VersionException.parse(value);
 
-        this.integerValue = Integer.parseInt(value);
-        if (this.integerValue < 0)
-            throw new NumberFormatException("Value: " + value + " is not valid version.");
+        final String globalValue = matcher.group(1);
+        final @Nullable String rawLocalValue = matcher.group(2);
+        final @Nullable String localValue = rawLocalValue == null ? null : rawLocalValue.substring(1);
 
-        this.value = value;
+        try {
+            final int integerValue = Integer.parseInt(globalValue);
+            return new Version(integerValue, localValue);
+        }
+        catch (NumberFormatException e) {
+            // This might happen if the value is too large.
+            throw VersionException.parse(value);
+        }
     }
 
-    public Version generateNext() {
-        return new Version(integerValue + 1);
+    public Version generateNext(@Nullable String localValue) {
+        return new Version(integerValue + 1, localValue);
     }
 
-    public static Version generateInitial() {
-        return new Version(0);
+    public static Version generateInitial(@Nullable String localValue) {
+        return new Version(0, localValue);
     }
 
     @Override public String toString() {
@@ -104,7 +129,7 @@ public class Version implements java.io.Serializable, java.lang.Comparable<Versi
         @Override public Version deserialize(JsonParser parser, DeserializationContext context) throws IOException {
             final JsonNode node = parser.getCodec().readTree(parser);
 
-            return new Version(node.asText());
+            return Version.fromString(node.asText());
         }
 
     }

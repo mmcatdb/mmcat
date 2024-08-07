@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Graph } from '@/types/categoryGraph';
+import { Graph, Node } from '@/types/categoryGraph';
 import Divider from '@/components/layout/Divider.vue';
-import { Node } from '@/types/categoryGraph';
-import ReferenceMerge from '@/components/category/inferenceEdit/ReferenceMerge.vue';
-import PrimaryKeyMerge from '@/components/category/inferenceEdit/PrimaryKeyMerge.vue';
+import ReferenceMerge from '@/components/category/inference/ReferenceMerge.vue';
+import PrimaryKeyMerge from '@/components/category/inference/PrimaryKeyMerge.vue';
 
 const props = defineProps<{
-    graph: Graph
+    graph: Graph;
 }>();
 
 const emit = defineEmits<{
@@ -42,17 +41,25 @@ function cancelEdit() {
 </script>
 
 <template>
-       <div class="merge">
+    <div class="merge">
         <h2>Merge Objects</h2>
         <div class="merge-type">
             <label>
-                <input type="radio" v-model="mergeType" value="reference"> Reference
+                <input
+                    v-model="mergeType"
+                    type="radio"
+                    value="reference"
+                /> Reference
             </label>
             <label>
-                <input type="radio" v-model="mergeType" value="primaryKey"> Primary Key
+                <input
+                    v-model="mergeType"
+                    type="radio"
+                    value="primaryKey"
+                /> Primary Key
             </label>
         </div>
-    <Divider />
+        <Divider />
         <component
             :is="mergeType === 'reference' ? ReferenceMerge : PrimaryKeyMerge"
             :graph="props.graph"

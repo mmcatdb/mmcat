@@ -14,5 +14,7 @@
         <Root level="debug">
             <AppenderRef ref="console"/>
         </Root>
+        <Logger name="org.apache.spark" level="error"/>
+        <Logger name="org.sparkproject.jetty" level="warn"/>
     </Loggers>
 </Configuration>

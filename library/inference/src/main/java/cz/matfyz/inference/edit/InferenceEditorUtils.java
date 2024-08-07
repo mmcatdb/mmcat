@@ -1,4 +1,4 @@
-package cz.matfyz.inference.edit.utils;
+package cz.matfyz.inference.edit;
 
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;

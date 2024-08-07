@@ -1,6 +1,6 @@
 package cz.matfyz.tests.inference;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
+import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.wrapperjson.JsonControlWrapper;
 import cz.matfyz.wrapperjson.JsonInferenceWrapper;
 import cz.matfyz.wrapperjson.JsonProvider;
@@ -17,14 +17,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-public class JsonInferenceWrapperTests {
+class JsonTests {
 
-    JsonInferenceWrapper setup(JsonProvider jsonProvider) throws Exception {
-        final var sparkSettings = new SparkSettings("local[*]", "./spark");
-        JsonInferenceWrapper jsonInferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkSettings);
-        jsonInferenceWrapper.buildSession();
-        jsonInferenceWrapper.initiateContext();
-        return jsonInferenceWrapper;
+    private final SparkProvider sparkProvider = new SparkProvider();
+
+    JsonInferenceWrapper setup(JsonProvider jsonProvider) {
+        final var wrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
+        wrapper.startSession();
+
+        return wrapper;
     }
 
     @Test

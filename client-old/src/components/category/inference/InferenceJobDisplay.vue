@@ -4,9 +4,8 @@ import { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
 import { SchemaCategory } from '@/types/schema';
-import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
-import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
-import { RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inferenceEdit/inferenceEdit'; 
+import EditorForInferenceSchemaCategory from '@/components/category/inference/EditorForInferenceSchemaCategory.vue';
+import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
 
 type InferenceJobDisplayProps = {
     job: Job;
@@ -18,22 +17,22 @@ const props = defineProps<InferenceJobDisplayProps>();
 const graph = shallowRef<Graph>();
 
 const emit = defineEmits<{
-    (e: 'update-edit', edit: AbstractInferenceEdit): void;
+    (e: 'update-edit', edit: InferenceEdit): void;
     (e: 'cancel-edit'): void;
 }>();
 
 watch(() => props.schemaCategory, (newCategory, oldCategory) => {
     if (newCategory && newCategory !== oldCategory) {
-        if (graph.value) {
+        if (graph.value) 
             newCategory.graph = graph.value;
-        }
+        
     }
 }, { immediate: true });
 
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
     if (!props.schemaCategory) {
-        console.log("This should not happen. - schemaCategory.value empty")
+        console.log('This should not happen. - schemaCategory.value empty');
         return;
     }
     props.schemaCategory.graph = newGraph;
@@ -69,26 +68,26 @@ function createRecursionEdit(payload: { nodes: (Node)[], edges: (Edge)[] }) {
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         const nodeName = node.schemaObject.label;
-        let direction: "->" | "<-" | "" = "";
+        let direction: '->' | '<-' | '' = '';
 
         if (i < edges.length) {
             const edge = edges[i];
-            direction = edge.domainNode.equals(node) ? "->" : "<-";
+            direction = edge.domainNode.equals(node) ? '->' : '<-';
         }
 
         pattern.push({ nodeName, direction });
     }
 
     // last segment direction should be empty
-    if (pattern.length > 0) {
-        pattern[pattern.length - 1].direction = "";
-    }
+    if (pattern.length > 0) 
+        pattern[pattern.length - 1].direction = '';
+    
 
     const edit = new RecursionInferenceEdit(pattern);   
     confirm(edit);
 }
 
-function confirm(edit: AbstractInferenceEdit) {
+function confirm(edit: InferenceEdit) {
     emit('update-edit', edit);
 }
 
@@ -99,7 +98,10 @@ function cancelEdit() {
 </script>
 
 <template>
-    <div v-if="job" class="d-flex flex-column">
+    <div
+        v-if="job"
+        class="d-flex flex-column"
+    >
         <div class="divide">
             <GraphDisplay @graph-created="graphCreated" />
             <div v-if="graph">
@@ -112,8 +114,8 @@ function cancelEdit() {
                     @confirm-recursion="createRecursionEdit"
                     @cancel-edit="cancelEdit"            
                 />
-                <slot name="below-editor"></slot>
+                <slot name="below-editor" />
             </div>
         </div>
     </div>
-</template>
+</template>@/types/inference/inferenceEdit@/types/inference/inferenceEdit

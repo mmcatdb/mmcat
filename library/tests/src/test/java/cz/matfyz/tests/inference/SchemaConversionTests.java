@@ -1,7 +1,6 @@
 package cz.matfyz.tests.inference;
 
 import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
@@ -15,6 +14,7 @@ import cz.matfyz.inference.schemaconversion.RSDToAccessTreeConverter;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
+import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
 import cz.matfyz.wrappercsv.CsvProvider;
 import cz.matfyz.wrappercsv.CsvProvider.CsvSettings;
@@ -36,7 +36,7 @@ import org.junit.jupiter.api.Test;
 
 public class SchemaConversionTests {
 
-    private static final SparkSettings sparkSettings = new SparkSettings("local[*]", "./spark");
+    private final SparkProvider sparkProvider = new SparkProvider();
 
     @Test
     void testRSDToAccessTree() throws Exception {
@@ -44,7 +44,7 @@ public class SchemaConversionTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkSettings);
+        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         // accessing the private method with reflection w/o having to make it visible
         final Method privateExecuteRBA = MMInferOneInAll.class.getDeclaredMethod("executeRBA", AbstractInferenceWrapper.class, boolean.class);
@@ -116,7 +116,7 @@ public class SchemaConversionTests {
         final var settings = new CsvSettings(url.toURI().toString(), false, false);
         final var csvProvider = new CsvProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
+        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final List<CategoryMappingPair> pairs = new MMInferOneInAll()
             .input(inferenceWrapper, "apps", "Test Schema Category")
@@ -137,7 +137,7 @@ public class SchemaConversionTests {
         final var settings = new JsonSettings(url.toURI().toString(), false, false);
         final var jsonProvider = new JsonProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkSettings);
+        final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final List<CategoryMappingPair> pairs = new MMInferOneInAll()
             .input(inferenceWrapper, "business", "Test Schema Category")
@@ -174,7 +174,7 @@ public class SchemaConversionTests {
         final var settings = new CsvSettings(url.toURI().toString(), false, false);
         final var csvProvider = new CsvProvider(settings);
 
-        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
+        final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final List<CategoryMappingPair> pairs = new MMInferOneInAll()
             .input(inferenceWrapper, "user", "Test Schema Category")

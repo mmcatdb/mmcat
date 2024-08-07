@@ -24,23 +24,13 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
     public final SchemaObjectWrapper[] objects;
     public final SchemaMorphismWrapper[] morphisms;
 
-    private SchemaCategoryWrapper(Id id, String label, Version version, SchemaObjectWrapper[] objects, SchemaMorphismWrapper[] morphisms) {
-        super(id, label, version);
+    private SchemaCategoryWrapper(Id id, String label, Version version, Version systemVersion, SchemaObjectWrapper[] objects, SchemaMorphismWrapper[] morphisms) {
+        super(id, label, version, systemVersion);
         this.objects = objects;
         this.morphisms = morphisms;
     }
 
     private static final ObjectReader reader = new ObjectMapper().readerFor(SchemaCategoryWrapper.class);
-
-    public static SchemaCategoryWrapper createNew(String label) {
-        return new SchemaCategoryWrapper(
-            null,
-            label,
-            Version.generateInitial(),
-            new SchemaObjectWrapper[] {},
-            new SchemaMorphismWrapper[] {}
-        );
-    }
 
     public static SchemaCategoryWrapper fromSchemaCategory(SchemaCategory category, MetadataContext context) {
         final var morphisms = category.allMorphisms().stream().map(SchemaMorphismWrapper::fromSchemaMorphism).toArray(SchemaMorphismWrapper[]::new);
@@ -52,6 +42,7 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
             context.getId(),
             category.label,
             context.getVersion(),
+            context.getSystemVersion(),
             objects,
             morphisms
         );
@@ -117,11 +108,12 @@ public class SchemaCategoryWrapper extends SchemaCategoryInfo {
 
             final var label = node.get("label").asText();
             final Version version = versionJsonReader.readValue(node.get("version"));
+            final Version systemVersion = versionJsonReader.readValue(node.get("systemVersion"));
 
             final SchemaObjectWrapper[] objects = objectsJsonReader.readValue(node.get("objects"));
             final SchemaMorphismWrapper[] morphisms = morphismsJsonReader.readValue(node.get("morphisms"));
 
-            return new SchemaCategoryWrapper(id, label, version, objects, morphisms);
+            return new SchemaCategoryWrapper(id, label, version, systemVersion, objects, morphisms);
         }
 
     }

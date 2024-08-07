@@ -1,6 +1,6 @@
 package cz.matfyz.tests.inference;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
+import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
 import cz.matfyz.wrappercsv.CsvInferenceWrapper;
 import cz.matfyz.wrappercsv.CsvProvider;
@@ -19,14 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-public class CsvInferenceWrapperTests {
+class CsvTests {
 
-    CsvInferenceWrapper setup(CsvProvider csvProvider) throws Exception {
-        final var sparkSettings = new SparkSettings("local[*]", "./spark");
-        CsvInferenceWrapper csvInferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkSettings);
-        csvInferenceWrapper.buildSession();
-        csvInferenceWrapper.initiateContext();
-        return csvInferenceWrapper;
+    private final SparkProvider sparkProvider = new SparkProvider();
+
+    CsvInferenceWrapper setup(CsvProvider csvProvider) {
+        final var wrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
+        wrapper.startSession();
+
+        return wrapper;
     }
 
     @Test

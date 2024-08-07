@@ -1,4 +1,4 @@
-package cz.matfyz.inference.edit;
+package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
@@ -10,40 +10,41 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.mapping.StaticName;
-import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
+import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditAlgorithm;
+import cz.matfyz.inference.edit.InferenceEditorUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
-@JsonDeserialize(using = PrimaryKeyMergeInferenceEdit.Deserializer.class)
-public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
+public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
-    private static final Logger LOGGER = Logger.getLogger(PrimaryKeyMergeInferenceEdit.class.getName());
+    public record Data(
+        Key primaryKey
+    ) implements InferenceEdit {
 
-    @JsonProperty("type")
-    private final String type = "primaryKey";
+        @Override public PrimaryKeyMerge createAlgorithm() {
+            return new PrimaryKeyMerge(this);
+        }
 
-    public final Key primaryKey;
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(PrimaryKeyMerge.class.getName());
+
+    private final Data data;
 
     private Key primaryKeyRoot;
     private List<Key> keysIdentifiedByPrimary;
     private Map<Key, Signature> newSignatureMap;
     private Map<Key, Signature> oldSignatureMap = new HashMap<>();
 
-    public PrimaryKeyMergeInferenceEdit(Key primaryKey) {
-        this.primaryKey = primaryKey;
+    public PrimaryKeyMerge(Data data) {
+        this.data = data;
     }
 
     @Override
@@ -59,7 +60,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         this.primaryKeyRoot = findPrimaryKeyRoot(newSchemaCategory);
         SchemaObject dom = newSchemaCategory.getObject(primaryKeyRoot);
 
-        String primaryKeyLabel = newSchemaCategory.getObject(primaryKey).label();
+        String primaryKeyLabel = newSchemaCategory.getObject(data.primaryKey).label();
         this.keysIdentifiedByPrimary = findKeysIdentifiedByPrimaryKeyLabel(newSchemaCategory, primaryKeyLabel);
 
         this.newSignatureMap = createNewMorphisms(newSchemaCategory, dom);
@@ -71,7 +72,7 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
     private Key findPrimaryKeyRoot(SchemaCategory schemaCategory) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
             // based on the assumption
-            if (morphism.cod().key().equals(primaryKey)) {
+            if (morphism.cod().key().equals(data.primaryKey)) {
                 return morphism.dom().key();
             }
         }
@@ -186,23 +187,4 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         return new ComplexProperty(complexProperty.name(), complexProperty.signature(), cleanedSubpaths);
     }
 
-    public static class Deserializer extends StdDeserializer<PrimaryKeyMergeInferenceEdit> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        @Override
-        public PrimaryKeyMergeInferenceEdit deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final Key primaryKey = parser.getCodec().treeToValue(node.get("primaryKey"), Key.class);
-
-            return new PrimaryKeyMergeInferenceEdit(primaryKey);
-        }
-    }
 }

@@ -1,6 +1,7 @@
 package cz.matfyz.server.service;
 
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.entity.Id;
@@ -12,6 +13,7 @@ import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
 import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.matfyz.server.repository.SchemaCategoryRepository;
+import cz.matfyz.server.utils.LayoutUtils;
 
 import java.util.List;
 
@@ -36,7 +38,8 @@ public class SchemaCategoryService {
         if (init.label() == null)
             return null;
 
-        final var newWrapper = SchemaCategoryWrapper.createNew(init.label());
+        final var category = new SchemaCategory(init.label());
+        final var newWrapper = newCategoryToWrapper(category);
         final Id generatedId = repository.add(newWrapper);
 
         if (generatedId == null)
@@ -44,25 +47,28 @@ public class SchemaCategoryService {
 
         jobService.createSession(generatedId);
 
-        return new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version);
+        return new SchemaCategoryInfo(generatedId, init.label(), newWrapper.version, newWrapper.version);
     }
 
-    /*
-     * Created for the case when I receive SchemaCategoryWrapper from inference
-     * Be aware of the label in creating SchemaCategoryInit
-     * */
-    public SchemaCategoryInfo createNewInfo(SchemaCategoryWrapper wrapper) {
-        final Id generatedId = repository.add(wrapper);
-        return generatedId == null ? null : new SchemaCategoryInfo(generatedId, "Schema_category_info", wrapper.version);
-    }
-
-    /***
+    /**
      * Workaround method for inference
      * Overwrites the existing empty SchemaCategory
      */
     public SchemaCategoryInfo overwriteInfo(SchemaCategoryWrapper wrapper, Id id) {
-        final boolean saved = repository.save(wrapper, id);
-        return saved ? new SchemaCategoryInfo(id, "Schema_category_info", wrapper.version) : null;
+        final boolean saved = repository.save(wrapper);
+        return saved ? new SchemaCategoryInfo(id, "Schema_category_info", wrapper.version, wrapper.version) : null;
+    }
+
+    public SchemaCategoryWrapper newCategoryToWrapper(SchemaCategory category) {
+        final var version = Version.generateInitial("0");
+        final var layout = LayoutUtils.computeObjectsLayout(category);
+
+        final var context = new MetadataContext()
+            .setVersion(version)
+            .setSystemVersion(version)
+            .setPostitions(layout);
+
+        return SchemaCategoryWrapper.fromSchemaCategory(category, context);
     }
 
     public SchemaCategoryInfo findInfo(Id id) {
@@ -75,7 +81,7 @@ public class SchemaCategoryService {
 
     public @Nullable SchemaCategoryWrapper update(Id id, SchemaUpdateInit updateInit) {
         final SchemaCategoryWrapper wrapper = repository.find(id);
-        final var update = SchemaUpdate.fromInit(updateInit, id);
+        final var update = SchemaUpdate.fromInit(updateInit, id, wrapper.systemVersion);
 
         if (!update.prevVersion.equals(wrapper.version))
             return null;
@@ -90,6 +96,7 @@ public class SchemaCategoryService {
         // So, we might need to keep all metadata somewhere. Maybe even version it ...
         updateInit.metadata().forEach(m -> context.setPosition(m.key(), m.position()));
         context.setVersion(update.nextVersion);
+        context.setSystemVersion(update.nextVersion);
 
         final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(category, context);
 

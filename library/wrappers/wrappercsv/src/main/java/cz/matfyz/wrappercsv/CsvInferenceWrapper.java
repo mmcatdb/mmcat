@@ -20,43 +20,23 @@ import java.util.List;
 import java.util.Map;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.SparkSession;
 
 public class CsvInferenceWrapper extends AbstractInferenceWrapper {
 
     private final CsvProvider provider;
-    private final SparkSettings sparkSettings;
-
-    private SparkSession sparkSession;
-    private JavaSparkContext context;
 
     private String fileName() {
         return kindName;
     }
 
     public CsvInferenceWrapper(CsvProvider provider, SparkSettings sparkSettings) {
+        super(sparkSettings);
         this.provider = provider;
-        this.sparkSettings = sparkSettings;
     }
 
     @Override
-    public void buildSession() {
-        sparkSession = SparkSession.builder().master(sparkSettings.master())
-                .getOrCreate();
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");
-    }
-
-    @Override
-    public void stopSession() {
-            sparkSession.stop();
-    }
-
-    @Override
-    public void initiateContext() {
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");
+    public AbstractInferenceWrapper copy() {
+        return new CsvInferenceWrapper(this.provider, this.sparkSettings);
     }
 
     @Override
@@ -73,10 +53,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     public JavaRDD<Map<String, String>> loadDocuments() {
-        JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
-        newContext.setLogLevel("ERROR");
-        newContext.setCheckpointDir(sparkSettings.checkpointDir());
-
         List<Map<String, String>> lines = new ArrayList<>();
         boolean firstLine = false;
         String[] header = null;
@@ -133,14 +109,6 @@ public class CsvInferenceWrapper extends AbstractInferenceWrapper {
         JavaRDD<Map<String, String>> csvDocuments = loadDocuments();
 
         return csvDocuments.flatMapToPair(new RecordToHeuristicsMap(fileName()));
-    }
-
-    @Override
-    public AbstractInferenceWrapper copy() {
-        return new CsvInferenceWrapper(
-            this.provider,
-            this.sparkSettings
-        );
     }
 
     @Override

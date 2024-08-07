@@ -1,4 +1,4 @@
-package cz.matfyz.inference.edit;
+package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
@@ -10,33 +10,34 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
+import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditAlgorithm;
+import cz.matfyz.inference.edit.InferenceEditorUtils;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
-@JsonDeserialize(using = ReferenceMergeInferenceEdit.Deserializer.class)
-public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
+public class ReferenceMerge extends InferenceEditAlgorithm {
 
-    private static final Logger LOGGER = Logger.getLogger(ReferenceMergeInferenceEdit.class.getName());
+    public record Data(
+        Key referenceKey,
+        Key referredKey
+    ) implements InferenceEdit {
+
+        @Override public ReferenceMerge createAlgorithm() {
+            return new ReferenceMerge(this);
+        }
+
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(ReferenceMerge.class.getName());
     private static final String INDEX_LABEL = "_index";
 
-    @JsonProperty("type")
-    private final String type = "reference";
-
-    public final Key referenceKey;
-    public final Key referredKey;
+    private final Data data;
 
     private boolean referenceIsArray;
 
@@ -45,9 +46,8 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     private Signature oldIndexSignature;
     private Signature newIndexSignature;
 
-    public ReferenceMergeInferenceEdit(Key referenceKey, Key referredKey) {
-        this.referenceKey = referenceKey;
-        this.referredKey = referredKey;
+    public ReferenceMerge(Data data) {
+        this.data = data;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
         this.referenceIsArray = isReferenceArray(newSchemaCategory);
 
-        SchemaObject referredObject = newSchemaCategory.getObject(referredKey);
+        SchemaObject referredObject = newSchemaCategory.getObject(data.referredKey);
 
         Key referenceParentKey = getReferenceParentKey(newSchemaCategory, referenceIsArray);
 
@@ -74,7 +74,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
             dom = referredObject;
             cod = newSchemaCategory.getObject(referenceParentKey);
 
-            indexKey = getIndexKey(newSchemaCategory, referenceKey);
+            indexKey = getIndexKey(newSchemaCategory, data.referenceKey);
             this.newIndexSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, referredObject, newSchemaCategory.getObject(indexKey));
         }
         this.newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, dom, cod);
@@ -87,7 +87,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     private boolean isReferenceArray(SchemaCategory schemaCategory) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().key().equals(referenceKey) && morphism.cod().label().equals(INDEX_LABEL)) {
+            if (morphism.dom().key().equals(data.referenceKey) && morphism.cod().label().equals(INDEX_LABEL)) {
                 return true;
             }
         }
@@ -98,11 +98,11 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
     private Key getReferenceParentKey(SchemaCategory schemaCategory, boolean isReferenceArray) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
             if (isReferenceArray) {
-                if (morphism.dom().key().equals(referenceKey) && !morphism.cod().label().equals(INDEX_LABEL)) {
+                if (morphism.dom().key().equals(data.referenceKey) && !morphism.cod().label().equals(INDEX_LABEL)) {
                     return morphism.cod().key();
                 }
             } else {
-                if (morphism.cod().key().equals(referenceKey)) {
+                if (morphism.cod().key().equals(data.referenceKey)) {
                     return morphism.dom().key();
                 }
             }
@@ -121,7 +121,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     private void findMorphismsAndObjectToDelete(SchemaCategory schemaCategory, Key indexKey) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (indexKey != null && morphism.dom().key().equals(referenceKey)) {
+            if (indexKey != null && morphism.dom().key().equals(data.referenceKey)) {
                 signaturesToDelete.add(morphism.signature());
                 // find the reference and index signatures
                 if (morphism.cod().key().equals(indexKey)) {
@@ -130,13 +130,13 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
                     oldReferenceSignature = morphism.signature();
                 }
             } else {
-                if (morphism.cod().key().equals(referenceKey)) {
+                if (morphism.cod().key().equals(data.referenceKey)) {
                     signaturesToDelete.add(morphism.signature());
                     oldReferenceSignature = morphism.signature();
                 }
             }
         }
-        keysToDelete.add(referenceKey);
+        keysToDelete.add(data.referenceKey);
     }
 
     @Override
@@ -179,7 +179,7 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     private Signature findReferredSignature(SchemaCategory schemaCategory) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if ((morphism.dom().key().equals(referredKey) || morphism.cod().key().equals(referredKey)) && !morphism.signature().equals(newIndexSignature)) {
+            if ((morphism.dom().key().equals(data.referredKey) || morphism.cod().key().equals(data.referredKey)) && !morphism.signature().equals(newIndexSignature)) {
                 if (referenceIsArray) {
                     if (!morphism.signature().equals(newReferenceSignature.dual())) {
                         return morphism.signature();
@@ -220,24 +220,4 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
         return new ComplexProperty(referenceComplexProperty.name(), referenceComplexProperty.signature(), newSubpaths);
     }
 
-    public static class Deserializer extends StdDeserializer<ReferenceMergeInferenceEdit> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        @Override
-        public ReferenceMergeInferenceEdit deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final Key referenceKey = parser.getCodec().treeToValue(node.get("referenceKey"), Key.class);
-            final Key referredKey = parser.getCodec().treeToValue(node.get("referredKey"), Key.class);
-
-            return new ReferenceMergeInferenceEdit(referenceKey, referredKey);
-        }
-    }
 }

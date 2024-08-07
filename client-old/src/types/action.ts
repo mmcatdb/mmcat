@@ -56,9 +56,9 @@ export const ACTION_TYPES = [
     },
 ];
 
-interface ActionPayloadType<TType extends ActionType = ActionType> {
+type ActionPayloadType<TType extends ActionType = ActionType> = {
     readonly type: TType;
-}
+};
 
 export type ActionPayload =
     | ModelToCategoryPayload

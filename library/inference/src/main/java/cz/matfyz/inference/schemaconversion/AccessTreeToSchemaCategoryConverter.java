@@ -33,7 +33,7 @@ public class AccessTreeToSchemaCategoryConverter {
             currentObject = new SchemaObject(currentNode.getKey(), kindName, ObjectIds.createGenerated(), SignatureId.createEmpty());
             schemaCategory.addObject(currentObject);
         } else {
-            System.out.println("Creating SO and SM for node: " + currentNode.getName());
+            // System.out.println("Creating SO and SM for node: " + currentNode.getName());
             currentObject = createSchemaObject(currentNode);
             createSchemaMorphism(currentNode, currentObject);
         }
@@ -56,9 +56,10 @@ public class AccessTreeToSchemaCategoryConverter {
         if (schemaObjectParent == null) {
             System.out.println("SK after accessing the parent node");
             System.out.println(schemaCategory.allObjects());
-            System.out.println("Error while creating morphism. Domain is null and codomain is " + schemaObject.label());
             System.out.println("Node key: " + node.getKey());
             System.out.println("Parent key: " + node.getParentKey());
+
+            throw new RuntimeException("Error while creating morphism. Domain is null and codomain is " + schemaObject.label());
         }
 
         SchemaObject dom = schemaObjectParent;

@@ -1,4 +1,4 @@
-package cz.matfyz.inference.edit;
+package cz.matfyz.inference.edit.algorithms;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
@@ -13,7 +13,6 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,29 +27,31 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
+import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditAlgorithm;
+import cz.matfyz.inference.edit.InferenceEditorUtils;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
-@JsonDeserialize(using = ClusterInferenceEdit.Deserializer.class)
-public class ClusterInferenceEdit extends AbstractInferenceEdit {
+public class ClusterMerge extends InferenceEditAlgorithm {
 
-    private static final Logger LOGGER = Logger.getLogger(ClusterInferenceEdit.class.getName());
+    public record Data(
+        List<Key> clusterKeys
+    ) implements InferenceEdit {
+
+        @Override public ClusterMerge createAlgorithm() {
+            return new ClusterMerge(this);
+        }
+
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(ClusterMerge.class.getName());
     private static final String TYPE_LABEL = "_type";
     private static final int RND_CLUSTER_IDX = 0;
 
-    @JsonProperty("type")
-    private final String type = "cluster";
-
-    public final List<Key> clusterKeys;
+    private final Data data;
 
     private Key newClusterKey;
     private Signature newClusterSignature;
@@ -60,8 +61,8 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     private Map<String, Signature> mapOldClusterNameSignature = new HashMap<>(); // this maps the original cluster names to their original signatures
     private Map<Signature, Signature> mapOldNewSignature = new HashMap<>(); // this maps the original signatures to the new signatures
 
-    public ClusterInferenceEdit(List<Key> clusterKeys) {
-        this.clusterKeys = clusterKeys;
+    public ClusterMerge(Data data) {
+        this.data = data;
     }
 
     @Override
@@ -80,7 +81,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         this.newClusterName = findRepeatingPattern(oldClusterNames);
 
         // traverse one of the members of cluster and create a new SK based on that + add that SK to the original one
-        SchemaCategory newSchemaCategoryPart = traverseAndBuild(newSchemaCategory, clusterKeys.get(RND_CLUSTER_IDX), clusterRootKey);
+        SchemaCategory newSchemaCategoryPart = traverseAndBuild(newSchemaCategory, data.clusterKeys.get(RND_CLUSTER_IDX), clusterRootKey);
         addSchemaCategoryPart(newSchemaCategory, newSchemaCategoryPart, oldClusterNames, clusterRootKey);
 
         findMorphismsAndObjectsToDelete(newSchemaCategory, clusterRootKey);
@@ -94,7 +95,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     private Key findClusterRootKey(SchemaCategory schemaCategory) {
         Multiset<Key> rootCandidates = HashMultiset.create();
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (clusterKeys.contains(morphism.cod().key())) {
+            if (data.clusterKeys.contains(morphism.cod().key())) {
                 rootCandidates.add(morphism.dom().key());
             }
         }
@@ -106,7 +107,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
 
     private List<String> getOldClusterNames(SchemaCategory schemaCategory) {
         List<String> oldClusterNames = new ArrayList<>();
-        for (Key key : clusterKeys) {
+        for (Key key : data.clusterKeys) {
             oldClusterNames.add(schemaCategory.getObject(key).label());
         }
         return oldClusterNames;
@@ -239,11 +240,11 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     }
 
     private void findMorphismsAndObjectsToDelete(SchemaCategory schemaCategory, Key clusterRootKey) {
-        for (Key key : clusterKeys) {
+        for (Key key : data.clusterKeys) {
             traverseAndFind(schemaCategory, key, clusterRootKey);
         }
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().key().equals(clusterRootKey) && clusterKeys.contains(morphism.cod().key())) {
+            if (morphism.dom().key().equals(clusterRootKey) && data.clusterKeys.contains(morphism.cod().key())) {
                 mapOldClusterNameSignature.put(morphism.cod().label(), morphism.signature());
                 signaturesToDelete.add(morphism.signature());
             }
@@ -264,7 +265,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     private Mapping findClusterMapping(List<Mapping> mappings) {
         for (Mapping mapping : mappings) {
             // just try if any of the old signatures is in the mapping, then all of them should be there
-            SchemaObject randomClusterObject = oldSchemaCategory.getObject(clusterKeys.get(RND_CLUSTER_IDX));
+            SchemaObject randomClusterObject = oldSchemaCategory.getObject(data.clusterKeys.get(RND_CLUSTER_IDX));
             String randomClusterName = randomClusterObject.label();
             if (mapping.accessPath().getSubpathBySignature(mapOldClusterNameSignature.get(randomClusterName)) != null) {
                 return mapping;
@@ -279,7 +280,7 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
     }
 
     private ComplexProperty changeComplexProperties(ComplexProperty clusterComplexProperty) {
-        SchemaObject randomClusterObject = oldSchemaCategory.getObject(clusterKeys.get(RND_CLUSTER_IDX));
+        SchemaObject randomClusterObject = oldSchemaCategory.getObject(data.clusterKeys.get(RND_CLUSTER_IDX));
         String randomClusterName = randomClusterObject.label();
         AccessPath firstClusterAccessPath = clusterComplexProperty.getSubpathBySignature(mapOldClusterNameSignature.get(randomClusterName));
         return getNewComplexProperty(firstClusterAccessPath, clusterComplexProperty);
@@ -354,30 +355,4 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
         return new SimpleProperty(original.name(), mapOldNewSignature.get(original.signature()));
     }
 
-    public static class Deserializer extends StdDeserializer<ClusterInferenceEdit> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        @Override
-        public ClusterInferenceEdit deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final List<Key> clusterKeys = new ArrayList<>();
-            final JsonNode keysNode = node.get("clusterKeys");
-
-            if (keysNode != null && keysNode.isArray()) {
-                for (JsonNode keyNode : keysNode) {
-                    Key key = parser.getCodec().treeToValue(keyNode, Key.class);
-                    clusterKeys.add(key);
-                }
-            }
-            return new ClusterInferenceEdit(clusterKeys);
-        }
-    }
 }

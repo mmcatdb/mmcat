@@ -13,22 +13,16 @@ public record MappingInit(
     Key rootObjectKey,
     Signature[] primaryKey,
     String kindName,
-    ComplexProperty accessPath,
-    Version categoryVersion
+    ComplexProperty accessPath
 ) {
 
-    public Version version() {
-        return Version.generateInitial();
-    }
-
-    public MappingJsonValue toJsonValue() {
+    public MappingJsonValue toJsonValue(Version version) {
         return new MappingRepository.MappingJsonValue(
             rootObjectKey,
             primaryKey,
             kindName,
             accessPath,
-            version(),
-            categoryVersion
+            version
         );
     }
 

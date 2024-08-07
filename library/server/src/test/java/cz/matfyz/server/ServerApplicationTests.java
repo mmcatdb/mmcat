@@ -51,7 +51,7 @@ class ServerApplicationTests {
     private WrapperService wrapperService;
 
     @BeforeEach
-    public void setUp() {
+    public void setup() {
         UniqueIdProvider.reset();
         Statistics.reset();
     }

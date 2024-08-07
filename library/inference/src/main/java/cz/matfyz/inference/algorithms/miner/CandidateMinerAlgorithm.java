@@ -37,11 +37,9 @@ public class CandidateMinerAlgorithm implements Serializable {
 
             for (String kind : kinds) {
                 System.out.println("Current kind while processing candidates: " + kind);
-                AbstractInferenceWrapper w = wrapper.copy();
+                final var w = wrapper.copyForKind(kind);
                 wrappers.add(w);
-                w.kindName = kind;
-                w.buildSession();
-                w.initiateContext();
+                w.startSession();
                 JavaRDD<PropertyHeuristics> heuristics = Footprinter.INSTANCE.process(w);
                 if (all == null)
                     all = heuristics;

@@ -42,19 +42,19 @@ public class SchemaConverter {
         LOGGER.info("Creating the access tree from RSD...");
         RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter(kindName, keyGenerator, signatureGenerator);
         AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
-        System.out.println("Access tree with unprocessed arrays: ");
-        root.printTree(" ");
+        // System.out.println("Access tree with unprocessed arrays: ");
+        // root.printTree(" ");
 
         LOGGER.info("Creating the schema category from the access tree...");
         AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(categoryLabel, kindName);
         SchemaCategory schemaCategory = accessTreeToSchemaCategoryConverter.convert(root);
 
-        System.out.println("Morphisms in the final SK: ");
-        for (SchemaMorphism m : schemaCategory.allMorphisms()) {
-            System.out.println(m.dom() == null ? "Domain is null" : "Domain: " + m.dom().label());
-            System.out.println(m.cod() == null ? "Codomain is null" : "Codomain: " + m.cod().label());
-            System.out.println();
-        }
+        // System.out.println("Morphisms in the final SK: ");
+        // for (SchemaMorphism m : schemaCategory.allMorphisms()) {
+        //     System.out.println(m.dom() == null ? "Domain is null" : "Domain: " + m.dom().label());
+        //     System.out.println(m.cod() == null ? "Codomain is null" : "Codomain: " + m.cod().label());
+        //     System.out.println();
+        // }
 
         LOGGER.info("Creating the mapping for the schema category...");
         MappingCreator mappingCreator = new MappingCreator(root.getKey(), root);

@@ -19,8 +19,7 @@ public record MappingWrapper(
     Signature[] primaryKey,
     String kindName,
     ComplexProperty accessPath,
-    Version version,
-    Version categoryVersion
+    Version version
 ) implements IEntity {
 
     public MappingWrapper(
@@ -35,8 +34,7 @@ public record MappingWrapper(
             jsonValue.primaryKey(),
             jsonValue.kindName(),
             jsonValue.accessPath(),
-            jsonValue.version(),
-            jsonValue.categoryVersion()
+            jsonValue.version()
         );
     }
 

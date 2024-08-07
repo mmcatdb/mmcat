@@ -12,9 +12,10 @@ import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LayoutUtil {
+public class LayoutUtils {
 
-    // Constants for layout configuration
+    // Constants for layout configuration.
+
     private static final int MIN_LAYOUT_SIZE = 600;
     private static final double SIZE_MULTIPLIER = 200.0;
     private static final int INITIAL_STEPS = 1000;
@@ -28,21 +29,19 @@ public class LayoutUtil {
     private static final double ATTRACTION_MULTIPLIER_SMALL = 1.0;
     private static final double REPULSION_MULTIPLIER_SMALL = 1.0;
 
-    private LayoutUtil() {
-        throw new UnsupportedOperationException("Utility class LayoutUtil.");
-    }
+    private LayoutUtils() {}
 
     /**
      * Layout algorithm using JUNG library.
      */
-    public static Map<Key, Position> layoutObjects(SchemaCategory schemaCategory) {
-        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = createGraphFromSchemaCategory(schemaCategory);
+    public static Map<Key, Position> computeObjectsLayout(SchemaCategory schemaCategory) {
+        final var graph = createGraphFromSchemaCategory(schemaCategory);
 
         // Determine the layout size based on the number of nodes
-        int numNodes = schemaCategory.allObjects().size();
-        int layoutSize = Math.max(MIN_LAYOUT_SIZE, (int) (Math.log(numNodes + 1.0) * SIZE_MULTIPLIER));
+        final int numNodes = schemaCategory.allObjects().size();
+        final int layoutSize = Math.max(MIN_LAYOUT_SIZE, (int) (Math.log(numNodes + 1.0) * SIZE_MULTIPLIER));
 
-        FRLayout<SchemaObject, SchemaMorphism> layout = new FRLayout<>(graph);
+        final var layout = new FRLayout<>(graph);
         layout.setSize(new Dimension(layoutSize, layoutSize));
 
         // Adjust attraction and repulsion multipliers based on the graph size
@@ -57,31 +56,28 @@ public class LayoutUtil {
             layout.setRepulsionMultiplier(REPULSION_MULTIPLIER_SMALL);
         }
 
-        for (int i = 0; i < INITIAL_STEPS; i++) { // Initialize positions
+        for (int i = 0; i < INITIAL_STEPS; i++)
             layout.step();
-        }
 
-        Map<Key, Position> positions = new HashMap<>();
-        for (SchemaObject node : graph.getVertices()) {
-            double x = layout.getX(node);
-            double y = layout.getY(node);
-            positions.put(node.key(), new Position(x, y));
+        final var positions = new HashMap<Key, Position>();
+        for (final SchemaObject node : graph.getVertices()) {
+            final var position = new Position(layout.getX(node), layout.getY(node));
+            positions.put(node.key(), position);
         }
 
         return positions;
     }
 
     private static DirectedSparseGraph<SchemaObject, SchemaMorphism> createGraphFromSchemaCategory(SchemaCategory schemaCategory) {
-        DirectedSparseGraph<SchemaObject, SchemaMorphism> graph = new DirectedSparseGraph<>();
-        for (SchemaObject o : schemaCategory.allObjects()) {
-            graph.addVertex(o);
-        }
+        final var graph = new DirectedSparseGraph<SchemaObject, SchemaMorphism>();
 
-        for (SchemaMorphism m : schemaCategory.allMorphisms()) {
-            if (m.dom() != null && m.cod() != null)
-                graph.addEdge(m, m.dom(), m.cod());
-        }
+        for (SchemaObject object : schemaCategory.allObjects())
+            graph.addVertex(object);
+
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms())
+            graph.addEdge(morphism, morphism.dom(), morphism.cod());
 
         return graph;
     }
+
 }

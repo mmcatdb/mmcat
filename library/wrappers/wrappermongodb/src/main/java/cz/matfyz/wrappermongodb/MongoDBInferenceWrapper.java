@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 import org.bson.Document;
 import scala.Tuple2;
@@ -27,23 +26,19 @@ import scala.Tuple2;
 public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
 
     private final MongoDBProvider provider;
-    private final SparkSettings sparkSettings;
-
-    private SparkSession sparkSession;
-    private JavaSparkContext context;
-
-/*    private String collectionName() {
-        return collectionName();
-    } */
 
     private String collectionName() {
         return kindName;
     }
 
-
     public MongoDBInferenceWrapper(MongoDBProvider provider, SparkSettings sparkSettings) {
+        super(sparkSettings);
         this.provider = provider;
-        this.sparkSettings = sparkSettings;
+    }
+
+    @Override
+    public MongoDBInferenceWrapper copy() {
+        return new MongoDBInferenceWrapper(this.provider, this.sparkSettings);
     }
 
     @Override
@@ -54,18 +49,6 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
             .config("spark.mongodb.input.database", provider.settings.database())
             .config("spark.mongodb.input.collection", kindName)
             .getOrCreate();
-
-    }
-
-    @Override
-    public void stopSession() {
-        sparkSession.stop();
-    }
-
-    @Override
-    public void initiateContext() {
-        context = new JavaSparkContext(sparkSession.sparkContext());
-        context.setLogLevel("ERROR");
     }
 
     @Override
@@ -98,13 +81,11 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
     }
 
     public JavaMongoRDD<Document> loadRecords() {
-        JavaSparkContext newContext = new JavaSparkContext(sparkSession.sparkContext());
-        newContext.setLogLevel("ERROR");
         Map<String, String> readOverrides = new HashMap<>();
         readOverrides.put("collection", kindName);
-        ReadConfig readConfig = ReadConfig.create(newContext).withOptions(readOverrides);
+        ReadConfig readConfig = ReadConfig.create(context).withOptions(readOverrides);
 
-        return MongoSpark.load(newContext, readConfig);
+        return MongoSpark.load(context, readConfig);
     }
 
     @Override
@@ -121,14 +102,6 @@ public class MongoDBInferenceWrapper extends AbstractInferenceWrapper {
         JavaMongoRDD<Document> records = loadRecords();
 
         return records.flatMapToPair(new RecordToHeuristicsMap(collectionName()));
-    }
-
-    @Override
-    public MongoDBInferenceWrapper copy() {
-        return new MongoDBInferenceWrapper(
-            this.provider,
-            this.sparkSettings
-        );
     }
 
     @Override

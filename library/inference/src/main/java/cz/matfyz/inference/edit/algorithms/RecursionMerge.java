@@ -1,15 +1,15 @@
-package cz.matfyz.inference.edit;
+package cz.matfyz.inference.edit.algorithms;
 
-import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
-import cz.matfyz.inference.edit.utils.PatternSegment;
+import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditAlgorithm;
+import cz.matfyz.inference.edit.InferenceEditorUtils;
+import cz.matfyz.inference.edit.PatternSegment;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,29 +18,29 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-
 // TODO: this class is a one big WIP
-@JsonDeserialize(using = RecursionInferenceEdit.Deserializer.class)
-public class RecursionInferenceEdit extends AbstractInferenceEdit {
+public class RecursionMerge extends InferenceEditAlgorithm {
 
-    private static final Logger LOGGER = Logger.getLogger(RecursionInferenceEdit.class.getName());
+    public record Data(
+        List<PatternSegment> pattern
+    ) implements InferenceEdit {
+
+        @Override public RecursionMerge createAlgorithm() {
+            return new RecursionMerge(this);
+        }
+
+    }
+
+    private final Data data;
+
+    private static final Logger LOGGER = Logger.getLogger(RecursionMerge.class.getName());
     private static final String RECURSIVE_MORPH_STRING = "@";
 
-    @JsonProperty("type")
-    private final String type = "recursion";
+    private List<PatternSegment> adjustedPattern;
+    private Map<PatternSegment, Set<SchemaObject>> mapPatternObjects = new HashMap<>();
 
-    public final List<PatternSegment> pattern;
-    public static List<PatternSegment> adjustedPattern;
-    public Map<PatternSegment, Set<SchemaObject>> mapPatternObjects = new HashMap<>();
-
-    public RecursionInferenceEdit(List<PatternSegment> pattern) {
-        this.pattern = pattern;
+    public RecursionMerge(Data data) {
+        this.data = data;
     }
 
     @Override
@@ -72,12 +72,12 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
         List<PatternSegment> newPattern = new ArrayList<>();
         int i = 0;
         boolean lastAdjusted = false;
-        while (i < pattern.size() - 1) {
-            PatternSegment currentSegment = pattern.get(i);
-            PatternSegment nextSegment = pattern.get(i + 1);
+        while (i < data.pattern.size() - 1) {
+            PatternSegment currentSegment = data.pattern.get(i);
+            PatternSegment nextSegment = data.pattern.get(i + 1);
 
-            if (currentSegment.nodeName.equals(nextSegment.nodeName)) {
-                newPattern.add(new PatternSegment(currentSegment.nodeName, RECURSIVE_MORPH_STRING + nextSegment.direction));
+            if (currentSegment.nodeName().equals(nextSegment.nodeName())) {
+                newPattern.add(new PatternSegment(currentSegment.nodeName(), RECURSIVE_MORPH_STRING + nextSegment.direction()));
                 i = i + 2;
                 lastAdjusted = true;
             } else {
@@ -87,10 +87,10 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
             }
         }
         if (!lastAdjusted) {
-            newPattern.add(pattern.get(pattern.size() - 1));
+            newPattern.add(data.pattern.get(data.pattern.size() - 1));
         }
 
-        this.adjustedPattern = newPattern;
+        adjustedPattern = newPattern;
         System.out.println("adjusted pattern" + adjustedPattern);
     }
 
@@ -112,7 +112,7 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
 
         PatternSegment currentSegment = adjustedPattern.get(patternIndex);
 
-        if (currentNode.label().equals(currentSegment.nodeName)) {
+        if (currentNode.label().equals(currentSegment.nodeName())) {
             currentPath.add(currentNode);
             if (mapPatternObjects.isEmpty() || mapPatternObjects.get(currentSegment) == null) {
                 Set<SchemaObject> objects = new HashSet<>();
@@ -137,21 +137,21 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
                     }
                 //}
             } else {
-                if (currentSegment.direction.equals("->") || currentSegment.direction.equals("@->")) {
+                if (currentSegment.direction().equals("->") || currentSegment.direction().equals("@->")) {
                     List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
                     for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
                         if (morphism.dom().equals(currentNode)) {
                             morphismsToProcess.add(morphism);
                         }
                     }
-                    if (currentSegment.direction.equals("@->")) {
+                    if (currentSegment.direction().equals("@->")) {
                         if (!containsRecursiveAlready(recursiveNodes, currentNode)) {
                             recursiveNodes.add(currentNode);
                         }
                         processing = true;
                     }
                     for (SchemaMorphism m : morphismsToProcess) {
-                        if (currentSegment.direction.equals("@->") && m.cod().label().equals(currentNode.label())) {
+                        if (currentSegment.direction().equals("@->") && m.cod().label().equals(currentNode.label())) {
                             dfsFind(schemaCategory, m.cod(), patternIndex, currentPath, result, fullMatch, processing, recursiveNodes);
                             if (recursiveNodes.contains(currentNode)) {
                                 processing = false;
@@ -166,7 +166,7 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
                         }
                     }
                 }
-                if (currentSegment.direction.equals("<-") || currentSegment.direction.equals("@<-")) {
+                if (currentSegment.direction().equals("<-") || currentSegment.direction().equals("@<-")) {
                     List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
                     for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
                         if (morphism.cod().equals(currentNode)) {
@@ -174,7 +174,7 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
                         }
                     }
                     for (SchemaMorphism m : morphismsToProcess) {
-                        if (currentSegment.direction.equals("@<-") && m.dom().label().equals(currentNode.label())) {
+                        if (currentSegment.direction().equals("@<-") && m.dom().label().equals(currentNode.label())) {
                             dfsFind(schemaCategory, m.dom(), patternIndex, currentPath, result, fullMatch, processing, recursiveNodes);
                             processing = false;
                         } else {
@@ -292,17 +292,13 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
     }
 
     private boolean foundFullMatch(List<SchemaObject> currentPath) {
-        if (currentPath.size() < adjustedPattern.size()) {
+        if (currentPath.size() < adjustedPattern.size())
             return false;
-        }
-        if (isSublist2(currentPath)) {
-            return true;
-        }
 
-        return false;
+        return isSublist2(currentPath);
     }
 
-    private static boolean isSublist2(List<SchemaObject> list) {
+    private boolean isSublist2(List<SchemaObject> list) {
         if (adjustedPattern.size() > list.size()) {
             return false;
         }
@@ -311,7 +307,7 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
             boolean foundSublist = true;
 
             for (int j = 0; j < adjustedPattern.size(); j++) {
-                if (!list.get(i + j).label().equals(adjustedPattern.get(j).nodeName)) {
+                if (!list.get(i + j).label().equals(adjustedPattern.get(j).nodeName())) {
                     foundSublist = false;
                     break;
                 }
@@ -349,13 +345,13 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
 
     private SchemaObject findNextNode(SchemaCategory schemaCategory, SchemaObject currentNode, PatternSegment currentSegment) {
         for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (currentSegment.direction.equals("->") && morphism.dom().equals(currentNode)) {
+            if (currentSegment.direction().equals("->") && morphism.dom().equals(currentNode)) {
                 return morphism.cod();
-            } else if (currentSegment.direction.equals("<-") && morphism.cod().equals(currentNode)) {
+            } else if (currentSegment.direction().equals("<-") && morphism.cod().equals(currentNode)) {
                 return morphism.dom();
-            } else if (currentSegment.direction.equals("@->") && morphism.dom().equals(currentNode)) {
+            } else if (currentSegment.direction().equals("@->") && morphism.dom().equals(currentNode)) {
                 return morphism.cod();
-            } else if (currentSegment.direction.equals("@<-") && morphism.cod().equals(currentNode)) {
+            } else if (currentSegment.direction().equals("@<-") && morphism.cod().equals(currentNode)) {
                 return morphism.dom();
             }
         }
@@ -463,7 +459,7 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
     }
 
     private boolean isRepetitive(PatternSegment segment) {
-        if (segment.direction.contains("@")) {
+        if (segment.direction().contains("@")) {
             return true;
         }
         return false;
@@ -486,30 +482,4 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
         return mappings;
     }
 
-    public static class Deserializer extends StdDeserializer<RecursionInferenceEdit> {
-
-        public Deserializer() {
-            this(null);
-        }
-
-        public Deserializer(Class<?> vc) {
-            super(vc);
-        }
-
-        @Override
-        public RecursionInferenceEdit deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-            final JsonNode node = parser.getCodec().readTree(parser);
-
-            final List<PatternSegment> pattern = new ArrayList<>();
-            final JsonNode patternNode = node.get("pattern");
-
-            if (pattern != null) {
-                for (JsonNode patternSegmentNode : patternNode) {
-                    PatternSegment patternSegment = parser.getCodec().treeToValue(patternSegmentNode, PatternSegment.class);
-                    pattern.add(patternSegment);
-                }
-            }
-            return new RecursionInferenceEdit(pattern);
-        }
-    }
 }

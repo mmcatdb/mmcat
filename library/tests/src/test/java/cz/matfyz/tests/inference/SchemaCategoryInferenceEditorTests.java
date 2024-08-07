@@ -1,7 +1,5 @@
 package cz.matfyz.tests.inference;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.AccessPath;
@@ -11,11 +9,11 @@ import cz.matfyz.core.mapping.MappingBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.inference.edit.ClusterInferenceEdit;
-import cz.matfyz.inference.edit.ReferenceMergeInferenceEdit;
-import cz.matfyz.inference.edit.utils.PatternSegment;
-import cz.matfyz.inference.edit.PrimaryKeyMergeInferenceEdit;
-import cz.matfyz.inference.edit.RecursionInferenceEdit;
+import cz.matfyz.inference.edit.PatternSegment;
+import cz.matfyz.inference.edit.algorithms.ClusterMerge;
+import cz.matfyz.inference.edit.algorithms.PrimaryKeyMerge;
+import cz.matfyz.inference.edit.algorithms.RecursionMerge;
+import cz.matfyz.inference.edit.algorithms.ReferenceMerge;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,9 +23,7 @@ import org.junit.jupiter.api.Test;
 
 public class SchemaCategoryInferenceEditorTests {
 
-    private static final SparkSettings sparkSettings = new SparkSettings("local[*]", "./spark");
-
- @Test
+    @Test
     void testReferenceMergeEditArray() throws Exception {
         // Setup A
         SchemaCategory categoryA = new SchemaCategory("schemaA");
@@ -86,7 +82,7 @@ public class SchemaCategoryInferenceEditorTests {
         mappings.add(mappingA);
         mappings.add(mappingB);
 
-        ReferenceMergeInferenceEdit edit = new ReferenceMergeInferenceEdit(new Key(2), new Key(4));
+        ReferenceMerge edit = (new ReferenceMerge.Data(new Key(2), new Key(4))).createAlgorithm();
 
         SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
 
@@ -159,7 +155,7 @@ public class SchemaCategoryInferenceEditorTests {
         mappings.add(mappingA);
         mappings.add(mappingB);
 
-        ReferenceMergeInferenceEdit edit = new ReferenceMergeInferenceEdit(new Key(2), new Key(4));
+        ReferenceMerge edit = (new ReferenceMerge.Data(new Key(2), new Key(4))).createAlgorithm();
 
         SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
 
@@ -234,7 +230,7 @@ public class SchemaCategoryInferenceEditorTests {
         mappings.add(mappingA);
         mappings.add(mappingB);
 
-        PrimaryKeyMergeInferenceEdit edit = new PrimaryKeyMergeInferenceEdit(new Key(1));
+        PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(new Key(1))).createAlgorithm();
 
         SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
 
@@ -288,7 +284,7 @@ public class SchemaCategoryInferenceEditorTests {
         clusterKeys.add(new Key(2));
         clusterKeys.add(new Key(6));
 
-        ClusterInferenceEdit edit = new ClusterInferenceEdit(clusterKeys);
+        ClusterMerge edit = (new ClusterMerge.Data(clusterKeys)).createAlgorithm();
 
         System.out.println("Schema Category before edit:");
         System.out.println("Objects: " + category.allObjects());
@@ -359,7 +355,7 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+        RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
 
         System.out.println("Schema Category before edit:");
         System.out.println("Objects: " + category.allObjects());
@@ -419,7 +415,7 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+        RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
 
         System.out.println("Schema Category before edit:");
         System.out.println("Objects: " + category.allObjects());
@@ -461,7 +457,7 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+        RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
 
         System.out.println("Schema Category before edit:");
         System.out.println("Objects: " + category.allObjects());
@@ -516,7 +512,7 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+        RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
 
         System.out.println("Schema Category before edit:");
         System.out.println("Objects: " + category.allObjects());
@@ -580,7 +576,7 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+        RecursionMerge edit = (new RecursionMerge.Data(pattern)).createAlgorithm();
 
         System.out.println("Schema Category before edit:");
         System.out.println("Objects: " + category.allObjects());

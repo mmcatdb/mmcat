@@ -16,8 +16,6 @@ import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.service.SchemaCategoryService;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

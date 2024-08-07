@@ -38,8 +38,7 @@ public class MappingBuilder {
             mapping.rootObject().key(),
             mapping.primaryKey().toArray(Signature[]::new),
             mapping.kindName(),
-            mapping.accessPath(),
-            version
+            mapping.accessPath()
         );
         inits.add(init);
 

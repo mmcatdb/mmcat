@@ -8,11 +8,13 @@ import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class MetadataContext {
 
-    private Id id;
+    private @Nullable Id id;
 
-    public Id getId() {
+    public @Nullable Id getId() {
         return id;
     }
 
@@ -21,9 +23,9 @@ public class MetadataContext {
         return this;
     }
 
-    private Version version;
+    private @Nullable Version version;
 
-    public Version getVersion() {
+    public @Nullable Version getVersion() {
         return version;
     }
 
@@ -32,14 +34,30 @@ public class MetadataContext {
         return this;
     }
 
-    private final Map<Key, Position> positions = new TreeMap<>();
+    private @Nullable Version systemVersion;
 
-    public Position getPosition(Key key) {
+    public @Nullable Version getSystemVersion() {
+        return systemVersion;
+    }
+
+    public MetadataContext setSystemVersion(Version systemVersion) {
+        this.systemVersion = systemVersion;
+        return this;
+    }
+
+    private Map<Key, Position> positions = new TreeMap<>();
+
+    public @Nullable Position getPosition(Key key) {
         return positions.get(key);
     }
 
     public MetadataContext setPosition(Key key, Position position) {
         positions.put(key, position);
+        return this;
+    }
+
+    public MetadataContext setPostitions(Map<Key, Position> positions) {
+        this.positions = positions;
         return this;
     }
 

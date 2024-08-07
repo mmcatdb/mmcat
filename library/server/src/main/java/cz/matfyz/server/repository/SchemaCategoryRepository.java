@@ -32,54 +32,58 @@ public class SchemaCategoryRepository {
 
     public List<SchemaCategoryInfo> findAllInfos() {
         return db.getMultiple((connection, output) -> {
-            var statement = connection.createStatement();
-            var resultSet = statement.executeQuery("""
+            final var statement = connection.createStatement();
+            final var resultSet = statement.executeQuery("""
                 SELECT
                     id,
                     json_value::json->>'label' as label,
-                    json_value::json->>'version' as version
+                    json_value::json->>'version' as version,
+                    json_value::json->>'systemVersion' as systemVersion
                 FROM schema_category
                 ORDER BY id;
                 """);
 
             while (resultSet.next()) {
-                var id = getId(resultSet, "id");
-                var label = resultSet.getString("label");
-                var version = new Version(resultSet.getString("version"));
-                output.add(new SchemaCategoryInfo(id, label, version));
+                final var id = getId(resultSet, "id");
+                final var label = resultSet.getString("label");
+                final var version = Version.fromString(resultSet.getString("version"));
+                final var systemVersion = Version.fromString(resultSet.getString("systemVersion"));
+                output.add(new SchemaCategoryInfo(id, label, version, systemVersion));
             }
         });
     }
 
     public SchemaCategoryInfo findInfo(Id id) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("""
+            final var statement = connection.prepareStatement("""
                 SELECT
                     id,
                     json_value::json->>'label' as label,
-                    json_value::json->>'version' as version
+                    json_value::json->>'version' as version,
+                    json_value::json->>'systemVersion' as systemVersion
                 FROM schema_category
                 WHERE id = ?;
                 """);
             setId(statement, 1, id);
-            var resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                var label = resultSet.getString("label");
-                var version = new Version(resultSet.getString("version"));
-                output.set(new SchemaCategoryInfo(id, label, version));
+                final var label = resultSet.getString("label");
+                final var version = Version.fromString(resultSet.getString("version"));
+                final var systemVersion = Version.fromString(resultSet.getString("systemVersion"));
+                output.set(new SchemaCategoryInfo(id, label, version, systemVersion));
             }
         });
     }
 
     public SchemaCategoryWrapper find(Id id) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("SELECT * FROM schema_category WHERE id = ?;");
+            final var statement = connection.prepareStatement("SELECT * FROM schema_category WHERE id = ?;");
             setId(statement, 1, id);
-            var resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                var jsonValue = resultSet.getString("json_value");
+                final var jsonValue = resultSet.getString("json_value");
                 output.set(SchemaCategoryWrapper.fromJsonValue(id, jsonValue));
             }
         });
@@ -87,7 +91,7 @@ public class SchemaCategoryRepository {
 
     public Id add(SchemaCategoryWrapper wrapper) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("""
+            final var statement = connection.prepareStatement("""
                 INSERT INTO schema_category (json_value)
                 VALUES (?::jsonb);
                 """,
@@ -95,77 +99,68 @@ public class SchemaCategoryRepository {
             );
             statement.setString(1, wrapper.toJsonValue());
 
-            int affectedRows = statement.executeUpdate();
+            final int affectedRows = statement.executeUpdate();
             if (affectedRows == 0)
                 return;
 
-            var generatedKeys = statement.getGeneratedKeys();
+            final var generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next())
                 output.set(getId(generatedKeys, "id"));
         });
     }
-    /***
-     * Temporary workaround method for inference
-     * Overwrites the existing empty SchemaCategory
-     * @param wrapper, id is the id that was originally generated
-     * while creating the new (empty) info
-     * @return
-     */
-    public boolean save(SchemaCategoryWrapper wrapper, Id id) {
-        return db.get((connection, output) -> {
-        var statement = connection.prepareStatement("""
-                UPDATE schema_category
-                SET json_value = ?::jsonb
-                WHERE id = ?;
-                """);
-        statement.setString(1, wrapper.toJsonValue());
-        setId(statement, 2, id);
-        //setId(statement, 2, wrapper.id);
 
-        int affectedRows = statement.executeUpdate();
+    public boolean save(SchemaCategoryWrapper wrapper) {
+        return db.get((connection, output) -> {
+        final var statement = connection.prepareStatement("""
+            UPDATE schema_category
+            SET json_value = ?::jsonb
+            WHERE id = ?;
+            """);
+        statement.setString(1, wrapper.toJsonValue());
+        setId(statement, 2, wrapper.id);
+
+        final int affectedRows = statement.executeUpdate();
         output.set(affectedRows != 0);
         });
     }
 
     public boolean update(SchemaCategoryWrapper wrapper, SchemaUpdate update) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("""
+            final var statement = connection.prepareStatement("""
                 UPDATE schema_category
                 SET json_value = ?::jsonb
                 WHERE id = ?;
                 INSERT INTO schema_category_update (schema_category_id, json_value)
                 VALUES (?, ?::jsonb);
-                """
-            );
+                """);
             statement.setString(1, wrapper.toJsonValue());
             setId(statement, 2, wrapper.id);
             setId(statement, 3, wrapper.id);
             statement.setString(4, update.toJsonValue());
 
-            int affectedRows = statement.executeUpdate();
+            final int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);
         });
     }
 
     public boolean updateMetadata(SchemaCategoryWrapper wrapper) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("""
+            final var statement = connection.prepareStatement("""
                 UPDATE schema_category
                 SET json_value = ?::jsonb
                 WHERE id = ?;
-                """
-            );
+                """);
             statement.setString(1, wrapper.toJsonValue());
             setId(statement, 2, wrapper.id);
 
-            int affectedRows = statement.executeUpdate();
+            final int affectedRows = statement.executeUpdate();
             output.set(affectedRows != 0);
         });
     }
 
     public List<SchemaUpdate> findAllUpdates(Id categoryId) {
         return db.getMultiple((connection, output) -> {
-            var statement = connection.prepareStatement("""
+            final var statement = connection.prepareStatement("""
                 SELECT
                     id,
                     json_value
@@ -174,11 +169,11 @@ public class SchemaCategoryRepository {
                 ORDER BY id;
                 """);
             setId(statement, 1, categoryId);
-            var resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                var id = getId(resultSet, "id");
-                var jsonValue = resultSet.getString("json_value");
+                final var id = getId(resultSet, "id");
+                final var jsonValue = resultSet.getString("json_value");
                 output.add(SchemaUpdate.fromJsonValue(id, categoryId, jsonValue));
             }
         });
@@ -186,7 +181,7 @@ public class SchemaCategoryRepository {
 
     public SchemaObjectWrapper findObject(Id categoryId, Key key) {
         return db.get((connection, output) -> {
-            var statement = connection.prepareStatement("""
+            final var statement = connection.prepareStatement("""
                 SELECT object
                 FROM
                     (SELECT * FROM schema_category WHERE id = ?) as selected_category,
@@ -195,10 +190,10 @@ public class SchemaCategoryRepository {
                 """);
             setId(statement, 1, categoryId);
             statement.setString(2, Utils.toJson(key));
-            var resultSet = statement.executeQuery();
+            final var resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                var jsonObject = resultSet.getString("object");
+                final var jsonObject = resultSet.getString("object");
                 output.set(schemaObjectWrapperJsonReader.readValue(jsonObject));
             }
         });
