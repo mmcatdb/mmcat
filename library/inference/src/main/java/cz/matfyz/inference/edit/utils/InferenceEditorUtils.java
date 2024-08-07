@@ -14,6 +14,7 @@ import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -110,13 +111,19 @@ public class InferenceEditorUtils {
     }
 
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, Mapping mappingToKeep) {
+        return updateMappings(mappings, mappingsToDelete, Arrays.asList(mappingToKeep));
+    }
+
+    public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, List<Mapping> mappingsToKeep) {
         List<Mapping> updatedMappings = new ArrayList<>();
         for (Mapping mapping : mappings) {
             if (!mappingsToDelete.contains(mapping)) {
                 updatedMappings.add(mapping);
             }
         }
-        updatedMappings.add(mappingToKeep);
+        for (Mapping mapping : mappingsToKeep) {
+            updatedMappings.add(mapping);
+        }
 
         return updatedMappings;
     }

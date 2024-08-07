@@ -9,7 +9,6 @@ import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.mapping.StaticName;
 import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
 
 import java.io.IOException;
@@ -109,22 +108,11 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
          */
         LOGGER.info("Applying Primary Key Merge Edit on Mapping...");
 
-        Mapping primaryKeyMapping = findPrimaryKeyMapping(mappings);
         List<Mapping> primaryKeyMappings = findMappingsWithPrimaryKey(mappings);
 
-        Mapping mergedMapping = createMergedMapping(primaryKeyMapping, primaryKeyMappings);
+        List<Mapping> cleanedPrimaryKeyMappings = cleanPrimaryKeyMappings(primaryKeyMappings);
 
-        primaryKeyMappings.add(primaryKeyMapping);
-        return InferenceEditorUtils.updateMappings(mappings, primaryKeyMappings, mergedMapping);
-    }
-
-    private Mapping findPrimaryKeyMapping(List<Mapping> mappings) {
-        for (Mapping mapping : mappings) {
-            if (mapping.rootObject().key().equals(primaryKeyRoot)) {
-                return mapping;
-            }
-        }
-        throw new NotFoundException("Primary Key Mapping has not been found");
+        return InferenceEditorUtils.updateMappings(mappings, primaryKeyMappings, cleanedPrimaryKeyMappings);
     }
 
     private List<Mapping> findMappingsWithPrimaryKey(List<Mapping> mappings) {
@@ -137,53 +125,24 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
         return primaryKeyMappings;
     }
 
-    private Mapping createMergedMapping(Mapping primaryKeyMapping, List<Mapping> primaryKeyMappings) {
-        ComplexProperty mergedComplexProperty = mergeComplexProperties(primaryKeyMapping, primaryKeyMappings);
-        return InferenceEditorUtils.createNewMapping(newSchemaCategory, primaryKeyMapping, primaryKeyMappings, mergedComplexProperty);
+    private List<Mapping> cleanPrimaryKeyMappings(List<Mapping> primaryKeyMappings) {
+        List<Mapping> cleanedPrimaryKeyMappings = new ArrayList<>();
+        for (Mapping mapping : primaryKeyMappings) {
+            cleanedPrimaryKeyMappings.add(createCleanedMapping(mapping));
+        }
+        return cleanedPrimaryKeyMappings;
     }
 
-    private ComplexProperty mergeComplexProperties(Mapping primaryKeyMapping, List<Mapping> primaryKeyMappings) {
-        List<AccessPath> combinedSubPaths = new ArrayList<>(cleanPrimaryKeySubpaths(primaryKeyMapping).subpaths());
-        for (Mapping currentMapping : primaryKeyMappings) {
-            String currentMappingLabel = currentMapping.rootObject().label();
-            Key currentMappingKey = currentMapping.rootObject().key();
-
-            AccessPath accessPathToDelete = currentMapping.accessPath().getSubpathBySignature(oldSignatureMap.get(currentMappingKey));
-
-            ComplexProperty cleanedComplexProperty = currentMapping.accessPath().minusSubpath(accessPathToDelete);
-
-            ComplexProperty newComplexProperty = new ComplexProperty(new StaticName(currentMappingLabel), newSignatureMap.get(currentMappingKey), cleanedComplexProperty.subpaths());
-            combinedSubPaths.add(newComplexProperty);
-        }
-        return new ComplexProperty(primaryKeyMapping.accessPath().name(), primaryKeyMapping.accessPath().signature(), combinedSubPaths);
+    private Mapping createCleanedMapping(Mapping mapping) {
+        ComplexProperty cleanedComplexProperty = cleanComplexProperty(mapping);
+        return new Mapping(newSchemaCategory, mapping.rootObject().key(), mapping.kindName(), cleanedComplexProperty, mapping.primaryKey());
     }
 
-    private ComplexProperty cleanPrimaryKeySubpaths(Mapping primaryKeyMapping) {
-        ComplexProperty primaryKeyComplexProperty = primaryKeyMapping.accessPath();
-        for (Signature signature : oldSignatureMap.values()) {
-            AccessPath accessPathToDelete = primaryKeyComplexProperty.getSubpathBySignature(signature);
-            if (accessPathToDelete != null) {
-                primaryKeyComplexProperty = cleanFromAccessPath(primaryKeyComplexProperty, accessPathToDelete);
-            }
-        }
-        return primaryKeyComplexProperty;
-    }
-
-    private ComplexProperty cleanFromAccessPath(ComplexProperty complexProperty, AccessPath accessPathToDelete) {
-        List<AccessPath> cleanedSubpaths = new ArrayList<>();
-        for (AccessPath accessPath : complexProperty.subpaths()) {
-            if (accessPath instanceof ComplexProperty currentComplexProperty) {
-                if (currentComplexProperty.getSubpathBySignature(accessPathToDelete.signature()) != null) {
-                    ComplexProperty cleanedComplexProperty = currentComplexProperty.minusSubpath(accessPathToDelete);
-                    cleanedSubpaths.add(cleanedComplexProperty);
-                } else {
-                    cleanedSubpaths.add(currentComplexProperty);
-                }
-            } else {
-                cleanedSubpaths.add(accessPath);
-            }
-        }
-        return new ComplexProperty(complexProperty.name(), complexProperty.signature(), cleanedSubpaths);
+    private ComplexProperty cleanComplexProperty(Mapping mapping) {
+        ComplexProperty complexProperty = mapping.accessPath();
+        Signature oldSignature = oldSignatureMap.get(mapping.rootObject().key());
+        AccessPath accessPathToDelete = complexProperty.getSubpathBySignature(oldSignature);
+        return complexProperty.minusSubpath(accessPathToDelete);
     }
 
     public static class Deserializer extends StdDeserializer<PrimaryKeyMergeInferenceEdit> {

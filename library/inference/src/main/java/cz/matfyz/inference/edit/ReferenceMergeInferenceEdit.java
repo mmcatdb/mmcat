@@ -2,17 +2,12 @@ package cz.matfyz.inference.edit;
 
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -141,19 +136,21 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
 
     @Override
     public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
+        /*
+         * No edit required
+         */
         LOGGER.info("Applying Reference Merge Edit on Mapping...");
 
+        /*
         if (referenceIsArray) {
             this.oldReferenceSignature = this.oldReferenceSignature.dual();
             this.newReferenceSignature = this.newReferenceSignature.dual();
-        }
+        }*/
 
-        Mapping referenceMapping = findReferenceMapping(mappings);
-        Mapping referredMapping = findReferredMapping(mappings, newSchemaCategory);
+        // Mapping referenceMapping = findReferenceMapping(mappings);
+        // Mapping referredMapping = findReferredMapping(mappings, newSchemaCategory);
 
-        Mapping mergedMapping = createMergedMapping(referenceMapping, referredMapping);
-
-        return InferenceEditorUtils.updateMappings(mappings, Arrays.asList(referenceMapping, referredMapping), mergedMapping);
+        return mappings;
     }
 
     private Mapping findReferenceMapping(List<Mapping> mappings) {
@@ -192,32 +189,6 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
             }
         }
         throw new NotFoundException("Signature for referred object has not been found");
-    }
-
-    private Mapping createMergedMapping(Mapping referenceMapping, Mapping referredMapping) {
-        ComplexProperty mergedComplexProperty = mergeComplexProperties(referenceMapping.accessPath(), referredMapping.accessPath());
-        return InferenceEditorUtils.createNewMapping(newSchemaCategory, referenceMapping, Arrays.asList(referredMapping), mergedComplexProperty);
-    }
-
-    private ComplexProperty mergeComplexProperties(ComplexProperty referenceComplexProperty, ComplexProperty referredComplexProperty) {
-        List<AccessPath> newSubpaths = new ArrayList<>();
-        boolean replaced = false;
-
-        for (AccessPath subpath : referenceComplexProperty.subpaths()) {
-            if (!replaced && subpath.signature().equals(oldReferenceSignature)) {
-                List<AccessPath> combinedSubpaths = new ArrayList<>(referredComplexProperty.subpaths());
-                if (referenceIsArray && subpath instanceof ComplexProperty currentComplexProperty) {
-                    AccessPath currentSubpath = currentComplexProperty.getSubpathBySignature(oldIndexSignature); // assuming there is just _index object
-                    SimpleProperty newIndexSimpleProperty = new SimpleProperty(currentSubpath.name(), newIndexSignature);
-                    combinedSubpaths.add(newIndexSimpleProperty);
-                }
-                newSubpaths.add(new ComplexProperty(subpath.name(), newReferenceSignature, combinedSubpaths));
-                replaced = true;
-            } else {
-                newSubpaths.add(subpath);
-            }
-        }
-        return new ComplexProperty(referenceComplexProperty.name(), referenceComplexProperty.signature(), newSubpaths);
     }
 
     public static class Deserializer extends StdDeserializer<ReferenceMergeInferenceEdit> {

@@ -9,7 +9,6 @@ public class InferenceEditor {
 
     private SchemaCategory schemaCategory;
     private List<Mapping> mappings;
-    private Mapping finalMapping;
     public final List<AbstractInferenceEdit> edits;
 
     public InferenceEditor(SchemaCategory schemaCategory, List<AbstractInferenceEdit> edits) {
@@ -27,8 +26,8 @@ public class InferenceEditor {
         return this.schemaCategory;
     }
 
-    public Mapping getFinalMapping() {
-        return this.finalMapping;
+    public List<Mapping> getMappings() {
+        return this.mappings;
     }
 
     public boolean hasMappings() {
@@ -39,7 +38,6 @@ public class InferenceEditor {
         applySchemaCategoryEdits();
         if (hasMappings()) {
             applyMappingEdits();
-            setFinalMapping();
         }
     }
 
@@ -52,14 +50,6 @@ public class InferenceEditor {
     private void applyMappingEdits() {
         for (AbstractInferenceEdit edit : edits) {
             mappings = edit.applyMappingEdit(mappings);
-        }
-    }
-
-    private void setFinalMapping() throws IllegalArgumentException {
-        if (mappings.size() == 1) {
-            finalMapping = mappings.get(0);
-        } else {
-            throw new IllegalArgumentException("The mappings after edits should be merged into one.");
         }
     }
 

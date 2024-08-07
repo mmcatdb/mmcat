@@ -321,7 +321,7 @@ public class JobExecutorService {
         inferenceJobData.finalSchema = makeEdits(inferenceEditor);
 
         if (savePermanent) {
-            finishRSDToCategoryProcessing(job, inferenceJobData.finalSchema, inferenceEditor.getFinalMapping());
+            finishRSDToCategoryProcessing(job, inferenceJobData.finalSchema, inferenceEditor.getMappings());
         } else {
             try {
                 job.job().data = inferenceJobData.toJsonValue();
@@ -332,14 +332,17 @@ public class JobExecutorService {
         return job;
     }
 
-    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping finalMapping) {
+    public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, List<Mapping> finalMappings) {
         RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
 
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
         final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id, jobWithRun.run().categoryId, "Initial logical model");
 
         schemaService.overwriteInfo(finalSchema, jobWithRun.run().categoryId);
-        mappingService.createNew(finalMapping, logicalModelWithDatasource.logicalModel().id);
+
+        for (Mapping mapping : finalMappings) {
+            mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
+        }
     }
 
     private List<Mapping> createMappings(List<MappingJsonValue> mappingsJsonValue, SchemaCategory schemaCategory) {
