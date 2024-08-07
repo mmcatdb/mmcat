@@ -7,11 +7,12 @@ import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
-import InferenceJobDisplay from '@/components/category/inferenceEdit/InferenceJobDisplay.vue'
-import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
+import InferenceJobDisplay from '@/components/category/inferenceEdit/InferenceJobDisplay.vue';
+import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit';
 import { SaveJobResultPayload } from '@/types/inferenceEdit/inferenceEdit';
 import { SchemaCategory } from '@/types/schema';
 import { isInferenceJobData } from '@/utils/InferenceJobData';
+import { createInferenceEditFromServer } from '@/types/inferenceEdit/inferenceEdit';
 
 type JobDisplayProps = {
     job: Job;
@@ -22,9 +23,9 @@ const props = defineProps<JobDisplayProps>();
 const error = computed(() => props.job.error ? { name: props.job.error.name, data: stringify(props.job.error.data) } : undefined);
 
 const result = computed(() => {
-    if (props.job.payload.type === ActionType.RSDToCategory) {
+    if (props.job.payload.type === ActionType.RSDToCategory)
         return '';
-    }
+    
     return stringify(props.job.result);
 });
 
@@ -52,6 +53,24 @@ const schemaCategory = computed(() => {
         const parsedResult = JSON.parse(props.job.result);
         if (isInferenceJobData(parsedResult)) {
             return SchemaCategory.fromServer(parsedResult.finalSchema, []);
+        } else {
+            throw new Error("InferenceJobData is not the right type");            
+        }
+    }
+    throw new Error("InferenceJobData is not the right type");
+});
+
+const inferenceEdits = computed(() => {
+    if (typeof props.job.result === 'string' && props.job.payload.type === ActionType.RSDToCategory) {
+        const parsedResult = JSON.parse(props.job.result);
+        if (isInferenceJobData(parsedResult)) {
+            if (parsedResult.manual.length > 0) {
+                console.log("manual not null");
+                return parsedResult.manual.map(createInferenceEditFromServer);
+            } else {
+                console.log("manual null");
+                return [];
+            }
         } else {
             throw new Error("InferenceJobData is not the right type");            
         }
@@ -90,10 +109,6 @@ async function restartJob() {
 }
 
 async function saveJob(edit: AbstractInferenceEdit, permanent: boolean) {
-    if (edit != null) {
-        console.log("edit is not null in saveJob displayjob");
-    }  
-
     fetching.value = true;
 
     const saveJobResultPayload = new SaveJobResultPayload(permanent, edit);
@@ -101,25 +116,22 @@ async function saveJob(edit: AbstractInferenceEdit, permanent: boolean) {
 
     const result = await API.jobs.saveJobResult({ id: props.job.id }, { payload: JSON.stringify(saveJobResultPayload) });
     if (result.status) {
-        console.log("about to emit updateJob in jobdisplay");
         emit('updateJob', Job.fromServer(result.data));
     }
 
     fetching.value = false;
-
 }
-
-async function cancelEdit() {
+// if no params, then cancel last job edit
+// else receive edit id and set isActive on that edit
+async function manageEdit(edit?: AbstractInferenceEdit) {
     fetching.value = true;
 
     const result = await API.jobs.cancelLastJobEdit({ id: props.job.id });
     if (result.status) {
-        console.log("about to emit updateJob in jobdisplay");
         emit('updateJob', Job.fromServer(result.data));
     }
 
     fetching.value = false;
-
 }
 
 function toggleGeneratedDataModel() {
@@ -222,8 +234,11 @@ function toggleGeneratedDataModel() {
                 <InferenceJobDisplay 
                     :job="job"
                     :schema-category="schemaCategory"
+                    :inference-edits="inferenceEdits"
                     @update-edit="(edit) => saveJob(edit, false)"
-                    @cancel-edit="cancelEdit"
+                    @cancel-edit="manageEdit"
+                    @undo-edit="manageEdit"
+                    @redo-edit="manageEdit"
                 >
                     <template #below-editor>
                         <div class="d-flex justify-content-end mt-2">

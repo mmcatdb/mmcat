@@ -208,7 +208,17 @@ public class ReferenceMergeInferenceEdit extends AbstractInferenceEdit {
             final Key referenceKey = parser.getCodec().treeToValue(node.get("referenceKey"), Key.class);
             final Key referredKey = parser.getCodec().treeToValue(node.get("referredKey"), Key.class);
 
-            return new ReferenceMergeInferenceEdit(referenceKey, referredKey);
+            ReferenceMergeInferenceEdit edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey);
+
+            if (node.has("isActive")) {
+                edit.setActive(node.get("isActive").asBoolean());
+            }
+
+            if (node.has("id") && node.get("id") != null) {
+                edit.setId(node.get("id").asInt());
+            }
+
+            return edit;
         }
     }
 }

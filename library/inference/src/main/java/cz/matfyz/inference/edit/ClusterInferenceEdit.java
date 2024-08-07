@@ -377,7 +377,17 @@ public class ClusterInferenceEdit extends AbstractInferenceEdit {
                     clusterKeys.add(key);
                 }
             }
-            return new ClusterInferenceEdit(clusterKeys);
+            ClusterInferenceEdit edit = new ClusterInferenceEdit(clusterKeys);
+
+            if (node.has("isActive")) {
+                edit.setActive(node.get("isActive").asBoolean());
+            }
+
+            if (node.has("id") && node.get("id") != null) {
+                edit.setId(node.get("id").asInt());
+            }
+
+            return edit;
         }
     }
 }

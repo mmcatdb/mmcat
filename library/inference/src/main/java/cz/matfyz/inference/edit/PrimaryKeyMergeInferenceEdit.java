@@ -161,7 +161,17 @@ public class PrimaryKeyMergeInferenceEdit extends AbstractInferenceEdit {
 
             final Key primaryKey = parser.getCodec().treeToValue(node.get("primaryKey"), Key.class);
 
-            return new PrimaryKeyMergeInferenceEdit(primaryKey);
+            PrimaryKeyMergeInferenceEdit edit = new PrimaryKeyMergeInferenceEdit(primaryKey);
+
+            if (node.has("isActive")) {
+                edit.setActive(node.get("isActive").asBoolean());
+            }
+
+            if (node.has("id") && node.get("id") != null) {
+                edit.setId(node.get("id").asInt());
+            }
+
+            return edit;
         }
     }
 }

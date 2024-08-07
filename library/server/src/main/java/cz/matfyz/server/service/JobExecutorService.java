@@ -311,7 +311,9 @@ public class JobExecutorService {
         if (edit == null && !savePermanent) { //cancel edit
             inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
         } else if (!savePermanent) { // new edit
+            edit.setId(inferenceJobData.manual.size());
             inferenceJobData.manual.add(edit);
+            System.out.println("continu manual: " + inferenceJobData.manual);
         }
         SchemaCategory inferenceSchemaCategory = inferenceJobData.inference.schemaCategory.toSchemaCategory();
         List<MappingJsonValue> mappingsJsonValue = inferenceJobData.inference.mapping;
@@ -325,6 +327,7 @@ public class JobExecutorService {
         } else {
             try {
                 job.job().data = inferenceJobData.toJsonValue();
+                System.out.println("job.job().data" + job.job().data);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
             }

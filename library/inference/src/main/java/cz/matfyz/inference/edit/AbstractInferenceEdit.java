@@ -4,8 +4,6 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.inference.edit.utils.InferenceEditorUtils;
 
 import java.io.IOException;
@@ -13,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonParser;
@@ -35,11 +34,26 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 @JsonDeserialize(using = AbstractInferenceEdit.Deserializer.class)
 public abstract class AbstractInferenceEdit {
 
+    // TODO: change to Id
+    @JsonProperty("id")
+    protected int id;
+
+    @JsonProperty("isActive")
+    protected boolean isActive;
+
     protected SchemaCategory oldSchemaCategory;
     protected SchemaCategory newSchemaCategory;
 
     protected Set<Signature> signaturesToDelete = new HashSet<>();
     protected Set<Key> keysToDelete = new HashSet<>();
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 
     protected void setSchemaCategories(SchemaCategory schemaCategory) {
         this.oldSchemaCategory = schemaCategory;

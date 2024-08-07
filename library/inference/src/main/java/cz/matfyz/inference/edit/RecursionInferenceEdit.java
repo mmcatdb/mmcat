@@ -509,7 +509,17 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
                     pattern.add(patternSegment);
                 }
             }
-            return new RecursionInferenceEdit(pattern);
+            RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+
+            if (node.has("isActive")) {
+                edit.setActive(node.get("isActive").asBoolean());
+            }
+
+            if (node.has("id") && node.get("id") != null) {
+                edit.setId(node.get("id").asInt());
+            }
+
+            return edit;
         }
     }
 }
