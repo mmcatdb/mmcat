@@ -22,7 +22,7 @@ import java.util.TreeSet;
  */
 public class InstanceObject implements Identified<InstanceObject, Key> {
 
-    public final SchemaObject schemaObject;
+    private final SchemaObject schemaObject;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
@@ -31,7 +31,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     }
 
     /**
-     * Copies all data from the source instance object to this object. All previous data is discareded!
+     * Copies all data from the source instance object to this object. All previous data is discarded!
      */
     public void load(InstanceObject source) {
         domain.clear();
@@ -48,10 +48,6 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
 
     public Key key() {
         return schemaObject.key();
-    }
-
-    public String label() {
-        return schemaObject.label();
     }
 
     public SignatureId superId() {
@@ -102,15 +98,6 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     public static DomainRow getOrCreateRowWithEdge(SuperIdWithValues superId, DomainRow parent, InstanceEdge edgeFromParent) {
         var merger = new Merger();
         return merger.merge(superId, parent, edgeFromParent);
-    }
-
-    public static DomainRow getOrCreateRowWithBaseMorphism(SuperIdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
-        return getOrCreateRowWithEdge(superId, parent, new InstanceEdge(baseMorphismFromParent, true));
-    }
-
-    public static DomainRow connectRowWithBaseMorphism(DomainRow domainRow, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
-        // TODO optimize
-        return getOrCreateRowWithBaseMorphism(domainRow.superId, parent, baseMorphismFromParent);
     }
 
     DomainRow createRow(SuperIdWithValues superId) {
@@ -232,23 +219,15 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         return new FindSuperIdResult(superId, foundIds);
     }
 
-    public static SuperIdWithValues mergeSuperIds(Collection<DomainRow> rows) {
-        var builder = new SuperIdWithValues.Builder();
-
-        for (var row : rows)
-            builder.add(row.superId);
+    private static SuperIdWithValues mergeSuperIds(Collection<DomainRow> rows) {
+        final var builder = new SuperIdWithValues.Builder();
+        rows.forEach(row -> builder.add(row.superId));
 
         return builder.build();
     }
 
-    public static Set<String> mergeTechnicalIds(Collection<DomainRow> rows) {
-        var output = new TreeSet<String>();
-        rows.forEach(row -> output.addAll(row.technicalIds));
-        return output;
-    }
-
     private Set<DomainRow> findNewRows(Set<SuperIdWithValues> foundIds, Set<DomainRow> outOriginalRows) {
-        var output = new TreeSet<DomainRow>();
+        final var output = new TreeSet<DomainRow>();
 
         for (var id : foundIds) {
             var row = getRowById(id);
@@ -332,8 +311,6 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         StringBuilder builder = new StringBuilder();
 
         builder.append("\tKey: ").append(key());
-        if (!label().isEmpty())
-            builder.append("\t(").append(label()).append(")");
         builder.append("\n");
 
         builder.append("\tValues:\n");

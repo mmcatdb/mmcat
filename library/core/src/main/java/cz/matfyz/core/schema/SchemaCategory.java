@@ -3,41 +3,41 @@ package cz.matfyz.core.schema;
 import cz.matfyz.core.exception.MorphismNotFoundException;
 import cz.matfyz.core.identifiers.BaseSignature;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.MapUniqueContext;
 import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.identifiers.UniqueContext;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class SchemaCategory {
 
     public final String label;
 
+    private final Map<Key, SchemaObject> objects = new TreeMap<>();
+    private final Map<Signature, SchemaMorphism> morphisms = new TreeMap<>();
+
     public SchemaCategory(String label) {
         this.label = label;
     }
 
-    private final UniqueContext<SchemaObject, Key> objectContext = new MapUniqueContext<>();
-    private final UniqueContext<SchemaMorphism, Signature> morphismContext = new MapUniqueContext<>();
+    public SchemaObject getObject(Key key) {
+        return objects.get(key);
+    }
 
     public SchemaObject addObject(SchemaObject object) {
-        return objectContext.createUniqueObject(object);
+        return objects.put(object.key(), object);
     }
 
     public SchemaMorphism addMorphism(SchemaMorphism morphism) {
-        return morphismContext.createUniqueObject(morphism);
+        return morphisms.put(morphism.signature(), morphism);
     }
 
     public void removeMorphism(SchemaMorphism morphism) {
-        morphismContext.deleteUniqueObject(morphism);
-    }
-
-    public SchemaObject getObject(Key key) {
-        return objectContext.getUniqueObject(key);
+        morphisms.remove(morphism.signature());
     }
 
     public SchemaMorphism getMorphism(Signature signature) {
@@ -48,19 +48,12 @@ public class SchemaCategory {
             if (baseSignature.isDual())
                 throw MorphismNotFoundException.signatureIsDual(baseSignature);
 
-            final SchemaMorphism baseMorphism = morphismContext.getUniqueObject(baseSignature);
-            if (baseMorphism == null)
+            return morphisms.computeIfAbsent(baseSignature, x -> {
                 throw MorphismNotFoundException.baseNotFound(baseSignature);
-
-            return baseMorphism;
+            });
         }
 
-        final SchemaMorphism morphism = morphismContext.getUniqueObject(signature);
-        if (morphism != null)
-            return morphism;
-
-        final SchemaMorphism newMorphism = createCompositeMorphism(signature);
-        return morphismContext.createUniqueObject(newMorphism);
+        return morphisms.computeIfAbsent(signature, this::createCompositeMorphism);
     }
 
     /**
@@ -132,19 +125,19 @@ public class SchemaCategory {
     }
 
     public Collection<SchemaObject> allObjects() {
-        return objectContext.getAllUniqueObjects();
+        return objects.values();
     }
 
     public Collection<SchemaMorphism> allMorphisms() {
-        return morphismContext.getAllUniqueObjects();
+        return morphisms.values();
     }
 
     public boolean hasObject(Key key) {
-        return objectContext.getUniqueObject(key) != null;
+        return objects.containsKey(key);
     }
 
     public boolean hasMorphism(Signature signature) {
-        return morphismContext.getUniqueObject(signature) != null;
+        return morphisms.containsKey(signature);
     }
 
     public boolean hasEdge(BaseSignature base) {
@@ -182,12 +175,12 @@ public class SchemaCategory {
 
     public abstract static class Editor {
 
-        protected static UniqueContext<SchemaObject, Key> getObjectContext(SchemaCategory category) {
-            return category.objectContext;
+        protected static Map<Key, SchemaObject> getObjects(SchemaCategory category) {
+            return category.objects;
         }
 
-        protected static UniqueContext<SchemaMorphism, Signature> getMorphismContext(SchemaCategory category) {
-            return category.morphismContext;
+        protected static Map<Signature, SchemaMorphism> getMorphisms(SchemaCategory category) {
+            return category.morphisms;
         }
 
     }

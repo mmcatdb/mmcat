@@ -17,7 +17,7 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMorphism.class);
 
-    public final SchemaMorphism schemaMorphism;
+    private final SchemaMorphism schemaMorphism;
     private final List<InstanceMorphism> bases;
     private final InstanceObject dom;
     private final InstanceObject cod;

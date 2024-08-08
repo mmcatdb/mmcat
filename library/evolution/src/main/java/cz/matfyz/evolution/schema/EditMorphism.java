@@ -27,13 +27,12 @@ public class EditMorphism extends SchemaCategory.Editor implements SchemaModific
     }
 
     private void replaceMorphism(SchemaCategory category, DisconnectedSchemaMorphism morphism) {
-        final var objects = getObjectContext(category);
-        final var morphismWithObjects = morphism.toSchemaMorphism(objects::getUniqueObject);
+        final var objects = getObjects(category);
+        final var morphismWithObjects = morphism.toSchemaMorphism(objects::get);
 
-        final var morphisms = getMorphismContext(category);
+        final var morphisms = getMorphisms(category);
         // Replace the morphism by its newer version. The equality is determined by its signature.
-        morphisms.deleteUniqueObject(morphismWithObjects);
-        morphisms.createUniqueObject(morphismWithObjects);
+        morphisms.put(morphismWithObjects.signature(), morphismWithObjects);
     }
 
 }

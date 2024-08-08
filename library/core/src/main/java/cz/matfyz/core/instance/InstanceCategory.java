@@ -15,8 +15,7 @@ import java.util.Map;
 
 public class InstanceCategory {
 
-    // Evolution extension
-    public final SchemaCategory schema;
+    private final SchemaCategory schema;
     private final Map<Key, InstanceObject> objects;
     private final Map<Signature, InstanceMorphism> morphisms;
 
@@ -32,11 +31,6 @@ public class InstanceCategory {
 
     public Map<Signature, InstanceMorphism> morphisms() {
         return morphisms;
-    }
-
-    // Evolution extension
-    public void deleteMorphism(InstanceMorphism morphism) {
-        morphisms.remove(morphism.signature());
     }
 
     public InstanceObject getObject(Key key) {
@@ -146,8 +140,8 @@ public class InstanceCategory {
     }
 
     public void createReferences() {
-        for (var object : objects.values())
-            for (var signature : object.superId().signatures())
+        for (final var object : objects.values())
+            for (final var signature : object.superId().signatures())
                 createReferencesForSignature(signature);
     }
 
@@ -155,16 +149,16 @@ public class InstanceCategory {
         if (!signature.isComposite())
             return;
 
-        var baseSignatures = signature.toBases();
+        final var baseSignatures = signature.toBases();
         var signatureToTarget = Signature.createEmpty();
 
         for (int i = 0; i < baseSignatures.size() - 1; i++) {
-            var currentBase = baseSignatures.get(i);
-            var signatureInTarget = Signature.concatenate(baseSignatures.subList(i + 1, baseSignatures.size()));
+            final var currentBase = baseSignatures.get(i);
+            final var signatureInTarget = Signature.concatenate(baseSignatures.subList(i + 1, baseSignatures.size()));
             signatureToTarget = signatureToTarget.concatenate(currentBase);
 
-            var pathFromTarget = getPath(signatureToTarget.dual());
-            var currentTarget = pathFromTarget.to();
+            final var pathFromTarget = getPath(signatureToTarget.dual());
+            final var currentTarget = pathFromTarget.to();
             if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;
 
@@ -180,18 +174,11 @@ public class InstanceCategory {
             builder.append(key).append(", ");
         builder.append("\n\n");
 
-
         builder.append("Objects (showing only non-empty):\n");
         for (InstanceObject object : objects.values())
             if (!object.isEmpty())
                 builder.append(object).append("\n");
         builder.append("\n");
-
-        /*builder.append("Objects :\n");
-        for (InstanceObject object : objects.values())
-            //if (!object.isEmpty())
-            builder.append(object).append("\n");
-        builder.append("\n");*/
 
         builder.append("Signatures: ");
         for (Signature signature : morphisms.keySet())

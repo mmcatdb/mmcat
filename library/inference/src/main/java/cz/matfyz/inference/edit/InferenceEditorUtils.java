@@ -5,7 +5,6 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
-import cz.matfyz.core.identifiers.UniqueContext;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
@@ -148,13 +147,11 @@ public class InferenceEditorUtils {
         }
 
         public void deleteObject(Key key) {
-            UniqueContext<SchemaObject, Key> objectContext = getObjectContext(schemaCategory);
-            SchemaObject objectToRemove = objectContext.getUniqueObject(key);
-            if (objectToRemove != null) {
-                objectContext.deleteUniqueObject(objectToRemove);
-            } else {
+            final var objects = getObjects(schemaCategory);
+            if (objects.containsKey(key))
                 throw new NotFoundException("SchemaObject with the provided key does not exist");
-            }
+
+            objects.remove(key);
         }
 
         public void deleteObjects(Set<Key> keys) {

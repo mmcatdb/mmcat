@@ -4,6 +4,7 @@ import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
 import cz.matfyz.core.instance.InstanceObject.ReferenceToRow;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -168,7 +169,7 @@ class Merger {
 
             var result = instanceObject.findMaximalSuperId(superId, originalRows);
             var maximalSuperId = result.superId();
-            var maximalTechnicalId = InstanceObject.mergeTechnicalIds(originalRows);
+            var maximalTechnicalId = mergeTechnicalIds(originalRows);
 
             if (originalRows.size() == 1)
                 return; // No merging is required
@@ -181,6 +182,13 @@ class Merger {
             // Detect all morphisms that have maximal cardinality ONE and merge their rows. This can cause a chain reaction.
             // This steps is done by combining the rows' superIds and then calling merge.
             mergeMappings(originalRows, newRow);
+        }
+
+        private static Set<String> mergeTechnicalIds(Collection<DomainRow> rows) {
+            final var output = new TreeSet<String>();
+            rows.forEach(row -> output.addAll(row.technicalIds));
+
+            return output;
         }
 
         private void mergeMappings(Set<DomainRow> originalRows, DomainRow newRow) {

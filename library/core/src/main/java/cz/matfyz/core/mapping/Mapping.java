@@ -30,7 +30,6 @@ public class Mapping implements Comparable<Mapping> {
         final var rootObject = category.getObject(rootKey);
 
         return new Mapping(category, rootKey, kindName, accessPath, defaultPrimaryKey(rootObject));
-        //return new Mapping(category, rootKey, kindName, accessPath, List.of(Signature.createEmpty()));
     }
 
     public static List<Signature> defaultPrimaryKey(SchemaObject object) {

@@ -17,14 +17,14 @@ public class CreateMorphism extends SchemaCategory.Editor implements SchemaModif
     }
 
     @Override public void up(SchemaCategory category) {
-        final var objects = getObjectContext(category);
-        final var morphismWithObjects = morphism.toSchemaMorphism(objects::getUniqueObject);
+        final var objects = getObjects(category);
+        final var morphismWithObjects = morphism.toSchemaMorphism(objects::get);
 
-        getMorphismContext(category).createUniqueObject(morphismWithObjects);
+        getMorphisms(category).put(morphismWithObjects.signature(), morphismWithObjects);
     }
 
     @Override public void down(SchemaCategory category) {
-        getMorphismContext(category).deleteUniqueObject(morphism.signature());
+        getMorphisms(category).remove(morphism.signature());
     }
 
 }

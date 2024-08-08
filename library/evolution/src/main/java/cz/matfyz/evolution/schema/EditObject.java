@@ -26,12 +26,12 @@ public class EditObject extends SchemaCategory.Editor implements SchemaModificat
     }
 
     private void replaceObject(SchemaCategory category, SchemaObject object) {
-        final var objects = getObjectContext(category);
+        final var objects = getObjects(category);
         // Replace the object by its newer version. The equality is determined by its key.
-        objects.deleteUniqueObject(object);
-        objects.createUniqueObject(object);
+        objects.remove(object.key());
+        objects.put(object.key(), object);
 
-        getMorphismContext(category).getAllUniqueObjects().forEach(morphism -> morphism.updateObject(object));
+        category.allMorphisms().forEach(morphism -> morphism.updateObject(object));
     }
 
 }

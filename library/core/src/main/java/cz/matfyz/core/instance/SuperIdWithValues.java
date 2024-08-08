@@ -49,8 +49,6 @@ public class SuperIdWithValues implements Serializable, Comparable<SuperIdWithVa
         if (cachedId == null)
             cachedId = new SignatureId(tuples.keySet());
         return cachedId;
-        // Evolution extension
-        //return new Id(map.keySet());
     }
 
     public Collection<String> values() {

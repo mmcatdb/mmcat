@@ -206,7 +206,7 @@ public class SchemaBuilder {
         return Signature.concatenate(signatures);
     }
 
-    // Objects ids - they need to be defined them when the morphisms are already there.
+    // Objects ids - they need to be defined when the morphisms are already here.
 
     public SchemaBuilder ids(BuilderObject object, BuilderMorphism... morphisms) {
         final var id = new SignatureId(Stream.of(morphisms).map(m -> m.signature()).toArray(Signature[]::new));

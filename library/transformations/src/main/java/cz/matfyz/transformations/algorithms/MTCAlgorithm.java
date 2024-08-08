@@ -43,21 +43,16 @@ public class MTCAlgorithm {
     }
 
     public void algorithm() {
-        System.out.println("In MTCAlgo()");
         LOGGER.debug("Model To Category algorithm");
         final ComplexProperty rootAccessPath = mapping.accessPath().copyWithoutAuxiliaryNodes();
 
         // Create references for adding found values to the superId of other rows.
         category.createReferences();
-        System.out.println("Size of forest: " + forest.size());
-        for (RootRecord rootRecord : forest) {
-            System.out.println("root Record" + rootRecord);
+        for (RootRecord rootRecord : forest)
             processRootRecord(rootRecord, rootAccessPath);
-        }
     }
 
     private void processRootRecord(RootRecord rootRecord, ComplexProperty rootAccessPath) {
-        System.out.println("Processing root recod");
         LOGGER.debug("Process a root record:\n{}", rootRecord);
 
         Deque<StackTriple> masterStack = createStackWithObject(mapping.rootObject(), rootRecord, rootAccessPath);
@@ -103,7 +98,6 @@ public class MTCAlgorithm {
     }
 
     private void processTopOfStack(Deque<StackTriple> masterStack) {
-        System.out.println("Processing top of stack");
         StackTriple triple = masterStack.pop();
         final var superIds = SuperIdsFetcher.fetch(triple.parentRecord, triple.parentRow, triple.parentToChild, triple.childAccessPath);
 
@@ -144,7 +138,7 @@ public class MTCAlgorithm {
             }
             */
         }
-        System.out.println("current domain: " + currentDomainRow);
+
         return currentDomainRow;
 
         // Now try merging them from the codomain object to the domain object (the other way should be already merged).
