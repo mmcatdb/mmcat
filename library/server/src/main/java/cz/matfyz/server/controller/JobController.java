@@ -1,5 +1,6 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
 import cz.matfyz.inference.edit.utils.SaveJobResultPayload;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
@@ -145,16 +146,26 @@ public class JobController {
         }
     }
 
-    @PostMapping("/jobs/{id}/cancelEdit")
-    public JobDetail cancelLastJobEdit(@PathVariable Id id) {
-        System.out.println("cancelling last edit...");
-
+    @PostMapping("/jobs/{id}/manageEdit")
+    public JobDetail manageEdit(@PathVariable Id id, @Nullable @RequestBody ManageEditRequest manageEditRequest) {
         final var jobWithRun = repository.find(id);
 
+        final var edit = extractEdit(manageEditRequest.edit());
+
         InferenceJobData inferenceJobData = extractInferenceJobData(jobWithRun.job());
-        JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, null, false);
+        JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, false);
 
         return jobToJobDetail(service.transition(newJobWithRun, State.Waiting));
+    }
+
+    private AbstractInferenceEdit extractEdit(String editString) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            return objectMapper.readValue(editString, AbstractInferenceEdit.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to process JSON while extracting the payload from inference job", e);
+        }
     }
 
 
@@ -195,5 +206,7 @@ public class JobController {
     }
 
     public record SaveJobResultRequest(String payload) {}
+
+    public record ManageEditRequest(String edit) {}
 
 }

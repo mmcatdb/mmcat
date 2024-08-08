@@ -9,8 +9,6 @@ import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
@@ -21,7 +19,6 @@ import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
-import cz.matfyz.server.builder.MetadataContext;
 import cz.matfyz.server.builder.GeneratedDataModel;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
@@ -40,24 +37,20 @@ import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.entity.query.QueryVersion;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.Position;
 import cz.matfyz.server.exception.SessionException;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.repository.QueryRepository;
 import cz.matfyz.server.repository.QueryRepository.QueryWithVersion;
 import cz.matfyz.server.utils.InferenceJobData;
-import cz.matfyz.server.utils.LayoutUtil;
 import cz.matfyz.server.utils.SchemaCategoryUtil;
 import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -308,13 +301,8 @@ public class JobExecutorService {
     }
 
     public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData inferenceJobData, AbstractInferenceEdit edit, boolean savePermanent) {
-        if (edit == null && !savePermanent) { //cancel edit
-            inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
-        } else if (!savePermanent) { // new edit
-            edit.setId(inferenceJobData.manual.size());
-            inferenceJobData.manual.add(edit);
-            System.out.println("continu manual: " + inferenceJobData.manual);
-        }
+        updateInferenceJobDataManual(inferenceJobData, edit, savePermanent);
+
         SchemaCategory inferenceSchemaCategory = inferenceJobData.inference.schemaCategory.toSchemaCategory();
         List<MappingJsonValue> mappingsJsonValue = inferenceJobData.inference.mapping;
 
@@ -333,6 +321,34 @@ public class JobExecutorService {
             }
         }
         return job;
+    }
+
+    private void updateInferenceJobDataManual(InferenceJobData inferenceJobData, AbstractInferenceEdit edit, boolean savePermanent) {
+        if (edit == null) {
+            System.out.println("edit is null");
+            if (!savePermanent && !inferenceJobData.manual.isEmpty()) {
+                inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
+            }
+            return;
+        }
+        // TODO: make a better id system
+        Integer editIdx = editIdxInManual(edit, inferenceJobData.manual);
+        if (editIdx == null) {
+            edit.setId(inferenceJobData.manual.size());
+            inferenceJobData.manual.add(edit);
+        } else {
+            AbstractInferenceEdit existingEdit = inferenceJobData.manual.get(editIdx);
+            existingEdit.setActive(!existingEdit.isActive);
+        }
+    }
+
+    private Integer editIdxInManual(AbstractInferenceEdit edit, List<AbstractInferenceEdit> manual) {
+        for (int i = 0; i < manual.size(); i++) {
+            if (manual.get(i).id.equals(edit.id)) {
+                return i;
+            }
+        }
+        return null;
     }
 
     public void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, List<Mapping> finalMappings) {

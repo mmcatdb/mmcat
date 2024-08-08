@@ -1,19 +1,19 @@
-import { Key } from "../identifiers";
+import { Key } from '../identifiers';
 
 interface AbstractInferenceEdit {
-    id: number | undefined;
+    id: number | null;
     isActive: boolean;
     toJSON(): any;
 }
 export type { AbstractInferenceEdit };
 
 export class PrimaryKeyMergeInferenceEdit implements AbstractInferenceEdit {
-    public readonly type: string = "primaryKey";
+    public readonly type: string = 'primaryKey';
     public readonly primaryKey: Key;
     public isActive: boolean;
-    public id: number | undefined;
+    public id: number | null;
 
-    constructor(primaryKey: Key, isActive: boolean, id?: number) {
+    constructor(primaryKey: Key, isActive: boolean, id: number | null = null) {
         this.primaryKey = primaryKey;
         this.isActive = isActive;
         this.id = id;
@@ -29,13 +29,13 @@ export class PrimaryKeyMergeInferenceEdit implements AbstractInferenceEdit {
 }
 
 export class ReferenceMergeInferenceEdit implements AbstractInferenceEdit {
-    public readonly type: string = "reference";
+    public readonly type: string = 'reference';
     public readonly referenceKey: Key;
     public readonly referredKey: Key;
     public isActive: boolean;
-    public id: number | undefined;
+    public id: number | null;
 
-    constructor(referenceKey: Key, referredKey: Key, isActive: boolean, id?: number) {
+    constructor(referenceKey: Key, referredKey: Key, isActive: boolean, id: number | null = null) {
         this.referenceKey = referenceKey;
         this.referredKey = referredKey;
         this.isActive = isActive;
@@ -54,12 +54,12 @@ export class ReferenceMergeInferenceEdit implements AbstractInferenceEdit {
 }
 
 export class ClusterInferenceEdit implements AbstractInferenceEdit {
-    public readonly type: string = "cluster";
+    public readonly type: string = 'cluster';
     public readonly clusterKeys: Key[];
     public isActive: boolean;
-    public id: number | undefined;
+    public id: number | null;
 
-    constructor(clusterKeys: Key[], isActive: boolean, id?: number) {
+    constructor(clusterKeys: Key[], isActive: boolean, id: number | null = null) {
         this.clusterKeys = clusterKeys;
         this.isActive = isActive;
         this.id = id;
@@ -76,12 +76,12 @@ export class ClusterInferenceEdit implements AbstractInferenceEdit {
 }
 
 export class RecursionInferenceEdit implements AbstractInferenceEdit {
-    public readonly type: string = "recursion";
+    public readonly type: string = 'recursion';
     public readonly pattern: PatternSegment[];
     public isActive: boolean;
-    public id: number | undefined;
+    public id: number | null;
 
-    constructor(pattern: PatternSegment[], isActive: boolean, id?: number) {
+    constructor(pattern: PatternSegment[], isActive: boolean, id: number | null = null) {
         this.pattern = pattern;
         this.isActive = isActive;
         this.id = id;
@@ -102,33 +102,33 @@ export class RecursionInferenceEdit implements AbstractInferenceEdit {
 
 export function createInferenceEditFromServer(data: any): AbstractInferenceEdit {
     switch (data.type) {
-    case "primaryKey":
+    case 'primaryKey':
         return new PrimaryKeyMergeInferenceEdit(
             Key.fromServer(data.primaryKey), 
             data.isActive, 
-            data.id
+            data.id,
         );
-    case "reference":
+    case 'reference':
         return new ReferenceMergeInferenceEdit(
             Key.fromServer(data.referenceKey),
             Key.fromServer(data.referredKey),
             data.isActive,
-            data.id
+            data.id,
         );
-    case "cluster":
+    case 'cluster':
         return new ClusterInferenceEdit(
             data.clusterKeys.map((key: number) => Key.fromServer(key)),
             data.isActive,
-            data.id
+            data.id,
         );
-    case "recursion":
+    case 'recursion':
         return new RecursionInferenceEdit(
             data.pattern.map((segment: any) => new PatternSegment(segment.nodeName, segment.direction)),
             data.isActive,
-            data.id
+            data.id,
         );
     default:
-        throw new Error("Unknown edit type");
+        throw new Error('Unknown edit type');
     }
 }
 
@@ -136,7 +136,7 @@ export function createInferenceEditFromServer(data: any): AbstractInferenceEdit 
 export class SaveJobResultPayload {
     constructor(
         public permanent: boolean,
-        public edit: AbstractInferenceEdit
+        public edit: AbstractInferenceEdit,
     ) {}
 
     toJSON() {
@@ -151,7 +151,7 @@ export class PatternSegment {
     public readonly nodeName : string;
     public readonly direction: string;
 
-    constructor (nodeName: string, direction: string) {
+    constructor(nodeName: string, direction: string) {
         this.nodeName = nodeName;
         this.direction = direction;
     }

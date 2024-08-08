@@ -22,7 +22,7 @@ function undoEdit(edit: AbstractInferenceEdit) {
 }
 
 function redoEdit(edit: AbstractInferenceEdit) {
-    emit('undo-edit', edit);
+    emit('redo-edit', edit);
 }
 
 function cancel() {

@@ -515,8 +515,13 @@ public class RecursionInferenceEdit extends AbstractInferenceEdit {
                 edit.setActive(node.get("isActive").asBoolean());
             }
 
-            if (node.has("id") && node.get("id") != null) {
-                edit.setId(node.get("id").asInt());
+            if (node.has("id")) {
+                JsonNode idNode = node.get("id");
+                if (idNode.isNull()) {
+                    edit.setId(null);
+                } else {
+                    edit.setId(idNode.asInt());
+                }
             }
 
             return edit;

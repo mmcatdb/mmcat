@@ -126,7 +126,7 @@ async function saveJob(edit: AbstractInferenceEdit, permanent: boolean) {
 async function manageEdit(edit?: AbstractInferenceEdit) {
     fetching.value = true;
 
-    const result = await API.jobs.cancelLastJobEdit({ id: props.job.id });
+    const result = await API.jobs.manageEdit({ id: props.job.id }, { edit: JSON.stringify(edit) });
     if (result.status) {
         emit('updateJob', Job.fromServer(result.data));
     }

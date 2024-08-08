@@ -36,10 +36,10 @@ public abstract class AbstractInferenceEdit {
 
     // TODO: change to Id
     @JsonProperty("id")
-    protected int id;
+    public Integer id;
 
     @JsonProperty("isActive")
-    protected boolean isActive;
+    public boolean isActive;
 
     protected SchemaCategory oldSchemaCategory;
     protected SchemaCategory newSchemaCategory;
@@ -47,7 +47,7 @@ public abstract class AbstractInferenceEdit {
     protected Set<Signature> signaturesToDelete = new HashSet<>();
     protected Set<Key> keysToDelete = new HashSet<>();
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
