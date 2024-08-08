@@ -1,9 +1,9 @@
-import { Key } from '../identifiers';
+import { Key, KeyFromServer } from '../identifiers';
 
 interface AbstractInferenceEdit {
     id: number | null;
     isActive: boolean;
-    toJSON(): any;
+    toJSON(): unknown;
 }
 export type { AbstractInferenceEdit };
 
@@ -95,7 +95,7 @@ export class RecursionInferenceEdit implements AbstractInferenceEdit {
                 direction: segment.direction,
                 isActive: this.isActive,
                 id: this.id,
-            }))
+            })),
         };
     }
 }
@@ -117,7 +117,7 @@ export function createInferenceEditFromServer(data: any): AbstractInferenceEdit 
         );
     case 'cluster':
         return new ClusterInferenceEdit(
-            data.clusterKeys.map((key: number) => Key.fromServer(key)),
+            data.clusterKeys.map((key: KeyFromServer) => Key.fromServer(key)),
             data.isActive,
             data.id,
         );
@@ -136,20 +136,20 @@ export function createInferenceEditFromServer(data: any): AbstractInferenceEdit 
 export class SaveJobResultPayload {
     constructor(
         public permanent: boolean,
-        public edit: AbstractInferenceEdit,
+        public edit: AbstractInferenceEdit | null,
     ) {}
 
     toJSON() {
         return {
             permanent: this.permanent,
-            edit: this.edit instanceof ReferenceMergeInferenceEdit ? this.edit.toJSON() : this.edit
+            edit: this.edit ? this.edit.toJSON() : null,
         };
     }
 }
 
 export class PatternSegment {
     public readonly nodeName : string;
-    public readonly direction: string;
+    public direction: string;
 
     constructor(nodeName: string, direction: string) {
         this.nodeName = nodeName;

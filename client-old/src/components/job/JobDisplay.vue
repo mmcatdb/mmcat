@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue';
+import { computed, ref } from 'vue';
 import API from '@/utils/api';
 import { Job, JobState } from '@/types/job';
 import { ActionType } from '@/types/action';
@@ -51,31 +51,28 @@ const fetching = ref(false);
 const schemaCategory = computed(() => {
     if (typeof props.job.result === 'string' && props.job.payload.type === ActionType.RSDToCategory) {
         const parsedResult = JSON.parse(props.job.result);
-        if (isInferenceJobData(parsedResult)) {
+        if (isInferenceJobData(parsedResult)) 
             return SchemaCategory.fromServer(parsedResult.finalSchema, []);
-        } else {
-            throw new Error("InferenceJobData is not the right type");            
-        }
+        else 
+            throw new Error('InferenceJobData is not the right type');            
+        
     }
-    throw new Error("InferenceJobData is not the right type");
+    throw new Error('InferenceJobData is not the right type');
 });
 
 const inferenceEdits = computed(() => {
     if (typeof props.job.result === 'string' && props.job.payload.type === ActionType.RSDToCategory) {
         const parsedResult = JSON.parse(props.job.result);
         if (isInferenceJobData(parsedResult)) {
-            if (parsedResult.manual.length > 0) {
-                console.log("manual not null");
+            if (parsedResult.manual.length > 0) 
                 return parsedResult.manual.map(createInferenceEditFromServer);
-            } else {
-                console.log("manual null");
-                return [];
-            }
+            else 
+                return [];            
         } else {
-            throw new Error("InferenceJobData is not the right type");            
+            throw new Error('InferenceJobData is not the right type');            
         }
     }
-    throw new Error("InferenceJobData is not the right type");
+    throw new Error('InferenceJobData is not the right type');
 });
 
 async function startJob() {
@@ -108,29 +105,16 @@ async function restartJob() {
     fetching.value = false;
 }
 
-async function saveJob(edit: AbstractInferenceEdit, permanent: boolean) {
+async function updateJobResult(edit: AbstractInferenceEdit | null, permanent: boolean) {
     fetching.value = true;
 
     const saveJobResultPayload = new SaveJobResultPayload(permanent, edit);
-    console.log("saveJobResultPayload before sending to server: " + JSON.stringify(saveJobResultPayload));
+    console.log('saveJobResultPayload before sending to server: ' + JSON.stringify(saveJobResultPayload));
 
-    const result = await API.jobs.saveJobResult({ id: props.job.id }, { payload: JSON.stringify(saveJobResultPayload) });
-    if (result.status) {
+    const result = await API.jobs.updateJobResult({ id: props.job.id }, { payload: JSON.stringify(saveJobResultPayload) });
+    if (result.status) 
         emit('updateJob', Job.fromServer(result.data));
-    }
-
-    fetching.value = false;
-}
-// if no params, then cancel last job edit
-// else receive edit id and set isActive on that edit
-async function manageEdit(edit?: AbstractInferenceEdit) {
-    fetching.value = true;
-
-    const result = await API.jobs.manageEdit({ id: props.job.id }, { edit: JSON.stringify(edit) });
-    if (result.status) {
-        emit('updateJob', Job.fromServer(result.data));
-    }
-
+    
     fetching.value = false;
 }
 
@@ -230,22 +214,20 @@ function toggleGeneratedDataModel() {
         <div
             v-if="isShowDetail"
         >
-             <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
+            <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
                 <InferenceJobDisplay 
                     :job="job"
                     :schema-category="schemaCategory"
                     :inference-edits="inferenceEdits"
-                    @update-edit="(edit) => saveJob(edit, false)"
-                    @cancel-edit="manageEdit"
-                    @undo-edit="manageEdit"
-                    @redo-edit="manageEdit"
+                    @update-edit="(edit) => updateJobResult(edit, false)"
+                    @cancel-edit="updateJobResult(null, false)"
                 >
                     <template #below-editor>
                         <div class="d-flex justify-content-end mt-2">
                             <button 
                                 :disabled="fetching"
                                 class="primary"
-                                @click="() => saveJob(null, true)"
+                                @click="() => updateJobResult(null, true)"
                             >
                                 Save and Finish
                             </button>
@@ -267,7 +249,7 @@ function toggleGeneratedDataModel() {
                 readonly
                 :min-rows="1"
             />
-           <TextArea
+            <TextArea
                 v-else-if="!showGeneratedDataModel && result && job.payload.type !== ActionType.RSDToCategory"
                 v-model="result"
                 class="w-100 mt-2"

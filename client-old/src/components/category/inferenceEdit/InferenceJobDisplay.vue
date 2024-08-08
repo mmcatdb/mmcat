@@ -4,8 +4,8 @@ import { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
 import { SchemaCategory } from '@/types/schema';
-import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue'
-import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit'
+import EditorForInferenceSchemaCategory from '@/components/category/inferenceEdit/EditorForInferenceSchemaCategory.vue';
+import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit';
 import { RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inferenceEdit/inferenceEdit'; 
 
 type InferenceJobDisplayProps = {
@@ -21,8 +21,6 @@ const graph = shallowRef<Graph>();
 const emit = defineEmits<{
     (e: 'update-edit', edit: AbstractInferenceEdit): void;
     (e: 'cancel-edit'): void;
-    (e: 'undo-edit', edit: AbstractInferenceEdit): void;
-    (e: 'redo-edit', edit: AbstractInferenceEdit): void;
 }>();
 
 watch(() => props.schemaCategory, (newCategory, oldCategory) => {
@@ -36,9 +34,10 @@ watch(() => props.schemaCategory, (newCategory, oldCategory) => {
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
     if (!props.schemaCategory) {
-        console.log("This should not happen. - schemaCategory.value empty")
+        console.log('This should not happen. - schemaCategory.value empty');
         return;
     }
+    // eslint-disable-next-line vue/no-mutating-props
     props.schemaCategory.graph = newGraph;
 }
 
@@ -47,21 +46,21 @@ function createReferenceMergeEdit(nodes: (Node)[]) {
     const referredKey = nodes[1].schemaObject.key;
 
     const edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey, true);
-    confirm(edit);
+    confirmOrRevert(edit);
 }
 
 function createPrimaryKeyMergeEdit(nodes: (Node)[]) {
     const primaryKey = nodes[0].schemaObject.key;
 
     const edit = new PrimaryKeyMergeInferenceEdit(primaryKey, true);
-    confirm(edit);
+    confirmOrRevert(edit);
 }
 
 function createClusterEdit(nodes: (Node)[]) {
     const clusterKeys = nodes.map(node => node.schemaObject.key);
 
     const edit = new ClusterInferenceEdit(clusterKeys, true);
-    confirm(edit);
+    confirmOrRevert(edit);
 }
 
 function createRecursionEdit(payload: { nodes: (Node)[], edges: (Edge)[] }) {
@@ -84,14 +83,14 @@ function createRecursionEdit(payload: { nodes: (Node)[], edges: (Edge)[] }) {
 
     // last segment direction should be empty
     if (pattern.length > 0)
-        pattern[pattern.length - 1].direction = "";
+        pattern[pattern.length - 1].direction = '';
     
 
     const edit = new RecursionInferenceEdit(pattern, true);   
-    confirm(edit);
+    confirmOrRevert(edit);
 }
 
-function confirm(edit: AbstractInferenceEdit) {
+function confirmOrRevert(edit: AbstractInferenceEdit) {
     emit('update-edit', edit);
 }
 
@@ -99,13 +98,6 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
-function undoEdit(edit: AbstractInferenceEdit) {
-    emit('undo-edit', edit);
-}
-
-function redoEdit(edit: AbstractInferenceEdit) {
-    emit('redo-edit', edit);
-}
 
 </script>
 
@@ -122,11 +114,10 @@ function redoEdit(edit: AbstractInferenceEdit) {
                     @confirm-primary-key-merge="createPrimaryKeyMergeEdit"
                     @confirm-cluster="createClusterEdit"
                     @confirm-recursion="createRecursionEdit"
-                    @cancel-edit="cancelEdit"            
-                    @undo-edit="undoEdit"
-                    @redo-edit="redoEdit"
+                    @cancel-edit="cancelEdit"   
+                    @revert-edit="confirmOrRevert"         
                 />
-                <slot name="below-editor"></slot>
+                <slot name="below-editor" />
             </div>
         </div>
     </div>

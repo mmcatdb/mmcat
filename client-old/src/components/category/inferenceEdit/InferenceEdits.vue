@@ -11,18 +11,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'cancel'): void;
-    (e: 'undo-edit', edit: AbstractInferenceEdit): void;
-    (e: 'redo-edit', edit: AbstractInferenceEdit): void;
+    (e: 'revert-edit', edit: AbstractInferenceEdit): void;
 }>();
 
 const hasEdits = computed(() => props.inferenceEdits.length > 0);
 
-function undoEdit(edit: AbstractInferenceEdit) {
-    emit('undo-edit', edit);
-}
-
-function redoEdit(edit: AbstractInferenceEdit) {
-    emit('redo-edit', edit);
+function revertEdit(edit: AbstractInferenceEdit) {
+    emit('revert-edit', edit);
 }
 
 function cancel() {
@@ -60,19 +55,19 @@ function getEditName(editType: string): string {
                             active: {{ edit.isActive }}
                         </p>
                         <button 
-                            @click="undoEdit(edit)"
                             :disabled="!edit.isActive"
+                            @click="revertEdit(edit)"
                         >
                             Undo
                         </button>
                         <button
-                            @click="redoEdit(edit)"
                             :disabled="edit.isActive"
+                            @click="revertEdit(edit)"
                         >
                             Redo
                         </button>
                         <Divider />
-                        <br>
+                        <br />
                     </div>
                 </template>
                 <template v-else>

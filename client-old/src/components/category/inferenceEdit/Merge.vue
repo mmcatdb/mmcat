@@ -7,14 +7,14 @@ import ReferenceMerge from '@/components/category/inferenceEdit/ReferenceMerge.v
 import PrimaryKeyMerge from '@/components/category/inferenceEdit/PrimaryKeyMerge.vue';
 
 const props = defineProps<{
-    graph: Graph
+    graph: Graph;
 }>();
 
 const emit = defineEmits<{
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
+    (e: 'confirm-reference-merge', nodes: (Node)[]): void;
+    (e: 'confirm-primary-key-merge', nodes: (Node)[]): void;
 }>();
 
 const mergeType = ref<'reference' | 'primaryKey'>('reference');
@@ -23,11 +23,11 @@ const confirmHandler = computed(() => {
     return mergeType.value === 'reference' ? confirmReference : confirmPrimaryKey;
 });
 
-function confirmReference(nodes: (Node | undefined)[]) {
+function confirmReference(nodes: (Node)[]) {
     emit('confirm-reference-merge', nodes);
 }
 
-function confirmPrimaryKey(nodes: (Node | undefined)[]) {
+function confirmPrimaryKey(nodes: (Node)[]) {
     emit('confirm-primary-key-merge', nodes);
 }
 
@@ -42,17 +42,25 @@ function cancelEdit() {
 </script>
 
 <template>
-       <div class="merge">
+    <div class="merge">
         <h2>Merge Objects</h2>
         <div class="merge-type">
             <label>
-                <input type="radio" v-model="mergeType" value="reference"> Reference
+                <input
+                    v-model="mergeType"
+                    type="radio"
+                    value="reference"
+                /> Reference
             </label>
             <label>
-                <input type="radio" v-model="mergeType" value="primaryKey"> Primary Key
+                <input 
+                    v-model="mergeType" 
+                    type="radio" 
+                    value="primaryKey" 
+                /> Primary Key
             </label>
         </div>
-    <Divider />
+        <Divider />
         <component
             :is="mergeType === 'reference' ? ReferenceMerge : PrimaryKeyMerge"
             :graph="props.graph"

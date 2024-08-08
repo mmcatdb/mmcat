@@ -7,16 +7,16 @@ import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 
 const props = defineProps<{
-    graph: Graph
+    graph: Graph;
 }>();
 
 const emit = defineEmits<{
-    (e: 'confirm', nodes: (Node | undefined)[]): void;
+    (e: 'confirm', nodes: (Node)[]): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
 }>();
 
-const nodes = shallowRef<(Node | undefined)[]>([]);
+const nodes = shallowRef<(Node)[]>([]);
 const confirmClicked = ref(false);
 
 const nodeSelected = computed(() => !!nodes.value[0]);
@@ -36,7 +36,7 @@ function cancel() {
         emit('cancel');
     }
     
-    nodes.value = [undefined];  //unselect selected nodes
+    nodes.value = [];  //unselect selected nodes
 
     if (confirmClicked.value) { // delete the edit (on BE)
         emit('cancel-edit');

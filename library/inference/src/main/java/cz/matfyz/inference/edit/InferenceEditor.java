@@ -10,9 +10,9 @@ public class InferenceEditor {
 
     private SchemaCategory schemaCategory;
     private List<Mapping> mappings;
-    public final List<AbstractInferenceEdit> edits;
+    private final List<AbstractInferenceEdit> edits;
 
-    public List<AbstractInferenceEdit> activeEdits;
+    private List<AbstractInferenceEdit> activeEdits;
 
     public InferenceEditor(SchemaCategory schemaCategory, List<AbstractInferenceEdit> edits) {
         this.schemaCategory = schemaCategory;
@@ -58,8 +58,6 @@ public class InferenceEditor {
 
     private void applySchemaCategoryEdits() {
         for (AbstractInferenceEdit edit : activeEdits) {
-            System.out.println("edit id: " + edit.id);
-            System.out.println("edit is active: " + edit.isActive);
             schemaCategory = edit.applySchemaCategoryEdit(schemaCategory);
         }
     }

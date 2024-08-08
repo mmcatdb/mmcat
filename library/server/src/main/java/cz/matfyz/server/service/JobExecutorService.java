@@ -296,7 +296,7 @@ public class JobExecutorService {
         try {
             job.data = inferenceJobData.toJsonValue();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
+            throw new OtherException(e);
         }
     }
 
@@ -306,9 +306,11 @@ public class JobExecutorService {
         SchemaCategory inferenceSchemaCategory = inferenceJobData.inference.schemaCategory.toSchemaCategory();
         List<MappingJsonValue> mappingsJsonValue = inferenceJobData.inference.mapping;
 
-        InferenceEditor inferenceEditor = savePermanent ? new InferenceEditor(inferenceSchemaCategory, createMappings(mappingsJsonValue, inferenceSchemaCategory), inferenceJobData.manual) : new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
+        InferenceEditor inferenceEditor = savePermanent
+                                            ? new InferenceEditor(inferenceSchemaCategory, createMappings(mappingsJsonValue, inferenceSchemaCategory), inferenceJobData.manual)
+                                            : new InferenceEditor(inferenceJobData.inference.schemaCategory.toSchemaCategory(), inferenceJobData.manual);
 
-        inferenceJobData.finalSchema = makeEdits(inferenceEditor);
+        inferenceJobData.finalSchema = applyEdits(inferenceEditor);
 
         if (savePermanent) {
             finishRSDToCategoryProcessing(job, inferenceJobData.finalSchema, inferenceEditor.getMappings());
@@ -317,7 +319,7 @@ public class JobExecutorService {
                 job.job().data = inferenceJobData.toJsonValue();
                 System.out.println("job.job().data" + job.job().data);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to process JSON while saving SK and mapping to job.data", e);
+                throw new OtherException(e);
             }
         }
         return job;
@@ -325,14 +327,13 @@ public class JobExecutorService {
 
     private void updateInferenceJobDataManual(InferenceJobData inferenceJobData, AbstractInferenceEdit edit, boolean savePermanent) {
         if (edit == null) {
-            System.out.println("edit is null");
             if (!savePermanent && !inferenceJobData.manual.isEmpty()) {
                 inferenceJobData.manual.remove(inferenceJobData.manual.size() - 1);
             }
             return;
         }
         // TODO: make a better id system
-        Integer editIdx = editIdxInManual(edit, inferenceJobData.manual);
+        Integer editIdx = findEditIdx(edit, inferenceJobData.manual);
         if (editIdx == null) {
             edit.setId(inferenceJobData.manual.size());
             inferenceJobData.manual.add(edit);
@@ -342,7 +343,7 @@ public class JobExecutorService {
         }
     }
 
-    private Integer editIdxInManual(AbstractInferenceEdit edit, List<AbstractInferenceEdit> manual) {
+    private Integer findEditIdx(AbstractInferenceEdit edit, List<AbstractInferenceEdit> manual) {
         for (int i = 0; i < manual.size(); i++) {
             if (manual.get(i).id.equals(edit.id)) {
                 return i;
@@ -359,9 +360,7 @@ public class JobExecutorService {
 
         schemaService.overwriteInfo(finalSchema, jobWithRun.run().categoryId);
 
-        for (Mapping mapping : finalMappings) {
-            mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id);
-        }
+        finalMappings.forEach(mapping -> mappingService.createNew(mapping, logicalModelWithDatasource.logicalModel().id));
     }
 
     private List<Mapping> createMappings(List<MappingJsonValue> mappingsJsonValue, SchemaCategory schemaCategory) {
@@ -397,7 +396,7 @@ public class JobExecutorService {
         return mappingsJsonValue;
     }
 
-    private SchemaCategoryWrapper makeEdits(InferenceEditor inferenceEditor) {
+    private SchemaCategoryWrapper applyEdits(InferenceEditor inferenceEditor) {
         inferenceEditor.applyEdits();
         return SchemaCategoryUtil.createWrapperFromCategory(inferenceEditor.getSchemaCategory());
     }

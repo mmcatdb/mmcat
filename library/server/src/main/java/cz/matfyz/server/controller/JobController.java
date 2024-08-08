@@ -1,6 +1,6 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
+import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.inference.edit.AbstractInferenceEdit;
 import cz.matfyz.inference.edit.utils.SaveJobResultPayload;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
@@ -104,14 +104,13 @@ public class JobController {
         return jobToJobDetail(service.transition(jobWithRun, State.Canceled));
     }
 
-    // this method is only used in inference
-    @PostMapping("/jobs/{id}/saveResult")
-    public JobDetail saveJobResult(@PathVariable Id id, @RequestBody SaveJobResultRequest saveJobResultPayloadString) {
+    @PostMapping("/jobs/{id}/updateResult")
+    public JobDetail updateJobResult(@PathVariable Id id, @RequestBody SaveJobResultRequest saveJobResultPayloadString) {
         final var jobWithRun = repository.find(id);
 
-        InferenceJobData inferenceJobData = extractInferenceJobData(jobWithRun.job());
-        SaveJobResultPayload payload = extractSaveJobResultPayload(saveJobResultPayloadString.payload());
-        boolean permanent = payload.permanent;
+        final var inferenceJobData = extractInferenceJobData(jobWithRun.job());
+        final var payload = extractSaveJobResultPayload(saveJobResultPayloadString.payload());
+        final var permanent = payload.permanent;
 
         JobWithRun newJobWithRun;
 
@@ -119,55 +118,27 @@ public class JobController {
             AbstractInferenceEdit edit = permanent ? null : payload.edit;
             newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, permanent);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
+            throw new OtherException(e);
         }
 
         return jobToJobDetail(service.transition(newJobWithRun, permanent ? State.Finished : State.Waiting));
     }
 
     private InferenceJobData extractInferenceJobData(Job job) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jobDataString = job.data.toString();
-
         try {
-            return objectMapper.readValue(jobDataString, InferenceJobData.class);
+            return new ObjectMapper().readValue(job.data.toString(), InferenceJobData.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process JSON while extracting the SK and mapping from job.data", e);
+            throw new OtherException(e);
         }
     }
 
     private SaveJobResultPayload extractSaveJobResultPayload(String saveJobResultPayloadString) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         try {
-            return objectMapper.readValue(saveJobResultPayloadString, SaveJobResultPayload.class);
+            return new ObjectMapper().readValue(saveJobResultPayloadString, SaveJobResultPayload.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process JSON while extracting the payload from inference job", e);
+            throw new OtherException(e);
         }
     }
-
-    @PostMapping("/jobs/{id}/manageEdit")
-    public JobDetail manageEdit(@PathVariable Id id, @Nullable @RequestBody ManageEditRequest manageEditRequest) {
-        final var jobWithRun = repository.find(id);
-
-        final var edit = extractEdit(manageEditRequest.edit());
-
-        InferenceJobData inferenceJobData = extractInferenceJobData(jobWithRun.job());
-        JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, false);
-
-        return jobToJobDetail(service.transition(newJobWithRun, State.Waiting));
-    }
-
-    private AbstractInferenceEdit extractEdit(String editString) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        try {
-            return objectMapper.readValue(editString, AbstractInferenceEdit.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to process JSON while extracting the payload from inference job", e);
-        }
-    }
-
 
     private JobDetail jobToJobDetail(JobWithRun job) {
         final var payload = actionController.actionPayloadToDetail(job.job().payload);
@@ -206,7 +177,4 @@ public class JobController {
     }
 
     public record SaveJobResultRequest(String payload) {}
-
-    public record ManageEditRequest(String edit) {}
-
 }

@@ -17,12 +17,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-cluster', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-recursion', payload: { nodes: (Node | undefined)[], edges: (Edge | undefined)[] }): void;
-    (e: 'undo-edit', edit: AbstractInferenceEdit): void;
-    (e: 'redo-edit', edit: AbstractInferenceEdit): void;
+    (e: 'confirm-reference-merge', nodes: (Node)[]): void;
+    (e: 'confirm-primary-key-merge', nodes: (Node)[]): void;
+    (e: 'confirm-cluster', nodes: (Node)[]): void;
+    (e: 'confirm-recursion', payload: { nodes: (Node)[], edges: (Edge)[] }): void;
+    (e: 'revert-edit', edit: AbstractInferenceEdit): void;
 }>();
 
 enum State {
@@ -64,19 +63,19 @@ function setStateToDefault() {
     state.value = { type: State.Default };
 }
 
-function confirmReferenceMergeEdit(nodes: (Node | undefined)[]) {
+function confirmReferenceMergeEdit(nodes: (Node)[]) {
     emit('confirm-reference-merge', nodes);
 }
 
-function confirmPrimaryKeyMergeEdit(nodes: (Node | undefined)[]) {
+function confirmPrimaryKeyMergeEdit(nodes: (Node)[]) {
     emit('confirm-primary-key-merge', nodes);
 }
 
-function confirmClusterEdit(nodes: (Node | undefined)[]) {
+function confirmClusterEdit(nodes: (Node)[]) {
     emit('confirm-cluster', nodes);
 }
 
-function confirmRecursionEdit(nodes: (Node | undefined)[], edges: (Edge | undefined)[]) {
+function confirmRecursionEdit(nodes: (Node)[], edges: (Edge)[]) {
     emit('confirm-recursion', { nodes, edges });
 }
 
@@ -84,19 +83,15 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
-function undoEdit(edit: AbstractInferenceEdit) {
-    emit('undo-edit', edit);
-}
-
-function redoEdit(edit: AbstractInferenceEdit) {
-    emit('redo-edit', edit);
+function revertEdit(edit: AbstractInferenceEdit) {
+    emit('revert-edit', edit);
 }
 
 
 </script>
 
 <template>
-        <div class="editor">
+    <div class="editor">
         <div
             v-if="state.type === State.Default"
             class="options"
@@ -144,12 +139,10 @@ function redoEdit(edit: AbstractInferenceEdit) {
             <InferenceEdits
                 :inference-edits="props.inferenceEdits"
                 @cancel="setStateToDefault"
-                @undo-edit="undoEdit"
-                @redo-edit="redoEdit"
+                @revert-edit="revertEdit"
             />
         </template>
     </div>
-
 </template>
 
 <style scoped>
