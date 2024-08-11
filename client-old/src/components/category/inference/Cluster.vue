@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import { ref, shallowRef, computed } from 'vue';
-import { Graph } from '@/types/categoryGraph';
-import { SelectionType, type Node } from '@/types/categoryGraph';
+import { SelectionType, type Node, type Graph } from '@/types/categoryGraph';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
 
 const props = defineProps<{
-    graph: Graph
+    graph: Graph;
 }>();
 
 const emit = defineEmits<{
     (e: 'save'): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
-    (e: 'confirm', nodes: (Node | undefined)[]): void;
+    (e: 'confirm', nodes: Node[]): void;
 }>();
 
 const nodes = shallowRef<(Node | undefined)[]>([]);
@@ -32,7 +31,7 @@ const selectedNodeLabels = computed(() => {
 
 function confirm() {
     confirmClicked.value = true;
-    emit('confirm', nodes.value);
+    emit('confirm', nodes.value as Node[]);
 }
 
 function save() { // do not do anything, just go back t editor
@@ -44,7 +43,7 @@ function cancel() {
         emit('cancel');
     }
     
-    nodes.value = [undefined, undefined];  //unselect selected nodes
+    nodes.value = [ undefined, undefined ];  // unselect selected nodes
 
     if (confirmClicked.value) { // delete the edit (on BE)
         emit('cancel-edit');
@@ -56,7 +55,7 @@ function cancel() {
 
 <template>
     <div class="cluster">
-    <h2>Cluster Objects</h2>
+        <h2>Cluster Objects</h2>
         <ValueContainer>
             <ValueRow label="Objects forming a cluster:"> 
                 {{ selectedNodeLabels }}

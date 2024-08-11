@@ -13,9 +13,9 @@ public class SchemaCategoryInfo extends Entity {
 
     public SchemaCategoryInfo(Id id, String label, Version version, Version systemVersion) {
         super(id);
-        this.label = label;
         this.version = version;
         this.systemVersion = systemVersion;
+        this.label = label;
     }
 
     public static SchemaCategoryInfo fromWrapper(SchemaCategoryWrapper wrapper) {

@@ -1,31 +1,37 @@
 package cz.matfyz.inference.edit;
 
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class InferenceEditor {
 
-    private SchemaCategory schemaCategory;
-    private List<Mapping> mappings;
+    private SchemaCategory schema;
+    private MetadataCategory metadata;
+    private @Nullable List<Mapping> mappings;
     private Mapping finalMapping;
     public final List<InferenceEdit> edits;
 
-    public InferenceEditor(SchemaCategory schemaCategory, List<InferenceEdit> edits) {
-        this.schemaCategory = schemaCategory;
+    public InferenceEditor(SchemaCategory schema, MetadataCategory metadata, List<InferenceEdit> edits) {
+        this.schema = schema;
+        this.metadata = metadata;
         this.edits = edits;
     }
 
-    public InferenceEditor(SchemaCategory schemaCategory, List<Mapping> mappings, List<InferenceEdit> edits) {
-        this.schemaCategory = schemaCategory;
+    public InferenceEditor(SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings, List<InferenceEdit> edits) {
+        this.schema = schema;
+        this.metadata = metadata;
         this.mappings = mappings;
         this.edits = edits;
     }
 
     public SchemaCategory getSchemaCategory() {
-        return this.schemaCategory;
+        return this.schema;
     }
 
     public Mapping getFinalMapping() {
@@ -39,18 +45,21 @@ public class InferenceEditor {
     private final List<InferenceEditAlgorithm> algorithms = new ArrayList<>();
 
     public void applyEdits() {
-        applySchemaCategoryEdits();
+        applyCategoryEdits();
         if (hasMappings()) {
             applyMappingEdits();
             setFinalMapping();
         }
     }
 
-    private void applySchemaCategoryEdits() {
+    private void applyCategoryEdits() {
         for (final var edit : edits) {
             final var algorithm = edit.createAlgorithm();
             algorithms.add(algorithm);
-            schemaCategory = algorithm.applySchemaCategoryEdit(schemaCategory);
+
+            final var result = algorithm.applyCategoryEdit(schema, metadata);
+            schema = result.schema();
+            metadata = result.metadata();
         }
     }
 

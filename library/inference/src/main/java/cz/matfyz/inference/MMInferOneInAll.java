@@ -29,12 +29,10 @@ public class MMInferOneInAll {
 
     private AbstractInferenceWrapper wrapper;
     private String kindName;
-    private String categoryLabel;
 
-    public MMInferOneInAll input(AbstractInferenceWrapper wrapper, String kindName, String categoryLabel) {
+    public MMInferOneInAll input(AbstractInferenceWrapper wrapper, String kindName) {
         this.wrapper = wrapper;
         this.kindName = kindName;
-        this.categoryLabel = categoryLabel;
 
         return this;
     }
@@ -57,7 +55,7 @@ public class MMInferOneInAll {
 
         //RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
 
-        SchemaConverter schemaConverter = new SchemaConverter(categoryLabel);
+        SchemaConverter schemaConverter = new SchemaConverter();
 
         List<CategoryMappingPair> pairs = new ArrayList<CategoryMappingPair>();
 

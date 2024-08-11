@@ -1,36 +1,30 @@
 package cz.matfyz.evolution.schema;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism.DisconnectedSchemaMorphism;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
 
-public class EditMorphism extends SchemaCategory.Editor implements SchemaModificationOperation {
+public record EditMorphism(
+    SerializedMorphism newMorphism,
+    SerializedMorphism oldMorphism
+) implements SchemaModificationOperation {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
-    // The dom and cod of the morphism are probably null because they have not been created yet during the creation of this operation.
-    public final DisconnectedSchemaMorphism newMorphism;
-    public final DisconnectedSchemaMorphism oldMorphism;
-
-    public EditMorphism(DisconnectedSchemaMorphism newMorphism, DisconnectedSchemaMorphism oldMorphism) {
-        this.newMorphism = newMorphism;
-        this.oldMorphism = oldMorphism;
+    @Override public void up(SchemaCategory schema) {
+        replaceMorphism(schema, newMorphism);
     }
 
-    @Override public void up(SchemaCategory category) {
-        replaceMorphism(category, newMorphism);
+    @Override public void down(SchemaCategory schema) {
+        replaceMorphism(schema, oldMorphism);
     }
 
-    @Override public void down(SchemaCategory category) {
-        replaceMorphism(category, oldMorphism);
-    }
+    private void replaceMorphism(SchemaCategory schema, SerializedMorphism morphism) {
+        final var objects = (new SchemaEditor(schema)).getObjects();
+        final var morphismWithObjects = morphism.deserialize(objects::get);
 
-    private void replaceMorphism(SchemaCategory category, DisconnectedSchemaMorphism morphism) {
-        final var objects = getObjects(category);
-        final var morphismWithObjects = morphism.toSchemaMorphism(objects::get);
-
-        final var morphisms = getMorphisms(category);
+        final var morphisms = (new SchemaEditor(schema)).getMorphisms();
         // Replace the morphism by its newer version. The equality is determined by its signature.
         morphisms.put(morphismWithObjects.signature(), morphismWithObjects);
     }

@@ -6,6 +6,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.SimpleProperty;
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -50,44 +51,39 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         this.data = data;
     }
 
-    @Override
-    public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
-        /*
-         * Assumption: when there is a reference and it is an array object
-         * it has 2 outgoing morphism, one for _index and one for the original parent node
-         * If it is not array, it has only one ingoing morphism from the root
-         */
+    /*
+     * Assumption: when there is a reference and it is an array object
+     * it has 2 outgoing morphism, one for _index and one for the original parent node
+     * If it is not array, it has only one ingoing morphism from the root
+     */
+    @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Reference Merge Edit on Schema Category...");
 
-        setSchemaCategories(schemaCategory);
+        this.referenceIsArray = isReferenceArray(newSchema, newMetadata);
 
-        this.referenceIsArray = isReferenceArray(newSchemaCategory);
+        SchemaObject referredObject = newSchema.getObject(data.referredKey);
 
-        SchemaObject referredObject = newSchemaCategory.getObject(data.referredKey);
+        Key referenceParentKey = getReferenceParentKey(newSchema, newMetadata, referenceIsArray);
 
-        Key referenceParentKey = getReferenceParentKey(newSchemaCategory, referenceIsArray);
-
-        SchemaObject dom = newSchemaCategory.getObject(referenceParentKey);
+        SchemaObject dom = newSchema.getObject(referenceParentKey);
         SchemaObject cod = referredObject;
         Key indexKey = null;
         if (referenceIsArray) {
             dom = referredObject;
-            cod = newSchemaCategory.getObject(referenceParentKey);
+            cod = newSchema.getObject(referenceParentKey);
 
-            indexKey = getIndexKey(newSchemaCategory, data.referenceKey);
-            this.newIndexSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, referredObject, newSchemaCategory.getObject(indexKey));
+            indexKey = getIndexKey(newSchema, newMetadata, data.referenceKey);
+            this.newIndexSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, referredObject, newSchema.getObject(indexKey));
         }
-        this.newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(newSchemaCategory, dom, cod);
+        this.newReferenceSignature = InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, cod);
 
-        findMorphismsAndObjectToDelete(newSchemaCategory, indexKey);
-        InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
-
-        return newSchemaCategory;
+        findMorphismsAndObjectToDelete(newSchema, indexKey);
+        InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
     }
 
-    private boolean isReferenceArray(SchemaCategory schemaCategory) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().key().equals(data.referenceKey) && morphism.cod().label().equals(INDEX_LABEL)) {
+    private boolean isReferenceArray(SchemaCategory schema, MetadataCategory metadata) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
+            if (morphism.dom().key().equals(data.referenceKey) && metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL)) {
                 return true;
             }
         }
@@ -95,10 +91,10 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     }
 
     // based on the assumptions
-    private Key getReferenceParentKey(SchemaCategory schemaCategory, boolean isReferenceArray) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+    private Key getReferenceParentKey(SchemaCategory schema, MetadataCategory metadata, boolean isReferenceArray) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (isReferenceArray) {
-                if (morphism.dom().key().equals(data.referenceKey) && !morphism.cod().label().equals(INDEX_LABEL)) {
+                if (morphism.dom().key().equals(data.referenceKey) && !metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL)) {
                     return morphism.cod().key();
                 }
             } else {
@@ -110,17 +106,17 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Parent key has not been found");
     }
 
-    private Key getIndexKey(SchemaCategory schemaCategory, Key key) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-            if (morphism.dom().key().equals(key) && morphism.cod().label().equals(INDEX_LABEL)) {
+    private Key getIndexKey(SchemaCategory schema, MetadataCategory metadata, Key key) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
+            if (morphism.dom().key().equals(key) && metadata.getObject(morphism.cod()).label.equals(INDEX_LABEL)) {
                 return morphism.cod().key();
             }
         }
         throw new NotFoundException("Index key has not been found");
     }
 
-    private void findMorphismsAndObjectToDelete(SchemaCategory schemaCategory, Key indexKey) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+    private void findMorphismsAndObjectToDelete(SchemaCategory schema, Key indexKey) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (indexKey != null && morphism.dom().key().equals(data.referenceKey)) {
                 signaturesToDelete.add(morphism.signature());
                 // find the reference and index signatures
@@ -139,8 +135,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         keysToDelete.add(data.referenceKey);
     }
 
-    @Override
-    public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
+    @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         LOGGER.info("Applying Reference Merge Edit on Mapping...");
 
         if (referenceIsArray) {
@@ -149,7 +144,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         }
 
         Mapping referenceMapping = findReferenceMapping(mappings);
-        Mapping referredMapping = findReferredMapping(mappings, newSchemaCategory);
+        Mapping referredMapping = findReferredMapping(mappings, newSchema);
 
         Mapping mergedMapping = createMergedMapping(referenceMapping, referredMapping);
 
@@ -165,10 +160,10 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Mapping for reference has not been found.");
     }
 
-    private Mapping findReferredMapping(List<Mapping> mappings, SchemaCategory schemaCategory) {
-        // 1) in the schemaCategory find the signature where key is dom or cod
+    private Mapping findReferredMapping(List<Mapping> mappings, SchemaCategory schema) {
+        // 1) in the schema find the signature where key is dom or cod
         // 2) check in which mapping this signature appears, it should appear in exactly one
-        Signature referredSignature = findReferredSignature(schemaCategory);
+        Signature referredSignature = findReferredSignature(schema);
         for (Mapping mapping : mappings) {
             if (mapping.accessPath().getSubpathBySignature(referredSignature) != null) {
                 return mapping;
@@ -177,18 +172,12 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         throw new NotFoundException("Mapping for referred with signature " + referredSignature + " has not been found.");
     }
 
-    private Signature findReferredSignature(SchemaCategory schemaCategory) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+    private Signature findReferredSignature(SchemaCategory schema) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
             if ((morphism.dom().key().equals(data.referredKey) || morphism.cod().key().equals(data.referredKey)) && !morphism.signature().equals(newIndexSignature)) {
-                if (referenceIsArray) {
-                    if (!morphism.signature().equals(newReferenceSignature.dual())) {
-                        return morphism.signature();
-                    }
-                } else {
-                    if (!morphism.signature().equals(newReferenceSignature)) {
-                        return morphism.signature();
-                    }
-                }
+                final var comparison = referenceIsArray ? newReferenceSignature.dual() : newReferenceSignature;
+                if (!morphism.signature().equals(comparison))
+                    return morphism.signature();
             }
         }
         throw new NotFoundException("Signature for referred object has not been found");
@@ -196,7 +185,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
 
     private Mapping createMergedMapping(Mapping referenceMapping, Mapping referredMapping) {
         ComplexProperty mergedComplexProperty = mergeComplexProperties(referenceMapping.accessPath(), referredMapping.accessPath());
-        return InferenceEditorUtils.createNewMapping(newSchemaCategory, referenceMapping, Arrays.asList(referredMapping), mergedComplexProperty);
+        return InferenceEditorUtils.createNewMapping(newSchema, referenceMapping, Arrays.asList(referredMapping), mergedComplexProperty);
     }
 
     private ComplexProperty mergeComplexProperties(ComplexProperty referenceComplexProperty, ComplexProperty referredComplexProperty) {

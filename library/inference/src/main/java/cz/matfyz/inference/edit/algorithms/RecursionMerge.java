@@ -43,29 +43,24 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         this.data = data;
     }
 
-    @Override
-    public SchemaCategory applySchemaCategoryEdit(SchemaCategory schemaCategory) {
-        /*
-         * Assumptions: Morphisms in the pattern are only among the elemenets of the pattern
-         * Pattern always starts and ends in the same object (w/ however the occurence does not have to end in this object)
-         * For now we assume that the pattern needs to occur at least one in its full length to count it as a full match
-         */
+    /*
+     * Assumptions: Morphisms in the pattern are only among the elemenets of the pattern
+     * Pattern always starts and ends in the same object (w/ however the occurence does not have to end in this object)
+     * For now we assume that the pattern needs to occur at least one in its full length to count it as a full match
+     */
+    @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Recursion Edit on Schema Category...");
-
-        setSchemaCategories(schemaCategory);
 
         adjustPattern();
 
-        List<List<SchemaObject>> occurences = findAdjustedPatternOccurences(newSchemaCategory);
+        List<List<SchemaObject>> occurences = findAdjustedPatternOccurences();
 
-        bridgeOccurences(newSchemaCategory, occurences);
+        bridgeOccurences(occurences);
 
-        findMorphismsAndObjectsToDelete(newSchemaCategory, occurences);
-        InferenceEditorUtils.removeMorphismsAndObjects(newSchemaCategory, signaturesToDelete, keysToDelete);
+        findMorphismsAndObjectsToDelete(occurences);
+        InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
 
-        createRecursiveMorphisms(newSchemaCategory, occurences);
-
-        return newSchemaCategory;
+        createRecursiveMorphisms(occurences);
     }
 
     private void adjustPattern() {
@@ -94,117 +89,121 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         System.out.println("adjusted pattern" + adjustedPattern);
     }
 
-    private List<List<SchemaObject>> findAdjustedPatternOccurences(SchemaCategory schemaCategory) {
+    private List<List<SchemaObject>> findAdjustedPatternOccurences() {
         List<List<SchemaObject>> result = new ArrayList<>();
-        for (SchemaObject node : schemaCategory.allObjects()) {
-            dfsFind(schemaCategory, node, 0, new ArrayList<>(), result, false, false, new HashSet<>());
-        }
+        for (SchemaObject node : newSchema.allObjects())
+            dfsFind(node, 0, new ArrayList<>(), result, false, false, new HashSet<>());
+
         System.out.println(result);
         result = cleanOccurences(result);
         System.out.println("clean result: " + result);
         return result;
     }
 
-    private void dfsFind(SchemaCategory schemaCategory, SchemaObject currentNode, int patternIndex,
-                     List<SchemaObject> currentPath, List<List<SchemaObject>> result, boolean fullMatch, boolean processing,
-                     Set<SchemaObject> recursiveNodes) {
-        if (currentNode == null || patternIndex >= adjustedPattern.size()) return;
+    private void dfsFind(
+        SchemaObject currentNode,
+        int patternIndex,
+        List<SchemaObject> currentPath,
+        List<List<SchemaObject>> result,
+        boolean fullMatch,
+        boolean processing,
+        Set<SchemaObject> recursiveNodes
+    ) {
+        if (currentNode == null || patternIndex >= adjustedPattern.size())
+            return;
 
         PatternSegment currentSegment = adjustedPattern.get(patternIndex);
+        final var currentNodeLabel = newMetadata.getObject(currentNode).label;
 
-        if (currentNode.label().equals(currentSegment.nodeName())) {
-            currentPath.add(currentNode);
-            if (mapPatternObjects.isEmpty() || mapPatternObjects.get(currentSegment) == null) {
-                Set<SchemaObject> objects = new HashSet<>();
-                objects.add(currentNode);
-                mapPatternObjects.put(currentSegment, objects);
-            } else {
-                Set<SchemaObject> objects = mapPatternObjects.get(currentSegment);
-                objects.add(currentNode);
-                mapPatternObjects.put(currentSegment, objects);
+        if (!currentNodeLabel.equals(currentSegment.nodeName())) {
+            if (foundFullMatch(currentPath)) {
+                result.add(new ArrayList<>(currentPath));
+                dfsFind(currentNode, 0, new ArrayList<>(), result, false, false, recursiveNodes);
             }
 
-            if (patternIndex == adjustedPattern.size() - 1) {
-               // if (isValidPattern(currentPath, schemaCategory)) {
-                    fullMatch = true;
-                    patternIndex = 0;
-                    currentSegment = adjustedPattern.get(patternIndex);
-
-                    SchemaObject nextNode = findNextNode(schemaCategory, currentNode, currentSegment);
-
-                    if (nextNode != null) {
-                        dfsFind(schemaCategory, nextNode, 1, currentPath, result, fullMatch, processing, recursiveNodes);
-                    }
-                //}
-            } else {
-                if (currentSegment.direction().equals("->") || currentSegment.direction().equals("@->")) {
-                    List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
-                    for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-                        if (morphism.dom().equals(currentNode)) {
-                            morphismsToProcess.add(morphism);
-                        }
-                    }
-                    if (currentSegment.direction().equals("@->")) {
-                        if (!containsRecursiveAlready(recursiveNodes, currentNode)) {
-                            recursiveNodes.add(currentNode);
-                        }
-                        processing = true;
-                    }
-                    for (SchemaMorphism m : morphismsToProcess) {
-                        if (currentSegment.direction().equals("@->") && m.cod().label().equals(currentNode.label())) {
-                            dfsFind(schemaCategory, m.cod(), patternIndex, currentPath, result, fullMatch, processing, recursiveNodes);
-                            if (recursiveNodes.contains(currentNode)) {
-                                processing = false;
-                            }
-                        } else {
-                            dfsFind(schemaCategory, m.cod(), patternIndex + 1, currentPath, result, fullMatch, processing, recursiveNodes);
-                            if (recursiveNodes.contains(currentNode)) {
-                                processing = false;
-                            } else {
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (currentSegment.direction().equals("<-") || currentSegment.direction().equals("@<-")) {
-                    List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
-                    for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
-                        if (morphism.cod().equals(currentNode)) {
-                            morphismsToProcess.add(morphism);
-                        }
-                    }
-                    for (SchemaMorphism m : morphismsToProcess) {
-                        if (currentSegment.direction().equals("@<-") && m.dom().label().equals(currentNode.label())) {
-                            dfsFind(schemaCategory, m.dom(), patternIndex, currentPath, result, fullMatch, processing, recursiveNodes);
-                            processing = false;
-                        } else {
-                            dfsFind(schemaCategory, m.dom(), patternIndex + 1, currentPath, result, fullMatch, processing, recursiveNodes);
-                            processing = false;
-                        }
-                    }
-
-                } else if (foundFullMatch(currentPath)) {
-                    if (!processing && !occurenceAlreadyFound(result, currentPath)) {
-                        result.add(new ArrayList<>(currentPath));
-                        dfsFind(schemaCategory, currentNode, 0, new ArrayList<>(), result, false, false, recursiveNodes);
-                    }
-                }
-            }
-            if (!foundFullMatch(currentPath) && !processing) {
-                currentPath.remove(currentPath.size() - 1);
-            }
-        } else if (foundFullMatch(currentPath)) {
-            result.add(new ArrayList<>(currentPath));
-            dfsFind(schemaCategory, currentNode, 0, new ArrayList<>(), result, false, false, recursiveNodes);
+            return;
         }
+
+        currentPath.add(currentNode);
+
+        final Set<SchemaObject> objects = mapPatternObjects.isEmpty() || mapPatternObjects.get(currentSegment) == null
+            ? new HashSet<>()
+            : mapPatternObjects.get(currentSegment);
+
+        objects.add(currentNode);
+        mapPatternObjects.put(currentSegment, objects);
+
+        if (patternIndex == adjustedPattern.size() - 1) {
+            // if (isValidPattern(currentPath, schema)) {
+                fullMatch = true;
+                patternIndex = 0;
+                currentSegment = adjustedPattern.get(patternIndex);
+
+                SchemaObject nextNode = findNextNode(newSchema, currentNode, currentSegment);
+
+                if (nextNode != null)
+                    dfsFind(nextNode, 1, currentPath, result, fullMatch, processing, recursiveNodes);
+            //}
+        } else {
+            if (currentSegment.direction().equals("->") || currentSegment.direction().equals("@->")) {
+                List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
+                for (SchemaMorphism morphism : newSchema.allMorphisms())
+                    if (morphism.dom().equals(currentNode))
+                        morphismsToProcess.add(morphism);
+
+                if (currentSegment.direction().equals("@->")) {
+                    if (!containsRecursiveAlready(recursiveNodes, currentNodeLabel))
+                        recursiveNodes.add(currentNode);
+
+                    processing = true;
+                }
+
+                for (SchemaMorphism m : morphismsToProcess) {
+                    if (currentSegment.direction().equals("@->") && newMetadata.getObject(m.cod()).label.equals(currentNodeLabel)) {
+                        dfsFind(m.cod(), patternIndex, currentPath, result, fullMatch, processing, recursiveNodes);
+                        if (recursiveNodes.contains(currentNode))
+                            processing = false;
+                    }
+                    else {
+                        dfsFind(m.cod(), patternIndex + 1, currentPath, result, fullMatch, processing, recursiveNodes);
+                        if (!recursiveNodes.contains(currentNode))
+                            break;
+
+                        processing = false;
+                    }
+                }
+            }
+            if (currentSegment.direction().equals("<-") || currentSegment.direction().equals("@<-")) {
+                List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
+                for (SchemaMorphism morphism : newSchema.allMorphisms())
+                    if (morphism.cod().equals(currentNode))
+                        morphismsToProcess.add(morphism);
+
+                for (SchemaMorphism m : morphismsToProcess) {
+                    final var nextIndex = currentSegment.direction().equals("@<-") && newMetadata.getObject(m.dom()).label.equals(currentNodeLabel)
+                        ? patternIndex
+                        : patternIndex + 1;
+
+                    dfsFind(m.dom(), nextIndex, currentPath, result, fullMatch, processing, recursiveNodes);
+
+                    processing = false;
+                }
+
+            } else if (foundFullMatch(currentPath) && !processing && !occurenceAlreadyFound(result, currentPath)) {
+                result.add(new ArrayList<>(currentPath));
+                dfsFind(currentNode, 0, new ArrayList<>(), result, false, false, recursiveNodes);
+            }
+        }
+
+        if (!foundFullMatch(currentPath) && !processing)
+            currentPath.remove(currentPath.size() - 1);
     }
 
-    public boolean containsRecursiveAlready(Set<SchemaObject> recursiveNodes, SchemaObject currentNode) {
-        for (SchemaObject schemaObject : recursiveNodes) {
-            if (schemaObject.label().equals(currentNode.label())) {
+    public boolean containsRecursiveAlready(Set<SchemaObject> recursiveNodes, String currentNodeLabel) {
+        for (final SchemaObject object : recursiveNodes)
+            if (newMetadata.getObject(object).label.equals(currentNodeLabel))
                 return true;
-            }
-        }
+
         return false;
     }
 
@@ -299,23 +298,21 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     private boolean isSublist2(List<SchemaObject> list) {
-        if (adjustedPattern.size() > list.size()) {
+        if (adjustedPattern.size() > list.size())
             return false;
-        }
 
         for (int i = 0; i <= list.size() - adjustedPattern.size(); i++) {
             boolean foundSublist = true;
 
             for (int j = 0; j < adjustedPattern.size(); j++) {
-                if (!list.get(i + j).label().equals(adjustedPattern.get(j).nodeName())) {
+                if (!newMetadata.getObject(list.get(i + j)).label.equals(adjustedPattern.get(j).nodeName())) {
                     foundSublist = false;
                     break;
                 }
             }
 
-            if (foundSublist) {
+            if (foundSublist)
                 return true;
-            }
         }
 
         return false;
@@ -343,8 +340,8 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
-    private SchemaObject findNextNode(SchemaCategory schemaCategory, SchemaObject currentNode, PatternSegment currentSegment) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+    private SchemaObject findNextNode(SchemaCategory schema, SchemaObject currentNode, PatternSegment currentSegment) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (currentSegment.direction().equals("->") && morphism.dom().equals(currentNode)) {
                 return morphism.cod();
             } else if (currentSegment.direction().equals("<-") && morphism.cod().equals(currentNode)) {
@@ -358,18 +355,18 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return null;
     }
 
-    private boolean isValidPattern(List<SchemaObject> path, SchemaCategory schemaCategory) {
+    private boolean isValidPattern(List<SchemaObject> path, SchemaCategory schema) {
         for (int i = 1; i < path.size() - 1; i++) {
             SchemaObject middleNode = path.get(i);
-            if (hasOtherMorphisms(middleNode, path.get(i - 1), path.get(i + 1), schemaCategory)) {
+            if (hasOtherMorphisms(middleNode, path.get(i - 1), path.get(i + 1), schema)) {
                 return false;
             }
         }
         return true;
     }
 
-    private boolean hasOtherMorphisms(SchemaObject node, SchemaObject previous, SchemaObject next, SchemaCategory schemaCategory) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+    private boolean hasOtherMorphisms(SchemaObject node, SchemaObject previous, SchemaObject next, SchemaCategory schema) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
             if ((morphism.dom().equals(node) && !morphism.cod().equals(next)) ||
                 (morphism.cod().equals(node) && !morphism.dom().equals(previous))) {
                 return true;
@@ -378,20 +375,20 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
-    private void bridgeOccurences(SchemaCategory schemaCategory, List<List<SchemaObject>> occurences) {
+    private void bridgeOccurences(List<List<SchemaObject>> occurences) {
         for (List<SchemaObject> occurence : occurences) {
             SchemaObject firstInPattern = occurence.get(0);
             SchemaObject oneBeforeLastOccurence = occurence.get(occurence.size() - 2);
             SchemaObject lastOccurence = occurence.get(occurence.size() - 1);
 
-            List<SchemaMorphism> otherMorphisms = findOtherMorphisms(lastOccurence, oneBeforeLastOccurence, schemaCategory);
-            createNewOtherMorphisms(schemaCategory, lastOccurence, firstInPattern, otherMorphisms);
+            List<SchemaMorphism> otherMorphisms = findOtherMorphisms(lastOccurence, oneBeforeLastOccurence);
+            createNewOtherMorphisms(lastOccurence, firstInPattern, otherMorphisms);
         }
     }
 
-    private List<SchemaMorphism> findOtherMorphisms(SchemaObject node, SchemaObject previous, SchemaCategory schemaCategory) {
+    private List<SchemaMorphism> findOtherMorphisms(SchemaObject node, SchemaObject previous) {
         List<SchemaMorphism> morphisms = new ArrayList<>();
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+        for (SchemaMorphism morphism : newSchema.allMorphisms()) {
             if ((morphism.cod().equals(node) && !morphism.dom().equals(previous)) ||
                 (morphism.dom().equals(node) && !morphism.cod().equals(previous))) {
                 morphisms.add(morphism);
@@ -400,33 +397,34 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return morphisms;
     }
 
-    private void createNewOtherMorphisms(SchemaCategory schemaCategory, SchemaObject lastOccurence, SchemaObject firstInPattern, List<SchemaMorphism> otherMorphisms) {
-        if (otherMorphisms != null) {
-            for (SchemaMorphism morphism : otherMorphisms) {
-                SchemaObject dom = firstInPattern;
-                SchemaObject cod = morphism.cod();
-                if (!morphism.dom().equals(lastOccurence)) {
-                    dom = morphism.dom();
-                    cod = firstInPattern;
-                }
-                InferenceEditorUtils.createAndAddMorphism(schemaCategory, dom, cod);
+    private void createNewOtherMorphisms(SchemaObject lastOccurence, SchemaObject firstInPattern, List<SchemaMorphism> otherMorphisms) {
+        if (otherMorphisms == null)
+            return;
+
+        for (SchemaMorphism morphism : otherMorphisms) {
+            SchemaObject dom = firstInPattern;
+            SchemaObject cod = morphism.cod();
+            if (!morphism.dom().equals(lastOccurence)) {
+                dom = morphism.dom();
+                cod = firstInPattern;
             }
+            InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, dom, cod);
         }
     }
 
-    private void findMorphismsAndObjectsToDelete(SchemaCategory schemaCategory, List<List<SchemaObject>> occurences) {
+    private void findMorphismsAndObjectsToDelete(List<List<SchemaObject>> occurences) {
         for (List<SchemaObject> occurence : occurences) {
             for (int i = adjustedPattern.size() - 1; i < occurence.size(); i++) {
                 SchemaObject schemaObject = occurence.get(i);
                 keysToDelete.add(schemaObject.key());
-                signaturesToDelete.addAll(findSignaturesForObject(schemaCategory, schemaObject));
+                signaturesToDelete.addAll(findSignaturesForObject(schemaObject));
             }
         }
     }
 
-    private List<Signature> findSignaturesForObject(SchemaCategory schemaCategory, SchemaObject schemaObject) {
+    private List<Signature> findSignaturesForObject(SchemaObject schemaObject) {
         List<Signature> signatures = new ArrayList<>();
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+        for (SchemaMorphism morphism : newSchema.allMorphisms()) {
             if (morphism.dom().equals(schemaObject) || morphism.cod().equals(schemaObject)) {
                 signatures.add(morphism.signature());
             }
@@ -434,24 +432,24 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return signatures;
     }
 
-    private void createRecursiveMorphisms(SchemaCategory schemaCategory, List<List<SchemaObject>> occurences) {
+    private void createRecursiveMorphisms(List<List<SchemaObject>> occurences) {
         for (List<SchemaObject> occurence : occurences) {
             SchemaObject firstInPattern = occurence.get(0);
             SchemaObject oneBeforeLastInPattern = occurence.get(adjustedPattern.size() - 2);
-            InferenceEditorUtils.createAndAddMorphism(schemaCategory, oneBeforeLastInPattern, firstInPattern);
+            InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, oneBeforeLastInPattern, firstInPattern);
         }
 
-        createRepetitiveMorphisms(schemaCategory, occurences);
+        createRepetitiveMorphisms(occurences);
     }
 
-    private void createRepetitiveMorphisms(SchemaCategory schemaCategory, List<List<SchemaObject>> occurences) {
+    private void createRepetitiveMorphisms(List<List<SchemaObject>> occurences) {
         System.out.println("keysToDelete" + keysToDelete);
         System.out.println("map: " + mapPatternObjects);
         for (PatternSegment segment : adjustedPattern) {
             if (isRepetitive(segment)) {
                 for (SchemaObject object : mapPatternObjects.get(segment)) {
                     if (!keysToDelete.contains(object.key()) && inAnyOccurence(occurences, object)) {
-                        InferenceEditorUtils.createAndAddMorphism(schemaCategory, object, object);
+                        InferenceEditorUtils.createAndAddMorphism(newSchema, newMetadata, object, object);
                     }
                 }
             }
@@ -476,8 +474,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         return false;
     }
 
-    @Override
-    public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
+    @Override public List<Mapping> applyMappingEdit(List<Mapping> mappings) {
         // TODO: adjust the mapping
         return mappings;
     }

@@ -8,7 +8,7 @@ import cz.matfyz.tests.example.basic.Schema;
 class SchemaSetup extends SchemaBase {
 
     private SchemaSetup(SchemaCategoryWrapper wrapper, String lastUpdateVersion) {
-        super(wrapper, lastUpdateVersion, Schema.newSchemaCategory());
+        super(wrapper, lastUpdateVersion, Schema.newSchema());
     }
 
     static SchemaUpdateInit createNewUpdate(SchemaCategoryWrapper wrapper, String lastUpdateVersion) {

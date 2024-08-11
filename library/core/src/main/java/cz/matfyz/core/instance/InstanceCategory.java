@@ -7,10 +7,8 @@ import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.core.schema.SchemaMorphism.Min;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 public class InstanceCategory {
@@ -23,14 +21,6 @@ public class InstanceCategory {
         this.schema = schema;
         this.objects = objects;
         this.morphisms = morphisms;
-    }
-
-    public Map<Key, InstanceObject> objects() {
-        return objects;
-    }
-
-    public Map<Signature, InstanceMorphism> morphisms() {
-        return morphisms;
     }
 
     public InstanceObject getObject(Key key) {
@@ -56,11 +46,7 @@ public class InstanceCategory {
 
         return morphisms.computeIfAbsent(signature, x -> {
             // The composite morphisms are created dynamically when needed.
-            SchemaMorphism schemaMorphism = schema.getMorphism(x);
-            InstanceObject dom = getObject(schemaMorphism.dom().key());
-            InstanceObject cod = getObject(schemaMorphism.cod().key());
-
-            return new InstanceMorphism(schemaMorphism, dom, cod, this);
+            return new InstanceMorphism(schema.getMorphism(x));
         });
     }
 
@@ -68,80 +54,17 @@ public class InstanceCategory {
         return this.getMorphism(schemaMorphism.signature());
     }
 
-    public record InstanceEdge(
-        InstanceMorphism morphism,
-        boolean direction
-    ) {
-        public Signature signature() {
-            return direction ? morphism.signature() : morphism.signature().dual();
-        }
-
-        public InstanceObject from() {
-            return direction ? morphism.dom() : morphism.cod();
-        }
-
-        public InstanceObject to() {
-            return direction ? morphism.cod() : morphism.dom();
-        }
-
-        public boolean isArray() {
-            return !direction;
-        }
-
-        public void createMapping(DomainRow domainRow, DomainRow codomainRow) {
-            if (direction)
-                morphism.createMapping(domainRow, codomainRow);
-            else
-                morphism.createMapping(codomainRow, domainRow);
-        }
+    public Collection<InstanceObject> allObjects() {
+        return schema.allObjects().stream().map(this::getObject).toList();
     }
 
-    public InstanceEdge getEdge(BaseSignature base) {
-        return new InstanceEdge(
-            getMorphism(base.isDual() ? base.dual() : base),
-            !base.isDual()
-        );
-    }
-
-    public record InstancePath(
-        List<InstanceEdge> edges,
-        Signature signature
-    ) {
-        public InstanceObject from() {
-            return edges.get(0).from();
-        }
-
-        public InstanceObject to() {
-            return edges.get(edges.size() - 1).to();
-        }
-
-        public boolean isArray() {
-            for (final var edge : edges)
-                if (edge.isArray())
-                    return true;
-
-            return false;
-        }
-
-        public Min min() {
-            for (final var edge : edges)
-                if (edge.isArray() || edge.morphism.min() == Min.ZERO)
-                    return Min.ZERO;
-
-            return Min.ONE;
-        }
-    }
-
-    public InstancePath getPath(Signature signature) {
-        final var list = new ArrayList<InstanceEdge>();
-        signature.toBases().stream().map(this::getEdge).forEach(list::add);
-
-        return new InstancePath(list, signature);
+    public Collection<InstanceMorphism> allMorphisms() {
+        return schema.allMorphisms().stream().map(this::getMorphism).toList();
     }
 
     public void createReferences() {
         for (final var object : objects.values())
-            for (final var signature : object.superId().signatures())
+            for (final var signature : object.schema.superId().signatures())
                 createReferencesForSignature(signature);
     }
 
@@ -157,12 +80,12 @@ public class InstanceCategory {
             final var signatureInTarget = Signature.concatenate(baseSignatures.subList(i + 1, baseSignatures.size()));
             signatureToTarget = signatureToTarget.concatenate(currentBase);
 
-            final var pathFromTarget = getPath(signatureToTarget.dual());
+            final var pathFromTarget = schema.getPath(signatureToTarget.dual());
             final var currentTarget = pathFromTarget.to();
             if (!currentTarget.superId().hasSignature(signatureInTarget))
                 continue;
 
-            currentTarget.addReferenceToRow(signatureInTarget, pathFromTarget, signature);
+            getObject(currentTarget).addReferenceToRow(signatureInTarget, pathFromTarget, signature);
         }
     }
 

@@ -42,7 +42,7 @@ public class RSDToAccessTreeConverter {
 
             for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
                 //here we are excluding the "_" objects of arrays
-                if (!rsdChild.getName().equals("_")) {                    
+                if (!rsdChild.getName().equals("_")) {
                     boolean isArray = isTypeArray(rsdChild);
                     AccessTreeNode.State state = isArray ? AccessTreeNode.State.COMPLEX : AccessTreeNode.State.SIMPLE;
                     BaseSignature signature = Signature.createBase(signatureGenerator.next());
@@ -98,13 +98,12 @@ public class RSDToAccessTreeConverter {
     }
 
     private String createLabel(RecordSchemaDescription rsd, boolean isArray) {
-        if (isArray) {
+        if (isArray)
             return SchemaConverter.Label.RELATIONAL.name();
-        } else {
-            if (rsd.getUnique() == Char.TRUE) {
-                return SchemaConverter.Label.IDENTIFIER.name();
-            }
-        }
+
+        if (rsd.getUnique() == Char.TRUE)
+            return SchemaConverter.Label.IDENTIFIER.name();
+
         return null;
     }
 }

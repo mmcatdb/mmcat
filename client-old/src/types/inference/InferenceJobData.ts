@@ -1,28 +1,25 @@
-import { JobDataType } from '../job';
-import { SchemaCategory, type SchemaCategoryFromServer } from '../schema';
+import type { JobDataType } from '../job';
+import { SchemaCategory, type SchemaCategoryInfo, type SerializedSchema, type SerializedMetadata } from '../schema';
 import type { InferenceEdit } from './inferenceEdit';
-
-type InferenceDataFromServer = {
-    schemaCategory: SchemaCategoryFromServer;
-};
 
 export type InferenceJobDataFromServer = {
     type: JobDataType.Inference;
-    inference: InferenceDataFromServer;
-    manual: InferenceEdit[];
-    finalSchema: SchemaCategoryFromServer;
+    edits: InferenceEdit[];
+    schema: SerializedSchema;
+    metadata: SerializedMetadata;
+    // mappings
 };
 
 export class InferenceJobData {
     constructor(
-        public manual: InferenceEdit[],
-        public finalSchema: SchemaCategory,
+        public edits: InferenceEdit[],
+        public schema: SchemaCategory,
     ) {}
 
-    static fromServer(input: InferenceJobDataFromServer): InferenceJobData {
+    static fromServer(input: InferenceJobDataFromServer, info: SchemaCategoryInfo): InferenceJobData {
         return new InferenceJobData(
-            input.manual,
-            SchemaCategory.fromServer(input.finalSchema, []),
+            input.edits,
+            SchemaCategory.fromServerWithInfo(info, input.schema, input.metadata),
         );
     }
 }

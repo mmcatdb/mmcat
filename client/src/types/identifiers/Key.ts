@@ -1,6 +1,4 @@
-export type KeyFromServer = {
-    value: number;
-};
+export type KeyFromServer = number;
 
 export class Key {
     private constructor(
@@ -8,7 +6,7 @@ export class Key {
     ) {}
 
     static fromServer(input: KeyFromServer): Key {
-        return new Key(input.value);
+        return new Key(input);
     }
 
     static createNew(value: number): Key {
@@ -16,9 +14,7 @@ export class Key {
     }
 
     public toServer(): KeyFromServer {
-        return {
-            value: this.value,
-        };
+        return this.value;
     }
 
     public equals(key: Key): boolean {

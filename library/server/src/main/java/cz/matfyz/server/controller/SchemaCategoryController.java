@@ -1,12 +1,12 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.evolution.metadata.MetadataModificationOperation;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.matfyz.server.service.SchemaCategoryService;
 
 import java.util.List;
@@ -84,7 +84,7 @@ public class SchemaCategoryController {
     }
 
     @PutMapping("/schema-categories/{id}/metadata")
-    public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataUpdate> metadataUpdates) {
+    public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataModificationOperation> metadataUpdates) {
         service.updateMetadata(id, metadataUpdates);
     }
 

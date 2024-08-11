@@ -42,7 +42,7 @@ public class SchemaUpdate extends Entity {
     public SchemaCategoryUpdate toEvolution() {
         return new SchemaCategoryUpdate(
             prevVersion,
-            operations.stream().map(operation -> operation.smo().toEvolution()).toList()
+            operations.stream().map(VersionedSMO::smo).toList()
         );
     }
 

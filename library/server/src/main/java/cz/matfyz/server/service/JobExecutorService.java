@@ -8,8 +8,10 @@ import cz.matfyz.core.exception.NamedException;
 import cz.matfyz.core.exception.OtherException;
 import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.Mapping.SerializedMapping;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataSerializer;
 import cz.matfyz.core.schema.SchemaCategory;
+import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.utils.ArrayUtils;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.evolution.querying.QueryEvolver;
@@ -18,6 +20,7 @@ import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditor;
+import cz.matfyz.inference.schemaconversion.Layout;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
@@ -32,7 +35,6 @@ import cz.matfyz.server.entity.job.Job;
 import cz.matfyz.server.entity.job.Run;
 import cz.matfyz.server.entity.job.data.InferenceJobData;
 import cz.matfyz.server.entity.job.data.ModelJobData;
-import cz.matfyz.server.entity.job.data.InferenceJobData.InferenceData;
 import cz.matfyz.server.repository.LogicalModelRepository.LogicalModelWithDatasource;
 import cz.matfyz.server.entity.logicalmodel.LogicalModelInit;
 import cz.matfyz.server.entity.mapping.MappingInit;
@@ -266,68 +268,68 @@ public class JobExecutorService {
 
     private void rsdToCategoryAlgorithm(Run run, Job job, RSDToCategoryPayload payload) {
         // extracting the empty SK wrapper
-        final SchemaCategoryWrapper originalSchemaWrapper = schemaService.find(run.categoryId);
         final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
 
         final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
         final List<CategoryMappingPair> categoryMappingPairs = new MMInferOneInAll()
-            .input(inferenceWrapper, payload.kindName(), originalSchemaWrapper.label)
+            .input(inferenceWrapper, payload.kindName())
             .run();
 
-        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(categoryMappingPairs, originalSchemaWrapper.label);
-        final List<SerializedMapping> mappings = CategoryMappingPair.getMappings(categoryMappingPairs)
-            .stream().map(SerializedMapping::fromMapping).toList();
+        final var pair = CategoryMappingPair.merge(categoryMappingPairs);
+        final SchemaCategory schema = pair.schema();
+        final MetadataCategory metadata = pair.metadata();
+        final List<Mapping> mappings = pair.mappings();
 
-        final var schemaWrapper = schemaService.newCategoryToWrapper(schemaCategory);
 
-        job.data = new InferenceJobData(new InferenceJobData.InferenceData(schemaWrapper.toSerializedSchemaCategory(), mappings));
+        Layout.applyToMetadata(schema, metadata);
+
+        job.data = InferenceJobData.fromSchemaCategory(List.of(), schema, metadata, mappings);
     }
 
-    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, InferenceEdit edit, boolean savePermanent) {
-        final List<InferenceEdit> manual = data.manual();
-        if (edit == null && !savePermanent) { // cancel edit
-            manual.remove(manual.size() - 1);
-        } else if (!savePermanent) { // new edit
-            manual.add(edit);
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, InferenceEdit edit, boolean isFinal) {
+        final List<InferenceEdit> edits = data.edits();
+        if (!isFinal) {
+            if (edit == null)
+                edits.remove(edits.size() - 1); // Cancel edit.
+            else
+                edits.add(edit); // New edit.
         }
 
-        final InferenceData inference = data.inference();
-        final SchemaCategory inferenceSchemaCategory = inference.schemaCategory().toSchemaCategory();
+        final var schema = SchemaSerializer.deserialize(data.schema());
+        final var metadata = MetadataSerializer.deserialize(data.metadata(), schema);
+        final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
-        final var mappings = inference.mappings().stream().map(s -> s.toMapping(inferenceSchemaCategory)).toList();
-
-        InferenceEditor inferenceEditor = savePermanent
-            ? new InferenceEditor(inferenceSchemaCategory, mappings, manual)
-            : new InferenceEditor(inferenceSchemaCategory, manual);
+        final InferenceEditor inferenceEditor = isFinal
+            ? new InferenceEditor(schema, metadata, mappings, edits)
+            : new InferenceEditor(schema, metadata, edits);
 
         inferenceEditor.applyEdits();
-        final SchemaCategoryWrapper finalSchema = schemaService.newCategoryToWrapper(inferenceEditor.getSchemaCategory());
-        finalSchema.assignId(job.run().categoryId);
 
-        if (savePermanent) {
-            finishRSDToCategoryProcessing(job, finalSchema, inferenceEditor.getFinalMapping());
-        } else {
-            job.job().data = new InferenceJobData(inference, manual, finalSchema.toSerializedSchemaCategory());
-        }
+        job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, metadata, mappings);
+
+        if (isFinal)
+            finishRSDToCategoryProcessing(job, schema, metadata, inferenceEditor.getFinalMapping());
 
         return job;
     }
 
-    private void finishRSDToCategoryProcessing(JobWithRun jobWithRun, SchemaCategoryWrapper finalSchema, Mapping finalMapping) {
-        final RSDToCategoryPayload payload = (RSDToCategoryPayload) jobWithRun.job().payload;
+    private void finishRSDToCategoryProcessing(JobWithRun job, SchemaCategory schema, MetadataCategory metadata, Mapping finalMapping) {
+        final var wrapper = schemaService.find(job.run().categoryId);
+        final var newWrapper = SchemaCategoryWrapper.fromSchemaCategory(wrapper.id(), wrapper.label, wrapper.version, wrapper.systemVersion, schema, metadata);
+        schemaService.replace(newWrapper);
 
-        final DatasourceWrapper datasourceWrapper = datasourceService.find(payload.datasourceId());
-        final LogicalModelWithDatasource logicalModelWithDatasource = createLogicalModel(datasourceWrapper.id(), finalSchema.id(), "Initial logical model");
+        final RSDToCategoryPayload payload = (RSDToCategoryPayload) job.job().payload;
+        final DatasourceWrapper datasource = datasourceService.find(payload.datasourceId());
+        final LogicalModelWithDatasource logicalModel = createLogicalModel(datasource.id(), newWrapper.id(), "Initial logical model");
 
-        schemaService.replace(finalSchema);
-        final MappingInit init = MappingInit.fromMapping(finalMapping, logicalModelWithDatasource.logicalModel().id());
+        final MappingInit init = MappingInit.fromMapping(finalMapping, logicalModel.logicalModel().id());
         mappingService.createNew(init);
     }
 
-    private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id schemaCategoryId, String initialLogicalModelLabel) {
-        LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceId, schemaCategoryId, initialLogicalModelLabel);
+    private LogicalModelWithDatasource createLogicalModel(Id datasourceId, Id categoryId, String initialLogicalModelLabel) {
+        final LogicalModelInit logicalModelInit = new LogicalModelInit(datasourceId, categoryId, initialLogicalModelLabel);
         return logicalModelService.createNew(logicalModelInit);
     }
 }

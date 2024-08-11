@@ -4,12 +4,19 @@ import type { Graph } from '../categoryGraph';
 
 export type SchemaMorphismFromServer = {
     signature: SignatureFromServer;
-    label?: string;
     domKey: KeyFromServer;
     codKey: KeyFromServer;
     min: Min;
     tags?: Tag[];
 };
+
+export type MetadataMorphismFromServer = {
+    signature: SignatureFromServer;
+    label: string;
+};
+
+// TODO
+const TEMP_METADATA_MORPHISM: MetadataMorphismFromServer = { signature: '0', label: '' };
 
 export enum Cardinality {
     Zero = 'ZERO',
@@ -36,14 +43,14 @@ export class SchemaMorphism {
         private _isNew: boolean,
     ) {}
 
-    static fromServer(input: SchemaMorphismFromServer): SchemaMorphism {
+    static fromServer(schema: SchemaMorphismFromServer, metadata: MetadataMorphismFromServer = TEMP_METADATA_MORPHISM): SchemaMorphism {
         return new SchemaMorphism(
-            Signature.fromServer(input.signature),
-            Key.fromServer(input.domKey),
-            Key.fromServer(input.codKey),
-            input.min,
-            input.label ?? '',
-            input.tags ? input.tags : [],
+            Signature.fromServer(schema.signature),
+            Key.fromServer(schema.domKey),
+            Key.fromServer(schema.codKey),
+            schema.min,
+            metadata.label,
+            schema.tags ? schema.tags : [],
             false,
         );
     }
@@ -70,7 +77,6 @@ export class SchemaMorphism {
             domKey: this.domKey.toServer(),
             codKey: this.codKey.toServer(),
             min: this.min,
-            label: this.label,
             tags: this.tags,
         };
     }

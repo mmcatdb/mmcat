@@ -1,22 +1,29 @@
 import { UniqueIdProvider } from '@/types/utils/UniqueIdProvider';
 import { ComplexProperty, type ParentProperty } from '@/types/accessPath/basic';
 import type { Entity, Id, VersionId } from '../id';
-import { DynamicName, Key, Signature } from '../identifiers';
+import { DynamicName, Key, type KeyFromServer, Signature, type SignatureFromServer } from '../identifiers';
 import type { LogicalModel } from '../logicalModel';
-import { SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
-import { type SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
+import { type MetadataMorphismFromServer, SchemaMorphism, type SchemaMorphismFromServer, VersionedSchemaMorphism } from './SchemaMorphism';
+import { type MetadataObjectFromServer, type SchemaObject, type SchemaObjectFromServer, VersionedSchemaObject } from './SchemaObject';
 import type { Graph } from '../categoryGraph';
 import { ComparableMap } from '@/types/utils/ComparableMap';
 import type { Mapping } from '../mapping';
 import { ComparableSet } from '@/types/utils/ComparableSet';
 import type { DatasourceType } from '../datasource';
 
-export type SchemaCategoryFromServer = {
-    id: Id;
-    label: string;
-    version: VersionId;
+export type SchemaCategoryFromServer = SchemaCategoryInfoFromServer & {
+    schema: SerializedSchema;
+    metadata: SerializedMetadata;
+};
+
+export type SerializedSchema = {
     objects: SchemaObjectFromServer[];
     morphisms: SchemaMorphismFromServer[];
+};
+
+export type SerializedMetadata = {
+    objects: MetadataObjectFromServer[];
+    morphisms: MetadataMorphismFromServer[];
 };
 
 export class SchemaCategory implements Entity {
@@ -58,16 +65,28 @@ export class SchemaCategory implements Entity {
     }
 
     static fromServer(input: SchemaCategoryFromServer, logicalModels: LogicalModel[]): SchemaCategory {
-        const morphisms = input.morphisms.map(SchemaMorphism.fromServer);
+        const objectMetadata = new Map<KeyFromServer, MetadataObjectFromServer>(
+            input.metadata.objects.map(o => [ o.key, o ]),
+        );
+        const objects = input.schema.objects.map(o => VersionedSchemaObject.fromServer(o, objectMetadata.get(o.key)!));
+
+        const morphismMetadata = new Map<SignatureFromServer, MetadataMorphismFromServer>(
+            input.metadata.morphisms.map(m => [ m.signature, m ]),
+        );
+        const morphisms = input.schema.morphisms.map(m => SchemaMorphism.fromServer(m, morphismMetadata.get(m.signature)));
 
         return new SchemaCategory(
             input.id,
             input.label,
             input.version,
-            input.objects.map(VersionedSchemaObject.fromServer),
+            objects,
             morphisms,
             logicalModels,
         );
+    }
+
+    static fromServerWithInfo(info: SchemaCategoryInfo, schema: SerializedSchema, metadata: SerializedMetadata): SchemaCategory {
+        return this.fromServer({ ...info, version: info.versionId, schema, metadata }, []);
     }
 
     private readonly objects = new ComparableMap<Key, number, VersionedSchemaObject>(key => key.value);

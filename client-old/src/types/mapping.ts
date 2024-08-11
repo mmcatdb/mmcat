@@ -42,7 +42,7 @@ export class Mapping implements Entity {
 }
 
 export type MappingInit = Omit<MappingFromServer, 'id' | 'rootObject' | 'version'> & {
-    rootObjectKey: Key;
+    rootObjectKey: KeyFromServer;
 };
 
 export type MappingInfoFromServer = {

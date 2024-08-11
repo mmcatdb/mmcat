@@ -2,29 +2,21 @@ package cz.matfyz.server.repository;
 
 import static cz.matfyz.server.repository.utils.Utils.*;
 
-import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper;
 import cz.matfyz.server.repository.utils.DatabaseWrapper;
-import cz.matfyz.server.repository.utils.Utils;
 
 import java.sql.Statement;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class SchemaCategoryRepository {
-
-    private static final ObjectMapper mapper = new ObjectMapper();
-    private static final ObjectReader schemaObjectWrapperJsonReader = mapper.readerFor(SchemaObjectWrapper.class);
 
     @Autowired
     private DatabaseWrapper db;
@@ -165,26 +157,6 @@ public class SchemaCategoryRepository {
                 final var id = getId(resultSet, "id");
                 final var jsonValue = resultSet.getString("json_value");
                 output.add(SchemaUpdate.fromJsonValue(id, categoryId, jsonValue));
-            }
-        });
-    }
-
-    public SchemaObjectWrapper findObject(Id categoryId, Key key) {
-        return db.get((connection, output) -> {
-            final var statement = connection.prepareStatement("""
-                SELECT object
-                FROM
-                    (SELECT * FROM schema_category WHERE id = ?) as selected_category,
-                    jsonb_array_elements(selected_category.json_value->'objects') object
-                WHERE object->'key' @> ?;
-                """);
-            setId(statement, 1, categoryId);
-            statement.setString(2, Utils.toJson(key));
-            final var resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                final var jsonObject = resultSet.getString("object");
-                output.set(schemaObjectWrapperJsonReader.readValue(jsonObject));
             }
         });
     }

@@ -38,18 +38,15 @@ export class RecursionInferenceEdit implements InferenceEdit {
 }
 
 export type SaveJobResultPayload = {
-    isPermanent: false;
+    isFinal: false;
     edit: InferenceEdit;
 } | {
-    isPermanent: true;
+    isFinal: true;
 };
 
 export class PatternSegment {
-    public readonly nodeName : string;
-    public readonly direction: string;
-
-    constructor(nodeName: string, direction: string) {
-        this.nodeName = nodeName;
-        this.direction = direction;
-    }
+    constructor(
+        readonly nodeName: string,
+        readonly direction: string,
+    ) {}
 }

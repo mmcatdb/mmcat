@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from 'vue';
+import { computed, ref } from 'vue';
 import API from '@/utils/api';
 import { Job, JobState, type ModelJobData } from '@/types/job';
 import { ActionType } from '@/types/action';
@@ -8,8 +8,9 @@ import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
 import InferenceJobDisplay from '@/components/category/inference/InferenceJobDisplay.vue';
-import { type InferenceEdit, type SaveJobResultPayload } from '@/types/inference/inferenceEdit';
-import { type InferenceJobData } from '@/types/inference/InferenceJobData';
+import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/inferenceEdit';
+import type { InferenceJobData } from '@/types/inference/InferenceJobData';
+import { useSchemaCategoryInfo } from '@/utils/injects';
 
 type JobDisplayProps = {
     job: Job;
@@ -34,14 +35,14 @@ const emit = defineEmits<{
 }>();
 
 const fetching = ref(false);
-
+const info = useSchemaCategoryInfo();
 
 async function startJob() {
     fetching.value = true;
     const result = await API.jobs.startJob({ id: props.job.id });
     fetching.value = false;
     if (result.status)
-        emit('updateJob', Job.fromServer(result.data));
+        emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
 async function cancelJob() {
@@ -49,7 +50,7 @@ async function cancelJob() {
     const result = await API.jobs.cancelJob({ id: props.job.id });
     fetching.value = false;
     if (result.status)
-        emit('updateJob', Job.fromServer(result.data));
+        emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
 async function restartJob() {
@@ -57,16 +58,16 @@ async function restartJob() {
     const result = await API.jobs.createRestartedJob({ id: props.job.id });
     fetching.value = false;
     if (result.status)
-        emit('updateJob', Job.fromServer(result.data));
+        emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
 async function saveJob(edit?: InferenceEdit) {
     fetching.value = true;
-    const result = await API.jobs.saveJobResult({ id: props.job.id }, { edit, isPermanent: !edit } as SaveJobResultPayload);
+    const result = await API.jobs.saveJobResult({ id: props.job.id }, { edit, isFinal: !edit } as SaveJobResultPayload);
     fetching.value = false;
     if (result.status) {
         console.log('about to emit updateJob in jobdisplay');
-        emit('updateJob', Job.fromServer(result.data));
+        emit('updateJob', Job.fromServer(result.data, info.value));
     }
 }
 
@@ -76,7 +77,7 @@ async function cancelEdit() {
     fetching.value = false;
     if (result.status) {
         console.log('about to emit updateJob in jobdisplay');
-        emit('updateJob', Job.fromServer(result.data));
+        emit('updateJob', Job.fromServer(result.data, info.value));
     }
 }
 
@@ -167,7 +168,7 @@ async function cancelEdit() {
             <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
                 <InferenceJobDisplay 
                     :job="job"
-                    :schema-category="(job.data as InferenceJobData).finalSchema"
+                    :schema-category="(job.data as InferenceJobData).schema"
                     @update-edit="(edit) => saveJob(edit)"
                     @cancel-edit="cancelEdit"
                 >

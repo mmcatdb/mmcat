@@ -3,8 +3,8 @@ import { shallowRef } from 'vue';
 import Merge from './Merge.vue';
 import Cluster from './Cluster.vue';
 import Recursion from './Recursion.vue';
-import { Graph, Node, Edge } from '@/types/categoryGraph';
-import { SchemaCategory } from '@/types/schema';
+import type { Graph, Node, Edge } from '@/types/categoryGraph';
+import type { SchemaCategory } from '@/types/schema';
 
 const props = defineProps<{
     graph: Graph;
@@ -13,10 +13,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-primary-key-merge', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-cluster', nodes: (Node | undefined)[]): void;
-    (e: 'confirm-recursion', payload: { nodes: (Node | undefined)[], edges: (Edge | undefined)[] }): void;
+    (e: 'confirm-reference-merge', nodes: Node[]): void;
+    (e: 'confirm-primary-key-merge', nodes: Node[]): void;
+    (e: 'confirm-cluster', nodes: Node[]): void;
+    (e: 'confirm-recursion', payload: { nodes: Node[], edges: Edge[] }): void;
 }>();
 
 enum State {
@@ -52,19 +52,19 @@ function setStateToDefault() {
     state.value = { type: State.Default };
 }
 
-function confirmReferenceMergeEdit(nodes: (Node | undefined)[]) {
+function confirmReferenceMergeEdit(nodes: Node[]) {
     emit('confirm-reference-merge', nodes);
 }
 
-function confirmPrimaryKeyMergeEdit(nodes: (Node | undefined)[]) {
+function confirmPrimaryKeyMergeEdit(nodes: Node[]) {
     emit('confirm-primary-key-merge', nodes);
 }
 
-function confirmClusterEdit(nodes: (Node | undefined)[]) {
+function confirmClusterEdit(nodes: Node[]) {
     emit('confirm-cluster', nodes);
 }
 
-function confirmRecursionEdit(nodes: (Node | undefined)[], edges: (Edge | undefined)[]) {
+function confirmRecursionEdit(nodes: Node[], edges: Edge[]) {
     emit('confirm-recursion', { nodes, edges });
 }
 

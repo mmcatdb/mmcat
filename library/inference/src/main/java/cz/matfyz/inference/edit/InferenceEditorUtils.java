@@ -11,6 +11,10 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataMorphism;
+import cz.matfyz.core.metadata.MetadataObject;
+import cz.matfyz.core.metadata.MetadataObject.Position;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,9 +30,9 @@ public class InferenceEditorUtils {
         throw new UnsupportedOperationException("Utility class InferenceEditorUtils.");
     }
 
-    private static int getNewSignatureValue(SchemaCategory schemaCategory) {
+    private static int getNewSignatureValue(SchemaCategory schema) {
         int max = 0;
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
             // TODO: here I am relying on the fact, that in inference I create only BaseSignatures
             int signatureVal = Integer.parseInt(morphism.signature().toString());
             if (signatureVal > max) {
@@ -38,9 +42,9 @@ public class InferenceEditorUtils {
         return max + 1;
     }
 
-    private static int getNewKeyValue(SchemaCategory schemaCategory) {
+    private static int getNewKeyValue(SchemaCategory schema) {
         int max = 0;
-        for (SchemaObject object : schemaCategory.allObjects()) {
+        for (SchemaObject object : schema.allObjects()) {
             // TODO: here I am relying on the fact, that in inference I create only BaseSignatures
             int keyVal = object.key().getValue();
             if (keyVal > max) {
@@ -50,24 +54,22 @@ public class InferenceEditorUtils {
         return max + 1;
     }
 
-    public static Signature createAndAddMorphism(SchemaCategory schemaCategory, SchemaObject dom, SchemaObject cod) {
-        SchemaMorphism existingMorphism = getMorphismIfExists(schemaCategory, dom, cod);
-        if (existingMorphism != null) {
+    public static Signature createAndAddMorphism(SchemaCategory schema, MetadataCategory metadata, SchemaObject dom, SchemaObject cod) {
+        final SchemaMorphism existingMorphism = getMorphismIfExists(schema, dom, cod);
+        if (existingMorphism != null)
             return existingMorphism.signature();
-        } else {
-            SchemaMorphism newMorphism = createMorphism(schemaCategory, dom, cod);
-            schemaCategory.addMorphism(newMorphism);
-            return newMorphism.signature();
-        }
+
+        final BaseSignature signature = Signature.createBase(getNewSignatureValue(schema));
+        final SchemaMorphism newMorphism = new SchemaMorphism(signature, dom, cod, Min.ONE, Set.of());
+
+        schema.addMorphism(newMorphism);
+        metadata.setMorphism(newMorphism, new MetadataMorphism(""));
+
+        return newMorphism.signature();
     }
 
-    private static SchemaMorphism createMorphism(SchemaCategory schemaCategory, SchemaObject dom, SchemaObject cod) {
-        BaseSignature signature = Signature.createBase(getNewSignatureValue(schemaCategory));
-        return new SchemaMorphism(signature, null, Min.ONE, new HashSet<>(), dom, cod);
-    }
-
-    private static SchemaMorphism getMorphismIfExists(SchemaCategory schemaCategory, SchemaObject dom, SchemaObject cod) {
-        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+    private static SchemaMorphism getMorphismIfExists(SchemaCategory schema, SchemaObject dom, SchemaObject cod) {
+        for (SchemaMorphism morphism : schema.allMorphisms()) {
             if (morphism.dom().equals(dom) && morphism.cod().equals(cod)) {
                 return morphism;
             }
@@ -75,27 +77,26 @@ public class InferenceEditorUtils {
         return null;
     }
 
-    public static Key createAndAddObject(SchemaCategory schemaCategory, String objectLabel, ObjectIds ids) {
-        SchemaObject newObject = createObject(schemaCategory, objectLabel, ids);
-        schemaCategory.addObject(newObject);
-        return newObject.key();
+    public static Key createAndAddObject(SchemaCategory schema, MetadataCategory metadata, ObjectIds ids, String label) {
+        final Key key = new Key(getNewKeyValue(schema));
+        final SchemaObject object = new SchemaObject(key, ids, SignatureId.createEmpty());
+
+        schema.addObject(object);
+        metadata.setObject(object, new MetadataObject(label, Position.createDefault()));
+
+        return key;
     }
 
-    private static SchemaObject createObject(SchemaCategory schemaCategory, String objectLabel, ObjectIds ids) {
-        Key key = new Key(getNewKeyValue(schemaCategory));
-        return new SchemaObject(key, objectLabel, ids, SignatureId.createEmpty());
-    }
-
-    public static void removeMorphismsAndObjects(SchemaCategory schemaCategory, Set<Signature> signaturesToDelete, Set<Key> keysToDelete) {
+    public static void removeMorphismsAndObjects(SchemaCategory schema, Set<Signature> signaturesToDelete, Set<Key> keysToDelete) {
         for (Signature sig : signaturesToDelete) {
-            SchemaMorphism morphism = schemaCategory.getMorphism(sig);
-            schemaCategory.removeMorphism(morphism);
+            SchemaMorphism morphism = schema.getMorphism(sig);
+            schema.removeMorphism(morphism);
         }
-        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schemaCategory);
+        InferenceEditorUtils.SchemaCategoryEditor editor = new InferenceEditorUtils.SchemaCategoryEditor(schema);
         editor.deleteObjects(keysToDelete);
     }
 
-    public static Mapping createNewMapping(SchemaCategory schemaCategory, Mapping mapping, List<Mapping> mappingsToMerge, ComplexProperty accessPath) {
+    public static Mapping createNewMapping(SchemaCategory schema, Mapping mapping, List<Mapping> mappingsToMerge, ComplexProperty accessPath) {
         Collection<Signature> primaryKey = new HashSet<>();
         if (mapping.primaryKey() != null) {
             primaryKey.addAll(mapping.primaryKey());
@@ -105,7 +106,7 @@ public class InferenceEditorUtils {
                 primaryKey.addAll(mappingToMerge.primaryKey());
             }
         }
-        return new Mapping(schemaCategory, mapping.rootObject().key(), mapping.kindName(), accessPath, primaryKey);
+        return new Mapping(schema, mapping.rootObject().key(), mapping.kindName(), accessPath, primaryKey);
     }
 
     public static List<Mapping> updateMappings(List<Mapping> mappings, List<Mapping> mappingsToDelete, Mapping mappingToKeep) {
@@ -120,19 +121,35 @@ public class InferenceEditorUtils {
         return updatedMappings;
     }
 
-    public static SchemaCategory createSchemaCategoryCopy(SchemaCategory original) {
-        SchemaCategory copy = new SchemaCategory(original.label);
+    public static SchemaCategory createSchemaCopy(SchemaCategory original) {
+        final SchemaCategory copy = new SchemaCategory();
 
-        for (SchemaObject schemaObject : original.allObjects()) {
-            SchemaObject objectCopy = new SchemaObject(schemaObject.key(), schemaObject.label(), schemaObject.ids(), schemaObject.superId());
-            copy.addObject(objectCopy);
+        for (final SchemaObject object : original.allObjects())
+            copy.addObject(new SchemaObject(object.key(), object.ids(), object.superId()));
+
+        for (final SchemaMorphism morphism : original.allMorphisms())
+            copy.addMorphism(new SchemaMorphism(
+                morphism.signature(),
+                copy.getObject(morphism.dom().key()),
+                copy.getObject(morphism.cod().key()),
+                morphism.min(),
+                morphism.tags()
+            ));
+
+        return copy;
+    }
+
+    public static MetadataCategory createMetadataCopy(MetadataCategory original, SchemaCategory schema) {
+        final MetadataCategory copy = MetadataCategory.createEmpty(schema);
+
+        for (final SchemaObject object : schema.allObjects()) {
+            final var mo = original.getObject(object);
+            copy.setObject(object, new MetadataObject(mo.label, mo.position));
         }
 
-        for (SchemaMorphism morphism : original.allMorphisms()) {
-            SchemaObject domCopy = copy.getObject(morphism.dom().key());
-            SchemaObject codCopy = copy.getObject(morphism.cod().key());
-            SchemaMorphism morphCopy = new SchemaMorphism(morphism.signature(), morphism.label, morphism.min(), morphism.tags(), domCopy, codCopy); // Adjust according to your SchemaMorphism constructor
-            copy.addMorphism(morphCopy);
+        for (final SchemaMorphism morphism : schema.allMorphisms()) {
+            final var mm = original.getMorphism(morphism);
+            copy.setMorphism(morphism, new MetadataMorphism(mm.label));
         }
 
         return copy;
@@ -140,14 +157,14 @@ public class InferenceEditorUtils {
 
     public static class SchemaCategoryEditor extends SchemaCategory.Editor {
 
-        public final SchemaCategory schemaCategory;
+        public final SchemaCategory schema;
 
-        public SchemaCategoryEditor(SchemaCategory schemaCategory) {
-            this.schemaCategory = schemaCategory;
+        public SchemaCategoryEditor(SchemaCategory schema) {
+            this.schema = schema;
         }
 
         public void deleteObject(Key key) {
-            final var objects = getObjects(schemaCategory);
+            final var objects = getObjects(schema);
             if (objects.containsKey(key))
                 throw new NotFoundException("SchemaObject with the provided key does not exist");
 

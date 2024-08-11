@@ -4,7 +4,7 @@ import { Job } from '@/types/job';
 import API from '@/utils/api';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
-import { useSchemaCategoryId } from '@/utils/injects';
+import { useSchemaCategoryInfo } from '@/utils/injects';
 
 const jobs = ref<Job[]>();
 
@@ -21,14 +21,14 @@ function updateJob(job: Job) {
     jobs.value = newJobs;
 }
 
-const categoryId = useSchemaCategoryId();
+const info = useSchemaCategoryInfo();
 
 async function fetchJobs() {
-    const result = await API.jobs.getAllJobsInCategory({ categoryId });
+    const result = await API.jobs.getAllJobsInCategory({ categoryId: info.value.id });
     if (!result.status)
         return false;
 
-    jobs.value = result.data.map(Job.fromServer).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    jobs.value = result.data.map(job => Job.fromServer(job, info.value)).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     return true;
 }
 </script>

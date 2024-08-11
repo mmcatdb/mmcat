@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef, watch } from 'vue';
-import { Job } from '@/types/job';
+import { shallowRef, watch } from 'vue';
+import type { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
-import { SchemaCategory } from '@/types/schema';
+import type { SchemaCategory } from '@/types/schema';
 import EditorForInferenceSchemaCategory from '@/components/category/inference/EditorForInferenceSchemaCategory.vue';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
 
@@ -38,7 +38,7 @@ function graphCreated(newGraph: Graph) {
     props.schemaCategory.graph = newGraph;
 }
 
-function createReferenceMergeEdit(nodes: (Node)[]) {
+function createReferenceMergeEdit(nodes: Node[]) {
     const referenceKey = nodes[0].schemaObject.key;
     const referredKey = nodes[1].schemaObject.key;
 
@@ -46,21 +46,21 @@ function createReferenceMergeEdit(nodes: (Node)[]) {
     confirm(edit);
 }
 
-function createPrimaryKeyMergeEdit(nodes: (Node)[]) {
+function createPrimaryKeyMergeEdit(nodes: Node[]) {
     const primaryKey = nodes[0].schemaObject.key;
 
     const edit = new PrimaryKeyMergeInferenceEdit(primaryKey);
     confirm(edit);
 }
 
-function createClusterEdit(nodes: (Node)[]) {
+function createClusterEdit(nodes: Node[]) {
     const clusterKeys = nodes.map(node => node.schemaObject.key);
 
     const edit = new ClusterInferenceEdit(clusterKeys);
     confirm(edit);
 }
 
-function createRecursionEdit(payload: { nodes: (Node)[], edges: (Edge)[] }) {
+function createRecursionEdit(payload: { nodes: Node[], edges: Edge[] }) {
     const { nodes, edges } = payload;
 
     const pattern: PatternSegment[] = [];
@@ -79,8 +79,10 @@ function createRecursionEdit(payload: { nodes: (Node)[], edges: (Edge)[] }) {
     }
 
     // last segment direction should be empty
-    if (pattern.length > 0) 
-        pattern[pattern.length - 1].direction = '';
+    if (pattern.length > 0) {
+        const lastSegment = pattern[pattern.length - 1];
+        pattern[pattern.length - 1] = new PatternSegment(lastSegment.nodeName, '');
+    }
     
 
     const edit = new RecursionInferenceEdit(pattern);   
@@ -118,4 +120,4 @@ function cancelEdit() {
             </div>
         </div>
     </div>
-</template>@/types/inference/inferenceEdit@/types/inference/inferenceEdit
+</template>

@@ -1,72 +1,84 @@
 package cz.matfyz.inference.schemaconversion;
 
-import java.util.HashSet;
+import java.util.Set;
+
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.SignatureId;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataMorphism;
+import cz.matfyz.core.metadata.MetadataObject;
+import cz.matfyz.core.metadata.MetadataObject.Position;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
+import cz.matfyz.inference.schemaconversion.utils.SchemaWithMetadata;
 
 public class AccessTreeToSchemaCategoryConverter {
 
-    private final SchemaCategory schemaCategory;
+    private final SchemaCategory schema;
+    private final MetadataCategory metadata;
     private final String kindName;
 
-    public AccessTreeToSchemaCategoryConverter(String categoryLabel, String kindName) {
-        this.schemaCategory = new SchemaCategory(categoryLabel);
+    public AccessTreeToSchemaCategoryConverter(String kindName) {
+        this.schema = new SchemaCategory();
+        this.metadata = MetadataCategory.createEmpty(schema);
         this.kindName = kindName;
     }
 
-    public SchemaCategory convert(AccessTreeNode root) {
+    public SchemaWithMetadata convert(AccessTreeNode root) {
         buildSchemaCategory(root);
-        return schemaCategory;
+        return new SchemaWithMetadata(schema, metadata);
     }
 
     private void buildSchemaCategory(AccessTreeNode currentNode) {
-        SchemaObject currentObject;
-        if (currentNode.getState() == AccessTreeNode.State.ROOT) {
-            currentObject = new SchemaObject(currentNode.getKey(), kindName, ObjectIds.createGenerated(), SignatureId.createEmpty());
-            schemaCategory.addObject(currentObject);
-        } else {
-            // System.out.println("Creating SO and SM for node: " + currentNode.getName());
-            currentObject = createSchemaObject(currentNode);
-            createSchemaMorphism(currentNode, currentObject);
-        }
+        final var isRoot = currentNode.getState() == AccessTreeNode.State.ROOT;
+        final var object = createSchemaObject(currentNode, isRoot);
 
-        for (AccessTreeNode childNode : currentNode.getChildren()) {
+        if (!isRoot)
+            createSchemaMorphism(currentNode, object);
+
+        for (AccessTreeNode childNode : currentNode.getChildren())
             buildSchemaCategory(childNode);
-        }
     }
 
-    private SchemaObject createSchemaObject(AccessTreeNode node) {
-        ObjectIds ids = node.getChildren().isEmpty() ? ObjectIds.createValue() : ObjectIds.createGenerated();
-        SchemaObject object = new SchemaObject(node.getKey(), node.getName(), ids, SignatureId.createEmpty());
-        schemaCategory.addObject(object);
+    private SchemaObject createSchemaObject(AccessTreeNode node, boolean isRoot) {
+        final var ids = isRoot || !node.getChildren().isEmpty()
+            ? ObjectIds.createGenerated()
+            : ObjectIds.createValue();
+
+        final SchemaObject object = new SchemaObject(node.getKey(), ids, SignatureId.createEmpty());
+        schema.addObject(object);
+
+        final var label = isRoot ? kindName : node.getName();
+        metadata.setObject(object, new MetadataObject(label, Position.createDefault()));
+
         return object;
     }
 
     private void createSchemaMorphism(AccessTreeNode node, SchemaObject schemaObject) {
-        SchemaObject schemaObjectParent = schemaCategory.getObject(node.getParentKey());
+        final var parentObject = schema.getObject(node.getParentKey());
 
-        if (schemaObjectParent == null) {
+        if (parentObject == null) {
             System.out.println("SK after accessing the parent node");
-            System.out.println(schemaCategory.allObjects());
+            System.out.println(schema.allObjects());
             System.out.println("Node key: " + node.getKey());
             System.out.println("Parent key: " + node.getParentKey());
 
-            throw new RuntimeException("Error while creating morphism. Domain is null and codomain is " + schemaObject.label());
+            throw new RuntimeException("Error while creating morphism. Domain is null and codomain is " + schemaObject.key());
         }
 
-        SchemaObject dom = schemaObjectParent;
+        SchemaObject dom = parentObject;
         SchemaObject cod = schemaObject;
 
         if (node.getIsArrayType()) {
             dom = schemaObject;
-            cod = schemaObjectParent;
+            cod = parentObject;
         }
 
-        SchemaMorphism sm = new SchemaMorphism(node.getSignature(), node.getLabel(), node.getMin(), new HashSet<>(), dom, cod);
-        schemaCategory.addMorphism(sm);
+        final SchemaMorphism sm = new SchemaMorphism(node.getSignature(), dom, cod, node.getMin(), Set.of());
+        schema.addMorphism(sm);
+
+        metadata.setMorphism(sm, new MetadataMorphism(node.getLabel()));
     }
 }

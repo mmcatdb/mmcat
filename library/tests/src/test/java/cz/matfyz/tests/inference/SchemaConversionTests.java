@@ -94,19 +94,19 @@ public class SchemaConversionTests {
         root.addChild(child1);
         root.addChild(child2);
 
-        final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter("customer", "person");
-        final SchemaCategory schemaCategory = accessTreeToSchemaCategoryConverter.convert(root);
+        final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter("person");
+        final SchemaCategory schema = accessTreeToSchemaCategoryConverter.convert(root).schema();
 
-        assertEquals(5, schemaCategory.allObjects().size());
-        assertEquals(4, schemaCategory.allMorphisms().size());
+        assertEquals(5, schema.allObjects().size());
+        assertEquals(4, schema.allMorphisms().size());
 
-        assertNotNull(schemaCategory.getObject(new Key(0)), "Key 0 should be present in the schema category");
-        assertNotNull(schemaCategory.getObject(new Key(1)), "Key 1 should be present in the schema category");
-        assertNotNull(schemaCategory.getObject(new Key(2)), "Key 2 should be present in the schema category");
-        assertNotNull(schemaCategory.getObject(new Key(3)), "Key 3 should be present in the schema category");
-        assertNotNull(schemaCategory.getObject(new Key(4)), "Key 4 should be present in the schema category");
+        assertNotNull(schema.getObject(new Key(0)), "Key 0 should be present in the schema category");
+        assertNotNull(schema.getObject(new Key(1)), "Key 1 should be present in the schema category");
+        assertNotNull(schema.getObject(new Key(2)), "Key 2 should be present in the schema category");
+        assertNotNull(schema.getObject(new Key(3)), "Key 3 should be present in the schema category");
+        assertNotNull(schema.getObject(new Key(4)), "Key 4 should be present in the schema category");
 
-        assertNull(schemaCategory.getObject(new Key(5)), "Key 5 should not be present in the schema category");
+        assertNull(schema.getObject(new Key(5)), "Key 5 should not be present in the schema category");
     }
 
 
@@ -119,16 +119,17 @@ public class SchemaConversionTests {
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final List<CategoryMappingPair> pairs = new MMInferOneInAll()
-            .input(inferenceWrapper, "apps", "Test Schema Category")
+            .input(inferenceWrapper, "apps")
             .run();
 
-        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(pairs, "Test Schema Category");
-        final Mapping mapping = CategoryMappingPair.getMappings(pairs).get(0);
+        final var pair = CategoryMappingPair.merge(pairs);
+        final SchemaCategory schema = pair.schema();
+        final Mapping mapping = pair.mappings().get(0);
 
-        assertEquals(10, schemaCategory.allObjects().size(), "There should be 10 Schema Objects.");
-        assertEquals(9, schemaCategory.allMorphisms().size(), "There should be 10 Schema Morphisms.");
+        assertEquals(10, schema.allObjects().size(), "There should be 10 Schema Objects.");
+        assertEquals(9, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
 
-        assertEquals(mapping.accessPath().subpaths().size(), schemaCategory.allObjects().size() - 1, "Mapping should be as long as there are Schema Objects.");
+        assertEquals(mapping.accessPath().subpaths().size(), schema.allObjects().size() - 1, "Mapping should be as long as there are Schema Objects.");
     }
 
     @Test
@@ -140,14 +141,15 @@ public class SchemaConversionTests {
         final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final List<CategoryMappingPair> pairs = new MMInferOneInAll()
-            .input(inferenceWrapper, "business", "Test Schema Category")
+            .input(inferenceWrapper, "business")
             .run();
 
-        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(pairs, "Test Schema Category");
-        final Mapping mapping = CategoryMappingPair.getMappings(pairs).get(0);
+        final var pair = CategoryMappingPair.merge(pairs);
+        final SchemaCategory schema = pair.schema();
+        final Mapping mapping = pair.mappings().get(0);
 
-        assertEquals(22, schemaCategory.allObjects().size(), "There should be 10 Schema Objects.");
-        assertEquals(21, schemaCategory.allMorphisms().size(), "There should be 10 Schema Morphisms.");
+        assertEquals(22, schema.allObjects().size(), "There should be 10 Schema Objects.");
+        assertEquals(21, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
 
         assertEquals(3, countComplexProperties(mapping), "There should be 3 complex properties");
     }
@@ -177,16 +179,17 @@ public class SchemaConversionTests {
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final List<CategoryMappingPair> pairs = new MMInferOneInAll()
-            .input(inferenceWrapper, "user", "Test Schema Category")
+            .input(inferenceWrapper, "user")
             .run();
 
-        final SchemaCategory schemaCategory = CategoryMappingPair.mergeCategory(pairs, "Test Schema Category");
-        final Mapping mapping = CategoryMappingPair.getMappings(pairs).get(0);
+        final var pair = CategoryMappingPair.merge(pairs);
+        final SchemaCategory schema = pair.schema();
+        final Mapping mapping = pair.mappings().get(0);
 
-        System.out.println(schemaCategory.allObjects());
+        System.out.println(schema.allObjects());
 
-        //assertEquals(22, schemaCategory.allObjects().size(), "There should be 10 Schema Objects.");
-        //assertEquals(21, schemaCategory.allMorphisms().size(), "There should be 10 Schema Morphisms.");
+        //assertEquals(22, schema.allObjects().size(), "There should be 10 Schema Objects.");
+        //assertEquals(21, schema.allMorphisms().size(), "There should be 10 Schema Morphisms.");
 
         //assertEquals(3, countComplexProperties(mapping), "There should be 3 complex properties");
     }

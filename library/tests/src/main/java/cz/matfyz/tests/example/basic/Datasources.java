@@ -9,7 +9,7 @@ import cz.matfyz.wrapperpostgresql.PostgreSQLControlWrapper;
 
 public class Datasources {
 
-    public final SchemaCategory schema = Schema.newSchemaCategory();
+    public final SchemaCategory schema = Schema.newSchema();
 
     private static final DatasourceProvider datasourceProvider = new DatasourceProvider("tests");
 

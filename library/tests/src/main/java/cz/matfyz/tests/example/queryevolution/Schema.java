@@ -5,13 +5,14 @@ import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderMorphism;
 import cz.matfyz.core.schema.SchemaBuilder.BuilderObject;
 import cz.matfyz.core.identifiers.Signature;
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaBuilder;
 
 public class Schema {
 
     public static final String schemaLabel = "Query Evolution Schema";
 
-    private static final SchemaBuilder builder = new SchemaBuilder(schemaLabel);
+    private static final SchemaBuilder builder = new SchemaBuilder();
 
     // Keys
 
@@ -95,7 +96,7 @@ public class Schema {
     /**
      * Create new full schema category.
      */
-    public static SchemaCategory newSchemaCategory(int version) {
+    public static SchemaCategory newSchema(int version) {
         if (version < 1) {
             builder.skip(
                 item,
@@ -104,6 +105,10 @@ public class Schema {
         }
 
         return builder.build();
+    }
+
+    public static MetadataCategory newMetadata(SchemaCategory schema) {
+        return builder.buildMetadata(schema);
     }
 
 }

@@ -67,29 +67,29 @@ public class MTCAlgorithmTestBase {
         instanceAdder.add(builder);
         InstanceCategory expectedInstance = builder.build();
 
-        assertEquals(expectedInstance.objects(), instance.objects(), "Test objects differ from the expected objects.");
-        assertEquals(expectedInstance.morphisms(), instance.morphisms(), "Test morphisms differ from the expected morphisms.");
+        assertEquals(expectedInstance.allObjects(), instance.allObjects(), "Test objects differ from the expected objects.");
+        assertEquals(expectedInstance.allMorphisms(), instance.allMorphisms(), "Test morphisms differ from the expected morphisms.");
 
-        for (var entry : expectedInstance.objects().entrySet()) {
-            var expectedObject = entry.getValue();
-            var object = instance.getObject(entry.getKey());
+        for (final var expectedObject : expectedInstance.allObjects()) {
+            final var object = instance.getObject(expectedObject.schema.key());
 
-            var expectedString = expectedObject.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObject)).toList();
-            var string = object.allRowsToSet().stream().map(row -> rowToMappingsString(row, object)).toList();
+            final var expectedString = expectedObject.allRowsToSet().stream().map(row -> rowToMappingsString(row, expectedObject)).toList();
+            final var string = object.allRowsToSet().stream().map(row -> rowToMappingsString(row, object)).toList();
 
             assertEquals(expectedString, string);
         }
     }
 
     private static String rowToMappingsString(DomainRow row, InstanceObject object) {
-        String output = "\n[row] (" + object.key() + ") "  + row;
+        String output = "\n[row] (" + object.schema.key() + ") "  + row;
 
-        for (var mappingsOfType : row.getAllMappingsFrom()) {
-            output += "\n\tmappings [" + mappingsOfType.getKey().signature() + "]->(" + mappingsOfType.getKey().cod().key() + "):";
-            for (var m : mappingsOfType.getValue())
+        for (final var mappingsOfType : row.getAllMappingsFrom()) {
+            output += "\n\tmappings [" + mappingsOfType.morphism().schema.signature() + "]->(" + mappingsOfType.morphism().schema.cod().key() + "):";
+            for (final var m : mappingsOfType.mappings())
                 output += "\n\t\t" + m.codomainRow();
         }
 
         return output + "\n";
     }
+
 }

@@ -1,24 +1,23 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, shallowRef, computed, watch } from 'vue';
-import { Graph } from '@/types/categoryGraph';
-import { Edge, SelectionType, type Node } from '@/types/categoryGraph';
+import { onMounted, onUnmounted, ref, shallowRef, computed } from 'vue';
+import { type Graph, Edge, SelectionType, type Node } from '@/types/categoryGraph';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
-import Warning from './Warning.vue'
+import Warning from './Warning.vue';
 
 const props = defineProps<{
-    graph: Graph
+    graph: Graph;
 }>();
 
 const emit = defineEmits<{
     (e: 'save'): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
-    (e: 'confirm', nodes: (Node | undefined)[], edges: (Edge | undefined)[]): void;
+    (e: 'confirm', nodes: Node[], edges: Edge[]): void;
 }>();
 
-const nodes = shallowRef<(Node)[]>([]);
-const edges = shallowRef<(Edge)[]>([]);
+const nodes = shallowRef<Node[]>([]);
+const edges = shallowRef<Edge[]>([]);
 const confirmClicked = ref(false);
 const showWarning = ref(false);
 const warningMessage = ref('');
@@ -78,10 +77,11 @@ onUnmounted(() => {
 
 function onNodeTapHandler(node: Node) {
     if (isNodeTurn.value) {
-        nodes.value = [...nodes.value, node];
+        nodes.value = [ ...nodes.value, node ];
         node.select({ type: SelectionType.Root, level: 0 });
         showWarning.value = false;
-    } else {
+    }
+    else {
         showWarning.value = true;
         warningMessage.value = 'Please select an edge next.';
     }
@@ -89,9 +89,10 @@ function onNodeTapHandler(node: Node) {
 
 function onEdgeTapHandler(edge: Edge) {
     if (!isNodeTurn.value) {
-        edges.value = [...edges.value, edge];
+        edges.value = [ ...edges.value, edge ];
         showWarning.value = false; // Hide warning on valid selection
-    } else {
+    }
+    else {
         showWarning.value = true;
         warningMessage.value = 'Please select a node next.';
     }
@@ -100,11 +101,11 @@ function onEdgeTapHandler(edge: Edge) {
 
 <template>
     <div class="recursion">
-    <Warning 
-        :show="showWarning"
-        :message="warningMessage"
-    />
-    <h2>Find Recursion</h2>
+        <Warning 
+            :show="showWarning"
+            :message="warningMessage"
+        />
+        <h2>Find Recursion</h2>
         <ValueContainer>
             <ValueRow label="Recursive pattern:"> 
                 {{ selectedNodeLabels }}

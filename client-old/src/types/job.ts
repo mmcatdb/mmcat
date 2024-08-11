@@ -1,6 +1,7 @@
 import { type ActionPayload, actionPayloadFromServer, type ActionPayloadFromServer } from './action';
 import type { Entity, Id } from './id';
 import { InferenceJobData, type InferenceJobDataFromServer } from './inference/InferenceJobData';
+import type { SchemaCategoryInfo } from './schema';
 
 export type JobFromServer = {
     id: Id;
@@ -27,7 +28,7 @@ export class Job implements Entity {
         public readonly createdAt: Date,
     ) {}
 
-    static fromServer(input: JobFromServer): Job {
+    static fromServer(input: JobFromServer, info: SchemaCategoryInfo): Job {
         return new Job(
             input.id,
             input.categoryId,
@@ -35,7 +36,7 @@ export class Job implements Entity {
             input.label,
             input.state,
             actionPayloadFromServer(input.payload),
-            input.data && jobDataFromServer(input.data),
+            input.data && jobDataFromServer(input.data, info),
             input.error,
             new Date(input.createdAt),
         );
@@ -70,12 +71,12 @@ type JobDataFromServer = ModelJobData | InferenceJobDataFromServer;
 
 type JobData = ModelJobData | InferenceJobData;
 
-function jobDataFromServer(input: JobDataFromServer): JobData {
+function jobDataFromServer(input: JobDataFromServer, info: SchemaCategoryInfo): JobData {
     switch (input.type) {
     case JobDataType.Model:
         return input;
     case JobDataType.Inference:
-        return InferenceJobData.fromServer(input);
+        return InferenceJobData.fromServer(input, info);
     }
 }
 

@@ -15,14 +15,8 @@ import java.util.TreeMap;
 
 public class SchemaCategory {
 
-    public final String label;
-
     private final Map<Key, SchemaObject> objects = new TreeMap<>();
     private final Map<Signature, SchemaMorphism> morphisms = new TreeMap<>();
-
-    public SchemaCategory(String label) {
-        this.label = label;
-    }
 
     public SchemaObject getObject(Key key) {
         return objects.get(key);
@@ -151,11 +145,7 @@ public class SchemaCategory {
             .anyMatch(base -> getEdge(base).to().key().equals(key));
     }
 
-    private int lastCompositeId = 0;
-
     private SchemaMorphism createCompositeMorphism(Signature signature) {
-        final String morphismLabel = "composite" + lastCompositeId++;
-
         final Signature[] bases = signature.toBases().toArray(Signature[]::new);
 
         final Signature lastSignature = bases[0];
@@ -170,7 +160,7 @@ public class SchemaCategory {
             min = Min.combine(min, lastMorphism.min());
         }
 
-        return new SchemaMorphism(signature, morphismLabel, min, Set.of(), dom, cod);
+        return new SchemaMorphism(signature, dom, cod, min, Set.of());
     }
 
     public abstract static class Editor {

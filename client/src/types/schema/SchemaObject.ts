@@ -3,15 +3,20 @@ import { ComparablePosition, type Position } from './Position';
 import { SchemaCategoryInvalidError } from './Error';
 import type { Graph } from '../categoryGraph';
 
-export type SchemaObjectDataFromServer = {
-    label: string;
+export type SchemaObjectFromServer = {
+    key: KeyFromServer;
     ids?: ObjectIdsFromServer;
     superId: SignatureIdFromServer;
 };
 
-export type SchemaObjectMetadataFromServer = {
+export type MetadataObjectFromServer = {
+    key: KeyFromServer;
+    label: string;
     position: Position;
 };
+
+// TODO
+const TEMP_METADATA_OBJECT: MetadataObjectFromServer = { key: 0, label: '', position: { x: 0, y: 0 } };
 
 export class SchemaObject {
     private constructor(
@@ -22,12 +27,13 @@ export class SchemaObject {
         private _isNew: boolean,
     ) {}
 
-    static fromServer(key: KeyFromServer, input: SchemaObjectDataFromServer): SchemaObject {
+    static fromServer(schema: SchemaObjectFromServer, metadata: MetadataObjectFromServer = TEMP_METADATA_OBJECT): SchemaObject {
         const object = new SchemaObject(
-            Key.fromServer(key),
-            input.label,
-            input.ids ? ObjectIds.fromServer(input.ids) : undefined,
-            SignatureId.fromServer(input.superId),
+            Key.fromServer(schema.key),
+            // schema.label,
+            metadata.label,
+            schema.ids ? ObjectIds.fromServer(schema.ids) : undefined,
+            SignatureId.fromServer(schema.superId),
             false,
         );
 
@@ -68,9 +74,9 @@ export class SchemaObject {
         return this.ids;
     }
 
-    toServer(): SchemaObjectDataFromServer {
+    toServer(): SchemaObjectFromServer {
         return {
-            label: this.label,
+            key: this.key.toServer(),
             ids: this.ids?.toServer(),
             superId: this.superId.toServer(),
         };
@@ -86,12 +92,6 @@ export type ObjectDefinition = {
     ids?: ObjectIds;
 };
 
-export type SchemaObjectFromServer = {
-    key: KeyFromServer;
-    data: SchemaObjectDataFromServer;
-    metadata: SchemaObjectMetadataFromServer;
-};
-
 // TODO rename for consistency
 
 export class VersionedSchemaObject {
@@ -101,12 +101,12 @@ export class VersionedSchemaObject {
         private _graph?: Graph,
     ) {}
 
-    static fromServer(input: SchemaObjectFromServer): VersionedSchemaObject {
+    static fromServer(input: SchemaObjectFromServer, metadata: MetadataObjectFromServer): VersionedSchemaObject {
         const output = new VersionedSchemaObject(
             Key.fromServer(input.key),
-            ComparablePosition.fromPosition(input.metadata.position),
+            ComparablePosition.fromPosition(metadata.position),
         );
-        output.current = SchemaObject.fromServer(input.key, input.data);
+        output.current = SchemaObject.fromServer(input, metadata);
 
         return output;
     }
