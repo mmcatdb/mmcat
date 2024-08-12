@@ -1,4 +1,5 @@
-import { Key, KeyFromServer } from '../identifiers';
+import { Key } from '../identifiers';
+import type { KeyFromServer } from '../identifiers'; 
 
 interface AbstractInferenceEdit {
     id: number | null;

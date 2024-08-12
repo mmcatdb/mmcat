@@ -7,7 +7,7 @@ import CleverRouterLink from '@/components/common/CleverRouterLink.vue';
 import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
-import InferenceJobDisplay from '@/components/category/inferenceEdit/InferenceJobDisplay.vue';
+import InferenceJobDisplay from '@/components/category/inference/InferenceJobDisplay.vue';
 import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit';
 import { SaveJobResultPayload } from '@/types/inferenceEdit/inferenceEdit';
 import { SchemaCategory } from '@/types/schema';

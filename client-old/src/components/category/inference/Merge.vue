@@ -3,8 +3,8 @@ import { ref, computed } from 'vue';
 import { Graph } from '@/types/categoryGraph';
 import Divider from '@/components/layout/Divider.vue';
 import { Node } from '@/types/categoryGraph';
-import ReferenceMerge from '@/components/category/inferenceEdit/ReferenceMerge.vue';
-import PrimaryKeyMerge from '@/components/category/inferenceEdit/PrimaryKeyMerge.vue';
+import ReferenceMerge from '@/components/category/inference/ReferenceMerge.vue';
+import PrimaryKeyMerge from '@/components/category/inference/PrimaryKeyMerge.vue';
 
 const props = defineProps<{
     graph: Graph;
