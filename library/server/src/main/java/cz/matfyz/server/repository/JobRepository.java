@@ -1,8 +1,6 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.getIdOrNull;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -107,8 +105,8 @@ public class JobRepository {
         });
     }
 
-    public boolean save(Job job) {
-        return db.getBoolean((connection, output) -> {
+    public void save(Job job) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO job (id, run_id, json_value)
                 VALUES (?, ?, ?::jsonb)
@@ -116,16 +114,15 @@ public class JobRepository {
                     run_id = EXCLUDED.run_id,
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, job.id);
+            setId(statement, 1, job.id());
             setId(statement, 2, job.runId);
             statement.setString(3, job.toJsonValue());
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 
-    public boolean save(Run run) {
-        return db.getBoolean((connection, output) -> {
+    public void save(Run run) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO run (id, schema_category_id, action_id, session_id)
                 VALUES (?, ?, ?, ?)
@@ -134,12 +131,11 @@ public class JobRepository {
                     action_id = EXCLUDED.action_id,
                     session_id = EXCLUDED.session_id;
                 """);
-            setId(statement, 1, run.id);
+            setId(statement, 1, run.id());
             setId(statement, 2, run.categoryId);
             setId(statement, 3, run.actionId, true);
             setId(statement, 4, run.sessionId, true);
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 
@@ -163,8 +159,8 @@ public class JobRepository {
         });
     }
 
-    public boolean save(Session session) {
-        return db.getBoolean((connection, output) -> {
+    public void save(Session session) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO session (id, schema_category_id, json_value)
                 VALUES (?, ?, ?::jsonb)
@@ -172,11 +168,10 @@ public class JobRepository {
                     schema_category_id = EXCLUDED.schema_category_id,
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, session.id);
+            setId(statement, 1, session.id());
             setId(statement, 2, session.categoryId);
             statement.setString(3, session.toJsonValue());
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 
@@ -197,8 +192,8 @@ public class JobRepository {
         });
     }
 
-    public boolean saveInstanceCategoryJson(Id sessionId, String json) {
-        return db.getBoolean((connection, output) -> {
+    public void saveInstanceCategoryJson(Id sessionId, String json) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 UPDATE session
                 SET instance_data = ?
@@ -206,8 +201,7 @@ public class JobRepository {
                 """);
             statement.setString(1, json);
             setId(statement, 2, sessionId);
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 

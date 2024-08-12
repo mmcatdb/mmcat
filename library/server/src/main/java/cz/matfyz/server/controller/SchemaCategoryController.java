@@ -1,19 +1,18 @@
 package cz.matfyz.server.controller;
 
+import cz.matfyz.evolution.metadata.MetadataModificationOperation;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.evolution.SchemaUpdate;
 import cz.matfyz.server.entity.evolution.SchemaUpdateInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryInfo;
 import cz.matfyz.server.entity.schema.SchemaCategoryInit;
 import cz.matfyz.server.entity.schema.SchemaCategoryWrapper;
-import cz.matfyz.server.entity.schema.SchemaObjectWrapper.MetadataUpdate;
 import cz.matfyz.server.service.SchemaCategoryService;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,11 +34,10 @@ public class SchemaCategoryController {
 
     @PostMapping("/schema-categories")
     public SchemaCategoryInfo createNewCategory(@RequestBody SchemaCategoryInit init) {
-        var newInfo = service.createNewInfo(init);
-        if (newInfo == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (init.label() == null)
+            return null;
 
-        return newInfo;
+        return SchemaCategoryInfo.fromWrapper(service.create(init));
     }
 
     @GetMapping("/schema-categories/{id}/info")
@@ -86,19 +84,8 @@ public class SchemaCategoryController {
     }
 
     @PutMapping("/schema-categories/{id}/metadata")
-    public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataUpdate> metadataUpdates) {
-        if (!service.updateMetadata(id, metadataUpdates))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-    }
-
-    /*
-     * Method for receiving the SchemaCategoryWrapper which came from mminfer
-     * Probs should get rid of the return value, and only have void
-     * */
-    @PostMapping("/schema-categories/store")
-    public ResponseEntity<String> storeSchemaCategoryWrapper(@RequestBody SchemaCategoryWrapper wrapper) {
-        service.createNewInfo(wrapper);
-        return ResponseEntity.ok("Got your request");
+    public void updateCategoryMetadata(@PathVariable Id id, @RequestBody List<MetadataModificationOperation> metadataUpdates) {
+        service.updateMetadata(id, metadataUpdates);
     }
 
 }

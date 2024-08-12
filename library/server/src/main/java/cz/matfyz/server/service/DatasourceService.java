@@ -48,8 +48,8 @@ public class DatasourceService {
         return datasource;
     }
 
-    public boolean delete(Id datasourceId) {
-        return repository.delete(datasourceId);
+    public void delete(Id datasourceId) {
+        repository.delete(datasourceId);
     }
 
 }

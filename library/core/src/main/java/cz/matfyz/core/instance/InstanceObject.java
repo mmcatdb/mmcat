@@ -3,12 +3,11 @@ package cz.matfyz.core.instance;
 import cz.matfyz.core.exception.ObjectException;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
-import cz.matfyz.core.instance.InstanceCategory.InstanceEdge;
-import cz.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.matfyz.core.schema.SchemaObject;
+import cz.matfyz.core.schema.SchemaCategory.SchemaEdge;
+import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,44 +21,15 @@ import java.util.TreeSet;
  */
 public class InstanceObject implements Identified<InstanceObject, Key> {
 
-    public final SchemaObject schemaObject;
+    public final SchemaObject schema;
+
+    private final InstanceCategory instance;
     private final Map<SignatureId, Map<SuperIdWithValues, DomainRow>> domain = new TreeMap<>();
     private final Map<String, DomainRow> domainByTechnicalIds = new TreeMap<>();
 
-    public InstanceObject(SchemaObject schemaObject) {
-        this.schemaObject = schemaObject;
-    }
-
-    /**
-     * Copies all data from the source instance object to this object. All previous data is discareded!
-     */
-    public void load(InstanceObject source) {
-        domain.clear();
-        source.domain.entrySet().forEach(entry -> {
-            // Both SuperIdWithValues and DomainRow are immutable, so we just need to copy the map.
-            // TODO - this is not true for the pending references. But that is not an issue (yet).
-            var newRowsWithSameId = new TreeMap<>(entry.getValue());
-            domain.put(entry.getKey(), newRowsWithSameId);
-        });
-
-        domainByTechnicalIds.clear();
-        domainByTechnicalIds.putAll(source.domainByTechnicalIds);
-    }
-
-    public Key key() {
-        return schemaObject.key();
-    }
-
-    public String label() {
-        return schemaObject.label();
-    }
-
-    public SignatureId superId() {
-        return schemaObject.superId();
-    }
-
-    public ObjectIds ids() {
-        return schemaObject.ids();
+    InstanceObject(SchemaObject schema, InstanceCategory instance) {
+        this.schema = schema;
+        this.instance = instance;
     }
 
     public boolean isEmpty() {
@@ -67,7 +37,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     }
 
     // TODO rozlišit id od superId
-    public DomainRow getRowById(SuperIdWithValues id) {
+    private DomainRow getRowById(SuperIdWithValues id) {
         Map<SuperIdWithValues, DomainRow> rowsWithSameTypeId = domain.get(id.id());
         return rowsWithSameTypeId == null ? null : rowsWithSameTypeId.get(id);
     }
@@ -92,32 +62,23 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
 
     public DomainRow getOrCreateRow(SuperIdWithValues superId) {
         // If the superId doesn't contain any id, we have to create a technical one.
-        if (superId.findFirstId(ids()) == null)
+        if (superId.findFirstId(schema.ids()) == null)
             return createRow(superId, Set.of(generateTechnicalId()), Set.of());
 
-        var merger = new Merger();
+        final var merger = new Merger(instance);
         return merger.merge(superId, this);
     }
 
-    public static DomainRow getOrCreateRowWithEdge(SuperIdWithValues superId, DomainRow parent, InstanceEdge edgeFromParent) {
-        var merger = new Merger();
+    public static DomainRow getOrCreateRowWithEdge(InstanceCategory instance, SuperIdWithValues superId, DomainRow parent, SchemaEdge edgeFromParent) {
+        final var merger = new Merger(instance);
         return merger.merge(superId, parent, edgeFromParent);
     }
 
-    public static DomainRow getOrCreateRowWithBaseMorphism(SuperIdWithValues superId, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
-        return getOrCreateRowWithEdge(superId, parent, new InstanceEdge(baseMorphismFromParent, true));
-    }
-
-    public static DomainRow connectRowWithBaseMorphism(DomainRow domainRow, DomainRow parent, InstanceMorphism baseMorphismFromParent) {
-        // TODO optimize
-        return getOrCreateRowWithBaseMorphism(domainRow.superId, parent, baseMorphismFromParent);
-    }
-
     DomainRow createRow(SuperIdWithValues superId) {
-        Set<String> technicalIds = superId.findFirstId(ids()) == null
+        Set<String> technicalIds = superId.findFirstId(schema.ids()) == null
             ? Set.of(generateTechnicalId())
             : Set.of();
-        var ids = superId.findAllIds(ids()).foundIds();
+        final var ids = superId.findAllIds(schema.ids()).foundIds();
 
         return createRow(superId, technicalIds, ids);
     }
@@ -125,14 +86,14 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     DomainRow createRow(SuperIdWithValues superId, Set<String> technicalIds, Set<SuperIdWithValues> allIds) {
         // TODO this can be optimized - we can discard the references that were referenced in all merged rows.
         // However, it might be quite rare, so the overhead caused by finding such ids would be greater than the savings.
-        var row = new DomainRow(superId, technicalIds, referencesToRows.keySet());
+        final var row = new DomainRow(superId, technicalIds, referencesToRows.keySet());
         setRow(row, allIds);
 
         return row;
     }
 
     public DomainRow getRow(SuperIdWithValues superId) {
-        for (var id : superId.findAllIds(ids()).foundIds()) {
+        for (final var id : superId.findAllIds(schema.ids()).foundIds()) {
             final var row = getRowById(id);
             if (row != null)
                 return row;
@@ -147,7 +108,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
      */
     public DomainRow getActualRow(SuperIdWithValues superId, Set<String> technicalIds) {
         // Simply find the first id of all possible ids (any of them should point to the same row).
-        var foundId = superId.findFirstId(ids());
+        var foundId = superId.findFirstId(schema.ids());
         if (foundId != null)
             return getRowById(foundId);
 
@@ -213,7 +174,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
 
         int previousSuperIdSize = 0;
         Set<SuperIdWithValues> foundIds = new TreeSet<>();
-        Set<SignatureId> notFoundIds = ids().toSignatureIds();
+        Set<SignatureId> notFoundIds = schema.ids().toSignatureIds();
 
         while (previousSuperIdSize < superId.size()) {
             previousSuperIdSize = superId.size();
@@ -232,23 +193,15 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
         return new FindSuperIdResult(superId, foundIds);
     }
 
-    public static SuperIdWithValues mergeSuperIds(Collection<DomainRow> rows) {
-        var builder = new SuperIdWithValues.Builder();
-
-        for (var row : rows)
-            builder.add(row.superId);
+    private static SuperIdWithValues mergeSuperIds(Collection<DomainRow> rows) {
+        final var builder = new SuperIdWithValues.Builder();
+        rows.forEach(row -> builder.add(row.superId));
 
         return builder.build();
     }
 
-    public static Set<String> mergeTechnicalIds(Collection<DomainRow> rows) {
-        var output = new TreeSet<String>();
-        rows.forEach(row -> output.addAll(row.technicalIds));
-        return output;
-    }
-
     private Set<DomainRow> findNewRows(Set<SuperIdWithValues> foundIds, Set<DomainRow> outOriginalRows) {
-        var output = new TreeSet<DomainRow>();
+        final var output = new TreeSet<DomainRow>();
 
         for (var id : foundIds) {
             var row = getRowById(id);
@@ -264,8 +217,8 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
 
     private final Map<Signature, Set<ReferenceToRow>> referencesToRows = new TreeMap<>();
 
-    public void addReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
-        var referencesForSignature = referencesToRows.computeIfAbsent(signatureInThis, x -> new TreeSet<>());
+    public void addReferenceToRow(Signature signatureInThis, SchemaPath path, Signature signatureInOther) {
+        final var referencesForSignature = referencesToRows.computeIfAbsent(signatureInThis, x -> new TreeSet<>());
         referencesForSignature.add(new ReferenceToRow(signatureInThis, path, signatureInOther));
     }
 
@@ -276,10 +229,10 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     public static class ReferenceToRow implements Comparable<ReferenceToRow> {
 
         public final Signature signatureInThis;
-        public final InstancePath path;
+        public final SchemaPath path;
         public final Signature signatureInOther;
 
-        public ReferenceToRow(Signature signatureInThis, InstancePath path, Signature signatureInOther) {
+        public ReferenceToRow(Signature signatureInThis, SchemaPath path, Signature signatureInOther) {
             this.signatureInThis = signatureInThis;
             this.path = path;
             this.signatureInOther = signatureInOther;
@@ -315,15 +268,15 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     // Identification
 
     @Override public Key identifier() {
-        return schemaObject.key();
+        return schema.key();
     }
 
     @Override public boolean equals(Object other) {
-        return other instanceof InstanceObject instanceObject && instanceObject.schemaObject.equals(schemaObject);
+        return other instanceof InstanceObject instanceObject && instanceObject.schema.equals(schema);
     }
 
     @Override public int hashCode() {
-        return schemaObject.hashCode();
+        return schema.hashCode();
     }
 
     // Identification
@@ -331,9 +284,7 @@ public class InstanceObject implements Identified<InstanceObject, Key> {
     @Override public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("\tKey: ").append(key());
-        if (!label().isEmpty())
-            builder.append("\t(").append(label()).append(")");
+        builder.append("\tKey: ").append(schema.key());
         builder.append("\n");
 
         builder.append("\tValues:\n");

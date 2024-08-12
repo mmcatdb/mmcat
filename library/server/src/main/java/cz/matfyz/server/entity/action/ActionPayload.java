@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = CategoryToModelPayload.class, name = "CategoryToModel"),
     @JsonSubTypes.Type(value = ModelToCategoryPayload.class, name = "ModelToCategory"),
     @JsonSubTypes.Type(value = UpdateSchemaPayload.class, name = "UpdateSchema"),
-    @JsonSubTypes.Type(value = RSDToCategoryPayload.class, name = "RSDToCategory")
+    @JsonSubTypes.Type(value = RSDToCategoryPayload.class, name = "RSDToCategory"),
 })
 public interface ActionPayload extends Serializable {
 

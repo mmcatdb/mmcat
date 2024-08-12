@@ -1,36 +1,41 @@
 package cz.matfyz.inference.edit;
 
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 public class InferenceEditor {
 
-    private SchemaCategory schemaCategory;
-    private List<Mapping> mappings;
-    private final List<AbstractInferenceEdit> edits;
+    private SchemaCategory schema;
+    private MetadataCategory metadata;
+    private @Nullable List<Mapping> mappings;
+    public final List<InferenceEdit> edits;
+    private List<InferenceEdit> activeEdits;
 
-    private List<AbstractInferenceEdit> activeEdits;
-
-    public InferenceEditor(SchemaCategory schemaCategory, List<AbstractInferenceEdit> edits) {
-        this.schemaCategory = schemaCategory;
+    public InferenceEditor(SchemaCategory schema, MetadataCategory metadata, List<InferenceEdit> edits) {
+        this.schema = schema;
+        this.metadata = metadata;
         this.edits = edits;
         filterActiveEdits();
     }
 
-    public InferenceEditor(SchemaCategory schemaCategory, List<Mapping> mappings, List<AbstractInferenceEdit> edits) {
-        this.schemaCategory = schemaCategory;
+    public InferenceEditor(SchemaCategory schema, MetadataCategory metadata, List<Mapping> mappings, List<InferenceEdit> edits) {
+        this.schema = schema;
+        this.metadata = metadata;
         this.mappings = mappings;
         this.edits = edits;
         filterActiveEdits();
     }
 
     private void filterActiveEdits() {
-        List<AbstractInferenceEdit> filteredEdits = new ArrayList<>();
-        for (AbstractInferenceEdit edit : edits) {
-            if (edit.isActive) {
+        List<InferenceEdit> filteredEdits = new ArrayList<>();
+        for (InferenceEdit edit : edits) {
+            if (edit.isActive()) {
                 filteredEdits.add(edit);
             }
         }
@@ -38,7 +43,7 @@ public class InferenceEditor {
     }
 
     public SchemaCategory getSchemaCategory() {
-        return this.schemaCategory;
+        return this.schema;
     }
 
     public List<Mapping> getMappings() {
@@ -49,22 +54,29 @@ public class InferenceEditor {
         return this.mappings != null;
     }
 
+    private final List<InferenceEditAlgorithm> algorithms = new ArrayList<>();
+
     public void applyEdits() {
-        applySchemaCategoryEdits();
+        applyCategoryEdits();
         if (hasMappings()) {
             applyMappingEdits();
         }
     }
 
-    private void applySchemaCategoryEdits() {
-        for (AbstractInferenceEdit edit : activeEdits) {
-            schemaCategory = edit.applySchemaCategoryEdit(schemaCategory);
+    private void applyCategoryEdits() {
+        for (final var edit : activeEdits) {
+            final var algorithm = edit.createAlgorithm();
+            algorithms.add(algorithm);
+
+            final var result = algorithm.applyCategoryEdit(schema, metadata);
+            schema = result.schema();
+            metadata = result.metadata();
         }
     }
 
     private void applyMappingEdits() {
-        for (AbstractInferenceEdit edit : activeEdits) {
-            mappings = edit.applyMappingEdit(mappings);
-        }
+        for (final var algorithm : algorithms)
+            mappings = algorithm.applyMappingEdit(mappings);
     }
+
 }

@@ -20,11 +20,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @JsonDeserialize(using = Id.Deserializer.class)
 public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.lang.CharSequence {
 
-    @NonNull
-    private final String value;
+    private final @NonNull String value;
 
-    public Id(String value) {
-        this.value = value != null ? value : "";
+    public Id(@NonNull String value) {
+        this.value = value;
     }
 
     public static Id createNewUUID() {
@@ -51,10 +50,6 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
         return value.isEmpty();
     }
 
-    public @Nullable Id toNullable() {
-        return value.isEmpty() ? null : this;
-    }
-
     private static final Pattern UUID_REGEX = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
     public boolean isUuid() {
@@ -65,7 +60,7 @@ public class Id implements java.io.Serializable, java.lang.Comparable<Id>, java.
         return value.compareTo(another.value);
     }
 
-    @Override public boolean equals(Object object) {
+    @Override public boolean equals(@Nullable Object object) {
         return object instanceof Id another && another != null && value.equals(another.value);
     }
 

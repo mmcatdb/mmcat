@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 
 class MTCAlgorithmTests {
 
-    private static final SchemaCategory schema = Schema.newSchemaCategory();
+    private static final SchemaCategory schema = Schema.newSchema();
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         UniqueIdProvider.reset();
     }
 

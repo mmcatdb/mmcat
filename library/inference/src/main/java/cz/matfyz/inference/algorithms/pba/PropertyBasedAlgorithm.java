@@ -20,8 +20,7 @@ public class PropertyBasedAlgorithm {
     public RecordSchemaDescription process(AbstractInferenceWrapper wrapper, AbstractSeqFunction merge, AbstractCombFunction merge2) {
 
         // create Spark Session (and initiate context)
-        wrapper.buildSession();
-        wrapper.initiateContext();
+        wrapper.startSession();
 
         try {
             long start = System.currentTimeMillis();

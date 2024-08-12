@@ -49,7 +49,7 @@ public class QueryService {
     public ResultList executeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
-        final var kindsAndDatasources = defineKinds(categoryWrapper.id, category);
+        final var kindsAndDatasources = defineKinds(categoryWrapper.id(), category);
 
         return new QueryToInstance(category, queryString, kindsAndDatasources.kinds).execute();
     }
@@ -57,7 +57,7 @@ public class QueryService {
     public QueryDescription describeQuery(Id categoryId, String queryString) {
         final var categoryWrapper = categoryRepository.find(categoryId);
         final var category = categoryWrapper.toSchemaCategory();
-        final var kindsAndDatasources = defineKinds(categoryWrapper.id, category);
+        final var kindsAndDatasources = defineKinds(categoryWrapper.id(), category);
 
         final var rawDescriptions = new QueryToInstance(category, queryString, kindsAndDatasources.kinds).describe();
 
@@ -86,14 +86,14 @@ public class QueryService {
                 if (!control.isQueryable())
                     return List.<Kind>of().stream();
 
-                datasources.put(datasourceWrapper.id, datasourceWrapper);
+                datasources.put(datasourceWrapper.id(), datasourceWrapper);
 
                 final var builder = new Datasource.Builder();
-                mappingService.findAll(model.logicalModel().id).forEach(mappingWrapper -> {
+                mappingService.findAll(model.logicalModel().id()).forEach(mappingWrapper -> {
                     final var mapping = mappingWrapper.toMapping(category);
                     builder.mapping(mapping);
                 });
-                final var datasource = builder.build(datasourceWrapper.type, control, datasourceWrapper.id.toString());
+                final var datasource = builder.build(datasourceWrapper.type, control, datasourceWrapper.id().toString());
                 return datasource.kinds.stream();
             }).toList();
 
@@ -104,7 +104,7 @@ public class QueryService {
         final var categoryInfo = categoryRepository.findInfo(init.categoryId());
 
         final var query = Query.createNew(init.categoryId(), init.label());
-        final var version = QueryVersion.createNew(query.id, categoryInfo.version, init.content(), List.of());
+        final var version = QueryVersion.createNew(query.id(), categoryInfo.version, init.content(), List.of());
 
         repository.save(query);
         repository.save(version);
@@ -134,10 +134,9 @@ public class QueryService {
         return version;
     }
 
-    public boolean deleteQueryWithVersions(Id id) {
-        return
-            repository.deleteQueryVersionsByQuery(id) &&
-            repository.deleteQuery(id);
+    public void deleteQueryWithVersions(Id id) {
+        repository.deleteQueryVersionsByQuery(id);
+        repository.deleteQuery(id);
     }
 
 }

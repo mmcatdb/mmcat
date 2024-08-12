@@ -3,9 +3,7 @@ package cz.matfyz.core.instance;
 import cz.matfyz.core.identifiers.Identified;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.schema.SchemaMorphism;
-import cz.matfyz.core.schema.SchemaMorphism.Min;
 
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -17,20 +15,12 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
     @SuppressWarnings({ "java:s1068", "unused" })
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMorphism.class);
 
-    public final SchemaMorphism schemaMorphism;
-    private final List<InstanceMorphism> bases;
-    private final InstanceObject dom;
-    private final InstanceObject cod;
+    public final SchemaMorphism schema;
 
     private final SortedSet<MappingRow> mappings = new TreeSet<>();
 
-    public InstanceMorphism(SchemaMorphism schemaMorphism, InstanceObject dom, InstanceObject cod, InstanceCategory category) {
-        this.schemaMorphism = schemaMorphism;
-        this.dom = dom;
-        this.cod = cod;
-        this.bases = isBase()
-            ? List.of(this)
-            : List.of(signature().toBases().stream().map(category::getMorphism).toArray(InstanceMorphism[]::new));
+    InstanceMorphism(SchemaMorphism schemaMorphism) {
+        this.schema = schemaMorphism;
     }
 
     public boolean isEmpty() {
@@ -38,23 +28,11 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
     }
 
     public boolean isBase() {
-        return this.schemaMorphism.isBase();
-    }
-
-    /**
-     * Returns base morphisms in the order they need to be traversed (i.e., the first one has the same domainObject as this).
-     * @return
-     */
-    public List<InstanceMorphism> bases() {
-        return bases;
-    }
-
-    public InstanceMorphism lastBase() {
-        return bases.get(bases.size() - 1);
+        return this.schema.isBase();
     }
 
     public void createMapping(DomainRow domainRow, DomainRow codomainRow) {
-        var mapping = new MappingRow(domainRow, codomainRow);
+        final var mapping = new MappingRow(domainRow, codomainRow);
 
         addMapping(mapping);
 
@@ -78,34 +56,18 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
         return mappings;
     }
 
-    public Signature signature() {
-        return schemaMorphism.signature();
-    }
-
-    public Min min() {
-        return schemaMorphism.min();
-    }
-
-    public InstanceObject dom() {
-        return dom;
-    }
-
-    public InstanceObject cod() {
-        return cod;
-    }
-
     // Identification
 
     @Override public Signature identifier() {
-        return schemaMorphism.signature();
+        return schema.signature();
     }
 
     @Override public boolean equals(Object other) {
-        return other instanceof InstanceMorphism instanceMorphism && instanceMorphism.schemaMorphism.equals(schemaMorphism);
+        return other instanceof InstanceMorphism instanceMorphism && instanceMorphism.schema.equals(schema);
     }
 
     @Override public int hashCode() {
-        return schemaMorphism.hashCode();
+        return schema.hashCode();
     }
 
     // Identification
@@ -113,9 +75,9 @@ public class InstanceMorphism implements Identified<InstanceMorphism, Signature>
     @Override public String toString() {
         var builder = new StringBuilder();
 
-        builder.append("\tSignature: ").append(signature())
-            .append("\tDom: ").append(dom.key())
-            .append("\tCod: ").append(cod.key())
+        builder.append("\tSignature: ").append(schema.signature())
+            .append("\tDom: ").append(schema.dom().key())
+            .append("\tCod: ").append(schema.cod().key())
             .append("\n");
 
         builder.append("\tValues:\n");

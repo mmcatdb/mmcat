@@ -31,11 +31,11 @@ const category = useSchemaCategoryInfo();
                 <VersionDisplay :version-id="mapping.version" />
             </ValueRow>
             <ValueRow
-                v-if="mapping.categoryVersionId !== category.versionId"
+                v-if="mapping.categoryVersionnId !== category.versionId"
                 label="Category Version:"
             >
                 <VersionDisplay
-                    :version-id="mapping.categoryVersionId"
+                    :version-id="mapping.categoryVersionnId"
                     :error="true"
                 />
             </ValueRow>

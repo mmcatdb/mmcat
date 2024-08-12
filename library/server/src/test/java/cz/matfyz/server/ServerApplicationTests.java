@@ -51,7 +51,7 @@ class ServerApplicationTests {
     private WrapperService wrapperService;
 
     @BeforeEach
-    public void setUp() {
+    public void setup() {
         UniqueIdProvider.reset();
         Statistics.reset();
     }
@@ -149,7 +149,7 @@ class ServerApplicationTests {
     }
 
     private Mapping createMapping(MappingWrapper mappingWrapper) {
-        final var model = logicalModelService.find(mappingWrapper.logicalModelId());
+        final var model = logicalModelService.find(mappingWrapper.logicalModelId);
         final var categoryWrapper = categoryService.find(model.logicalModel().categoryId);
         final var category = categoryWrapper.toSchemaCategory();
 

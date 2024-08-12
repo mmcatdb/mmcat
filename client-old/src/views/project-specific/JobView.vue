@@ -2,12 +2,13 @@
 import { ref } from 'vue';
 import { Job } from '@/types/job';
 import API from '@/utils/api';
-
+import { useSchemaCategoryInfo } from '@/utils/injects';
 import ResourceLoader from '@/components/common/ResourceLoader.vue';
 import JobDisplay from '@/components/job/JobDisplay.vue';
 import { useRoute } from 'vue-router';
 
 const job = ref<Job>();
+const info = useSchemaCategoryInfo();
 
 const route = useRoute();
 
@@ -16,7 +17,7 @@ async function fetchJob() {
     if (!result.status)
         return false;
 
-    job.value = Job.fromServer(result.data);
+    job.value = Job.fromServer(result.data, info.value);
     return true;
 }
 </script>

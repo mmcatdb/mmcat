@@ -1,30 +1,25 @@
 package cz.matfyz.evolution.schema;
 
 import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism.DisconnectedSchemaMorphism;
+import cz.matfyz.core.schema.SchemaSerializer.SerializedMorphism;
 
-public class CreateMorphism extends SchemaCategory.Editor implements SchemaModificationOperation {
+public record CreateMorphism(
+    SerializedMorphism morphism
+) implements SchemaModificationOperation {
 
     @Override public <T> T accept(SchemaEvolutionVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
-    // The dom and cod objects of the morphism are probably null because they have not been created yet during the creation of this operation.
-    public final DisconnectedSchemaMorphism morphism;
+    @Override public void up(SchemaCategory schema) {
+        final var objects = (new SchemaEditor(schema)).getObjects();
+        final var morphismWithObjects = morphism.deserialize(objects::get);
 
-    public CreateMorphism(DisconnectedSchemaMorphism morphism) {
-        this.morphism = morphism;
+        (new SchemaEditor(schema)).getMorphisms().put(morphismWithObjects.signature(), morphismWithObjects);
     }
 
-    @Override public void up(SchemaCategory category) {
-        final var objects = getObjectContext(category);
-        final var morphismWithObjects = morphism.toSchemaMorphism(objects::getUniqueObject);
-
-        getMorphismContext(category).createUniqueObject(morphismWithObjects);
-    }
-
-    @Override public void down(SchemaCategory category) {
-        getMorphismContext(category).deleteUniqueObject(morphism.signature());
+    @Override public void down(SchemaCategory schema) {
+        (new SchemaEditor(schema)).getMorphisms().remove(morphism.signature());
     }
 
 }

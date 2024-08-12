@@ -6,7 +6,6 @@ import cz.matfyz.server.entity.datasource.DatasourceInit;
 import cz.matfyz.server.example.common.DatasourceSettings;
 import cz.matfyz.server.service.DatasourceService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.shaded.org.apache.commons.lang3.NotImplementedException;

@@ -1,244 +1,203 @@
 package cz.matfyz.tests.inference;
 
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper;
-import cz.matfyz.abstractwrappers.AbstractInferenceWrapper.SparkSettings;
 import cz.matfyz.core.identifiers.Key;
-import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.AccessPath;
-import cz.matfyz.core.mapping.ComplexProperty;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.mapping.MappingBuilder;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.schema.SchemaBuilder;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
-import cz.matfyz.inference.edit.ClusterInferenceEdit;
-import cz.matfyz.inference.edit.ReferenceMergeInferenceEdit;
-import cz.matfyz.inference.edit.utils.PatternSegment;
-import cz.matfyz.inference.edit.PrimaryKeyMergeInferenceEdit;
-import cz.matfyz.inference.edit.RecursionInferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditAlgorithm;
+import cz.matfyz.inference.edit.PatternSegment;
+import cz.matfyz.inference.edit.algorithms.ClusterMerge;
+import cz.matfyz.inference.edit.algorithms.PrimaryKeyMerge;
+import cz.matfyz.inference.edit.algorithms.RecursionMerge;
+import cz.matfyz.inference.edit.algorithms.ReferenceMerge;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-public class SchemaCategoryInferenceEditorTests {
+class SchemaCategoryInferenceEditorTests {
 
-    private static final SparkSettings sparkSettings = new SparkSettings("local[*]", "./spark");
+    @Test
+    void testReferenceMergeEditArray() {
+        final SchemaBuilder sbA = new SchemaBuilder();
+        final var app =             sbA.object("app", 0);
+        final var name =            sbA.object("name", 1);
+        final var reviewsA =        sbA.object("reviews", 2);
+        final var index =           sbA.object("_index", 3);
+        final var appToName =       sbA.morphism(app, name, 1);
+        final var reviewsAToApp =   sbA.morphism(reviewsA, app, 2);
+        final var reviewsAToIndex = sbA.morphism(reviewsA, index, 3);
+        final SchemaCategory schemaA = sbA.build();
 
- @Test
-    void testReferenceMergeEditArray() throws Exception {
-        // Setup A
-        SchemaCategory categoryA = new SchemaCategory("schemaA");
-        categoryA.addObject(new SchemaObject(new Key(0), "app", null, null));
-        categoryA.addObject(new SchemaObject(new Key(1), "name", null, null));
-        categoryA.addObject(new SchemaObject(new Key(2), "reviews", null, null));
-        categoryA.addObject(new SchemaObject(new Key(3), "_index", null, null));
-        categoryA.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), categoryA.getObject(new Key(0)), categoryA.getObject(new Key(1))));
-        categoryA.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), categoryA.getObject(new Key(2)), categoryA.getObject(new Key(0))));
-        categoryA.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), categoryA.getObject(new Key(2)), categoryA.getObject(new Key(3))));
+        final MappingBuilder mbA = new MappingBuilder();
+        final Mapping mappingA = new Mapping(
+            schemaA,
+            name.key(),
+            "kindNameA",
+            mbA.root(
+                mbA.simple("name", appToName),
+                mbA.complex("reviews", reviewsAToApp.dual(),
+                    mbA.simple("_index", reviewsAToIndex)
+                )
+            ),
+            null
+        );
 
-        MappingBuilder builderA = new MappingBuilder();
-        List<AccessPath> subpathsA = new ArrayList<>();
-
-        subpathsA.add(builderA.simple("name", Signature.createBase(1)));
-        subpathsA.add(builderA.complex("reviews", Signature.createBase(-2), builderA.simple("_index", Signature.createBase(3))));
-
-        ComplexProperty complexPropertyA = builderA.complex("app", Signature.createBase(0), subpathsA.toArray(new AccessPath[0]));
-
-        Mapping mappingA = new Mapping(categoryA, new Key(1), "kindNameA", complexPropertyA, null);
         System.out.println(mappingA.accessPath());
-
         System.out.println();
 
         // Setup B
-        SchemaCategory categoryB = new SchemaCategory("schemaB");
-        categoryB.addObject(new SchemaObject(new Key(4), "reviews", null, null));
-        categoryB.addObject(new SchemaObject(new Key(5), "text", null, null));
-        categoryB.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), categoryB.getObject(new Key(4)), categoryB.getObject(new Key(5))));
+        final SchemaBuilder sbB = new SchemaBuilder();
+        final var reviewsB =        sbB.object("reviews", 4);
+        final var text =            sbB.object("text", 5);
+        final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
+        final SchemaCategory schemaB = sbB.build();
 
-        MappingBuilder builderB = new MappingBuilder();
-        List<AccessPath> subpathsB = new ArrayList<>();
+        final MappingBuilder mbB = new MappingBuilder();
+        final Mapping mappingB = new Mapping(
+            schemaB,
+            reviewsB.key(),
+            "kindNameB",
+            mbB.root(
+                mbB.simple("text", reviewsBToText)
+            ),
+            null
+        );
 
-        subpathsB.add(builderB.simple("text", Signature.createBase(5)));
-
-        ComplexProperty complexPropertyB = builderB.complex("reviews", Signature.createBase(4), subpathsB.toArray(new AccessPath[0]));
-
-        Mapping mappingB = new Mapping(categoryB, new Key(4), "kindNameB", complexPropertyB, null);
         System.out.println(mappingB.accessPath());
 
-        SchemaCategory category = new SchemaCategory("schema");
-        for (SchemaObject obj : categoryA.allObjects()) {
-            category.addObject(obj);
-        }
-        for (SchemaObject obj : categoryB.allObjects()) {
-            category.addObject(obj);
-        }
-        for (SchemaMorphism morph : categoryA.allMorphisms()) {
-            category.addMorphism(morph);
-        }
-        for (SchemaMorphism morph : categoryB.allMorphisms()) {
-            category.addMorphism(morph);
-        }
+        final SchemaCategory schema = mergeSchemas(schemaA, schemaB);
+        final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
+        final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        List<Mapping> mappings = new ArrayList<>();
-        mappings.add(mappingA);
-        mappings.add(mappingB);
+        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key())).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
 
-        ReferenceMergeInferenceEdit edit = new ReferenceMergeInferenceEdit(new Key(2), new Key(4));
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-
-        List<Mapping> editMappings = edit.applyMappingEdit(mappings);
+        final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
 
         System.out.println(editMappings.get(0).accessPath());
     }
 
     @Test
-    void testReferenceMergeEditObject() throws Exception {
-
+    void testReferenceMergeEditObject() {
         // Setup A
-        SchemaCategory categoryA = new SchemaCategory("schemaA");
-        categoryA.addObject(new SchemaObject(new Key(0), "app", null, null));
-        categoryA.addObject(new SchemaObject(new Key(1), "name", null, null));
-        categoryA.addObject(new SchemaObject(new Key(2), "reviews", null, null));
-        categoryA.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), categoryA.getObject(new Key(0)), categoryA.getObject(new Key(1))));
-        categoryA.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), categoryA.getObject(new Key(0)), categoryA.getObject(new Key(2))));
+        final SchemaBuilder sbA = new SchemaBuilder();
+        final var app =             sbA.object("app", 0);
+        final var name =            sbA.object("name", 1);
+        final var reviewsA =        sbA.object("reviews", 2);
+        final var appToName =       sbA.morphism(app, name, 1);
+        final var appToReviewsA =   sbA.morphism(app, reviewsA, 2);
+        final SchemaCategory schemaA = sbA.build();
 
-        MappingBuilder builderA = new MappingBuilder();
-        List<AccessPath> subpathsA = new ArrayList<>();
+        final MappingBuilder mbA = new MappingBuilder();
+        final Mapping mappingA = new Mapping(
+            schemaA,
+            name.key(),
+            "kindNameA",
+            mbA.root(
+                mbA.simple("name", appToName),
+                mbA.simple("reviews", appToReviewsA)
+            ),
+            null
+        );
 
-        subpathsA.add(builderA.simple("name", Signature.createBase(1)));
-        subpathsA.add(builderA.simple("reviews", Signature.createBase(2)));
-
-        ComplexProperty complexPropertyA = builderA.complex("app", Signature.createBase(0), subpathsA.toArray(new AccessPath[0]));
-
-        Mapping mappingA = new Mapping(categoryA, new Key(1), "kindNameA", complexPropertyA, null);
         System.out.println(mappingA.accessPath());
-
         System.out.println();
 
         // Setup B
-        SchemaCategory categoryB = new SchemaCategory("schemaB");
-        categoryB.addObject(new SchemaObject(new Key(4), "reviews", null, null));
-        categoryB.addObject(new SchemaObject(new Key(5), "text", null, null));
-        categoryB.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), categoryB.getObject(new Key(4)), categoryB.getObject(new Key(5))));
+        final SchemaBuilder sbB = new SchemaBuilder();
+        final var reviewsB =        sbB.object("reviews", 4);
+        final var text =            sbB.object("text", 5);
+        final var reviewsBToText =  sbB.morphism(reviewsB, text, 5);
+        final SchemaCategory schemaB = sbB.build();
 
-        MappingBuilder builderB = new MappingBuilder();
-        List<AccessPath> subpathsB = new ArrayList<>();
+        final MappingBuilder mbB = new MappingBuilder();
+        final Mapping mappingB = new Mapping(
+            schemaB,
+            reviewsB.key(),
+            "kindNameB",
+            mbB.root(
+                mbB.simple("text", reviewsBToText)
+            ),
+            null
+        );
 
-        subpathsB.add(builderB.simple("text", Signature.createBase(5)));
-
-        ComplexProperty complexPropertyB = builderB.complex("reviews", Signature.createBase(4), subpathsB.toArray(new AccessPath[0]));
-
-        Mapping mappingB = new Mapping(categoryB, new Key(4), "kindNameB", complexPropertyB, null);
         System.out.println(mappingB.accessPath());
 
-        SchemaCategory category = new SchemaCategory("schema");
-        for (SchemaObject obj : categoryA.allObjects()) {
-            category.addObject(obj);
-        }
-        for (SchemaObject obj : categoryB.allObjects()) {
-            category.addObject(obj);
-        }
-        for (SchemaMorphism morph : categoryA.allMorphisms()) {
-            category.addMorphism(morph);
-        }
-        for (SchemaMorphism morph : categoryB.allMorphisms()) {
-            category.addMorphism(morph);
-        }
+        final SchemaCategory schema = mergeSchemas(schemaA, schemaB);
+        final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
+        final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        List<Mapping> mappings = new ArrayList<>();
-        mappings.add(mappingA);
-        mappings.add(mappingB);
+        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key())).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
 
-        ReferenceMergeInferenceEdit edit = new ReferenceMergeInferenceEdit(new Key(2), new Key(4));
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-
-        List<Mapping> editMappings = edit.applyMappingEdit(mappings);
+        final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
 
         System.out.println(editMappings.get(0).accessPath());
     }
 
     @Test
-    void testPrimaryKeyMergeEdit() throws Exception {
+    void testPrimaryKeyMergeEdit() {
         // Setup A
-        SchemaCategory categoryA = new SchemaCategory("schemaA");
-        categoryA.addObject(new SchemaObject(new Key(0), "app", null, null));
-        categoryA.addObject(new SchemaObject(new Key(1), "app_id", null, null));
-        categoryA.addObject(new SchemaObject(new Key(2), "name", null, null));
-        categoryA.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), categoryA.getObject(new Key(0)), categoryA.getObject(new Key(1))));
-        categoryA.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), categoryA.getObject(new Key(0)), categoryA.getObject(new Key(2))));
+        final SchemaBuilder sbA = new SchemaBuilder();
+        final var app =         sbA.object("app", 0);
+        final var appIdA =      sbA.object("app_id", 1);
+        final var name =        sbA.object("name", 2);
+        final var appToAppIdA = sbA.morphism(app, appIdA, 1);
+        final var appToName =   sbA.morphism(app, name, 2);
+        final SchemaCategory schemaA = sbA.build();
 
-        MappingBuilder builderA = new MappingBuilder();
-        List<AccessPath> subpathsA = new ArrayList<>();
+        final MappingBuilder mbA = new MappingBuilder();
+        final Mapping mappingA = new Mapping(
+            schemaA,
+            app.key(),
+            "kindNameA",
+            mbA.root(
+                mbA.simple("name", appToAppIdA),
+                mbA.simple("app_id", appToName)
+            ),
+            null
+        );
 
-        subpathsA.add(builderA.simple("name", Signature.createBase(2)));
-        subpathsA.add(builderA.simple("app_id", Signature.createBase(1)));
-
-        ComplexProperty complexPropertyA = builderA.complex("app", Signature.createBase(0), subpathsA.toArray(new AccessPath[0]));
-
-        Mapping mappingA = new Mapping(categoryA, new Key(0), "kindNameA", complexPropertyA, null);
         System.out.println(mappingA.accessPath());
-
         System.out.println();
 
         // Setup B
-        SchemaCategory categoryB = new SchemaCategory("schemaB");
-        categoryB.addObject(new SchemaObject(new Key(3), "reviews", null, null));
-        categoryB.addObject(new SchemaObject(new Key(4), "app_id", null, null));
-        categoryB.addObject(new SchemaObject(new Key(5), "text", null, null));
-        categoryB.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), categoryB.getObject(new Key(3)), categoryB.getObject(new Key(4))));
-        categoryB.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), categoryB.getObject(new Key(3)), categoryB.getObject(new Key(5))));
+        final SchemaBuilder sbB = new SchemaBuilder();
+        final var reviews =         sbB.object("reviews", 3);
+        final var appIdB =          sbB.object("app_id", 4);
+        final var text =            sbB.object("text", 5);
+        final var reviewsToAppIdB = sbB.morphism(reviews, appIdB, 3);
+        final var reviewsToText =   sbB.morphism(reviews, text, 4);
+        final SchemaCategory schemaB = sbB.build();
 
-        MappingBuilder builderB = new MappingBuilder();
-        List<AccessPath> subpathsB = new ArrayList<>();
+        final MappingBuilder mbB = new MappingBuilder();
+        final Mapping mappingB = new Mapping(
+            schemaB,
+            reviews.key(),
+            "kindNameB",
+            mbB.root(
+                mbB.simple("text", reviewsToText),
+                mbB.simple("app_id", reviewsToAppIdB)
+            ),
+            null
+        );
 
-        subpathsB.add(builderB.simple("text", Signature.createBase(4)));
-        subpathsB.add(builderB.simple("app_id", Signature.createBase(3)));
-
-        ComplexProperty complexPropertyB = builderB.complex("reviews", Signature.createBase(5), subpathsB.toArray(new AccessPath[0]));
-
-        Mapping mappingB = new Mapping(categoryB, new Key(3), "kindNameB", complexPropertyB, null);
         System.out.println(mappingB.accessPath());
 
-        SchemaCategory category = new SchemaCategory("schema");
-        for (SchemaObject obj : categoryA.allObjects()) {
-            category.addObject(obj);
-        }
-        for (SchemaObject obj : categoryB.allObjects()) {
-            category.addObject(obj);
-        }
-        for (SchemaMorphism morph : categoryA.allMorphisms()) {
-            category.addMorphism(morph);
-        }
-        for (SchemaMorphism morph : categoryB.allMorphisms()) {
-            category.addMorphism(morph);
-        }
+        final SchemaCategory schema = mergeSchemas(schemaA, schemaB);
+        final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
+        final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        List<Mapping> mappings = new ArrayList<>();
-        mappings.add(mappingA);
-        mappings.add(mappingB);
+        final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, appIdA.key())).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
 
-        PrimaryKeyMergeInferenceEdit edit = new PrimaryKeyMergeInferenceEdit(new Key(1));
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        List<Mapping> editMappings = edit.applyMappingEdit(mappings);
+        final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
 /*
         System.out.println();
         System.out.println("Editted Size: ");
@@ -246,30 +205,34 @@ public class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testClusterEdit() throws Exception {
+    void testClusterEdit() {
+        final var builder = new SchemaBuilder();
 
-        SchemaCategory category = new SchemaCategory("schema");
-        category.addObject(new SchemaObject(new Key(0), "world", null, null));
-        category.addObject(new SchemaObject(new Key(1), "continent", null, null));
-        category.addObject(new SchemaObject(new Key(2), "country_1", null, null));
-        category.addObject(new SchemaObject(new Key(3), "a", null, null));
-        category.addObject(new SchemaObject(new Key(4), "b", null, null));
-        category.addObject(new SchemaObject(new Key(5), "c", null, null));
-        category.addObject(new SchemaObject(new Key(6), "country_2", null, null));
-        category.addObject(new SchemaObject(new Key(7), "a", null, null));
-        category.addObject(new SchemaObject(new Key(8), "b", null, null));
-        category.addObject(new SchemaObject(new Key(9), "c", null, null));
+        final var world =       builder.object("world", 0);
+        final var continent =   builder.object("continent", 1);
+        final var country1 =    builder.object("country_1", 2);
+        final var o3 =          builder.object("a", 3);
+        final var o4 =          builder.object("b", 4);
+        final var o5 =          builder.object("c", 5);
+        final var country2 =    builder.object("country_2", 6);
+        final var o7 =          builder.object("a", 7);
+        final var o8 =          builder.object("b", 8);
+        final var o9 =          builder.object("c", 9);
 
-        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(2))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(6))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(3))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(4))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(5))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(7))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(7)), category.getObject(new Key(9))));
-/*
+        builder.morphism(world, continent, 1);
+        builder.morphism(continent, country1, 2);
+        builder.morphism(continent, country2, 3);
+        builder.morphism(country1, o3, 4);
+        builder.morphism(country1, o4, 5);
+        builder.morphism(o3, o5, 6);
+        builder.morphism(country2, o7, 7);
+        builder.morphism(country2, o8, 8);
+        builder.morphism(o7, o9, 9);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
+
+        /*
         MappingBuilder builder = new MappingBuilder();
 
         List<AccessPath> subpaths = new ArrayList<>();
@@ -285,25 +248,11 @@ public class SchemaCategoryInferenceEditorTests {
         //List<Mapping> mappings = new ArrayList<>();
         //mappings.add(mapping);
         List<Key> clusterKeys = new ArrayList<>();
-        clusterKeys.add(new Key(2));
-        clusterKeys.add(new Key(6));
+        clusterKeys.add(country1.key());
+        clusterKeys.add(country2.key());
 
-        ClusterInferenceEdit edit = new ClusterInferenceEdit(clusterKeys);
-
-        System.out.println("Schema Category before edit:");
-        System.out.println("Objects: " + category.allObjects());
-        for (SchemaMorphism m : category.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-        System.out.println();
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
+        final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
 
         //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
 /*
@@ -313,34 +262,38 @@ public class SchemaCategoryInferenceEditorTests {
     }
 
     @Test
-    void testRecursionEdit() throws Exception {
+    void testRecursionEdit() {
+        final var builder = new SchemaBuilder();
 
-        SchemaCategory category = new SchemaCategory("schema");
-        category.addObject(new SchemaObject(new Key(0), "B", null, null));
-        category.addObject(new SchemaObject(new Key(1), "A", null, null));
-        category.addObject(new SchemaObject(new Key(2), "A", null, null));
-        category.addObject(new SchemaObject(new Key(3), "B", null, null));
-        category.addObject(new SchemaObject(new Key(4), "B", null, null));
-        category.addObject(new SchemaObject(new Key(5), "B", null, null));
-        category.addObject(new SchemaObject(new Key(6), "A", null, null));
-        category.addObject(new SchemaObject(new Key(7), "A", null, null));
-        category.addObject(new SchemaObject(new Key(8), "B", null, null));
-        category.addObject(new SchemaObject(new Key(9), "B", null, null));
-        category.addObject(new SchemaObject(new Key(10), "A", null, null));
-        category.addObject(new SchemaObject(new Key(11), "B", null, null));
+        final var o0 =  builder.object("B", 0);
+        final var o1 =  builder.object("A", 1);
+        final var o2 =  builder.object("A", 2);
+        final var o3 =  builder.object("B", 3);
+        final var o4 =  builder.object("B", 4);
+        final var o5 =  builder.object("B", 5);
+        final var o6 =  builder.object("A", 6);
+        final var o7 =  builder.object("A", 7);
+        final var o8 =  builder.object("B", 8);
+        final var o9 =  builder.object("B", 9);
+        final var o10 = builder.object("A", 10);
+        final var o11 = builder.object("B", 11);
 
-        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(2))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(3))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(4))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(5))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(6))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(7))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(7)), category.getObject(new Key(9))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(10)), category.getObject(new Key(11))));
-/*
+        builder.morphism(o0, o1, 1);
+        builder.morphism(o0, o2, 2);
+        builder.morphism(o1, o3, 3);
+        builder.morphism(o1, o4, 4);
+        builder.morphism(o2, o5, 5);
+        builder.morphism(o3, o6, 6);
+        builder.morphism(o4, o7, 7);
+        builder.morphism(o6, o8, 8);
+        builder.morphism(o7, o9, 9);
+        builder.morphism(o9, o10, 10);
+        builder.morphism(o10, o11, 11);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
+
+        /*
         MappingBuilder builder = new MappingBuilder();
 
         List<AccessPath> subpaths = new ArrayList<>();
@@ -359,22 +312,8 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
-
-        System.out.println("Schema Category before edit:");
-        System.out.println("Objects: " + category.allObjects());
-        for (SchemaMorphism m : category.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-        System.out.println();
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
+        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
 
         //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
 /*
@@ -383,77 +322,72 @@ public class SchemaCategoryInferenceEditorTests {
         System.out.println(editMappings.size());*/
     }
 
+    /**
+     * With simple pattern A->B->A and notebook example
+     */
     @Test
-    void testRecursionEdit2() throws Exception {
-        /**
-         * With simple pattern A->B->A and notebook example
-         */
-        SchemaCategory category = new SchemaCategory("schema");
-        category.addObject(new SchemaObject(new Key(0), "_id", null, null));
-        category.addObject(new SchemaObject(new Key(1), "A", null, null));
-        category.addObject(new SchemaObject(new Key(2), "B", null, null));
-        category.addObject(new SchemaObject(new Key(3), "B", null, null));
-        category.addObject(new SchemaObject(new Key(4), "A", null, null));
-        category.addObject(new SchemaObject(new Key(5), "A", null, null));
-        category.addObject(new SchemaObject(new Key(6), "A", null, null));
-        category.addObject(new SchemaObject(new Key(7), "B", null, null));
-        category.addObject(new SchemaObject(new Key(8), "B", null, null));
-        category.addObject(new SchemaObject(new Key(9), "A", null, null));
-        category.addObject(new SchemaObject(new Key(10), "B", null, null));
-        category.addObject(new SchemaObject(new Key(11), "A", null, null));
+    void testRecursionEdit2() {
+        final var builder = new SchemaBuilder();
 
-        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(2))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(3))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(4))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(5))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(6))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(7))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(7)), category.getObject(new Key(9))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(10)), category.getObject(new Key(11))));
+        final var id =  builder.object("_id", 0);
+        final var o1 =  builder.object("A", 1);
+        final var o2 =  builder.object("B", 2);
+        final var o3 =  builder.object("B", 3);
+        final var o4 =  builder.object("A", 4);
+        final var o5 =  builder.object("A", 5);
+        final var o6 =  builder.object("A", 6);
+        final var o7 =  builder.object("B", 7);
+        final var o8 =  builder.object("B", 8);
+        final var o9 =  builder.object("A", 9);
+        final var o10 = builder.object("B", 10);
+        final var o11 = builder.object("A", 11);
+
+        builder.morphism(id, o1, 1);
+        builder.morphism(id, o2, 2);
+        builder.morphism(o1, o3, 3);
+        builder.morphism(o1, o4, 4);
+        builder.morphism(o2, o5, 5);
+        builder.morphism(o3, o6, 6);
+        builder.morphism(o4, o7, 7);
+        builder.morphism(o6, o8, 8);
+        builder.morphism(o7, o9, 9);
+        builder.morphism(o9, o10, 10);
+        builder.morphism(o10, o11, 11);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
 
         List<PatternSegment> pattern = new ArrayList<>();
         pattern.add(new PatternSegment("A", "->"));
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
-
-        System.out.println("Schema Category before edit:");
-        System.out.println("Objects: " + category.allObjects());
-        for (SchemaMorphism m : category.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-        System.out.println();
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
+        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
     }
-    @Test
-    void testRecursionEdit3() throws Exception {
-        /*
-         * With complex pattern A<-A->B->A and notebook example short version
-         */
-        SchemaCategory category = new SchemaCategory("schema");
-        category.addObject(new SchemaObject(new Key(0), "_id", null, null));
-        category.addObject(new SchemaObject(new Key(1), "A", null, null));
-        category.addObject(new SchemaObject(new Key(3), "B", null, null));
-        category.addObject(new SchemaObject(new Key(4), "A", null, null));
-        category.addObject(new SchemaObject(new Key(6), "A", null, null));
-        category.addObject(new SchemaObject(new Key(8), "B", null, null));
 
-        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(3))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(4))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(6))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
+    /**
+     * With complex pattern A<-A->B->A and notebook example short version
+     */
+    @Test
+    void testRecursionEdit3() {
+        final var builder = new SchemaBuilder();
+
+        final var id =  builder.object("_id", 0);
+        final var o1 =  builder.object("A", 1);
+        final var o3 =  builder.object("B", 3);
+        final var o4 =  builder.object("A", 4);
+        final var o6 =  builder.object("A", 6);
+        final var o8 =  builder.object("B", 8);
+
+        builder.morphism(id, o1, 1);
+        builder.morphism(o1, o3, 3);
+        builder.morphism(o1, o4, 4);
+        builder.morphism(o3, o6, 6);
+        builder.morphism(o6, o8, 8);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
 
         List<PatternSegment> pattern = new ArrayList<>();
         pattern.add(new PatternSegment("A", "<-"));
@@ -461,54 +395,44 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
-
-        System.out.println("Schema Category before edit:");
-        System.out.println("Objects: " + category.allObjects());
-        for (SchemaMorphism m : category.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-        System.out.println();
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-
+        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
     }
-    @Test
-    void testRecursionEdit4() throws Exception {
-        /*
-         * With complex pattern A<-A->B->A and notebook example long version
-         */
-        SchemaCategory category = new SchemaCategory("schema");
-        category.addObject(new SchemaObject(new Key(0), "_id", null, null));
-        category.addObject(new SchemaObject(new Key(1), "A", null, null));
-        category.addObject(new SchemaObject(new Key(2), "B", null, null));
-        category.addObject(new SchemaObject(new Key(3), "B", null, null));
-        category.addObject(new SchemaObject(new Key(4), "A", null, null));
-        category.addObject(new SchemaObject(new Key(5), "A", null, null));
-        category.addObject(new SchemaObject(new Key(6), "A", null, null));
-        category.addObject(new SchemaObject(new Key(7), "B", null, null));
-        category.addObject(new SchemaObject(new Key(8), "B", null, null));
-        category.addObject(new SchemaObject(new Key(9), "A", null, null));
-        category.addObject(new SchemaObject(new Key(10), "B", null, null));
-        category.addObject(new SchemaObject(new Key(11), "A", null, null));
 
-        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(2))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(3))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(4))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(5))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(6))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(7))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(8))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(7)), category.getObject(new Key(9))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(10)), category.getObject(new Key(11))));
+    /**
+     * With complex pattern A<-A->B->A and notebook example long version
+     */
+    @Test
+    void testRecursionEdit4() {
+        final var builder = new SchemaBuilder();
+
+        final var id =  builder.object("_id", 0);
+        final var o1 =  builder.object("A", 1);
+        final var o2 =  builder.object("B", 2);
+        final var o3 =  builder.object("B", 3);
+        final var o4 =  builder.object("A", 4);
+        final var o5 =  builder.object("A", 5);
+        final var o6 =  builder.object("A", 6);
+        final var o7 =  builder.object("B", 7);
+        final var o8 =  builder.object("B", 8);
+        final var o9 =  builder.object("A", 9);
+        final var o10 = builder.object("B", 10);
+        final var o11 = builder.object("A", 11);
+
+        builder.morphism(id, o1, 1);
+        builder.morphism(id, o2, 2);
+        builder.morphism(o1, o3, 3);
+        builder.morphism(o1, o4, 4);
+        builder.morphism(o2, o5, 5);
+        builder.morphism(o3, o6, 6);
+        builder.morphism(o4, o7, 7);
+        builder.morphism(o6, o8, 8);
+        builder.morphism(o7, o9, 9);
+        builder.morphism(o9, o10, 10);
+        builder.morphism(o10, o11, 11);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
 
         List<PatternSegment> pattern = new ArrayList<>();
         pattern.add(new PatternSegment("A", "<-"));
@@ -516,63 +440,52 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
-
-        System.out.println("Schema Category before edit:");
-        System.out.println("Objects: " + category.allObjects());
-        for (SchemaMorphism m : category.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-        System.out.println();
-
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
-
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
-        }
-
+        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
     }
+
+    /**
+     * With complex pattern A<-A->B->A and client example
+     */
     @Test
-    void testRecursionEdit5() throws Exception {
-        /*
-         * With complex pattern A<-A->B->A and client example
-         */
-        SchemaCategory category = new SchemaCategory("schema");
-        category.addObject(new SchemaObject(new Key(0), "checkin", null, null));
-        category.addObject(new SchemaObject(new Key(1), "_id", null, null));
-        category.addObject(new SchemaObject(new Key(2), "A", null, null));
-        category.addObject(new SchemaObject(new Key(3), "A", null, null));
-        category.addObject(new SchemaObject(new Key(4), "B", null, null));
-        category.addObject(new SchemaObject(new Key(5), "A", null, null));
-        category.addObject(new SchemaObject(new Key(6), "B", null, null));
-        category.addObject(new SchemaObject(new Key(7), "A", null, null));
-        category.addObject(new SchemaObject(new Key(8), "B", null, null));
-        category.addObject(new SchemaObject(new Key(9), "A", null, null));
-        category.addObject(new SchemaObject(new Key(10), "B", null, null));
-        category.addObject(new SchemaObject(new Key(11), "B", null, null));
-        category.addObject(new SchemaObject(new Key(12), "A", null, null));
-        category.addObject(new SchemaObject(new Key(13), "business_id", null, null));
-        category.addObject(new SchemaObject(new Key(14), "date", null, null));
-        category.addObject(new SchemaObject(new Key(15), "date", null, null));
+    void testRecursionEdit5() {
+        final var builder = new SchemaBuilder();
 
+        final var checkin =     builder.object("checkin", 0);
+        final var id =          builder.object("_id", 1);
+        final var o2 =          builder.object("A", 2);
+        final var o3 =          builder.object("A", 3);
+        final var o4 =          builder.object("B", 4);
+        final var o5 =          builder.object("A", 5);
+        final var o6 =          builder.object("B", 6);
+        final var o7 =          builder.object("A", 7);
+        final var o8 =          builder.object("B", 8);
+        final var o9 =          builder.object("A", 9);
+        final var o10 =         builder.object("B", 10);
+        final var o11 =         builder.object("B", 11);
+        final var o12 =         builder.object("A", 12);
+        final var businessId =  builder.object("business_id", 13);
+        final var date1 =       builder.object("date", 14);
+        final var date2 =       builder.object("date", 15);
 
-        category.addMorphism(new SchemaMorphism(Signature.createBase(0), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(1))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(12), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(13))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(13), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(14))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(14), null, null,  new HashSet<>(), category.getObject(new Key(0)), category.getObject(new Key(15))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(10), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(11))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(1), null, null,  new HashSet<>(), category.getObject(new Key(1)), category.getObject(new Key(2))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(11), null, null,  new HashSet<>(), category.getObject(new Key(11)), category.getObject(new Key(12))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(7), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(8))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(2), null, null,  new HashSet<>(), category.getObject(new Key(2)), category.getObject(new Key(3))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(3), null, null,  new HashSet<>(), category.getObject(new Key(3)), category.getObject(new Key(4))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(4), null, null,  new HashSet<>(), category.getObject(new Key(4)), category.getObject(new Key(5))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(5), null, null,  new HashSet<>(), category.getObject(new Key(5)), category.getObject(new Key(6))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(6), null, null,  new HashSet<>(), category.getObject(new Key(6)), category.getObject(new Key(7))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(8), null, null,  new HashSet<>(), category.getObject(new Key(8)), category.getObject(new Key(9))));
-        category.addMorphism(new SchemaMorphism(Signature.createBase(9), null, null,  new HashSet<>(), category.getObject(new Key(9)), category.getObject(new Key(10))));
+        builder.morphism(checkin, id, 0);
+        builder.morphism(checkin, businessId, 12);
+        builder.morphism(checkin, date1, 13);
+        builder.morphism(checkin, date2, 14);
+        builder.morphism(id, o11, 10);
+        builder.morphism(id, o2, 1);
+        builder.morphism(o11, o12, 11);
+        builder.morphism(o2, o8, 7);
+        builder.morphism(o2, o3, 2);
+        builder.morphism(o3, o4, 3);
+        builder.morphism(o4, o5, 4);
+        builder.morphism(o5, o6, 5);
+        builder.morphism(o6, o7, 6);
+        builder.morphism(o8, o9, 8);
+        builder.morphism(o9, o10, 9);
+
+        final SchemaCategory schema = builder.build();
+        final MetadataCategory metadata = builder.buildMetadata(schema);
 
         List<PatternSegment> pattern = new ArrayList<>();
         pattern.add(new PatternSegment("A", "<-"));
@@ -580,23 +493,74 @@ public class SchemaCategoryInferenceEditorTests {
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));
 
-        RecursionInferenceEdit edit = new RecursionInferenceEdit(pattern);
+        final RecursionMerge edit = (new RecursionMerge.Data(0, true, pattern)).createAlgorithm();
+        testAlgorithm(schema, metadata, edit);
+    }
 
-        System.out.println("Schema Category before edit:");
-        System.out.println("Objects: " + category.allObjects());
-        for (SchemaMorphism m : category.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+    private SchemaCategory mergeSchemas(SchemaCategory... schemas) {
+        final SchemaCategory output = new SchemaCategory();
+        for (final SchemaCategory schema : schemas) {
+            for (final SchemaObject object : schema.allObjects())
+                schema.addObject(object);
+
+            for (final SchemaMorphism morphism : schema.allMorphisms())
+                schema.addMorphism(morphism);
         }
+
+        return output;
+    }
+
+    private MetadataCategory mergeMetadatas(SchemaCategory schema, MetadataCategory... metadatas) {
+        final MetadataCategory output = MetadataCategory.createEmpty(schema);
+
+        for (final SchemaObject object : schema.allObjects()) {
+            for (final MetadataCategory metadata : metadatas) {
+                final var mo = metadata.getObject(object);
+                if (mo != null) {
+                    output.setObject(object, mo);
+                    break;
+                }
+            }
+        }
+
+        for (final SchemaMorphism morphism : schema.allMorphisms()) {
+            for (final MetadataCategory metadata : metadatas) {
+                final var mm = metadata.getMorphism(morphism);
+                if (mm != null) {
+                    output.setMorphism(morphism, mm);
+                    break;
+                }
+            }
+        }
+
+        return output;
+    }
+
+    private void testAlgorithm(SchemaCategory schema, MetadataCategory metadata, InferenceEditAlgorithm edit) {
+        System.out.println("Schema Category before edit:");
+        printCategory(schema, metadata);
         System.out.println();
 
-        SchemaCategory categoryFinal = edit.applySchemaCategoryEdit(category);
+        final var result = edit.applyCategoryEdit(schema, metadata);
 
-        System.out.println("Schema Category after edit:");
-        System.out.println("Objects: " + categoryFinal.allObjects());
-        for (SchemaMorphism m : categoryFinal.allMorphisms()) {
-            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature());
+        System.out.println("Schema category after edit:");
+        printCategory(result.schema(), result.metadata());
+
+        System.out.println("Metadata category after edit:");
+        // TODO
+    }
+
+    private void printCategory(SchemaCategory schema, MetadataCategory metadata) {
+        System.out.println("Objects: ");
+        for (SchemaObject o : schema.allObjects()) {
+            final var mo = metadata.getObject(o);
+            System.out.println("Object: " + o + " label: " + mo.label);
         }
 
+        for (SchemaMorphism m : schema.allMorphisms()) {
+            final var mm = metadata.getMorphism(m);
+            System.out.println("Dom: " + m.dom() + " cod: " + m.cod() + " sig: " + m.signature() + " label: " + mm.label);
+        }
     }
 
 }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 class DDLAlgorithmTests {
 
-    private static final SchemaCategory schema = Schema.newSchemaCategory();
+    private static final SchemaCategory schema = Schema.newSchema();
 
     @Test
     void basicTest() {

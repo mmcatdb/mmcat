@@ -49,7 +49,7 @@ public class LogicalModelService {
 
     public List<LogicalModelWithMappings> findAllFull(Id categoryId) {
         return repository.findAllInCategory(categoryId).stream().map(model -> {
-            final var mappings = mappingService.findAll(model.logicalModel().id);
+            final var mappings = mappingService.findAll(model.logicalModel().id());
 
             return new LogicalModelWithMappings(model.logicalModel(), model.datasource(), mappings);
         }).toList();
@@ -57,13 +57,13 @@ public class LogicalModelService {
 
     public LogicalModelWithDatasource createNew(LogicalModelInit init) {
         final var datasource = datasourceService.find(init.datasourceId());
-        final Id generatedId = repository.add(init);
         final var logicalModel = new LogicalModel(
-            generatedId,
+            null,
             init.categoryId(),
             init.datasourceId(),
             init.label()
         );
+        repository.add(logicalModel);
 
         return new LogicalModelWithDatasource(logicalModel, datasource);
     }

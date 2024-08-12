@@ -32,20 +32,20 @@ public class DMLAlgorithm {
     private static final Logger LOGGER = LoggerFactory.getLogger(DMLAlgorithm.class);
 
     private Mapping mapping;
-    private InstanceCategory category;
+    private InstanceCategory instance;
     private AbstractDMLWrapper wrapper;
 
     public void input(Mapping mapping, InstanceCategory instance, AbstractDMLWrapper wrapper) {
         this.mapping = mapping;
-        this.category = instance;
+        this.instance = instance;
         this.wrapper = wrapper;
     }
 
     public List<AbstractStatement> algorithm() {
-        InstanceObject instanceObject = category.getObject(mapping.rootObject());
-        Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
-        Deque<DMLStackTriple> masterStack = new ArrayDeque<>();
-        List<AbstractStatement> output = new ArrayList<>();
+        final InstanceObject instanceObject = instance.getObject(mapping.rootObject());
+        final Set<DomainRow> domainRows = fetchSuperIds(instanceObject);
+        final Deque<DMLStackTriple> masterStack = new ArrayDeque<>();
+        final List<AbstractStatement> output = new ArrayList<>();
         if (domainRows.isEmpty())
             System.out.println("domain rows are empty");
 
@@ -61,12 +61,6 @@ public class DMLAlgorithm {
     private Set<DomainRow> fetchSuperIds(InstanceObject object) {
         return object.allRowsToSet();
     }
-
-    /*
-    private Set<MappingRow> fetchRelations(InstanceMorphism morphism) {
-        return morphism.allMappings();
-    }
-    */
 
     private AbstractStatement buildStatement(Deque<DMLStackTriple> masterStack) {
         wrapper.clear();
@@ -94,12 +88,12 @@ public class DMLAlgorithm {
     }
 
     private List<NameValuePair> collectNameValuePairs(ComplexProperty path, DomainRow row, String prefix) {
-        List<NameValuePair> output = new ArrayList<>();
+        final List<NameValuePair> output = new ArrayList<>();
 
-        for (AccessPath subpath : path.subpaths()) {
+        for (final AccessPath subpath : path.subpaths()) {
             if (subpath instanceof ComplexProperty complexSubpath && complexSubpath.isAuxiliary()) {
                 if (complexSubpath.name() instanceof StaticName staticName) {
-                    String newPrefix = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                    final String newPrefix = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
                     output.addAll(collectNameValuePairs(complexSubpath, row, newPrefix));
                 }
             }
@@ -110,25 +104,25 @@ public class DMLAlgorithm {
                     if (!(subpath.name() instanceof StaticName staticName))
                         continue; // This should not happen.
 
-                    String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                    final String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
                     output.add(new NameValuePair(name, row.getValue(Signature.createEmpty())));
 
                     continue;
                 }
 
-                final var instancePath = category.getPath(subpath.signature());
+                final var schemaPath = mapping.category().getPath(subpath.signature());
                 final boolean isObjectWithDynamicKeys = subpath instanceof ComplexProperty complexSubpath && complexSubpath.hasDynamicKeys();
-                final boolean showIndex = instancePath.isArray() && !isObjectWithDynamicKeys;
+                final boolean showIndex = schemaPath.isArray() && !isObjectWithDynamicKeys;
 
                 int index = 0;
-                for (DomainRow objectRow : row.traverseThrough(instancePath)) {
+                for (final DomainRow objectRow : row.traverseThrough(schemaPath)) {
                     output.add(getNameValuePair(subpath, row, objectRow, prefix, index, showIndex));
                     index++;
                 }
 
                 // If it's an array but there aren't any items in it, we return a simple pair with 'null' value.
                 if (index == 0 && showIndex && subpath.name() instanceof StaticName staticName) {
-                    String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
+                    final String name = DDLAlgorithm.concatenatePaths(prefix, staticName.getStringName());
                     output.add(new NameValuePair(name, null));
                 }
 
@@ -141,14 +135,14 @@ public class DMLAlgorithm {
     }
 
     private NameValuePair getNameValuePair(AccessPath objectPath, DomainRow parentRow, DomainRow objectRow, String prefix, int index, boolean showIndex) {
-        String name = getStringName(objectPath, parentRow) + (showIndex ? "[" + index + "]" : "");
-        String fullName = DDLAlgorithm.concatenatePaths(prefix, name);
+        final String name = getStringName(objectPath, parentRow) + (showIndex ? "[" + index + "]" : "");
+        final String fullName = DDLAlgorithm.concatenatePaths(prefix, name);
 
         if (objectPath instanceof ComplexProperty complexPath) {
             return new NameValuePair(fullName, objectRow, complexPath);
         }
 
-        String value = objectRow.getValue(Signature.createEmpty());
+        final String value = objectRow.getValue(Signature.createEmpty());
         return new NameValuePair(fullName, value);
     }
 
@@ -156,10 +150,10 @@ public class DMLAlgorithm {
         if (objectPath.name() instanceof StaticName staticName)
             return staticName.getStringName();
 
-        var dynamicName = (DynamicName) objectPath.name();
+        final var dynamicName = (DynamicName) objectPath.name();
         // If the name is dynamic, we have to find its string value.
-        final var namePath = category.getPath(dynamicName.signature());
-        var nameRowSet = parentRow.traverseThrough(namePath);
+        final var namePath = mapping.category().getPath(dynamicName.signature());
+        final var nameRowSet = parentRow.traverseThrough(namePath);
 
         if (nameRowSet != null && !nameRowSet.isEmpty())
             return nameRowSet.iterator().next().getValue(Signature.createEmpty());

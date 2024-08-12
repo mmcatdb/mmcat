@@ -5,6 +5,10 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.ObjectIds;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.identifiers.SignatureId;
+import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.metadata.MetadataMorphism;
+import cz.matfyz.core.metadata.MetadataObject;
+import cz.matfyz.core.metadata.MetadataObject.Position;
 import cz.matfyz.core.schema.SchemaMorphism.Min;
 import cz.matfyz.core.schema.SchemaMorphism.Tag;
 import cz.matfyz.core.utils.SequenceGenerator;
@@ -19,12 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SchemaBuilder {
-
-    private String schemaLabel;
-
-    public SchemaBuilder(String schemaLabel) {
-        this.schemaLabel = schemaLabel;
-    }
 
     // Schema object
 
@@ -47,16 +45,27 @@ public class SchemaBuilder {
             return key;
         }
 
-        public String label() {
-            return label;
-        }
-
         public ObjectIds ids() {
             return ids;
         }
 
         public SignatureId superId() {
             return superId;
+        }
+
+        public String label() {
+            return label;
+        }
+
+        private Position position = Position.createDefault();
+
+        public Position position() {
+            return position;
+        }
+
+        public BuilderObject position(Position position) {
+            this.position = position;
+            return this;
         }
 
         @Override public int compareTo(BuilderObject other) {
@@ -206,7 +215,7 @@ public class SchemaBuilder {
         return Signature.concatenate(signatures);
     }
 
-    // Objects ids - they need to be defined them when the morphisms are already there.
+    // Objects ids - they need to be defined when the morphisms are already here.
 
     public SchemaBuilder ids(BuilderObject object, BuilderMorphism... morphisms) {
         final var id = new SignatureId(Stream.of(morphisms).map(m -> m.signature()).toArray(Signature[]::new));
@@ -233,13 +242,13 @@ public class SchemaBuilder {
     }
 
     public SchemaCategory build() {
-        final var schema = new SchemaCategory(schemaLabel);
+        final var schema = new SchemaCategory();
 
         objectsByKey.values().forEach(o -> {
             if (objectsToSkip.contains(o))
                 return;
 
-            final var object = new SchemaObject(o.key, o.label, o.ids, o.superId);
+            final var object = new SchemaObject(o.key, o.ids, o.superId);
             schema.addObject(object);
         });
 
@@ -252,8 +261,7 @@ public class SchemaBuilder {
 
             final var dom = schema.getObject(m.domKey());
             final var cod = schema.getObject(m.codKey());
-            final var morphism = new SchemaMorphism(m.signature, m.label, m.min, m.tags, dom, cod);
-
+            final var morphism = new SchemaMorphism(m.signature, dom, cod, m.min, m.tags);
             schema.addMorphism(morphism);
         });
 
@@ -261,6 +269,22 @@ public class SchemaBuilder {
         morphismsToSkip.clear();
 
         return schema;
+    }
+
+    public MetadataCategory buildMetadata(SchemaCategory schema) {
+        final var metadata = MetadataCategory.createEmpty(schema);
+
+        schema.allObjects().forEach(object -> {
+            final var builderObject = objectsByKey.get(object.key());
+            metadata.setObject(object, new MetadataObject(builderObject.label(), builderObject.position()));
+        });
+
+        schema.allMorphisms().forEach(morphism -> {
+            final var builderMorphism = morphismsBySignature.get(morphism.signature());
+            metadata.setMorphism(morphism, new MetadataMorphism(builderMorphism.label()));
+        });
+
+        return metadata;
     }
 
 }

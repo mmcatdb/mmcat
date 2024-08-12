@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, shallowRef, computed } from 'vue';
-import { Graph } from '@/types/categoryGraph';
-import { SelectionType, type Node } from '@/types/categoryGraph';
+import { type Graph, SelectionType, type Node } from '@/types/categoryGraph';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import NodeInput from '@/components/input/NodeInput.vue';
@@ -11,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'confirm', nodes: (Node)[]): void;
+    (e: 'confirm', nodes: Node[]): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
 }>();
@@ -24,7 +23,7 @@ const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
 function confirm() {
     confirmClicked.value = true;
-    emit('confirm', nodes.value);
+    emit('confirm', nodes.value as Node[]);
 }
 
 function save() { // do not do anything, just go back t editor
@@ -36,7 +35,7 @@ function cancel() {
         emit('cancel');
     }
     
-    nodes.value = [];  //unselect selected nodes
+    nodes.value = [ undefined, undefined ];  // unselect selected nodes
 
     if (confirmClicked.value) { // delete the edit (on BE)
         emit('cancel-edit');

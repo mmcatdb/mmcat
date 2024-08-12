@@ -6,8 +6,9 @@ import org.slf4j.LoggerFactory;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
-import cz.matfyz.core.schema.SchemaCategory;
-import cz.matfyz.core.schema.SchemaMorphism;
+
+import java.util.List;
+
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.rsd.RecordSchemaDescription;
 
@@ -19,13 +20,11 @@ public class SchemaConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SchemaConverter.class);
 
     private RecordSchemaDescription rsd;
-    public final String categoryLabel;
     public String kindName; // TODO: I need this to name the root of my SK and my mapping (probably the same as kind name). Getting it as user inpu rn, but in case of MongoDB, it has to match a collection name! (otherwise cant pull from it)
     private final UniqueNumberGenerator keyGenerator;
     private final UniqueNumberGenerator signatureGenerator;
 
-    public SchemaConverter(String categoryLabel) {
-        this.categoryLabel = categoryLabel;
+    public SchemaConverter() {
         this.keyGenerator = new UniqueNumberGenerator(0);
         this.signatureGenerator = new UniqueNumberGenerator(0);
     }
@@ -40,27 +39,30 @@ public class SchemaConverter {
         LOGGER.info("Converting RSD to SchemaCategory...");
 
         LOGGER.info("Creating the access tree from RSD...");
-        RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter(kindName, keyGenerator, signatureGenerator);
-        AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
-        System.out.println("Access tree with unprocessed arrays: ");
-        root.printTree(" ");
+        final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter(kindName, keyGenerator, signatureGenerator);
+        final AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
+        // System.out.println("Access tree with unprocessed arrays: ");
+        // root.printTree(" ");
 
         LOGGER.info("Creating the schema category from the access tree...");
-        AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(categoryLabel, kindName);
-        SchemaCategory schemaCategory = accessTreeToSchemaCategoryConverter.convert(root);
+        final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(kindName);
+        final var schemaWithMetadata = accessTreeToSchemaCategoryConverter.convert(root);
+        final var schema = schemaWithMetadata.schema();
+        final var metadata = schemaWithMetadata.metadata();
 
-        System.out.println("Morphisms in the final SK: ");
-        for (SchemaMorphism m : schemaCategory.allMorphisms()) {
-            System.out.println(m.dom() == null ? "Domain is null" : "Domain: " + m.dom().label());
-            System.out.println(m.cod() == null ? "Codomain is null" : "Codomain: " + m.cod().label());
-            System.out.println();
-        }
+
+        // System.out.println("Morphisms in the final SK: ");
+        // for (SchemaMorphism m : schemaCategory.allMorphisms()) {
+        //     System.out.println(m.dom() == null ? "Domain is null" : "Domain: " + m.dom().label());
+        //     System.out.println(m.cod() == null ? "Codomain is null" : "Codomain: " + m.cod().label());
+        //     System.out.println();
+        // }
 
         LOGGER.info("Creating the mapping for the schema category...");
-        MappingCreator mappingCreator = new MappingCreator(root.getKey(), root);
-        Mapping mapping = mappingCreator.createMapping(schemaCategory, this.kindName); //What will this label be?
+        final MappingCreator mappingCreator = new MappingCreator(root.getKey(), root);
+        final Mapping mapping = mappingCreator.createMapping(schema, this.kindName); //What will this label be?
 
-        return new CategoryMappingPair(schemaCategory, mapping);
+        return new CategoryMappingPair(schema, metadata, List.of(mapping));
     }
 
     public enum Label {

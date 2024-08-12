@@ -1,5 +1,7 @@
 import { type ActionPayload, actionPayloadFromServer, type ActionPayloadFromServer } from './action';
 import type { Entity, Id } from './id';
+import { InferenceJobData, type InferenceJobDataFromServer } from './inference/InferenceJobData';
+import type { SchemaCategoryInfo } from './schema';
 
 export type JobFromServer = {
     id: Id;
@@ -8,8 +10,8 @@ export type JobFromServer = {
     label: string;
     state: JobState;
     payload: ActionPayloadFromServer;
-    data: JobError | unknown;
-    generatedDataModel: string | unknown;
+    data?: JobDataFromServer;
+    error?: JobError;
     createdAt: string;
 };
 
@@ -21,13 +23,12 @@ export class Job implements Entity {
         public readonly label: string,
         public state: JobState,
         public readonly payload: ActionPayload,
+        public readonly data: JobData | undefined,
         public readonly error: JobError | undefined,
-        public readonly result: unknown | undefined,
-        public readonly resultModel: unknown | undefined,
         public readonly createdAt: Date,
     ) {}
 
-    static fromServer(input: JobFromServer): Job {
+    static fromServer(input: JobFromServer, info: SchemaCategoryInfo): Job {
         return new Job(
             input.id,
             input.categoryId,
@@ -35,30 +36,14 @@ export class Job implements Entity {
             input.label,
             input.state,
             actionPayloadFromServer(input.payload),
-            input.state === JobState.Failed ? input.data as JobError : undefined,
-            input.state === JobState.Finished || JobState.Waiting ? input.data : undefined,
-            input.state === JobState.Finished ? input.generatedDataModel : undefined,
+            input.data && jobDataFromServer(input.data, info),
+            input.error,
             new Date(input.createdAt),
         );
     }
 
     setState(state: JobState) {
         this.state = state;
-    }
-
-    withUpdatedResult(newResult: unknown): Job {
-        return new Job(
-            this.id,
-            this.categoryId,
-            this.actionId,
-            this.label,
-            this.state,
-            this.payload,
-            this.error,
-            newResult,
-            this.resultModel,
-            this.createdAt
-        );
     }
 }
 
@@ -75,6 +60,29 @@ export enum JobState {
 type JobError = {
     name: string;
     data: unknown;
+};
+
+export enum JobDataType {
+    Model = 'Model',
+    Inference = 'Inference',
+}
+
+type JobDataFromServer = ModelJobData | InferenceJobDataFromServer;
+
+type JobData = ModelJobData | InferenceJobData;
+
+function jobDataFromServer(input: JobDataFromServer, info: SchemaCategoryInfo): JobData {
+    switch (input.type) {
+    case JobDataType.Model:
+        return input;
+    case JobDataType.Inference:
+        return InferenceJobData.fromServer(input, info);
+    }
+}
+
+export type ModelJobData = {
+    type: JobDataType.Model;
+    model: string;
 };
 
 export type SessionFromServer = {

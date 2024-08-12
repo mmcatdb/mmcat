@@ -1,7 +1,6 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -26,7 +25,7 @@ public class QueryRepository {
 
     public record QueryWithVersion(Query query, QueryVersion version) implements Comparable<QueryWithVersion> {
         @Override public int compareTo(QueryWithVersion other) {
-            return query.id.compareTo(other.query.id);
+            return query.compareTo(other.query);
         }
     }
 
@@ -153,8 +152,8 @@ public class QueryRepository {
         });
     }
 
-    public boolean save(Query query) {
-        return db.getBoolean((connection, output) -> {
+    public void save(Query query) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO query (id, schema_category_id, json_value)
                 VALUES (?, ?, ?::jsonb)
@@ -162,16 +161,15 @@ public class QueryRepository {
                     schema_category_id = EXCLUDED.schema_category_id,
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, query.id);
+            setId(statement, 1, query.id());
             setId(statement, 2, query.categoryId);
             statement.setString(3, query.toJsonValue());
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 
-    public boolean save(QueryVersion version) {
-        return db.getBoolean((connection, output) -> {
+    public void save(QueryVersion version) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 INSERT INTO query_version (id, query_id, json_value)
                 VALUES (?, ?, ?::jsonb)
@@ -179,37 +177,32 @@ public class QueryRepository {
                     query_id = EXCLUDED.query_id,
                     json_value = EXCLUDED.json_value;
                 """);
-            setId(statement, 1, version.id);
+            setId(statement, 1, version.id());
             setId(statement, 2, version.queryId);
             statement.setString(3, version.toJsonValue());
-
-            output.set(statement.executeUpdate() != 0);
+            executeChecked(statement);
         });
     }
 
-    public boolean deleteQuery(Id id) {
-        return db.getBoolean((connection, output) -> {
+    public void deleteQuery(Id id) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 DELETE FROM query
                 WHERE id = ?;
                 """);
             setId(statement, 1, id);
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            executeChecked(statement);
         });
     }
 
-    public boolean deleteQueryVersionsByQuery(Id queryId) {
-        return db.getBoolean((connection, output) -> {
+    public void deleteQueryVersionsByQuery(Id queryId) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 DELETE FROM query_version
                 WHERE query_id = ?;
                 """);
             setId(statement, 1, queryId);
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            executeChecked(statement);
         });
     }
 

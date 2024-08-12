@@ -13,8 +13,7 @@ public class RecordBasedAlgorithm {
     private static final Logger LOGGER = LoggerFactory.getLogger(RecordBasedAlgorithm.class);
 
     public RecordSchemaDescription process(AbstractInferenceWrapper wrapper, AbstractRSDsReductionFunction merge) {
-        wrapper.buildSession();
-        wrapper.initiateContext();
+        wrapper.startSession();
 
         try {
             long start = System.currentTimeMillis();

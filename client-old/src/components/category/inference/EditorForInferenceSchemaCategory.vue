@@ -4,7 +4,7 @@ import Merge from './Merge.vue';
 import Cluster from './Cluster.vue';
 import Recursion from './Recursion.vue';
 import InferenceEdits from './InferenceEdits.vue';
-import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit';
+import type { InferenceEdit } from '@/types/inference/inferenceEdit';
 import { Graph, Node, Edge } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 import Divider from '@/components/layout/Divider.vue';
@@ -12,16 +12,15 @@ import Divider from '@/components/layout/Divider.vue';
 const props = defineProps<{
     graph: Graph;
     schemaCategory: SchemaCategory;
-    inferenceEdits: AbstractInferenceEdit[];
+    inferenceEdits: InferenceEdit[];
 }>();
 
 const emit = defineEmits<{
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', nodes: (Node)[]): void;
-    (e: 'confirm-primary-key-merge', nodes: (Node)[]): void;
-    (e: 'confirm-cluster', nodes: (Node)[]): void;
-    (e: 'confirm-recursion', payload: { nodes: (Node)[], edges: (Edge)[] }): void;
-    (e: 'revert-edit', edit: AbstractInferenceEdit): void;
+    (e: 'confirm-reference-merge', nodes: Node[]): void;
+    (e: 'confirm-primary-key-merge', nodes: Node[]): void;
+    (e: 'confirm-cluster', nodes: Node[]): void;
+    (e: 'confirm-recursion', payload: { nodes: Node[], edges: Edge[] }): void;
 }>();
 
 enum State {
@@ -63,19 +62,19 @@ function setStateToDefault() {
     state.value = { type: State.Default };
 }
 
-function confirmReferenceMergeEdit(nodes: (Node)[]) {
+function confirmReferenceMergeEdit(nodes: Node[]) {
     emit('confirm-reference-merge', nodes);
 }
 
-function confirmPrimaryKeyMergeEdit(nodes: (Node)[]) {
+function confirmPrimaryKeyMergeEdit(nodes: Node[]) {
     emit('confirm-primary-key-merge', nodes);
 }
 
-function confirmClusterEdit(nodes: (Node)[]) {
+function confirmClusterEdit(nodes: Node[]) {
     emit('confirm-cluster', nodes);
 }
 
-function confirmRecursionEdit(nodes: (Node)[], edges: (Edge)[]) {
+function confirmRecursionEdit(nodes: Node[], edges: Edge[]) {
     emit('confirm-recursion', { nodes, edges });
 }
 
@@ -83,7 +82,7 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
-function revertEdit(edit: AbstractInferenceEdit) {
+function revertEdit(edit: InferenceEdit) {
     emit('revert-edit', edit);
 }
 

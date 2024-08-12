@@ -14,7 +14,6 @@ import cz.matfyz.server.service.QueryService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class QueryController {
@@ -104,9 +102,7 @@ public class QueryController {
 
     @DeleteMapping("/queries/{queryId}")
     public void deleteQuery(@PathVariable Id queryId) {
-        boolean result = service.deleteQueryWithVersions(queryId);
-        if (!result)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        service.deleteQueryWithVersions(queryId);
     }
 
     public record QueryVersionUpdate(

@@ -4,8 +4,6 @@ import cz.matfyz.server.entity.Entity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.repository.utils.Utils;
 
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -23,10 +21,8 @@ public class LogicalModel extends Entity {
         this.label = label;
     }
 
-    private static final List<String> idPropertyNames = List.of("id", "categoryId", "datasourceId");
-
     public String toJsonValue() throws JsonProcessingException {
-        return Utils.toJsonWithoutProperties(this, idPropertyNames);
+        return Utils.toJson(new JsonValue(label));
     }
 
     private record JsonValue(

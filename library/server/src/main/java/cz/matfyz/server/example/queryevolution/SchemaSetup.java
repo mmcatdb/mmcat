@@ -11,7 +11,7 @@ class SchemaSetup extends SchemaBase {
     private final int version;
 
     private SchemaSetup(SchemaCategoryWrapper wrapper, String lastUpdateVersion, int version) {
-        super(wrapper, lastUpdateVersion, Schema.newSchemaCategory(version));
+        super(wrapper, lastUpdateVersion, Schema.newSchema(version));
         this.version = version;
     }
 

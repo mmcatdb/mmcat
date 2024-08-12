@@ -29,12 +29,10 @@ public class MMInferOneInAll {
 
     private AbstractInferenceWrapper wrapper;
     private String kindName;
-    private String categoryLabel;
 
-    public MMInferOneInAll input(AbstractInferenceWrapper wrapper, String kindName, String categoryLabel) {
+    public MMInferOneInAll input(AbstractInferenceWrapper wrapper, String kindName) {
         this.wrapper = wrapper;
         this.kindName = kindName;
-        this.categoryLabel = categoryLabel;
 
         return this;
     }
@@ -57,7 +55,7 @@ public class MMInferOneInAll {
 
         //RecordSchemaDescription rsd = mergeRecordSchemaDescriptions(rsds);
 
-        SchemaConverter schemaConverter = new SchemaConverter(categoryLabel);
+        SchemaConverter schemaConverter = new SchemaConverter();
 
         List<CategoryMappingPair> pairs = new ArrayList<CategoryMappingPair>();
 
@@ -75,10 +73,8 @@ public class MMInferOneInAll {
 
         inputWrapper.getKindNames().forEach(kindName -> {
             System.out.println(kindName);
-            final AbstractInferenceWrapper copy = inputWrapper.copy();
-            copy.kindName = kindName;
-
-            wrappers.put(kindName, copy);
+            final var wrapper = inputWrapper.copyForKind(kindName);
+            wrappers.put(kindName, wrapper);
         });
         return wrappers;
     }
@@ -98,10 +94,10 @@ public class MMInferOneInAll {
         RecordSchemaDescription rsd = rba.process(wrapper, merge);
         long end = System.currentTimeMillis();
 
-        if (printSchema) {
-            System.out.print("RESULT_RECORD_BA: ");
-            System.out.println(rsd);
-        }
+        // if (printSchema) {
+        //     System.out.print("RESULT_RECORD_BA: ");
+        //     System.out.println(rsd);
+        // }
 
         System.out.println("RESULT_TIME_RECORD_BA TOTAL: " + (end - start) + "ms");
 

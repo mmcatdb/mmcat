@@ -71,7 +71,7 @@ public class SchemaExtractor {
     private Queue<SchemaMorphism> morphismQueue;
 
     private void createNewCategory() {
-        newSchema = new SchemaCategory(schema.label);
+        newSchema = new SchemaCategory();
         morphismQueue = new ArrayDeque<>(patternMorphisms);
 
         // We have to use queue because the morphisms need to add objects which need to add their ids which consist of objects and morphisms ... so we have to break the chain somewhere.

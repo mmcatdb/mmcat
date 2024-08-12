@@ -8,15 +8,18 @@ public class SchemaCategoryInfo extends Entity {
 
     public final String label;
     public final Version version;
+    /** The current version of the whole project. */
+    public final Version systemVersion;
 
-    public SchemaCategoryInfo(Id id, String label, Version version) {
+    public SchemaCategoryInfo(Id id, String label, Version version, Version systemVersion) {
         super(id);
-        this.label = label;
         this.version = version;
+        this.systemVersion = systemVersion;
+        this.label = label;
     }
 
     public static SchemaCategoryInfo fromWrapper(SchemaCategoryWrapper wrapper) {
-        return new SchemaCategoryInfo(wrapper.id, wrapper.label, wrapper.version);
+        return new SchemaCategoryInfo(wrapper.id(), wrapper.label, wrapper.version, wrapper.systemVersion);
     }
 
 }

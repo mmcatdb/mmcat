@@ -28,7 +28,7 @@ public class JobService {
 
     public JobWithRun createSystemRun(Id categoryId, String label, ActionPayload payload) {
         final var run = Run.createSystem(categoryId);
-        final var job = Job.createNew(run.id, label, payload, isJobStartedManually(payload));
+        final var job = Job.createNew(run.id(), label, payload, isJobStartedManually(payload));
 
         repository.save(run);
         repository.save(job);
@@ -37,8 +37,8 @@ public class JobService {
     }
 
     public JobWithRun createUserRun(Action action, Id sessionId) {
-        final var run = Run.createUser(action.categoryId, action.id, sessionId);
-        final var job = Job.createNew(run.id, action.label, action.payload, isJobStartedManually(action.payload));
+        final var run = Run.createUser(action.categoryId, action.id(), sessionId);
+        final var job = Job.createNew(run.id(), action.label, action.payload, isJobStartedManually(action.payload));
 
         repository.save(run);
         repository.save(job);
@@ -63,7 +63,7 @@ public class JobService {
         final var job = jobWithRun.job();
         final State prevState = job.state;
         if (!allowedTransitions.containsKey(newState) || !allowedTransitions.get(newState).contains(prevState))
-            throw InvalidTransitionException.job(job.id, prevState, newState);
+            throw InvalidTransitionException.job(job.id(), prevState, newState);
 
         job.state = newState;
         repository.save(job);

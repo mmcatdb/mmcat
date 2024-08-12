@@ -1,7 +1,6 @@
 package cz.matfyz.server.repository;
 
-import static cz.matfyz.server.repository.utils.Utils.getId;
-import static cz.matfyz.server.repository.utils.Utils.setId;
+import static cz.matfyz.server.repository.utils.Utils.*;
 
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.instance.InstanceCategoryWrapper;
@@ -42,8 +41,8 @@ public class InstanceCategoryRepository {
         });
     }
 
-    public boolean save(InstanceCategoryWrapper wrapper) {
-        return db.getBoolean((connection, output) -> {
+    public void save(InstanceCategoryWrapper wrapper) {
+        db.run(connection -> {
             final var statement = connection.prepareStatement("""
                 UPDATE session
                 SET instance_data = ?::jsonb
@@ -52,9 +51,7 @@ public class InstanceCategoryRepository {
             );
             statement.setString(1, wrapper.toJsonValue());
             setId(statement, 2, wrapper.sessionId());
-
-            final int affectedRows = statement.executeUpdate();
-            output.set(affectedRows != 0);
+            executeChecked(statement);
         });
     }
 

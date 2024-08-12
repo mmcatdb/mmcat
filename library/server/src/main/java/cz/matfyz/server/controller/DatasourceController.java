@@ -77,9 +77,7 @@ public class DatasourceController {
 
     @DeleteMapping("/datasources/{id}")
     public void deleteDatasource(@PathVariable Id id) {
-        final boolean status = service.delete(id);
-        if (!status)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The data source can't be deleted. Check that there aren't any mappings that depend on it.");
+        service.delete(id);
     }
 
     public DatasourceDetail datasourceToDetail(DatasourceWrapper datasource) {

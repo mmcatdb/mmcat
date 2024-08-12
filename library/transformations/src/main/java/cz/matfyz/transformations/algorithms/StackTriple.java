@@ -1,19 +1,19 @@
 package cz.matfyz.transformations.algorithms;
 
 import cz.matfyz.core.instance.DomainRow;
-import cz.matfyz.core.instance.InstanceCategory.InstancePath;
 import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.record.IComplexRecord;
+import cz.matfyz.core.schema.SchemaCategory.SchemaPath;
 import cz.matfyz.core.utils.printable.*;
 
 public class StackTriple implements Printable {
 
-    public final InstancePath parentToChild;
+    public final SchemaPath parentToChild;
     public final DomainRow parentRow;
     public final AccessPath childAccessPath;
     public final IComplexRecord parentRecord;
 
-    public StackTriple(DomainRow parentRow, InstancePath parentToChild, AccessPath childAccessPath, IComplexRecord parentRecord) {
+    public StackTriple(DomainRow parentRow, SchemaPath parentToChild, AccessPath childAccessPath, IComplexRecord parentRecord) {
         this.parentRow = parentRow;
         this.parentToChild = parentToChild;
         this.childAccessPath = childAccessPath;

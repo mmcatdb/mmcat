@@ -1,27 +1,25 @@
 package cz.matfyz.server.controller;
 
-import cz.matfyz.core.exception.OtherException;
-import cz.matfyz.inference.edit.AbstractInferenceEdit;
-import cz.matfyz.inference.edit.utils.SaveJobResultPayload;
+import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.edit.algorithms.PrimaryKeyMerge;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.job.Job;
+import cz.matfyz.server.entity.job.JobData;
 import cz.matfyz.server.entity.job.Session;
 import cz.matfyz.server.entity.job.Job.State;
+import cz.matfyz.server.entity.job.data.InferenceJobData;
 import cz.matfyz.server.repository.ActionRepository;
 import cz.matfyz.server.repository.JobRepository;
 import cz.matfyz.server.repository.JobRepository.JobWithRun;
 import cz.matfyz.server.service.JobExecutorService;
 import cz.matfyz.server.service.JobService;
-import cz.matfyz.server.utils.InferenceJobData;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -105,40 +103,22 @@ public class JobController {
     }
 
     @PostMapping("/jobs/{id}/updateResult")
-    public JobDetail updateJobResult(@PathVariable Id id, @RequestBody SaveJobResultRequest saveJobResultPayloadString) {
+    public JobDetail updateJobResult(@PathVariable Id id, @RequestBody SaveJobResultPayload payload) {
         final var jobWithRun = repository.find(id);
+        if (!(jobWithRun.job().data instanceof InferenceJobData inferenceJobData))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The job data is not an instance of InferenceJobData");
 
-        final var inferenceJobData = extractInferenceJobData(jobWithRun.job());
-        final var payload = extractSaveJobResultPayload(saveJobResultPayloadString.payload());
-        final var permanent = payload.permanent;
+        InferenceEdit edit = payload.isFinal ? null : payload.edit;
+        System.out.println("payload.edit: " + payload.edit.toString());
+        final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, payload.isFinal);
 
-        JobWithRun newJobWithRun;
-
-        try {
-            AbstractInferenceEdit edit = permanent ? null : payload.edit;
-            newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, permanent);
-        } catch (Exception e) {
-            throw new OtherException(e);
-        }
-
-        return jobToJobDetail(service.transition(newJobWithRun, permanent ? State.Finished : State.Waiting));
+        return jobToJobDetail(service.transition(newJobWithRun, payload.isFinal ? State.Finished : State.Waiting));
     }
 
-    private InferenceJobData extractInferenceJobData(Job job) {
-        try {
-            return new ObjectMapper().readValue(job.data.toString(), InferenceJobData.class);
-        } catch (JsonProcessingException e) {
-            throw new OtherException(e);
-        }
-    }
-
-    private SaveJobResultPayload extractSaveJobResultPayload(String saveJobResultPayloadString) {
-        try {
-            return new ObjectMapper().readValue(saveJobResultPayloadString, SaveJobResultPayload.class);
-        } catch (JsonProcessingException e) {
-            throw new OtherException(e);
-        }
-    }
+    private record SaveJobResultPayload(
+        boolean isFinal,
+        @Nullable InferenceEdit edit
+    ) {}
 
     private JobDetail jobToJobDetail(JobWithRun job) {
         final var payload = actionController.actionPayloadToDetail(job.job().payload);
@@ -155,14 +135,14 @@ public class JobController {
         Date createdAt,
         Job.State state,
         ActionPayloadDetail payload,
-        @Nullable Serializable data,
-        @Nullable Serializable generatedDataModel
+        @Nullable JobData data,
+        @Nullable Serializable error
     ) implements IEntity {
         public static JobDetail create(JobWithRun jobWithRun, ActionPayloadDetail payload) {
             final var job = jobWithRun.job();
             final var run = jobWithRun.run();
 
-            return new JobDetail(job.id, run.categoryId, run.id, run.actionId, job.label, job.createdAt, job.state, payload, job.data, job.generatedDataModel);
+            return new JobDetail(job.id(), run.categoryId, run.id(), run.actionId, job.label, job.createdAt, job.state, payload, job.data, job.error);
         }
     }
 
@@ -176,5 +156,4 @@ public class JobController {
         return service.createSession(categoryId);
     }
 
-    public record SaveJobResultRequest(String payload) {}
 }

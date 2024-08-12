@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { AbstractInferenceEdit } from '@/types/inferenceEdit/inferenceEdit';
+import type { InferenceEdit } from '@/types/inference/inferenceEdit';
 import ValueContainer from '@/components/layout/page/ValueContainer.vue';
 import ValueRow from '@/components/layout/page/ValueRow.vue';
 import Divider from '@/components/layout/Divider.vue';
 
 const props = defineProps<{
-    inferenceEdits: AbstractInferenceEdit[];
+    inferenceEdits: InferenceEdit[];
 }>();
 
 const emit = defineEmits<{
     (e: 'cancel'): void;
-    (e: 'revert-edit', edit: AbstractInferenceEdit): void;
+    (e: 'revert-edit', edit: InferenceEdit): void;
 }>();
 
 const hasEdits = computed(() => props.inferenceEdits.length > 0);
 
-function revertEdit(edit: AbstractInferenceEdit) {
+function revertEdit(edit: InferenceEdit) {
     emit('revert-edit', edit);
 }
 
@@ -26,14 +26,14 @@ function cancel() {
 
 function getEditName(editType: string): string {
     switch (editType) {
-    case 'primaryKey':
+    case 'PrimaryKey':
         return 'Primary Key Merge';
-    case 'reference':
+    case 'Reference':
         return 'Reference Merge';
-    case 'recursion':
-        return 'Recursion';
-    case 'cluster':
-        return 'Cluster';
+    case 'Recursion':
+        return 'Recursion Merge';
+    case 'Cluster':
+        return 'Cluster Merge';
     default:
         return 'Unknown';
     }

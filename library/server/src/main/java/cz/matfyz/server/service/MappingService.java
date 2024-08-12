@@ -1,13 +1,12 @@
 package cz.matfyz.server.service;
 
-import cz.matfyz.core.identifiers.Signature;
-import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.evolution.Version;
 import cz.matfyz.server.entity.Id;
 import cz.matfyz.server.entity.mapping.MappingInfo;
 import cz.matfyz.server.entity.mapping.MappingInit;
 import cz.matfyz.server.entity.mapping.MappingWrapper;
 import cz.matfyz.server.repository.MappingRepository;
+import cz.matfyz.server.repository.ProjectRepository;
 
 import java.util.List;
 
@@ -20,6 +19,9 @@ public class MappingService {
 
     @Autowired
     private MappingRepository repository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     public MappingWrapper find(Id id) {
         return repository.find(id);
@@ -34,42 +36,14 @@ public class MappingService {
     }
 
     public MappingInfo createNew(MappingInit init) {
-        Id generatedId = repository.add(init);
+        final Version systemVersion = projectRepository
+            .getVersionByLogicalModel(init.logicalModelId())
+            .generateNext();
 
-        return generatedId == null ? null : new MappingInfo(
-            generatedId,
-            init.kindName(),
-            init.version(),
-            init.categoryVersion()
-        );
-    }
+        final var wrapper = new MappingWrapper(null, init.logicalModelId(), init.rootObjectKey(), init.primaryKey(), init.kindName(), init.accessPath(), systemVersion);
+        repository.add(wrapper);
 
-    /**
-     * Created for the case when I receive Mapping from inference
-     */
-    public MappingInfo createNew(Mapping mapping, Id logicalModelId) {
-        Signature[] primaryKeyArray = mapping.primaryKey().toArray(new Signature[0]);
-
-        MappingInit init = new MappingInit(
-                logicalModelId,
-                mapping.rootObject().key(),
-                primaryKeyArray,
-                mapping.kindName(),
-                mapping.accessPath(),
-                Version.generateInitial());
-
-        Id generatedId = repository.add(init);
-        if (generatedId != null) {
-            return new MappingInfo(
-                generatedId,
-                mapping.kindName(),
-                init.version(),
-                init.categoryVersion()
-            );
-        }
-        else {
-            return null;
-        }
+        return MappingInfo.fromWrapper(wrapper);
     }
 
 }
