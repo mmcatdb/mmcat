@@ -50,6 +50,10 @@ public class InferenceEditor {
         return this.mappings;
     }
 
+    public MetadataCategory getMetadata() {
+        return this.metadata;
+    }
+
     public boolean hasMappings() {
         return this.mappings != null;
     }

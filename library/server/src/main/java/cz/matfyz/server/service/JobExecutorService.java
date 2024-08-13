@@ -304,9 +304,10 @@ public class JobExecutorService {
         inferenceEditor.applyEdits();
         System.out.println("schema objects after edits: " + schema.allObjects());
 
-        job.job().data = InferenceJobData.fromSchemaCategory(edits, inferenceEditor.getSchemaCategory(), metadata, mappings);
+        //job.job().data = InferenceJobData.fromSchemaCategory(edits, inferenceEditor.getSchemaCategory(), metadata, mappings);
+        job.job().data = InferenceJobData.fromSchemaCategory(edits, inferenceEditor.getSchemaCategory(), inferenceEditor.getMetadata(), mappings);
 
-        if (isFinal)
+        if (isFinal) // TODO: tady asi taky vzit schema z editoru
             finishRSDToCategoryProcessing(job, schema, metadata, inferenceEditor.getMappings());
 
         return job;

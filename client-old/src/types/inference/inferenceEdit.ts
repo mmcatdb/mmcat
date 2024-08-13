@@ -1,4 +1,5 @@
-import type { Key } from '../identifiers';
+import { Key } from '../identifiers';
+import type { KeyFromServer } from '../identifiers';
 
 export interface InferenceEdit {
     id: number | null;
