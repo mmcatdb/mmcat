@@ -17,7 +17,7 @@ export function CommonPage({ children }: CommonPageProps) {
         <div className={clsx('h-screen overflow-hidden text-foreground bg-background', theme)}>
             <div className='main-scroller'>
                 <CommonNavbar />
-                <main className='w-[1024px] mx-auto p-6'>
+                <main className='w-full max-w-[1024px] mx-auto p-6'>
                     {children}
                 </main>
             </div>
