@@ -3,14 +3,11 @@ package cz.matfyz.inference.edit.algorithms;
 import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
-import cz.matfyz.core.mapping.SimpleProperty;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -28,10 +25,13 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     public static class Data implements InferenceEdit {
 
         private Integer id;
+        @JsonProperty("isActive")
         private boolean isActive;
-        Key referenceKey;
-        Key referredKey;
-    
+        @JsonProperty("referenceKey")
+        private final Key referenceKey;
+        @JsonProperty("referredKey")
+        private final Key referredKey;
+
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
@@ -50,32 +50,31 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             this.referenceKey = null;
             this.referredKey = null;
         }
-    
+
         @Override public ReferenceMerge createAlgorithm() {
             return new ReferenceMerge(this);
         }
-    
+
         @Override
         public Integer getId() {
             return id;
         }
-    
+
         @Override
         public void setId(Integer id) {
             this.id = id;
         }
-    
+
         @Override
         public boolean isActive() {
             return isActive;
         }
-    
+
         @Override
         public void setActive(boolean isActive) {
             this.isActive = isActive;
         }
     }
-    
 
     private static final Logger LOGGER = Logger.getLogger(ReferenceMerge.class.getName());
     private static final String INDEX_LABEL = "_index";
@@ -100,6 +99,11 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Reference Merge Edit on Schema Category...");
+
+        System.out.println("reference: " + data.referenceKey);
+        System.out.println("referred: " + data.referredKey);
+        System.out.println("id: " + data.id);
+        System.out.println("isActive: " + data.isActive);
 
         this.referenceIsArray = isReferenceArray(newSchema, newMetadata);
 

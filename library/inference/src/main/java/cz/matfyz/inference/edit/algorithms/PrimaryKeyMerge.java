@@ -29,9 +29,11 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     public static class Data implements InferenceEdit {
 
         private Integer id;
+        @JsonProperty("isActive")
         private boolean isActive;
+        @JsonProperty("primaryKey")
         private final Key primaryKey;
-    
+
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
@@ -47,27 +49,27 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             this.isActive = false;
             this.primaryKey = null;
         }
-    
+
         @Override
         public PrimaryKeyMerge createAlgorithm() {
             return new PrimaryKeyMerge(this);
         }
-    
+
         @Override
         public Integer getId() {
             return id;
         }
-    
+
         @Override
         public void setId(Integer id) {
             this.id = id;
         }
-    
+
         @Override
         public boolean isActive() {
             return isActive;
         }
-    
+
         @Override
         public void setActive(boolean isActive) {
             this.isActive = isActive;

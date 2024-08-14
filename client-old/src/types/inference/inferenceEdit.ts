@@ -95,7 +95,7 @@ export function createInferenceEditFromServer(data: any): InferenceEdit {
 
 export type SaveJobResultPayload = {
     isFinal: false;
-    edit: InferenceEdit;
+    edit: InferenceEdit | null;
 } | {
     isFinal: true;
 };

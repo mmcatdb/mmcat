@@ -15,6 +15,7 @@ const emit = defineEmits<{
 }>();
 
 const hasEdits = computed(() => props.inferenceEdits.length > 0);
+console.log('inference edits: ', props.inferenceEdits);
 
 function revertEdit(edit: InferenceEdit) {
     emit('revert-edit', edit);

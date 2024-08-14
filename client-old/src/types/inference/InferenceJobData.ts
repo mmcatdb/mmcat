@@ -6,22 +6,27 @@ import { createInferenceEditFromServer } from './inferenceEdit';
 export type InferenceJobDataFromServer = {
     type: JobDataType.Inference;
     edits: InferenceEdit[];
-    schema: SerializedSchema;
-    metadata: SerializedMetadata;
+    inferenceSchema: SerializedSchema;
+    finalSchema: SerializedSchema;
+    inferenceMetadata: SerializedMetadata;
+    finalMetadata: SerializedMetadata;
     // mappings
 };
 
 export class InferenceJobData {
     constructor(
         public edits: InferenceEdit[],
-        public schema: SchemaCategory,
+        public inferenceSchema: SchemaCategory,
+        public finalSchema: SchemaCategory,
     ) {}
 
     static fromServer(input: InferenceJobDataFromServer, info: SchemaCategoryInfo): InferenceJobData {
+        console.log('edits in InferenceJobData', input.edits);
         return new InferenceJobData(
-            //input.edits,
-            input.edits.map(createInferenceEditFromServer),
-            SchemaCategory.fromServerWithInfo(info, input.schema, input.metadata),
+            input.edits,
+            //input.edits.map(createInferenceEditFromServer),
+            SchemaCategory.fromServerWithInfo(info, input.inferenceSchema, input.inferenceMetadata),
+            SchemaCategory.fromServerWithInfo(info, input.finalSchema, input.finalMetadata),
         );
     }
 }

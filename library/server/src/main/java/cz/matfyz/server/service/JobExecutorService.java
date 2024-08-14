@@ -285,15 +285,16 @@ public class JobExecutorService {
 
         Layout.applyToMetadata(schema, metadata);
 
-        job.data = InferenceJobData.fromSchemaCategory(List.of(), schema, metadata, mappings);
+        job.data = InferenceJobData.fromSchemaCategory(List.of(), schema, schema, metadata, metadata, mappings);
     }
 
     public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, InferenceEdit edit, boolean isFinal) {
         final List<InferenceEdit> edits = data.edits();
         updateInferenceEdits(edits, edit, isFinal);
+        System.out.println("edits in jobexecutor: " + edits);
 
-        final var schema = SchemaSerializer.deserialize(data.schema());
-        final var metadata = MetadataSerializer.deserialize(data.metadata(), schema);
+        final var schema = SchemaSerializer.deserialize(data.inferenceSchema());
+        final var metadata = MetadataSerializer.deserialize(data.inferenceMetadata(), schema);
         final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
         final InferenceEditor inferenceEditor = isFinal
@@ -304,11 +305,12 @@ public class JobExecutorService {
         inferenceEditor.applyEdits();
         System.out.println("schema objects after edits: " + schema.allObjects());
 
-        //job.job().data = InferenceJobData.fromSchemaCategory(edits, inferenceEditor.getSchemaCategory(), metadata, mappings);
-        job.job().data = InferenceJobData.fromSchemaCategory(edits, inferenceEditor.getSchemaCategory(), inferenceEditor.getMetadata(), mappings);
+        //job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, metadata, mappings);
+        job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, inferenceEditor.getSchemaCategory(), metadata, inferenceEditor.getMetadata(), mappings);
 
         if (isFinal) // TODO: tady asi taky vzit schema z editoru
-            finishRSDToCategoryProcessing(job, schema, metadata, inferenceEditor.getMappings());
+            //finishRSDToCategoryProcessing(job, schema, metadata, inferenceEditor.getMappings());
+            finishRSDToCategoryProcessing(job, inferenceEditor.getSchemaCategory(), inferenceEditor.getMetadata(), inferenceEditor.getMappings());
 
         return job;
     }

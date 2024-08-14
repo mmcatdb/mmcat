@@ -28,7 +28,9 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     public static class Data implements InferenceEdit {
 
         private Integer id;
+        @JsonProperty("isActive")
         private boolean isActive;
+        @JsonProperty("pattern")
         List<PatternSegment> pattern;
     
         @JsonCreator

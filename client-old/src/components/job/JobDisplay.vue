@@ -8,11 +8,8 @@ import JobStateBadge from './JobStateBadge.vue';
 import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
 import InferenceJobDisplay from '@/components/category/inference/InferenceJobDisplay.vue';
-
-import { SchemaCategory } from '@/types/schema';
-import { createInferenceEditFromServer } from '@/types/inferenceEdit/inferenceEdit';
-
 import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/inferenceEdit';
+import { createInferenceEditFromServer } from '@/types/inference/inferenceEdit';
 import type { InferenceJobData } from '@/types/inference/InferenceJobData';
 import { useSchemaCategoryInfo } from '@/utils/injects';
 
@@ -50,22 +47,21 @@ const schemaCategory = computed(() => {
         
     }
     throw new Error('InferenceJobData is not the right type');
-});
+});*/
 
 const inferenceEdits = computed(() => {
-    if (typeof props.job.result === 'string' && props.job.payload.type === ActionType.RSDToCategory) {
-        const parsedResult = JSON.parse(props.job.result);
-        if (isInferenceJobData(parsedResult)) {
-            if (parsedResult.manual.length > 0) 
-                return parsedResult.manual.map(createInferenceEditFromServer);
-            else 
-                return [];            
-        } else {
-            throw new Error('InferenceJobData is not the right type');            
-        }
+    //const inferenceData = job.data as InferenceJobData;
+    if (props.job.payload.type === ActionType.RSDToCategory) {
+        const inferenceData  = props.job.data as InferenceJobData;
+        if (inferenceData.edits.length > 0) 
+            return inferenceData.edits.map(createInferenceEditFromServer);
+        else 
+            return [];            
+
     }
     throw new Error('InferenceJobData is not the right type');
-});*/
+});
+
 const info = useSchemaCategoryInfo();
 
 async function startJob() {
@@ -95,7 +91,7 @@ async function restartJob() {
 async function updateJobResult(edit: InferenceEdit | null, permanent: boolean) {
     fetching.value = true;
 
-    const payload: SaveJobResultPayload = { edit, isFinal: permanent };
+    const payload: SaveJobResultPayload = { isFinal: permanent, edit };
     console.log("Sending payload:", JSON.stringify(payload));
 
     const result = await API.jobs.updateJobResult({ id: props.job.id }, { edit, isFinal: permanent } as SaveJobResultPayload);
@@ -192,8 +188,8 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean) {
             <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
                 <InferenceJobDisplay 
                     :job="job"
-                    :schema-category="(job.data as InferenceJobData).schema"
-                    :inference-edits="(job.data as InferenceJobData).edits"
+                    :schema-category="(job.data as InferenceJobData).finalSchema"
+                    :inference-edits="inferenceEdits"
                     @update-edit="(edit) => updateJobResult(edit, false)"
                     @cancel-edit="updateJobResult(null, false)"
                 >
@@ -227,4 +223,3 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean) {
         </div>
     </div>
 </template>
-@/types/inference/inferenceEdit@/types/inference/inferenceEdit

@@ -15,21 +15,27 @@ import java.util.List;
 
 public record InferenceJobData(
     List<InferenceEdit> edits,
-    SerializedSchema schema,
-    SerializedMetadata metadata,
+    SerializedSchema inferenceSchema,
+    SerializedSchema finalSchema,
+    SerializedMetadata inferenceMetadata,
+    SerializedMetadata finalMetadata,
     List<SerializedMapping> mappings
 ) implements JobData {
 
     public static InferenceJobData fromSchemaCategory(
         List<InferenceEdit> edits,
-        SchemaCategory schema,
-        MetadataCategory metadata,
+        SchemaCategory inferenceSchema,
+        SchemaCategory finalSchema,
+        MetadataCategory inferenceMetadata,
+        MetadataCategory finalMetadata,
         List<Mapping> mappings
     ) {
         return new InferenceJobData(
             edits,
-            SchemaSerializer.serialize(schema),
-            MetadataSerializer.serialize(metadata),
+            SchemaSerializer.serialize(inferenceSchema),
+            SchemaSerializer.serialize(finalSchema),
+            MetadataSerializer.serialize(inferenceMetadata),
+            MetadataSerializer.serialize(finalMetadata),
             mappings.stream().map(SerializedMapping::fromMapping).toList()
         );
     }
