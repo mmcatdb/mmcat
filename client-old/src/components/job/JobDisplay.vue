@@ -48,7 +48,7 @@ const schemaCategory = computed(() => {
     }
     throw new Error('InferenceJobData is not the right type');
 });*/
-
+//TODO: do I need to create serialized Inference Edits?
 const inferenceEdits = computed(() => {
     //const inferenceData = job.data as InferenceJobData;
     if (props.job.payload.type === ActionType.RSDToCategory) {
@@ -190,6 +190,7 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean) {
                     :job="job"
                     :schema-category="(job.data as InferenceJobData).finalSchema"
                     :inference-edits="inferenceEdits"
+                    :candidates="(job.data as InferenceJobData).candidates"
                     @update-edit="(edit) => updateJobResult(edit, false)"
                     @cancel-edit="updateJobResult(null, false)"
                 >

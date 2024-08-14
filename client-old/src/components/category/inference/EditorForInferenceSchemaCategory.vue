@@ -5,6 +5,7 @@ import Cluster from './Cluster.vue';
 import Recursion from './Recursion.vue';
 import InferenceEdits from './InferenceEdits.vue';
 import type { InferenceEdit } from '@/types/inference/inferenceEdit';
+import { Candidates } from '@/types/inference/candidates';
 import { Graph, Node, Edge } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 import Divider from '@/components/layout/Divider.vue';
@@ -13,6 +14,7 @@ const props = defineProps<{
     graph: Graph;
     schemaCategory: SchemaCategory;
     inferenceEdits: InferenceEdit[];
+    candidates: Candidates;
 }>();
 
 const emit = defineEmits<{
@@ -112,6 +114,7 @@ function revertEdit(edit: InferenceEdit) {
         <template v-else-if="state.type === State.Merge">
             <Merge
                 :graph="props.graph"
+                :candidates="props.candidates"
                 @confirm-reference-merge="confirmReferenceMergeEdit"
                 @confirm-primary-key-merge="confirmPrimaryKeyMergeEdit"
                 @cancel="setStateToDefault"

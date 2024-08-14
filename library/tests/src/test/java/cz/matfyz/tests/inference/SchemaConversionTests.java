@@ -13,6 +13,7 @@ import cz.matfyz.inference.schemaconversion.AccessTreeToSchemaCategoryConverter;
 import cz.matfyz.inference.schemaconversion.RSDToAccessTreeConverter;
 import cz.matfyz.inference.schemaconversion.utils.AccessTreeNode;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.inference.schemaconversion.utils.UniqueNumberGenerator;
 import cz.matfyz.tests.example.common.SparkProvider;
 import cz.matfyz.wrappercsv.CsvControlWrapper;
@@ -118,9 +119,11 @@ public class SchemaConversionTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
-        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
+        final InferenceResult inferenceResult = new MMInferOneInAll()
             .input(inferenceWrapper, "apps")
             .run();
+
+        final List<CategoryMappingPair> pairs = inferenceResult.pairs();
 
         final var pair = CategoryMappingPair.merge(pairs);
         final SchemaCategory schema = pair.schema();
@@ -140,9 +143,11 @@ public class SchemaConversionTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
 
-        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
+        final InferenceResult inferenceResult = new MMInferOneInAll()
             .input(inferenceWrapper, "business")
             .run();
+
+        final List<CategoryMappingPair> pairs = inferenceResult.pairs();
 
         final var pair = CategoryMappingPair.merge(pairs);
         final SchemaCategory schema = pair.schema();
@@ -178,9 +183,11 @@ public class SchemaConversionTests {
 
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
-        final List<CategoryMappingPair> pairs = new MMInferOneInAll()
+        final InferenceResult inferenceResult = new MMInferOneInAll()
             .input(inferenceWrapper, "user")
             .run();
+
+        final List<CategoryMappingPair> pairs = inferenceResult.pairs();
 
         final var pair = CategoryMappingPair.merge(pairs);
         final SchemaCategory schema = pair.schema();

@@ -10,6 +10,8 @@ import cz.matfyz.core.instance.InstanceCategory;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataSerializer;
+import cz.matfyz.core.rsd.Candidates;
+import cz.matfyz.core.rsd.CandidatesSerializer;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.utils.ArrayUtils;
@@ -22,6 +24,7 @@ import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.Layout;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
+import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
 import cz.matfyz.server.entity.Id;
@@ -273,19 +276,21 @@ public class JobExecutorService {
         final var sparkSettings = new SparkSettings(spark.master(), spark.checkpoint());
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
-        final List<CategoryMappingPair> categoryMappingPairs = new MMInferOneInAll()
+        final InferenceResult inferenceResult = new MMInferOneInAll()
             .input(inferenceWrapper, payload.kindName())
             .run();
+
+        final Candidates candidates = inferenceResult.candidates();
+        final List<CategoryMappingPair> categoryMappingPairs = inferenceResult.pairs();
 
         final var pair = CategoryMappingPair.merge(categoryMappingPairs);
         final SchemaCategory schema = pair.schema();
         final MetadataCategory metadata = pair.metadata();
         final List<Mapping> mappings = pair.mappings();
 
-
         Layout.applyToMetadata(schema, metadata);
 
-        job.data = InferenceJobData.fromSchemaCategory(List.of(), schema, schema, metadata, metadata, mappings);
+        job.data = InferenceJobData.fromSchemaCategory(List.of(), schema, schema, metadata, metadata, candidates, mappings);
     }
 
     public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, InferenceEdit edit, boolean isFinal) {
@@ -295,6 +300,7 @@ public class JobExecutorService {
 
         final var schema = SchemaSerializer.deserialize(data.inferenceSchema());
         final var metadata = MetadataSerializer.deserialize(data.inferenceMetadata(), schema);
+        final var candidates = CandidatesSerializer.deserialize(data.candidates());
         final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
         final InferenceEditor inferenceEditor = isFinal
@@ -306,9 +312,9 @@ public class JobExecutorService {
         System.out.println("schema objects after edits: " + schema.allObjects());
 
         //job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, metadata, mappings);
-        job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, inferenceEditor.getSchemaCategory(), metadata, inferenceEditor.getMetadata(), mappings);
+        job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, inferenceEditor.getSchemaCategory(), metadata, inferenceEditor.getMetadata(), candidates, mappings);
 
-        if (isFinal) // TODO: tady asi taky vzit schema z editoru
+        if (isFinal)
             //finishRSDToCategoryProcessing(job, schema, metadata, inferenceEditor.getMappings());
             finishRSDToCategoryProcessing(job, inferenceEditor.getSchemaCategory(), inferenceEditor.getMetadata(), inferenceEditor.getMappings());
 

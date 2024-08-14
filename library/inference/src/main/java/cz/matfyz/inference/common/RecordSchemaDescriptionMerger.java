@@ -20,6 +20,7 @@ public class RecordSchemaDescriptionMerger {
 
     /**
      * Merging based on the primary key
+     * TODO: delete this class later
      */
     public static RecordSchemaDescription mergeBasedOnPrimaryKey(Map<String, RecordSchemaDescription> rsds, PrimaryKeyCandidate candidate) {
         LOGGER.info("Merging based on primary key...");

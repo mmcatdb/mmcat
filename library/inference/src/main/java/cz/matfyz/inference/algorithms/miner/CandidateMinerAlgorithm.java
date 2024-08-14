@@ -18,21 +18,19 @@ import org.apache.spark.api.java.JavaPairRDD;
 import scala.Tuple2;
 import cz.matfyz.inference.algorithms.miner.functions.ReferenceTupleToPairWithSubsetTypeMapFunction;
 
+/*
+ * When I got this class, the process() method was not returning anything.
+ * I added the return statement (and the conversions from raw candidates)
+ */
 public class CandidateMinerAlgorithm implements Serializable {
 
     public Candidates process(AbstractInferenceWrapper wrapper, List<String> kinds) throws Exception {
-        System.out.println("processing candidates");
+
         Candidates candidates = new Candidates();
 
         List<AbstractInferenceWrapper> wrappers = new ArrayList<>();
 
         try {
-            //List<String> kinds = new ArrayList<>(); // I have added the new parameter kinds, instead of manually adding them here
-            //kinds.add("apps");
-            //kinds.add("reviews");
-            // kinds.add("imdb4k");
-            //kinds.add("wikidata40");
-
             JavaRDD<PropertyHeuristics> all = null;
 
             for (String kind : kinds) {
@@ -46,8 +44,6 @@ public class CandidateMinerAlgorithm implements Serializable {
                 else
                     all.union(heuristics);
             }
-
-            System.out.println("RDD print all:");
 
             // remove later
             all.foreach(new VoidFunction<PropertyHeuristics>() {

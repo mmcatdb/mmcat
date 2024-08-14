@@ -5,6 +5,9 @@ import cz.matfyz.core.mapping.Mapping.SerializedMapping;
 import cz.matfyz.core.metadata.MetadataCategory;
 import cz.matfyz.core.metadata.MetadataSerializer;
 import cz.matfyz.core.metadata.MetadataSerializer.SerializedMetadata;
+import cz.matfyz.core.rsd.Candidates;
+import cz.matfyz.core.rsd.CandidatesSerializer;
+import cz.matfyz.core.rsd.CandidatesSerializer.SerializedCandidates;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedSchema;
@@ -19,6 +22,7 @@ public record InferenceJobData(
     SerializedSchema finalSchema,
     SerializedMetadata inferenceMetadata,
     SerializedMetadata finalMetadata,
+    SerializedCandidates candidates,
     List<SerializedMapping> mappings
 ) implements JobData {
 
@@ -28,6 +32,7 @@ public record InferenceJobData(
         SchemaCategory finalSchema,
         MetadataCategory inferenceMetadata,
         MetadataCategory finalMetadata,
+        Candidates candidates,
         List<Mapping> mappings
     ) {
         return new InferenceJobData(
@@ -36,6 +41,7 @@ public record InferenceJobData(
             SchemaSerializer.serialize(finalSchema),
             MetadataSerializer.serialize(inferenceMetadata),
             MetadataSerializer.serialize(finalMetadata),
+            CandidatesSerializer.serialize(candidates),
             mappings.stream().map(SerializedMapping::fromMapping).toList()
         );
     }

@@ -6,11 +6,13 @@ import GraphDisplay from '../../category/GraphDisplay.vue';
 import type { SchemaCategory } from '@/types/schema';
 import EditorForInferenceSchemaCategory from '@/components/category/inference/EditorForInferenceSchemaCategory.vue';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
+import { Candidates } from '@/types/inference/candidates'; 
 
 type InferenceJobDisplayProps = {
     job: Job;
     schemaCategory: SchemaCategory;
     inferenceEdits: InferenceEdit[];
+    candidates: Candidates;
 };
 
 const props = defineProps<InferenceJobDisplayProps>();
@@ -114,6 +116,7 @@ function cancelEdit() {
                     :graph="graph" 
                     :schema-category="props.schemaCategory" 
                     :inference-edits="props.inferenceEdits"
+                    :candidates="props.candidates"
                     @confirm-reference-merge="createReferenceMergeEdit"    
                     @confirm-primary-key-merge="createPrimaryKeyMergeEdit"
                     @confirm-cluster="createClusterEdit"
