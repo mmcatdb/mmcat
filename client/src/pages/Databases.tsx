@@ -1,14 +1,17 @@
 import { CommonPage } from "@/components/CommonPage";
 import { Button } from "@nextui-org/react";
-import { CollapsibleTable } from "@/components/databases/CollapsibleTable";
+import { DatabasesTable } from "@/components/databases/DatabasesTable";
 
 export function Databases() {
     return (
         <CommonPage>
-            <h1>Databases in projects</h1>
-            <Button startContent={<p>🐢</p>}>Add project</Button>
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold leading-tight">Databases</h1>
+                <Button startContent={<p>🐢</p>}>Add Database</Button>
+            </div>
+
             <div className="mt-5">
-                <CollapsibleTable />
+                <DatabasesTable />
             </div>
         </CommonPage>
     );

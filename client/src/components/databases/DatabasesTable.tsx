@@ -3,6 +3,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, 
 import { EditIcon } from "@/components/icons/EditIcon";
 import { DeleteIcon } from "@/components/icons/DeleteIcon";
 import { EyeIcon } from "@/components/icons/EyeIcon";
+import {columns, users} from "./data";
 
 // TODO: Add pagination and `Add New` Button
 // https://nextui.org/docs/components/table#custom-styles
@@ -19,35 +20,7 @@ interface User {
 
 type ColumnKey = "label" | "id" | "type" | "actions";
 
-const columns = [
-    {name: "LABEL", uid: "label"},
-    {name: "ID", uid: "id"},
-    {name: "TYPE", uid: "type"},
-    {name: "ACTIONS", uid: "actions"},
-];
-
-const users = [
-    {
-      id: 1,
-      label: "PostgreSQL - Basic",
-      type: "postgreSQL",
-      host: "mmcat-postgresql",
-      port: "5432",
-      database: "example_basic",
-      actions: "todo: delete this",
-    },
-    {
-        id: 2,
-        label: "MongoDB - Basic",
-        type: "mongoDB",
-        host: "mmcat-mongodb",
-        port: "27017",
-        database: "example_basic",
-        actions: "todo: delete this",
-    },
-];
-
-export default function DatabasesTable() {
+export function DatabasesTable() {
   const renderCell = React.useCallback((user: User, columnKey: ColumnKey) => {
     const cellValue = user[columnKey];
 
