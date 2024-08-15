@@ -6,7 +6,7 @@ import GraphDisplay from '../../category/GraphDisplay.vue';
 import type { SchemaCategory } from '@/types/schema';
 import EditorForInferenceSchemaCategory from '@/components/category/inference/EditorForInferenceSchemaCategory.vue';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
-import { Candidates } from '@/types/inference/candidates'; 
+import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates'; 
 
 type InferenceJobDisplayProps = {
     job: Job;
@@ -42,18 +42,30 @@ function graphCreated(newGraph: Graph) {
     props.schemaCategory.graph = newGraph;
 }
 
-function createReferenceMergeEdit(nodes: Node[]) {
-    const referenceKey = nodes[0].schemaObject.key;
-    const referredKey = nodes[1].schemaObject.key;
+function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
+    let edit;
 
-    const edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey, true);
+    if (payload instanceof ReferenceCandidate) {
+        edit = new ReferenceMergeInferenceEdit(payload, true);
+    } else {
+        const referenceKey = payload[0].schemaObject.key;
+        const referredKey = payload[1].schemaObject.key;
+
+        edit = new ReferenceMergeInferenceEdit(referenceKey, referredKey, true);
+    }
     confirmOrRevert(edit);
 }
 
-function createPrimaryKeyMergeEdit(nodes: Node[]) {
-    const primaryKey = nodes[0].schemaObject.key;
+function createPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
+    let edit;
 
-    const edit = new PrimaryKeyMergeInferenceEdit(primaryKey, true);
+    if (payload instanceof PrimaryKeyCandidate) {
+        edit = new PrimaryKeyMergeInferenceEdit(payload, true);
+    } else {
+        const primaryKey = payload[0].schemaObject.key;
+
+        edit = new PrimaryKeyMergeInferenceEdit(primaryKey, true);
+    }
     confirmOrRevert(edit);
 }
 

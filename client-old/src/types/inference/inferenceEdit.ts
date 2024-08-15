@@ -1,5 +1,6 @@
 import { Key } from '../identifiers';
 import type { KeyFromServer } from '../identifiers';
+import { PrimaryKeyCandidate, ReferenceCandidate } from './candidates';
 
 export interface InferenceEdit {
     id: number | null;
@@ -9,12 +10,20 @@ export interface InferenceEdit {
 
 export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
     readonly type: string = 'PrimaryKey';
-    readonly primaryKey: Key;
+    readonly primaryKey?: Key;
+    readonly candidate?: PrimaryKeyCandidate;
     public isActive: boolean;
     public id: number | null;
 
-    constructor(primaryKey: Key, isActive: boolean, id: number | null = null) {
-        this.primaryKey = primaryKey;
+    constructor(primaryKey: Key, isActive: boolean, id?: number | null);
+    constructor(candidate: PrimaryKeyCandidate, isActive: boolean, id?: number | null);
+
+    constructor(primaryKeyOrCandidate: Key | PrimaryKeyCandidate, isActive: boolean, id: number | null = null) {
+        if (primaryKeyOrCandidate instanceof Key) 
+            this.primaryKey = primaryKeyOrCandidate;
+        else 
+            this.candidate = primaryKeyOrCandidate;
+        
         this.isActive = isActive;
         this.id = id;
     }
@@ -22,16 +31,28 @@ export class PrimaryKeyMergeInferenceEdit implements InferenceEdit {
 
 export class ReferenceMergeInferenceEdit implements InferenceEdit {
     readonly type: string = 'Reference';
-    readonly referenceKey: Key;
-    readonly referredKey: Key;
+    readonly referenceKey?: Key;
+    readonly referredKey?: Key;
+    readonly candidate?: ReferenceCandidate;
     public isActive: boolean;
     public id: number | null;
 
-    constructor(reference: Key, referredKey: Key, isActive: boolean, id: number | null = null) {
-        this.referenceKey = reference;
-        this.referredKey = referredKey;
-        this.isActive = isActive;
-        this.id = id;
+    constructor(reference: Key, referredKey: Key, isActive: boolean, id?: number | null);
+    constructor(candidate: ReferenceCandidate, isActive: boolean, id?: number | null);
+
+    constructor(referenceOrCandidate: Key | ReferenceCandidate, referredKeyOrIsActive: Key | boolean, isActiveOrId?: boolean | number | null, id?: number | null) {
+        if (referenceOrCandidate instanceof Key && referredKeyOrIsActive instanceof Key) {
+            this.referenceKey = referenceOrCandidate;
+            this.referredKey = referredKeyOrIsActive;
+            this.isActive = isActiveOrId as boolean;
+            this.id = id ?? null;
+        } else if (referenceOrCandidate instanceof ReferenceCandidate) {
+            this.candidate = referenceOrCandidate;
+            this.isActive = referredKeyOrIsActive as boolean;
+            this.id =  isActiveOrId as number ?? null;
+        } else {
+            throw new Error('Invalid constructor arguments for ReferenceMergeInferenceEdit.');
+        }
     }
 }
 

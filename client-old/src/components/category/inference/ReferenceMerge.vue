@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'confirm', nodes: Node[]): void;
+    (e: 'confirm', payload: Node[] | ReferenceCandidate): void;
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
 }>();
@@ -21,16 +21,20 @@ const inputType = ref<'manual' | 'candidate'>('manual');
 
 const nodes = shallowRef<(Node)[]>([]);
 const confirmClicked = ref(false);
+const clickedCandidates = ref<ReferenceCandidate[]>([]);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
 const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
-function selectCandidate(candidate: ReferenceCandidate) {
-    //emit('select-candidate', candidate);
-    // Here you can add additional logic if needed
+function confirmCandidate(candidate: ReferenceCandidate) {
+    if (!clickedCandidates.value.includes(candidate)) 
+        clickedCandidates.value.push(candidate);
+
+    confirmClicked.value = true;
+    emit('confirm', candidate);
 }
 
-function confirm() {
+function confirmNodes() {
     confirmClicked.value = true;
     emit('confirm', nodes.value as Node[]);
 }
@@ -40,7 +44,7 @@ function save() { // do not do anything, just go back t editor
 }
 
 function cancel() {
-    if (noNodesSelected.value) { // go back to editor
+    if (noNodesSelected.value && !confirmClicked.value) { // go back to editor
         emit('cancel');
     }
     
@@ -49,28 +53,29 @@ function cancel() {
     if (confirmClicked.value) { // delete the edit (on BE)
         emit('cancel-edit');
         confirmClicked.value = false;
+        //candidateClicked.value = null; //maybe dont reset it here?
     }
 }
 
 function splitName(name: string) {
-    const [partA, partB] = name.split('/');
+    const [ partA, partB ] = name.split('/');
     return { partA, partB };
 }
-//TODO: the NodeInput component used to be outside of the ValueContainer, make sure it works this way
+
 
 </script>
 
 <template>
     <div class="referenceMerge">
         <div class="input-type">
-            <label>
+            <label class="radio-label">
                 <input
                     v-model="inputType"
                     type="radio"
                     value="manual"
                 /> Manual
             </label>
-            <label>
+            <label class="radio-label">
                 <input
                     v-model="inputType"
                     type="radio"
@@ -97,15 +102,19 @@ function splitName(name: string) {
                 <button
                     v-for="(candidate, index) in props.candidates.refCandidates"
                     :key="'ref-' + index"
-                    @click="selectCandidate(candidate)"
                     class="candidate-button"
+                    :disabled="confirmClicked"
+                    :class="{ 'clicked': clickedCandidates.includes(candidate) }"
+                    @click="confirmCandidate(candidate)"
                 >
                     <div class="candidate-content">
                         <div class="candidate-side">
                             <div>{{ splitName(candidate.referencing).partA }}</div>
                             <div>{{ splitName(candidate.referencing).partB }}</div>
                         </div>
-                        <div class="candidate-middle">REF</div>
+                        <div class="candidate-middle">
+                            REF
+                        </div>
                         <div class="candidate-side">
                             <div>{{ splitName(candidate.referred).partA }}</div>
                             <div>{{ splitName(candidate.referred).partB }}</div>
@@ -113,12 +122,15 @@ function splitName(name: string) {
                     </div>
                 </button>
             </div>
-            <p v-else>No candidates available</p>
+            <p v-else>
+                No candidates available
+            </p>
         </div>
         <div class="button-row">
             <button
+                v-if="inputType === 'manual'"
                 :disabled="!nodesSelected || confirmClicked"
-                @click="confirm"
+                @click="confirmNodes"
             >
                 Confirm
             </button>
@@ -140,6 +152,11 @@ function splitName(name: string) {
 </template>
 
 <style scoped>
+.radio-label {
+    margin-right: 20px;
+    cursor: pointer;
+} 
+
 .candidate-button {
     display: flex;
     justify-content: space-between;
@@ -154,7 +171,12 @@ function splitName(name: string) {
     cursor: pointer;
 }
 
-.candidate-button:hover {
+.candidate-button.clicked {
+    background-color: #d3e2ff;
+    border-color: #007bff;
+}
+
+.candidate-button:hover:not(.clicked) {
     background-color: #e0e0e0;
 }
 

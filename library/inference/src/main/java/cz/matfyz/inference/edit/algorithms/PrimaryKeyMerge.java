@@ -6,6 +6,7 @@ import cz.matfyz.core.mapping.AccessPath;
 import cz.matfyz.core.mapping.ComplexProperty;
 
 import cz.matfyz.core.mapping.Mapping;
+import cz.matfyz.core.rsd.PrimaryKeyCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -29,25 +30,33 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
     public static class Data implements InferenceEdit {
 
         private Integer id;
+
         @JsonProperty("isActive")
         private boolean isActive;
+
         @JsonProperty("primaryKey")
-        private final Key primaryKey;
+        private Key primaryKey;
+
+        @JsonProperty("candidate")
+        private PrimaryKeyCandidate candidate;
 
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
                 @JsonProperty("isActive") boolean isActive,
-                @JsonProperty("primaryKey") Key primaryKey) {
+                @JsonProperty("primaryKey") Key primaryKey,
+                @JsonProperty("candidate") PrimaryKeyCandidate candidate) {
             this.id = id;
             this.isActive = isActive;
             this.primaryKey = primaryKey;
+            this.candidate = candidate;
         }
 
         public Data() {
             this.id = null;
             this.isActive = false;
             this.primaryKey = null;
+            this.candidate = null;
         }
 
         @Override
@@ -95,6 +104,10 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Primary Key Merge Edit on Schema Category...");
+
+        if (data.candidate != null) {
+            data.primaryKey = InferenceEditorUtils.findKeyFromName(newSchema, newMetadata, data.candidate.hierarchicalName());
+        }
 
         System.out.println("schema in PK before: " + newSchema.allObjects());
         System.out.println("pk: " + data.primaryKey);

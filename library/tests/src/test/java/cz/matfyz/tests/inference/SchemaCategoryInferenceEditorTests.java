@@ -75,7 +75,7 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
         final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key())).createAlgorithm();
+        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key(), null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
@@ -133,7 +133,7 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
         final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key())).createAlgorithm();
+        final ReferenceMerge edit = (new ReferenceMerge.Data(0, true, reviewsA.key(), reviewsB.key(), null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
@@ -194,7 +194,7 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = mergeMetadatas(schema, sbA.buildMetadata(schemaA), sbB.buildMetadata(schemaB));
         final List<Mapping> mappings = List.of(mappingA, mappingB);
 
-        final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, appIdA.key())).createAlgorithm();
+        final PrimaryKeyMerge edit = (new PrimaryKeyMerge.Data(0, true, appIdA.key(), null)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);

@@ -49,7 +49,7 @@ export class PrimaryKeyCandidate {
         return new PrimaryKeyCandidate(
             input.type,
             input.hierarchicalName,
-            input.selected
+            input.selected,
         );
     }
 /*
@@ -77,7 +77,7 @@ export class ReferenceCandidate {
             input.referred,
             input.referencing,
             input.weak,
-            input.selected
+            input.selected,
         );
     }
 /*

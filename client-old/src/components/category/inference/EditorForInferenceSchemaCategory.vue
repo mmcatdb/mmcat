@@ -5,7 +5,7 @@ import Cluster from './Cluster.vue';
 import Recursion from './Recursion.vue';
 import InferenceEdits from './InferenceEdits.vue';
 import type { InferenceEdit } from '@/types/inference/inferenceEdit';
-import { Candidates } from '@/types/inference/candidates';
+import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates';
 import { Graph, Node, Edge } from '@/types/categoryGraph';
 import { SchemaCategory } from '@/types/schema';
 import Divider from '@/components/layout/Divider.vue';
@@ -19,10 +19,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', nodes: Node[]): void;
-    (e: 'confirm-primary-key-merge', nodes: Node[]): void;
+    (e: 'confirm-reference-merge', payload: Node[] | ReferenceCandidate): void;
+    (e: 'confirm-primary-key-merge', nodes: Node[] | PrimaryKeyCandidate): void;
     (e: 'confirm-cluster', nodes: Node[]): void;
     (e: 'confirm-recursion', payload: { nodes: Node[], edges: Edge[] }): void;
+    (e: 'revert-edit', edit: InferenceEdit ): void;
 }>();
 
 enum State {
@@ -64,12 +65,12 @@ function setStateToDefault() {
     state.value = { type: State.Default };
 }
 
-function confirmReferenceMergeEdit(nodes: Node[]) {
-    emit('confirm-reference-merge', nodes);
+function confirmReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
+    emit('confirm-reference-merge', payload);
 }
 
-function confirmPrimaryKeyMergeEdit(nodes: Node[]) {
-    emit('confirm-primary-key-merge', nodes);
+function confirmPrimaryKeyMergeEdit(payload: Node[] | PrimaryKeyCandidate) {
+    emit('confirm-primary-key-merge', payload);
 }
 
 function confirmClusterEdit(nodes: Node[]) {

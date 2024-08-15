@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import type { Graph, Node } from '@/types/categoryGraph';
 import Divider from '@/components/layout/Divider.vue';
-import { Candidates } from '@/types/inference/candidates';
+import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates';
 import ReferenceMerge from '@/components/category/inference/ReferenceMerge.vue';
 import PrimaryKeyMerge from '@/components/category/inference/PrimaryKeyMerge.vue';
 
@@ -14,18 +14,18 @@ const props = defineProps<{
 const emit = defineEmits<{
     (e: 'cancel'): void;
     (e: 'cancel-edit'): void;
-    (e: 'confirm-reference-merge', nodes: Node[]): void;
-    (e: 'confirm-primary-key-merge', nodes: Node[]): void;
+    (e: 'confirm-reference-merge', payload: Node[] | ReferenceCandidate): void;
+    (e: 'confirm-primary-key-merge', nodes: Node[] | PrimaryKeyCandidate): void;
 }>();
 
 const mergeType = ref<'reference' | 'primaryKey'>('reference');
 
-function confirmReference(nodes: Node[]) {
-    emit('confirm-reference-merge', nodes);
+function confirmReference(payload: Node[] | ReferenceCandidate ) {
+    emit('confirm-reference-merge', payload);
 }
 
-function confirmPrimaryKey(nodes: Node[]) {
-    emit('confirm-primary-key-merge', nodes);
+function confirmPrimaryKey(payload: Node[] | PrimaryKeyCandidate) {
+    emit('confirm-primary-key-merge', payload);
 }
 
 function cancel() {
@@ -36,26 +36,28 @@ function cancelEdit() {
     emit('cancel-edit');
 }
 
+function setMergeType(type: 'reference' | 'primaryKey') {
+    mergeType.value = type;
+}
+
 </script>
 
 <template>
     <div class="merge">
         <h2>Merge Objects</h2>
-        <div class="merge-type">
-            <label class="radio-label">
-                <input
-                    v-model="mergeType"
-                    type="radio"
-                    value="reference"
-                /> Reference
-            </label>
-            <label class="radio-label">
-                <input
-                    v-model="mergeType"
-                    type="radio"
-                    value="primaryKey"
-                /> Primary Key
-            </label>
+        <div class="merge-type button-row">
+            <button
+                :disabled="mergeType === 'reference'"
+                @click="setMergeType('reference')"
+            >
+                Reference
+            </button>
+            <button
+                :disabled="mergeType === 'primaryKey'"
+                @click="setMergeType('primaryKey')"
+            >
+                Primary Key
+            </button>
         </div>
         <Divider />
         <ReferenceMerge
@@ -88,14 +90,4 @@ function cancelEdit() {
     justify-content: center;
 }
 
-.radio-label {
-    font-weight: bold; /* Make the text bold */
-    font-size: 18px;   /* Adjust the size of the text */
-    margin-right: 15px; /* Space between the radio buttons */
-    cursor: pointer;   /* Change cursor to pointer for better UX */
-}
-
-.radio-label input[type="radio"] {
-    margin-right: 5px; /* Space between the radio button and the label text */
-}
 </style>

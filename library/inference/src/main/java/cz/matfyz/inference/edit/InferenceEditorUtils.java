@@ -162,6 +162,29 @@ public class InferenceEditorUtils {
         return copy;
     }
 
+    public static Key findKeyFromName(SchemaCategory schemaCategory, MetadataCategory metadata, String fullName) {
+        String[] nameParts = fullName.split("/");
+        if (nameParts.length != 2) {
+            throw new IllegalArgumentException("Invalid full name format: " + fullName);
+        }
+
+        String parentName = nameParts[0];
+        String childName = nameParts[1];
+
+        for (SchemaMorphism morphism : schemaCategory.allMorphisms()) {
+            SchemaObject dom = morphism.dom();
+            SchemaObject cod = morphism.cod();
+
+            MetadataObject metaDom = metadata.getObject(dom);
+            MetadataObject metaCod = metadata.getObject(cod);
+
+            if (metaDom.label.equals(parentName) && metaCod.label.equals(childName)) {
+                return cod.key();
+            }
+        }
+        throw new NotFoundException("Key for name " + fullName + " does not exist");
+    }
+
     public static class SchemaCategoryEditor extends SchemaCategory.Editor {
 
         public final SchemaCategory schema;

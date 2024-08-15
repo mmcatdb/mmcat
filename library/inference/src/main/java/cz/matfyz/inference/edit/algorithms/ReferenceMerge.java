@@ -4,6 +4,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
 import cz.matfyz.core.schema.SchemaObject;
@@ -25,23 +26,32 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
     public static class Data implements InferenceEdit {
 
         private Integer id;
+
         @JsonProperty("isActive")
         private boolean isActive;
+
         @JsonProperty("referenceKey")
-        private final Key referenceKey;
+        private Key referenceKey;
+
         @JsonProperty("referredKey")
-        private final Key referredKey;
+        private Key referredKey;
+
+        @JsonProperty("candidate")
+        private final ReferenceCandidate candidate;
+
 
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
                 @JsonProperty("isActive") boolean isActive,
                 @JsonProperty("referenceKey") Key referenceKey,
-                @JsonProperty("referredKey") Key referredKey) {
+                @JsonProperty("referredKey") Key referredKey,
+                @JsonProperty("candidate") ReferenceCandidate candidate) {
             this.id = id;
             this.isActive = isActive;
             this.referenceKey = referenceKey;
             this.referredKey = referredKey;
+            this.candidate = candidate;
         }
 
         public Data() {
@@ -49,12 +59,14 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             this.isActive = false;
             this.referenceKey = null;
             this.referredKey = null;
+            this.candidate = null;
         }
 
         @Override public ReferenceMerge createAlgorithm() {
             return new ReferenceMerge(this);
         }
 
+        // TODO: probs dont need these getters and setters here (similarly in the other edits)
         @Override
         public Integer getId() {
             return id;
@@ -74,6 +86,7 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         public void setActive(boolean isActive) {
             this.isActive = isActive;
         }
+
     }
 
     private static final Logger LOGGER = Logger.getLogger(ReferenceMerge.class.getName());
@@ -99,6 +112,11 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
      */
     @Override protected void innerCategoryEdit() {
         LOGGER.info("Applying Reference Merge Edit on Schema Category...");
+
+        if (data.candidate != null) {
+            data.referenceKey = InferenceEditorUtils.findKeyFromName(newSchema, newMetadata, data.candidate.referencing());
+            data.referredKey = InferenceEditorUtils.findKeyFromName(newSchema, newMetadata, data.candidate.referred());
+        }
 
         System.out.println("reference: " + data.referenceKey);
         System.out.println("referred: " + data.referredKey);
