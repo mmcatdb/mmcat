@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
@@ -17,15 +18,31 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = ClusterMerge.Data.class, name = "Cluster"),
     @JsonSubTypes.Type(value = RecursionMerge.Data.class, name = "Recursion")
 })
-public interface InferenceEdit extends Serializable {
+public abstract class InferenceEdit implements Serializable {
 
-    Integer getId();
-    void setId(Integer id);
+    @JsonProperty("id")
+    private Integer id;
 
-    boolean isActive();
-    void setActive(boolean isActive);
+    @JsonProperty("isActive")
+    private boolean isActive;
 
-    InferenceEditAlgorithm createAlgorithm();
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
+   public abstract InferenceEditAlgorithm createAlgorithm();
 
 }
 

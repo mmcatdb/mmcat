@@ -148,6 +148,18 @@ export class Graph {
     getEdge(signature: Signature): Edge | undefined {
         return this.edges.get(signature);
     }
+
+    public toggleEdgeLabels(show: boolean): void {
+        const labelStyle = show ? { 'text-opacity': 1 } : { 'text-opacity': 0 };
+    
+        this.cytoscape.edges().forEach(edge => {
+            const currentLabel = edge.data('label');
+            edge.style({
+                'label': currentLabel,
+                ...labelStyle,
+            });
+        });
+    }
 }
 
 class GraphEventListener {

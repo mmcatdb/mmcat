@@ -27,12 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
-    public static class Data implements InferenceEdit {
-
-        private Integer id;
-
-        @JsonProperty("isActive")
-        private boolean isActive;
+    public static class Data extends InferenceEdit {
 
         @JsonProperty("primaryKey")
         private Key primaryKey;
@@ -46,15 +41,15 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
                 @JsonProperty("isActive") boolean isActive,
                 @JsonProperty("primaryKey") Key primaryKey,
                 @JsonProperty("candidate") PrimaryKeyCandidate candidate) {
-            this.id = id;
-            this.isActive = isActive;
+            setId(id);
+            setActive(isActive);
             this.primaryKey = primaryKey;
             this.candidate = candidate;
         }
 
         public Data() {
-            this.id = null;
-            this.isActive = false;
+            setId(null);
+            setActive(false);
             this.primaryKey = null;
             this.candidate = null;
         }
@@ -62,26 +57,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
         @Override
         public PrimaryKeyMerge createAlgorithm() {
             return new PrimaryKeyMerge(this);
-        }
-
-        @Override
-        public Integer getId() {
-            return id;
-        }
-
-        @Override
-        public void setId(Integer id) {
-            this.id = id;
-        }
-
-        @Override
-        public boolean isActive() {
-            return isActive;
-        }
-
-        @Override
-        public void setActive(boolean isActive) {
-            this.isActive = isActive;
         }
     }
 
@@ -111,8 +86,8 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
         System.out.println("schema in PK before: " + newSchema.allObjects());
         System.out.println("pk: " + data.primaryKey);
-        System.out.println("isActive: " + data.isActive);
-        System.out.println("id: " + data.id);
+        System.out.println("isActive: " + data.isActive());
+        System.out.println("id: " + data.getId());
         this.primaryKeyRoot = findPrimaryKeyRoot(newSchema);
         SchemaObject dom = newSchema.getObject(primaryKeyRoot);
 

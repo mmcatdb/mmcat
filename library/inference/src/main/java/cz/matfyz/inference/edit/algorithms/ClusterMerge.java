@@ -31,7 +31,6 @@ import java.util.LinkedList;
 import cz.matfyz.inference.edit.InferenceEdit;
 import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
-import cz.matfyz.inference.edit.PatternSegment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -41,56 +40,32 @@ import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 public class ClusterMerge extends InferenceEditAlgorithm {
 
-    public static class Data implements InferenceEdit {
+    public static class Data extends InferenceEdit {
 
-        private Integer id;
-        @JsonProperty("isActive")
-        private boolean isActive;
         @JsonProperty("clusterKeys")
         List<Key> clusterKeys;
-    
+
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
                 @JsonProperty("isActive") boolean isActive,
                 @JsonProperty("clusterKeys") List<Key> clusterKeys) {
-            this.id = id;
-            this.isActive = isActive;
+            setId(id);
+            setActive(isActive);
             this.clusterKeys = clusterKeys;
         }
 
         public Data() {
-            this.id = null;
-            this.isActive = false;
+            setId(null);
+            setActive(false);
             this.clusterKeys = null;
         }
 
-    
         @Override public ClusterMerge createAlgorithm() {
             return new ClusterMerge(this);
         }
-    
-        @Override
-        public Integer getId() {
-            return id;
-        }
-    
-        @Override
-        public void setId(Integer id) {
-            this.id = id;
-        }
-    
-        @Override
-        public boolean isActive() {
-            return isActive;
-        }
-    
-        @Override
-        public void setActive(boolean isActive) {
-            this.isActive = isActive;
-        }
     }
-    
+
 
     private static final Logger LOGGER = Logger.getLogger(ClusterMerge.class.getName());
     private static final String TYPE_LABEL = "_type";

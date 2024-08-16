@@ -1,6 +1,5 @@
 package cz.matfyz.inference.edit.algorithms;
 
-import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.schema.SchemaCategory;
@@ -25,52 +24,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 // TODO: this class is a one big WIP
 public class RecursionMerge extends InferenceEditAlgorithm {
 
-    public static class Data implements InferenceEdit {
+    public static class Data extends InferenceEdit {
 
-        private Integer id;
-        @JsonProperty("isActive")
-        private boolean isActive;
         @JsonProperty("pattern")
         List<PatternSegment> pattern;
-    
+
         @JsonCreator
         public Data(
                 @JsonProperty("id") Integer id,
                 @JsonProperty("isActive") boolean isActive,
                 @JsonProperty("pattern") List<PatternSegment> pattern) {
-            this.id = id;
-            this.isActive = isActive;
+            setId(id);
+            setActive(isActive);
             this.pattern = pattern;
         }
 
         public Data() {
-            this.id = null;
-            this.isActive = false;
+            setId(null);
+            setActive(false);
             this.pattern = null;
         }
-    
+
         @Override public RecursionMerge createAlgorithm() {
             return new RecursionMerge(this);
-        }
-    
-        @Override
-        public Integer getId() {
-            return id;
-        }
-    
-        @Override
-        public void setId(Integer id) {
-            this.id = id;
-        }
-    
-        @Override
-        public boolean isActive() {
-            return isActive;
-        }
-    
-        @Override
-        public void setActive(boolean isActive) {
-            this.isActive = isActive;
         }
     }
 

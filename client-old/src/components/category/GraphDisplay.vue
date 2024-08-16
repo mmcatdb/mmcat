@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, shallowRef } from 'vue';
+import { onMounted, shallowRef, ref, watch } from 'vue';
 import cytoscape from 'cytoscape';
 import fcose from 'cytoscape-fcose';
 import layoutUtilities from 'cytoscape-layout-utilities';
@@ -13,6 +13,8 @@ const emit = defineEmits([ 'graphCreated', 'updatePositions' ]);
 
 const graph = shallowRef<Graph>();
 
+const showSignatures = ref(true);
+
 withDefaults(defineProps<{ fetching?: boolean }>(), {
     fetching: false,
 });
@@ -21,6 +23,11 @@ onMounted(() => {
     const newGraph = createGraph();
     graph.value = newGraph;
     emit('graphCreated', newGraph);
+});
+
+watch(showSignatures, (newValue) => {
+    if (graph.value) 
+        graph.value.toggleEdgeLabels(newValue);
 });
 
 function getContainer(): HTMLElement | undefined {
@@ -94,6 +101,12 @@ function toggleGroup(groupId: string) {
                 >
                     Reset layout
                 </button>
+                <label>
+                    <input
+                        v-model="showSignatures"
+                        type="checkbox"
+                    /> Show Signatures
+                </label>
                 <div class="d-flex gap-3 px-2 justify-content-end flex-grow-1 flex-wrap">
                     <label
 

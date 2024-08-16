@@ -23,12 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ReferenceMerge extends InferenceEditAlgorithm {
 
-    public static class Data implements InferenceEdit {
-
-        private Integer id;
-
-        @JsonProperty("isActive")
-        private boolean isActive;
+    public static class Data extends InferenceEdit {
 
         @JsonProperty("referenceKey")
         private Key referenceKey;
@@ -47,16 +42,16 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
                 @JsonProperty("referenceKey") Key referenceKey,
                 @JsonProperty("referredKey") Key referredKey,
                 @JsonProperty("candidate") ReferenceCandidate candidate) {
-            this.id = id;
-            this.isActive = isActive;
+            setId(id);
+            setActive(isActive);
             this.referenceKey = referenceKey;
             this.referredKey = referredKey;
             this.candidate = candidate;
         }
 
         public Data() {
-            this.id = null;
-            this.isActive = false;
+            setId(null);
+            setActive(false);
             this.referenceKey = null;
             this.referredKey = null;
             this.candidate = null;
@@ -65,28 +60,6 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
         @Override public ReferenceMerge createAlgorithm() {
             return new ReferenceMerge(this);
         }
-
-        // TODO: probs dont need these getters and setters here (similarly in the other edits)
-        @Override
-        public Integer getId() {
-            return id;
-        }
-
-        @Override
-        public void setId(Integer id) {
-            this.id = id;
-        }
-
-        @Override
-        public boolean isActive() {
-            return isActive;
-        }
-
-        @Override
-        public void setActive(boolean isActive) {
-            this.isActive = isActive;
-        }
-
     }
 
     private static final Logger LOGGER = Logger.getLogger(ReferenceMerge.class.getName());
@@ -120,8 +93,8 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
 
         System.out.println("reference: " + data.referenceKey);
         System.out.println("referred: " + data.referredKey);
-        System.out.println("id: " + data.id);
-        System.out.println("isActive: " + data.isActive);
+        System.out.println("id: " + data.getId());
+        System.out.println("isActive: " + data.isActive());
 
         this.referenceIsArray = isReferenceArray(newSchema, newMetadata);
 
