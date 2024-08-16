@@ -96,8 +96,7 @@ public class ActionController {
         if (payload instanceof RSDToCategoryPayload rsdToCategoryPayload) {
             final var datasource = datasourceRepository.find(rsdToCategoryPayload.datasourceId());
             final var datasourceDetail = datasourceController.datasourceToDetail(datasource);
-            final var kindName = rsdToCategoryPayload.kindName();
-            return new RSDToCategoryPayloadDetail(datasourceDetail, kindName);
+            return new RSDToCategoryPayloadDetail(datasourceDetail);
         }
 
         throw new UnsupportedOperationException("Unsupported action type: " + payload.getClass().getSimpleName() + ".");
@@ -137,8 +136,7 @@ public class ActionController {
     ) implements ActionPayloadDetail {}
 
     record RSDToCategoryPayloadDetail(
-        DatasourceDetail datasource,
-        String kindName
+        DatasourceDetail datasource
     ) implements ActionPayloadDetail {}
 
 }

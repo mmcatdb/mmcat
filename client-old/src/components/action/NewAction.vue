@@ -18,7 +18,6 @@ const datasources = ref<Datasource[]>();
 const fetched = ref(false);
 const logicalModelId = ref<Id>();
 const datasourceId = ref<Id>();
-const kindName = ref('');
 const actionName = ref<string>('');
 const actionType = ref(ACTION_TYPES[0].value);
 const fetching = ref(false);
@@ -42,7 +41,7 @@ const dataValid = computed(() => {
         return false;
 
     if (actionType.value === ActionType.RSDToCategory)
-        return !!datasourceId.value && !!kindName.value; // this will fail, if kindName will be null
+        return !!datasourceId.value;
     else return !!logicalModelId.value;
 
 });
@@ -55,7 +54,6 @@ async function createAction() {
         payload = {
             type: actionType.value,
             datasourceId: datasourceId.value,
-            kindName: kindName.value,
         };
     }
     else {
@@ -108,12 +106,6 @@ async function createAction() {
                         {{ datasource.label }}
                     </option>
                 </select>
-            </ValueRow>
-            <ValueRow
-                v-if="actionType === ActionType.RSDToCategory"
-                label="Kind name:"
-            >
-                <input v-model="kindName" />
             </ValueRow>
             <ValueRow
                 v-if="actionType === ActionType.ModelToCategory || actionType === ActionType.CategoryToModel"

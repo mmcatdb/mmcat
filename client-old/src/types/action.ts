@@ -1,5 +1,5 @@
 import type { Entity, Id, VersionId } from './id';
-import { LogicalModelInfo, type LogicalModelFromServer, type LogicalModelInfoFromServer } from './logicalModel';
+import { LogicalModelInfo, type LogicalModelInfoFromServer } from './logicalModel';
 import {  Datasource, type DatasourceFromServer } from './datasource';
 
 export type ActionFromServer = {
@@ -90,7 +90,6 @@ export type ActionPayloadInit = {
 } | {
     type: ActionType.RSDToCategory;
     datasourceId: Id;
-    kindName: string;
 };
 
 type ModelToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.ModelToCategory> & {
@@ -152,7 +151,6 @@ class UpdateSchemaPayload implements ActionPayloadType<ActionType.UpdateSchema> 
 
 type RSDToCategoryPayloadFromServer = ActionPayloadFromServer<ActionType.RSDToCategory> & {
     datasource: DatasourceFromServer;
-    kindName: string;
 };
 
 class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory> {
@@ -160,15 +158,13 @@ class RSDToCategoryPayload implements ActionPayloadType<ActionType.RSDToCategory
 
     private constructor(
         readonly datasource: Datasource,
-        readonly kindName: string,
     ) {
 
     }
 
     static fromServer(input: RSDToCategoryPayloadFromServer): RSDToCategoryPayload {
         const datasource =  Datasource.fromServer(input.datasource);
-        const kindName = input.kindName;
-        return new RSDToCategoryPayload(datasource, kindName);
+        return new RSDToCategoryPayload(datasource);
     }
 }
 

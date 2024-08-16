@@ -36,7 +36,7 @@ public class ExampleSetup {
         // create empty SK
         final SchemaCategoryWrapper schemaCategory = createEmptySchemaCategory();
 
-        RSDToCategoryPayload inferencePayload = new RSDToCategoryPayload(datasource.id(), "business");
+        RSDToCategoryPayload inferencePayload = new RSDToCategoryPayload(datasource.id());
 
         Action inferenceAction = createAndSaveAction(inferencePayload, schemaCategory.id(), "inference");
 

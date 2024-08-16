@@ -84,7 +84,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             data.primaryKey = InferenceEditorUtils.findKeyFromName(newSchema, newMetadata, data.candidate.hierarchicalName());
         }
 
-        System.out.println("schema in PK before: " + newSchema.allObjects());
         System.out.println("pk: " + data.primaryKey);
         System.out.println("isActive: " + data.isActive());
         System.out.println("id: " + data.getId());
@@ -96,7 +95,6 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
 
         this.newSignatureMap = createNewMorphisms(dom);
         InferenceEditorUtils.removeMorphismsAndObjects(newSchema, signaturesToDelete, keysToDelete);
-        System.out.println("schema in PK after: " + newSchema.allObjects());
     }
 
     private Key findPrimaryKeyRoot(SchemaCategory schema) {

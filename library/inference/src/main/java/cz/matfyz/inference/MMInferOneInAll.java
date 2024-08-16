@@ -23,11 +23,9 @@ import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
 public class MMInferOneInAll {
 
     private AbstractInferenceWrapper wrapper;
-    private String kindName;
 
-    public MMInferOneInAll input(AbstractInferenceWrapper wrapper, String kindName) {
+    public MMInferOneInAll input(AbstractInferenceWrapper wrapper) {
         this.wrapper = wrapper;
-        this.kindName = kindName;
 
         return this;
     }
@@ -86,11 +84,6 @@ public class MMInferOneInAll {
         long start = System.currentTimeMillis();
         RecordSchemaDescription rsd = rba.process(wrapper, merge);
         long end = System.currentTimeMillis();
-
-        // if (printSchema) {
-        //     System.out.print("RESULT_RECORD_BA: ");
-        //     System.out.println(rsd);
-        // }
 
         System.out.println("RESULT_TIME_RECORD_BA TOTAL: " + (end - start) + "ms");
 

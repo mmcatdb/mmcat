@@ -277,7 +277,7 @@ public class JobExecutorService {
         final AbstractInferenceWrapper inferenceWrapper = wrapperService.getControlWrapper(datasourceWrapper).getInferenceWrapper(sparkSettings);
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper, payload.kindName())
+            .input(inferenceWrapper)
             .run();
 
         final Candidates candidates = inferenceResult.candidates();
@@ -311,11 +311,9 @@ public class JobExecutorService {
         inferenceEditor.applyEdits();
         System.out.println("schema objects after edits: " + schema.allObjects());
 
-        //job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, metadata, mappings);
         job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, inferenceEditor.getSchemaCategory(), metadata, inferenceEditor.getMetadata(), candidates, mappings);
 
         if (isFinal)
-            //finishRSDToCategoryProcessing(job, schema, metadata, inferenceEditor.getMappings());
             finishRSDToCategoryProcessing(job, inferenceEditor.getSchemaCategory(), inferenceEditor.getMetadata(), inferenceEditor.getMappings());
 
         return job;

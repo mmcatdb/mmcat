@@ -120,7 +120,7 @@ public class SchemaConversionTests {
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper, "apps")
+            .input(inferenceWrapper)
             .run();
 
         final List<CategoryMappingPair> pairs = inferenceResult.pairs();
@@ -144,7 +144,7 @@ public class SchemaConversionTests {
         final AbstractInferenceWrapper inferenceWrapper = new JsonControlWrapper(jsonProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper, "business")
+            .input(inferenceWrapper)
             .run();
 
         final List<CategoryMappingPair> pairs = inferenceResult.pairs();
@@ -184,7 +184,7 @@ public class SchemaConversionTests {
         final AbstractInferenceWrapper inferenceWrapper = new CsvControlWrapper(csvProvider).getInferenceWrapper(sparkProvider.getSettings());
 
         final InferenceResult inferenceResult = new MMInferOneInAll()
-            .input(inferenceWrapper, "user")
+            .input(inferenceWrapper)
             .run();
 
         final List<CategoryMappingPair> pairs = inferenceResult.pairs();
