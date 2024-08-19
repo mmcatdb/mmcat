@@ -1,6 +1,7 @@
 import { Key } from '../identifiers';
 import type { KeyFromServer } from '../identifiers';
 import { PrimaryKeyCandidate, ReferenceCandidate } from './candidates';
+import { LayoutType } from '@/types/inference/layoutType';
 
 export interface InferenceEdit {
     id: number | null;
@@ -115,11 +116,11 @@ export function createInferenceEditFromServer(data: any): InferenceEdit {
 }
 
 export type SaveJobResultPayload = {
-    isFinal: false;
+    isFinal: boolean | null;
     edit: InferenceEdit | null;
-} | {
-    isFinal: true;
+    layoutType: LayoutType | null;
 };
+
 
 export class PatternSegment {
     constructor(

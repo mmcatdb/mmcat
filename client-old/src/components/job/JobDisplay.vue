@@ -11,6 +11,7 @@ import InferenceJobDisplay from '@/components/category/inference/InferenceJobDis
 import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/inferenceEdit';
 import { createInferenceEditFromServer } from '@/types/inference/inferenceEdit';
 import type { InferenceJobData } from '@/types/inference/InferenceJobData';
+import { LayoutType } from '@/types/inference/layoutType';
 import { useSchemaCategoryInfo } from '@/utils/injects';
 
 type JobDisplayProps = {
@@ -36,30 +37,22 @@ const emit = defineEmits<{
 }>();
 
 const fetching = ref(false);
-/*
-const schemaCategory = computed(() => {
-    if (typeof props.job.result === 'string' && props.job.payload.type === ActionType.RSDToCategory) {
-        const parsedResult = JSON.parse(props.job.result);
-        if (isInferenceJobData(parsedResult)) 
-            return SchemaCategory.fromServer(parsedResult.finalSchema, []);
-        else 
-            throw new Error('InferenceJobData is not the right type');            
-        
+
+const inferenceJobData = computed(() => {
+    if (props.job.payload.type === ActionType.RSDToCategory) {
+        return props.job.data as InferenceJobData;
+    } else {
+        throw new Error('Expected job payload type to be RSDToCategory, but got ' + props.job.payload.type);
     }
-    throw new Error('InferenceJobData is not the right type');
-});*/
+}); 
+
 //TODO: do I need to create serialized Inference Edits?
 const inferenceEdits = computed(() => {
-    //const inferenceData = job.data as InferenceJobData;
-    if (props.job.payload.type === ActionType.RSDToCategory) {
-        const inferenceData  = props.job.data as InferenceJobData;
-        if (inferenceData.edits.length > 0) 
-            return inferenceData.edits.map(createInferenceEditFromServer);
-        else 
-            return [];            
-
+    if (inferenceJobData.value && inferenceJobData.value.edits.length > 0) {
+        return inferenceJobData.value.edits.map(createInferenceEditFromServer);
+    } else {
+        return [];
     }
-    throw new Error('InferenceJobData is not the right type');
 });
 
 const info = useSchemaCategoryInfo();
@@ -88,17 +81,17 @@ async function restartJob() {
         emit('updateJob', Job.fromServer(result.data, info.value));
 }
 
-async function updateJobResult(edit: InferenceEdit | null, permanent: boolean) {
+async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | null, newLayoutType: LayoutType | null) {
     fetching.value = true;
 
-    const payload: SaveJobResultPayload = { isFinal: permanent, edit };
+    const payload: SaveJobResultPayload = { isFinal: permanent, edit, newLayoutType };
     console.log("Sending payload:", JSON.stringify(payload));
 
-    const result = await API.jobs.updateJobResult({ id: props.job.id }, { edit, isFinal: permanent } as SaveJobResultPayload);
+    const result = await API.jobs.updateJobResult({ id: props.job.id }, { isFinal: permanent, edit, newLayoutType } as SaveJobResultPayload);
     fetching.value = false;
-    if (result.status) {
+    if (result.status) 
         emit('updateJob', Job.fromServer(result.data, info.value));
-    }
+    
 }
 
 </script>
@@ -188,18 +181,20 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean) {
             <template v-if="job.payload.type === ActionType.RSDToCategory && job.state === JobState.Waiting">
                 <InferenceJobDisplay 
                     :job="job"
-                    :schema-category="(job.data as InferenceJobData).finalSchema"
+                    :schema-category="inferenceJobData?.finalSchema"
                     :inference-edits="inferenceEdits"
-                    :candidates="(job.data as InferenceJobData).candidates"
-                    @update-edit="(edit) => updateJobResult(edit, false)"
-                    @cancel-edit="updateJobResult(null, false)"
+                    :layoutType="inferenceJobData?.layoutType"
+                    :candidates="inferenceJobData?.candidates"
+                    @update-edit="(edit) => updateJobResult(edit, false, null)"
+                    @cancel-edit="updateJobResult(null, false, null)"
+                    @change-layout="(newLayoutType) => updateJobResult(null, null, newLayoutType)"
                 >
                     <template #below-editor>
                         <div class="d-flex justify-content-end mt-2">
                             <button 
                                 :disabled="fetching"
                                 class="primary"
-                                @click="() => updateJobResult(null, true)"
+                                @click="() => updateJobResult(null, true, null)"
                             >
                                 Save and Finish
                             </button>

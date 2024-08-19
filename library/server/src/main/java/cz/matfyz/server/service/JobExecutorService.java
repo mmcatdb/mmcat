@@ -25,6 +25,7 @@ import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.Layout;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
 import cz.matfyz.inference.schemaconversion.utils.InferenceResult;
+import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.Configuration.ServerProperties;
 import cz.matfyz.server.Configuration.SparkProperties;
 import cz.matfyz.server.entity.Id;
@@ -288,30 +289,50 @@ public class JobExecutorService {
         final MetadataCategory metadata = pair.metadata();
         final List<Mapping> mappings = pair.mappings();
 
-        Layout.applyToMetadata(schema, metadata);
+        Layout.applyToMetadata(schema, metadata, LayoutType.FR);
 
-        job.data = InferenceJobData.fromSchemaCategory(List.of(), schema, schema, metadata, metadata, candidates, mappings);
+        job.data = InferenceJobData.fromSchemaCategory(
+            List.of(),
+            schema,
+            schema,
+            metadata,
+            metadata,
+            LayoutType.FR,
+            candidates,
+            mappings
+        );
     }
 
-    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, InferenceEdit edit, boolean isFinal) {
-        final List<InferenceEdit> edits = data.edits();
-        updateInferenceEdits(edits, edit, isFinal);
-        System.out.println("edits in jobexecutor: " + edits);
-
+    public JobWithRun continueRSDToCategoryProcessing(JobWithRun job, InferenceJobData data, InferenceEdit edit, boolean isFinal, LayoutType layoutType) {
         final var schema = SchemaSerializer.deserialize(data.inferenceSchema());
         final var metadata = MetadataSerializer.deserialize(data.inferenceMetadata(), schema);
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
         final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
+        final List<InferenceEdit> edits = data.edits();
+
+        if (layoutType != null) {
+            Layout.applyToMetadata(schema, metadata, layoutType);
+        } else {
+            updateInferenceEdits(edits, edit, isFinal);
+        }
+
         final InferenceEditor inferenceEditor = isFinal
             ? new InferenceEditor(schema, metadata, mappings, edits)
             : new InferenceEditor(schema, metadata, edits);
 
-        System.out.println("schema objects before edits: " + schema.allObjects());
         inferenceEditor.applyEdits();
-        System.out.println("schema objects after edits: " + schema.allObjects());
 
-        job.job().data = InferenceJobData.fromSchemaCategory(edits, schema, inferenceEditor.getSchemaCategory(), metadata, inferenceEditor.getMetadata(), candidates, mappings);
+        job.job().data = InferenceJobData.fromSchemaCategory(
+            edits,
+            schema,
+            inferenceEditor.getSchemaCategory(),
+            metadata,
+            inferenceEditor.getMetadata(),
+            layoutType != null ? layoutType : data.layoutType(),
+            candidates,
+            mappings
+        );
 
         if (isFinal)
             finishRSDToCategoryProcessing(job, inferenceEditor.getSchemaCategory(), inferenceEditor.getMetadata(), inferenceEditor.getMappings());
@@ -319,6 +340,7 @@ public class JobExecutorService {
         return job;
     }
 
+    // TODO: move this to an util class
     private void updateInferenceEdits(List<InferenceEdit> edits, InferenceEdit edit, boolean isFinal) {
         if (edit == null) {
             if (!isFinal && !edits.isEmpty()) {
@@ -326,7 +348,6 @@ public class JobExecutorService {
             }
             return;
         }
-        // TODO: make a better id system
         Integer editIdx = findEditIdx(edit, edits);
         if (editIdx == null) {
             edit.setId(edits.size());

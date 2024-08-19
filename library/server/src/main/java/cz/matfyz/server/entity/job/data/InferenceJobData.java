@@ -12,6 +12,7 @@ import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaSerializer;
 import cz.matfyz.core.schema.SchemaSerializer.SerializedSchema;
 import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.entity.job.JobData;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public record InferenceJobData(
     SerializedSchema finalSchema,
     SerializedMetadata inferenceMetadata,
     SerializedMetadata finalMetadata,
+    LayoutType layoutType,
     SerializedCandidates candidates,
     List<SerializedMapping> mappings
 ) implements JobData {
@@ -32,6 +34,7 @@ public record InferenceJobData(
         SchemaCategory finalSchema,
         MetadataCategory inferenceMetadata,
         MetadataCategory finalMetadata,
+        LayoutType layoutType,
         Candidates candidates,
         List<Mapping> mappings
     ) {
@@ -41,6 +44,7 @@ public record InferenceJobData(
             SchemaSerializer.serialize(finalSchema),
             MetadataSerializer.serialize(inferenceMetadata),
             MetadataSerializer.serialize(finalMetadata),
+            layoutType,
             CandidatesSerializer.serialize(candidates),
             mappings.stream().map(SerializedMapping::fromMapping).toList()
         );

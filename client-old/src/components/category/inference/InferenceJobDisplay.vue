@@ -4,7 +4,9 @@ import type { Job } from '@/types/job';
 import type { Graph, Node, Edge } from '@/types/categoryGraph';
 import GraphDisplay from '../../category/GraphDisplay.vue';
 import type { SchemaCategory } from '@/types/schema';
-import EditorForInferenceSchemaCategory from '@/components/category/inference/EditorForInferenceSchemaCategory.vue';
+import EditorForInferenceSchemaCategory from './EditorForInferenceSchemaCategory.vue';
+import LayoutSelector from './LayoutSelector.vue';
+import { LayoutType } from '@/types/inference/layoutType';
 import { type InferenceEdit, RecursionInferenceEdit, ClusterInferenceEdit, PrimaryKeyMergeInferenceEdit, ReferenceMergeInferenceEdit, PatternSegment } from '@/types/inference/inferenceEdit'; 
 import { Candidates, ReferenceCandidate, PrimaryKeyCandidate } from '@/types/inference/candidates'; 
 
@@ -12,6 +14,7 @@ type InferenceJobDisplayProps = {
     job: Job;
     schemaCategory: SchemaCategory;
     inferenceEdits: InferenceEdit[];
+    layoutType: LayoutType;
     candidates: Candidates;
 };
 
@@ -20,6 +23,7 @@ const props = defineProps<InferenceJobDisplayProps>();
 const graph = shallowRef<Graph>();
 
 const emit = defineEmits<{
+    (e: 'change-layout', newLayoutType: LayoutType): void;
     (e: 'update-edit', edit: InferenceEdit): void;
     (e: 'cancel-edit'): void;
 }>();
@@ -40,6 +44,10 @@ function graphCreated(newGraph: Graph) {
     }
     // eslint-disable-next-line vue/no-mutating-props
     props.schemaCategory.graph = newGraph;
+}
+
+function changeLayout(newLayoutType: LayoutType) {
+    emit('change-layout', newLayoutType);
 }
 
 function createReferenceMergeEdit(payload: Node[] | ReferenceCandidate) {
@@ -124,6 +132,10 @@ function cancelEdit() {
         <div class="divide">
             <GraphDisplay @graph-created="graphCreated" />
             <div v-if="graph">
+                <LayoutSelector
+                    :layout-type="props.layoutType"
+                    @change-layout="changeLayout"
+                />
                 <EditorForInferenceSchemaCategory 
                     :graph="graph" 
                     :schema-category="props.schemaCategory" 

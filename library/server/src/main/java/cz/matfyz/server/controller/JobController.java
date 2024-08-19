@@ -1,7 +1,7 @@
 package cz.matfyz.server.controller;
 
 import cz.matfyz.inference.edit.InferenceEdit;
-import cz.matfyz.inference.edit.algorithms.PrimaryKeyMerge;
+import cz.matfyz.inference.schemaconversion.utils.LayoutType;
 import cz.matfyz.server.controller.ActionController.ActionPayloadDetail;
 import cz.matfyz.server.entity.IEntity;
 import cz.matfyz.server.entity.Id;
@@ -109,14 +109,15 @@ public class JobController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The job data is not an instance of InferenceJobData");
 
         InferenceEdit edit = payload.isFinal ? null : payload.edit;
-        final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, payload.isFinal);
+        final JobWithRun newJobWithRun = jobExecutorService.continueRSDToCategoryProcessing(jobWithRun, inferenceJobData, edit, payload.isFinal, payload.newLayoutType);
 
         return jobToJobDetail(service.transition(newJobWithRun, payload.isFinal ? State.Finished : State.Waiting));
     }
 
     private record SaveJobResultPayload(
-        boolean isFinal,
-        @Nullable InferenceEdit edit
+        @Nullable boolean isFinal,
+        @Nullable InferenceEdit edit,
+        @Nullable LayoutType newLayoutType
     ) {}
 
     private JobDetail jobToJobDetail(JobWithRun job) {
