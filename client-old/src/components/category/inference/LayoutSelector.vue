@@ -12,7 +12,6 @@ const emit = defineEmits<{
 
 const showOptions = ref(false);
 
-//this should be whatever the actual layout is though! - will probs need to pass it as probs
 const selectedLayout = ref<LayoutType>(props.layoutType);
 
 function toggleOptions() {
@@ -34,7 +33,8 @@ function changeLayout(layoutType: LayoutType) {
                 {{ showOptions ? 'Hide Layout' : 'Layout' }}
             </button>
         </div>
-        <div v-if="showOptions" class="options">
+        <div v-if="showOptions"
+            class="options">
             <label>
                 <input
                     v-model="selectedLayout"
@@ -43,7 +43,7 @@ function changeLayout(layoutType: LayoutType) {
                     value="FR"
                     @change="changeLayout(LayoutType.FR)"
                 />
-                Force-Directed (FR)
+                Force-Directed
             </label>
             <label>
                 <input
@@ -63,7 +63,7 @@ function changeLayout(layoutType: LayoutType) {
                     value="KK"
                     @change="changeLayout(LayoutType.KK)"
                 />
-                Kamada-Kawai (KK)
+                Kamada-Kawai
             </label>
             <label>
                 <input

@@ -39,20 +39,18 @@ const emit = defineEmits<{
 const fetching = ref(false);
 
 const inferenceJobData = computed(() => {
-    if (props.job.payload.type === ActionType.RSDToCategory) {
+    if (props.job.payload.type === ActionType.RSDToCategory) 
         return props.job.data as InferenceJobData;
-    } else {
+    else
         throw new Error('Expected job payload type to be RSDToCategory, but got ' + props.job.payload.type);
-    }
 }); 
 
-//TODO: do I need to create serialized Inference Edits?
+//TODO: do I need to create serialized Inference Edits? - Yes
 const inferenceEdits = computed(() => {
-    if (inferenceJobData.value && inferenceJobData.value.edits.length > 0) {
+    if (inferenceJobData.value && inferenceJobData.value.edits.length > 0) 
         return inferenceJobData.value.edits.map(createInferenceEditFromServer);
-    } else {
+    else
         return [];
-    }
 });
 
 const info = useSchemaCategoryInfo();
@@ -85,7 +83,7 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
     fetching.value = true;
 
     const payload: SaveJobResultPayload = { isFinal: permanent, edit, newLayoutType };
-    console.log("Sending payload:", JSON.stringify(payload));
+    console.log('Sending payload:', JSON.stringify(payload));
 
     const result = await API.jobs.updateJobResult({ id: props.job.id }, { isFinal: permanent, edit, newLayoutType } as SaveJobResultPayload);
     fetching.value = false;
@@ -183,7 +181,7 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
                     :job="job"
                     :schema-category="inferenceJobData?.finalSchema"
                     :inference-edits="inferenceEdits"
-                    :layoutType="inferenceJobData?.layoutType"
+                    :layout-type="inferenceJobData?.layoutType"
                     :candidates="inferenceJobData?.candidates"
                     @update-edit="(edit) => updateJobResult(edit, false, null)"
                     @cancel-edit="updateJobResult(null, false, null)"

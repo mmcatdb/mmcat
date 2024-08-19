@@ -45,7 +45,6 @@ public class Layout {
     private static Map<Key, Position> computeObjectsLayout(SchemaCategory schema, LayoutType layoutType) {
         final var graph = createGraphFromSchemaCategory(schema);
 
-        // Determine the layout size based on the number of nodes
         final int nodesAmount = schema.allObjects().size();
         final int layoutSize = Math.max(MIN_LAYOUT_SIZE, (int) (Math.log(nodesAmount + 1.0) * SIZE_MULTIPLIER));
 

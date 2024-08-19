@@ -22,11 +22,10 @@ const innerValue = shallowRef([ ...props.modelValue ]);
 const lastIndex = shallowRef((props.count && props.modelValue.length >= props.count) ? props.count - 1 : props.modelValue.length);
 
 const graph = computed(() => {
-    if (props.graph) {
+    if (props.graph) 
         return props.graph;
-    }
-    const evocat = useEvocat();
-    return evocat.graph;
+    
+    return useEvocat().graph.value;
 });
 
 watch(() => props.modelValue, (newValue: (Node | undefined)[]) => {
@@ -43,9 +42,9 @@ onMounted(() => {
     listener = graph.value.listen();
 
     innerValue.value.forEach((node, index) => node?.select({ type: props.type, level: index }));
-    if (!props.disabled) {
+    if (!props.disabled) 
         listener.onNode('tap', onNodeTapHandler);
-    }
+    
 });
 
 onUnmounted(() => {
