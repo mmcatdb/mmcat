@@ -22,15 +22,17 @@ const inputType = ref<'manual' | 'candidate'>('manual');
 const nodes = shallowRef<(Node)[]>([]);
 const confirmClicked = ref(false);
 const clickedCandidates = ref<ReferenceCandidate[]>([]);
+const clickedIndex = ref<number | undefined>(undefined);
 
 const nodesSelected = computed(() => !!nodes.value[0] && !!nodes.value[1]);
 const noNodesSelected = computed(() => !nodes.value[0] && !nodes.value[1]);
 
-function confirmCandidate(candidate: ReferenceCandidate) {
+function confirmCandidate(candidate: ReferenceCandidate, index: number) {
     if (!clickedCandidates.value.includes(candidate)) 
         clickedCandidates.value.push(candidate);
 
     confirmClicked.value = true;
+    clickedIndex.value = index;
     emit('confirm', candidate);
 }
 
@@ -53,7 +55,7 @@ function cancel() {
     if (confirmClicked.value) { // delete the edit (on BE)
         emit('cancel-edit');
         confirmClicked.value = false;
-        //candidateClicked.value = null; //maybe dont reset it here?
+        clickedIndex.value = undefined; //maybe dont reset it here?
     }
 }
 
@@ -103,9 +105,9 @@ function splitName(name: string) {
                     v-for="(candidate, index) in props.candidates.refCandidates"
                     :key="'ref-' + index"
                     class="candidate-button"
-                    :disabled="confirmClicked"
+                    :disabled="clickedIndex !== undefined && clickedIndex !== index"
                     :class="{ 'clicked': clickedCandidates.includes(candidate) }"
-                    @click="confirmCandidate(candidate)"
+                    @click="confirmCandidate(candidate, index)"
                 >
                     <div class="candidate-content">
                         <div class="candidate-side">
