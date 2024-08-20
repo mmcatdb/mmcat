@@ -449,6 +449,7 @@ class SchemaCategoryInferenceEditorTests {
      */
     @Test
     void testRecursionEdit5() {
+        System.out.println("in test 5");
         final var builder = new SchemaBuilder();
 
         final var checkin =     builder.object("checkin", 0);
@@ -457,8 +458,8 @@ class SchemaCategoryInferenceEditorTests {
         final var o3 =          builder.object("A", 3);
         final var o4 =          builder.object("B", 4);
         final var o5 =          builder.object("A", 5);
-        final var o6 =          builder.object("B", 6);
-        final var o7 =          builder.object("A", 7);
+        //final var o6 =          builder.object("B", 6);
+        //final var o7 =          builder.object("A", 7);
         final var o8 =          builder.object("B", 8);
         final var o9 =          builder.object("A", 9);
         final var o10 =         builder.object("B", 10);
@@ -479,8 +480,8 @@ class SchemaCategoryInferenceEditorTests {
         builder.morphism(o2, o3, 2);
         builder.morphism(o3, o4, 3);
         builder.morphism(o4, o5, 4);
-        builder.morphism(o5, o6, 5);
-        builder.morphism(o6, o7, 6);
+        //builder.morphism(o5, o6, 5);
+        //builder.morphism(o6, o7, 6);
         builder.morphism(o8, o9, 8);
         builder.morphism(o9, o10, 9);
 
@@ -488,7 +489,13 @@ class SchemaCategoryInferenceEditorTests {
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
         List<PatternSegment> pattern = new ArrayList<>();
+        /*
         pattern.add(new PatternSegment("A", "<-"));
+        pattern.add(new PatternSegment("A", "->"));
+        pattern.add(new PatternSegment("B", "->"));
+        pattern.add(new PatternSegment("A", ""));
+         */
+
         pattern.add(new PatternSegment("A", "->"));
         pattern.add(new PatternSegment("B", "->"));
         pattern.add(new PatternSegment("A", ""));

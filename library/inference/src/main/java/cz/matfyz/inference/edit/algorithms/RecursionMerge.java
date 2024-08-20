@@ -10,18 +10,13 @@ import cz.matfyz.inference.edit.InferenceEditAlgorithm;
 import cz.matfyz.inference.edit.InferenceEditorUtils;
 import cz.matfyz.inference.edit.PatternSegment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-// TODO: this class is a one big WIP
+// TODO: this class is a one big WIP + needs refactoring
 public class RecursionMerge extends InferenceEditAlgorithm {
 
     public static class Data extends InferenceEdit {
@@ -50,11 +45,14 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         }
     }
 
-
     private final Data data;
 
     private static final Logger LOGGER = Logger.getLogger(RecursionMerge.class.getName());
-    private static final String RECURSIVE_MORPH_STRING = "@";
+    private static final String FORWARD = "->";
+    private static final String BACKWARD = "<-";
+    private static final String RECURSIVE_FORWARD = "@->";
+    private static final String RECURSIVE_BACKWARD = "@<-";
+    private static final String RECURSIVE_MARKER = "@";
 
     private List<PatternSegment> adjustedPattern;
     private Map<PatternSegment, Set<SchemaObject>> mapPatternObjects = new HashMap<>();
@@ -65,7 +63,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
 
     /*
      * Assumptions: Morphisms in the pattern are only among the elemenets of the pattern
-     * Pattern always starts and ends in the same object (w/ however the occurence does not have to end in this object)
+     * Pattern always starts and ends in the same object (however the occurence does not have to end in this object)
      * For now we assume that the pattern needs to occur at least one in its full length to count it as a full match
      */
     @Override protected void innerCategoryEdit() {
@@ -92,7 +90,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
             PatternSegment nextSegment = data.pattern.get(i + 1);
 
             if (currentSegment.nodeName().equals(nextSegment.nodeName())) {
-                newPattern.add(new PatternSegment(currentSegment.nodeName(), RECURSIVE_MORPH_STRING + nextSegment.direction()));
+                newPattern.add(new PatternSegment(currentSegment.nodeName(), RECURSIVE_MARKER + nextSegment.direction()));
                 i = i + 2;
                 lastAdjusted = true;
             } else {
@@ -106,7 +104,6 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         }
 
         adjustedPattern = newPattern;
-        System.out.println("adjusted pattern" + adjustedPattern);
     }
 
     private List<List<SchemaObject>> findAdjustedPatternOccurences() {
@@ -114,10 +111,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         for (SchemaObject node : newSchema.allObjects())
             dfsFind(node, 0, new ArrayList<>(), result, false, false, new HashSet<>());
 
-        System.out.println(result);
-        result = cleanOccurences(result);
-        System.out.println("clean result: " + result);
-        return result;
+        return cleanOccurences(result);
     }
 
     private void dfsFind(
@@ -140,7 +134,6 @@ public class RecursionMerge extends InferenceEditAlgorithm {
                 result.add(new ArrayList<>(currentPath));
                 dfsFind(currentNode, 0, new ArrayList<>(), result, false, false, recursiveNodes);
             }
-
             return;
         }
 
@@ -154,24 +147,21 @@ public class RecursionMerge extends InferenceEditAlgorithm {
         mapPatternObjects.put(currentSegment, objects);
 
         if (patternIndex == adjustedPattern.size() - 1) {
-            // if (isValidPattern(currentPath, schema)) {
-                fullMatch = true;
-                patternIndex = 0;
-                currentSegment = adjustedPattern.get(patternIndex);
+            fullMatch = true;
+            patternIndex = 0;
+            currentSegment = adjustedPattern.get(patternIndex);
+            SchemaObject nextNode = findNextNode(newSchema, currentNode, currentSegment);
 
-                SchemaObject nextNode = findNextNode(newSchema, currentNode, currentSegment);
-
-                if (nextNode != null)
-                    dfsFind(nextNode, 1, currentPath, result, fullMatch, processing, recursiveNodes);
-            //}
+            if (nextNode != null)
+                dfsFind(nextNode, 1, currentPath, result, fullMatch, processing, recursiveNodes);
         } else {
-            if (currentSegment.direction().equals("->") || currentSegment.direction().equals("@->")) {
+            if (currentSegment.direction().equals(FORWARD) || currentSegment.direction().equals(RECURSIVE_FORWARD)) {
                 List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
                 for (SchemaMorphism morphism : newSchema.allMorphisms())
                     if (morphism.dom().equals(currentNode))
                         morphismsToProcess.add(morphism);
 
-                if (currentSegment.direction().equals("@->")) {
+                if (currentSegment.direction().equals(RECURSIVE_FORWARD)) {
                     if (!containsRecursiveAlready(recursiveNodes, currentNodeLabel))
                         recursiveNodes.add(currentNode);
 
@@ -179,7 +169,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
                 }
 
                 for (SchemaMorphism m : morphismsToProcess) {
-                    if (currentSegment.direction().equals("@->") && newMetadata.getObject(m.cod()).label.equals(currentNodeLabel)) {
+                    if (currentSegment.direction().equals(RECURSIVE_FORWARD) && newMetadata.getObject(m.cod()).label.equals(currentNodeLabel)) {
                         dfsFind(m.cod(), patternIndex, currentPath, result, fullMatch, processing, recursiveNodes);
                         if (recursiveNodes.contains(currentNode))
                             processing = false;
@@ -193,14 +183,14 @@ public class RecursionMerge extends InferenceEditAlgorithm {
                     }
                 }
             }
-            if (currentSegment.direction().equals("<-") || currentSegment.direction().equals("@<-")) {
+            if (currentSegment.direction().equals(BACKWARD) || currentSegment.direction().equals(RECURSIVE_BACKWARD)) {
                 List<SchemaMorphism> morphismsToProcess = new ArrayList<>();
                 for (SchemaMorphism morphism : newSchema.allMorphisms())
                     if (morphism.cod().equals(currentNode))
                         morphismsToProcess.add(morphism);
 
                 for (SchemaMorphism m : morphismsToProcess) {
-                    final var nextIndex = currentSegment.direction().equals("@<-") && newMetadata.getObject(m.dom()).label.equals(currentNodeLabel)
+                    final var nextIndex = currentSegment.direction().equals(RECURSIVE_BACKWARD) && newMetadata.getObject(m.dom()).label.equals(currentNodeLabel)
                         ? patternIndex
                         : patternIndex + 1;
 
@@ -261,26 +251,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     private static boolean isSublist(List<SchemaObject> list, List<SchemaObject> sublist) {
-        if (sublist.size() > list.size()) {
-            return false;
-        }
-
-        for (int i = 0; i <= list.size() - sublist.size(); i++) {
-            boolean foundSublist = true;
-
-            for (int j = 0; j < sublist.size(); j++) {
-                if (!list.get(i + j).equals(sublist.get(j))) {
-                    foundSublist = false;
-                    break;
-                }
-            }
-
-            if (foundSublist) {
-                return true;
-            }
-        }
-
-        return false;
+        return Collections.indexOfSubList(list, sublist) != -1;
     }
 
     private static boolean canMerge(List<SchemaObject> list1, List<SchemaObject> list2) {
@@ -291,7 +262,6 @@ public class RecursionMerge extends InferenceEditAlgorithm {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -311,13 +281,10 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     private boolean foundFullMatch(List<SchemaObject> currentPath) {
-        if (currentPath.size() < adjustedPattern.size())
-            return false;
-
-        return isSublist2(currentPath);
+        return currentPath.size() >= adjustedPattern.size() && containsPatternSequence(currentPath);
     }
 
-    private boolean isSublist2(List<SchemaObject> list) {
+    private boolean containsPatternSequence(List<SchemaObject> list) {
         if (adjustedPattern.size() > list.size())
             return false;
 
@@ -339,7 +306,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     private boolean occurenceAlreadyFound(List<List<SchemaObject>> result, List<SchemaObject> currentPath) {
-        if (result.size() == 0) {
+        if (result.isEmpty()) {
             return false;
         }
         for (List<SchemaObject> r : result) {
@@ -362,37 +329,17 @@ public class RecursionMerge extends InferenceEditAlgorithm {
 
     private SchemaObject findNextNode(SchemaCategory schema, SchemaObject currentNode, PatternSegment currentSegment) {
         for (SchemaMorphism morphism : schema.allMorphisms()) {
-            if (currentSegment.direction().equals("->") && morphism.dom().equals(currentNode)) {
+            if (currentSegment.direction().equals(FORWARD) && morphism.dom().equals(currentNode)) {
                 return morphism.cod();
-            } else if (currentSegment.direction().equals("<-") && morphism.cod().equals(currentNode)) {
+            } else if (currentSegment.direction().equals(BACKWARD) && morphism.cod().equals(currentNode)) {
                 return morphism.dom();
-            } else if (currentSegment.direction().equals("@->") && morphism.dom().equals(currentNode)) {
+            } else if (currentSegment.direction().equals(RECURSIVE_FORWARD) && morphism.dom().equals(currentNode)) {
                 return morphism.cod();
-            } else if (currentSegment.direction().equals("@<-") && morphism.cod().equals(currentNode)) {
+            } else if (currentSegment.direction().equals(RECURSIVE_BACKWARD) && morphism.cod().equals(currentNode)) {
                 return morphism.dom();
             }
         }
         return null;
-    }
-
-    private boolean isValidPattern(List<SchemaObject> path, SchemaCategory schema) {
-        for (int i = 1; i < path.size() - 1; i++) {
-            SchemaObject middleNode = path.get(i);
-            if (hasOtherMorphisms(middleNode, path.get(i - 1), path.get(i + 1), schema)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean hasOtherMorphisms(SchemaObject node, SchemaObject previous, SchemaObject next, SchemaCategory schema) {
-        for (SchemaMorphism morphism : schema.allMorphisms()) {
-            if ((morphism.dom().equals(node) && !morphism.cod().equals(next)) ||
-                (morphism.cod().equals(node) && !morphism.dom().equals(previous))) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void bridgeOccurences(List<List<SchemaObject>> occurences) {
@@ -463,8 +410,6 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     private void createRepetitiveMorphisms(List<List<SchemaObject>> occurences) {
-        System.out.println("keysToDelete" + keysToDelete);
-        System.out.println("map: " + mapPatternObjects);
         for (PatternSegment segment : adjustedPattern) {
             if (isRepetitive(segment)) {
                 for (SchemaObject object : mapPatternObjects.get(segment)) {
@@ -477,10 +422,7 @@ public class RecursionMerge extends InferenceEditAlgorithm {
     }
 
     private boolean isRepetitive(PatternSegment segment) {
-        if (segment.direction().contains("@")) {
-            return true;
-        }
-        return false;
+        return segment.direction().contains(RECURSIVE_MARKER);
     }
 
     private boolean inAnyOccurence(List<List<SchemaObject>> occurences, SchemaObject schemaObjectToFind) {

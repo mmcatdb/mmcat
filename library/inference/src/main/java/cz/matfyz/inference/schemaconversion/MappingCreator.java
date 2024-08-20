@@ -37,10 +37,8 @@ public class MappingCreator {
         }
 
         if (node.getState() == AccessTreeNode.State.ROOT) {
-            System.out.println("Adding root to mapping");
             return builder.root(subpaths.toArray(new AccessPath[0]));
         } else {
-            System.out.println("Creating complex property for: " + node.getName());
             return builder.complex(node.getName(), getDirectedSignature(node), subpaths.toArray(new AccessPath[0]));
         }
     }
