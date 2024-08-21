@@ -1,12 +1,13 @@
 import type { JobDataType } from '../job';
 import { SchemaCategory, type SchemaCategoryInfo, type SerializedSchema, type SerializedMetadata } from '../schema';
 import { Candidates, type SerializedCandidates } from './candidates';
-import type { InferenceEdit } from './inferenceEdit';
+import { type InferenceEdit, type SerializedInferenceEdit } from './inferenceEdit';
+import { createInferenceEditFromServer } from './inferenceEdit';
 import { LayoutType } from './layoutType';
 
 export type InferenceJobDataFromServer = {
     type: JobDataType.Inference;
-    edits: InferenceEdit[];
+    edits: SerializedInferenceEdit[];
     inferenceSchema: SerializedSchema;
     finalSchema: SerializedSchema;
     inferenceMetadata: SerializedMetadata;
@@ -28,7 +29,7 @@ export class InferenceJobData {
     static fromServer(input: InferenceJobDataFromServer, info: SchemaCategoryInfo): InferenceJobData {
         console.log('edits in InferenceJobData', input.edits);
         return new InferenceJobData(
-            input.edits,
+            input.edits.map(createInferenceEditFromServer),
             SchemaCategory.fromServerWithInfo(info, input.inferenceSchema, input.inferenceMetadata),
             SchemaCategory.fromServerWithInfo(info, input.finalSchema, input.finalMetadata),
             input.layoutType,

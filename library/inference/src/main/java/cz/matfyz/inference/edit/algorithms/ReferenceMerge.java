@@ -4,6 +4,7 @@ import cz.matfyz.core.identifiers.Key;
 import cz.matfyz.core.identifiers.Signature;
 import cz.matfyz.core.mapping.Mapping;
 import cz.matfyz.core.metadata.MetadataCategory;
+import cz.matfyz.core.rsd.PrimaryKeyCandidate;
 import cz.matfyz.core.rsd.ReferenceCandidate;
 import cz.matfyz.core.schema.SchemaCategory;
 import cz.matfyz.core.schema.SchemaMorphism;
@@ -55,6 +56,18 @@ public class ReferenceMerge extends InferenceEditAlgorithm {
             this.referenceKey = null;
             this.referredKey = null;
             this.candidate = null;
+        }
+
+        public Key getReferenceKey() {
+            return referenceKey;
+        }
+
+        public Key getReferredKey() {
+            return referredKey;
+        }
+
+        public ReferenceCandidate getCandidate() {
+            return candidate;
         }
 
         @Override public ReferenceMerge createAlgorithm() {

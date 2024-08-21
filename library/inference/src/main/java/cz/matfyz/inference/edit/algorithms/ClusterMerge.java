@@ -61,6 +61,10 @@ public class ClusterMerge extends InferenceEditAlgorithm {
             this.clusterKeys = null;
         }
 
+        public List<Key> getClusterKeys() {
+            return clusterKeys;
+        }
+
         @Override public ClusterMerge createAlgorithm() {
             return new ClusterMerge(this);
         }

@@ -54,6 +54,14 @@ public class PrimaryKeyMerge extends InferenceEditAlgorithm {
             this.candidate = null;
         }
 
+        public Key getPrimaryKey() {
+            return primaryKey;
+        }
+
+        public PrimaryKeyCandidate getCandidate() {
+            return candidate;
+        }
+
         @Override
         public PrimaryKeyMerge createAlgorithm() {
             return new PrimaryKeyMerge(this);

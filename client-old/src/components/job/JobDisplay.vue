@@ -9,7 +9,6 @@ import VersionDisplay from '@/components/VersionDisplay.vue';
 import TextArea from '../input/TextArea.vue';
 import InferenceJobDisplay from '@/components/category/inference/InferenceJobDisplay.vue';
 import type { InferenceEdit, SaveJobResultPayload } from '@/types/inference/inferenceEdit';
-import { createInferenceEditFromServer } from '@/types/inference/inferenceEdit';
 import type { InferenceJobData } from '@/types/inference/InferenceJobData';
 import { LayoutType } from '@/types/inference/layoutType';
 import { useSchemaCategoryInfo } from '@/utils/injects';
@@ -44,14 +43,6 @@ const inferenceJobData = computed(() => {
     else
         throw new Error('Expected job payload type to be RSDToCategory, but got ' + props.job.payload.type);
 }); 
-
-//TODO: do I need to create serialized Inference Edits? - Yes
-const inferenceEdits = computed(() => {
-    if (inferenceJobData.value && inferenceJobData.value.edits.length > 0) 
-        return inferenceJobData.value.edits.map(createInferenceEditFromServer);
-    else
-        return [];
-});
 
 const info = useSchemaCategoryInfo();
 
@@ -180,7 +171,7 @@ async function updateJobResult(edit: InferenceEdit | null, permanent: boolean | 
                 <InferenceJobDisplay 
                     :job="job"
                     :schema-category="inferenceJobData?.finalSchema"
-                    :inference-edits="inferenceEdits"
+                    :inference-edits="inferenceJobData?.edits"
                     :layout-type="inferenceJobData?.layoutType"
                     :candidates="inferenceJobData?.candidates"
                     @update-edit="(edit) => updateJobResult(edit, false, null)"

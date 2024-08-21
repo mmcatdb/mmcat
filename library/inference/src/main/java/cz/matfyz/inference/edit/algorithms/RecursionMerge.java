@@ -40,6 +40,10 @@ public class RecursionMerge extends InferenceEditAlgorithm {
             this.pattern = null;
         }
 
+        public List<PatternSegment> getPattern() {
+            return pattern;
+        }
+
         @Override public RecursionMerge createAlgorithm() {
             return new RecursionMerge(this);
         }

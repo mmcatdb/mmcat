@@ -21,6 +21,7 @@ import cz.matfyz.evolution.querying.QueryUpdateResult;
 import cz.matfyz.evolution.schema.SchemaCategoryUpdate;
 import cz.matfyz.inference.MMInferOneInAll;
 import cz.matfyz.inference.edit.InferenceEdit;
+import cz.matfyz.inference.edit.InferenceEditSerializer;
 import cz.matfyz.inference.edit.InferenceEditor;
 import cz.matfyz.inference.schemaconversion.Layout;
 import cz.matfyz.inference.schemaconversion.utils.CategoryMappingPair;
@@ -54,6 +55,7 @@ import cz.matfyz.transformations.processes.DatabaseToInstance;
 import cz.matfyz.transformations.processes.InstanceToDatabase;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -309,7 +311,9 @@ public class JobExecutorService {
         final var candidates = CandidatesSerializer.deserialize(data.candidates());
         final var mappings = data.mappings().stream().map(s -> s.toMapping(schema)).toList();
 
-        final List<InferenceEdit> edits = data.edits();
+        final List<InferenceEdit> edits = data.edits().stream()
+            .map(InferenceEditSerializer::deserialize)
+            .collect(Collectors.toList());
 
         if (layoutType != null) {
             Layout.applyToMetadata(schema, metadata, layoutType);
