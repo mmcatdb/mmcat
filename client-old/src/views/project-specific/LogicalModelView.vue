@@ -9,7 +9,6 @@ import LogicalModelDisplay from '@/components/LogicalModelDisplay.vue';
 import MappingDisplay from '@/components/accessPath/MappingDisplay.vue';
 import API from '@/utils/api';
 import { useRoute, useRouter } from 'vue-router';
-import { Mapping } from '@/types/mapping';
 
 const logicalModel = ref<LogicalModel>();
 
@@ -31,6 +30,7 @@ function createNewMapping() {
 }
 
 const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(logicalModel.value.datasource.type));
+console.log("isForFile: ", isForFile.value);
 
 
 </script>
@@ -47,7 +47,7 @@ const isForFile = computed(() => logicalModel.value?.datasource.type && isFile(l
             <h2>{{ isForFile ? 'Mapping' : 'Mappings' }}</h2>
             <div class="button-row">
                 <button
-                    :disabled="!(isForFile && logicalModel.mappings.length > 0)"
+                    :disabled="(isForFile && logicalModel.mappings.length > 0)"
                     @click="createNewMapping"
                 >
                     Create new

@@ -66,7 +66,6 @@ public class ClusterMerge extends InferenceEditAlgorithm {
         }
     }
 
-
     private static final Logger LOGGER = Logger.getLogger(ClusterMerge.class.getName());
     private static final String TYPE_LABEL = "_type";
     private static final int RND_CLUSTER_IDX = 0;

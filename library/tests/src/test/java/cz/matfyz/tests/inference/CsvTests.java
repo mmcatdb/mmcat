@@ -46,41 +46,7 @@ class CsvTests {
         }
     }
 
-    @Test
-    void testLocalUrlFolder() throws Exception { // testing folder
-        @SuppressWarnings("deprecation")
-        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
-        final var csvProvider = new CsvProvider(settings);
-
-        final List<String> fileNames = csvProvider.getCsvFileNames();
-
-        for (String fileName : fileNames) {
-            System.out.println(fileName);
-            try (InputStream inputStream = csvProvider.getInputStream(fileName)) {
-                assertNotNull(inputStream);
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                assertNotNull(reader.readLine(), "The header should not be empty");
-            }
-        }
-    }
-
-    @Test
-    void testLocalUrlFile() throws Exception { // testing folder
-        @SuppressWarnings("deprecation")
-        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/Kaggle/Social_media_users/user_table.csv");
-        final var settings = new CsvSettings(url.toURI().toString(), false, false);
-        final var csvProvider = new CsvProvider(settings);
-
-        final List<String> fileNames = csvProvider.getCsvFileNames();
-
-        assertEquals("user_table", fileNames.get(0));
-
-        try (InputStream inputStream = csvProvider.getInputStream("user_table")) {
-            assertNotNull(inputStream);
-        }
-    }
+    //TODO: Add tests for local url - testing both a single file and a whole folder
 
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
@@ -126,7 +92,6 @@ class CsvTests {
         assertEquals(2, documents.count(), "There should be two documents");
     }
 
-    // test class to test csv formats w/o having to load a file
     private static class StringCsvProvider extends CsvProvider {
         private final String csvContent;
 

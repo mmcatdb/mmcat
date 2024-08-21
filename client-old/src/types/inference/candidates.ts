@@ -11,12 +11,6 @@ export class Candidates {
         return new Candidates(pkCandidates, refCandidates);
     }
 
-    toServer(): SerializedCandidates {
-        return {
-            pkCandidates: this.pkCandidates.map(candidate => candidate.toServer()),
-            refCandidates: this.refCandidates.map(candidate => candidate.toServer()),
-        };
-    }
 }
 
 export type SerializedCandidates = {
@@ -52,14 +46,6 @@ export class PrimaryKeyCandidate {
             input.selected,
         );
     }
-/*
-    toServer(): SerializedPrimaryKeyCandidate {
-        return {
-            type: this.type,
-            hierarchicalName: this.hierarchicalName,
-            selected: this.selected,
-        };
-    }*/
 }
 
 export class ReferenceCandidate {
@@ -80,14 +66,4 @@ export class ReferenceCandidate {
             input.selected,
         );
     }
-/*
-    toServer(): SerializedReferenceCandidate {
-        return {
-            type: this.type,
-            referred: this.referred,
-            referencing: this.referencing,
-            weak: this.weak,
-            selected: this.selected,
-        };
-    }*/
 }

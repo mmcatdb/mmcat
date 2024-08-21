@@ -340,7 +340,7 @@ public class JobExecutorService {
         return job;
     }
 
-    // TODO: move this to an util class
+    // TODO: move this to an util class - should I?
     private void updateInferenceEdits(List<InferenceEdit> edits, InferenceEdit edit, boolean isFinal) {
         if (edit == null) {
             if (!isFinal && !edits.isEmpty()) {

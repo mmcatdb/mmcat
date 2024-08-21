@@ -16,6 +16,7 @@ import cz.matfyz.inference.edit.algorithms.RecursionMerge;
 import cz.matfyz.inference.edit.algorithms.ReferenceMerge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -198,10 +199,6 @@ class SchemaCategoryInferenceEditorTests {
         testAlgorithm(schema, metadata, edit);
 
         final List<Mapping> editMappings = edit.applyMappingEdit(mappings);
-/*
-        System.out.println();
-        System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());*/
     }
 
     @Test
@@ -219,34 +216,44 @@ class SchemaCategoryInferenceEditorTests {
         final var o8 =          builder.object("b", 8);
         final var o9 =          builder.object("c", 9);
 
-        builder.morphism(world, continent, 1);
-        builder.morphism(continent, country1, 2);
-        builder.morphism(continent, country2, 3);
-        builder.morphism(country1, o3, 4);
-        builder.morphism(country1, o4, 5);
-        builder.morphism(o3, o5, 6);
-        builder.morphism(country2, o7, 7);
-        builder.morphism(country2, o8, 8);
-        builder.morphism(o7, o9, 9);
+        final var worldToContinent =        builder.morphism(world, continent, 1);
+        final var continentToCountry1 =     builder.morphism(continent, country1, 2);
+        final var continentToCountry2 =     builder.morphism(continent, country2, 3);
+        final var country1ToA =             builder.morphism(country1, o3, 4);
+        final var country1ToB =             builder.morphism(country1, o4, 5);
+        final var aToC1 =                   builder.morphism(o3, o5, 6);
+        final var country2ToA =             builder.morphism(country2, o7, 7);
+        final var country2ToB =             builder.morphism(country2, o8, 8);
+        final var aToC2 =                   builder.morphism(o7, o9, 9);
 
         final SchemaCategory schema = builder.build();
         final MetadataCategory metadata = builder.buildMetadata(schema);
 
-        /*
-        MappingBuilder builder = new MappingBuilder();
+        final MappingBuilder mb = new MappingBuilder();
+        final Mapping mapping = new Mapping(
+            schema,
+            world.key(),
+            "kindName",
+            mb.root(
+                mb.complex("continent", worldToContinent,
+                    mb.complex("country_1", continentToCountry1,
+                        mb.complex("a", country1ToA,
+                            mb.simple("c", aToC1)),
+                        mb.simple("b", country1ToB)),
+                    mb.complex("country_2", continentToCountry2,
+                        mb.complex("a", country2ToA,
+                            mb.simple("c", aToC2)),
+                        mb.simple("b", country2ToB)
+                            )
+                        )
+            ),
+            null
+        );
 
-        List<AccessPath> subpaths = new ArrayList<>();
-        subpaths.add(builder.simple("c", Signature.createBase(6)));
-        subpaths.add(builder.simple("b", Signature.createBase(5)));
-
-        ComplexProperty complexProperty = builder.complex("app", Signature.createBase(0), subpaths.toArray(new AccessPath[0]));
-
-        Mapping mapping = new Mapping(category, new Key(0), "kindNameA", complexProperty, null);
+        System.out.println("Mapping before edit:");
         System.out.println(mapping.accessPath());
-*/
 
-        //List<Mapping> mappings = new ArrayList<>();
-        //mappings.add(mapping);
+
         List<Key> clusterKeys = new ArrayList<>();
         clusterKeys.add(country1.key());
         clusterKeys.add(country2.key());
@@ -254,11 +261,10 @@ class SchemaCategoryInferenceEditorTests {
         final ClusterMerge edit = (new ClusterMerge.Data(0, true, clusterKeys)).createAlgorithm();
         testAlgorithm(schema, metadata, edit);
 
-        //List<Mapping> editMappings = edit.applyMappingEdit(mappings, categoryFinal);
-/*
-        System.out.println();
-        System.out.println("Editted Size: ");
-        System.out.println(editMappings.size());*/
+        final List<Mapping> editMappings = edit.applyMappingEdit(List.of(mapping));
+
+        System.out.println("Mapping after edit:");
+        System.out.println(editMappings.get(0).accessPath());
     }
 
     @Test

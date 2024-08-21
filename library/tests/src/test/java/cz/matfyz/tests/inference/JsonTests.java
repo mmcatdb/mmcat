@@ -44,38 +44,7 @@ class JsonTests {
         }
     }
 
-    @Test
-    void testLocalUrlFolder() throws Exception {
-        @SuppressWarnings("deprecation")
-        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/test_json_folder/");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
-        final var jsonProvider = new JsonProvider(settings);
-
-        final List<String> fileNames = jsonProvider.getJsonFileNames();
-
-        for (String fileName : fileNames) {
-            System.out.println(fileName);
-            try (InputStream inputStream = jsonProvider.getInputStream(fileName)) {
-                assertNotNull(inputStream);
-            }
-        }
-    }
-
-    @Test
-    void testLocalUrlFile() throws Exception {
-        @SuppressWarnings("deprecation")
-        URL url = new URL("file:///mnt/c/Users/alzbe/Documents/mff_mgr/Diplomka/Datasets/test_json_folder/customer.json");
-        final var settings = new JsonSettings(url.toURI().toString(), false, false);
-        final var jsonProvider = new JsonProvider(settings);
-
-        final List<String> fileNames = jsonProvider.getJsonFileNames();
-
-        assertEquals("customer", fileNames.get(0));
-
-        try (InputStream inputStream = jsonProvider.getInputStream("yelpbusinesssampel")) {
-            assertNotNull(inputStream);
-        }
-    }
+    //TODO: Add tests for local url - testing both a single file and a whole folder
 
     @Test
     void testLoadDocumentsBasicFromFile() throws Exception {
@@ -134,7 +103,6 @@ class JsonTests {
         assertFalse(documents.isEmpty(), "Documents should not be empty");
     }
 
-    // test class to test json formats w/o having to load a file
     private static class StringJsonProvider extends JsonProvider {
         private final String jsonContent;
 
