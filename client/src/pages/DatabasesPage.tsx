@@ -2,7 +2,7 @@ import { CommonPage } from '@/components/CommonPage';
 import { Button } from '@nextui-org/react';
 import { DatabasesTable } from '@/components/databases/DatabasesTable';
 
-export function Databases() {
+export function DatabasesPage() {
     return (
         <CommonPage>
             <div className='flex items-center justify-between'>
