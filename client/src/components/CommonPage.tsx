@@ -71,7 +71,7 @@ const navbarItems: NavbarItem[] = [
     {
         label: 'Databases',
         route: '/databases',
-    }
+    },
 ];
 
 type ThemeToggleProps = Readonly<{
