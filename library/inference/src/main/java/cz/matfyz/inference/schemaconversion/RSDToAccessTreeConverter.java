@@ -41,15 +41,13 @@ public class RSDToAccessTreeConverter {
             }
 
             for (RecordSchemaDescription rsdChild : rsdParent.getChildren()) {
-                //here we are excluding the "_" objects of arrays
-                if (!rsdChild.getName().equals("_")) {
+               // if (!rsdChild.getName().equals("_")) { //here we are excluding the "_" objects of arrays
                     boolean isArray = isTypeArray(rsdChild);
                     AccessTreeNode.State state = isArray ? AccessTreeNode.State.COMPLEX : AccessTreeNode.State.SIMPLE;
                     BaseSignature signature = Signature.createBase(signatureGenerator.next());
                     Key keyChild = new Key(keyGenerator.next());
                     Min min = findMin(rsdParent, rsdChild);
 
-                    // for now we have decided not to have labels
                     // String label = createLabel(rsdChild, isArray);
                     String label = null;
 
@@ -65,7 +63,7 @@ public class RSDToAccessTreeConverter {
                     }
 
                     buildAccessTree(rsdChild, keyChild, i++, child);
-                }
+             //   }
             }
         }
     }

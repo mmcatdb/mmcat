@@ -35,14 +35,13 @@ public class SchemaConverter {
     }
 
     public CategoryMappingPair convertToSchemaCategoryAndMapping() {
-        System.out.println(rsd);
         LOGGER.info("Converting RSD to SchemaCategory...");
 
         LOGGER.info("Creating the access tree from RSD...");
         final RSDToAccessTreeConverter rsdToAccessTreeConverter = new RSDToAccessTreeConverter(kindName, keyGenerator, signatureGenerator);
         final AccessTreeNode root = rsdToAccessTreeConverter.convert(rsd);
-        // System.out.println("Access tree with unprocessed arrays: ");
-        // root.printTree(" ");
+        System.out.println("Access tree with unprocessed arrays: ");
+        root.printTree(" ");
 
         LOGGER.info("Creating the schema category from the access tree...");
         final AccessTreeToSchemaCategoryConverter accessTreeToSchemaCategoryConverter = new AccessTreeToSchemaCategoryConverter(kindName);

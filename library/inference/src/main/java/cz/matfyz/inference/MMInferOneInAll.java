@@ -48,7 +48,7 @@ public class MMInferOneInAll {
 
         SchemaConverter schemaConverter = new SchemaConverter();
 
-        List<CategoryMappingPair> pairs = new ArrayList<CategoryMappingPair>();
+        List<CategoryMappingPair> pairs = new ArrayList<>();
 
         for (String kindName : rsds.keySet()) {
             schemaConverter.setNewRSD(rsds.get(kindName), kindName);
@@ -63,7 +63,6 @@ public class MMInferOneInAll {
         System.out.println("getKindNames from the db: " + inputWrapper.getKindNames());
 
         inputWrapper.getKindNames().forEach(kindName -> {
-            System.out.println(kindName);
             final var wrapper = inputWrapper.copyForKind(kindName);
             wrappers.put(kindName, wrapper);
         });
@@ -86,6 +85,7 @@ public class MMInferOneInAll {
         long end = System.currentTimeMillis();
 
         System.out.println("RESULT_TIME_RECORD_BA TOTAL: " + (end - start) + "ms");
+        System.out.println("RSD: " + rsd);
 
         return rsd;
     }

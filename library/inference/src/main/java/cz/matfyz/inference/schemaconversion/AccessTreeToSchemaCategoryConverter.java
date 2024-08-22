@@ -60,8 +60,6 @@ public class AccessTreeToSchemaCategoryConverter {
         final var parentObject = schema.getObject(node.getParentKey());
 
         if (parentObject == null) {
-            System.out.println("SK after accessing the parent node");
-            System.out.println(schema.allObjects());
             System.out.println("Node key: " + node.getKey());
             System.out.println("Parent key: " + node.getParentKey());
 
