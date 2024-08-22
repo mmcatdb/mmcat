@@ -34,7 +34,7 @@ function confirm() {
     emit('confirm', nodes.value as Node[]);
 }
 
-function save() { // do not do anything, just go back t editor
+function save() { // do not do anything, just go back to editor
     emit('cancel');
 }
 

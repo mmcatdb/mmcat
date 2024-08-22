@@ -49,7 +49,11 @@ function getEditName(editType: string): string {
         <ValueContainer>
             <ValueRow> 
                 <template v-if="hasEdits">
-                    <div v-for="(edit, index) in props.inferenceEdits" :key="index" class="edit-item">
+                    <div
+                        v-for="(edit, index) in props.inferenceEdits"
+                        :key="index"
+                        class="edit-item"
+                    >
                         <p>
                             <strong>{{ getEditName(edit.type) }}</strong>: 
                             id: {{ edit.id }}, 

@@ -80,9 +80,6 @@ function setMergeType(type: 'reference' | 'primaryKey') {
 </template>
 
 <style>
-.number-input {
-    max-width: 80px;
-}
 
 .button-row {
     display: flex;

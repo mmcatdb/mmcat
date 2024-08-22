@@ -33,8 +33,10 @@ function changeLayout(layoutType: LayoutType) {
                 {{ showOptions ? 'Hide Layout' : 'Layout' }}
             </button>
         </div>
-        <div v-if="showOptions"
-            class="options">
+        <div
+            v-if="showOptions"
+            class="options"
+        >
             <label>
                 <input
                     v-model="selectedLayout"

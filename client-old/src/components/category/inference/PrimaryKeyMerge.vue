@@ -9,7 +9,7 @@ import NodeInput from '@/components/input/NodeInput.vue';
 const props = defineProps<{
     graph: Graph;
     candidates: Candidates;
-}>();
+}>(); 
 
 const emit = defineEmits<{
     (e: 'confirm', payload: Node[] | PrimaryKeyCandidate): void;
@@ -48,7 +48,7 @@ function cancel() {
         emit('cancel');
     }
     
-    nodes.value = [ undefined ];  //unselect selected nodes
+    nodes.value = [];  //unselect selected nodes
 
     if (confirmClicked.value) { // delete the edit (on BE)
         emit('cancel-edit');

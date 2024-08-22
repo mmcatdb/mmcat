@@ -38,10 +38,9 @@ watch(() => props.schemaCategory, (newCategory, oldCategory) => {
 
 function graphCreated(newGraph: Graph) {
     graph.value = newGraph;
-    if (!props.schemaCategory) {
-        console.log('This should not happen. - schemaCategory.value empty');
+    if (!props.schemaCategory)
         return;
-    }
+    
     // eslint-disable-next-line vue/no-mutating-props
     props.schemaCategory.graph = newGraph;
 }

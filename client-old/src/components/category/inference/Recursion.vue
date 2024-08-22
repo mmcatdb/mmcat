@@ -50,6 +50,8 @@ function save() { // do not do anything, just go back to editor
 }
 
 function cancel() {
+    showWarning.value = false;
+
     if (noNodesSelected.value) { // go back to editor
         emit('cancel');
     }
@@ -90,7 +92,7 @@ function onNodeTapHandler(node: Node) {
 function onEdgeTapHandler(edge: Edge) {
     if (!isNodeTurn.value) {
         edges.value = [ ...edges.value, edge ];
-        showWarning.value = false; // Hide warning on valid selection
+        showWarning.value = false;
     }
     else {
         showWarning.value = true;
