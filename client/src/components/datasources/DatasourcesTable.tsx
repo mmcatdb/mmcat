@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Spinner, Table, TableHeader, TableBody, TableColumn, TableRow, TableCell } from '@nextui-org/react';
 import { api } from '@/api';
-import type { DatasourceFromServer } from '@/types/datasource';
+import type { Datasource } from '@/types/datasource';
 
 export const DatasourcesTable = () => {
-    const [ datasources, setDatasources ] = useState<DatasourceFromServer[]>([]);
+    const [ datasources, setDatasources ] = useState<Datasource[]>([]);
     const [ loading, setLoading ] = useState<boolean>(true);
     const [ error, setError ] = useState<string | null>(null);
 
@@ -50,8 +50,8 @@ export const DatasourcesTable = () => {
     );
 };
 
-interface DatasourceTableProps {
-    datasources: DatasourceFromServer[];
+type DatasourceTableProps = {
+    datasources: Datasource[];
 }
 
 const DatasourceTable: React.FC<DatasourceTableProps> = ({ datasources }) => {
