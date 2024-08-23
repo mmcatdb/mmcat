@@ -32,5 +32,5 @@ export const routes = {
         index: projectIndex,
         // databases: projectIndex.child('/databases', 'databases'),
     },
-    databases: 'databases',
+    datasources: 'datasources',
 } as const;
